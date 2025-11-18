@@ -273,17 +273,6 @@ class Controller extends AbstractController {
 		// Perform the deletion (delete_zone returns void).
 		WC_Shipping_Zones::delete_zone( $zone_id );
 
-		/**
-		 * Fires after a shipping zone is deleted via the REST API.
-		 *
-		 * @since 10.5.0
-		 *
-		 * @param WC_Shipping_Zone $zone     The shipping zone being deleted.
-		 * @param WP_REST_Response $response The response data.
-		 * @param WP_REST_Request  $request  The request sent to the API.
-		 */
-		do_action( 'woocommerce_rest_delete_shipping_zone', $zone, $response, $request );
-
 		return $response;
 	}
 

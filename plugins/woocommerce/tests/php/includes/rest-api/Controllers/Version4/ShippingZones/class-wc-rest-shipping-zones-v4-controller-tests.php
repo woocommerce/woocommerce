@@ -1642,44 +1642,6 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test that woocommerce_rest_delete_shipping_zone action hook is fired.
-	 */
-	public function test_delete_item_fires_action_hook() {
-		$zone = $this->create_shipping_zone( 'Hook Test Zone' );
-
-		$hook_fired = false;
-		$hook_zone  = null;
-
-		// Add hook listener.
-		add_action(
-			'woocommerce_rest_delete_shipping_zone',
-			function ( $zone ) use ( &$hook_fired, &$hook_zone ) {
-				$hook_fired = true;
-				$hook_zone  = $zone;
-			},
-			10,
-			1
-		);
-
-		$zone_id = $zone->get_id();
-		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
-		$request->set_param( 'force', true );
-		$this->server->dispatch( $request );
-
-		$this->assertTrue( $hook_fired, 'woocommerce_rest_delete_shipping_zone action hook was not fired' );
-		$this->assertNotNull( $hook_zone, 'Hook did not receive zone parameter' );
-		$this->assertEquals( $zone_id, $hook_zone->get_id(), 'Hook received wrong zone' );
-
-		// Remove from cleanup array since it's already deleted.
-		$this->zones = array_filter(
-			$this->zones,
-			function ( $z ) use ( $zone_id ) {
-				return $z->get_id() !== $zone_id;
-			}
-		);
-	}
-
-	/**
 	 * Test delete zone with methods attached.
 	 */
 	public function test_delete_item_with_methods() {
