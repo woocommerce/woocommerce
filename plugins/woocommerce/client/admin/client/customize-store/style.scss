@@ -188,9 +188,37 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		padding: 2rem 3rem;
 		position: relative;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+		overflow: hidden;
 
 		&.no-ai-banner {
 			background: rgba(242, 237, 255, 0.6);
+		}
+
+		.banner-visual {
+			position: absolute;
+			right: 0;
+			top: 50%;
+			transform: translateY(-50%);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100%;
+			pointer-events: none;
+
+			.banner-shape {
+				position: absolute;
+				height: auto;
+				max-height: 280px;
+				z-index: 1;
+			}
+
+			.banner-icon {
+				position: relative;
+				height: auto;
+				max-height: 200px;
+				z-index: 2;
+				margin-right: 2rem;
+			}
 		}
 
 		&.pick-your-theme-banner {

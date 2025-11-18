@@ -25,6 +25,10 @@ import { useFullScreen } from '~/utils';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { isFeatureEnabled } from '~/utils/features';
 import { SiteHub } from './assembler-hub/site-hub';
+import banner1Shape from './assets/banner-1-shape.png';
+import banner2Shape from './assets/banner-2-shape.png';
+import banner1Icon from './assets/banner-1-icon.png';
+import banner2Icon from './assets/banner-2-icon.png';
 import './style.scss';
 
 const CustomizeStoreController = () => {
@@ -148,6 +152,18 @@ const CustomizeStoreController = () => {
 							</Button>
 						</div>
 					</div>
+					<div className="banner-visual">
+						<img
+							src={ banner1Shape }
+							alt=""
+							className="banner-shape"
+						/>
+						<img
+							src={ banner1Icon }
+							alt=""
+							className="banner-icon"
+						/>
+					</div>
 				</div>
 
 				<div className="woocommerce-customize-store-banner pick-your-theme-banner">
@@ -197,6 +213,18 @@ const CustomizeStoreController = () => {
 								) }
 							</Button>
 						</div>
+					</div>
+					<div className="banner-visual">
+						<img
+							src={ banner2Shape }
+							alt=""
+							className="banner-shape"
+						/>
+						<img
+							src={ banner2Icon }
+							alt=""
+							className="banner-icon"
+						/>
 					</div>
 				</div>
 			</div>
