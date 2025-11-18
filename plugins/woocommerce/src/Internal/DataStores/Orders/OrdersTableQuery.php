@@ -697,15 +697,12 @@ class OrdersTableQuery {
 			$this->args['status'] = array( $this->args['status'] );
 		}
 
-		if ( in_array( 'any', $this->args['status'], true ) || in_array( 'all', $this->args['status'], true ) ) {
-			// When querying for 'any' or 'all' statuses, filter to only include statuses that should be visible.
-			// This matches WordPress core's WP_Query behavior and the Admin Orders ListTable behavior.
-			// Internal statuses (like 'checkout-draft') are excluded by checking 'show_in_admin_all_list'.
-			$visible_statuses = array_intersect(
-				array_keys( wc_get_order_statuses() ),
-				get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' )
-			);
-			$this->args['status'] = array_values( $visible_statuses );
+		if ( in_array( 'any', $this->args['status'], true ) ) {
+			// Querying for 'any' status, filter to valid statuses from wc_get_order_statuses().
+			$this->args['status'] = $valid_statuses;
+		} elseif ( in_array( 'all', $this->args['status'], true ) ) {
+			// Querying for 'all' status does not filter by status at all.
+			$this->args['status'] = array();
 		}
 
 		foreach ( $this->args['status'] as &$status ) {
