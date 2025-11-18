@@ -618,12 +618,42 @@ final class WC_Cart_Session {
 
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
 			if ( $product_data instanceof WC_Product && $product_data->is_sold_individually() ) {
+				/**
+				 * Filter sold individually quantity for add-to-cart requests created from Order Again.
+				 *
+				 * Mirrors the cart add_to_cart behavior to ensure reorders respect sold individually rules.
+				 *
+				 * @since 1.0.0
+				 * @param int   $quantity      The enforced quantity (default 1).
+				 * @param int   $original_qty  The originally requested quantity.
+				 * @param int   $product_id    The parent product ID.
+				 * @param int   $variation_id  The variation ID (0 if none).
+				 * @param array $cart_item_data Additional cart item data.
+				 */
 				$quantity = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
 
-				$cart_id        = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
-				$found_in_cart  = apply_filters( 'woocommerce_add_to_cart_sold_individually_found_in_cart', isset( $cart[ $cart_id ] ) && isset( $cart[ $cart_id ]['quantity'] ) && $cart[ $cart_id ]['quantity'] > 0, $product_id, $variation_id, $cart_item_data, $cart_id );
+				$cart_id       = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
+				/**
+				 * Filter whether an item matching a sold individually product is found in cart during Order Again.
+				 *
+				 * @since 1.0.0
+				 * @param bool  $found_in_cart Whether an identical cart line exists.
+				 * @param int   $product_id    The parent product ID.
+				 * @param int   $variation_id  The variation ID (0 if none).
+				 * @param array $cart_item_data Additional cart item data.
+				 * @param string $cart_id      The generated cart ID.
+				 */
+				$found_in_cart = apply_filters( 'woocommerce_add_to_cart_sold_individually_found_in_cart', isset( $cart[ $cart_id ] ) && isset( $cart[ $cart_id ]['quantity'] ) && $cart[ $cart_id ]['quantity'] > 0, $product_id, $variation_id, $cart_item_data, $cart_id );
 				if ( $found_in_cart ) {
+					/* translators: %s: product name */
 					$message         = sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() );
+					/**
+					 * Filters message about more than 1 product being added to cart during Order Again.
+					 *
+					 * @since 1.0.0
+					 * @param string     $message      Message.
+					 * @param WC_Product $product_data Product data.
+					 */
 					$message         = apply_filters( 'woocommerce_cart_product_cannot_add_another_message', $message, $product_data );
 					$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 					$message         = sprintf( '%s <a href="%s" class="button wc-forward%s">%s</a>', $message, esc_url( wc_get_cart_url() ), esc_attr( $wp_button_class ), __( 'View cart', 'woocommerce' ) );

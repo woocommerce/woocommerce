@@ -85,7 +85,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $variation_id, $only_item['variation_id'], 'Cart item should correspond to the ordered variation.' );
 		$this->assertEquals( 1, $only_item['quantity'], 'Quantity should be forced to 1 for sold individually products.' );
 
-		$available_variations = $variable_product->get_available_variations();
+		$available_variations     = $variable_product->get_available_variations();
 		$attributes_for_variation = array();
 		foreach ( $available_variations as $v ) {
 			if ( (int) $v['variation_id'] === $variation_id ) {
@@ -95,13 +95,13 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		}
 		$this->assertNotEmpty( $attributes_for_variation, 'Expected to find attributes for variation.' );
 
-		$added = WC()->cart->add_to_cart( $variable_product->get_id( ), 1, $variation_id, $attributes_for_variation );
+		$added = WC()->cart->add_to_cart( $variable_product->get_id(), 1, $variation_id, $attributes_for_variation );
 		$this->assertFalse( $added, 'Adding duplicate sold individually variation should be blocked.' );
 
 		$notices = wc_get_notices();
 		$this->assertArrayHasKey( 'error', $notices );
 		$this->assertNotEmpty( $notices['error'], 'Expected an error notice when adding duplicate sold individually item.' );
-		
+
 		$cart_contents_after = WC()->cart->get_cart();
 		$this->assertCount( 1, $cart_contents_after, 'Cart should still contain one item.' );
 		$only_item_after = array_values( $cart_contents_after )[0];
