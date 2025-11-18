@@ -17,13 +17,13 @@ use WP_Http;
 /**
  * Data store class for push tokens.
  *
- * @since 10.4.0
+ * @since 10.5.0
  */
 class PushTokensDataStore {
 	/**
 	 * Creates a post representing the push token.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be created.
 	 * @throws Exception If the token creation fails.
@@ -67,7 +67,7 @@ class PushTokensDataStore {
 	/**
 	 * Gets post representing a push token.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be read.
 	 * @throws Exception If the token can't be found.
@@ -117,7 +117,7 @@ class PushTokensDataStore {
 	/**
 	 * Updates a post representing the push token.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be updated.
 	 * @throws Exception If the token update fails.
@@ -171,7 +171,7 @@ class PushTokensDataStore {
 	/**
 	 * Returns an array of post meta objects as key => value pairs.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return array
 	 * @throws InvalidArgumentException If the token can't be read.
