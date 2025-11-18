@@ -877,13 +877,13 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		// Add hook listener.
 		add_action(
 			'woocommerce_rest_delete_shipping_zone_method',
-			function ( $method, $zone, $response, $request ) use ( &$hook_fired, &$hook_method, &$hook_zone ) {
+			function ( $method, $zone ) use ( &$hook_fired, &$hook_method, &$hook_zone ) {
 				$hook_fired  = true;
 				$hook_method = $method;
 				$hook_zone   = $zone;
 			},
 			10,
-			4
+			2
 		);
 
 		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
