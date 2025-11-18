@@ -1525,7 +1525,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	 * Test delete zone with invalid ID.
 	 */
 	public function test_delete_item_invalid_id() {
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/99999' );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/99999' );
+		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
