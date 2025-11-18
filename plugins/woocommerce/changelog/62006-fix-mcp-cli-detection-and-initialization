@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix MCP CLI request detection to handle WP-CLI global flags and enable WP-CLI command registration for wp mcp-adapter commands
