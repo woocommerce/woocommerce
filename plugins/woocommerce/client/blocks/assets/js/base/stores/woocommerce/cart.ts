@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getConfig, store } from '@wordpress/interactivity';
+import { speak } from '@wordpress/a11y';
 import type {
 	Cart,
 	CartItem,
@@ -402,7 +403,7 @@ const { state, actions } = store< Store >(
 						'woocommerce'
 					) as WooCommerceConfig;
 					if ( messages?.addedToCartText ) {
-						wp?.a11y?.speak( messages.addedToCartText, 'polite' );
+						speak( messages.addedToCartText, 'polite' );
 					}
 
 					// Dispatches the event to sync the @wordpress/data store.
@@ -557,10 +558,7 @@ const { state, actions } = store< Store >(
 							'woocommerce'
 						) as WooCommerceConfig;
 						if ( messages?.addedToCartText ) {
-							wp?.a11y?.speak(
-								messages.addedToCartText,
-								'polite'
-							);
+							speak( messages.addedToCartText, 'polite' );
 						}
 
 						// Dispatches the event to sync the @wordpress/data store.
