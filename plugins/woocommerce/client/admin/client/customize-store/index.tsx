@@ -25,6 +25,8 @@ import { useFullScreen } from '~/utils';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { isFeatureEnabled } from '~/utils/features';
 import { SiteHub } from './assembler-hub/site-hub';
+import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { useDispatch } from '@wordpress/data';
 import banner1Shape from './assets/banner-1-shape.png';
 import banner2Shape from './assets/banner-2-shape.png';
 import banner1Icon from './assets/banner-1-icon.png';
@@ -34,6 +36,8 @@ import './style.scss';
 const CustomizeStoreController = () => {
 	useFullScreen( [ 'woocommerce-customize-store' ] );
 
+	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+
 	useEffect( () => {
 		document.body.classList.add( 'woocommerce-customize-store' );
 		return () => {
@@ -41,12 +45,19 @@ const CustomizeStoreController = () => {
 		};
 	}, [] );
 
+	const markTaskComplete = () => {
+		updateOptions( {
+			woocommerce_admin_customize_store_completed: 'yes',
+		} );
+	};
+
 	const handleDesignClick = () => {
+		markTaskComplete();
 		window.location.href = getAdminLink( 'site-editor.php' );
 	};
 
 	const handleMarketplaceClick = () => {
-		// TODO: Mark task complete
+		markTaskComplete();
 		// Redirect to themes marketplace using same logic as redirectToThemes
 		if ( isWooExpress() ) {
 			window.location.href = getAdminLink( 'themes.php' );
