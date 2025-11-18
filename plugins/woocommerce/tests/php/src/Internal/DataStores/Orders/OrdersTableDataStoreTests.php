@@ -767,7 +767,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 4, count( $query->orders ), "Omitted status should behave like 'any' and return only valid WooCommerce statuses" );
 		$this->assertContains( $order_pending->get_id(), $query->orders, 'Omitted status should include pending orders' );
 		$this->assertContains( $order_processing->get_id(), $query->orders, 'Omitted status should include processing orders' );
-		$this->assertContains( $order_completed->get_id(), $query->orders, "'mitted status should include completed orders' );
+		$this->assertContains( $order_completed->get_id(), $query->orders, 'Omitted status should include completed orders' );
 		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, 'Omitted status should include checkout-draft orders (registered WC status)' );
 		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, 'Omitted status should exclude auto-draft orders (internal WordPress status)' );
 	}
