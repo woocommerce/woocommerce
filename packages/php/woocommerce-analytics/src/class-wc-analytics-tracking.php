@@ -229,7 +229,14 @@ class WC_Analytics_Tracking extends WC_Tracks {
 		// Add request timestamp and nocache to all pixels.
 		$pixels_to_send = array();
 		foreach ( self::$pixel_batch_queue as $pixel ) {
-			$pixels_to_send[] = WC_Tracks_Client::add_request_timestamp_and_nocache( $pixel );
+			// Check if the method exists for backwards compatibility with older WooCommerce versions.
+			if ( method_exists( WC_Tracks_Client::class, 'add_request_timestamp_and_nocache' ) ) {
+				$pixels_to_send[] = WC_Tracks_Client::add_request_timestamp_and_nocache( $pixel );
+			} else {
+				// Fallback for older versions - add timestamp and nocache parameters manually.
+				// Remove this fallback when WooCommerce minimum version is 9.7.0+.
+				$pixels_to_send[] = $pixel . '&_rt=' . WC_Tracks_Client::build_timestamp() . '&_=_';
+			}
 		}
 
 		// Send with Requests library for true parallel batching.
