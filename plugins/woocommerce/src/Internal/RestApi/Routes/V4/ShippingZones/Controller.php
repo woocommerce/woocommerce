@@ -244,21 +244,36 @@ class Controller extends AbstractController {
 	 */
 	public function delete_item( $request ) {
 		$zone_id = (int) $request['id'];
-		$result  = WC_Shipping_Zones::delete_zone( $zone_id );
 
-		if ( ! $result ) {
-			return $this->get_route_error_response(
-				$this->get_error_prefix() . 'invalid_id',
-				__( 'Invalid resource ID.', 'woocommerce' ),
-				WP_Http::NOT_FOUND
-			);
+		// Get the zone before deletion to return in response.
+		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+
+		if ( ! $zone ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		return rest_ensure_response(
-			array(
-				'success' => true,
-			)
-		);
+		// Prepare response before deletion.
+		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
+
+		// Perform the deletion.
+		$result = WC_Shipping_Zones::delete_zone( $zone_id );
+
+		if ( ! $result ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		/**
+		 * Fires after a shipping zone is deleted via the REST API.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param WC_Shipping_Zone $zone     The shipping zone being deleted.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_shipping_zone', $zone, $response, $request );
+
+		return $response;
 	}
 
 	/**
