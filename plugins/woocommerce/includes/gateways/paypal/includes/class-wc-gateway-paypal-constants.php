@@ -94,7 +94,7 @@ class WC_Gateway_Paypal_Constants {
 	);
 
 	/**
-	 * List of currencies supported by PayPal.
+	 * List of currencies supported by PayPal (Orders API V2).
 	 *
 	 * @var array<string>
 	 */

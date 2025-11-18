@@ -414,7 +414,11 @@ class WC_Gateway_Paypal_Request {
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
 
 		// Check if the order currency is supported by PayPal.
-		if ( ! in_array( strtoupper( $order->get_currency() ), WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES, true ) ) {
+		$supported_currencies = apply_filters(
+			'woocommerce_paypal_supported_currencies',
+			WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES
+		);
+		if ( ! in_array( strtoupper( $order->get_currency() ), $supported_currencies, true ) ) {
 			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( $order->get_id() ) );
 		}
 
