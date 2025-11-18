@@ -814,9 +814,26 @@ class CheckoutFields {
 		];
 
 		// Merge the "default" country locale with our defined core fields here, we're not using the default locale alone
-		//because it could have fields removed, so merging it with this list ensures we have the full set of fields.
+		// because it could have fields removed, so merging it with this list ensures we have the full set of fields.
 		$default_core_locale = isset( WC()->countries->locale['default'] ) ? WC()->countries->locale['default'] : [];
-		return wc_array_overlay( $blocks_defined_core_fields, $default_core_locale );
+
+		// For each field in $default_core_locale, re-map `priority` to `index` to match our field definition.
+		foreach ( $default_core_locale as $key => $field ) {
+			if ( isset( $field['priority'] ) ) {
+				$default_core_locale[ $key ]['index'] = $field['priority'];
+				unset( $default_core_locale[ $key ]['priority'] );
+			}
+		}
+
+		$merged_locales = wc_array_overlay( $blocks_defined_core_fields, $default_core_locale );
+
+		// Set email and country back to required and not hidden in case they were changed.
+		$merged_locales['email']['required']   = true;
+		$merged_locales['email']['hidden']     = false;
+		$merged_locales['country']['required'] = true;
+		$merged_locales['country']['hidden']   = false;
+
+		return $merged_locales;
 	}
 
 	/**
