@@ -30,6 +30,9 @@
 	vertical-align: middle; // Support stripe loader inside the buttons.
 }
 
+// Import shared sidebar layout styles
+@import '../../shared/sidebar-layout';
+
 .woocommerce-launch-your-store {
 	min-width: 600px;
 	overflow: auto;
@@ -53,33 +56,19 @@
 		padding: 0;
 
 		.launch-your-store-layout__container {
-			display: flex;
-			flex-direction: row;
-			background-color: #fcfcfc;
-			min-height: 100vh;
-
-			@media screen and (max-width: 782px) {
-				flex-direction: column;
-				min-height: 100vh;
-			}
+			@include sidebar-layout-container;
 
 			.customize-your-store-edit-site-resizable-frame__inner-content {
 				height: 100%;
 			}
 
 			.launch-your-store-layout__sidebar {
-				width: 380px;
 				z-index: 3;
 
 				&.is-sidebar-hidden {
 					display: none;
 				}
 
-				@media screen and (min-width: 768px) and (max-width: 1024px) {
-					width: 280px;
-				}
-
-				// Hide sidebar on mobile by default
 				@media screen and (max-width: 782px) {
 					position: fixed;
 					left: -380px;
@@ -88,6 +77,8 @@
 					background: #fff;
 					box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 					transition: all 0.3s ease;
+					width: 380px;
+					display: flex;
 
 					&.is-mobile-open {
 						left: 0;
@@ -96,28 +87,7 @@
 				}
 
 				.launch-store-sidebar__container {
-					display: flex;
-					flex-direction: column;
-					height: 100%;
-
-					.woocommerce-edit-site-layout__hub {
-						width: 380px;
-						height: 64px;
-					}
-
-					.woocommerce-edit-site-site-hub {
-						align-items: center;
-						display: flex;
-						gap: 8px;
-						justify-content: space-between;
-					}
-
-					.woocommerce-edit-site-site-hub__view-mode-toggle-container {
-						height: 64px;
-						padding: 16px 12px 0 0;
-						color: #ccc;
-						width: auto;
-					}
+					@include sidebar-container;
 
 					.woocommerce-lys-mobile-sidebar-close {
 						display: none;
@@ -134,57 +104,6 @@
 						}
 					}
 
-					.woocommerce-edit-site-sidebar-navigation-screen__title-icon {
-						align-items: center;
-						background-color: transparent;
-						padding-top: 16px;
-						padding-bottom: 0;
-						margin-bottom: 8px;
-						gap: 0;
-						width: 348px;
-						z-index: 2;
-
-						@media screen and (max-width: 782px) {
-							display: none;
-						}
-					}
-
-					.woocommerce-edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
-						align-items: center;
-						display: flex;
-					}
-
-					.woocommerce-edit-site-site-hub__site-title {
-						color: $gray-900;
-						font-size: 0.8125rem;
-						font-style: normal;
-						font-weight: 500;
-						line-height: 20px; /* 153.846% */
-						margin: 0;
-					}
-
-					.edit-site-site-icon__image {
-						border-radius: 2px;
-						width: 100%;
-						height: auto;
-						object-fit: cover;
-						background: rgba(0, 0, 0, 0);
-					}
-
-					.woocommerce-edit-site-site-hub__view-mode-toggle-container {
-						.woocommerce-edit-site-layout__view-mode-toggle,
-						.woocommerce-edit-site-layout__view-mode-toggle-icon.edit-site-site-icon,
-						.edit-site-site-icon__icon {
-							width: 32px;
-							height: 32px;
-							fill: #ccc;
-						}
-					}
-
-					// .components-navigator-screen {
-					will-change: auto;
-					padding: 0 16px;
-					overflow-x: hidden;
 					flex: 1;
 
 					&::-webkit-scrollbar-thumb {
@@ -202,52 +121,13 @@
 					}
 
 					.woocommerce-edit-site-sidebar-navigation-screen__main {
-						height: 100%;
-						margin-bottom: 0;
-
-						.edit-site-sidebar-button {
-							color: $gray-900;
-							height: 40px;
-						}
-
-						.woocommerce-edit-site-sidebar-navigation-screen__title {
-							flex-grow: 1;
-							padding: 0;
-
-							button {
-								font-size: 1rem;
-								color: $gray-900;
-								text-overflow: ellipsis;
-								white-space: nowrap;
-								font-style: normal;
-								font-weight: 600;
-								line-height: 24px; /* 150% */
-								padding: 0;
-							}
-						}
-
 						.woocommerce-edit-site-sidebar-navigation-screen__description {
-							color: $gray-700;
-							font-size: 0.8125rem;
-							font-style: normal;
-							font-weight: 400;
-							line-height: 20px; /* 153.846% */
-							margin-block: 0 32px;
-
 							@media screen and (max-width: 782px) {
 								display: none;
-							}
-
-							a {
-								text-decoration: none;
 							}
 						}
 
 						.woocommerce-edit-site-sidebar-navigation-screen__content {
-							padding-inline: 16px;
-							height: 100%;
-							display: flex;
-							flex-direction: column;
 
 							.woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group.components-item-group {
 								margin-inline: -16px;
