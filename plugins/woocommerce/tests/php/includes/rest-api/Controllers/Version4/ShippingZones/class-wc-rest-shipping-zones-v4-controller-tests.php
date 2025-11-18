@@ -1494,4 +1494,209 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
 		$this->assertCount( 0, $zone_reloaded->get_zone_locations() );
 	}
+
+	/**
+	 * Test DELETE endpoint route configuration.
+	 */
+	public function test_delete_route_configuration() {
+		$routes = $this->server->get_routes();
+		$route  = $routes['/wc/v4/shipping-zones/(?P<id>[\d]+)'];
+
+		// Find the DELETE method in the route configuration.
+		$delete_config = null;
+		foreach ( $route as $config ) {
+			if ( isset( $config['methods']['DELETE'] ) ) {
+				$delete_config = $config;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $delete_config, 'DELETE method not found in route configuration' );
+		$this->assertEquals( 'DELETE', $delete_config['methods']['DELETE'] );
+		$this->assertEquals( array( $this->endpoint, 'delete_item' ), $delete_config['callback'] );
+		$this->assertEquals( array( $this->endpoint, 'check_permissions' ), $delete_config['permission_callback'] );
+	}
+
+	/**
+	 * Test delete zone with invalid ID.
+	 */
+	public function test_delete_item_invalid_id() {
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/99999' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_invalid_id', $data['code'] );
+		$this->assertEquals( 'Invalid resource ID.', $data['message'] );
+	}
+
+	/**
+	 * Test delete zone successfully.
+	 */
+	public function test_delete_item_success() {
+		$zone = $this->create_shipping_zone( 'Zone to Delete', 1 );
+		$zone->add_location( 'US', 'country' );
+		$zone->save();
+
+		$zone_id = $zone->get_id();
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Verify response contains full zone object (not just success flag).
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'name', $data );
+		$this->assertArrayHasKey( 'order', $data );
+		$this->assertArrayHasKey( 'locations', $data );
+		$this->assertArrayHasKey( 'methods', $data );
+		$this->assertEquals( $zone_id, $data['id'] );
+		$this->assertEquals( 'Zone to Delete', $data['name'] );
+		$this->assertEquals( 1, $data['order'] );
+
+		// Verify the zone was actually deleted.
+		$zone_after = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+		$this->assertFalse( $zone_after, 'Zone should be deleted' );
+
+		// Remove from cleanup array since it's already deleted.
+		$this->zones = array_filter(
+			$this->zones,
+			function ( $z ) use ( $zone_id ) {
+				return $z->get_id() !== $zone_id;
+			}
+		);
+	}
+
+	/**
+	 * Test delete zone for already deleted zone.
+	 */
+	public function test_delete_item_already_deleted() {
+		$zone    = $this->create_shipping_zone( 'Zone to Delete' );
+		$zone_id = $zone->get_id();
+
+		// Delete the zone first.
+		$zone->delete();
+
+		// Remove from cleanup array.
+		$this->zones = array_filter(
+			$this->zones,
+			function ( $z ) use ( $zone_id ) {
+				return $z->get_id() !== $zone_id;
+			}
+		);
+
+		// Try to delete again.
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_invalid_id', $data['code'] );
+	}
+
+	/**
+	 * Test delete zone without permission.
+	 */
+	public function test_delete_item_without_permission() {
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+
+		wp_set_current_user( 0 );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test delete zone when shipping is disabled.
+	 */
+	public function test_delete_item_shipping_disabled() {
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+
+		// Disable shipping temporarily.
+		add_filter( 'wc_shipping_enabled', '__return_false' );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 503, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_disabled', $data['code'] );
+
+		// Re-enable shipping.
+		remove_filter( 'wc_shipping_enabled', '__return_false' );
+	}
+
+	/**
+	 * Test that woocommerce_rest_delete_shipping_zone action hook is fired.
+	 */
+	public function test_delete_item_fires_action_hook() {
+		$zone = $this->create_shipping_zone( 'Hook Test Zone' );
+
+		$hook_fired = false;
+		$hook_zone  = null;
+
+		// Add hook listener.
+		add_action(
+			'woocommerce_rest_delete_shipping_zone',
+			function ( $zone, $response, $request ) use ( &$hook_fired, &$hook_zone ) {
+				$hook_fired = true;
+				$hook_zone  = $zone;
+			},
+			10,
+			3
+		);
+
+		$zone_id = $zone->get_id();
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$this->server->dispatch( $request );
+
+		$this->assertTrue( $hook_fired, 'woocommerce_rest_delete_shipping_zone action hook was not fired' );
+		$this->assertNotNull( $hook_zone, 'Hook did not receive zone parameter' );
+		$this->assertEquals( $zone_id, $hook_zone->get_id(), 'Hook received wrong zone' );
+
+		// Remove from cleanup array since it's already deleted.
+		$this->zones = array_filter(
+			$this->zones,
+			function ( $z ) use ( $zone_id ) {
+				return $z->get_id() !== $zone_id;
+			}
+		);
+	}
+
+	/**
+	 * Test delete zone with methods attached.
+	 */
+	public function test_delete_item_with_methods() {
+		$zone = $this->create_shipping_zone( 'Zone with Methods' );
+		$this->add_shipping_method( $zone, 'flat_rate' );
+		$this->add_shipping_method( $zone, 'free_shipping' );
+
+		$zone_id = $zone->get_id();
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'methods', $data );
+		$this->assertCount( 2, $data['methods'], 'Response should include the methods that were deleted with the zone' );
+
+		// Verify the zone was actually deleted.
+		$zone_after = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+		$this->assertFalse( $zone_after, 'Zone should be deleted' );
+
+		// Remove from cleanup array.
+		$this->zones = array_filter(
+			$this->zones,
+			function ( $z ) use ( $zone_id ) {
+				return $z->get_id() !== $zone_id;
+			}
+		);
+	}
 }
