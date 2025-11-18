@@ -77,14 +77,18 @@ class Utils {
 	/**
 	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding a blur event listener.
 	 *
-	 * @param string   $quantity_html The quantity HTML.
-	 * @param array    $wrapper_attributes Optional wrapper attributes.
-	 * @param array    $input_attributes Optional input attributes.
-	 * @param int|null $child_product_id Optional child product ID. Used in the case of grouped products.
+	 * @param string $quantity_html The quantity HTML.
+	 * @param array  $wrapper_attributes Optional wrapper attributes.
+	 * @param array  $input_attributes Optional input attributes.
+	 * @param array  $context {
+	 *     Optional context for quantity input.
+	 *     @type int  $productId  Product ID for context-specific behavior.
+	 *     @type bool $allowZero  Whether to allow zero quantity.
+	 * }
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $child_product_id = null ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array() ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		global $product;
 
@@ -97,7 +101,7 @@ class Utils {
 			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
 			// A child product ID indicates a grouped product, which should start at 0; otherwise fall back
 			// to the product min (or 1 if no product).
-			$input_quantity = $child_product_id ? 0 : $default_quantity;
+			$input_quantity = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
 
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options-quantity-selector',
@@ -123,10 +127,11 @@ class Utils {
 		);
 
 		$context_attribute = wp_interactivity_data_wp_context(
-			array(
-				'productId' => $child_product_id || ! $product instanceof \WC_Product ?
-					$child_product_id :
-					$product->get_id(),
+			wp_parse_args(
+				$context,
+				array(
+					'productId' => $product instanceof \WC_Product ? $product->get_id() : 0,
+				)
 			)
 		);
 
