@@ -30,10 +30,12 @@ type Option = {
 };
 
 type Context = AddToCartWithOptionsStoreContext & {
+	id: string;
 	name: string;
 	selectedValue: string | null;
 	option: Option;
 	options: Option[];
+	autoselect: boolean;
 };
 
 // When true, do not handle clicks on attributes, this is to avoid infinite recursion
@@ -108,12 +110,12 @@ function attributesAutoselect( variation_selectors ) {
 }
 
 function attributesAutoselectOthers() {
-	const context = getContext< Context >(),
-		form = document.querySelector( 'form.wc-block-add-to-cart-with-options' ),
-		variation_selectors = form.querySelectorAll( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
-		autoselect =
-			variation_selectors[0].dataset?.autoselect ||
-			false;
+	const context = getContext< Context >();
+	const { id, autoselect } = context;
+	const variation_selectors = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` )
+		.closest( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector' )
+		.querySelectorAll( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' );
+
 	if ( autoselect && context.selectedValue ) {
 		let target_variation_selector;
 		variation_selectors.forEach( ( el ) => {
@@ -347,12 +349,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		},
 		callbacks: {
 			setDefaultSelectedAttribute() {
-				const context = getContext< Context >(),
-					form = document.querySelector( 'form.wc-block-add-to-cart-with-options' ),
-					variation_selectors = form.querySelectorAll( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
-					autoselect =
-						variation_selectors[0].dataset?.autoselect ||
-						false;
+				const context = getContext< Context >();
+				const { id, autoselect } = context;
+				const variation_selectors = document.querySelectorAll( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` );
 
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );

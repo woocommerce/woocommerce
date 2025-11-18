@@ -143,6 +143,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 		$attribute_terms = $block->context['woocommerce/attributeTerms'];
 		$attrs = $block->__get( 'attributes' );
+		$autoselect = $attrs[ 'autoselect' ] ?? false;
 		$disabled_attributes_action = $attrs[ 'disabledAttributesAction' ] ?? 'disable';
 
 		wp_interactivity_state(
@@ -191,10 +192,12 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'id'              => $attribute_id,
 					'aria-labelledby' => $attribute_id . '_label',
 					'data-wp-context' => array(
+						'id'            => $attribute_id,
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
 						'focused'       => '',
+						'autoselect'    => $autoselect,
 					),
 					'data-wp-init'    => 'callbacks.setDefaultSelectedAttribute',
 				),
@@ -228,6 +231,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$selected_attribute = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
 		$attrs = $block->__get( 'attributes' );
+		$autoselect = $attrs[ 'autoselect' ] ?? false;
 		$disabled_attributes_action = $attrs[ 'disabledAttributesAction' ] ?? 'disable';
 
 		$options = '';
@@ -263,9 +267,11 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'class'              => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 					'id'                 => $attribute_id,
 					'data-wp-context'    => array(
+						'id'            => $attribute_id,
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
 						'selectedValue' => $selected_attribute,
+						'autoselect'    => $autoselect,
 					),
 					'data-wp-init'       => 'callbacks.setDefaultSelectedAttribute',
 					'data-wp-on--change' => 'actions.handleDropdownChange',
