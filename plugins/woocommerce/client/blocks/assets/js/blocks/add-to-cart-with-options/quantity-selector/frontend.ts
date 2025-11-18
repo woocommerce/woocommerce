@@ -110,7 +110,10 @@ store< QuantitySelectorStore >(
 			get inputQuantity(): number {
 				const { productId } = getContext< Context >();
 
-				return addToCartWithOptionsStore.state.quantity?.[ productId ];
+				const quantity =
+					addToCartWithOptionsStore.state.quantity?.[ productId ];
+
+				return quantity === undefined ? 0 : quantity;
 			},
 		},
 		actions: {
