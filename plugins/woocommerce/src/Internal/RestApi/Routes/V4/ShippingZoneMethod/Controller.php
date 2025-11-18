@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
 use WC_Shipping_Zones;
+use WC_Shipping_Zone;
 use WP_Http;
 use WP_REST_Request;
 use WP_REST_Server;
