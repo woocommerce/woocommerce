@@ -307,6 +307,19 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox SKIP header is added to raw array responses when cache is skipped.
+	 */
+	public function test_skip_header_added_for_raw_array_responses() {
+		$response = $this->query_endpoint( 'raw_array_response', array( '_skip_cache' => 'true' ) );
+		$this->assertCacheHeader( $response, 'SKIP' );
+		$this->assertInstanceOf( WP_REST_Response::class, $response );
+		$this->assertIsArray( $response->get_data() );
+		$this->assertArrayHasKey( 'id', $response->get_data() );
+		$this->assertSame( 42, $response->get_data()['id'] );
+		$this->assertCount( 0, $this->get_all_cache_keys() );
+	}
+
+	/**
 	 * Query an endpoint and return the response.
 	 *
 	 * @param string      $endpoint_name Endpoint name.

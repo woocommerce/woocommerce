@@ -141,7 +141,8 @@ trait RestApiCache {
 
 		if ( $should_skip_cache ) {
 			$response = call_user_func( $callback, $request );
-			if ( $response instanceof WP_REST_Response ) {
+			if ( ! is_wp_error( $response ) ) {
+				$response = rest_ensure_response( $response );
 				$response->header( 'X-WC-Cache', 'SKIP' );
 			}
 			return $response;
