@@ -687,6 +687,91 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Tests that 'status' query var handles 'any' and 'all' correctly (excluding/including internal statuses).
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_status_any_and_all() {
+		$this->disable_cot_sync();
+
+		// Create orders with valid WooCommerce statuses.
+		$order_pending = new WC_Order();
+		$this->switch_data_store( $order_pending, $this->sut );
+		$order_pending->set_status( OrderStatus::PENDING );
+		$order_pending->save();
+
+		$order_processing = new WC_Order();
+		$this->switch_data_store( $order_processing, $this->sut );
+		$order_processing->set_status( OrderStatus::PROCESSING );
+		$order_processing->save();
+
+		$order_completed = new WC_Order();
+		$this->switch_data_store( $order_completed, $this->sut );
+		$order_completed->set_status( OrderStatus::COMPLETED );
+		$order_completed->save();
+
+		// Create orders with internal WordPress statuses.
+		$order_auto_draft = new WC_Order();
+		$this->switch_data_store( $order_auto_draft, $this->sut );
+		$order_auto_draft->set_status( OrderStatus::AUTO_DRAFT );
+		$order_auto_draft->save();
+
+		$order_checkout_draft = new WC_Order();
+		$this->switch_data_store( $order_checkout_draft, $this->sut );
+		$order_checkout_draft->set_status( 'checkout-draft' );
+		$order_checkout_draft->save();
+
+		// Test 'status' => 'any' - should return only valid WooCommerce statuses (excludes internal statuses).
+		$query = new OrdersTableQuery( array( 'status' => 'any' ) );
+		$this->assertEquals( 3, count( $query->orders ), "status='any' should return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "status='any' should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "status='any' should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "status='any' should include completed orders" );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, "status='any' should exclude auto-draft orders" );
+		$this->assertNotContains( $order_checkout_draft->get_id(), $query->orders, "status='any' should exclude checkout-draft orders" );
+
+		// Test 'status' => 'all' - should return all statuses without filtering.
+		$query = new OrdersTableQuery( array( 'status' => 'all' ) );
+		$this->assertEquals( 5, count( $query->orders ), "status='all' should return all orders regardless of status" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "status='all' should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "status='all' should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "status='all' should include completed orders" );
+		$this->assertContains( $order_auto_draft->get_id(), $query->orders, "status='all' should include auto-draft orders" );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, "status='all' should include checkout-draft orders" );
+
+		// Test that internal statuses can still be queried explicitly.
+		$query = new OrdersTableQuery( array( 'status' => OrderStatus::AUTO_DRAFT ) );
+		$this->assertEquals( 1, count( $query->orders ), "Internal statuses can be queried explicitly" );
+		$this->assertContains( $order_auto_draft->get_id(), $query->orders, "Explicit query for auto-draft should return auto-draft order" );
+
+		$query = new OrdersTableQuery( array( 'status' => 'checkout-draft' ) );
+		$this->assertEquals( 1, count( $query->orders ), "Internal statuses can be queried explicitly" );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, "Explicit query for checkout-draft should return checkout-draft order" );
+
+		// Test with array of statuses including 'any'.
+		$query = new OrdersTableQuery( array( 'status' => array( 'any' ) ) );
+		$this->assertEquals( 3, count( $query->orders ), "status=['any'] should work same as status='any'" );
+
+		// Test empty status (should behave like 'any').
+		$query = new OrdersTableQuery( array( 'status' => '' ) );
+		$this->assertEquals( 3, count( $query->orders ), "Empty status should behave like 'any' and return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "Empty status should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "Empty status should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "Empty status should include completed orders" );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, "Empty status should exclude auto-draft orders" );
+		$this->assertNotContains( $order_checkout_draft->get_id(), $query->orders, "Empty status should exclude checkout-draft orders" );
+
+		// Test omitted status (should behave like 'any').
+		$query = new OrdersTableQuery( array() );
+		$this->assertEquals( 3, count( $query->orders ), "Omitted status should behave like 'any' and return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "Omitted status should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "Omitted status should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "Omitted status should include completed orders" );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, "Omitted status should exclude auto-draft orders" );
+		$this->assertNotContains( $order_checkout_draft->get_id(), $query->orders, "Omitted status should exclude checkout-draft orders" );
+	}
+
+	/**
 	 * @testDox Tests meta queries in the `OrdersTableQuery` class.
 	 *
 	 * @return void

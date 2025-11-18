@@ -689,16 +689,12 @@ class OrdersTableQuery {
 	private function sanitize_status(): void {
 		$valid_statuses = array_keys( wc_get_order_statuses() );
 
-		if ( empty( $this->args['status'] ) ) {
-			$this->args['status'] = array();
-		}
-
 		if ( ! is_array( $this->args['status'] ) ) {
 			$this->args['status'] = array( $this->args['status'] );
 		}
 
-		if ( in_array( 'any', $this->args['status'], true ) ) {
-			// Querying for 'any' status, filter to valid statuses from wc_get_order_statuses().
+		if ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) ) {
+			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses().
 			$this->args['status'] = $valid_statuses;
 		} elseif ( in_array( 'all', $this->args['status'], true ) ) {
 			// Querying for 'all' status does not filter by status at all.
