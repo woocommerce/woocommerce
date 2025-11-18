@@ -8,6 +8,7 @@ import {
 	getElement,
 	useLayoutEffect,
 	useRef,
+	withSyncEvent,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type {
@@ -81,13 +82,19 @@ type MiniCart = {
 		drawerTabIndex: string | null;
 		buttonAriaLabel: string;
 		shouldShowTaxLabel: boolean;
+		miniCartButtonRef: HTMLElement | null;
 	};
-	callbacks: {
+	actions: {
 		openDrawer: () => void;
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
+		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
+	};
+	callbacks: {
 		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
+		focusFirstElement: () => void;
+		saveMiniCartButtonRef: () => void;
 	};
 };
 
@@ -95,15 +102,20 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
-type CartItemDataAttr = {
+type ItemData = {
 	raw_attribute?: string | undefined;
-	key?: string | undefined;
 	value?: string | undefined;
-	className?: string;
-	hidden?: boolean;
 	display?: string;
 	attribute?: string;
+	hidden?: boolean | string | number;
 } & ( { key: string; name?: never } | { key?: never; name: string } );
+
+type CartItemDataAttr = {
+	value: string;
+	name: string;
+	className: string;
+	hidden: boolean;
+};
 
 type DataProperty = 'item_data' | 'variation';
 
@@ -115,13 +127,30 @@ const trimWords = ( html: string, maxWords = 15 ): string => {
 	return words.slice( 0, maxWords ).join( ' ' ) + '…';
 };
 
+const focusableSelectors = `
+	a[href],
+	input:not([disabled]):not([type="hidden"]):not([aria-hidden]),
+	select:not([disabled]):not([aria-hidden]),
+	textarea:not([disabled]):not([aria-hidden]),
+	button:not([disabled]):not([aria-hidden]),
+	[contenteditable],
+	[tabindex]:not([tabindex^="-"])
+`;
+
+const getFocusableElements = ( container: HTMLElement | null ) =>
+	container
+		? Array.from(
+				container!.querySelectorAll< HTMLElement >( focusableSelectors )
+		  ).filter( ( el ) => el.offsetParent !== null )
+		: [];
+
 const { state: woocommerceState, actions } = store< WooCommerce >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
 
-const { state: miniCartState, callbacks } = store< MiniCart >(
+const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{},
 	{ lock: true }
@@ -216,6 +245,62 @@ store< MiniCart >(
 			},
 		},
 
+		actions: {
+			openDrawer() {
+				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+					window.location.href = checkoutUrl;
+					return;
+				}
+				state.isOpen = true;
+			},
+
+			closeDrawer() {
+				state.isOpen = false;
+				state.miniCartButtonRef?.focus();
+			},
+
+			overlayCloseDrawer( e: MouseEvent ) {
+				// Only close the drawer if the overlay itself was clicked.
+				if ( e.target === e.currentTarget ) {
+					miniCartActions.closeDrawer();
+				}
+			},
+
+			handleOverlayKeydown: withSyncEvent( ( e: KeyboardEvent ) => {
+				if ( state.isOpen ) {
+					if ( e.key === 'Escape' ) {
+						miniCartActions.closeDrawer();
+					}
+
+					// Trap focus if it is an overlay (main menu).
+					if ( e.key === 'Tab' ) {
+						const { ref } = getElement();
+						const focusableElements = getFocusableElements( ref );
+						if (
+							e.shiftKey &&
+							document.activeElement === focusableElements?.[ 0 ]
+						) {
+							// Focus last element when shift+tab in the first one.
+							e.preventDefault();
+							focusableElements[
+								focusableElements.length - 1
+							]?.focus();
+						} else if (
+							! e.shiftKey &&
+							document.activeElement ===
+								focusableElements?.[
+									focusableElements.length - 1
+								]
+						) {
+							// Focus first element when tab in the last one.
+							e.preventDefault();
+							focusableElements?.[ 0 ]?.focus();
+						}
+					}
+				}
+			} ),
+		},
+
 		callbacks: {
 			*setupEventListeners() {
 				// eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -246,7 +331,7 @@ store< MiniCart >(
 				if ( addToCartBehaviour === 'open_drawer' ) {
 					document.body.addEventListener(
 						'wc-blocks_added_to_cart',
-						callbacks.openDrawer
+						miniCartActions.openDrawer
 					);
 				}
 
@@ -261,32 +346,13 @@ store< MiniCart >(
 					);
 					document.body.removeEventListener(
 						'wc-blocks_added_to_cart',
-						callbacks.openDrawer
+						miniCartActions.openDrawer
 					);
 					if ( 'jQuery' in window ) {
 						removeJQueryAddedToCartEvent();
 						removeJQueryRemovedFromCartEvent();
 					}
 				};
-			},
-
-			openDrawer() {
-				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
-					window.location.href = checkoutUrl;
-					return;
-				}
-				state.isOpen = true;
-			},
-
-			closeDrawer() {
-				state.isOpen = false;
-			},
-
-			overlayCloseDrawer( e: MouseEvent ) {
-				// Only close the drawer if the overlay itself was clicked.
-				if ( e.target === e.currentTarget ) {
-					state.isOpen = false;
-				}
 			},
 
 			disableScrollingOnBody() {
@@ -305,6 +371,19 @@ store< MiniCart >(
 					} );
 				}
 			},
+
+			focusFirstElement() {
+				if ( state.isOpen ) {
+					const { ref } = getElement();
+					// Focus first element when the minicart is opened.
+					getFocusableElements( ref )[ 0 ]?.focus();
+				}
+			},
+
+			saveMiniCartButtonRef() {
+				const { ref } = getElement();
+				state.miniCartButtonRef = ref;
+			},
 		},
 	},
 	{ lock: universalLock }
@@ -318,11 +397,9 @@ function itemDataInnerHTML( field: 'name' | 'value' ) {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
-	const dataAttr = cartItemState.cartItemDataAttr as
-		| CartItemDataAttr
-		| { hidden: boolean };
+	const dataAttr = cartItemState.cartItemDataAttr;
 
-	if ( 'hidden' in dataAttr && dataAttr.hidden ) {
+	if ( ! dataAttr ) {
 		return;
 	}
 
@@ -719,9 +796,9 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr | { hidden: boolean } {
+			get cartItemDataAttr(): CartItemDataAttr | null {
 				const { itemData, dataProperty } = getContext< {
-					itemData: CartItemDataAttr;
+					itemData: ItemData;
 					dataProperty: DataProperty;
 				} >();
 
@@ -730,7 +807,7 @@ const { state: cartItemState } = store(
 					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 
 				if ( ! dataItemAttr ) {
-					return { hidden: true };
+					return null;
 				}
 
 				// Extract name based on data type (variation uses 'attribute', item_data uses 'key' or 'name')
@@ -750,22 +827,36 @@ const { state: cartItemState } = store(
 				const valueTxt = document.createElement( 'textarea' );
 				valueTxt.innerHTML = rawValue;
 
+				const processedName = nameTxt.value ? nameTxt.value + ':' : '';
+				const hiddenValue = dataItemAttr.hidden;
+
 				return {
-					name: nameTxt.value,
+					name: processedName,
 					value: valueTxt.value,
 					className: `wc-block-components-product-details__${ nameTxt.value
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
 						.replace( /<[^>]*>/g, '' )
 						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
-					hidden: dataItemAttr.hidden === '1' ? true : false,
+					hidden:
+						hiddenValue === true ||
+						hiddenValue === 'true' ||
+						hiddenValue === '1' ||
+						hiddenValue === 1,
 				};
+			},
+
+			get cartItemDataAttrHidden(): boolean {
+				return (
+					cartItemState.cartItemDataAttr === null ||
+					!! cartItemState.cartItemDataAttr?.hidden
+				);
 			},
 
 			// Used to index cart item data attributes for wp-each-key.
 			get cartItemDataKey(): string {
 				const { itemData, dataProperty } = getContext< {
-					itemData: CartItemDataAttr;
+					itemData: ItemData;
 					dataProperty: DataProperty;
 				} >();
 

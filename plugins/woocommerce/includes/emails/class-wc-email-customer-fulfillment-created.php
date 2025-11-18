@@ -38,7 +38,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 			$this->id             = 'customer_fulfillment_created';
 			$this->customer_email = true;
 			$this->title          = __( 'Fulfillment created', 'woocommerce' );
-			$this->email_group    = 'order-processing';
+			$this->email_group    = 'order-updates';
 			$this->template_html  = 'emails/customer-fulfillment-created.php';
 			$this->template_plain = 'emails/plain/customer-fulfillment-created.php';
 			$this->placeholders   = array(

@@ -121,6 +121,7 @@ export const Edit = ( {
 					) }
 				<PanelBody title={ __( 'Display options', 'woocommerce' ) }>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __( 'Require checkbox', 'woocommerce' ) }
 						checked={ checkbox }
 						onChange={ () =>
@@ -130,6 +131,7 @@ export const Edit = ( {
 						}
 					/>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __( 'Show separator', 'woocommerce' ) }
 						checked={ showSeparator }
 						onChange={ () =>

@@ -15,6 +15,10 @@
 	}
 }
 
+:where(.wc-block-add-to-cart-with-options__quantity-selector--hidden) {
+	display: none;
+}
+
 // Set the height to 100% so when the quantity selector is inside a flex
 // container with `verticalAlignment: stretch` (that's the default in WC core
 // templates), the quantity selector will stretch to the height of the container.
