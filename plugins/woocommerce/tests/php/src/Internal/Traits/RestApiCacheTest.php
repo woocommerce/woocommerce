@@ -510,7 +510,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			// phpcs:disable Squiz.Commenting
 			use RestApiCache;
 
-			public $responses             = array(
+			public $responses = array(
 				'single_entity'      => array(
 					'id'   => 1,
 					'name' => 'Product 1',
@@ -542,6 +542,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 					'name' => 'Product with Custom TTL',
 				),
 			);
+
 			public $default_entity_type   = 'product';
 			public $default_vary_by_user  = true;
 			public $endpoint_vary_by_user = array();
@@ -555,15 +556,15 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 			public function register_routes() {
 				$this->register_cached_route( 'single_entity' );
-			$this->register_cached_route( 'multiple_entities' );
-			$this->register_cached_route( 'custom_entity_type', array( 'entity_type' => 'custom_thing' ) );
-			$this->register_cached_route( 'non_array_response', array( 'entity_type' => 'custom_thing' ), true );
-			$this->register_cached_route( 'raw_array_response', array(), false, true );
-			$this->register_cached_route( 'no_vary_by_user', array( 'vary_by_user' => false ) );
-			$this->register_cached_route( 'with_endpoint_id', array( 'endpoint_id' => 'test_endpoint' ) );
-			$this->register_cached_route( 'custom_ttl', array( 'cache_ttl' => 10 ) );
-			$this->register_multi_method_route();
-		}
+				$this->register_cached_route( 'multiple_entities' );
+				$this->register_cached_route( 'custom_entity_type', array( 'entity_type' => 'custom_thing' ) );
+				$this->register_cached_route( 'non_array_response', array( 'entity_type' => 'custom_thing' ), true );
+				$this->register_cached_route( 'raw_array_response', array(), false, true );
+				$this->register_cached_route( 'no_vary_by_user', array( 'vary_by_user' => false ) );
+				$this->register_cached_route( 'with_endpoint_id', array( 'endpoint_id' => 'test_endpoint' ) );
+				$this->register_cached_route( 'custom_ttl', array( 'cache_ttl' => 10 ) );
+				$this->register_multi_method_route();
+			}
 
 			private function register_cached_route( string $endpoint, array $cache_args = array(), bool $non_array_request = false, bool $raw_response = false ) {
 				register_rest_route(
@@ -588,33 +589,33 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			}
 
 
-		private function register_multi_method_route() {
-			register_rest_route(
-				$this->namespace,
-				'/' . $this->rest_base . '/multi_method',
-				array(
-					'methods'             => array( 'GET', 'POST' ),
-					'callback'            => $this->with_cache(
-						function ( $request ) {
-							$method = $request->get_method();
-							return new WP_REST_Response(
-								array(
-									'id'     => 'GET' === $method ? 10 : 20,
-									'method' => $method,
-								),
-								200
-							);
-						}
-					),
-					'permission_callback' => '__return_true',
-				)
-			);
-		}
-
-		protected function get_default_response_entity_type(): ?string {
-			return $this->default_entity_type;
-		}
+			private function register_multi_method_route() {
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/multi_method',
+					array(
+						'methods'             => array( 'GET', 'POST' ),
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								$method = $request->get_method();
+								return new WP_REST_Response(
+									array(
+										'id'     => 'GET' === $method ? 10 : 20,
+										'method' => $method,
+									),
+									200
+								);
+							}
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
 			}
+
+			protected function get_default_response_entity_type(): ?string {
+				return $this->default_entity_type;
+			}
+
 
 			protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool {
 				if ( ! is_null( $endpoint_id ) && isset( $this->endpoint_vary_by_user[ $endpoint_id ] ) ) {
