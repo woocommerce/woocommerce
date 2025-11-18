@@ -413,7 +413,14 @@ class WC_Gateway_Paypal_Request {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
 
-		// Check if the order currency is supported by PayPal.
+		/**
+		 * Filter the supported currencies for PayPal.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param array $supported_currencies Array of supported currency codes.
+		 * @return array
+		 */
 		$supported_currencies = apply_filters(
 			'woocommerce_paypal_supported_currencies',
 			WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES
