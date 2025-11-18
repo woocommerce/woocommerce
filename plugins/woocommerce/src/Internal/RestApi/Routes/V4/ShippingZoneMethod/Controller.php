@@ -217,6 +217,33 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Delte shipping zone method by ID.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$instance_id = (int) $request['id'];
+
+		$zone = $this->validate_zone_by_method_instance( $instance_id );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$result = $zone->delete_shipping_method( $instance_id );
+
+		if ( ! $result ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+			)
+		);
+	}
+
+	/**
 	 * Get the schema for shipping methods.
 	 *
 	 * @return array
