@@ -30,7 +30,7 @@ export type QuantitySelectorStore = {
 		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
-		inputQuantity: number | string | null;
+		inputQuantity: number;
 	};
 	actions: {
 		increaseQuantity: (
