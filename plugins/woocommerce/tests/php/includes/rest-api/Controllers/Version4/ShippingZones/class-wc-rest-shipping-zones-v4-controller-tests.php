@@ -1645,12 +1645,12 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		// Add hook listener.
 		add_action(
 			'woocommerce_rest_delete_shipping_zone',
-			function ( $zone, $response, $request ) use ( &$hook_fired, &$hook_zone ) {
+			function ( $zone ) use ( &$hook_fired, &$hook_zone ) {
 				$hook_fired = true;
 				$hook_zone  = $zone;
 			},
 			10,
-			3
+			1
 		);
 
 		$zone_id = $zone->get_id();
@@ -1678,8 +1678,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->add_shipping_method( $zone, 'flat_rate' );
 		$this->add_shipping_method( $zone, 'free_shipping' );
 
-		$zone_id = $zone->get_id();
-		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$zone_id  = $zone->get_id();
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
