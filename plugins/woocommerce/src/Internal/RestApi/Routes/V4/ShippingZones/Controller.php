@@ -231,6 +231,31 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Delete a shipping zone by zone id.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
+	 */
+	public function delete_item( $request ) {
+		$zone_id = (int) $request['id'];
+		$result  = WC_Shipping_Zones::delete_zone( $zone_id );
+
+		if ( ! $result ) {
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_id',
+				__( 'Invalid resource ID.', 'woocommerce' ),
+				WP_Http::NOT_FOUND
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+			)
+		);
+	}
+
+	/**
 	 * Get route error by code, including custom shipping zone errors.
 	 *
 	 * @param string $error_code Error code.
