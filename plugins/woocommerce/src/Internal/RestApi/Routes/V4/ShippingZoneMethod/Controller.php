@@ -106,7 +106,13 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						),
+					),
 				),
 			)
 		);
@@ -231,6 +237,16 @@ class Controller extends AbstractController {
 	 */
 	public function delete_item( $request ) {
 		$instance_id = (int) $request['id'];
+		$force       = $request['force'];
+
+		// Shipping methods do not support trashing.
+		if ( ! $force ) {
+			return new WP_Error(
+				'woocommerce_rest_trash_not_supported',
+				__( 'Shipping methods do not support trashing.', 'woocommerce' ),
+				array( 'status' => 501 )
+			);
+		}
 
 		// Get the method before deletion to return in response.
 		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );

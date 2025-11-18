@@ -759,6 +759,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/99999' );
 		$request->set_param( 'id', 99999 );
+		$request->set_param( 'force', true );
 
 		$response = $this->controller->delete_item( $request );
 
@@ -785,6 +786,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
 		$request->set_param( 'id', $instance_id );
+		$request->set_param( 'force', true );
 
 		$response = $this->controller->delete_item( $request );
 
@@ -824,6 +826,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		// Try to delete again.
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/' . $instance_id );
 		$request->set_param( 'id', $instance_id );
+		$request->set_param( 'force', true );
 		$response = $this->controller->delete_item( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $response );
@@ -848,6 +851,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 			$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/' . $instance_id );
 			$request->set_param( 'id', $instance_id );
+			$request->set_param( 'force', true );
 			$response = $this->controller->delete_item( $request );
 
 			$this->assertNotInstanceOf( WP_Error::class, $response, "Failed to delete method type: {$method_type}" );
@@ -888,6 +892,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
 		$request->set_param( 'id', $instance_id );
+		$request->set_param( 'force', true );
 
 		$response = $this->controller->delete_item( $request );
 
@@ -896,6 +901,60 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		$this->assertNotNull( $hook_zone, 'Hook did not receive zone parameter' );
 		$this->assertEquals( $instance_id, $hook_method->instance_id, 'Hook received wrong method' );
 		$this->assertEquals( $zone->get_id(), $hook_zone->get_id(), 'Hook received wrong zone' );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test delete shipping method without force parameter returns 501.
+	 */
+	public function test_delete_item_without_force_parameter() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone        = $this->create_shipping_zone();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
+		$request->set_param( 'id', $instance_id );
+		// Don't set force parameter - should default to false
+
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 'woocommerce_rest_trash_not_supported', $response->get_error_code() );
+		$this->assertEquals( 'Shipping methods do not support trashing.', $response->get_error_message() );
+		$this->assertEquals( 501, $response->get_error_data()['status'] );
+
+		// Verify the method was NOT deleted
+		$method_after = \WC_Shipping_Zones::get_shipping_method( $instance_id );
+		$this->assertNotFalse( $method_after, 'Method should not be deleted without force=true' );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test delete shipping method with force=false returns 501.
+	 */
+	public function test_delete_item_with_force_false() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone        = $this->create_shipping_zone();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
+		$request->set_param( 'id', $instance_id );
+		$request->set_param( 'force', false );
+
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 'woocommerce_rest_trash_not_supported', $response->get_error_code() );
+		$this->assertEquals( 'Shipping methods do not support trashing.', $response->get_error_message() );
+		$this->assertEquals( 501, $response->get_error_data()['status'] );
+
+		// Verify the method was NOT deleted
+		$method_after = \WC_Shipping_Zones::get_shipping_method( $instance_id );
+		$this->assertNotFalse( $method_after, 'Method should not be deleted with force=false' );
 
 		wp_set_current_user( 0 );
 	}
