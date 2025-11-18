@@ -738,4 +738,118 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zone_method_', $prefix );
 	}
+
+	/**
+	 * Test DELETE endpoint route configuration.
+	 */
+	public function test_delete_route_configuration() {
+		$routes = rest_get_server()->get_routes();
+		$route  = $routes['/wc/v4/shipping-zone-method/(?P<id>[\\d]+)'];
+
+		$this->assertEquals( 'DELETE', $route[2]['methods']['DELETE'] );
+		$this->assertEquals( array( $this->controller, 'delete_item' ), $route[2]['callback'] );
+		$this->assertEquals( array( $this->controller, 'check_permissions' ), $route[2]['permission_callback'] );
+	}
+
+	/**
+	 * Test delete item with invalid ID.
+	 */
+	public function test_delete_item_invalid_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/99999' );
+		$request->set_param( 'id', 99999 );
+
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'invalid_id', $response->get_error_code() );
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_error_data()['status'] );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test delete item successfully.
+	 */
+	public function test_delete_item_success() {
+		wp_set_current_user( self::$admin_user_id );
+
+		// Create zone and method.
+		$zone        = $this->create_shipping_zone();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		// Verify the method exists.
+		$methods_before = $zone->get_shipping_methods( false );
+		$this->assertNotEmpty( $methods_before );
+
+		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
+		$request->set_param( 'id', $instance_id );
+
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertNotInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'success', $data );
+		$this->assertTrue( $data['success'] );
+
+		// Verify the method was actually deleted.
+		$methods_after = $zone->get_shipping_methods( false );
+		$this->assertCount( count( $methods_before ) - 1, $methods_after );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test delete item for already deleted method.
+	 */
+	public function test_delete_item_already_deleted() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone        = $this->create_shipping_zone( 'Test Zone' );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		// Delete the method first.
+		$zone->delete_shipping_method( $instance_id );
+
+		// Try to delete again.
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/' . $instance_id );
+		$request->set_param( 'id', $instance_id );
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'invalid_id', $response->get_error_code() );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test delete item with different shipping method types.
+	 */
+	public function test_delete_item_different_method_types() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+
+		// Test with different method types.
+		$method_types = array( 'flat_rate', 'free_shipping', 'local_pickup' );
+
+		foreach ( $method_types as $method_type ) {
+			$instance_id = $zone->add_shipping_method( $method_type );
+
+			$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/' . $instance_id );
+			$request->set_param( 'id', $instance_id );
+			$response = $this->controller->delete_item( $request );
+
+			$this->assertNotInstanceOf( WP_Error::class, $response, "Failed to delete method type: {$method_type}" );
+			$this->assertEquals( 200, $response->get_status() );
+
+			$data = $response->get_data();
+			$this->assertTrue( $data['success'], "Delete did not return success for method type: {$method_type}" );
+		}
+
+		wp_set_current_user( 0 );
+	}
 }
