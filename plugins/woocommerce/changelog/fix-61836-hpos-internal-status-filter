@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore original HPOS status filtering behavior to exclude internal order statuses when status='any', matching post-based storage behavior.
