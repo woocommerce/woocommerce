@@ -124,7 +124,13 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::DELETABLE ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						),
+					),
 				),
 			)
 		);
@@ -244,23 +250,28 @@ class Controller extends AbstractController {
 	 */
 	public function delete_item( $request ) {
 		$zone_id = (int) $request['id'];
+		$force   = $request['force'];
 
-		// Get the zone before deletion to return in response.
-		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+		// Shipping zones do not support trashing.
+		if ( ! $force ) {
+			return new WP_Error(
+				'woocommerce_rest_trash_not_supported',
+				__( 'Shipping zones do not support trashing.', 'woocommerce' ),
+				array( 'status' => 501 )
+			);
+		}
 
-		if ( ! $zone ) {
-			return $this->get_route_error_by_code( self::INVALID_ID );
+		// Validate the zone exists.
+		$zone = $this->validate_zone( $zone_id );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
 		}
 
 		// Prepare response before deletion.
 		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
 
-		// Perform the deletion.
-		$result = WC_Shipping_Zones::delete_zone( $zone_id );
-
-		if ( ! $result ) {
-			return $this->get_route_error_by_code( self::INVALID_ID );
-		}
+		// Perform the deletion (delete_zone returns void).
+		WC_Shipping_Zones::delete_zone( $zone_id );
 
 		/**
 		 * Fires after a shipping zone is deleted via the REST API.

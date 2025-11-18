@@ -1513,8 +1513,12 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		$this->assertNotNull( $delete_config, 'DELETE method not found in route configuration' );
 		$this->assertEquals( 'DELETE', $delete_config['methods']['DELETE'] );
-		$this->assertEquals( array( $this->endpoint, 'delete_item' ), $delete_config['callback'] );
-		$this->assertEquals( array( $this->endpoint, 'check_permissions' ), $delete_config['permission_callback'] );
+		$this->assertIsArray( $delete_config['callback'] );
+		$this->assertInstanceOf( get_class( $this->endpoint ), $delete_config['callback'][0] );
+		$this->assertEquals( 'delete_item', $delete_config['callback'][1] );
+		$this->assertIsArray( $delete_config['permission_callback'] );
+		$this->assertInstanceOf( get_class( $this->endpoint ), $delete_config['permission_callback'][0] );
+		$this->assertEquals( 'check_permissions', $delete_config['permission_callback'][1] );
 	}
 
 	/**
@@ -1527,8 +1531,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		$this->assertEquals( 404, $response->get_status() );
 		$this->assertArrayHasKey( 'code', $data );
-		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_invalid_id', $data['code'] );
-		$this->assertEquals( 'Invalid resource ID.', $data['message'] );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_invalid_zone_id', $data['code'] );
+		$this->assertEquals( 'Invalid shipping zone ID.', $data['message'] );
 	}
 
 	/**
@@ -1541,7 +1545,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		$zone_id = $zone->get_id();
 
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -1589,13 +1594,14 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		);
 
 		// Try to delete again.
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 404, $response->get_status() );
 		$this->assertArrayHasKey( 'code', $data );
-		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_invalid_id', $data['code'] );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_invalid_zone_id', $data['code'] );
 	}
 
 	/**
@@ -1606,7 +1612,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		wp_set_current_user( 0 );
 
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 401, $response->get_status() );
@@ -1621,7 +1628,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		// Disable shipping temporarily.
 		add_filter( 'wc_shipping_enabled', '__return_false' );
 
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -1655,6 +1663,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		$zone_id = $zone->get_id();
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$request->set_param( 'force', true );
 		$this->server->dispatch( $request );
 
 		$this->assertTrue( $hook_fired, 'woocommerce_rest_delete_shipping_zone action hook was not fired' );
@@ -1678,8 +1687,9 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->add_shipping_method( $zone, 'flat_rate' );
 		$this->add_shipping_method( $zone, 'free_shipping' );
 
-		$zone_id  = $zone->get_id();
-		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$zone_id = $zone->get_id();
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -1698,5 +1708,48 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 				return $z->get_id() !== $zone_id;
 			}
 		);
+	}
+
+	/**
+	 * Test delete zone without force parameter returns 501.
+	 */
+	public function test_delete_item_without_force_parameter() {
+		$zone = $this->create_shipping_zone( 'Zone Without Force' );
+
+		$zone_id  = $zone->get_id();
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 501, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_trash_not_supported', $data['code'] );
+		$this->assertEquals( 'Shipping zones do not support trashing.', $data['message'] );
+
+		// Verify the zone was NOT deleted.
+		$zone_after = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+		$this->assertNotFalse( $zone_after, 'Zone should not be deleted without force=true' );
+	}
+
+	/**
+	 * Test delete zone with force=false returns 501.
+	 */
+	public function test_delete_item_with_force_false() {
+		$zone = $this->create_shipping_zone( 'Zone With Force False' );
+
+		$zone_id = $zone->get_id();
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/' . $zone_id );
+		$request->set_param( 'force', false );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 501, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_trash_not_supported', $data['code'] );
+		$this->assertEquals( 'Shipping zones do not support trashing.', $data['message'] );
+
+		// Verify the zone was NOT deleted.
+		$zone_after = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+		$this->assertNotFalse( $zone_after, 'Zone should not be deleted with force=false' );
 	}
 }
