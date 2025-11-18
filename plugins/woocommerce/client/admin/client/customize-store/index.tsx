@@ -79,6 +79,19 @@ const CustomizeStoreController = () => {
 
 	return (
 		<div className="woocommerce-customize-store__container">
+			<div className="mobile-header">
+				<Button
+					className="mobile-header__back-button"
+					onClick={ () => {
+						window.location.href = getNewPath( {}, '/', {} );
+					} }
+					icon={ chevronIcon }
+					label={ __( 'Back', 'woocommerce' ) }
+				/>
+				<h1 className="mobile-header__title">
+					{ __( 'Customize your store', 'woocommerce' ) }
+				</h1>
+			</div>
 			<div className="woocommerce-customize-store-sidebar">
 				<motion.div
 					className="woocommerce-edit-site-layout__header-container"

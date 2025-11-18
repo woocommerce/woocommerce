@@ -52,8 +52,47 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	background-color: #fcfcfc;
 	min-height: 100vh;
 
+	@media screen and (max-width: 782px) {
+		flex-direction: column;
+	}
+
 	button {
 		cursor: pointer;
+	}
+
+	.mobile-header {
+		display: none;
+
+		@media screen and (max-width: 782px) {
+			display: flex;
+			align-items: center;
+			padding: 0.5rem;
+			background: #fff;
+			border-bottom: 1px solid #dcdcde;
+			gap: 0.5rem;
+
+			&__back-button {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				min-width: 36px;
+				height: 36px;
+				padding: 0;
+
+				svg {
+					fill: $gray-900;
+				}
+			}
+
+			&__title {
+				font-size: 1rem;
+				font-weight: 600;
+				line-height: 24px;
+				color: $gray-900;
+				margin: 0;
+				flex: 1;
+			}
+		}
 	}
 }
 
@@ -62,6 +101,10 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
+
+	@media screen and (max-width: 782px) {
+		display: none;
+	}
 
 	.woocommerce-edit-site-layout__hub {
 		width: 380px;
@@ -150,7 +193,7 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 			color: $gray-700;
 			font-size: 0.8125rem;
 			font-style: normal;
-			font-weight: 400;
+				font-weight: 400;
 			line-height: 20px;
 			margin-block: 0 32px;
 
@@ -162,13 +205,17 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		.woocommerce-edit-site-sidebar-navigation-screen__content {
 			padding-inline: 16px;
 			height: 100%;
-			display: flex;
-			flex-direction: column;
+		display: flex;
+		flex-direction: column;
 		}
 	}
 
 	.woocommerce-edit-site-layout__header-container {
 		position: static;
+
+		@media screen and (max-width: 782px) {
+			display: none;
+		}
 	}
 }
 
@@ -176,6 +223,11 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 	flex: 1;
 	padding: 2rem 2.5rem;
 	overflow-y: auto;
+
+	@media screen and (max-width: 782px) {
+		padding: 1rem;
+		width: 100%;
+	}
 
 	.woocommerce-customize-store-banner {
 		background: rgba(242, 237, 255, 0.6);
@@ -189,6 +241,11 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		position: relative;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 		overflow: hidden;
+
+		@media screen and (max-width: 782px) {
+			padding: 1.5rem;
+			min-height: 200px;
+		}
 
 		&.no-ai-banner {
 			background: rgba(242, 237, 255, 0.6);
@@ -204,6 +261,10 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 			justify-content: center;
 			height: 100%;
 			pointer-events: none;
+
+			@media screen and (max-width: 782px) {
+				display: none;
+			}
 
 			.banner-shape {
 				position: absolute;
