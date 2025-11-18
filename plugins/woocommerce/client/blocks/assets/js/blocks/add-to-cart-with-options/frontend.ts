@@ -6,7 +6,6 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 	ProductData,
-	VariationData,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
@@ -20,6 +19,7 @@ import { getMatchedVariation } from '../../base/utils/variations/get-matched-var
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
+import type { NormalizedProductData, NormalizedVariationData } from './types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -54,52 +54,47 @@ const { state: productDataState } = store< ProductDataStore >(
 export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
-) => {
-	let productId = id;
-	let productData: ProductData | VariationData | undefined;
-
+): NormalizedProductData | NormalizedVariationData | null => {
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	let type: ProductData[ 'type' ] | 'variation' | null = null;
-	if ( selectedAttributes && selectedAttributes.length > 0 ) {
-		if ( ! products || ! products[ id ] ) {
-			return null;
-		}
-		const variations = products[ id ].variations;
-		const matchedVariation = getMatchedVariation(
-			variations,
-			selectedAttributes
-		);
-		if ( matchedVariation?.variation_id ) {
-			productId = matchedVariation.variation_id;
-			productData = products?.[ id ]?.variations?.[
-				matchedVariation?.variation_id
-			] as VariationData;
-			type = 'variation';
-		}
-	} else {
-		productData = products?.[ productId ] as ProductData;
-		type = productData?.type;
-	}
-
-	if ( typeof productData !== 'object' || productData === null ) {
+	if ( ! products || ! products[ id ] ) {
 		return null;
 	}
 
-	const min = typeof productData.min === 'number' ? productData.min : 1;
+	let product = {
+		id,
+		...products[ id ],
+	} as ProductData & { id: number };
+
+	if (
+		product.type === 'variable' &&
+		selectedAttributes &&
+		selectedAttributes.length > 0
+	) {
+		const matchedVariation = getMatchedVariation(
+			product.variations,
+			selectedAttributes
+		);
+		if ( matchedVariation ) {
+			product = {
+				...matchedVariation,
+				id: matchedVariation.variation_id,
+				type: 'variation',
+			};
+		}
+	}
+
+	const min = typeof product.min === 'number' ? product.min : 1;
 	const max =
-		typeof productData.max === 'number' && productData.max >= 1
-			? productData.max
-			: Infinity;
-	const step = productData.step || 1;
+		typeof product.max === 'number' ? Math.max( product.max, 0 ) : Infinity;
+	const step =
+		typeof product.step === 'number' && product.step > 0 ? product.step : 1;
 
 	return {
-		id: productId,
-		...productData,
+		...product,
 		min,
 		max,
 		step,
-		type,
 	};
 };
 
@@ -133,11 +128,13 @@ export const getNewQuantity = (
 
 export type AddToCartWithOptionsStore = {
 	state: {
-		isFormValid: boolean;
 		noticeIds: string[];
 		validationErrors: AddToCartError[];
+		isFormValid: boolean;
+		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
+		productData: NormalizedProductData | NormalizedVariationData | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -170,6 +167,11 @@ const { actions, state } = store<
 			get isFormValid(): boolean {
 				return state.validationErrors.length === 0;
 			},
+			get allowsAddingToCart(): boolean {
+				const { productData } = state;
+
+				return productData?.is_in_stock ?? true;
+			},
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
 				return context.quantity || {};
@@ -177,6 +179,14 @@ const { actions, state } = store<
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
+			},
+			get productData() {
+				const { selectedAttributes } = getContext< Context >();
+
+				return getProductData(
+					productDataState.productId,
+					selectedAttributes
+				);
 			},
 		},
 		actions: {
@@ -233,11 +243,7 @@ const { actions, state } = store<
 					};
 				}
 
-				const productObject = getProductData(
-					productDataState.productId,
-					context.selectedAttributes
-				);
-				if ( productObject?.type === 'grouped' ) {
+				if ( state.productData?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );

@@ -115,9 +115,11 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postType: testData.templateType,
 				} );
+
 				await editor.revertTemplate( {
 					templateName: testData.fallbackTemplate?.templateName || '',
 				} );
+
 				await testData.visitPage( {
 					admin,
 					editor,

@@ -4,7 +4,6 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { HTMLElementEvent } from '@woocommerce/types';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
@@ -14,6 +13,7 @@ import type { AddToCartWithOptionsStore } from '../frontend';
 
 export type Context = {
 	productId: number;
+	allowZero?: boolean;
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -22,12 +22,6 @@ const universalLock =
 
 const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
-	{},
-	{ lock: universalLock }
-);
-
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
 	{},
 	{ lock: universalLock }
 );
@@ -51,6 +45,7 @@ export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 
 export type QuantitySelectorStore = {
 	state: {
+		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
 	};
@@ -74,15 +69,28 @@ store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
+			get allowsQuantityChange(): boolean {
+				const { productData } = addToCartWithOptionsStore.state;
+
+				if ( ! productData ) {
+					return true;
+				}
+
+				return (
+					productData.is_in_stock && ! productData.sold_individually
+				);
+			},
 			get allowsDecrease() {
+				// Note: in grouped products, `productData` will be the parent product.
+				// We handle grouped products decrease differently because we
+				// allow setting the quantity to 0.
 				const { quantity, selectedAttributes } =
 					addToCartWithOptionsStore.state;
 
-				// Note: in grouped products, this will be the parent product.
-				// We handle grouped products decrease differently because we
-				// allow setting the quantity to 0.
+				const { allowZero, productId } = getContext< Context >();
+
 				const productObject = getProductData(
-					productDataState.productId,
+					productId,
 					selectedAttributes
 				);
 
@@ -90,17 +98,14 @@ store< QuantitySelectorStore >(
 					return true;
 				}
 
-				if ( productObject.type === 'grouped' ) {
-					const { productId } = getContext< Context >();
-
-					return quantity[ productId ] > 0;
-				}
-
 				const { id, min, step } = productObject;
 
 				const currentQuantity = quantity[ id ] || 0;
 
-				return currentQuantity - step >= min;
+				return (
+					( allowZero && currentQuantity > 0 ) ||
+					currentQuantity - step >= min
+				);
 			},
 			get allowsIncrease() {
 				const { quantity, selectedAttributes } =
@@ -146,6 +151,7 @@ store< QuantitySelectorStore >(
 				);
 
 				let newValue = currentValue + 1;
+
 				if ( productObject ) {
 					const { max, min, step } = productObject;
 					newValue = currentValue + step;
@@ -170,42 +176,23 @@ store< QuantitySelectorStore >(
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-
-				const { productId } = getContext< Context >();
+				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
-				const parentProductObject = getProductData(
-					productDataState.productId,
+				const productObject = getProductData(
+					productId,
 					selectedAttributes
 				);
-
-				let productObject = parentProductObject;
-
-				if ( parentProductObject?.type === 'grouped' ) {
-					productObject = getProductData(
-						productId,
-						selectedAttributes
-					);
-				}
 
 				let newValue = currentValue - 1;
 
 				if ( productObject ) {
-					const { min, step } = productObject;
+					const { max, min, step } = productObject;
 					newValue = currentValue - step;
-
-					if ( newValue < min ) {
-						// In grouped product children, we allow decreasing the value
-						// down to 0, even if the minimum value is greater than 0.
-						if ( parentProductObject?.type === 'grouped' ) {
-							if ( currentValue > min ) {
-								newValue = min;
-							} else {
-								newValue = 0;
-							}
-						} else {
-							newValue = min;
-						}
+					if ( allowZero && newValue < min && currentValue === min ) {
+						newValue = 0;
+					} else {
+						newValue = Math.min( max, Math.max( min, newValue ) );
 					}
 				}
 
@@ -225,10 +212,11 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
+				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
-				let min = 1;
+
 				const productObject = getProductData(
-					productDataState.productId,
+					productId,
 					selectedAttributes
 				);
 
@@ -236,18 +224,19 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { productId } = getContext< Context >();
+				const { min } = productObject;
 
 				// In grouped products, we reset invalid inputs to ''.
 				if (
+					allowZero &&
 					( Number.isNaN( event.target.valueAsNumber ) ||
-						event.target.valueAsNumber === 0 ) &&
-					productObject.type === 'grouped'
+						event.target.valueAsNumber === 0 )
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
 						0
 					);
+
 					if ( Number.isNaN( event.target.valueAsNumber ) ) {
 						event.target.value = '';
 					}
@@ -255,30 +244,15 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				let childProductObject = null;
-
-				if ( productObject.type === 'grouped' ) {
-					childProductObject = getProductData(
-						productId,
-						selectedAttributes
-					);
-
-					if ( ! childProductObject ) {
-						return;
-					}
-				} else {
-					childProductObject = productObject;
-				}
-
-				min = childProductObject.min;
-
-				// In other product types, we reset inputs to `min` if they are
-				// 0 or NaN.
-				const newValue =
+				let newValue;
+				if (
 					Number.isFinite( event.target.valueAsNumber ) &&
 					event.target.valueAsNumber > 0
-						? event.target.valueAsNumber
-						: min;
+				) {
+					newValue = event.target.valueAsNumber;
+				} else {
+					newValue = allowZero ? 0 : min;
+				}
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,

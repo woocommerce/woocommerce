@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.4.0",
+	"version": "10.5.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -23,6 +23,7 @@
 		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
 		"build:project:actualize-translation-domains": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"env:destroy": "pnpm wp-env destroy",
 		"env:dev": "pnpm wp-env start --update",
 		"env:down": "pnpm wp-env stop",
@@ -206,7 +207,8 @@
 					]
 				},
 				{
-					"name": "PHP: 7.4 WP: prerelease",
+					"name": "PHP: 7.4 WP: pre-release",
+					"optional": true,
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -474,6 +476,7 @@
 				},
 				{
 					"name": "Core e2e tests - WP pre-release",
+					"optional": true,
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -764,6 +767,7 @@
 				},
 				{
 					"name": "Blocks e2e tests - WP pre-release",
+					"optional": true,
 					"testType": "e2e",
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
@@ -781,6 +785,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
@@ -818,6 +823,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
@@ -898,6 +904,7 @@
 		"eslint-plugin-playwright": "0.22.1",
 		"jest": "29.5.x",
 		"nodemon": "^3.0.2",
+		"playwright-ctrf-json-reporter": "^0.0.26",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
