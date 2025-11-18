@@ -253,7 +253,7 @@ class Controller extends AbstractController {
 		$force   = $request['force'];
 
 		// Shipping zones do not support trashing.
-		// This is done to ensure backward compatibility w/ v2/v3
+		// This is done to ensure backward compatibility w/ v2/v3.
 		if ( ! $force ) {
 			return new WP_Error(
 				'woocommerce_rest_trash_not_supported',
