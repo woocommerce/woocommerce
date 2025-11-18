@@ -158,7 +158,7 @@ const CustomizeStoreController = () => {
 			</div>
 
 			<div className="woocommerce-customize-store-main">
-				<div className="woocommerce-customize-store-banner no-ai-banner">
+				<div className="woocommerce-customize-store-banner">
 					<div className="woocommerce-customize-store-banner-content">
 						<div className="banner-actions">
 							<h1>{ __( 'Design your own', 'woocommerce' ) }</h1>

@@ -61,7 +61,6 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 .woocommerce-customize-store-main {
 	flex: 1;
 	padding: 2rem 2.5rem;
-	overflow-y: auto;
 
 	@media screen and (max-width: 782px) {
 		padding: 1rem;
@@ -70,7 +69,7 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 
 	.woocommerce-customize-store-banner {
 		background: rgba(242, 237, 255, 0.6);
-		border-radius: 8px;
+		border-radius: 4px;
 		display: flex;
 		margin-bottom: 1.5rem;
 		min-height: 248px;
@@ -78,16 +77,11 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		align-items: center;
 		padding: 2rem 3rem;
 		position: relative;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 		overflow: hidden;
 
 		@media screen and (max-width: 782px) {
 			padding: 1.5rem;
 			min-height: 200px;
-		}
-
-		&.no-ai-banner {
-			background: rgba(242, 237, 255, 0.6);
 		}
 
 		.banner-visual {
@@ -107,22 +101,11 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 
 			.banner-shape {
 				position: absolute;
-				height: auto;
-				max-height: 280px;
-				z-index: 1;
 			}
 
 			.banner-icon {
 				position: relative;
-				height: auto;
-				max-height: 200px;
-				z-index: 2;
-				margin-right: 2rem;
 			}
-		}
-
-		&.pick-your-theme-banner {
-			background: rgba(242, 237, 255, 0.6);
 		}
 
 		.woocommerce-customize-store-banner-content {
@@ -134,54 +117,44 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 			}
 
 			button.components-button {
-				padding: 10px 20px;
-				height: 44px;
-				font-size: 0.875rem;
+				padding: 8px 16px;
+				height: 40px;
 			}
 
 			h1,
 			h2 {
-				font-size: 1.5rem;
-				line-height: 1.4;
-				font-weight: 600;
-				color: #1e1e1e;
+				font-size: 1.25rem;
+				line-height: 23.87px;
+				font-weight: 500;
+				color: #000;
 				padding: 0;
-				margin: 0 0 0.75rem 0;
 			}
 
 			p {
-				margin: 0 0 1.5rem 0;
-				color: #50575e;
-				line-height: 1.6;
-				font-size: 0.875rem;
+				margin: 12px 0 28px 0;
+				color: #2f2f2f;
+				line-height: 16px;
 			}
 
 			.pick-your-theme-banner__content {
 				display: flex;
-				gap: 2rem;
+				gap: 1rem;
 				flex-direction: row;
 
 				ul {
 					flex: 1 1 50%;
 					list-style: disc;
-					padding-left: 1.25rem;
-					margin: 0 0 1.5rem 0;
+					padding-left: 1rem;
 
 					li {
-						margin-bottom: 0.5rem;
-						line-height: 1.6;
-						color: #50575e;
-						font-size: 0.875rem;
-
-						&:last-child {
-							margin-bottom: 0;
-						}
+						margin-bottom: 0;
+						line-height: 1.5;
 					}
 				}
 
 				p {
-					line-height: 1.6;
-					flex: 1 1 50%;
+					line-height: 1.5;
+					max-width: 255px;
 				}
 			}
 		}
