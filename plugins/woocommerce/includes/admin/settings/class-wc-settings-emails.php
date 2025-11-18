@@ -155,7 +155,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				array(
 					array(
 						'title'    => __( 'Add "Reply-to" email', 'woocommerce' ),
-						'desc'     => __( 'Use a different email address for replies.', 'woocommerce' ),
+						'desc'     => __( 'Add a different email address to receive replies.', 'woocommerce' ),
 						'id'       => 'woocommerce_email_reply_to_enabled',
 						'type'     => 'checkbox',
 						'default'  => 'no',
