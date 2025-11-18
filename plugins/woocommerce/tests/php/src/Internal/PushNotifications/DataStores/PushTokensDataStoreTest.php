@@ -108,17 +108,14 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		// Verify device_uuid exists initially.
 		$this->assertNotNull( $push_token->get_device_uuid() );
 		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
 		$this->assertNotEmpty( $device_uuid );
 
-		// Convert to browser token (device_uuid becomes null).
 		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
 		$push_token->set_device_uuid( null );
 		$data_store->update( $push_token );
 
-		// Verify device_uuid meta is removed from database.
 		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
 		$this->assertEmpty( $device_uuid );
 	}
@@ -192,7 +189,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_reading_push_token_with_wrong_post_type() {
 		$data_store = new PushTokensDataStore();
 
-		// Create a regular post instead of a push_token.
 		$post_id = wp_insert_post(
 			array(
 				'post_title'  => 'Test Post',
@@ -218,7 +214,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_reading_push_token_with_malformed_metadata() {
 		$data_store = new PushTokensDataStore();
 
-		// Create a push_token post but with missing metadata.
 		$post_id = wp_insert_post(
 			array(
 				'post_author' => 1,
@@ -289,7 +284,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_updating_push_token_with_wrong_post_type() {
 		$data_store = new PushTokensDataStore();
 
-		// Create a regular post instead of a push_token.
 		$post_id = wp_insert_post(
 			array(
 				'post_title'  => 'Test Post',
@@ -335,7 +329,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_deleting_push_token_with_wrong_post_type() {
 		$data_store = new PushTokensDataStore();
 
-		// Create a regular post instead of a push_token.
 		$post_id = wp_insert_post(
 			array(
 				'post_title'  => 'Test Post',
@@ -869,7 +862,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_can_create_and_read_browser_token_without_device_uuid() {
 		$data_store = new PushTokensDataStore();
 
-		// Create a browser token without device_uuid.
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( '{"endpoint":"https://example.com/push","keys":{"auth":"test","p256dh":"test"}}' );
@@ -880,7 +872,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 
 		$this->assertNotNull( $push_token->get_id() );
 
-		// Now try to read it back.
 		$read_token = new PushToken();
 		$read_token->set_id( $push_token->get_id() );
 
