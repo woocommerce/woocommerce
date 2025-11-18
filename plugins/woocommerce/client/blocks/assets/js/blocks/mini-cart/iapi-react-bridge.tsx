@@ -6,7 +6,6 @@
 /**
  * External dependencies
  */
-import { ExpressPaymentMethods } from '../cart-checkout-shared/payment-methods';
 import MiniCartExpressPaymentWrapper from './components/mini-cart-express-payment-wrapper';
 
 /**
@@ -15,7 +14,6 @@ import MiniCartExpressPaymentWrapper from './components/mini-cart-express-paymen
 if ( typeof window !== 'undefined' ) {
 	window.wc = window.wc || {};
 	window.wc.blocksCheckout = window.wc.blocksCheckout || {};
-	window.wc.blocksCheckout.ExpressPaymentMethods = ExpressPaymentMethods;
 	window.wc.blocksCheckout.MiniCartExpressPaymentWrapper =
 		MiniCartExpressPaymentWrapper;
 }
