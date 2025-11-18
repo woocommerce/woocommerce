@@ -262,7 +262,7 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 			height: 100%;
 			pointer-events: none;
 
-			@media screen and (max-width: 782px) {
+			@media screen and (max-width: 1024px) {
 				display: none;
 			}
 
@@ -284,18 +284,15 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 
 		&.pick-your-theme-banner {
 			background: rgba(242, 237, 255, 0.6);
-
-			.woocommerce-customize-store-banner-content {
-				width: 550px;
-
-				@media only screen and (min-width: 1400px) {
-					width: 710px;
-				}
-			}
 		}
 
 		.woocommerce-customize-store-banner-content {
 			width: 100%;
+			max-width: 60%;
+
+			@media screen and (max-width: 1024px) {
+				max-width: 100%;
+			}
 
 			button.components-button {
 				padding: 10px 20px;
