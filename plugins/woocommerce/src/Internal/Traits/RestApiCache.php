@@ -94,13 +94,6 @@ trait RestApiCache {
 	private static string $cache_group = 'woocommerce_rest_api_cache';
 
 	/**
-	 * Cache TTL in seconds.
-	 *
-	 * @var int
-	 */
-	private static int $cache_ttl = HOUR_IN_SECONDS;
-
-	/**
 	 * The instance of VersionStringGenerator to use, or null if caching is disabled.
 	 *
 	 * @var VersionStringGenerator|null
