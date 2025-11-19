@@ -24,13 +24,15 @@ import clsx from 'clsx';
 import './editor.scss';
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
 
+const noop = () => undefined;
+
 export const Edit = ( {
 	attributes: { checkbox, text, showSeparator },
 	setAttributes,
 }: {
 	attributes: { text: string; checkbox: boolean; showSeparator: boolean };
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+} ) => {
 	const blockProps = useBlockProps();
 
 	const defaultText = checkbox
@@ -119,6 +121,7 @@ export const Edit = ( {
 					) }
 				<PanelBody title={ __( 'Display options', 'woocommerce' ) }>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __( 'Require checkbox', 'woocommerce' ) }
 						checked={ checkbox }
 						onChange={ () =>
@@ -128,6 +131,7 @@ export const Edit = ( {
 						}
 					/>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __( 'Show separator', 'woocommerce' ) }
 						checked={ showSeparator }
 						onChange={ () =>
@@ -145,10 +149,13 @@ export const Edit = ( {
 			>
 				{ checkbox ? (
 					<>
-						<CheckboxControl
-							id="terms-condition"
-							checked={ false }
-						/>
+						<div className="wc-block-checkout__terms-checkbox-wrapper">
+							<CheckboxControl
+								id="terms-condition"
+								checked={ false }
+								onChange={ noop }
+							/>
+						</div>
 						<RichText
 							value={ currentText }
 							onChange={ ( value ) =>
@@ -170,6 +177,6 @@ export const Edit = ( {
 	);
 };
 
-export const Save = (): JSX.Element => {
+export const Save = () => {
 	return <div { ...useBlockProps.save() } />;
 };

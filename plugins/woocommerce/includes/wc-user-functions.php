@@ -1098,7 +1098,7 @@ function wc_update_user_last_active( $user_id ) {
 	if ( ! $user_id ) {
 		return;
 	}
-	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( gmdate( 'Y-m-d', time() ) ) );
+	update_user_meta( $user_id, 'wc_last_active', (string) time() );
 }
 
 /**

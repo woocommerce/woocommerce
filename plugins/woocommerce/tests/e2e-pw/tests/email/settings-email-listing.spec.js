@@ -99,9 +99,9 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		);
 
 		// I want to check that search works
-		await page.getByPlaceholder( 'Search' ).fill( 'Completed order' );
+		await page.getByPlaceholder( 'Search' ).fill( 'Failed order' );
 		await expect(
-			listViewLocator.getByText( 'Completed order' )
+			listViewLocator.getByText( 'Failed order' )
 		).toBeVisible();
 
 		// Check that only one row is visible after search
