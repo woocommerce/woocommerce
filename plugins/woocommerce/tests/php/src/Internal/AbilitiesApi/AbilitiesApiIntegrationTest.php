@@ -88,15 +88,15 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		// Ensure REST API routes are registered after bootstrap is loaded.
 		// The parent setUp() fires rest_api_init before bootstrap is loaded, so we need to register routes manually
 		// or fire rest_api_init again after bootstrap is loaded.
-		if ( class_exists( '\WP_REST_Abilities_Init' ) ) {
+		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
 			\WP_REST_Abilities_Init::register_routes( $this->server );
 		} else {
 			// Bootstrap might not have loaded the REST init class yet, so try loading it directly.
 			$rest_init_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/rest-api/class-wp-rest-abilities-init.php';
-			if ( file_exists( $rest_init_file ) && ! class_exists( '\WP_REST_Abilities_Init' ) ) {
+			if ( file_exists( $rest_init_file ) ) {
 				require_once $rest_init_file;
 			}
-			if ( class_exists( '\WP_REST_Abilities_Init' ) ) {
+			if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
 				\WP_REST_Abilities_Init::register_routes( $this->server );
 			} else {
 				/**
@@ -104,6 +104,8 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				 * The bootstrap file hooks into this action, but parent::set_up() fires it before bootstrap is loaded.
 				 *
 				 * @param WP_REST_Server $server The REST server instance.
+				 *
+				 * @since 10.4.0
 				 */
 				do_action( 'rest_api_init', $this->server );
 			}
@@ -398,7 +400,14 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_rest_endpoints_are_registered() {
-		$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
+		// WordPress 6.9+ uses core controllers with different namespace, earlier versions use vendor package.
+		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
+		if ( $are_abilities_in_wp_core ) {
+			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
+		} else {
+			$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
+		}
+
 		$list_endpoint = '/wp-abilities/v1/abilities';
 		$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 
@@ -482,10 +491,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 
-		// Create REST request - use version-appropriate namespace.
-		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
-		$list_endpoint            = '/wp-abilities/v1/abilities';
-		$request                  = new \WP_REST_Request( 'GET', $list_endpoint );
+		// Create REST request.
+		$list_endpoint = '/wp-abilities/v1/abilities';
+		$request       = new \WP_REST_Request( 'GET', $list_endpoint );
 		// Set up authentication for admin user.
 		wp_set_current_user( 1 );
 		$response = $this->server->dispatch( $request );
