@@ -236,7 +236,61 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
+<<<<<<< HEAD
 	 * Test create item with missing zone_id parameter.
+=======
+	 * @testdox Should check delete permission for DELETE requests.
+	 */
+	public function test_check_permissions_delete_context() {
+		wp_set_current_user( self::$admin_user_id );
+
+		// Add filter to deny delete permissions but allow edit.
+		$filter_callback = function ( $permission, $context, $object_id, $object_type ) {
+			if ( 'settings' === $object_type && 'delete' === $context ) {
+				return false;
+			}
+			return $permission;
+		};
+		add_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10, 4 );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/1' );
+		$result  = $this->controller->check_permissions( $request );
+
+		// Should be denied because delete permission is blocked.
+		$this->assertInstanceOf( WP_Error::class, $result );
+
+		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should check read permission for GET requests.
+	 */
+	public function test_check_permissions_read_context() {
+		wp_set_current_user( self::$admin_user_id );
+
+		// Add filter to deny read permissions but allow edit.
+		$filter_callback = function ( $permission, $context, $object_id, $object_type ) {
+			if ( 'settings' === $object_type && 'read' === $context ) {
+				return false;
+			}
+			return $permission;
+		};
+		add_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10, 4 );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/shipping-zone-method/1' );
+		$result  = $this->controller->check_permissions( $request );
+
+		// Should be denied because read permission is blocked.
+		$this->assertInstanceOf( WP_Error::class, $result );
+
+		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should return error when creating item with missing zone_id parameter.
+>>>>>>> 197a970a ([WOO13-80] feat: add v4 delete endpoint for shipping zone (#62016))
 	 */
 	public function test_create_item_missing_zone_id() {
 		wp_set_current_user( self::$admin_user_id );
@@ -738,4 +792,168 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zone_method_', $prefix );
 	}
+<<<<<<< HEAD
+=======
+
+	/**
+	 * @testdox Should configure DELETE endpoint route correctly.
+	 */
+	public function test_delete_route_configuration() {
+		$routes = rest_get_server()->get_routes();
+		$route  = $routes['/wc/v4/shipping-zone-method/(?P<id>[\\d]+)'];
+
+		$this->assertEquals( 'DELETE', $route[2]['methods']['DELETE'] );
+		$this->assertEquals( array( $this->controller, 'delete_item' ), $route[2]['callback'] );
+		$this->assertEquals( array( $this->controller, 'check_permissions' ), $route[2]['permission_callback'] );
+	}
+
+	/**
+	 * @testdox Should return error when deleting item with invalid ID.
+	 */
+	public function test_delete_item_invalid_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/99999' );
+		$request->set_param( 'id', 99999 );
+
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'invalid_id', $response->get_error_code() );
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_error_data()['status'] );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should delete item successfully.
+	 */
+	public function test_delete_item_success() {
+		wp_set_current_user( self::$admin_user_id );
+
+		// Create zone and method.
+		$zone        = $this->create_shipping_zone();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		// Verify the method exists.
+		$methods_before = $zone->get_shipping_methods( false );
+		$this->assertNotEmpty( $methods_before );
+
+		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
+		$request->set_param( 'id', $instance_id );
+
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertNotInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		// Verify response contains full method object (not just success flag).
+		$this->assertArrayHasKey( 'instance_id', $data );
+		$this->assertArrayHasKey( 'zone_id', $data );
+		$this->assertArrayHasKey( 'method_id', $data );
+		$this->assertArrayHasKey( 'enabled', $data );
+		$this->assertArrayHasKey( 'settings', $data );
+		$this->assertEquals( $instance_id, $data['instance_id'] );
+		$this->assertEquals( 'flat_rate', $data['method_id'] );
+		$this->assertEquals( $zone->get_id(), $data['zone_id'] );
+
+		// Verify the method was actually deleted.
+		$methods_after = $zone->get_shipping_methods( false );
+		$this->assertCount( count( $methods_before ) - 1, $methods_after );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should return error when deleting already deleted method.
+	 */
+	public function test_delete_item_already_deleted() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone        = $this->create_shipping_zone( 'Test Zone' );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		// Delete the method first.
+		$zone->delete_shipping_method( $instance_id );
+
+		// Try to delete again.
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/' . $instance_id );
+		$request->set_param( 'id', $instance_id );
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'invalid_id', $response->get_error_code() );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should delete item for different shipping method types.
+	 */
+	public function test_delete_item_different_method_types() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+
+		// Test with different method types.
+		$method_types = array( 'flat_rate', 'free_shipping', 'local_pickup' );
+
+		foreach ( $method_types as $method_type ) {
+			$instance_id = $zone->add_shipping_method( $method_type );
+
+			$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/' . $instance_id );
+			$request->set_param( 'id', $instance_id );
+			$response = $this->controller->delete_item( $request );
+
+			$this->assertNotInstanceOf( WP_Error::class, $response, "Failed to delete method type: {$method_type}" );
+			$this->assertEquals( 200, $response->get_status() );
+
+			$data = $response->get_data();
+			$this->assertArrayHasKey( 'method_id', $data, "Response missing method_id for method type: {$method_type}" );
+			$this->assertEquals( $method_type, $data['method_id'], "Method type mismatch for: {$method_type}" );
+		}
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_rest_delete_shipping_zone_method action hook.
+	 */
+	public function test_delete_item_fires_action_hook() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone        = $this->create_shipping_zone();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		$hook_fired  = false;
+		$hook_method = null;
+		$hook_zone   = null;
+
+		// Add hook listener.
+		add_action(
+			'woocommerce_rest_delete_shipping_zone_method',
+			function ( $method, $zone ) use ( &$hook_fired, &$hook_method, &$hook_zone ) {
+				$hook_fired  = true;
+				$hook_method = $method;
+				$hook_zone   = $zone;
+			},
+			10,
+			2
+		);
+
+		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
+		$request->set_param( 'id', $instance_id );
+
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertTrue( $hook_fired, 'woocommerce_rest_delete_shipping_zone_method action hook was not fired' );
+		$this->assertNotNull( $hook_method, 'Hook did not receive method parameter' );
+		$this->assertNotNull( $hook_zone, 'Hook did not receive zone parameter' );
+		$this->assertEquals( $instance_id, $hook_method->instance_id, 'Hook received wrong method' );
+		$this->assertEquals( $zone->get_id(), $hook_zone->get_id(), 'Hook received wrong zone' );
+
+		wp_set_current_user( 0 );
+	}
+>>>>>>> 197a970a ([WOO13-80] feat: add v4 delete endpoint for shipping zone (#62016))
 }
