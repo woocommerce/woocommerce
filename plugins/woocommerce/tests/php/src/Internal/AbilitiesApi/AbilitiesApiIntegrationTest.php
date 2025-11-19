@@ -88,15 +88,15 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		// Ensure REST API routes are registered after bootstrap is loaded.
 		// The parent setUp() fires rest_api_init before bootstrap is loaded, so we need to register routes manually
 		// or fire rest_api_init again after bootstrap is loaded.
-		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
+		if ( class_exists( '\\WP_REST_Abilities_Init' ) ) {
 			\WP_REST_Abilities_Init::register_routes( $this->server );
 		} else {
 			// Bootstrap might not have loaded the REST init class yet, so try loading it directly.
 			$rest_init_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/rest-api/class-wp-rest-abilities-init.php';
-			if ( file_exists( $rest_init_file ) ) {
+			if ( file_exists( $rest_init_file ) && ! class_exists( '\\WP_REST_Abilities_Init' ) ) {
 				require_once $rest_init_file;
 			}
-			if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
+			if ( class_exists( '\\WP_REST_Abilities_Init' ) ) {
 				\WP_REST_Abilities_Init::register_routes( $this->server );
 			} else {
 				/**
