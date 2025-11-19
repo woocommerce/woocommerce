@@ -49,7 +49,11 @@ final class CallbackUtil {
 
 		if ( is_object( $callback ) ) {
 			// Invokable object.
-			return get_class( $callback ) . '::__invoke';
+			try {
+				return self::get_invokable_signature( $callback );
+			} catch ( \Exception $e ) {
+				return get_class( $callback ) . '::__invoke';
+			}
 		}
 
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Fallback for unknown callback types.
@@ -108,5 +112,25 @@ final class CallbackUtil {
 		}
 
 		return sprintf( 'Closure@%s:%d-%d', $file, $start, $end );
+	}
+
+	/**
+	 * Get a stable signature for an invokable object based on its class and __invoke method location.
+	 *
+	 * @param object $invokable The invokable object to generate a signature for.
+	 * @return string Signature in the format 'ClassName::__invoke@filename:startLine-endLine'.
+	 * @throws \ReflectionException If reflection fails.
+	 */
+	private static function get_invokable_signature( object $invokable ): string {
+		$reflection = new \ReflectionMethod( $invokable, '__invoke' );
+		$file       = $reflection->getFileName();
+		$start      = $reflection->getStartLine();
+		$end        = $reflection->getEndLine();
+
+		if ( false === $file || false === $start || false === $end ) {
+			throw new \ReflectionException( 'Unable to get invokable location information' );
+		}
+
+		return sprintf( '%s::__invoke@%s:%d-%d', get_class( $invokable ), $file, $start, $end );
 	}
 }

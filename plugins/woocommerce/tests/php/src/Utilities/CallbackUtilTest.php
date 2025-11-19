@@ -144,17 +144,16 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `get_callback_signature` should return class name with __invoke for invokable objects.
+	 * @testdox `get_callback_signature` should return class name with __invoke and location for invokable objects.
 	 */
 	public function test_get_callback_signature_with_invokable_object() {
 		$invokable = new DummyInvokableClass();
 
 		$signature = CallbackUtil::get_callback_signature( $invokable );
 
-		$this->assertEquals(
-			DummyInvokableClass::class . '::__invoke',
-			$signature
-		);
+		$this->assertStringStartsWith( DummyInvokableClass::class . '::__invoke@', $signature );
+		$this->assertStringContainsString( 'DummyInvokableClass.php', $signature );
+		$this->assertMatchesRegularExpression( '/:\d+-\d+$/', $signature );
 	}
 
 	/**
@@ -323,10 +322,9 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $signatures[10] );
 
-		$this->assertEquals(
-			DummyInvokableClass::class . '::__invoke',
-			$signatures[10][0]
-		);
+		$this->assertStringStartsWith( DummyInvokableClass::class . '::__invoke@', $signatures[10][0] );
+		$this->assertStringContainsString( 'DummyInvokableClass.php', $signatures[10][0] );
+		$this->assertMatchesRegularExpression( '/:\d+-\d+$/', $signatures[10][0] );
 
 		remove_all_actions( $hook_name );
 	}
