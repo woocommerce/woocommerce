@@ -115,7 +115,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test route registration.
+	 * @testdox Should register routes correctly.
 	 */
 	public function test_register_routes() {
 		$routes = rest_get_server()->get_routes();
@@ -125,7 +125,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test POST endpoint route configuration.
+	 * @testdox Should configure POST endpoint route correctly.
 	 */
 	public function test_post_route_configuration() {
 		$routes = rest_get_server()->get_routes();
@@ -137,7 +137,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test GET endpoint route configuration.
+	 * @testdox Should configure GET endpoint route correctly.
 	 */
 	public function test_get_route_configuration() {
 		$routes = rest_get_server()->get_routes();
@@ -149,7 +149,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test PUT endpoint route configuration.
+	 * @testdox Should configure PUT endpoint route correctly.
 	 */
 	public function test_put_route_configuration() {
 		$routes = rest_get_server()->get_routes();
@@ -162,7 +162,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test permissions when shipping is disabled.
+	 * @testdox Should return error when shipping is disabled.
 	 */
 	public function test_check_permissions_shipping_disabled() {
 		// Disable shipping.
@@ -180,7 +180,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test permissions without proper capabilities.
+	 * @testdox Should return error without proper capabilities.
 	 */
 	public function test_check_permissions_insufficient_permissions() {
 		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
@@ -197,7 +197,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test permissions with proper capabilities.
+	 * @testdox Should allow access with proper capabilities.
 	 */
 	public function test_check_permissions_with_permissions() {
 		wp_set_current_user( self::$admin_user_id );
@@ -211,7 +211,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test that woocommerce_rest_check_permissions filter is applied.
+	 * @testdox Should apply woocommerce_rest_check_permissions filter.
 	 */
 	public function test_check_permissions_applies_filter() {
 		wp_set_current_user( self::$admin_user_id );
@@ -236,7 +236,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item with missing zone_id parameter.
+	 * @testdox Should return error when creating item with missing zone_id parameter.
 	 */
 	public function test_create_item_missing_zone_id() {
 		wp_set_current_user( self::$admin_user_id );
@@ -257,7 +257,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item with missing method_id parameter.
+	 * @testdox Should return error when creating item with missing method_id parameter.
 	 */
 	public function test_create_item_missing_method_id() {
 		wp_set_current_user( self::$admin_user_id );
@@ -280,7 +280,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item with missing enabled parameter (should succeed with default value).
+	 * @testdox Should succeed when creating item with missing enabled parameter using default value.
 	 */
 	public function test_create_item_missing_enabled() {
 		wp_set_current_user( self::$admin_user_id );
@@ -302,7 +302,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item with missing settings parameter (should succeed with defaults).
+	 * @testdox Should succeed when creating item with missing settings parameter using defaults.
 	 */
 	public function test_create_item_missing_settings() {
 		wp_set_current_user( self::$admin_user_id );
@@ -324,7 +324,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item with invalid zone ID.
+	 * @testdox Should return error when creating item with invalid zone ID.
 	 */
 	public function test_create_item_invalid_zone_id() {
 		wp_set_current_user( self::$admin_user_id );
@@ -345,7 +345,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item with invalid method type.
+	 * @testdox Should return error when creating item with invalid method type.
 	 */
 	public function test_create_item_invalid_method_type() {
 		wp_set_current_user( self::$admin_user_id );
@@ -368,7 +368,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item successfully.
+	 * @testdox Should create item successfully.
 	 */
 	public function test_create_item_success() {
 		wp_set_current_user( self::$admin_user_id );
@@ -397,7 +397,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item rollback on validation failure.
+	 * @testdox Should rollback item creation on validation failure.
 	 */
 	public function test_create_item_rollback_on_validation_failure() {
 		wp_set_current_user( self::$admin_user_id );
@@ -479,7 +479,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test update item with invalid ID.
+	 * @testdox Should return error when updating item with invalid ID.
 	 */
 	public function test_update_item_invalid_id() {
 		wp_set_current_user( self::$admin_user_id );
@@ -497,7 +497,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test update item ignores zone_id since it's readonly.
+	 * @testdox Should ignore zone_id when updating since it is readonly.
 	 */
 	public function test_update_item_ignores_readonly_zone_id() {
 		wp_set_current_user( self::$admin_user_id );
@@ -529,7 +529,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test update item successfully.
+	 * @testdox Should update item successfully.
 	 */
 	public function test_update_item_success() {
 		wp_set_current_user( self::$admin_user_id );
@@ -558,7 +558,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test update item with only zone_id validation.
+	 * @testdox Should validate zone_id when updating item.
 	 */
 	public function test_update_item_zone_id_only() {
 		wp_set_current_user( self::$admin_user_id );
@@ -580,7 +580,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test get item with valid ID.
+	 * @testdox Should return item with valid ID.
 	 */
 	public function test_get_item_success() {
 		wp_set_current_user( self::$admin_user_id );
@@ -608,7 +608,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test get item returns 404 for invalid ID.
+	 * @testdox Should return 404 for invalid ID.
 	 */
 	public function test_get_item_invalid_id() {
 		wp_set_current_user( self::$admin_user_id );
@@ -626,7 +626,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test get item returns 404 for deleted method.
+	 * @testdox Should return 404 for deleted method.
 	 */
 	public function test_get_item_deleted_method() {
 		wp_set_current_user( self::$admin_user_id );
@@ -648,7 +648,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test get item works with different shipping method types.
+	 * @testdox Should return item for different shipping method types.
 	 */
 	public function test_get_item_different_method_types() {
 		wp_set_current_user( self::$admin_user_id );
@@ -677,7 +677,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test get item returns method from correct zone.
+	 * @testdox Should return method from correct zone.
 	 */
 	public function test_get_item_correct_zone() {
 		wp_set_current_user( self::$admin_user_id );
@@ -713,7 +713,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test get schema.
+	 * @testdox Should return schema correctly.
 	 */
 	public function test_get_schema() {
 		$schema = $this->controller->get_item_schema();
@@ -727,7 +727,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test error prefix.
+	 * @testdox Should return correct error prefix.
 	 */
 	public function test_get_error_prefix() {
 		$reflection = new \ReflectionClass( $this->controller );
@@ -740,7 +740,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test DELETE endpoint route configuration.
+	 * @testdox Should configure DELETE endpoint route correctly.
 	 */
 	public function test_delete_route_configuration() {
 		$routes = rest_get_server()->get_routes();
@@ -752,7 +752,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test delete item with invalid ID.
+	 * @testdox Should return error when deleting item with invalid ID.
 	 */
 	public function test_delete_item_invalid_id() {
 		wp_set_current_user( self::$admin_user_id );
@@ -771,7 +771,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test delete item successfully.
+	 * @testdox Should delete item successfully.
 	 */
 	public function test_delete_item_success() {
 		wp_set_current_user( self::$admin_user_id );
@@ -812,7 +812,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test delete item for already deleted method.
+	 * @testdox Should return error when deleting already deleted method.
 	 */
 	public function test_delete_item_already_deleted() {
 		wp_set_current_user( self::$admin_user_id );
@@ -836,7 +836,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test delete item with different shipping method types.
+	 * @testdox Should delete item for different shipping method types.
 	 */
 	public function test_delete_item_different_method_types() {
 		wp_set_current_user( self::$admin_user_id );
@@ -866,7 +866,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test that woocommerce_rest_delete_shipping_zone_method action hook is fired.
+	 * @testdox Should fire woocommerce_rest_delete_shipping_zone_method action hook.
 	 */
 	public function test_delete_item_fires_action_hook() {
 		wp_set_current_user( self::$admin_user_id );
@@ -906,7 +906,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test delete shipping method without force parameter returns 501.
+	 * @testdox Should return 501 when deleting without force parameter.
 	 */
 	public function test_delete_item_without_force_parameter() {
 		wp_set_current_user( self::$admin_user_id );
@@ -933,7 +933,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test delete shipping method with force=false returns 501.
+	 * @testdox Should return 501 when deleting with force=false.
 	 */
 	public function test_delete_item_with_force_false() {
 		wp_set_current_user( self::$admin_user_id );
