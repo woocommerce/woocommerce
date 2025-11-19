@@ -397,13 +397,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
 		if ( $are_abilities_in_wp_core ) {
 			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
-			$list_endpoint = '/wp-abilities/v1/abilities';
-			$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 		} else {
 			$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
-			$list_endpoint = '/wp/v2/abilities';
-			$run_endpoint  = '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 		}
+		$list_endpoint = '/wp-abilities/v1/abilities';
+		$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 
 		$routes = $this->server->get_routes();
 
@@ -487,7 +485,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Create REST request - use version-appropriate namespace.
 		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
-		$list_endpoint            = $are_abilities_in_wp_core ? '/wp-abilities/v1/abilities' : '/wp/v2/abilities';
+		$list_endpoint            = '/wp-abilities/v1/abilities';
 		$request                  = new \WP_REST_Request( 'GET', $list_endpoint );
 		// Set up authentication for admin user.
 		wp_set_current_user( 1 );
