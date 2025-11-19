@@ -11,6 +11,11 @@ declare(strict_types=1);
  * Class WC_Helper_Updater_Test
  */
 class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
+	/**
+	 * The mocked response for 'update-check' API used for the tests.
+	 *
+	 * @var array
+	 */
 	private $mocked_updates = array(
 		123 => array(
 			'version'        => '2.0.0',
