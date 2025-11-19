@@ -253,7 +253,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cache varies by user ID automatically.
+	 * @testdox Cache varies by user ID when vary_by_user is true (default).
 	 */
 	public function test_cache_varies_by_user() {
 		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
@@ -269,6 +269,149 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$response2 = $this->query_endpoint( 'single_entity' );
 		$this->assertCacheHeader( $response2, 'MISS' );
 		$this->assertCount( 2, $this->get_all_cache_keys() );
+	}
+
+	/**
+	 * @testdox Cache does not vary by user when vary_by_user is false.
+	 */
+	public function test_cache_does_not_vary_by_user_when_disabled() {
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array( 'get_current_user_id' => fn() => 1 )
+		);
+		$response1 = $this->query_endpoint( 'no_vary_by_user' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array( 'get_current_user_id' => fn() => 2 )
+		);
+		$response2 = $this->query_endpoint( 'no_vary_by_user' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+	}
+
+	/**
+	 * @testdox Endpoint with endpoint_id works correctly.
+	 */
+	public function test_endpoint_id_is_supported() {
+		$response1 = $this->query_endpoint( 'with_endpoint_id' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertEquals( $this->sut->responses['with_endpoint_id'], $response1->get_data() );
+
+		$response2 = $this->query_endpoint( 'with_endpoint_id' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+		$this->assertEquals( $this->sut->responses['with_endpoint_id'], $response2->get_data() );
+	}
+
+	/**
+	 * @testdox Filter woocommerce_rest_api_cache_key_info allows customizing cache key parts.
+	 */
+	public function test_cache_key_info_filter() {
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+
+		$filter_called = false;
+		add_filter(
+			'woocommerce_rest_api_cache_key_info',
+			function ( $cache_key_parts, $request, $vary_by_user, $endpoint_id, $controller ) use ( &$filter_called ) {
+				$filter_called = true;
+				$this->assertIsArray( $cache_key_parts );
+				$this->assertInstanceOf( WP_REST_Request::class, $request );
+				$this->assertIsBool( $vary_by_user );
+				$this->assertIsObject( $controller );
+				$cache_key_parts[] = 'custom_part';
+				return $cache_key_parts;
+			},
+			10,
+			5
+		);
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertTrue( $filter_called, 'Filter should have been called' );
+		$this->assertCacheHeader( $response2, 'MISS' );
+		$this->assertCount( 2, $this->get_all_cache_keys() );
+
+		remove_all_filters( 'woocommerce_rest_api_cache_key_info' );
+	}
+
+	/**
+	 * @testdox Custom cache TTL can be specified per endpoint.
+	 */
+	public function test_custom_cache_ttl() {
+		$response1 = $this->query_endpoint( 'custom_ttl' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$response2 = $this->query_endpoint( 'custom_ttl' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		$this->fixed_time += 11;
+
+		$response3 = $this->query_endpoint( 'custom_ttl' );
+		$this->assertCacheHeader( $response3, 'MISS' );
+	}
+
+	/**
+	 * @testdox Custom extract_entity_ids_from_response method can be overridden.
+	 */
+	public function test_custom_extract_entity_ids_from_response_override() {
+		$custom_controller = new class() extends WP_REST_Controller {
+			// phpcs:disable Squiz.Commenting
+			use RestApiCache;
+
+			public $custom_extractor_called = false;
+
+			public function __construct() {
+				$this->namespace = 'wc/v3';
+				$this->rest_base = 'custom_extraction_test';
+				$this->initialize_rest_api_cache();
+			}
+
+			protected function get_default_response_entity_type(): ?string {
+				return 'product';
+			}
+
+			protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array {
+				$this->custom_extractor_called = true;
+				return isset( $response_data['product_id'] ) ? array( $response_data['product_id'] ) : array();
+			}
+
+			public function register_routes() {
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base,
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								unset( $request ); // Avoid parameter not used PHPCS errors.
+								return new WP_REST_Response(
+									array(
+										'product_id' => 999,
+										'name'       => 'Custom Product',
+									),
+									200
+								);
+							}
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
+			}
+			// phpcs:enable Squiz.Commenting
+		};
+
+		$custom_controller->register_routes();
+
+		$request   = new WP_REST_Request( 'GET', '/wc/v3/custom_extraction_test' );
+		$response1 = $this->server->dispatch( $request );
+
+		$this->assertTrue( $custom_controller->custom_extractor_called, 'Custom extractor should have been called' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertNotEmpty( $this->version_generator->get_version( 'product_999' ) );
+
+		$response2 = $this->server->dispatch( $request );
+		$this->assertCacheHeader( $response2, 'HIT' );
 	}
 
 	/**
@@ -367,7 +510,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			// phpcs:disable Squiz.Commenting
 			use RestApiCache;
 
-			public $responses           = array(
+			public $responses = array(
 				'single_entity'      => array(
 					'id'   => 1,
 					'name' => 'Product 1',
@@ -386,8 +529,24 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 					'id'   => 100,
 					'name' => 'Custom Thing 100',
 				),
+				'no_vary_by_user'    => array(
+					'id'   => 50,
+					'name' => 'Shared Product',
+				),
+				'with_endpoint_id'   => array(
+					'id'   => 60,
+					'name' => 'Product with Endpoint ID',
+				),
+				'custom_ttl'         => array(
+					'id'   => 70,
+					'name' => 'Product with Custom TTL',
+				),
 			);
-			public $default_entity_type = 'product';
+
+			public $default_entity_type   = 'product';
+			public $default_vary_by_user  = true;
+			public $endpoint_vary_by_user = array();
+			public $endpoint_ids          = array();
 
 			public function __construct() {
 				$this->namespace = 'wc/v3';
@@ -401,6 +560,9 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->register_cached_route( 'custom_entity_type', array( 'entity_type' => 'custom_thing' ) );
 				$this->register_cached_route( 'non_array_response', array( 'entity_type' => 'custom_thing' ), true );
 				$this->register_cached_route( 'raw_array_response', array(), false, true );
+				$this->register_cached_route( 'no_vary_by_user', array( 'vary_by_user' => false ) );
+				$this->register_cached_route( 'with_endpoint_id', array( 'endpoint_id' => 'test_endpoint' ) );
+				$this->register_cached_route( 'custom_ttl', array( 'cache_ttl' => 10 ) );
 				$this->register_multi_method_route();
 			}
 
@@ -426,6 +588,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				);
 			}
 
+
 			private function register_multi_method_route() {
 				register_rest_route(
 					$this->namespace,
@@ -449,8 +612,16 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				);
 			}
 
-			protected function get_default_entity_type(): ?string {
+			protected function get_default_response_entity_type(): ?string {
 				return $this->default_entity_type;
+			}
+
+
+			protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool {
+				if ( ! is_null( $endpoint_id ) && isset( $this->endpoint_vary_by_user[ $endpoint_id ] ) ) {
+					return $this->endpoint_vary_by_user[ $endpoint_id ];
+				}
+				return $this->default_vary_by_user;
 			}
 
 			private function handle_request( string $endpoint, WP_REST_Request $request ) {
