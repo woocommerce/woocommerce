@@ -42,74 +42,88 @@ class OrderItemSchema extends AbstractLineItemSchema {
 	 */
 	public function get_item_schema_properties(): array {
 		$schema = array(
-			'id'           => array(
+			'id'              => array(
 				'description' => __( 'Item ID.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'name'         => array(
+			'name'            => array(
 				'description' => __( 'Item name.', 'woocommerce' ),
 				'type'        => array( 'string', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'image'        => array(
+			'image'           => array(
 				'description' => __( 'Line item image, if available.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'product_id'   => array(
+			'product_id'      => array(
 				'description' => __( 'Product or variation ID.', 'woocommerce' ),
 				'type'        => array( 'integer', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'product_data' => array(
+			'product_data'    => array(
 				'description' => __( 'Product data this item is linked to.', 'woocommerce' ),
 				'type'        => array( 'object', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'properties'  => $this->get_product_data_schema(),
 			),
-			'quantity'     => array(
+			'quantity'        => array(
 				'description' => __( 'Quantity ordered.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'price'        => array(
+			'price'           => array(
 				'description' => __( 'Item price. Calculated as total / quantity.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'tax_class'    => array(
+			'tax_class'       => array(
 				'description' => __( 'Tax class of product.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'subtotal'     => array(
+			'subtotal'        => array(
 				'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'subtotal_tax' => array(
+			'subtotal_tax'    => array(
 				'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'total'        => array(
+			'total'           => array(
 				'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'total_tax'    => array(
+			'total_tax'       => array(
 				'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'taxes'        => $this->get_taxes_schema(),
-			'meta_data'    => $this->get_meta_data_schema(),
+			'taxes'           => $this->get_taxes_schema(),
+			'meta_data'       => $this->get_meta_data_schema(),
+			'currency'        => array(
+				'description' => __( 'Currency the order item was created with, in ISO format.', 'woocommerce' ),
+				'type'        => 'string',
+				'default'     => get_woocommerce_currency(),
+				'enum'        => array_keys( get_woocommerce_currencies() ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
+			'currency_symbol' => array(
+				'description' => __( 'Currency symbol for the currency which can be used to format returned prices.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		if ( $this->cogs_is_enabled() ) {
@@ -154,20 +168,22 @@ class OrderItemSchema extends AbstractLineItemSchema {
 		$dp              = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
 		$quantity_amount = (float) $order_item->get_quantity();
 		$data            = array(
-			'id'           => $order_item->get_id(),
-			'name'         => $order_item->get_name(),
-			'image'        => $this->get_image( $order_item ),
-			'product_id'   => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
-			'product_data' => $this->get_product_data( $order_item ),
-			'quantity'     => $order_item->get_quantity(),
-			'price'        => $quantity_amount ? $order_item->get_total() / $quantity_amount : 0,
-			'tax_class'    => $order_item->get_tax_class(),
-			'subtotal'     => wc_format_decimal( $order_item->get_subtotal(), $dp ),
-			'subtotal_tax' => wc_format_decimal( $order_item->get_subtotal_tax(), $dp ),
-			'total'        => wc_format_decimal( $order_item->get_total(), $dp ),
-			'total_tax'    => wc_format_decimal( $order_item->get_total_tax(), $dp ),
-			'taxes'        => $this->prepare_taxes( $order_item, $request ),
-			'meta_data'    => $this->prepare_meta_data( $order_item ),
+			'id'              => $order_item->get_id(),
+			'name'            => $order_item->get_name(),
+			'image'           => $this->get_image( $order_item ),
+			'product_id'      => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
+			'product_data'    => $this->get_product_data( $order_item ),
+			'quantity'        => $order_item->get_quantity(),
+			'price'           => $quantity_amount ? $order_item->get_total() / $quantity_amount : 0,
+			'tax_class'       => $order_item->get_tax_class(),
+			'subtotal'        => wc_format_decimal( $order_item->get_subtotal(), $dp ),
+			'subtotal_tax'    => wc_format_decimal( $order_item->get_subtotal_tax(), $dp ),
+			'total'           => wc_format_decimal( $order_item->get_total(), $dp ),
+			'total_tax'       => wc_format_decimal( $order_item->get_total_tax(), $dp ),
+			'taxes'           => $this->prepare_taxes( $order_item, $request ),
+			'meta_data'       => $this->prepare_meta_data( $order_item ),
+			'currency'        => $order_item->get_order()->get_currency(),
+			'currency_symbol' => html_entity_decode( get_woocommerce_currency_symbol( $order_item->get_order()->get_currency() ), ENT_QUOTES ),
 		);
 
 		// Add COGS data.
