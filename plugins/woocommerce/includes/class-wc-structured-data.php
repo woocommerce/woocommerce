@@ -255,7 +255,7 @@ class WC_Structured_Data {
 						'@type'      => 'AggregateOffer',
 						'lowPrice'   => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
-						'offerCount' => count( $product->get_available_variations() ),
+						'offerCount' => count( $product->get_available_variations( 'objects' ) ),
 					);
 
 					if ( $product->is_on_sale() ) {
