@@ -672,8 +672,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the add_meta method throws exception when push token ID is
-	 * not set.
+	 * @testdox Tests that add_meta method throws exception when push token ID
+	 * is not set.
 	 */
 	public function test_it_throws_exception_when_adding_meta_without_id() {
 		$data_store = new PushTokensDataStore();
