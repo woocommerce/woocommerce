@@ -2958,7 +2958,9 @@ EOT;
 	 */
 	public static function page_created( $page_id, $page_data ) {
 		if ( 'refund_returns' === $page_data['post_name'] ) {
-			if ( WC()->is_wc_admin_active() ) {
+			if ( Constants::is_true( 'WC_INSTALLING' ) ) {
+				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'wc_notes_refund_returns_page_created', array( $page_id ), 'woocommerce', true );
+			} else {
 				WC_Notes_Refund_Returns::possibly_add_note( $page_id );
 			}
 		}
