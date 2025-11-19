@@ -185,6 +185,37 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Prepare links for the request.
+	 *
+	 * @param mixed            $item WordPress representation of the item.
+	 * @param WP_REST_Request  $request Request object.
+	 * @param WP_REST_Response $response Response object.
+	 * @return array
+	 */
+	protected function prepare_links( $item, WP_REST_Request $request, WP_REST_Response $response ): array {
+		$links = array(
+			'self'       => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
+			),
+			'up'         => array(
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $item->get_parent_id() ) ),
+			),
+		);
+
+		if ( $item->get_refunded_by() ) {
+			$links['refunded_by'] = array(
+				'href'       => rest_url( sprintf( '/wp/v2/users/%d', $item->get_refunded_by() ) ),
+				'embeddable' => true,
+			);
+		}
+
+		return $links;
+	}
+
+	/**
 	 * Prepare a single order object for response.
 	 *
 	 * @param WC_Order_Refund $refund Refund object.
