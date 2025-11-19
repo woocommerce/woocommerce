@@ -85,30 +85,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		parent::set_up();
 
-		// Ensure REST API routes are registered after bootstrap is loaded.
-		// The parent setUp() fires rest_api_init before bootstrap is loaded, so we need to register routes manually
-		// or fire rest_api_init again after bootstrap is loaded.
-		if ( class_exists( '\\WP_REST_Abilities_Init' ) ) {
+		// Ensure REST API routes are registered.
+		// WordPress 6.9+ core registers routes automatically, but vendor package needs manual registration
+		// since parent::set_up() fires rest_api_init before bootstrap is loaded.
+		if ( ! $this->are_abilities_in_wp_core() && class_exists( '\WP_REST_Abilities_Init' ) ) {
 			\WP_REST_Abilities_Init::register_routes( $this->server );
-		} else {
-			// Bootstrap might not have loaded the REST init class yet, so try loading it directly.
-			$rest_init_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/rest-api/class-wp-rest-abilities-init.php';
-			if ( file_exists( $rest_init_file ) && ! class_exists( '\\WP_REST_Abilities_Init' ) ) {
-				require_once $rest_init_file;
-			}
-			if ( class_exists( '\\WP_REST_Abilities_Init' ) ) {
-				\WP_REST_Abilities_Init::register_routes( $this->server );
-			} else {
-				/**
-				 * Fire rest_api_init again to ensure abilities API REST routes are registered.
-				 * The bootstrap file hooks into this action, but parent::set_up() fires it before bootstrap is loaded.
-				 *
-				 * @param WP_REST_Server $server The REST server instance.
-				 *
-				 * @since 10.4.0
-				 */
-				do_action( 'rest_api_init', $this->server );
-			}
 		}
 	}
 
@@ -405,7 +386,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		if ( $are_abilities_in_wp_core ) {
 			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
 		} else {
-			$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
+			$this->assertTrue( class_exists( '\WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
 		}
 
 		$list_endpoint = '/wp-abilities/v1/abilities';
