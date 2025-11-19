@@ -127,8 +127,18 @@ class Controller extends AbstractController {
 			);
 		}
 
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return $this->get_authentication_error_by_method( $request->get_method() );
+		$method = $request->get_method();
+
+		if ( 'GET' === $method ) {
+			$context = 'read';
+		} elseif ( 'DELETE' === $method ) {
+			$context = 'delete';
+		} else {
+			$context = 'edit';
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', $context ) ) {
+			return $this->get_authentication_error_by_method( $method );
 		}
 
 		return true;

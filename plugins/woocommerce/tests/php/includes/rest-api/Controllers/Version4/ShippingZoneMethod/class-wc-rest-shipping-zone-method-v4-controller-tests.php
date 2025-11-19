@@ -236,6 +236,56 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
+	 * @testdox Should check delete permission for DELETE requests.
+	 */
+	public function test_check_permissions_delete_context() {
+		wp_set_current_user( self::$admin_user_id );
+
+		// Add filter to deny delete permissions but allow edit.
+		$filter_callback = function ( $permission, $context, $object_id, $object_type ) {
+			if ( 'settings' === $object_type && 'delete' === $context ) {
+				return false;
+			}
+			return $permission;
+		};
+		add_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10, 4 );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zone-method/1' );
+		$result  = $this->controller->check_permissions( $request );
+
+		// Should be denied because delete permission is blocked.
+		$this->assertInstanceOf( WP_Error::class, $result );
+
+		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should check read permission for GET requests.
+	 */
+	public function test_check_permissions_read_context() {
+		wp_set_current_user( self::$admin_user_id );
+
+		// Add filter to deny read permissions but allow edit.
+		$filter_callback = function ( $permission, $context, $object_id, $object_type ) {
+			if ( 'settings' === $object_type && 'read' === $context ) {
+				return false;
+			}
+			return $permission;
+		};
+		add_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10, 4 );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/shipping-zone-method/1' );
+		$result  = $this->controller->check_permissions( $request );
+
+		// Should be denied because read permission is blocked.
+		$this->assertInstanceOf( WP_Error::class, $result );
+
+		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
 	 * @testdox Should return error when creating item with missing zone_id parameter.
 	 */
 	public function test_create_item_missing_zone_id() {

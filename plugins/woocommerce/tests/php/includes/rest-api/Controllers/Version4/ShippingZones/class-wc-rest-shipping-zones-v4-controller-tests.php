@@ -376,6 +376,50 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * @testdox Should check delete permission for DELETE requests.
+	 */
+	public function test_check_permissions_delete_context() {
+		// Add filter to deny delete permissions but allow edit.
+		$filter_callback = function ( $permission, $context, $object_id, $object_type ) {
+			if ( 'settings' === $object_type && 'delete' === $context ) {
+				return false;
+			}
+			return $permission;
+		};
+		add_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10, 4 );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/1' );
+		$result  = $this->endpoint->check_permissions( $request );
+
+		// Should be denied because delete permission is blocked.
+		$this->assertInstanceOf( WP_Error::class, $result );
+
+		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
+	}
+
+	/**
+	 * @testdox Should check read permission for GET requests.
+	 */
+	public function test_check_permissions_read_context() {
+		// Add filter to deny read permissions but allow edit.
+		$filter_callback = function ( $permission, $context, $object_id, $object_type ) {
+			if ( 'settings' === $object_type && 'read' === $context ) {
+				return false;
+			}
+			return $permission;
+		};
+		add_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10, 4 );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones' );
+		$result  = $this->endpoint->check_permissions( $request );
+
+		// Should be denied because read permission is blocked.
+		$this->assertInstanceOf( WP_Error::class, $result );
+
+		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
+	}
+
+	/**
 	 * @testdox Should order zones correctly.
 	 */
 	public function test_zone_ordering() {
