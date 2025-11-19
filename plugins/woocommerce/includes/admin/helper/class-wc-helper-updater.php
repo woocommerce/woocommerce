@@ -619,7 +619,7 @@ class WC_Helper_Updater {
 
 		$cache_key = '_woocommerce_helper_updates';
 		$data      = get_transient( $cache_key );
-		if ( false !== $data ) {
+		if ( false !== $data && is_array( $data ) ) {
 			if ( hash_equals( $hash, $data['hash'] ) ) {
 				return $data['products'];
 			}
