@@ -149,7 +149,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test route registration.
+	 * @testdox Should register routes correctly.
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
@@ -157,7 +157,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test getting all shipping zones.
+	 * @testdox Should return all shipping zones.
 	 */
 	public function test_get_items() {
 		// Create test zones.
@@ -246,7 +246,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test shipping method formatting.
+	 * @testdox Should format shipping methods correctly.
 	 */
 	public function test_method_formatting() {
 		$zone = $this->create_shipping_zone( 'Method Test Zone' );
@@ -291,7 +291,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test location formatting.
+	 * @testdox Should format locations correctly.
 	 */
 	public function test_location_formatting() {
 		$zone = $this->create_shipping_zone(
@@ -340,7 +340,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test empty locations.
+	 * @testdox Should handle empty locations.
 	 */
 	public function test_empty_locations() {
 		$zone = $this->create_shipping_zone( 'Empty Zone' );
@@ -364,7 +364,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test permissions.
+	 * @testdox Should return error without permissions.
 	 */
 	public function test_get_items_without_permission() {
 		wp_set_current_user( 0 );
@@ -376,7 +376,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test zone ordering.
+	 * @testdox Should order zones correctly.
 	 */
 	public function test_zone_ordering() {
 		$zone1 = $this->create_shipping_zone( 'Zone Order 3', 3 );
@@ -400,7 +400,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test non-numeric cost handling.
+	 * @testdox Should handle non-numeric cost values.
 	 */
 	public function test_non_numeric_cost_handling() {
 		$zone = $this->create_shipping_zone( 'Expression Cost Zone' );
@@ -434,7 +434,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test free shipping requirements.
+	 * @testdox Should handle free shipping requirements.
 	 */
 	public function test_free_shipping_requirements() {
 		$zone = $this->create_shipping_zone( 'Free Shipping Test Zone' );
@@ -511,7 +511,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test malformed state location code handling.
+	 * @testdox Should handle malformed state location codes.
 	 *
 	 * Note: This test simulates what would happen if malformed data exists.
 	 */
@@ -558,7 +558,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test shipping disabled response.
+	 * @testdox Should return error when shipping is disabled.
 	 */
 	public function test_shipping_disabled_response() {
 		// Disable shipping temporarily.
@@ -581,7 +581,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test schema.
+	 * @testdox Should return correct schema.
 	 */
 	public function test_get_item_schema() {
 		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v4/shipping-zones' );
@@ -616,7 +616,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test get single zone.
+	 * @testdox Should return single zone by ID.
 	 */
 	public function test_get_item() {
 		$zone = $this->create_shipping_zone( 'Single Zone Test' );
@@ -657,7 +657,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test get single zone with invalid ID.
+	 * @testdox Should return error for invalid zone ID.
 	 */
 	public function test_get_item_invalid_id() {
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones/99999' );
@@ -673,7 +673,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test get single zone when shipping is disabled.
+	 * @testdox Should return error when getting zone with shipping disabled.
 	 */
 	public function test_get_item_shipping_disabled() {
 		$zone = $this->create_shipping_zone( 'Test Zone' );
@@ -698,7 +698,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test get single zone without permission.
+	 * @testdox Should return error when getting zone without permission.
 	 */
 	public function test_get_item_without_permission() {
 		$zone = $this->create_shipping_zone( 'Test Zone' );
@@ -711,7 +711,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test detailed location formatting for "Rest of the World" zone.
+	 * @testdox Should format Rest of World zone locations correctly.
 	 */
 	public function test_get_item_rest_of_world_zone() {
 		// "Rest of the World" zone has ID 0.
@@ -727,7 +727,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with minimal fields (name and empty locations).
+	 * @testdox Should create zone with minimal fields.
 	 */
 	public function test_create_item_minimal() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -755,7 +755,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with name and locations.
+	 * @testdox Should create zone with name and locations.
 	 */
 	public function test_create_item_with_locations() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -791,7 +791,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with all fields (name, order, locations).
+	 * @testdox Should create zone with all fields.
 	 */
 	public function test_create_item_with_all_fields() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -825,7 +825,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with missing required name field.
+	 * @testdox Should return error when creating zone without name.
 	 */
 	public function test_create_item_missing_name() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -844,7 +844,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with missing required locations field.
+	 * @testdox Should create zone without required locations.
 	 */
 	public function test_create_item_missing_locations() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -863,7 +863,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with invalid location type (should be skipped).
+	 * @testdox Should skip invalid location types.
 	 */
 	public function test_create_item_invalid_location_type() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -898,7 +898,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with location type defaulting to country.
+	 * @testdox Should default location type to country.
 	 */
 	public function test_create_item_location_type_defaults_to_country() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -929,7 +929,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone response structure and status code.
+	 * @testdox Should return correct response structure on create.
 	 */
 	public function test_create_item_response_structure() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -964,7 +964,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone sets Location header correctly.
+	 * @testdox Should set Location header on create.
 	 */
 	public function test_create_item_location_header() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -991,7 +991,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone without permission.
+	 * @testdox Should return error when creating zone without permission.
 	 */
 	public function test_create_item_without_permission() {
 		wp_set_current_user( 0 );
@@ -1010,7 +1010,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone when shipping is disabled.
+	 * @testdox Should return error when creating zone with shipping disabled.
 	 */
 	public function test_create_item_shipping_disabled() {
 		// Disable shipping temporarily.
@@ -1036,7 +1036,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with various location types.
+	 * @testdox Should create zone with various location types.
 	 */
 	public function test_create_item_with_various_location_types() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -1088,7 +1088,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with empty location code (should be skipped).
+	 * @testdox Should skip empty location codes.
 	 */
 	public function test_create_item_empty_location_code() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -1122,7 +1122,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with country:state location type (v4 specific feature).
+	 * @testdox Should create zone with country:state location type.
 	 */
 	public function test_create_item_with_country_state_location_type() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -1172,7 +1172,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with empty name fails.
+	 * @testdox Should return error for empty zone name.
 	 */
 	public function test_create_item_empty_name() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -1193,7 +1193,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test create zone with whitespace-only name fails.
+	 * @testdox Should return error for whitespace zone name.
 	 */
 	public function test_create_item_whitespace_name() {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
@@ -1213,7 +1213,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update "Rest of the World" zone name fails.
+	 * @testdox Should return error when updating Rest of World zone name.
 	 */
 	public function test_update_rest_of_world_zone_name() {
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/0' );
@@ -1233,7 +1233,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update "Rest of the World" zone locations fails.
+	 * @testdox Should return error when updating Rest of World zone locations.
 	 */
 	public function test_update_rest_of_world_zone_locations() {
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/0' );
@@ -1258,7 +1258,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update "Rest of the World" zone order fails.
+	 * @testdox Should return error when updating Rest of World zone order.
 	 */
 	public function test_update_rest_of_world_zone_order() {
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/0' );
@@ -1278,7 +1278,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update regular zone with empty name fails.
+	 * @testdox Should return error when updating zone with empty name.
 	 */
 	public function test_update_item_empty_name() {
 		$zone          = $this->create_shipping_zone( 'Test Zone' );
@@ -1301,7 +1301,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update regular zone name successfully.
+	 * @testdox Should update zone name.
 	 */
 	public function test_update_item_name() {
 		$zone          = $this->create_shipping_zone( 'Original Name' );
@@ -1327,7 +1327,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update regular zone order successfully.
+	 * @testdox Should update zone order.
 	 */
 	public function test_update_item_order() {
 		$zone          = $this->create_shipping_zone( 'Test Zone', 0 );
@@ -1352,7 +1352,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update regular zone locations successfully.
+	 * @testdox Should update zone locations.
 	 */
 	public function test_update_item_locations() {
 		$zone          = $this->create_shipping_zone( 'Test Zone' );
@@ -1387,7 +1387,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update regular zone with all fields successfully.
+	 * @testdox Should Update regular zone with all fields successfully.
 	 */
 	public function test_update_item_all_fields() {
 		$zone          = $this->create_shipping_zone( 'Original Name', 0 );
@@ -1418,7 +1418,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update zone with invalid ID.
+	 * @testdox Should Update zone with invalid id.
 	 */
 	public function test_update_item_invalid_id() {
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/99999' );
@@ -1438,7 +1438,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update zone without permission.
+	 * @testdox Should Update zone without permission.
 	 */
 	public function test_update_item_without_permission() {
 		$zone          = $this->create_shipping_zone( 'Test Zone' );
@@ -1459,7 +1459,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test update zone clears locations with empty array.
+	 * @testdox Should Update zone clears locations with empty array.
 	 */
 	public function test_update_item_clear_locations() {
 		$zone          = $this->create_shipping_zone(
@@ -1496,7 +1496,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test DELETE endpoint route configuration.
+	 * @testdox Should Delete endpoint route configuration.
 	 */
 	public function test_delete_route_configuration() {
 		$routes = $this->server->get_routes();
@@ -1522,7 +1522,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test delete zone with invalid ID.
+	 * @testdox Should return error when deleting zone with invalid ID.
 	 */
 	public function test_delete_item_invalid_id() {
 		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/shipping-zones/99999' );
@@ -1536,7 +1536,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test delete zone successfully.
+	 * @testdox Should delete zone successfully.
 	 */
 	public function test_delete_item_success() {
 		$zone = $this->create_shipping_zone( 'Zone to Delete', 1 );
@@ -1575,7 +1575,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test delete zone for already deleted zone.
+	 * @testdox Should Delete zone for already deleted zone.
 	 */
 	public function test_delete_item_already_deleted() {
 		$zone    = $this->create_shipping_zone( 'Zone to Delete' );
@@ -1603,7 +1603,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test delete zone without permission.
+	 * @testdox Should return error when deleting zone without permission.
 	 */
 	public function test_delete_item_without_permission() {
 		$zone = $this->create_shipping_zone( 'Test Zone' );
@@ -1617,7 +1617,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test delete zone when shipping is disabled.
+	 * @testdox Should Delete zone when shipping is disabled.
 	 */
 	public function test_delete_item_shipping_disabled() {
 		$zone = $this->create_shipping_zone( 'Test Zone' );
@@ -1638,7 +1638,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test delete zone with methods attached.
+	 * @testdox Should Delete zone with methods attached.
 	 */
 	public function test_delete_item_with_methods() {
 		$zone = $this->create_shipping_zone( 'Zone with Methods' );
