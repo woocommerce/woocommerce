@@ -84,6 +84,15 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		// Save the original value and set to 1. Doesn't hurt pre-6.9 versions.
 		$this->original_init_action_count = $wp_actions['init'] ?? null;
 		$wp_actions['init']               = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		// Ensure REST API routes are registered after bootstrap is loaded.
+		// The parent setUp() fires rest_api_init before bootstrap is loaded, so we need to fire it again
+		// or manually register routes if the class exists.
+		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
+			WP_REST_Abilities_Init::register_routes( $this->server );
+		} elseif ( has_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) ) ) {
+			do_action( 'rest_api_init', $this->server );
+		}
 	}
 
 	/**
