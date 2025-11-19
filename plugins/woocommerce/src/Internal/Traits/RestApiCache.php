@@ -58,7 +58,7 @@ use WP_REST_Response;
  *                         'entity_type' => 'product',
  *                         // Optional int, defaults to the controller's get_ttl_for_cached_response().
  *                         'cache_ttl'      => HOUR_IN_SECONDS,
- *                         // Optional array, defaults to the controller's get_hooks_relevant_to_caching().
+ *                         // Optional bool, defaults to the controller's response_cache_vary_by_user().
  *                         'vary_by_user'   => true,
  *                         // Optional, this will be passed to all the caching-related methods.
  *                         'endpoint_id'    => 'get_product'
@@ -83,7 +83,7 @@ use WP_REST_Response;
  * (checked via call to VersionStringGenerator::can_use()), so the cache is persistent
  * across requests and not just for the current request.
  *
- * @since   10.4.0
+ * @since   10.5.0
  */
 trait RestApiCache {
 	/**
@@ -189,7 +189,7 @@ trait RestApiCache {
 		/**
 		 * Filter whether to enable response caching for a given REST API controller.
 		 *
-		 * @since 10.4.0
+		 * @since 10.5.0
 		 *
 		 * @param bool            $enable_caching Whether to enable response caching (result of !_skip_cache evaluation).
 		 * @param object          $controller     The controller instance.
@@ -221,7 +221,7 @@ trait RestApiCache {
 				'wc_doing_it_wrong',
 				__METHOD__,
 				'No entity type provided and no default entity type available. Skipping cache.',
-				'10.4.0'
+				'10.5.0'
 			);
 			return null;
 		}
@@ -400,12 +400,12 @@ trait RestApiCache {
 		 *
 		 * Allows customization of what uniquely identifies a request for caching purposes.
 		 *
-		 * @since 10.4.0
+		 * @since 10.5.0
 		 *
 		 * @param array           $cache_key_parts Array of cache key information parts.
 		 * @param WP_REST_Request $request         The request object.
 		 * @param bool            $vary_by_user    Whether user ID is included in cache key.
-		 * @param string|null     $endpoint_id     Optional friendly identifier for the endpoint.
+		 * @param string|null     $endpoint_id     Optional friendly identifier for the endpoint (passed to with_cache).
 		 * @param object          $controller      The controller instance.
 		 * @return array Filtered cache key information parts.
 		 */
