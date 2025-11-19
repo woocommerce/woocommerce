@@ -124,13 +124,6 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
-					'args'                => array(
-						'force' => array(
-							'default'     => false,
-							'type'        => 'boolean',
-							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
-						),
-					),
 				),
 			)
 		);
@@ -245,22 +238,17 @@ class Controller extends AbstractController {
 	/**
 	 * Delete a shipping zone by zone id.
 	 *
+	 * Note: Shipping zones do not support trashing. Deletion is always permanent.
+	 * Unlike other WooCommerce REST API endpoints that use a `force` parameter to distinguish
+	 * between soft delete (trash) and permanent deletion, shipping zones are stored
+	 * as database records without trash support. This endpoint performs immediate permanent
+	 * deletion of the shipping zone.
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
 	 */
 	public function delete_item( $request ) {
 		$zone_id = (int) $request['id'];
-		$force   = $request['force'];
-
-		// Shipping zones do not support trashing.
-		// This is done to ensure backward compatibility w/ v2/v3.
-		if ( ! $force ) {
-			return new WP_Error(
-				'woocommerce_rest_trash_not_supported',
-				__( 'Shipping zones do not support trashing.', 'woocommerce' ),
-				array( 'status' => 501 )
-			);
-		}
 
 		$zone = $this->validate_zone( $zone_id );
 		if ( is_wp_error( $zone ) ) {
