@@ -299,7 +299,7 @@ class Controller extends AbstractController {
 			}
 
 			// Convert line items to internal format.
-			$line_item_data = $this->data_utils->convert_line_items_to_internal_format( $request['line_items'] );
+			$line_item_data = $this->data_utils->convert_line_items_to_internal_format( $request['line_items'], $order );
 			$refund_amount  = ! empty( $request['amount'] ) ? $request['amount'] : $this->data_utils->calculate_refund_amount( $request['line_items'] );
 
 			if ( 0 > $refund_amount || ! $refund_amount ) {
