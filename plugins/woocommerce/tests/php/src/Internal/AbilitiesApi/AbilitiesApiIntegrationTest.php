@@ -63,19 +63,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	public function set_up() {
 		global $wp_actions;
 
-		// Detect WordPress 6.9+ by checking for the core class name (plural "Categories").
-		// WP 6.9+ uses different action names and class names than the vendor package.
-		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
-
-		if ( $are_abilities_in_wp_core ) {
-			$this->abilities_init_action            = 'wp_abilities_api_init';
-			$this->abilities_categories_init_action = 'wp_abilities_api_categories_init';
-			$this->category_registry_class          = 'WP_Ability_Categories_Registry';
-		} else {
-			$this->abilities_init_action            = 'abilities_api_init';
-			$this->abilities_categories_init_action = 'abilities_api_categories_init';
-			$this->category_registry_class          = 'WP_Abilities_Category_Registry';
-		}
+		$this->abilities_init_action            = 'wp_abilities_api_init';
+		$this->abilities_categories_init_action = 'wp_abilities_api_categories_init';
+		$this->category_registry_class          = 'WP_Ability_Categories_Registry';
 
 		/*
 		 * Explicitly ensure the abilities API bootstrap file is loaded for tests.
@@ -86,14 +76,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			if ( file_exists( $bootstrap_file ) ) {
 				require $bootstrap_file;
 			}
-		}
-
-		/*
-		 * Ensure REST API routes are registered (hook may be cleared by parent tear_down).
-		 * WordPress 6.9+ handles REST API registration in core, so only do this for vendor package.
-		 */
-		if ( ! $are_abilities_in_wp_core && class_exists( 'WP_REST_Abilities_Init' ) ) {
-			add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
 		}
 
 		parent::set_up();
@@ -392,14 +374,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_rest_endpoints_are_registered() {
-		// Ensure REST API classes are loaded.
-		// WordPress 6.9+ uses core controllers with different namespace, earlier versions use vendor package.
-		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
-		if ( $are_abilities_in_wp_core ) {
-			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
-		} else {
-			$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
-		}
+		$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
 		$list_endpoint = '/wp-abilities/v1/abilities';
 		$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 
