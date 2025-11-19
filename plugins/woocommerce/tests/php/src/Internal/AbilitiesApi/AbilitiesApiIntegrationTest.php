@@ -587,9 +587,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 
-		// Create REST request for execution
-		$namespace                = '/wp-abilities/v1';
-		$request                  = new \WP_REST_Request( 'POST', $namespace . '/abilities/' . $ability_id . '/run' );
+		// Create REST request for execution.
+		$namespace = '/wp-abilities/v1';
+		$request   = new \WP_REST_Request( 'POST', $namespace . '/abilities/' . $ability_id . '/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(
