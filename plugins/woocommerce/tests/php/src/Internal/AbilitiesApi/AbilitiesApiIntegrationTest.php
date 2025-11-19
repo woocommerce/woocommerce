@@ -91,6 +91,8 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
 			WP_REST_Abilities_Init::register_routes( $this->server );
 		} elseif ( has_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) ) ) {
+			// Fire rest_api_init again to ensure abilities API REST routes are registered.
+			// The bootstrap file hooks into this action, but parent::set_up() fires it before bootstrap is loaded.
 			do_action( 'rest_api_init', $this->server );
 		}
 	}
