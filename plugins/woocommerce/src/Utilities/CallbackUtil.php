@@ -78,12 +78,6 @@ final class CallbackUtil {
 			return array();
 		}
 
-		// phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
-
-		if ( ! is_object( $wp_filter[ $hook_name ] ) || ! is_array( $wp_filter[ $hook_name ]->callbacks ?? null ) ) {
-			return array( 0 => array( serialize( $wp_filter[ $hook_name ] ) ) );
-		}
-
 		$result = array();
 
 		foreach ( $wp_filter[ $hook_name ]->callbacks as $priority => $priority_callbacks ) {
@@ -92,8 +86,6 @@ final class CallbackUtil {
 				array_values( $priority_callbacks )
 			);
 		}
-
-		// phpcs:enable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 
 		return $result;
 	}

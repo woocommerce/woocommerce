@@ -370,8 +370,7 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		$signatures = CallbackUtil::get_hook_callback_signatures( $hook_name );
 
-		// After removing all actions, the hook might still exist but be empty.
-		// Or it might not exist at all. Either way, result should be empty.
 		$this->assertIsArray( $signatures );
+		$this->assertEmpty( $signatures );
 	}
 }
