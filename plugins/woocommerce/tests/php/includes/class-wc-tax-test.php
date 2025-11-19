@@ -561,7 +561,7 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_shipping_tax_class',
-			function ( $tax_class ) {
+			function () {
 				return 'reduced-rate';
 			}
 		);
@@ -621,7 +621,7 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_shipping_tax_class',
-			function ( $tax_class ) {
+			function () {
 				return null;
 			}
 		);
