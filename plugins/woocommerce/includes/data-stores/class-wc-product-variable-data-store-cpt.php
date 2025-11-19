@@ -638,7 +638,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$format   = array_fill( 0, count( $children ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 
-		// phpcs:ignore WordPress.DB
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_weight' AND meta_value > 0 AND post_id IN {$query_in}", $children ) );
 	}
 
@@ -660,7 +660,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$format   = array_fill( 0, count( $children ), '%d' );
 		$query_in = '(' . implode( ',', $format ) . ')';
 
-		// phpcs:ignore WordPress.DB
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		return null !== $wpdb->get_var( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key IN ( '_length', '_width', '_height' ) AND meta_value > 0 AND post_id IN {$query_in}", $children ) );
 	}
 
@@ -760,7 +760,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$status   = $product->get_stock_status();
 				$format   = array_fill( 0, count( $children ), '%d' );
 				$query_in = '(' . implode( ',', $format ) . ')';
-				// phpcs:ignore WordPress.DB
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 				$managed_children = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '_manage_stock' AND meta_value != 'yes' AND post_id IN {$query_in}", $children ) ) );
 				foreach ( $managed_children as $managed_child ) {
 					if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
@@ -792,7 +792,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $children ) {
 			$format   = array_fill( 0, count( $children ), '%d' );
 			$query_in = '(' . implode( ',', $format ) . ')';
-			// phpcs:ignore WordPress.DB
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 			$prices = array_unique( $wpdb->get_col( $wpdb->prepare( "SELECT meta_value FROM $wpdb->postmeta WHERE meta_key = '_price' AND post_id IN {$query_in}", $children ) ) );
 		} else {
 			$prices = array();
