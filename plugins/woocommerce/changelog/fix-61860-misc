@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Reduce options queried on admin page loads.
