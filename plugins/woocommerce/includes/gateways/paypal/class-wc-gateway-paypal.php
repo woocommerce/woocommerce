@@ -518,11 +518,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_valid_for_use() {
+		if ( $this->should_use_orders_v2() ) {
+			$valid_currencies = WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES;
+		} else {
+			$valid_currencies = array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' );
+		}
 		return in_array(
 			get_woocommerce_currency(),
 			apply_filters(
 				'woocommerce_paypal_supported_currencies',
-				array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' )
+				$valid_currencies
 			),
 			true
 		);
