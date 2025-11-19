@@ -243,7 +243,7 @@ class RefundSchema extends AbstractSchema {
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_tax'   => array(
-							'description' => __( 'Taxes refunded for this item.', 'woocommerce' ),
+							'description' => __( 'Optional: Taxes refunded for this item. If not provided, tax will be automatically extracted from refund_total using the order\'s tax rates.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 							'default'     => array(),
@@ -268,14 +268,6 @@ class RefundSchema extends AbstractSchema {
 									),
 								),
 							),
-						),
-						'refund_total_tax' => array(
-							'description'       => __( 'Total tax amount to refund. Tax will be split proportionally across tax rates. Cannot be used together with refund_tax.', 'woocommerce' ),
-							'type'              => 'number',
-							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
-							'default'           => 0,
-							'sanitize_callback' => 'sanitize_text_field',
-							'validate_callback' => 'rest_validate_request_arg',
 						),
 					),
 				),

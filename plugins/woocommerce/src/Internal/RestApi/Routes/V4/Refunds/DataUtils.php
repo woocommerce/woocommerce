@@ -45,17 +45,26 @@ class DataUtils {
 				continue;
 			}
 
-			// If refund_total_tax is provided and refund_tax is not, calculate proportional split.
-			if ( isset( $line_item['refund_total_tax'] ) && ! isset( $line_item['refund_tax'] ) ) {
+			// If no explicit refund_tax provided, extract tax from refund_total using WC_Tax.
+			if ( ! isset( $line_item['refund_tax'] ) ) {
 				$original_item = $order->get_item( $line_item['line_item_id'] );
 				if ( $original_item ) {
 					$original_taxes = $original_item->get_taxes();
-					$line_item['refund_tax'] = $this->convert_proportional_taxes_to_schema_format(
-						$this->calculate_proportional_taxes(
-							(float) $line_item['refund_total_tax'],
-							$original_taxes['total'] ?? array()
-						)
-					);
+					$tax_ids        = array_keys( $original_taxes['total'] ?? array() );
+
+					if ( ! empty( $tax_ids ) ) {
+						$tax_rates = $this->build_tax_rates_array( $order, $tax_ids );
+
+						// Always assume refund_total includes tax - extract it using WC_Tax.
+						$calculated_taxes = \WC_Tax::calc_inclusive_tax(
+							(float) $line_item['refund_total'],
+							$tax_rates
+						);
+
+						$line_item['refund_tax'] = $this->convert_proportional_taxes_to_schema_format(
+							$calculated_taxes
+						);
+					}
 				}
 			}
 
@@ -150,41 +159,17 @@ class DataUtils {
 				return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
 			}
 
-			// Validate refund total is not greater than the item total.
-			if ( $item->get_total() < $line_item['refund_total'] ) {
+			// Validate refund total is not greater than the item total (including tax).
+			$item_total_with_tax = $item->get_total() + $item->get_total_tax();
+			if ( $item_total_with_tax < $line_item['refund_total'] ) {
 				return new WP_Error(
 					'invalid_refund_amount',
 					sprintf(
-						/* translators: %s: item total */
-						__( 'Refund total cannot be greater than the line item total (%s).', 'woocommerce' ),
-						$item->get_total()
+						/* translators: %s: item total with tax */
+						__( 'Refund total cannot be greater than the line item total including tax (%s).', 'woocommerce' ),
+						$item_total_with_tax
 					)
 				);
-			}
-
-			// Validate refund_total_tax if provided.
-			if ( isset( $line_item['refund_total_tax'] ) ) {
-				// Cannot use both refund_tax and refund_total_tax.
-				if ( isset( $line_item['refund_tax'] ) && ! empty( $line_item['refund_tax'] ) ) {
-					return new WP_Error(
-						'invalid_line_item',
-						__( 'Cannot specify both refund_tax and refund_total_tax. Use one or the other.', 'woocommerce' )
-					);
-				}
-
-				$item_taxes     = $item->get_taxes();
-				$total_item_tax = \Automattic\WooCommerce\Utilities\NumberUtil::array_sum( $item_taxes['total'] ?? array() );
-
-				if ( $total_item_tax < $line_item['refund_total_tax'] ) {
-					return new WP_Error(
-						'invalid_refund_amount',
-						sprintf(
-							/* translators: %s: total item tax */
-							__( 'Refund total tax cannot be greater than the line item total tax (%s).', 'woocommerce' ),
-							$total_item_tax
-						)
-					);
-				}
 			}
 
 			if ( isset( $line_item['refund_tax'] ) ) {
@@ -230,49 +215,46 @@ class DataUtils {
 	}
 
 	/**
-	 * Calculate proportional tax split from a total tax amount.
+	 * Convert calculated taxes (internal format) to schema format.
 	 *
-	 * @param float $total_tax Total tax amount to split.
-	 * @param array $original_taxes Original tax amounts keyed by tax rate ID.
-	 * @return array Proportional tax amounts keyed by tax rate ID.
-	 */
-	private function calculate_proportional_taxes( float $total_tax, array $original_taxes ): array {
-		if ( empty( $original_taxes ) ) {
-			return array();
-		}
-
-		$total_original = \Automattic\WooCommerce\Utilities\NumberUtil::array_sum( $original_taxes );
-
-		if ( 0 === $total_original ) {
-			return array();
-		}
-
-		$result = array();
-		foreach ( $original_taxes as $rate_id => $original_amount ) {
-			$proportion = $original_amount / $total_original;
-			$result[ $rate_id ] = \Automattic\WooCommerce\Utilities\NumberUtil::round(
-				$total_tax * $proportion,
-				wc_get_rounding_precision()
-			);
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Convert proportional taxes (internal format) to schema format.
-	 *
-	 * @param array $proportional_taxes Taxes keyed by tax ID with amounts.
+	 * @param array $calculated_taxes Taxes keyed by tax ID with amounts.
 	 * @return array Schema format with id and refund_total keys.
 	 */
-	private function convert_proportional_taxes_to_schema_format( array $proportional_taxes ): array {
+	private function convert_proportional_taxes_to_schema_format( array $calculated_taxes ): array {
 		$result = array();
-		foreach ( $proportional_taxes as $tax_id => $amount ) {
+		foreach ( $calculated_taxes as $tax_id => $amount ) {
 			$result[] = array(
 				'id'           => (int) $tax_id,
 				'refund_total' => $amount,
 			);
 		}
 		return $result;
+	}
+
+	/**
+	 * Build tax rate array from order tax items for use with WC_Tax calculations.
+	 *
+	 * @param WC_Order $order The order.
+	 * @param array    $tax_ids Array of tax rate IDs that apply to an item.
+	 * @return array Tax rates array formatted for WC_Tax::calc_*_tax() methods.
+	 */
+	private function build_tax_rates_array( WC_Order $order, array $tax_ids ): array {
+		$tax_rates = array();
+		$tax_items = $order->get_items( 'tax' );
+
+		foreach ( $tax_ids as $tax_id ) {
+			foreach ( $tax_items as $tax_item ) {
+				if ( $tax_item->get_rate_id() === (int) $tax_id ) {
+					$tax_rates[ $tax_id ] = array(
+						'rate'     => $tax_item->get_rate_percent(),
+						'label'    => $tax_item->get_label(),
+						'compound' => $tax_item->is_compound() ? 'yes' : 'no',
+					);
+					break;
+				}
+			}
+		}
+
+		return $tax_rates;
 	}
 }
