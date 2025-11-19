@@ -73,6 +73,11 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		}
 		$this->created_orders = array();
 
+		// Clean up tax data.
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+
 		parent::tearDown();
 		$this->disable_rest_api_v4_feature();
 	}
@@ -451,6 +456,101 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '5.00', $response_data['amount'] );
 		$this->assertArrayHasKey( 'line_items', $response_data );
 		$this->assertCount( 1, $response_data['line_items'] );
+
+		// Track for cleanup.
+		$this->created_refunds[] = $response_data['id'];
+
+		// Clean up product.
+		$product->delete( true );
+	}
+
+	/**
+	 * Test refund creation with automatic tax extraction.
+	 */
+	public function test_refunds_create_with_automatic_tax_extraction(): void {
+		// Enable tax calculations.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		// Create a tax rate.
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create order with product and taxes.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->save();
+
+		$this->created_orders[] = $order->get_id();
+
+		// Create refund with just refund_total (should extract tax automatically).
+		$refund_data = array(
+			'order_id'   => $order->get_id(),
+			'amount'     => 110.00,
+			'reason'     => 'Testing automatic tax extraction',
+			'line_items' => array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 110.00, // Includes 10.00 tax.
+				),
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params( $refund_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status(), 'Refund should be created successfully' );
+		$response_data = $response->get_data();
+
+		$this->assertIsArray( $response_data );
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
+
+		// Total refund amount should include extracted tax.
+		$this->assertEquals( '110.00', $response_data['amount'], 'Refund amount should include tax' );
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];

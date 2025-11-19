@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
 use WC_Order;
+use WC_Tax;
 
 /**
  * Helper methods for the REST API.
@@ -56,7 +57,7 @@ class DataUtils {
 						$tax_rates = $this->build_tax_rates_array( $order, $tax_ids );
 
 						// Always assume refund_total includes tax - extract it using WC_Tax.
-						$calculated_taxes = \WC_Tax::calc_inclusive_tax(
+						$calculated_taxes = WC_Tax::calc_inclusive_tax(
 							(float) $line_item['refund_total'],
 							$tax_rates
 						);
