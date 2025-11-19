@@ -570,18 +570,27 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		/**
 		 * Filters whether to use the legacy callback serialization algorithm.
 		 *
-		 * By default, WooCommerce uses CallbackUtil to generate stable callback signatures
-		 * for price hash calculation. This filter allows reverting to the legacy behavior
-		 * of serializing the entire callback, which may be necessary for compatibility
-		 * with certain plugins or custom code.
+		 * By default, WooCommerce will use the legacy algorithm to get the callback signatures
+		 * for variation price hash calculation. This algorithm serializes the entire callback
+		 * array as it comes from $wp_filter, which means that for callbacks that are class methods
+		 * the entire object will be serialized, including the current values of the class variables.
+		 * This implies that a change in these variables will change the price hash,
+		 * even if they do not affect the price calculation.
+		 *
+		 * This filter allows using CallbackUtil instead, which generates a more stable signature
+		 * that does not depend on the internal state of objects, but only on the method names and
+		 * class names. This results in a more consistent and reliable price hash, reducing unnecessary
+		 * cache misses; but can cause compatibility issues with plugins that rely on the legacy behavior.
+		 *
+		 * IMPORTANT: see also the documentation for the 'woocommerce_variation_prices_price' filter.
 		 *
 		 * @since 10.4.0
 		 *
-		 * @param bool       $use_legacy  Whether to use legacy algorithm. Default false.
+		 * @param bool       $use_legacy  True to use the legacy algorithm (default), false to use CallbackUtil
 		 * @param WC_Product $product     The product object.
 		 * @param bool       $for_display If taxes should be calculated or not.
 		 */
-		$use_legacy_algorithm = apply_filters( 'woocommerce_use_legacy_get_variations_price_hash', false, $product, $for_display );
+		$use_legacy_algorithm = apply_filters( 'woocommerce_use_legacy_get_variations_price_hash', true, $product, $for_display );
 
 		if ( $use_legacy_algorithm ) {
 			global $wp_filter;
