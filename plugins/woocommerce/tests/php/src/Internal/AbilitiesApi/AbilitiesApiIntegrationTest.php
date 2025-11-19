@@ -78,26 +78,35 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		}
 
-		parent::set_up();
-
 		// WordPress 6.9+ requires did_action('init') to return truthy before abilities API can be used.
 		// Save the original value and set to 1. Doesn't hurt pre-6.9 versions.
 		$this->original_init_action_count = $wp_actions['init'] ?? null;
 		$wp_actions['init']               = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
+		parent::set_up();
+
 		// Ensure REST API routes are registered after bootstrap is loaded.
-		// The parent setUp() fires rest_api_init before bootstrap is loaded, so we need to fire it again
-		// or manually register routes if the class exists.
-		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
+		// The parent setUp() fires rest_api_init before bootstrap is loaded, so we need to register routes manually
+		// or fire rest_api_init again after bootstrap is loaded.
+		if ( class_exists( '\WP_REST_Abilities_Init' ) ) {
 			\WP_REST_Abilities_Init::register_routes( $this->server );
-		} elseif ( has_action( 'rest_api_init', array( '\\WP_REST_Abilities_Init', 'register_routes' ) ) ) {
-			/**
-			 * Fire rest_api_init again to ensure abilities API REST routes are registered.
-			 * The bootstrap file hooks into this action, but parent::set_up() fires it before bootstrap is loaded.
-			 *
-			 * @param WP_REST_Server $server The REST server instance.
-			 */
-			do_action( 'rest_api_init', $this->server );
+		} else {
+			// Bootstrap might not have loaded the REST init class yet, so try loading it directly.
+			$rest_init_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/rest-api/class-wp-rest-abilities-init.php';
+			if ( file_exists( $rest_init_file ) && ! class_exists( '\WP_REST_Abilities_Init' ) ) {
+				require_once $rest_init_file;
+			}
+			if ( class_exists( '\WP_REST_Abilities_Init' ) ) {
+				\WP_REST_Abilities_Init::register_routes( $this->server );
+			} else {
+				/**
+				 * Fire rest_api_init again to ensure abilities API REST routes are registered.
+				 * The bootstrap file hooks into this action, but parent::set_up() fires it before bootstrap is loaded.
+				 *
+				 * @param WP_REST_Server $server The REST server instance.
+				 */
+				do_action( 'rest_api_init', $this->server );
+			}
 		}
 	}
 
