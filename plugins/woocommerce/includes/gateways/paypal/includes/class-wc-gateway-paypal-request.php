@@ -413,6 +413,29 @@ class WC_Gateway_Paypal_Request {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
 
+		/**
+		 * Filter the supported currencies for PayPal.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param array $supported_currencies Array of supported currency codes.
+		 * @return array
+		 */
+		$supported_currencies = apply_filters(
+			'woocommerce_paypal_supported_currencies',
+			WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES
+		);
+		if ( ! in_array( strtoupper( $order->get_currency() ), $supported_currencies, true ) ) {
+			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( $order->get_id() ) );
+		}
+
+		$order_items = $this->get_paypal_order_items( $order );
+		if ( empty( $order_items ) ) {
+			// If we cannot build order items (e.g. negative item amounts),
+			// we should not proceed with the create-order request.
+			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
+		}
+
 		$src_locale = get_locale();
 		// If the locale is longer than PayPal's string limit (10).
 		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
@@ -421,13 +444,6 @@ class WC_Gateway_Paypal_Request {
 			if ( count( $locale_parts ) > 2 ) {
 				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
 			}
-		}
-
-		$order_items = $this->get_paypal_order_items( $order );
-		if ( empty( $order_items ) ) {
-			// If we cannot build order items (e.g. negative item amounts),
-			// we should not proceed with the create-order request.
-			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
 		}
 
 		$params = array(
