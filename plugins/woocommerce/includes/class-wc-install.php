@@ -351,7 +351,6 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
-		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
@@ -2945,7 +2944,7 @@ EOT;
 
 	/**
 	 * When pages are created, we might want to take some action.
-	 * In this case we want to set an option when refund and returns
+	 * In this case we want to create an admin note when the refund and returns
 	 * page is created.
 	 *
 	 * @since 5.6.0
@@ -2955,8 +2954,9 @@ EOT;
 	 */
 	public static function page_created( $page_id, $page_data ) {
 		if ( 'refund_returns' === $page_data['post_name'] ) {
-			delete_option( 'woocommerce_refund_returns_page_created' );
-			add_option( 'woocommerce_refund_returns_page_created', $page_id, '', false );
+			if ( WC()->is_wc_admin_active() ) {
+				WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+			}
 		}
 	}
 
