@@ -223,4 +223,63 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 			}
 		}
 	}
+
+	/**
+	 * Test that gateway is available when Orders v2 is disabled (legacy mode).
+	 */
+	public function test_is_available_with_legacy_mode() {
+		// Enable the gateway.
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'yes' ) );
+
+		// Mock Orders v2 to be disabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( false );
+
+		$this->assertTrue( $mock_gateway->is_available() );
+	}
+
+	/**
+	 * Test that gateway is not available when Orders v2 is enabled and email is empty.
+	 */
+	public function test_is_available_with_orders_v2_and_no_email() {
+		// Enable the gateway with empty email.
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'yes', 'email' => '' ) );
+
+		// Mock Orders v2 to be enabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
+
+		// Gateway should not be available with empty email in Orders v2.
+		$this->assertFalse( $mock_gateway->is_available() );
+	}
+
+	/**
+	 * Test that gateway is available when Orders v2 is enabled and email is valid.
+	 */
+	public function test_is_available_with_orders_v2_and_valid_email() {
+		// Enable the gateway with valid email.
+		update_option(
+			'woocommerce_paypal_settings',
+			array(
+				'enabled' => 'yes',
+				'email'   => 'merchant@example.com',
+			)
+		);
+
+		// Mock Orders v2 to be enabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
+
+		// Reinitialize settings to pick up the email.
+		$mock_gateway->init_settings();
+
+		// Gateway should be available with valid email in Orders v2.
+		$this->assertTrue( $mock_gateway->is_available() );
+	}
 }
