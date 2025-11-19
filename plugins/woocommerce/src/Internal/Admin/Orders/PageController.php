@@ -422,10 +422,12 @@ class PageController {
 				}
 
 				if ( isset( $hook_mappings[ $screen->id ] ) ) {
-					// Store the original ID in case something needs it.
+					// Store the original ID and base in case something needs them.
 					$screen->original_id = $screen->id;
-					// Change the screen ID to what plugins expect.
+					$screen->original_base = $screen->base;
+					// Change the screen ID and base to what plugins expect.
 					$screen->id = $hook_mappings[ $screen->id ];
+					$screen->base = $hook_mappings[ $screen->id ];
 				}
 			},
 			1
