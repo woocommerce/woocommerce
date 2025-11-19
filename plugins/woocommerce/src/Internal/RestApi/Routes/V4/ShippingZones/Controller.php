@@ -239,11 +239,9 @@ class Controller extends AbstractController {
 	/**
 	 * Delete a shipping zone by zone id.
 	 *
-	 * Note: Shipping zones do not support trashing. Deletion is always permanent.
-	 * Unlike other WooCommerce REST API endpoints that use a `force` parameter to distinguish
-	 * between soft delete (trash) and permanent deletion, shipping zones are stored
-	 * as database records without trash support. This endpoint performs immediate permanent
-	 * deletion of the shipping zone.
+	 * Note: In v2/v3, this endpoint required a `force` parameter, but since shipping zones
+	 * do not support trashing, it would either delete (force=true) or return a 501 error (force=false).
+	 * We removed the `force` parameter in v4 as it serves no purpose when soft delete is not supported.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
