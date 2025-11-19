@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
@@ -3136,4 +3137,66 @@ function wc_update_1030_add_comments_date_type_index() {
 function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
 	delete_option( 'last_fetch_patterns_request' );
 	as_unschedule_all_actions( 'fetch_patterns' );
+}
+
+/**
+ * Autoload frequently used options for performance improvements (see https://github.com/woocommerce/woocommerce/issues/61855)
+ *
+ * `$autoload_options` frequently used options that may already be in the db but with `autoload = off`.
+ * `$feature_missing_options` are frequently used feature flag options that are not stored in the db.
+ *
+ * @return void
+ */
+function wc_update_1050_enable_autoload_options() {
+	global $wpdb;
+
+	$autoload_options = array(
+		'woocommerce_address_autocomplete_provider',
+		'woocommerce_actionable_order_statuses',
+		'woocommerce_custom_orders_table_background_sync_mode',
+		'woocommerce_thumbnail_cropping',
+		'woocommerce_pickup_location_settings',
+		// Page ID options `off` in the db.
+		'woocommerce_myaccount_page_id',
+		'woocommerce_cart_page_id',
+		'woocommerce_checkout_page_id',
+		'woocommerce_terms_page_id',
+		// Feature status options `off` in the db.
+		'woocommerce_show_marketplace_suggestions',
+		'woocommerce_enable_delayed_account_creation',
+	);
+
+	$feature_options = array(
+		'wc_feature_woocommerce_brands_enabled',
+		'woocommerce_feature_fulfillments_enabled',
+		'woocommerce_feature_marketplace_enabled',
+		'woocommerce_feature_cart_checkout_blocks_enabled',
+		'wc_connect_taxes_enabled',
+		'woocommerce_logs_logging_enabled',
+		'woocommerce_email_improvements_existing_store_enabled',
+		'woocommerce_feature_push_notifications_enabled',
+		'woocommerce_feature_agentic_checkout_enabled',
+		'woocommerce_custom_orders_table_data_sync_enabled',
+	);
+
+	$features_controller = wc_get_container()->get( FeaturesController::class );
+
+	foreach ( $feature_options as $option ) {
+		if ( false === get_option( $option, false ) ) {
+			add_option( $option, wc_bool_to_string( $features_controller->feature_is_enabled( $option ) ), '', true );
+		} else {
+			$autoload_options[] = $option;
+		}
+	}
+
+	// Build placeholders for each item.
+	$placeholders        = array_fill( 0, count( $autoload_options ), '%s' );
+	$placeholders_string = implode( ',', $placeholders );
+
+	$wpdb->query(
+		$wpdb->prepare(
+			'UPDATE ' . $wpdb->options . " SET autoload = 'on' WHERE option_name IN (" . $placeholders_string . ')',
+			$autoload_options
+		)
+	);
 }
