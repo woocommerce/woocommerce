@@ -154,6 +154,8 @@ export type VariableProductAddToCartWithOptionsStore =
 			handleDropdownChange: (
 				event: ChangeEvent< HTMLSelectElement >
 			) => void;
+			autoselectAttributes: ( variation_selectors: Element[] ) => void;
+			autoselectOtherAttributes: () => void;
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
@@ -261,7 +263,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					actions.autoselectOtherAttributes();
 				}
 			},
-			autoselectAttributes( variation_selectors ) {
+			autoselectAttributes( variation_selectors: Element[] ) {
 				const { selectedAttributes } = getContext< Context >();
 
 				for ( const current_variation_selector of variation_selectors ) {
@@ -269,7 +271,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					// Dropdown options or Pill inputs,
 					// that HAVE a value (Choose an Option has an empty value of ""),
 					// and are compatible with the possible variations
-					let valid_choices = [];
+					let valid_choices: Element[] = [];
 					current_variation_selector.querySelectorAll( 'option:not([value=""]), input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:not([value=""])' ).forEach( ( el ) => {
 						const name = optionStyle === 'dropdown' ? JSON.parse( el.dataset?.wpContext )[ 'name' ] : el.getAttribute( 'name' );
 						if ( isAttributeValueValid( {
@@ -282,8 +284,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					} );
 					if ( valid_choices.length === 1 ) {
 						// Only 1 option (+ the "Choose an option" choice in case of dropdowns)
-						const valid_choice = valid_choices[0];
-						const selected = current_variation_selector.querySelectorAll( ':checked' );
+						const valid_choice: Element = valid_choices[0];
+						const selected: Element = current_variation_selector.querySelectorAll( ':checked' );
 						if ( selected.length === 0 || selected[0].value !== valid_choice.value ) {
 							// No option selected, OR the selected value is not the same as the only valid one (for example if the selected value is "" (Choose an Option))
 							inAutoselectScope = true;
@@ -313,18 +315,18 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			autoselectOtherAttributes() {
 				const context = getContext< Context >();
 				const { id, autoselect } = context;
-				const variation_selectors = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` )
+				const variation_selectors: Element[] = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` )
 					.closest( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector' )
 					.querySelectorAll( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' );
 
 				if ( autoselect && context.selectedValue ) {
-					let target_variation_selector;
+					let target_variation_selector: Element;
 					variation_selectors.forEach( ( el ) => {
 						if ( el.querySelector( `[name="${ context.name }"]` ) !== null ) {
 							target_variation_selector = el;
 						}
 					} );
-					let other_variation_selectors = [];
+					let other_variation_selectors: Element[] = [];
 					variation_selectors.forEach( ( el ) => {
 						if ( el !== target_variation_selector ) {
 							other_variation_selectors.push( el );
@@ -338,13 +340,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			setDefaultSelectedAttribute() {
 				const context = getContext< Context >();
 				const { id, autoselect } = context;
-				const variation_selectors = document.querySelectorAll( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` );
+				const variation_selectors: Element[] = document.querySelectorAll( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` );
 
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
 				if ( autoselect ) {
-					let target_variation_selector;
+					let target_variation_selector: Element;
 					variation_selectors.forEach( ( el ) => {
 						if ( el.querySelector( `[name="${ context.name }"]` ) !== null ) {
 							target_variation_selector = el;
