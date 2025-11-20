@@ -51,6 +51,24 @@ class CollectionQuery extends AbstractCollectionQuery {
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
+			'include'  => array(
+				'description'       => __( 'Limit result set to specific IDs.', 'woocommerce' ),
+				'type'              => 'array',
+				'items'             => array(
+					'type' => 'integer',
+				),
+				'default'           => array(),
+				'sanitize_callback' => 'wp_parse_id_list',
+			),
+			'exclude' => array(
+				'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
+				'type'              => 'array',
+				'items'             => array(
+					'type' => 'integer',
+				),
+				'default'           => array(),
+				'sanitize_callback' => 'wp_parse_id_list',
+			),
 			'order'              => array(
 				'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 				'type'              => 'string',
@@ -196,6 +214,8 @@ class CollectionQuery extends AbstractCollectionQuery {
 			'created_via'    => $request['created_via'],
 			'status'         => $request['status'],
 			'customer'       => $request['customer'],
+			'post__in'       => $request['include'],
+			'post__not_in'   => $request['exclude'],
 		);
 
 		if ( 'date' === $args['orderby'] ) {
