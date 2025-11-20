@@ -632,7 +632,7 @@ final class WC_Cart_Session {
 				 */
 				$quantity = apply_filters( 'woocommerce_add_to_cart_sold_individually_quantity', 1, $quantity, $product_id, $variation_id, $cart_item_data );
 
-				$cart_id       = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
+				$cart_id = WC()->cart->generate_cart_id( $product_id, $variation_id, $variations, $cart_item_data );
 				/**
 				 * Filter whether an item matching a sold individually product is found in cart during Order Again.
 				 *
@@ -646,7 +646,7 @@ final class WC_Cart_Session {
 				$found_in_cart = apply_filters( 'woocommerce_add_to_cart_sold_individually_found_in_cart', isset( $cart[ $cart_id ] ) && isset( $cart[ $cart_id ]['quantity'] ) && $cart[ $cart_id ]['quantity'] > 0, $product_id, $variation_id, $cart_item_data, $cart_id );
 				if ( $found_in_cart ) {
 					/* translators: %s: product name */
-					$message         = sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() );
+					$message = sprintf( __( 'You cannot add another "%s" to your cart.', 'woocommerce' ), $product_data->get_name() );
 					/**
 					 * Filters message about more than 1 product being added to cart during Order Again.
 					 *
