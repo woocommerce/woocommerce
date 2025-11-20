@@ -392,98 +392,36 @@ class PageController {
 	 * @param array $hook_mappings Array of actual_hook => expected_hook mappings.
 	 */
 	private function create_hook_compatibility( array $hook_mappings ): void {
+		// Hook prefixes to map for backwards compatibility.
+		$hook_prefixes = array(
+			'load-',
+			'admin_print_styles-',
+			'admin_print_scripts-',
+			'admin_head-',
+			'admin_footer-',
+			'admin_print_footer_scripts-',
+		);
+
 		foreach ( $hook_mappings as $actual_hook => $expected_hook ) {
-			// Fire the expected hooks when the actual hooks are triggered.
-			add_action(
-				"load-{$actual_hook}",
-				function () use ( $expected_hook ) {
-					// Only fire if we're not already in the expected hook (prevent infinite loops).
-					if ( ! doing_action( "load-{$expected_hook}" ) ) {
-						/**
-						 * Fires when the orders page is loaded.
-						 *
-						 * @since 10.3.0
-						 */
-						do_action( "load-{$expected_hook}" ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for this hook pattern.
-					}
-				},
-				1
-			);
-
-			add_action(
-				"admin_print_styles-{$actual_hook}",
-				function () use ( $expected_hook ) {
-					if ( ! doing_action( "admin_print_styles-{$expected_hook}" ) ) {
-						/**
-						 * Fires when styles are printed for the orders page.
-						 *
-						 * @since 10.3.0
-						 */
-						do_action( "admin_print_styles_{$expected_hook}" );
-					}
-				},
-				1
-			);
-
-			add_action(
-				"admin_print_scripts-{$actual_hook}",
-				function () use ( $expected_hook ) {
-					if ( ! doing_action( "admin_print_scripts-{$expected_hook}" ) ) {
-						/**
-						 * Fires when scripts are printed for the orders page.
-						 *
-						 * @since 10.3.0
-						 */
-						do_action( "admin_print_scripts_{$expected_hook}" );
-					}
-				},
-				1
-			);
-
-			add_action(
-				"admin_head-{$actual_hook}",
-				function () use ( $expected_hook ) {
-					if ( ! doing_action( "admin_head-{$expected_hook}" ) ) {
-						/**
-						 * Fires in the head section of the orders page.
-						 *
-						 * @since 10.3.0
-						 */
-						do_action( "admin_head-{$expected_hook}" ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for this hook pattern.
-					}
-				},
-				1
-			);
-
-			add_action(
-				"admin_footer-{$actual_hook}",
-				function () use ( $expected_hook ) {
-					if ( ! doing_action( "admin_footer-{$expected_hook}" ) ) {
-						/**
-						 * Fires in the footer section of the orders page.
-						 *
-						 * @since 10.3.0
-						 */
-						do_action( "admin_footer-{$expected_hook}" ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for this hook pattern.
-					}
-				},
-				1
-			);
-
-			add_action(
-				"admin_print_footer_scripts-{$actual_hook}",
-				function () use ( $expected_hook ) {
-					if ( ! doing_action( "admin_print_footer_scripts-{$expected_hook}" ) ) {
-						/**
-						 * Fires when footer scripts are printed for the orders page.
-						 *
-						 * @since 10.3.0
-						 */
-						do_action( "admin_print_footer_scripts-{$expected_hook}" ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for this hook pattern.
-					}
-				},
-				1
-			);
+			// Register compatibility hooks for each prefix.
+			foreach ( $hook_prefixes as $prefix ) {
+				add_action(
+					"{$prefix}{$actual_hook}",
+					function () use ( $expected_hook, $prefix ) {
+						$expected_full_hook = "{$prefix}{$expected_hook}";
+						// Only fire if we're not already in the expected hook (prevent infinite loops).
+						if ( ! doing_action( $expected_full_hook ) ) {
+							/**
+							 * Fires compatibility hooks for the orders page.
+							 *
+							 * @since 10.3.0
+							 */
+							do_action( $expected_full_hook ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for some hook patterns.
+						}
+					},
+					1
+				);
+			}
 
 			// Also fire the base hook (without prefix).
 			add_action(
