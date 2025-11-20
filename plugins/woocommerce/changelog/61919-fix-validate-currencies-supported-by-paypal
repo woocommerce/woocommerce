@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Adds validation for currency support on PayPal Standard based on the official PayPal currency table for the Orders V2 API.

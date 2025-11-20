@@ -162,7 +162,7 @@ h2.wc-block-mini-cart__title {
 }
 
 .wc-block-mini-cart__footer {
-	@include with-translucent-border(1px 0 0);
+	border-top: 1px solid $universal-translucent-border-color;
 	padding: $gap-large $gap;
 
 	.wc-block-components-totals-item.wc-block-mini-cart__footer-subtotal {

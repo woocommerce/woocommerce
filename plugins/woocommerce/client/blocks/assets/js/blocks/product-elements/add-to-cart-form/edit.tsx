@@ -3,7 +3,7 @@
  */
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
+import { MultiLineTextSkeleton } from '@woocommerce/base-components/skeleton/patterns/multi-line-text-skeleton';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled, Tooltip } from '@wordpress/components';
 import { isSiteEditorPage } from '@woocommerce/utils';
@@ -56,7 +56,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					position="bottom right"
 				>
 					<div className="wc-block-editor-add-to-cart-form-container">
-						<ProductShortDescriptionSkeleton isStatic={ true } />
+						<MultiLineTextSkeleton isStatic={ true } />
 						<Disabled>
 							{ props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Input && (

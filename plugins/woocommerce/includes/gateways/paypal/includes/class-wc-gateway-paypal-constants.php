@@ -60,9 +60,11 @@ class WC_Gateway_Paypal_Constants {
 	const PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH = 127;
 	const PAYPAL_INVOICE_ID_MAX_LENGTH      = 127;
 	const PAYPAL_ADDRESS_LINE_MAX_LENGTH    = 300;
+	const PAYPAL_COUNTRY_CODE_LENGTH        = 2;
 	const PAYPAL_STATE_MAX_LENGTH           = 300;
 	const PAYPAL_CITY_MAX_LENGTH            = 120;
 	const PAYPAL_POSTAL_CODE_MAX_LENGTH     = 60;
+	const PAYPAL_LOCALE_MAX_LENGTH          = 10;
 
 	/**
 	 * Supported payment sources.
@@ -89,5 +91,38 @@ class WC_Gateway_Paypal_Constants {
 		'phone',
 		'phone_number',
 		'national_number',
+	);
+
+	/**
+	 * List of currencies supported by PayPal (Orders API V2).
+	 *
+	 * @var array<string>
+	 */
+	const SUPPORTED_CURRENCIES = array(
+		'AUD', // Australian Dollar.
+		'BRL', // Brazilian Real.
+		'CAD', // Canadian Dollar.
+		'CNY', // Chinese Renminbi.
+		'CZK', // Czech Koruna.
+		'DKK', // Danish Krone.
+		'EUR', // Euro.
+		'HKD', // Hong Kong Dollar.
+		'HUF', // Hungarian Forint.
+		'ILS', // Israeli New Shekel.
+		'JPY', // Japanese Yen.
+		'MYR', // Malaysian Ringgit.
+		'MXN', // Mexican Peso.
+		'TWD', // New Taiwan Dollar.
+		'NZD', // New Zealand Dollar.
+		'NOK', // Norwegian Krone.
+		'PHP', // Philippine Peso.
+		'PLN', // Polish Złoty.
+		'GBP', // Pound Sterling.
+		'SGD', // Singapore Dollar.
+		'SEK', // Swedish Krona.
+		'CHF', // Swiss Franc.
+		'THB', // Thai Baht.
+		'USD', // United States Dollar.
+		'RUB', // Russian Ruble.
 	);
 }

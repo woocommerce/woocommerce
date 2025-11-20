@@ -15,3 +15,7 @@ reviews:
         - Is backwards compatible.
         - Is readable and intuitive.
         - Has unit or E2E tests where applicable.
+        When making any changes to code that deletes or modifies orders/products/customer data, make sure that there are
+        sufficient checks in place to prevent accidental data loss. As an example, if deleting a draft order, check that
+        the order status is indeed `draft` or `checkout-draft`. Also think about whether race conditions could occur and
+        delete orders that don't belong to the current customer. When in doubt, ask for clarification in the PR comments.

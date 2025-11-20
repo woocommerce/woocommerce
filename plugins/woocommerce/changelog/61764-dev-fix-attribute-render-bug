@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+iAPI Mini Cart - Fix a bug where attributes were not rendered correctly due to incorrect key.

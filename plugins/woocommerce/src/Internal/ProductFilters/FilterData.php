@@ -266,17 +266,17 @@ class FilterData {
 		if ( $product_ids ) {
 			global $wpdb;
 
-			$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) ) . '")';
-			$attribute_count_sql     = "
-			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
-			FROM {$wpdb->posts} AS posts
-			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
-			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
-			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
-			WHERE posts.ID IN ( {$product_ids} )
-			{$attributes_to_count_sql}
-			GROUP BY terms.term_id
-		";
+			$taxonomy_escaped    = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
+			$attribute_count_sql = "
+				SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
+				FROM {$wpdb->posts} AS posts
+				INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
+				INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
+				INNER JOIN {$wpdb->terms} AS terms USING( term_id )
+				WHERE posts.ID IN ( {$product_ids} )
+				AND term_taxonomy.taxonomy = '{$taxonomy_escaped}'
+				GROUP BY terms.term_id
+			";
 
 			/**
 			 * We can't use $wpdb->prepare() here because using %s with

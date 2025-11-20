@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Added display support for "Unique product id" in wp-admin products table.

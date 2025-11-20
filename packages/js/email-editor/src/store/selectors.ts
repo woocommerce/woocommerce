@@ -301,15 +301,15 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 		if ( postId ) {
 			if ( canEdit ) {
 				return select( coreDataStore ).getEditedEntityRecord(
-					'postType',
-					'wp_global_styles',
+					'root',
+					'globalStyles',
 					postId
 				) as unknown as Post;
 			}
 			return regularizedGetEntityRecord(
 				select( coreDataStore ).getEntityRecord(
-					'postType',
-					'wp_global_styles',
+					'root',
+					'globalStyles',
 					postId,
 					{ context: 'view' }
 				)

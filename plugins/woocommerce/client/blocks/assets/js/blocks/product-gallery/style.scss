@@ -73,23 +73,6 @@ $dialog-padding: 20px;
 		}
 	}
 
-	/**
-	* ============================================================
-	* START TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
-	* ============================================================
-	*/
-	:where(.wc-block-woocommerce-product-gallery-large-image__image--legacy) {
-		margin: 0 auto;
-		aspect-ratio: 1 / 1;
-		object-fit: contain;
-		width: 100%;
-	}
-	/**
-	* ==========================================================
-	* END TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
-	* ==========================================================
-	*/
-
 	:where(.wc-block-product-gallery-large-image__inner-blocks) {
 		display: flex;
 		flex-direction: column;

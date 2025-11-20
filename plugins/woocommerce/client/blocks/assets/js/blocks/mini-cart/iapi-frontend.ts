@@ -8,13 +8,13 @@ import {
 	getElement,
 	useLayoutEffect,
 	useRef,
+	withSyncEvent,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
-import Dinero from 'dinero.js';
 
 /**
  * Internal dependencies
@@ -51,6 +51,18 @@ const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
 
+type ScalePriceArgs = {
+	price: number;
+	inputDecimals: number;
+	outputDecimals?: number;
+};
+
+const scalePrice = ( {
+	price,
+	inputDecimals,
+	outputDecimals = 0,
+}: ScalePriceArgs ) => price * Math.pow( 10, outputDecimals - inputDecimals );
+
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
@@ -70,13 +82,19 @@ type MiniCart = {
 		drawerTabIndex: string | null;
 		buttonAriaLabel: string;
 		shouldShowTaxLabel: boolean;
+		miniCartButtonRef: HTMLElement | null;
 	};
-	callbacks: {
+	actions: {
 		openDrawer: () => void;
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
+		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
+	};
+	callbacks: {
 		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
+		focusFirstElement: () => void;
+		saveMiniCartButtonRef: () => void;
 	};
 };
 
@@ -84,11 +102,19 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
+type ItemData = {
+	raw_attribute?: string | undefined;
+	value?: string | undefined;
+	display?: string;
+	attribute?: string;
+	hidden?: boolean | string | number;
+} & ( { key: string; name?: never } | { key?: never; name: string } );
+
 type CartItemDataAttr = {
-	name?: string;
-	value?: string;
-	className?: string;
-	hidden?: boolean;
+	value: string;
+	name: string;
+	className: string;
+	hidden: boolean;
 };
 
 type DataProperty = 'item_data' | 'variation';
@@ -101,13 +127,30 @@ const trimWords = ( html: string, maxWords = 15 ): string => {
 	return words.slice( 0, maxWords ).join( ' ' ) + '…';
 };
 
+const focusableSelectors = `
+	a[href],
+	input:not([disabled]):not([type="hidden"]):not([aria-hidden]),
+	select:not([disabled]):not([aria-hidden]),
+	textarea:not([disabled]):not([aria-hidden]),
+	button:not([disabled]):not([aria-hidden]),
+	[contenteditable],
+	[tabindex]:not([tabindex^="-"])
+`;
+
+const getFocusableElements = ( container: HTMLElement | null ) =>
+	container
+		? Array.from(
+				container!.querySelectorAll< HTMLElement >( focusableSelectors )
+		  ).filter( ( el ) => el.offsetParent !== null )
+		: [];
+
 const { state: woocommerceState, actions } = store< WooCommerce >(
 	'woocommerce',
 	{},
 	{ lock: universalLock }
 );
 
-const { state: miniCartState, callbacks } = store< MiniCart >(
+const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{},
 	{ lock: true }
@@ -202,6 +245,62 @@ store< MiniCart >(
 			},
 		},
 
+		actions: {
+			openDrawer() {
+				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+					window.location.href = checkoutUrl;
+					return;
+				}
+				state.isOpen = true;
+			},
+
+			closeDrawer() {
+				state.isOpen = false;
+				state.miniCartButtonRef?.focus();
+			},
+
+			overlayCloseDrawer( e: MouseEvent ) {
+				// Only close the drawer if the overlay itself was clicked.
+				if ( e.target === e.currentTarget ) {
+					miniCartActions.closeDrawer();
+				}
+			},
+
+			handleOverlayKeydown: withSyncEvent( ( e: KeyboardEvent ) => {
+				if ( state.isOpen ) {
+					if ( e.key === 'Escape' ) {
+						miniCartActions.closeDrawer();
+					}
+
+					// Trap focus if it is an overlay (main menu).
+					if ( e.key === 'Tab' ) {
+						const { ref } = getElement();
+						const focusableElements = getFocusableElements( ref );
+						if (
+							e.shiftKey &&
+							document.activeElement === focusableElements?.[ 0 ]
+						) {
+							// Focus last element when shift+tab in the first one.
+							e.preventDefault();
+							focusableElements[
+								focusableElements.length - 1
+							]?.focus();
+						} else if (
+							! e.shiftKey &&
+							document.activeElement ===
+								focusableElements?.[
+									focusableElements.length - 1
+								]
+						) {
+							// Focus first element when tab in the last one.
+							e.preventDefault();
+							focusableElements?.[ 0 ]?.focus();
+						}
+					}
+				}
+			} ),
+		},
+
 		callbacks: {
 			*setupEventListeners() {
 				// eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -232,7 +331,7 @@ store< MiniCart >(
 				if ( addToCartBehaviour === 'open_drawer' ) {
 					document.body.addEventListener(
 						'wc-blocks_added_to_cart',
-						callbacks.openDrawer
+						miniCartActions.openDrawer
 					);
 				}
 
@@ -247,32 +346,13 @@ store< MiniCart >(
 					);
 					document.body.removeEventListener(
 						'wc-blocks_added_to_cart',
-						callbacks.openDrawer
+						miniCartActions.openDrawer
 					);
 					if ( 'jQuery' in window ) {
 						removeJQueryAddedToCartEvent();
 						removeJQueryRemovedFromCartEvent();
 					}
 				};
-			},
-
-			openDrawer() {
-				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
-					window.location.href = checkoutUrl;
-					return;
-				}
-				state.isOpen = true;
-			},
-
-			closeDrawer() {
-				state.isOpen = false;
-			},
-
-			overlayCloseDrawer( e: MouseEvent ) {
-				// Only close the drawer if the overlay itself was clicked.
-				if ( e.target === e.currentTarget ) {
-					state.isOpen = false;
-				}
 			},
 
 			disableScrollingOnBody() {
@@ -291,10 +371,45 @@ store< MiniCart >(
 					} );
 				}
 			},
+
+			focusFirstElement() {
+				if ( state.isOpen ) {
+					const { ref } = getElement();
+					// Focus first element when the minicart is opened.
+					getFocusableElements( ref )[ 0 ]?.focus();
+				}
+			},
+
+			saveMiniCartButtonRef() {
+				const { ref } = getElement();
+				state.miniCartButtonRef = ref;
+			},
 		},
 	},
 	{ lock: universalLock }
 );
+
+function itemDataInnerHTML( field: 'name' | 'value' ) {
+	const { ref } = getElement();
+
+	if ( ! ref ) {
+		return;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+	const dataAttr = cartItemState.cartItemDataAttr;
+
+	if ( ! dataAttr ) {
+		return;
+	}
+
+	if ( field in dataAttr ) {
+		const value = dataAttr[ field as keyof typeof dataAttr ];
+		if ( typeof value === 'string' && value ) {
+			ref.innerHTML = trimWords( value );
+		}
+	}
+}
 
 const { state: cartItemState } = store(
 	'woocommerce/mini-cart-products-table-block',
@@ -305,47 +420,32 @@ const { state: cartItemState } = store(
 			// state.cartItem to get the cart item.
 			get cartItem() {
 				const {
-					cartItem: { id },
+					cartItem: { key },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				const cartItem =
-					woocommerceState.cart.items.find(
-						( item ) => item.id === id
-					) || ( {} as CartItem );
+				const cartItem = ( woocommerceState.cart.items.find(
+					( item ) => item.key === key
+				) || {} ) as CartItem;
 
-				return {
-					variation: [],
-					item_data: [],
-					...cartItem,
-				};
+				cartItem.variation = cartItem.variation || [];
+				cartItem.item_data = cartItem.item_data || [];
+
+				return cartItem;
 			},
 
 			get currency(): Currency {
 				return normalizeCurrencyResponse(
 					woocommerceState.cart.totals,
-					currency
+					currency as Currency
 				);
 			},
 
 			get cartItemDiscount(): string {
-				const { prices } = cartItemState.cartItem;
+				const { extensions } = cartItemState.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const saleAmountSingle =
-					regularAmountSingle.subtract( purchaseAmountSingle );
-
-				const discountPrice = saleAmountSingle
-					.convertPrecision( cartItemState.currency.minorUnit )
-					.getAmount();
+				const discountPrice =
+					cartItemState.regularAmountSingle -
+					cartItemState.purchaseAmountSingle;
 
 				const price = formatPriceWithCurrency(
 					discountPrice,
@@ -364,7 +464,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
+								extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -380,25 +480,12 @@ const { state: cartItemState } = store(
 			},
 
 			get lineItemDiscount(): string {
-				const { quantity, prices } = cartItemState.cartItem;
+				const { quantity, extensions } = cartItemState.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const saleAmountLineItem = regularAmountSingle
-					.subtract( purchaseAmountSingle )
-					.multiply( quantity );
-
-				const totalLineItemDiscount = saleAmountLineItem
-					.convertPrecision( cartItemState.currency.minorUnit )
-					.getAmount();
+				const totalLineItemDiscount =
+					( cartItemState.regularAmountSingle -
+						cartItemState.purchaseAmountSingle ) *
+					quantity;
 
 				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
@@ -417,7 +504,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
+								extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -433,9 +520,10 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemHasDiscount(): boolean {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				return (
-					cartItemState.cartItem.prices.regular_price !==
-					cartItemState.cartItem.prices.price
+					parseInt( rawPrices.regular_price, 10 ) >
+					parseInt( rawPrices.price, 10 )
 				);
 			},
 
@@ -519,10 +607,37 @@ const { state: cartItemState } = store(
 			},
 
 			get priceWithoutDiscount(): string {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
+				const priceWithoutDiscount = scalePrice( {
+					price: parseInt( rawPrices.regular_price, 10 ),
+					inputDecimals: rawPrices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+
 				return formatPriceWithCurrency(
-					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
+					priceWithoutDiscount,
 					cartItemState.currency
 				);
+			},
+
+			get regularAmountSingle(): number {
+				const { prices } = cartItemState.cartItem;
+
+				return scalePrice( {
+					price: parseInt( prices.raw_prices.regular_price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+			},
+
+			get purchaseAmountSingle(): number {
+				const { prices } = cartItemState.cartItem;
+
+				return scalePrice( {
+					price: parseInt( prices.raw_prices.price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 			},
 
 			get beforeItemPrice(): string | null {
@@ -578,8 +693,15 @@ const { state: cartItemState } = store(
 			},
 
 			get itemPrice(): string {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
+				const itemPrice = scalePrice( {
+					price: parseInt( rawPrices.price, 10 ),
+					inputDecimals: rawPrices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+
 				return formatPriceWithCurrency(
-					parseInt( cartItemState.cartItem.prices.price, 10 ),
+					itemPrice,
 					cartItemState.currency
 				);
 			},
@@ -676,13 +798,7 @@ const { state: cartItemState } = store(
 
 			get cartItemDataAttr(): CartItemDataAttr | null {
 				const { itemData, dataProperty } = getContext< {
-					itemData: {
-						key: string;
-						attribute: string;
-						name: string;
-						value: string;
-						hidden: string;
-					};
+					itemData: ItemData;
 					dataProperty: DataProperty;
 				} >();
 
@@ -691,29 +807,80 @@ const { state: cartItemState } = store(
 					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 
 				if ( ! dataItemAttr ) {
-					return { hidden: true };
+					return null;
 				}
 
-				const dataItemAttrKey =
+				// Extract name based on data type (variation uses 'attribute', item_data uses 'key' or 'name')
+				const rawName =
 					dataItemAttr.key ||
 					dataItemAttr.attribute ||
-					dataItemAttr.name;
+					dataItemAttr.name ||
+					'';
+
+				// Extract value - prefer 'display' over 'value' for item_data if available
+				const rawValue =
+					dataItemAttr.display || dataItemAttr.value || '';
 
 				// Decode entities.
 				const nameTxt = document.createElement( 'textarea' );
-				nameTxt.innerHTML = dataItemAttrKey + ':';
+				nameTxt.innerHTML = rawName;
 				const valueTxt = document.createElement( 'textarea' );
-				valueTxt.innerHTML = dataItemAttr.value;
+				valueTxt.innerHTML = rawValue;
+
+				const processedName = nameTxt.value ? nameTxt.value + ':' : '';
+				const hiddenValue = dataItemAttr.hidden;
 
 				return {
-					name: nameTxt.value,
+					name: processedName,
 					value: valueTxt.value,
-					className: `wc-block-components-product-details__${ dataItemAttrKey
+					className: `wc-block-components-product-details__${ nameTxt.value
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
-						.replace( /[\s_]+/g, '-' )
+						.replace( /<[^>]*>/g, '' )
+						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
-					hidden: dataItemAttr.hidden === '1' ? true : false,
+					hidden:
+						hiddenValue === true ||
+						hiddenValue === 'true' ||
+						hiddenValue === '1' ||
+						hiddenValue === 1,
 				};
+			},
+
+			get cartItemDataAttrHidden(): boolean {
+				return (
+					cartItemState.cartItemDataAttr === null ||
+					!! cartItemState.cartItemDataAttr?.hidden
+				);
+			},
+
+			// Used to index cart item data attributes for wp-each-key.
+			get cartItemDataKey(): string {
+				const { itemData, dataProperty } = getContext< {
+					itemData: ItemData;
+					dataProperty: DataProperty;
+				} >();
+
+				const dataItemAttr =
+					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+
+				if ( ! dataItemAttr ) {
+					return '';
+				}
+
+				let name = '';
+				let value = '';
+
+				if ( dataProperty === 'variation' ) {
+					// For variations use raw_attribute as name and value as value
+					name = dataItemAttr.raw_attribute || '';
+					value = dataItemAttr.value || '';
+				} else {
+					// For item_data, use key/name and display/value
+					name = dataItemAttr.key || dataItemAttr.name || '';
+					value = dataItemAttr.display || dataItemAttr.value || '';
+				}
+
+				return `${ name }:${ value }`;
 			},
 
 			get itemDataHasMultipleAttributes(): boolean {
@@ -780,6 +947,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -801,6 +969,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -818,6 +987,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -850,6 +1020,14 @@ const { state: cartItemState } = store(
 					}
 				}
 			},
+
+			itemDataNameInnerHTML() {
+				itemDataInnerHTML( 'name' );
+			},
+			itemDataValueInnerHTML() {
+				itemDataInnerHTML( 'value' );
+			},
+
 			filterCartItemClass() {
 				// TODO: Add deprecation notice urging to replace with a `data-wp-class` directive.
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -866,9 +1044,11 @@ const { state: cartItemState } = store(
 						const { ref } = getElement();
 
 						// Remove previously applied classes.
-						ref!.classList.remove(
-							...previouslyAppliedClasses.current
-						);
+						if ( ref ) {
+							ref.classList.remove(
+								...previouslyAppliedClasses.current
+							);
+						}
 
 						const newClassesString = applyCheckoutFilter( {
 							filterName: 'cartItemClass',
@@ -885,9 +1065,11 @@ const { state: cartItemState } = store(
 						previouslyAppliedClasses.current = newClassesString
 							.split( ' ' )
 							.filter( Boolean );
-						ref!.classList.add(
-							...previouslyAppliedClasses.current
-						);
+						if ( ref ) {
+							ref.classList.add(
+								...previouslyAppliedClasses.current
+							);
+						}
 					}
 				} );
 			},

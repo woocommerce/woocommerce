@@ -90,3 +90,8 @@
 		left: 0;
 	}
 }
+
+// Hide core's Styles sidebar controls
+.components-button[aria-controls="edit-site:global-styles"] {
+	display: none !important;
+}

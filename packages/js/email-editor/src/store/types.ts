@@ -275,3 +275,11 @@ export type PostWithPermissions = Post & {
 		update: boolean;
 	};
 };
+
+export type EmailEditorConfig = {
+	editorSettings: EmailEditorSettings;
+	theme: EmailTheme;
+	urls: EmailEditorUrls;
+	userEmail: string;
+	globalStylesPostId?: number | null;
+};

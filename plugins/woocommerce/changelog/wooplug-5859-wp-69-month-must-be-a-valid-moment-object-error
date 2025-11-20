@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix issue where updating the woocommerce_default_date_range option was saving stringified undefined values.

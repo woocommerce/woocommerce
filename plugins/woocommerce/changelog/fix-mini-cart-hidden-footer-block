@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent rendering Mini Cart Footer block when it's hidden
