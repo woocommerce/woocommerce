@@ -560,6 +560,137 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test refund creation with automatic tax extraction using compound taxes.
+	 */
+	public function test_refunds_create_with_compound_tax_extraction(): void {
+		// Enable tax calculations.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		// Create a regular tax rate (10%).
+		$tax_rate_id_1 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'State Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create a compound tax rate (5%) - applies on top of base + tax_rate_id_1.
+		$tax_rate_id_2 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '5.0000',
+				'tax_rate_name'     => 'Compound Tax',
+				'tax_rate_priority' => '2',
+				'tax_rate_compound' => '1',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '2',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create order with product and compound taxes.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+
+		// Manually calculate compound taxes:
+		// Base: 100.00
+		// Tax 1 (10%): 10.00
+		// Tax 2 (5% compound on 110.00): 5.50
+		// Total: 115.50.
+		$item->set_taxes(
+			array(
+				'total'    => array(
+					$tax_rate_id_1 => 10.00,
+					$tax_rate_id_2 => 5.50,
+				),
+				'subtotal' => array(
+					$tax_rate_id_1 => 10.00,
+					$tax_rate_id_2 => 5.50,
+				),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item_1 = new WC_Order_Item_Tax();
+		$tax_item_1->set_rate( $tax_rate_id_1 );
+		$tax_item_1->set_tax_total( 10.00 );
+		$tax_item_1->set_compound( false );
+		$tax_item_1->save();
+		$order->add_item( $tax_item_1 );
+
+		$tax_item_2 = new WC_Order_Item_Tax();
+		$tax_item_2->set_rate( $tax_rate_id_2 );
+		$tax_item_2->set_tax_total( 5.50 );
+		$tax_item_2->set_compound( true );
+		$tax_item_2->save();
+		$order->add_item( $tax_item_2 );
+
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'CA' );
+		$order->set_total( 115.50 );
+		$order->save();
+
+		$this->created_orders[] = $order->get_id();
+
+		// Create refund with just refund_total (should extract compound taxes automatically).
+		$refund_data = array(
+			'order_id'   => $order->get_id(),
+			'amount'     => 115.50,
+			'reason'     => 'Testing automatic compound tax extraction',
+			'line_items' => array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 115.50, // Includes 10.00 + 5.50 compound tax.
+				),
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params( $refund_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status(), 'Refund should be created successfully' );
+		$response_data = $response->get_data();
+
+		$this->assertIsArray( $response_data );
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
+
+		// Total refund amount should include extracted compound taxes.
+		$this->assertEquals( '115.50', $response_data['amount'], 'Refund amount should include compound taxes' );
+
+		// Track for cleanup.
+		$this->created_refunds[] = $response_data['id'];
+
+		// Clean up product.
+		$product->delete( true );
+	}
+
+	/**
 	 * Test refund creation with API refund and restock options.
 	 */
 	public function test_refunds_create_with_api_options(): void {
