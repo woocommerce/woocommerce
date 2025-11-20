@@ -16,6 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-notices.php';
+}
+
 /**
  * Generates requests to send to PayPal.
  */
@@ -157,6 +161,9 @@ class WC_Gateway_Paypal_Request {
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
+
+			// Handle PayPal notices based on response status.
+			$this->maybe_add_or_remove_notice( $http_code );
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
@@ -1319,5 +1326,22 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return number_format( (float) $price, $decimals, '.', '' );
+	}
+
+	/**
+	 * Maybe add or remove account restriction notice based on HTTP status code.
+	 *
+	 * Sets the account restriction flag if the status is 422 (account restricted),
+	 * or clears it if the status indicates success (200, 201).
+	 *
+	 * @param int $http_code The HTTP status code from the PayPal API response.
+	 * @return void
+	 */
+	protected function maybe_add_or_remove_notice( $http_code ) {
+		if ( 422 === $http_code ) {
+			WC_Gateway_Paypal_Notices::set_account_restriction_flag();
+		} elseif ( in_array( $http_code, array( 200, 201 ), true ) ) {
+			WC_Gateway_Paypal_Notices::clear_account_restriction_flag();
+		}
 	}
 }

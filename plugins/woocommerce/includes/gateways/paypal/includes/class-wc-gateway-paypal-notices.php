@@ -107,4 +107,28 @@ class WC_Gateway_Paypal_Notices {
 	protected static function paypal_migration_notice_dismissed() {
 		return get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_completed_notice', true );
 	}
+
+	/**
+	 * Set the flag indicating PayPal account restriction.
+	 *
+	 * @return void
+	 */
+	public static function set_account_restriction_flag() {
+		$gateway = WC_Gateway_Paypal::get_instance();
+		if ( $gateway ) {
+			$gateway->update_option( 'account_restricted', 'yes' );
+		}
+	}
+
+	/**
+	 * Clear the flag indicating PayPal account restriction.
+	 *
+	 * @return void
+	 */
+	public static function clear_account_restriction_flag() {
+		$gateway = WC_Gateway_Paypal::get_instance();
+		if ( $gateway ) {
+			$gateway->update_option( 'account_restricted', 'no' );
+		}
+	}
 }
