@@ -90,7 +90,7 @@ trait CouponsMovedTrait {
 	 * @return bool
 	 */
 	protected static function should_display_legacy_menu() {
-		return ( get_option( self::$option_key, 1 ) && ! Features::is_enabled( 'navigation' ) );
+		return ! Features::is_enabled( 'navigation' );
 	}
 
 	/**
