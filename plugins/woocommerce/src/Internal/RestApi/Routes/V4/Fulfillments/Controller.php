@@ -123,6 +123,7 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_providers' ),
 					'permission_callback' => array( $this, 'check_permission_for_providers' ),
+					'schema'              => array( $this, 'get_schema_for_providers' ),
 				),
 			)
 		);
@@ -739,6 +740,7 @@ class Controller extends AbstractController {
 	/**
 	 * Get all shipping providers.
 	 *
+	 * @since 10.5.0
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response
 	 */
@@ -750,10 +752,58 @@ class Controller extends AbstractController {
 	/**
 	 * Check permissions for accessing shipping providers.
 	 *
+	 * @since 10.5.0
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return bool
+	 * @return bool|WP_Error True if the current user has the capability, otherwise a WP_Error.
 	 */
-	public function check_permission_for_providers( WP_REST_Request $request ): bool {
-		return current_user_can( 'manage_woocommerce' );
+	public function check_permission_for_providers( WP_REST_Request $request ) {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get the schema for the providers endpoint.
+	 *
+	 * @since 10.5.0
+	 * @return array The schema for the providers endpoint.
+	 */
+	private function get_schema_for_providers(): array {
+		return array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => __( 'Shipping providers', 'woocommerce' ),
+			'type'    => 'object',
+			'additionalProperties' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'label' => array(
+						'description' => __( 'The display name of the shipping provider.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'icon'  => array(
+						'description' => __( 'The icon URL for the shipping provider.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'value' => array(
+						'description' => __( 'The unique key for the shipping provider.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+					'url'   => array(
+						'description' => __( 'The tracking URL template for the shipping provider.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => array( 'view' ),
+						'readonly'    => true,
+					),
+				),
+			),
+		);
 	}
 }

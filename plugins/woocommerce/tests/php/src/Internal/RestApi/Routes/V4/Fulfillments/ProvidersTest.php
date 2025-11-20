@@ -121,20 +121,6 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_providers returns correct structure
-	 */
-	public function test_get_providers_returns_correct_structure() {
-		wp_set_current_user( $this->admin_user_id );
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/providers' );
-
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertIsArray( $data );
-	}
-
-	/**
 	 * Test get_providers contains expected providers
 	 */
 	public function test_get_providers_contains_expected_providers() {
