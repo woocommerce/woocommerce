@@ -47,6 +47,7 @@ jobs:
             - Summary: Overall risk [None|Low|Medium|High] and a 2 to 4 sentence rationale.
             - Testing Focus: targeted regression areas (e.g., checkout, gateways, subscriptions) with concrete steps.
             - Confidence: a percentage and one-sentence justification.
+            - Apart from the "Overall risk" section, please use collapsed sections for details, the overall Github comment should be short and readable at first glance.
 
             Scope to analyze (but not limited to):
             - PHP: public/protected API signature/visibility changes; default param or type-hint changes; thrown exceptions; removed/renamed hooks (`do_action`, `apply_filters`); template changes under `templates/**`; REST params/response shapes; DB/schema/options changes; global constants/vars; composer constraints.
