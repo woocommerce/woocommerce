@@ -139,6 +139,9 @@ class PageController {
 			add_action( 'admin_menu', array( $this, 'register_menu' ), 9 );
 		}
 
+		// Remove legacy post type menus after WordPress registers them.
+		add_action( 'admin_menu', array( $this, 'remove_legacy_order_type_menus' ), 50 );
+
 		// Not on an Orders page.
 		if ( empty( $plugin_page ) || 'admin.php' !== $pagenow || 0 !== strpos( $plugin_page, 'wc-orders' ) ) {
 			return;
@@ -253,7 +256,12 @@ class PageController {
 	}
 
 	/**
-	 * Registers the "Orders" menu.
+	 * Registers the "Orders" menu when HPOS is enabled.
+	 *
+	 * Creates admin.php-based menu items for order types to replace the legacy post type menus.
+	 * shop_order is registered as a top-level "Orders" menu, while custom order types
+	 * (e.g., shop_subscription) are placed under WooCommerce if the user has access, otherwise
+	 * under Orders, or as top-level menus if neither parent is available.
 	 *
 	 * @return void
 	 */
@@ -301,7 +309,8 @@ class PageController {
 			);
 		}
 
-		// Process remaining order types.
+		// Process remaining order types (custom order types like shop_subscription).
+		// These are placed in a hierarchy: WooCommerce menu > Orders menu > Top-level.
 		foreach ( $order_types as $order_type ) {
 			// Skip shop_order if we already processed it.
 			if ( 'shop_order' === $order_type && $has_shop_order ) {
@@ -311,35 +320,70 @@ class PageController {
 			$post_type = get_post_type_object( $order_type );
 			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
 
-			// Add as submenu under shop_order if it exists, otherwise under WooCommerce.
-			$menu_parent = $has_shop_order ? 'wc-orders' : 'woocommerce';
+			// Determine menu parent: prefer WooCommerce menu if user can access it, then Orders, then top-level.
+			$menu_parent = $has_shop_order ? 'wc-orders' : null;
+			$menu_parent = \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : $menu_parent;
 
-			$sub_hook_suffix = add_submenu_page(
-				$menu_parent,
-				$post_type->labels->name,
-				$post_type->labels->menu_name,
-				$post_type->cap->edit_posts,
-				$page_slug,
-				array( $this, 'output' )
-			);
+			if ( null === $menu_parent ) {
+				// Create as top-level menu if no parent available.
+				$hook_suffix = add_menu_page(
+					$post_type->labels->name,
+					$post_type->labels->menu_name,
+					$post_type->cap->edit_posts,
+					$page_slug,
+					array( $this, 'output' ),
+					$post_type->menu_icon ?? 'dashicons-text-page',
+					56
+				);
+			} else {
+				// Create as submenu under the determined parent.
+				$hook_suffix = add_submenu_page(
+					$menu_parent,
+					$post_type->labels->name,
+					$post_type->labels->menu_name,
+					$post_type->cap->edit_posts,
+					$page_slug,
+					array( $this, 'output' )
+				);
+			}
 
 			// Map submenu hooks - they should appear as if under woocommerce for backwards compatibility.
-			$hook_mappings[ $sub_hook_suffix ] = 'woocommerce_page_' . $page_slug;
+			$hook_mappings[ $hook_suffix ] = 'woocommerce_page_' . $page_slug;
 		}
 
 		// Create backwards compatibility layer.
 		$this->create_hook_compatibility( $hook_mappings );
+	}
 
-		// In some cases (such as if the authoritative order store was changed earlier in the current request) we
-		// need an extra step to remove the menu entry for the menu post type.
-		add_action(
-			'admin_init',
-			function() use ( $order_types ) {
-				foreach ( $order_types as $order_type ) {
-					remove_menu_page( 'edit.php?post_type=' . $order_type );
-				}
+	/**
+	 * Removes legacy post type menu pages for order types.
+	 *
+	 * In some cases (such as if the authoritative order store was changed earlier in the current request) we
+	 * need an extra step to remove the menu entry for the post type.
+	 *
+	 * @return void
+	 */
+	public function remove_legacy_order_type_menus(): void {
+		$order_types = wc_get_order_types( 'admin-menu' );
+
+		foreach ( $order_types as $order_type ) {
+			$post_type = get_post_type_object( $order_type );
+
+			if ( ! $post_type ) {
+				continue;
 			}
-		);
+
+			$menu_slug = 'edit.php?post_type=' . $order_type;
+
+			// Check if this is a top-level menu or submenu.
+			if ( true === $post_type->show_in_menu ) {
+				// Top-level menu (e.g., shop_order when HPOS is disabled).
+				remove_menu_page( $menu_slug );
+			} elseif ( is_string( $post_type->show_in_menu ) ) {
+				// Submenu under a parent (e.g., shop_subscription under 'woocommerce').
+				remove_submenu_page( $post_type->show_in_menu, $menu_slug );
+			}
+		}
 	}
 
 	/**
