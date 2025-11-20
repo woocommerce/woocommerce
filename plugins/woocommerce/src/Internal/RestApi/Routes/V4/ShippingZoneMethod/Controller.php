@@ -106,13 +106,7 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
-					'args'                => array(
-						'force' => array(
-							'default'     => false,
-							'type'        => 'boolean',
-							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
-						),
-					),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::DELETABLE ),
 				),
 			)
 		);
@@ -133,8 +127,18 @@ class Controller extends AbstractController {
 			);
 		}
 
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return $this->get_authentication_error_by_method( $request->get_method() );
+		$method = $request->get_method();
+
+		if ( 'GET' === $method ) {
+			$context = 'read';
+		} elseif ( 'DELETE' === $method ) {
+			$context = 'delete';
+		} else {
+			$context = 'edit';
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', $context ) ) {
+			return $this->get_authentication_error_by_method( $method );
 		}
 
 		return true;
@@ -232,21 +236,15 @@ class Controller extends AbstractController {
 	/**
 	 * Delete shipping zone method by ID.
 	 *
+	 * Note: In v2/v3, this endpoint required a `force` parameter, but since shipping zone methods
+	 * do not support trashing, it would either delete (force=true) or return a 501 error (force=false).
+	 * We removed the `force` parameter in v4 as it serves no purpose when soft delete is not supported.
+	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
 		$instance_id = (int) $request['id'];
-		$force       = $request['force'];
-
-		// Shipping methods do not support trashing.
-		if ( ! $force ) {
-			return new WP_Error(
-				'woocommerce_rest_trash_not_supported',
-				__( 'Shipping methods do not support trashing.', 'woocommerce' ),
-				array( 'status' => 501 )
-			);
-		}
 
 		// Get the method before deletion to return in response.
 		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );

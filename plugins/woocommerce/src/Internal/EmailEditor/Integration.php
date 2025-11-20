@@ -119,7 +119,7 @@ class Integration {
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
 		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
-		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ) );
+		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
 	}
@@ -251,13 +251,16 @@ class Integration {
 	 *
 	 * @param string $data       The preview data.
 	 * @param string $email_type The email type identifier (e.g., 'customer_processing_order').
+	 * @param int    $post_id    The post ID.
 	 * @return string The updated preview data with placeholders replaced.
 	 */
-	private function update_email_preview_data( $data, string $email_type ) {
+	private function update_email_preview_data( $data, string $email_type, $post_id = 0 ) {
 		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
 
-		if ( ! empty( $email_type ) ) {
-			$type_param = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_template_name( $email_type );
+		if ( ! empty( $post_id ) ) {
+			$type_param = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_post_id( $post_id );
+		} elseif ( ! empty( $email_type ) ) {
+			$type_param = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_email_id( $email_type );
 		}
 
 		$email_preview = wc_get_container()->get( EmailPreview::class );
@@ -281,10 +284,11 @@ class Integration {
 	/**
 	 * Filter email preview data used when sending a preview email.
 	 *
-	 * @param string $data The preview data.
+	 * @param string  $data The preview data.
+	 * @param WP_Post $post The post object.
 	 * @return string The updated preview data with placeholders replaced.
 	 */
-	public function update_send_preview_email_rendered_data( $data ) {
+	public function update_send_preview_email_rendered_data( $data, $post ) {
 		$email_type = '';
 		$post_body  = file_get_contents( 'php://input' );
 
@@ -298,6 +302,11 @@ class Integration {
 				if ( ! empty( $email_type ) ) {
 					return $this->update_email_preview_data( $data, $email_type );
 				}
+			}
+		} elseif ( ! empty( $post ) && $post instanceof \WP_Post ) {
+			$email_type = WCTransactionalEmailPostsManager::get_instance()->get_email_type_from_post_id( $post->ID );
+			if ( ! empty( $email_type ) ) {
+				return $this->update_email_preview_data( $data, $email_type, $post->ID );
 			}
 		}
 		return $data;
@@ -336,12 +345,21 @@ class Integration {
 	 * @return string The updated preview HTML with placeholders replaced.
 	 */
 	public function update_preview_post_template_html_data( $data ) {
+		// return early if the data does not contain the placeholder meaning it's already been processed.
+		if ( ! str_contains( (string) $data, BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ) ) {
+			return $data;
+		}
+
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		// Nonce verification is disabled here because the preview action doesn't modify data,
 		// and the check caused issues with the 'Preview in new tab' feature due to context changes.
 		$type_param = isset( $_GET['woo_email'] ) ? sanitize_text_field( wp_unslash( $_GET['woo_email'] ) ) : '';
+
+		// check for post id (preview id) in the request.
+		$post_id = isset( $_REQUEST['preview_id'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['preview_id'] ) ) : '';
+
 		// phpcs:enable
-		return $this->update_email_preview_data( $data, $type_param );
+		return $this->update_email_preview_data( $data, $type_param, $post_id );
 	}
 
 	/**
