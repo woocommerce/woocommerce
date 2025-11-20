@@ -537,7 +537,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			$mu_plugins_directory_length = strlen( WPMU_PLUGIN_DIR );
 			$next_slash_index = strpos( $file_path, '/', $mu_plugins_directory_length );
 			if ( false === $next_slash_index ) {
-				$plugin_slug = str_ends_with( $file_path, '.php' ) ? substr( $file_path, $themes_directory_length, -4 ) : substr( $file_path, $themes_directory_length );
+				$mu_plugin_slug = str_ends_with( $file_path, '.php' ) ? substr( $file_path, $mu_plugins_directory_length, -4 ) : substr( $file_path, $mu_plugins_directory_length );
 			} else {
 				// Use subdirectory as the slug - we can't tell for sure which mu-plugin it is/was.
 				$mu_plugin_slug = substr( $file_path, $mu_plugins_directory_length, $next_slash_index - $mu_plugins_directory_length );
