@@ -833,10 +833,10 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->created_orders[] = $order->get_id();
 
 		// Create partial refund with explicit refund_tax array (legacy backward compatibility).
-		// Refunding 30.00 out of 50.00 subtotal.
+		// Refunding 30.00 out of 50.00 subtotal (30.00 + 6.90 + 1.50 = 38.40).
+		// Don't specify amount - let it auto-calculate from line items.
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 37.40,
 			'reason'     => 'Testing explicit tax array (legacy format)',
 			'line_items' => array(
 				array(
@@ -869,7 +869,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
 
 		// Total refund amount should include the explicit taxes.
-		$this->assertEquals( '37.40', $response_data['amount'], 'Refund amount should include explicit taxes' );
+		$this->assertEquals( '38.40', $response_data['amount'], 'Refund amount should include explicit taxes' );
 
 		// Verify explicit taxes were recorded on the refund line item.
 		$refund           = wc_get_order( $response_data['id'] );
