@@ -314,7 +314,7 @@ class Controller extends AbstractController {
 					'invalid_refund_amount',
 					sprintf(
 						/* translators: %s: calculated total from line items */
-						__( 'Refund amount cannot be less than the total of line items (%s). Amount can exceed line items for goodwill refunds.', 'woocommerce' ),
+						__( 'Refund amount cannot be less than the total of line items (%s).', 'woocommerce' ),
 						wc_format_decimal( $calculated_total, 2 )
 					)
 				);
