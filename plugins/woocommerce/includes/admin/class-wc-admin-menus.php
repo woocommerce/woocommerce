@@ -319,9 +319,7 @@ class WC_Admin_Menus {
 	public function menu_order( $menu_order ) {
 		// Initialize our custom order array.
 		$woocommerce_menu_order = array();
-
-		// Cache HPOS status check.
-		$is_hpos_enabled = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+		$is_hpos_enabled        = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 
 		// Menu identifiers for reordering.
 		$separator     = 'separator-woocommerce';
