@@ -206,7 +206,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			if ( null !== $mock_wp_theme_directories ) {
 				$initial_wp_theme_directories = isset( $wp_theme_directories ) ? $wp_theme_directories : null;
 				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test setup.
-				$wp_theme_directories         = $mock_wp_theme_directories;
+				$wp_theme_directories = $mock_wp_theme_directories;
 			}
 
 			$formatted_log = $this->sut->get_formatted_log( $level, $message, $context );
@@ -245,7 +245,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$store_id    = \get_option( \WC_Install::STORE_ID_OPTION, null );
 
 			return array(
-				'basic log data'                                          => array(
+				'basic log data'                         => array(
 					'error',
 					'Fatal error occurred at line 123 in ' . ABSPATH . 'wp-content/file.php',
 					array( 'tags' => array( 'tag1', 'tag2' ) ),
@@ -256,13 +256,13 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						'tags'     => array( 'woocommerce', 'php', 'tag1', 'tag2' ),
 					),
 				),
-				'log with backtrace'                                      => array(
+				'log with backtrace'                     => array(
 					'error',
 					'Test error message',
 					array( 'backtrace' => ABSPATH . 'wp-content/plugins/woocommerce/file.php' ),
 					array( 'trace' => './woocommerce/file.php' ),
 				),
-				'log with extra attributes'                               => array(
+				'log with extra attributes'              => array(
 					'error',
 					'Test error message',
 					array(
@@ -278,7 +278,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						),
 					),
 				),
-				'log with WooCommerce error file'                         => array(
+				'log with WooCommerce error file'        => array(
 					'error',
 					'Test error message',
 					array( 'error' => array( 'file' => WC_ABSPATH . 'includes/class-wc-test.php' ) ),
@@ -295,7 +295,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						),
 					),
 				),
-				'log with single file plugin error file'                  => array(
+				'log with single file plugin error file' => array(
 					'error',
 					'Test error message',
 					array( 'error' => array( 'file' => WP_PLUGIN_DIR . '/test-plugin.php' ) ),
@@ -319,7 +319,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						),
 					),
 				),
-				'log with directory-based plugin error file'              => array(
+				'log with directory-based plugin error file' => array(
 					'error',
 					'Test error message',
 					array( 'error' => array( 'file' => WP_PLUGIN_DIR . '/test-plugin/src/test-plugin-file.php' ) ),
@@ -343,7 +343,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						),
 					),
 				),
-				'log with single file mu-plugin error file'               => array(
+				'log with single file mu-plugin error file' => array(
 					'error',
 					'Test error message',
 					array( 'error' => array( 'file' => WPMU_PLUGIN_DIR . '/test-mu-plugin.php' ) ),
@@ -359,7 +359,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						),
 					),
 				),
-				'log with directory-based mu-plugin error file'           => array(
+				'log with directory-based mu-plugin error file' => array(
 					'error',
 					'Test error message',
 					array( 'error' => array( 'file' => WPMU_PLUGIN_DIR . '/test-mu-plugin/src/test-file.php' ) ),
@@ -375,7 +375,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						),
 					),
 				),
-				'log with standard theme error file'                      => array(
+				'log with standard theme error file'     => array(
 					'error',
 					'Test error message',
 					array( 'error' => array( 'file' => WP_CONTENT_DIR . '/themes/twentytwentyfive/functions.php' ) ),
@@ -409,7 +409,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					null,
 					array( ABSPATH . 'custom-themes' ),
 				),
-				'log with multi-directory non-standard theme error file'  => array(
+				'log with multi-directory non-standard theme error file' => array(
 					'error',
 					'Test error message',
 					array( 'error' => array( 'file' => ABSPATH . 'custom-themes/test-custom-theme/functions.php' ) ),
