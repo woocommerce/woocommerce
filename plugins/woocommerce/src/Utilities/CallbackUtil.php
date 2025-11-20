@@ -117,20 +117,26 @@ final class CallbackUtil {
 	/**
 	 * Get a stable signature for an invokable object based on its class and __invoke method location.
 	 *
+	 * For regular classes, returns 'ClassName::__invoke' since the class name is stable.
+	 * For anonymous classes, includes file location since the class name varies between requests.
+	 *
 	 * @param object $invokable The invokable object to generate a signature for.
-	 * @return string Signature in the format 'ClassName::__invoke@filename:startLine-endLine'.
-	 * @throws \ReflectionException If reflection fails.
+	 * @return string Signature in format 'ClassName::__invoke' or 'ClassName::__invoke@filename:startLine-endLine'.
 	 */
 	private static function get_invokable_signature( object $invokable ): string {
-		$reflection = new \ReflectionMethod( $invokable, '__invoke' );
-		$file       = $reflection->getFileName();
-		$start      = $reflection->getStartLine();
-		$end        = $reflection->getEndLine();
+		$method = new \ReflectionMethod( $invokable, '__invoke' );
+		$class  = $method->getDeclaringClass();
 
-		if ( false === $file || false === $start || false === $end ) {
-			throw new \ReflectionException( 'Unable to get invokable location information' );
+		if ( ! $class->isAnonymous() ) {
+			return $class->getName() . '::__invoke';
 		}
 
-		return sprintf( '%s::__invoke@%s:%d-%d', get_class( $invokable ), $file, $start, $end );
+		return sprintf(
+			'%s::__invoke@%s:%d-%d',
+			$class->getName(),
+			$method->getFileName(),
+			$method->getStartLine(),
+			$method->getEndLine()
+		);
 	}
 }
