@@ -65,6 +65,10 @@ class DataUtils {
 						$line_item['refund_tax'] = $this->convert_proportional_taxes_to_schema_format(
 							$calculated_taxes
 						);
+
+						// Subtract extracted tax from refund_total to get the amount excluding tax.
+						$total_tax                 = array_sum( $calculated_taxes );
+						$line_item['refund_total'] = $line_item['refund_total'] - $total_tax;
 					}
 				}
 			}

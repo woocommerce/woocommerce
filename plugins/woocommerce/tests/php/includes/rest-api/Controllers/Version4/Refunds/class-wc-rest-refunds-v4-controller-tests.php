@@ -465,24 +465,38 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test refund creation with automatic tax extraction.
+	 * Test refund creation with automatic tax extraction (multiple non-compound rates).
 	 */
 	public function test_refunds_create_with_automatic_tax_extraction(): void {
 		// Enable tax calculations.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_prices_include_tax', 'no' );
 
-		// Create a tax rate.
-		$tax_rate_id = WC_Tax::_insert_tax_rate(
+		// Create two non-compound tax rates to test proportional splitting.
+		$tax_rate_id_1 = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'US',
 				'tax_rate_state'    => '',
-				'tax_rate'          => '10.0000',
-				'tax_rate_name'     => 'VAT',
+				'tax_rate'          => '23.0000',
+				'tax_rate_name'     => 'Tax 1',
 				'tax_rate_priority' => '1',
 				'tax_rate_compound' => '0',
 				'tax_rate_shipping' => '1',
 				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$tax_rate_id_2 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '5.0000',
+				'tax_rate_name'     => 'Tax 2',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '2',
 				'tax_rate_class'    => '',
 			)
 		);
@@ -503,37 +517,50 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'total'    => 100.00,
 			)
 		);
+		// Tax 1 (23%): 23.00, Tax 2 (5%): 5.00, Total: 128.00.
 		$item->set_taxes(
 			array(
-				'total'    => array( $tax_rate_id => 10.00 ),
-				'subtotal' => array( $tax_rate_id => 10.00 ),
+				'total'    => array(
+					$tax_rate_id_1 => 23.00,
+					$tax_rate_id_2 => 5.00,
+				),
+				'subtotal' => array(
+					$tax_rate_id_1 => 23.00,
+					$tax_rate_id_2 => 5.00,
+				),
 			)
 		);
 		$item->save();
 		$order->add_item( $item );
 
-		$tax_item = new WC_Order_Item_Tax();
-		$tax_item->set_rate( $tax_rate_id );
-		$tax_item->set_tax_total( 10.00 );
-		$tax_item->save();
-		$order->add_item( $tax_item );
+		$tax_item_1 = new WC_Order_Item_Tax();
+		$tax_item_1->set_rate( $tax_rate_id_1 );
+		$tax_item_1->set_tax_total( 23.00 );
+		$tax_item_1->save();
+		$order->add_item( $tax_item_1 );
+
+		$tax_item_2 = new WC_Order_Item_Tax();
+		$tax_item_2->set_rate( $tax_rate_id_2 );
+		$tax_item_2->set_tax_total( 5.00 );
+		$tax_item_2->save();
+		$order->add_item( $tax_item_2 );
 
 		$order->set_billing_country( 'US' );
-		$order->set_total( 110.00 );
+		$order->set_total( 128.00 );
 		$order->save();
 
 		$this->created_orders[] = $order->get_id();
 
-		// Create refund with just refund_total (should extract tax automatically).
+		// Create refund with just refund_total (should extract and split tax automatically).
 		$refund_data = array(
 			'order_id'   => $order->get_id(),
-			'amount'     => 110.00,
-			'reason'     => 'Testing automatic tax extraction',
+			'amount'     => 128.00,
+			'reason'     => 'Testing automatic tax extraction with multiple rates',
 			'line_items' => array(
 				array(
 					'line_item_id' => $item->get_id(),
 					'quantity'     => 1,
-					'refund_total' => 110.00, // Includes 10.00 tax.
+					'refund_total' => 128.00, // Includes 23.00 + 5.00 tax.
 				),
 			),
 		);
@@ -549,8 +576,28 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $response_data );
 		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
 
-		// Total refund amount should include extracted tax.
-		$this->assertEquals( '110.00', $response_data['amount'], 'Refund amount should include tax' );
+		// Total refund amount should include extracted taxes.
+		$this->assertEquals( '128.00', $response_data['amount'], 'Refund amount should include both taxes' );
+
+		// Verify taxes were extracted and split proportionally on the refund line item.
+		$refund           = wc_get_order( $response_data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+
+		// Line item total should exclude tax (negative value for refund).
+		$this->assertEquals( -100.00, $refund_line_item->get_total(), 'Line item total should be -100.00 (excluding tax)' );
+
+		// Line item taxes should contain both extracted taxes split proportionally.
+		$refund_taxes = $refund_line_item->get_taxes();
+		$this->assertArrayHasKey( 'total', $refund_taxes, 'Line item should have taxes array' );
+		$this->assertArrayHasKey( $tax_rate_id_1, $refund_taxes['total'], 'Line item should have tax for rate ID 1' );
+		$this->assertArrayHasKey( $tax_rate_id_2, $refund_taxes['total'], 'Line item should have tax for rate ID 2' );
+		$this->assertEquals( -23.00, (float) $refund_taxes['total'][ $tax_rate_id_1 ], 'Extracted tax 1 should be -23.00' );
+		$this->assertEquals( -5.00, (float) $refund_taxes['total'][ $tax_rate_id_2 ], 'Extracted tax 2 should be -5.00' );
+
+		// Verify refund has tax items for both rates.
+		$refund_tax_items = $refund->get_items( 'tax' );
+		$this->assertCount( 2, $refund_tax_items, 'Refund should have 2 tax items' );
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
@@ -682,6 +729,26 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Total refund amount should include extracted compound taxes.
 		$this->assertEquals( '115.50', $response_data['amount'], 'Refund amount should include compound taxes' );
+
+		// Verify compound taxes were extracted and recorded on the refund line item.
+		$refund           = wc_get_order( $response_data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+
+		// Line item total should exclude tax (negative value for refund).
+		$this->assertEquals( -100.00, $refund_line_item->get_total(), 'Line item total should be -100.00 (excluding tax)' );
+
+		// Line item taxes should contain the extracted compound taxes.
+		$refund_taxes = $refund_line_item->get_taxes();
+		$this->assertArrayHasKey( 'total', $refund_taxes, 'Line item should have taxes array' );
+		$this->assertArrayHasKey( $tax_rate_id_1, $refund_taxes['total'], 'Line item should have tax for rate ID 1' );
+		$this->assertArrayHasKey( $tax_rate_id_2, $refund_taxes['total'], 'Line item should have tax for compound rate ID 2' );
+		$this->assertEquals( -10.00, (float) $refund_taxes['total'][ $tax_rate_id_1 ], 'Extracted tax 1 should be -10.00' );
+		$this->assertEquals( -5.50, (float) $refund_taxes['total'][ $tax_rate_id_2 ], 'Extracted compound tax 2 should be -5.50' );
+
+		// Verify refund has tax items for both rates.
+		$refund_tax_items = $refund->get_items( 'tax' );
+		$this->assertCount( 2, $refund_tax_items, 'Refund should have 2 tax items (regular and compound)' );
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
