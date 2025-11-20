@@ -51,7 +51,7 @@ class WooEmailTemplate {
 
 <!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group">
-<!-- wp:post-content {"lock":{"move":true,"remove":false},"layout":{"type":"default"}} /-->
+<!-- wp:post-content {"lock":{"move":true,"remove":true},"layout":{"type":"default"}} /-->
 </div>
 <!-- /wp:group -->
 
