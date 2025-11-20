@@ -35,18 +35,10 @@ export type QuantitySelectorStore = {
 		inputQuantity: number;
 	};
 	actions: {
-		increaseQuantity: (
-			event: HTMLElementEvent< HTMLButtonElement >
-		) => void;
-		decreaseQuantity: (
-			event: HTMLElementEvent< HTMLButtonElement >
-		) => void;
-		handleQuantityBlur: (
-			event: HTMLElementEvent< HTMLInputElement >
-		) => void;
-		handleQuantityCheckboxChange: (
-			event: HTMLElementEvent< HTMLInputElement >
-		) => void;
+		increaseQuantity: () => void;
+		decreaseQuantity: () => void;
+		handleQuantityBlur: () => void;
+		handleQuantityCheckboxChange: () => void;
 	};
 	callbacks: {
 		storeInputElementRef: () => void;
@@ -126,11 +118,8 @@ store< QuantitySelectorStore >(
 			},
 		},
 		actions: {
-			increaseQuantity: (
-				event: HTMLElementEvent< HTMLButtonElement >
-			) => {
-				const inputElement =
-					event.target.parentElement?.querySelector( '.qty' );
+			increaseQuantity: () => {
+				const { productId, inputElement } = getContext< Context >();
 
 				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
@@ -138,7 +127,6 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 
-				const { productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
@@ -160,18 +148,15 @@ store< QuantitySelectorStore >(
 					{ changeTarget: inputElement }
 				);
 			},
-			decreaseQuantity: (
-				event: HTMLElementEvent< HTMLButtonElement >
-			) => {
-				const inputElement =
-					event.target.parentElement?.querySelector( '.qty' );
+			decreaseQuantity: () => {
+				const { allowZero, productId, inputElement } =
+					getContext< Context >();
 
 				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
@@ -202,10 +187,9 @@ store< QuantitySelectorStore >(
 			// We need to listen to blur events instead of change events because
 			// the change event isn't triggered in invalid numbers (ie: writing
 			// letters) if the current value is already invalid or an empty string.
-			handleQuantityBlur: (
-				event: HTMLElementEvent< HTMLInputElement >
-			) => {
-				const { allowZero, productId } = getContext< Context >();
+			handleQuantityBlur: () => {
+				const { allowZero, productId, inputElement } =
+					getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
@@ -217,18 +201,18 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const isValueNaN = Number.isNaN( event.target.valueAsNumber );
+				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 				const { min } = productObject;
 
 				if (
 					allowZero &&
-					( isValueNaN || event.target.valueAsNumber === 0 )
+					( isValueNaN || inputElement?.valueAsNumber === 0 )
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
 						0,
 						{
-							changeTarget: event.target,
+							changeTarget: inputElement,
 							forceUpdate: isValueNaN,
 						}
 					);
@@ -237,15 +221,13 @@ store< QuantitySelectorStore >(
 
 				// In other product types, we reset inputs to `min` if they are
 				// 0 or NaN.
-				const newValue =
-					! isValueNaN && event.target.valueAsNumber > 0
-						? event.target.valueAsNumber
-						: min;
+				const value = inputElement?.valueAsNumber ?? NaN;
+				const newValue = ! isNaN( value ) && value > 0 ? value : min;
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
 					newValue,
-					{ changeTarget: event.target, forceUpdate: isValueNaN }
+					{ changeTarget: inputElement, forceUpdate: isValueNaN }
 				);
 			},
 			handleQuantityCheckboxChange: () => {
