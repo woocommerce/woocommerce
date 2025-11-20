@@ -3,7 +3,6 @@
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
-import type { HTMLElementEvent } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -144,8 +143,7 @@ store< QuantitySelectorStore >(
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
-					newValue,
-					{ changeTarget: inputElement }
+					newValue
 				);
 			},
 			decreaseQuantity: () => {
@@ -179,8 +177,7 @@ store< QuantitySelectorStore >(
 				if ( newValue !== currentValue ) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
-						newValue,
-						{ changeTarget: inputElement }
+						newValue
 					);
 				}
 			},
@@ -210,11 +207,7 @@ store< QuantitySelectorStore >(
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
-						0,
-						{
-							changeTarget: inputElement,
-							forceUpdate: isValueNaN,
-						}
+						0
 					);
 					return;
 				}
@@ -226,8 +219,7 @@ store< QuantitySelectorStore >(
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
-					newValue,
-					{ changeTarget: inputElement, forceUpdate: isValueNaN }
+					newValue
 				);
 			},
 			handleQuantityCheckboxChange: () => {
