@@ -978,6 +978,97 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test refund creation fails when amount is less than line items total (under-refunding).
+	 */
+	public function test_refunds_create_validation_error_under_refunding(): void {
+		// Enable tax calculations.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Create a tax rate.
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create order with product and taxes.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->save();
+
+		$this->created_orders[] = $order->get_id();
+
+		// Try to create refund with amount LESS than line items total (should fail).
+		// Line items: 110.00, but amount: 50.00 (under-refunding).
+		$refund_data = array(
+			'order_id'   => $order->get_id(),
+			'amount'     => 50.00,
+			'reason'     => 'Should fail - under-refunding',
+			'line_items' => array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 110.00, // Line items total is 110.00.
+				),
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params( $refund_data );
+		$response = $this->server->dispatch( $request );
+
+		// Should return 400 Bad Request.
+		$this->assertEquals( 400, $response->get_status(), 'Refund should fail with 400 status' );
+
+		$response_data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $response_data );
+		$this->assertEquals( 'invalid_refund_amount', $response_data['code'] );
+		$this->assertStringContainsString( 'cannot be less than the total of line items', $response_data['message'] );
+		$this->assertStringContainsString( '110.00', $response_data['message'], 'Error should show calculated total' );
+
+		// Clean up product.
+		$product->delete( true );
+	}
+
+	/**
 	 * Test refund creation with API refund and restock options.
 	 */
 	public function test_refunds_create_with_api_options(): void {
