@@ -107,6 +107,18 @@ class RemoteLogger extends \WC_Log_Handler {
 
 		if ( isset( $context['error']['file'] ) && is_string( $context['error']['file'] ) && '' !== $context['error']['file'] ) {
 			$log_data['file'] = $this->normalize_paths( $context['error']['file'] );
+
+			// See if we can identify plugin or theme details from the file path.
+			$plugin_or_theme_details = $this->get_plugin_or_theme_details_from_file_path( $context['error']['file'] );
+
+			if ( is_array( $plugin_or_theme_details ) ) {
+				$log_data['properties']['type'] = $plugin_or_theme_details['type'];
+				$log_data['properties']['slug'] = $plugin_or_theme_details['slug'];
+				if ( null !== $plugin_or_theme_details['version'] ) {
+					$log_data['properties']['version'] = $plugin_or_theme_details['version'];
+				}
+			}
+
 			unset( $context['error']['file'] );
 		}
 
@@ -455,6 +467,91 @@ class RemoteLogger extends \WC_Log_Handler {
 			array( './', './' ),
 			$content
 		);
+	}
+
+	/**
+	 * Get the plugin or theme name and version from the file path.
+	 *
+	 * @param string $file_path The file path to get the plugin or theme name and version from.
+	 * @return null|array {
+	 *     Plugin or theme details.
+	 * 
+	 *     @type string      $type    The detected type of the trigger. Can be 'plugin' or 'theme'.
+	 *     @type string      $slug    The slug of the plugin or theme.
+	 *     @type string|null $version The version of the plugin or theme.
+	 * }
+	 */
+	private function get_plugin_or_theme_details_from_file_path( string $file_path ): ?array {
+		// Check for plugin first.
+		if ( defined( 'WP_PLUGIN_DIR' ) && str_starts_with( $file_path, WP_PLUGIN_DIR ) ) {
+			$plugins_directory_length = strlen( WP_PLUGIN_DIR );
+			$next_slash_index         = strpos( $file_path, '/', $plugins_directory_length );
+			$plugin_slug              = null;
+			$plugin_file              = null;
+			$plugin_version           = null;
+			// Check for plugins in subdirectories and in top-level directory.
+			if ( false !== $next_slash_index ) {
+				$plugin_slug    = substr( $file_path, $plugins_directory_length, $next_slash_index - $plugins_directory_length );
+				$plugin_file    = "$plugin_slug/$plugin_slug.php";				
+			} elseif ( str_ends_with( $file_path, '.php' ) ) {
+				$plugin_slug = substr( $file_path, $plugins_directory_length, -4 );
+				$plugin_file = "$plugin_slug.php";
+			}
+
+			if ( null === $plugin_slug || null === $plugin_file ) {
+				return null;
+			}
+
+			if ( function_exists( 'wp_cache_get' ) ) {
+				$cached_plugin_data = \wp_cache_get( 'plugins', 'plugins' );
+				if ( is_array( $cached_plugin_data ) && isset( $cached_plugin_data[''][ $plugin_file ]['Version'] ) ) {
+					// Site-wide plugin cache uses '' array key.
+					$plugin_version = $cached_plugin_data[ $plugin_file ]['Version'];
+				}
+			}
+
+			return array(
+				'type'    => 'plugin',
+				'slug'    => $plugin_slug,
+				'version' => $plugin_version,
+			);
+		}
+
+		// Check for theme in default theme directory. This may be expanded to additional root directories.
+		if ( defined( 'WP_CONTENT_DIR' ) && str_starts_with( $file_path, WP_CONTENT_DIR . '/themes/' ) ) {
+			$themes_directory_length = strlen( WP_CONTENT_DIR . '/themes/' );
+			$next_slash_index = strpos( $file_path, '/', $themes_directory_length );
+			if ( false === $next_slash_index ) {
+				return null;
+			}
+			$theme_slug = substr( $file_path, $themes_directory_length, $next_slash_index - $themes_directory_length );
+
+			return array(
+				'type'    => 'theme',
+				'slug'    => $theme_slug,
+				'version' => null,
+			);
+		}
+
+		if ( defined( 'WPMU_PLUGIN_DIR' ) && str_starts_with( $file_path, WPMU_PLUGIN_DIR ) ) {
+			$mu_plugins_directory_length = strlen( WPMU_PLUGIN_DIR );
+			$next_slash_index = strpos( $file_path, '/', $mu_plugins_directory_length );
+			if ( false === $next_slash_index ) {
+				$plugin_slug = str_ends_with( $file_path, '.php' ) ? substr( $file_path, $themes_directory_length, -4 ) : substr( $file_path, $themes_directory_length );
+			} else {
+				// Use subdirectory as the slug - we can't tell for sure which mu-plugin it is/was.
+				$mu_plugin_slug = substr( $file_path, $mu_plugins_directory_length, $next_slash_index - $mu_plugins_directory_length );
+			}
+			// We may want to get the mu-plugin version in future, but it depends on a number of functions, so skipping for now.
+
+			return array(
+				'type'    => 'mu-plugin',
+				'slug'    => $mu_plugin_slug,
+				'version' => null,
+			);
+		}
+
+		return null;
 	}
 
 	/**
