@@ -38,9 +38,6 @@ type Context = AddToCartWithOptionsStoreContext & {
 	autoselect: boolean;
 };
 
-// When true, do not handle clicks on attributes, this is to avoid infinite recursion
-let inAutoselectScope = false;
-
 // Set selected pill styles for proper contrast.
 setStyles();
 
@@ -148,7 +145,7 @@ export type VariableProductAddToCartWithOptionsStore =
 			isOptionDisabled: boolean;
 		};
 		actions: {
-			setAttribute: ( attribute: string, value: string ) => void;
+			setAttribute: ( attribute: string, value: string, context: Context | null ) => void;
 			removeAttribute: ( attribute: string ) => void;
 			handlePillClick: () => void;
 			handleDropdownChange: (
@@ -202,8 +199,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 		},
 		actions: {
-			setAttribute( attribute: string, value: string ) {
-				const { selectedAttributes } = getContext< Context >();
+			setAttribute( attribute: string, value: string, context: Context | null ) {
+				context = context || getContext< Context >();
+				const { selectedAttributes } = context;
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
@@ -247,21 +245,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					context.selectedValue = context.option.value;
 				}
 				actions.setAttribute( context.name, context.selectedValue );
-				if ( inAutoselectScope ) {
-					// Avoid infinite recursion
-				} else {
-					actions.autoselectOtherAttributes();
-				}
+				actions.autoselectOtherAttributes();
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
-				if ( inAutoselectScope ) {
-					// Avoid infinite recursion
-				} else {
-					actions.autoselectOtherAttributes();
-				}
+				actions.autoselectOtherAttributes();
 			},
 			autoselectAttributes( variation_selectors: Element[] ) {
 				const { selectedAttributes } = getContext< Context >();
@@ -285,29 +275,21 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					if ( valid_choices.length === 1 ) {
 						// Only 1 option (+ the "Choose an option" choice in case of dropdowns)
 						const valid_choice: Element = valid_choices[0];
-						const selected: Element = current_variation_selector.querySelectorAll( ':checked' );
+						const selected: Element[] = current_variation_selector.querySelectorAll( ':checked' );
 						if ( selected.length === 0 || selected[0].value !== valid_choice.value ) {
 							// No option selected, OR the selected value is not the same as the only valid one (for example if the selected value is "" (Choose an Option))
-							inAutoselectScope = true;
-							let ev;
-							switch ( optionStyle ) {
-								case 'pills':
-									// Manually enable the input, because we know it is valid and will be enabled by Wordpress's interactivity API anyways.
-									valid_choice.classList.remove( 'disabled' )
-									valid_choice.removeAttribute( 'disabled' );
-									ev = new MouseEvent( 'click', { bubbles: true } );
-									valid_choice.dispatchEvent( ev );
-									break;
-								case 'dropdown':
-									const select = valid_choice.parentElement;
-									select.value = valid_choice.value;
-									ev = new Event( 'change' , { bubbles: true } );
-									select.dispatchEvent( ev );
-									break;
-								default:
-									throw new Error( 'optionStyle not implemented!: ' + optionStyle );
+							const name = optionStyle === 'dropdown' ? JSON.parse( valid_choice.dataset?.wpContext )[ 'name' ] : valid_choice.getAttribute( 'name' );
+							if ( optionStyle === 'dropdown' ) {
+								valid_choice.parentElement.value = valid_choice.value
+							} else {
+								if ( selected.length !== 0 ) {
+									selected[0].checked = false;
+								}
+								// Manually enable the input, because we know it is valid and will be enabled by Wordpress's interactivity API anyways.
+								valid_choice.removeAttribute( 'disabled' );
+								valid_choice.checked = true;
 							}
-							inAutoselectScope = false;
+							current_variation_selector.dispatchEvent( new CustomEvent( 'wc-set-selected-value', { detail: { name: name, value: valid_choice.value } } ) );
 						}
 					}
 				}
@@ -315,17 +297,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			autoselectOtherAttributes() {
 				const context = getContext< Context >();
 				const { id, autoselect } = context;
-				const variation_selectors: Element[] = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` )
+				const target_variation_selector: Element = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` );
+				const variation_selectors: Element[] = target_variation_selector
 					.closest( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector' )
 					.querySelectorAll( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' );
 
 				if ( autoselect && context.selectedValue ) {
-					let target_variation_selector: Element;
-					variation_selectors.forEach( ( el ) => {
-						if ( el.querySelector( `[name="${ context.name }"]` ) !== null ) {
-							target_variation_selector = el;
-						}
-					} );
 					let other_variation_selectors: Element[] = [];
 					variation_selectors.forEach( ( el ) => {
 						if ( el !== target_variation_selector ) {
@@ -340,17 +317,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			setDefaultSelectedAttribute() {
 				const context = getContext< Context >();
 				const { id, autoselect } = context;
-				const variation_selectors: Element[] = document.querySelectorAll( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` );
+				const target_variation_selector: Element = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` );
 
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
 				if ( autoselect ) {
-					let target_variation_selector: Element;
-					variation_selectors.forEach( ( el ) => {
-						if ( el.querySelector( `[name="${ context.name }"]` ) !== null ) {
-							target_variation_selector = el;
-						}
+					target_variation_selector.addEventListener( 'wc-set-selected-value', ( e: CustomEvent ) => {
+						context.selectedValue = e.detail.value;
+						actions.setAttribute( e.detail.name, e.detail.value, context );
 					} );
 					actions.autoselectAttributes( [ target_variation_selector ] );
 				}
