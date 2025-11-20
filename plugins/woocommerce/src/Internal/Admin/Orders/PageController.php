@@ -440,6 +440,51 @@ class PageController {
 				1
 			);
 
+			add_action(
+				"admin_head-{$actual_hook}",
+				function () use ( $expected_hook ) {
+					if ( ! doing_action( "admin_head-{$expected_hook}" ) ) {
+						/**
+						 * Fires in the head section of the orders page.
+						 *
+						 * @since 10.3.0
+						 */
+						do_action( "admin_head-{$expected_hook}" ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for this hook pattern.
+					}
+				},
+				1
+			);
+
+			add_action(
+				"admin_footer-{$actual_hook}",
+				function () use ( $expected_hook ) {
+					if ( ! doing_action( "admin_footer-{$expected_hook}" ) ) {
+						/**
+						 * Fires in the footer section of the orders page.
+						 *
+						 * @since 10.3.0
+						 */
+						do_action( "admin_footer-{$expected_hook}" ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for this hook pattern.
+					}
+				},
+				1
+			);
+
+			add_action(
+				"admin_print_footer_scripts-{$actual_hook}",
+				function () use ( $expected_hook ) {
+					if ( ! doing_action( "admin_print_footer_scripts-{$expected_hook}" ) ) {
+						/**
+						 * Fires when footer scripts are printed for the orders page.
+						 *
+						 * @since 10.3.0
+						 */
+						do_action( "admin_print_footer_scripts-{$expected_hook}" ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for this hook pattern.
+					}
+				},
+				1
+			);
+
 			// Also fire the base hook (without prefix).
 			add_action(
 				$actual_hook,
