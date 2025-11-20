@@ -76,7 +76,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
 			if ( file_exists( $bootstrap_file ) ) {
 				require $bootstrap_file;
-				\WP_REST_Abilities_Init::register_routes( $this->server );
 			}
 		}
 
@@ -86,6 +85,24 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$wp_actions['init']               = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		parent::setUp();
+
+		// Ensure Abilities API REST routes are registered if needed.
+		if ( function_exists( 'wp_register_ability' ) && class_exists( 'WP_REST_Abilities_Init' ) ) {
+			$routes = $this->server->get_routes();
+
+			// Check if any Abilities API routes are already registered.
+			$has_abilities_routes = false;
+			foreach ( $routes as $route => $handlers ) {
+				if ( strpos( $route, '/wp-abilities/v1/' ) === 0 ) {
+					$has_abilities_routes = true;
+					break;
+				}
+			}
+
+			if ( ! $has_abilities_routes ) {
+				\WP_REST_Abilities_Init::register_routes( $this->server );
+			}
+		}
 	}
 
 	/**
