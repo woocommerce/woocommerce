@@ -3143,7 +3143,7 @@ function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
  * Autoload frequently used options for performance improvements (see https://github.com/woocommerce/woocommerce/issues/61855)
  *
  * `$autoload_options` frequently used options that may already be in the db but with `autoload = off`.
- * `$feature_missing_options` are frequently used feature flag options that are not stored in the db.
+ * `$feature_options` are frequently used feature flag options that are not stored in the db.
  *
  * @return void
  */
@@ -3151,11 +3151,6 @@ function wc_update_1050_enable_autoload_options() {
 	global $wpdb;
 
 	$autoload_options = array(
-		'woocommerce_address_autocomplete_provider',
-		'woocommerce_actionable_order_statuses',
-		'woocommerce_custom_orders_table_background_sync_mode',
-		'woocommerce_thumbnail_cropping',
-		'woocommerce_pickup_location_settings',
 		// Page ID options `off` in the db.
 		'woocommerce_myaccount_page_id',
 		'woocommerce_cart_page_id',
