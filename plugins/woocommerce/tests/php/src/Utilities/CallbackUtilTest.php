@@ -275,7 +275,7 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 	 * @testdox `get_hook_callback_signatures` should return signatures for all callbacks on a hook.
 	 */
 	public function test_get_hook_callback_signatures_with_multiple_callbacks() {
-		$hook_name = 'test_hook_' . uniqid();
+		$hook_name = 'test_hook_multiple_callbacks';
 		$object    = new DummyCallbackClass();
 
 		add_action( $hook_name, 'my_function', 10 );
@@ -301,7 +301,7 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 	 * @testdox `get_hook_callback_signatures` should handle closures correctly.
 	 */
 	public function test_get_hook_callback_signatures_with_closures() {
-		$hook_name = 'test_hook_closure_' . uniqid();
+		$hook_name = 'test_hook_closures';
 
 		$closure1 = function () {
 			return 'test1';
@@ -330,7 +330,7 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 	 * @testdox `get_hook_callback_signatures` should handle invokable objects correctly.
 	 */
 	public function test_get_hook_callback_signatures_with_invokable() {
-		$hook_name = 'test_hook_invokable_' . uniqid();
+		$hook_name = 'test_hook_invokable';
 		$invokable = new DummyInvokableClass();
 
 		add_action( $hook_name, $invokable, 10 );
@@ -353,7 +353,7 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 	 * @testdox `get_hook_callback_signatures` should produce consistent signatures across multiple instances.
 	 */
 	public function test_get_hook_callback_signatures_consistent_across_instances() {
-		$hook_name = 'test_hook_consistent_' . uniqid();
+		$hook_name = 'test_hook_consistent';
 
 		$object1 = new DummyCallbackClassWithDynamicProps();
 		add_action( $hook_name, array( $object1, 'my_method' ), 10 );
@@ -381,7 +381,7 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 	 * @testdox `get_hook_callback_signatures` should return empty array when hook has no callbacks.
 	 */
 	public function test_get_hook_callback_signatures_with_empty_hook() {
-		$hook_name = 'test_hook_empty_' . uniqid();
+		$hook_name = 'test_hook_empty';
 
 		add_action( $hook_name, '__return_true', 10 );
 		remove_all_actions( $hook_name );
