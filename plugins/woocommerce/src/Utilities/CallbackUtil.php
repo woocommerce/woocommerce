@@ -121,7 +121,7 @@ final class CallbackUtil {
 	 * For anonymous classes, includes file location since the class name varies between requests.
 	 *
 	 * @param object $invokable The invokable object to generate a signature for.
-	 * @return string Signature in format 'ClassName::__invoke' or 'ClassName::__invoke@filename:startLine-endLine'.
+	 * @return string Signature in format 'ClassName::__invoke' or 'class@anonymous[hash]::__invoke@filename:startLine-endLine'.
 	 */
 	private static function get_invokable_signature( object $invokable ): string {
 		$method = new \ReflectionMethod( $invokable, '__invoke' );
@@ -132,8 +132,8 @@ final class CallbackUtil {
 		}
 
 		return sprintf(
-			'%s::__invoke@%s:%d-%d',
-			$class->getName(),
+			'class@anonymous[%s]::__invoke@%s:%d-%d',
+			md5( $class->getName() ),
 			$method->getFileName(),
 			$method->getStartLine(),
 			$method->getEndLine()

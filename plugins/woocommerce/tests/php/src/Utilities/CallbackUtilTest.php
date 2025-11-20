@@ -158,7 +158,7 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `get_callback_signature` should return class name with __invoke and location for anonymous invokable objects.
+	 * @testdox `get_callback_signature` should return hashed class name with __invoke and location for anonymous invokable objects.
 	 */
 	public function test_get_callback_signature_with_anonymous_invokable_object() {
 		$invokable = new class() {
@@ -170,7 +170,7 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 
 		$signature = CallbackUtil::get_callback_signature( $invokable );
 
-		$this->assertStringContainsString( '::__invoke@', $signature );
+		$this->assertMatchesRegularExpression( '/^class@anonymous\[[a-f0-9]{32}\]::__invoke@/', $signature );
 		$this->assertStringContainsString( 'CallbackUtilTest.php', $signature );
 		$this->assertMatchesRegularExpression( '/:\d+-\d+$/', $signature );
 	}
