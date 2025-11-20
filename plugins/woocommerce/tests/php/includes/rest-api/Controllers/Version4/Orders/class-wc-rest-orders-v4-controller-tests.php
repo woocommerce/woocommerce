@@ -1863,4 +1863,91 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$order->delete( true );
 		}
 	}
+
+	/**
+	 * Test include and exclude parameters.
+	 */
+	public function test_include_and_exclude_parameters(): void {
+		// Create 6 test orders.
+		$order1 = $this->create_test_order();
+		$order2 = $this->create_test_order();
+		$order3 = $this->create_test_order();
+		$order4 = $this->create_test_order();
+		$order5 = $this->create_test_order();
+		$order6 = $this->create_test_order();
+
+		// Test include with single order ID.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'include', array( $order1->get_id() ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 1, $response_data, 'Should return exactly 1 order when including single ID' );
+		$this->assertEquals( $order1->get_id(), $response_data[0]['id'], 'Should return the included order' );
+
+		// Test include with multiple order IDs.
+		$request->set_param( 'include', array( $order1->get_id(), $order3->get_id(), $order5->get_id() ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 3, $response_data, 'Should return exactly 3 orders when including three IDs' );
+		$returned_ids = array_column( $response_data, 'id' );
+		$this->assertContains( $order1->get_id(), $returned_ids, 'Should include order1' );
+		$this->assertContains( $order3->get_id(), $returned_ids, 'Should include order3' );
+		$this->assertContains( $order5->get_id(), $returned_ids, 'Should include order5' );
+		$this->assertNotContains( $order2->get_id(), $returned_ids, 'Should not include order2' );
+		$this->assertNotContains( $order4->get_id(), $returned_ids, 'Should not include order4' );
+		$this->assertNotContains( $order6->get_id(), $returned_ids, 'Should not include order6' );
+
+		// Test include with non-existent ID - should return empty.
+		$request->set_param( 'include', array( 99999 ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 0, $response_data, 'Should return empty array when including non-existent ID' );
+
+		// Test exclude with single order ID.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'exclude', array( $order2->get_id() ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$returned_ids = array_column( $response_data, 'id' );
+		$this->assertNotContains( $order2->get_id(), $returned_ids, 'Should exclude order2' );
+		$this->assertContains( $order1->get_id(), $returned_ids, 'Should include order1' );
+		$this->assertContains( $order3->get_id(), $returned_ids, 'Should include order3' );
+		$this->assertContains( $order4->get_id(), $returned_ids, 'Should include order4' );
+		$this->assertContains( $order5->get_id(), $returned_ids, 'Should include order5' );
+		$this->assertContains( $order6->get_id(), $returned_ids, 'Should include order6' );
+
+		// Test exclude with multiple order IDs.
+		$request->set_param( 'exclude', array( $order1->get_id(), $order3->get_id(), $order5->get_id() ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$returned_ids = array_column( $response_data, 'id' );
+		$this->assertNotContains( $order1->get_id(), $returned_ids, 'Should exclude order1' );
+		$this->assertNotContains( $order3->get_id(), $returned_ids, 'Should exclude order3' );
+		$this->assertNotContains( $order5->get_id(), $returned_ids, 'Should exclude order5' );
+		$this->assertContains( $order2->get_id(), $returned_ids, 'Should include order2' );
+		$this->assertContains( $order4->get_id(), $returned_ids, 'Should include order4' );
+		$this->assertContains( $order6->get_id(), $returned_ids, 'Should include order6' );
+
+		// Clean up.
+		$order1->delete( true );
+		$order2->delete( true );
+		$order3->delete( true );
+		$order4->delete( true );
+		$order5->delete( true );
+		$order6->delete( true );
+	}
 }

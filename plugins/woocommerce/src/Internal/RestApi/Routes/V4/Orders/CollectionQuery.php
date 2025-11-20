@@ -51,7 +51,7 @@ class CollectionQuery extends AbstractCollectionQuery {
 				'sanitize_callback' => 'absint',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
-			'include'  => array(
+			'include'            => array(
 				'description'       => __( 'Limit result set to specific IDs.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
@@ -60,7 +60,7 @@ class CollectionQuery extends AbstractCollectionQuery {
 				'default'           => array(),
 				'sanitize_callback' => 'wp_parse_id_list',
 			),
-			'exclude' => array(
+			'exclude'            => array(
 				'description'       => __( 'Ensure result set excludes specific IDs.', 'woocommerce' ),
 				'type'              => 'array',
 				'items'             => array(
