@@ -475,7 +475,7 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * @param string $file_path The file path to get the plugin or theme name and version from.
 	 * @return null|array {
 	 *     Plugin or theme details.
-	 * 
+	 *
 	 *     @type string      $type    The detected type of the trigger. Can be 'plugin' or 'theme'.
 	 *     @type string      $slug    The slug of the plugin or theme.
 	 *     @type string|null $version The version of the plugin or theme.
@@ -500,8 +500,8 @@ class RemoteLogger extends \WC_Log_Handler {
 			$plugin_version           = null;
 			// Check for plugins in subdirectories and in top-level directory.
 			if ( false !== $next_slash_index ) {
-				$plugin_slug    = substr( $file_path, $plugins_directory_length, $next_slash_index - $plugins_directory_length );
-				$plugin_file    = "$plugin_slug/$plugin_slug.php";				
+				$plugin_slug = substr( $file_path, $plugins_directory_length, $next_slash_index - $plugins_directory_length );
+				$plugin_file = "$plugin_slug/$plugin_slug.php";
 			} elseif ( str_ends_with( $file_path, '.php' ) ) {
 				$plugin_slug = substr( $file_path, $plugins_directory_length, -4 );
 				$plugin_file = "$plugin_slug.php";
@@ -535,7 +535,7 @@ class RemoteLogger extends \WC_Log_Handler {
 
 		if ( defined( 'WPMU_PLUGIN_DIR' ) && str_starts_with( $file_path, \WPMU_PLUGIN_DIR . '/' ) ) {
 			$mu_plugins_directory_length = strlen( \WPMU_PLUGIN_DIR . '/' );
-			$next_slash_index = strpos( $file_path, '/', $mu_plugins_directory_length );
+			$next_slash_index            = strpos( $file_path, '/', $mu_plugins_directory_length );
 			if ( false === $next_slash_index ) {
 				$mu_plugin_slug = str_ends_with( $file_path, '.php' ) ? substr( $file_path, $mu_plugins_directory_length, -4 ) : substr( $file_path, $mu_plugins_directory_length );
 			} else {
@@ -565,7 +565,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			$full_theme_directory = $theme_directory . '/';
 			if ( str_starts_with( $file_path, $full_theme_directory ) ) {
 				$full_theme_directory_length = strlen( $full_theme_directory );
-				$next_slash_index = strpos( $file_path, '/', $full_theme_directory_length );
+				$next_slash_index            = strpos( $file_path, '/', $full_theme_directory_length );
 				if ( false === $next_slash_index ) {
 					return null;
 				}
