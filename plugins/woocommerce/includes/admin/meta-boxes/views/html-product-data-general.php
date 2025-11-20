@@ -49,11 +49,15 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 			<span class="show_if_simple show_if_external">
 		<?php endif; ?>
 		<?php
+			$tax_label = wc_tax_enabled()
+			? ( wc_prices_include_tax() ? ' ' . __( 'incl. tax', 'woocommerce' ) : ' ' . __( 'excl. tax', 'woocommerce' ) )
+			: '';
+
 			woocommerce_wp_text_input(
 				array(
 					'id'        => '_regular_price',
 					'value'     => $product_object->get_regular_price( 'edit' ),
-					'label'     => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+					'label'     => __( 'Regular price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ( $tax_label ? ' ' . $tax_label : '' ) . ')',
 					'data_type' => 'price',
 				)
 			);
@@ -63,7 +67,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 					'id'          => '_sale_price',
 					'value'       => $product_object->get_sale_price( 'edit' ),
 					'data_type'   => 'price',
-					'label'       => __( 'Sale price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ')',
+					'label'       => __( 'Sale price', 'woocommerce' ) . ' (' . get_woocommerce_currency_symbol() . ( $tax_label ? ' ' . $tax_label : '' ) . ')',
 					'description' => '<a href="#" class="sale_schedule">' . __( 'Schedule', 'woocommerce' ) . '</a>',
 				)
 			);
