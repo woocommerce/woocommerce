@@ -492,8 +492,8 @@ class RemoteLogger extends \WC_Log_Handler {
 		}
 
 		// Then check for other plugins.
-		if ( defined( 'WP_PLUGIN_DIR' ) && str_starts_with( $file_path, WP_PLUGIN_DIR ) ) {
-			$plugins_directory_length = strlen( WP_PLUGIN_DIR );
+		if ( defined( 'WP_PLUGIN_DIR' ) && str_starts_with( $file_path, \WP_PLUGIN_DIR . '/' ) ) {
+			$plugins_directory_length = strlen( \WP_PLUGIN_DIR . '/' );
 			$next_slash_index         = strpos( $file_path, '/', $plugins_directory_length );
 			$plugin_slug              = null;
 			$plugin_file              = null;
@@ -511,11 +511,18 @@ class RemoteLogger extends \WC_Log_Handler {
 				return null;
 			}
 
-			if ( function_exists( 'wp_cache_get' ) ) {
+			// If get_plugins() is available, use it to get the plugin version.
+			if ( function_exists( 'get_plugins' ) ) {
+				$plugins = \get_plugins();
+				if ( is_array( $plugins ) && isset( $plugins[ $plugin_file ]['Version'] ) ) {
+					$plugin_version = $plugins[ $plugin_file ]['Version'];
+				}
+			} elseif ( function_exists( 'wp_cache_get' ) ) {
+				// Fall back on direct access to the plugins cache.
 				$cached_plugin_data = \wp_cache_get( 'plugins', 'plugins' );
+				// The full plugin cache is under the '' key due to the way get_plugins() is structured.
 				if ( is_array( $cached_plugin_data ) && isset( $cached_plugin_data[''][ $plugin_file ]['Version'] ) ) {
-					// Site-wide plugin cache uses '' array key.
-					$plugin_version = $cached_plugin_data[ $plugin_file ]['Version'];
+					$plugin_version = $cached_plugin_data[''][ $plugin_file ]['Version'];
 				}
 			}
 
