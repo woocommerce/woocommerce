@@ -200,14 +200,19 @@
         },
         {
           "name": "large",
-          "size": "28px",
+          "size": "24px",
           "slug": "large"
         },
         {
           "name": "extra-large",
-          "size": "42px",
+          "size": "32px",
           "slug": "x-large"
-        }
+        },
+		{
+			"name": "extra-extra-large",
+			"size": "40px",
+			"slug": "xx-large"
+		}
       ]
     },
     "useRootPaddingAwareAlignments": true
@@ -244,53 +249,7 @@
           "fontStyle": "normal",
           "lineHeight": "1.5"
         }
-      },
-      "h1": {
-        "typography": {
-          "fontSize": "42px",
-          "fontWeight": "700",
-          "fontStyle": "normal"
-        }
-      },
-      "h2": {
-        "typography": {
-          "fontSize": "42px"
-        }
-      },
-      "h3": {
-        "typography": {
-          "fontSize": "28px"
-        }
-      },
-      "h4": {
-        "typography": {
-          "fontSize": "16px"
-        }
-      },
-      "h5": {
-        "typography": {
-          "fontSize": "13px"
-        }
-      },
-      "h6": {
-        "typography": {
-          "fontSize": "13px"
-        }
-      },
-		"button": {
-			"color": {
-				"background": "#32373c",
-				"text": "#ffffff"
-			},
-			"spacing": {
-				"padding": {
-					"bottom": "0.7em",
-					"left": "1.4em",
-					"right": "1.4em",
-					"top": "0.7em"
-				}
-			}
-		}
+      }
     }
   }
 }
