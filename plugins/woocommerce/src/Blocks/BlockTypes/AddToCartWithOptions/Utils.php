@@ -90,13 +90,25 @@ class Utils {
 	 */
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array() ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+		global $product;
+
 		if (
 			$processor->next_tag( 'input' ) &&
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options-quantity-selector::actions.handleQuantityBlur' );
+			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
+			$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
 
+			wp_interactivity_state(
+				'woocommerce/add-to-cart-with-options-quantity-selector',
+				array(
+					'inputQuantity' => $input_quantity,
+				)
+			);
+
+			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options-quantity-selector::actions.handleQuantityBlur' );
+			$processor->set_attribute( 'data-wp-bind--value', 'woocommerce/add-to-cart-with-options-quantity-selector::state.inputQuantity' );
 			foreach ( $input_attributes as $attribute => $value ) {
 				$processor->set_attribute( $attribute, $value );
 			}
@@ -110,8 +122,6 @@ class Utils {
 			),
 			$wrapper_attributes
 		);
-
-		global $product;
 
 		$context_attribute = wp_interactivity_data_wp_context(
 			wp_parse_args(
