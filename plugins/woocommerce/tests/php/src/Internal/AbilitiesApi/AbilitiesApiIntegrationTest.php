@@ -54,8 +54,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @return bool True if Abilities API is in core, false if using vendor package.
 	 */
 	private function are_abilities_in_wp_core(): bool {
-		return version_compare( get_bloginfo( 'version' ), '6.9', '>=' ) &&
-			class_exists( 'WP_Ability_Categories_Registry' );
+		return class_exists( 'WP_Ability_Categories_Registry' );
 	}
 
 	/**
