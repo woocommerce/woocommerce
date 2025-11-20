@@ -468,10 +468,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test refund creation with automatic tax extraction (multiple non-compound rates).
 	 */
 	public function test_refunds_create_with_automatic_tax_extraction(): void {
-		// Enable tax calculations.
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-
 		// Create two non-compound tax rates to test proportional splitting.
 		$tax_rate_id_1 = WC_Tax::_insert_tax_rate(
 			array(
@@ -610,10 +606,6 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test refund creation with automatic tax extraction using compound taxes.
 	 */
 	public function test_refunds_create_with_compound_tax_extraction(): void {
-		// Enable tax calculations.
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
-
 		// Create a regular tax rate (10%).
 		$tax_rate_id_1 = WC_Tax::_insert_tax_rate(
 			array(
@@ -752,6 +744,234 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
+
+		// Clean up product.
+		$product->delete( true );
+	}
+
+	/**
+	 * Test refund creation with explicit tax array (legacy format).
+	 */
+	public function test_refunds_create_with_explicit_tax_array(): void {
+		// Create two tax rates.
+		$tax_rate_id_1 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '23.0000',
+				'tax_rate_name'     => 'Tax 1',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$tax_rate_id_2 = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '5.0000',
+				'tax_rate_name'     => 'Tax 2',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '2',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create order with product and taxes.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+		// Tax 1 (23%): 11.50, Tax 2 (5%): 2.50, Total: 64.00.
+		$item->set_taxes(
+			array(
+				'total'    => array(
+					$tax_rate_id_1 => 11.50,
+					$tax_rate_id_2 => 2.50,
+				),
+				'subtotal' => array(
+					$tax_rate_id_1 => 11.50,
+					$tax_rate_id_2 => 2.50,
+				),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item_1 = new WC_Order_Item_Tax();
+		$tax_item_1->set_rate( $tax_rate_id_1 );
+		$tax_item_1->set_tax_total( 11.50 );
+		$tax_item_1->save();
+		$order->add_item( $tax_item_1 );
+
+		$tax_item_2 = new WC_Order_Item_Tax();
+		$tax_item_2->set_rate( $tax_rate_id_2 );
+		$tax_item_2->set_tax_total( 2.50 );
+		$tax_item_2->save();
+		$order->add_item( $tax_item_2 );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 64.00 );
+		$order->save();
+
+		$this->created_orders[] = $order->get_id();
+
+		// Create partial refund with explicit refund_tax array (legacy backward compatibility).
+		// Refunding 30.00 out of 50.00 subtotal.
+		$refund_data = array(
+			'order_id'   => $order->get_id(),
+			'amount'     => 37.40,
+			'reason'     => 'Testing explicit tax array (legacy format)',
+			'line_items' => array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 30.00, // Excluding tax.
+					'refund_tax'   => array(
+						array(
+							'id'           => $tax_rate_id_1,
+							'refund_total' => 6.90, // 23% of 30.00.
+						),
+						array(
+							'id'           => $tax_rate_id_2,
+							'refund_total' => 1.50, // 5% of 30.00.
+						),
+					),
+				),
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params( $refund_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status(), 'Refund should be created successfully with explicit tax' );
+		$response_data = $response->get_data();
+
+		$this->assertIsArray( $response_data );
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
+
+		// Total refund amount should include the explicit taxes.
+		$this->assertEquals( '37.40', $response_data['amount'], 'Refund amount should include explicit taxes' );
+
+		// Verify explicit taxes were recorded on the refund line item.
+		$refund           = wc_get_order( $response_data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+
+		// Line item total should exclude tax.
+		$this->assertEquals( -30.00, $refund_line_item->get_total(), 'Line item total should be -30.00 (excluding tax)' );
+
+		// Line item taxes should contain the explicit tax values.
+		$refund_taxes = $refund_line_item->get_taxes();
+		$this->assertEquals( -6.90, (float) $refund_taxes['total'][ $tax_rate_id_1 ], 'Explicit tax 1 should be -6.90' );
+		$this->assertEquals( -1.50, (float) $refund_taxes['total'][ $tax_rate_id_2 ], 'Explicit tax 2 should be -1.50' );
+
+		// Track for cleanup.
+		$this->created_refunds[] = $response_data['id'];
+
+		// Clean up product.
+		$product->delete( true );
+	}
+
+	/**
+	 * Test refund creation fails when refund_total exceeds line item total.
+	 */
+	public function test_refunds_create_validation_error_exceeds_total(): void {
+		// Create a tax rate.
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create order with product and taxes.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 100.00,
+				'total'    => 100.00,
+			)
+		);
+		$item->set_taxes(
+			array(
+				'total'    => array( $tax_rate_id => 10.00 ),
+				'subtotal' => array( $tax_rate_id => 10.00 ),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 10.00 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		$order->set_billing_country( 'US' );
+		$order->set_total( 110.00 );
+		$order->save();
+
+		$this->created_orders[] = $order->get_id();
+
+		// Try to create refund with refund_total exceeding line item total (should fail).
+		$refund_data = array(
+			'order_id'   => $order->get_id(),
+			'amount'     => 500.00,
+			'reason'     => 'Should fail - exceeding total',
+			'line_items' => array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 500.00, // Exceeds 110.00 (item total with tax).
+				),
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params( $refund_data );
+		$response = $this->server->dispatch( $request );
+
+		// Should return 400 Bad Request.
+		$this->assertEquals( 400, $response->get_status(), 'Refund should fail with 400 status' );
+
+		$response_data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $response_data );
+		$this->assertEquals( 'invalid_refund_amount', $response_data['code'] );
+		$this->assertStringContainsString( 'cannot be greater than the line item total including tax', $response_data['message'] );
 
 		// Clean up product.
 		$product->delete( true );
