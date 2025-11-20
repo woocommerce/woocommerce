@@ -54,13 +54,14 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @return bool True if Abilities API is in core, false if using vendor package.
 	 */
 	private function are_abilities_in_wp_core(): bool {
-		return class_exists( 'WP_Ability_Categories_Registry' );
+		return version_compare( get_bloginfo( 'version' ), '6.9', '>=' ) &&
+			class_exists( 'WP_Ability_Categories_Registry' );
 	}
 
 	/**
 	 * Set up before each test
 	 */
-	public function set_up() {
+	public function setUp(): void {
 		global $wp_actions;
 
 		$this->abilities_init_action            = 'wp_abilities_api_init';
@@ -75,6 +76,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
 			if ( file_exists( $bootstrap_file ) ) {
 				require $bootstrap_file;
+				\WP_REST_Abilities_Init::register_routes( $this->server );
 			}
 		}
 
@@ -83,14 +85,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$this->original_init_action_count = $wp_actions['init'] ?? null;
 		$wp_actions['init']               = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		parent::set_up();
-
-		// Ensure REST API routes are registered.
-		// WordPress 6.9+ core registers routes automatically, but vendor package needs manual registration
-		// since parent::set_up() fires rest_api_init before bootstrap is loaded.
-		if ( ! $this->are_abilities_in_wp_core() && class_exists( '\WP_REST_Abilities_Init' ) ) {
-			\WP_REST_Abilities_Init::register_routes( $this->server );
-		}
+		parent::setUp();
 	}
 
 	/**
