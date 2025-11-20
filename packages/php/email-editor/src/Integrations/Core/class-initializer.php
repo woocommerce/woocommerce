@@ -150,14 +150,6 @@ class Initializer {
 			$settings['render_email_callback'] = array( $this, 'render_block' );
 		}
 
-		// Special handling for core/post-content to use stateless renderer.
-		// This prevents issues with WordPress's static $seen_ids array when rendering
-		// multiple emails in a single request (e.g., MailPoet batch processing).
-		if ( 'core/post-content' === $settings['name'] ) {
-			$post_content_renderer       = new Post_Content();
-			$settings['render_callback'] = array( $post_content_renderer, 'render_stateless' );
-		}
-
 		return $settings;
 	}
 
