@@ -466,7 +466,7 @@ trait RestApiCache {
 		/**
 		 * Filter the data used to generate the hooks hash for REST API response caching.
 		 *
-		 * @since 10.4.0
+		 * @since 10.5.0
 		 *
 		 * @param array  $cache_hash_data Hook callbacks data used for hash generation.
 		 * @param array  $hook_names      Hook names being tracked.
