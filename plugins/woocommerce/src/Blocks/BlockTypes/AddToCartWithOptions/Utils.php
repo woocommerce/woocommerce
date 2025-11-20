@@ -97,11 +97,8 @@ class Utils {
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-
 			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
-			// A child product ID indicates a grouped product, which should start at 0; otherwise fall back
-			// to the product min (or 1 if no product).
-			$input_quantity = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
+			$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
 
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options-quantity-selector',
