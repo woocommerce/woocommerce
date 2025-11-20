@@ -426,8 +426,8 @@ class PageController {
 					$screen->original_id = $screen->id;
 					$screen->original_base = $screen->base;
 					// Change the screen ID and base to what plugins expect.
-					$screen->id = $hook_mappings[ $screen->id ];
-					$screen->base = $hook_mappings[ $screen->id ];
+					$screen->id = $hook_mappings[ $screen->original_id ];
+					$screen->base = $hook_mappings[ $screen->original_id ];
 				}
 			},
 			1
