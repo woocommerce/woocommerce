@@ -584,7 +584,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 *
 		 * IMPORTANT: see also the documentation for the 'woocommerce_variation_prices_price' filter.
 		 *
-		 * @since 10.4.0
+		 * @since 10.5.0
 		 *
 		 * @param bool       $use_legacy  True to use the legacy algorithm (default), false to use CallbackUtil
 		 * @param WC_Product $product     The product object.
