@@ -165,4 +165,45 @@ class WCTransactionalEmailPostsManager {
 	public function get_email_type_class_name_from_template_name( $email_template_name ) {
 		return 'WC_Email_' . implode( '_', array_map( 'ucfirst', explode( '_', $email_template_name ) ) );
 	}
+
+	/**
+	 * Gets the email type class name, e.g. 'WC_Email_Customer_New_Account' from the email ID (e.g. 'customer_new_account' from the WC_Email->id property).
+	 *
+	 * @param string $email_id The email ID.
+	 * @return string|null The email type class name.
+	 */
+	public function get_email_type_class_name_from_email_id( $email_id ) {
+		// Early return if email_id is invalid.
+		if ( empty( $email_id ) ) {
+			return null;
+		}
+
+		/**
+		 * Get all the emails registered in WooCommerce.
+		 *
+		 * @var \WC_Email[]
+		 */
+		$emails = WC()->mailer()->get_emails();
+		foreach ( $emails as $email ) {
+			if ( $email->id === $email_id ) {
+				return get_class( $email );
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Gets the email type class name, e.g. 'WC_Email_Customer_New_Account' from the post ID.
+	 *
+	 * @param int $post_id The post ID.
+	 * @return string|null The email type class name.
+	 */
+	public function get_email_type_class_name_from_post_id( $post_id ) {
+		// Early return if post_id is invalid.
+		if ( empty( $post_id ) ) {
+			return null;
+		}
+
+		return $this->get_email_type_class_name_from_email_id( $this->get_email_type_from_post_id( $post_id ) );
+	}
 }
