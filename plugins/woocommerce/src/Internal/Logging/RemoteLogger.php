@@ -533,24 +533,8 @@ class RemoteLogger extends \WC_Log_Handler {
 			);
 		}
 
-		// Check for theme in default theme directory. This may be expanded to additional root directories.
-		if ( defined( 'WP_CONTENT_DIR' ) && str_starts_with( $file_path, WP_CONTENT_DIR . '/themes/' ) ) {
-			$themes_directory_length = strlen( WP_CONTENT_DIR . '/themes/' );
-			$next_slash_index = strpos( $file_path, '/', $themes_directory_length );
-			if ( false === $next_slash_index ) {
-				return null;
-			}
-			$theme_slug = substr( $file_path, $themes_directory_length, $next_slash_index - $themes_directory_length );
-
-			return array(
-				'type'    => 'theme',
-				'slug'    => $theme_slug,
-				'version' => null,
-			);
-		}
-
-		if ( defined( 'WPMU_PLUGIN_DIR' ) && str_starts_with( $file_path, WPMU_PLUGIN_DIR ) ) {
-			$mu_plugins_directory_length = strlen( WPMU_PLUGIN_DIR );
+		if ( defined( 'WPMU_PLUGIN_DIR' ) && str_starts_with( $file_path, \WPMU_PLUGIN_DIR . '/' ) ) {
+			$mu_plugins_directory_length = strlen( \WPMU_PLUGIN_DIR . '/' );
 			$next_slash_index = strpos( $file_path, '/', $mu_plugins_directory_length );
 			if ( false === $next_slash_index ) {
 				$mu_plugin_slug = str_ends_with( $file_path, '.php' ) ? substr( $file_path, $mu_plugins_directory_length, -4 ) : substr( $file_path, $mu_plugins_directory_length );
@@ -565,6 +549,34 @@ class RemoteLogger extends \WC_Log_Handler {
 				'slug'    => $mu_plugin_slug,
 				'version' => null,
 			);
+		}
+
+		global $wp_theme_directories;
+
+		$theme_directories = array();
+
+		if ( isset( $wp_theme_directories ) && is_array( $wp_theme_directories ) && ! empty( $wp_theme_directories ) ) {
+			$theme_directories = array_values( $wp_theme_directories );
+		} elseif ( defined( 'WP_CONTENT_DIR' ) ) {
+			$theme_directories = array( \WP_CONTENT_DIR . '/themes' );
+		}
+
+		foreach ( $theme_directories as $theme_directory ) {
+			$full_theme_directory = $theme_directory . '/';
+			if ( str_starts_with( $file_path, $full_theme_directory ) ) {
+				$full_theme_directory_length = strlen( $full_theme_directory );
+				$next_slash_index = strpos( $file_path, '/', $full_theme_directory_length );
+				if ( false === $next_slash_index ) {
+					return null;
+				}
+
+				$theme_slug = substr( $file_path, $full_theme_directory_length, $next_slash_index - $full_theme_directory_length );
+				return array(
+					'type'    => 'theme',
+					'slug'    => $theme_slug,
+					'version' => null,
+				);
+			}
 		}
 
 		return null;
