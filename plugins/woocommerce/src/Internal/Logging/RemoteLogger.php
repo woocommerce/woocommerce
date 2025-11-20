@@ -482,7 +482,16 @@ class RemoteLogger extends \WC_Log_Handler {
 	 * }
 	 */
 	private function get_plugin_or_theme_details_from_file_path( string $file_path ): ?array {
-		// Check for plugin first.
+		// Check for core WooCommerce plugin first.
+		if ( defined( 'WC_ABSPATH' ) && str_starts_with( $file_path, WC_ABSPATH ) ) {
+			return array(
+				'type'    => 'plugin',
+				'slug'    => 'woocommerce',
+				'version' => null,
+			);
+		}
+
+		// Then check for other plugins.
 		if ( defined( 'WP_PLUGIN_DIR' ) && str_starts_with( $file_path, WP_PLUGIN_DIR ) ) {
 			$plugins_directory_length = strlen( WP_PLUGIN_DIR );
 			$next_slash_index         = strpos( $file_path, '/', $plugins_directory_length );
