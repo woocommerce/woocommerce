@@ -127,7 +127,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_user_id );
 
 		// Add a test provider using the filter.
-		$test_provider = function ( $providers ) {
+		$test_provider = function () {
 			return array( 'TestProvider' );
 		};
 		add_filter( 'woocommerce_fulfillment_shipping_providers', $test_provider );

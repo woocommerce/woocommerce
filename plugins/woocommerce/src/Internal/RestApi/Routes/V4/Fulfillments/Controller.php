@@ -772,9 +772,9 @@ class Controller extends AbstractController {
 	 */
 	private function get_schema_for_providers(): array {
 		return array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => __( 'Shipping providers', 'woocommerce' ),
-			'type'    => 'object',
+			'$schema'              => 'http://json-schema.org/draft-04/schema#',
+			'title'                => __( 'Shipping providers', 'woocommerce' ),
+			'type'                 => 'object',
 			'additionalProperties' => array(
 				'type'       => 'object',
 				'properties' => array(
