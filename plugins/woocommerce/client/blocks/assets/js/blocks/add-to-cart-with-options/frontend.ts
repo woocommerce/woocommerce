@@ -47,7 +47,7 @@ export type AddToCartError = {
  *
  * @param inputElement - The quantity input element to dispatch the event on.
  */
-export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
+const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	const event = new Event( 'change', { bubbles: true } );
 	inputElement.dispatchEvent( event );
 };
