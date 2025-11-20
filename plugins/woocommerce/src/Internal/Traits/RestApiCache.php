@@ -524,7 +524,7 @@ trait RestApiCache {
 		/**
 		 * Filter the list of response header names to cache.
 		 *
-		 * @since 10.4.0
+		 * @since 10.5.0
 		 *
 		 * @param array            $cached_header_names Candidate list of header names to cache.
 		 * @param array            $all_header_names    All header names available in the response.
