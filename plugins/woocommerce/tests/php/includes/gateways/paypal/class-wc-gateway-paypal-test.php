@@ -245,7 +245,13 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_available_with_orders_v2_and_no_email() {
 		// Enable the gateway with empty email.
-		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'yes', 'email' => '' ) );
+		update_option(
+			'woocommerce_paypal_settings',
+			array(
+				'enabled' => 'yes',
+				'email' => ''
+			)
+		);
 
 		// Mock Orders v2 to be enabled.
 		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
