@@ -249,7 +249,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 			'woocommerce_paypal_settings',
 			array(
 				'enabled' => 'yes',
-				'email' => ''
+				'email'   => '',
 			)
 		);
 
