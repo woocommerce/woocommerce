@@ -186,25 +186,62 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 		 * @testdox get_formatted_log method returns expected array structure
 		 * @dataProvider get_formatted_log_provider
 		 *
-		 * @param string $level    The log level.
-		 * @param string $message  The log message.
-		 * @param array  $context  The log context.
-		 * @param array  $expected The expected formatted log array.
+		 * @param string     $level                     The log level.
+		 * @param string     $message                   The log message.
+		 * @param array      $context                   The log context.
+		 * @param array      $expected                  The expected formatted log array.
+		 * @param array|null $mock_cached_plugin_data   Mock data to store in the plugins cache mock. Only set if not null.
+		 * @param array|null $mock_wp_theme_directories Mock data to store in the {@see $wp_theme_directories} global. Only set if not null.
 		 */
-		public function test_get_formatted_log( $level, $message, $context, $expected ) {
+		public function test_get_formatted_log( $level, $message, $context, $expected, ?array $mock_cached_plugin_data = null, ?array $mock_wp_theme_directories = null ) {
+			global $wp_theme_directories;
+
+			$initial_cached_plugin_data = false;
+			if ( null !== $mock_cached_plugin_data ) {
+				$initial_cached_plugin_data = \wp_cache_get( 'plugins', 'plugins' );
+				\wp_cache_set( 'plugins', $mock_cached_plugin_data, 'plugins' );
+			}
+
+			$initial_wp_theme_directories = null;
+			if ( null !== $mock_wp_theme_directories ) {
+				$initial_wp_theme_directories = isset( $wp_theme_directories ) ? $wp_theme_directories : null;
+				$wp_theme_directories = $mock_wp_theme_directories;
+			}
+
 			$formatted_log = $this->sut->get_formatted_log( $level, $message, $context );
+
+			// Restore the initial data before any assertions.
+			if ( false !== $initial_cached_plugin_data ) {
+				\wp_cache_set( 'plugins', $initial_cached_plugin_data, 'plugins' );
+			}
+			if ( null !== $initial_wp_theme_directories ) {
+				$wp_theme_directories = $initial_wp_theme_directories;
+			}
+
 			foreach ( $expected as $key => $value ) {
 				$this->assertArrayHasKey( $key, $formatted_log );
-				$this->assertEquals( $value, $formatted_log[ $key ] );
+				if ( is_array( $value ) ) {
+					foreach ( $value as $sub_key => $sub_value ) {
+						$this->assertArrayHasKey( $sub_key, $formatted_log[ $key ] );
+						$this->assertEquals( $sub_value, $formatted_log[ $key ][ $sub_key ] );
+					}
+				} else {
+					$this->assertEquals( $value, $formatted_log[ $key ] );
+				}
 			}
 		}
 
 		/**
-		 * Data provider for test_get_formatted_log.
+		 * Data provider for {@see test_get_formatted_log()}.
 		 *
 		 * @return array[] Test cases with log data and expected formatted output.
 		 */
 		public function get_formatted_log_provider() {
+			$wc_version  = WC_VERSION;
+			$php_version = phpversion();
+			$wp_version  = \get_bloginfo( 'version' );
+			$store_id    = \get_option( \WC_Install::STORE_ID_OPTION, null );
+
 			return array(
 				'basic log data'            => array(
 					'error',
@@ -239,13 +276,154 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 						),
 					),
 				),
-				'log with error file'       => array(
+				'log with WooCommerce error file'       => array(
 					'error',
 					'Test error message',
 					array( 'error' => array( 'file' => WC_ABSPATH . 'includes/class-wc-test.php' ) ),
 					array(
 						'file' => './woocommerce/includes/class-wc-test.php',
+						'properties' => array(
+							'type'        => 'plugin',
+							'slug'        => 'woocommerce',
+							'version'     => $wc_version,
+							'wc_version'  => $wc_version,
+							'php_version' => $php_version,
+							'wp_version'  => $wp_version,
+							'store_id'    => $store_id,
+						),
 					),
+				),
+				'log with single file plugin error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => WP_PLUGIN_DIR . '/test-plugin.php' ) ),
+					array(
+						'file' => './test-plugin.php',
+						'properties' => array(
+							'type'        => 'plugin',
+							'slug'        => 'test-plugin',
+							'version'     => '9.8.7-test',
+							'wc_version'  => $wc_version,
+							'php_version' => $php_version,
+							'wp_version'  => $wp_version,
+							'store_id'    => $store_id,
+						),
+					),
+					array(
+						'' => array(
+							'test-plugin.php' => array(
+								'Version' => '9.8.7-test',
+							),
+						),
+					),
+				),
+				'log with directory-based plugin error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => WP_PLUGIN_DIR . '/test-plugin/src/test-plugin-file.php' ) ),
+					array(
+						'file' => './test-plugin/src/test-plugin-file.php',
+						'properties' => array(
+							'type'        => 'plugin',
+							'slug'        => 'test-plugin',
+							'version'     => '7.8.9-dev',
+							'wc_version'  => $wc_version,
+							'php_version' => $php_version,
+							'wp_version'  => $wp_version,
+							'store_id'    => $store_id,
+						),
+					),
+					array(
+						'' => array(
+							'test-plugin/test-plugin.php' => array(
+								'Version' => '7.8.9-dev',
+							),
+						),
+					)
+				),
+				'log with single file mu-plugin error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => WPMU_PLUGIN_DIR . '/test-mu-plugin.php' ) ),
+					array(
+						'file' => './wp-content/mu-plugins/test-mu-plugin.php',
+						'properties' => array(
+							'type'        => 'mu-plugin',
+							'slug'        => 'test-mu-plugin',
+							'wc_version'  => $wc_version,
+							'php_version' => $php_version,
+							'wp_version'  => $wp_version,
+							'store_id'    => $store_id,
+						),
+					),
+				),
+				'log with directory-based mu-plugin error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => WPMU_PLUGIN_DIR . '/test-mu-plugin/src/test-file.php' ) ),
+					array(
+						'file' => './wp-content/mu-plugins/test-mu-plugin/src/test-file.php',
+						'properties' => array(
+							'type'        => 'mu-plugin',
+							'slug'        => 'test-mu-plugin',
+							'wc_version'  => $wc_version,
+							'php_version' => $php_version,
+							'wp_version'  => $wp_version,
+							'store_id'    => $store_id,
+						),
+					),
+				),
+				'log with standard theme error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => WP_CONTENT_DIR . '/themes/twentytwentyfive/functions.php' ) ),
+					array(
+						'file' => './wp-content/themes/twentytwentyfive/functions.php',
+						'properties' => array(
+							'type'        => 'theme',
+							'slug'        => 'twentytwentyfive',
+							'wc_version'  => $wc_version,
+							'php_version' => $php_version,
+							'wp_version'  => $wp_version,
+							'store_id'    => $store_id,
+						),
+					),
+				),
+				'log with single directory non-standard theme error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => ABSPATH . 'custom-themes/test-custom-theme/functions.php' ) ),
+					array(
+						'file' => './custom-themes/test-custom-theme/functions.php',
+						'properties' => array(
+							'type'        => 'theme',
+							'slug'        => 'test-custom-theme',
+							'wc_version'  => $wc_version,
+							'php_version' => $php_version,
+							'wp_version'  => $wp_version,
+							'store_id'    => $store_id,
+						),
+					),
+					null,
+					array( ABSPATH . 'custom-themes' ),
+				),
+				'log with multi-directory non-standard theme error file'       => array(
+					'error',
+					'Test error message',
+					array( 'error' => array( 'file' => ABSPATH . 'custom-themes/test-custom-theme/functions.php' ) ),
+					array(
+						'file' => './custom-themes/test-custom-theme/functions.php',
+						'properties' => array(
+							'type'        => 'theme',
+							'slug'        => 'test-custom-theme',
+							'wc_version'  => $wc_version,
+							'php_version' => $php_version,
+							'wp_version'  => $wp_version,
+							'store_id'    => $store_id,
+						),
+					),
+					null,
+					array( ABSPATH . 'wp-core-themes', ABSPATH . 'custom-themes' ),
 				),
 			);
 		}
