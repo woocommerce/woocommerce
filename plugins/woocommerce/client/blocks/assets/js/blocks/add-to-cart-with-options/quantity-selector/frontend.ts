@@ -14,6 +14,7 @@ import type { AddToCartWithOptionsStore } from '../frontend';
 export type Context = {
 	productId: number;
 	allowZero?: boolean;
+	inputElement?: HTMLInputElement | null;
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -46,6 +47,9 @@ export type QuantitySelectorStore = {
 		handleQuantityCheckboxChange: (
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
+	};
+	callbacks: {
+		storeInputElementRef: () => void;
 	};
 };
 
@@ -257,6 +261,17 @@ store< QuantitySelectorStore >(
 					productId,
 					element.ref.checked ? 1 : 0
 				);
+			},
+		},
+		callbacks: {
+			storeInputElementRef: () => {
+				const { ref } = getElement();
+				if ( ref ) {
+					const context = getContext< Context >();
+					const inputElement =
+						ref.querySelector< HTMLInputElement >( '.qty' );
+					context.inputElement = inputElement;
+				}
 			},
 		},
 	},
