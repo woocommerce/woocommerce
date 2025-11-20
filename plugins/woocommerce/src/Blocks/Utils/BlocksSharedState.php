@@ -7,10 +7,6 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 use InvalidArgumentException;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
-use Automattic\WooCommerce\StoreApi\StoreApi;
-use Automattic\WooCommerce\StoreApi\SchemaController;
-use Automattic\WooCommerce\StoreApi\Utilities\CartController;
-use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.

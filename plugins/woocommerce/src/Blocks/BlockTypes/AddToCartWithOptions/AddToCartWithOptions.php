@@ -6,8 +6,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 class AddToCartWithOptions extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
+	use ProductsStore;
 
 	/**
 	 * Block name.
@@ -144,6 +145,8 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			return '';
 		}
+
+		$this->load_product( $product_id );
 
 		// For variations, we display the simple product form.
 		$product_type = ProductType::VARIATION === $product->get_type() ? ProductType::SIMPLE : $product->get_type();

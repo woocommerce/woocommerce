@@ -172,6 +172,10 @@ export type AddToCartWithOptionsStore = {
 	};
 };
 
+const { state: productState } = store( 'woocommerce/products' );
+
+console.log( productState );
+
 const { actions, state } = store<
 	AddToCartWithOptionsStore &
 		Partial< GroupedProductAddToCartWithOptionsStore > &
