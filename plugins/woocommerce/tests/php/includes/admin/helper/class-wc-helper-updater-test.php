@@ -67,6 +67,21 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Helper method to call private should_use_cached_update_data method via reflection.
+	 *
+	 * @param mixed  $data The cached data to validate.
+	 * @param string $hash The expected hash.
+	 * @return bool The result from should_use_cached_update_data.
+	 */
+	private function call_should_use_cached_update_data( $data, $hash ) {
+		$reflection = new ReflectionClass( 'WC_Helper_Updater' );
+		$method     = $reflection->getMethod( 'should_use_cached_update_data' );
+		$method->setAccessible( true );
+
+		return $method->invoke( null, $data, $hash );
+	}
+
+	/**
 	 * Test that _update_check handles malformed transient data (i.e. string instead of array).
 	 */
 	public function test_update_check_handles_malformed_string_transient() {
@@ -290,6 +305,133 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 		// Verify count transient is cleared.
 		$this->assertFalse( get_transient( '_woocommerce_helper_updates_count' ), 'Count transient should be cleared after upgrade' );
+	}
+
+	/**
+	 * Test should_use_cached_update_data returns false when data is not an array.
+	 */
+	public function test_should_use_cached_update_data_rejects_non_array() {
+		$hash = 'test_hash';
+
+		$this->assertFalse( $this->call_should_use_cached_update_data( 'string', $hash ), 'Should reject string data' );
+		$this->assertFalse( $this->call_should_use_cached_update_data( 123, $hash ), 'Should reject numeric data' );
+		$this->assertFalse( $this->call_should_use_cached_update_data( null, $hash ), 'Should reject null data' );
+		$this->assertFalse( $this->call_should_use_cached_update_data( false, $hash ), 'Should reject false data' );
+		$this->assertFalse( $this->call_should_use_cached_update_data( true, $hash ), 'Should reject boolean data' );
+	}
+
+	/**
+	 * Test should_use_cached_update_data returns false when required keys are missing.
+	 */
+	public function test_should_use_cached_update_data_rejects_missing_keys() {
+		$hash = 'test_hash';
+
+		// Missing both keys.
+		$this->assertFalse( $this->call_should_use_cached_update_data( array(), $hash ), 'Should reject empty array' );
+
+		// Missing 'hash' key.
+		$data = array( 'products' => array() );
+		$this->assertFalse( $this->call_should_use_cached_update_data( $data, $hash ), 'Should reject data without hash key' );
+
+		// Missing 'products' key.
+		$data = array( 'hash' => $hash );
+		$this->assertFalse( $this->call_should_use_cached_update_data( $data, $hash ), 'Should reject data without products key' );
+	}
+
+	/**
+	 * Test should_use_cached_update_data returns false when hash is not a string.
+	 */
+	public function test_should_use_cached_update_data_rejects_non_string_hash() {
+		$data = array(
+			'hash'     => 123, // Not a string.
+			'products' => array(),
+		);
+
+		$this->assertFalse( $this->call_should_use_cached_update_data( $data, 'test_hash' ), 'Should reject numeric hash' );
+
+		$data['hash'] = null;
+		$this->assertFalse( $this->call_should_use_cached_update_data( $data, 'test_hash' ), 'Should reject null hash' );
+
+		$data['hash'] = array( 'hash' );
+		$this->assertFalse( $this->call_should_use_cached_update_data( $data, 'test_hash' ), 'Should reject array hash' );
+	}
+
+	/**
+	 * Test should_use_cached_update_data returns false when products is not an array.
+	 */
+	public function test_should_use_cached_update_data_rejects_non_array_products() {
+		$hash = 'test_hash';
+
+		$data = array(
+			'hash'     => $hash,
+			'products' => 'string', // Not an array.
+		);
+		$this->assertFalse( $this->call_should_use_cached_update_data( $data, $hash ), 'Should reject string products' );
+
+		$data['products'] = 123;
+		$this->assertFalse( $this->call_should_use_cached_update_data( $data, $hash ), 'Should reject numeric products' );
+
+		$data['products'] = null;
+		$this->assertFalse( $this->call_should_use_cached_update_data( $data, $hash ), 'Should reject null products' );
+	}
+
+	/**
+	 * Test should_use_cached_update_data returns false when hash doesn't match.
+	 */
+	public function test_should_use_cached_update_data_rejects_mismatched_hash() {
+		$data = array(
+			'hash'     => 'cached_hash',
+			'products' => array(
+				123 => array( 'version' => '1.0.0' ),
+			),
+		);
+
+		$this->assertFalse(
+			$this->call_should_use_cached_update_data( $data, 'different_hash' ),
+			'Should reject data with mismatched hash'
+		);
+	}
+
+	/**
+	 * Test should_use_cached_update_data returns true when all validation passes.
+	 */
+	public function test_should_use_cached_update_data_accepts_valid_data() {
+		$hash = 'matching_hash';
+		$data = array(
+			'hash'     => $hash,
+			'products' => array(
+				123 => array(
+					'version' => '2.0.0',
+					'url'     => 'https://woocommerce.com/products/test',
+				),
+			),
+			'updated'  => time(),
+			'errors'   => array(),
+		);
+
+		$this->assertTrue(
+			$this->call_should_use_cached_update_data( $data, $hash ),
+			'Should accept valid data with matching hash'
+		);
+	}
+
+	/**
+	 * Test should_use_cached_update_data accepts valid data even with extra keys.
+	 */
+	public function test_should_use_cached_update_data_accepts_data_with_extra_keys() {
+		$hash = 'test_hash';
+		$data = array(
+			'hash'        => $hash,
+			'products'    => array(),
+			'updated'     => time(),
+			'errors'      => array(),
+			'extra_field' => 'extra_value', // Extra key should not cause rejection.
+		);
+
+		$this->assertTrue(
+			$this->call_should_use_cached_update_data( $data, $hash ),
+			'Should accept valid data with extra keys'
+		);
 	}
 
 	/**
