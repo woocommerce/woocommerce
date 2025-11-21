@@ -56,7 +56,7 @@ const scrollImageIntoView = ( imageId: number ) => {
 	);
 
 	if ( ! galleryContainer ) {
-		return;
+		return false;
 	}
 
 	// Find the scrollable container for the large image gallery
