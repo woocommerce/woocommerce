@@ -56,6 +56,10 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+const { state: productState } = store( 'woocommerce/products' );
+
+console.log( productState );
+
 const { state: wooState } = store< WooCommerce >(
 	'woocommerce',
 	{},
