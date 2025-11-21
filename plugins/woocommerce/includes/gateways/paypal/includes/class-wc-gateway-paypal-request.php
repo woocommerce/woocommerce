@@ -798,7 +798,7 @@ class WC_Gateway_Paypal_Request {
 		if ( strpos( $url, home_url() ) === 0 ) {
 			return $url;
 		}
-		
+
 		// Return the URL if it is already absolute (contains ://).
 		if ( strpos( $url, '://' ) !== false ) {
 			return $url;
