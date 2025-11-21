@@ -208,8 +208,8 @@ jobs:
             # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
             echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
             
-            # TEST MODE: Force failure on first attempt if branch contains "test-retry"
-            if [ "$ATTEMPT" -eq 1 ] && [[ "${{ github.head_ref }}" == *"test-retry"* || "${{ github.ref_name }}" == *"test-retry"* ]]; then
+            # TEST MODE: Force failure on first attempt if branch contains "ci-restart"
+            if [ "$ATTEMPT" -eq 1 ] && [[ "${{ github.head_ref }}" == *"ci-restart"* || "${{ github.ref_name }}" == *"ci-restart"* ]]; then
               echo "🧪 TEST MODE: Simulating failure on first attempt (exit code: 1)"
               COMMAND_RESULT=1
             else
