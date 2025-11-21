@@ -1,4 +1,4 @@
 Significance: patch
-Type: fix
+Type: tweak
 
-Fix tax-inclusive prices incorrectly adding customer taxes when no base tax rate is configured.
+Improve UX for tax-inclusive pricing configuration by adding validation notice and clearer setting description when base tax rate is not configured.
