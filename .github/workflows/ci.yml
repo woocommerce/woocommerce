@@ -208,13 +208,21 @@ jobs:
             # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
             echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
             
-            # Try to start the environment
-            if WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}; then
+            # TEST MODE: Force failure on first attempt if branch contains "test-retry"
+            if [ "$ATTEMPT" -eq 1 ] && [[ "${{ github.head_ref }}" == *"test-retry"* || "${{ github.ref_name }}" == *"test-retry"* ]]; then
+              echo "TEST MODE: Simulating failure on first attempt (exit code: 1)"
+              COMMAND_RESULT=1
+            else
+              # Try to start the environment
+              WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+              COMMAND_RESULT=$?
+            fi
+            
+            if [ $COMMAND_RESULT -eq 0 ]; then
               echo "Test environment started successfully on attempt $ATTEMPT"
               exit 0
             else
-              EXIT_CODE=$?
-              echo "Failed to start test environment on attempt $ATTEMPT (exit code: $EXIT_CODE)"
+              echo "Failed to start test environment on attempt $ATTEMPT (exit code: $COMMAND_RESULT)"
               
               if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
                 echo "Retrying in 5 seconds..."
@@ -222,7 +230,7 @@ jobs:
                 ATTEMPT=$((ATTEMPT + 1))
               else
                 echo "All attempts to start test environment failed"
-                exit $EXIT_CODE
+                exit $COMMAND_RESULT
               fi
             fi
           done
