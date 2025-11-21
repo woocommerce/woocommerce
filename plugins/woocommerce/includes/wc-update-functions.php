@@ -3125,3 +3125,15 @@ function wc_update_1030_add_comments_date_type_index() {
 		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
 	}
 }
+
+/**
+ * Clean up the old last_fetch_patterns_request option and non-grouped actions after migration to using the `action_scheduler_ensure_recurring_actions` hook.
+ *
+ * In version 10.4.0, this functionality was replaced with Action Scheduler recurring actions.
+ *
+ * @return void
+ */
+function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
+	delete_option( 'last_fetch_patterns_request' );
+	as_unschedule_all_actions( 'fetch_patterns' );
+}

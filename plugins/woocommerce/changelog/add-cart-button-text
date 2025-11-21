@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add support for conditional "Finish checkout" button text in cart collections for email rendering

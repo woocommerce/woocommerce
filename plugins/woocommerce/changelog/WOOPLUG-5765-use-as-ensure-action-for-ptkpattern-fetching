@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Use 'action_scheduler_ensure_recurring_actions' for scheduling PTK Pattern fetches.

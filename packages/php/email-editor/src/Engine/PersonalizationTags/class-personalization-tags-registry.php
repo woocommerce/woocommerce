@@ -82,6 +82,43 @@ class Personalization_Tags_Registry {
 	}
 
 	/**
+	 * Unregister a personalization tag by its token or tag instance.
+	 *
+	 * @param string|Personalization_Tag $token_or_tag The token string or Personalization_Tag instance to unregister.
+	 * @return Personalization_Tag|null The unregistered tag or null if not found.
+	 */
+	public function unregister( $token_or_tag ): ?Personalization_Tag {
+		// Extract token from the argument.
+		if ( $token_or_tag instanceof Personalization_Tag ) {
+			$token = $token_or_tag->get_token();
+		} elseif ( is_string( $token_or_tag ) ) {
+			$token = $token_or_tag;
+		} else {
+			$this->logger->warning(
+				'Invalid argument type for unregister method',
+				array(
+					'type' => gettype( $token_or_tag ),
+				)
+			);
+			return null;
+		}
+
+		$tag = $this->tags[ $token ] ?? null;
+		if ( $tag ) {
+			unset( $this->tags[ $token ] );
+			$this->logger->debug(
+				'Personalization tag unregistered',
+				array(
+					'token'    => $token,
+					'name'     => $tag->get_name(),
+					'category' => $tag->get_category(),
+				)
+			);
+		}
+		return $tag;
+	}
+
+	/**
 	 * Retrieve a personalization tag by its token.
 	 * Example: get_by_token( 'user:first_name' ) will return the instance of Personalization_Tag with identical token.
 	 *

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Prevent unnecessary queries in admin notices.

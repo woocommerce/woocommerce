@@ -118,7 +118,7 @@ test.describe( `${ blockData.name } editor`, () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the new Product Gallery block',
+				name: 'Use the Product Gallery block',
 			} )
 			.click();
 

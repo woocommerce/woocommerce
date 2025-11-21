@@ -40,7 +40,7 @@ export const UpgradeProductImageGallery = () => {
 	);
 
 	const buttonLabel = __(
-		'Upgrade to the blockified Product Gallery',
+		'Upgrade to the Product Gallery block',
 		'woocommerce'
 	);
 

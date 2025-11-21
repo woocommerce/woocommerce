@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+For HPOS sync-on-read, ensure metadata is fully read from the CPT datastore.

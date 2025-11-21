@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Add empty attributes to woocommerce/add-to-cart-with-options-variation-selector-attribute block to prevent an error when Gutenberg 22.0 is active
+
+

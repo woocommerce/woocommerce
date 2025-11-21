@@ -65,7 +65,7 @@ function useProducts(
 				  }
 				: {
 						// For a small catalog we fetch all the products.
-						per_page: 0,
+						per_page: 100,
 				  },
 		};
 		getProducts( query ).then( ( results ) => {

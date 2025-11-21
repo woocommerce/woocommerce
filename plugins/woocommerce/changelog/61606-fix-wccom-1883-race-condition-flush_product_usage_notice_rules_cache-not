@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Flush subscription usage cache when WooCommerce.com license is activated

@@ -69,6 +69,8 @@ export const BlockSettings = ( {
 			</PanelBody>
 			<PanelBody title={ __( 'Display settings', 'woocommerce' ) }>
 				<SelectControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
 					className="customer-account-display-style"
 					label={ __( 'Icon options', 'woocommerce' ) }
 					value={ displayStyle }
@@ -96,6 +98,8 @@ export const BlockSettings = ( {
 				/>
 				{ displayIconStyleSelector ? (
 					<ToggleGroupControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						label={ __( 'Display Style', 'woocommerce' ) }
 						isBlock
 						value={ iconStyle }
