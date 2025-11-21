@@ -1,0 +1,20 @@
+includes:
+	- phpstan-baseline.neon
+    
+parameters:
+	level: 9
+	phpVersion: 80400
+	paths:
+		- woocommerce.php
+		- src/
+		- includes/
+	excludePaths:
+		# Matches the prior test implementation; GeoIP relies on data files.
+		- includes/class-wc-geo-ip.php
+		- vendor/
+	bootstrapFiles:
+		- vendor/autoload.php
+	treatPhpDocTypesAsCertain: false
+	ignoreErrors:
+		- identifier: missingType.iterableValue
+

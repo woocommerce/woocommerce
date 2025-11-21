@@ -77,6 +77,20 @@ pnpm run --filter='@woocommerce/block-library' lint
 pnpm run --filter='@woocommerce/block-library' test
 ```
 
+## PHP Code Analysis
+
+WooCommerce uses [PHPStan](https://phpstan.org/) for static analysis of PHP code. PHPStan helps catch bugs and type errors before runtime.
+
+```bash
+# Run PHPStan analysis on the WooCommerce plugin.
+composer phpstan
+
+# Generate a baseline file to ignore existing errors (useful for initial setup).
+composer phpstan:baseline
+```
+
+PHPStan configuration is stored in `phpstan.neon` at the root of the plugin directory. The analysis runs at level 9 (the strictest level) and includes WordPress-specific stubs via the `szepeviktor/phpstan-wordpress` extension.
+
 ## Documentation
 
 - [WooCommerce Documentation](https://woocommerce.com/)
