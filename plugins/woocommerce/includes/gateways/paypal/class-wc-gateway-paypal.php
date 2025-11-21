@@ -347,7 +347,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function is_available() {
 		// For Orders v2, require a valid email address to be set up in the gateway settings.
-		if ( $this->should_use_orders_v2() && ! is_email( $this->email ) ) {
+		if ( $this->should_use_orders_v2() && ( empty( $this->email ) || ! is_email( $this->email ) ) ) {
 			return false;
 		}
 
