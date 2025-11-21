@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "10.4.0",
+	"version": "10.5.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
@@ -56,7 +56,7 @@
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*",
-		"wordpress/abilities-api": "^0.3.0",
+		"wordpress/abilities-api": "^0.4.0",
 		"wordpress/mcp-adapter": "^0.3.0"
 	},
 	"require-dev": {

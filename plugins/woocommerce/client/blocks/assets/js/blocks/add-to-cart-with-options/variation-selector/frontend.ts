@@ -15,7 +15,6 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
  * Internal dependencies
  */
 import { getProductData } from '../frontend';
-import { dispatchChangeEvent } from '../quantity-selector/frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
@@ -359,11 +358,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					) {
 						actions.setQuantity(
 							productDataState.productId,
-							newValue
+							newValue,
+							{ changeTarget: ref }
 						);
-
-						ref.value = newValue.toString();
-						dispatchChangeEvent( ref );
 					}
 				}
 			},
