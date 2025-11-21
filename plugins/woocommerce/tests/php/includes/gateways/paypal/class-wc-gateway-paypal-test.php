@@ -254,37 +254,37 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		);
 
 		if ( null !== $email ) {
-			 $new_settings['email'] = $email;
+			$new_settings['email'] = $email;
 		}
 
 		update_option( 'woocommerce_paypal_settings', $new_settings );
-		
+
 		// Mock Orders v2 to be enabled.
 		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
 			->onlyMethods( array( 'should_use_orders_v2' ) )
 			->getMock();
 		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
-		
+
 		$this->assertSame( $expected_available, $mock_gateway->is_available() );
 	}
 
 	/**
-	 * Data provider for payment gateway 	availability tests.
+	 * Data provider for payment gateway availability tests when Orders v2 is enabled.
 	 *
 	 * @return array Test cases with email values and expected paypal gateway availability.
 	 */
 	public function gateway_availability_data_provider_for_orders_v2() {
 		return array(
-			'email is empty string'   => array(
-				'email' => '',
+			'email is empty string' => array(
+				'email'              => '',
 				'expected_available' => false,
 			),
-			'email is invalid'        => array(
-				'email' => 'example@',
+			'email is invalid'      => array(
+				'email'              => 'example@',
 				'expected_available' => false,
 			),
-			'email is valid'          => array(
-				'email' => 'merchant@example.com',
+			'email is valid'        => array(
+				'email'              => 'merchant@example.com',
 				'expected_available' => true,
 			),
 		);
