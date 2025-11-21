@@ -143,6 +143,7 @@ class OrderSchema extends AbstractSchema {
 				'default'     => get_woocommerce_currency(),
 				'enum'        => array_keys( get_woocommerce_currencies() ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
 			),
 			'currency_symbol'      => array(
 				'description' => __( 'Currency symbol for the currency which can be used to format returned prices.', 'woocommerce' ),
