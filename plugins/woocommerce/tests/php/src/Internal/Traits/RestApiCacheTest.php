@@ -137,6 +137,48 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cache is invalidated when endpoint-level relevant hooks change.
+	 */
+	public function test_cache_invalidated_when_endpoint_hooks_change() {
+		$response1 = $this->query_endpoint( 'with_endpoint_hooks' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+
+		$response2 = $this->query_endpoint( 'with_endpoint_hooks' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		add_filter( 'test_endpoint_hook_for_caching', '__return_true' );
+		$this->fixed_time += 1;
+
+		$response3 = $this->query_endpoint( 'with_endpoint_hooks' );
+		$this->assertCacheHeader( $response3, 'MISS' );
+
+		remove_filter( 'test_endpoint_hook_for_caching', '__return_true' );
+	}
+
+	/**
+	 * @testdox Cache is invalidated when controller-level relevant hooks change.
+	 */
+	public function test_cache_invalidated_when_controller_hooks_change() {
+		$this->sut->controller_hooks = array( 'test_controller_hook_for_caching' );
+
+		$response1 = $this->query_endpoint( 'with_controller_hooks' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+
+		$response2 = $this->query_endpoint( 'with_controller_hooks' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		add_filter( 'test_controller_hook_for_caching', '__return_false' );
+		$this->fixed_time += 1;
+
+		$response3 = $this->query_endpoint( 'with_controller_hooks' );
+		$this->assertCacheHeader( $response3, 'MISS' );
+
+		remove_filter( 'test_controller_hook_for_caching', '__return_false' );
+	}
+
+	/**
 	 * @testdox Cache is invalidated when entity versions change.
 	 * @testWith [2, true]
 	 *           [3, true]
@@ -511,11 +553,11 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			use RestApiCache;
 
 			public $responses = array(
-				'single_entity'      => array(
+				'single_entity'         => array(
 					'id'   => 1,
 					'name' => 'Product 1',
 				),
-				'multiple_entities'  => array(
+				'multiple_entities'     => array(
 					array(
 						'id'   => 2,
 						'name' => 'Product 2',
@@ -525,21 +567,29 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 						'name' => 'Product 3',
 					),
 				),
-				'custom_entity_type' => array(
+				'custom_entity_type'    => array(
 					'id'   => 100,
 					'name' => 'Custom Thing 100',
 				),
-				'no_vary_by_user'    => array(
+				'no_vary_by_user'       => array(
 					'id'   => 50,
 					'name' => 'Shared Product',
 				),
-				'with_endpoint_id'   => array(
+				'with_endpoint_id'      => array(
 					'id'   => 60,
 					'name' => 'Product with Endpoint ID',
 				),
-				'custom_ttl'         => array(
+				'custom_ttl'            => array(
 					'id'   => 70,
 					'name' => 'Product with Custom TTL',
+				),
+				'with_endpoint_hooks'   => array(
+					'id'   => 80,
+					'name' => 'Product with Endpoint Hooks',
+				),
+				'with_controller_hooks' => array(
+					'id'   => 90,
+					'name' => 'Product with Controller Hooks',
 				),
 			);
 
@@ -547,6 +597,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			public $default_vary_by_user  = true;
 			public $endpoint_vary_by_user = array();
 			public $endpoint_ids          = array();
+			public $controller_hooks      = array();
 
 			public function __construct() {
 				$this->namespace = 'wc/v3';
@@ -564,6 +615,8 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->register_cached_route( 'with_endpoint_id', array( 'endpoint_id' => 'test_endpoint' ) );
 				$this->register_cached_route( 'custom_ttl', array( 'cache_ttl' => 10 ) );
 				$this->register_multi_method_route();
+				$this->register_cached_route( 'with_endpoint_hooks', array( 'relevant_hooks' => array( 'test_endpoint_hook_for_caching' ) ) );
+				$this->register_cached_route( 'with_controller_hooks' );
 			}
 
 			private function register_cached_route( string $endpoint, array $cache_args = array(), bool $non_array_request = false, bool $raw_response = false ) {
@@ -622,6 +675,10 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 					return $this->endpoint_vary_by_user[ $endpoint_id ];
 				}
 				return $this->default_vary_by_user;
+			}
+
+			protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array {
+				return $this->controller_hooks;
 			}
 
 			private function handle_request( string $endpoint, WP_REST_Request $request ) {
