@@ -676,6 +676,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			'X-Header-Three' => 'value-three',
 		);
 
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 		$filter_callback = function ( $cached_header_names, $all_header_names, $request, $response, $endpoint_id, $controller ) {
 			if ( in_array( 'X-Header-Two', $all_header_names, true ) ) {
 				$cached_header_names[] = 'X-Header-Two';
@@ -714,6 +715,64 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
 		$this->sut->custom_include_headers = false;
+	}
+
+	/**
+	 * @testdox The woocommerce_rest_api_cached_headers filter cannot re-introduce always-excluded headers.
+	 */
+	public function test_filter_cannot_reintroduce_always_excluded_headers() {
+		$this->sut->response_headers['standard'] = array(
+			'Set-Cookie'      => 'session=abc123',
+			'Cache-Control'   => 'no-cache',
+			'X-Custom-Header' => 'custom-value',
+		);
+
+		$filter_callback = fn( $cached_header_names, $all_header_names )  => $all_header_names;
+		add_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10, 6 );
+
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Internal\Traits\RestApiCache::get_headers_to_cache' );
+
+		$response1 = $this->query_endpoint( 'standard' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertArrayNotHasKey( 'Set-Cookie', $cached_entry['headers'], 'Set-Cookie should not be cached even when filter returns it' );
+		$this->assertArrayNotHasKey( 'Cache-Control', $cached_entry['headers'], 'Cache-Control should not be cached even when filter returns it' );
+		$this->assertArrayHasKey( 'X-Custom-Header', $cached_entry['headers'], 'Non-excluded headers should still be cached' );
+		$this->assertEquals( 'custom-value', $cached_entry['headers']['X-Custom-Header'] );
+
+		$response2 = $this->query_endpoint( 'standard' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		$headers = $response2->get_headers();
+		$this->assertArrayNotHasKey( 'Set-Cookie', $headers, 'Set-Cookie should not be in cached response' );
+		$this->assertArrayNotHasKey( 'Cache-Control', $headers, 'Cache-Control should not be in cached response' );
+		$this->assertArrayHasKey( 'X-Custom-Header', $headers );
+
+		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
+	}
+
+	/**
+	 * @testdox A doing_it_wrong notice is emitted when filter tries to re-introduce always-excluded headers.
+	 */
+	public function test_doing_it_wrong_notice_when_filter_reintroduces_excluded_headers() {
+		$this->sut->response_headers['standard'] = array(
+			'Set-Cookie'      => 'session=abc123',
+			'X-Custom-Header' => 'custom-value',
+		);
+
+		$filter_callback = fn( $cached_header_names, $all_header_names )  => $all_header_names;
+		add_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10, 6 );
+
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Internal\Traits\RestApiCache::get_headers_to_cache' );
+
+		$this->query_endpoint( 'standard' );
+
+		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
 	}
 
 	/**
