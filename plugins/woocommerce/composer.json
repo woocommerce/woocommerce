@@ -65,9 +65,12 @@
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "1.6.6",
+		"phpstan/extension-installer": "^1.4.3",
+		"phpstan/phpstan": "^2.1",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
+		"szepeviktor/phpstan-wordpress": "^2.0",
 		"woocommerce/monorepo-plugin": "*",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
@@ -83,6 +86,7 @@
 			"automattic/jetpack-autoloader": true,
 			"composer/installers": true,
 			"bamarni/composer-bin-plugin": true,
+			"phpstan/extension-installer": true,
 			"woocommerce/monorepo-plugin": true
 		}
 	},
@@ -153,6 +157,12 @@
 		],
 		"build-lib": [
 			"sh ./bin/build-lib.sh"
+		],
+		"phpstan": [
+			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=3G"
+		],
+		"phpstan:baseline": [
+			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=3G --generate-baseline=phpstan-baseline.neon"
 		]
 	},
 	"extra": {
@@ -167,6 +177,8 @@
 			"test": "Run unit tests",
 			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
 			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
+			"phpstan": "Run PHPStan static analysis on the WooCommerce plugin",
+			"phpstan:baseline": "Generate a PHPStan baseline file to ignore existing errors",
 			"makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
 			"makepot": "Generate i18n/languages/woocommerce.pot file"
 		},
