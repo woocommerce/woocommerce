@@ -189,6 +189,7 @@ jobs:
         env: ${{ matrix.testEnv.envVars }}
         run: |
           # Retry logic: attempt up to 2 times (1 initial + 1 retry)
+          # This handles transient failures like 429 (Too Many Requests), network issues, etc.
           MAX_ATTEMPTS=2
           ATTEMPT=1
           
@@ -210,11 +211,11 @@ jobs:
             
             # Try to start the environment
             if WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}; then
-              echo "Test environment started successfully on attempt $ATTEMPT"
+              echo "✓ Test environment started successfully on attempt $ATTEMPT"
               exit 0
             else
               EXIT_CODE=$?
-              echo "Failed to start test environment on attempt $ATTEMPT (exit code: $EXIT_CODE)"
+              echo "✗ Failed to start test environment on attempt $ATTEMPT (exit code: $EXIT_CODE)"
               
               if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
                 echo "Retrying in 5 seconds..."
