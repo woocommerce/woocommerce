@@ -16,7 +16,7 @@ If you are not a developer, please use the [WooCommerce plugin page](https://wor
 
 Ensure your system meets [the requirements](../../README.md#getting-started) (TLDR: NVM, PNPM, PHP 7.4+, Composer are required for development).
 
-Depending on the preferred environment for running the development instance of WooCommerce, you might need [Docker](https://docs.docker.com/get-docker/) as well. You can learn more about supported environments [here](https://developer.woocommerce.com/docs/setting-up-your-development-environment/).
+Depending on the preferred environment for running the development instance of WooCommerce, you might need [Docker](https://docs.docker.com/get-docker/) as well. You can learn more about supported environments [here in the developer docs](https://developer.woocommerce.com/docs/setting-up-your-development-environment/).
 
 Once you have verified the prerequisites, you can start the development environment:
 
@@ -93,10 +93,10 @@ PHPStan configuration is stored in `phpstan.neon` at the root of the plugin dire
 
 ## Documentation
 
-- [WooCommerce Documentation](https://woocommerce.com/)
-- [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
-- [WooCommerce Code Reference](https://woocommerce.com/wc-apidocs/)
-- [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+-   [WooCommerce Documentation](https://woocommerce.com/)
+-   [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
+-   [WooCommerce Code Reference](https://woocommerce.com/wc-apidocs/)
+-   [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
 
 ## Reporting Security Issues
 
