@@ -70,6 +70,8 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Clear cart.
 		WC()->cart->empty_cart();
 
+		remove_all_filters( 'woocommerce_shipping_tax_class' );
+
 		// Clean up created products.
 		foreach ( $this->created_products as $product_id ) {
 			wp_delete_post( $product_id, true );
@@ -599,13 +601,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		WC_Tax::get_shipping_tax_rates();
 
 		$this->assertSame( '', $received_tax_class, 'Filter should receive empty string for standard tax class' );
-	}
-
-	/**
-	 * Test woocommerce_shipping_tax_class filter does not fire when there are no taxable items.
-	 */
-	public function test_shipping_tax_class_filter_does_not_fire_for_no_taxable_items() {
-		$this->markTestSkipped( 'Requires non-taxable items which need complex product setup' );
 	}
 
 	/**
