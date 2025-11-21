@@ -12,7 +12,7 @@ parameters:
 	excludePaths:
 		# Matches the prior test implementation; GeoIP relies on data files.
 		- includes/class-wc-geo-ip.php
-		- includes/react-admin/feature-config.php
+		- includes/react-admin/feature-config.php (?)
 	bootstrapFiles:
 		- vendor/autoload.php
 	scanDirectories:
