@@ -603,21 +603,30 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function test_it_can_add_meta() {
 		$data_store = new PushTokensDataStore();
-		$push_token = $this->create_test_push_token();
 
-		$data_store->add_meta(
+		$push_token = new PushToken();
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'browser_token_' . wp_rand() );
+		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data_store->create( $push_token );
+
+		$meta_value = get_post_meta( $push_token->get_id(), 'device_uuid', true );
+		$this->assertEmpty( $meta_value, 'device_uuid should not be present initially' );
+
+		$result = $data_store->add_meta(
 			$push_token,
 			array(
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				'meta_key'   => 'platform',
+				'meta_key'   => 'device_uuid',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-				'meta_value' => PushToken::PLATFORM_APPLE,
+				'meta_value' => 'newly-added-device-uuid',
 			)
 		);
 
-		$meta_value = get_post_meta( $push_token->get_id(), 'platform', true );
-
-		$this->assertEquals( PushToken::PLATFORM_APPLE, $meta_value );
+		$this->assertNotFalse( $result, 'add_meta should return meta ID, not false' );
+		$meta_value = get_post_meta( $push_token->get_id(), 'device_uuid', true );
+		$this->assertEquals( 'newly-added-device-uuid', $meta_value );
 	}
 
 	/**

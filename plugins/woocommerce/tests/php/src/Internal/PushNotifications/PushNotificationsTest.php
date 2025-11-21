@@ -218,8 +218,6 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
 		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
 
-		$hooks_before = $GLOBALS['wp_filter']['init'] ?? null;
-
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'init' );
 
