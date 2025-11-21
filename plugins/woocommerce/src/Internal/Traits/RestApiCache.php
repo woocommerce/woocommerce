@@ -18,7 +18,7 @@ use WP_REST_Response;
  *   headers (like Set-Cookie) and optionally others specified via configuration
  *   (per-controller or per-endpoint).
  * - For the purposes of caching, a request is uniquely identified by its route,
- *   HTTP method, query string, and user ID.
+ *   query string, and user ID.
  * - The VersionStringGenerator class is used to track versions of entities included
  *   in the responses (an "entity" is any object that is uniquely identified by type and id
  *   and contributes with information to be included in the response),
@@ -32,6 +32,11 @@ use WP_REST_Response;
  *   to the query string.
  * - A X-WC-Cache HTTP header is added to responses to indicate cache status:
  *   HIT, MISS, or SKIP.
+ *
+ * Additionally to caching, this trait also handles the sending of appropriate
+ * Cache-Control and ETag headers to instruct clients and proxies on how to cache responses.
+ * The ETag is generated based on the cached response data and cache key, and a request
+ * containing an If-None-Match header with a matching ETag will receive a 304 Not Modified response.
  *
  * Usage: Wrap endpoint callbacks with the `with_cache()` method when registering routes.
  *
@@ -98,7 +103,7 @@ use WP_REST_Response;
  * (checked via call to VersionStringGenerator::can_use()), so the cache is persistent
  * across requests and not just for the current request.
  *
- * @since   10.5.0
+ * @since 10.5.0
  */
 trait RestApiCache {
 	/**
@@ -133,12 +138,21 @@ trait RestApiCache {
 	private ?VersionStringGenerator $version_string_generator = null;
 
 	/**
+	 * Whether we are currently handling a cached endpoint.
+	 *
+	 * @var bool
+	 */
+	private $is_handling_cached_endpoint = false;
+
+	/**
 	 * Initialize the trait.
 	 * This MUST be called from the controller's constructor.
 	 */
 	protected function initialize_rest_api_cache(): void {
 		$generator                      = wc_get_container()->get( VersionStringGenerator::class );
 		$this->version_string_generator = $generator->can_use() ? $generator : null;
+
+		add_filter( 'rest_send_nocache_headers', array( $this, 'handle_rest_send_nocache_headers' ), 10, 1 );
 	}
 
 	/**
@@ -185,14 +199,15 @@ trait RestApiCache {
 
 		if ( $should_skip_cache ) {
 			$response = call_user_func( $callback, $request );
-			if ( ! is_wp_error( $response ) ) {
-				$response = rest_ensure_response( $response );
+			if ( $response instanceof WP_REST_Response ) {
 				$response->header( 'X-WC-Cache', 'SKIP' );
 			}
 			return $response;
 		}
 
-		$cached_response = $this->get_cached_response( $cached_config );
+		$this->is_handling_cached_endpoint = true;
+
+		$cached_response = $this->get_cached_response( $request, $cached_config );
 
 		if ( $cached_response ) {
 			$cached_response->header( 'X-WC-Cache', 'HIT' );
@@ -312,6 +327,9 @@ trait RestApiCache {
 				$cached_config['endpoint_id']
 			);
 
+			$etag_data = is_array( $data ) ? $this->get_data_for_etag( $data, $request, $cached_config['endpoint_id'] ) : $data;
+			$etag      = '"' . md5( $cached_config['cache_key'] . wp_json_encode( $etag_data ) ) . '"';
+
 			$this->store_cached_response(
 				$cached_config['cache_key'],
 				$data,
@@ -320,10 +338,16 @@ trait RestApiCache {
 				$entity_ids,
 				$cached_config['cache_ttl'],
 				$cached_config['relevant_hooks'],
-				$cacheable_headers
+				$cacheable_headers,
+				$etag
 			);
 
 			$cached = true;
+
+			$is_user_logged_in = wc_get_container()->get( LegacyProxy::class )->call_function( 'is_user_logged_in' );
+			$cache_visibility  = $cached_config['vary_by_user'] && $is_user_logged_in ? 'private' : 'public';
+			$response->header( 'ETag', $etag );
+			$response->header( 'Cache-Control', $cache_visibility . ', must-revalidate, max-age=' . $cached_config['cache_ttl'] );
 		}
 
 		$response->header( 'X-WC-Cache', $cached ? 'MISS' : 'SKIP' );
@@ -340,6 +364,21 @@ trait RestApiCache {
 	 */
 	protected function get_default_response_entity_type(): ?string {
 		return null;
+	}
+
+	/**
+	 * Get data for ETag generation.
+	 *
+	 * Override in classes to exclude fields that change on each request
+	 * (e.g., random recommendations, timestamps).
+	 *
+	 * @param array           $data        Response data.
+	 * @param WP_REST_Request $request     The request object.
+	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+	 * @return array Cleaned data for ETag generation.
+	 */
+	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return $data;
 	}
 
 	/**
@@ -474,9 +513,7 @@ trait RestApiCache {
 	 * 3. The woocommerce_rest_api_cached_headers filter is applied, receiving both the candidate
 	 *    headers list and all available headers. This allows filters to both add and remove
 	 *    headers from the caching list.
-	 * 4. Always-excluded headers are enforced again post-filter to prevent filters from
-	 *    re-introducing dangerous headers like Set-Cookie.
-	 * 5. Only headers from the response that are in the filtered list are returned.
+	 * 4. Only headers from the response that are in the filtered list are returned.
 	 *
 	 * @param array            $nominal_headers Response headers.
 	 * @param array|false      $include_headers Header names to include (false to use exclusion logic).
@@ -539,32 +576,8 @@ trait RestApiCache {
 			$this
 		);
 
-		// Step 4: Enforce always-excluded headers post-filter.
+		// Step 4: Return only the headers that are in the filtered list.
 		$filtered_header_names_lowercase = array_map( 'strtolower', $filtered_header_names );
-		$reintroduced_headers            = array_filter(
-			$filtered_header_names,
-			fn( $name ) => in_array( strtolower( $name ), $always_exclude_lowercase, true )
-		);
-
-		if ( ! empty( $reintroduced_headers ) ) {
-			wc_get_container()->get( LegacyProxy::class )->call_function(
-				'wc_doing_it_wrong',
-				__METHOD__,
-				sprintf(
-					/* translators: %s: comma-separated list of header names */
-					'The woocommerce_rest_api_cached_headers filter attempted to cache always-excluded headers: %s. These headers have been removed for security reasons.',
-					implode( ', ', $reintroduced_headers )
-				),
-				'10.5.0'
-			);
-
-			$filtered_header_names_lowercase = array_filter(
-				$filtered_header_names_lowercase,
-				fn( $name ) => ! in_array( $name, $always_exclude_lowercase, true )
-			);
-		}
-
-		// Step 5: Return only the headers that are in the filtered list.
 		return array_filter(
 			$nominal_headers,
 			fn( $name ) => in_array( strtolower( $name ), $filtered_header_names_lowercase, true ),
@@ -588,7 +601,6 @@ trait RestApiCache {
 
 		$cache_key_parts = array(
 			$request->get_route(),
-			$request->get_method(),
 			wp_json_encode( $request_query_params ),
 		);
 
@@ -622,7 +634,7 @@ trait RestApiCache {
 		 * @param array           $cache_key_parts Array of cache key information parts.
 		 * @param WP_REST_Request $request         The request object.
 		 * @param bool            $vary_by_user    Whether user ID is included in cache key.
-		 * @param string|null     $endpoint_id     Optional friendly identifier for the endpoint (passed to with_cache).
+		 * @param string|null     $endpoint_id     Optional friendly identifier for the endpoint.
 		 * @param object          $controller      The controller instance.
 		 * @return array Filtered cache key information parts.
 		 */
@@ -681,10 +693,11 @@ trait RestApiCache {
 	/**
 	 * Get a cached response, but only if it's valid (otherwise the cached response will be invalidated).
 	 *
-	 * @param array $cached_config Built caching configuration from build_cache_config().
+	 * @param WP_REST_Request $request       The request object.
+	 * @param array           $cached_config Built caching configuration from build_cache_config().
 	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
 	 */
-	private function get_cached_response( array $cached_config ): ?WP_REST_Response {
+	private function get_cached_response( WP_REST_Request $request, array $cached_config ): ?WP_REST_Response {
 		$cache_key      = $cached_config['cache_key'];
 		$entity_type    = $cached_config['entity_type'];
 		$cache_ttl      = $cached_config['cache_ttl'];
@@ -724,7 +737,34 @@ trait RestApiCache {
 		}
 
 		// At this point the cached response is valid.
+
+		// Check if client sent an ETag and it matches - if so, return 304 Not Modified.
+		$cached_etag  = $cached['etag'] ?? '';
+		$request_etag = $request->get_header( 'if_none_match' );
+
+		$is_user_logged_in = wc_get_container()->get( LegacyProxy::class )->call_function( 'is_user_logged_in' );
+		$cache_visibility  = $cached_config['vary_by_user'] && $is_user_logged_in ? 'private' : 'public';
+		$response_headers  = array();
+
+		if ( ! empty( $cached_etag ) ) {
+			$response_headers['ETag'] = $cached_etag;
+		}
+		$response_headers['Cache-Control'] = $cache_visibility . ', must-revalidate, max-age=' . $cache_ttl;
+
+		// If the server adds a 'Date' header by itself there will be two such headers in the response.
+		// To help disambiguate them, we add also an 'X-WC-Date' header with the proper value.
+		$created_at                    = gmdate( 'D, d M Y H:i:s', $cached['created_at'] ) . ' GMT';
+		$response_headers['Date']      = $created_at;
+		$response_headers['X-WC-Date'] = $created_at;
+
+		if ( ! empty( $cached_etag ) && $request_etag === $cached_etag ) {
+			return new WP_REST_Response( null, 304, $response_headers );
+		}
 		$response = new WP_REST_Response( $cached['data'], $cached['status_code'] ?? 200 );
+
+		foreach ( $response_headers as $name => $value ) {
+			$response->header( $name, $value );
+		}
 
 		if ( ! empty( $cached['headers'] ) ) {
 			foreach ( $cached['headers'] as $name => $value ) {
@@ -746,8 +786,9 @@ trait RestApiCache {
 	 * @param int    $cache_ttl      Cache TTL in seconds.
 	 * @param array  $relevant_hooks Hook names to track for invalidation.
 	 * @param array  $headers        Response headers to cache.
+	 * @param string $etag           ETag for the response.
 	 */
-	private function store_cached_response( string $cache_key, $data, int $status_code, string $entity_type, array $entity_ids, int $cache_ttl, array $relevant_hooks, array $headers = array() ): void {
+	private function store_cached_response( string $cache_key, $data, int $status_code, string $entity_type, array $entity_ids, int $cache_ttl, array $relevant_hooks, array $headers = array(), string $etag = '' ): void {
 		$entity_versions = array();
 		foreach ( $entity_ids as $entity_id ) {
 			$version_id = "{$entity_type}_{$entity_id}";
@@ -775,6 +816,27 @@ trait RestApiCache {
 			$cache_data['headers'] = $headers;
 		}
 
+		if ( ! empty( $etag ) ) {
+			$cache_data['etag'] = $etag;
+		}
+
 		wp_cache_set( $cache_key, $cache_data, self::$cache_group, $cache_ttl );
+	}
+
+	/**
+	 * Handle rest_send_nocache_headers filter to prevent WordPress from overriding our cache headers.
+	 *
+	 * @internal
+	 *
+	 * @param bool $send_no_cache_headers Whether to send no-cache headers.
+	 * @return bool False if we're handling caching for this request, original value otherwise.
+	 */
+	public function handle_rest_send_nocache_headers( bool $send_no_cache_headers ): bool {
+		if ( ! $this->is_handling_cached_endpoint ) {
+			return $send_no_cache_headers;
+		}
+
+		$this->is_handling_cached_endpoint = false;
+		return false;
 	}
 }
