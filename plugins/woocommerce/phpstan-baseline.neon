@@ -43867,8 +43867,14 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
 
 		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\Jetpack…'' and ''is_signed_with_blog…'' will always evaluate to false\.$#'
-			identifier: function.impossibleType
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\Jetpack…'' and ''is_signed_with_blog…'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-webhooks-controller.php
+
+		-
+			message: '#^Class Automattic\\Jetpack\\Connection\\Rest_Authentication referenced with incorrect case\: Automattic\\Jetpack\\Connection\\REST_Authentication\.$#'
+			identifier: class.nameCase
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-webhooks-controller.php
 
@@ -80504,6 +80510,12 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: src/Gateways/PayPal/AddressRequirements.php
+
+		-
+			message: '#^Parameter \#2 \$args of function wp_register_ability expects array\{label\?\: string, description\?\: string, category\?\: string, execute_callback\?\: callable\(mixed\=\)\: mixed, permission_callback\?\: callable\(mixed\=\)\: \(bool\|WP_Error\), input_schema\?\: array\<string, mixed\>, output_schema\?\: array\<string, mixed\>, meta\?\: array\{annotations\?\: array\<string, bool\|string\>, show_in_rest\?\: bool\}, \.\.\.\}, array\{label\: mixed, description\: mixed, category\: ''woocommerce\-rest'', input_schema\: array, output_schema\: array, execute_callback\: Closure\(mixed\)\: mixed, permission_callback\: Closure\(\)\: bool, ability_class\: ''Automattic\\\\WooCommerce\\\\Internal\\\\Abilities\\\\REST\\\\RestAbility'', \.\.\.\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/Abilities/REST/RestAbilityFactory.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$payload\.$#'
