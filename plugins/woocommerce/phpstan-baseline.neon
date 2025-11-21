@@ -20137,6 +20137,12 @@ parameters:
 			path: includes/class-wc-frontend-scripts.php
 
 		-
+			message: '#^Method WC_Frontend_Scripts\:\:enqueue_block_assets\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/class-wc-frontend-scripts.php
+
+		-
 			message: '#^Method WC_Frontend_Scripts\:\:enqueue_script\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -20222,6 +20228,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$path of static method WC_Frontend_Scripts\:\:register_script\(\) expects string, false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-frontend-scripts.php
+
+		-
+			message: '#^Parameter \#4 \$ver of function wp_enqueue_style expects bool\|string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-frontend-scripts.php
@@ -24357,17 +24369,11 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$maybeint of function absint expects array\|bool\|float\|int\|resource\|string\|null, mixed given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 3
 			path: includes/class-wc-query.php
 
 		-
 			message: '#^Parameter \#1 \$meta_query of method WC_Query\:\:get_meta_query\(\) expects array, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-query.php
-
-		-
-			message: '#^Parameter \#1 \$page_id of method WC_Query\:\:page_on_front_is\(\) expects int, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-query.php
@@ -36461,12 +36467,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/react-admin/emails/plain-admin-report-export-download.php
-
-		-
-			message: '#^Function wc_admin_get_feature_config\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/react-admin/feature-config.php
 
 		-
 			message: '#^Function wc_admin_connect_page\(\) has no return type specified\.$#'
@@ -80510,12 +80510,6 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: src/Gateways/PayPal/AddressRequirements.php
-
-		-
-			message: '#^Parameter \#2 \$args of function wp_register_ability expects array\{label\?\: string, description\?\: string, category\?\: string, execute_callback\?\: callable\(mixed\=\)\: mixed, permission_callback\?\: callable\(mixed\=\)\: \(bool\|WP_Error\), input_schema\?\: array\<string, mixed\>, output_schema\?\: array\<string, mixed\>, meta\?\: array\{annotations\?\: array\<string, bool\|string\>, show_in_rest\?\: bool\}, \.\.\.\}, array\{label\: mixed, description\: mixed, category\: ''woocommerce\-rest'', input_schema\: array, output_schema\: array, execute_callback\: Closure\(mixed\)\: mixed, permission_callback\: Closure\(\)\: bool, ability_class\: ''Automattic\\\\WooCommerce\\\\Internal\\\\Abilities\\\\REST\\\\RestAbility'', \.\.\.\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Abilities/REST/RestAbilityFactory.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$payload\.$#'
