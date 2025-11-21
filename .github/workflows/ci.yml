@@ -189,6 +189,7 @@ jobs:
         env: ${{ matrix.testEnv.envVars }}
         run: |
           # Retry logic: attempt up to 2 times (1 initial + 1 retry)
+          # This handles transient failures like 429 (Too Many Requests), network issues, etc.
           MAX_ATTEMPTS=2
           ATTEMPT=1
           
@@ -201,28 +202,19 @@ jobs:
             randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
             httpport="${randomized}80"
             mysqlport="${randomized}36"
-
             # provision the environment to propagate the randomized ports
             echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
             echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
             # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
             echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
             
-            # TEST MODE: Force failure on first attempt if branch contains "test-retry"
-            if [ "$ATTEMPT" -eq 1 ] && [[ "${{ github.head_ref }}" == *"test-retry"* || "${{ github.ref_name }}" == *"test-retry"* ]]; then
-              echo "TEST MODE: Simulating failure on first attempt (exit code: 1)"
-              COMMAND_RESULT=1
-            else
-              # Try to start the environment
-              WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
-              COMMAND_RESULT=$?
-            fi
-            
-            if [ $COMMAND_RESULT -eq 0 ]; then
-              echo "Test environment started successfully on attempt $ATTEMPT"
+            # Try to start the environment
+            if WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}; then
+              echo "✓ Test environment started successfully on attempt $ATTEMPT"
               exit 0
             else
-              echo "Failed to start test environment on attempt $ATTEMPT (exit code: $COMMAND_RESULT)"
+              EXIT_CODE=$?
+              echo "✗ Failed to start test environment on attempt $ATTEMPT (exit code: $EXIT_CODE)"
               
               if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
                 echo "Retrying in 5 seconds..."
@@ -230,7 +222,7 @@ jobs:
                 ATTEMPT=$((ATTEMPT + 1))
               else
                 echo "All attempts to start test environment failed"
-                exit $COMMAND_RESULT
+                exit $EXIT_CODE
               fi
             fi
           done
