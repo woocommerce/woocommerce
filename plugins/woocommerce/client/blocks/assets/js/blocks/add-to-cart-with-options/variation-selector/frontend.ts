@@ -54,18 +54,31 @@ const { state: productState } = store< { state: ProductsStoreState } >(
 );
 
 /**
+ * Normalize attribute name by removing the "attribute_" prefix if present.
+ * Context uses format like "attribute_pa_color" or "attribute_size",
+ * while Store API uses "pa_color" or "size".
+ *
+ * @param name - The attribute name to normalize.
+ * @return The normalized attribute name.
+ */
+const normalizeAttributeName = ( name: string ): string => {
+	return name.replace( /^attribute_/, '' ).toLowerCase();
+};
+
+/**
  * Get an attribute value from a variation's attributes array.
  *
  * @param attributes    - Array of attribute objects with name and value.
- * @param attributeName - The attribute name to look up.
+ * @param attributeName - The attribute name to look up (may have "attribute_" prefix).
  * @return The attribute value, or undefined if not found.
  */
 const getVariationAttributeValue = (
 	attributes: Array< { name: string; value: string } >,
 	attributeName: string
 ): string | undefined => {
+	const normalizedName = normalizeAttributeName( attributeName );
 	return attributes.find(
-		( attr ) => attr.name.toLowerCase() === attributeName.toLowerCase()
+		( attr ) => attr.name.toLowerCase() === normalizedName
 	)?.value;
 };
 
@@ -99,8 +112,11 @@ const isAttributeValueValid = ( {
 	// if "Blue" and "Small" are selected, we want "Blue" and "Medium" to be
 	// valid, that's why we subtract one from the total number of attributes to
 	// match.
+	const normalizedAttributeName = normalizeAttributeName( attributeName );
 	const isCurrentAttributeSelected = selectedAttributes.some(
-		( selectedAttribute ) => selectedAttribute.attribute === attributeName
+		( selectedAttribute ) =>
+			normalizeAttributeName( selectedAttribute.attribute ) ===
+			normalizedAttributeName
 	);
 	const attributesToMatch = isCurrentAttributeSelected
 		? selectedAttributes.length - 1
@@ -153,7 +169,9 @@ const isAttributeValueValid = ( {
 				// selection.
 				if ( availableVariationAttributeValue === '' ) {
 					if (
-						selectedAttribute.attribute !== attributeName ||
+						normalizeAttributeName(
+							selectedAttribute.attribute
+						) !== normalizedAttributeName ||
 						attributeValue === selectedAttribute.value
 					) {
 						return true;
@@ -213,11 +231,23 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return false;
 				}
 
-				return ! isAttributeValueValid( {
+				const isValid = isAttributeValueValid( {
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes,
 				} );
+
+				// DEBUG: Remove after troubleshooting
+				// eslint-disable-next-line no-console
+				console.log( 'DEBUG isOptionDisabled:', {
+					name,
+					optionValue: option.value,
+					selectedAttributes,
+					isValid,
+					willBeDisabled: ! isValid,
+				} );
+
+				return ! isValid;
 			},
 		},
 		actions: {

@@ -163,6 +163,43 @@ class HydrationTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that variable product response includes variations array with correct format.
+	 */
+	public function test_get_rest_api_response_data_variable_product_has_variations() {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variable_product->save();
+
+		$result = $this->hydration->get_rest_api_response_data(
+			'/wc/store/v1/products/' . $variable_product->get_id()
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'body', $result );
+		$this->assertIsArray( $result['body'] );
+
+		// Variable product should have variations field.
+		$this->assertArrayHasKey( 'variations', $result['body'], 'Variable product should have variations field' );
+		$this->assertIsArray( $result['body']['variations'] );
+		$this->assertNotEmpty( $result['body']['variations'], 'Variable product should have at least one variation' );
+
+		// Each variation should have id and attributes array.
+		// Note: variations are stdClass objects from JSON decode.
+		foreach ( $result['body']['variations'] as $variation ) {
+			$this->assertObjectHasProperty( 'id', $variation, 'Variation should have id' );
+			$this->assertObjectHasProperty( 'attributes', $variation, 'Variation should have attributes' );
+			$this->assertIsArray( $variation->attributes );
+
+			// Each attribute should have name and value.
+			foreach ( $variation->attributes as $attr ) {
+				$this->assertArrayHasKey( 'name', $attr, 'Attribute should have name' );
+				$this->assertArrayHasKey( 'value', $attr, 'Attribute should have value' );
+			}
+		}
+
+		$variable_product->delete( true );
+	}
+
+	/**
 	 * Test that encoded query parameters are properly handled.
 	 */
 	public function test_get_rest_api_response_data_with_encoded_query_params() {
