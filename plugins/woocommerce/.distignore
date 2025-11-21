@@ -47,3 +47,4 @@ webpack.config.js
 /client/blocks/
 phpstan.neon
 phpstan-baseline.neon
+/php-stubs/
