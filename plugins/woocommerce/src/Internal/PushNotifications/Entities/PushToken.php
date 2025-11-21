@@ -24,7 +24,7 @@ class PushToken extends WC_Data {
 	/**
 	 * Platform identifier for Apple devices.
 	 */
-	const PLATFORM_APPLE   = 'apple';
+	const PLATFORM_APPLE = 'apple';
 
 	/**
 	 * Platform identifier for Android devices.

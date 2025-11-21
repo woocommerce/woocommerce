@@ -189,18 +189,16 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 		$push_notifications->register();
 
-		// Expect potential incorrect usage notices from WooCommerce initialization.
 		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
 		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
 
-		// Trigger the init action to register the post type.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'init' );
 
-		// Verify the post type is registered.
 		$this->assertTrue( post_type_exists( PushToken::POST_TYPE ), 'Push token post type should be registered' );
 
-		// Verify the post type configuration.
 		$post_type_object = get_post_type_object( PushToken::POST_TYPE );
+
 		$this->assertNotNull( $post_type_object );
 		$this->assertFalse( $post_type_object->public );
 		$this->assertFalse( $post_type_object->publicly_queryable );
@@ -217,20 +215,23 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 		$push_notifications->register();
 
-		// Expect potential incorrect usage notices from WooCommerce initialization.
 		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
 		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
 
-		// Count existing hooks before init.
 		$hooks_before = $GLOBALS['wp_filter']['init'] ?? null;
 
-		// Trigger the init action.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'init' );
 
-		// The post type should not be registered since the feature is disabled.
-		// Note: We can't unregister a post type once it's registered in other tests,
-		// so we check that the register hook wasn't added.
-		$this->assertFalse( has_action( 'init', array( 'Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore', 'register_post_type' ) ) );
+		$this->assertFalse(
+			has_action(
+				'init',
+				array(
+					'Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore',
+					'register_post_type',
+				)
+			)
+		);
 	}
 
 	/**

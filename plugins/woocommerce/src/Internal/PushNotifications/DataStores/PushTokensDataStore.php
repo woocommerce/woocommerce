@@ -21,12 +21,12 @@ use WC_Object_Data_Store_Interface;
  * @since 10.5.0
  */
 class PushTokensDataStore implements WC_Object_Data_Store_Interface {
-	const META_KEYS = [
+	const META_KEYS = array(
 		'origin',
 		'device_uuid',
 		'token',
 		'platform',
-	];
+	);
 
 	/**
 	 * Registers the push token custom post type.
@@ -38,22 +38,22 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		register_post_type(
 			PushToken::POST_TYPE,
 			array(
-				'labels'              => array(
+				'labels'             => array(
 					'name'          => __( 'Push Tokens', 'woocommerce' ),
 					'singular_name' => __( 'Push Token', 'woocommerce' ),
 				),
-				'public'              => false,
-				'publicly_queryable'  => false,
-				'show_ui'             => false,
-				'show_in_menu'        => false,
-				'query_var'           => false,
-				'rewrite'             => false,
-				'capability_type'     => 'post',
-				'has_archive'         => false,
-				'hierarchical'        => false,
-				'supports'            => array( 'author' ),
-				'can_export'          => false,
-				'delete_with_user'    => true,
+				'public'             => false,
+				'publicly_queryable' => false,
+				'show_ui'            => false,
+				'show_in_menu'       => false,
+				'query_var'          => false,
+				'rewrite'            => false,
+				'capability_type'    => 'post',
+				'has_archive'        => false,
+				'hierarchical'       => false,
+				'supports'           => array( 'author' ),
+				'can_export'         => false,
+				'delete_with_user'   => true,
 			)
 		);
 	}
@@ -238,7 +238,6 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
-
 		foreach ( static::META_KEYS as $key ) {
 			delete_post_meta( $push_token->get_id(), $key );
 		}
@@ -268,7 +267,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		$placeholders = implode( ',', array_fill( 0, count( static::META_KEYS ), '%s' ) );
 
 		return $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT * FROM $wpdb->postmeta WHERE post_id = %d and meta_key IN ( $placeholders );",
 				$push_token->get_id(),
 				...static::META_KEYS
