@@ -21,6 +21,23 @@ use WC_Object_Data_Store_Interface;
  * @since 10.5.0
  */
 class PushTokensDataStore implements WC_Object_Data_Store_Interface {
+	const META_KEYS = [
+		'origin',
+		'device_uuid',
+		'token',
+		'platform',
+	];
+
+	/**
+	 * Returns array of meta keys whose persistence should be managed via
+	 * class setters.
+	 *
+	 * @return array
+	 */
+	public function get_internal_meta_keys() {
+		return array();
+	}
+
 	/**
 	 * Creates a post representing the push token.
 	 *
@@ -49,9 +66,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 						'token'       => $push_token->get_token(),
 						'device_uuid' => $push_token->get_device_uuid(),
 						'origin'      => $push_token->get_origin(),
-					),
-					static fn ( $value, $key ) => 'device_uuid' !== $key || null !== $value,
-					ARRAY_FILTER_USE_BOTH
+					)
 				),
 			),
 			true
@@ -90,15 +105,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
-		$meta = $this->read_meta( $push_token );
+		$meta_map = $this->meta_objects_to_map( $push_token->get_meta_data() );
 
 		if (
-			empty( $meta['token'] )
-			|| empty( $meta['platform'] )
-			|| empty( $meta['origin'] )
+			empty( $meta_map['token'] )
+			|| empty( $meta_map['platform'] )
+			|| empty( $meta_map['origin'] )
 			|| (
-				empty( $meta['device_uuid'] )
-				&& PushToken::PLATFORM_BROWSER !== $meta['platform']
+				empty( $meta_map['device_uuid'] )
+				&& PushToken::PLATFORM_BROWSER !== $meta_map['platform']
 			)
 		) {
 			throw new InvalidArgumentException(
@@ -109,10 +124,10 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		}
 
 		$push_token->set_user_id( (int) $post->post_author );
-		$push_token->set_token( $meta['token'] );
-		$push_token->set_platform( $meta['platform'] );
-		$push_token->set_device_uuid( $meta['device_uuid'] ?? null );
-		$push_token->set_origin( $meta['origin'] );
+		$push_token->set_token( $meta_map['token'] );
+		$push_token->set_platform( $meta_map['platform'] );
+		$push_token->set_device_uuid( $meta_map['device_uuid'] ?? null );
+		$push_token->set_origin( $meta_map['origin'] );
 	}
 
 	/**
@@ -151,9 +166,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 						'token'       => $push_token->get_token(),
 						'device_uuid' => $push_token->get_device_uuid(),
 						'origin'      => $push_token->get_origin(),
-					),
-					static fn ( $value, $key ) => 'device_uuid' !== $key || null !== $value,
-					ARRAY_FILTER_USE_BOTH
+					)
 				),
 			),
 			true
@@ -195,6 +208,11 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
+
+		foreach ( static::META_KEYS as $key ) {
+			delete_post_meta( $push_token->get_id(), $key );
+		}
+
 		wp_delete_post( $push_token->get_id(), true );
 	}
 
@@ -215,9 +233,16 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			);
 		}
 
-		return array_map(
-			static fn ( $meta ) => $meta[0] ?? $meta,
-			get_post_meta( $push_token->get_id() )
+		global $wpdb;
+
+		$placeholders = implode( ',', array_fill( 0, count( static::META_KEYS ), '%s' ) );
+
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM $wpdb->postmeta WHERE post_id = %d and meta_key IN ( $placeholders );",
+				$push_token->get_id(),
+				...static::META_KEYS
+			)
 		);
 	}
 
@@ -242,6 +267,14 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		if ( empty( $meta['meta_key'] ) ) {
 			throw new InvalidArgumentException(
 				'Can\'t add meta for push token because the meta key was not provided.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		if ( ! in_array( $meta['meta_key'], static::META_KEYS, true ) ) {
+			throw new InvalidArgumentException(
+				'Can\'t add meta for push token because the meta key is not valid.',
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				WP_Http::BAD_REQUEST
 			);
@@ -281,6 +314,14 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			);
 		}
 
+		if ( ! in_array( $meta['meta_key'], static::META_KEYS, true ) ) {
+			throw new InvalidArgumentException(
+				'Can\'t update meta for push token because the meta key is not valid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
 		return update_post_meta(
 			$push_token->get_id(),
 			$meta['meta_key'],
@@ -314,6 +355,14 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			);
 		}
 
+		if ( ! in_array( $meta['meta_key'], static::META_KEYS, true ) ) {
+			throw new InvalidArgumentException(
+				'Can\'t delete meta for push token because the meta key is not valid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
 		return delete_post_meta( $push_token->get_id(), $meta['meta_key'] );
 	}
 
@@ -334,17 +383,10 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			! $push_token->get_user_id()
 			|| ! $push_token->get_platform()
 			|| ! $push_token->get_origin()
+			|| ( ! $push_token->get_token() && ! $push_token->get_device_uuid() )
 		) {
 			throw new InvalidArgumentException(
-				'Can\'t retrieve push token using token or device UUID because the push token data provided is invalid.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
-			);
-		}
-
-		if ( ! $push_token->get_token() && ! $push_token->get_device_uuid() ) {
-			throw new InvalidArgumentException(
-				'Can\'t retrieve push token: token or device UUID must be provided.',
+				'Can\'t retrieve push token because the push token data provided is invalid.',
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				WP_Http::BAD_REQUEST
 			);
@@ -352,68 +394,64 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 
 		global $wpdb;
 
-		$device_uuid_condition = '';
-
-		$params = array(
-			PushToken::POST_TYPE,
-			$push_token->get_user_id(),
-			$push_token->get_platform(),
-			$push_token->get_origin(),
-			$push_token->get_token(),
-		);
-
-		if ( $push_token->get_device_uuid() ) {
-			$device_uuid_condition = 'OR device_uuid_meta.meta_value = %s';
-			$params[]              = $push_token->get_device_uuid();
-		}
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$push_token_data = $wpdb->get_row(
-			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+		$posts = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT
-					posts.ID,
-					posts.post_author,
-					platform_meta.meta_value as platform,
-					token_meta.meta_value as token,
-					device_uuid_meta.meta_value as device_uuid,
-					origin_meta.meta_value as origin
-				FROM {$wpdb->posts} AS posts
-				INNER JOIN {$wpdb->postmeta} AS platform_meta
-					ON posts.ID = platform_meta.post_id
-					AND platform_meta.meta_key = 'platform'
-				INNER JOIN {$wpdb->postmeta} AS token_meta
-					ON posts.ID = token_meta.post_id
-					AND token_meta.meta_key = 'token'
-				LEFT JOIN {$wpdb->postmeta} AS device_uuid_meta
-					ON posts.ID = device_uuid_meta.post_id
-					AND device_uuid_meta.meta_key = 'device_uuid'
-				INNER JOIN {$wpdb->postmeta} AS origin_meta
-					ON posts.ID = origin_meta.post_id
-					AND origin_meta.meta_key = 'origin'
-				WHERE posts.post_type = %s
-					AND posts.post_status = 'private'
-					AND posts.post_author = %d
-					AND platform_meta.meta_value = %s
-					AND origin_meta.meta_value = %s
-					AND (
-						token_meta.meta_value = %s
-						{$device_uuid_condition}
-					)
-				ORDER BY posts.ID DESC
-				LIMIT 1",
-				...$params
+				"SELECT *
+				FROM {$wpdb->posts}
+				WHERE post_type = %s
+					AND post_status = 'private'
+					AND post_author = %d
+				ORDER BY ID DESC",
+				PushToken::POST_TYPE,
+				$push_token->get_user_id()
 			)
 		);
 
-		if ( ! $push_token_data ) {
-			return null;
+		foreach ( $posts as $post ) {
+			$candidate = new PushToken();
+			$candidate->set_id( (int) $post->ID );
+
+			try {
+				$meta = $candidate->get_meta_data();
+			} catch ( Exception $e ) {
+				continue;
+			}
+
+			$meta_map = $this->meta_objects_to_map( $meta );
+
+			if (
+				$meta_map['platform'] === $push_token->get_platform()
+				&& $meta_map['origin'] === $push_token->get_origin()
+				&& (
+					( $push_token->get_token() && $push_token->get_token() === $meta_map['token'] )
+					|| ( $push_token->get_device_uuid() && $push_token->get_device_uuid() === $meta_map['device_uuid'] )
+				)
+			) {
+				$push_token->set_id( (int) $post->ID );
+				$push_token->set_token( $meta_map['token'] );
+				$push_token->set_device_uuid( $meta_map['device_uuid'] );
+				return $push_token;
+			}
 		}
 
-		$push_token->set_id( (int) $push_token_data->ID );
-		$push_token->set_token( $push_token_data->token );
-		$push_token->set_device_uuid( $push_token_data->device_uuid );
+		return null;
+	}
 
-		return $push_token;
+	/**
+	 * Converts an array of WC_Meta_Data objects to a key-value array.
+	 * Sets any missing META_KEYS to null.
+	 *
+	 * @param array $meta_objects Array of WC_Meta_Data objects from get_meta_data().
+	 * @return array Associative array with meta keys as keys.
+	 */
+	private function meta_objects_to_map( array $meta_objects ): array {
+		$meta_map = array_fill_keys( static::META_KEYS, null );
+
+		foreach ( $meta_objects as $meta_object ) {
+			$data                     = $meta_object->get_data();
+			$meta_map[ $data['key'] ] = $data['value'];
+		}
+
+		return $meta_map;
 	}
 }

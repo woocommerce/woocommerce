@@ -50,7 +50,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token_12345' );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'device-uuid-123' );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
@@ -220,7 +220,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
 				'meta_input'  => array(
-					'platform' => PushToken::PLATFORM_IOS,
+					'platform' => PushToken::PLATFORM_APPLE,
 					'token'    => 'test_token',
 					// Missing device_uuid and origin.
 				),
@@ -266,7 +266,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_id( 999999 );
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'device-uuid' );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
@@ -296,7 +296,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_id( $post_id );
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'device-uuid' );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
@@ -558,16 +558,28 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$meta = $data_store->read_meta( $push_token );
 
 		$this->assertIsArray( $meta );
+		$this->assertCount( 4, $meta );
 
-		$this->assertEquals(
-			array(
-				'platform'    => $push_token->get_platform(),
-				'token'       => $push_token->get_token(),
-				'device_uuid' => $push_token->get_device_uuid(),
-				'origin'      => $push_token->get_origin(),
-			),
-			$meta
-		);
+		$meta_by_key = array();
+
+		foreach ( $meta as $meta_object ) {
+			$this->assertIsObject( $meta_object );
+			$this->assertObjectHasProperty( 'meta_key', $meta_object );
+			$this->assertObjectHasProperty( 'meta_value', $meta_object );
+			$meta_by_key[ $meta_object->meta_key ] = $meta_object->meta_value;
+		}
+
+		$this->assertArrayHasKey( 'platform', $meta_by_key );
+		$this->assertEquals( $push_token->get_platform(), $meta_by_key['platform'] );
+
+		$this->assertArrayHasKey( 'token', $meta_by_key );
+		$this->assertEquals( $push_token->get_token(), $meta_by_key['token'] );
+
+		$this->assertArrayHasKey( 'device_uuid', $meta_by_key );
+		$this->assertEquals( $push_token->get_device_uuid(), $meta_by_key['device_uuid'] );
+
+		$this->assertArrayHasKey( 'origin', $meta_by_key );
+		$this->assertEquals( $push_token->get_origin(), $meta_by_key['origin'] );
 	}
 
 	/**
@@ -599,13 +611,13 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_key'   => 'platform',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-				'meta_value' => PushToken::PLATFORM_IOS,
+				'meta_value' => PushToken::PLATFORM_APPLE,
 			)
 		);
 
 		$meta_value = get_post_meta( $push_token->get_id(), 'platform', true );
 
-		$this->assertEquals( PushToken::PLATFORM_IOS, $meta_value );
+		$this->assertEquals( PushToken::PLATFORM_APPLE, $meta_value );
 	}
 
 	/**
@@ -615,7 +627,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_IOS );
+		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_APPLE );
 
 		$data_store->update_meta(
 			$push_token,
@@ -639,7 +651,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_IOS );
+		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_APPLE );
 
 		$data_store->delete_meta(
 			$push_token,
@@ -784,13 +796,13 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 
 		$push_token = new PushToken();
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test_device' );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t retrieve push token using token or device UUID because the push token data provided is invalid.' );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
 		$this->expectExceptionCode( 400 );
 
 		$data_store->get_by_token_or_device_id( $push_token );
@@ -810,7 +822,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_device_uuid( 'test_device' );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t retrieve push token using token or device UUID because the push token data provided is invalid.' );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
 		$this->expectExceptionCode( 400 );
 
 		$data_store->get_by_token_or_device_id( $push_token );
@@ -825,12 +837,12 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test_device' );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t retrieve push token using token or device UUID because the push token data provided is invalid.' );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
 		$this->expectExceptionCode( 400 );
 
 		$data_store->get_by_token_or_device_id( $push_token );
@@ -845,11 +857,11 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t retrieve push token: token or device UUID must be provided.' );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
 		$this->expectExceptionCode( 400 );
 
 		$data_store->get_by_token_or_device_id( $push_token );
@@ -886,6 +898,80 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests get_internal_meta_keys returns empty array.
+	 */
+	public function test_it_returns_empty_internal_meta_keys() {
+		$data_store = new PushTokensDataStore();
+
+		$result = $data_store->get_internal_meta_keys();
+
+		$this->assertIsArray( $result );
+		$this->assertEmpty( $result );
+	}
+
+	/**
+	 * @testdox Tests add_meta throws exception when using invalid meta key.
+	 */
+	public function test_it_throws_exception_when_adding_meta_with_invalid_key() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Can\'t add meta for push token because the meta key is not valid.' );
+		$this->expectExceptionCode( 400 );
+
+		$data_store->add_meta(
+			$push_token,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'   => 'invalid_key',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_value' => 'test_value',
+			)
+		);
+	}
+
+	/**
+	 * @testdox Tests update_meta throws exception when using invalid meta key.
+	 */
+	public function test_it_throws_exception_when_updating_meta_with_invalid_key() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Can\'t update meta for push token because the meta key is not valid.' );
+		$this->expectExceptionCode( 400 );
+
+		$data_store->update_meta(
+			$push_token,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key'   => 'invalid_key',
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'meta_value' => 'test_value',
+			)
+		);
+	}
+
+	/**
+	 * @testdox Tests delete_meta throws exception when using invalid meta key.
+	 */
+	public function test_it_throws_exception_when_deleting_meta_with_invalid_key() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Can\'t delete meta for push token because the meta key is not valid.' );
+		$this->expectExceptionCode( 400 );
+
+		$data_store->delete_meta(
+			$push_token,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			array( 'meta_key' => 'invalid_key' )
+		);
+	}
+
+	/**
 	 * Creates a test push token and saves it to the database.
 	 *
 	 * @return PushToken The created push token object.
@@ -896,7 +982,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token_' . wp_rand() );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid-' . wp_rand() );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
