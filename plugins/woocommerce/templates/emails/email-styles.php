@@ -282,6 +282,10 @@ body {
 	padding-top: 5px;
 }
 
+#body_content .email-order-details .order-totals .includes_tax {
+	display: block;
+}
+
 #body_content .email-order-details .order-totals-total th {
 	font-weight: bold;
 }
