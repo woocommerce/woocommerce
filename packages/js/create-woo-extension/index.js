@@ -1,5 +1,7 @@
+const { join } = require( 'path' );
+
 module.exports = {
-	templatesPath: __dirname,
+	templatesPath: join( __dirname, 'variants/default' ),
 	defaultValues: {
 		npmDependencies: [
 			'@wordpress/hooks',
@@ -15,7 +17,8 @@ module.exports = {
 		namespace: 'extension',
 		license: 'GPL-3.0+',
 		customScripts: {
-			postinstall: 'composer install',
+			postinstall: 'rm block.json && composer install',
 		},
 	},
+	variants: {},
 };
