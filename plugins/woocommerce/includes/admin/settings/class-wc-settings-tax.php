@@ -32,6 +32,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			add_action( 'woocommerce_sections_' . $this->id, array( $this, 'output_sections' ) );
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
+			add_action( 'admin_notices', array( $this, 'tax_configuration_validation_notice' ) );
 		}
 	}
 
@@ -364,6 +365,67 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			}
 		}
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * Display admin notice when tax-inclusive pricing is enabled without a base tax rate.
+	 *
+	 * @since 10.4.0
+	 */
+	public function tax_configuration_validation_notice() {
+		// Only show on WooCommerce settings pages.
+		$screen = get_current_screen();
+		if ( ! $screen || 'woocommerce_page_wc-settings' !== $screen->id ) {
+			return;
+		}
+
+		// Check if prices are entered with tax.
+		if ( 'yes' !== get_option( 'woocommerce_prices_include_tax' ) ) {
+			return;
+		}
+
+		// Check if base location has tax rates configured.
+		$base_location = wc_get_base_location();
+		if ( empty( $base_location['country'] ) ) {
+			return;
+		}
+
+		// Check all tax classes for rates at the base location.
+		$tax_classes   = array_merge( array( '' ), WC_Tax::get_tax_classes() );
+		$has_base_rate = false;
+
+		foreach ( $tax_classes as $tax_class ) {
+			$tax_class_slug = sanitize_title( $tax_class );
+			$base_rates     = WC_Tax::get_base_tax_rates( $tax_class_slug );
+
+			if ( ! empty( $base_rates ) ) {
+				$has_base_rate = true;
+				break;
+			}
+		}
+
+		// If no base rates exist, show warning.
+		if ( ! $has_base_rate ) {
+			?>
+			<div class="notice notice-warning">
+				<p>
+					<strong><?php esc_html_e( 'Tax configuration incomplete', 'woocommerce' ); ?></strong>
+				</p>
+				<p>
+					<?php
+					echo wp_kses_post(
+						sprintf(
+							/* translators: 1: opening link tag 2: closing link tag */
+							__( 'You have enabled "Prices entered with tax" but have not configured a tax rate for your base location. Please %1$sconfigure tax rates%2$s for your store\'s base location to ensure accurate tax calculations.', 'woocommerce' ),
+							'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax&section=standard' ) ) . '">',
+							'</a>'
+						)
+					);
+					?>
+				</p>
+			</div>
+			<?php
+		}
 	}
 }
 

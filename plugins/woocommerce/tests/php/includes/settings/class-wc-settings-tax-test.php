@@ -172,4 +172,128 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		$this->assertEquals( array( 'tax_1' ), $deleted );
 		$this->assertEquals( array( 'tax_4' ), $created );
 	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' shows notice when tax-inclusive pricing is enabled without base rate.
+	 */
+	public function test_tax_configuration_validation_notice_shows_when_prices_include_tax_but_no_base_rate() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Mock the screen to simulate being on WooCommerce settings page.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Mock WC_Tax methods to return empty base rates.
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Tax' => array(
+					'get_tax_classes'    => function () {
+						return array();
+					},
+					'get_base_tax_rates' => function () {
+						return array();
+					},
+				),
+			)
+		);
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Assert notice is displayed.
+		$this->assertStringContainsString( 'Tax configuration incomplete', $output );
+		$this->assertStringContainsString( 'configure tax rates', $output );
+		$this->assertStringContainsString( 'notice-warning', $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when base rate exists.
+	 */
+	public function test_tax_configuration_validation_notice_does_not_show_when_base_rate_exists() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Mock WC_Tax methods to return base rates.
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Tax' => array(
+					'get_tax_classes'    => function () {
+						return array();
+					},
+					'get_base_tax_rates' => function () {
+						return array(
+							array(
+								'rate' => '10.0000',
+							),
+						);
+					},
+				),
+			)
+		);
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Assert notice is NOT displayed.
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when prices are not tax-inclusive.
+	 */
+	public function test_tax_configuration_validation_notice_does_not_show_when_prices_not_inclusive() {
+		// Set up prices exclude tax option.
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Assert notice is NOT displayed.
+		$this->assertEmpty( $output );
+	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice on non-WooCommerce pages.
+	 */
+	public function test_tax_configuration_validation_notice_does_not_show_on_non_woocommerce_pages() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Mock the screen to simulate being on a different admin page.
+		set_current_screen( 'dashboard' );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Assert notice is NOT displayed.
+		$this->assertEmpty( $output );
+	}
 }
