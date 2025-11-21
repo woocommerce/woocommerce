@@ -424,8 +424,13 @@ class WC_Gateway_Paypal_Request {
 
 			try {
 				$order_data         = $this->get_paypal_order_details( $paypal_order_id );
-				$authorization_data = $order_data['purchase_units'][0]['payments']['authorizations'][0] ?? null;
-				$capture_data       = $order_data['purchase_units'][0]['payments']['captures'][0] ?? null;
+				$authorization_data = $this->get_latest_transaction_data( 
+					$order_data['purchase_units'][0]['payments']['authorizations'] ?? array() 
+				);
+				
+				$capture_data = $this->get_latest_transaction_data( 
+					$order_data['purchase_units'][0]['payments']['captures'] ?? array() 
+				);
 
 				// If the payment is already captured, store the capture ID and status, and return null as there is no authorization ID that needs to be captured.
 				if ( $capture_data && isset( $capture_data['id'] ) ) {
@@ -461,6 +466,41 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return $authorization_id;
+	}
+
+	/**
+	 * Get the latest item from an the authorizations or captures array based on update_time.
+	 *
+	 * @param array $items Array of authorizations or captures.
+	 * @return array|null The latest authorization or capture or null if array is empty or no valid update_time found.
+	 */
+	private function get_latest_transaction_data( $items ) {
+		if ( empty( $items ) || ! is_array( $items ) ) {
+			return null;
+		}
+
+		$latest_item = null;
+		$latest_time = null;
+
+		foreach ( $items as $item ) {
+			if ( empty( $item['update_time'] ) ) {
+				continue;
+			}
+		
+			$timestamp = strtotime( $item['update_time'] );
+		
+			if ( false === $timestamp ) {
+				continue;
+			}
+		
+			// If this is the first valid timestamp, or the most recent so far, track it.
+			if ( ! isset( $latest_time ) || $timestamp > $latest_time ) {
+				$latest_time = $timestamp;
+				$latest_item = $item;
+			}
+		}
+
+		return $latest_item;
 	}
 
 	/**
