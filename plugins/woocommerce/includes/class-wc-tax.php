@@ -594,7 +594,7 @@ class WC_Tax {
 		 * that will be used to calculate shipping tax rates. It fires after core
 		 * logic determines the tax class but before rates are looked up.
 		 *
-		 * @since 10.4.0
+		 * @since 10.5.0
 		 *
 		 * @param string|null      $tax_class The tax class determined by core logic. Can be null, empty string (standard), or a tax class slug.
 		 * @param WC_Cart|null     $cart      The cart object containing all cart items, or null if not available.
