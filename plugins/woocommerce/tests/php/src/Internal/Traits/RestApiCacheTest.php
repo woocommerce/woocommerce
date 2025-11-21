@@ -213,6 +213,25 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cache keys differ based on HTTP method.
+	 */
+	public function test_cache_key_depends_on_http_method() {
+		$response1 = $this->query_endpoint( 'multi_method', null, 'GET' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+
+		$response2 = $this->query_endpoint( 'multi_method', null, 'POST' );
+		$this->assertCacheHeader( $response2, 'MISS' );
+		$this->assertCount( 2, $this->get_all_cache_keys() );
+
+		$response3 = $this->query_endpoint( 'multi_method', null, 'GET' );
+		$this->assertCacheHeader( $response3, 'HIT' );
+
+		$response4 = $this->query_endpoint( 'multi_method', null, 'POST' );
+		$this->assertCacheHeader( $response4, 'HIT' );
+	}
+
+	/**
 	 * @testdox Caching is skipped when _skip_cache parameter is set.
 	 * @testWith ["1"]
 	 *           ["true"]
@@ -468,6 +487,19 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox SKIP header is added to raw array responses when cache is skipped.
+	 */
+	public function test_skip_header_added_for_raw_array_responses() {
+		$response = $this->query_endpoint( 'raw_array_response', array( '_skip_cache' => 'true' ) );
+		$this->assertCacheHeader( $response, 'SKIP' );
+		$this->assertInstanceOf( WP_REST_Response::class, $response );
+		$this->assertIsArray( $response->get_data() );
+		$this->assertArrayHasKey( 'id', $response->get_data() );
+		$this->assertSame( 42, $response->get_data()['id'] );
+		$this->assertCount( 0, $this->get_all_cache_keys() );
+	}
+
+	/**
 	 * @testdox Response headers are cached and restored on cache hit.
 	 */
 	public function test_response_headers_are_cached() {
@@ -689,6 +721,67 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The woocommerce_rest_api_cached_headers filter cannot re-introduce always-excluded headers.
+	 */
+	public function test_filter_cannot_reintroduce_always_excluded_headers() {
+		$this->sut->response_headers['standard'] = array(
+			'Set-Cookie'      => 'session=abc123',
+			'Cache-Control'   => 'no-cache',
+			'X-Custom-Header' => 'custom-value',
+		);
+
+		$filter_callback = fn( $cached_header_names, $all_header_names )  => $all_header_names;
+		add_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10, 6 );
+
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Internal\Traits\RestApiCache::get_headers_to_cache' );
+
+		$response1 = $this->query_endpoint( 'standard' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertArrayNotHasKey( 'Set-Cookie', $cached_entry['headers'], 'Set-Cookie should not be cached even when filter returns it' );
+		$this->assertArrayNotHasKey( 'Cache-Control', $cached_entry['headers'], 'Cache-Control should not be cached even when filter returns it' );
+		$this->assertArrayHasKey( 'X-Custom-Header', $cached_entry['headers'], 'Non-excluded headers should still be cached' );
+		$this->assertEquals( 'custom-value', $cached_entry['headers']['X-Custom-Header'] );
+
+		$response2 = $this->query_endpoint( 'standard' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		$headers = $response2->get_headers();
+		$this->assertArrayNotHasKey( 'Set-Cookie', $headers, 'Set-Cookie should not be in cached response' );
+		// Cache-Control IS present because we add our own cache control headers, but it should NOT contain the original "no-cache" value.
+		$this->assertArrayHasKey( 'Cache-Control', $headers, 'Cache-Control should be present with our generated cache headers' );
+		$this->assertStringNotContainsString( 'no-cache', $headers['Cache-Control'], 'Original no-cache value should not be in Cache-Control' );
+		$this->assertStringContainsString( 'max-age', $headers['Cache-Control'], 'Our generated Cache-Control should contain max-age' );
+		$this->assertArrayHasKey( 'X-Custom-Header', $headers );
+
+		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
+	}
+
+	/**
+	 * @testdox A doing_it_wrong notice is emitted when filter tries to re-introduce always-excluded headers.
+	 */
+	public function test_doing_it_wrong_notice_when_filter_reintroduces_excluded_headers() {
+		$this->sut->response_headers['standard'] = array(
+			'Set-Cookie'      => 'session=abc123',
+			'X-Custom-Header' => 'custom-value',
+		);
+
+		$filter_callback = fn( $cached_header_names, $all_header_names )  => $all_header_names;
+		add_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10, 6 );
+
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Internal\Traits\RestApiCache::get_headers_to_cache' );
+
+		$this->query_endpoint( 'standard' );
+
+		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
+	}
+
+	/**
 	 * @testdox Setting include_headers to false in endpoint config forces exclusion mode even when controller has default inclusion list.
 	 */
 	public function test_false_include_headers_forces_exclusion_mode() {
@@ -749,15 +842,15 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->query_endpoint( 'invalid_headers' );
 	}
 
-
 	/**
 	 * Query an endpoint and return the response.
 	 *
-	 * @param string     $endpoint_name Endpoint name.
-	 * @param array|null $query_params  Optional query parameters.
+	 * @param string      $endpoint_name Endpoint name.
+	 * @param array|null  $query_params  Optional query parameters.
+	 * @param string|null $method        Optional HTTP method (default: GET).
 	 */
-	private function query_endpoint( $endpoint_name, $query_params = null ) {
-		$request = new WP_REST_Request( 'GET', "/wc/v3/rest_api_cache_test/{$endpoint_name}" );
+	private function query_endpoint( $endpoint_name, $query_params = null, $method = null ) {
+		$request = new WP_REST_Request( $method ?? 'GET', "/wc/v3/rest_api_cache_test/{$endpoint_name}" );
 		if ( ! is_null( $query_params ) ) {
 			$request->set_query_params( $query_params );
 		}
@@ -894,6 +987,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->register_cached_route( 'no_vary_by_user', array( 'vary_by_user' => false ) );
 				$this->register_cached_route( 'with_endpoint_id', array( 'endpoint_id' => 'test_endpoint' ) );
 				$this->register_cached_route( 'custom_ttl', array( 'cache_ttl' => 10 ) );
+				$this->register_multi_method_route();
 				$this->register_cached_route( 'with_endpoint_hooks', array( 'relevant_hooks' => array( 'test_endpoint_hook_for_caching' ) ) );
 				$this->register_cached_route( 'with_controller_hooks' );
 				$this->register_cached_route( 'standard' );
@@ -918,6 +1012,29 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 									$this->handle_request( $endpoint, $request );
 							},
 							$cache_args
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
+			}
+
+			private function register_multi_method_route() {
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/multi_method',
+					array(
+						'methods'             => array( 'GET', 'POST' ),
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								$method = $request->get_method();
+								return new WP_REST_Response(
+									array(
+										'id'     => 'GET' === $method ? 10 : 20,
+										'method' => $method,
+									),
+									200
+								);
+							}
 						),
 						'permission_callback' => '__return_true',
 					)

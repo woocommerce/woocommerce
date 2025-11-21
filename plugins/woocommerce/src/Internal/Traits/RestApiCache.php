@@ -18,7 +18,7 @@ use WP_REST_Response;
  *   headers (like Set-Cookie) and optionally others specified via configuration
  *   (per-controller or per-endpoint).
  * - For the purposes of caching, a request is uniquely identified by its route,
- *   query string, and user ID.
+ *   HTTP method, query string, and user ID.
  * - The VersionStringGenerator class is used to track versions of entities included
  *   in the responses (an "entity" is any object that is uniquely identified by type and id
  *   and contributes with information to be included in the response),
@@ -199,7 +199,8 @@ trait RestApiCache {
 
 		if ( $should_skip_cache ) {
 			$response = call_user_func( $callback, $request );
-			if ( $response instanceof WP_REST_Response ) {
+			if ( ! is_wp_error( $response ) ) {
+				$response = rest_ensure_response( $response );
 				$response->header( 'X-WC-Cache', 'SKIP' );
 			}
 			return $response;
@@ -513,7 +514,9 @@ trait RestApiCache {
 	 * 3. The woocommerce_rest_api_cached_headers filter is applied, receiving both the candidate
 	 *    headers list and all available headers. This allows filters to both add and remove
 	 *    headers from the caching list.
-	 * 4. Only headers from the response that are in the filtered list are returned.
+	 * 4. Always-excluded headers are enforced again post-filter to prevent filters from
+	 *    re-introducing dangerous headers like Set-Cookie.
+	 * 5. Only headers from the response that are in the filtered list are returned.
 	 *
 	 * @param array            $nominal_headers Response headers.
 	 * @param array|false      $include_headers Header names to include (false to use exclusion logic).
@@ -576,8 +579,32 @@ trait RestApiCache {
 			$this
 		);
 
-		// Step 4: Return only the headers that are in the filtered list.
+		// Step 4: Enforce always-excluded headers post-filter.
 		$filtered_header_names_lowercase = array_map( 'strtolower', $filtered_header_names );
+		$reintroduced_headers            = array_filter(
+			$filtered_header_names,
+			fn( $name ) => in_array( strtolower( $name ), $always_exclude_lowercase, true )
+		);
+
+		if ( ! empty( $reintroduced_headers ) ) {
+			wc_get_container()->get( LegacyProxy::class )->call_function(
+				'wc_doing_it_wrong',
+				__METHOD__,
+				sprintf(
+					/* translators: %s: comma-separated list of header names */
+					'The woocommerce_rest_api_cached_headers filter attempted to cache always-excluded headers: %s. These headers have been removed for security reasons.',
+					implode( ', ', $reintroduced_headers )
+				),
+				'10.5.0'
+			);
+
+			$filtered_header_names_lowercase = array_filter(
+				$filtered_header_names_lowercase,
+				fn( $name ) => ! in_array( $name, $always_exclude_lowercase, true )
+			);
+		}
+
+		// Step 5: Return only the headers that are in the filtered list.
 		return array_filter(
 			$nominal_headers,
 			fn( $name ) => in_array( strtolower( $name ), $filtered_header_names_lowercase, true ),
@@ -601,6 +628,7 @@ trait RestApiCache {
 
 		$cache_key_parts = array(
 			$request->get_route(),
+			$request->get_method(),
 			wp_json_encode( $request_query_params ),
 		);
 
@@ -634,7 +662,7 @@ trait RestApiCache {
 		 * @param array           $cache_key_parts Array of cache key information parts.
 		 * @param WP_REST_Request $request         The request object.
 		 * @param bool            $vary_by_user    Whether user ID is included in cache key.
-		 * @param string|null     $endpoint_id     Optional friendly identifier for the endpoint.
+		 * @param string|null     $endpoint_id     Optional friendly identifier for the endpoint (passed to with_cache).
 		 * @param object          $controller      The controller instance.
 		 * @return array Filtered cache key information parts.
 		 */
