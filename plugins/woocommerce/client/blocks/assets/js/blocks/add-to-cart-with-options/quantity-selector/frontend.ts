@@ -8,7 +8,7 @@ import type { HTMLElementEvent } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { getProductData } from '../frontend';
+import { getProductOrVariation } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
 
 export type Context = {
@@ -73,7 +73,7 @@ store< QuantitySelectorStore >(
 
 				const { allowZero, productId } = getContext< Context >();
 
-				const productObject = getProductData(
+				const productObject = getProductOrVariation(
 					productId,
 					selectedAttributes
 				);
@@ -82,7 +82,9 @@ store< QuantitySelectorStore >(
 					return true;
 				}
 
-				const { id, min, step } = productObject;
+				const { id, add_to_cart } = productObject;
+				const min = add_to_cart.minimum;
+				const step = add_to_cart.multiple_of;
 
 				const currentQuantity = quantity[ id ] || 0;
 
@@ -97,7 +99,7 @@ store< QuantitySelectorStore >(
 
 				const { productId } = getContext< Context >();
 
-				const productObject = getProductData(
+				const productObject = getProductOrVariation(
 					productId,
 					selectedAttributes
 				);
@@ -106,7 +108,9 @@ store< QuantitySelectorStore >(
 					return true;
 				}
 
-				const { id, max, step } = productObject;
+				const { id, add_to_cart } = productObject;
+				const max = add_to_cart.maximum;
+				const step = add_to_cart.multiple_of;
 
 				const currentQuantity = quantity[ id ] || 0;
 
@@ -137,7 +141,7 @@ store< QuantitySelectorStore >(
 				const { productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
-				const productObject = getProductData(
+				const productObject = getProductOrVariation(
 					productId,
 					selectedAttributes
 				);
@@ -145,7 +149,10 @@ store< QuantitySelectorStore >(
 				let newValue = currentValue + 1;
 
 				if ( productObject ) {
-					const { max, min, step } = productObject;
+					const { add_to_cart } = productObject;
+					const max = add_to_cart.maximum;
+					const min = add_to_cart.minimum;
+					const step = add_to_cart.multiple_of;
 					newValue = currentValue + step;
 					newValue = Math.max( min, Math.min( max, newValue ) );
 				}
@@ -170,7 +177,7 @@ store< QuantitySelectorStore >(
 				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
-				const productObject = getProductData(
+				const productObject = getProductOrVariation(
 					productId,
 					selectedAttributes
 				);
@@ -178,7 +185,10 @@ store< QuantitySelectorStore >(
 				let newValue = currentValue - 1;
 
 				if ( productObject ) {
-					const { max, min, step } = productObject;
+					const { add_to_cart } = productObject;
+					const max = add_to_cart.maximum;
+					const min = add_to_cart.minimum;
+					const step = add_to_cart.multiple_of;
 					newValue = currentValue - step;
 					if ( allowZero && newValue < min && currentValue === min ) {
 						newValue = 0;
@@ -204,7 +214,7 @@ store< QuantitySelectorStore >(
 				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
-				const productObject = getProductData(
+				const productObject = getProductOrVariation(
 					productId,
 					selectedAttributes
 				);
@@ -214,7 +224,7 @@ store< QuantitySelectorStore >(
 				}
 
 				const isValueNaN = Number.isNaN( event.target.valueAsNumber );
-				const { min } = productObject;
+				const min = productObject.add_to_cart.minimum;
 
 				if (
 					allowZero &&

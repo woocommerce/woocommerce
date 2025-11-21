@@ -14,11 +14,12 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 /**
  * Internal dependencies
  */
-import { getProductData } from '../frontend';
+import { getProductOrVariation } from '../frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
+import type { ProductsStoreState } from '../types';
 import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
@@ -41,6 +42,32 @@ setStyles();
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
+const { state: productState } = store< { state: ProductsStoreState } >(
+	'woocommerce/products'
+);
+
+/**
+ * Get an attribute value from a variation's attributes array.
+ *
+ * @param attributes    - Array of attribute objects with name and value.
+ * @param attributeName - The attribute name to look up.
+ * @return The attribute value, or undefined if not found.
+ */
+const getVariationAttributeValue = (
+	attributes: Array< { name: string; value: string } >,
+	attributeName: string
+): string | undefined => {
+	return attributes.find(
+		( attr ) => attr.name.toLowerCase() === attributeName.toLowerCase()
+	)?.value;
+};
 
 /**
  * Check if the attribute value is valid given the other selected attributes and
@@ -79,23 +106,27 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const { products } = getConfig( 'woocommerce' );
+	const product = productState.products?.[ productDataState.productId ];
 
-	if ( ! products || ! products[ productDataState.productId ] ) {
+	if ( ! product?.variations ) {
 		return false;
 	}
 
-	const availableVariations = Object.values(
-		products[ productDataState.productId ].variations || {}
-	);
+	const availableVariations = product.variations;
 
 	// Check if there is at least one available variation matching the current
 	// selected attributes and the attribute value being checked.
 	return availableVariations.some( ( availableVariation ) => {
+		const variationAttrValue = getVariationAttributeValue(
+			availableVariation.attributes,
+			attributeName
+		);
+
 		// Skip variations that don't match the current attribute value.
 		if (
-			availableVariation.attributes[ attributeName ] !== attributeValue &&
-			availableVariation.attributes[ attributeName ] !== '' // "" is used for "any".
+			variationAttrValue?.toLowerCase() !==
+				attributeValue.toLowerCase() &&
+			variationAttrValue !== '' // "" is used for "any".
 		) {
 			return false;
 		}
@@ -104,13 +135,15 @@ const isAttributeValueValid = ( {
 		const matchingAttributes = selectedAttributes.filter(
 			( selectedAttribute ) => {
 				const availableVariationAttributeValue =
-					availableVariation.attributes[
+					getVariationAttributeValue(
+						availableVariation.attributes,
 						selectedAttribute.attribute
-					];
+					);
 				// If the current available variation matches the selected
 				// value, count it.
 				if (
-					availableVariationAttributeValue === selectedAttribute.value
+					availableVariationAttributeValue?.toLowerCase() ===
+					selectedAttribute.value.toLowerCase()
 				) {
 					return true;
 				}
@@ -156,12 +189,6 @@ export type VariableProductAddToCartWithOptionsStore =
 			watchQuantityConstraints: () => void;
 		};
 	};
-
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
 
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
@@ -257,15 +284,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 			},
 			setSelectedVariationId: () => {
-				const { products } = getConfig( 'woocommerce' );
+				const product =
+					productState.products?.[ productDataState.productId ];
 
-				const variations =
-					products?.[ productDataState.productId ].variations;
+				if ( ! product?.variations ) {
+					return;
+				}
 
 				const { selectedAttributes } = getContext< Context >();
 
-				const matchedVariation = getMatchedVariation(
-					variations,
+				const matchedVariationId = getMatchedVariation(
+					product.variations,
 					selectedAttributes
 				);
 
@@ -275,32 +304,28 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						{},
 						{ lock: universalLock }
 					);
-				const matchedVariationId =
-					matchedVariation?.variation_id || null;
 				productDataActions.setVariationId( matchedVariationId );
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { products } = getConfig( 'woocommerce' );
+				const product =
+					productState.products?.[ productDataState.productId ];
 
-				if ( ! products || ! products[ productDataState.productId ] ) {
+				if ( ! product?.variations ) {
 					return;
 				}
 
-				const variations =
-					products[ productDataState.productId ].variations;
-
 				const { selectedAttributes } = getContext< Context >();
 
-				const matchedVariation = getMatchedVariation(
-					variations,
+				const matchedVariationId = getMatchedVariation(
+					product.variations,
 					selectedAttributes
 				);
 
 				const { errorMessages } = getConfig();
 
-				if ( ! matchedVariation?.variation_id ) {
+				if ( ! matchedVariationId ) {
 					actions.addError( {
 						code: 'variableProductMissingAttributes',
 						message:
@@ -311,7 +336,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				if ( ! matchedVariation?.is_in_stock ) {
+				// Look up the full variation data to check stock status.
+				// Note: If productVariations isn't populated (load_variations not called),
+				// this check is skipped. This relies on QuantitySelector.php calling
+				// load_variations() for variable products.
+				const matchedVariation =
+					productState.productVariations?.[ matchedVariationId ];
+
+				if ( matchedVariation && ! matchedVariation.is_in_stock ) {
 					actions.addError( {
 						code: 'variableProductOutOfStock',
 						message: errorMessages?.variableProductOutOfStock || '',
@@ -335,7 +367,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { selectedAttributes } = getContext< Context >();
 
-				const productObject = getProductData(
+				const productObject = getProductOrVariation(
 					productDataState.productId,
 					selectedAttributes
 				);
@@ -343,7 +375,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( productObject ) {
 					const { quantity } = getContext< Context >();
 					const currentValue = quantity[ productObject.id ];
-					const { min, max } = productObject;
+					const min = productObject.add_to_cart.minimum;
+					const max = productObject.add_to_cart.maximum;
 
 					let newValue = currentValue;
 					if ( currentValue < min ) {

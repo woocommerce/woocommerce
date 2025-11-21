@@ -57,7 +57,7 @@ trait ProductsStore {
 			$state['products'] = array();
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent=' . $parent_id );
+		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id );
 
 		if ( empty( $response['body'] ) ) {
 			return $state;
@@ -84,19 +84,19 @@ trait ProductsStore {
 	public function load_variations( $parent_id ) {
 		$state = wp_interactivity_state( self::$store_namespace );
 
-		if ( ! isset( $state['products'] ) ) {
-			$state['products'] = array();
+		if ( ! isset( $state['productVariations'] ) ) {
+			$state['productVariations'] = array();
 		}
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent=' . $parent_id . '&type=variation' );
+		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
 
 		if ( empty( $response['body'] ) ) {
 			return $state;
 		}
 
-		// Re-key array by product ID and merge into state.
-		$keyed_variations  = array_column( $response['body'], null, 'id' );
-		$state['products'] = array_merge( $state['products'], $keyed_variations );
+		// Re-key array by variation ID and merge into state.
+		$keyed_variations           = array_column( $response['body'], null, 'id' );
+		$state['productVariations'] = array_merge( $state['productVariations'], $keyed_variations );
 
 		return wp_interactivity_state( self::$store_namespace, $state );
 	}

@@ -5,8 +5,6 @@ import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
-	ProductData,
-	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
@@ -19,7 +17,7 @@ import { getMatchedVariation } from '../../base/utils/variations/get-matched-var
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
-import type { NormalizedProductData, NormalizedVariationData } from './types';
+import type { StoreAPIProduct, ProductsStoreState } from './types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -56,9 +54,9 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productState } = store( 'woocommerce/products' );
-
-console.log( productState );
+const { state: productState } = store< { state: ProductsStoreState } >(
+	'woocommerce/products'
+);
 
 const { state: wooState } = store< WooCommerce >(
 	'woocommerce',
@@ -72,51 +70,41 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
-export const getProductData = (
+/**
+ * Get a product or its matched variation based on selected attributes.
+ *
+ * @param id                 - The product ID.
+ * @param selectedAttributes - The selected attribute values.
+ * @return The product or matched variation, or null if not found.
+ */
+export const getProductOrVariation = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
-): NormalizedProductData | NormalizedVariationData | null => {
-	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
+): StoreAPIProduct | null => {
+	const { products, productVariations } = productState;
 
-	if ( ! products || ! products[ id ] ) {
+	const product = products?.[ id ];
+	if ( ! product ) {
 		return null;
 	}
 
-	let product = {
-		id,
-		...products[ id ],
-	} as ProductData & { id: number };
-
+	// For variable products, find matching variation
 	if (
 		product.type === 'variable' &&
-		selectedAttributes &&
-		selectedAttributes.length > 0
+		selectedAttributes?.length > 0 &&
+		product.variations
 	) {
-		const matchedVariation = getMatchedVariation(
+		const matchedVariationId = getMatchedVariation(
 			product.variations,
 			selectedAttributes
 		);
-		if ( matchedVariation ) {
-			product = {
-				...matchedVariation,
-				id: matchedVariation.variation_id,
-				type: 'variation',
-			};
+
+		if ( matchedVariationId ) {
+			return productVariations?.[ matchedVariationId ] ?? null;
 		}
 	}
 
-	const min = typeof product.min === 'number' ? product.min : 1;
-	const max =
-		typeof product.max === 'number' ? Math.max( product.max, 0 ) : Infinity;
-	const step =
-		typeof product.step === 'number' && product.step > 0 ? product.step : 1;
-
-	return {
-		...product,
-		min,
-		max,
-		step,
-	};
+	return product;
 };
 
 export const getNewQuantity = (
@@ -160,7 +148,7 @@ export type AddToCartWithOptionsStore = {
 		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
-		productData: NormalizedProductData | NormalizedVariationData | null;
+		productData: StoreAPIProduct | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -213,7 +201,7 @@ const { actions, state } = store<
 			get productData() {
 				const { selectedAttributes } = getContext< Context >();
 
-				return getProductData(
+				return getProductOrVariation(
 					productDataState.productId,
 					selectedAttributes
 				);
@@ -230,7 +218,7 @@ const { actions, state } = store<
 				const { selectedAttributes } = getContext< Context >();
 
 				// If selected quantity is invalid, add an error.
-				const productObject = getProductData(
+				const productObject = getProductOrVariation(
 					productId,
 					selectedAttributes
 				);
@@ -238,8 +226,8 @@ const { actions, state } = store<
 				if (
 					value === 0 ||
 					( productObject &&
-						( value < productObject.min ||
-							value > productObject.max ) )
+						( value < productObject.add_to_cart.minimum ||
+							value > productObject.add_to_cart.maximum ) )
 				) {
 					const { errorMessages } = getConfig();
 
@@ -256,13 +244,11 @@ const { actions, state } = store<
 				options: SetQuantityOptions = {}
 			) {
 				const context = getContext< Context >();
-				const { products } = getConfig(
-					'woocommerce'
-				) as WooCommerceConfig;
-				const variations = products?.[ productId ].variations;
+				const { products } = productState;
+				const variations = products?.[ productId ]?.variations;
 
 				if ( variations ) {
-					const variationIds = Object.keys( variations );
+					const variationIds = variations.map( ( v ) => v.id );
 					// Set the quantity for all variations, so when switching
 					// variations the quantity persists.
 					const idsToUpdate = [ productId, ...variationIds ];
@@ -338,7 +324,7 @@ const { actions, state } = store<
 
 				const productType = productDataState.variationId
 					? 'variation'
-					: getProductData( id, selectedAttributes )?.type;
+					: getProductOrVariation( id, selectedAttributes )?.type;
 
 				if ( ! productType ) {
 					return;
