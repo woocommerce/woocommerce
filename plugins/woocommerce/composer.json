@@ -159,10 +159,10 @@
 			"sh ./bin/build-lib.sh"
 		],
 		"phpstan": [
-			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=3G"
+			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G"
 		],
 		"phpstan:baseline": [
-			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=3G --generate-baseline=phpstan-baseline.neon"
+			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G --generate-baseline=phpstan-baseline.neon"
 		]
 	},
 	"extra": {
