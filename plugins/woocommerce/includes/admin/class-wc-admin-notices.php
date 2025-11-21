@@ -63,7 +63,7 @@ class WC_Admin_Notices {
 
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
-		add_action( 'wp_loaded', array( __CLASS__, 'add_redirect_download_method_notice' ) );
+		add_action( 'update_option_woocommerce_file_download_method', array( __CLASS__, 'add_redirect_download_method_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
 		add_action( 'admin_init', array( __CLASS__, 'maybe_remove_legacy_api_removal_notice' ), 20 );
 
