@@ -412,8 +412,14 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
-		// If the authorization ID is not found, try to retrieve it from the PayPal order details as a fallback for backwards compatibility.
-		if ( ! $authorization_id ) {
+		// If authorization ID is marked as 'none', it means we already checked and found no authorization data.
+		// Return null to avoid repeated API calls.
+		if ( 'none' === $authorization_id ) {
+			return null;
+		}
+
+	    // If the authorization ID is not found, try to retrieve it from the PayPal order details as a fallback for backwards compatibility.
+		if ( empty( $authorization_id ) ) {
 			WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
 
 			try {
@@ -442,7 +448,10 @@ class WC_Gateway_Paypal_Request {
 					$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
 					$order->save();
 				} else {
+					// Store 'none' to prevent repeated API calls for orders with no authorization data.
 					WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
+					$order->update_meta_data( '_paypal_authorization_id', 'none' );
+					$order->save();
 					return null;
 				}
 			} catch ( Exception $e ) {
