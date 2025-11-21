@@ -163,7 +163,7 @@ class WC_Gateway_Paypal_Request {
 			$response_data = json_decode( $body, true );
 
 			// Handle PayPal notices based on response status.
-			$this->maybe_add_or_remove_notice( $http_code );
+			$this->maybe_add_or_remove_notice( $http_code, $response_data );
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
@@ -1335,10 +1335,11 @@ class WC_Gateway_Paypal_Request {
 	 * or clears it if the status indicates success (200, 201).
 	 *
 	 * @param int $http_code The HTTP status code from the PayPal API response.
+	 * @param array $response_data The response data from the PayPal API response.
 	 * @return void
 	 */
-	protected function maybe_add_or_remove_notice( $http_code ) {
-		if ( 422 === $http_code ) {
+	protected function maybe_add_or_remove_notice( $http_code, $response_data ) {
+		if ( 422 === $http_code && $response_data['details'][0]['issue'] === 'PAYEE_ACCOUNT_LOCKED_OR_CLOSED' || $response_data['details'][0]['issue'] === 'PAYEE_ACCOUNT_RESTRICTED' ) {
 			WC_Gateway_Paypal_Notices::set_account_restriction_flag();
 		} elseif ( in_array( $http_code, array( 200, 201 ), true ) ) {
 			WC_Gateway_Paypal_Notices::clear_account_restriction_flag();
