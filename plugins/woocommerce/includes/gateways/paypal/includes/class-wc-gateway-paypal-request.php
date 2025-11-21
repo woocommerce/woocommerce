@@ -405,8 +405,10 @@ class WC_Gateway_Paypal_Request {
 	private function get_authorization_id_for_capture( $order ) {
 		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
 		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
+		$capture_id       = $order->get_meta( '_paypal_capture_id', true );
 
-		if ( ! $paypal_order_id ) {
+		// If the PayPal order ID is not found or the capture ID is already set, return null.
+		if ( ! $paypal_order_id || ! empty( $capture_id ) ) {
 			return null;
 		}
 
