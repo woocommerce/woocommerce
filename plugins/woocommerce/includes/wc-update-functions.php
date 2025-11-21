@@ -3142,7 +3142,7 @@ function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
 /**
  * Autoload frequently used options for performance improvements (see https://github.com/woocommerce/woocommerce/issues/61855)
  *
- * `$autoload_options` frequently used options that may already be in the db but with `autoload = off`.
+ * `$autoload_options` are frequently used options that may already be in the db but with `autoload = off`.
  * `$feature_options` are frequently used feature flag options that are not stored in the db.
  *
  * @return void
@@ -3151,27 +3151,27 @@ function wc_update_1050_enable_autoload_options() {
 	global $wpdb;
 
 	$autoload_options = array(
-		// Page ID options `off` in the db.
+		// Page ID options with autoload `off` in the db.
 		'woocommerce_myaccount_page_id',
 		'woocommerce_cart_page_id',
 		'woocommerce_checkout_page_id',
 		'woocommerce_terms_page_id',
-		// Feature status options `off` in the db.
+		// Feature status options with autoload `off` in the db.
 		'woocommerce_show_marketplace_suggestions',
 		'woocommerce_enable_delayed_account_creation',
-	);
-
-	$feature_options = array(
 		'wc_feature_woocommerce_brands_enabled',
-		'woocommerce_feature_fulfillments_enabled',
-		'woocommerce_feature_marketplace_enabled',
-		'woocommerce_feature_cart_checkout_blocks_enabled',
 		'wc_connect_taxes_enabled',
 		'woocommerce_logs_logging_enabled',
 		'woocommerce_email_improvements_existing_store_enabled',
+		'woocommerce_custom_orders_table_data_sync_enabled',
+	);
+
+	$feature_options = array(
+		'woocommerce_feature_fulfillments_enabled',
+		'woocommerce_feature_marketplace_enabled',
 		'woocommerce_feature_push_notifications_enabled',
 		'woocommerce_feature_agentic_checkout_enabled',
-		'woocommerce_custom_orders_table_data_sync_enabled',
+		'woocommerce_feature_cart_checkout_blocks_enabled',
 	);
 
 	$features_controller = wc_get_container()->get( FeaturesController::class );
@@ -3184,14 +3184,13 @@ function wc_update_1050_enable_autoload_options() {
 		}
 	}
 
-	// Build placeholders for each item.
-	$placeholders        = array_fill( 0, count( $autoload_options ), '%s' );
-	$placeholders_string = implode( ',', $placeholders );
+	$placeholders = implode( ', ', array_fill( 0, count( $autoload_options ), '%s' ) );
 
 	$wpdb->query(
 		$wpdb->prepare(
-			'UPDATE ' . $wpdb->options . " SET autoload = 'on' WHERE option_name IN (" . $placeholders_string . ')',
-			$autoload_options
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"UPDATE {$wpdb->options} SET autoload = 'on' WHERE option_name IN ($placeholders)",
+			...$autoload_options
 		)
 	);
 }
