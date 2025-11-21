@@ -29,6 +29,36 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	];
 
 	/**
+	 * Registers the push token custom post type.
+	 *
+	 * @since 10.5.0
+	 * @internal
+	 */
+	public static function register_post_type() {
+		register_post_type(
+			PushToken::POST_TYPE,
+			array(
+				'labels'              => array(
+					'name'          => __( 'Push Tokens', 'woocommerce' ),
+					'singular_name' => __( 'Push Token', 'woocommerce' ),
+				),
+				'public'              => false,
+				'publicly_queryable'  => false,
+				'show_ui'             => false,
+				'show_in_menu'        => false,
+				'query_var'           => false,
+				'rewrite'             => false,
+				'capability_type'     => 'post',
+				'has_archive'         => false,
+				'hierarchical'        => false,
+				'supports'            => array( 'author' ),
+				'can_export'          => false,
+				'delete_with_user'    => true,
+			)
+		);
+	}
+
+	/**
 	 * Returns array of meta keys whose persistence should be managed via
 	 * class setters.
 	 *

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
@@ -173,6 +174,63 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 
 		// Subsequent call should return cached true.
 		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should return cached true value' );
+	}
+
+	/**
+	 * @testdox Tests that push_token post type is registered when enabled.
+	 */
+	public function test_it_registers_push_token_post_type_when_enabled() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( true );
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->register();
+
+		// Expect potential incorrect usage notices from WooCommerce initialization.
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
+		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
+
+		// Trigger the init action to register the post type.
+		do_action( 'init' );
+
+		// Verify the post type is registered.
+		$this->assertTrue( post_type_exists( PushToken::POST_TYPE ), 'Push token post type should be registered' );
+
+		// Verify the post type configuration.
+		$post_type_object = get_post_type_object( PushToken::POST_TYPE );
+		$this->assertNotNull( $post_type_object );
+		$this->assertFalse( $post_type_object->public );
+		$this->assertFalse( $post_type_object->publicly_queryable );
+		$this->assertTrue( $post_type_object->delete_with_user );
+	}
+
+	/**
+	 * @testdox Tests that push_token post type is not registered when disabled.
+	 */
+	public function test_it_does_not_register_push_token_post_type_when_disabled() {
+		$this->set_up_features_controller_mock( false );
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->register();
+
+		// Expect potential incorrect usage notices from WooCommerce initialization.
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
+		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
+
+		// Count existing hooks before init.
+		$hooks_before = $GLOBALS['wp_filter']['init'] ?? null;
+
+		// Trigger the init action.
+		do_action( 'init' );
+
+		// The post type should not be registered since the feature is disabled.
+		// Note: We can't unregister a post type once it's registered in other tests,
+		// so we check that the register hook wasn't added.
+		$this->assertFalse( has_action( 'init', array( 'Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore', 'register_post_type' ) ) );
 	}
 
 	/**

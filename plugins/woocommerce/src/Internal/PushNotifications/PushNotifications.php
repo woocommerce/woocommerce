@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Exception;
@@ -52,6 +53,8 @@ class PushNotifications {
 		if ( ! $this->should_be_enabled() ) {
 			return;
 		}
+
+		add_action( 'init', array( PushTokensDataStore::class, 'register_post_type' ) );
 
 		// Library endpoints and scheduled tasks will be registered here.
 	}
