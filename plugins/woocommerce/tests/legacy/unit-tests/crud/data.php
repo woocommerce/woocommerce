@@ -634,9 +634,9 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$object->save_meta_data();
 
 		// Get original meta IDs.
-		$original_meta         = $object->get_meta_data();
-		$original_meta_id_1    = $original_meta[0]->id;
-		$original_meta_id_2    = $original_meta[1]->id;
+		$original_meta      = $object->get_meta_data();
+		$original_meta_id_1 = $original_meta[0]->id;
+		$original_meta_id_2 = $original_meta[1]->id;
 
 		// Set cache mode before cloning.
 		$object->set_clone_mode( WC_Data::CLONE_MODE_CACHE );
