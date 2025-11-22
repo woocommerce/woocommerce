@@ -42,6 +42,16 @@ module.exports = {
 				'@woocommerce/onboarding',
 			],
 		},
+		'dashboard-section': {
+			pluginTemplatesPath: join(
+				__dirname,
+				'variants/dashboard-section'
+			),
+			blockTemplatesPath: null,
+			customScripts: {
+				postinstall: 'rm block.json && composer install',
+			},
+		},
 		'table-column': {
 			pluginTemplatesPath: join( __dirname, 'variants/table-column' ),
 			blockTemplatesPath: null,

@@ -18,8 +18,9 @@ Navigate to the newly created folder and get started.
 
 ```bash
 cd my-extension-name
-npm install # Install dependencies
-npm run build # Build the javascript
+npm run start # Watch the javascript for changes
+
+# Local development with wp-env (optional)
 npm -g i @wordpress/env # If you don't already have wp-env
 wp-env start # Start Wordpress environment
 ```
@@ -28,9 +29,13 @@ See the new plugin activated from the WordPress plugins page and navigate to `wp
 
 ## Variations
 
+```bash
+npx @wordpress/create-block -t @woocommerce/create-woo-extension --variant=add-report my-extension-name
+```
+
 - `add-report` - Create a "Hello World" report page.
 - `add-task` - Create a custom task for the onboarding task list.
-- `dashboard-section` - Adding a custom "section" to the new dashboard area.
+- `dashboard-section` - Adding a custom "section" to the Analytics Overview area.
 - `table-column` - An example of how to add column(s) to any report.
 
 ## Development

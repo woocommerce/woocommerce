@@ -20,39 +20,39 @@ import {
 /**
  * Internal dependencies
  */
-import UpcomingEvents from './upcoming-events';
-import GlobalPrices from './global-prices';
+import UpcomingEvents from './components/UpcomingEvents';
+import GlobalPrices from './components/GlobalPrices';
 
 const config = [
 	{
-		title: 'Granny Smith',
-		events: [ { date: '2020-01-02', title: 'The Granny Apple Fair' } ],
+		title: __( 'Granny Smith', '{{textdomain}}' ),
+		events: [ { date: '2020-01-02', title: __( 'The Granny Apple Fair', '{{textdomain}}' ) } ],
 	},
 	{
-		title: 'Golden Delicious',
+		title: __( 'Golden Delicious', '{{textdomain}}' ),
 		events: [
-			{ date: '2020-04-15', title: 'Madrid Manzana Dorada' },
-			{ date: '2020-05-07', title: 'Golden CO Golden Delicious Day' },
+			{ date: '2020-04-15', title: __( 'Madrid Manzana Dorada', '{{textdomain}}' ) },
+			{ date: '2020-05-07', title: __( 'Golden CO Golden Delicious Day', '{{textdomain}}' ) },
 		],
 	},
 	{
-		title: 'Gala',
-		events: [ { date: '2020-08-31', title: 'The Met Gala Pomme' } ],
+		title: __( 'Gala', '{{textdomain}}' ),
+		events: [ { date: '2020-08-31', title: __( 'The Met Gala Pomme', '{{textdomain}}' ) } ],
 	},
 	{
-		title: 'Braeburn',
-		events: [ { date: '2020-08-18', title: 'Mt. Aoraki Crisper' } ],
+		title: __( 'Braeburn', '{{textdomain}}' ),
+		events: [ { date: '2020-08-18', title: __( 'Mt. Aoraki Crisper', '{{textdomain}}' ) } ],
 	},
 ];
 
 const dashboardItems = [
 	{
-		title: 'Upcoming Events',
+		title: __( 'Upcoming Events', '{{textdomain}}' ),
 		component: UpcomingEvents,
 		key: 'upcoming-events',
 	},
 	{
-		title: 'Global Apple Prices',
+		title: __( 'Global Apple Prices', '{{textdomain}}' ),
 		component: GlobalPrices,
 		key: 'global-prices',
 	},
@@ -75,11 +75,11 @@ class Section extends Component {
 
 		return (
 			<EllipsisMenu
-				label={ __( 'Choose Apples', 'woocommerce-admin' ) }
+				label={ __( 'Choose Items', '{{textdomain}}' ) }
 				renderContent={ ( { onToggle } ) => (
 					<Fragment>
 						<MenuTitle>
-							{ __( 'My Apples', 'woocommerce-admin' ) }
+							{ __( 'Dashboard Items', '{{textdomain}}' ) }
 						</MenuTitle>
 						{ dashboardItems.map( ( item ) => (
 							<MenuItem
@@ -133,14 +133,14 @@ class Section extends Component {
 
 addFilter(
 	'woocommerce_dashboard_default_sections',
-	'plugin-domain',
+	'{{textdomain}}',
 	( sections ) => {
 		return [
 			...sections,
 			{
-				key: 'dashboard-apples',
+				key: '{{slugSnakeCase}}-dashboard',
 				component: Section,
-				title: __( 'Apples', 'woocommerce-admin' ),
+				title: __( '{{title}}', '{{textdomain}}' ),
 				isVisible: true,
 				icon: wordpress,
 				hiddenBlocks: [],

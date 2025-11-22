@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { flatten } from 'lodash';
+import { __ } from '@wordpress/i18n';
 
 /**
  * WooCommerce dependencies
@@ -22,11 +23,11 @@ const UpcomingEvents = ( { config } ) => {
 	);
 	return (
 		<TableCard
-			title={ 'Upcoming Events' }
+			title={ __( 'Upcoming Events', '{{textdomain}}' ) }
 			headers={ [
-				{ label: 'Variety', key: 'variety' },
-				{ label: 'Event', key: 'event' },
-				{ label: 'Date', key: 'date' },
+				{ label: __( 'Variety', '{{textdomain}}' ), key: 'variety' },
+				{ label: __( 'Event', '{{textdomain}}' ), key: 'event' },
+				{ label: __( 'Date', '{{textdomain}}' ), key: 'date' },
 			] }
 			rows={ rows }
 			rowsPerPage={ 100 }
