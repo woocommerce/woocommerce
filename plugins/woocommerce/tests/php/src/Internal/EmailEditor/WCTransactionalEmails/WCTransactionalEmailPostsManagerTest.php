@@ -112,6 +112,111 @@ class WCTransactionalEmailPostsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_email_type_from_post_id returns null for non-existent post ID.
+	 */
+	public function testGetEmailTypeFromPostIdReturnsNullForNonExistentPostId(): void {
+		$this->assertNull( $this->template_manager->get_email_type_from_post_id( 999999 ) );
+	}
+
+	/**
+	 * Test that get_email_post returns null when post exists in options but not in posts table.
+	 */
+	public function testGetEmailPostReturnsNullWhenPostExistsInOptionsButNotInPostsTable(): void {
+		// Save a post ID that doesn't exist in posts table.
+		$this->template_manager->save_email_template_post_id( 'test_email', 999999 );
+
+		$email_post = $this->template_manager->get_email_post( 'test_email' );
+
+		$this->assertNull( $email_post );
+	}
+
+	/**
+	 * Test that get_email_template_post_id returns false for non-existent email type.
+	 */
+	public function testGetEmailTemplatePostIdReturnsFalseForNonExistentEmailType(): void {
+		$post_id = $this->template_manager->get_email_template_post_id( 'non_existent_email' );
+
+		$this->assertFalse( $post_id );
+	}
+
+	/**
+	 * Test that get_email_type_class_name_from_template_name converts correctly.
+	 */
+	public function testGetEmailTypeClassNameFromTemplateNameConvertsCorrectly(): void {
+		$test_cases = array(
+			'customer_new_account'      => 'WC_Email_Customer_New_Account',
+			'admin_new_order'           => 'WC_Email_Admin_New_Order',
+			'customer_processing_order' => 'WC_Email_Customer_Processing_Order',
+			'simple_name'               => 'WC_Email_Simple_Name',
+			'single'                    => 'WC_Email_Single',
+		);
+
+		foreach ( $test_cases as $template_name => $expected_class_name ) {
+			$result = $this->template_manager->get_email_type_class_name_from_template_name( $template_name );
+			$this->assertEquals( $expected_class_name, $result );
+		}
+	}
+
+	/**
+	 * Test that get_email_type_class_name_from_email_id returns correct class name for valid email ID.
+	 */
+	public function testGetEmailTypeClassNameFromEmailIdReturnsCorrectClassNameForValidEmailId(): void {
+		$email_id = 'new_order';
+
+		$result = $this->template_manager->get_email_type_class_name_from_email_id( $email_id );
+
+		$this->assertEquals( 'WC_Email_New_Order', $result );
+	}
+
+	/**
+	 * Test that get_email_type_class_name_from_post_id returns correct class name for valid post ID.
+	 */
+	public function testGetEmailTypeClassNameFromPostIdReturnsCorrectClassNameForValidPostId(): void {
+		$post_id = $this->factory->post->create();
+		$this->template_manager->save_email_template_post_id( 'new_order', $post_id );
+
+		$this->assertEquals( 'new_order', $this->template_manager->get_email_type_from_post_id( $post_id ) );
+
+		$result = $this->template_manager->get_email_type_class_name_from_post_id( $post_id );
+		$this->assertEquals( 'WC_Email_New_Order', $result );
+
+		// clean up.
+		$this->template_manager->delete_email_template( 'new_order' );
+
+		$this->assertNull( $this->template_manager->get_email_type_from_post_id( $post_id ) );
+	}
+
+	/**
+	 * Test that updating an existing email template works correctly.
+	 */
+	public function testUpdatingExistingEmailTemplateWorksCorrectly(): void {
+		$post_id_1 = $this->factory->post->create();
+		$post_id_2 = $this->factory->post->create();
+
+		// Save initial template.
+		$this->template_manager->save_email_template_post_id( 'test_email', $post_id_1 );
+		$this->assertEquals( $post_id_1, $this->template_manager->get_email_template_post_id( 'test_email' ) );
+
+		// Update with new post ID.
+		$this->template_manager->save_email_template_post_id( 'test_email', $post_id_2 );
+		$this->assertEquals( $post_id_2, $this->template_manager->get_email_template_post_id( 'test_email' ) );
+	}
+
+	/**
+	 * Test that the WC_OPTION_NAME constant is used correctly.
+	 */
+	public function testWCOptionNameConstantIsUsedCorrectly(): void {
+		$post_id    = $this->factory->post->create();
+		$email_type = 'test_email_constant';
+
+		$this->template_manager->save_email_template_post_id( $email_type, $post_id );
+
+		// Check that the option was saved with the correct name format.
+		$expected_option_name = 'woocommerce_email_templates_' . $email_type . '_post_id';
+		$this->assertEquals( $post_id, get_option( $expected_option_name ) );
+	}
+
+	/**
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {
