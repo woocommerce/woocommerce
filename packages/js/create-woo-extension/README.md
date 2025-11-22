@@ -26,6 +26,13 @@ wp-env start # Start Wordpress environment
 
 See the new plugin activated from the WordPress plugins page and navigate to `wp-admin/admin.php?page=wc-admin&path=%2Fmy-extension-name` to check it out.
 
+## Variations
+
+- `add-report` - Create a "Hello World" report page.
+- `add-task` - Create a custom task for the onboarding task list.
+- `dashboard-section` - Adding a custom "section" to the new dashboard area.
+- `table-column` - An example of how to add column(s) to any report.
+
 ## Development
 
 For development on this tool itself, you can also install from a local directory.

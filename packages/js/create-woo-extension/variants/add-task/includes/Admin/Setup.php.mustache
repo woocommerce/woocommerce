@@ -1,0 +1,75 @@
+<?php
+
+namespace {{slugPascalCase}}\Admin;
+
+use {{slugPascalCase}}\Task;
+
+/**
+ * {{slugPascalCase}} Setup Class
+ */
+class Setup {
+	/**
+	 * Constructor.
+	 *
+	 * @since 1.0.0
+	 */
+	public function __construct() {
+		add_action( 'init', array( $this, 'add_task' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
+	}
+
+	/**
+	 * Register the custom task.
+	 *
+	 * @since 1.0.0
+	 */
+	public function add_task() {
+		if ( ! class_exists( 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists' ) ) {
+			return;
+		}
+
+		$task_lists = \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists::instance();
+
+		// Add the task to the extended list.
+		$task_lists::add_task(
+			'extended',
+			new Task(
+				$task_lists::get_list( 'extended' ),
+			)
+		);
+	}
+
+	/**
+	 * Register scripts to fill the task content on the frontend.
+	 *
+	 * @since 1.0.0
+	 */
+	public function register_scripts() {
+		if (
+			! class_exists( 'Automattic\WooCommerce\Internal\Admin\Loader' ) ||
+			! \Automattic\WooCommerce\Admin\PageController::is_admin_or_embed_page()
+		) {
+			return;
+		}
+
+		$script_path       = '/build/index.js';
+		$script_asset_path = dirname( {{slugSnakeCase}}_MAIN_PLUGIN_FILE ) . '/build/index.asset.php';
+		$script_asset      = file_exists( $script_asset_path )
+			? require $script_asset_path
+			: array(
+				'dependencies' => array(),
+				'version'      => filemtime( $script_path ),
+			);
+		$script_url        = plugins_url( $script_path, {{slugSnakeCase}}_MAIN_PLUGIN_FILE );
+
+		wp_register_script(
+			'{{slug}}',
+			$script_url,
+			$script_asset['dependencies'],
+			$script_asset['version'],
+			true
+		);
+
+		wp_enqueue_script( '{{slug}}' );
+	}
+}

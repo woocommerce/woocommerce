@@ -29,14 +29,14 @@ class Setup {
 		}
 
 		$script_path       = '/build/index.js';
-		$script_asset_path = dirname( MAIN_PLUGIN_FILE ) . '/build/index.asset.php';
+		$script_asset_path = dirname( {{slugSnakeCase}}_MAIN_PLUGIN_FILE ) . '/build/index.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 		? require $script_asset_path
 		: array(
 			'dependencies' => array(),
 			'version'      => filemtime( $script_path ),
 		);
-		$script_url        = plugins_url( $script_path, MAIN_PLUGIN_FILE );
+		$script_url        = plugins_url( $script_path, {{slugSnakeCase}}_MAIN_PLUGIN_FILE );
 
 		wp_register_script(
 			'{{slug}}',
@@ -48,10 +48,10 @@ class Setup {
 
 		wp_register_style(
 			'{{slug}}',
-			plugins_url( '/build/index.css', MAIN_PLUGIN_FILE ),
+			plugins_url( '/build/index.css', {{slugSnakeCase}}_MAIN_PLUGIN_FILE ),
 			// Add any dependencies styles may have, such as wp-components.
 			array(),
-			filemtime( dirname( MAIN_PLUGIN_FILE ) . '/build/index.css' )
+			filemtime( dirname( {{slugSnakeCase}}_MAIN_PLUGIN_FILE ) . '/build/index.css' )
 		);
 
 		wp_enqueue_script( '{{slug}}' );

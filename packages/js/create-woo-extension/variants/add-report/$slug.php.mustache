@@ -37,7 +37,7 @@ use {{slugPascalCase}}\Admin\Setup;
  */
 function {{slugSnakeCase}}_missing_wc_notice() {
 	/* translators: %s WC download URL link. */
-	echo '<div class="error"><p><strong>' . sprintf( esc_html__( '{{title}} requires WooCommerce to be installed and active. You can download %s here.', '{{slugSnakeCase}}' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
+	echo '<div class="error"><p><strong>' . sprintf( esc_html__( '{{title}} requires WooCommerce to be installed and active. You can download %s here.', '{{textdomain}}' ), '<a href="https://woocommerce.com/" target="_blank">WooCommerce</a>' ) . '</strong></p></div>';
 }
 
 register_activation_hook( __FILE__, '{{slugSnakeCase}}_activate' );
@@ -79,14 +79,14 @@ if ( ! class_exists( '{{slugSnakeCase}}' ) ) :
 		 * Cloning is forbidden.
 		 */
 		public function __clone() {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', '{{slugSnakeCase}}' ), $this->version );
+			wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', '{{textdomain}}' ), $this->version );
 		}
 
 		/**
 		 * Unserializing instances of this class is forbidden.
 		 */
 		public function __wakeup() {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', '{{slugSnakeCase}}' ), $this->version );
+			wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', '{{textdomain}}' ), $this->version );
 		}
 
 		/**
@@ -115,7 +115,7 @@ add_action( 'plugins_loaded', '{{slugSnakeCase}}_init', 10 );
  * @since {{version}}
  */
 function {{slugSnakeCase}}_init() {
-	load_plugin_textdomain( '{{slugSnakeCase}}', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( '{{textdomain}}', false, plugin_basename( dirname( __FILE__ ) ) . '/languages' );
 
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		add_action( 'admin_notices', '{{slugSnakeCase}}_missing_wc_notice' );
