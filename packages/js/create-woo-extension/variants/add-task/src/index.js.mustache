@@ -4,7 +4,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Card, CardBody } from '@wordpress/components';
+import { Card, CardBody, CardFooter, Button } from '@wordpress/components';
 import { onboardingStore } from '@woocommerce/data';
 import { registerPlugin } from '@wordpress/plugins';
 import { useDispatch } from '@wordpress/data';
@@ -30,19 +30,20 @@ const TaskContent = ( { onComplete, task } ) => {
 				{ isActioned ? 'actioned' : 'not actioned' }
 				<br />
 				<br />
-				<div>
-					<button
-						onClick={ () => {
-							actionTask( '{{slugSnakeCase}}-task' );
-						} }
-					>
-						{ __( 'Action task', '{{textdomain}}' ) }
-					</button>
-					<button onClick={ onComplete }>
-						{ __( 'Complete', '{{textdomain}}' ) }
-					</button>
-				</div>
 			</CardBody>
+			<CardFooter>
+				<Button
+					onClick={ () => {
+						actionTask( '{{slugSnakeCase}}-task' );
+					} }
+					variant='primary'
+				>
+					{ __( 'Action task', '{{textdomain}}' ) }
+				</Button>
+				<Button onClick={ onComplete } variant='secondary'>
+					{ __( 'Complete', '{{textdomain}}' ) }
+				</Button>
+			</CardFooter>
 		</Card>
 	);
 };

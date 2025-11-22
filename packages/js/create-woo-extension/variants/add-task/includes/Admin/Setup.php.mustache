@@ -14,29 +14,7 @@ class Setup {
 	 * @since 1.0.0
 	 */
 	public function __construct() {
-		add_action( 'init', array( $this, 'add_task' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts' ) );
-	}
-
-	/**
-	 * Register the custom task.
-	 *
-	 * @since 1.0.0
-	 */
-	public function add_task() {
-		if ( ! class_exists( 'Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists' ) ) {
-			return;
-		}
-
-		$task_lists = \Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists::instance();
-
-		// Add the task to the extended list.
-		$task_lists::add_task(
-			'extended',
-			new Task(
-				$task_lists::get_list( 'extended' ),
-			)
-		);
 	}
 
 	/**
