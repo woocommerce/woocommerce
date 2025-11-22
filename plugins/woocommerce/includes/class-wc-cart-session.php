@@ -623,7 +623,7 @@ final class WC_Cart_Session {
 				 *
 				 * Mirrors the cart add_to_cart behavior to ensure reorders respect sold individually rules.
 				 *
-				 * @since 1.0.0
+				 * @since 10.5.0
 				 * @param int   $quantity      The enforced quantity (default 1).
 				 * @param int   $original_qty  The originally requested quantity.
 				 * @param int   $product_id    The parent product ID.
@@ -636,7 +636,7 @@ final class WC_Cart_Session {
 				/**
 				 * Filter whether an item matching a sold individually product is found in cart during Order Again.
 				 *
-				 * @since 1.0.0
+				 * @since 10.5.0
 				 * @param bool  $found_in_cart Whether an identical cart line exists.
 				 * @param int   $product_id    The parent product ID.
 				 * @param int   $variation_id  The variation ID (0 if none).
@@ -650,7 +650,7 @@ final class WC_Cart_Session {
 					/**
 					 * Filters message about more than 1 product being added to cart during Order Again.
 					 *
-					 * @since 1.0.0
+					 * @since 10.5.0
 					 * @param string     $message      Message.
 					 * @param WC_Product $product_data Product data.
 					 */
