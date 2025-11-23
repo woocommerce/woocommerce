@@ -28,14 +28,14 @@ abstract class WC_Data {
 	/**
 	 * Clone mode constant: Duplicate mode clears meta IDs (default, for backward compatibility).
 	 *
-	 * @since 10.2.0
+	 * @since 10.4.0
 	 */
 	const CLONE_MODE_DUPLICATE = 'duplicate';
 
 	/**
 	 * Clone mode constant: Cache mode preserves meta IDs.
 	 *
-	 * @since 10.2.0
+	 * @since 10.4.0
 	 */
 	const CLONE_MODE_CACHE = 'cache';
 
@@ -125,7 +125,7 @@ abstract class WC_Data {
 	/**
 	 * Clone mode for controlling meta ID handling during clone operations.
 	 *
-	 * @since 10.2.0
+	 * @since 10.4.0
 	 * @var string Either CLONE_MODE_DUPLICATE (default, clears meta IDs) or CLONE_MODE_CACHE (preserves meta IDs).
 	 */
 	protected $clone_mode = self::CLONE_MODE_DUPLICATE;
@@ -203,7 +203,7 @@ abstract class WC_Data {
 	 * - CLONE_MODE_DUPLICATE (default): Clears meta IDs for duplication workflows
 	 * - CLONE_MODE_CACHE: Preserves meta IDs for caching workflows
 	 *
-	 * @since 10.2.0
+	 * @since 10.4.0
 	 * @param string $mode One of the CLONE_MODE_* constants.
 	 * @throws InvalidArgumentException If an invalid mode is provided.
 	 */
@@ -217,7 +217,7 @@ abstract class WC_Data {
 	/**
 	 * Get the current clone mode.
 	 *
-	 * @since 10.2.0
+	 * @since 10.4.0
 	 * @return string The current clone mode (one of the CLONE_MODE_* constants).
 	 */
 	public function get_clone_mode() {
