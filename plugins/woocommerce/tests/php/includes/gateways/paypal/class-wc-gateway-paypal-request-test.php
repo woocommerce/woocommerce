@@ -255,11 +255,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				'input'    => '/checkout#payment',
 				'expected' => home_url() . '/checkout#payment',
 			),
-			'url_with_different_domain' => array(
+			'url_with_different_domain'            => array(
 				'input'    => 'https://external.com/callback',
 				'expected' => 'https://external.com/callback',
 			),
-			'url_with_html_entities' => array(
+			'url_with_html_entities'               => array(
 				'input'    => '/checkout?product=Test<Product>',
 				'expected' => home_url() . '/checkout?product=TestProduct',
 			),
