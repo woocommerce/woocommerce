@@ -211,8 +211,10 @@ export const updateReleaseBranchChangelogs = async (
 		);
 
 		const noEntriesWritten =
-			changelogOutput.includes( 'No changes were found' ) ||
-			changelogOutput.includes( 'no changes with content for this write' );
+			changelogOutput.includes( `No changes were found` ) ||
+			changelogOutput.includes(
+				`no changes with content for this write`
+			);
 
 		Logger.notice( `Changelog command output: ${ changelogOutput }` );
 		Logger.notice( `Committing deleted files in ${ tmpRepoPath }` );
@@ -228,7 +230,9 @@ export const updateReleaseBranchChangelogs = async (
 			await git.commit(
 				`Delete changelog files from ${ version } release`
 			);
-			deletionCommitHash = ( await git.raw( [ 'rev-parse', 'HEAD' ] ) ).trim();
+			deletionCommitHash = (
+				await git.raw( [ 'rev-parse', 'HEAD' ] )
+			 ).trim();
 			Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
 		} else {
 			Logger.notice(
@@ -263,7 +267,7 @@ export const updateReleaseBranchChangelogs = async (
 				`Changelog update was committed directly to ${ releaseBranch }`
 			);
 			return {
-				deletionCommitHash: deletionCommitHash,
+				deletionCommitHash,
 				prNumber: -1,
 			};
 		}
@@ -292,7 +296,7 @@ export const updateReleaseBranchChangelogs = async (
 		}
 
 		return {
-			deletionCommitHash: deletionCommitHash,
+			deletionCommitHash,
 			prNumber: pullRequest.number,
 		};
 	} catch ( e ) {
