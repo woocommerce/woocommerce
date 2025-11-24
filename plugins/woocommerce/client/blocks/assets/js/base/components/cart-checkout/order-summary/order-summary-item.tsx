@@ -133,6 +133,26 @@ const OrderSummaryItem = ( {
 		validation: productPriceValidation,
 	} );
 
+	const productPriceScreenReaderDefault = sprintf(
+		/* translators: %1$d is the number of items, %2$s is the item name and %3$s is the total price including the currency symbol. */
+		_n(
+			'Total price for %1$d %2$s item: %3$s',
+			'Total price for %1$d %2$s items: %3$s',
+			quantity,
+			'woocommerce'
+		),
+		quantity,
+		name,
+		formatPrice( subtotalPrice, totalsCurrency )
+	);
+
+	const productPriceScreenReaderFormat = applyCheckoutFilter( {
+		filterName: 'cartItemPrice',
+		defaultValue: productPriceScreenReaderDefault,
+		extensions,
+		arg: { ...arg, context: 'summaryScreenReader' },
+	} );
+
 	const cartItemClassNameFilter = applyCheckoutFilter( {
 		filterName: 'cartItemClass',
 		defaultValue: '',
@@ -204,18 +224,7 @@ const OrderSummaryItem = ( {
 				<ProductMetadata { ...productMetaProps } />
 			</div>
 			<span className="screen-reader-text">
-				{ sprintf(
-					/* translators: %1$d is the number of items, %2$s is the item name and %3$s is the total price including the currency symbol. */
-					_n(
-						'Total price for %1$d %2$s item: %3$s',
-						'Total price for %1$d %2$s items: %3$s',
-						quantity,
-						'woocommerce'
-					),
-					quantity,
-					name,
-					formatPrice( subtotalPrice, totalsCurrency )
-				) }
+				{ productPriceScreenReaderFormat }
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"
