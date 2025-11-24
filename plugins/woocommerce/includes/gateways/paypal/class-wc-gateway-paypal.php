@@ -212,7 +212,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
 
 				$buttons = new WC_Gateway_Paypal_Buttons( $this );
-				if ( $buttons->is_enabled() ) {
+				if ( $buttons->is_enabled() && ! $this->needs_setup() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
 
@@ -341,6 +341,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Check if the gateway is available for use.
+	 *
+	 * @return bool
+	 */
+	public function is_available() {
+		// For Orders v2, require a valid email address to be set up in the gateway settings.
+		if ( $this->should_use_orders_v2() && $this->needs_setup() ) {
+			return false;
+		}
+
+		return parent::is_available();
+	}
+
+	/**
 	 * Return whether or not this gateway still requires setup to function.
 	 *
 	 * When this gateway is toggled on via AJAX, if this returns true a
@@ -350,7 +364,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function needs_setup() {
-		return ! is_email( $this->email );
+		return empty( $this->email ) || ! is_email( $this->email );
 	}
 
 	/**
