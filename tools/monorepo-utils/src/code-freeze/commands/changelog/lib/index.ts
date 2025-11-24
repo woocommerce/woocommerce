@@ -219,9 +219,22 @@ export const updateReleaseBranchChangelogs = async (
 		//Checkout pnpm-lock.yaml to prevent issues in case of an out of date lockfile.
 		await git.checkout( 'pnpm-lock.yaml' );
 		await git.add( 'plugins/woocommerce/changelog/' );
-		await git.commit( `Delete changelog files from ${ version } release` );
-		const deletionCommitHash = await git.raw( [ 'rev-parse', 'HEAD' ] );
-		Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
+
+		// Check if any files were actually deleted.
+		const status = await git.status();
+		let deletionCommitHash = '';
+
+		if ( status.staged.length > 0 ) {
+			await git.commit(
+				`Delete changelog files from ${ version } release`
+			);
+			deletionCommitHash = ( await git.raw( [ 'rev-parse', 'HEAD' ] ) ).trim();
+			Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
+		} else {
+			Logger.notice(
+				'No changelog files to delete, skipping deletion commit'
+			);
+		}
 
 		Logger.notice( `Updating readme.txt in ${ tmpRepoPath }` );
 		await updateReleaseChangelogs(
@@ -250,7 +263,7 @@ export const updateReleaseBranchChangelogs = async (
 				`Changelog update was committed directly to ${ releaseBranch }`
 			);
 			return {
-				deletionCommitHash: deletionCommitHash.trim(),
+				deletionCommitHash: deletionCommitHash,
 				prNumber: -1,
 			};
 		}
@@ -279,7 +292,7 @@ export const updateReleaseBranchChangelogs = async (
 		}
 
 		return {
-			deletionCommitHash: deletionCommitHash.trim(),
+			deletionCommitHash: deletionCommitHash,
 			prNumber: pullRequest.number,
 		};
 	} catch ( e ) {
@@ -306,6 +319,15 @@ export const updateBranchChangelog = async (
 ): Promise< number > => {
 	const { owner, name, version } = options;
 	const { deletionCommitHash, prNumber } = releaseBranchChanges;
+
+	// Skip if there were no changelog files to delete
+	if ( ! deletionCommitHash ) {
+		Logger.notice(
+			`No deletion commit hash found, skipping changelog deletion from ${ releaseBranch }`
+		);
+		return -1;
+	}
+
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
