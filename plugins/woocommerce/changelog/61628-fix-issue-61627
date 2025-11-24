@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix fatal error in needs_shipping() when order contains permanently deleted product
