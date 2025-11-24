@@ -3140,6 +3140,28 @@ function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
 }
 
 /**
+ * Update brand permalink setting to take into account obsolete 'woocommerce_prepend_shop_page_to_urls' option, removed in WC 2.0.3.
+ * This migration ensures any installations that still have this old option set will have their brand permalink updated appropriately.
+ *
+ * @since 10.5.0
+ */
+function wc_update_1050_migrate_brand_permalink_setting() {
+	if ( 'yes' !== get_option( 'woocommerce_prepend_shop_page_to_urls' ) ) {
+		return;
+	}
+
+	$shop_page_id = wc_get_page_id( 'shop' );
+	$shop_slug    = ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : 'shop';
+
+	if ( ! $shop_slug ) {
+		return;
+	}
+
+	$slug = trailingslashit( $shop_slug ) . __( 'brand', 'woocommerce' );
+	update_option( 'woocommerce_brand_permalink', $slug );
+}
+
+/**
  * Autoload frequently used options for performance improvements (see https://github.com/woocommerce/woocommerce/issues/61855)
  *
  * `$autoload_options` are frequently used options that may already be in the db but with `autoload = off`.
@@ -3188,7 +3210,7 @@ function wc_update_1050_enable_autoload_options() {
 
 	$wpdb->query(
 		$wpdb->prepare(
-			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			"UPDATE {$wpdb->options} SET autoload = 'on' WHERE option_name IN ($placeholders)",
 			...$autoload_options
 		)
