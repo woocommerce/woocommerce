@@ -45,9 +45,9 @@ class ProductCacheController {
 		add_action( 'before_delete_post', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
 
 		// Handle post meta updates (third-party plugins updating via postmeta API).
-		add_action( 'updated_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
-		add_action( 'added_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
-		add_action( 'deleted_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
+		add_action( 'updated_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 2 );
+		add_action( 'added_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 2 );
+		add_action( 'deleted_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 2 );
 
 		// Handle direct stock/sales updates (which uses direct SQL and cache manipulation, bypassing standard meta hooks)
 		// In the future, update WC_Product_Data_Store_CPT::update_product_stock() and
@@ -97,13 +97,10 @@ class ProductCacheController {
 	 *
 	 * @param int    $meta_id The ID of the metadata entry.
 	 * @param int    $object_id The ID of the object the metadata is for.
-	 * @param string $meta_key The meta key.
-	 * @param mixed  $meta_value The meta value.
 	 * @return void
 	 */
-	public function maybe_invalidate_product_cache_by_meta( $meta_id, $object_id, $meta_key, $meta_value ) {
-		// Only invalidate for product-related meta keys.
-		if ( str_starts_with( $meta_key, '_' ) && get_post_type( $object_id ) === 'product' ) {
+	public function maybe_invalidate_product_cache_by_meta( $meta_id, $object_id ) {
+		if ( get_post_type( $object_id ) === 'product' ) {
 			$this->maybe_invalidate_product_cache( $object_id );
 		}
 	}
