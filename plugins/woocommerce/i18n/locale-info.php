@@ -332,7 +332,7 @@ return array(
 		'locales'        => $locales['XOF'],
 	),
 	'BG' => array(
-		'currency_code'  => 'BGN',
+		'currency_code'  => 'EUR',
 		'currency_pos'   => 'right_space',
 		'thousand_sep'   => ' ',
 		'decimal_sep'    => ',',
