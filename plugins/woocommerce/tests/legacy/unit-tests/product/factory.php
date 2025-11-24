@@ -84,7 +84,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 * This is critical for the caching feature to work correctly.
 	 */
 	public function test_factory_cached_product_preserves_meta_ids() {
-		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME ) ) {
 			$this->markTestSkipped( 'Product instance caching feature is not enabled.' );
 		}
 
@@ -178,7 +178,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 * Test that cache is used when retrieving the same product multiple times.
 	 */
 	public function test_factory_uses_cache_for_repeated_retrievals() {
-		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME ) ) {
 			$this->markTestSkipped( 'Product instance caching feature is not enabled.' );
 		}
 
@@ -213,7 +213,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 * Test that cache is bypassed when feature is disabled.
 	 */
 	public function test_factory_bypasses_cache_when_feature_disabled() {
-		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME ) ) {
 			$this->markTestSkipped( 'Product instance caching feature is enabled. This test requires it to be disabled.' );
 		}
 

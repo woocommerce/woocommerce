@@ -14,6 +14,11 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 class ProductCacheController {
 
 	/**
+	 * Feature flag name for product instance caching.
+	 */
+	public const FEATURE_NAME = 'product_instance_caching';
+
+	/**
 	 * The product cache instance.
 	 *
 	 * @var ProductCache
@@ -41,6 +46,13 @@ class ProductCacheController {
 		add_action( 'updated_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
 		add_action( 'added_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
 		add_action( 'deleted_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
+
+		// Handle direct stock/sales updates (which uses direct SQL and cache manipulation, bypassing standard meta hooks)
+		// In the future, update WC_Product_Data_Store_CPT::update_product_stock() and
+		// update_product_sales() to trigger standard WordPress updated_post_meta hooks instead
+		// of requiring specific hooks here.
+		add_action( 'woocommerce_updated_product_stock', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
+		add_action( 'woocommerce_updated_product_sales', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
 	}
 
 	/**
@@ -54,13 +66,13 @@ class ProductCacheController {
 	 * @return void
 	 */
 	public function maybe_set_product_cache_group_as_non_persistent() {
-		if ( FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
 			wp_cache_add_non_persistent_groups( array( $this->product_cache->get_object_type() ) );
 		}
 	}
 
 	public function maybe_invalidate_product_cache( $post_id ) {
-		if ( ! FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
 			return;
 		}
 
