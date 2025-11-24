@@ -18,7 +18,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import './gutenberg-styles/resizable-frame.scss';
+import './resizable-frame.scss';
 
 // Removes the inline styles in the drag handles.
 const HANDLE_STYLES_OVERRIDE = {
