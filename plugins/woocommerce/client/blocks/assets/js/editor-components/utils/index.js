@@ -53,18 +53,6 @@ const getProductsRequests = ( {
 	return requests;
 };
 
-const uniqBy = ( array, iteratee ) => {
-	const seen = new Map();
-	return array.filter( ( item ) => {
-		const key = iteratee( item );
-		if ( ! seen.has( key ) ) {
-			seen.set( key, item );
-			return true;
-		}
-		return false;
-	} );
-};
-
 /**
  * Get a promise that resolves to a list of products from the Store API.
  *
@@ -83,15 +71,16 @@ export const getProducts = ( {
 	const requests = getProductsRequests( { selected, search, queryArgs } );
 
 	return Promise.all( requests.map( ( path ) => apiFetch( { path } ) ) )
-		.then( ( data ) => {
-			const flatData = data.flat();
-			const products = uniqBy( flatData, ( item ) => item.id );
-			const list = products.map( ( product ) => ( {
-				...product,
-				parent: 0,
-			} ) );
-			return list;
-		} )
+		.then( ( data ) => [
+			...new Map(
+				data.flatMap( ( products ) =>
+					products.map( ( item ) => [
+						item.id,
+						{ ...item, parent: 0 },
+					] )
+				)
+			).values(),
+		] )
 		.catch( ( e ) => {
 			throw e;
 		} );
@@ -169,10 +158,13 @@ export const getProductTags = ( { selected = [], search } ) => {
 	const requests = getProductTagsRequests( { selected, search } );
 
 	return Promise.all( requests.map( ( path ) => apiFetch( { path } ) ) ).then(
-		( data ) => {
-			const flatData = data.flat();
-			return uniqBy( flatData, ( item ) => item.id );
-		}
+		( data ) => [
+			...new Map(
+				data.flatMap( ( tags ) =>
+					tags.map( ( item ) => [ item.id, item ] )
+				)
+			).values(),
+		]
 	);
 };
 
