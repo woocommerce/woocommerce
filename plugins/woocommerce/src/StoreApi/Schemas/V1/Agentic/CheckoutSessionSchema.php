@@ -530,8 +530,10 @@ class CheckoutSessionSchema extends AbstractSchema {
 
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$quantity    = $item->get_quantity();
-			$base_amount = $this->amount_to_cents( $item->get_subtotal() );
-			$discount    = $this->amount_to_cents( $item->get_subtotal() - $item->get_total() );
+			$item_subtotal = (float) $item->get_subtotal();
+			$item_total    = (float) $item->get_total();
+			$base_amount = $this->amount_to_cents( $item_subtotal );
+			$discount    = $this->amount_to_cents( $item_subtotal - $item_total );
 			$subtotal    = $base_amount - $discount;
 			$tax         = $this->amount_to_cents( $item->get_total_tax() );
 			$total       = $subtotal + $tax;
@@ -790,8 +792,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		// Items base amount.
 		$items_base = 0;
 		foreach ( $order->get_items() as $item ) {
-			$product     = $item->get_product();
-			$items_base += $product->get_price() * $item->get_quantity();
+			$items_base += (float) $item->get_subtotal();
 		}
 		$totals[] = [
 			'type'         => TotalType::ITEMS_BASE_AMOUNT,
