@@ -4,11 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
     "content-hash": "3aa316fbb8a87613846bb8dd45006c5a",
-=======
     "content-hash": "c433f2e0744104f73ad290380d910d2d",
->>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
     "packages": [
         {
             "name": "automattic/block-delimiter",
