@@ -199,4 +199,92 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	public function return_blog_token( $value ) {
 		return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
 	}
+
+	/**
+	 * Data provider for normalize_url_for_paypal test scenarios.
+	 *
+	 * @return array
+	 */
+	public function provider_normalize_url_scenarios() {
+		return array(
+			'absolute_url_https'                   => array(
+				'input'    => 'https://example.com/checkout',
+				'expected' => 'https://example.com/checkout',
+			),
+			'absolute_url_http'                    => array(
+				'input'    => 'http://example.com/checkout',
+				'expected' => 'http://example.com/checkout',
+			),
+			'relative_url_with_leading_slash'      => array(
+				'input'    => '/checkout',
+				'expected' => home_url() . '/checkout',
+			),
+			'relative_url_without_leading_slash'   => array(
+				'input'    => 'checkout',
+				'expected' => home_url() . '/checkout',
+			),
+			'url_with_encoded_ampersand'           => array(
+				'input'    => 'https://example.com/checkout?foo=bar&#038;baz=qux',
+				'expected' => 'https://example.com/checkout?foo=bar&baz=qux',
+			),
+			'url_with_multiple_encoded_ampersands' => array(
+				'input'    => 'https://example.com/checkout?a=1&#038;b=2&#038;c=3',
+				'expected' => 'https://example.com/checkout?a=1&b=2&c=3',
+			),
+			'relative_url_with_encoded_ampersand'  => array(
+				'input'    => '/checkout?foo=bar&#038;baz=qux',
+				'expected' => home_url() . '/checkout?foo=bar&baz=qux',
+			),
+			'url_starting_with_home_url'           => array(
+				'input'    => home_url() . '/checkout',
+				'expected' => home_url() . '/checkout',
+			),
+			'url_starting_with_home_url_and_encoded_ampersand' => array(
+				'input'    => home_url() . '/checkout?foo=bar&#038;baz=qux',
+				'expected' => home_url() . '/checkout?foo=bar&baz=qux',
+			),
+			'empty_string'                         => array(
+				'input'    => '',
+				'expected' => home_url() . '/',
+			),
+			'url_with_query_params'                => array(
+				'input'    => '/checkout?order_id=123&key=abc',
+				'expected' => home_url() . '/checkout?order_id=123&key=abc',
+			),
+			'url_with_fragment'                    => array(
+				'input'    => '/checkout#payment',
+				'expected' => home_url() . '/checkout#payment',
+			),
+			'url_with_different_domain'            => array(
+				'input'    => 'https://external.com/callback',
+				'expected' => 'https://external.com/callback',
+			),
+			'url_with_html_entities'               => array(
+				'input'    => '/checkout?product=Test<Product>',
+				'expected' => home_url() . '/checkout?product=TestProduct',
+			),
+		);
+	}
+
+	/**
+	 * Test normalize_url_for_paypal with various URL scenarios.
+	 *
+	 * @dataProvider provider_normalize_url_scenarios
+	 *
+	 * @param string $input    The input URL to normalize.
+	 * @param string $expected The expected normalized URL.
+	 */
+	public function test_normalize_url_for_paypal( $input, $expected ) {
+		$gateway = new WC_Gateway_Paypal();
+		$request = new WC_Gateway_Paypal_Request( $gateway );
+
+		// Use reflection to access the private method.
+		$reflection = new ReflectionClass( $request );
+		$method     = $reflection->getMethod( 'normalize_url_for_paypal' );
+		$method->setAccessible( true );
+
+		$result = $method->invokeArgs( $request, array( $input ) );
+
+		$this->assertEquals( $expected, $result );
+	}
 }
