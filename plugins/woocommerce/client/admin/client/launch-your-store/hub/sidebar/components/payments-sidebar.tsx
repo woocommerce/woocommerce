@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
@@ -17,6 +17,7 @@ import {
 } from '@wordpress/components';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 import { recordEvent } from '@woocommerce/tracks';
+import type { TaskType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -30,6 +31,7 @@ import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
+import { getLysTasklist } from '../tasklist';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
@@ -42,10 +44,49 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		isLoading,
 	} = useOnboardingContext();
 
-	const { context } = props;
-	const payments_task = context.tasklist?.tasks?.find(
-		( task ) => task.id === 'payments'
+	// Fetch payments task using getLysTasklist
+	const [ payments_task, setPaymentsTask ] = useState< TaskType | undefined >(
+		undefined
 	);
+
+	useEffect( () => {
+		let isMounted = true;
+
+		const fetchPaymentsTask = async () => {
+			try {
+				const tasklist = await getLysTasklist();
+
+				// Validate that fullLysTaskList is an array
+				if ( ! Array.isArray( tasklist?.fullLysTaskList ) ) {
+					// eslint-disable-next-line no-console
+					console.error(
+						'Invalid tasklist data: fullLysTaskList is not an array'
+					);
+					return;
+				}
+
+				const task = tasklist.fullLysTaskList.find(
+					( t ) => t.id === 'payments'
+				);
+
+				// Only update state if component is still mounted
+				if ( isMounted ) {
+					setPaymentsTask( task );
+				}
+			} catch ( error ) {
+				// Log errors but maintain current state
+				// eslint-disable-next-line no-console
+				console.error( 'Error fetching payments task:', error );
+			}
+		};
+
+		fetchPaymentsTask();
+
+		// Cleanup function to prevent state updates after unmount
+		return () => {
+			isMounted = false;
+		};
+	}, [ isWooPaymentsActive, wooPaymentsRecentlyActivated ] ); // Refresh when WooPayments state changes
 
 	const currentStepIndex = allSteps.findIndex(
 		( step ) => step.id === currentStep?.id
