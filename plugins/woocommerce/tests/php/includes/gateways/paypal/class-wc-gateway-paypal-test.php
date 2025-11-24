@@ -284,18 +284,18 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 				'email'              => null,
 				'expected_available' => false,
 			),
-			// 'email is empty string' => array(
-			// 	'email'              => '',
-			// 	'expected_available' => false,
-			// ),
-			// 'email is invalid'      => array(
-			// 	'email'              => 'example@',
-			// 	'expected_available' => false,
-			// ),
-			// 'email is valid'        => array(
-			// 	'email'              => 'merchant@example.com',
-			// 	'expected_available' => true,
-			// ),
+			'email is empty string'  => array(
+				'email'              => '',
+				'expected_available' => false,
+			),
+			'email is invalid'       => array(
+				'email'              => 'example@',
+				'expected_available' => false,
+			),
+			'email is valid'         => array(
+				'email'              => 'merchant@example.com',
+				'expected_available' => true,
+			),
 		);
 	}
 }
