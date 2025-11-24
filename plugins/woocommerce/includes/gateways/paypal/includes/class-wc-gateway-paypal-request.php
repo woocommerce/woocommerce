@@ -788,7 +788,6 @@ class WC_Gateway_Paypal_Request {
 	 * @return string Normalized URL.
 	 */
 	private function normalize_url_for_paypal( $url ) {
-		$url = esc_url_raw( $url );
 		// Replace encoded ampersand with actual ampersand.
 		// In some cases, the URL may contain encoded ampersand but PayPal expects the actual ampersand.
 		// PayPal request fails if the URL contains encoded ampersand.
@@ -796,23 +795,23 @@ class WC_Gateway_Paypal_Request {
 
 		// If the URL is already the home URL, return it.
 		if ( strpos( $url, home_url() ) === 0 ) {
-			return $url;
+			return esc_url_raw( $url );
 		}
 
 		// Return the URL if it is already absolute (contains ://).
 		if ( strpos( $url, '://' ) !== false ) {
-			return $url;
+			return esc_url_raw( $url );
 		}
 
 		$home_url = untrailingslashit( home_url() );
 
 		// If the URL is relative (starts with /), prepend the home URL.
 		if ( strpos( $url, '/' ) === 0 ) {
-			return $home_url . $url;
+			return esc_url_raw( $home_url . $url );
 		}
 
 		// Prepend home URL with a slash.
-		return $home_url . '/' . $url;
+		return esc_url_raw( $home_url . '/' . $url );
 	}
 
 	/**
