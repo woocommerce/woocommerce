@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Abilities API integration tests for WordPress 6.9+ compatibility with backward compatibility for earlier versions.
