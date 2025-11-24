@@ -2468,7 +2468,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$needs_shipping = false;
 
 		foreach ( $this->get_items() as $item ) {
-			if ( is_a( $item, 'WC_Order_Item_Product' ) && $item->get_product()->needs_shipping() ) {
+			if ( ! is_a( $item, 'WC_Order_Item_Product' ) ) {
+				continue;
+			}
+
+			$product = $item->get_product();
+			if ( is_a( $product, 'WC_Product' ) && $product->needs_shipping() ) {
 				$needs_shipping = true;
 				break;
 			}
