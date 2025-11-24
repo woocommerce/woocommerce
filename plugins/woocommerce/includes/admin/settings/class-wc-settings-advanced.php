@@ -5,6 +5,7 @@
  * @package  WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -445,6 +446,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_keys_section() {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		if ( ! $features_controller->feature_is_enabled( 'rest_api_caching' ) ) {
+			return array();
+		}
+
 		$has_object_cache = wp_using_ext_object_cache();
 
 		$settings = array(

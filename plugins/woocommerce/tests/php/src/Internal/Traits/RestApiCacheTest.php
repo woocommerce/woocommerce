@@ -58,6 +58,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
 		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
 
@@ -1567,5 +1568,41 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$response2 = $this->server->dispatch( $request );
 
 		$this->assertCacheHeader( $response2, 'MATCH' );
+	}
+
+	/**
+	 * @testdox Caching is completely bypassed when rest_api_caching feature is disabled (even with caching options enabled).
+	 */
+	public function test_caching_bypassed_when_feature_disabled() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'no' );
+		$this->sut->reinitialize_cache();
+
+		$this->reset_rest_server();
+
+		$response = $this->query_endpoint( 'single_entity' );
+
+		$this->assertCount( 0, $this->get_all_cache_keys() );
+
+		$headers = $response->get_headers();
+		$this->assertArrayNotHasKey( 'X-WC-Cache', $headers );
+		$this->assertArrayNotHasKey( 'ETag', $headers );
+		$this->assertArrayNotHasKey( 'Cache-Control', $headers );
+
+		$this->assertEquals( $this->sut->responses['single_entity'], $response->get_data() );
+	}
+
+	/**
+	 * @testdox rest_send_nocache_headers filter is not registered when feature is disabled.
+	 */
+	public function test_nocache_headers_filter_not_registered_when_feature_disabled() {
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'no' );
+
+		// Create a new controller with the feature disabled to test that the filter is not registered.
+		$controller = $this->create_test_controller();
+
+		$has_filter = has_filter( 'rest_send_nocache_headers', array( $controller, 'handle_rest_send_nocache_headers' ) );
+		$this->assertFalse( $has_filter );
 	}
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Traits;
 
 use Automattic\WooCommerce\Internal\Caches\VersionStringGenerator;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\CallbackUtil;
 use WP_REST_Request;
@@ -145,10 +146,24 @@ trait RestApiCache {
 	private $is_handling_cached_endpoint = false;
 
 	/**
+	 * Whether the REST API caching feature is enabled.
+	 *
+	 * @var bool
+	 */
+	private bool $rest_api_caching_feature_enabled = false;
+
+	/**
 	 * Initialize the trait.
 	 * This MUST be called from the controller's constructor.
 	 */
 	protected function initialize_rest_api_cache(): void {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+
+		$this->rest_api_caching_feature_enabled = $features_controller->feature_is_enabled( 'rest_api_caching' );
+		if ( ! $this->rest_api_caching_feature_enabled ) {
+			return;
+		}
+
 		$generator = wc_get_container()->get( VersionStringGenerator::class );
 
 		$backend_caching_enabled        = 'yes' === get_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
@@ -174,7 +189,9 @@ trait RestApiCache {
 	 * @return callable Wrapped callback.
 	 */
 	protected function with_cache( callable $callback, array $config = array() ): callable {
-		return fn( $request ) => $this->handle_cacheable_request( $request, $callback, $config );
+		return $this->rest_api_caching_feature_enabled
+			? fn( $request ) => $this->handle_cacheable_request( $request, $callback, $config )
+			: fn( $request ) => call_user_func( $callback, $request );
 	}
 
 	/**
