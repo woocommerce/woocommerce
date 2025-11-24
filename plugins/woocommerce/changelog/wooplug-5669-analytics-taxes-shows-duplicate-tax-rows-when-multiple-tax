@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix issue where tax reports where showing duplicate rows for orders with multiple tax rates.
