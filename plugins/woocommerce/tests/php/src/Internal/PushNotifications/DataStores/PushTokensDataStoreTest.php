@@ -636,7 +636,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_APPLE );
+		$initial_value = get_post_meta( $push_token->get_id(), 'platform', true );
+		$this->assertEquals( PushToken::PLATFORM_APPLE, $initial_value );
 
 		$data_store->update_meta(
 			$push_token,

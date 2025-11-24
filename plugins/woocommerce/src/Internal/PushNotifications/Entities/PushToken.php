@@ -90,6 +90,7 @@ class PushToken extends WC_Data {
 	 * Constructs the class and initializes the data store.
 	 */
 	public function __construct() {
+		parent::__construct();
 		$this->data_store = new PushTokensDataStore();
 	}
 
@@ -183,18 +184,6 @@ class PushToken extends WC_Data {
 		}
 
 		return $instance;
-	}
-
-	/**
-	 * Sets the ID.
-	 *
-	 * @param int $id The id of the token post.
-	 * @throws InvalidArgumentException If ID is <= 0.
-	 *
-	 * @since 10.4.0
-	 */
-	public function set_id( $id ) {
-		$this->id = $id;
 	}
 
 	/**
