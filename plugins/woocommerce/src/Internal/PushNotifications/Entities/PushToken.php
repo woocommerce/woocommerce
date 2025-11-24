@@ -277,17 +277,6 @@ class PushToken extends WC_Data {
 	}
 
 	/**
-	 * Gets the ID.
-	 *
-	 * @return int|null
-	 *
-	 * @since 10.4.0
-	 */
-	public function get_id() {
-		return $this->id;
-	}
-
-	/**
 	 * Gets the user ID.
 	 *
 	 * @return int|null
