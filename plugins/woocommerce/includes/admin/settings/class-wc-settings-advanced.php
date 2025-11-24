@@ -47,12 +47,18 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 */
 	protected function get_own_sections() {
 		$sections = array(
-			''                => __( 'Page setup', 'woocommerce' ),
-			'keys'            => __( 'REST API', 'woocommerce' ),
-			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
-			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
-			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
+			''     => __( 'Page setup', 'woocommerce' ),
+			'keys' => __( 'REST API keys', 'woocommerce' ),
 		);
+
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		if ( $features_controller->feature_is_enabled( 'rest_api_caching' ) ) {
+			$sections['rest_api_caching'] = __( 'REST API caching', 'woocommerce' );
+		}
+
+		$sections['webhooks']        = __( 'Webhooks', 'woocommerce' );
+		$sections['legacy_api']      = __( 'Legacy API', 'woocommerce' );
+		$sections['woocommerce_com'] = __( 'WooCommerce.com', 'woocommerce' );
 
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
 			$sections['blueprint'] = __( 'Blueprint (beta)', 'woocommerce' );
@@ -441,16 +447,11 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	}
 
 	/**
-	 * Get settings for the REST API (keys) section.
+	 * Get settings for the REST API caching section.
 	 *
 	 * @return array
 	 */
-	protected function get_settings_for_keys_section() {
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		if ( ! $features_controller->feature_is_enabled( 'rest_api_caching' ) ) {
-			return array();
-		}
-
+	protected function get_settings_for_rest_api_caching_section() {
 		$has_object_cache = wp_using_ext_object_cache();
 
 		$settings = array(

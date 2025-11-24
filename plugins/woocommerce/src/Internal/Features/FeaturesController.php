@@ -563,7 +563,7 @@ class FeaturesController {
 				'description'                  => sprintf(
 					/* translators: %1$s and %2$s are opening and closing <a> tags */
 					__( 'Enable backend caching and cache control headers for REST API responses via the <code>RestApiCache</code> trait. ⚙️ %1$sConfiguration%2$s', 'woocommerce' ),
-					'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) . '">',
+					'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=rest_api_caching' ) . '">',
 					'</a>'
 				),
 				'enabled_by_default'           => false,
