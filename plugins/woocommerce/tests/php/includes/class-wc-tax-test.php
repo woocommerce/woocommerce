@@ -70,6 +70,8 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Clear cart.
 		WC()->cart->empty_cart();
 
+		remove_all_filters( 'woocommerce_shipping_tax_class' );
+
 		// Clean up created products.
 		foreach ( $this->created_products as $product_id ) {
 			wp_delete_post( $product_id, true );
@@ -501,5 +503,201 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		// Should return the first tax class found in the hierarchy (reduced-rate comes before zero-rate).
 		$this->assertEquals( 'reduced-rate', $result );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter fires with correct parameters.
+	 */
+	public function test_shipping_tax_class_filter_fires_with_correct_parameters() {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+
+		$filter_called = false;
+		$filter_params = array();
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function ( $tax_class, $cart, $customer, $location ) use ( &$filter_called, &$filter_params ) {
+				$filter_called = true;
+				$filter_params = array(
+					'tax_class' => $tax_class,
+					'cart'      => $cart,
+					'customer'  => $customer,
+					'location'  => $location,
+				);
+				return $tax_class;
+			},
+			10,
+			4
+		);
+
+		WC_Tax::get_shipping_tax_rates();
+
+		$this->assertTrue( $filter_called, 'Filter should have been called' );
+		$this->assertEquals( '', $filter_params['tax_class'], 'Tax class should be empty string (standard)' );
+		$this->assertInstanceOf( 'WC_Cart', $filter_params['cart'], 'Cart parameter should be WC_Cart instance' );
+		$this->assertIsArray( $filter_params['location'], 'Location should be an array' );
+		$this->assertCount( 4, $filter_params['location'], 'Location should have 4 elements' );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter can modify tax class.
+	 */
+	public function test_shipping_tax_class_filter_can_modify_tax_class() {
+		$standard_product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $standard_product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+		$this->create_tax_rate_for_class( 'reduced-rate', 10.0 );
+
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$rates_without_filter = WC_Tax::get_shipping_tax_rates();
+		$this->assertNotEmpty( $rates_without_filter );
+		$rate_without_filter = reset( $rates_without_filter );
+		$this->assertEquals( '20.0000', $rate_without_filter['rate'] );
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function () {
+				return 'reduced-rate';
+			}
+		);
+
+		wp_cache_flush();
+		\WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+
+		$rates_with_filter = WC_Tax::get_shipping_tax_rates();
+		$this->assertNotEmpty( $rates_with_filter );
+		$rate_with_filter = reset( $rates_with_filter );
+		$this->assertEquals( '10.0000', $rate_with_filter['rate'], 'Filter should override tax class to reduced-rate (10%)' );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter receives empty string when standard tax class.
+	 */
+	public function test_shipping_tax_class_filter_receives_empty_string_for_standard() {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+
+		$received_tax_class = null;
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function ( $tax_class ) use ( &$received_tax_class ) {
+				$received_tax_class = $tax_class;
+				return $tax_class;
+			}
+		);
+
+		WC_Tax::get_shipping_tax_rates();
+
+		$this->assertSame( '', $received_tax_class, 'Filter should receive empty string for standard tax class' );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter can return null to indicate no taxable items.
+	 */
+	public function test_shipping_tax_class_filter_can_return_null() {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function () {
+				return null;
+			}
+		);
+
+		$rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertEmpty( $rates, 'Should return empty array when filter returns null' );
+	}
+
+	/**
+	 * Test backward compatibility: original behavior without filter.
+	 */
+	public function test_shipping_tax_class_backward_compatibility_without_filter() {
+		$standard_product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		$reduced_product  = $this->create_product_with_tax_class( 'reduced-rate', 'Reduced Product' );
+
+		WC()->cart->add_to_cart( $standard_product->get_id(), 1 );
+		WC()->cart->add_to_cart( $reduced_product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+		$this->create_tax_rate_for_class( 'reduced-rate', 10.0 );
+
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertNotEmpty( $rates );
+		$rate = reset( $rates );
+		$this->assertEquals( '20.0000', $rate['rate'], 'Should use standard rate (20%) when no filter is hooked' );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter works with explicit shipping tax class setting.
+	 */
+	public function test_shipping_tax_class_filter_with_explicit_setting() {
+		$standard_product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $standard_product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+		$this->create_tax_rate_for_class( 'reduced-rate', 10.0 );
+
+		update_option( 'woocommerce_shipping_tax_class', 'reduced-rate' );
+
+		$received_tax_class = null;
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function ( $tax_class ) use ( &$received_tax_class ) {
+				$received_tax_class = $tax_class;
+				return $tax_class;
+			}
+		);
+
+		$rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertEquals( 'reduced-rate', $received_tax_class, 'Filter should receive explicitly set tax class' );
+		$this->assertNotEmpty( $rates );
+		$rate = reset( $rates );
+		$this->assertEquals( '10.0000', $rate['rate'], 'Should use reduced rate (10%) from explicit setting' );
+	}
+
+	/**
+	 * Helper method to create a tax rate for a specific tax class.
+	 *
+	 * @param string $tax_class Tax class slug ('' for standard, 'reduced-rate', etc).
+	 * @param float  $rate Tax rate percentage.
+	 * @return int Tax rate ID.
+	 */
+	private function create_tax_rate_for_class( $tax_class = '', $rate = 20.0 ) {
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => number_format( $rate, 4, '.', '' ),
+			'tax_rate_name'     => $tax_class ? ucfirst( str_replace( '-', ' ', $tax_class ) ) . ' Rate' : 'Standard Rate',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => $tax_class,
+		);
+
+		return WC_Tax::_insert_tax_rate( $tax_rate );
 	}
 }
