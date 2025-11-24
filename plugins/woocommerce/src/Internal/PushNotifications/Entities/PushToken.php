@@ -93,7 +93,7 @@ class PushToken extends WC_Data {
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->data_store = new PushTokensDataStore();
+		$this->data_store = wc_get_container()->get( PushTokensDataStore::class );
 	}
 
 	/**
@@ -129,7 +129,7 @@ class PushToken extends WC_Data {
 	 *
 	 * @var string|null
 	 */
-	private ?string $origin = null;
+	protected ?string $origin = null;
 
 	/**
 	 * Creates a new PushToken instance with the specified properties.
