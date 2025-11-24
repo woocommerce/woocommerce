@@ -83,20 +83,26 @@ export const getProductData = (
 		...products[ id ],
 	} as ProductData & { id: number };
 
-	if (
-		product.type === 'variable' &&
-		selectedAttributes &&
-		selectedAttributes.length > 0
-	) {
-		const matchedVariation = getMatchedVariation(
-			product.variations,
-			selectedAttributes
-		);
+	if ( product.type === 'variable' ) {
+		// For variable products, check if we have a complete variation match
+		const matchedVariation =
+			selectedAttributes && selectedAttributes.length > 0
+				? getMatchedVariation( product.variations, selectedAttributes )
+				: null;
+
 		if ( matchedVariation ) {
+			// Complete variation selected - use variation data
 			product = {
 				...matchedVariation,
 				id: matchedVariation.variation_id,
 				type: 'variation',
+			};
+		} else {
+			// Partial or no selection - treat as "in stock" for UI purposes
+			// Stock status should only be shown after a complete variation is selected
+			product = {
+				...product,
+				is_in_stock: true,
 			};
 		}
 	}
@@ -329,6 +335,8 @@ const { actions, state } = store<
 
 				const { selectedAttributes } = getContext< Context >();
 
+				// Use variation ID if available, otherwise parent product ID
+				// Store API handles both: if variation ID is sent, it extracts parent ID automatically
 				const id =
 					productDataState.variationId || productDataState.productId;
 
@@ -347,8 +355,12 @@ const { actions, state } = store<
 
 				const { quantity } = getContext< Context >();
 
+				// For getNewQuantity, always use parent product ID
+				// Cart items store parent ID in item.id, not variation ID
+				const quantityLookupId = productDataState.productId;
+
 				const newQuantity = getNewQuantity(
-					id,
+					quantityLookupId,
 					quantity[ id ],
 					selectedAttributes
 				);
@@ -358,11 +370,18 @@ const { actions, state } = store<
 					{},
 					{ lock: universalLock }
 				);
+				// Store API expects attribute names without the "attribute_" prefix
+				// because wc_variation_attribute_name() adds it on the backend
+				const variationForAPI = selectedAttributes.map( ( attr ) => ( {
+					attribute: attr.attribute.replace( /^attribute_/, '' ),
+					value: attr.value,
+				} ) );
+
 				yield wooActions.addCartItem(
 					{
 						id,
 						quantity: newQuantity,
-						variation: selectedAttributes,
+						variation: variationForAPI,
 						type: productType,
 					},
 					{

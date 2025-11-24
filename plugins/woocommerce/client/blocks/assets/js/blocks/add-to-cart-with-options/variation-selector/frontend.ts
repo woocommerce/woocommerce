@@ -42,6 +42,47 @@ setStyles();
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
+const { state: productState } = store< { state: ProductsStoreState } >(
+	'woocommerce/products'
+);
+
+/**
+ * Normalize attribute name by removing the "attribute_" prefix if present.
+ * Context uses format like "attribute_pa_color" or "attribute_size",
+ * while Store API uses "pa_color" or "size".
+ *
+ * @param name - The attribute name to normalize.
+ * @return The normalized attribute name.
+ */
+const normalizeAttributeName = ( name: string ): string => {
+	return name.replace( /^attribute_/, '' ).toLowerCase();
+};
+
+/**
+ * Get an attribute value from a variation's attributes array.
+ *
+ * @param attributes    - Array of attribute objects with name and value.
+ * @param attributeName - The attribute name to look up (may have "attribute_" prefix).
+ * @return The attribute value (null normalized to empty string), or undefined if not found.
+ */
+const getVariationAttributeValue = (
+	attributes: Array< { name: string; value: string | null } >,
+	attributeName: string
+): string | undefined => {
+	const normalizedName = normalizeAttributeName( attributeName );
+	const attr = attributes.find(
+		( attribute ) => attribute.name.toLowerCase() === normalizedName
+	);
+	// Normalize null to empty string (backend bug workaround - null should be '')
+	return attr ? attr.value ?? '' : undefined;
+};
+
 /**
  * Check if the attribute value is valid given the other selected attributes and
  * the available variations.
@@ -157,11 +198,11 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 	};
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
+// const { state: productDataState } = store< ProductDataStore >(
+// 	'woocommerce/product-data',
+// 	{},
+// 	{ lock: universalLock }
+// );
 
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
@@ -191,11 +232,23 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					attributeValue: option.value,
 					selectedAttributes,
 				} );
+
+				return ! isValid;
 			},
 		},
 		actions: {
 			setAttribute( attribute: string, value: string ) {
 				const { selectedAttributes } = getContext< Context >();
+
+				console.log(
+					'the attribute',
+					attribute,
+					'the value:',
+					value,
+					'the attributes: ',
+					selectedAttributes
+				);
+
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
@@ -275,9 +328,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						{},
 						{ lock: universalLock }
 					);
-				const matchedVariationId =
-					matchedVariation?.variation_id || null;
-				productDataActions.setVariationId( matchedVariationId );
+				productDataActions.setVariationId(
+					matchedVariation?.variation_id || null
+				);
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
@@ -293,6 +346,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { selectedAttributes } = getContext< Context >();
 
+				// Don't validate if no attributes selected yet
+				if ( ! selectedAttributes || selectedAttributes.length === 0 ) {
+					return;
+				}
+
 				const matchedVariation = getMatchedVariation(
 					variations,
 					selectedAttributes
@@ -300,18 +358,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { errorMessages } = getConfig();
 
-				if ( ! matchedVariation?.variation_id ) {
+				// Add validation error when no variation matched
+				// This disables the button but doesn't show an error message
+				if ( ! matchedVariation ) {
 					actions.addError( {
 						code: 'variableProductMissingAttributes',
-						message:
-							errorMessages?.variableProductMissingAttributes ||
-							'',
+						message: '', // Empty message - just used to disable button
 						group: 'variable-product',
 					} );
 					return;
 				}
 
-				if ( ! matchedVariation?.is_in_stock ) {
+				// Show out of stock error only when a specific variation is selected
+				if ( ! matchedVariation.is_in_stock ) {
 					actions.addError( {
 						code: 'variableProductOutOfStock',
 						message: errorMessages?.variableProductOutOfStock || '',
