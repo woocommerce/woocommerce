@@ -209,7 +209,7 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 			$this->markTestSkipped( 'Product instance caching feature is enabled. This test requires it to be disabled.' );
 		}
 
-		$product = WC_Helper_Product::create_simple_product();
+		$product    = WC_Helper_Product::create_simple_product();
 		$product_id = $product->get_id();
 
 		// Get product via factory (should NOT cache when feature disabled).

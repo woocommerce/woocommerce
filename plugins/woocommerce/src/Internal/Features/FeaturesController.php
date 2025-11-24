@@ -547,7 +547,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			PushNotifications::FEATURE_NAME => array(
+			PushNotifications::FEATURE_NAME      => array(
 				'name'                         => __( 'Push Notifications', 'woocommerce' ),
 				'description'                  => __(
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
