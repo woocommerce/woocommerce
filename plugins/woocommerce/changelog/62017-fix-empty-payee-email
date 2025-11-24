@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Hide PayPal Standard for orders v2 from the checkout page when the email is empty in the settings.
