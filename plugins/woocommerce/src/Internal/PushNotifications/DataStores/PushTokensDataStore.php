@@ -218,10 +218,12 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 *
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @param array     $args Not used, enforced by interface.
+	 * @param array     $args Not used, enforced by WC_Object_Data_Store_Interface.
 	 * @return void
 	 * @throws InvalidArgumentException If the token can't be deleted.
 	 * @throws Exception If the item to delete is not a push token.
+	 *
+	 * phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 */
 	public function delete( &$push_token, $args = array() ) {
 		if ( ! $push_token->can_be_deleted() ) {
@@ -446,6 +448,14 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			try {
 				$meta = $candidate->get_meta_data();
 			} catch ( Exception $e ) {
+				wc_get_logger()->warning(
+					'Failed to load meta for push token.',
+					array(
+						'token_id' => $post->ID,
+						'error'    => $e->getMessage(),
+					)
+				);
+
 				continue;
 			}
 
