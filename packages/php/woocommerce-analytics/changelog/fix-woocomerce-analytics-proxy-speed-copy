@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Fix proxy speed module installation using WP_Filesystem API with proper error handling

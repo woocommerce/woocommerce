@@ -174,12 +174,11 @@ class Woocommerce_Analytics {
 	 * Maybe add proxy speed module.
 	 */
 	public static function maybe_add_proxy_speed_module() {
-		if ( ! function_exists( 'WP_Filesystem' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
+		if ( ! self::init_filesystem() ) {
+			return;
 		}
 
-		// Initialize the WP filesystem.
-		WP_Filesystem();
+		global $wp_filesystem;
 
 		// Create the mu-plugin directory if it doesn't exist.
 		if ( ! is_dir( WPMU_PLUGIN_DIR ) ) {
@@ -191,36 +190,85 @@ class Woocommerce_Analytics {
 			return;
 		}
 
+		// Check if the mu-plugin directory is writable.
+		if ( ! $wp_filesystem->is_writable( WPMU_PLUGIN_DIR ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->debug( 'WooCommerce Analytics proxy speed module not installed: mu-plugins directory is not writable.', array( 'source' => 'woocommerce-analytics' ) );
+			}
+			return;
+		}
+
 		if ( get_option( 'woocommerce_analytics_proxy_speed_module_version' ) === self::PROXY_SPEED_MODULE_VERSION ) {
 			// No need to copy the files again.
 			return;
 		}
 
-		update_option( 'woocommerce_analytics_proxy_speed_module_version', self::PROXY_SPEED_MODULE_VERSION );
 		$mu_plugin_src_file  = __DIR__ . '/mu-plugin/woocommerce-analytics-proxy-speed-module.php';
-		$mu_plugin_dest_file = WPMU_PLUGIN_DIR . '/woocommerce-analytics-proxy-speed-module.php';
-		$results             = copy( $mu_plugin_src_file, $mu_plugin_dest_file );
+		$mu_plugin_dest_file = trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-analytics-proxy-speed-module.php';
 
-		if ( ! $results ) {
+		// Verify source file exists before attempting to copy.
+		if ( ! file_exists( $mu_plugin_src_file ) ) {
 			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->error( 'Failed to copy the WooCommerce Analytics proxy speed module files.', array( 'source' => 'woocommerce-analytics' ) );
+				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module source file not found.', array( 'source' => 'woocommerce-analytics' ) );
 			}
+			return;
 		}
+
+		$content = $wp_filesystem->get_contents( $mu_plugin_src_file );
+		if ( false === $content ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'Failed to read the WooCommerce Analytics proxy speed module source file.', array( 'source' => 'woocommerce-analytics' ) );
+			}
+			return;
+		}
+
+		if ( ! $wp_filesystem->put_contents( $mu_plugin_dest_file, $content ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'Failed to copy the WooCommerce Analytics proxy speed module file.', array( 'source' => 'woocommerce-analytics' ) );
+			}
+			return;
+		}
+
+		update_option( 'woocommerce_analytics_proxy_speed_module_version', self::PROXY_SPEED_MODULE_VERSION );
 	}
 
 	/**
 	 * Maybe removes the proxy speed module. This should be invoked when the plugin is deactivated.
 	 */
 	public static function maybe_remove_proxy_speed_module() {
+		if ( ! self::init_filesystem() ) {
+			return;
+		}
+
+		global $wp_filesystem;
+
 		/**
 		 * Clean up MU plugin.
 		 */
-		$file_path = WPMU_PLUGIN_DIR . '/woocommerce-analytics-proxy-speed-module.php';
+		$file_path = trailingslashit( WPMU_PLUGIN_DIR ) . 'woocommerce-analytics-proxy-speed-module.php';
 
-		if ( file_exists( $file_path ) ) {
-			wp_delete_file( $file_path );
+		if ( $wp_filesystem->exists( $file_path ) && $wp_filesystem->is_writable( $file_path ) ) {
+			$wp_filesystem->delete( $file_path );
 		}
 
 		delete_option( 'woocommerce_analytics_proxy_speed_module_version' );
+	}
+
+	/**
+	 * Initialize the WP filesystem.
+	 *
+	 * @return bool True if filesystem is initialized, false otherwise.
+	 */
+	private static function init_filesystem() {
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		// Initialize the WP filesystem.
+		ob_start();
+		$initialized = WP_Filesystem();
+		ob_end_clean();
+
+		return $initialized;
 	}
 }
