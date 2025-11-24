@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrate usage of wc_enqueue_js() to wp_add_inline_script().
