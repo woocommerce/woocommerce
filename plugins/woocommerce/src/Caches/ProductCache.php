@@ -23,22 +23,22 @@ class ProductCache extends ObjectCache {
 	/**
 	 * Get the id of an object to be cached.
 	 *
-	 * @param array|object $object The object to be cached.
+	 * @param array|object $product The product to be cached.
 	 * @return int|string|null The id of the object, or null if it can't be determined.
 	 */
-	protected function get_object_id( $object ) {
-		return $object->get_id();
+	protected function get_object_id( $product ) {
+		return $product->get_id();
 	}
 
 	/**
 	 * Validate an object before caching it.
 	 *
-	 * @param WC_Product $object The object to validate.
+	 * @param WC_Product $product The product to validate.
 	 * @return string[]|null An array of error messages, or null if the object is valid.
 	 */
-	protected function validate( $object ): ?array {
-		if ( ! $object instanceof WC_Product ) {
-			return array( 'The supplied product is not an instance of WC_Product, ' . gettype( $object ) );
+	protected function validate( $product ): ?array {
+		if ( ! $product instanceof WC_Product ) {
+			return array( 'The supplied product is not an instance of WC_Product, ' . gettype( $product ) );
 		}
 
 		return null;
@@ -50,17 +50,17 @@ class ProductCache extends ObjectCache {
 	 * Sets the clone mode to CACHE before storing to ensure meta IDs are preserved
 	 * when WordPress object cache clones the object.
 	 *
-	 * @param WC_Product      $object The product to be cached.
+	 * @param WC_Product      $product The product to be cached.
 	 * @param int|string|null $id Id of the product to be cached, if null, get_object_id will be used to get it.
 	 * @param int             $expiration Expiration of the cached data in seconds from the current time, or DEFAULT_EXPIRATION to use the default value.
 	 * @return bool True on success, false on error.
 	 * @throws \Automattic\WooCommerce\Caching\CacheException Invalid parameter, or null id was passed and get_object_id returns null too.
 	 */
-	public function set( $object, $id = null, int $expiration = self::DEFAULT_EXPIRATION ): bool {
-		$original_mode = $object->get_clone_mode();
-		$object->set_clone_mode( \WC_Data::CLONE_MODE_CACHE );
-		$result = parent::set( $object, $id, $expiration );
-		$object->set_clone_mode( $original_mode );
+	public function set( $product, $id = null, int $expiration = self::DEFAULT_EXPIRATION ): bool {
+		$original_mode = $product->get_clone_mode();
+		$product->set_clone_mode( \WC_Data::CLONE_MODE_CACHE );
+		$result = parent::set( $product, $id, $expiration );
+		$product->set_clone_mode( $original_mode );
 
 		return $result;
 	}
