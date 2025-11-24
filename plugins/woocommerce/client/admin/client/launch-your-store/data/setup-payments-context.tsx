@@ -1,9 +1,12 @@
 /**
  * External dependencies
  */
-import { createContext, useContext, useState } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
-import { pluginsStore } from '@woocommerce/data';
+import {
+	createContext,
+	useContext,
+	useState,
+	useEffect,
+} from '@wordpress/element';
 import { getNewPath } from '@woocommerce/navigation';
 
 /**
@@ -11,6 +14,7 @@ import { getNewPath } from '@woocommerce/navigation';
  */
 import { LYSPaymentsSteps } from '~/settings-payments/onboarding/providers/woopayments/steps';
 import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
+import { getLysTasklist } from '../hub/sidebar/tasklist';
 
 interface SetUpPaymentsContextType {
 	isWooPaymentsActive: boolean;
@@ -35,22 +39,66 @@ export const SetUpPaymentsProvider: React.FC< {
 	children: React.ReactNode;
 	closeModal: () => void;
 } > = ( { children, closeModal } ) => {
-	// Check if WooPayments is active by looking for the plugin in the active plugins list
-	const isWooPaymentsActive = useSelect(
-		( select ) =>
-			select( pluginsStore )
-				.getActivePlugins()
-				.includes( 'woocommerce-payments' ),
-		[]
-	);
+	// Extract WooPayments state from the payments task's additionalData using getLysTasklist
+	const [ isWooPaymentsActive, setIsWooPaymentsActive ] =
+		useState< boolean >( false );
+	const [ isWooPaymentsInstalled, setIsWooPaymentsInstalled ] =
+		useState< boolean >( false );
 
-	const isWooPaymentsInstalled = useSelect(
-		( select ) =>
-			select( pluginsStore )
-				.getInstalledPlugins()
-				.includes( 'woocommerce-payments' ),
-		[]
-	);
+	useEffect( () => {
+		let isMounted = true;
+
+		const fetchWooPaymentsStatus = async () => {
+			try {
+				const tasklist = await getLysTasklist();
+
+				// Validate that fullLysTaskList is an array
+				if ( ! Array.isArray( tasklist?.fullLysTaskList ) ) {
+					// eslint-disable-next-line no-console
+					console.error(
+						'Invalid tasklist data: fullLysTaskList is not an array'
+					);
+					return;
+				}
+
+				const paymentsTask = tasklist.fullLysTaskList.find(
+					( task ) => task.id === 'payments'
+				);
+
+				// Validate paymentsTask.additionalData has expected properties
+				if ( paymentsTask?.additionalData ) {
+					const { wooPaymentsIsActive, wooPaymentsIsInstalled } =
+						paymentsTask.additionalData;
+
+					// Only update state if component is still mounted
+					if ( isMounted ) {
+						// Validate boolean-like values before setting state
+						setIsWooPaymentsActive(
+							typeof wooPaymentsIsActive === 'boolean'
+								? wooPaymentsIsActive
+								: false
+						);
+						setIsWooPaymentsInstalled(
+							typeof wooPaymentsIsInstalled === 'boolean'
+								? wooPaymentsIsInstalled
+								: false
+						);
+					}
+				}
+			} catch ( error ) {
+				// Log errors but maintain default state
+				// eslint-disable-next-line no-console
+				console.error( 'Error fetching WooPayments status:', error );
+			}
+		};
+
+		fetchWooPaymentsStatus();
+
+		// Cleanup function to prevent state updates after unmount
+		return () => {
+			isMounted = false;
+		};
+	}, [] );
 
 	// State to track if WooPayments was recently enabled
 	const [ wooPaymentsRecentlyActivated, setWooPaymentsRecentlyActivated ] =
