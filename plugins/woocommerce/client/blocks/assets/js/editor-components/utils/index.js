@@ -199,13 +199,53 @@ export const getCategory = ( categoryId ) => {
  * @param {number} product Product ID.
  */
 export const getProductVariations = ( product ) => {
+	// Fetch the first page to get total page count from headers
 	return apiFetch( {
 		path: addQueryArgs( `wc/store/v1/products`, {
-			per_page: 0,
+			per_page: 100,
 			type: 'variation',
 			parent: product,
+			page: 1,
 		} ),
-	} );
+		parse: false,
+	} )
+		.then( ( response ) => {
+			const totalPages = parseInt(
+				response.headers.get( 'X-WP-TotalPages' ) || '1',
+				10
+			);
+
+			// Parse the first page data
+			const firstPagePromise = response.json();
+
+			// Build array of fetch promises for remaining pages (starting at page 2)
+			const remainingRequests = [];
+			for ( let page = 2; page <= totalPages; page++ ) {
+				remainingRequests.push(
+					apiFetch( {
+						path: addQueryArgs( `wc/store/v1/products`, {
+							per_page: 100,
+							type: 'variation',
+							parent: product,
+							page,
+						} ),
+					} )
+				);
+			}
+
+			// Combine first page with remaining pages
+			return Promise.all( [ firstPagePromise, ...remainingRequests ] );
+		} )
+		.then( ( data ) => [
+			...new Map(
+				data.flatMap( ( variations ) =>
+					variations.map( ( item ) => [ item.id, item ] )
+				)
+			).values(),
+		] )
+		.catch( ( e ) => {
+			throw e;
+		} );
 };
 
 /**
