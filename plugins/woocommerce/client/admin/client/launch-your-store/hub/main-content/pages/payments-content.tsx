@@ -36,7 +36,7 @@ const InstallWooPaymentsStep = ( {
 	isPluginInstalling,
 	isPluginInstalled,
 }: {
-	installWooPayments: () => void;
+	installWooPayments: ( slug: string | undefined ) => void;
 	isPluginInstalling: boolean;
 	isPluginInstalled: boolean;
 } ) => {
@@ -124,7 +124,10 @@ const InstallWooPaymentsStep = ( {
 						} );
 					}
 
-					installWooPayments();
+					// Provide the plugin slug reported by the provider, if available, since it is the most accurate.
+					// If we use the official slug and WooPayments is installed under a different slug (like when using test versions),
+					// the WPORG version will be installed and activated instead.
+					installWooPayments( wooPaymentsProvider?.plugin?.slug );
 				} }
 				isBusy={ isPluginInstalling }
 				disabled={ isPluginInstalling }
@@ -149,66 +152,73 @@ export const PaymentsContent = ( {} ) => {
 		useState< boolean >( false );
 	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 
-	const installWooPayments = useCallback( () => {
-		// Set the plugin installation state to true to show a loading indicator.
-		setIsPluginInstalling( true );
+	const installWooPayments = useCallback(
+		( realPluginSlug: string | undefined ) => {
+			// Set the plugin installation state to true to show a loading indicator.
+			setIsPluginInstalling( true );
 
-		recordPaymentsEvent( 'recommendations_setup', {
-			extension_selected: wooPaymentsExtensionSlug,
-			extension_action: ! isWooPaymentsInstalled ? 'install' : 'activate',
-			provider_id: wooPaymentsProviderId,
-			suggestion_id: wooPaymentsSuggestionId,
-			provider_extension_slug: wooPaymentsExtensionSlug,
-			from: 'lys',
-			source: wooPaymentsOnboardingSessionEntryLYS,
-		} );
+			recordPaymentsEvent( 'recommendations_setup', {
+				extension_selected: wooPaymentsExtensionSlug, // Use the official slug, not the real one.
+				extension_action: ! isWooPaymentsInstalled
+					? 'install'
+					: 'activate',
+				provider_id: wooPaymentsProviderId,
+				suggestion_id: wooPaymentsSuggestionId,
+				provider_extension_slug: wooPaymentsExtensionSlug, // Use the official slug, not the real one.
+				from: 'lys',
+				source: wooPaymentsOnboardingSessionEntryLYS,
+			} );
 
-		// Install and activate the WooPayments plugin.
-		installAndActivatePlugins( [ wooPaymentsExtensionSlug ] )
-			.then( async ( response ) => {
-				createNoticesFromResponse( response );
-				setWooPaymentsRecentlyActivated( true );
-				// Refresh store data after installation.
-				// This will trigger a re-render and initialize the onboarding flow.
-				refreshStoreData();
+			// Install and activate the WooPayments plugin.
+			installAndActivatePlugins( [
+				realPluginSlug ?? wooPaymentsExtensionSlug,
+			] )
+				.then( async ( response ) => {
+					createNoticesFromResponse( response );
+					setWooPaymentsRecentlyActivated( true );
+					// Refresh store data after installation.
+					// This will trigger a re-render and initialize the onboarding flow.
+					refreshStoreData();
 
-				if ( ! isWooPaymentsInstalled ) {
-					// Record the extension installation event.
-					recordPaymentsEvent( 'provider_installed', {
+					if ( ! isWooPaymentsInstalled ) {
+						// Record the extension installation event.
+						recordPaymentsEvent( 'provider_installed', {
+							provider_id: wooPaymentsProviderId,
+							suggestion_id: wooPaymentsSuggestionId,
+							provider_extension_slug: wooPaymentsExtensionSlug,
+							from: 'lys',
+							source: wooPaymentsOnboardingSessionEntryLYS,
+						} );
+					}
+					// Note: The provider extension activation is tracked from the backend (the `provider_extension_activated` event).
+
+					setIsPluginInstalling( false );
+				} )
+				.catch( ( response: { errors: Record< string, string > } ) => {
+					// Handle errors during installation
+					let eventName = 'provider_extension_installation_failed';
+					if ( isWooPaymentsInstalled ) {
+						eventName = 'provider_extension_activation_failed';
+					}
+					recordPaymentsEvent( eventName, {
 						provider_id: wooPaymentsProviderId,
 						suggestion_id: wooPaymentsSuggestionId,
 						provider_extension_slug: wooPaymentsExtensionSlug,
 						from: 'lys',
 						source: wooPaymentsOnboardingSessionEntryLYS,
+						reason: 'error',
 					} );
-				}
-				// Note: The provider extension activation is tracked from the backend (the `provider_extension_activated` event).
-
-				setIsPluginInstalling( false );
-			} )
-			.catch( ( response: { errors: Record< string, string > } ) => {
-				// Handle errors during installation
-				let eventName = 'provider_extension_installation_failed';
-				if ( isWooPaymentsInstalled ) {
-					eventName = 'provider_extension_activation_failed';
-				}
-				recordPaymentsEvent( eventName, {
-					provider_id: wooPaymentsProviderId,
-					suggestion_id: wooPaymentsSuggestionId,
-					provider_extension_slug: wooPaymentsExtensionSlug,
-					from: 'lys',
-					source: wooPaymentsOnboardingSessionEntryLYS,
-					reason: 'error',
+					createNoticesFromResponse( response );
+					setIsPluginInstalling( false );
 				} );
-				createNoticesFromResponse( response );
-				setIsPluginInstalling( false );
-			} );
-	}, [
-		setIsPluginInstalling,
-		installAndActivatePlugins,
-		refreshStoreData,
-		setWooPaymentsRecentlyActivated,
-	] );
+		},
+		[
+			setIsPluginInstalling,
+			installAndActivatePlugins,
+			refreshStoreData,
+			setWooPaymentsRecentlyActivated,
+		]
+	);
 
 	return (
 		<div className="launch-your-store-payments-content">
