@@ -113,6 +113,32 @@ class HydrationTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test that get_rest_api_response_data handles multiple query parameters (parent + type).
+	 */
+	public function test_get_rest_api_response_data_with_multiple_query_params() {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variable_product->save();
+
+		$result = $this->hydration->get_rest_api_response_data(
+			'/wc/store/v1/products?parent[]=' . $variable_product->get_id() . '&type=variation'
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'body', $result );
+		$this->assertIsArray( $result['body'] );
+
+		// Each returned product should be a variation of the parent.
+		foreach ( $result['body'] as $variation_data ) {
+			$this->assertArrayHasKey( 'id', $variation_data );
+			$this->assertArrayHasKey( 'parent', $variation_data );
+			$this->assertEquals( $variable_product->get_id(), $variation_data['parent'] );
+			$this->assertEquals( 'variation', $variation_data['type'] );
+		}
+
+		$variable_product->delete( true );
+	}
+
+	/**
 	 * Test that get_rest_api_response_data handles product with ID in URL.
 	 */
 	public function test_get_rest_api_response_data_product_with_id() {
