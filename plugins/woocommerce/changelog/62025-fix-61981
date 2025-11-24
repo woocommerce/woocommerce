@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix PHP 8.4 fatal error in WooCommerce Helper updater when transient contains malformed data
