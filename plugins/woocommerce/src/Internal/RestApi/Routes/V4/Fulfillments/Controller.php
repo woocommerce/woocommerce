@@ -741,10 +741,9 @@ class Controller extends AbstractController {
 	 * Get all shipping providers.
 	 *
 	 * @since 10.5.0
-	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response
 	 */
-	public function get_providers( WP_REST_Request $request ): WP_REST_Response {
+	public function get_providers(): WP_REST_Response {
 		$providers = \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils::get_shipping_providers_object();
 		return new WP_REST_Response( $providers, WP_Http::OK );
 	}
