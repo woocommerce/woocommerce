@@ -88,6 +88,8 @@ class PushToken extends WC_Data {
 
 	/**
 	 * Constructs the class and initializes the data store.
+	 *
+	 * @since 10.5.0
 	 */
 	public function __construct() {
 		parent::__construct();
@@ -281,7 +283,7 @@ class PushToken extends WC_Data {
 	 *
 	 * @since 10.4.0
 	 */
-	public function get_id(): ?int {
+	public function get_id() {
 		return $this->id;
 	}
 
@@ -405,7 +407,7 @@ class PushToken extends WC_Data {
 	/**
 	 * Defers to the data store to read the record in the style of WC_Data.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @return void
 	 */
 	public function read(): void {

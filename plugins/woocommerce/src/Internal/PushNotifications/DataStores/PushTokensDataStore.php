@@ -62,6 +62,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 * Returns array of meta keys whose persistence should be managed via
 	 * class setters.
 	 *
+	 * @since 10.5.0
 	 * @return array
 	 */
 	public function get_internal_meta_keys() {
@@ -472,6 +473,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 * Converts an array of WC_Meta_Data objects to a key-value array.
 	 * Sets any missing META_KEYS to null.
 	 *
+	 * @since 10.5.0
 	 * @param array $meta_objects Array of WC_Meta_Data objects from get_meta_data().
 	 * @return array Associative array with meta keys as keys.
 	 */
