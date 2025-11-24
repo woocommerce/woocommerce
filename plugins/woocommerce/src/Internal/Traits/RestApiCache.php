@@ -452,7 +452,7 @@ trait RestApiCache {
 		/**
 		 * Filter the 304 Not Modified response before sending.
 		 *
-		 * @since 10.4.0
+		 * @since 10.5.0
 		 *
 		 * @param WP_REST_Response|false $response    The 304 response object, or false to prevent sending it.
 		 * @param WP_REST_Request        $request     The request object.
@@ -892,9 +892,9 @@ trait RestApiCache {
 
 			// If the server adds a 'Date' header by itself there will be two such headers in the response.
 			// To help disambiguate them, we add also an 'X-WC-Date' header with the proper value.
-			$created_at                        = gmdate( 'D, d M Y H:i:s', $cached['created_at'] ) . ' GMT';
-			$response_headers['Date']          = $created_at;
-			$response_headers['X-WC-Date']     = $created_at;
+			$created_at                    = gmdate( 'D, d M Y H:i:s', $cached['created_at'] ) . ' GMT';
+			$response_headers['Date']      = $created_at;
+			$response_headers['X-WC-Date'] = $created_at;
 
 			if ( ! empty( $cached_etag ) && $request_etag === $cached_etag ) {
 				$cache_control         = $response_headers['Cache-Control'] ?? '';

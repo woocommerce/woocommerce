@@ -506,7 +506,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		/**
 		 * Filter REST API cache settings.
 		 *
-		 * @since 10.4.0
+		 * @since 10.5.0
 		 * @param array $settings REST API cache settings.
 		 */
 		return apply_filters( 'woocommerce_rest_api_cache_settings', $settings );
