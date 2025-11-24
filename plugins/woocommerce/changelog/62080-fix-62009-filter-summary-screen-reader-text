@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Introduce `summaryScreenReader` context to `cartItemPrice` checkout filter.
