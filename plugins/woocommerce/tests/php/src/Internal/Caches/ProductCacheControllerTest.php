@@ -1,0 +1,421 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Caches;
+
+use Automattic\WooCommerce\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use WC_Helper_Product;
+
+/**
+ * Tests for ProductCacheController.
+ */
+class ProductCacheControllerTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * System under test.
+	 *
+	 * @var ProductCacheController
+	 */
+	private $sut;
+
+	/**
+	 * Product cache instance.
+	 *
+	 * @var ProductCache
+	 */
+	private $product_cache;
+
+	/**
+	 * Setup test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->product_cache = wc_get_container()->get( ProductCache::class );
+		$this->sut           = wc_get_container()->get( ProductCacheController::class );
+	}
+
+	/**
+	 * Teardown test.
+	 */
+	public function tearDown(): void {
+		$this->product_cache->flush();
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Controller registers cache invalidation hooks when initialized.
+	 */
+	public function test_controller_registers_hooks() {
+		// Verify clean_post_cache hook is registered.
+		$this->assertNotFalse(
+			has_action( 'clean_post_cache', array( $this->sut, 'maybe_invalidate_product_cache' ) ),
+			'clean_post_cache hook should be registered'
+		);
+
+		// Verify before_delete_post hook is registered.
+		$this->assertNotFalse(
+			has_action( 'before_delete_post', array( $this->sut, 'maybe_invalidate_product_cache' ) ),
+			'before_delete_post hook should be registered'
+		);
+
+		// Verify meta update hooks are registered.
+		$this->assertNotFalse(
+			has_action( 'updated_post_meta', array( $this->sut, 'maybe_invalidate_product_cache_by_meta' ) ),
+			'updated_post_meta hook should be registered'
+		);
+
+		$this->assertNotFalse(
+			has_action( 'added_post_meta', array( $this->sut, 'maybe_invalidate_product_cache_by_meta' ) ),
+			'added_post_meta hook should be registered'
+		);
+
+		$this->assertNotFalse(
+			has_action( 'deleted_post_meta', array( $this->sut, 'maybe_invalidate_product_cache_by_meta' ) ),
+			'deleted_post_meta hook should be registered'
+		);
+
+		// Verify stock/sales hooks are registered.
+		$this->assertNotFalse(
+			has_action( 'woocommerce_updated_product_stock', array( $this->sut, 'maybe_invalidate_product_cache' ) ),
+			'woocommerce_updated_product_stock hook should be registered'
+		);
+
+		$this->assertNotFalse(
+			has_action( 'woocommerce_updated_product_sales', array( $this->sut, 'maybe_invalidate_product_cache' ) ),
+			'woocommerce_updated_product_sales hook should be registered'
+		);
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when product is saved via CRUD.
+	 */
+	public function test_cache_invalidated_on_product_save() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original Name' );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		wc_get_product( $product_id );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ), 'Product should be cached after retrieval' );
+
+		// Update and save product.
+		$product->set_name( 'Updated Name' );
+		$product->save();
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after save' );
+
+		// Verify fresh data is returned.
+		$fresh_product = wc_get_product( $product_id );
+		$this->assertEquals( 'Updated Name', $fresh_product->get_name(), 'Should return updated name' );
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when stock is updated via direct SQL.
+	 */
+	public function test_cache_invalidated_on_stock_update() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		$cached_product = wc_get_product( $product_id );
+		$this->assertEquals( 10, $cached_product->get_stock_quantity() );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		// Update stock directly (uses SQL, bypasses CRUD).
+		$data_store = \WC_Data_Store::load( 'product' );
+		$data_store->update_product_stock( $product_id, 5, 'set' );
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after stock update' );
+
+		// Verify fresh stock is returned.
+		$fresh_product = wc_get_product( $product_id );
+		$this->assertEquals( 5, $fresh_product->get_stock_quantity(), 'Should return updated stock quantity' );
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when stock is increased.
+	 */
+	public function test_cache_invalidated_on_stock_increase() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		wc_get_product( $product_id );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		// Increase stock.
+		$data_store = \WC_Data_Store::load( 'product' );
+		$data_store->update_product_stock( $product_id, 5, 'increase' );
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after stock increase' );
+
+		// Verify fresh stock is returned.
+		$fresh_product = wc_get_product( $product_id );
+		$this->assertEquals( 15, $fresh_product->get_stock_quantity(), 'Stock should be increased to 15' );
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when stock is decreased.
+	 */
+	public function test_cache_invalidated_on_stock_decrease() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		wc_get_product( $product_id );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		// Decrease stock (simulates order placement).
+		$data_store = \WC_Data_Store::load( 'product' );
+		$data_store->update_product_stock( $product_id, 3, 'decrease' );
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after stock decrease' );
+
+		// Verify fresh stock is returned.
+		$fresh_product = wc_get_product( $product_id );
+		$this->assertEquals( 7, $fresh_product->get_stock_quantity(), 'Stock should be decreased to 7' );
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when total sales is updated.
+	 */
+	public function test_cache_invalidated_on_sales_update() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_total_sales( 0 );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		$cached_product = wc_get_product( $product_id );
+		$this->assertEquals( 0, $cached_product->get_total_sales() );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		// Update sales directly (uses SQL, bypasses CRUD).
+		$data_store = \WC_Data_Store::load( 'product' );
+		$data_store->update_product_sales( $product_id, 10, 'set' );
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after sales update' );
+
+		// Verify fresh sales count is returned.
+		$fresh_product = wc_get_product( $product_id );
+		$this->assertEquals( 10, $fresh_product->get_total_sales(), 'Should return updated total sales' );
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when product meta is added directly.
+	 */
+	public function test_cache_invalidated_on_meta_add() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		$cached_product = wc_get_product( $product_id );
+		$this->assertEmpty( $cached_product->get_meta( '_test_meta' ) );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		// Add meta directly (bypasses CRUD).
+		add_post_meta( $product_id, '_test_meta', 'test_value' );
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after meta add' );
+
+		// Verify fresh meta is returned.
+		$fresh_product = wc_get_product( $product_id );
+		$this->assertEquals( 'test_value', $fresh_product->get_meta( '_test_meta' ), 'Should return new meta value' );
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when product meta is updated directly.
+	 */
+	public function test_cache_invalidated_on_meta_update() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->add_meta_data( '_test_meta', 'original_value', true );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		$cached_product = wc_get_product( $product_id );
+		$this->assertEquals( 'original_value', $cached_product->get_meta( '_test_meta' ) );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		// Update meta directly (bypasses CRUD).
+		update_post_meta( $product_id, '_test_meta', 'updated_value' );
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after meta update' );
+
+		// Verify fresh meta is returned.
+		$fresh_product = wc_get_product( $product_id );
+		$this->assertEquals( 'updated_value', $fresh_product->get_meta( '_test_meta' ), 'Should return updated meta value' );
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when product meta is deleted directly.
+	 */
+	public function test_cache_invalidated_on_meta_delete() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->add_meta_data( '_test_meta', 'test_value', true );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		$cached_product = wc_get_product( $product_id );
+		$this->assertEquals( 'test_value', $cached_product->get_meta( '_test_meta' ) );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		// Delete meta directly (bypasses CRUD).
+		delete_post_meta( $product_id, '_test_meta' );
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after meta delete' );
+
+		// Verify meta is gone.
+		$fresh_product = wc_get_product( $product_id );
+		$this->assertEmpty( $fresh_product->get_meta( '_test_meta' ), 'Meta should be deleted' );
+	}
+
+	/**
+	 * @testdox Product cache is invalidated when product is deleted.
+	 */
+	public function test_cache_invalidated_on_product_delete() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		// Cache the product.
+		$this->product_cache->remove( $product_id );
+		wc_get_product( $product_id );
+		$this->assertTrue( $this->product_cache->is_cached( $product_id ) );
+
+		// Delete the product.
+		$product->delete( true );
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Cache should be invalidated after delete' );
+
+		// Verify product is gone.
+		$deleted_product = wc_get_product( $product_id );
+		$this->assertFalse( $deleted_product, 'Deleted product should return false' );
+	}
+
+	/**
+	 * @testdox Variation cache is invalidated when variation is updated.
+	 */
+	public function test_cache_invalidated_on_variation_update() {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is not enabled.' );
+		}
+
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variations       = $variable_product->get_children();
+		$variation_id     = $variations[0];
+
+		// Cache the variation.
+		$this->product_cache->remove( $variation_id );
+		$variation = wc_get_product( $variation_id );
+		$this->assertTrue( $this->product_cache->is_cached( $variation_id ) );
+
+		// Update variation.
+		$variation->set_regular_price( 19.99 );
+		$variation->save();
+
+		// Verify cache was invalidated.
+		$this->assertFalse( $this->product_cache->is_cached( $variation_id ), 'Variation cache should be invalidated after save' );
+
+		// Verify fresh data is returned.
+		$fresh_variation = wc_get_product( $variation_id );
+		$this->assertEquals( '19.99', $fresh_variation->get_regular_price(), 'Should return updated price' );
+	}
+
+	/**
+	 * @testdox Cache invalidation respects feature flag being disabled.
+	 */
+	public function test_invalidation_respects_feature_flag() {
+		if ( FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
+			$this->markTestSkipped( 'Product instance caching is enabled. This test requires it to be disabled.' );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test Product' );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Verify product is NOT cached (feature disabled).
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Product should not be cached when feature is disabled' );
+
+		// Update product.
+		$product->set_name( 'Updated Product' );
+		$product->save();
+
+		// Verify still not cached.
+		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Product should still not be cached after update' );
+	}
+}
