@@ -25,7 +25,7 @@ import { chevronRight, chevronLeft } from '@wordpress/icons';
 import { useFullScreen } from '~/utils';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { isFeatureEnabled } from '~/utils/features';
-import { SiteHub } from './assembler-hub/site-hub';
+import { SiteHub } from './site-hub';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import banner1Shape from './assets/banner-1-shape.png';
