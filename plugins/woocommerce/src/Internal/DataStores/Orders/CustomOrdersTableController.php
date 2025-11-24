@@ -558,7 +558,7 @@ class CustomOrdersTableController {
 				'can_export'                       => false,
 				'supports'                         => array(),
 				'capability_type'                  => 'shop_order',
-				'map_meta_cap'					   => true,
+				'map_meta_cap'	                 => true,
 				'exclude_from_order_count'         => true,
 				'exclude_from_order_views'         => true,
 				'exclude_from_order_reports'       => true,
