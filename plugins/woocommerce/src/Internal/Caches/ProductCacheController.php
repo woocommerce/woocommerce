@@ -77,6 +77,7 @@ class ProductCacheController {
 	 * Invalidate the product cache for a given post ID if it's a product or product variation.
 	 *
 	 * @param int $post_id The post ID to check and invalidate.
+	 *
 	 * @return void
 	 */
 	public function maybe_invalidate_product_cache( $post_id ) {
@@ -95,8 +96,9 @@ class ProductCacheController {
 	/**
 	 * Invalidate the product cache when post meta is updated.
 	 *
-	 * @param int    $meta_id The ID of the metadata entry.
-	 * @param int    $object_id The ID of the object the metadata is for.
+	 * @param int $meta_id   The ID of the metadata entry.
+	 * @param int $object_id The ID of the object the metadata is for.
+	 *
 	 * @return void
 	 */
 	public function maybe_invalidate_product_cache_by_meta( $meta_id, $object_id ) {

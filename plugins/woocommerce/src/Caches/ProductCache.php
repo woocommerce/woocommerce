@@ -24,6 +24,7 @@ class ProductCache extends ObjectCache {
 	 * Get the id of an object to be cached.
 	 *
 	 * @param array|object $product The product to be cached.
+	 *
 	 * @return int|string|null The id of the object, or null if it can't be determined.
 	 */
 	protected function get_object_id( $product ) {
@@ -34,6 +35,7 @@ class ProductCache extends ObjectCache {
 	 * Validate an object before caching it.
 	 *
 	 * @param WC_Product $product The product to validate.
+	 *
 	 * @return string[]|null An array of error messages, or null if the object is valid.
 	 */
 	protected function validate( $product ): ?array {
@@ -53,6 +55,7 @@ class ProductCache extends ObjectCache {
 	 * @param WC_Product      $product The product to be cached.
 	 * @param int|string|null $id Id of the product to be cached, if null, get_object_id will be used to get it.
 	 * @param int             $expiration Expiration of the cached data in seconds from the current time, or DEFAULT_EXPIRATION to use the default value.
+	 *
 	 * @return bool True on success, false on error.
 	 * @throws \Automattic\WooCommerce\Caching\CacheException Invalid parameter, or null id was passed and get_object_id returns null too.
 	 */
@@ -75,6 +78,7 @@ class ProductCache extends ObjectCache {
 	 * @param int|string    $id The id of the product to retrieve.
 	 * @param int           $expiration Expiration of the cached data in seconds from the current time, used if a product is retrieved from datastore and cached.
 	 * @param callable|null $get_from_datastore_callback Optional callback to get the product if it's not cached, it must return a WC_Product or null.
+	 *
 	 * @return WC_Product|null Cached product, or null if it's not cached and can't be retrieved from datastore or via callback.
 	 * @throws \Automattic\WooCommerce\Caching\CacheException Invalid id parameter.
 	 */
