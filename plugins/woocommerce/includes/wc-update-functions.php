@@ -3189,7 +3189,7 @@ function wc_update_1050_enable_autoload_options() {
 	$wpdb->query(
 		$wpdb->prepare(
 			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			"UPDATE {$wpdb->options} SET autoload = 'auto' WHERE option_name IN ($placeholders)",
+			"UPDATE {$wpdb->options} SET autoload = 'on' WHERE option_name IN ($placeholders)",
 			...$autoload_options
 		)
 	);
