@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add Agentic Commerce checkout `complete` endpoint and `agentic_commerce` payment gateway feature support.

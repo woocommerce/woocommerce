@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Coerce order total into float when empty string is provided in setter
