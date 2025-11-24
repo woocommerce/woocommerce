@@ -3189,18 +3189,18 @@ function wc_update_1050_enable_autoload_options() {
 	);
 
 	$feature_options = array(
-		'woocommerce_feature_fulfillments_enabled',
-		'woocommerce_feature_marketplace_enabled',
-		'woocommerce_feature_push_notifications_enabled',
-		'woocommerce_feature_agentic_checkout_enabled',
-		'woocommerce_feature_cart_checkout_blocks_enabled',
+		'fulfillments'         => 'woocommerce_feature_fulfillments_enabled',
+		'marketplace'          => 'woocommerce_feature_marketplace_enabled',
+		'push_notifications'   => 'woocommerce_feature_push_notifications_enabled',
+		'agentic_checkout'     => 'woocommerce_feature_agentic_checkout_enabled',
+		'cart_checkout_blocks' => 'woocommerce_feature_cart_checkout_blocks_enabled',
 	);
 
 	$features_controller = wc_get_container()->get( FeaturesController::class );
 
-	foreach ( $feature_options as $option ) {
+	foreach ( $feature_options as $key => $option ) {
 		if ( false === get_option( $option, false ) ) {
-			add_option( $option, wc_bool_to_string( $features_controller->feature_is_enabled( $option ) ), '', true );
+			add_option( $option, wc_bool_to_string( $features_controller->feature_is_enabled( $key ) ), '', true );
 		} else {
 			$autoload_options[] = $option;
 		}
