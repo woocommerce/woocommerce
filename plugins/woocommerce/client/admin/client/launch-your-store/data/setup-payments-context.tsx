@@ -14,7 +14,7 @@ import { getNewPath } from '@woocommerce/navigation';
  */
 import { LYSPaymentsSteps } from '~/settings-payments/onboarding/providers/woopayments/steps';
 import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
-import { getLysTasklist } from '../hub/sidebar/tasklist';
+import { getPaymentsTaskFromLysTasklist } from '../hub/sidebar/tasklist';
 
 interface SetUpPaymentsContextType {
 	isWooPaymentsActive: boolean;
@@ -49,46 +49,24 @@ export const SetUpPaymentsProvider: React.FC< {
 		let isMounted = true;
 
 		const fetchWooPaymentsStatus = async () => {
-			try {
-				const tasklist = await getLysTasklist();
+			const paymentsTask = await getPaymentsTaskFromLysTasklist();
 
-				// Validate that fullLysTaskList is an array
-				if ( ! Array.isArray( tasklist?.fullLysTaskList ) ) {
-					// eslint-disable-next-line no-console
-					console.error(
-						'Invalid tasklist data: fullLysTaskList is not an array'
-					);
-					return;
-				}
+			// Validate paymentsTask.additionalData has expected properties
+			if ( paymentsTask?.additionalData && isMounted ) {
+				const { wooPaymentsIsActive, wooPaymentsIsInstalled } =
+					paymentsTask.additionalData;
 
-				const paymentsTask = tasklist.fullLysTaskList.find(
-					( task ) => task.id === 'payments'
+				// Validate boolean-like values before setting state
+				setIsWooPaymentsActive(
+					typeof wooPaymentsIsActive === 'boolean'
+						? wooPaymentsIsActive
+						: false
 				);
-
-				// Validate paymentsTask.additionalData has expected properties
-				if ( paymentsTask?.additionalData ) {
-					const { wooPaymentsIsActive, wooPaymentsIsInstalled } =
-						paymentsTask.additionalData;
-
-					// Only update state if component is still mounted
-					if ( isMounted ) {
-						// Validate boolean-like values before setting state
-						setIsWooPaymentsActive(
-							typeof wooPaymentsIsActive === 'boolean'
-								? wooPaymentsIsActive
-								: false
-						);
-						setIsWooPaymentsInstalled(
-							typeof wooPaymentsIsInstalled === 'boolean'
-								? wooPaymentsIsInstalled
-								: false
-						);
-					}
-				}
-			} catch ( error ) {
-				// Log errors but maintain default state
-				// eslint-disable-next-line no-console
-				console.error( 'Error fetching WooPayments status:', error );
+				setIsWooPaymentsInstalled(
+					typeof wooPaymentsIsInstalled === 'boolean'
+						? wooPaymentsIsInstalled
+						: false
+				);
 			}
 		};
 

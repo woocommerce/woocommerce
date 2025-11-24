@@ -31,7 +31,7 @@ import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
-import { getLysTasklist } from '../tasklist';
+import { getPaymentsTaskFromLysTasklist } from '../tasklist';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
@@ -44,7 +44,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		isLoading,
 	} = useOnboardingContext();
 
-	// Fetch payments task using getLysTasklist
+	// Fetch payments task using getPaymentsTaskFromLysTasklist helper
 	const [ payments_task, setPaymentsTask ] = useState< TaskType | undefined >(
 		undefined
 	);
@@ -53,30 +53,11 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		let isMounted = true;
 
 		const fetchPaymentsTask = async () => {
-			try {
-				const tasklist = await getLysTasklist();
+			const task = await getPaymentsTaskFromLysTasklist();
 
-				// Validate that fullLysTaskList is an array
-				if ( ! Array.isArray( tasklist?.fullLysTaskList ) ) {
-					// eslint-disable-next-line no-console
-					console.error(
-						'Invalid tasklist data: fullLysTaskList is not an array'
-					);
-					return;
-				}
-
-				const task = tasklist.fullLysTaskList.find(
-					( t ) => t.id === 'payments'
-				);
-
-				// Only update state if component is still mounted
-				if ( isMounted ) {
-					setPaymentsTask( task );
-				}
-			} catch ( error ) {
-				// Log errors but maintain current state
-				// eslint-disable-next-line no-console
-				console.error( 'Error fetching payments task:', error );
+			// Only update state if component is still mounted
+			if ( isMounted ) {
+				setPaymentsTask( task );
 			}
 		};
 
