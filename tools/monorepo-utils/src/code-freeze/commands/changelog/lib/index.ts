@@ -202,13 +202,19 @@ export const updateReleaseBranchChangelogs = async (
 
 		Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
 
-		execSync(
+		const changelogOutput = execSync(
 			`pnpm --filter=@woocommerce/plugin-woocommerce changelog write --add-pr-num -n --yes -vvv --use-version ${ mainVersion }`,
 			{
 				cwd: tmpRepoPath,
-				stdio: 'inherit',
+				encoding: 'utf-8',
 			}
 		);
+
+		const noEntriesWritten =
+			changelogOutput.includes( 'No changes were found' ) ||
+			changelogOutput.includes( 'no changes with content for this write' );
+
+		Logger.notice( `Changelog command output: ${ changelogOutput }` );
 		Logger.notice( `Committing deleted files in ${ tmpRepoPath }` );
 		//Checkout pnpm-lock.yaml to prevent issues in case of an out of date lockfile.
 		await git.checkout( 'pnpm-lock.yaml' );
@@ -249,11 +255,14 @@ export const updateReleaseBranchChangelogs = async (
 			};
 		}
 		Logger.notice( `Creating PR for ${ branch }` );
+		const warningMessage = noEntriesWritten
+			? '> [!WARNING]\n> No entries were written to the changelog. Consider adding a generic changelog entry before releasing.\n\n'
+			: '';
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
 			title: `Release: Prepare the changelog for ${ version }`,
-			body: `This pull request was automatically generated to prepare the changelog for ${ version }`,
+			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
 		} );
