@@ -119,7 +119,7 @@ class Utils {
 		$wrapper_attributes = array_merge(
 			array(
 				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options-quantity-selector',
-				'data-wp-init' 	      => 'callbacks.storeInputElementRef',
+				'data-wp-init'        => 'callbacks.storeInputElementRef',
 			),
 			$wrapper_attributes
 		);
