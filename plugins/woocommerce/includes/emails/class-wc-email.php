@@ -95,6 +95,13 @@ class WC_Email extends WC_Settings_API {
 	public $template_html;
 
 	/**
+	 * Initial email block template path.
+	 *
+	 * @var string
+	 */
+	public $template_block;
+
+	/**
 	 * Template path.
 	 *
 	 * @var string
@@ -1292,6 +1299,8 @@ class WC_Email extends WC_Settings_API {
 			return $this->template_html;
 		} elseif ( 'template_plain' === $type ) {
 			return $this->template_plain;
+		} elseif ( 'template_block' === $type ) {
+			return $this->template_block;
 		}
 		return '';
 	}
