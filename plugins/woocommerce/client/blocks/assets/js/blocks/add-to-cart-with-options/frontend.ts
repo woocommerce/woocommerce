@@ -240,9 +240,11 @@ const { actions, state } = store<
 			},
 			setQuantity( productId: number, value: number ) {
 				const context = getContext< Context >();
-				const { inputElement } = getContext< QuantitySelectorContext >(
-					'woocommerce/add-to-cart-with-options-quantity-selector'
-				);
+				const quantitySelectorContext =
+					getContext< QuantitySelectorContext >(
+						'woocommerce/add-to-cart-with-options-quantity-selector'
+					);
+				const inputElement = quantitySelectorContext?.inputElement;
 				const { products } = getConfig(
 					'woocommerce'
 				) as WooCommerceConfig;
