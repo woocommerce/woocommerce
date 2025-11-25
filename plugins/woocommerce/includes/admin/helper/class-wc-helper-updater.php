@@ -255,7 +255,7 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
-			echo esc_html_e( ' Activate WooCommerce.com Update Manager to update.', 'woocommerce' );
+			esc_html_e( ' Activate WooCommerce.com Update Manager to update.', 'woocommerce' );
 		}
 	}
 

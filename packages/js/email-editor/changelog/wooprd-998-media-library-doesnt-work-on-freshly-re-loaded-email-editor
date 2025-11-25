@@ -1,5 +1,4 @@
 Significance: patch
 Type: fix
-Comment: Remove unnecessary hook for media library
 
-
+Remove unnecessary hook for media library

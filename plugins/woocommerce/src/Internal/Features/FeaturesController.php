@@ -806,7 +806,7 @@ class FeaturesController {
 			return false;
 		}
 
-		return update_option( $this->feature_enable_option_name( $feature_id ), $enable ? 'yes' : 'no' );
+		return update_option( $this->feature_enable_option_name( $feature_id ), $enable ? 'yes' : 'no', 'on' );
 	}
 
 	/**
