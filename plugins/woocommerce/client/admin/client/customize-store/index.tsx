@@ -46,6 +46,24 @@ const CustomizeStoreController = () => {
 
 	const isBlockTheme = currentTheme?.is_block_theme;
 
+	const getDesignUrl = () => {
+		return isBlockTheme
+			? getAdminLink( 'site-editor.php' )
+			: getAdminLink( 'customize.php?return=/wp-admin/themes.php' );
+	};
+
+	const getMarketplaceUrl = () => {
+		if ( isWooExpress() ) {
+			return getAdminLink( 'themes.php' );
+		}
+		if ( isFeatureEnabled( 'marketplace' ) ) {
+			return getAdminLink(
+				'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
+			);
+		}
+		return 'https://woocommerce.com/product-category/themes/';
+	};
+
 	useEffect( () => {
 		document.body.classList.add( 'woocommerce-customize-store' );
 		return () => {
@@ -64,26 +82,11 @@ const CustomizeStoreController = () => {
 			theme_type: isBlockTheme ? 'block' : 'classic',
 		} );
 		markTaskComplete();
-		// Redirect to Site Editor for block themes, Customizer for classic themes
-		window.location.href = isBlockTheme
-			? getAdminLink( 'site-editor.php' )
-			: getAdminLink( 'customize.php?return=/wp-admin/themes.php' );
 	};
 
 	const handleMarketplaceClick = () => {
 		recordEvent( 'customize_your_store_intro_browse_all_themes_click' );
 		markTaskComplete();
-		// Redirect to themes marketplace using same logic as redirectToThemes
-		if ( isWooExpress() ) {
-			window.location.href = getAdminLink( 'themes.php' );
-		} else if ( isFeatureEnabled( 'marketplace' ) ) {
-			window.location.href = getAdminLink(
-				'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
-			);
-		} else {
-			window.location.href =
-				'https://woocommerce.com/product-category/themes/';
-		}
 	};
 
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
@@ -186,6 +189,7 @@ const CustomizeStoreController = () => {
 							<Button
 								variant="primary"
 								onClick={ handleDesignClick }
+								href={ getDesignUrl() }
 							>
 								{ __( 'Start designing', 'woocommerce' ) }
 							</Button>
@@ -245,6 +249,7 @@ const CustomizeStoreController = () => {
 							<Button
 								variant="primary"
 								onClick={ handleMarketplaceClick }
+								href={ getMarketplaceUrl() }
 							>
 								{ __(
 									'Browse the Marketplace',
