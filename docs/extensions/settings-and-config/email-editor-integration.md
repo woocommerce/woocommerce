@@ -323,6 +323,7 @@ class YourPlugin_Loyalty_Welcome_Email extends WC_Email {
 
         $this->template_html  = 'emails/loyalty-welcome.php';
         $this->template_plain = 'emails/plain/loyalty-welcome.php';
+        $this->template_block = 'emails/block/loyalty-welcome.php';
         $this->template_base  = plugin_dir_path( __FILE__ ) . 'templates/';
 
         parent::__construct();

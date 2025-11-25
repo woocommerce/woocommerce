@@ -1289,7 +1289,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get template.
 	 *
-	 * @param  string $type Template type. Can be either 'template_html' or 'template_plain'.
+	 * @param  string $type Template type. Can be either 'template_html', 'template_plain' or 'template_block'.
 	 * @return string
 	 */
 	public function get_template( $type ) {
