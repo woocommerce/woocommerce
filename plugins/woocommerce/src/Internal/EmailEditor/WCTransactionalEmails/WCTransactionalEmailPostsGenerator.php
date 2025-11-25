@@ -116,7 +116,7 @@ class WCTransactionalEmailPostsGenerator {
 	 * @return string The email template.
 	 */
 	public function get_email_template( $email ) {
-		$template_name = !empty( $email->template_block ) ? $email->template_block : str_replace( 'plain', 'block', $email->template_plain );
+		$template_name = ! empty( $email->template_block ) ? $email->template_block : str_replace( 'plain', 'block', $email->template_plain );
 
 		try {
 			$template_html = wc_get_template_html(
@@ -126,6 +126,10 @@ class WCTransactionalEmailPostsGenerator {
 				$email->template_base ?? ''
 			);
 		} catch ( \Exception $e ) {
+			// wc_get_template_html() uses ob_start(), so we need to clean the output buffer if an exception is thrown.
+			if ( ob_get_level() > 0 ) {
+				ob_end_clean();
+			}
 			$template_html = '';
 		}
 
