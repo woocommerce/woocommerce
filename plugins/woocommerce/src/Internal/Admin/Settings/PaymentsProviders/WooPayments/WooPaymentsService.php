@@ -2031,10 +2031,29 @@ class WooPaymentsService {
 				}
 			}
 		}
-		// Standardize errors to be a list of arrays with `code`, `message`, and other keys.
+		// Standardize errors to be a list of arrays with `code`, `message`, and optional extra keys.
 		$standardized_errors = array();
-		foreach ( $step_details['errors'] as $error ) {
+		$raw_errors          = is_array( $step_details['errors'] )
+			? $step_details['errors']
+			: array( $step_details['errors'] );
+
+		foreach ( $raw_errors as $error ) {
+			if ( $error instanceof \WP_Error ) {
+				$standardized_errors[] = array(
+					'code'    => $error->get_error_code(),
+					'message' => $error->get_error_message(),
+					'context' => $error->get_error_data(),
+				);
+				continue;
+			}
+
 			if ( is_array( $error ) ) {
+				if ( empty( $error['code'] ) ) {
+					$error['code'] = 'general_error';
+				}
+				if ( ! array_key_exists( 'message', $error ) ) {
+					$error['message'] = '';
+				}
 				$standardized_errors[] = $error;
 			} else {
 				$standardized_errors[] = array(
