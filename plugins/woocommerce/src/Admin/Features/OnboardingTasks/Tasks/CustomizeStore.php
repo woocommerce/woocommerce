@@ -148,9 +148,17 @@ class CustomizeStore extends Task {
 	}
 
 	/**
+	 * Methods below are kept for backward compatibility.
+	 */
+
+	/**
 	 * Possibly add site editor scripts.
+	 *
+	 * @deprecated 10.5.0 This method is no longer used. The CYS flow has been simplified.
+	 * @return void
 	 */
 	public function possibly_add_site_editor_scripts() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'The CYS flow has been simplified and this method should no longer be used.' );
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$is_wc_admin_page = (
 			isset( $_GET['page'] ) &&
@@ -272,9 +280,12 @@ class CustomizeStore extends Task {
 	/**
 	 * Appends a small style to hide admin bar
 	 *
+	 * @deprecated 10.5.0 This method is no longer used. The CYS flow has been simplified.
 	 * @param bool $show Whether to show the admin bar.
+	 * @return bool
 	 */
 	public function possibly_hide_wp_admin_bar( $show ) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'The CYS flow has been simplified and this method should no longer be used.' );
 		if ( isset( $_GET['cys-hide-admin-bar'] ) ) { // @phpcs:ignore
 			return false;
 		}
@@ -285,9 +296,11 @@ class CustomizeStore extends Task {
 	 * Runs script and add styles to remove unwanted elements and hide scrollbar
 	 * when users are viewing with ?cys-hide-admin-bar=true.
 	 *
+	 * @deprecated 10.5.0 This method is no longer used. The CYS flow has been simplified.
 	 * @return void
 	 */
 	public function possibly_remove_unwanted_ui_elements() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'The CYS flow has been simplified and this method should no longer be used.' );
 		if ( isset( $_GET['cys-hide-admin-bar'] ) ) { // @phpcs:ignore
 			echo '
 			<style type="text/css">
