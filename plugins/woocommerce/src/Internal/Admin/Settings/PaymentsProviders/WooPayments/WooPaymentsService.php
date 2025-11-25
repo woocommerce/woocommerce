@@ -2031,6 +2031,19 @@ class WooPaymentsService {
 				}
 			}
 		}
+		// Standardize errors to be a list of arrays with `code`, `message`, and other keys.
+		$standardized_errors = array();
+		foreach ( $step_details['errors'] as $error ) {
+			if ( is_array( $error ) ) {
+				$standardized_errors[] = $error;
+			} else {
+				$standardized_errors[] = array(
+					'code'    => 'general_error',
+					'message' => (string) $error,
+				);
+			}
+		}
+		$step_details['errors'] = $standardized_errors;
 
 		// Ensure that any step has the general actions.
 		if ( empty( $step_details['actions'] ) ) {
