@@ -115,29 +115,32 @@ class Image extends Abstract_Block_Renderer {
 				}
 			}
 
-			// Try to get dimensions from attachment metadata.
+			// Next we check the attachment data if it has an ID.
 			$attachment_id = $parsed_block['attrs']['id'] ?? null;
-
 			if ( $attachment_id ) {
-				$size_slug = $parsed_block['attrs']['sizeSlug'] ?? 'full';
+				$size_slug = $parsed_block['attrs']['sizeSlug'] ?? 'large';
 
-				// Try wp_get_attachment_image_src first (works better in multisite).
-				$image_src = wp_get_attachment_image_src( $attachment_id, $size_slug );
-
-				if ( $image_src && isset( $image_src[1] ) ) {
-					// wp_get_attachment_image_src returns [url, width, height, is_intermediate].
-					$image_size = $image_src[1];
-				} else {
-					// Fallback to metadata approach.
-					$metadata = wp_get_attachment_metadata( $attachment_id );
-
-					if ( $metadata && isset( $metadata['width'] ) ) {
+				// Check the metadata first.
+				$metadata = wp_get_attachment_metadata( $attachment_id );
+				if ( $metadata ) {
+					if ( isset( $metadata['width'] ) ) {
 						$image_size = $metadata['width'];
-					} elseif ( $metadata && isset( $metadata['sizes'][ $size_slug ]['width'] ) ) {
+					} elseif ( isset( $metadata['sizes'][ $size_slug ]['width'] ) ) {
 						$image_size = $metadata['sizes'][ $size_slug ]['width'];
-					} else {
-						$image_size = $max_width;
 					}
+				}
+
+				// Last try to get dimensions from wp_get_attachment_image_src.
+				$image_src = wp_get_attachment_image_src( $attachment_id, $size_slug );
+				if ( $image_src && isset( $image_src[1] ) ) {
+					$image_size = $image_src[1];
+				}
+
+				if ( isset( $image_size ) ) {
+					$width                          = min( $image_size, $max_width );
+					$parsed_block['attrs']['width'] = "{$width}px";
+
+					return $parsed_block;
 				}
 			} else {
 				// Fallback to wp_getimagesize.
