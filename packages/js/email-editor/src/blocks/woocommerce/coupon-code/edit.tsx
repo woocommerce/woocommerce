@@ -54,14 +54,20 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 
 	// Fetch coupons from WooCommerce API
 	useEffect( () => {
+		const controller = new AbortController();
+
 		const fetchCoupons = async () => {
 			try {
 				setIsLoading( true );
 				const response = await apiFetch< Coupon[] >( {
 					path: '/wc/v3/coupons?per_page=100',
+					signal: controller.signal,
 				} );
 				setCoupons( response );
 			} catch ( error ) {
+				if ( error instanceof Error && error.name === 'AbortError' ) {
+					return;
+				}
 				// eslint-disable-next-line no-console
 				console.error( 'Error fetching coupons:', error );
 				setCoupons( [] );
@@ -71,6 +77,10 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 		};
 
 		fetchCoupons();
+
+		return () => {
+			controller.abort();
+		};
 	}, [] );
 
 	// Convert coupons to options format and filter based on search
