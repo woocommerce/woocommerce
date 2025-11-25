@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1](https://github.com/woocommerce/email-editor/releases/tag/2.0.1) - 2025-11-25 
+
+-   Patch - Swap core/post-content render callback only during email rendering to prevent conflicts with other plugins like MailPoet. [#61874]
+-   Patch - Add support for conditional "Finish checkout" button text in cart collections for email rendering [#61822]
+-   Patch - Improve email editor preview in new tab functionality by adding post context to the rendered data filter. [#62010]
+
 ## [2.0.0](https://github.com/woocommerce/email-editor/releases/tag/2.0.0) - 2025-11-07 
 
 -   Patch - Fix core/post-content block rendering empty on second email in batch processing by overriding WordPress render callback with stateless version [#61546]

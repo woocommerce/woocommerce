@@ -315,6 +315,7 @@ class WC_Install {
 		),
 		'10.5.0' => array(
 			'wc_update_1050_migrate_brand_permalink_setting',
+			'wc_update_1050_enable_autoload_options',
 		),
 	);
 
