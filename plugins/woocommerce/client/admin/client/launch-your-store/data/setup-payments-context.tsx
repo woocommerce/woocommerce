@@ -1,12 +1,9 @@
 /**
  * External dependencies
  */
-import {
-	createContext,
-	useContext,
-	useState,
-	useEffect,
-} from '@wordpress/element';
+import { createContext, useContext, useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { pluginsStore, paymentSettingsStore } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 
 /**
@@ -14,7 +11,8 @@ import { getNewPath } from '@woocommerce/navigation';
  */
 import { LYSPaymentsSteps } from '~/settings-payments/onboarding/providers/woopayments/steps';
 import { OnboardingProvider } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
-import { getPaymentsTaskFromLysTasklist } from '../hub/sidebar/tasklist';
+import { isWooPayments } from '~/settings-payments/utils';
+import { wooPaymentsExtensionSlug } from '~/settings-payments/constants';
 
 interface SetUpPaymentsContextType {
 	isWooPaymentsActive: boolean;
@@ -39,44 +37,35 @@ export const SetUpPaymentsProvider: React.FC< {
 	children: React.ReactNode;
 	closeModal: () => void;
 } > = ( { children, closeModal } ) => {
-	// Extract WooPayments state from the payments task's additionalData using getLysTasklist
-	const [ isWooPaymentsActive, setIsWooPaymentsActive ] =
-		useState< boolean >( false );
-	const [ isWooPaymentsInstalled, setIsWooPaymentsInstalled ] =
-		useState< boolean >( false );
-
-	useEffect( () => {
-		let isMounted = true;
-
-		const fetchWooPaymentsStatus = async () => {
-			const paymentsTask = await getPaymentsTaskFromLysTasklist();
-
-			// Validate paymentsTask.additionalData has expected properties
-			if ( paymentsTask?.additionalData && isMounted ) {
-				const { wooPaymentsIsActive, wooPaymentsIsInstalled } =
-					paymentsTask.additionalData;
-
-				// Validate boolean-like values before setting state
-				setIsWooPaymentsActive(
-					typeof wooPaymentsIsActive === 'boolean'
-						? wooPaymentsIsActive
-						: false
-				);
-				setIsWooPaymentsInstalled(
-					typeof wooPaymentsIsInstalled === 'boolean'
-						? wooPaymentsIsInstalled
-						: false
-				);
-			}
-		};
-
-		fetchWooPaymentsStatus();
-
-		// Cleanup function to prevent state updates after unmount
-		return () => {
-			isMounted = false;
-		};
+	// Get the WooPayments provider to access the real plugin slug.
+	// This is important for test/beta versions that may be installed under a different slug.
+	const wooPaymentsProvider = useSelect( ( select ) => {
+		const store = select( paymentSettingsStore );
+		return store
+			.getPaymentProviders()
+			.find( ( provider ) => isWooPayments( provider.id ) );
 	}, [] );
+
+	// Use the real plugin slug from the provider, falling back to the official slug.
+	const wooPaymentsPluginSlug =
+		wooPaymentsProvider?.plugin?.slug ?? wooPaymentsExtensionSlug;
+
+	// Check if WooPayments is active by looking for the plugin in the active plugins list.
+	const isWooPaymentsActive = useSelect(
+		( select ) =>
+			select( pluginsStore )
+				.getActivePlugins()
+				.includes( wooPaymentsPluginSlug ),
+		[ wooPaymentsPluginSlug ]
+	);
+
+	const isWooPaymentsInstalled = useSelect(
+		( select ) =>
+			select( pluginsStore )
+				.getInstalledPlugins()
+				.includes( wooPaymentsPluginSlug ),
+		[ wooPaymentsPluginSlug ]
+	);
 
 	// State to track if WooPayments was recently enabled
 	const [ wooPaymentsRecentlyActivated, setWooPaymentsRecentlyActivated ] =
