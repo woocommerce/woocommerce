@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
-import { Button } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -60,6 +60,16 @@ const TestOrLiveAccountStep = () => {
 								</p>
 							</div>
 						</div>
+						{ currentStep?.errors &&
+							currentStep.errors.length > 0 && (
+								<Notice
+									status="error"
+									isDismissible={ false }
+									className="woocommerce-payments-test-or-live-account-step__error"
+								>
+									<p>{ currentStep.errors[ 0 ].message }</p>
+								</Notice>
+							) }
 						<div className="woocommerce-payments-test-or-live-account-step__success-whats-next">
 							<div className="woocommerce-woopayments-modal__content__item-flex">
 								<img

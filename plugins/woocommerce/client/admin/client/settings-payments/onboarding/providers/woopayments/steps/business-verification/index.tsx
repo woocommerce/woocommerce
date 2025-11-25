@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React from 'react';
+import { Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -70,6 +71,15 @@ export const BusinessVerificationStep: React.FC = () => {
 		<div className="settings-payments-onboarding-modal__step-business-verification">
 			<WooPaymentsStepHeader onClose={ closeModal } />
 			<div className="settings-payments-onboarding-modal__step-business-verification-content">
+				{ currentStep?.errors && currentStep.errors.length > 0 && (
+					<Notice
+						status="error"
+						isDismissible={ false }
+						className="settings-payments-onboarding-modal__step-business-verification-error"
+					>
+						<p>{ currentStep.errors[ 0 ].message }</p>
+					</Notice>
+				) }
 				<BusinessVerificationContextProvider
 					initialData={ initialData }
 				>
