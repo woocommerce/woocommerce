@@ -659,6 +659,11 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 
 		// Verify clone mode persists on cloned object.
 		$this->assertEquals( WC_Data::CLONE_MODE_CACHE, $cloned_object->get_clone_mode(), 'Clone mode should persist to cloned object' );
+
+		// Modify cloned meta and verify original is unchanged.
+		$cloned_meta[0]->value = 'modified_value';
+		$original_meta_after   = $object->get_meta_data();
+		$this->assertNotEquals( 'modified_value', $original_meta_after[0]->value, 'Modifying cloned meta should not affect original' );
 	}
 
 	/**
@@ -757,25 +762,4 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( WC_Data::CLONE_MODE_DUPLICATE, $retrieved_object->get_clone_mode() );
 	}
 
-	/**
-	 * Test that set_id() does not affect meta IDs (simplified behavior).
-	 */
-	public function test_set_id_does_not_affect_meta() {
-		$object = $this->create_test_post();
-		$object->add_meta_data( 'test_meta_key', 'val1', true );
-		$object->save_meta_data();
-
-		// Get original meta ID.
-		$meta_before      = $object->get_meta_data();
-		$original_meta_id = $meta_before[0]->id;
-
-		// Change the object ID (this no longer affects meta).
-		$object->set_id( 999 );
-
-		// Verify meta ID is unchanged.
-		$meta_after = $object->get_meta_data();
-		$this->assertEquals( $original_meta_id, $meta_after[0]->id, 'Meta ID should not be affected by set_id()' );
-		$this->assertEquals( 'test_meta_key', $meta_after[0]->key, 'Meta key should be unchanged' );
-		$this->assertEquals( 'val1', $meta_after[0]->value, 'Meta value should be unchanged' );
-	}
 }

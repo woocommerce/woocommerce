@@ -1,4 +1,4 @@
-Significance: major
-Type: update
+Significance: minor
+Type: add
 
-Update WC_Data meta_data IDs with WC_Data::set_id() instead of during ::__clone().
+Add configurable clone mode to WC_Data to support both duplication and caching workflows while maintaining backward compatibility.
