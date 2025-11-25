@@ -27,8 +27,14 @@ function wrapWithDeprecate< T extends Record< string, unknown > >( obj: T ): T {
 		const value = obj[ key ];
 		if ( typeof value === 'function' ) {
 			wrapped[ key ] = function ( this: unknown, ...args: unknown[] ) {
-				// onLoad action is automatically called when initDispatchers is called, skip deprecation message.
-				if ( key !== 'onLoad' ) {
+				// Skip deprecation message for:
+				// - onLoad (automatically called by initDispatchers)
+				// - onHistoryChange when called internally with true flag
+				const shouldSkipDeprecation =
+					key === 'onLoad' ||
+					( key === 'onHistoryChange' && args[ 0 ] === true );
+
+				if ( ! shouldSkipDeprecation ) {
 					deprecated( 'Navigation store', {} );
 				}
 				return ( value as ( ...args: unknown[] ) => unknown ).apply(

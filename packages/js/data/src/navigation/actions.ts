@@ -90,7 +90,8 @@ export function removeFavoriteSuccess( favorite: string ) {
 	};
 }
 
-export function* onHistoryChange() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function* onHistoryChange( _internalCall?: boolean ) {
 	const persistedQuery = getPersistedQuery();
 
 	if ( ! Object.keys( persistedQuery ).length ) {

@@ -16,7 +16,8 @@ export default async () => {
 
 	addHistoryListener( async () => {
 		setTimeout( async () => {
-			await onHistoryChange();
+			// Pass true to suppress deprecation warning for internal usage only.
+			await onHistoryChange( true );
 		}, 0 );
 	} );
 };
