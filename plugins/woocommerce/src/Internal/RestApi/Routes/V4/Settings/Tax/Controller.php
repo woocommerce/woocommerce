@@ -241,27 +241,7 @@ class Controller extends AbstractController {
 			return true;
 		}
 
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		// @todo Fix ciab-next plugin's settings transformation.
-		// The ciab-next plugin filters 'woocommerce_tax_settings' and transforms options from the simple
-		// WooCommerce format to a structured format, also clearing out the 'title' field. This causes
-		// validation issues in the REST API. The plugin should preserve the original format or only
-		// transform settings for UI display purposes without affecting the REST API.
-
-		// Handle both formats of options since plugins can filter the settings structure.
-		// Original WooCommerce format: array( 'yes' => 'Label', 'no' => 'Label' )
-		// Transformed format (e.g., ciab-next plugin): array( 0 => array( 'value' => 'yes', 'label' => 'Label', 'desc' => '...' ) )
-		// Without this, validation extracts ['0', '1'] instead of ['yes', 'no'], causing valid requests to fail.
-		$allowed_values = array();
-		foreach ( $options as $key => $option ) {
-			if ( is_array( $option ) && isset( $option['value'] ) ) {
-				// Structured format - extract the value.
-				$allowed_values[] = (string) $option['value'];
-			} else {
-				// Simple format - use the key.
-				$allowed_values[] = (string) $key;
-			}
-		}
+		$allowed_values = array_map( 'strval', array_keys( (array) $options ) );
 
 		// Normalize value to array for consistent validation.
 		$check_values = is_array( $value ) ? array_map( 'strval', $value ) : array( (string) $value );
