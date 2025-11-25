@@ -45,10 +45,6 @@ export function registerCouponCodeBlock() {
 			},
 		},
 		attributes: {
-			couponId: {
-				type: 'number',
-				default: 0,
-			},
 			couponCode: {
 				type: 'string',
 				default: '',
