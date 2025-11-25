@@ -107,10 +107,10 @@ class Image extends Abstract_Block_Renderer {
 			if ( isset( $parsed_url['query'] ) ) {
 				parse_str( $parsed_url['query'], $query_params );
 				if ( isset( $query_params['w'] ) && is_numeric( $query_params['w'] ) ) {
-					$image_size                     = (int) $query_params['w'];
-					$width                          = min( $image_size, $max_width );
-					$parsed_block['attrs']['width'] = "{$width}px";
+					$image_size = (int) $query_params['w'];
+					$width      = min( $image_size, $max_width );
 
+					$parsed_block['attrs']['width'] = "{$width}px";
 					return $parsed_block;
 				}
 			}
@@ -137,9 +137,9 @@ class Image extends Abstract_Block_Renderer {
 				}
 
 				if ( isset( $image_size ) ) {
-					$width                          = min( $image_size, $max_width );
-					$parsed_block['attrs']['width'] = "{$width}px";
+					$width = min( $image_size, $max_width );
 
+					$parsed_block['attrs']['width'] = "{$width}px";
 					return $parsed_block;
 				}
 			} else {
@@ -148,14 +148,14 @@ class Image extends Abstract_Block_Renderer {
 				$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
 				$image_size = wp_getimagesize( $image_path );
 				$image_size = $image_size ? $image_size[0] : $max_width;
-			}
+				$width      = min( $image_size, $max_width );
 
-			$width = min( $image_size, $max_width );
-		} else {
-			$width = $max_width;
+				$parsed_block['attrs']['width'] = "{$width}px";
+				return $parsed_block;
+			}
 		}
 
-		$parsed_block['attrs']['width'] = "{$width}px";
+		$parsed_block['attrs']['width'] = "{$max_width}px";
 		return $parsed_block;
 	}
 
