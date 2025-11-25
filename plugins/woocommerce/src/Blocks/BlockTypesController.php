@@ -445,6 +445,7 @@ final class BlockTypesController {
 			'ComingSoon',
 			'CustomerAccount',
 			'EmailContent',
+			'ExpressPaymentsCheckoutReact',
 			'FeaturedCategory',
 			'FeaturedProduct',
 			'FilterWrapper',

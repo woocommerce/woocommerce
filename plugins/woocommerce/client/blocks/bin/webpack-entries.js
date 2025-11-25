@@ -64,6 +64,7 @@ const blocks = {
 	'coming-soon': {},
 	'customer-account': {},
 	'email-content': {},
+	'express-payments-checkout-react': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
 	},

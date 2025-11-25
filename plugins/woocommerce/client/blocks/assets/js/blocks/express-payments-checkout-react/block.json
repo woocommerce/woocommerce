@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/express-payments-checkout-react",
+	"title": "Express Payments",
+	"category": "woocommerce",
+	"description": "Display express payment methods for quick checkout.",
+	"keywords": [ "WooCommerce", "express", "payment", "checkout" ],
+	"textdomain": "woocommerce",
+	"supports": {
+		"align": [ "wide", "full" ],
+		"html": false,
+		"multiple": true,
+		"inserter": true
+	},
+	"attributes": {}
+}

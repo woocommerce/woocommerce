@@ -47,6 +47,7 @@ class Api {
 		add_filter( 'woocommerce_blocks_register_script_dependencies', array( $this, 'add_payment_method_script_dependencies' ), 10, 2 );
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
+		add_action( 'woocommerce_blocks_express_payments_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_payment_method_type_registration', array( $this, 'register_payment_method_integrations' ) );
 		add_action( 'wp_print_scripts', array( $this, 'verify_payment_methods_dependencies' ), 1 );
 	}
@@ -59,7 +60,7 @@ class Api {
 	 * @return array
 	 */
 	public function add_payment_method_script_dependencies( $dependencies, $handle ) {
-		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend', 'wc-cart-block', 'wc-cart-block-frontend', 'wc-mini-cart-iapi-react-bridge' ], true ) ) {
+		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend', 'wc-cart-block', 'wc-cart-block-frontend', 'wc-mini-cart-iapi-react-bridge', 'wc-express-payments-checkout-react-block-frontend' ], true ) ) {
 			return $dependencies;
 		}
 		return array_merge( $dependencies, $this->payment_method_registry->get_all_active_payment_method_script_dependencies() );
