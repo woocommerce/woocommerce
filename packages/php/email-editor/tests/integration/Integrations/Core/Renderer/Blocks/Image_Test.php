@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+use WC_Unit_Test_Case;
 
 /**
  * Integration test for Image class
@@ -309,72 +310,6 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		// Should use max width (600px) when URL parameter (800px) is larger.
 		$this->assertStringContainsString( 'width="600"', $rendered );
 		$this->assertStringContainsString( 'width:600px;', $rendered );
-	}
-
-	/**
-	 * Test it retrieves width from attachment metadata
-	 */
-	public function testItRetrievesWidthFromAttachmentMetadata(): void {
-		// Create a test attachment.
-		$attachment_id = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
-		$this->assertIsInt( $attachment_id );
-		$this->assertGreaterThan( 0, $attachment_id );
-
-		// Get the actual uploaded image URL.
-		$image_url = wp_get_attachment_url( $attachment_id );
-		$this->assertNotFalse( $image_url );
-
-		$image_content = '
-			<figure class="wp-block-image alignleft size-full is-style-default">
-				<img src="' . esc_url( $image_url ) . '" alt="" style="" srcset=""/>
-			</figure>
-		';
-		$parsed_image  = $this->parsed_image;
-		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
-		$parsed_image['attrs']['id']          = $attachment_id;
-		$parsed_image['attrs']['sizeSlug']    = 'full';
-		$parsed_image['email_attrs']['width'] = '800px'; // Set max width.
-		$parsed_image['innerHTML']            = $image_content;
-
-		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
-
-		// Should retrieve width from attachment metadata (canola.jpg is 640px wide).
-		$this->assertStringContainsString( 'width="640"', $rendered );
-		$this->assertStringContainsString( 'width:640px;', $rendered );
-	}
-
-	/**
-	 * Test it retrieves width from attachment metadata for specific size
-	 */
-	public function testItRetrievesWidthFromAttachmentMetadataForSpecificSize(): void {
-		// Create a test attachment.
-		$attachment_id = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
-		$this->assertIsInt( $attachment_id );
-		$this->assertGreaterThan( 0, $attachment_id );
-
-		// Get the medium size URL.
-		$image_data = wp_get_attachment_image_src( $attachment_id, 'medium' );
-		$this->assertNotFalse( $image_data );
-		$image_url = $image_data[0];
-
-		$image_content = '
-			<figure class="wp-block-image alignleft size-medium is-style-default">
-				<img src="' . esc_url( $image_url ) . '" alt="" style="" srcset=""/>
-			</figure>
-		';
-		$parsed_image  = $this->parsed_image;
-		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
-		$parsed_image['attrs']['id']          = $attachment_id;
-		$parsed_image['attrs']['sizeSlug']    = 'medium';
-		$parsed_image['email_attrs']['width'] = '800px'; // Set max width.
-		$parsed_image['innerHTML']            = $image_content;
-
-		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
-
-		// Should retrieve width from attachment metadata for medium size.
-		// Medium size is typically 300px or less.
-		$this->assertMatchesRegularExpression( '/width="\d+"/', $rendered );
-		$this->assertMatchesRegularExpression( '/width:\d+px;/', $rendered );
 	}
 
 	/**

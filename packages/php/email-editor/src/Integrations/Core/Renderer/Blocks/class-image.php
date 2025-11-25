@@ -123,10 +123,10 @@ class Image extends Abstract_Block_Renderer {
 					// Check the metadata first.
 					$metadata = wp_get_attachment_metadata( $attachment_id );
 					if ( $metadata ) {
-						if ( isset( $metadata['width'] ) ) {
-							$image_size = (int) $metadata['width'];
-						} elseif ( isset( $metadata['sizes'][ $size_slug ]['width'] ) ) {
+						if ( isset( $metadata['sizes'][ $size_slug ]['width'] ) ) {
 							$image_size = (int) $metadata['sizes'][ $size_slug ]['width'];
+						} elseif ( 'full' === $size_slug && isset( $metadata['width'] ) ) {
+							$image_size = (int) $metadata['width'];
 						}
 					}
 
