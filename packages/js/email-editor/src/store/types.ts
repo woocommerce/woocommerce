@@ -38,6 +38,7 @@ export type ExperimentalSettings = {
 export type EmailEditorSettings = EditorSettings &
 	ExperimentalSettings & {
 		isPreviewMode: boolean;
+		allowedIframeStyleHandles?: string[];
 	};
 
 export type EmailTheme = {
@@ -201,8 +202,8 @@ export type ContentValidation = {
 export type State = {
 	postId?: number | string; // Template use strings
 	postType?: string;
-	editorSettings: EmailEditorSettings;
-	theme: EmailTheme;
+	editorSettings?: EmailEditorSettings;
+	theme?: EmailTheme;
 	styles: {
 		globalStylesPostId: number | null;
 	};
@@ -213,10 +214,6 @@ export type State = {
 		isSendingPreviewEmail: boolean;
 		sendingPreviewStatus: SendingPreviewStatus | null;
 		errorMessage?: string;
-	};
-	personalizationTags: {
-		list: PersonalizationTag[];
-		isFetching: boolean;
 	};
 	contentValidation?: ContentValidation;
 };
@@ -277,4 +274,12 @@ export type PostWithPermissions = Post & {
 		delete: boolean;
 		update: boolean;
 	};
+};
+
+export type EmailEditorConfig = {
+	editorSettings: EmailEditorSettings;
+	theme: EmailTheme;
+	urls: EmailEditorUrls;
+	userEmail: string;
+	globalStylesPostId?: number | null;
 };

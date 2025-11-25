@@ -101,7 +101,7 @@ add_action( 'init', 'add_currency_settings' );
 
 In the console, you can confirm the data has safely made its way to the client.
 
-![screnshot of console](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-1.11.50-pm.png?w=476)
+![screenshot of console](https://developer.woocommerce.com/wp-content/uploads/2023/12/screen-shot-2020-02-19-at-1.11.50-pm.png?w=476)
 
 In `index.js` create the custom currency filter and add it the Orders Report.
 

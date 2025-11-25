@@ -107,7 +107,8 @@ jobs:
 
             const branches = ['trunk'];
 
-            let version = targetVersion;
+            let version = targetVersion.match(/^\d+\.\d+/)[0];
+
             while ( version !== trunkVersion ) {
               branches.push( `release/${ version }` );
               version = getNextVersion( version );

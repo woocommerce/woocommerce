@@ -421,9 +421,18 @@ class WC_Order_Item_Product extends WC_Order_Item {
 					);
 				}
 			}
-		}
 
-		return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+			/**
+			 * Filters the list of downloadable files for an order item.
+			 *
+			 * @since 2.7.0
+			 *
+			 * @param array                 $files Array of downloadable file data.
+			 * @param WC_Order_Item_Product $this  The order item product object.
+			 * @param WC_Order              $order The order object.
+			 */
+			return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+		}
 	}
 
 	/**

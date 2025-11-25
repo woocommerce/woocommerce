@@ -39,6 +39,13 @@ const reporter = [
 		},
 	],
 	[
+		'playwright-ctrf-json-reporter',
+		{
+			outputDir: `${ TESTS_ROOT_PATH }/test-results`,
+			outputFile: `ctrf-report-${ Date.now() }.json`,
+		},
+	],
+	[
 		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.js`,
 		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
@@ -51,6 +58,14 @@ const reporter = [
 if ( process.env.CI ) {
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.js` ] );
+	reporter.push( [
+		'junit',
+		{
+			outputFile: `${ TESTS_ROOT_PATH }/test-results/results.xml`,
+			stripANSIControlSequences: true,
+			includeProjectInTestName: true,
+		},
+	] );
 } else {
 	reporter.push( [
 		'html',
@@ -121,6 +136,11 @@ export default defineConfig( {
 		{
 			name: 'api',
 			testMatch: '**/api-tests/**',
+			dependencies: [ 'site setup' ],
+		},
+		{
+			name: 'legacy-mini-cart',
+			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
 			dependencies: [ 'site setup' ],
 		},
 	],

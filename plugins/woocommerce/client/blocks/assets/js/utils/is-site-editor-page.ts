@@ -1,21 +1,15 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { isObject } from '../types/type-guards';
+import { select } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
 
-export const isSiteEditorPage = ( store: unknown ): boolean => {
-	if ( isObject( store ) ) {
-		const editedPostType = (
-			store as {
-				getEditedPostType: () => string;
-			}
-		 ).getEditedPostType();
+export const isSiteEditorPage = (): boolean => {
+	// @ts-expect-error getCurrentPostType is not typed.
+	const editedPostType = select( editorStore )?.getCurrentPostType();
 
-		return (
-			editedPostType === 'wp_template' ||
-			editedPostType === 'wp_template_part'
-		);
-	}
-
-	return false;
+	return (
+		editedPostType === 'wp_template' ||
+		editedPostType === 'wp_template_part'
+	);
 };

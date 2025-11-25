@@ -121,7 +121,9 @@ class WCTransactionalEmailPostsGenerator {
 		try {
 			$template_html = wc_get_template_html(
 				$template_name,
-				array()
+				array(),
+				'',
+				$email->template_base ?? ''
 			);
 		} catch ( \Exception $e ) {
 			$template_html = '';
@@ -246,10 +248,9 @@ class WCTransactionalEmailPostsGenerator {
 	 * @throws \Exception When post creation fails.
 	 */
 	private function generate_single_template( $email_type, $email_data ) {
-		$email_enabled = $email_data->is_enabled() || $email_data->is_manual();
-		$post_data     = array(
+		$post_data = array(
 			'post_type'    => Integration::EMAIL_POST_TYPE,
-			'post_status'  => $email_enabled ? 'publish' : 'draft',
+			'post_status'  => 'publish',
 			'post_name'    => $email_type,
 			'post_title'   => $email_data->get_title(),
 			'post_excerpt' => $email_data->get_description(),

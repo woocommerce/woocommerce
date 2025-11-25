@@ -7,7 +7,6 @@ import { AnyInterpreter, Sender, StateValue } from 'xstate';
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '.';
-import { ThemeCard } from './intro/types';
 
 export type CustomizeStoreComponent = ( props: {
 	parentMachine: AnyInterpreter;
@@ -18,15 +17,6 @@ export type CustomizeStoreComponent = ( props: {
 
 export type CustomizeStoreComponentMeta = {
 	component: CustomizeStoreComponent;
-};
-
-export type RecommendThemesAPIResponse = {
-	themes: ThemeCard[];
-	_links: {
-		browse_all?: {
-			href: string;
-		};
-	};
 };
 
 export type aiStatusResponse = {
@@ -40,7 +30,6 @@ export type customizeStoreStateMachineContext = {
 	intro: {
 		hasErrors: boolean;
 		errorStatus: number | undefined;
-		themeData: RecommendThemesAPIResponse;
 		activeTheme: string;
 		customizeStoreTaskCompleted: boolean;
 	};

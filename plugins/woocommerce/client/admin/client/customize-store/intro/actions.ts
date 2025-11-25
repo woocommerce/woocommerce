@@ -8,32 +8,10 @@ import { TaskReferralRecord } from '@woocommerce/onboarding';
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '..';
-import {
-	customizeStoreStateMachineContext,
-	RecommendThemesAPIResponse,
-} from '../types';
+import { customizeStoreStateMachineContext } from '../types';
 import { events } from './';
 import { isIframe } from '~/customize-store/utils';
 import { trackEvent } from '../tracking';
-
-export const assignThemeData = assign<
-	customizeStoreStateMachineContext,
-	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
->( {
-	intro: ( context, event ) => {
-		const apiResponse = (
-			event as DoneInvokeEvent< {
-				themeData: RecommendThemesAPIResponse;
-			} >
-		 ).data.themeData;
-
-		// type coercion workaround for now
-		return {
-			...context.intro,
-			themeData: apiResponse,
-		};
-	},
-} );
 
 export const assignActiveTheme = assign<
 	customizeStoreStateMachineContext,

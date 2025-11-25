@@ -376,6 +376,11 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$actions        = array();
 		$status_actions = array();
 
+		$wp_post_type = get_post_type_object( $order->get_type() ) ?? get_post_type_object( 'shop_order' );
+		if ( ! current_user_can( $wp_post_type->cap->edit_post, $order->get_id() ) ) {
+			return '';
+		}
+
 		if ( $order->has_status( array( OrderStatus::PENDING ) ) ) {
 			$status_actions['on-hold'] = array(
 				'url'    => wp_nonce_url( admin_url( 'admin-ajax.php?action=woocommerce_mark_order_status&status=on-hold&order_id=' . $order->get_id() ), 'woocommerce-mark-order-status' ),
@@ -443,6 +448,9 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		$billing_address  = $order->get_formatted_billing_address();
 		$shipping_address = $order->get_formatted_shipping_address();
 
+		$wp_post_type = get_post_type_object( $order->get_type() ) ?? get_post_type_object( 'shop_order' );
+		$is_editable  = current_user_can( $wp_post_type->cap->edit_post, $order->get_id() );
+
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
 		 * Filter to customize the order details data that the woocommerce_get_order_details action will send.
@@ -453,6 +461,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			'woocommerce_admin_order_preview_get_order_details',
 			array(
 				'data'                       => $order->get_data(),
+				'is_editable'                => $is_editable,
 				'order_number'               => $order->get_order_number(),
 				'item_html'                  => self::get_order_preview_item_html( $order ),
 				'actions_html'               => self::get_order_preview_actions_html( $order ),
@@ -471,6 +480,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		$order_details['data'] = array_intersect_key( $order_details['data'], array_flip( array( 'id', 'billing', 'shipping', 'customer_note' ) ) );
+
 		return $order_details;
 	}
 

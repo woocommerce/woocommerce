@@ -156,6 +156,29 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Bulk create, update, and delete items.
+	 *
+	 * This method extends the parent batch_items functionality by deferring term counting
+	 * to optimize performance when processing multiple products that may share common terms.
+	 *
+	 * @param WP_REST_Request $request Full details about the request containing arrays of
+	 *                                 products to create, update, or delete.
+	 *
+	 * @return array Array of WP_Error or WP_REST_Response objects for each processed item.
+	 * @since 10.4.0 Added term counting optimization for bulk operations.
+	 */
+	public function batch_items( $request ) {
+		$already_deferred = wp_defer_term_counting();
+		wp_defer_term_counting( true );
+		try {
+			return parent::batch_items( $request );
+		} finally {
+			// Be sure to trigger term counting already processed terms even if there was an exception unless something had already deferred it.
+			wp_defer_term_counting( $already_deferred );
+		}
+	}
+
+	/**
 	 * Prepare a single product output for response.
 	 *
 	 * @param WC_Data         $object  Object data.

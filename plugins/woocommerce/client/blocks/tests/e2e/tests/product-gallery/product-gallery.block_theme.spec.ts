@@ -382,6 +382,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		// Go back to the Custom Single Product template.
 		await page.getByLabel( 'Open Navigation' ).click();
+
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
 			.first()

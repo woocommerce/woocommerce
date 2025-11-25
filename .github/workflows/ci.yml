@@ -188,20 +188,45 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
         run: |
-          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
-          min=10
-          max=99
-          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
-          httpport="${randomized}80"
-          mysqlport="${randomized}36"
-
-          # provision the environment to propagate the randomized ports
-          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
-          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
-          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
-          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
+          # Retry logic: attempt up to 2 times (1 initial + 1 retry)
+          # This handles transient failures like 429 (Too Many Requests), network issues, etc.
+          MAX_ATTEMPTS=2
+          ATTEMPT=1
           
-          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT of $MAX_ATTEMPTS to start test environment"
+            
+            # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
+            min=10
+            max=99
+            randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
+            httpport="${randomized}80"
+            mysqlport="${randomized}36"
+
+            # provision the environment to propagate the randomized ports
+            echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
+            echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
+            # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
+            echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
+            
+            # Try to start the environment
+            if WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}; then
+              echo "✓ Test environment started successfully on attempt $ATTEMPT"
+              exit 0
+            else
+              EXIT_CODE=$?
+              echo "✗ Failed to start test environment on attempt $ATTEMPT (exit code: $EXIT_CODE)"
+              
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "Retrying in 5 seconds..."
+                sleep 5
+                ATTEMPT=$((ATTEMPT + 1))
+              else
+                echo "All attempts to start test environment failed"
+                exit $EXIT_CODE
+              fi
+            fi
+          done
 
       - name: 'Determine BuildKite Analytics Message'
         env:
@@ -245,6 +270,8 @@ jobs:
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
+          PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
+          PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
         run: |
           lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
@@ -316,8 +343,11 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: ubuntu-latest
-    needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
-    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    needs: [ 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
+    # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
+    if: ${{ !cancelled() }}
+    outputs:
+      non_successful_jobs: ${{ steps.evaluation.outputs.non_successful_jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -327,6 +357,7 @@ jobs:
               .github/workflows/scripts
 
       - name: 'Evaluation'
+        id: evaluation
         env:
           REPOSITORY: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
@@ -346,6 +377,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
+    env:
+      NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -376,9 +409,15 @@ jobs:
               CHECKS_TYPE=""
           fi
 
+          # Parse non-successful jobs and create comma-separated list of job names
+          FAILED_JOBS=""
+          if [[ -n "${NON_SUCCESSFUL_JOBS}" ]]; then
+            FAILED_JOBS=$(echo "${NON_SUCCESSFUL_JOBS}" | jq -r '.[].name' | paste -sd "," -)
+          fi
+
           pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE build jobs matrix" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE linting" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
-          pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
+          pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json" --jobs-list "Failed:###$FAILED_JOBS"
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
@@ -406,7 +445,7 @@ jobs:
       - name: 'Publish report to dashboard'
         if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
         env:
-          GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+          GH_TOKEN: ${{ secrets.TEST_REPORTS_DISPATCH_WORKFLOW_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPORT_NAME: ${{ matrix.report }}
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
@@ -539,6 +578,7 @@ jobs:
       ${{
         ! cancelled() && 
         github.event_name == 'pull_request' && 
+        github.event.pull_request.user.login != 'woocommercebot' && 
         github.event.pull_request.user.login != 'github-actions[bot]' && 
         needs.identify-jobs-to-run.outputs.needs-changelog-validation == 'true' && 
         ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) && 

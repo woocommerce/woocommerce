@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * SingleProduct class.
@@ -175,10 +176,6 @@ class SingleProduct extends AbstractBlock {
 
 		if ( ! $product instanceof \WC_Product ) {
 			return '';
-		}
-
-		if ( ! $product->is_type( 'variable' ) ) {
-			return parent::render( $attributes, $content, $block );
 		}
 
 		$interactivity_context = array(

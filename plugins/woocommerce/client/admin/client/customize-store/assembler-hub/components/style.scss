@@ -24,6 +24,34 @@
 	&.slide-from-right {
 		animation-name: slide-from-right;
 	}
+
+	.woocommerce-edit-site-sidebar-navigation-screen-theme-banner {
+		margin-top: 32px;
+		background: rgba(242, 237, 255, 0.6) url(../../assets/images/sidebar-theme-banner.svg) no-repeat bottom right;
+		background-size: contain;
+		border-radius: 4px;
+		padding: 1rem;
+
+		&__title {
+			max-width: 170px;
+			line-height: 1.4;
+			margin: 0 0 8px 0;
+		}
+
+		&__description {
+			color: var(--gutenberg-gray-900, #1e1e1e);
+			margin-top: 8px;
+		}
+
+		&__button {
+			$button-padding: 8px;
+			padding-left: $button-padding;
+			padding-right: $button-padding;
+			// negative margin to align button with rest of the content
+			margin-left: -$button-padding;
+			margin-right: -$button-padding;
+		}
+	}
 }
 
 @keyframes slide-from-right {

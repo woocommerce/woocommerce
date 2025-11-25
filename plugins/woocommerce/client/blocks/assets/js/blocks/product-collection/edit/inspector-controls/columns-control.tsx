@@ -65,7 +65,7 @@ const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 					label={ columnsLabel }
 					onChange={ onColumnsChange }
 					value={ columns }
-					min={ 2 }
+					min={ 1 }
 					max={ Math.max( 6, columns ) }
 				/>
 			</ToolsPanelItem>

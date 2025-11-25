@@ -2,13 +2,8 @@
  * External dependencies
  */
 import { FrameLocator, Locator, Page } from '@playwright/test';
-import { Editor, Admin } from '@woocommerce/e2e-utils';
+import { Editor, Admin, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
-
-/**
- * Internal dependencies
- */
-import { BLOCK_THEME_SLUG } from '../../utils/constants';
 
 export const BLOCK_LABELS = {
 	productTemplate: 'Block: Product Template',
@@ -336,7 +331,7 @@ class ProductCollectionPage {
 
 	// Going to Product Catalog by default
 	async goToEditorTemplate(
-		template = 'woocommerce/woocommerce//archive-product'
+		template = `${ BLOCK_THEME_SLUG }//archive-product`
 	) {
 		await this.admin.visitSiteEditor( {
 			postId: template,
@@ -348,7 +343,7 @@ class ProductCollectionPage {
 
 	async goToProductCatalogAndInsertCollection( collection: Collections ) {
 		await this.goToTemplateAndInsertCollection(
-			'woocommerce/woocommerce//archive-product',
+			`${ BLOCK_THEME_SLUG }//archive-product`,
 			collection
 		);
 	}

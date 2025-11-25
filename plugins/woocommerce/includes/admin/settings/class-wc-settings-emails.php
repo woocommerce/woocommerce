@@ -146,11 +146,56 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'autoload'          => false,
 					'desc_tip'          => true,
 				),
+			);
+
+		// Add reply-to fields when block email editor is enabled.
+		if ( $block_email_editor_enabled ) {
+			$settings = array_merge(
+				$settings,
+				array(
+					array(
+						'title'    => __( 'Add "Reply-to" email', 'woocommerce' ),
+						'desc'     => __( 'Add a different email address to receive replies.', 'woocommerce' ),
+						'id'       => 'woocommerce_email_reply_to_enabled',
+						'type'     => 'checkbox',
+						'default'  => 'no',
+						'autoload' => false,
+					),
+
+					array(
+						'title'    => __( '"Reply-to" name', 'woocommerce' ),
+						'desc'     => '',
+						'id'       => 'woocommerce_email_reply_to_name',
+						'type'     => 'text',
+						'css'      => 'min-width:400px;',
+						'default'  => '',
+						'autoload' => false,
+						'desc_tip' => true,
+					),
+
+					array(
+						'title'    => __( '"Reply-to" address', 'woocommerce' ),
+						'desc'     => '',
+						'id'       => 'woocommerce_email_reply_to_address',
+						'type'     => 'email',
+						'css'      => 'min-width:400px;',
+						'default'  => '',
+						'autoload' => false,
+						'desc_tip' => true,
+					),
+				)
+			);
+		}
+
+		$settings = array_merge(
+			$settings,
+			array(
 				array(
 					'type' => 'sectionend',
 					'id'   => 'email_options',
 				),
-			);
+			)
+		);
 
 		// If the email editor is enabled the design is handled by the email editor.
 		if ( ! $block_email_editor_enabled ) {

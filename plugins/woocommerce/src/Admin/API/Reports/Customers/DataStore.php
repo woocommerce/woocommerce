@@ -82,7 +82,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => 'state',
 			'postcode'         => 'postcode',
 			'date_registered'  => 'date_registered',
-			'date_last_active' => 'IF( date_last_active <= "0000-00-00 00:00:00", NULL, date_last_active ) AS date_last_active',
+			// Use single quotes for string literals to ensure compatibility with sql_mode=ANSI_QUOTES.
+			'date_last_active' => "IF( date_last_active <= '0000-00-00 00:00:00', NULL, date_last_active ) AS date_last_active",
 			'date_last_order'  => "MAX( {$wpdb->prefix}wc_order_stats.date_created ) as date_last_order",
 			'orders_count'     => "{$orders_count} as orders_count",
 			'total_spend'      => "{$total_spend} as total_spend",
@@ -518,7 +519,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->subquery->clear_sql_clause( 'select' );
 		$this->subquery->add_sql_clause( 'select', $selections );
-		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+		// For aggregated fields, ensure deterministic ordering by including GROUP BY field.
+		$order_by = $this->get_sql_clause( 'order_by' );
+		if ( in_array( $order_by, array( 'orders_count', 'total_spend', 'avg_order_value' ), true ) ) {
+			$this->subquery->add_sql_clause( 'order_by', $order_by . ', customer_id' );
+		} else {
+			$this->subquery->add_sql_clause( 'order_by', $order_by );
+		}
 		$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 
 		$customer_data = $wpdb->get_results(

@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML as sanitizeHTMLFromPackage } from '@woocommerce/sanitize';
+
 export function isGutenbergVersionAtLeast( version: number ) {
 	const adminSettings: { gutenberg_version?: string } = getSetting( 'admin' );
 	if ( adminSettings.gutenberg_version ) {
@@ -31,7 +32,6 @@ const ALLOWED_TAGS = [
 	'blockquote',
 	'hr',
 ];
-const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download', 'title' ];
 
 /**
  * Sanitizes HTML content to ensure it only contains allowed tags and attributes.
@@ -40,5 +40,5 @@ const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download', 'title' ];
  * @return Sanitized HTML content.
  */
 export function sanitizeHTML( html: string ) {
-	return sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } );
+	return sanitizeHTMLFromPackage( html, { tags: ALLOWED_TAGS } );
 }

@@ -4307,7 +4307,7 @@ function wc_set_hooked_blocks_version() {
 		return;
 	}
 
-	add_option( $option_name, WC()->version );
+	add_option( $option_name, WC()->stable_version() );
 }
 
 /**
@@ -4379,7 +4379,7 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 
 	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
 	if ( ! $old_theme->is_block_theme() && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
-		add_option( $option_name, WC()->version );
+		add_option( $option_name, WC()->stable_version() );
 	}
 }
 

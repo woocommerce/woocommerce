@@ -53,7 +53,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		$increase_quantity_label = __( 'Increase quantity of %s', 'woocommerce' );
 
 		// translators: %s is the name of the product in cart.
-		$quantity_description_label = __( 'Quantity of %s in your cart', 'woocommerce' );
+		$quantity_description_label = __( 'Quantity of %s in your cart.', 'woocommerce' );
 
 		// translators: %s is the name of the product in cart.
 		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
@@ -112,10 +112,20 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 						data-wp-each-key="state.cartItem.key"
 					>
 						<tr class="wc-block-cart-items__row" data-wp-run="callbacks.filterCartItemClass" tabindex="-1">
-							<td class="wc-block-cart-item__image" aria-hidden="true">
-								<img data-wp-bind--hidden="!state.isProductHiddenFromCatalog" data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">
+							<td data-wp-context='{ "isImageHidden": false }' class="wc-block-cart-item__image" aria-hidden="true">
+								<img
+									data-wp-bind--hidden="!state.isProductHiddenFromCatalog"
+									data-wp-bind--src="state.itemThumbnail" 
+									data-wp-bind--alt="state.cartItemName"
+									data-wp-on--error="actions.hideImage"
+								>
 								<a data-wp-bind--hidden="state.isProductHiddenFromCatalog" data-wp-bind--href="state.cartItem.permalink" tabindex="-1">
-									<img data-wp-bind--src="state.itemThumbnail" data-wp-bind--alt="state.cartItemName">	
+									<img
+										data-wp-bind--hidden="context.isImageHidden"
+										data-wp-bind--src="state.itemThumbnail"
+										data-wp-bind--alt="state.cartItemName"
+										data-wp-on--error="actions.hideImage"
+									>	
 								</a>
 							</td>
 							<td class="wc-block-cart-item__product">
@@ -132,8 +142,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 									>
 									</div>
 									<div class="wc-block-cart-item__prices">
-										<span data-wp-text="state.beforeItemPrice"></span>
 										<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price">
+											<span data-wp-text="state.beforeItemPrice"></span>
 											<span class="screen-reader-text">
 												<?php esc_html_e( 'Previous price:', 'woocommerce' ); ?>
 											</span>
@@ -142,12 +152,14 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 												<?php esc_html_e( 'Discounted price:', 'woocommerce' ); ?>
 											</span>
 											<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted"></ins>
+											<span data-wp-text="state.afterItemPrice"></span>
 										</span>
 										<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price">
+											<span data-wp-text="state.beforeItemPrice"></span>
 											<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
 											</span>
+											<span data-wp-text="state.afterItemPrice"></span>
 										</span>
-										<span data-wp-text="state.afterItemPrice"></span>
 									</div>
 									<div 
 										data-wp-bind--hidden="!state.cartItemHasDiscount" 
@@ -164,6 +176,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
+										<?php echo $this->render_experimental_iapi_product_details_markup( 'item_data' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										<?php echo $this->render_experimental_iapi_product_details_markup( 'variation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									</div>
 									<div class="wc-block-cart-item__quantity">
 										<div class="wc-block-components-quantity-selector" data-wp-bind--hidden="state.cartItem.sold_individually">
@@ -234,6 +248,69 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				</tbody>
 			</table>
 		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render markup for product details.
+	 *
+	 * @param string $property The property to render in the product details markup.
+	 * @return string Rendered product details output.
+	 */
+	protected function render_experimental_iapi_product_details_markup( $property ) {
+		$context = array( 'dataProperty' => $property );
+
+		// If the property is item_data, so not a variation, we need to skip the text directive.
+		$is_item_data = 'item_data' === $context['dataProperty'];
+
+		ob_start();
+		?>
+		<div
+			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			class="wc-block-components-product-details"
+			data-wp-bind--hidden="state.shouldHideSingleProductDetails"
+		>
+			<?php echo $this->render_experimental_iapi_product_details_item_markup( 'div', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+		</div>
+		<ul
+			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			class="wc-block-components-product-details"
+			data-wp-bind--hidden="state.shouldHideMultipleProductDetails"
+		>
+			<template
+				data-wp-each--item-data="state.cartItem.<?php echo esc_attr( $property ); ?>"
+				data-wp-each-key="state.cartItemDataKey"
+			>
+				<?php echo $this->render_experimental_iapi_product_details_item_markup( 'li', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</template>
+		</ul>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Render markup for a single product detail item.
+	 *
+	 * @param string $tag_name   The HTML tag to use for the item.
+	 * @param bool   $is_item_data Whether the item is of item_data type.
+	 * @return string Rendered product detail item output based on item type.
+	 */
+	private function render_experimental_iapi_product_details_item_markup( $tag_name, $is_item_data = false ) {
+		ob_start();
+		?>
+	<<?php echo tag_escape( $tag_name ); ?>
+		data-wp-bind--hidden="state.cartItemDataAttrHidden"
+		data-wp-bind--class="state.cartItemDataAttr.className"
+	>
+		<?php if ( $is_item_data ) : ?>
+			<span class="wc-block-components-product-details__name" data-wp-watch="callbacks.itemDataNameInnerHTML"></span>
+			<span class="wc-block-components-product-details__value" data-wp-watch="callbacks.itemDataValueInnerHTML"></span>
+		<?php else : ?>
+			<span class="wc-block-components-product-details__name"  data-wp-text="state.cartItemDataAttr.name"></span>
+			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
+		<?php endif; ?>
+		</<?php echo tag_escape( $tag_name ); ?>>
 		<?php
 		return ob_get_clean();
 	}

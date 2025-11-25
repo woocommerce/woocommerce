@@ -8,6 +8,9 @@ const { toggleBlockProductTour } = require( '../../../utils/tours' );
 const { tags } = require( '../../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../../playwright.config' );
 const { wpCLI } = require( '../../../utils/cli' );
+const { skipTestsForDeprecatedFeature } = require( './helpers/skip-tests' );
+
+skipTestsForDeprecatedFeature();
 
 async function dismissFeedbackModalIfShown( page ) {
 	try {

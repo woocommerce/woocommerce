@@ -166,4 +166,38 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$this->assertEquals( array( 1 ), $coupon->get_used_by() );
 	}
 
+	/**
+	 * Test coupon status update from publish to draft.
+	 * @since 10.4.0
+	 */
+	public function test_coupon_status_update_to_draft() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'update-test-coupon' );
+		$coupon->save();
+		$this->assertEquals( 'publish', $coupon->get_status() );
+
+		$coupon->set_status( 'draft' );
+		$coupon->save();
+
+		$updated_coupon = new WC_Coupon( $coupon->get_id() );
+		$this->assertEquals( 'draft', $updated_coupon->get_status() );
+	}
+
+	/**
+	 * Test coupon creation with specific status.
+	 * @since 10.4.0
+	 */
+	public function test_coupon_create_with_status() {
+		$code   = 'create-test-coupon-' . time();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( $code );
+		$coupon->set_status( 'draft' );
+		$coupon->save();
+
+		$this->assertEquals( 'draft', $coupon->get_status() );
+		$this->assertNotEquals( 0, $coupon->get_id() );
+
+		$read_coupon = new WC_Coupon( $coupon->get_id() );
+		$this->assertEquals( 'draft', $read_coupon->get_status() );
+	}
+
 }

@@ -95,4 +95,52 @@ class Rendering_Context_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( '#00ff00', $context->translate_slug_to_color( 'secondary' ) );
 		$this->assertSame( 'unknown', $context->translate_slug_to_color( 'unknown' ) );
 	}
+
+	/**
+	 * Test it stores and retrieves email context data.
+	 */
+	public function testItStoresEmailContext(): void {
+		/**
+		 * WP_Theme_JSON mock for using in test.
+		 *
+		 * @var \WP_Theme_JSON&\PHPUnit\Framework\MockObject\MockObject $theme_json
+		 */
+		$theme_json = $this->createMock( \WP_Theme_JSON::class );
+
+		$email_context = array(
+			'user_id'         => 123,
+			'recipient_email' => 'user@example.com',
+			'order_id'        => 456,
+			'email_type'      => 'order_confirmation',
+		);
+
+		$context = new Rendering_Context( $theme_json, $email_context );
+
+		$this->assertSame( 123, $context->get_user_id() );
+		$this->assertSame( 'user@example.com', $context->get_recipient_email() );
+		$this->assertSame( 456, $context->get( 'order_id' ) );
+		$this->assertSame( 'order_confirmation', $context->get( 'email_type' ) );
+		$this->assertSame( $email_context, $context->get_email_context() );
+	}
+
+	/**
+	 * Test it returns null for missing email context data.
+	 */
+	public function testItReturnsNullForMissingEmailContext(): void {
+		/**
+		 * WP_Theme_JSON mock for using in test.
+		 *
+		 * @var \WP_Theme_JSON&\PHPUnit\Framework\MockObject\MockObject $theme_json
+		 */
+		$theme_json = $this->createMock( \WP_Theme_JSON::class );
+
+		$context = new Rendering_Context( $theme_json );
+
+		$this->assertNull( $context->get_user_id() );
+		$this->assertNull( $context->get_recipient_email() );
+		$this->assertNull( $context->get( 'order_id' ) );
+		$this->assertNull( $context->get( 'non_existent_key' ) );
+		$this->assertSame( 'default', $context->get( 'non_existent_key', 'default' ) );
+		$this->assertSame( array(), $context->get_email_context() );
+	}
 }

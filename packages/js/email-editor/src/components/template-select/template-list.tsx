@@ -55,7 +55,7 @@ function TemplateListBox( {
 		return {
 			// @ts-expect-error There are no types for the experimental features settings.
 			// eslint-disable-next-line no-underscore-dangle
-			layout: editorSettings.__experimentalFeatures.layout,
+			layout: editorSettings?.__experimentalFeatures?.layout,
 		};
 	} );
 

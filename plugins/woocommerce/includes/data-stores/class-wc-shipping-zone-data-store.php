@@ -72,43 +72,98 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @throws Exception If invalid data store.
 	 */
 	public function read( &$zone ) {
-		global $wpdb;
+		$zones = array( $zone->get_id() => $zone );
+		$this->read_multiple( $zones );
+	}
 
-		// Zone 0 is used as a default if no other zones fit.
-		if ( 0 === $zone->get_id() || '0' === $zone->get_id() ) {
-			$this->read_zone_locations( $zone );
-			$zone->set_zone_name( __( 'Locations not covered by your other zones', 'woocommerce' ) );
-			$zone->read_meta_data();
+	/**
+	 * Reads multiple WC_Shipping_Zone objects from the data store.
+	 *
+	 * @param WC_Shipping_Zone[] $zones Array of zones to read keyed by the zone_id.
+	 *
+	 * @return void
+	 *
+	 * @throws Exception If invalid zone_id givein for data store.
+	 */
+	public function read_multiple( array &$zones ) {
+		$zone_ids  = array_keys( $zones );
+		$zone_data = $this->get_zone_data_for_ids( $zone_ids );
+		foreach ( $zones as $zone_id => $zone ) {
+			if ( 0 === $zone_id || '0' === $zone_id ) {
+				$zone->set_zone_name( __( 'Locations not covered by your other zones', 'woocommerce' ) );
+			} else {
+				if ( ! isset( $zone_data[ $zone_id ] ) ) {
+					throw new Exception( __( 'Invalid data store.', 'woocommerce' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				}
+				$zone->set_zone_name( $zone_data[ $zone_id ]->zone_name );
+				$zone->set_zone_order( $zone_data[ $zone_id ]->zone_order );
+			}
+		}
+
+		$zone_locations = $this->get_zone_locations_for_ids( $zone_ids );
+		foreach ( $zone_locations as $zone_location ) {
+			if ( isset( $zones[ $zone_location->zone_id ] ) ) {
+				$zones[ $zone_location->zone_id ]->add_location( $zone_location->location_code, $zone_location->location_type );
+			}
+		}
+
+		foreach ( $zones as $zone_id => $zone ) {
 			$zone->set_object_read( true );
-
 			/**
 			 * Indicate that the WooCommerce shipping zone has been loaded.
 			 *
 			 * @param WC_Shipping_Zone $zone The shipping zone that has been loaded.
 			 */
 			do_action( 'woocommerce_shipping_zone_loaded', $zone );
-			return;
+		}
+	}
+
+	/**
+	 * Retrieve the zone data for the given zone_ids.
+	 *
+	 * @param array $ids The zone_ids to retrieve.
+	 *
+	 * @return stdClass[] An array of objects containing the zone data, keyed by the zone_id.
+	 */
+	private function get_zone_data_for_ids( array $ids ) {
+		global $wpdb;
+
+		if ( empty( $ids ) || array( '0' ) === $ids || array( 0 ) === $ids ) {
+			return array();
 		}
 
-		$zone_data = $wpdb->get_row(
-			$wpdb->prepare(
-				"SELECT zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones WHERE zone_id = %d LIMIT 1",
-				$zone->get_id()
-			)
+		$zone_ids = array_map( 'absint', $ids );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $zone_ids already run through absint.
+		return $wpdb->get_results(
+			"SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones " .
+			'WHERE zone_id IN ( ' . implode( ',', $zone_ids ) . ' ) ',
+			OBJECT_K
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+	}
 
-		if ( ! $zone_data ) {
-			throw new Exception( __( 'Invalid data store.', 'woocommerce' ) );
+	/**
+	 * Retrieve the zone location data for the given zone_ids.
+	 *
+	 * @param array $ids The zone_ids to retrieve.
+	 *
+	 * @return stdClass[] An array of objects containing the zone_id, location_code, and location_type for each zone location.
+	 */
+	private function get_zone_locations_for_ids( array $ids ) {
+		global $wpdb;
+
+		if ( empty( $ids ) || array( '0' ) === $ids || array( 0 ) === $ids ) {
+			return array();
 		}
 
-		$zone->set_zone_name( $zone_data->zone_name );
-		$zone->set_zone_order( $zone_data->zone_order );
-		$this->read_zone_locations( $zone );
-		$zone->read_meta_data();
-		$zone->set_object_read( true );
-
-		/** This action is documented in includes/datastores/class-wc-shipping-zone-data-store.php. */
-		do_action( 'woocommerce_shipping_zone_loaded', $zone );
+		$zone_ids = array_map( 'absint', $ids );
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $zone_ids already run through absint.
+		return $wpdb->get_results(
+			"SELECT zone_id, location_code, location_type FROM {$wpdb->prefix}woocommerce_shipping_zone_locations " .
+			'WHERE zone_id IN ( ' . implode( ',', $zone_ids ) . ' ) '
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -316,28 +371,6 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	public function get_zone_id_by_instance_id( $id ) {
 		global $wpdb;
 		return $wpdb->get_var( $wpdb->prepare( "SELECT zone_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods as methods WHERE methods.instance_id = %d LIMIT 1;", $id ) );
-	}
-
-	/**
-	 * Read location data from the database.
-	 *
-	 * @param WC_Shipping_Zone $zone Shipping zone object.
-	 */
-	private function read_zone_locations( &$zone ) {
-		global $wpdb;
-
-		$locations = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT location_code, location_type FROM {$wpdb->prefix}woocommerce_shipping_zone_locations WHERE zone_id = %d",
-				$zone->get_id()
-			)
-		);
-
-		if ( $locations ) {
-			foreach ( $locations as $location ) {
-				$zone->add_location( $location->location_code, $location->location_type );
-			}
-		}
 	}
 
 	/**

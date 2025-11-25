@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Fixed missing styles on TreeSelectControl by copying from @wordpress/components/CheckboxControl and importing @wordpress/base-styles

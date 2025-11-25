@@ -31,11 +31,26 @@ const config: PlaywrightTestConfig = {
 					},
 				],
 				[ 'buildkite-test-collector/playwright/reporter' ],
+				[
+					'junit',
+					{
+						outputFile: `${ __dirname }/artifacts/test-results/results.xml`,
+						stripANSIControlSequences: true,
+						includeProjectInTestName: true,
+					},
+				],
+				[
+					'playwright-ctrf-json-reporter',
+					{
+						outputDir: `${ __dirname }/artifacts/test-results`,
+						outputFile: `ctrf-report-${ Date.now() }.json`,
+					},
+				],
 		  ]
 		: 'list',
 	use: {
 		baseURL: BASE_URL,
-		screenshot: 'only-on-failure',
+		screenshot: { mode: 'only-on-failure', fullPage: true },
 		trace:
 			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
 				? 'retain-on-first-failure'
@@ -54,6 +69,17 @@ const config: PlaywrightTestConfig = {
 			name: 'chromium',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			fullyParallel: true,
+		},
+		{
+			name: 'legacy-mini-cart',
+			testMatch: [
+				'**/tests/mini-cart/**/*.spec.ts',
+				'**/tests/add-to-cart-with-options/**/*.spec.ts',
+				'**/tests/product-button/**/*.spec.ts',
+				'**/tests/product-collection/**/*.spec.ts',
+			],
+			fullyParallel: true,
+			use: { ...devices[ 'Desktop Chrome' ] },
 		},
 	],
 };

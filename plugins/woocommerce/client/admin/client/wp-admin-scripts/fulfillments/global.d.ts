@@ -5,6 +5,7 @@ declare global {
 		label: string;
 		icon: string | null;
 		value: string;
+		url: string;
 	}
 
 	interface FulfillmentStatusProps {

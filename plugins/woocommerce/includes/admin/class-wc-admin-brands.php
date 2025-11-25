@@ -99,6 +99,7 @@ class WC_Brands_Admin {
 		// Import.
 		add_filter( 'woocommerce_csv_product_import_mapping_options', array( $this, 'add_column_to_importer_exporter' ), 10 );
 		add_filter( 'woocommerce_csv_product_import_mapping_default_columns', array( $this, 'add_default_column_mapping' ), 10 );
+		add_filter( 'woocommerce_product_importer_formatting_callbacks', array( $this, 'add_formatting_callback' ), 10, 2 );
 		add_filter( 'woocommerce_product_import_inserted_product_object', array( $this, 'process_import' ), 10, 2 );
 
 		// Export.
@@ -690,18 +691,38 @@ class WC_Brands_Admin {
 	}
 
 	/**
+	 * Add formatting callback for brand_ids during CSV import.
+	 *
+	 * @param  array               $callbacks Formatting callbacks.
+	 * @param  WC_Product_Importer $importer  Importer instance.
+	 * @return array $callbacks
+	 */
+	public function add_formatting_callback( $callbacks, $importer ) {
+		$mapped_keys = $importer->get_mapped_keys();
+
+		// Find the index of brand_ids in the mapped keys.
+		$brand_ids_index = array_search( 'brand_ids', $mapped_keys, true );
+
+		// If brand_ids exists in the mapping, add our custom parser.
+		if ( false !== $brand_ids_index ) {
+			$callbacks[ $brand_ids_index ] = array( $this, 'parse_brands_field' );
+		}
+
+		return $callbacks;
+	}
+
+	/**
 	 * Add brands to newly imported product.
 	 *
 	 * @param WC_Product $product Product being imported.
 	 * @param array      $data    Raw CSV data.
 	 */
 	public function process_import( $product, $data ) {
-		if ( empty( $data['brand_ids'] ) ) {
+		if ( empty( $data['brand_ids'] ) || ! is_array( $data['brand_ids'] ) ) {
 			return;
 		}
 
-		$brand_ids = array_map( 'intval', $this->parse_brands_field( $data['brand_ids'] ) );
-
+		$brand_ids = array_map( 'intval', $data['brand_ids'] );
 		wp_set_object_terms( $product->get_id(), $brand_ids, 'product_brand' );
 	}
 
@@ -715,6 +736,10 @@ class WC_Brands_Admin {
 	 */
 	public function parse_brands_field( $value ) {
 
+		if ( empty( $value ) ) {
+			return array();
+		}
+
 		// Based on WC_Product_Importer::explode_values().
 		$values    = str_replace( '\\,', '::separator::', explode( ',', $value ) );
 		$row_terms = array();
@@ -725,12 +750,15 @@ class WC_Brands_Admin {
 		$brands = array();
 		foreach ( $row_terms as $row_term ) {
 			$parent = null;
-
-			// WC Core uses '>', but for some reason it's already escaped at this point.
-			$_terms = array_map( 'trim', explode( '&gt;', $row_term ) );
+			$_terms = array_map( 'trim', explode( '>', $row_term ) );
 			$total  = count( $_terms );
 
 			foreach ( $_terms as $index => $_term ) {
+				// Don't allow users without capabilities to create new brands.
+				if ( ! current_user_can( 'manage_product_terms' ) ) {
+					break;
+				}
+
 				$term = term_exists( $_term, 'product_brand', $parent );
 
 				if ( is_array( $term ) ) {

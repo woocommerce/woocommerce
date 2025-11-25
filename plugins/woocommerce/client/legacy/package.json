@@ -14,11 +14,13 @@
 		"build:project:assets": "wireit",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:assets": "pnpm build:project --watch"
+		"watch:build:project:assets": "pnpm build:project --watch",
+		"test:js": "wp-scripts test-unit-js --config jest.config.json"
 	},
 	"devDependencies": {
 		"@types/node": "20.x.x",
 		"@wordpress/stylelint-config": "^21.36.0",
+		"@wordpress/scripts": "^30.23.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",
 		"caniuse-lite": "1.0.30001146",
@@ -37,6 +39,7 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.16.0",
 		"gruntify-eslint": "5.0.0",
+		"jest-fixed-jsdom": "^0.0.10",
 		"sass": "^1.69.5",
 		"stylelint": "^14.16.1",
 		"wireit": "0.14.12"
@@ -64,6 +67,23 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json"
+			]
+		}
+	},
+	"config": {
+		"ci": {
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"js/**/*.{js,ts,tsx,scss,json}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
 			]
 		}
 	}

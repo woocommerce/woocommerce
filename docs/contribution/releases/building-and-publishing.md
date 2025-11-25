@@ -1,9 +1,16 @@
 ---
 post_title: Building and Publishing a Release
 sidebar_label: Building and Publishing
+sidebar_position: 1
 ---
 
 # Building and Publishing a Release
+
+:::note
+
+If you encounter any issues during the release process, refer to the [Release Troubleshooting & Recovery guide](/docs/contribution/releases/troubleshooting) for step-by-step solutions to common problems and recovery procedures.
+
+:::
 
 ## Prerequisites
 
@@ -41,10 +48,11 @@ sidebar_label: Building and Publishing
 
 - Run the ["Release: Upload release to WordPress.org" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-upload-to-wporg.yml) from `trunk` using the release tag.
 - This creates a new SVN tag and, if the release is newer than trunk, overwrites trunk.
+- When releasing the initial beta, longer processing times are expected.
 
 ### Step 2: Approve the Release
 
-- Visit [WordPress.org plugin releases](https://wordpress.org/plugins/developers/releases/) and approve the release.
+- Visit [WordPress.org plugin releases](https://wordpress.org/plugins/developers/releases/) as the user `woocommerce` and approve the release.
 - Wait a few minutes for WordPress.org to build the new version.
 
 ### Step 3: Verify Release Availability

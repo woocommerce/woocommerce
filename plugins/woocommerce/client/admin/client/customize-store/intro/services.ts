@@ -19,15 +19,6 @@ export const fetchAiStatus = async (): Promise< aiStatusResponse > => {
 	return data;
 };
 
-export const fetchThemeCards = async () => {
-	const themes = await apiFetch( {
-		path: '/wc-admin/onboarding/themes/recommended',
-		method: 'GET',
-	} );
-
-	return themes;
-};
-
 export const fetchCustomizeStoreCompleted = async () => {
 	const task = await resolveSelect( onboardingStore ).getTask(
 		'customize-store'
@@ -39,15 +30,9 @@ export const fetchCustomizeStoreCompleted = async () => {
 };
 
 export const fetchIntroData = async () => {
-	const getTaskPromise =
-		resolveSelect( onboardingStore ).getTask( 'customize-store' );
-
-	const themeDataPromise = fetchThemeCards();
-
-	const [ task, themeData ] = await Promise.all( [
-		getTaskPromise,
-		themeDataPromise,
-	] );
+	const task = await resolveSelect( onboardingStore ).getTask(
+		'customize-store'
+	);
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
@@ -59,7 +44,6 @@ export const fetchIntroData = async () => {
 
 	return {
 		customizeStoreTaskCompleted,
-		themeData,
 		activeTheme: theme.stylesheet || '',
 	};
 };

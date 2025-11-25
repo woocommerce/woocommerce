@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * ProductButton class.
@@ -46,6 +47,8 @@ class ProductButton extends AbstractBlock {
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
+		wp_enqueue_script( 'wp-a11y' );
+
 		if ( wp_is_block_theme() ) {
 			add_action(
 				'wp_enqueue_scripts',
@@ -71,9 +74,10 @@ class ProductButton extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// This workaround ensures that WordPress loads the core/button block styles.
-		// For more details, see https://github.com/woocommerce/woocommerce/pull/53052.
-		( new \WP_Block( array( 'blockName' => 'core/button' ) ) )->render();
+		// This is work-around so the Product Button block inherits the styles
+		// of the core Button block. We render it with the same classes and
+		// enqueue its stylesheet.
+		wp_enqueue_style( 'wp-block-button' );
 
 		global $product;
 		$previous_product = $product;
@@ -103,7 +107,7 @@ class ProductButton extends AbstractBlock {
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
 		$is_ajax_button           = ( ( $ajax_add_to_cart_enabled && $product->supports( 'ajax_add_to_cart' ) ) || $is_descendant_of_add_to_cart_form ) && $is_product_purchasable && ! $cart_redirect_after_add;
-		$html_element             = $is_ajax_button || ( $is_descendant_of_add_to_cart_form && 'external' !== $product->get_type() ) ? 'button' : 'a';
+		$html_element             = $is_ajax_button || ( $is_descendant_of_add_to_cart_form && ! $product->is_type( ProductType::EXTERNAL ) ) ? 'button' : 'a';
 		$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$classname                = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 		$custom_width_classes     = isset( $attributes['width'] ) ? 'has-custom-width wp-block-button__width-' . $attributes['width'] : '';
@@ -154,7 +158,7 @@ class ProductButton extends AbstractBlock {
 			'hasPressedButton' => false,
 		);
 
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$context['groupedProductIds'] = $product->get_children();
 		}
 
@@ -168,6 +172,15 @@ class ProductButton extends AbstractBlock {
 				'rel'  => 'nofollow',
 			);
 		}
+
+		wp_interactivity_config(
+			'woocommerce',
+			array(
+				'messages' => array(
+					'addedToCartText' => __( 'Added to cart', 'woocommerce' ),
+				),
+			)
+		);
 
 		wp_interactivity_state(
 			'woocommerce/product-button',
@@ -219,7 +232,9 @@ class ProductButton extends AbstractBlock {
 		$context_directives = wp_interactivity_data_wp_context( $context );
 
 		$button_directives = $is_descendant_of_add_to_cart_form ?
-			'data-wp-class--disabled="woocommerce/add-to-cart-with-options::!state.isFormValid" data-wp-on--click="actions.handlePressedState"' :
+			'data-wp-class--disabled="woocommerce/add-to-cart-with-options::!state.isFormValid"
+			data-wp-bind--hidden="woocommerce/add-to-cart-with-options::!state.allowsAddingToCart"
+			data-wp-on--click="actions.handlePressedState"' :
 			'data-wp-on--click="actions.addCartItem"';
 		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
 
@@ -325,7 +340,7 @@ class ProductButton extends AbstractBlock {
 	 * @return boolean The product is purchasable.
 	 */
 	private function is_product_purchasable( $product ) {
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$grouped_product_ids = $product->get_children();
 			foreach ( $grouped_product_ids as $child ) {
 				$child_product = wc_get_product( $child );
@@ -350,7 +365,7 @@ class ProductButton extends AbstractBlock {
 	 * @return string The inTheCartText string.
 	 */
 	private function get_in_the_cart_text( $product ) {
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( ProductType::GROUPED ) ) {
 			return __( 'Added to cart', 'woocommerce' );
 		}
 

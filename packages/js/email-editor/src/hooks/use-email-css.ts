@@ -11,7 +11,10 @@ import deepmerge from 'deepmerge';
  */
 import { EmailTheme, EmailBuiltStyles, storeName } from '../store';
 import { useUserTheme } from './use-user-theme';
-import { useGlobalStylesOutputWithConfig } from '../private-apis';
+import {
+	useGlobalStylesOutputWithConfig,
+	areExternalStylesSupported,
+} from '../private-apis';
 import { unwrapCompressedPresetStyleVariable } from '../style-variables';
 
 // Empty array to avoid re-rendering the component when the array is empty
@@ -33,9 +36,9 @@ export function useEmailCss() {
 				editorTheme: select( storeName ).getTheme(),
 				// @ts-expect-error There are no types for the experimental features settings.
 				// eslint-disable-next-line no-underscore-dangle
-				layout: editorSettings.__experimentalFeatures?.layout,
+				layout: editorSettings?.__experimentalFeatures?.layout,
 				deviceType: getDeviceType(),
-				editorSettingsStyles: editorSettings.styles,
+				editorSettingsStyles: editorSettings?.styles,
 			};
 		},
 		[]
@@ -51,11 +54,13 @@ export function useEmailCss() {
 		[ editorTheme, userTheme ]
 	);
 
+	// In the Gutenberg version 22.0+ the useGlobalStylesOutputWithConfig hook is not available and we return empty array.
+	// We keep this for now to support WP 6.9 and lower.
 	const [ styles ] = useGlobalStylesOutputWithConfig( mergedConfig );
 
 	let rootContainerStyles = '';
 	if ( layout && deviceType !== 'Mobile' ) {
-		rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;`;
+		rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;max-width: 100%;`;
 	}
 	const padding = mergedConfig.styles?.spacing?.padding;
 	if ( padding ) {
@@ -68,6 +73,9 @@ export function useEmailCss() {
 	}
 
 	const finalStyles = useMemo( () => {
+		if ( ! areExternalStylesSupported ) {
+			return EMPTY_ARRAY;
+		}
 		return [
 			...( ( styles as EmailBuiltStyles[] ) ?? [] ),
 			{

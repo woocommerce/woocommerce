@@ -85,11 +85,8 @@ class WC_Payment_Gateways {
 			'WC_Gateway_BACS',
 			'WC_Gateway_Cheque',
 			'WC_Gateway_COD',
+			'WC_Gateway_Paypal',
 		);
-
-		if ( $this->should_load_paypal_standard() ) {
-			$load_gateways[] = 'WC_Gateway_Paypal';
-		}
 
 		// Filter.
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
@@ -102,6 +99,13 @@ class WC_Payment_Gateways {
 		foreach ( $load_gateways as $gateway ) {
 			if ( is_string( $gateway ) && class_exists( $gateway ) ) {
 				$gateway = new $gateway();
+			}
+
+			if ( is_a( $gateway, 'WC_Gateway_Paypal' ) ) {
+				WC_Gateway_Paypal::set_instance( $gateway );
+				if ( ! $this->should_load_paypal_standard() ) {
+					continue;
+				}
 			}
 
 			// Gateways need to be valid and extend WC_Payment_Gateway.
@@ -443,9 +447,7 @@ All at %6$s
 	 * @return bool Whether PayPal Standard should be loaded or not.
 	 */
 	protected function should_load_paypal_standard() {
-		// Tech debt: This class needs to be initialized to make sure any existing subscriptions gets processed as expected, even if the gateway is not enabled for new orders.
-		// Eventually, we want to load this via a singleton pattern to avoid unnecessary instantiation.
-		$paypal = new WC_Gateway_Paypal();
+		$paypal = WC_Gateway_Paypal::get_instance();
 		return $paypal->should_load();
 	}
 

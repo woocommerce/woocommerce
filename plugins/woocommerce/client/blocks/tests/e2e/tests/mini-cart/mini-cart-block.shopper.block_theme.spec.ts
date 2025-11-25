@@ -13,6 +13,7 @@ import {
 import { getTestTranslation } from '../../utils/get-test-translation';
 import { translations } from '../../test-data/data/data';
 import ProductCollectionPage from '../product-collection/product-collection.page';
+import config from '../../../../../admin/config/core.json';
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	productCollectionPage: async ( { page, admin, editor }, use ) => {
@@ -31,7 +32,43 @@ test.describe( 'Shopper → Notices', () => {
 		editor,
 		admin,
 		productCollectionPage,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+		const checkMiniCartTitle = async ( itemCount: number ) => {
+			try {
+				// iAPI Mini Cart.
+				const miniCartTitleLabelBlock = page.locator(
+					'[data-block-name="woocommerce/mini-cart-title-label-block"]'
+				);
+				await expect( miniCartTitleLabelBlock ).toBeVisible( {
+					timeout: 1000,
+				} );
+				const miniCartTitleItemsCounterBlock = page.locator(
+					'[data-block-name="woocommerce/mini-cart-title-items-counter-block"]'
+				);
+				await expect( miniCartTitleLabelBlock ).toHaveText(
+					'Your cart'
+				);
+				await expect( miniCartTitleItemsCounterBlock ).toBeVisible();
+				await expect( miniCartTitleItemsCounterBlock ).toContainText(
+					String( itemCount )
+				);
+			} catch ( e ) {
+				// Legacy React Mini Cart.
+				await expect( page.getByText( 'Your cart' ) ).toBeVisible();
+				await expect(
+					page.getByText(
+						`(${ itemCount } item${ itemCount > 1 ? 's' : '' })`
+					)
+				).toBeVisible();
+			}
+		};
+
 		await admin.visitSiteEditor( {
 			postId: `twentytwentyfour//header`,
 			postType: 'wp_template_part',
@@ -54,8 +91,7 @@ test.describe( 'Shopper → Notices', () => {
 			.getByLabel( `Add to cart: “${ SIMPLE_PHYSICAL_PRODUCT_NAME }”` )
 			.click();
 
-		await expect( page.getByText( 'Your cart' ) ).toBeVisible();
-		await expect( page.getByText( '(1 item)' ) ).toBeVisible();
+		await checkMiniCartTitle( 1 );
 
 		await page.getByLabel( 'Close', { exact: true } ).click();
 		// Mini cart gets out of sync if triggered to open and close very quickly. PW interacts too quickly
@@ -65,8 +101,8 @@ test.describe( 'Shopper → Notices', () => {
 			.getByLabel( `Add to cart: “${ SIMPLE_PHYSICAL_PRODUCT_NAME }”` )
 			.click();
 
-		await expect( page.getByText( 'Your cart' ) ).toBeVisible();
-		await expect( page.getByText( '(2 items)' ) ).toBeVisible();
+		await checkMiniCartTitle( 2 );
+
 		await expect(
 			page
 				.getByRole( 'dialog' )
@@ -77,56 +113,59 @@ test.describe( 'Shopper → Notices', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Translations', () => {
-	test.beforeEach( async () => {
-		await wpCLI( `site switch-language ${ translations.locale }` );
+// Skip the rest of the translation tests if the iAPI mini cart is  enabled.
+if ( ! config.features[ 'experimental-iapi-mini-cart' ] ) {
+	test.describe( 'Shopper → Translations', () => {
+		test.beforeEach( async () => {
+			await wpCLI( `site switch-language ${ translations.locale }` );
+		} );
+
+		test( 'User can see translation in empty Mini-Cart', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+		} ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await miniCartUtils.openMiniCart();
+
+			await expect(
+				page.getByRole( 'link', {
+					name: getTestTranslation( 'Start shopping' ),
+				} )
+			).toBeVisible();
+		} );
+
+		test( 'User can see translation in filled Mini-Cart', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+		} ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await miniCartUtils.openMiniCart();
+
+			await expect(
+				page.getByRole( 'heading', {
+					name: getTestTranslation( 'Your cart' ),
+				} )
+			).toBeVisible();
+
+			await expect(
+				page.getByRole( 'link', {
+					name: getTestTranslation( 'View my cart' ),
+				} )
+			).toBeVisible();
+
+			await expect(
+				page.getByRole( 'link', {
+					name: getTestTranslation( 'Go to checkout' ),
+				} )
+			).toBeVisible();
+		} );
 	} );
-
-	test( 'User can see translation in empty Mini-Cart', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await miniCartUtils.openMiniCart();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'Start shopping' ),
-			} )
-		).toBeVisible();
-	} );
-
-	test( 'User can see translation in filled Mini-Cart', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		await expect(
-			page.getByRole( 'heading', {
-				name: getTestTranslation( 'Your cart' ),
-			} )
-		).toBeVisible();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'View my cart' ),
-			} )
-		).toBeVisible();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'Go to checkout' ),
-			} )
-		).toBeVisible();
-	} );
-} );
+}
 
 test.describe( 'Shopper → Tax', () => {
 	test.beforeEach( async () => {
@@ -137,33 +176,38 @@ test.describe( 'Shopper → Tax', () => {
 	test( 'User can see tax label and price including tax', async ( {
 		frontendUtils,
 		page,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToMiniCart();
 
-		await expect(
-			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
-		).toContainText( '(incl. tax)' );
+		const miniCartLocator = page
+			.getByTestId( 'mini-cart' )
+			.getByLabel(
+				config.features[ 'experimental-iapi-mini-cart' ]
+					? 'Number of items in the cart: 1'
+					: '1 item in cart'
+			);
+
+		await expect( miniCartLocator ).toContainText( '(incl. tax)' );
 
 		// Hovering over the mini cart should not change the label,
 		// see https://github.com/woocommerce/woocommerce/issues/43691
-		await page
-			.getByTestId( 'mini-cart' )
-			.getByLabel( '1 item in cart' )
-			.dispatchEvent( 'mouseover' );
+		await miniCartLocator.dispatchEvent( 'mouseover' );
 
-		await expect(
-			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
-		).toContainText( '(incl. tax)' );
+		await expect( miniCartLocator ).toContainText( '(incl. tax)' );
 
 		await wpCLI( 'option set woocommerce_prices_include_tax yes' );
 		await wpCLI( 'option set woocommerce_tax_display_cart excl' );
 		await page.reload();
 
-		await expect(
-			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
-		).toContainText( '(ex. tax)' );
+		await expect( miniCartLocator ).toContainText( '(ex. tax)' );
 	} );
 } );

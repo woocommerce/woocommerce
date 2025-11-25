@@ -19,6 +19,52 @@ const blockData: BlockData = {
 };
 
 test.describe( `${ blockData.name } Block`, () => {
+	const checkMiniCartTitle = async ( page, itemCount ) => {
+		try {
+			// iAPI Mini Cart.
+			const miniCartTitleBlock = page.locator(
+				'[data-block-name="woocommerce/mini-cart-title-block"]'
+			);
+			await expect( miniCartTitleBlock ).toBeVisible( { timeout: 1000 } );
+			const titleText = await miniCartTitleBlock.innerText();
+			expect(
+				titleText?.includes(
+					`(${ itemCount } item${ itemCount > 1 ? 's' : '' })`
+				) || titleText?.includes( `(items: ${ itemCount })` )
+			).toBeTruthy();
+		} catch ( e ) {
+			// Legacy React Mini Cart.
+			if ( itemCount > 0 ) {
+				await expect(
+					page.getByRole( 'heading', {
+						name: `Your cart (${ itemCount } item${
+							itemCount > 1 ? 's' : ''
+						})`,
+					} )
+				).toBeVisible();
+			} else {
+				await expect( page.getByRole( 'dialog' ) ).toContainText(
+					'Your cart is currently empty!'
+				);
+			}
+		}
+	};
+
+	const checkProductLink = async ( page ) => {
+		try {
+			// iAPI Mini Cart.
+			await expect(
+				page
+					.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
+					.filter( { has: page.locator( ':visible' ) } )
+			).toBeVisible( { timeout: 1000 } );
+		} catch ( e ) {
+			// Legacy React Mini Cart.
+			await expect(
+				page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
+			).toBeVisible();
+		}
+	};
 	/**
 	 * This is a workaround to run tests in isolation.
 	 * Ideally, the test should be run in isolation by default. But we're
@@ -51,7 +97,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
@@ -64,7 +117,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
@@ -80,7 +140,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
@@ -96,28 +163,38 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await page.click( 'text=Add to cart' );
 		await miniCartUtils.openMiniCart();
 
-		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Your cart (1 item)'
-		);
+		await checkMiniCartTitle( page, 1 );
 	} );
 
 	test( 'should show the correct cart items count', async ( {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect(
-			page.getByRole( 'heading', { name: 'Your cart (1 item)' } )
-		).toBeVisible();
+		await checkMiniCartTitle( page, 1 );
 
 		await page.getByRole( 'button', { name: 'Close' } ).click();
 
@@ -128,9 +205,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect(
-			page.getByRole( 'heading', { name: 'Your cart (2 items)' } )
-		).toBeVisible();
+		await checkMiniCartTitle( page, 2 );
 	} );
 
 	test( 'should show the correct cart item name', async ( {
@@ -142,16 +217,21 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect(
-			page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
-		).toBeVisible();
+		await checkProductLink( page );
 	} );
 
 	test( 'should show subtotal, view cart button and checkout button', async ( {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -171,7 +251,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -184,6 +271,8 @@ test.describe( `${ blockData.name } Block`, () => {
 			.getByRole( 'button', { name: 'Increase quantity of Polo' } )
 			.click();
 
+		await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '2' );
@@ -191,6 +280,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		await page
 			.getByRole( 'button', { name: 'Reduce quantity of Polo' } )
 			.click();
+
+		await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
@@ -205,14 +296,19 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect(
-			page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
-		).toBeVisible();
+		await checkProductLink( page );
 
 		await page
 			.getByRole( 'button', { name: 'Remove Polo from cart' } )
@@ -227,7 +323,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -239,7 +342,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
