@@ -358,8 +358,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					) {
 						actions.setQuantity(
 							productDataState.productId,
-							newValue,
-							{ changeTarget: ref }
+							newValue
 						);
 					}
 				}
