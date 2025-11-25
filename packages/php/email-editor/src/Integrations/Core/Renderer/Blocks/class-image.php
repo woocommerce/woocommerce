@@ -102,12 +102,52 @@ class Image extends Abstract_Block_Renderer {
 		$max_width = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] );
 
 		if ( $image_url ) {
-			$upload_dir = wp_upload_dir();
-			$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
-			$image_size = wp_getimagesize( $image_path );
+			// Try to extract width from URL query parameter if it exists.
+			$parsed_url = wp_parse_url( $image_url );
+			if ( isset( $parsed_url['query'] ) ) {
+				parse_str( $parsed_url['query'], $query_params );
+				if ( isset( $query_params['w'] ) && is_numeric( $query_params['w'] ) ) {
+					$image_size                     = (int) $query_params['w'];
+					$width                          = min( $image_size, $max_width );
+					$parsed_block['attrs']['width'] = "{$width}px";
 
-			$image_size = $image_size ? $image_size[0] : $max_width;
-			$width      = min( $image_size, $max_width );
+					return $parsed_block;
+				}
+			}
+
+			// Try to get dimensions from attachment metadata.
+			$attachment_id = $parsed_block['attrs']['id'] ?? null;
+
+			if ( $attachment_id ) {
+				$size_slug = $parsed_block['attrs']['sizeSlug'] ?? 'full';
+
+				// Try wp_get_attachment_image_src first (works better in multisite).
+				$image_src = wp_get_attachment_image_src( $attachment_id, $size_slug );
+
+				if ( $image_src && isset( $image_src[1] ) ) {
+					// wp_get_attachment_image_src returns [url, width, height, is_intermediate].
+					$image_size = $image_src[1];
+				} else {
+					// Fallback to metadata approach.
+					$metadata = wp_get_attachment_metadata( $attachment_id );
+
+					if ( $metadata && isset( $metadata['width'] ) ) {
+						$image_size = $metadata['width'];
+					} elseif ( $metadata && isset( $metadata['sizes'][ $size_slug ]['width'] ) ) {
+						$image_size = $metadata['sizes'][ $size_slug ]['width'];
+					} else {
+						$image_size = $max_width;
+					}
+				}
+			} else {
+				// Fallback to wp_getimagesize.
+				$upload_dir = wp_upload_dir();
+				$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
+				$image_size = wp_getimagesize( $image_path );
+				$image_size = $image_size ? $image_size[0] : $max_width;
+			}
+
+			$width = min( $image_size, $max_width );
 		} else {
 			$width = $max_width;
 		}
