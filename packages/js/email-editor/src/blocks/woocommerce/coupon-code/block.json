@@ -28,7 +28,16 @@
 			"width": true
 		}
 	},
-	"attributes": {},
+	"attributes": {
+		"couponId": {
+			"type": "number",
+			"default": 0
+		},
+		"couponCode": {
+			"type": "string",
+			"default": ""
+		}
+	},
 	"textdomain": "woocommerce",
 	"editorScript": "file:./index.tsx"
 }
