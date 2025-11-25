@@ -3125,3 +3125,37 @@ function wc_update_1030_add_comments_date_type_index() {
 		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
 	}
 }
+
+/**
+ * Clean up the old last_fetch_patterns_request option and non-grouped actions after migration to using the `action_scheduler_ensure_recurring_actions` hook.
+ *
+ * In version 10.4.0, this functionality was replaced with Action Scheduler recurring actions.
+ *
+ * @return void
+ */
+function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
+	delete_option( 'last_fetch_patterns_request' );
+	as_unschedule_all_actions( 'fetch_patterns' );
+}
+
+/**
+ * Update brand permalink setting to take into account obsolete 'woocommerce_prepend_shop_page_to_urls' option, removed in WC 2.0.3.
+ * This migration ensures any installations that still have this old option set will have their brand permalink updated appropriately.
+ *
+ * @since 10.5.0
+ */
+function wc_update_1050_migrate_brand_permalink_setting() {
+	if ( 'yes' !== get_option( 'woocommerce_prepend_shop_page_to_urls' ) ) {
+		return;
+	}
+
+	$shop_page_id = wc_get_page_id( 'shop' );
+	$shop_slug    = ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : 'shop';
+
+	if ( ! $shop_slug ) {
+		return;
+	}
+
+	$slug = trailingslashit( $shop_slug ) . __( 'brand', 'woocommerce' );
+	update_option( 'woocommerce_brand_permalink', $slug );
+}

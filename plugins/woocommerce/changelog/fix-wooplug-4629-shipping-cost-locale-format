@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes flat rate shipping cost input locale formatting issue where comma decimal separator is replaced with a dot resulting in incorrect display and saving at later times.

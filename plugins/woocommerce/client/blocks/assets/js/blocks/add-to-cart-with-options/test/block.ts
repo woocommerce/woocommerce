@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { dispatch } from '@wordpress/data';
 import { productsStore } from '@woocommerce/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -109,6 +110,20 @@ const handlers = [
 		return HttpResponse.json( mockProduct );
 	} ),
 
+	// @todo When updating the `@wordpress/data` package to 6.7 or later,
+	// this request will need to be updated to match the path in production:
+	// `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
+	http.options( '/wp/v2/[object%20Object]', () => {
+		return HttpResponse.json(
+			{},
+			{
+				headers: {
+					allow: 'GET, POST, PUT, PATCH, DELETE',
+				},
+			}
+		);
+	} ),
+
 	http.get( '/wp/v2/template-parts/*', ( request ) => {
 		if (
 			request.params[ 0 ] ===
@@ -164,6 +179,7 @@ const server = setupServer( ...handlers );
 beforeAll( () => server.listen() );
 afterEach( () => {
 	dispatch( productsStore ).invalidateResolutionForStore();
+	dispatch( coreStore ).invalidateResolutionForStore();
 	server.resetHandlers();
 } );
 afterAll( () => server.close() );
@@ -273,5 +289,32 @@ describe( 'Add to Cart + Options block', () => {
 		await expectHasBlock( 'Product Stock Indicator' );
 		await expectHasBlock( 'Product Quantity (Beta)' );
 		await expectHasBlock( 'Add to Cart Button' );
+	} );
+
+	it( 'should render the placeholder when viewed as a user without permissions to edit template parts', async () => {
+		server.use(
+			// @todo When updating the `@wordpress/data` package to 6.7 or later,
+			// this request will need to be updated to match the path in production:
+			// `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
+			http.options( '/wp/v2/[object%20Object]', () => {
+				return HttpResponse.json(
+					{},
+					{
+						headers: {
+							allow: 'GET',
+						},
+					}
+				);
+			} )
+		);
+
+		await setup();
+		await expectHasBlock( 'Add to Cart + Options (Beta)' );
+
+		await waitFor( () =>
+			expect(
+				screen.getByLabelText( 'Add to Cart + Options form' )
+			).toBeInTheDocument()
+		);
 	} );
 } );

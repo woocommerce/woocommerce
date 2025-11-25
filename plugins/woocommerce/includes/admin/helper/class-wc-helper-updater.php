@@ -602,6 +602,34 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Validates cached update data and checks if it matches the expected hash.
+	 *
+	 * Ensures the cached data is properly structured and corresponds to the current
+	 * payload to prevent fatal errors and avoid stale cache returns.
+	 *
+	 * @since 10.3.6
+	 *
+	 * @param mixed  $data The data retrieved from the transient.
+	 * @param string $hash The expected hash to compare against.
+	 * @return bool True if the data is valid and hash matches, false otherwise.
+	 */
+	private static function should_use_cached_update_data( $data, $hash ) {
+		if ( ! is_array( $data ) ) {
+			return false;
+		}
+
+		if ( ! isset( $data['hash'], $data['products'] ) ) {
+			return false;
+		}
+
+		if ( ! is_string( $data['hash'] ) || ! is_array( $data['products'] ) ) {
+			return false;
+		}
+
+		return hash_equals( $hash, $data['hash'] );
+	}
+
+	/**
 	 * Run an update check API call.
 	 *
 	 * The call is cached based on the payload (product ids, file ids). If
@@ -619,10 +647,9 @@ class WC_Helper_Updater {
 
 		$cache_key = '_woocommerce_helper_updates';
 		$data      = get_transient( $cache_key );
-		if ( false !== $data ) {
-			if ( hash_equals( $hash, $data['hash'] ) ) {
-				return $data['products'];
-			}
+
+		if ( self::should_use_cached_update_data( $data, $hash ) ) {
+			return $data['products'];
 		}
 
 		$data = array(

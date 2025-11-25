@@ -19,30 +19,35 @@ const getProductsRequests = ( {
 	search = '',
 	queryArgs = {},
 } ) => {
-	const isLargeCatalog = blocksConfig.productCount > 100;
-	const defaultArgs = {
-		per_page: isLargeCatalog ? 100 : 0,
-		catalog_visibility: 'any',
-		search,
-		orderby: 'title',
-		order: 'asc',
-	};
+	// Since the Store API has a maximum of 100 products per request, selected products
+	// might not be present in the main request and will need to be fetched separately.
+	const loadSelected = blocksConfig.productCount > 100 && selected.length > 0;
+
+	// Main request for products matching search criteria.
 	const requests = [
 		addQueryArgs( '/wc/store/v1/products', {
-			...defaultArgs,
+			per_page: 100,
+			catalog_visibility: 'any',
+			search,
+			orderby: 'title',
+			order: 'asc',
+			exclude: loadSelected ? selected : [],
 			...queryArgs,
 		} ),
 	];
 
-	// If we have a large catalog, we might not get all selected products in the first page.
-	if ( isLargeCatalog && selected.length ) {
-		requests.push(
-			addQueryArgs( '/wc/store/v1/products', {
-				catalog_visibility: 'any',
-				include: selected,
-				per_page: 0,
-			} )
-		);
+	if ( loadSelected ) {
+		const selectedPages = Math.ceil( selected.length / 100 );
+		for ( let page = 1; page <= selectedPages; page++ ) {
+			requests.push(
+				addQueryArgs( '/wc/store/v1/products', {
+					catalog_visibility: 'any',
+					include: selected,
+					per_page: 100,
+					page,
+				} )
+			);
+		}
 	}
 
 	return requests;
@@ -64,7 +69,7 @@ const uniqBy = ( array, iteratee ) => {
  * Get a promise that resolves to a list of products from the Store API.
  *
  * @param {Object}                     request           A query object with the list of selected products and search term.
- * @param {number[]}                   request.selected  Currently selected products.
+ * @param {number[]=}                  request.selected  Currently selected products.
  * @param {string=}                    request.search    Search string.
  * @param {(Record<string, unknown>)=} request.queryArgs Query args to pass in.
  * @return {Promise<unknown>} Promise resolving to a Product list.
