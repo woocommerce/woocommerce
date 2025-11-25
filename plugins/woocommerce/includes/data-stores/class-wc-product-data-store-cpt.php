@@ -1339,7 +1339,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta_2.meta_key = '_price'
 					AND postmeta_3.meta_key = '_sale_price'
 					AND postmeta.meta_value > 0
-					AND postmeta.meta_value <= %s
+					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value",
 				time()
 			)

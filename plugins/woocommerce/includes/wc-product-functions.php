@@ -532,9 +532,6 @@ function wc_schedule_product_sale_events( WC_Product $product ) {
 	$date_from  = $product->get_date_on_sale_from( 'edit' );
 	$date_to    = $product->get_date_on_sale_to( 'edit' );
 
-	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
-	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
-
 	if ( $date_from ) {
 		$start_ts = $date_from->getTimestamp();
 		if ( $start_ts > time() ) {
@@ -579,6 +576,10 @@ function wc_apply_sale_state_for_product( WC_Product $product, string $mode ) {
 			$product->set_price( $sale_price );
 			$product->save();
 
+			// Workaround: `_price` is not in `meta_key_to_props` mapping and only syncs
+			// when date/price props change in `handle_updated_props()`. Since we only
+			// changed `price` prop, we must update `_price` meta directly.
+			// See comment in `WC_Product_Data_Store_CPT::handle_updated_props()`.
 			update_post_meta( $product_id, '_price', $sale_price );
 		}
 	} elseif ( 'end' === $mode ) {
@@ -587,10 +588,19 @@ function wc_apply_sale_state_for_product( WC_Product $product, string $mode ) {
 
 		$product->save();
 
+		// Workaround: see above.
 		update_post_meta( $product_id, '_price', $regular_price );
 	}
 
 	wc_delete_product_transients( $product_id );
+
+	// Sync parent variable product price range if this is a variation.
+	if ( $product->is_type( 'variation' ) ) {
+		$parent_id = $product->get_parent_id();
+		if ( $parent_id ) {
+			WC_Product_Variable::sync( $parent_id );
+		}
+	}
 }
 
 /**
@@ -607,8 +617,29 @@ function wc_handle_product_start_scheduled_sale( $product_id ) {
 		return;
 	}
 
+	// Skip product types with derived prices.
+	if ( $product->is_type( array( 'variable', 'grouped' ) ) ) {
+		return;
+	}
+
 	// Verify sale should still start (dates/price might have changed since scheduling).
 	if ( ! $product->get_sale_price( 'edit' ) ) {
+		return;
+	}
+
+	$now       = time();
+	$date_from = $product->get_date_on_sale_from( 'edit' );
+	$date_to   = $product->get_date_on_sale_to( 'edit' );
+
+	if ( $date_from && $date_from->getTimestamp() > $now ) {
+		return;
+	}
+
+	if ( $date_to && $date_to->getTimestamp() < $now ) {
+		return;
+	}
+
+	if ( (float) $product->get_price( 'edit' ) === (float) $product->get_sale_price( 'edit' ) ) {
 		return;
 	}
 
@@ -627,6 +658,22 @@ add_action( 'wc_product_start_scheduled_sale', 'wc_handle_product_start_schedule
 function wc_handle_product_end_scheduled_sale( $product_id ) {
 	$product = wc_get_product( $product_id );
 	if ( ! $product ) {
+		return;
+	}
+
+	// Skip product types with derived prices.
+	if ( $product->is_type( array( 'variable', 'grouped' ) ) ) {
+		return;
+	}
+
+	$now     = time();
+	$date_to = $product->get_date_on_sale_to( 'edit' );
+
+	if ( $date_to && $date_to->getTimestamp() > $now ) {
+		return;
+	}
+
+	if ( (float) $product->get_price( 'edit' ) === (float) $product->get_regular_price( 'edit' ) ) {
 		return;
 	}
 
@@ -649,6 +696,12 @@ function wc_maybe_schedule_product_sale_events( $product_id, $product = null ) {
 		}
 	}
 
+	$product_id = $product->get_id();
+
+	// Always clear existing events first.
+	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
+	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
+
 	$date_from = $product->get_date_on_sale_from( 'edit' );
 	$date_to   = $product->get_date_on_sale_to( 'edit' );
 
@@ -669,7 +722,6 @@ add_action( 'woocommerce_new_product', 'wc_maybe_schedule_product_sale_events', 
  * This function now acts as a safety net to:
  * 1. Catch any products missed by the per-product Action Scheduler events
  * 2. Handle products created before the AS events were introduced
- * 3. Ensure the AS end event is scheduled for products whose sales just started
  *
  * This function is kept for backwards compatibility. Extenders may hook into the
  * `woocommerce_scheduled_sales` cron event or the before/after hooks fired within.
@@ -697,8 +749,8 @@ function wc_scheduled_sales() {
 
 			if ( $product ) {
 				wc_apply_sale_state_for_product( $product, 'start' );
-				// Ensure end action is scheduled for this product.
-				wc_schedule_product_sale_events( $product );
+				// Note: wc_apply_sale_state_for_product() calls save(), which triggers
+				// woocommerce_update_product hook, which schedules the end AS event.
 			}
 
 			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
