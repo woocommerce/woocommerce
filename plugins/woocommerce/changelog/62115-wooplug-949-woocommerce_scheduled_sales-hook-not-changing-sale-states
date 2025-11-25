@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix scheduled sales starting/ending at wrong times by using per-product Action Scheduler events instead of relying solely on daily cron.
