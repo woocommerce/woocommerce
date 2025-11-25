@@ -175,7 +175,11 @@ class WCTransactionalEmailPostsGenerator {
 			return false;
 		}
 
-		set_transient( $this->transient_name, Constants::get_constant( 'WC_VERSION' ), MONTH_IN_SECONDS );
+		set_transient( $this->transient_name, Constants::get_constant( 'WC_VERSION' ), WEEK_IN_SECONDS );
+
+		// Flush rewrite rules to ensure the new templates are loaded.
+		flush_rewrite_rules();
+
 		return true;
 	}
 
