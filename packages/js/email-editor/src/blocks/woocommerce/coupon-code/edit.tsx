@@ -77,7 +77,8 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 					} );
 
 					// Extract pagination headers
-					const totalPagesHeader = response.headers.get( 'X-WP-TotalPages' );
+					const totalPagesHeader =
+						response.headers.get( 'X-WP-TotalPages' );
 
 					if ( totalPagesHeader ) {
 						totalPages = parseInt( totalPagesHeader, 10 );
@@ -255,9 +256,9 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 					initialOpen={ true }
 				>
 					<div style={ { marginBottom: '16px' } }>
-						<label>
+						<div>
 							{ __( 'Select an existing coupon', 'woocommerce' ) }
-						</label>
+						</div>
 						{ isLoading ? (
 							<div
 								style={ {
@@ -270,7 +271,10 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 						) : (
 							<>
 								<ComboboxControl
-									label={ __( 'Search coupons', 'woocommerce' ) }
+									label={ __(
+										'Search coupons',
+										'woocommerce'
+									) }
 									hideLabelFromVision
 									value={ couponCode }
 									onChange={ ( value ) => {
