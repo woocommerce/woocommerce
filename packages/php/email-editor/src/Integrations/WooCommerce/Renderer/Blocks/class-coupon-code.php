@@ -26,6 +26,9 @@ class Coupon_Code extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		// $block_content is unused in this renderer but required by the parent interface.
+		unset( $block_content );
+
 		$attributes  = $parsed_block['attrs'] ?? array();
 		$coupon_code = $attributes['couponCode'] ?? '';
 
