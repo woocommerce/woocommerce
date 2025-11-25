@@ -43,6 +43,7 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ coupons, setCoupons ] = useState< Coupon[] >( [] );
 	const [ isLoading, setIsLoading ] = useState( true );
+	const [ isTruncated, setIsTruncated ] = useState( false );
 
 	// Get the create coupon URL from the store
 	const { createCouponUrl } = useSelect( ( select ) => {
@@ -52,18 +53,60 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 		};
 	}, [] );
 
-	// Fetch coupons from WooCommerce API
+	// Fetch coupons from WooCommerce API with pagination
 	useEffect( () => {
 		const controller = new AbortController();
+		const PER_PAGE = 100;
+		const MAX_PAGES = 10; // Safety cap to prevent infinite loops
 
 		const fetchCoupons = async () => {
 			try {
 				setIsLoading( true );
-				const response = await apiFetch< Coupon[] >( {
-					path: '/wc/v3/coupons?per_page=100',
-					signal: controller.signal,
-				} );
-				setCoupons( response );
+				setIsTruncated( false );
+
+				const allCoupons: Coupon[] = [];
+				let currentPage = 1;
+				let totalPages: number | null = null;
+				let hasMorePages = true;
+
+				while ( hasMorePages && currentPage <= MAX_PAGES ) {
+					const response = await apiFetch< Response >( {
+						path: `/wc/v3/coupons?per_page=${ PER_PAGE }&page=${ currentPage }`,
+						signal: controller.signal,
+						parse: false,
+					} );
+
+					// Extract pagination headers
+					const totalPagesHeader = response.headers.get( 'X-WP-TotalPages' );
+
+					if ( totalPagesHeader ) {
+						totalPages = parseInt( totalPagesHeader, 10 );
+					}
+
+					// Parse response body
+					const pageCoupons: Coupon[] = await response.json();
+
+					allCoupons.push( ...pageCoupons );
+
+					// Determine if we should continue fetching
+					if ( totalPages !== null ) {
+						// Use header-based pagination if available
+						hasMorePages = currentPage < totalPages;
+					} else {
+						// Fallback: check if we got fewer items than per_page
+						hasMorePages = pageCoupons.length === PER_PAGE;
+					}
+
+					// Safety check: if we've reached max pages and there are more, mark as truncated
+					if ( currentPage >= MAX_PAGES && hasMorePages ) {
+						setIsTruncated( true );
+						break;
+					}
+
+					currentPage++;
+				}
+
+				setCoupons( allCoupons );
 			} catch ( error ) {
 				if ( error instanceof Error && error.name === 'AbortError' ) {
 					return;
@@ -225,21 +268,41 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 								<Spinner />
 							</div>
 						) : (
-							<ComboboxControl
-								label={ __( 'Search coupons', 'woocommerce' ) }
-								hideLabelFromVision
-								value={ couponCode }
-								onChange={ ( value ) => {
-									setAttributes( {
-										couponCode: value || '',
-									} );
-								} }
-								onFilterValueChange={ ( value ) => {
-									setSearchValue( value );
-								} }
-								options={ couponOptions }
-								__nextHasNoMarginBottom
-							/>
+							<>
+								<ComboboxControl
+									label={ __( 'Search coupons', 'woocommerce' ) }
+									hideLabelFromVision
+									value={ couponCode }
+									onChange={ ( value ) => {
+										setAttributes( {
+											couponCode: value || '',
+										} );
+									} }
+									onFilterValueChange={ ( value ) => {
+										setSearchValue( value );
+									} }
+									options={ couponOptions }
+									__nextHasNoMarginBottom
+								/>
+								{ isTruncated && (
+									<div
+										style={ {
+											marginTop: '8px',
+											padding: '8px',
+											backgroundColor: '#fff3cd',
+											border: '1px solid #ffc107',
+											borderRadius: '4px',
+											fontSize: '12px',
+											color: '#856404',
+										} }
+									>
+										{ __(
+											'Note: Only the first 1,000 coupons are shown. Use the search to find specific coupons.',
+											'woocommerce'
+										) }
+									</div>
+								) }
+							</>
 						) }
 					</div>
 					{ createCouponUrl && (
