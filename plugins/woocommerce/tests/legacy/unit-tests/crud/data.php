@@ -761,5 +761,4 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$retrieved_object->set_clone_mode( WC_Data::CLONE_MODE_DUPLICATE );
 		$this->assertEquals( WC_Data::CLONE_MODE_DUPLICATE, $retrieved_object->get_clone_mode() );
 	}
-
 }
