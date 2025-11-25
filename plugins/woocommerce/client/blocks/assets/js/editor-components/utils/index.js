@@ -70,8 +70,8 @@ export const getProducts = ( {
 } ) => {
 	const requests = getProductsRequests( { selected, search, queryArgs } );
 
-	return Promise.all( requests.map( ( path ) => apiFetch( { path } ) ) )
-		.then( ( data ) => [
+	return Promise.all( requests.map( ( path ) => apiFetch( { path } ) ) ).then(
+		( data ) => [
 			...new Map(
 				data.flatMap( ( products ) =>
 					products.map( ( item ) => [
@@ -80,10 +80,8 @@ export const getProducts = ( {
 					] )
 				)
 			).values(),
-		] )
-		.catch( ( e ) => {
-			throw e;
-		} );
+		]
+	);
 };
 
 /**
@@ -242,10 +240,7 @@ export const getProductVariations = ( product ) => {
 					variations.map( ( item ) => [ item.id, item ] )
 				)
 			).values(),
-		] )
-		.catch( ( e ) => {
-			throw e;
-		} );
+		] );
 };
 
 /**
