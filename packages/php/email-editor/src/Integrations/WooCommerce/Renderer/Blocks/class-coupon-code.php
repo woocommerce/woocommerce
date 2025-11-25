@@ -29,8 +29,10 @@ class Coupon_Code extends Abstract_Block_Renderer {
 		// $block_content is unused in this renderer but required by the parent interface.
 		unset( $block_content );
 
-		$attributes  = $parsed_block['attrs'] ?? array();
-		$coupon_code = $attributes['couponCode'] ?? '';
+		$attributes_raw  = $parsed_block['attrs'] ?? array();
+		$attributes      = is_array( $attributes_raw ) ? $attributes_raw : array();
+		$coupon_code_raw = $attributes['couponCode'] ?? '';
+		$coupon_code     = is_string( $coupon_code_raw ) ? $coupon_code_raw : '';
 
 		// Do not render anything if no coupon code is set.
 		if ( empty( $coupon_code ) ) {
@@ -90,8 +92,16 @@ class Coupon_Code extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	private function apply_email_wrapper( string $coupon_html, array $parsed_block ): string {
-		$align_raw          = $parsed_block['attrs']['align'] ?? 'center';
-		$align              = is_string( $align_raw ) ? $align_raw : 'center';
+		$align_raw = 'center';
+		if (
+			is_array( $parsed_block['attrs'] ?? null ) &&
+			isset( $parsed_block['attrs']['align'] ) &&
+			is_string( $parsed_block['attrs']['align'] )
+		) {
+			$align_raw = $parsed_block['attrs']['align'];
+		}
+
+		$align              = $align_raw;
 		$allowed_alignments = array( 'left', 'center', 'right' );
 		if ( ! in_array( $align, $allowed_alignments, true ) ) {
 			$align = 'center';
