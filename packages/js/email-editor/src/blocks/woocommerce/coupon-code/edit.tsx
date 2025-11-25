@@ -255,7 +255,7 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 					initialOpen={ true }
 				>
 					<div style={ { marginBottom: '16px' } }>
-						<label htmlFor="coupon-search">
+						<label>
 							{ __( 'Select an existing coupon', 'woocommerce' ) }
 						</label>
 						{ isLoading ? (
