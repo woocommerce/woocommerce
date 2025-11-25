@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import React, { useEffect, useState } from '@wordpress/element';
+import React, { useEffect, useRef, useState } from '@wordpress/element';
 import { pluginsStore, paymentSettingsStore } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
@@ -151,6 +151,14 @@ export const PaymentsContent = ( {} ) => {
 	const [ isPluginInstalling, setIsPluginInstalling ] =
 		useState< boolean >( false );
 	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+	const isMountedRef = useRef( true );
+
+	// Cleanup on unmount to prevent state updates after component is unmounted.
+	useEffect( () => {
+		return () => {
+			isMountedRef.current = false;
+		};
+	}, [] );
 
 	const installWooPayments = useCallback(
 		( realPluginSlug: string | undefined ) => {
@@ -174,6 +182,9 @@ export const PaymentsContent = ( {} ) => {
 				realPluginSlug ?? wooPaymentsExtensionSlug,
 			] )
 				.then( async ( response ) => {
+					if ( ! isMountedRef.current ) {
+						return;
+					}
 					createNoticesFromResponse( response );
 					setWooPaymentsRecentlyActivated( true );
 					// Refresh store data after installation.
@@ -195,6 +206,9 @@ export const PaymentsContent = ( {} ) => {
 					setIsPluginInstalling( false );
 				} )
 				.catch( ( response: { errors: Record< string, string > } ) => {
+					if ( ! isMountedRef.current ) {
+						return;
+					}
 					// Handle errors during installation
 					let eventName = 'provider_extension_installation_failed';
 					if ( isWooPaymentsInstalled ) {
@@ -213,10 +227,10 @@ export const PaymentsContent = ( {} ) => {
 				} );
 		},
 		[
-			setIsPluginInstalling,
+			isWooPaymentsInstalled,
 			installAndActivatePlugins,
-			refreshStoreData,
 			setWooPaymentsRecentlyActivated,
+			refreshStoreData,
 		]
 	);
 
