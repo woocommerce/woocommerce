@@ -519,7 +519,166 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 }
 
 /**
+ * Schedule start/end sale actions for a product based on its sale dates.
+ *
+ * Uses Action Scheduler to fire events at the exact sale start/end times,
+ * rather than relying on the daily cron.
+ *
+ * @since 10.5.0
+ * @param WC_Product $product Product object.
+ */
+function wc_schedule_product_sale_events( WC_Product $product ) {
+	$product_id = $product->get_id();
+	$date_from  = $product->get_date_on_sale_from( 'edit' );
+	$date_to    = $product->get_date_on_sale_to( 'edit' );
+
+	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
+	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
+
+	if ( $date_from ) {
+		$start_ts = $date_from->getTimestamp();
+		if ( $start_ts > time() ) {
+			as_schedule_single_action(
+				$start_ts,
+				'wc_product_start_scheduled_sale',
+				array( 'product_id' => $product_id ),
+				'woocommerce-sales'
+			);
+		}
+	}
+
+	if ( $date_to ) {
+		$end_ts = $date_to->getTimestamp();
+		if ( $end_ts > time() ) {
+			as_schedule_single_action(
+				$end_ts,
+				'wc_product_end_scheduled_sale',
+				array( 'product_id' => $product_id ),
+				'woocommerce-sales'
+			);
+		}
+	}
+}
+
+/**
+ * Apply the expected sale state for a product.
+ *
+ * This is a shared helper used by both the per-product Action Scheduler
+ * callbacks and the daily cron safety net.
+ *
+ * @since 10.5.0
+ * @param WC_Product $product Product object.
+ * @param string     $mode    'start' or 'end'.
+ */
+function wc_apply_sale_state_for_product( WC_Product $product, string $mode ) {
+	$product_id = $product->get_id();
+
+	if ( 'start' === $mode ) {
+		$sale_price = $product->get_sale_price( 'edit' );
+		if ( $sale_price ) {
+			$product->set_price( $sale_price );
+			$product->save();
+
+			update_post_meta( $product_id, '_price', $sale_price );
+		}
+	} elseif ( 'end' === $mode ) {
+		$regular_price = $product->get_regular_price( 'edit' );
+		$product->set_price( $regular_price );
+
+		$product->save();
+
+		update_post_meta( $product_id, '_price', $regular_price );
+	}
+
+	wc_delete_product_transients( $product_id );
+}
+
+/**
+ * Handle scheduled sale start for a product.
+ *
+ * This is the Action Scheduler callback that fires at the exact sale start time.
+ *
+ * @since 10.5.0
+ * @param int $product_id Product ID.
+ */
+function wc_handle_product_start_scheduled_sale( $product_id ) {
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		return;
+	}
+
+	// Verify sale should still start (dates/price might have changed since scheduling).
+	if ( ! $product->get_sale_price( 'edit' ) ) {
+		return;
+	}
+
+	wc_apply_sale_state_for_product( $product, 'start' );
+}
+add_action( 'wc_product_start_scheduled_sale', 'wc_handle_product_start_scheduled_sale' );
+
+/**
+ * Handle scheduled sale end for a product.
+ *
+ * This is the Action Scheduler callback that fires at the exact sale end time.
+ *
+ * @since 10.5.0
+ * @param int $product_id Product ID.
+ */
+function wc_handle_product_end_scheduled_sale( $product_id ) {
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		return;
+	}
+
+	wc_apply_sale_state_for_product( $product, 'end' );
+}
+add_action( 'wc_product_end_scheduled_sale', 'wc_handle_product_end_scheduled_sale' );
+
+/**
+ * Schedule sale events when a product is saved with sale dates.
+ *
+ * @since 10.5.0
+ * @param int             $product_id Product ID.
+ * @param WC_Product|null $product    Product object (optional).
+ */
+function wc_maybe_schedule_product_sale_events( $product_id, $product = null ) {
+	if ( ! $product ) {
+		$product = wc_get_product( $product_id );
+		if ( ! $product ) {
+			return;
+		}
+	}
+
+	$date_from = $product->get_date_on_sale_from( 'edit' );
+	$date_to   = $product->get_date_on_sale_to( 'edit' );
+
+	if ( $date_from || $date_to ) {
+		wc_schedule_product_sale_events( $product );
+	}
+}
+add_action( 'woocommerce_update_product', 'wc_maybe_schedule_product_sale_events', 10, 2 );
+add_action( 'woocommerce_new_product', 'wc_maybe_schedule_product_sale_events', 10, 2 );
+
+/**
  * Function which handles the start and end of scheduled sales via cron.
+ *
+ * Previously, this daily cron was the only mechanism for starting/ending scheduled
+ * sales, which caused timing issues - sales could be "a day off" depending on when
+ * WP-Cron ran. Now, per-product Action Scheduler events fire at exact sale times.
+ *
+ * This function now acts as a safety net to:
+ * 1. Catch any products missed by the per-product Action Scheduler events
+ * 2. Handle products created before the AS events were introduced
+ * 3. Ensure the AS end event is scheduled for products whose sales just started
+ *
+ * This function is kept for backwards compatibility. Extenders may hook into the
+ * `woocommerce_scheduled_sales` cron event or the before/after hooks fired within.
+ *
+ * Note: The before/after hooks (wc_before_products_starting_sales, etc.) only fire
+ * when this cron finds products to process. If per-product AS events handled sales
+ * on time, these hooks may not fire.
+ *
+ * @since 3.0.0
  */
 function wc_scheduled_sales() {
 	$data_store = WC_Data_Store::load( 'product' );
@@ -532,27 +691,19 @@ function wc_scheduled_sales() {
 	if ( $product_ids ) {
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
+
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
 
 			if ( $product ) {
-				$sale_price = $product->get_sale_price();
-
-				if ( $sale_price ) {
-					$product->set_price( $sale_price );
-					$product->set_date_on_sale_from( '' );
-				} else {
-					$product->set_date_on_sale_to( '' );
-					$product->set_date_on_sale_from( '' );
-				}
-
-				$product->save();
+				wc_apply_sale_state_for_product( $product, 'start' );
+				// Ensure end action is scheduled for this product.
+				wc_schedule_product_sale_events( $product );
 			}
 
 			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
-
 		delete_transient( 'wc_products_onsale' );
 	}
 
@@ -561,22 +712,17 @@ function wc_scheduled_sales() {
 	if ( $product_ids ) {
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
+
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
 
 			if ( $product ) {
-				$regular_price = $product->get_regular_price();
-				$product->set_price( $regular_price );
-				$product->set_sale_price( '' );
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
-				$product->save();
+				wc_apply_sale_state_for_product( $product, 'end' );
 			}
 
 			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
-
 		delete_transient( 'wc_products_onsale' );
 	}
 
