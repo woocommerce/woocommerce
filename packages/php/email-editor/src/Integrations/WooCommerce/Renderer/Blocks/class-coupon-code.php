@@ -90,7 +90,12 @@ class Coupon_Code extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	private function apply_email_wrapper( string $coupon_html, array $parsed_block ): string {
-		$align = $parsed_block['attrs']['align'] ?? 'center';
+		$align_raw = $parsed_block['attrs']['align'] ?? 'center';
+		$align     = is_string( $align_raw ) ? $align_raw : 'center';
+		$allowed_alignments = array( 'left', 'center', 'right' );
+		if ( ! in_array( $align, $allowed_alignments, true ) ) {
+			$align = 'center';
+		}
 
 		$wrapper_styles = array(
 			'border-collapse' => 'collapse',
