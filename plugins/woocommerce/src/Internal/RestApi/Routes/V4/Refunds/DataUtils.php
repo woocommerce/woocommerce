@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 use WP_Error;
 use WC_Order;
+use WC_Tax;
 
 /**
  * Helper methods for the REST API.
@@ -33,16 +34,45 @@ class DataUtils {
 	 *   ],
 	 * ]
 	 *
-	 * @param array $line_items The line items to convert.
+	 * @param array    $line_items The line items to convert.
+	 * @param WC_Order $order The order being refunded.
 	 * @return array The converted line items.
 	 */
-	public function convert_line_items_to_internal_format( $line_items ) {
+	public function convert_line_items_to_internal_format( $line_items, WC_Order $order ) {
 		$prepared_line_items = array();
 
 		foreach ( $line_items as $line_item ) {
 			if ( ! isset( $line_item['line_item_id'], $line_item['quantity'], $line_item['refund_total'] ) ) {
 				continue;
 			}
+
+			// If no explicit refund_tax provided, extract tax from refund_total using WC_Tax.
+			if ( ! isset( $line_item['refund_tax'] ) ) {
+				$original_item = $order->get_item( $line_item['line_item_id'] );
+				if ( $original_item ) {
+					$original_taxes = $original_item->get_taxes();
+					$tax_ids        = array_keys( $original_taxes['total'] ?? array() );
+
+					if ( ! empty( $tax_ids ) ) {
+						$tax_rates = $this->build_tax_rates_array( $order, $tax_ids );
+
+						// Always assume refund_total includes tax - extract it using WC_Tax.
+						$calculated_taxes = WC_Tax::calc_inclusive_tax(
+							(float) $line_item['refund_total'],
+							$tax_rates
+						);
+
+						$line_item['refund_tax'] = $this->convert_proportional_taxes_to_schema_format(
+							$calculated_taxes
+						);
+
+						// Subtract extracted tax from refund_total to get the amount excluding tax.
+						$total_tax                 = array_sum( $calculated_taxes );
+						$line_item['refund_total'] = $line_item['refund_total'] - $total_tax;
+					}
+				}
+			}
+
 			$prepared_line_items[ $line_item['line_item_id'] ] = array(
 				'qty'          => $line_item['quantity'],
 				'refund_total' => $line_item['refund_total'],
@@ -134,14 +164,15 @@ class DataUtils {
 				return new WP_Error( 'invalid_line_item', sprintf( __( 'Line item quantity cannot be greater than the item quantity (%s).', 'woocommerce' ), $item->get_quantity() ) );
 			}
 
-			// Validate refund total is not greater than the item total.
-			if ( $item->get_total() < $line_item['refund_total'] ) {
+			// Validate refund total is not greater than the item total (including tax).
+			$item_total_with_tax = $item->get_total() + $item->get_total_tax();
+			if ( $item_total_with_tax < $line_item['refund_total'] ) {
 				return new WP_Error(
 					'invalid_refund_amount',
 					sprintf(
-						/* translators: %s: item total */
-						__( 'Refund total cannot be greater than the line item total (%s).', 'woocommerce' ),
-						$item->get_total()
+						/* translators: %s: item total with tax */
+						__( 'Refund total cannot be greater than the line item total including tax (%s).', 'woocommerce' ),
+						$item_total_with_tax
 					)
 				);
 			}
@@ -186,5 +217,49 @@ class DataUtils {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Convert calculated taxes (internal format) to schema format.
+	 *
+	 * @param array $calculated_taxes Taxes keyed by tax ID with amounts.
+	 * @return array Schema format with id and refund_total keys.
+	 */
+	private function convert_proportional_taxes_to_schema_format( array $calculated_taxes ): array {
+		$result = array();
+		foreach ( $calculated_taxes as $tax_id => $amount ) {
+			$result[] = array(
+				'id'           => (int) $tax_id,
+				'refund_total' => $amount,
+			);
+		}
+		return $result;
+	}
+
+	/**
+	 * Build tax rate array from order tax items for use with WC_Tax calculations.
+	 *
+	 * @param WC_Order $order The order.
+	 * @param array    $tax_ids Array of tax rate IDs that apply to an item.
+	 * @return array Tax rates array formatted for WC_Tax::calc_*_tax() methods.
+	 */
+	private function build_tax_rates_array( WC_Order $order, array $tax_ids ): array {
+		$tax_rates = array();
+		$tax_items = $order->get_items( 'tax' );
+
+		foreach ( $tax_ids as $tax_id ) {
+			foreach ( $tax_items as $tax_item ) {
+				if ( $tax_item->get_rate_id() === (int) $tax_id ) {
+					$tax_rates[ $tax_id ] = array(
+						'rate'     => $tax_item->get_rate_percent(),
+						'label'    => $tax_item->get_label(),
+						'compound' => $tax_item->is_compound() ? 'yes' : 'no',
+					);
+					break;
+				}
+			}
+		}
+
+		return $tax_rates;
 	}
 }
