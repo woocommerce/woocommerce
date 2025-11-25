@@ -39,16 +39,23 @@ export const SetUpPaymentsProvider: React.FC< {
 } > = ( { children, closeModal } ) => {
 	// Get the WooPayments provider to access the real plugin slug.
 	// This is important for test/beta versions that may be installed under a different slug.
-	const wooPaymentsProvider = useSelect( ( select ) => {
+	// We also track isFetching to avoid slug instability during initial load.
+	const wooPaymentsPluginSlug = useSelect( ( select ) => {
 		const store = select( paymentSettingsStore );
-		return store
-			.getPaymentProviders()
-			.find( ( provider ) => isWooPayments( provider.id ) );
-	}, [] );
+		const isFetching = store.isFetching();
+		const providers = store.getPaymentProviders();
+		const wooPaymentsProvider = providers.find( ( provider ) =>
+			isWooPayments( provider.id )
+		);
 
-	// Use the real plugin slug from the provider, falling back to the official slug.
-	const wooPaymentsPluginSlug =
-		wooPaymentsProvider?.plugin?.slug ?? wooPaymentsExtensionSlug;
+		// Use the real plugin slug from the provider once loaded,
+		// falling back to the official slug while loading or if not found.
+		// This prevents the slug from flipping during initial load,
+		// which would cause dependent selectors to re-run unnecessarily.
+		return ! isFetching && wooPaymentsProvider?.plugin?.slug
+			? wooPaymentsProvider.plugin.slug
+			: wooPaymentsExtensionSlug;
+	}, [] );
 
 	// Check if WooPayments is active by looking for the plugin in the active plugins list.
 	const isWooPaymentsActive = useSelect(
