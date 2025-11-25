@@ -268,4 +268,174 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringNotContainsString( 'javascript:', $rendered );
 		$this->assertStringNotContainsString( 'alert("xss")', $rendered );
 	}
+
+	/**
+	 * Test it extracts width from URL query parameter
+	 */
+	public function testItExtractsWidthFromUrlQueryParameter(): void {
+		$image_content = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg?w=500" alt="" style="" srcset="https://test.com/wp-content/uploads/2023/05/image.jpg 1000w"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
+		$parsed_image['email_attrs']['width'] = '600px'; // Set max width.
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		// Should use width from URL parameter (500px), which is less than max (600px).
+		$this->assertStringContainsString( 'width="500"', $rendered );
+		$this->assertStringContainsString( 'width:500px;', $rendered );
+	}
+
+	/**
+	 * Test it respects max width when URL parameter is larger
+	 */
+	public function testItRespectsMaxWidthWhenUrlParameterIsLarger(): void {
+		$image_content = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg?w=800" alt="" style="" srcset="https://test.com/wp-content/uploads/2023/05/image.jpg 1000w"/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
+		$parsed_image['email_attrs']['width'] = '600px'; // Set max width.
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		// Should use max width (600px) when URL parameter (800px) is larger.
+		$this->assertStringContainsString( 'width="600"', $rendered );
+		$this->assertStringContainsString( 'width:600px;', $rendered );
+	}
+
+	/**
+	 * Test it retrieves width from attachment metadata
+	 */
+	public function testItRetrievesWidthFromAttachmentMetadata(): void {
+		// Create a test attachment.
+		$attachment_id = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
+		$this->assertIsInt( $attachment_id );
+		$this->assertGreaterThan( 0, $attachment_id );
+
+		// Get the actual uploaded image URL.
+		$image_url = wp_get_attachment_url( $attachment_id );
+		$this->assertNotFalse( $image_url );
+
+		$image_content = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="' . esc_url( $image_url ) . '" alt="" style="" srcset=""/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
+		$parsed_image['attrs']['id']          = $attachment_id;
+		$parsed_image['attrs']['sizeSlug']    = 'full';
+		$parsed_image['email_attrs']['width'] = '800px'; // Set max width.
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		// Should retrieve width from attachment metadata (canola.jpg is 640px wide).
+		$this->assertStringContainsString( 'width="640"', $rendered );
+		$this->assertStringContainsString( 'width:640px;', $rendered );
+	}
+
+	/**
+	 * Test it retrieves width from attachment metadata for specific size
+	 */
+	public function testItRetrievesWidthFromAttachmentMetadataForSpecificSize(): void {
+		// Create a test attachment.
+		$attachment_id = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
+		$this->assertIsInt( $attachment_id );
+		$this->assertGreaterThan( 0, $attachment_id );
+
+		// Get the medium size URL.
+		$image_data = wp_get_attachment_image_src( $attachment_id, 'medium' );
+		$this->assertNotFalse( $image_data );
+		$image_url = $image_data[0];
+
+		$image_content = '
+			<figure class="wp-block-image alignleft size-medium is-style-default">
+				<img src="' . esc_url( $image_url ) . '" alt="" style="" srcset=""/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
+		$parsed_image['attrs']['id']          = $attachment_id;
+		$parsed_image['attrs']['sizeSlug']    = 'medium';
+		$parsed_image['email_attrs']['width'] = '800px'; // Set max width.
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		// Should retrieve width from attachment metadata for medium size.
+		// Medium size is typically 300px or less.
+		$this->assertMatchesRegularExpression( '/width="\d+"/', $rendered );
+		$this->assertMatchesRegularExpression( '/width:\d+px;/', $rendered );
+	}
+
+	/**
+	 * Test it falls back to 100% when no width information is available
+	 */
+	public function testItFallsBackTo100PercentWhenNoWidthInfoAvailable(): void {
+		$image_content = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="" srcset=""/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
+		unset( $parsed_image['email_attrs']['width'] ); // Remove email_attrs width to trigger 100% fallback.
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		// Should fall back to 100% width when no width information is available.
+		$this->assertStringContainsString( 'width:100%;', $rendered );
+	}
+
+	/**
+	 * Test it ignores invalid URL width parameters
+	 */
+	public function testItIgnoresInvalidUrlWidthParameters(): void {
+		$image_content = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg?w=invalid" alt="" style="" srcset=""/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
+		$parsed_image['email_attrs']['width'] = '600px'; // Set max width.
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		// Should fall back to max width when URL parameter is invalid.
+		$this->assertStringContainsString( 'width="600"', $rendered );
+		$this->assertStringContainsString( 'width:600px;', $rendered );
+	}
+
+	/**
+	 * Test it ignores negative or zero width parameters
+	 */
+	public function testItIgnoresNegativeOrZeroWidthParameters(): void {
+		$image_content = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<img src="https://test.com/wp-content/uploads/2023/05/image.jpg?w=0" alt="" style="" srcset=""/>
+			</figure>
+		';
+		$parsed_image  = $this->parsed_image;
+		unset( $parsed_image['attrs']['width'] ); // Remove width to test fallback logic.
+		$parsed_image['email_attrs']['width'] = '600px'; // Set max width.
+		$parsed_image['innerHTML']            = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		// Should fall back to max width when URL parameter is 0 or negative.
+		$this->assertStringContainsString( 'width="600"', $rendered );
+		$this->assertStringContainsString( 'width:600px;', $rendered );
+	}
 }

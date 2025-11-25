@@ -124,9 +124,9 @@ class Image extends Abstract_Block_Renderer {
 					$metadata = wp_get_attachment_metadata( $attachment_id );
 					if ( $metadata ) {
 						if ( isset( $metadata['width'] ) ) {
-							$image_size = $metadata['width'];
+							$image_size = (int) $metadata['width'];
 						} elseif ( isset( $metadata['sizes'][ $size_slug ]['width'] ) ) {
-							$image_size = $metadata['sizes'][ $size_slug ]['width'];
+							$image_size = (int) $metadata['sizes'][ $size_slug ]['width'];
 						}
 					}
 
@@ -134,7 +134,7 @@ class Image extends Abstract_Block_Renderer {
 					if ( ! isset( $image_size ) ) {
 						$image_src = wp_get_attachment_image_src( $attachment_id, $size_slug );
 						if ( $image_src && isset( $image_src[1] ) ) {
-							$image_size = $image_src[1];
+							$image_size = (int) $image_src[1];
 						}
 					}
 				}
@@ -144,15 +144,16 @@ class Image extends Abstract_Block_Renderer {
 			if ( ! isset( $image_size ) ) {
 				$upload_dir = wp_upload_dir();
 				$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
-				$image_size_result = wp_getimagesize( $image_path );
-				if ( $image_size_result ) {
-					$image_size = $image_size_result[0];
+				$image_size = wp_getimagesize( $image_path );
+				if ( $image_size ) {
+					$image_size = (int) $image_size[0];
 				}
 			}
 		}
 
 		// Use the found image size or fall back to max_width.
-		$width = isset( $image_size ) ? min( $image_size, $max_width ) : $max_width;
+		$width = isset( $image_size ) && is_numeric( $image_size ) ? min( $image_size, $max_width ) : $max_width;
+
 		$parsed_block['attrs']['width'] = "{$width}px";
 		return $parsed_block;
 	}
