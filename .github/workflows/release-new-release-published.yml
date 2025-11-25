@@ -25,6 +25,11 @@ jobs:
     steps:
       - name: 'Checkout repository'
         uses: actions/checkout@v4
+        with:
+          ref: trunk
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+          sparse-checkout-cone-mode: false
 
       - name: 'Get release branch from tag'
         id: get-branch
