@@ -12,7 +12,9 @@
 
 ## Overview
 
-WooCommerce uses WordPress i18n functions from `@wordpress/i18n` for translatable strings. Brand names like "WooPayments" should use placeholders to improve translation flexibility.
+WooCommerce uses WordPress i18n functions from `@wordpress/i18n` for
+translatable strings. Brand names like "WooPayments" should use placeholders
+to improve translation flexibility.
 
 ```typescript
 import { __, sprintf } from '@wordpress/i18n';
@@ -91,7 +93,7 @@ Use numbered placeholders `%1$s` when the same value appears multiple times:
 sprintf(
     /* translators: 1: Payment provider name (e.g., WooPayments) */
     __(
-        'By using %1$s you agree to our Terms of Service. Payments processed via %1$s are secure.',
+        'By using %1$s you agree to our Terms. Payments via %1$s are secure.',
         'woocommerce'
     ),
     'WooPayments'
@@ -120,7 +122,8 @@ sprintf(
 
 ### Comment Placement
 
-The translator comment must be placed **immediately before the `__()` or `_n()` function**, not before `sprintf()`:
+The translator comment must be placed **immediately before the `__()` or
+`_n()` function**, not before `sprintf()`:
 
 ```typescript
 // ❌ WRONG - Comment before sprintf
@@ -168,22 +171,20 @@ Always provide context for translators:
 
 ```typescript
 installText: ( extensionsString: string ) => {
-    const extensionsNumber = extensionsString.split( ', ' ).length;
+    const count = extensionsString.split( ', ' ).length;
     return createInterpolateElement(
         sprintf(
-            /* translators: 1: Payment provider name, 2: Extension names */
+            /* translators: 1: Provider name, 2: Extension names */
             _n(
-                'Installing <strong>%1$s</strong> will activate <strong>%2$s</strong> extension.',
-                'Installing <strong>%1$s</strong> will activate <strong>%2$s</strong> extensions.',
-                extensionsNumber,
+                'Installing <strong>%1$s</strong> activates <strong>%2$s</strong>.',
+                'Installing <strong>%1$s</strong> activates <strong>%2$s</strong>.',
+                count,
                 'woocommerce'
             ),
             'WooPayments',
             extensionsString
         ),
-        {
-            strong: <strong />,
-        }
+        { strong: <strong /> }
     );
 }
 ```
@@ -216,7 +217,8 @@ createInterpolateElement(
 
 ### Curly Apostrophes
 
-TypeScript files may use curly apostrophes (`'` U+2019) instead of straight apostrophes (`'` U+0027). When editing, preserve the original character:
+TypeScript files may use curly apostrophes (`'` U+2019) instead of straight
+apostrophes (`'` U+0027). When editing, preserve the original character:
 
 ```typescript
 // Original uses curly apostrophe - preserve it
@@ -226,7 +228,8 @@ __( 'I don't want to install another plugin', 'woocommerce' )
 
 ### ESLint i18n Rules
 
-The `@wordpress/i18n-translator-comments` rule requires comments directly before the translation function:
+The `@wordpress/i18n-translator-comments` rule requires comments directly
+before the translation function:
 
 ```typescript
 // ❌ ESLint error - comment not adjacent to __()
@@ -286,10 +289,10 @@ pnpm run lint  # NO - lints everything
 
 ## Summary
 
-| Pattern | Example |
-|---------|---------|
-| **Single placeholder** | `sprintf( __( 'Set up %s' ), 'WooPayments' )` |
-| **Repeated placeholder** | `sprintf( __( '%1$s is... via %1$s' ), 'WooPayments' )` |
-| **Multiple placeholders** | `sprintf( __( '%1$s in %2$s' ), 'WooPayments', 'US' )` |
-| **Comment format (simple)** | `/* translators: %s: Provider name */` |
-| **Comment format (numbered)** | `/* translators: 1: Provider, 2: Country */` |
+| Pattern                      | Example                                    |
+|------------------------------|--------------------------------------------|
+| **Single placeholder**       | `sprintf( __( 'Set up %s' ), 'Name' )`     |
+| **Repeated placeholder**     | `sprintf( __( '%1$s via %1$s' ), 'Name' )` |
+| **Multiple placeholders**    | `sprintf( __( '%1$s in %2$s' ), 'A', 'B' )`|
+| **Comment format (simple)**  | `/* translators: %s: Provider name */`     |
+| **Comment format (numbered)**| `/* translators: 1: Provider, 2: Country */`|
