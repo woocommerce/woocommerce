@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Properly handling PayPal order items with negative amounts.

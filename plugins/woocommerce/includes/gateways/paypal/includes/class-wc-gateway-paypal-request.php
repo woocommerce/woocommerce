@@ -413,14 +413,20 @@ class WC_Gateway_Paypal_Request {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
 
-		$src_locale = get_locale();
-		// If the locale is longer than PayPal's string limit (10).
-		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
-			// Keep only the main language and region parts.
-			$locale_parts = explode( '_', $src_locale );
-			if ( count( $locale_parts ) >= 2 ) {
-				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
-			}
+		/**
+		 * Filter the supported currencies for PayPal.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param array $supported_currencies Array of supported currency codes.
+		 * @return array
+		 */
+		$supported_currencies = apply_filters(
+			'woocommerce_paypal_supported_currencies',
+			WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES
+		);
+		if ( ! in_array( strtoupper( $order->get_currency() ), $supported_currencies, true ) ) {
+			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( $order->get_id() ) );
 		}
 
 		$order_items = $this->get_paypal_order_items( $order );
@@ -428,6 +434,16 @@ class WC_Gateway_Paypal_Request {
 			// If we cannot build order items (e.g. negative item amounts),
 			// we should not proceed with the create-order request.
 			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
+		}
+
+		$src_locale = get_locale();
+		// If the locale is longer than PayPal's string limit (10).
+		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
+			// Keep only the main language and region parts.
+			$locale_parts = explode( '_', $src_locale );
+			if ( count( $locale_parts ) > 2 ) {
+				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
+			}
 		}
 
 		$params = array(
@@ -438,9 +454,9 @@ class WC_Gateway_Paypal_Request {
 						'user_action'           => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
 						'shipping_preference'   => $shipping_preference,
 						// Customer redirected here on approval.
-						'return_url'            => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+						'return_url'            => $this->normalize_url_for_paypal( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 						// Customer redirected here on cancellation.
-						'cancel_url'            => esc_url_raw( $order->get_cancel_order_url_raw() ),
+						'cancel_url'            => $this->normalize_url_for_paypal( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
 						'locale'                => str_replace( '_', '-', $src_locale ),
 						'app_switch_preference' => array(
@@ -472,7 +488,7 @@ class WC_Gateway_Paypal_Request {
 		) ) {
 			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
-				'callback_url'    => esc_url_raw( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
+				'callback_url'    => $this->normalize_url_for_paypal( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
 			);
 		}
 
@@ -497,7 +513,7 @@ class WC_Gateway_Paypal_Request {
 					),
 					$request_origin
 				);
-				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = esc_url_raw( $cancel_url );
+				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $this->normalize_url_for_paypal( $cancel_url );
 			}
 		}
 
@@ -691,11 +707,11 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Make sure the country code is in the correct format.
-		if ( strlen( $country ) >= 3 ) {
-			if ( strlen( $country ) > 3 ) { // Log if we get an unexpected country code length.
-				WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country ), $country ) );
-			}
-			$country = substr( $country, 0, WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH );
+		$raw_country = $country;
+		$country     = $this->normalize_paypal_order_shipping_country_code( $raw_country );
+		if ( ! $country ) {
+			WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code. Raw value: %s', $raw_country ), 'error' );
+			return null;
 		}
 
 		// Validate required fields based on country-specific address requirements.
@@ -725,6 +741,77 @@ class WC_Gateway_Paypal_Request {
 				'country_code'   => strtoupper( $country ),
 			),
 		);
+	}
+
+	/**
+	 * Normalize PayPal order shipping country code.
+	 *
+	 * @param string $country_code Country code to normalize.
+	 * @return string|null
+	 */
+	private function normalize_paypal_order_shipping_country_code( $country_code ) {
+		// Normalize to uppercase.
+		$code = strtoupper( trim( (string) $country_code ) );
+
+		// Check if it's a valid alpha-2 code.
+		if ( strlen( $code ) === WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH ) {
+			if ( WC()->countries->country_exists( $code ) ) {
+				return $code;
+			}
+
+			WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
+			return null;
+		}
+
+		// Log when we get an unexpected country code length.
+		WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $code ), $code ) );
+
+		// Truncate to the expected maximum length (3).
+		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
+		if ( strlen( $code ) > $max_country_code_length ) {
+			$code = substr( $code, 0, $max_country_code_length );
+		}
+
+		// Check if it's a valid alpha-3 code.
+		$alpha2 = wc()->countries->get_country_from_alpha_3_code( $code );
+		if ( null === $alpha2 ) {
+			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
+		}
+
+		return $alpha2;
+	}
+
+	/**
+	 * Normalize a URL for PayPal. PayPal requires absolute URLs with protocol.
+	 *
+	 * @param string $url The URL to check.
+	 * @return string Normalized URL.
+	 */
+	private function normalize_url_for_paypal( $url ) {
+		// Replace encoded ampersand with actual ampersand.
+		// In some cases, the URL may contain encoded ampersand but PayPal expects the actual ampersand.
+		// PayPal request fails if the URL contains encoded ampersand.
+		$url = str_replace( '&#038;', '&', $url );
+
+		// If the URL is already the home URL, return it.
+		if ( strpos( $url, home_url() ) === 0 ) {
+			return esc_url_raw( $url );
+		}
+
+		// Return the URL if it is already absolute (contains ://).
+		if ( strpos( $url, '://' ) !== false ) {
+			return esc_url_raw( $url );
+		}
+
+		$home_url = untrailingslashit( home_url() );
+
+		// If the URL is relative (starts with /), prepend the home URL.
+		if ( strpos( $url, '/' ) === 0 ) {
+			return esc_url_raw( $home_url . $url );
+		}
+
+		// Prepend home URL with a slash.
+		return esc_url_raw( $home_url . '/' . $url );
 	}
 
 	/**

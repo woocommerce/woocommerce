@@ -38,7 +38,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Deleted', false ) ) :
 			$this->id             = 'customer_fulfillment_deleted';
 			$this->customer_email = true;
 			$this->title          = __( 'Fulfillment deleted', 'woocommerce' );
-			$this->email_group    = 'order-processing';
+			$this->email_group    = 'order-updates';
 			$this->template_html  = 'emails/customer-fulfillment-deleted.php';
 			$this->template_plain = 'emails/plain/customer-fulfillment-deleted.php';
 			$this->placeholders   = array(

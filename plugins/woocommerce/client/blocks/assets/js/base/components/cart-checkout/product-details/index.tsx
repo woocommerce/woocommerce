@@ -77,13 +77,13 @@ const ProductDetails = ( {
 								<span
 									className="wc-block-components-product-details__name"
 									dangerouslySetInnerHTML={ {
-										__html: sanitizeHTML( name, {
-											tags: CONTENT_TAGS,
-											attr: CONTENT_ATTR,
-										} ),
+										__html:
+											sanitizeHTML( name, {
+												tags: CONTENT_TAGS,
+												attr: CONTENT_ATTR,
+											} ) + ':',
 									} }
-								/>
-								{ ': ' }
+								/>{ ' ' }
 							</>
 						) }
 						<span

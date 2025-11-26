@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.4.0",
+	"version": "10.5.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -23,6 +23,7 @@
 		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
 		"build:project:actualize-translation-domains": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"env:destroy": "pnpm wp-env destroy",
 		"env:dev": "pnpm wp-env start --update",
 		"env:down": "pnpm wp-env stop",
@@ -792,6 +793,9 @@
 						}
 					},
 					"events": [
+						"pull_request",
+						"nightly-checks",
+						"release-checks",
 						"blocks-e2e-wp-pre-release"
 					],
 					"report": {
@@ -900,6 +904,7 @@
 		"eslint-plugin-playwright": "0.22.1",
 		"jest": "29.5.x",
 		"nodemon": "^3.0.2",
+		"playwright-ctrf-json-reporter": "^0.0.26",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
