@@ -164,6 +164,44 @@ jobs:
               }
             }
 
+  cleanup-milestones:
+    name: Clean up old and completed milestones
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [prepare-for-code-freeze, run-code-freeze]
+    steps:
+      - name: Close completed milestones
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const nextTrunkMainVersion = '${{ needs.prepare-for-code-freeze.outputs.nextTrunkMainVersion }}'; // e.g. '10.5'
+            const minVersionToKeep     = Number( nextTrunkMainVersion ) - 0.2; // e.g. 10.3
+
+            const { data: latestMilestones } = await github.rest.issues.listMilestones( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 10,
+              sort: 'completeness',
+              direction: 'desc',
+            } );
+
+            // Filter out milestones that do not have any open issues and are older than the minimum version to keep.
+            // We want to keep milestone for at least the last 4 main versions (dev, frozen, stable).
+            const milestonesToClose = latestMilestones.filter(
+              milestone => 0 === milestone.open_issues && /^\d+\.\d+\.0+$/.test( milestone.title ) && Number( milestone.title.slice( 0, -2 ) ) < minVersionToKeep
+            );
+
+            for ( const milestone of milestonesToClose ) {
+              await github.rest.issues.updateMilestone( {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                milestone_number: milestone.number,
+                state: 'closed',
+              } );
+
+              console.log( `Closed milestone ${milestone.title}` );
+            }
+
   bump-version-in-trunk:
     name: Bump version in trunk for next development cycle
     uses: ./.github/workflows/release-bump-version.yml
@@ -280,7 +318,7 @@ jobs:
   notify-slack-on-failure:
     name: Notify Slack on Failure
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
+    needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, cleanup-milestones, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
     if: always() && ((contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')))
     steps:
       - name: Notify Slack on failure
