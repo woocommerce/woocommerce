@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
@@ -15,6 +16,8 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
@@ -308,6 +311,11 @@ class WC_Install {
 		),
 		'10.4.0' => array(
 			'wc_update_1040_add_idx_date_paid_status_parent',
+			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
+		),
+		'10.5.0' => array(
+			'wc_update_1050_migrate_brand_permalink_setting',
+			'wc_update_1050_enable_autoload_options',
 		),
 	);
 
@@ -347,7 +355,6 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
-		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
@@ -1233,6 +1240,48 @@ class WC_Install {
 	}
 
 	/**
+	 * Get the wc_order_stats table schema.
+	 *
+	 * @since 10.4.0
+	 * @param string $collate Database collation.
+	 * @return string SQL schema for wc_order_stats table.
+	 */
+	private static function get_order_stats_table_schema( $collate ) {
+		global $wpdb;
+
+		$should_have_fulfillment_column = self::is_new_install() && FeaturesUtil::feature_is_enabled( 'fulfillments' );
+		if ( false === $should_have_fulfillment_column ) {
+			$should_have_fulfillment_column = OrdersStatsDataStore::has_fulfillment_status_column();
+		}
+
+		return "CREATE TABLE {$wpdb->prefix}wc_order_stats (
+	order_id bigint(20) unsigned NOT NULL,
+	parent_id bigint(20) unsigned DEFAULT 0 NOT NULL,
+	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_created_gmt datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_paid datetime DEFAULT '0000-00-00 00:00:00',
+	date_completed datetime DEFAULT '0000-00-00 00:00:00',
+	num_items_sold int(11) DEFAULT 0 NOT NULL,
+	total_sales double DEFAULT 0 NOT NULL,
+	tax_total double DEFAULT 0 NOT NULL,
+	shipping_total double DEFAULT 0 NOT NULL,
+	net_total double DEFAULT 0 NOT NULL,
+	returning_customer tinyint(1) DEFAULT NULL,
+	status varchar(20) NOT NULL,
+	customer_id bigint(20) unsigned NOT NULL" .
+		( $should_have_fulfillment_column ? ',
+	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ',
+	PRIMARY KEY (order_id),
+	KEY date_created (date_created),
+	KEY customer_id (customer_id),
+	KEY status (status)' .
+		( $should_have_fulfillment_column ? ',
+	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
+) $collate;";
+	}
+
+	/**
 	 * Delete obsolete notes.
 	 */
 	public static function delete_obsolete_notes() {
@@ -1708,6 +1757,7 @@ class WC_Install {
 
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
+		$order_stats_table_schema         = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -1947,27 +1997,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	PRIMARY KEY (url_id),
 	KEY url (url($max_index_length))
 ) $collate;
-CREATE TABLE {$wpdb->prefix}wc_order_stats (
-	order_id bigint(20) unsigned NOT NULL,
-	parent_id bigint(20) unsigned DEFAULT 0 NOT NULL,
-	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	date_created_gmt datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	date_paid datetime DEFAULT '0000-00-00 00:00:00',
-	date_completed datetime DEFAULT '0000-00-00 00:00:00',
-	num_items_sold int(11) DEFAULT 0 NOT NULL,
-	total_sales double DEFAULT 0 NOT NULL,
-	tax_total double DEFAULT 0 NOT NULL,
-	shipping_total double DEFAULT 0 NOT NULL,
-	net_total double DEFAULT 0 NOT NULL,
-	returning_customer tinyint(1) DEFAULT NULL,
-	status varchar(20) NOT NULL,
-	customer_id bigint(20) unsigned NOT NULL,
-	PRIMARY KEY (order_id),
-	KEY date_created (date_created),
-	KEY customer_id (customer_id),
-	KEY status (status),
-	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
-) $collate;
+$order_stats_table_schema
 CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	order_item_id bigint(20) unsigned NOT NULL,
 	order_id bigint(20) unsigned NOT NULL,
@@ -2900,9 +2930,13 @@ EOT;
 	 * Refund and returns page.
 	 *
 	 * @since 5.6.0
+	 * @deprecated 10.5.0 No longer used.
+	 *
 	 * @return void
 	 */
 	public static function add_admin_note_after_page_created() {
+		wc_deprecated_function( 'WC_Install::add_admin_note_after_page_created', '10.5.0' );
+
 		if ( ! WC()->is_wc_admin_active() ) {
 			return;
 		}
@@ -2918,7 +2952,7 @@ EOT;
 
 	/**
 	 * When pages are created, we might want to take some action.
-	 * In this case we want to set an option when refund and returns
+	 * In this case we want to create an admin note when the refund and returns
 	 * page is created.
 	 *
 	 * @since 5.6.0
@@ -2928,8 +2962,11 @@ EOT;
 	 */
 	public static function page_created( $page_id, $page_data ) {
 		if ( 'refund_returns' === $page_data['post_name'] ) {
-			delete_option( 'woocommerce_refund_returns_page_created' );
-			add_option( 'woocommerce_refund_returns_page_created', $page_id, '', false );
+			if ( Constants::is_true( 'WC_INSTALLING' ) ) {
+				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'wc_notes_refund_returns_page_created', array( $page_id ), 'woocommerce', true );
+			} else {
+				WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+			}
 		}
 	}
 

@@ -60,22 +60,12 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	/**
 	 * Set up before each test
 	 */
-	public function set_up() {
+	public function setUp(): void {
 		global $wp_actions;
 
-		// Detect WordPress 6.9+ by checking for the core class name (plural "Categories").
-		// WP 6.9+ uses different action names and class names than the vendor package.
-		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
-
-		if ( $are_abilities_in_wp_core ) {
-			$this->abilities_init_action            = 'wp_abilities_api_init';
-			$this->abilities_categories_init_action = 'wp_abilities_api_categories_init';
-			$this->category_registry_class          = 'WP_Ability_Categories_Registry';
-		} else {
-			$this->abilities_init_action            = 'abilities_api_init';
-			$this->abilities_categories_init_action = 'abilities_api_categories_init';
-			$this->category_registry_class          = 'WP_Abilities_Category_Registry';
-		}
+		$this->abilities_init_action            = 'wp_abilities_api_init';
+		$this->abilities_categories_init_action = 'wp_abilities_api_categories_init';
+		$this->category_registry_class          = 'WP_Ability_Categories_Registry';
 
 		/*
 		 * Explicitly ensure the abilities API bootstrap file is loaded for tests.
@@ -88,20 +78,30 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		}
 
-		/*
-		 * Ensure REST API routes are registered (hook may be cleared by parent tear_down).
-		 * WordPress 6.9+ handles REST API registration in core, so only do this for vendor package.
-		 */
-		if ( ! $are_abilities_in_wp_core && class_exists( 'WP_REST_Abilities_Init' ) ) {
-			add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
-		}
-
-		parent::set_up();
-
 		// WordPress 6.9+ requires did_action('init') to return truthy before abilities API can be used.
 		// Save the original value and set to 1. Doesn't hurt pre-6.9 versions.
 		$this->original_init_action_count = $wp_actions['init'] ?? null;
 		$wp_actions['init']               = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		parent::setUp();
+
+		// Ensure Abilities API REST routes are registered if needed.
+		if ( function_exists( 'wp_register_ability' ) && class_exists( 'WP_REST_Abilities_Init' ) ) {
+			$routes = $this->server->get_routes();
+
+			// Check if any Abilities API routes are already registered.
+			$has_abilities_routes = false;
+			foreach ( $routes as $route => $handlers ) {
+				if ( strpos( $route, '/wp-abilities/v1/' ) === 0 ) {
+					$has_abilities_routes = true;
+					break;
+				}
+			}
+
+			if ( ! $has_abilities_routes ) {
+				\WP_REST_Abilities_Init::register_routes( $this->server );
+			}
+		}
 	}
 
 	/**
@@ -392,18 +392,16 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_rest_endpoints_are_registered() {
-		// Ensure REST API classes are loaded.
 		// WordPress 6.9+ uses core controllers with different namespace, earlier versions use vendor package.
 		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
 		if ( $are_abilities_in_wp_core ) {
 			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
-			$list_endpoint = '/wp-abilities/v1/abilities';
-			$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 		} else {
-			$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
-			$list_endpoint = '/wp/v2/abilities';
-			$run_endpoint  = '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
+			$this->assertTrue( class_exists( '\WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
 		}
+
+		$list_endpoint = '/wp-abilities/v1/abilities';
+		$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 
 		$routes = $this->server->get_routes();
 
@@ -485,10 +483,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 
-		// Create REST request - use version-appropriate namespace.
-		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
-		$list_endpoint            = $are_abilities_in_wp_core ? '/wp-abilities/v1/abilities' : '/wp/v2/abilities';
-		$request                  = new \WP_REST_Request( 'GET', $list_endpoint );
+		// Create REST request.
+		$list_endpoint = '/wp-abilities/v1/abilities';
+		$request       = new \WP_REST_Request( 'GET', $list_endpoint );
 		// Set up authentication for admin user.
 		wp_set_current_user( 1 );
 		$response = $this->server->dispatch( $request );
@@ -582,10 +579,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 
-		// Create REST request for execution - use version-appropriate namespace.
-		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
-		$namespace                = $are_abilities_in_wp_core ? '/wp-abilities/v1' : '/wp/v2';
-		$request                  = new \WP_REST_Request( 'POST', $namespace . '/abilities/' . $ability_id . '/run' );
+		// Create REST request for execution.
+		$namespace = '/wp-abilities/v1';
+		$request   = new \WP_REST_Request( 'POST', $namespace . '/abilities/' . $ability_id . '/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(

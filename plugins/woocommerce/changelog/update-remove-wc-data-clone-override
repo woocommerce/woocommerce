@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add configurable clone mode to WC_Data to support both duplication and caching workflows while maintaining backward compatibility.

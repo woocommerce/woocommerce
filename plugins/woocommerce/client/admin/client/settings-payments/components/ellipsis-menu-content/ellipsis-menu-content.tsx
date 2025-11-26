@@ -324,8 +324,12 @@ export const EllipsisMenuContent = ( {
 							deactivateProviderExtension();
 						} }
 						isBusy={ isDeactivating }
-						// If the plugin file is not available, the button should be disabled.
-						disabled={ ! pluginFile || isDeactivating }
+						// If the plugin file is not available, or it's a bundled gateway, the button should be disabled.
+						disabled={
+							! pluginFile ||
+							pluginFile === 'woocommerce/woocommerce' ||
+							isDeactivating
+						}
 					>
 						{ __( 'Deactivate', 'woocommerce' ) }
 					</Button>

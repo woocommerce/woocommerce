@@ -5,6 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import { CheckboxControl, Textarea } from '@woocommerce/blocks-components';
 
+/**
+ * Internal dependencies
+ */
+import './style.scss';
+
 interface CheckoutOrderNotesProps {
 	disabled: boolean;
 	onChange: ( orderNotes: string ) => void;

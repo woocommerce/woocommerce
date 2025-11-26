@@ -19,9 +19,6 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 	/**
 	 * Constant representing the default size of the batches to process.
-	 *
-	 * Note that meta entry ids taken from batch items will be concatenated to form a
-	 * "delete ... where id in (id, id...)" SQL query, so this value can't be very big.
 	 */
 	public const DEFAULT_BATCH_SIZE = 1000;
 
@@ -157,7 +154,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 	/**
 	 * Get the next batch of items to process.
-	 * An item will be an associative array of 'meta_id' and 'meta_value'.
+	 * An item will be an associative array of 'order_id' and 'meta_value'.
 	 *
 	 * @param int $size Maximum size of the batch to return.
 	 * @return array
@@ -184,10 +181,10 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT id as meta_id, meta_value, order_id
+				"SELECT order_id, meta_value
                  FROM {$wpdb->prefix}wc_orders_meta
                  WHERE meta_key = %s
-                 ORDER BY id
+                 ORDER BY order_id
                  LIMIT %d",
 				'_debug_log_source_pending_deletion',
 				$size
@@ -207,12 +204,12 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT p.ID as order_id,pm.meta_id, pm.meta_value
+				"SELECT p.ID as order_id, pm.meta_value
                  FROM {$wpdb->postmeta} pm
                  INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
                  WHERE pm.meta_key = %s
                  AND p.post_type = 'shop_order'
-                 ORDER BY pm.meta_id
+                 ORDER BY p.ID
                  LIMIT %d",
 				'_debug_log_source_pending_deletion',
 				$size
@@ -238,41 +235,50 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			return;
 		}
 
-		$invalid_items = array_filter( $batch, fn( $item ) => ! is_array( $item ) || ! isset( $item['meta_id'] ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) );
-		if ( $invalid_items ) {
-			throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_id' key, a 'meta_value' key and an 'order_id' key" );
-		}
-
 		$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
 		foreach ( $batch as $item ) {
+			if ( ! is_array( $item ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) ) {
+				throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_value' key and an 'order_id' key" );
+			}
 			$logger->clear( $item['meta_value'] );
 		}
 
-		global $wpdb;
-		$table_name     = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
-		$id_column_name = $this->hpos_in_use ? 'id' : 'meta_id';
+		$order_ids = array_map( 'absint', array_column( $batch, 'order_id' ) );
 
-		$meta_ids     = array_map( fn( $item ) => absint( $item['meta_id'] ), $batch );
-		$placeholders = implode( ',', array_map( 'absint', $meta_ids ) );
+		// Delete from the authoritative meta table.
+		$this->delete_debug_log_source_meta_entries( true, $order_ids );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "DELETE FROM {$table_name} WHERE {$id_column_name} IN ({$placeholders})" );
-
-		if ( ! $this->data_synchronizer->data_sync_is_enabled() ) {
-			return;
+		if ( $this->data_synchronizer->data_sync_is_enabled() ) {
+			// When HPOS data sync is enabled we need to manually delete the entries in the backup meta table too,
+			// otherwise the next sync process will restore the rows we just deleted from the authoritative meta table.
+			$this->delete_debug_log_source_meta_entries( false, $order_ids );
 		}
+	}
 
-		// When HPOS data sync is enabled we need to manually delete the entries in the backup meta table too,
-		// otherwise the next sync process will restore the rows we just deleted from the authoritative meta table.
+	/**
+	 * Delete meta entries for the given order IDs.
+	 *
+	 * @param bool  $from_authoritative_table True to delete from the authoritative table, false for the backup table.
+	 * @param array $order_ids Array of order IDs to delete.
+	 */
+	private function delete_debug_log_source_meta_entries( bool $from_authoritative_table, array $order_ids ): void {
+		global $wpdb;
 
-		$order_ids    = array_map( fn( $item ) => absint( $item['order_id'] ), $batch );
-		$placeholders = implode( ',', array_map( 'absint', $order_ids ) );
+		$use_hpos_table = $this->hpos_in_use === $from_authoritative_table;
+		$table_name     = $use_hpos_table ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
+		$id_column_name = $use_hpos_table ? 'order_id' : 'post_id';
+		$placeholders   = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
 
-		$table_name     = $this->hpos_in_use ? $wpdb->postmeta : "{$wpdb->prefix}wc_orders_meta";
-		$id_column_name = $this->hpos_in_use ? 'post_id' : 'order_id';
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "DELETE FROM {$table_name} WHERE {$id_column_name} IN ({$placeholders})" );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table_name}
+				 WHERE {$id_column_name} IN ({$placeholders})
+				 AND meta_key = %s",
+				array_merge( $order_ids, array( '_debug_log_source_pending_deletion' ) )
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**

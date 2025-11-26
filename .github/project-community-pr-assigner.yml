@@ -60,6 +60,12 @@
 "packages/js/tracks/**/*":
   - Flux
 
+"packages/js/email-editor/**/*":
+  - Ballade
+
+"packages/php/email-editor/**/*":
+  - Ballade
+
 "plugins/woocommerce/**/*":
   - Flux
 
@@ -93,6 +99,12 @@
 
 "plugins/woocommerce-beta-tester/**/*":
   - Flux
+
+"plugins/woocommerce/src/Internal/EmailEditor/**/*":
+  - Ballade
+
+"plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/**/*":
+  - Ballade
 
 "tools/**/*":
   - Flux

@@ -908,6 +908,11 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		$this->assertTrue( $object->needs_shipping() );
+
+		$physical_product->delete( true );
+		// Reload the order to ensure fresh data.
+		$object = wc_get_order( $object->get_id() );
+		$this->assertFalse( $object->needs_shipping() );
 	}
 
 	/**

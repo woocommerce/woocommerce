@@ -56,24 +56,7 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			wp_enqueue_script( 'wc-price-slider' );
 		}
 
-		add_action( 'shutdown', array( $this, 'add_legacy_script_warnings' ) );
-
 		parent::__construct();
-	}
-
-	/**
-	 * Add warnings for deprecated script handles.
-	 */
-	public function add_legacy_script_warnings() {
-		$exists = wp_script_is( 'accounting' );
-		if ( $exists ) {
-			wc_deprecated_argument(
-				'wp_enqueue_script',
-				'10.3.0',
-				/* translators: %1$s: new script handle, %2$s: previous script handle */
-				sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), 'wc-accounting', 'accounting' )
-			);
-		}
 	}
 
 	/**
