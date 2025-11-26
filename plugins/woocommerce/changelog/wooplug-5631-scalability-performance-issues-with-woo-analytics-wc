@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Implement batch processing for analytics order imports to resolve performance issues on high-traffic sites

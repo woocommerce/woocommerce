@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add GET endpoint for retrieving individual shipping zone methods in REST API v4, allowing direct access to shipping method data by instance ID.
