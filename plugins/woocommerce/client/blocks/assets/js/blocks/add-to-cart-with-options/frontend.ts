@@ -18,6 +18,7 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 import { getMatchedVariation } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
+import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 import type { NormalizedProductData, NormalizedVariationData } from './types';
 
@@ -143,11 +144,6 @@ export const getNewQuantity = (
 	return currentQuantity + quantity;
 };
 
-type SetQuantityOptions = Partial< {
-	changeTarget: HTMLInputElement;
-	forceUpdate: boolean;
-} >;
-
 export type AddToCartWithOptionsStore = {
 	state: {
 		noticeIds: string[];
@@ -160,11 +156,7 @@ export type AddToCartWithOptionsStore = {
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
-		setQuantity: (
-			productId: number,
-			value: number,
-			options?: SetQuantityOptions
-		) => void;
+		setQuantity: ( productId: number, value: number ) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
 		addToCart: () => void;
@@ -246,16 +238,18 @@ const { actions, state } = store<
 					} );
 				}
 			},
-			setQuantity(
-				productId: number,
-				value: number,
-				options: SetQuantityOptions = {}
-			) {
+			setQuantity( productId: number, value: number ) {
 				const context = getContext< Context >();
+				const quantitySelectorContext =
+					getContext< QuantitySelectorContext >(
+						'woocommerce/add-to-cart-with-options-quantity-selector'
+					);
+				const inputElement = quantitySelectorContext?.inputElement;
 				const { products } = getConfig(
 					'woocommerce'
 				) as WooCommerceConfig;
 				const variations = products?.[ productId ].variations;
+				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
 				if ( variations ) {
 					const variationIds = Object.keys( variations );
@@ -264,7 +258,7 @@ const { actions, state } = store<
 					const idsToUpdate = [ productId, ...variationIds ];
 
 					idsToUpdate.forEach( ( id ) => {
-						if ( options?.forceUpdate ) {
+						if ( isValueNaN ) {
 							// Null the value first before setting the real value to ensure that
 							// a signal update happens.
 							context.quantity[ Number( id ) ] = null;
@@ -273,7 +267,7 @@ const { actions, state } = store<
 						context.quantity[ Number( id ) ] = value;
 					} );
 				} else {
-					if ( options?.forceUpdate ) {
+					if ( isValueNaN ) {
 						// Null the value first before setting the real value to ensure that
 						// a signal update happens.
 						context.quantity = {
@@ -294,8 +288,8 @@ const { actions, state } = store<
 					actions.validateQuantity( productId, value );
 				}
 
-				if ( options?.changeTarget ) {
-					dispatchChangeEvent( options.changeTarget );
+				if ( inputElement ) {
+					dispatchChangeEvent( inputElement );
 				}
 			},
 			addError: ( error: AddToCartError ): string => {

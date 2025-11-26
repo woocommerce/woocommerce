@@ -47,13 +47,20 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		remove_all_filters( 'woocommerce_rest_api_not_modified_response' );
+
 		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
 			array(
 				'time'                      => fn() => $this->fixed_time,
 				'get_current_user_id'       => fn() => 1,
+				'is_user_logged_in'         => fn() => true,
 				'wp_using_ext_object_cache' => fn() => true,
 			)
 		);
+
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
 
 		// Needed to ensure VersionStringGenerator uses the mocked wp_using_ext_object_cache.
 		$this->reset_container_resolutions();
@@ -70,6 +77,8 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp_rest_server;
 		$wp_rest_server = null;
+
+		remove_all_filters( 'woocommerce_rest_api_not_modified_response' );
 
 		parent::tearDown();
 	}
@@ -245,7 +254,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Caching is skipped when entity versions cache is disabled.
+	 * @testdox Backend caching is skipped when object cache is disabled, but cache headers still work.
 	 */
 	public function test_caching_skipped_when_entity_cache_disabled() {
 		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
@@ -255,8 +264,14 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->sut->reinitialize_cache();
 
 		$response = $this->query_endpoint( 'single_entity' );
-		$this->assertCacheHeader( $response, null );
+
+		// Backend caching should be skipped but cache headers should still work.
 		$this->assertCount( 0, $this->get_all_cache_keys() );
+
+		$this->assertCacheHeader( $response, 'HEADERS' );
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'ETag', $headers );
+		$this->assertArrayHasKey( 'Cache-Control', $headers );
 	}
 
 	/**
@@ -1135,6 +1150,15 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$headers = $response->get_headers();
 		$this->assertArrayHasKey( 'ETag', $headers );
 		$this->assertMatchesRegularExpression( '/^"[a-f0-9]{32}"$/', $headers['ETag'] );
+
+		$cache_keys = $this->get_all_cache_keys();
+		$this->assertCount( 1, $cache_keys );
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, 'woocommerce_rest_api_cache' );
+
+		$this->assertIsArray( $cached_entry );
+		$this->assertArrayHasKey( 'etag', $cached_entry, 'ETag should be stored in cache entry' );
+		$this->assertSame( $headers['ETag'], $cached_entry['etag'], 'Cached ETag should match response ETag' );
 	}
 
 	/**
@@ -1299,5 +1323,286 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'Cache-Control', $headers );
 		$this->assertStringNotContainsString( 'no-cache', $headers['Cache-Control'] );
 		$this->assertStringNotContainsString( 'no-store', $headers['Cache-Control'] );
+	}
+
+	/**
+	 * @testdox Cache headers work without backend caching when cache headers setting is enabled.
+	 */
+	public function test_cache_headers_without_backend_caching() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		$this->sut->reinitialize_cache();
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+
+		// Should not cache in backend, but should add cache headers.
+		$this->assertCount( 0, $this->get_all_cache_keys() );
+
+		$headers = $response1->get_headers();
+		$this->assertArrayHasKey( 'ETag', $headers );
+		$this->assertArrayHasKey( 'Cache-Control', $headers );
+		$this->assertCacheHeader( $response1, 'HEADERS' );
+
+		// Should return 304 on subsequent request with matching ETag.
+		$etag    = $headers['ETag'];
+		$request = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/single_entity' );
+		$request->set_header( 'If-None-Match', $etag );
+		$response2 = $this->server->dispatch( $request );
+
+		$this->assertSame( 304, $response2->get_status() );
+		$this->assertCacheHeader( $response2, 'MATCH' );
+	}
+
+	/**
+	 * @testdox Backend caching works without cache headers when backend caching is enabled.
+	 */
+	public function test_backend_caching_without_cache_headers() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'no' );
+		$this->sut->reinitialize_cache();
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+
+		// Should cache in backend, but should not add ETag or Cache-Control headers.
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$headers = $response1->get_headers();
+		$this->assertArrayNotHasKey( 'ETag', $headers );
+		$this->assertArrayNotHasKey( 'Cache-Control', $headers );
+
+		// Second request should return from cache.
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		// Still no ETag or Cache-Control headers.
+		$headers2 = $response2->get_headers();
+		$this->assertArrayNotHasKey( 'ETag', $headers2 );
+		$this->assertArrayNotHasKey( 'Cache-Control', $headers2 );
+	}
+
+	/**
+	 * @testdox Both features work together when both settings are enabled.
+	 */
+	public function test_both_features_enabled() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		$this->sut->reinitialize_cache();
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+
+		// Should cache in backend and add cache headers.
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$headers = $response1->get_headers();
+		$this->assertArrayHasKey( 'ETag', $headers );
+		$this->assertArrayHasKey( 'Cache-Control', $headers );
+
+		// Second request should return from cache with headers.
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		$headers2 = $response2->get_headers();
+		$this->assertArrayHasKey( 'ETag', $headers2 );
+		$this->assertArrayHasKey( 'Cache-Control', $headers2 );
+	}
+
+	/**
+	 * @testdox Neither feature works when both settings are disabled.
+	 */
+	public function test_both_features_disabled() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'no' );
+		$this->sut->reinitialize_cache();
+
+		$response = $this->query_endpoint( 'single_entity' );
+
+		// Should not cache in backend, nor add cache headers.
+		$this->assertCount( 0, $this->get_all_cache_keys() );
+
+		$headers = $response->get_headers();
+		$this->assertArrayNotHasKey( 'ETag', $headers );
+		$this->assertArrayNotHasKey( 'Cache-Control', $headers );
+
+		// Should not have X-WC-Cache header.
+		$this->assertArrayNotHasKey( 'X-WC-Cache', $headers );
+	}
+
+	/**
+	 * @testdox Filter woocommerce_rest_api_not_modified_response can prevent 304 response.
+	 */
+	public function test_filter_can_prevent_304_response() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		$this->sut->reinitialize_cache();
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$etag      = $response1->get_headers()['ETag'];
+
+		$filter_called     = false;
+		$received_response = null;
+		$filter            = function ( $response, $request, $endpoint_id ) use ( &$filter_called, &$received_response ) {
+			unset( $request, $endpoint_id ); // Avoid parameter not used PHPCS errors.
+			$filter_called     = true;
+			$received_response = $response;
+			return false;
+		};
+		add_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10, 3 );
+
+		// Request with matching ETag.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/single_entity' );
+		$request->set_header( 'If-None-Match', $etag );
+		$response2 = $this->server->dispatch( $request );
+
+		// Filter should have been called with a 304 response.
+		$this->assertTrue( $filter_called );
+		$this->assertInstanceOf( WP_REST_Response::class, $received_response );
+		$this->assertSame( 304, $received_response->get_status() );
+
+		// Should return 200 with full data instead of 304.
+		$this->assertSame( 200, $response2->get_status() );
+		$this->assertNotNull( $response2->get_data() );
+		$this->assertCacheHeader( $response2, 'HEADERS' );
+
+		remove_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10 );
+	}
+
+	/**
+	 * @testdox Filter woocommerce_rest_api_not_modified_response can modify 304 response.
+	 */
+	public function test_filter_can_modify_304_response() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		$this->sut->reinitialize_cache();
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$etag      = $response1->get_headers()['ETag'];
+
+		$filter = function ( $response, $request, $endpoint_id ) {
+			unset( $request, $endpoint_id ); // Avoid parameter not used PHPCS errors.
+			$response->header( 'X-Custom-Header', 'custom-value' );
+			return $response;
+		};
+		add_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10, 3 );
+
+		// Request with matching ETag.
+		$request = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/single_entity' );
+		$request->set_header( 'If-None-Match', $etag );
+		$response2 = $this->server->dispatch( $request );
+
+		$this->assertSame( 304, $response2->get_status() );
+
+		// Should have custom header.
+		$headers = $response2->get_headers();
+		$this->assertArrayHasKey( 'X-Custom-Header', $headers );
+		$this->assertSame( 'custom-value', $headers['X-Custom-Header'] );
+
+		remove_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10 );
+	}
+
+	/**
+	 * @testdox Filter woocommerce_rest_api_not_modified_response is called for cached 304 responses.
+	 */
+	public function test_filter_called_for_cached_304_responses() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		$this->sut->reinitialize_cache();
+
+		// First request to cache.
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$etag      = $response1->get_headers()['ETag'];
+
+		// Second request to populate cache.
+		$this->query_endpoint( 'single_entity' );
+
+		$filter_called = false;
+		$filter        = function ( $response, $request, $endpoint_id ) use ( &$filter_called ) {
+			unset( $response, $request, $endpoint_id ); // Avoid parameter not used PHPCS errors.
+			$filter_called = true;
+			return false;
+		};
+		add_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10, 3 );
+
+		// Third request with matching ETag (should be served from cache).
+		$request = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/single_entity' );
+		$request->set_header( 'If-None-Match', $etag );
+		$response3 = $this->server->dispatch( $request );
+
+		$this->assertTrue( $filter_called );
+
+		// Should return 200 with full cached data instead of 304.
+		$this->assertSame( 200, $response3->get_status() );
+		$this->assertNotNull( $response3->get_data() );
+		$this->assertCacheHeader( $response3, 'HIT' );
+
+		remove_filter( 'woocommerce_rest_api_not_modified_response', $filter, 10 );
+	}
+
+	/**
+	 * @testdox X-WC-Cache header shows HEADERS when only cache headers are enabled.
+	 */
+	public function test_x_wc_cache_headers_value() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		$this->sut->reinitialize_cache();
+
+		$response = $this->query_endpoint( 'single_entity' );
+
+		$this->assertCacheHeader( $response, 'HEADERS' );
+	}
+
+	/**
+	 * @testdox X-WC-Cache header shows MATCH on 304 response.
+	 */
+	public function test_x_wc_cache_match_value() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		$this->sut->reinitialize_cache();
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$etag      = $response1->get_headers()['ETag'];
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/single_entity' );
+		$request->set_header( 'If-None-Match', $etag );
+		$response2 = $this->server->dispatch( $request );
+
+		$this->assertCacheHeader( $response2, 'MATCH' );
+	}
+
+	/**
+	 * @testdox Caching is completely bypassed when rest_api_caching feature is disabled (even with caching options enabled).
+	 */
+	public function test_caching_bypassed_when_feature_disabled() {
+		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', 'yes' );
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'no' );
+		$this->sut->reinitialize_cache();
+
+		$this->reset_rest_server();
+
+		$response = $this->query_endpoint( 'single_entity' );
+
+		$this->assertCount( 0, $this->get_all_cache_keys() );
+
+		$headers = $response->get_headers();
+		$this->assertArrayNotHasKey( 'X-WC-Cache', $headers );
+		$this->assertArrayNotHasKey( 'ETag', $headers );
+		$this->assertArrayNotHasKey( 'Cache-Control', $headers );
+
+		$this->assertEquals( $this->sut->responses['single_entity'], $response->get_data() );
+	}
+
+	/**
+	 * @testdox rest_send_nocache_headers filter is not registered when feature is disabled.
+	 */
+	public function test_nocache_headers_filter_not_registered_when_feature_disabled() {
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'no' );
+
+		// Create a new controller with the feature disabled to test that the filter is not registered.
+		$controller = $this->create_test_controller();
+
+		$has_filter = has_filter( 'rest_send_nocache_headers', array( $controller, 'handle_rest_send_nocache_headers' ) );
+		$this->assertFalse( $has_filter );
 	}
 }
