@@ -5,22 +5,20 @@ import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
-	ProductData,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/product-data';
+import { getProductData } from '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import { getMatchedVariation } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
-import type { NormalizedProductData, NormalizedVariationData } from './types';
 
 // Do we need to export these types?
 export type Context = {
@@ -70,54 +68,6 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
-// This should be replaced with state.product.
-export const getProductData = (
-	id: number,
-	selectedAttributes: SelectedAttributes[]
-): NormalizedProductData | NormalizedVariationData | null => {
-	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
-
-	if ( ! products || ! products[ id ] ) {
-		return null;
-	}
-
-	let product = {
-		id,
-		...products[ id ],
-	} as ProductData & { id: number };
-
-	if (
-		product.type === 'variable' &&
-		selectedAttributes &&
-		selectedAttributes.length > 0
-	) {
-		const matchedVariation = getMatchedVariation(
-			product.variations,
-			selectedAttributes
-		);
-		if ( matchedVariation ) {
-			product = {
-				...matchedVariation,
-				id: matchedVariation.variation_id,
-				type: 'variation',
-			};
-		}
-	}
-
-	const min = typeof product.min === 'number' ? product.min : 1;
-	const max =
-		typeof product.max === 'number' ? Math.max( product.max, 0 ) : Infinity;
-	const step =
-		typeof product.step === 'number' && product.step > 0 ? product.step : 1;
-
-	return {
-		...product,
-		min,
-		max,
-		step,
-	};
-};
-
 // Not sure if this function is needed.
 export const getNewQuantity = (
 	productId: number,
@@ -155,7 +105,7 @@ export type AddToCartWithOptionsStore = {
 		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
-		productData: NormalizedProductData | NormalizedVariationData | null;
+		productData: ProductResponseItem | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;

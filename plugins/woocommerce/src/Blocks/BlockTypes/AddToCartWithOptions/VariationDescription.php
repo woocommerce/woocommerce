@@ -47,6 +47,7 @@ class VariationDescription extends AbstractBlock {
 			}
 		}
 
+		// Populate products properly from the REST API response (and probably in state).
 		wp_interactivity_config(
 			'woocommerce',
 			array(

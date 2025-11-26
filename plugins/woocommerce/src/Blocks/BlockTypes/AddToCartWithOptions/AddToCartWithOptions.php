@@ -242,6 +242,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
+			// Populate products properly from the REST API response (and probably in state).
 			wp_interactivity_config(
 				'woocommerce',
 				array(
@@ -279,6 +280,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					$variations_data[ $variation->get_id() ] = $variation_data;
 				}
 
+				// Populate products properly from the REST API response (and probably in state).
 				wp_interactivity_config(
 					'woocommerce',
 					array(
@@ -323,6 +325,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				}
 
 				$context['groupedProductIds'] = array_keys( $children_product_data );
+				// Populate products properly from the REST API response (and probably in state).
 				wp_interactivity_config(
 					'woocommerce',
 					array(

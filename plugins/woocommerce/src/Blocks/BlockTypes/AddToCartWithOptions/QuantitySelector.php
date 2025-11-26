@@ -115,6 +115,7 @@ class QuantitySelector extends AbstractBlock {
 
 		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
 
+		// Populate products properly from the REST API response (and probably in state).
 		wp_interactivity_config(
 			'woocommerce',
 			array(
@@ -153,6 +154,7 @@ class QuantitySelector extends AbstractBlock {
 				$formatted_variations_data[ $variation->get_id() ] = $variation_data;
 			}
 
+			// Populate products properly from the REST API response (and probably in state).
 			wp_interactivity_config(
 				'woocommerce',
 				array(

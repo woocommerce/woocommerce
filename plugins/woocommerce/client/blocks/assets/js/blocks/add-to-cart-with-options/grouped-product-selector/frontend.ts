@@ -6,6 +6,7 @@ import type {
 	ClientCartItem,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
+import { getProductData } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
@@ -14,7 +15,7 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import { getNewQuantity, getProductData } from '../frontend';
+import { getNewQuantity } from '../frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
