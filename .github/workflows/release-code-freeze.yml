@@ -158,7 +158,7 @@ jobs:
               } );
             } catch ( e ) {
               if ( e.response?.data?.errors?.some( ( err ) => 'already_exists' === err.code ) ) {
-                console.log( `Milestone ${ milestone } already exists.` );
+                console.log( `Milestone ${ trunkMilestone } already exists.` );
               } else {
                 throw e;
               }
