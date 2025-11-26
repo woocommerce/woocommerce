@@ -755,6 +755,14 @@ class WooPaymentsService {
 			}
 		}
 
+		// Flatten any nested 'context' key (e.g., from WP_Error data that includes its own context).
+		// The nested context values take precedence over the top-level values.
+		if ( isset( $sanitized_error['context']['context'] ) && is_array( $sanitized_error['context']['context'] ) ) {
+			$nested_context = $sanitized_error['context']['context'];
+			unset( $sanitized_error['context']['context'] );
+			$sanitized_error['context'] = array_merge( $sanitized_error['context'], $nested_context );
+		}
+
 		if ( ! empty( $sanitized_error['context'] ) ) {
 
 			// Sanitize the context data.
