@@ -738,12 +738,24 @@ class WooPaymentsService {
 			'context' => array(),
 		);
 
+		// Move all extra keys (not code, message, context) into the context.
+		$reserved_keys = array( 'code', 'message', 'context' );
+		foreach ( $error as $key => $value ) {
+			if ( ! in_array( $key, $reserved_keys, true ) ) {
+				$sanitized_error['context'][ $key ] = $value;
+			}
+		}
+
+		// Merge any existing context data.
 		if ( isset( $error['context'] ) && ( is_array( $error['context'] ) || is_object( $error['context'] ) ) ) {
 			// Make sure we are dealing with an array.
-			$sanitized_error['context'] = json_decode( wp_json_encode( $error['context'] ), true );
-			if ( ! is_array( $sanitized_error['context'] ) ) {
-				$sanitized_error['context'] = array();
+			$existing_context = json_decode( wp_json_encode( $error['context'] ), true );
+			if ( is_array( $existing_context ) ) {
+				$sanitized_error['context'] = array_merge( $sanitized_error['context'], $existing_context );
 			}
+		}
+
+		if ( ! empty( $sanitized_error['context'] ) ) {
 
 			// Sanitize the context data.
 			// It can only contain strings or arrays of strings.
@@ -2039,28 +2051,26 @@ class WooPaymentsService {
 
 		foreach ( $raw_errors as $error ) {
 			if ( $error instanceof \WP_Error ) {
-				$standardized_errors[] = array(
+				$error = array(
 					'code'    => $error->get_error_code(),
 					'message' => $error->get_error_message(),
 					'context' => $error->get_error_data(),
 				);
-				continue;
-			}
-
-			if ( is_array( $error ) ) {
+			} elseif ( is_array( $error ) ) {
 				if ( empty( $error['code'] ) ) {
 					$error['code'] = 'general_error';
 				}
 				if ( ! array_key_exists( 'message', $error ) ) {
 					$error['message'] = '';
 				}
-				$standardized_errors[] = $error;
 			} else {
-				$standardized_errors[] = array(
+				$error = array(
 					'code'    => 'general_error',
 					'message' => (string) $error,
 				);
 			}
+
+			$standardized_errors[] = $this->sanitize_onboarding_step_error( $error );
 		}
 		$step_details['errors'] = $standardized_errors;
 
