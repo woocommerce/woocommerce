@@ -117,7 +117,10 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 				} );
 			} }
 		>
-			{ __( 'Set up WooPayments', 'woocommerce' ) }
+			{
+				/* translators: %s: Payment provider name (e.g., WooPayments) */
+				sprintf( __( 'Set up %s', 'woocommerce' ), 'WooPayments' )
+			}
 		</Button>
 	);
 
