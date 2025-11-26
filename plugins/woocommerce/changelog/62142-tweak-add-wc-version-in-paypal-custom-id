@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Include WooCommerce version in PayPal Standard gateway requests.
