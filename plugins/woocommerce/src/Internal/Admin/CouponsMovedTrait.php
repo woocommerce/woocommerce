@@ -90,7 +90,18 @@ trait CouponsMovedTrait {
 	 * @return bool
 	 */
 	protected static function should_display_legacy_menu() {
-		return ! Features::is_enabled( 'navigation' );
+		/**
+		 * Filter to determine whether to display the legacy coupon menu item.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param bool $display Whether the menu should be displayed or not.
+		 * @return bool
+		 */
+		return apply_filters(
+			'wc_admin_show_legacy_coupon_menu',
+			! Features::is_enabled( 'navigation' )
+		);
 	}
 
 	/**
