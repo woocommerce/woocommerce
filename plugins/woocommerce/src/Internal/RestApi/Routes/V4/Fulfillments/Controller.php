@@ -433,8 +433,19 @@ class Controller extends AbstractController {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response
 	 */
-	public function get_providers( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+	public function get_providers( WP_REST_Request $request ): WP_REST_Response {
 		$providers = \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils::get_shipping_providers_object();
+
+		/**
+		 * Filters the shipping providers response before it is returned.
+		 *
+		 * @param array           $providers The shipping providers data.
+		 * @param WP_REST_Request $request   The request object.
+		 *
+		 * @since 10.5.0
+		 */
+		$providers = apply_filters( 'woocommerce_rest_prepare_fulfillments_providers', $providers, $request );
+
 		return new WP_REST_Response( $providers, WP_Http::OK );
 	}
 
