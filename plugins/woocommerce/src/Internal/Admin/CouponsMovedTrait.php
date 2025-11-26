@@ -96,6 +96,8 @@ trait CouponsMovedTrait {
 	/**
 	 * Set whether we should display the legacy coupon menu item.
 	 *
+	 * @deprecated 10.5.0 No longer in use.
+	 *
 	 * @param bool $display Whether the menu should be displayed or not.
 	 */
 	protected static function display_legacy_menu( $display = false ) {
