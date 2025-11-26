@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Fulfillments;
 
+use Automattic\WooCommerce\Internal\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema\FulfillmentSchema;
 use WC_REST_Unit_Test_Case;
@@ -67,7 +68,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		$this->controller = new FulfillmentsController();
-		$this->controller->init( new FulfillmentSchema() );
+		$this->controller->init( new FulfillmentSchema(), new OrderFulfillmentsRestController() );
 		$this->controller->register_routes();
 
 		$this->admin_user_id = $this->factory->user->create(

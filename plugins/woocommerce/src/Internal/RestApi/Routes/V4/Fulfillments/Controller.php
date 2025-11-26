@@ -59,12 +59,14 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param FulfillmentSchema $item_schema Fulfillment schema class.
+	 * @param FulfillmentSchema               $item_schema                   Fulfillment schema class.
+	 * @param OrderFulfillmentsRestController $order_fulfillments_controller Order fulfillments controller.
+	 *
 	 * @internal
 	 */
-	final public function init( FulfillmentSchema $item_schema ) {
+	final public function init( FulfillmentSchema $item_schema, OrderFulfillmentsRestController $order_fulfillments_controller ) {
 		$this->item_schema                   = $item_schema;
-		$this->order_fulfillments_controller = new OrderFulfillmentsRestController();
+		$this->order_fulfillments_controller = $order_fulfillments_controller;
 	}
 
 	/**
