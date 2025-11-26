@@ -54,24 +54,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Updated', false ) ) :
 
 			$this->description = __( 'Fulfillment updated emails are sent to the customer when the merchant updates a fulfillment for the order. The notification isn’t sent for draft fulfillments.', 'woocommerce' );
 
-			add_filter( 'woocommerce_emails_general_block_content_emails_without_order_details', array( $this, 'skip_order_details_in_block_editor_for_this_email' ), 10, 1 );
-			add_action( 'woocommerce_email_general_block_content', array( $this, 'add_to_general_block_content' ), 10, 3 );
-		}
-
-		public function skip_order_details_in_block_editor_for_this_email( $emails ) {
-			$emails[] = $this->id;
-			return $emails;
-		}
-
-		public function add_to_general_block_content( $sent_to_admin, $plain_text, $email ) {
-			if ( $email->id !== $this->id ) {
-				return;
-			}
-			$order = $this->object;
-			$fulfillment = $this->fulfillment;
-			do_action( 'woocommerce_email_fulfillment_details', $order, $fulfillment, $sent_to_admin, $plain_text, $email );
-			do_action( 'woocommerce_email_fulfillment_meta', $order, $fulfillment, $sent_to_admin, $plain_text, $email );
-			do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
+			$this->template_block_content = 'emails/block/general-block-content-for-fulfillment-emails.php';
 		}
 
 		/**
