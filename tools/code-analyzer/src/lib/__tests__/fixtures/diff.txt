@@ -7789,7 +7789,7 @@ index 0000000000..bd6cb4938a
 + * External dependencies
 + */
 +import { registerStore } from '@wordpress/data';
-+import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
++import { SelectFromMap, DispatchFromMap } from '@woocommerce/data';
 +import { Reducer, AnyAction } from 'redux';
 +/**
 + * Internal dependencies
@@ -8990,12 +8990,12 @@ index 0000000000..11f38ddad1
 +/**
 + * External dependencies
 + */
-+import { DispatchFromMap } from '@automattic/data-stores';
 +
 +/**
 + * Internal dependencies
 + */
 +import { CrudActions, CrudSelectors } from '../crud/types';
++import { DispatchFromMap } from '../types';
 +
 +type ProductAttribute = {
 +	id: number;
@@ -9119,13 +9119,12 @@ index 0000000000..79d72e85f2
 +/**
 + * External dependencies
 + */
-+import { DispatchFromMap } from '@automattic/data-stores';
 +
 +/**
 + * Internal dependencies
 + */
 +import { CrudActions, CrudSelectors } from '../crud/types';
-+import { BaseQueryParams } from '../types';
++import { BaseQueryParams, DispatchFromMap } from '../types';
 +
 +type ProductShippingClass = {
 +	id: number;
@@ -9434,12 +9433,12 @@ index 0000000000..4008831f47
 +/**
 + * External dependencies
 + */
-+import { DispatchFromMap } from '@automattic/data-stores';
 +
 +/**
 + * Internal dependencies
 + */
 +import { CrudActions, CrudSelectors } from '../crud/types';
++import { DispatchFromMap } from '../types';
 +
 +type ShippingZone = {
 +	id: number;

@@ -67,9 +67,9 @@
 	},
 	"private": true,
 	"devDependencies": {
-		"@automattic/data-stores": "^2.0.1",
 		"@babel/core": "7.25.7",
 		"@types/lodash": "^4.14.202",
+		"@woocommerce/data": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.55.0",
 		"jest": "29.5.x",
@@ -132,6 +132,9 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"node_modules/@woocommerce/data/build",
+				"node_modules/@woocommerce/data/build-module",
+				"node_modules/@woocommerce/data/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"
