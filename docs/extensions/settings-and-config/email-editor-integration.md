@@ -126,11 +126,9 @@ add_filter( 'woocommerce_transactional_emails_for_block_editor', 'your_plugin_re
 
 **Development tip:** WooCommerce caches email post-generation with a transient. When testing or developing, delete the transient `wc_email_editor_initial_templates_generated` to force post-generation.
 
-## 4. Create block template
+## 4. Create the initial block template
 
 Create `templates/emails/block/your-custom-email.php`:
-
-**Note:** Block templates are the modern approach for email editor integration. However, WooCommerce maintains backward compatibility with traditional email templates. If you don't provide a block template, WooCommerce will fall back to your traditional `template_html` and `template_plain` files defined in your email class. These properties are intended to be used in the `get_content_html` and `get_content_plain` methods to load the corresponding template files. This ensures your emails continue to work even without block template support.
 
 **Template base property:** Make sure to set the `$template_base` property in your email class constructor to point to your plugin's template directory. This allows WooCommerce to properly locate and load your block template files. The block template filename is expected to match the plain template, but using the `block` directory instead of `plain`.
 
@@ -153,6 +151,8 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:woocommerce/email-content -->
 ```
 
+Pro tip: If you use a custom path for your email templates, set the block template path using the `template_block` property on the email class.
+
 **Email content placeholder:**
 
 The `BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER` is a special placeholder that gets replaced with the main email content when the email is rendered. This placeholder is essential for integrating with WooCommerce's email system and allows the email editor to inject the core email content (like order details, customer information, etc.) into your custom template.
@@ -160,6 +160,8 @@ The `BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER` is a special placeholder
 By default, WooCommerce uses the [general block email template](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/templates/emails/block/general-block-email.php) to generate the content that replaces this placeholder. When WooCommerce processes your email template, it replaces this placeholder with the appropriate email content based on the email type and context.
 
 If your email needs to use different content, you have two options:
+
+**Using custom block content template:**
 
 1. **Set a custom template**: Set the `$template_block_content` property in your email class constructor to point to a custom template for the block content:
 
@@ -177,37 +179,8 @@ If your email needs to use different content, you have two options:
     }
     ```
 
-**Register the template:**
-
-You need to register your block template with the email editor so it can be used for editing. This connects your template file to your email class:
-
-```php
-function your_plugin_register_email_templates( $templates_registry ) {
-    $template = new \Automattic\WooCommerce\EmailEditor\Engine\Templates\Template(
-        // Template prefix (your plugin slug)
-        'your-plugin',
-        // Template slug (unique identifier)
-        'your-custom-email-template',
-        // Display title in editor
-        __( 'Custom Email Template', 'your-plugin' ),
-        // Description
-        __( 'Custom Email Template description', 'your-plugin' ),
-        // Template content
-        '<!-- wp:paragraph -->
-<p>Custom Email Template</p>
-<!-- /wp:paragraph -->
-
-<!-- wp:post-content {"lock":{"move":true,"remove":false},"layout":{"type":"default"}} /-->' ,
-        // Email post types this template can be used for
-        array( 'woo_email' )
-    );
-
-    $templates_registry->register( $template );
-
-    return $templates_registry;
-}
-add_filter( 'woocommerce_email_editor_register_templates', 'your_plugin_register_email_templates' );
-```
+**Using action hook:**
+You can use the action hook `woocommerce_email_general_block_email` to execute additional actions within the content template. 
 
 ## 5. Set Up Triggers
 
@@ -350,6 +323,7 @@ class YourPlugin_Loyalty_Welcome_Email extends WC_Email {
 
         $this->template_html  = 'emails/loyalty-welcome.php';
         $this->template_plain = 'emails/plain/loyalty-welcome.php';
+        $this->template_block = 'emails/block/loyalty-welcome.php';
         $this->template_base  = plugin_dir_path( __FILE__ ) . 'templates/';
 
         parent::__construct();
@@ -430,21 +404,6 @@ add_filter( 'woocommerce_email_groups', function( $email_groups ) {
 add_filter( 'woocommerce_transactional_emails_for_block_editor', function( $emails ) {
     $emails[] = 'loyalty_welcome_email';
     return $emails;
-} );
-
-// Register block template for the email editor
-add_filter( 'woocommerce_email_editor_register_templates', function( $registry ) {
-    $template = new \Automattic\WooCommerce\EmailEditor\Engine\Templates\Template(
-        'your-plugin',
-        'loyalty-welcome',
-        __( 'Loyalty Welcome Email', 'your-plugin' ),
-        __( 'Welcome email for new loyalty program members', 'your-plugin' ),
-        file_get_contents( plugin_dir_path( __FILE__ ) . 'templates/emails/block/loyalty-welcome.html' ),
-        array( 'woo_email' )
-    );
-    $registry->register( $template );
-
-    return $registry;
 } );
 
 // Set up trigger - when to send the email
