@@ -7,6 +7,6 @@ import { withFilteredAttributes } from '@woocommerce/shared-hocs';
  * Internal dependencies
  */
 import Block from './block';
-import { attributes } from './block.json';
+import metadata from './block.json';
 
-export default withFilteredAttributes( attributes )( Block );
+export default withFilteredAttributes( metadata.attributes )( Block );

@@ -9,10 +9,8 @@ export { default as Button } from '../../components/button';
 export { default as Label } from './label';
 export { default as StoreNoticesContainer } from '../../components/store-notices-container';
 export { CheckboxControl } from './checkbox-control';
-export {
-	default as ValidatedTextInput,
-	ValidatedTextInputHandle,
-} from '../../components/text-input/validated-text-input';
+export { default as ValidatedTextInput } from '../../components/text-input/validated-text-input';
+export type { ValidatedTextInputHandle } from '../../components/text-input/validated-text-input';
 export { default as TextInput } from '../../components/text-input/text-input';
 export { default as ValidationInputError } from '../../components/validation-input-error';
 export { default as StoreNotice } from '../../components/store-notice';

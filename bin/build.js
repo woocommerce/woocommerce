@@ -50,6 +50,12 @@ const ERROR_PATTERNS = [
 	/FATAL/,
 ];
 
+// Patterns indicating warnings
+const WARNING_PATTERNS = [
+	/\bWARNING\b/i,
+	/\bwarn\b/i,
+];
+
 // Patterns for package lines (pnpm stream format: "package-name task: content")
 const PACKAGE_LINE_PATTERN =
 	/^([\w@./-]+)\s+(build:project:[\w-]+)([:$])\s*(.*)?$/;
@@ -63,6 +69,7 @@ class BuildRunner {
 		this.errors = [];
 		this.lastProgressLine = '';
 		this.seenPackages = new Set();
+		this.isTTY = process.stdout.isTTY;
 	}
 
 	/**
@@ -86,6 +93,27 @@ class BuildRunner {
 	 */
 	isError( content ) {
 		return ERROR_PATTERNS.some( ( pattern ) => pattern.test( content ) );
+	}
+
+	/**
+	 * Check if content indicates a warning.
+	 */
+	isWarning( content ) {
+		return WARNING_PATTERNS.some( ( pattern ) => pattern.test( content ) );
+	}
+
+	/**
+	 * Clean up verbose webpack paths in warning/error messages.
+	 * Transforms paths like:
+	 *   "./assets/js/foo.scss (./assets/js/foo.scss.webpack[...]!=!.../css-loader/...!./assets/js/foo.scss)"
+	 * To:
+	 *   "./assets/js/foo.scss"
+	 */
+	cleanWebpackPath( message ) {
+		// Remove the verbose webpack loader chain in parentheses
+		return message
+			.replace( /\s*\([^)]*node_modules[^)]*\)/g, '' )
+			.replace( /\.webpack\[javascript\/auto\][^)]*!=!/g, '' );
 	}
 
 	/**
@@ -157,9 +185,10 @@ class BuildRunner {
 		const progressLine = `${ colors.bright }Building${ colors.reset } ${ bar } ${ colors.green }${ percent }%${ colors.reset } (${ this.packagesComplete }/${ this.packagesTotal }) ${ colors.dim }${ elapsed }s${ colors.reset } ${ currentDisplay }`;
 
 		// Clear the current line and write new progress
-		readline.clearLine( process.stdout, 0 );
-		readline.cursorTo( process.stdout, 0 );
-		process.stdout.write( progressLine );
+		if ( this.isTTY ) {
+			// Use \r to return to start of line, then overwrite with spaces and rewrite
+			process.stdout.write( '\r\x1b[K' + progressLine );
+		}
 		this.lastProgressLine = progressLine;
 	}
 
@@ -167,11 +196,14 @@ class BuildRunner {
 	 * Print a message above the progress bar.
 	 */
 	printAboveProgress( message ) {
-		// Clear current line, print message, then restore progress
-		readline.clearLine( process.stdout, 0 );
-		readline.cursorTo( process.stdout, 0 );
-		console.log( message );
-		this.updateProgress();
+		if ( this.isTTY ) {
+			// Clear current line, print message, then restore progress
+			process.stdout.write( '\r\x1b[K' );
+			console.log( message );
+			this.updateProgress();
+		} else {
+			console.log( message );
+		}
 	}
 
 	/**
@@ -221,10 +253,21 @@ class BuildRunner {
 			// Check if content should be shown
 			if ( content ) {
 				if ( this.isError( content ) ) {
-					this.errors.push( `${ packageName }: ${ content }` );
+					const cleanContent = this.cleanWebpackPath( content );
+					this.errors.push( `${ packageName }: ${ cleanContent }` );
 					this.printAboveProgress(
 						colors.red +
-							`${ packageName }: ${ content }` +
+							`${ packageName }: ${ cleanContent }` +
+							colors.reset
+					);
+					return;
+				}
+
+				if ( this.isWarning( content ) ) {
+					const cleanContent = this.cleanWebpackPath( content );
+					this.printAboveProgress(
+						colors.yellow +
+							`${ packageName }: ${ cleanContent }` +
 							colors.reset
 					);
 					return;
@@ -251,8 +294,18 @@ class BuildRunner {
 
 		// Check for errors in non-package lines
 		if ( this.isError( cleanLine ) ) {
-			this.errors.push( cleanLine );
-			this.printAboveProgress( colors.red + cleanLine + colors.reset );
+			const cleanContent = this.cleanWebpackPath( cleanLine );
+			this.errors.push( cleanContent );
+			this.printAboveProgress( colors.red + cleanContent + colors.reset );
+			return;
+		}
+
+		// Check for warnings in non-package lines
+		if ( this.isWarning( cleanLine ) ) {
+			const cleanContent = this.cleanWebpackPath( cleanLine );
+			this.printAboveProgress(
+				colors.yellow + cleanContent + colors.reset
+			);
 			return;
 		}
 
