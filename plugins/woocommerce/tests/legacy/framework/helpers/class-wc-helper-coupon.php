@@ -56,13 +56,13 @@ class WC_Helper_Coupon {
 			update_post_meta( $coupon_id, $key, $value );
 		}
 
-		return new WC_Coupon( $coupon_code );
+		return new WC_Coupon( $coupon_id );
 	}
 
 	/**
 	 * Delete a coupon.
 	 *
-	 * @param string $coupon_id
+	 * @param $coupon_id
 	 *
 	 * @return bool
 	 */
