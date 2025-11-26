@@ -441,6 +441,12 @@ class Controller extends AbstractController {
 		/**
 		 * Filters the shipping providers response before it is returned.
 		 *
+		 * Each provider in the array must have the following structure:
+		 * - 'label' (string): The display name of the provider.
+		 * - 'icon' (string): URL to the provider's icon.
+		 * - 'value' (string): The provider's unique identifier.
+		 * - 'url' (string): The tracking URL template.
+		 *
 		 * @param array           $providers The shipping providers data.
 		 * @param WP_REST_Request $request   The request object.
 		 *
@@ -448,7 +454,59 @@ class Controller extends AbstractController {
 		 */
 		$providers = apply_filters( 'woocommerce_rest_prepare_fulfillments_providers', $providers, $request );
 
+		// Validate filtered result to prevent extensions from returning invalid structures.
+		if ( ! is_array( $providers ) ) {
+			_doing_it_wrong(
+				'woocommerce_rest_prepare_fulfillments_providers',
+				__( 'The filter must return an array of providers.', 'woocommerce' ),
+				'10.5.0'
+			);
+			$providers = array();
+		} else {
+			$providers = $this->validate_providers_structure( $providers );
+		}
+
 		return new WP_REST_Response( $providers, WP_Http::OK );
+	}
+
+	/**
+	 * Validate the structure of providers returned by a filter.
+	 *
+	 * Removes any providers that don't have the required keys (label, icon, value, url).
+	 *
+	 * @since 10.5.0
+	 * @param array $providers The providers array to validate.
+	 * @return array The validated providers array with invalid entries removed.
+	 */
+	private function validate_providers_structure( array $providers ): array {
+		$required_keys    = array( 'label', 'icon', 'value', 'url' );
+		$valid_providers  = array();
+		$has_invalid      = false;
+
+		foreach ( $providers as $key => $provider ) {
+			if ( ! is_array( $provider ) ) {
+				$has_invalid = true;
+				continue;
+			}
+
+			$missing_keys = array_diff( $required_keys, array_keys( $provider ) );
+			if ( ! empty( $missing_keys ) ) {
+				$has_invalid = true;
+				continue;
+			}
+
+			$valid_providers[ $key ] = $provider;
+		}
+
+		if ( $has_invalid ) {
+			_doing_it_wrong(
+				'woocommerce_rest_prepare_fulfillments_providers',
+				__( 'Some providers were removed because they are missing required keys (label, icon, value, url).', 'woocommerce' ),
+				'10.5.0'
+			);
+		}
+
+		return $valid_providers;
 	}
 
 	/**
