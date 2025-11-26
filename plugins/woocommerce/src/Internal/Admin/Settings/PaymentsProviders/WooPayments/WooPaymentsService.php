@@ -2053,9 +2053,17 @@ class WooPaymentsService {
 		}
 		// Standardize errors to be a list of arrays with `code`, `message`, and optional extra keys.
 		$standardized_errors = array();
-		$raw_errors          = is_array( $step_details['errors'] )
-			? $step_details['errors']
-			: array( $step_details['errors'] );
+		// If the errors is not a list of errors or it has any of the reserved entries,
+		// treat it as a single error.
+		if ( ! is_array( $step_details['errors'] )
+			|| array_key_exists( 'code', $step_details['errors'] )
+			|| array_key_exists( 'message', $step_details['errors'] )
+			|| array_key_exists( 'context', $step_details['errors'] )
+		) {
+			$raw_errors = array( $step_details['errors'] );
+		} else {
+			$raw_errors = $step_details['errors'];
+		}
 
 		foreach ( $raw_errors as $error ) {
 			if ( $error instanceof \WP_Error ) {
