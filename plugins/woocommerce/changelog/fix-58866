@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Consistently format empty strings in decimal format utils

@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Add wc/v4/shipping-zone-method endpoints (POST/PUT) for creating and updating shipping methods with Core Data compatibility and modern v4 architecture patterns.
