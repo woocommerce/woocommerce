@@ -112,9 +112,7 @@ const CustomizeStoreController = () => {
 			<div className="mobile-header">
 				<Button
 					className="mobile-header__back-button"
-					onClick={ () => {
-						window.location.href = getNewPath( {}, '/', {} );
-					} }
+					href={ getNewPath( {}, '/', {} ) }
 					icon={ chevronIcon }
 					label={ __( 'Back', 'woocommerce' ) }
 				/>
