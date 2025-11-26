@@ -145,13 +145,7 @@ const CustomizeStoreController = () => {
 						className="woocommerce-edit-site-sidebar-navigation-screen__title-icon"
 					>
 						<SidebarButton
-							onClick={ () => {
-								window.location.href = getNewPath(
-									{},
-									'/',
-									{}
-								);
-							} }
+							href={ getNewPath( {}, '/', {} ) }
 							icon={ chevronIcon }
 							label={ __( 'Back', 'woocommerce' ) }
 							showTooltip={ false }
