@@ -310,6 +310,7 @@ const { state, actions } = store< Store >(
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				let item = state.cart.items.find( ( cartItem ) => {
+					// This shouldn't be needed and just with the selected attributes and getProductDatashould be enough.
 					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
 						// While different variations have different attributes,

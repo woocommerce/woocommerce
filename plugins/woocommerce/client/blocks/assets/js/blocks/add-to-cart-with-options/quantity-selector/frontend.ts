@@ -44,6 +44,7 @@ export type QuantitySelectorStore = {
 	};
 };
 
+// This file will need updates once we change the way we handle products data.
 store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
@@ -117,6 +118,7 @@ store< QuantitySelectorStore >(
 			},
 		},
 		actions: {
+			// These should just update the parent store giving the quantity, the productId, and the selected attributes..
 			increaseQuantity: () => {
 				const { productId, inputElement } = getContext< Context >();
 

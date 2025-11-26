@@ -208,6 +208,10 @@ const { actions, state } = store<
 			},
 		},
 		actions: {
+			// Have only one validateQuantity that works for all product types.
+			// Remove the ones in the grouped product selector.
+			// Check if the array is one or more. It should be better for extensions.
+			// Not sure if it is an action or a callback.
 			validateQuantity( productId: number, value?: number ) {
 				actions.clearErrors( 'invalid-quantities' );
 
@@ -238,6 +242,12 @@ const { actions, state } = store<
 					} );
 				}
 			},
+			// Review what this action is doing and if it is needed as is.
+			// Maybe this should be part of the quantity selector store. At least most of the logic.
+			// It is mainly used there and once in the variation selector.
+			// I think it should just check the selectedProducts array, and add/update items.
+			// Maybe it can have one that calls validateQuantity for all selected products and the dispatch event.
+			// Maybe updateProductQuantity that accept productId, selectedAttributes and quantity.
 			setQuantity( productId: number, value: number ) {
 				const context = getContext< Context >();
 				const quantitySelectorContext =
@@ -245,6 +255,7 @@ const { actions, state } = store<
 						'woocommerce/add-to-cart-with-options-quantity-selector'
 					);
 				const inputElement = quantitySelectorContext?.inputElement;
+				// This should be `state.products` in the future.
 				const { products } = getConfig(
 					'woocommerce'
 				) as WooCommerceConfig;
@@ -317,12 +328,21 @@ const { actions, state } = store<
 				}
 			},
 			*addToCart() {
+				// Include the errors when the form is not valid here??
+
+				// If array is one, call addToCart, if multiple call batchAddToCart.
+
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
 				const { selectedAttributes } = getContext< Context >();
 
+				// Selected products here that work for any product type.
+				// Instead of checking the product type, check the array length.
+				// More flexible for extensions?
+
+				// Call getProductData given id and selected attributes (if any).
 				const id =
 					productDataState.variationId || productDataState.productId;
 
@@ -341,6 +361,10 @@ const { actions, state } = store<
 
 				const { quantity } = getContext< Context >();
 
+				// I think we shouldn't need this one.
+				// Understand what this action is doing.
+				// Shouldn't this be handled by the addToCart cart action?
+
 				const newQuantity = getNewQuantity(
 					id,
 					quantity[ id ],
@@ -352,6 +376,14 @@ const { actions, state } = store<
 					{},
 					{ lock: universalLock }
 				);
+
+				// Add cart item shouldn't received type.
+				// With the id and attributes it should know if if it is a variation or not.
+				// Calling getProductData maybe.
+				// Understand what showCartUpdatesNotices is doing.
+				// From what I understand in the code, quantity is not the quantity you want to add to the cart,
+				// but the final quantity the cart item should have????
+				// I'm not sure if that makes sense.
 				yield wooActions.addCartItem(
 					{
 						id,
@@ -364,6 +396,8 @@ const { actions, state } = store<
 					}
 				);
 			},
+			// Change this name to be more specific.
+			// Not sure if it is even needed or if should just be addToCart.
 			*handleSubmit( event: SubmitEvent ) {
 				event.preventDefault();
 

@@ -163,10 +163,12 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
+// Review also the actions and callbacks here to see if they can be abstracted.
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
+			// I think this selector shouldn't be needed. If we need an empty array it could be initialized in the server?
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				if ( ! context ) {
@@ -193,7 +195,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 		},
+		// Some of these actions feel a bit imperative.
 		actions: {
+			// Not sure I understand what this action is doing.
 			setAttribute( attribute: string, value: string ) {
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
@@ -249,6 +253,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 		},
 		callbacks: {
+			// This is only called on init. Is this needed?
 			setDefaultSelectedAttribute() {
 				const context = getContext< Context >();
 
@@ -321,6 +326,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			// Quantity constraints might change dynamically when switching
 			// variations. Based on this, we might need to update the quantity.
+			// This should probably go in the global validate quantities.
 			watchQuantityConstraints() {
 				const { ref } = getElement();
 

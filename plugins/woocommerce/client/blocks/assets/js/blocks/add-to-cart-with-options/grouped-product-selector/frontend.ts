@@ -31,6 +31,8 @@ export type GroupedProductAddToCartWithOptionsStore =
 		};
 	};
 
+// I believe we can get rid of this file if we include the logic in the parent add to cart with options.
+// Extensions might want to validate multiple products as well.
 const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
