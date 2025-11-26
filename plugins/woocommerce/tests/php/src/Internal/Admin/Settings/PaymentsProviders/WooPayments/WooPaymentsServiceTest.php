@@ -7226,6 +7226,215 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that error sanitization moves extra keys to context when storing a step error.
+	 *
+	 * When an error has keys beyond 'code', 'message', and 'context', those extra keys
+	 * should be moved into the 'context' array.
+	 *
+	 * @return void
+	 */
+	public function test_error_sanitization_moves_extra_keys_to_context() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$step_id                 = WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT;
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						// Return the latest updated profile if available.
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API requests to return a WP_Error with extra data.
+		$error_data_with_extra_keys = array(
+			'details'  => 'Some additional details',
+			'trace'    => 'stack trace info',
+			'response' => 'raw response data',
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( $error_data_with_extra_keys ) {
+						unset( $params ); // Avoid parameter not used PHPCS errors.
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return new WP_Error( 'test_error', 'Test error message', $error_data_with_extra_keys );
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act - call the method which will trigger mark_onboarding_step_failed.
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+		} catch ( \Exception $e ) {
+			// Expected exception, ignore it.
+			unset( $e );
+		}
+
+		// Assert - verify the stored error has extra keys moved to context.
+		$this->assertNotEmpty( $updated_stored_profiles, 'Profile should have been updated' );
+		$final_profile = end( $updated_stored_profiles );
+
+		$this->assertArrayHasKey( 'onboarding', $final_profile );
+		$this->assertArrayHasKey( $location, $final_profile['onboarding'] );
+		$this->assertArrayHasKey( 'steps', $final_profile['onboarding'][ $location ] );
+		$this->assertArrayHasKey( $step_id, $final_profile['onboarding'][ $location ]['steps'] );
+		$this->assertArrayHasKey( 'data', $final_profile['onboarding'][ $location ]['steps'][ $step_id ] );
+		$this->assertArrayHasKey( 'error', $final_profile['onboarding'][ $location ]['steps'][ $step_id ]['data'] );
+
+		$stored_error = $final_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['error'];
+
+		// Verify the error structure has only code, message, and context at the top level.
+		$this->assertArrayHasKey( 'code', $stored_error );
+		$this->assertArrayHasKey( 'message', $stored_error );
+		$this->assertArrayHasKey( 'context', $stored_error );
+		$this->assertSame( 'test_error', $stored_error['code'] );
+		$this->assertSame( 'Test error message', $stored_error['message'] );
+
+		// Verify the extra keys were moved to context.
+		$this->assertIsArray( $stored_error['context'] );
+		$this->assertArrayHasKey( 'details', $stored_error['context'] );
+		$this->assertArrayHasKey( 'trace', $stored_error['context'] );
+		$this->assertArrayHasKey( 'response', $stored_error['context'] );
+		$this->assertSame( 'Some additional details', $stored_error['context']['details'] );
+		$this->assertSame( 'stack trace info', $stored_error['context']['trace'] );
+		$this->assertSame( 'raw response data', $stored_error['context']['response'] );
+
+		// Verify no extra keys remain at the top level.
+		$this->assertCount( 3, $stored_error, 'Error should only have code, message, and context keys' );
+	}
+
+	/**
+	 * Test that error sanitization merges extra keys with existing context.
+	 *
+	 * When an error has both a 'context' key and extra keys, the extra keys should be
+	 * merged into the context with existing context values taking precedence.
+	 *
+	 * @return void
+	 */
+	public function test_error_sanitization_merges_extra_keys_with_existing_context() {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		// Make it working.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the NOX profile.
+		$step_id                 = WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT;
+		$stored_profile          = array();
+		$updated_stored_profiles = array();
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$updated_stored_profiles, $stored_profile ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return ! empty( $updated_stored_profiles ) ? end( $updated_stored_profiles ) : $stored_profile;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$updated_stored_profiles ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						$updated_stored_profiles[] = $value;
+						return true;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Arrange the REST API requests to return a WP_Error with context containing extra keys.
+		// The error_data has a 'details' key that should be moved to context,
+		// and a nested 'context' with 'existing_key'.
+		$error_data = array(
+			'details' => 'Extra details',
+			'context' => array(
+				'existing_key'   => 'existing value',
+				'conflicting_key' => 'context value',
+			),
+			'conflicting_key' => 'extra key value', // This should be overwritten by context value.
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( $error_data ) {
+						unset( $params ); // Avoid parameter not used PHPCS errors.
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return new WP_Error( 'test_error', 'Test error message', $error_data );
+						}
+
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act.
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+		} catch ( \Exception $e ) {
+			unset( $e );
+		}
+
+		// Assert.
+		$this->assertNotEmpty( $updated_stored_profiles );
+		$final_profile = end( $updated_stored_profiles );
+		$stored_error  = $final_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['error'];
+
+		$this->assertArrayHasKey( 'context', $stored_error );
+		$this->assertIsArray( $stored_error['context'] );
+
+		// Verify extra key was moved to context.
+		$this->assertArrayHasKey( 'details', $stored_error['context'] );
+		$this->assertSame( 'Extra details', $stored_error['context']['details'] );
+
+		// Verify existing context key is preserved.
+		$this->assertArrayHasKey( 'existing_key', $stored_error['context'] );
+		$this->assertSame( 'existing value', $stored_error['context']['existing_key'] );
+
+		// Verify that the context value takes precedence over the extra key value for conflicting keys.
+		$this->assertArrayHasKey( 'conflicting_key', $stored_error['context'] );
+		$this->assertSame( 'context value', $stored_error['context']['conflicting_key'] );
+	}
+
+	/**
 	 * Test onboarding_test_account_init that throws an exception when the REST API call doesn't return success.
 	 *
 	 * @return void
