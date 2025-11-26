@@ -7,6 +7,7 @@ import type {
 } from '@woocommerce/stores/woocommerce/cart';
 
 export const doesCartItemMatchAttributes = (
+	// This could be cartItem: CartItem and CartItemVariation
 	cartItem: OptimisticCartItem,
 	selectedAttributes: SelectedAttributes[]
 ) => {

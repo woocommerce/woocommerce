@@ -22,6 +22,7 @@ import type { Context as QuantitySelectorContext } from './quantity-selector/fro
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 import type { NormalizedProductData, NormalizedVariationData } from './types';
 
+// Do we need to export these types?
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
 	quantity: Record< number, number >;
@@ -69,6 +70,7 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
+// This should be replaced with state.product.
 export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
@@ -116,6 +118,7 @@ export const getProductData = (
 	};
 };
 
+// Not sure if this function is needed.
 export const getNewQuantity = (
 	productId: number,
 	quantity: number,
@@ -189,10 +192,12 @@ const { actions, state } = store<
 
 				return productData?.is_in_stock ?? true;
 			},
+			// Why do we need this instead of using context?
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
 				return context.quantity;
 			},
+			// Why do we need this instead of using context?
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];

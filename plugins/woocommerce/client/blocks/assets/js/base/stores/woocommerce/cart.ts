@@ -32,20 +32,33 @@ export type WooCommerceConfig = {
 	currency?: Currency;
 };
 
+// Why are we exporting all the types? Where should they live?
+// Why some are inside @woocommerce/types and others here?
+
+// The `add-cart` action in the store API uses `attribute` as `raw_attribute`.
+// I personally find it confusing. Maybe we should use `raw_attribute` and then only
+// change it when sending to the API.
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
+// Review all these types. I don't fully understand them. Check if the variation differentiation is needed.
+// Should these be a destructure of the CartItem interface?
 export type OptimisticCartItem = {
 	key?: string | undefined;
 	id: number;
 	quantity: number;
-	variation?: CartVariationItem[];
+	variation: CartVariationItem[];
+	// This shouldn't be needed.
 	type: string;
 };
 
+// How is this different?
 export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 	variation?: SelectedAttributes[];
 };
 
+// Whhere are these types coming from?
+// It doesn't match what is included in the REST API.
+// Shouldn't this be defined in the products store? Or if it is specific to the add to cart form, in the add to cart with options block?
 export type VariationData = {
 	attributes: Record< string, string >;
 	is_in_stock: boolean;
@@ -62,6 +75,8 @@ export type VariationData = {
 	step?: number;
 };
 
+// Why don't we use ProductResponseItem?
+// Shouldn't this be defined in the products store?
 export type ProductData = {
 	type: string;
 	is_in_stock: boolean;
@@ -72,9 +87,11 @@ export type ProductData = {
 	sku?: string;
 	weight?: string;
 	dimensions?: string;
+	// These are different from the REST API. Why don't we use the same structure?
 	min?: number;
 	max?: number;
 	step?: number;
+	// This doesn't match the REST API.
 	variations?: Record< number, VariationData >;
 };
 
@@ -87,6 +104,7 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
+		// Should this use Cart or CartResponse?
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
@@ -306,9 +324,16 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				{ id, key, quantity, variation }: ClientCartItem,
+				// Should quantity be the final quantity or the quantity to add?
+				{
+					id,
+					key,
+					quantity,
+					variation: selectedAttributes = [],
+				}: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
+				// Given the id and variation (selected attributes), it should be able to find the product.
 				let item = state.cart.items.find( ( cartItem ) => {
 					// This shouldn't be needed and just with the selected attributes and getProductDatashould be enough.
 					if ( cartItem.type === 'variation' ) {
@@ -319,14 +344,15 @@ const { state, actions } = store< Store >(
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
+							! selectedAttributes ||
+							cartItem.variation.length !==
+								selectedAttributes.length
 						) {
 							return false;
 						}
 						return doesCartItemMatchAttributes(
 							cartItem,
-							variation
+							selectedAttributes
 						);
 					}
 					// If no key is provided, rely on the id.
@@ -339,6 +365,7 @@ const { state, actions } = store< Store >(
 				// Optimistically update the number of items in the cart except
 				// if the product is sold individually and is already in the
 				// cart.
+				// I need to understand better this logic and why item is being updated.
 				let updatedItem = null;
 				if ( item ) {
 					const isSoldIndividually =
@@ -352,7 +379,9 @@ const { state, actions } = store< Store >(
 					item = {
 						id,
 						quantity,
-						...( variation && { variation } ),
+						...( selectedAttributes && {
+							variation: selectedAttributes,
+						} ),
 					} as OptimisticCartItem;
 					quantityChanges.productsPendingAdd = [ id ];
 					state.cart.items.push( item );

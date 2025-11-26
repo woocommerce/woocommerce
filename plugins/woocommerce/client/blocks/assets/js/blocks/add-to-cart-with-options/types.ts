@@ -12,6 +12,7 @@ export interface Attributes {
 	className?: string;
 }
 
+// What are these normalized types for? Is not the same as ProductData and VariationData?
 export type NormalizedProductData = ProductData & {
 	id: number;
 	min: number;
