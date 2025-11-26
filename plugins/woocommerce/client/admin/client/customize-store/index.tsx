@@ -188,16 +188,16 @@ const CustomizeStoreController = () => {
 							</Button>
 						</div>
 					</div>
-					<div className="banner-visual">
+					<div className="woocommerce-banner-visual">
 						<img
 							src={ banner1Shape }
 							alt=""
-							className="banner-shape"
+							className="woocommerce-banner-shape"
 						/>
 						<img
 							src={ banner1Icon }
 							alt=""
-							className="banner-icon"
+							className="woocommerce-banner-icon"
 						/>
 					</div>
 				</div>
@@ -251,16 +251,16 @@ const CustomizeStoreController = () => {
 							</Button>
 						</div>
 					</div>
-					<div className="banner-visual">
+					<div className="woocommerce-banner-visual">
 						<img
 							src={ banner2Shape }
 							alt=""
-							className="banner-shape"
+							className="woocommerce-banner-shape"
 						/>
 						<img
 							src={ banner2Icon }
 							alt=""
-							className="banner-icon"
+							className="woocommerce-banner-icon"
 						/>
 					</div>
 				</div>
