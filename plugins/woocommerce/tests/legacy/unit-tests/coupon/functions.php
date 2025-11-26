@@ -97,5 +97,7 @@ class WC_Tests_Functions extends WC_Unit_Test_Case {
 		WC_Helper_Coupon::delete_coupon( $coupon2->get_id() );
 
 		$this->assertEquals( $coupon1->get_id(), wc_get_coupon_id_by_code( 'testCOUPON' ) );
+
+		WC_Helper_Coupon::delete_coupon( $coupon1->get_id() );
 	}
 }
