@@ -159,8 +159,7 @@ export type AddToCartWithOptionsStore = {
 		setQuantity: ( productId: number, value: number ) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
-		addToCart: () => void;
-		handleSubmit: ( event: SubmitEvent ) => void;
+		addToCart: ( event: SubmitEvent ) => void;
 	};
 };
 
@@ -327,8 +326,44 @@ const { actions, state } = store<
 					validationErrors.length = 0;
 				}
 			},
-			*addToCart() {
-				// Include the errors when the form is not valid here??
+			*addToCart( event: SubmitEvent ) {
+				// Check if the form is valid before adding to cart.
+				event.preventDefault();
+
+				if ( ! state.isFormValid ) {
+					// Dynamically import the store module first
+					yield import( '@woocommerce/stores/store-notices' );
+
+					const { actions: noticeActions } = store< StoreNotices >(
+						'woocommerce/store-notices',
+						{},
+						{
+							lock: universalLock,
+						}
+					);
+
+					const { noticeIds, validationErrors } = state;
+
+					// Clear previous notices.
+					noticeIds.forEach( ( id ) => {
+						noticeActions.removeNotice( id );
+					} );
+					noticeIds.splice( 0, noticeIds.length );
+
+					// Add new notices and track their IDs.
+					const newNoticeIds = validationErrors.map( ( error ) =>
+						noticeActions.addNotice( {
+							notice: error.message,
+							type: 'error',
+							dismissible: true,
+						} )
+					);
+
+					// Store the new IDs in-place.
+					noticeIds.push( ...newNoticeIds );
+
+					return;
+				}
 
 				// If array is one, call addToCart, if multiple call batchAddToCart.
 
@@ -395,50 +430,6 @@ const { actions, state } = store<
 						showCartUpdatesNotices: false,
 					}
 				);
-			},
-			// Change this name to be more specific.
-			// Not sure if it is even needed or if should just be addToCart.
-			*handleSubmit( event: SubmitEvent ) {
-				event.preventDefault();
-
-				const { isFormValid } = state;
-
-				if ( ! isFormValid ) {
-					// Dynamically import the store module first
-					yield import( '@woocommerce/stores/store-notices' );
-
-					const { actions: noticeActions } = store< StoreNotices >(
-						'woocommerce/store-notices',
-						{},
-						{
-							lock: universalLock,
-						}
-					);
-
-					const { noticeIds, validationErrors } = state;
-
-					// Clear previous notices.
-					noticeIds.forEach( ( id ) => {
-						noticeActions.removeNotice( id );
-					} );
-					noticeIds.splice( 0, noticeIds.length );
-
-					// Add new notices and track their IDs.
-					const newNoticeIds = validationErrors.map( ( error ) =>
-						noticeActions.addNotice( {
-							notice: error.message,
-							type: 'error',
-							dismissible: true,
-						} )
-					);
-
-					// Store the new IDs in-place.
-					noticeIds.push( ...newNoticeIds );
-
-					return;
-				}
-
-				yield actions.addToCart();
 			},
 		},
 	},
