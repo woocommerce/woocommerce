@@ -62,14 +62,13 @@ class WC_Helper_Coupon {
 	/**
 	 * Delete a coupon.
 	 *
-	 * @param $coupon_id
+	 * @param string $coupon_id
 	 *
 	 * @return bool
 	 */
 	public static function delete_coupon( $coupon_id ) {
-		wp_delete_post( $coupon_id, true );
-
-		return true;
+		$coupon = new WC_Coupon( $coupon_id );
+		return $coupon->delete( true );
 	}
 
 	/**

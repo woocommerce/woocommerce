@@ -58,7 +58,7 @@ class WC_Tests_Coupon_Data_Store extends WC_Unit_Test_Case {
 		$coupon = WC_Helper_Coupon::create_coupon( 'test' );
 
 		// Prime the cache.
-		$hashed_code = md5( $coupon->get_code() );
+		$hashed_code = md5( wc_strtolower( $coupon->get_code() ) );
 		$cache_name  = WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed_code;
 		wc_get_coupon_id_by_code( $coupon->get_code() );
 
