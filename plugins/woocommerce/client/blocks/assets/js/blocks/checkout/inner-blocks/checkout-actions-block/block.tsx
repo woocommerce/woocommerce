@@ -7,11 +7,16 @@ import {
 	PlaceOrderButton,
 	ReturnToCartButton,
 } from '@woocommerce/base-components/cart-checkout';
-import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
+import {
+	useCheckoutSubmit,
+	usePaymentMethodInterface,
+} from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { CART_URL } from '@woocommerce/block-settings';
+import { useSelect } from '@wordpress/data';
+import { paymentStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -37,7 +42,22 @@ const Block = ( {
 	returnToCartButtonLabel,
 	priceSeparator,
 }: BlockAttributes ) => {
-	const { paymentMethodButtonLabel } = useCheckoutSubmit();
+	const { paymentMethodButtonLabel, paymentMethodPlaceOrderButton } =
+		useCheckoutSubmit();
+
+	// Get the full payment method interface for custom buttons
+	const paymentMethodInterface = usePaymentMethodInterface();
+
+	// Check if a saved payment token is selected
+	const activeSavedToken = useSelect( ( select ) => {
+		const store = select( paymentStore );
+		return store.getActiveSavedToken();
+	}, [] );
+
+	// not showing the custom button when a saved token is selected - only when the payment method is selected from the list.
+	const CustomButtonComponent = activeSavedToken
+		? null
+		: paymentMethodPlaceOrderButton;
 
 	const label = applyCheckoutFilter( {
 		filterName: 'placeOrderButtonLabel',
@@ -70,12 +90,16 @@ const Block = ( {
 						{ returnToCartButtonLabel }
 					</ReturnToCartButton>
 				) }
-				<PlaceOrderButton
-					label={ label }
-					fullWidth={ ! shouldShowReturnToCart }
-					showPrice={ showPrice }
-					priceSeparator={ priceSeparator }
-				/>
+				{ CustomButtonComponent ? (
+					<CustomButtonComponent { ...paymentMethodInterface } />
+				) : (
+					<PlaceOrderButton
+						label={ label }
+						fullWidth={ ! shouldShowReturnToCart }
+						showPrice={ showPrice }
+						priceSeparator={ priceSeparator }
+					/>
+				) }
 			</div>
 		</div>
 	);

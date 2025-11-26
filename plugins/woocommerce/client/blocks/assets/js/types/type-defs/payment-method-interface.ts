@@ -171,6 +171,8 @@ export type PaymentMethodInterface = {
 	eventRegistration: EventRegistrationProps;
 	// Used to trigger checkout processing.
 	onSubmit: () => void;
+	// Validates the checkout form without starting processing. Returns a promise with validation results.
+	validate: () => Promise< { hasError: boolean } >;
 	// Various payment status helpers.
 	paymentStatus: {
 		isIdle: boolean;

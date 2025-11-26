@@ -41,6 +41,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 		onCheckoutAfterProcessingWithSuccess,
 		onCheckoutAfterProcessingWithError,
 		onSubmit,
+		validate,
 	} = useCheckoutEventsContext();
 
 	const { onCheckoutValidation, onCheckoutSuccess, onCheckoutFail } =
@@ -238,6 +239,7 @@ export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 			onShippingRateSuccess,
 		},
 		onSubmit,
+		validate,
 		paymentStatus,
 		setExpressPaymentError: deprecatedSetExpressPaymentError,
 		shippingData: {
