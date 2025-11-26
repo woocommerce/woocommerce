@@ -7384,9 +7384,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// The error_data has a 'details' key that should be moved to context,
 		// and a nested 'context' with 'existing_key'.
 		$error_data = array(
-			'details' => 'Extra details',
-			'context' => array(
-				'existing_key'   => 'existing value',
+			'details'         => 'Extra details',
+			'context'         => array(
+				'existing_key'    => 'existing value',
 				'conflicting_key' => 'context value',
 			),
 			'conflicting_key' => 'extra key value', // This should be overwritten by context value.

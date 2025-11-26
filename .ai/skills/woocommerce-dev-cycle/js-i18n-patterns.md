@@ -289,10 +289,10 @@ pnpm run lint  # NO - lints everything
 
 ## Summary
 
-| Pattern                      | Example                                    |
-|------------------------------|--------------------------------------------|
-| **Single placeholder**       | `sprintf( __( 'Set up %s' ), 'Name' )`     |
-| **Repeated placeholder**     | `sprintf( __( '%1$s via %1$s' ), 'Name' )` |
-| **Multiple placeholders**    | `sprintf( __( '%1$s in %2$s' ), 'A', 'B' )`|
-| **Comment format (simple)**  | `/* translators: %s: Provider name */`     |
-| **Comment format (numbered)**| `/* translators: 1: Provider, 2: Country */`|
+| Pattern                       | Example                                      |
+|-------------------------------|----------------------------------------------|
+| **Single placeholder**        | `sprintf( __( 'Set up %s' ), 'Name' )`       |
+| **Repeated placeholder**      | `sprintf( __( '%1$s via %1$s' ), 'Name' )`   |
+| **Multiple placeholders**     | `sprintf( __( '%1$s in %2$s' ), 'A', 'B' )`  |
+| **Comment format (simple)**   | `/* translators: %s: Provider name */`       |
+| **Comment format (numbered)** | `/* translators: 1: Provider, 2: Country */` |
