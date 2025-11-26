@@ -472,7 +472,7 @@ class Controller extends AbstractController {
 	 * @since 10.5.0
 	 * @return array The schema for the providers endpoint.
 	 */
-	private function get_schema_for_providers(): array {
+	public function get_schema_for_providers(): array {
 		return array(
 			'$schema'              => 'http://json-schema.org/draft-04/schema#',
 			'title'                => __( 'Shipping providers', 'woocommerce' ),
