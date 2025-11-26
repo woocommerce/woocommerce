@@ -148,15 +148,74 @@ registerPaymentMethod( options );
 
 The options you feed the configuration instance should be an object in this shape (see `PaymentMethodRegistrationOptions` typedef). The options you feed the configuration instance are the same as those for express payment methods with the following additions:
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `savedTokenComponent` | ReactNode | A React node that contains logic for handling saved payment methods. Rendered when a customer's saved token for this payment method is selected. |
-| `label` | ReactNode | A React node used to output the label for the payment method option. Can be text or images. |
-| `ariaLabel` | string | The label read by screen-readers when the payment method is selected. |
-| `placeOrderButtonLabel` | string | Optional label to change the default "Place Order" button text when this payment method is selected. |
-| `supports` | object | Contains information about supported features: |
-| `supports.showSavedCards` | boolean | Determines if saved cards for this payment method are shown to the customer. |
-| `supports.showSaveOption` | boolean | Controls whether to show the checkbox for saving the payment method for future use. |
+| Property                  | Type              | Description                                                                                                                                      |
+|---------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
+| `savedTokenComponent`     | ReactNode         | A React node that contains logic for handling saved payment methods. Rendered when a customer's saved token for this payment method is selected. |
+| `label`                   | ReactNode         | A React node used to output the label for the payment method option. Can be text or images.                                                      |
+| `ariaLabel`               | string            | The label read by screen-readers when the payment method is selected.                                                                            |
+| `placeOrderButtonLabel`   | string            | Optional label to change the default "Place Order" button text when this payment method is selected. Mutually exclusive with `placeOrderButton`. |
+| `placeOrderButton`        | React Component   | Optional React component to replace the default "Place Order" button when this payment method is selected. Mutually exclusive with `placeOrderButtonLabel`. The component receives `PaymentMethodInterface` props. |
+| `supports`                | object            | Contains information about supported features:                                                                                                   |
+| `supports.showSavedCards` | boolean           | Determines if saved cards for this payment method are shown to the customer.                                                                     |
+| `supports.showSaveOption` | boolean           | Controls whether to show the checkbox for saving the payment method for future use.                                                              |
+
+### Using Custom Place Order Button
+
+The `placeOrderButton` property allows you to replace the default "Place Order" button with a custom component. This is useful for payment methods that require custom button styling (e.g., Google Pay, Apple Pay) or need to show a payment UI before submitting the order.
+
+Your custom button component receives all the same props as the payment method `content` component via the `PaymentMethodInterface`. Here's a simple example:
+
+```js
+const CustomButton = ( props ) => {
+	const { billing, checkoutStatus, validate, onSubmit } = props;
+	const [ isLoading, setIsLoading ] = React.useState( false );
+
+	const handleClick = async () => {
+		setIsLoading( true );
+
+		// 1. Validate the checkout form
+		const validationResult = await validate();
+
+		if ( validationResult.hasError ) {
+			setIsLoading( false );
+			return; // WooCommerce automatically displays validation errors
+		}
+
+		// 2. Show your payment UI (e.g., Google Pay sheet, Apple Pay sheet)
+		// const paymentResult = await showPaymentSheet( billing.cartTotal.value );
+		// if ( ! paymentResult.success ) {
+		//     setIsLoading( false );
+		//     return;
+		// }
+
+		// 3. Submit the checkout
+		onSubmit();
+	};
+
+	return (
+		<button
+			onClick={ handleClick }
+			disabled={ checkoutStatus.isProcessing || isLoading }
+		>
+			{ isLoading ? 'Processing...' : 'Pay with Custom Method' }
+		</button>
+	);
+};
+
+registerPaymentMethod( {
+	name: 'my-custom-payment',
+	label: <div>My Custom Payment</div>,
+	content: <div>Payment method description</div>,
+	edit: <div>Payment method description</div>,
+	placeOrderButton: CustomButton,
+	canMakePayment: () => true,
+	supports: {
+		features: [ 'products' ],
+	},
+} );
+```
+
+**Note:** The custom button is only shown when the payment method is selected from the list. When a saved payment token is selected, the default "Place Order" button is used instead.
 
 ## Props Fed to Payment Method Nodes
 
