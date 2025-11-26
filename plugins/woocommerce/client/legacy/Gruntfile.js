@@ -149,7 +149,6 @@ module.exports = function ( grunt ) {
 				tasks: [
 					'sass',
 					'rtlcss',
-					'postcss',
 					'cssmin',
 					'concat:css',
 					'move:css',
@@ -280,7 +279,8 @@ module.exports = function ( grunt ) {
 	grunt.registerTask( 'css', [
 		'sass',
 		'rtlcss',
-		'postcss',
+		// Note: postcss/autoprefixer removed - modern browsers (per @wordpress/browserslist-config)
+		// no longer need CSS vendor prefixes. See https://github.com/browserslist/browserslist
 		'cssmin',
 		'concat:css',
 		'move:css',

@@ -18,7 +18,14 @@
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
 	"scripts": {
-		"build": "pnpm -r --workspace-concurrency=Infinity --stream '/^build:project:.*$/'",
+		"build": "node bin/build.js",
+		"build:verbose": "node bin/build.js --verbose",
+		"build:legacy": "pnpm -r --workspace-concurrency=Infinity --stream '/^build:project:.*$/'",
+		"watch": "node bin/watch.js",
+		"watch:verbose": "node bin/watch.js --verbose",
+		"watch:admin": "node bin/watch.js admin",
+		"watch:blocks": "node bin/watch.js blocks",
+		"watch:classic-assets": "node bin/watch.js classic-assets",
 		"test": "pnpm -r test",
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",

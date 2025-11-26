@@ -45,7 +45,8 @@ class CustomTemplatedPathPlugin {
 		compiler.hooks.compilation.tap(
 			'CustomTemplatedPathPlugin',
 			( compilation ) => {
-				compilation.mainTemplate.hooks.assetPath.tap(
+				// Use Compilation.hooks.assetPath instead of deprecated MainTemplate.hooks.assetPath
+				compilation.hooks.assetPath.tap(
 					'CustomTemplatedPathPlugin',
 					( path, data ) => {
 						for ( let i = 0; i < this.handlers.length; i++ ) {

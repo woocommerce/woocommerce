@@ -22,7 +22,8 @@ class AddSplitChunkDependencies {
 							.PROCESS_ASSETS_STAGE_ANALYSE,
 					},
 					() => {
-						const { chunks } = compilation;
+						// Convert chunks Set to Array for filtering (webpack 5 changed chunks from Array to Set)
+						const chunks = [ ...compilation.chunks ];
 
 						const splitChunks = chunks.filter( ( chunk ) => {
 							return chunk?.chunkReason?.includes( 'split' );
@@ -31,9 +32,11 @@ class AddSplitChunkDependencies {
 						// find files that have an asset.php file
 						const chunksToAddSplitsTo = chunks.filter(
 							( chunk ) => {
+								// Convert files Set to Array for find() (webpack 5 changed files from Array to Set)
+								const files = [ ...chunk.files ];
 								return (
 									! chunk?.chunkReason?.includes( 'split' ) &&
-									chunk.files.find( ( file ) =>
+									files.find( ( file ) =>
 										file.endsWith( 'asset.php' )
 									)
 								);
@@ -41,7 +44,9 @@ class AddSplitChunkDependencies {
 						);
 
 						for ( const chunk of chunksToAddSplitsTo ) {
-							const assetFile = chunk.files.find( ( file ) =>
+							// Convert files Set to Array for find()
+							const files = [ ...chunk.files ];
+							const assetFile = files.find( ( file ) =>
 								file.endsWith( 'asset.php' )
 							);
 

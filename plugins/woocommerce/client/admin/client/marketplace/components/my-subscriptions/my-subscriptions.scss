@@ -396,7 +396,7 @@
 
 		&.is-error,
 		&.is-warning {
-			align-items: start;
+			align-items: flex-start;
 
 			.components-notice__content {
 				margin: 0;
