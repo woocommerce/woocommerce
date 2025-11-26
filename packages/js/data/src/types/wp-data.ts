@@ -74,7 +74,7 @@ type CastToFunction< T > = Cast< T, ( ...args: any[] ) => any >;
 /**
  * Parameters type of a function, excluding the first parameter.
  *
- * This is useful for typing some @wordpres/data functions that make a leading
+ * This is useful for typing some @wordpress/data functions that make a leading
  * `state` argument implicit.
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
