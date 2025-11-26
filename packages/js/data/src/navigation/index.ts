@@ -20,6 +20,8 @@ import { PromiseifySelectors } from '../types/promiseify-selectors';
 
 export { type State };
 
+export const INTERNAL_CALL = Symbol( 'INTERNAL_CALL' );
+
 // Generic wrapper that applies deprecate() to all functions.
 function wrapWithDeprecate< T extends Record< string, unknown > >( obj: T ): T {
 	const wrapped = {} as T;
@@ -31,8 +33,8 @@ function wrapWithDeprecate< T extends Record< string, unknown > >( obj: T ): T {
 				// - onLoad (automatically called by initDispatchers)
 				// - onHistoryChange when called internally with true flag
 				const shouldSkipDeprecation =
-					key === 'onLoad' ||
-					( key === 'onHistoryChange' && args[ 0 ] === true );
+					( key === 'onLoad' || key === 'onHistoryChange' ) &&
+					args[ 0 ] === INTERNAL_CALL;
 
 				if ( ! shouldSkipDeprecation ) {
 					deprecated( 'Navigation store', {} );
