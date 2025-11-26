@@ -58,9 +58,11 @@
 // Mixin for sidebar styling
 @mixin sidebar-container {
 	width: 380px;
+	height: 100%;
+	padding: 0 16px;
 	display: flex;
 	flex-direction: column;
-	height: 100%;
+	overflow-x: hidden;
 
 	@media screen and (max-width: 782px) {
 		display: none;
@@ -131,10 +133,6 @@
 			fill: #ccc;
 		}
 	}
-
-	will-change: auto;
-	padding: 0 16px;
-	overflow-x: hidden;
 
 	.woocommerce-edit-site-sidebar-navigation-screen__main {
 		height: 100%;

@@ -46,10 +46,15 @@ const CustomizeStoreController = () => {
 
 	const isBlockTheme = currentTheme?.is_block_theme;
 
+	// Encoding is needed to carry-over query parameters.
+	const encodedReturnUrl = encodeURIComponent(
+		'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store'
+	);
+
 	const getDesignUrl = () => {
 		return isBlockTheme
 			? getAdminLink( 'site-editor.php' )
-			: getAdminLink( 'customize.php?return=/wp-admin/themes.php' );
+			: getAdminLink( `customize.php?return=${ encodedReturnUrl }` );
 	};
 
 	const getMarketplaceUrl = () => {
@@ -92,11 +97,7 @@ const CustomizeStoreController = () => {
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
 
 	const sidebarTitle = (
-		<Button
-			onClick={ () => {
-				window.location.href = getNewPath( {}, '/', {} );
-			} }
-		>
+		<Button href={ getNewPath( {}, '/', {} ) }>
 			{ __( 'Customize your store', 'woocommerce' ) }
 		</Button>
 	);
@@ -179,7 +180,7 @@ const CustomizeStoreController = () => {
 				<div className="woocommerce-customize-store-banner">
 					<div className="woocommerce-customize-store-banner-content">
 						<div className="banner-actions">
-							<h1>{ __( 'Design your own', 'woocommerce' ) }</h1>
+							<h2>{ __( 'Design your own', 'woocommerce' ) }</h2>
 							<p>
 								{ __(
 									'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
