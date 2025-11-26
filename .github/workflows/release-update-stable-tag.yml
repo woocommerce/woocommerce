@@ -281,6 +281,7 @@ jobs:
               --base "$BRANCH_NAME" \
               --head "$UPDATE_BRANCH" \
               --reviewer ${{ github.actor }}
+              --label Release
 
             echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME"
           fi
