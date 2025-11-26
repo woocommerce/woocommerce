@@ -49,6 +49,8 @@
 		"lint:php:changes:branch": "composer run-script lint-branch",
 		"lint:php:changes:staged": "composer run-script lint-staged",
 		"lint:php:fix": "composer run-script phpcbf",
+		"phpstan": "composer run-script phpstan",
+		"phpstan:baseline": "composer run-script phpstan:baseline",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"makepot": "XDEBUG_MODE=off composer run-script makepot",
 		"test": "pnpm test:unit",
