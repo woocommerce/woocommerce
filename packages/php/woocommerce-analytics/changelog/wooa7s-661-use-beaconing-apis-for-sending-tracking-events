@@ -1,0 +1,4 @@
+Significance: minor
+Type: changed
+
+Added Beacon API support and replaced @wordpress/api-fetch with native fetch

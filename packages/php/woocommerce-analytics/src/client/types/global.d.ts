@@ -5,6 +5,7 @@
 declare global {
 	interface Window {
 		wcAnalytics?: {
+			trackEndpoint: string;
 			eventQueue: Array< { eventName: string; props?: Record< string, unknown > } >;
 			commonProps: Record< string, unknown >;
 			features: Record< string, boolean >;

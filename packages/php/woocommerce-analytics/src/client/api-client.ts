@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-import apiFetch from '@wordpress/api-fetch';
 import debugFactory from 'debug';
 /**
  * Internal dependencies
  */
-import { API_NAMESPACE, API_ENDPOINT, BATCH_SIZE, DEBOUNCE_DELAY } from './constants';
+import { BATCH_SIZE, DEBOUNCE_DELAY } from './constants';
 import type { ApiEvent, ApiFetchResponse } from './types/shared';
 
 const debug = debugFactory( 'wc-analytics:api-client' );
@@ -78,6 +77,32 @@ export class ApiClient {
 	};
 
 	/**
+	 * Send events using the Beacon API for guaranteed delivery
+	 *
+	 * @param events - The events to send.
+	 * @return True if beacon was successfully queued, false otherwise.
+	 */
+	private sendEventsViaBeacon = ( events: ApiEvent[] ): boolean => {
+		// Check if beacon API is available
+		if ( typeof navigator === 'undefined' || ! navigator.sendBeacon ) {
+			debug( 'Beacon API not available' );
+			return false;
+		}
+
+		try {
+			// Convert events to JSON and create a Blob with correct content type
+			const data = JSON.stringify( events );
+			const blob = new Blob( [ data ], { type: 'application/json' } );
+
+			// Send via beacon - returns true if successfully queued
+			return navigator.sendBeacon( window.wcAnalytics.trackEndpoint, blob );
+		} catch ( error ) {
+			debug( 'Beacon API failed: %o', error );
+			return false;
+		}
+	};
+
+	/**
 	 * Flush all pending events immediately
 	 */
 	flush = (): void => {
@@ -93,7 +118,20 @@ export class ApiClient {
 		const eventsToSend = [ ...this.eventQueue ];
 		this.eventQueue = [];
 
-		this.sendEvents( eventsToSend );
+		if ( ! window.wcAnalytics?.trackEndpoint ) {
+			debug( 'Track endpoint not available' );
+			return;
+		}
+
+		// Try sending via Beacon API first for guaranteed delivery
+		const beaconSuccess = this.sendEventsViaBeacon( eventsToSend );
+
+		if ( beaconSuccess ) {
+			debug( 'Sent %d events via Beacon API', eventsToSend.length );
+		} else {
+			debug( 'Failed to send events via Beacon API, falling back to fetch with keepalive' );
+			this.sendEvents( eventsToSend );
+		}
 	};
 
 	/**
@@ -109,16 +147,22 @@ export class ApiClient {
 		try {
 			debug( 'Sending %d events to API', events.length );
 
-			const response = await apiFetch< ApiFetchResponse >( {
-				path: `/${ API_NAMESPACE }/${ API_ENDPOINT }`,
+			const response = await fetch( window.wcAnalytics.trackEndpoint, {
 				method: 'POST',
-				data: events,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify( events ),
+				keepalive: true,
+				credentials: 'same-origin',
 			} );
-			debug( 'API response received: %o', response );
 
-			if ( ! response.success ) {
-				debug( 'Some events failed to send: %o', response.results );
+			if ( ! response.ok ) {
+				throw new Error( `HTTP error! status: ${ response.status }` );
 			}
+
+			const data: ApiFetchResponse = await response.json();
+			debug( 'API response received: %o', data );
 		} catch ( error ) {
 			debug( 'Failed to send events to API: %o', error );
 			// Re-add events to queue for potential retry on next event

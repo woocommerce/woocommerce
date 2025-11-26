@@ -86,6 +86,9 @@ class Universal {
 				// Set the assets URL for webpack to find the split assets.
 				wcAnalytics.assets_url = '<?php echo esc_url( plugins_url( '../build/', __DIR__ . '/class-woocommerce-analytics.php' ) ); ?>';
 
+				// Set the REST API tracking endpoint URL.
+				wcAnalytics.trackEndpoint = '<?php echo esc_url( rest_url( 'woocommerce-analytics/v1/track' ) ); ?>';
+
 				// Set common properties for all events.
 				wcAnalytics.commonProps = <?php echo wp_json_encode( $common_properties, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 
