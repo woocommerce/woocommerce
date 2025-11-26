@@ -34,34 +34,26 @@ const colors = {
 	magenta: '\x1b[35m',
 };
 
-// Patterns to suppress
+// Patterns to suppress (items that cannot be fixed at source)
 const SUPPRESS_PATTERNS = [
-	// Wireit internal messages
+	// Wireit internal messages (WIREIT_LOGGER=quiet helps but doesn't eliminate all)
 	/^\s*\d+%\s*\[\d+\s*\/\s*\d+\]/,
 	/^Analyzing$/,
 	/^\s*$/,
 	/\$ wireit$/,
-	// Verbose webpack output
-	/^asset\s+.*\d+(\.\d+)?\s*[KMG]?i?B/,
-	/^\s*\+ \d+ assets$/,
-	/^runtime modules/,
-	/^orphan modules/,
-	/^cacheable modules/,
-	/^modules by path/,
-	/^\s+javascript modules/,
-	/^\s+css modules/,
-	/^Entrypoint/,
-	// Repetitive completion messages
+	// Wireit completion messages
 	/✅ Ran \d+ scripts? and skipped \d+/,
 	/^Building \[/,
-	/Successfully compiled \d+ files/,
-	// TypeScript "Found 0 errors" messages (spam on every recompile)
+	// TypeScript watch messages (tsc has no --quiet flag for watch mode)
 	/Found 0 errors\. Watching for file changes/,
-	// Webpack compiled messages (too verbose, one per entry point)
+	/Starting compilation in watch mode/,
+	// Webpack compiled messages (one per entry point, too verbose)
 	/webpack compiled in \d+/,
 	/webpack \d+\.\d+\.\d+ compiled successfully/,
 	/interactivity.*compiled in \d+/,
-	// Dart Sass warnings from external dependencies (cannot fix)
+	// Babel "Successfully compiled" (no quiet option)
+	/Successfully compiled \d+ files/,
+	// Dart Sass warnings from @wordpress/* dependencies (external, cannot fix)
 	/DEPRECATION WARNING:.*Using \/ for division/,
 	/DEPRECATION WARNING.*Sass/,
 	/Recommendation: math\.div/,

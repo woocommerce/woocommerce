@@ -91,6 +91,12 @@ require( 'fs-extra' ).ensureSymlinkSync(
 const webpackConfig = {
 	mode: NODE_ENV,
 	entry: getEntryPoints(),
+	stats: {
+		all: false,
+		errors: true,
+		warnings: true,
+		timings: true,
+	},
 	output: {
 		filename: ( data ) => {
 			// Output wpAdminScripts to wp-admin-scripts folder

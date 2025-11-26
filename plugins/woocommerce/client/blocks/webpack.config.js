@@ -24,11 +24,8 @@ const sharedConfig = {
 	},
 	stats: {
 		all: false,
-		assets: true,
-		builtAt: true,
-		colors: true,
 		errors: true,
-		hash: true,
+		warnings: true,
 		timings: true,
 	},
 	watchOptions: {
