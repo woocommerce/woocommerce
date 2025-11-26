@@ -36,24 +36,51 @@ const colors = {
 
 // Patterns to suppress (items that cannot be fixed at source)
 const SUPPRESS_PATTERNS = [
-	// Wireit internal messages (WIREIT_LOGGER=quiet helps but doesn't eliminate all)
+	//
+	// Wireit internal messages
+	// WIREIT_LOGGER=quiet (set in env below) reduces output but doesn't eliminate all messages.
+	// No additional config available: https://github.com/nickreese/wireit#environment-variables
+	//
 	/^\s*\d+%\s*\[\d+\s*\/\s*\d+\]/,
 	/^Analyzing$/,
 	/^\s*$/,
 	/\$ wireit$/,
-	// Wireit completion messages
 	/✅ Ran \d+ scripts? and skipped \d+/,
 	/^Building \[/,
-	// TypeScript watch messages (tsc has no --quiet flag for watch mode)
+
+	//
+	// TypeScript watch mode messages
+	// tsc --watch has no --quiet or --silent flag. The "Found 0 errors" message cannot be suppressed.
+	// https://stackoverflow.com/questions/57133106/silent-output-from-tsc-in-terminal
+	// https://github.com/microsoft/TypeScript/issues/33151
+	//
 	/Found 0 errors\. Watching for file changes/,
 	/Starting compilation in watch mode/,
-	// Webpack compiled messages (one per entry point, too verbose)
+
+	//
+	// Webpack "compiled in X ms" messages
+	// These appear once per entry point. The stats config in webpack.config.js controls the detailed
+	// output (assets, modules, etc.) but not these summary messages which come from the compiler hook.
+	// https://webpack.js.org/configuration/stats/
+	//
 	/webpack compiled in \d+/,
 	/webpack \d+\.\d+\.\d+ compiled successfully/,
 	/interactivity.*compiled in \d+/,
-	// Babel "Successfully compiled" (no quiet option)
+
+	//
+	// Babel "Successfully compiled X files" messages
+	// Babel CLI has no --quiet flag for watch mode. The --silent flag exists but suppresses errors too.
+	// https://babeljs.io/docs/babel-cli
+	//
 	/Successfully compiled \d+ files/,
-	// Dart Sass warnings from @wordpress/* dependencies (external, cannot fix)
+
+	//
+	// Dart Sass deprecation warnings from @wordpress/* dependencies
+	// These warnings come from @wordpress/components and other external packages that use the
+	// deprecated "/" division syntax. We cannot fix these as they're in node_modules.
+	// The warnings will disappear when WordPress updates their packages to use math.div().
+	// https://sass-lang.com/documentation/breaking-changes/slash-div
+	//
 	/DEPRECATION WARNING:.*Using \/ for division/,
 	/DEPRECATION WARNING.*Sass/,
 	/Recommendation: math\.div/,
