@@ -458,7 +458,7 @@ class Controller extends AbstractController {
 		if ( ! is_array( $providers ) ) {
 			_doing_it_wrong(
 				'woocommerce_rest_prepare_fulfillments_providers',
-				__( 'The filter must return an array of providers.', 'woocommerce' ),
+				esc_html__( 'The filter must return an array of providers.', 'woocommerce' ),
 				'10.5.0'
 			);
 			$providers = array();
@@ -479,9 +479,9 @@ class Controller extends AbstractController {
 	 * @return array The validated providers array with invalid entries removed.
 	 */
 	private function validate_providers_structure( array $providers ): array {
-		$required_keys    = array( 'label', 'icon', 'value', 'url' );
-		$valid_providers  = array();
-		$has_invalid      = false;
+		$required_keys   = array( 'label', 'icon', 'value', 'url' );
+		$valid_providers = array();
+		$has_invalid     = false;
 
 		foreach ( $providers as $key => $provider ) {
 			if ( ! is_array( $provider ) ) {
@@ -501,7 +501,7 @@ class Controller extends AbstractController {
 		if ( $has_invalid ) {
 			_doing_it_wrong(
 				'woocommerce_rest_prepare_fulfillments_providers',
-				__( 'Some providers were removed because they are missing required keys (label, icon, value, url).', 'woocommerce' ),
+				esc_html__( 'Some providers were removed because they are missing required keys (label, icon, value, url).', 'woocommerce' ),
 				'10.5.0'
 			);
 		}
