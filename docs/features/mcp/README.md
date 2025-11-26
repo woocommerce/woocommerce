@@ -329,11 +329,11 @@ Check **WooCommerce → Status → Logs** for entries with source `woocommerce-m
 
 ## Important Considerations
 
-- **Developer Preview**: This feature is in preview status and may change
-- **Implementation Approach**: Current abilities use REST endpoint bridging as a preview implementation
+- **Developer Preview**: This feature is in preview status and may change.
+- **Implementation Approach**: Current abilities use REST endpoint bridging as a preview implementation.
 - **Breaking Changes**: Future updates may introduce breaking changes
-- **Production Testing**: Thoroughly test before deploying to production
-- **API Stability**: The WordPress Abilities API and MCP adapter are evolving
+- **Production Testing**: Thoroughly test before deploying to production.
+- **API Stability**: The WordPress Abilities API and MCP adapter are evolving.
 
 ## Related Resources
 
