@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer fulfillment deleted email (inital block version)
+ * Customer fulfillment deleted email (initial block version)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *

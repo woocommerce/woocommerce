@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer fulfillment updated email (inital block version)
+ * Customer fulfillment updated email (initial block version)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
