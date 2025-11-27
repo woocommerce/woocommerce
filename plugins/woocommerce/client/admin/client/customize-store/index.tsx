@@ -270,3 +270,43 @@ const CustomizeStoreController = () => {
 };
 
 export default CustomizeStoreController;
+
+// ============================================================================
+// Stub exports for backwards compatibility with old flow code (intro, design-without-ai, etc.)
+// These will be removed in Phase 2 cleanup
+// ============================================================================
+
+/**
+ * Stub event type for backwards compatibility.
+ * The old state machine code references this type.
+ */
+export type customizeStoreStateMachineEvents =
+	| { type: 'GO_BACK_TO_DESIGN_WITHOUT_AI' }
+	| { type: 'EXTERNAL_URL_UPDATE' }
+	| { type: 'INSTALL_FONTS' }
+	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
+	| { type: 'IS_FONT_LIBRARY_AVAILABLE'; payload: boolean }
+	| { type: 'FINISH_CUSTOMIZATION' }
+	| { type: 'SELECTED_BROWSE_ALL_THEMES' }
+	| { type: 'DESIGN_WITHOUT_AI' }
+	| { type: 'CLICKED_ON_BREADCRUMB' }
+	| { type: 'JETPACK_OFFLINE_HOWTO' }
+	| { type: 'SELECTED_NEW_THEME'; payload: { theme: string } }
+	| { type: 'SELECTED_ACTIVE_THEME'; payload: { theme: string } };
+
+/**
+ * Global window type declaration for backwards compatibility.
+ * The old flow code sets/reads this global object.
+ */
+declare global {
+	interface Window {
+		__wcCustomizeStore: {
+			isFontLibraryAvailable: boolean | null;
+			isPTKPatternsAPIAvailable: boolean | null;
+			activeThemeHasMods: boolean | undefined;
+			sendEventToIntroMachine: (
+				typeEvent: customizeStoreStateMachineEvents
+			) => void;
+		};
+	}
+}
