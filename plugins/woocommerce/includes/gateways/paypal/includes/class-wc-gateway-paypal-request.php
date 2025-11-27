@@ -327,7 +327,7 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
+		$paypal_order_id = $order->get_meta( '_paypal_order_id', true );
 		// Skip if the PayPal Order ID is not found. This means the order was not created via the Orders v2 API.
 		if ( ! $paypal_order_id ) {
 			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
@@ -341,7 +341,7 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$paypal_status    = $order->get_meta( '_paypal_status', true );
+		$paypal_status = $order->get_meta( '_paypal_status', true );
 		// Skip if the payment is already captured.
 		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
@@ -354,7 +354,7 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$paypal_debug_id  = null;
+		$paypal_debug_id = null;
 
 		try {
 			$request_body = array(
@@ -418,18 +418,18 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
-	    // If the authorization ID is not found, try to retrieve it from the PayPal order details as a fallback for backwards compatibility.
+		// If the authorization ID is not found, try to retrieve it from the PayPal order details.
 		if ( empty( $authorization_id ) ) {
 			WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
 
 			try {
 				$order_data         = $this->get_paypal_order_details( $paypal_order_id );
-				$authorization_data = $this->get_latest_transaction_data( 
-					$order_data['purchase_units'][0]['payments']['authorizations'] ?? array() 
+				$authorization_data = $this->get_latest_transaction_data(
+					$order_data['purchase_units'][0]['payments']['authorizations'] ?? array()
 				);
-				
-				$capture_data = $this->get_latest_transaction_data( 
-					$order_data['purchase_units'][0]['payments']['captures'] ?? array() 
+
+				$capture_data = $this->get_latest_transaction_data(
+					$order_data['purchase_units'][0]['payments']['captures'] ?? array()
 				);
 
 				// If the payment is already captured, store the capture ID and status, and return null as there is no authorization ID that needs to be captured.
@@ -486,13 +486,13 @@ class WC_Gateway_Paypal_Request {
 			if ( empty( $item['update_time'] ) ) {
 				continue;
 			}
-		
+
 			$timestamp = strtotime( $item['update_time'] );
-		
+
 			if ( false === $timestamp ) {
 				continue;
 			}
-		
+
 			// If this is the first valid timestamp, or the most recent so far, track it.
 			if ( ! isset( $latest_time ) || $timestamp > $latest_time ) {
 				$latest_time = $timestamp;
