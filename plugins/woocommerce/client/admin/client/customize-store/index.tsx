@@ -273,7 +273,7 @@ export default CustomizeStoreController;
 
 // ============================================================================
 // Stub exports for backwards compatibility with old flow code (intro, design-without-ai, etc.)
-// These will be removed in Phase 2 cleanup
+// These will be removed in Phase 2 cleanup (see https://github.com/woocommerce/woocommerce/pull/61991).
 // ============================================================================
 
 /**
