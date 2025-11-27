@@ -18,6 +18,20 @@ require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
  */
 class WC_Gateway_Paypal_Notices {
 	/**
+	 * The name of the notice for PayPal migration.
+	 *
+	 * @var string
+	 */
+	const PAYPAL_MIGRATION_NOTICE = 'paypal_migration_completed';
+
+	/**
+	 * The name of the notice for PayPal account restriction.
+	 *
+	 * @var string
+	 */
+	const PAYPAL_ACCOUNT_RESTRICTED_NOTICE = 'paypal_account_restricted';
+
+	/**
 	 * The PayPal gateway instance.
 	 *
 	 * @var WC_Gateway_Paypal
@@ -42,7 +56,7 @@ class WC_Gateway_Paypal_Notices {
 	}
 
 	/**
-	 * Add PayPal notices.
+	 * Add PayPal Standard notices.
 	 *
 	 * @return void
 	 */
@@ -75,8 +89,8 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
-		$this->add_paypal_migration_notice_on_payments_settings_page();
-		$this->add_paypal_account_restricted_notice_on_payments_settings_page();
+		$this->add_paypal_migration_notice();
+		$this->add_paypal_account_restricted_notice();
 	}
 
 	/**
@@ -84,18 +98,14 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * @return void
 	 */
-	public function add_paypal_migration_notice() {
+	private function add_paypal_migration_notice() {
 		// Skip if the notice has been dismissed.
-		if ( $this->is_notice_dismissed( 'paypal_migration_completed' ) ) {
+		if ( $this->is_notice_dismissed( self::PAYPAL_MIGRATION_NOTICE ) ) {
 			return;
 		}
 
 		$doc_url     = 'https://woocommerce.com/document/woocommerce-paypal-payments/paypal-payments-upgrade-guide/';
-		$dismiss_url = wp_nonce_url(
-			add_query_arg( 'wc-hide-notice', 'paypal_migration_completed' ),
-			'woocommerce_hide_notices_nonce',
-			'_wc_notice_nonce'
-		);
+		$dismiss_url = $this->get_dismiss_url( self::PAYPAL_MIGRATION_NOTICE );
 		$message     = sprintf(
 			/* translators: 1: opening <a> tag, 2: closing </a> tag */
 			esc_html__( 'WooCommerce has upgraded your PayPal integration from PayPal Standard to PayPal Payments (PPCP), for a more reliable and modern checkout experience. If you do not prefer the upgraded integration in WooCommerce, we recommend switching to %1$sPayPal Payments%2$s extension.', 'woocommerce' ),
@@ -112,36 +122,23 @@ class WC_Gateway_Paypal_Notices {
 	}
 
 	/**
-	 * Check if the notice has been dismissed.
-	 *
-	 * @return bool
-	 */
-	protected static function is_notice_dismissed( $notice_name ) {
-		return get_user_meta( get_current_user_id(), 'dismissed_' . $notice_name . '_notice', true );
-	}
-
-	/**
 	 * Add notice warning about PayPal account restriction.
 	 *
 	 * @return void
 	 */
-	public function add_paypal_account_restricted_notice() {
+	private function add_paypal_account_restricted_notice() {
 		// Skip if there's no account restriction flag.
 		if ( ! $this->has_account_restriction_flag() ) {
 			return;
 		}
 
 		// Skip if the notice has been dismissed.
-		if ( $this->is_notice_dismissed( 'paypal_account_restricted' ) ) {
+		if ( $this->is_notice_dismissed( self::PAYPAL_ACCOUNT_RESTRICTED_NOTICE ) ) {
 			return;
 		}
 
 		$support_url = 'https://www.paypal.com/us/smarthelp/contact-us';
-		$dismiss_url = wp_nonce_url(
-			add_query_arg( 'wc-hide-notice', 'paypal_account_restricted' ),
-			'woocommerce_hide_notices_nonce',
-			'_wc_notice_nonce'
-		);
+		$dismiss_url = $this->get_dismiss_url( self::PAYPAL_ACCOUNT_RESTRICTED_NOTICE );
 		$message     = sprintf(
 			/* translators: 1: opening <a> tag, 2: closing </a> tag */
 			esc_html__( 'Your PayPal account has been restricted by PayPal. This may prevent customers from completing payments. Please %1$scontact PayPal support%2$s to resolve this issue and restore full functionality to your account.', 'woocommerce' ),
@@ -159,12 +156,27 @@ class WC_Gateway_Paypal_Notices {
 	}
 
 	/**
-	 * Check if the account restricted notice has been dismissed.
+	 * Get the dismiss URL for a notice.
 	 *
+	 * @param string $notice_name The name of the notice.
+	 * @return string
+	 */
+	private function get_dismiss_url( $notice_name ) {
+		return wp_nonce_url(
+			add_query_arg( 'wc-hide-notice', $notice_name ),
+			'woocommerce_hide_notices_nonce',
+			'_wc_notice_nonce'
+		);
+	}
+
+	/**
+	 * Check if the notice has been dismissed.
+	 *
+	 * @param string $notice_name The name of the notice.
 	 * @return bool
 	 */
-	protected static function paypal_account_restricted_notice_dismissed() {
-		return get_user_meta( get_current_user_id(), 'dismissed_paypal_account_restricted_notice', true );
+	private function is_notice_dismissed( $notice_name ) {
+		return get_user_meta( get_current_user_id(), 'dismissed_' . $notice_name . '_notice', true );
 	}
 
 	/**
@@ -172,7 +184,7 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * @return bool
 	 */
-	public function has_account_restriction_flag() {
+	private function has_account_restriction_flag() {
 		return 'yes' === $this->gateway->get_option( 'paypal_account_restricted', 'no' );
 	}
 
