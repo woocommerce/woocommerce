@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: Fixed fatal error in Store API when product has custom attribute matching a global attribute slug.
