@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import { useEffect } from '@wordpress/element';
+import { useEffect, useMemo } from '@wordpress/element';
 import { __, isRTL } from '@wordpress/i18n';
 import {
 	Button,
@@ -46,18 +46,18 @@ const CustomizeStoreController = () => {
 
 	const isBlockTheme = currentTheme?.is_block_theme;
 
-	// Encoding is needed to carry-over query parameters.
-	const encodedReturnUrl = encodeURIComponent(
-		'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store'
-	);
+	const designUrl = useMemo( () => {
+		// Encoding is needed to carry-over query parameters.
+		const encodedReturnUrl = encodeURIComponent(
+			'/wp-admin/admin.php?page=wc-admin&path=%2Fcustomize-store'
+		);
 
-	const getDesignUrl = () => {
 		return isBlockTheme
 			? getAdminLink( 'site-editor.php' )
 			: getAdminLink( `customize.php?return=${ encodedReturnUrl }` );
-	};
+	}, [ isBlockTheme ] );
 
-	const getMarketplaceUrl = () => {
+	const marketplaceUrl = useMemo( () => {
 		if ( isWooExpress() ) {
 			return getAdminLink( 'themes.php' );
 		}
@@ -67,7 +67,7 @@ const CustomizeStoreController = () => {
 			);
 		}
 		return 'https://woocommerce.com/product-category/themes/';
-	};
+	}, [] );
 
 	useEffect( () => {
 		document.body.classList.add( 'woocommerce-customize-store' );
@@ -182,7 +182,7 @@ const CustomizeStoreController = () => {
 							<Button
 								variant="primary"
 								onClick={ handleDesignClick }
-								href={ getDesignUrl() }
+								href={ designUrl }
 							>
 								{ __( 'Start designing', 'woocommerce' ) }
 							</Button>
@@ -242,7 +242,7 @@ const CustomizeStoreController = () => {
 							<Button
 								variant="primary"
 								onClick={ handleMarketplaceClick }
-								href={ getMarketplaceUrl() }
+								href={ marketplaceUrl }
 							>
 								{ __(
 									'Browse the Marketplace',
