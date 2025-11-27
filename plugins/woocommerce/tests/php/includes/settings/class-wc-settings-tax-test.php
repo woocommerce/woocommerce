@@ -296,4 +296,47 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 		// Assert notice is NOT displayed.
 		$this->assertEmpty( $output );
 	}
+
+	/**
+	 * @testDox 'tax_configuration_validation_notice' does not show notice when filtered to false.
+	 */
+	public function test_tax_configuration_validation_notice_respects_filter() {
+		// Set up prices include tax option.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Mock the screen.
+		set_current_screen( 'woocommerce_page_wc-settings' );
+
+		// Mock WC_Tax methods to return empty base rates.
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Tax' => array(
+					'get_tax_classes'    => function () {
+						return array();
+					},
+					'get_base_tax_rates' => function () {
+						return array();
+					},
+				),
+			)
+		);
+
+		// Add filter to disable the notice.
+		add_filter( 'woocommerce_show_tax_configuration_notice', '__return_false' );
+
+		$sut = new WC_Settings_Tax();
+
+		// Capture output.
+		ob_start();
+		$sut->tax_configuration_validation_notice();
+		$output = ob_get_clean();
+
+		// Remove filter.
+		remove_filter( 'woocommerce_show_tax_configuration_notice', '__return_false' );
+
+		// Assert notice is NOT displayed due to filter.
+		$this->assertEmpty( $output );
+	}
 }

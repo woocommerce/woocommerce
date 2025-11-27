@@ -406,6 +406,16 @@ class WC_Settings_Tax extends WC_Settings_Page {
 
 		// If no base rates exist, show warning.
 		if ( ! $has_base_rate ) {
+			/**
+			 * Filter whether to show the tax configuration incomplete notice.
+			 *
+			 * @since 10.4.0
+			 *
+			 * @param bool $show_notice Whether to show the notice. Default true.
+			 */
+			if ( ! apply_filters( 'woocommerce_show_tax_configuration_notice', true ) ) {
+				return;
+			}
 			?>
 			<div class="notice notice-warning">
 				<p>
