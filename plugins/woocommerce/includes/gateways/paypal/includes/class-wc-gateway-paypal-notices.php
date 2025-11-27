@@ -137,7 +137,7 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
-		$support_url = 'https://www.paypal.com/us/smarthelp/contact-us';
+		$support_url = 'https://www.paypal.com/smarthelp/contact-us';
 		$dismiss_url = $this->get_dismiss_url( self::PAYPAL_ACCOUNT_RESTRICTED_NOTICE );
 		$message     = sprintf(
 			/* translators: 1: opening <a> tag, 2: closing </a> tag */
