@@ -28,10 +28,10 @@ import { isFeatureEnabled } from '~/utils/features';
 import { SiteHub } from './site-hub';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
-import banner1Shape from './assets/images/banner-1-shape.svg';
-import banner2Shape from './assets/images/banner-2-shape.svg';
-import banner1Illu from './assets/images/banner-1-illu.svg';
-import banner2Illu from './assets/images/banner-2-illu.svg';
+import banner1Shape from './assets/banner-1-shape.svg';
+import banner2Shape from './assets/banner-2-shape.svg';
+import banner1Illu from './assets/banner-1-illu.svg';
+import banner2Illu from './assets/banner-2-illu.svg';
 import './style.scss';
 
 const CustomizeStoreController = () => {
