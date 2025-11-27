@@ -247,7 +247,37 @@
           "fontFamily": "Arial, 'Helvetica Neue', Helvetica, sans-serif",
           "fontWeight": "400",
           "fontStyle": "normal",
-          "lineHeight": "1.5"
+          "lineHeight": "1.2"
+        }
+      },
+	  "h1": {
+        "typography": {
+          "fontSize": "40px"
+        }
+      },
+      "h2": {
+        "typography": {
+          "fontSize": "32px"
+        }
+      },
+      "h3": {
+        "typography": {
+          "fontSize": "24px"
+        }
+      },
+      "h4": {
+        "typography": {
+          "fontSize": "16px"
+        }
+      },
+      "h5": {
+        "typography": {
+          "fontSize": "14px"
+        }
+      },
+      "h6": {
+        "typography": {
+          "fontSize": "12px"
         }
       }
     }
