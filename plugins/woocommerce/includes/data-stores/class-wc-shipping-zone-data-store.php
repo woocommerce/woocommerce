@@ -403,4 +403,19 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			);
 		}
 	}
+
+	/**
+	 * Shipping zones do not support meta data.
+	 *
+	 * This override prevents the parent class from incorrectly reading from wp_postmeta,
+	 * which would happen because shipping zones use their own table but there is no
+	 * corresponding shipping zone meta table.
+	 *
+	 * @since 10.5.0
+	 * @param WC_Shipping_Zone $zone Shipping zone object.
+	 * @return array Empty array - shipping zones have no meta table.
+	 */
+	public function read_meta( &$zone ) {
+		return array();
+	}
 }
