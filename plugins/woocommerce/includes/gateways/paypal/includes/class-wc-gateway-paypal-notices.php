@@ -33,22 +33,20 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
-		add_action( 'admin_notices', array( $this, 'add_paypal_migration_notice' ) );
-		add_action( 'admin_notices', array( $this, 'add_paypal_account_restricted_notice' ) );
+		add_action( 'admin_notices', array( $this, 'add_paypal_notices' ) );
 
 		// Use admin_head to inject notice on payments settings page.
 		// This bypasses the suppress_admin_notices() function which removes all admin_notices hooks on the payments page.
 		// This is a workaround to avoid the notice being suppressed by the suppress_admin_notices() function.
-		add_action( 'admin_head', array( $this, 'add_paypal_migration_notice_on_payments_settings_page' ) );
-		add_action( 'admin_head', array( $this, 'add_paypal_account_restricted_notice_on_payments_settings_page' ) );
+		add_action( 'admin_head', array( $this, 'add_paypal_notices_on_payments_settings_page' ) );
 	}
 
 	/**
-	 * Add notice warning about the migration to PayPal Payments.
+	 * Add PayPal notices.
 	 *
 	 * @return void
 	 */
-	public function add_paypal_migration_notice() {
+	public function add_paypal_notices() {
 		// Show only to users who can manage the site.
 		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -59,8 +57,36 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
+		$this->add_paypal_migration_notice();
+		$this->add_paypal_account_restricted_notice();
+	}
+
+	/**
+	 * Add PayPal notices on the payments settings page.
+	 *
+	 * @return void
+	 */
+	public function add_paypal_notices_on_payments_settings_page() {
+		global $current_tab, $current_section;
+		$is_payments_settings_page = 'woocommerce_page_wc-settings' === get_current_screen()->id && 'checkout' === $current_tab && empty( $current_section );
+
+		// Only add the notice from this callback on the payments settings page.
+		if ( ! $is_payments_settings_page ) {
+			return;
+		}
+
+		$this->add_paypal_migration_notice_on_payments_settings_page();
+		$this->add_paypal_account_restricted_notice_on_payments_settings_page();
+	}
+
+	/**
+	 * Add notice warning about the migration to PayPal Payments.
+	 *
+	 * @return void
+	 */
+	public function add_paypal_migration_notice() {
 		// Skip if the notice has been dismissed.
-		if ( $this->paypal_migration_notice_dismissed() ) {
+		if ( $this->is_notice_dismissed( 'paypal_migration_completed' ) ) {
 			return;
 		}
 
@@ -86,28 +112,12 @@ class WC_Gateway_Paypal_Notices {
 	}
 
 	/**
-	 * Add notice warning about the migration to PayPal Payments on the Payments settings page.
-	 *
-	 * @return void
-	 */
-	public function add_paypal_migration_notice_on_payments_settings_page() {
-		global $current_tab, $current_section;
-		$is_payments_settings_page = 'woocommerce_page_wc-settings' === get_current_screen()->id && 'checkout' === $current_tab && empty( $current_section );
-
-		// Only add the notice from this callback on the payments settings page.
-		if ( ! $is_payments_settings_page ) {
-			return;
-		}
-		$this->add_paypal_migration_notice();
-	}
-
-	/**
-	 * Check if the installation notice has been dismissed.
+	 * Check if the notice has been dismissed.
 	 *
 	 * @return bool
 	 */
-	protected static function paypal_migration_notice_dismissed() {
-		return get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_completed_notice', true );
+	protected static function is_notice_dismissed( $notice_name ) {
+		return get_user_meta( get_current_user_id(), 'dismissed_' . $notice_name . '_notice', true );
 	}
 
 	/**
@@ -116,23 +126,13 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public function add_paypal_account_restricted_notice() {
-		// Show only to users who can manage the site.
-		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		// Skip if the gateway is not available.
-		if ( ! WC_Gateway_Paypal_Helper::is_paypal_gateway_available() ) {
-			return;
-		}
-
 		// Skip if there's no account restriction flag.
 		if ( ! $this->has_account_restriction_flag() ) {
 			return;
 		}
 
 		// Skip if the notice has been dismissed.
-		if ( $this->paypal_account_restricted_notice_dismissed() ) {
+		if ( $this->is_notice_dismissed( 'paypal_account_restricted' ) ) {
 			return;
 		}
 
@@ -156,22 +156,6 @@ class WC_Gateway_Paypal_Notices {
 			. '</div>';
 
 		echo wp_kses_post( $notice_html );
-	}
-
-	/**
-	 * Add notice warning about PayPal account restriction on the Payments settings page.
-	 *
-	 * @return void
-	 */
-	public function add_paypal_account_restricted_notice_on_payments_settings_page() {
-		global $current_tab, $current_section;
-		$is_payments_settings_page = 'woocommerce_page_wc-settings' === get_current_screen()->id && 'checkout' === $current_tab && empty( $current_section );
-
-		// Only add the notice from this callback on the payments settings page.
-		if ( ! $is_payments_settings_page ) {
-			return;
-		}
-		$this->add_paypal_account_restricted_notice();
 	}
 
 	/**
