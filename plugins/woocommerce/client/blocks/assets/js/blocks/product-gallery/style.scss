@@ -10,7 +10,7 @@ $dialog-padding: 20px;
 	overflow: hidden;
 
 	//When Product Image aspect ratio is auto, we are setting constraints
-	//on the large image container and display full images in square container.
+	//on the viewer container and display full images in square container.
 	&:has(.wc-block-components-product-image--aspect-ratio-auto) {
 		aspect-ratio: 1/1;
 	}

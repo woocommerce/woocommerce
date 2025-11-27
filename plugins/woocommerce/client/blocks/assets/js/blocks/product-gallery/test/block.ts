@@ -13,7 +13,7 @@ import { setupServer } from 'msw/node';
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 import blockJson from '../block.json';
 import '../';
-import '../inner-blocks/product-gallery-large-image';
+import '../inner-blocks/product-gallery-viewer';
 import '../inner-blocks/product-gallery-thumbnails';
 import '../../next-previous-buttons';
 import '../../single-product';
@@ -174,13 +174,13 @@ describe( 'Product Gallery Block', () => {
 		expect( layout ).toHaveClass( 'is-horizontal' );
 		expect( layout ).toHaveClass( 'is-nowrap' );
 
-		// Check for large image block and its inner blocks
+		// Check for viewer block and its inner blocks
 		const largeImageBlock = screen.getByRole( 'document', {
-			name: /Block: Large Image/i,
+			name: /Block: Viewer/i,
 		} );
 		expect( largeImageBlock ).toBeInTheDocument();
 
-		// Check inner blocks of large image
+		// Check inner blocks of viewer
 		expect(
 			screen.getByRole( 'document', { name: /Block: Product Image/i } )
 		).toBeInTheDocument();
@@ -206,10 +206,10 @@ describe( 'Product Gallery Block', () => {
 		expect( productImage ).toHaveAttribute( 'alt', 'Test 1' );
 	} );
 
-	it( 'should ensure thumbnail height matches large image height with custom aspect ratio', async () => {
+	it( 'should ensure thumbnail height matches viewer height with custom aspect ratio', async () => {
 		await setup( { aspectRatio: '16/9' } );
 
-		// Get the large image
+		// Get the viewer
 		const productImage = screen.getByTestId( 'product-image' );
 		expect( productImage ).toBeInTheDocument();
 
