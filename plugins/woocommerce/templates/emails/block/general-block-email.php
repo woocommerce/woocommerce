@@ -99,6 +99,12 @@ endif;
  */
 do_action( 'woocommerce_email_general_block_content', $sent_to_admin, $plain_text, $email );
 
+/**
+ * Filter the list of email IDs that should not display order details.
+ *
+ * @since 10.5.0
+ * @param array $emails_without_order_details Array of email IDs that should not display order details.
+ */
 $emails_without_order_details = apply_filters( 'woocommerce_emails_general_block_content_emails_without_order_details', array() );
 
 $accounts_related_emails = array(

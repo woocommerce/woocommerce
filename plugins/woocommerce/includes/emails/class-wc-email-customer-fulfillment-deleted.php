@@ -158,11 +158,11 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Deleted', false ) ) :
 			return wc_get_template_html(
 				$this->template_block_content,
 				array(
-					'order'              => $this->object,
-					'fulfillment'        => $this->fulfillment,
-					'sent_to_admin'      => false,
-					'plain_text'         => false,
-					'email'              => $this,
+					'order'         => $this->object,
+					'fulfillment'   => $this->fulfillment,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
 				)
 			);
 		}

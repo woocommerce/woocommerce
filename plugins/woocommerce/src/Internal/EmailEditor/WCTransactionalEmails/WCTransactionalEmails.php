@@ -77,9 +77,9 @@ class WCTransactionalEmails {
 			$fulfillment_emails = array(
 				'customer_fulfillment_created',
 				'customer_fulfillment_updated',
-				'customer_fulfillment_deleted'
+				'customer_fulfillment_deleted',
 			);
-			$emails = array_merge( $emails, $fulfillment_emails );
+			$emails             = array_merge( $emails, $fulfillment_emails );
 		}
 
 		/**
