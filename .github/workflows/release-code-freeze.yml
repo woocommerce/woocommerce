@@ -188,7 +188,7 @@ jobs:
             // Filter out milestones that do not have any open issues and are older than the minimum version to keep.
             // We want to keep milestone for at least the last 4 main versions (dev, frozen, stable).
             const milestonesToClose = latestMilestones.filter(
-              milestone => 0 === milestone.open_issues && /^\d+\.\d+\.0+$/.test( milestone.title ) && Number( milestone.title.slice( 0, -2 ) ) < minVersionToKeep
+              milestone => 0 === milestone.open_issues && /^\d+\.\d+\.0$/.test( milestone.title ) && Number( milestone.title.slice( 0, -2 ) ) < minVersionToKeep
             );
 
             for ( const milestone of milestonesToClose ) {
