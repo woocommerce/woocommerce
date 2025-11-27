@@ -7,9 +7,9 @@ use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use WP_Block;
 
 /**
- * ProductGalleryViewerclass.
+ * ProductGalleryViewer class.
  */
-class ProductGalleryViewerclass extends AbstractBlock {
+class ProductGalleryViewer extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
