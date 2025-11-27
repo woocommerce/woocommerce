@@ -55,7 +55,7 @@ jobs:
 
             - name: 'Run PHPStan'
               working-directory: plugins/woocommerce
-              run: composer phpstan
+              run: pnpm --filter='@woocommerce/plugin-woocommerce' phpstan
 
             - name: 'Save PHPStan result cache'
               uses: actions/cache/save@v4
