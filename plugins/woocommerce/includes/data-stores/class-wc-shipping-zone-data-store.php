@@ -433,13 +433,16 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	/**
 	 * Shipping zones do not support meta data.
 	 *
+	 * Returns false to indicate the operation cannot be performed, consistent with
+	 * WordPress meta functions which return false on failure.
+	 *
 	 * @since 10.5.0
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
 	 * @param stdClass         $meta Meta object (containing ->key and ->value).
-	 * @return int Always returns 0 as no meta is stored.
+	 * @return false Always returns false as shipping zones do not support meta storage.
 	 */
 	public function add_meta( &$zone, $meta ) {
-		return 0;
+		return false;
 	}
 
 	/**
