@@ -30,6 +30,10 @@ const entries = {
 	// Experimental mini cart frontend modules, only enqueued when experimental-iapi-mini-cart feature flag is enabled.
 	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
 
+	// Express checkout iAPI block frontend module.
+	'woocommerce/express-checkout-iapi-block':
+		'./assets/js/blocks/express-checkout-iapi-block/frontend.ts',
+
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
 		'./assets/js/atomic/blocks/product-elements/frontend.ts',
@@ -83,6 +87,8 @@ module.exports = {
 					return `module ${ request }`;
 				} else if ( request.startsWith( '@woocommerce/stores/' ) ) {
 					return `import ${ request }`;
+				} else if ( request.startsWith( 'woocommerce/' ) ) {
+					return `module ${ request }`;
 				}
 			},
 		} ),

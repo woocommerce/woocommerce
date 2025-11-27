@@ -1,0 +1,29 @@
+{
+	"name": "woocommerce/express-checkout-iapi-block",
+	"version": "1.0.0",
+	"title": "Express Checkout iAPI",
+	"description": "Block that displays express checkout options using the Interactivity API.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": true,
+		"inserter": true,
+		"lock": false,
+		"interactivity": true
+	},
+	"viewScriptModule": "woocommerce/express-checkout-iapi-block",
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": false,
+				"move": false
+			}
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

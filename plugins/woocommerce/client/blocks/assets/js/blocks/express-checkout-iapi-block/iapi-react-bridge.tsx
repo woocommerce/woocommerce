@@ -1,12 +1,12 @@
 /**
- * Bridge file to expose React components to iAPI blocks via window.wc.blocksCheckout
+ * Bridge file to expose React components to the express-checkout-iapi-block via window.wc.blocksCheckout
  * This is a separate entry point to avoid circular dependencies.
  */
 
 /**
  * Internal dependencies
  */
-import MiniCartExpressPaymentWrapper from './components/mini-cart-express-payment-wrapper';
+import ExpressPaymentWrapper from './components/express-payment-wrapper';
 
 /**
  * Expose components to window for iAPI blocks to use
@@ -14,6 +14,5 @@ import MiniCartExpressPaymentWrapper from './components/mini-cart-express-paymen
 if ( typeof window !== 'undefined' ) {
 	window.wc = window.wc || {};
 	window.wc.blocksCheckout = window.wc.blocksCheckout || {};
-	window.wc.blocksCheckout.MiniCartExpressPaymentWrapper =
-		MiniCartExpressPaymentWrapper;
+	window.wc.blocksCheckout.ExpressPaymentWrapper = ExpressPaymentWrapper;
 }

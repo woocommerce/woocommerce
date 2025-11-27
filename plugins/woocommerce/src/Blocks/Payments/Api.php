@@ -48,6 +48,7 @@ class Api {
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_express_payments_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
+		add_action( 'woocommerce_blocks_express_checkout_iapi_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_payment_method_type_registration', array( $this, 'register_payment_method_integrations' ) );
 		add_action( 'wp_print_scripts', array( $this, 'verify_payment_methods_dependencies' ), 1 );
 	}

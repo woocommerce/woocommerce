@@ -64,6 +64,7 @@ const blocks = {
 	'coming-soon': {},
 	'customer-account': {},
 	'email-content': {},
+	'express-checkout-iapi-block': {},
 	'express-payments-checkout-react': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -390,6 +391,8 @@ const entries = {
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
 		'mini-cart-iapi-react-bridge':
 			'./assets/js/blocks/mini-cart/iapi-react-bridge.tsx',
+		'express-checkout-iapi-react-bridge':
+			'./assets/js/blocks/express-checkout-iapi-block/iapi-react-bridge.tsx',
 	},
 };
 
