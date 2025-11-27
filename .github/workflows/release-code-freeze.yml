@@ -1,4 +1,4 @@
-name: 'Release: Enforce Code Freeze'
+name: 'Release: Enforce Feature Freeze'
 on:
   schedule:
     - cron: '0 18 * * *' # Every day at 18h UTC
@@ -10,7 +10,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: release-code-freeze
+  group: release-feature-freeze
 
 env:
   GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -61,14 +61,14 @@ jobs:
                 console.log(`Found Feature Freeze event: ${ffEvent.summary}`);
                 core.setOutput('should-run', 'true');
               } else {
-                console.log('No Feature Freeze events found for today. Code freeze will not proceed.');
+                console.log('No Feature Freeze events found for today. Feature freeze will not proceed.');
                 core.setOutput('should-run', 'false');
               }
             } catch (error) {
               core.setFailed(`Failed to fetch calendar events: ${error.message}`);
             }
 
-  prepare-for-code-freeze:
+  prepare-for-feature-freeze:
     name: Calculate versions and confirm repo is in a good state
     needs: check-feature-freeze-event
     if: ${{ needs.check-feature-freeze-event.outputs.should-run == 'true' }}
@@ -123,10 +123,10 @@ jobs:
             core.setOutput( 'nextReleaseBranch', nextReleaseBranch );
             core.setOutput( 'nextTrunkVersion', nextTrunkVersion );
 
-  run-code-freeze:
-    name: Perform code freeze
+  run-feature-freeze:
+    name: Perform feature freeze
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: prepare-for-code-freeze
+    needs: prepare-for-feature-freeze
     steps:
       - name: Checkout trunk
         uses: actions/checkout@v4
@@ -135,19 +135,19 @@ jobs:
       - name: Push frozen branch to the repo
         run: |
           # Last opportunity to bail if branch already exists.
-          if [[ -n $(git ls-remote --heads origin ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}) ]]; then
-            echo "::error::Release branch '${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}' already exists."
+          if [[ -n $(git ls-remote --heads origin ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}) ]]; then
+            echo "::error::Release branch '${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}' already exists."
             exit 1
           fi
 
           git checkout trunk
-          git checkout -b ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
-          git push origin ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
+          git checkout -b ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
+          git push origin ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
 
   bump-version-in-trunk:
     name: Bump version in trunk for next development cycle
     uses: ./.github/workflows/release-bump-version.yml
-    needs: [run-code-freeze]
+    needs: [run-feature-freeze]
     secrets: inherit
     with:
       branch: trunk
@@ -156,16 +156,16 @@ jobs:
   build-dev-release:
     name: 'Build WooCommerce -dev release'
     uses: ./.github/workflows/release-build-zip-file.yml
-    needs: [prepare-for-code-freeze, run-code-freeze]
+    needs: [prepare-for-feature-freeze, run-feature-freeze]
     with:
       skip_verify: true
       create_github_release: true
-      branch: ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
+      branch: ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
 
   publish-dev-release:
     name: 'Publish -dev release'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: [prepare-for-code-freeze, build-dev-release]
+    needs: [prepare-for-feature-freeze, build-dev-release]
     outputs:
       release-zip: ${{ steps.publish-release.outputs.release-zip }}
     steps:
@@ -174,17 +174,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          gh release edit '${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev' \
+          gh release edit '${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}-dev' \
             --prerelease \
             --latest=false \
             --draft=false
 
-          echo "release-zip=https://github.com/${{ github.repository }}/releases/download/${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-dev/woocommerce.zip" >> $GITHUB_OUTPUT
+          echo "release-zip=https://github.com/${{ github.repository }}/releases/download/${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}-dev/woocommerce.zip" >> $GITHUB_OUTPUT
 
   notify-slack:
     name: Notify Slack
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: [publish-dev-release, prepare-for-code-freeze]
+    needs: [publish-dev-release, prepare-for-feature-freeze]
     steps:
       - name: Notify Slack on success
         uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
@@ -192,7 +192,7 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
-            :ice_cube: Code Freeze completed for `${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}` :checking:
+            :ice_cube: Feature Freeze completed for `${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}` :checking:
             If you need a fix or change to be included in this release, please request a backport following the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
             <${{ needs.publish-dev-release.outputs.release-zip }}|Download zip>
           slack-optional-unfurl_links: false
@@ -201,9 +201,9 @@ jobs:
   trigger-webhook:
     name: Trigger Release Webhook
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: [publish-dev-release, prepare-for-code-freeze]
+    needs: [publish-dev-release, prepare-for-feature-freeze]
     steps:
-      - name: Trigger Code Freeze Webhook
+      - name: Trigger Feature Freeze Webhook
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
@@ -211,7 +211,7 @@ jobs:
 
             const payload = {
               action: 'feature-freeze',
-              version: '${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}',
+              version: '${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}',
               build_zip: '${{ needs.publish-dev-release.outputs.release-zip }}',
               status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
             };
@@ -260,7 +260,7 @@ jobs:
   notify-slack-on-failure:
     name: Notify Slack on Failure
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: [ check-feature-freeze-event, prepare-for-code-freeze, run-code-freeze, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
+    needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
     if: always() && ((contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')))
     steps:
       - name: Notify Slack on failure
@@ -269,7 +269,7 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
-            :x: Some steps in the Code Freeze workflow failed. Please check the logs for details and re-run if needed.
+            :x: Some steps in the Feature Freeze workflow failed. Please check the logs for details and re-run if needed.
             <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
