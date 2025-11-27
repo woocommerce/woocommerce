@@ -173,7 +173,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return bool
 	 */
 	public function has_account_restriction_flag() {
-		return 'yes' === $this->gateway->get_option( 'account_restricted', 'no' );
+		return 'yes' === $this->gateway->get_option( 'paypal_account_restricted', 'no' );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class WC_Gateway_Paypal_Notices {
 	public static function set_account_restriction_flag() {
 		$gateway = WC_Gateway_Paypal::get_instance();
 		if ( $gateway ) {
-			$gateway->update_option( 'account_restricted', 'yes' );
+			$gateway->update_option( 'paypal_account_restricted', 'yes' );
 		}
 	}
 
@@ -196,7 +196,7 @@ class WC_Gateway_Paypal_Notices {
 	public static function clear_account_restriction_flag() {
 		$gateway = WC_Gateway_Paypal::get_instance();
 		if ( $gateway ) {
-			$gateway->update_option( 'account_restricted', 'no' );
+			$gateway->update_option( 'paypal_account_restricted', 'no' );
 		}
 	}
 }
