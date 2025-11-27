@@ -427,7 +427,14 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @param stdClass         $meta Meta object (containing at least ->id).
 	 */
 	public function delete_meta( &$zone, $meta ) {
-		// No-op: Shipping zones have no meta table.
+		wc_get_logger()->warning(
+			'Attempted to delete meta from a shipping zone, but shipping zones do not support meta data.',
+			array(
+				'source'    => 'shipping_zone_data_store',
+				'zone_id'   => $zone->get_id(),
+				'backtrace' => true,
+			)
+		);
 	}
 
 	/**
@@ -442,6 +449,15 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @return false Always returns false as shipping zones do not support meta storage.
 	 */
 	public function add_meta( &$zone, $meta ) {
+		wc_get_logger()->warning(
+			'Attempted to add meta to a shipping zone, but shipping zones do not support meta data.',
+			array(
+				'source'    => 'shipping_zone_data_store',
+				'zone_id'   => $zone->get_id(),
+				'key'       => $meta->key ?? '',
+				'backtrace' => true,
+			)
+		);
 		return false;
 	}
 
@@ -453,6 +469,14 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @param stdClass         $meta Meta object (containing ->id, ->key and ->value).
 	 */
 	public function update_meta( &$zone, $meta ) {
-		// No-op: Shipping zones have no meta table.
+		wc_get_logger()->warning(
+			'Attempted to update meta on a shipping zone, but shipping zones do not support meta data.',
+			array(
+				'source'    => 'shipping_zone_data_store',
+				'zone_id'   => $zone->get_id(),
+				'key'       => $meta->key ?? '',
+				'backtrace' => true,
+			)
+		);
 	}
 }
