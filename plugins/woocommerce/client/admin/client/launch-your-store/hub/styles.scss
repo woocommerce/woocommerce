@@ -143,10 +143,6 @@
 						gap: 0;
 						width: 348px;
 						z-index: 2;
-
-						@media screen and (max-width: 782px) {
-							display: none;
-						}
 					}
 
 					.woocommerce-edit-site-layout__view-mode-toggle-icon.edit-site-site-icon {
