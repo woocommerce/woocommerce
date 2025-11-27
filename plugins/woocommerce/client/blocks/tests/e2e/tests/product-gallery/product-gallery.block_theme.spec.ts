@@ -84,7 +84,7 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'with thumbnails', () => {
-		test( 'should have as first thumbnail, the same image that it is visible in the Large Image block', async ( {
+		test( 'should have as first thumbnail, the same image that it is visible in the product block', async ( {
 			page,
 			editor,
 			pageObject,
@@ -97,8 +97,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const viewerImageId = await pageObject.getViewerImageId();
 
 			const firstImageThumbnailId = await getThumbnailImageIdByNth(
 				0,
@@ -107,7 +106,7 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( visibleLargeImageId ).toBe( firstImageThumbnailId );
+			expect( viewerImageId ).toBe( firstImageThumbnailId );
 		} );
 
 		test( 'should change the image when the user click on a thumbnail image', async ( {
@@ -123,8 +122,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const viewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -133,7 +131,7 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( visibleLargeImageId ).not.toBe( secondImageThumbnailId );
+			expect( viewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await (
 				await pageObject.getThumbnailsBlock( {
@@ -145,10 +143,9 @@ test.describe( `${ blockData.name }`, () => {
 				.click();
 
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await pageObject.getVisibleLargeImageId();
+				const newViewerImageId = await pageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+				expect( newViewerImageId ).toBe( secondImageThumbnailId );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
@@ -167,8 +164,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const initialViewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -177,21 +173,19 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( initialVisibleLargeImageId ).not.toBe(
-				secondImageThumbnailId
-			);
+			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await pageObject.clickNextButton();
 
-			const nextImageId = await pageObject.getVisibleLargeImageId();
+			const nextImageId = await pageObject.getViewerImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
 			await pageObject.clickPreviousButton();
 
-			const previousImageId = await pageObject.getVisibleLargeImageId();
+			const previousImageId = await pageObject.getViewerImageId();
 
-			expect( previousImageId ).toBe( initialVisibleLargeImageId );
+			expect( previousImageId ).toBe( initialViewerImageId );
 		} );
 	} );
 
@@ -209,8 +203,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const initialViewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -219,20 +212,18 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( initialVisibleLargeImageId ).not.toBe(
-				secondImageThumbnailId
-			);
+			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await pageObject.clickNextButton();
 
-			const nextImageId = await pageObject.getVisibleLargeImageId();
+			const nextImageId = await pageObject.getViewerImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
-			const largeImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
-			await largeImageBlock.click();
+			await viewerBlock.click();
 
 			const dialogImage = page
 				.getByRole( 'dialog' )
@@ -246,8 +237,7 @@ test.describe( `${ blockData.name }`, () => {
 			);
 			await closePopUpButton.click();
 
-			const singleProductImageId =
-				await pageObject.getVisibleLargeImageId();
+			const singleProductImageId = await pageObject.getViewerImageId();
 
 			expect( singleProductImageId ).toBe( nextImageId );
 		} );
@@ -277,13 +267,13 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const mainImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
-			await mainImageBlock.click();
+			await viewerBlock.click();
 
 			await expect( page.locator( 'dialog' ) ).toBeVisible();
 		} );
@@ -304,11 +294,11 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
-			const mainImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
 
-			await mainImageBlock.click();
+			await viewerBlock.click();
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 		} );

@@ -210,7 +210,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			const visibleImage =
-				await productGalleryPageObject.getVisibleLargeImageId();
+				await productGalleryPageObject.getViewerImageId();
 			expect( visibleImage ).toBe( '34' );
 
 			await colorBlueOption.click();
@@ -232,10 +232,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 				page.getByText( variationDescription )
 			).toBeVisible();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '35' );
+				expect( newViewerImageId ).toBe( '35' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -253,10 +253,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '34' );
+				expect( newViewerImageId ).toBe( '34' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 

@@ -114,7 +114,7 @@ async function setup( attributes = {} ) {
 		...attributes,
 	} );
 
-	const largeImageBlock = createBlock(
+	const viewerBlock = createBlock(
 		'woocommerce/product-gallery-large-image',
 		{},
 		[
@@ -136,7 +136,7 @@ async function setup( attributes = {} ) {
 			hoverZoom: true,
 			fullScreenOnClick: true,
 		},
-		[ thumbnailsBlock, largeImageBlock ]
+		[ thumbnailsBlock, viewerBlock ]
 	);
 
 	const singleProductBlock = [
@@ -175,10 +175,10 @@ describe( 'Product Gallery Block', () => {
 		expect( layout ).toHaveClass( 'is-nowrap' );
 
 		// Check for viewer block and its inner blocks
-		const largeImageBlock = screen.getByRole( 'document', {
+		const viewerBlock = screen.getByRole( 'document', {
 			name: /Block: Viewer/i,
 		} );
-		expect( largeImageBlock ).toBeInTheDocument();
+		expect( viewerBlock ).toBeInTheDocument();
 
 		// Check inner blocks of viewer
 		expect(
@@ -228,10 +228,10 @@ describe( 'Product Gallery Block', () => {
 		expect( thumbnailsBlock ).toBeInTheDocument();
 
 		// Get the heights
-		const largeImageHeight = productImage.getBoundingClientRect().height;
+		const viewerHeight = productImage.getBoundingClientRect().height;
 		const thumbnailHeight = thumbnailsBlock.getBoundingClientRect().height;
 
 		// Check that the heights match
-		expect( thumbnailHeight ).toBe( largeImageHeight );
+		expect( thumbnailHeight ).toBe( viewerHeight );
 	} );
 } );
