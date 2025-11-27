@@ -545,6 +545,38 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'fraud_protection'       => array(
+				'name'                         => __( 'Fraud protection', 'woocommerce' ),
+				'description'                  => __(
+					'Enable fraud protection features for your store',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'additional_settings'          => array(
+					array(
+						'type'    => 'select',
+						'id'      => 'woocommerce_fraud_protection_apply_to',
+						'title'   => __( 'Apply fraud protection to', 'woocommerce' ),
+						'desc'    => __( 'Choose where fraud protection friction points should be applied.', 'woocommerce' ),
+						'default' => 'both',
+						'options' => array(
+							'cart'     => __( 'Cart only (Add to cart)', 'woocommerce' ),
+							'checkout' => __( 'Checkout only (Payment methods)', 'woocommerce' ),
+							'both'     => __( 'Both cart and checkout', 'woocommerce' ),
+						),
+					),
+					array(
+						'type'  => 'fraud_protection_reset_sessions',
+						'id'    => 'fraud_protection_reset_sessions_button',
+						'title' => __( 'Reset Session Clearances', 'woocommerce' ),
+						'desc'  => __( 'Reset all data about session fraud protection clearance. This will require all users to validate their sessions again.', 'woocommerce' ),
+					),
+				),
+			),
 		);
 
 		if ( ! $tracking_enabled ) {

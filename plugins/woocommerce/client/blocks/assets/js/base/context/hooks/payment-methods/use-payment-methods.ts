@@ -78,9 +78,19 @@ const usePaymentMethodState = (
 		{}
 	);
 
+	// Filter out express payment methods if fraud protection is active.
+	const filteredExpressPaymentMethods =
+		typeof window !== 'undefined' &&
+		window.wcFraudProtection &&
+		window.wcFraudProtection.sessionStatus !== 'allowed' &&
+		( window.wcFraudProtection.applyTo === 'checkout' ||
+			window.wcFraudProtection.applyTo === 'both' )
+			? {}
+			: expressPaymentMethods;
+
 	const currentPaymentMethods = useShallowEqual( paymentMethods );
 	const currentExpressPaymentMethods = useShallowEqual(
-		expressPaymentMethods
+		filteredExpressPaymentMethods
 	);
 
 	return {

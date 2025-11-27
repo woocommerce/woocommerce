@@ -17,6 +17,10 @@ use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\FraudProtection\AdminSettingsHandler;
+use Automattic\WooCommerce\Internal\FraudProtection\ClearanceRestController;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
@@ -321,6 +325,7 @@ final class WooCommerce {
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
+		add_action( 'rest_api_init', array( $this, 'register_fraud_protection_endpoints' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
@@ -357,6 +362,8 @@ final class WooCommerce {
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
 		$container->get( MCPAdapterProvider::class );
+		$container->get( AdminSettingsHandler::class );
+		$container->get( FraudProtectionController::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -1641,5 +1648,18 @@ final class WooCommerce {
 		) {
 			new WC_Shop_Customizer();
 		}
+	}
+
+	/**
+	 * Register fraud protection REST API endpoints.
+	 *
+	 * @internal
+	 *
+	 * @since 10.4.0
+	 */
+	public function register_fraud_protection_endpoints() {
+		$container = wc_get_container();
+		$controller = $container->get( ClearanceRestController::class );
+		$controller->register_routes();
 	}
 }

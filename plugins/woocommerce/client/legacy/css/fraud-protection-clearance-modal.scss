@@ -1,0 +1,166 @@
+/**
+ * Fraud Protection Clearance Modal Styles
+ */
+
+/* Prevent body scroll when modal is open */
+body.wc-fraud-protection-modal-open {
+	overflow: hidden;
+}
+
+/* Modal overlay */
+.wc-fraud-protection-modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.7);
+	z-index: 999999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Modal container */
+.wc-fraud-protection-modal {
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+	max-width: 500px;
+	width: 90%;
+	padding: 30px;
+	position: relative;
+	animation: slideUp 0.3s ease-out;
+}
+
+/* Modal content */
+.wc-fraud-protection-modal-content h2 {
+	margin: 0 0 15px;
+	font-size: 24px;
+	font-weight: 600;
+	color: #333;
+}
+
+.wc-fraud-protection-modal-content p {
+	margin: 0 0 15px;
+	font-size: 14px;
+	line-height: 1.6;
+	color: #666;
+}
+
+.wc-fraud-protection-modal-content .wc-fraud-protection-notice {
+	font-weight: 500;
+	color: #333;
+	margin-bottom: 20px;
+}
+
+/* Action buttons */
+.wc-fraud-protection-actions {
+	display: flex;
+	gap: 15px;
+	margin-top: 25px;
+}
+
+.wc-fraud-protection-actions .button {
+	flex: 1;
+	padding: 12px 24px;
+	font-size: 15px;
+	font-weight: 500;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-align: center;
+}
+
+.wc-fraud-allow-session {
+	background: #2c7d2e;
+	color: #fff;
+}
+
+.wc-fraud-allow-session:hover {
+	background: #236621;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(44, 125, 46, 0.3);
+}
+
+.wc-fraud-block-session {
+	background: #d63638;
+	color: #fff;
+}
+
+.wc-fraud-block-session:hover {
+	background: #b32d2e;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px rgba(214, 54, 56, 0.3);
+}
+
+/* Loading state */
+.wc-fraud-protection-loading {
+	text-align: center;
+	padding: 20px 0;
+}
+
+.wc-fraud-protection-loading .spinner {
+	display: inline-block;
+	margin: 0 auto 10px;
+	float: none;
+}
+
+.wc-fraud-protection-loading p {
+	margin: 0;
+	color: #666;
+	font-size: 14px;
+}
+
+/* Error message */
+.wc-fraud-protection-error {
+	background: #fef8f8;
+	border: 1px solid #d63638;
+	border-radius: 4px;
+	padding: 10px 15px;
+	margin-top: 15px;
+	font-size: 13px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideUp {
+	from {
+		transform: translateY(30px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+	.wc-fraud-protection-modal {
+		width: 95%;
+		padding: 20px;
+	}
+
+	.wc-fraud-protection-modal-content h2 {
+		font-size: 20px;
+	}
+
+	.wc-fraud-protection-actions {
+		flex-direction: column;
+	}
+
+	.wc-fraud-protection-actions .button {
+		width: 100%;
+	}
+}
