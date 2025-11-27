@@ -429,4 +429,27 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	public function delete_meta( &$zone, $meta ) {
 		// No-op: Shipping zones have no meta table.
 	}
+
+	/**
+	 * Shipping zones do not support meta data.
+	 *
+	 * @since 10.5.0
+	 * @param WC_Shipping_Zone $zone Shipping zone object.
+	 * @param stdClass         $meta Meta object (containing ->key and ->value).
+	 * @return int Always returns 0 as no meta is stored.
+	 */
+	public function add_meta( &$zone, $meta ) {
+		return 0;
+	}
+
+	/**
+	 * Shipping zones do not support meta data.
+	 *
+	 * @since 10.5.0
+	 * @param WC_Shipping_Zone $zone Shipping zone object.
+	 * @param stdClass         $meta Meta object (containing ->id, ->key and ->value).
+	 */
+	public function update_meta( &$zone, $meta ) {
+		// No-op: Shipping zones have no meta table.
+	}
 }
