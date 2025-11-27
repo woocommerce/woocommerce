@@ -55,6 +55,11 @@ class PushToken {
 	const ORIGIN_WOOCOMMERCE_IOS_DEV = 'com.automattic.woocommerce:dev';
 
 	/**
+	 * Origin identifier for browsers.
+	 */
+	const ORIGIN_BROWSER = 'browser';
+
+	/**
 	 * List of valid platforms.
 	 */
 	const PLATFORMS = array(
@@ -67,6 +72,7 @@ class PushToken {
 	 * List of valid origins.
 	 */
 	const ORIGINS = array(
+		self::ORIGIN_BROWSER,
 		self::ORIGIN_WOOCOMMERCE_ANDROID,
 		self::ORIGIN_WOOCOMMERCE_ANDROID_DEV,
 		self::ORIGIN_WOOCOMMERCE_IOS,
