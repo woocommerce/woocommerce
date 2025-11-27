@@ -6,7 +6,7 @@ use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
- * ProductGalleryLargeImage class.
+ * NextPreviousButtons class.
  */
 class NextPreviousButtons extends AbstractBlock {
 
