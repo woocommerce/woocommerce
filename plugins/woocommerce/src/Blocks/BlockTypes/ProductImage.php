@@ -180,7 +180,7 @@ class ProductImage extends AbstractBlock {
 		$attr = array(
 			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
 			'data-testid'   => 'product-image',
-			'data-image-id' => $provided_image_id_is_valid ? $image_id : $featured_image_id,
+			'data-image-id' => $target_image_id,
 			'style'         => $image_style,
 		);
 
