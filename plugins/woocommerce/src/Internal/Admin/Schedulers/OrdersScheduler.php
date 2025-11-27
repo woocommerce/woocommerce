@@ -683,7 +683,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Check if immediate import is enabled.
+	 * Check whether immediate import is enabled.
+	 *
+	 * When the "analytics-scheduled-import" feature is disabled, only immediate
+	 * import is supported (returns true). When enabled, checks the option value.
 	 *
 	 * @internal
 	 * @return bool
