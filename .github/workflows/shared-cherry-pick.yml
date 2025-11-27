@@ -288,6 +288,13 @@ jobs:
                 labels: ['Release']
               });
 
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: newPr.number,
+                reviewers: [context.actor, context.payload.pull_request.user.login]
+              });
+
               core.setOutput('pr_number', newPr.number.toString());
               core.setOutput('original_author', originalPr.user?.login || '');
               core.setOutput('original_merger', originalPr.merged_by?.login || '');

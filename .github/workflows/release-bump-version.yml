@@ -172,6 +172,7 @@ jobs:
             --base ${{ inputs.branch }} \
             --head ${branch_name} \
             --label Release
+            --reviewer "${{ github.actor }}"
 
       - name: Ensure milestone for dev version exists
         if: ${{ inputs.bump-type == 'dev' }}
