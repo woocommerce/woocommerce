@@ -28,6 +28,20 @@ class ExpressCheckoutIapiBlock extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * Includes checkout block styles which contain the express payment CSS.
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		// Register the checkout block styles which include express payment component styles.
+		$this->asset_api->register_style( 'wc-blocks-style-checkout', $this->asset_api->get_block_asset_build_path( 'checkout', 'css' ), [], 'all', true );
+
+		return array( 'wc-blocks-style', 'wc-blocks-style-checkout', 'wc-blocks-packages-style' );
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.

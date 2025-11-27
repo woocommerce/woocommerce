@@ -44,7 +44,7 @@ store( 'woocommerce/express-checkout-iapi-block', {
 		renderExpressPaymentMethodsIsland() {
 			const { ref } = getElement();
 			const debugName = 'express payment methods island';
-			console.log( 'this gets called' );
+
 			// Check if any express payment methods are actually registered
 			// Use the window-exposed registry as it's the canonical source populated by the main app
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
