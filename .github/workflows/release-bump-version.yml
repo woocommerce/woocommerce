@@ -171,7 +171,7 @@ jobs:
             --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
             --base ${{ inputs.branch }} \
             --head ${branch_name} \
-            --label Release
+            --label Release \
             --reviewer "${{ github.actor }}"
 
       - name: Ensure milestone for dev version exists
