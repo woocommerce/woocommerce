@@ -14,6 +14,9 @@ use Automattic\WooCommerce\Admin\Features\Features;
  */
 class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
+	/**
+	 * Set up the test environment.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
