@@ -12,4 +12,3 @@ import './mini-cart-footer-block';
 import './mini-cart-shopping-button-block';
 import './mini-cart-cart-button-block';
 import './mini-cart-checkout-button-block';
-import './mini-cart-express-checkout-block';

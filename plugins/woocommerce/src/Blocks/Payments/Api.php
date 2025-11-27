@@ -61,7 +61,7 @@ class Api {
 	 * @return array
 	 */
 	public function add_payment_method_script_dependencies( $dependencies, $handle ) {
-		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend', 'wc-cart-block', 'wc-cart-block-frontend', 'wc-mini-cart-iapi-react-bridge', 'wc-express-payments-checkout-react-block-frontend' ], true ) ) {
+		if ( ! in_array( $handle, [ 'wc-checkout-block', 'wc-checkout-block-frontend', 'wc-cart-block', 'wc-cart-block-frontend', 'wc-express-payments-checkout-react-block-frontend' ], true ) ) {
 			return $dependencies;
 		}
 		return array_merge( $dependencies, $this->payment_method_registry->get_all_active_payment_method_script_dependencies() );
