@@ -412,9 +412,9 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
-		// If authorization ID is marked as 'none', it means we already checked and found no authorization data.
+		// If '_paypal_authorization_checked' is set to 'yes' and the authorization ID is empty, it means we already checked and found no authorization data.
 		// Return null to avoid repeated API calls.
-		if ( 'none' === $authorization_id ) {
+		if ( 'yes' === $order->get_meta('_paypal_authorization_checked', true) && empty( $authorization_id ) ) {
 			return null;
 		}
 
@@ -453,9 +453,10 @@ class WC_Gateway_Paypal_Request {
 					$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
 					$order->save();
 				} else {
-					// Store 'none' to prevent repeated API calls for orders with no authorization data.
+					// Store '_paypal_authorization_checked' flag to prevent repeated API calls for orders with no authorization data.
 					WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
-					$order->update_meta_data( '_paypal_authorization_id', 'none' );
+					$order->update_meta_data( '_paypal_authorization_id', '' );
+					$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
 					$order->save();
 					return null;
 				}
