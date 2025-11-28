@@ -68218,6 +68218,12 @@ parameters:
 			path: src/Admin/Features/PaymentGatewaySuggestions/DefaultPaymentGateways.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\PaymentGatewaySuggestions\\EvaluateSuggestion\:\:get_memo_key\(\) should return string but returns false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Admin/Features/PaymentGatewaySuggestions/EvaluateSuggestion.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\PaymentGatewaySuggestions\\EvaluateSuggestion\:\:reset_memo\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
