@@ -8,7 +8,7 @@ export const Edit = (): JSX.Element => {
 
 	return (
 		<div { ...blockProps }>
-			<p>Express Checkout iAPI noninteractive</p>
+			<p>Express Payments iAPI noninteractive</p>
 		</div>
 	);
 };

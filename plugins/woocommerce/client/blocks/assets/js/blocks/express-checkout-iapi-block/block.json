@@ -1,7 +1,7 @@
 {
 	"name": "woocommerce/express-checkout-iapi-block",
 	"version": "1.0.0",
-	"title": "Express Checkout iAPI",
+	"title": "Express Payments iAPI",
 	"description": "Block that displays express checkout options using the Interactivity API.",
 	"category": "woocommerce",
 	"supports": {
