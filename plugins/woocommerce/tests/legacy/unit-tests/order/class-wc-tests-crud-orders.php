@@ -16,6 +16,15 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
  * @package WooCommerce\Tests\CRUD
  */
 class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
+	/**
+	 * Tear down the test class.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		remove_all_filters( 'wc_get_price_thousand_separator' );
+		remove_all_filters( 'wc_get_price_decimal_separator' );
+	}
 
 	/**
 	 * Test: get_type
@@ -207,6 +216,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->set_total( '' );
 		$this->assertEquals( 0, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_pre_formatted_standard_value
+	 */
+	public function test_get_total_pre_formatted_standard_value() {
+		$object = new WC_Order();
+		$object->set_total( '2,000.00' );
+		$this->assertEquals( 2000, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_pre_formatted_eu_value
+	 */
+	public function test_get_total_pre_formatted_eu_value() {
+		// Simulate a price format like 3.567,89.
+		add_filter( 'wc_get_price_thousand_separator', fn() => '.' );
+		add_filter( 'wc_get_price_decimal_separator', fn() => ',' );
+
+		$object = new WC_Order();
+		$object->set_total( '2.000,00' );
+		$this->assertEquals( 2000, $object->get_total() );
 	}
 
 	/**
