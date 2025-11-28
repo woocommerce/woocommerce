@@ -85,12 +85,12 @@ class WC_Gateway_Paypal_Notices {
 	 */
 	public function add_paypal_notices_on_payments_settings_page() {
 		global $current_tab, $current_section;
-		
+
 		$screen = get_current_screen();
 		if ( ! $screen ) {
 			return;
 		}
-		
+
 		$is_payments_settings_page = 'woocommerce_page_wc-settings' === $screen->id && 'checkout' === $current_tab && empty( $current_section );
 
 		// Only add the notice from this callback on the payments settings page.
@@ -231,10 +231,9 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * @param int        $http_code     The HTTP status code from the PayPal API response.
 	 * @param array|null $response_data The decoded response data from the PayPal API, or null if decoding failed.
-	 * @param WC_Order   $order         The WooCommerce order object.
 	 * @return void
 	 */
-	public function handle_paypal_response( int $http_code, $response_data, $order ): void {
+	public function handle_paypal_response( int $http_code, $response_data ): void {
 		/**
 		 * Filters whether account restriction notices should be enabled.
 		 *
