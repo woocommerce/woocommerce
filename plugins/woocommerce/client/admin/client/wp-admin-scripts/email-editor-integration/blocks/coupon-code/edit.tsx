@@ -46,16 +46,13 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	const [ isTruncated, setIsTruncated ] = useState( false );
 
 	// Get the create coupon URL from the store
-	const { createCouponUrl } = useSelect(
-		( select ) => {
-			// @ts-expect-error - storeName is a valid store identifier
-			const urls = select( storeName )?.getUrls();
-			return {
-				createCouponUrl: urls?.createCoupon || '',
-			};
-		},
-		[]
-	);
+	const { createCouponUrl } = useSelect( ( select ) => {
+		// @ts-expect-error - storeName is a valid store identifier
+		const urls = select( storeName )?.getUrls();
+		return {
+			createCouponUrl: urls?.createCoupon || '',
+		};
+	}, [] );
 
 	// Fetch coupons from WooCommerce API with pagination
 	useEffect( () => {
