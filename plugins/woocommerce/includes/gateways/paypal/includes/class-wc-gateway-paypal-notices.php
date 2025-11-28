@@ -82,15 +82,20 @@ class WC_Gateway_Paypal_Notices {
 	 */
 	public function add_paypal_notices_on_payments_settings_page() {
 		global $current_tab, $current_section;
-		$is_payments_settings_page = 'woocommerce_page_wc-settings' === get_current_screen()->id && 'checkout' === $current_tab && empty( $current_section );
+		
+		$screen = get_current_screen();
+		if ( ! $screen ) {
+			return;
+		}
+		
+		$is_payments_settings_page = 'woocommerce_page_wc-settings' === $screen->id && 'checkout' === $current_tab && empty( $current_section );
 
 		// Only add the notice from this callback on the payments settings page.
 		if ( ! $is_payments_settings_page ) {
 			return;
 		}
 
-		$this->add_paypal_migration_notice();
-		$this->add_paypal_account_restricted_notice();
+		$this->add_paypal_notices();
 	}
 
 	/**
