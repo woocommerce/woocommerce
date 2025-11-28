@@ -201,6 +201,8 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 			pageObject,
 		} ) => {
+			await page.setViewportSize( { width: 800, height: 600 } );
+
 			await pageObject.addProductGalleryBlock( { cleanContent: false } );
 
 			await editor.saveSiteEditorEntities( {
