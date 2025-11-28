@@ -16,10 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
-	require_once __DIR__ . '/class-wc-gateway-paypal-notices.php';
-}
-
 /**
  * Generates requests to send to PayPal.
  */
@@ -1383,11 +1379,15 @@ class WC_Gateway_Paypal_Request {
 	 * Sets the account restriction flag if the status is 422 (account restricted),
 	 * or clears it if the status indicates success (200, 201).
 	 *
-	 * @param int   $http_code The HTTP status code from the PayPal API response.
-	 * @param array $response_data The response data from the PayPal API response.
+	 * @param int         $http_code The HTTP status code from the PayPal API response.
+	 * @param array|null  $response_data The response data from the PayPal API response.
 	 * @return void
 	 */
-	protected function maybe_add_or_remove_notice( $http_code, $response_data ) {
+	protected function maybe_add_or_remove_notice( int $http_code, array $response_data ): void {
+		if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+			require_once __DIR__ . '/class-wc-gateway-paypal-notices.php';
+		}
+
 		if ( in_array( $http_code, array( 200, 201 ), true ) ) {
 			WC_Gateway_Paypal_Notices::clear_account_restriction_flag();
 			return;
