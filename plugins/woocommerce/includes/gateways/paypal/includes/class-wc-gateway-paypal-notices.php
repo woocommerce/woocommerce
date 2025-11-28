@@ -55,7 +55,7 @@ class WC_Gateway_Paypal_Notices {
 		add_action( 'admin_head', array( $this, 'add_paypal_notices_on_payments_settings_page' ) );
 
 		// Listen for PayPal order responses to manage account restriction notices.
-		add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'handle_paypal_response' ), 10, 3 );
+		add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
 	}
 
 	/**
@@ -233,7 +233,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @param array|null $response_data The decoded response data from the PayPal API, or null if decoding failed.
 	 * @return void
 	 */
-	public function handle_paypal_response( int $http_code, $response_data ): void {
+	public function manage_account_restriction_status( int $http_code, $response_data ): void {
 		/**
 		 * Filters whether account restriction notices should be enabled.
 		 *
