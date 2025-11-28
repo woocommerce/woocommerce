@@ -181,7 +181,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return bool
 	 */
 	private function is_notice_dismissed( string $notice_name ): bool {
-		return get_user_meta( get_current_user_id(), 'dismissed_' . $notice_name . '_notice', true );
+		return (bool) get_user_meta( get_current_user_id(), 'dismissed_' . $notice_name . '_notice', true );
 	}
 
 	/**
