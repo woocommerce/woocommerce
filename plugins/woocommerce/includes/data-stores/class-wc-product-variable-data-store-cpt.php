@@ -637,7 +637,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$child_id,
 					ProductCacheInvalidator::OPERATION_UPDATE,
 					array(
-						'function'      => __METHOD__,
+						'function'  => __METHOD__,
 						'parent_id' => $product->get_id(),
 					)
 				);
@@ -646,8 +646,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$product->get_id(),
 				ProductCacheInvalidator::OPERATION_UPDATE,
 				array(
-					'function'      => __METHOD__,
-					'product' => $product,
+					'function' => __METHOD__,
+					'product'  => $product,
 				)
 			);
 		}
@@ -683,8 +683,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 							$managed_child,
 							ProductCacheInvalidator::OPERATION_UPDATE,
 							array(
-								'function'      => __METHOD__,
-								'parent_id' => $product->get_id()
+								'function'  => __METHOD__,
+								'parent_id' => $product->get_id(),
 							)
 						);
 					}
@@ -700,8 +700,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$product->get_id(),
 					ProductCacheInvalidator::OPERATION_UPDATE,
 					array(
-						'function'      => __METHOD__,
-						'product' => $product,
+						'function' => __METHOD__,
+						'product'  => $product,
 					)
 				);
 			}
