@@ -161,7 +161,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @param string $notice_name The name of the notice.
 	 * @return string
 	 */
-	private function get_dismiss_url( $notice_name ) {
+	private function get_dismiss_url( string $notice_name ): string {
 		return wp_nonce_url(
 			add_query_arg( 'wc-hide-notice', $notice_name ),
 			'woocommerce_hide_notices_nonce',
@@ -175,7 +175,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @param string $notice_name The name of the notice.
 	 * @return bool
 	 */
-	private function is_notice_dismissed( $notice_name ) {
+	private function is_notice_dismissed( string $notice_name ): bool {
 		return get_user_meta( get_current_user_id(), 'dismissed_' . $notice_name . '_notice', true );
 	}
 
@@ -184,7 +184,7 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * @return bool
 	 */
-	private function has_account_restriction_flag() {
+	private function has_account_restriction_flag(): bool {
 		return 'yes' === $this->gateway->get_option( 'paypal_account_restricted', 'no' );
 	}
 
@@ -193,7 +193,7 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * @return void
 	 */
-	public static function set_account_restriction_flag() {
+	public static function set_account_restriction_flag(): void {
 		$gateway = WC_Gateway_Paypal::get_instance();
 		if ( $gateway && 'no' === $gateway->get_option( 'paypal_account_restricted', 'no' ) ) {
 			$gateway->update_option( 'paypal_account_restricted', 'yes' );
@@ -205,7 +205,7 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * @return void
 	 */
-	public static function clear_account_restriction_flag() {
+	public static function clear_account_restriction_flag(): void {
 		$gateway = WC_Gateway_Paypal::get_instance();
 		if ( $gateway && 'yes' === $gateway->get_option( 'paypal_account_restricted', 'no' ) ) {
 			$gateway->update_option( 'paypal_account_restricted', 'no' );
