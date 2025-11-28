@@ -348,6 +348,22 @@ class Settings {
 				'date_completed' => 'date_completed',
 			),
 		);
+
+		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
+			$settings[] = array(
+				'id'          => 'woocommerce_analytics_immediate_import',
+				'option_key'  => 'woocommerce_analytics_immediate_import',
+				'label'       => __( 'Analytics Import Mode', 'woocommerce' ),
+				'description' => __( 'Controls how analytics data is imported from orders.', 'woocommerce' ),
+				'type'        => 'radio',
+				'default'     => 'yes',
+				'options'     => array(
+					'no'  => __( 'Scheduled (Recommended)', 'woocommerce' ),
+					'yes' => __( 'Immediately', 'woocommerce' ),
+				),
+			);
+		}
+
 		return $settings;
 	}
 
