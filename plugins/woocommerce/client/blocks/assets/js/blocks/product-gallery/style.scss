@@ -315,35 +315,21 @@ $dialog-padding: 20px;
 	fill: var(--wp--preset--color--contrast, #000);
 }
 
-:where(.wc-block-product-gallery-dialog__content) {
+.wc-block-product-gallery-dialog .wc-block-product-gallery-dialog__content {
 	height: calc(100vh - 64px);
-	margin-bottom: 64px;
 	overflow: auto;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	gap: 8px;
+	padding: 0 8px;
 
-	:where(img) {
-		max-width: 1600px !important;
+	img {
+		max-width: 1600px;
 		width: 100%;
 		height: auto;
-		margin: 0 20px;
 	}
 }
-
-
-// 	:where(img) {
-// 		max-width: 1000px !important;
-// 		width: 100%;
-// 		height: auto;
-// 		margin-bottom: 20px;
-// 	}
-
-// 	:where(img:last-child) {
-// 		margin-bottom: 0;
-// 	}
-// }
 
 // On mobile devices (<600px):
 // - Product gallery groups are stacked vertically
