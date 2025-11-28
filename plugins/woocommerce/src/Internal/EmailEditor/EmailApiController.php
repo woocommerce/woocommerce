@@ -225,14 +225,22 @@ class EmailApiController {
 	}
 
 	/**
+	 * Get all WooCommerce emails.
+	 *
+	 * @return \WC_Email[]
+	 */
+	protected function get_emails(): array {
+		return WC()->mailer()->get_emails();
+	}
+
+	/**
 	 * Get the email object by ID.
 	 *
 	 * @param string $id - The email ID.
 	 * @return \WC_Email|null - The email object or null if not found.
 	 */
 	private function get_email_by_type( ?string $id ): ?WC_Email {
-		$emails = WC()->mailer()->get_emails();
-		foreach ( $emails as $email ) {
+		foreach ( $this->get_emails() as $email ) {
 			if ( $email->id === $id ) {
 				return $email;
 			}
