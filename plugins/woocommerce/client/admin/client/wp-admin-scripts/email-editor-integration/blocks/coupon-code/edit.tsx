@@ -5,15 +5,14 @@ import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import {
 	PanelBody,
-	ExternalLink,
+	Button,
 	ComboboxControl,
 	Spinner,
 } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import type { CSSProperties } from 'react';
 import apiFetch from '@wordpress/api-fetch';
-import { storeName } from '@woocommerce/email-editor';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -45,14 +44,23 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ isTruncated, setIsTruncated ] = useState( false );
 
-	// Get the create coupon URL from the store
-	const { createCouponUrl } = useSelect( ( select ) => {
-		// @ts-expect-error - storeName is a valid store identifier
-		const urls = select( storeName )?.getUrls();
-		return {
-			createCouponUrl: urls?.createCoupon || '',
-		};
-	}, [] );
+	// Handler for creating a new coupon - uses a filter so integrators can customize behavior
+	const handleCreateCoupon = () => {
+		const createCouponHandler = applyFilters(
+			'woocommerce_email_editor_create_coupon_handler',
+			() => {
+				// Default fallback: open in new tab
+				window.open(
+					'/wp-admin/post-new.php?post_type=shop_coupon',
+					'_blank'
+				);
+			}
+		);
+
+		if ( typeof createCouponHandler === 'function' ) {
+			createCouponHandler();
+		}
+	};
 
 	// Fetch coupons from WooCommerce API with pagination
 	useEffect( () => {
@@ -311,13 +319,15 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 							</>
 						) }
 					</div>
-					{ createCouponUrl && (
-						<div>
-							<ExternalLink href={ createCouponUrl }>
-								{ __( 'Create new coupon', 'woocommerce' ) }
-							</ExternalLink>
-						</div>
-					) }
+					<div>
+						<Button
+							variant="link"
+							onClick={ handleCreateCoupon }
+							style={ { padding: 0, height: 'auto' } }
+						>
+							{ __( 'Create new coupon', 'woocommerce' ) }
+						</Button>
+					</div>
 				</PanelBody>
 			</InspectorControls>
 			<div

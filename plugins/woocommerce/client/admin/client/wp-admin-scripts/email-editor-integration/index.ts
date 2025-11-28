@@ -37,6 +37,20 @@ addFilter(
 	() => true
 );
 
+/**
+ * Register handler for creating coupons in WooCommerce.
+ * This uses a callback approach to support SPA routing instead of static URLs.
+ */
+addFilter(
+	'woocommerce_email_editor_create_coupon_handler',
+	NAME_SPACE,
+	() => () => {
+		// Navigate to coupon creation page in a new tab
+		// Integrators could customize this to use SPA routing (e.g., history.push for React Router)
+		window.open( '/wp-admin/post-new.php?post_type=shop_coupon', '_blank' );
+	}
+);
+
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
