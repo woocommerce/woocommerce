@@ -14,13 +14,11 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer, { State } from './reducer';
 import * as resolvers from './resolvers';
-import initDispatchers from './dispatchers';
+import initDispatchers, { INTERNAL_CALL } from './dispatchers';
 import { WPDataActions, WPDataSelectors } from '../types';
 import { PromiseifySelectors } from '../types/promiseify-selectors';
 
 export { type State };
-
-export const INTERNAL_CALL = Symbol( 'INTERNAL_CALL' );
 
 // Generic wrapper that applies deprecate() to all functions.
 function wrapWithDeprecate< T extends Record< string, unknown > >( obj: T ): T {

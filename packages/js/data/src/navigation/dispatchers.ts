@@ -8,8 +8,8 @@ import { addHistoryListener } from '@woocommerce/navigation';
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
-import { INTERNAL_CALL } from '.';
 
+export const INTERNAL_CALL = Symbol( 'INTERNAL_CALL' );
 export default async () => {
 	const { onLoad, onHistoryChange } = dispatch( STORE_NAME );
 
