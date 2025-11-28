@@ -13,12 +13,12 @@ import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import type { CSSProperties } from 'react';
 import apiFetch from '@wordpress/api-fetch';
+import { storeName } from '@woocommerce/email-editor';
 
 /**
  * Internal dependencies
  */
 import type { BlockEditProps } from './types';
-import { storeName } from '../../../store/constants';
 
 interface Coupon {
 	id: number;
@@ -46,12 +46,16 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	const [ isTruncated, setIsTruncated ] = useState( false );
 
 	// Get the create coupon URL from the store
-	const { createCouponUrl } = useSelect( ( select ) => {
-		const urls = select( storeName ).getUrls();
-		return {
-			createCouponUrl: urls?.createCoupon || '',
-		};
-	}, [] );
+	const { createCouponUrl } = useSelect(
+		( select ) => {
+			// @ts-expect-error - storeName is a valid store identifier
+			const urls = select( storeName )?.getUrls();
+			return {
+				createCouponUrl: urls?.createCoupon || '',
+			};
+		},
+		[]
+	);
 
 	// Fetch coupons from WooCommerce API with pagination
 	useEffect( () => {

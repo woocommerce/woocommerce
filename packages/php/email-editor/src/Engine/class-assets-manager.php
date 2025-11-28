@@ -210,10 +210,9 @@ class Assets_Manager {
 			'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
 			'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
 			'urls'                  => array(
-				'listings'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
-				'send'         => admin_url( 'admin.php?page=wc-settings&tab=email' ),
-				'back'         => admin_url( 'admin.php?page=wc-settings&tab=email' ),
-				'createCoupon' => admin_url( 'post-new.php?post_type=shop_coupon' ),
+				'listings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+				'send'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+				'back'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
 			),
 		);
 

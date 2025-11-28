@@ -122,6 +122,26 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
+		add_action( 'init', array( $this, 'register_coupon_code_block' ) );
+	}
+
+	/**
+	 * Register the coupon code block.
+	 */
+	public function register_coupon_code_block() {
+		$editor_container              = \Automattic\WooCommerce\EmailEditor\Email_Editor_Container::container();
+		$woocommerce_integration       = $editor_container->get( \Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Initializer::class );
+
+		register_block_type(
+			'woocommerce/coupon-code',
+			array(
+				'title'                 => 'Coupon Code',
+				'supports'              => array(
+					'email' => true,
+				),
+				'render_email_callback' => array( $woocommerce_integration, 'render_block' ),
+			)
+		);
 	}
 
 	/**

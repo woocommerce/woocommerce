@@ -88,13 +88,6 @@ class Bootstrap {
 				10,
 				1
 			);
-			register_block_type(
-				'woocommerce/coupon-code',
-				array(
-					'title'                 => 'Coupon Code', // This shouldn't be used anywhere. Required by `register_block_type()`, however the value from the frontend is used.
-					'render_email_callback' => array( $this->woocommerce_email_editor_integration, 'render_block' ),
-				)
-			);
 		}
 	}
 

@@ -29,7 +29,6 @@ import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
 import { modifyMoveToTrashAction } from './core/move-to-trash';
 import { enhanceSiteLogoBlock } from './core/site-logo';
-import { registerWooCommerceBlocks } from './woocommerce';
 
 export { getAllowedBlockNames } from './utils';
 
@@ -56,5 +55,4 @@ export function initBlocks() {
 	modifyMoveToTrashAction();
 	enhanceSiteLogoBlock();
 	removeBlockStylesFromAllBlocks();
-	registerWooCommerceBlocks();
 }

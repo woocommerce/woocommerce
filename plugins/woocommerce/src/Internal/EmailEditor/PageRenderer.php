@@ -102,6 +102,9 @@ class PageRenderer {
 		$localized_data['editor_settings']['isFullScreenForced']     = true;
 		$localized_data['editor_settings']['displaySendEmailButton'] = false;
 
+		// Add WooCommerce-specific URLs.
+		$localized_data['urls']['createCoupon'] = admin_url( 'post-new.php?post_type=shop_coupon' );
+
 		return $localized_data;
 	}
 
