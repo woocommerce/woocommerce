@@ -144,9 +144,9 @@ class Image extends Abstract_Block_Renderer {
 			if ( ! isset( $image_size ) ) {
 				$upload_dir = wp_upload_dir();
 				$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
-				$image_size = wp_getimagesize( $image_path );
-				if ( $image_size ) {
-					$image_size = (int) $image_size[0];
+				$result     = wp_getimagesize( $image_path );
+				if ( $result ) {
+					$image_size = (int) $result[0];
 				}
 			}
 		}
