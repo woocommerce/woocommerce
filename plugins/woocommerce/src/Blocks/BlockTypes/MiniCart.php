@@ -91,7 +91,6 @@ class MiniCart extends AbstractBlock {
 		'woocommerce/mini-cart-footer-block',
 		'woocommerce/mini-cart-cart-button-block',
 		'woocommerce/mini-cart-checkout-button-block',
-		'woocommerce/mini-cart-express-checkout-block',
 		'woocommerce/empty-mini-cart-contents-block',
 		'woocommerce/mini-cart-shopping-button-block',
 	);
@@ -222,38 +221,6 @@ class MiniCart extends AbstractBlock {
 		}
 
 		parent::enqueue_data( $attributes );
-
-		// Enqueue payment methods for iAPI Mini Cart.
-		// The React bridge is now lazy-loaded client-side to optimize performance.
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			/**
-			 * Fires before mini-cart express payment scripts are enqueued.
-			 * This allows payment gateways to enqueue their express payment method scripts.
-			 *
-			 * @since 9.4.0
-			 */
-			do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
-
-			$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-iapi-react-bridge-frontend.js', array() );
-			$this->asset_api->register_script( 'wc-mini-cart-iapi-react-bridge', 'assets/client/blocks/mini-cart-iapi-react-bridge-frontend.js', array() );
-			wp_enqueue_script( 'wc-mini-cart-iapi-react-bridge' );
-
-			// Explicitly enqueue payment method scripts to ensure they register with wcBlocksRegistry.
-			// This is needed because payment gateways may not enqueue their scripts on non-cart/checkout pages.
-			$payment_method_registry = Package::container()->get( PaymentMethodRegistry::class );
-			$payment_methods         = $payment_method_registry->get_all_active_payment_method_script_dependencies();
-
-			foreach ( $payment_methods as $payment_method ) {
-				wp_enqueue_script( $payment_method );
-			}
-
-			/**
-			 * Fires after mini-cart express payment scripts are enqueued.
-			 *
-			 * @since 9.4.0
-			 */
-			do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
-		}
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
