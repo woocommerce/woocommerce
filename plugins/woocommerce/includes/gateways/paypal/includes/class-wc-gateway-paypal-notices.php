@@ -53,6 +53,9 @@ class WC_Gateway_Paypal_Notices {
 		// This bypasses the suppress_admin_notices() function which removes all admin_notices hooks on the payments page.
 		// This is a workaround to avoid the notice being suppressed by the suppress_admin_notices() function.
 		add_action( 'admin_head', array( $this, 'add_paypal_notices_on_payments_settings_page' ) );
+
+		// Listen for PayPal order responses to manage account restriction notices.
+		add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'handle_paypal_response' ), 10, 3 );
 	}
 
 	/**
@@ -214,6 +217,49 @@ class WC_Gateway_Paypal_Notices {
 		$gateway = WC_Gateway_Paypal::get_instance();
 		if ( $gateway && 'yes' === $gateway->get_option( 'paypal_account_restricted', 'no' ) ) {
 			$gateway->update_option( 'paypal_account_restricted', 'no' );
+		}
+	}
+
+	/**
+	 * Handle PayPal order response to manage account restriction notices.
+	 *
+	 * This method is called via the 'woocommerce_paypal_standard_order_created_response' hook
+	 * and manages the account restriction flag based on PayPal API responses.
+	 *
+	 * Extensions can disable this feature using the filter:
+	 * add_filter( 'woocommerce_paypal_account_restriction_notices_enabled', '__return_false' );
+	 *
+	 * @param int        $http_code     The HTTP status code from the PayPal API response.
+	 * @param array|null $response_data The decoded response data from the PayPal API, or null if decoding failed.
+	 * @param WC_Order   $order         The WooCommerce order object.
+	 * @return void
+	 */
+	public function handle_paypal_response( int $http_code, $response_data, $order ): void {
+		/**
+		 * Filters whether account restriction notices should be enabled.
+		 *
+		 * This filter allows extensions to opt out of the account restriction notice functionality.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool $enabled Whether account restriction notices are enabled. Default true.
+		 */
+		if ( ! apply_filters( 'woocommerce_paypal_account_restriction_notices_enabled', true ) ) {
+			return;
+		}
+
+		// Clear the restriction flag on successful responses.
+		if ( in_array( $http_code, array( 200, 201 ), true ) ) {
+			self::clear_account_restriction_flag();
+			return;
+		}
+
+		// Set the restriction flag for account-related errors.
+		if ( 422 === $http_code && is_array( $response_data ) ) {
+			$issue = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : null;
+			if ( in_array( $issue, array( 'PAYEE_ACCOUNT_LOCKED_OR_CLOSED', 'PAYEE_ACCOUNT_RESTRICTED' ), true ) ) {
+				self::set_account_restriction_flag();
+			}
 		}
 	}
 }

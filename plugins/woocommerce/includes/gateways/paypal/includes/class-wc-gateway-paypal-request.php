@@ -81,6 +81,11 @@ class WC_Gateway_Paypal_Request {
 	public function __construct( $gateway ) {
 		$this->gateway    = $gateway;
 		$this->notify_url = WC()->api_request_url( 'WC_Gateway_Paypal' );
+
+		if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+			require_once __DIR__ . '/class-wc-gateway-paypal-notices.php';
+			new WC_Gateway_Paypal_Notices();
+		}
 	}
 
 	/**
@@ -158,8 +163,19 @@ class WC_Gateway_Paypal_Request {
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
-			// Handle PayPal notices based on response status.
-			$this->maybe_add_or_remove_notice( $http_code, $response_data ?? array() );
+			/**
+			 * Fires after receiving a response from PayPal order creation.
+			 *
+			 * This hook allows extensions to react to PayPal API responses, such as
+			 * displaying admin notices or logging response data.
+			 *
+			 * @since 10.4.0
+			 *
+			 * @param int        $http_code     The HTTP status code from the PayPal API response.
+			 * @param array|null $response_data The decoded response data from the PayPal API, or null if decoding failed.
+			 * @param WC_Order   $order         The WooCommerce order object.
+			 */
+			do_action( 'woocommerce_paypal_standard_order_created_response', $http_code, $response_data, $order );
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
@@ -1373,29 +1389,4 @@ class WC_Gateway_Paypal_Request {
 		return number_format( (float) $price, $decimals, '.', '' );
 	}
 
-	/**
-	 * Maybe add or remove account restriction notice based on HTTP status code.
-	 *
-	 * Sets the account restriction flag if the status is 422 (account restricted),
-	 * or clears it if the status indicates success (200, 201).
-	 *
-	 * @param int   $http_code The HTTP status code from the PayPal API response.
-	 * @param array $response_data The response data from the PayPal API response.
-	 * @return void
-	 */
-	protected function maybe_add_or_remove_notice( int $http_code, array $response_data ): void {
-		if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
-			require_once __DIR__ . '/class-wc-gateway-paypal-notices.php';
-		}
-
-		if ( in_array( $http_code, array( 200, 201 ), true ) ) {
-			WC_Gateway_Paypal_Notices::clear_account_restriction_flag();
-			return;
-		}
-
-		$issue = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : null;
-		if ( 422 === $http_code && in_array( $issue, array( 'PAYEE_ACCOUNT_LOCKED_OR_CLOSED', 'PAYEE_ACCOUNT_RESTRICTED' ), true ) ) {
-			WC_Gateway_Paypal_Notices::set_account_restriction_flag();
-		}
-	}
 }
