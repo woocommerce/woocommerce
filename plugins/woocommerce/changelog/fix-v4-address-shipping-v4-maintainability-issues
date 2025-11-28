@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Move the business logic for v4 endpoints for shipping zones and methods from the global model to a dedicated service.

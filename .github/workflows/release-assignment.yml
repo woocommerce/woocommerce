@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Install node-ical
         run: npm install node-ical
-      - name: Check for code freeze events
+      - name: Check for feature freeze events
         id: check-code-freeze-8-weeks
         uses: actions/github-script@v7
         with:
@@ -63,14 +63,14 @@ jobs:
               if (eventsInRange.length > 0) {
                 const date = eventsInRange[0].start.toISOString();
                 const version = eventsInRange[0].summary.match(/\d+\.\d+/)[0];
-                console.log(`Found Code Freeze event: ${eventsInRange[0].summary}`);
+                console.log(`Found Feature Freeze event: ${eventsInRange[0].summary}`);
                 console.log(`Date: ${date}`);
                 console.log(`Version: ${version}`);
                 core.setOutput('should-trigger-webhook', 'true');
                 core.setOutput('version', version);
                 core.setOutput('feature-freeze-date', date);
               } else {
-                console.log(`No Code Freeze events found in the specified range.`);
+                console.log(`No Feature Freeze events found in the specified range.`);
                 core.setOutput('should-trigger-webhook', 'false');
               }
             } catch (error) {

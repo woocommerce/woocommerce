@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix missing data in certain WooCommerce blocks inside the Product block when editing as an author
