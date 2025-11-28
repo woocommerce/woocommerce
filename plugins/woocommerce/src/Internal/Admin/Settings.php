@@ -353,10 +353,10 @@ class Settings {
 			$settings[] = array(
 				'id'          => 'woocommerce_analytics_immediate_import',
 				'option_key'  => 'woocommerce_analytics_immediate_import',
-				'label'       => __( 'Analytics Import Mode', 'woocommerce' ),
+				'label'       => __( 'Update', 'woocommerce' ),
 				'description' => __( 'Controls how analytics data is imported from orders.', 'woocommerce' ),
 				'type'        => 'radio',
-				'default'     => 'yes',
+				'default'     => 'no', // Default to scheduled import for new stores.
 				'options'     => array(
 					'no'  => __( 'Scheduled (Recommended)', 'woocommerce' ),
 					'yes' => __( 'Immediately', 'woocommerce' ),
