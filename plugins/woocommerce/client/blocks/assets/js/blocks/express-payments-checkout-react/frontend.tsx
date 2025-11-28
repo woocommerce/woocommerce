@@ -10,6 +10,10 @@ import {
 import { ExpressPaymentContext } from '../cart-checkout-shared/payment-methods/express-payment/express-payment-context';
 import { useSelect } from '@wordpress/data';
 import { PAYMENT_STORE_KEY } from '@woocommerce/block-data';
+import { useEffect } from '@wordpress/element';
+
+// Performance measurement: script start.
+performance.mark( 'express-react-script-start' );
 
 const Block = (): JSX.Element => {
 	const expressPaymentContextValue = {
@@ -32,10 +36,28 @@ const Block = (): JSX.Element => {
 		};
 	} );
 
-	console.log(
-		'>>>>>>> MiniCartExpressPaymentWrapper paymentState',
-		paymentState
-	);
+	// Performance measurement: component mounted.
+	useEffect( () => {
+		performance.mark( 'express-react-mounted' );
+		performance.measure(
+			'express-react-total',
+			'express-react-script-start',
+			'express-react-mounted'
+		);
+		const measure = performance.getEntriesByName(
+			'express-react-total'
+		)[ 0 ];
+		// eslint-disable-next-line no-console
+		console.log(
+			`[Perf] React Block: ${ measure?.duration.toFixed( 2 ) }ms`
+		);
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		( window as any ).__expressMetrics =
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			( window as any ).__expressMetrics || {};
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		( window as any ).__expressMetrics.react = measure?.duration;
+	}, [] );
 
 	return (
 		<CheckoutProvider>

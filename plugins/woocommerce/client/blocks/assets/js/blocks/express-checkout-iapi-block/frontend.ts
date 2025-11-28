@@ -3,6 +3,9 @@
  */
 import { store, getElement } from '@wordpress/interactivity';
 
+// Performance measurement: script start.
+performance.mark( 'express-iapi-script-start' );
+
 /**
  * Helper function to check base dependencies required for express payment methods rendering.
  *
@@ -42,6 +45,9 @@ function checkBaseDependencies(
 store( 'woocommerce/express-checkout-iapi-block', {
 	callbacks: {
 		renderExpressPaymentMethodsIsland() {
+			// Performance measurement: callback start.
+			performance.mark( 'express-iapi-callback-start' );
+
 			const { ref } = getElement();
 			const debugName = 'express payment methods island';
 

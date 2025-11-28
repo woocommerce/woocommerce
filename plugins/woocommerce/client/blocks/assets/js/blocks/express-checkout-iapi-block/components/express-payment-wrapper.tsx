@@ -5,6 +5,7 @@ import {
 	CheckoutProvider,
 	CheckoutEventsProvider,
 } from '@woocommerce/base-context';
+import { useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -37,6 +38,42 @@ const ExpressPaymentWrapper = ( {
 		buttonHeight: String( buttonHeight ),
 		buttonBorderRadius: String( buttonBorderRadius ),
 	};
+
+	// Performance measurement: component mounted.
+	useEffect( () => {
+		performance.mark( 'express-iapi-mounted' );
+		performance.measure(
+			'express-iapi-total',
+			'express-iapi-script-start',
+			'express-iapi-mounted'
+		);
+		performance.measure(
+			'express-iapi-callback-to-mount',
+			'express-iapi-callback-start',
+			'express-iapi-mounted'
+		);
+
+		const total = performance.getEntriesByName( 'express-iapi-total' )[ 0 ];
+		const cbToMount = performance.getEntriesByName(
+			'express-iapi-callback-to-mount'
+		)[ 0 ];
+		// eslint-disable-next-line no-console
+		console.log(
+			`[Perf] iAPI Block: ${ total?.duration.toFixed(
+				2
+			) }ms (callback→mount: ${ cbToMount?.duration.toFixed( 2 ) }ms)`
+		);
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		( window as any ).__expressMetrics =
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			( window as any ).__expressMetrics || {};
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		( window as any ).__expressMetrics.iapi = total?.duration;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		( window as any ).__expressMetrics.iapiCallbackToMount =
+			cbToMount?.duration;
+	}, [] );
 
 	return (
 		<CheckoutProvider>
