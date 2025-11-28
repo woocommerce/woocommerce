@@ -260,7 +260,7 @@ export const addLabelsToIssue = async (
  * @param {string} options.title pull request title.
  * @param {string} options.body  pull request body.
  * @return {Promise<object>}     pull request data.
- * @param {string[]} options. reviewers list of GitHub usernames to request a review from.
+ * @param {string[]} options.reviewers list of GitHub usernames to request a review from.
  */
 export const createPullRequest = async ( options: {
 	head: string;
