@@ -356,7 +356,7 @@ class Settings {
 				'label'       => __( 'Update', 'woocommerce' ),
 				'description' => __( 'Controls how analytics data is imported from orders.', 'woocommerce' ),
 				'type'        => 'radio',
-				'default'     => 'no', // Default to scheduled import for new stores.
+				'default'     => 'yes', // Default to immediate import for backward compatibility to ensure we don't accidentally change the behavior for existing stores.
 				'options'     => array(
 					'no'  => __( 'Scheduled (Recommended)', 'woocommerce' ),
 					'yes' => __( 'Immediately', 'woocommerce' ),
