@@ -152,7 +152,7 @@ class Image extends Abstract_Block_Renderer {
 		}
 
 		// Use the found image size or fall back to max_width.
-		$width = isset( $image_size ) && is_numeric( $image_size ) ? min( $image_size, $max_width ) : $max_width;
+		$width = isset( $image_size ) ? min( $image_size, $max_width ) : $max_width;
 
 		$parsed_block['attrs']['width'] = "{$width}px";
 		return $parsed_block;
