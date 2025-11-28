@@ -288,6 +288,7 @@ $dialog-padding: 20px;
 	bottom: 0;
 	z-index: 1000;
 	overflow: hidden;
+	background-color: var(--wp--preset--color--base, #fff);
 
 	:where(.admin-bar) & {
 		// Subtract the admin bar height.
@@ -304,6 +305,7 @@ $dialog-padding: 20px;
 	background: none;
 	border: none;
 	cursor: pointer;
+	fill: var(--wp--preset--color--contrast, #000);
 }
 
 :where(.wc-block-product-gallery-dialog__content) {
