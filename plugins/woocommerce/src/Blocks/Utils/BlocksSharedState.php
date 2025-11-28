@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 
 /**
  * Manages the registration of interactivity config and state that is commonly shared by WooCommerce blocks.
- * Initialization only happens on the first call to initialize_shared_config.
+ * Initialization only happens on the first call to load_store_config.
  *
  * This is a private API and may change in future versions.
  */
