@@ -112,7 +112,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await test.step( 'styles are not applied to other images', async () => {
 				// img[style] is the selector because the style attribute is Interactivity API.
-				const hiddenImage = blockFrontend.locator( 'img' ).nth( 1 );
+				const hiddenImage = viewerBlock.locator( 'img' ).nth( 1 );
 				const style = await hiddenImage.evaluate( ( el ) => el.style );
 
 				expect( style.transform ).toBe( '' );
