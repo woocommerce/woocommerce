@@ -291,6 +291,7 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 									} }
 									options={ couponOptions }
 									__nextHasNoMarginBottom
+									__next40pxDefaultSize
 								/>
 								{ isTruncated && (
 									<div
