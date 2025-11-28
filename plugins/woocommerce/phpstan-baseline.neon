@@ -7,25 +7,31 @@ parameters:
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$key\.$#'
+			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 2
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
-			message: '#^Call to an undefined method object\:\:add_meta\(\)\.$#'
-			identifier: method.notFound
+			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
+			identifier: property.notFound
+			count: 5
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
+			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 6
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
+			message: '#^Argument of an invalid type array\<WC_Meta_Data\>\|null supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
 			count: 1
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
-			message: '#^Call to an undefined method object\:\:apply_changes\(\)\.$#'
+			message: '#^Call to an undefined method object\:\:add_meta\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/abstracts/abstract-wc-data.php
@@ -50,12 +56,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method object\:\:filter_raw_meta_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
-			message: '#^Call to an undefined method object\:\:get_changes\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: includes/abstracts/abstract-wc-data.php
@@ -181,6 +181,12 @@ parameters:
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
+			message: '#^Method WC_Data\:\:set_clone_mode\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
 			message: '#^Method WC_Data\:\:set_date_prop\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -223,8 +229,20 @@ parameters:
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
+			message: '#^Offset \(int\|string\) might not exist on array\<WC_Meta_Data\>\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 5
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
 			message: '#^Offset 7 on list\{0\: non\-falsy\-string, 1\: non\-falsy\-string&numeric\-string, 2\: non\-falsy\-string&numeric\-string, 3\: non\-falsy\-string&numeric\-string, 4\: non\-falsy\-string&numeric\-string, 5\: non\-falsy\-string&numeric\-string, 6\: non\-falsy\-string&numeric\-string, 7\: non\-falsy\-string, \.\.\.\} in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.offset
+			count: 1
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
+			message: '#^Offset int\|string might not exist on array\<WC_Meta_Data\>\|null\.$#'
+			identifier: offsetAccess.notFound
 			count: 1
 			path: includes/abstracts/abstract-wc-data.php
 
@@ -238,6 +256,18 @@ parameters:
 			message: '#^Parameter \#1 \$hour of function gmmktime expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
+			message: '#^Parameter \#1 \$input of function array_filter expects array, array\<WC_Meta_Data\>\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
+			message: '#^Parameter \#1 \$input_list of function wp_list_pluck expects array, array\<WC_Meta_Data\>\|null given\.$#'
+			identifier: argument.type
+			count: 4
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
@@ -3508,6 +3538,12 @@ parameters:
 			message: '#^Cannot call method get_sku\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
+			path: includes/admin/class-wc-admin-duplicate-product.php
+
+		-
+			message: '#^Cannot call method read_meta_data\(\) on WC_Product\|false\|null\.$#'
+			identifier: method.nonObject
+			count: 1
 			path: includes/admin/class-wc-admin-duplicate-product.php
 
 		-
@@ -16051,6 +16087,12 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
+			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-cart-session.php
+
+		-
 			message: '#^Parameter \#1 \$value of method WC_Cart\:\:set_applied_coupons\(\) expects array, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -21763,6 +21805,12 @@ parameters:
 			path: includes/class-wc-order-item-tax.php
 
 		-
+			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-order-item.php
+
+		-
 			message: '#^Access to an undefined property object\:\:\$key\.$#'
 			identifier: property.notFound
 			count: 3
@@ -21771,6 +21819,12 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$value\.$#'
 			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-order-item.php
+
+		-
+			message: '#^Argument of an invalid type array\<WC_Meta_Data\>\|null supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
 			count: 1
 			path: includes/class-wc-order-item.php
 
@@ -21868,6 +21922,12 @@ parameters:
 			message: '#^Method WC_Order_Item\:\:set_order_id\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
+			path: includes/class-wc-order-item.php
+
+		-
+			message: '#^Parameter \#1 \$input_list of function wp_list_pluck expects array, array\<WC_Meta_Data\>\|null given\.$#'
+			identifier: argument.type
+			count: 3
 			path: includes/class-wc-order-item.php
 
 		-
@@ -48166,7 +48226,7 @@ parameters:
 			path: includes/tracks/class-wc-tracks-event.php
 
 		-
-			message: '#^Argument of an invalid type bool supplied for foreach, only iterables are supported\.$#'
+			message: '#^Argument of an invalid type object supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
 			path: includes/tracks/class-wc-tracks-event.php
@@ -48184,8 +48244,14 @@ parameters:
 			path: includes/tracks/class-wc-tracks-event.php
 
 		-
-			message: '#^Method WC_Tracks_Event\:\:validate_and_sanitize\(\) should return bool\|WP_Error but returns stdClass\.$#'
+			message: '#^Method WC_Tracks_Event\:\:validate_and_sanitize\(\) should return object but returns array\|object\.$#'
 			identifier: return.type
+			count: 1
+			path: includes/tracks/class-wc-tracks-event.php
+
+		-
+			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed\)\: mixed\)\|null, ''strval'' given\.$#'
+			identifier: argument.type
 			count: 1
 			path: includes/tracks/class-wc-tracks-event.php
 
@@ -48197,12 +48263,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$event of static method WC_Tracks_Footer_Pixel\:\:record_event\(\) expects array, \$this\(WC_Tracks_Event\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/tracks/class-wc-tracks-event.php
-
-		-
-			message: '#^Parameter \#1 \$querydata of function http_build_query expects array\|object, bool given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/tracks/class-wc-tracks-event.php
@@ -76210,7 +76270,13 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductImage.php
 
 		-
-			message: '#^Parameter \#4 \$attr of function wp_get_attachment_image expects array\{src\?\: string, class\?\: string, alt\?\: string, srcset\?\: string, sizes\?\: string, loading\?\: string\|false, decoding\?\: string, fetchpriority\?\: string\}, array\{alt\: mixed, data\-testid\: ''product\-image'', data\-image\-id\: int, style\: string\} given\.$#'
+			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductImage.php
+
+		-
+			message: '#^Parameter \#4 \$attr of function wp_get_attachment_image expects array\{src\?\: string, class\?\: string, alt\?\: string, srcset\?\: string, sizes\?\: string, loading\?\: string\|false, decoding\?\: string, fetchpriority\?\: string\}, array\{alt\: mixed, data\-testid\: ''product\-image'', data\-image\-id\: int\<min, \-1\>\|int\<1, max\>, style\: string\} given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductImage.php
@@ -88732,12 +88798,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
 
 		-
-			message: '#^Call to method schedule_recurring\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
-
-		-
 			message: '#^Cannot call method get_date_created\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -88768,6 +88828,12 @@ parameters:
 			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
 
 		-
+			message: '#^Function as_schedule_recurring_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
+
+		-
 			message: '#^Function as_unschedule_all_actions not found\.$#'
 			identifier: function.notFound
 			count: 1
@@ -88786,12 +88852,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\OrdersScheduler\:\:initialize_last_processed_date\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\OrdersScheduler\:\:possibly_schedule_import\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -88805,6 +88865,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$cursor_date of static method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\OrdersScheduler\:\:get_orders_since\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
+
+		-
+			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
@@ -97699,6 +97765,12 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Controller\:\:check_permission_for_providers\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Controller\:\:create_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -97725,6 +97797,18 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Controller\:\:get_item_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Controller\:\:get_providers\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Controller\:\:init\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
 
@@ -97759,10 +97843,22 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
 
 		-
+			message: '#^Parameter \#1 \$fulfillment of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Schema\\FulfillmentSchema\:\:get_item_response\(\) expects Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
+
+		-
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
 			identifier: argument.type
 			count: 12
 			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Fulfillments\\Schema\\FulfillmentSchema\:\:get_item_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Fulfillments/Schema/FulfillmentSchema.php
 
 		-
 			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
