@@ -205,11 +205,12 @@ jobs:
   bump-version-in-trunk:
     name: Bump version in trunk for next development cycle
     uses: ./.github/workflows/release-bump-version.yml
-    needs: [run-feature-freeze]
+    needs: [prepare-for-feature-freeze, run-feature-freeze]
     secrets: inherit
     with:
       branch: trunk
       bump-type: dev
+      milestone: ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}
 
   build-dev-release:
     name: 'Build WooCommerce -dev release'
