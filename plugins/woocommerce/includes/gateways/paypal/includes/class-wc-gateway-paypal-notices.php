@@ -22,14 +22,14 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * @var string
 	 */
-	const PAYPAL_MIGRATION_NOTICE = 'paypal_migration_completed';
+	private const PAYPAL_MIGRATION_NOTICE = 'paypal_migration_completed';
 
 	/**
 	 * The name of the notice for PayPal account restriction.
 	 *
 	 * @var string
 	 */
-	const PAYPAL_ACCOUNT_RESTRICTED_NOTICE = 'paypal_account_restricted';
+	private const PAYPAL_ACCOUNT_RESTRICTED_NOTICE = 'paypal_account_restricted';
 
 	/**
 	 * The PayPal gateway instance.
