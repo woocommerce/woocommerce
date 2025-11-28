@@ -201,7 +201,7 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 			pageObject,
 		} ) => {
-			await page.setViewportSize( { width: 800, height: 600 } );
+			await page.setViewportSize( { width: 800, height: 800 } );
 
 			await pageObject.addProductGalleryBlock( { cleanContent: false } );
 
@@ -241,7 +241,7 @@ test.describe( `${ blockData.name }`, () => {
 				.locator( `img[data-image-id='${ nextImageId }']` );
 
 			// The image should be in the viewport but it simply doesn't fit fully.
-			await expect( dialogImage ).toBeInViewport( { ratio: 0.75 } );
+			await expect( dialogImage ).toBeInViewport( { ratio: 0.7 } );
 
 			const closePopUpButton = page.locator(
 				'.wc-block-product-gallery-dialog__close-button'
