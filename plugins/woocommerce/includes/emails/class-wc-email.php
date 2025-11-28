@@ -95,6 +95,13 @@ class WC_Email extends WC_Settings_API {
 	public $template_html;
 
 	/**
+	 * Initial email block template path.
+	 *
+	 * @var string
+	 */
+	public $template_block;
+
+	/**
 	 * Template path.
 	 *
 	 * @var string
@@ -446,8 +453,10 @@ class WC_Email extends WC_Settings_API {
 		$email_groups = array(
 			'accounts'         => __( 'Accounts', 'woocommerce' ),
 			'orders'           => __( 'Orders', 'woocommerce' ),
-			'order-processing' => __( 'Order processing', 'woocommerce' ),
-			'order-exceptions' => __( 'Order exceptions', 'woocommerce' ),
+			'order-processing' => __( 'Order updates', 'woocommerce' ),  // @deprecated Please use 'order-updates' instead. Will be removed in 10.5.0.
+			'order-updates'    => __( 'Order updates', 'woocommerce' ),
+			'order-exceptions' => __( 'Order changes', 'woocommerce' ),  // @deprecated Please use 'order-changes' instead. Will be removed in 10.5.0.
+			'order-changes'    => __( 'Order changes', 'woocommerce' ),
 			'payments'         => __( 'Payments', 'woocommerce' ),
 		);
 
@@ -1188,6 +1197,9 @@ class WC_Email extends WC_Settings_API {
 			$this->form_fields['cc']  = $this->get_cc_field();
 			$this->form_fields['bcc'] = $this->get_bcc_field();
 		}
+		if ( $this->block_email_editor_enabled ) {
+			$this->form_fields['preheader'] = $this->get_preheader_field();
+		}
 	}
 
 	/**
@@ -1219,6 +1231,22 @@ class WC_Email extends WC_Settings_API {
 			/* translators: %s: admin email */
 			'description' => __( 'Enter Bcc recipients (comma-separated) for this email.', 'woocommerce' ),
 			'placeholder' => '',
+			'default'     => '',
+			'desc_tip'    => true,
+		);
+	}
+
+	/**
+	 * Get the preheader field definition.
+	 *
+	 * @return array
+	 */
+	protected function get_preheader_field() {
+		return array(
+			'title'       => __( 'Preheader', 'woocommerce' ),
+			'description' => __( 'Shown as a preview in the Inbox, next to the subject line. (Max 150 characters).', 'woocommerce' ),
+			'placeholder' => '',
+			'type'        => 'text',
 			'default'     => '',
 			'desc_tip'    => true,
 		);
@@ -1261,7 +1289,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get template.
 	 *
-	 * @param  string $type Template type. Can be either 'template_html' or 'template_plain'.
+	 * @param  string $type Template type. Can be either 'template_html', 'template_plain' or 'template_block'.
 	 * @return string
 	 */
 	public function get_template( $type ) {
@@ -1271,6 +1299,8 @@ class WC_Email extends WC_Settings_API {
 			return $this->template_html;
 		} elseif ( 'template_plain' === $type ) {
 			return $this->template_plain;
+		} elseif ( 'template_block' === $type ) {
+			return $this->template_block;
 		}
 		return '';
 	}

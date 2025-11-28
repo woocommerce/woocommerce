@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c433f2e0744104f73ad290380d910d2d",
+    "content-hash": "d53a02736b9464bf4de8108d46e2c77d",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1178,11 +1178,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "1.9.0",
+            "version": "2.0.1",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "00969be174af096de73e723cf4793e39a1e71114"
+                "reference": "36d431f7edcecb4be6e48559cf3192938169751d"
             },
             "require": {
                 "php": ">=7.4"
@@ -1262,16 +1262,16 @@
         },
         {
             "name": "wordpress/abilities-api",
-            "version": "v0.3.0",
+            "version": "v0.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/abilities-api.git",
-                "reference": "a6805fbc3a59b510b1b342d7dadcf8f93333f547"
+                "reference": "0759075aed37c4247adbf273bdebec096d52e825"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/a6805fbc3a59b510b1b342d7dadcf8f93333f547",
-                "reference": "a6805fbc3a59b510b1b342d7dadcf8f93333f547",
+                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/0759075aed37c4247adbf273bdebec096d52e825",
+                "reference": "0759075aed37c4247adbf273bdebec096d52e825",
                 "shasum": ""
             },
             "require": {
@@ -1347,20 +1347,20 @@
                 "issues": "https://github.com/WordPress/abilities-api/issues",
                 "source": "https://github.com/WordPress/abilities-api"
             },
-            "time": "2025-10-17T06:54:28+00:00"
+            "time": "2025-10-29T05:35:31+00:00"
         },
         {
             "name": "wordpress/mcp-adapter",
-            "version": "dev-trunk",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/mcp-adapter.git",
-                "reference": "7a2d22cff92328bc94f5b1648a66ae4273e949c5"
+                "reference": "653ca8d95180b25809b1a1dc489d8305ec5beb63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/7a2d22cff92328bc94f5b1648a66ae4273e949c5",
-                "reference": "7a2d22cff92328bc94f5b1648a66ae4273e949c5",
+                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/653ca8d95180b25809b1a1dc489d8305ec5beb63",
+                "reference": "653ca8d95180b25809b1a1dc489d8305ec5beb63",
                 "shasum": ""
             },
             "require": {
@@ -1382,7 +1382,6 @@
                 "wpackagist-plugin/plugin-check": "^1.6",
                 "yoast/phpunit-polyfills": "^4.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "installer-paths": {
@@ -1442,7 +1441,7 @@
                 "issues": "https://github.com/wordpress/mcp-adapter/issues",
                 "source": "https://github.com/wordpress/mcp-adapter"
             },
-            "time": "2025-10-30T20:39:26+00:00"
+            "time": "2025-11-06T14:56:51+00:00"
         }
     ],
     "packages-dev": [
@@ -5420,9 +5419,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "wordpress/mcp-adapter": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -5432,5 +5429,5 @@
     "platform-overrides": {
         "php": "7.4"
     },
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

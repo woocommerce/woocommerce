@@ -39,6 +39,12 @@ class AddToCartWithOptionsPage {
 		);
 
 		await addToCartWithOptionsBlock
+			.getByLabel( 'Loading the Add to Cart + Options template part' )
+			.waitFor( {
+				state: 'hidden',
+			} );
+
+		await addToCartWithOptionsBlock
 			.locator( '.components-spinner' )
 			.waitFor( {
 				state: 'hidden',

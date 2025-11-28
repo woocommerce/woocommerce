@@ -74,9 +74,10 @@ class ProductButton extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// This workaround ensures that WordPress loads the core/button block styles.
-		// For more details, see https://github.com/woocommerce/woocommerce/pull/53052.
-		( new \WP_Block( array( 'blockName' => 'core/button' ) ) )->render();
+		// This is work-around so the Product Button block inherits the styles
+		// of the core Button block. We render it with the same classes and
+		// enqueue its stylesheet.
+		wp_enqueue_style( 'wp-block-button' );
 
 		global $product;
 		$previous_product = $product;

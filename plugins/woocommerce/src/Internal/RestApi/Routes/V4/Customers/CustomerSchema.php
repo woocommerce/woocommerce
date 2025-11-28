@@ -243,6 +243,20 @@ class CustomerSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
+			'last_active'        => array(
+				'description' => __( "When the customer was last active in the site's timezone.", 'woocommerce' ),
+				'type'        => array( 'null', 'string' ),
+				'format'      => 'date-time',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
+			'last_active_gmt'    => array(
+				'description' => __( 'When the customer was last active, as GMT.', 'woocommerce' ),
+				'type'        => array( 'null', 'string' ),
+				'format'      => 'date-time',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		return $schema;
@@ -263,6 +277,10 @@ class CustomerSchema extends AbstractSchema {
 
 		$data = $item->get_data();
 
+		// Normalize last active timestamp - treat empty string, '0', 0, or false as null.
+		$last_active = $item->get_meta( 'wc_last_active' );
+		$last_active = empty( $last_active ) ? null : $last_active;
+
 		$formatted_data = array(
 			'id'                 => $item->get_id(),
 			'date_created'       => wc_rest_prepare_date_response( $item->get_date_created(), false ),
@@ -280,6 +298,8 @@ class CustomerSchema extends AbstractSchema {
 			'orders_count'       => $item->get_order_count(),
 			'total_spent'        => $item->get_total_spent(),
 			'avatar_url'         => $item->get_avatar_url(),
+			'last_active'        => $last_active ? wc_rest_prepare_date_response( $last_active, false ) : null,
+			'last_active_gmt'    => $last_active ? wc_rest_prepare_date_response( $last_active ) : null,
 		);
 
 		// Filter fields if specified.
