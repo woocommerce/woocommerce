@@ -5,62 +5,120 @@ namespace Automattic\WooCommerce\Blocks\SharedStores;
 
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Package;
+use InvalidArgumentException;
 
 /**
  * Manages the registration of interactivity state that provides product data
- * to interactive blocks. The idea of this experimental API is to have common
- * store data that is not tied to one specific block.
+ * to interactive blocks. This is shared store data that is not tied to one
+ * specific block.
  *
- * Initialization only happens on the first call to initialize_shared_config.
- * Intended to be used as a singleton.
+ * This is an experimental API and may change in future versions.
  */
-trait ProductsStore {
+class ProductsStore {
+
+	/**
+	 * The consent statement for using this experimental API.
+	 *
+	 * @var string
+	 */
+	private static string $consent_statement = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+
 	/**
 	 * The namespace for the store.
 	 *
 	 * @var string
 	 */
-	private static $store_namespace = 'woocommerce/products';
+	private static string $store_namespace = 'woocommerce/products';
+
+	/**
+	 * Products that have been loaded into state.
+	 *
+	 * @var array
+	 */
+	private static array $products = array();
+
+	/**
+	 * Product variations that have been loaded into state.
+	 *
+	 * @var array
+	 */
+	private static array $product_variations = array();
+
+	/**
+	 * Check that the consent statement was passed.
+	 *
+	 * @param string $consent_statement The consent statement string.
+	 * @return true
+	 * @throws InvalidArgumentException If the statement does not match.
+	 */
+	private static function check_consent( string $consent_statement ): bool {
+		if ( $consent_statement !== self::$consent_statement ) {
+			throw new InvalidArgumentException( 'This method cannot be called without consenting that the API may change.' );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Register the interactivity state if products have been loaded.
+	 *
+	 * @return void
+	 */
+	private static function register_state(): void {
+		$state = array();
+
+		if ( ! empty( self::$products ) ) {
+			$state['products'] = self::$products;
+		}
+
+		if ( ! empty( self::$product_variations ) ) {
+			$state['productVariations'] = self::$product_variations;
+		}
+
+		if ( ! empty( $state ) ) {
+			wp_interactivity_state( self::$store_namespace, $state );
+		}
+	}
 
 	/**
 	 * Load a product into state.
 	 *
-	 * @param int $product_id The product ID.
+	 * @param string $consent_statement The consent statement string.
+	 * @param int    $product_id        The product ID.
+	 * @return array The product data.
+	 * @throws InvalidArgumentException If consent statement doesn't match.
 	 */
-	public function load_product( $product_id ) {
-		$state = wp_interactivity_state( self::$store_namespace );
-
-		if ( ! isset( $state['products'] ) ) {
-			$state['products'] = array();
-		}
+	public static function load_product( string $consent_statement, int $product_id ): array {
+		self::check_consent( $consent_statement );
 
 		// Skip loading if product is already in state.
-		if ( isset( $state['products'][ $product_id ] ) ) {
-			return $state;
+		if ( isset( self::$products[ $product_id ] ) ) {
+			return self::$products[ $product_id ];
 		}
 
-		$product_state = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
+		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
 
-		$state['products'][ $product_id ] = $product_state['body'];
-		return wp_interactivity_state( self::$store_namespace, $state );
+		self::$products[ $product_id ] = $response['body'] ?? array();
+		self::register_state();
+
+		return self::$products[ $product_id ];
 	}
 
 	/**
 	 * Load all purchasable child products of a parent product into state.
 	 *
-	 * @param int $parent_id The parent product ID.
+	 * @param string $consent_statement The consent statement string.
+	 * @param int    $parent_id         The parent product ID.
+	 * @return array The purchasable child products keyed by ID.
+	 * @throws InvalidArgumentException If consent statement doesn't match.
 	 */
-	public function load_purchasable_child_products( $parent_id ) {
-		$state = wp_interactivity_state( self::$store_namespace );
-
-		if ( ! isset( $state['products'] ) ) {
-			$state['products'] = array();
-		}
+	public static function load_purchasable_child_products( string $consent_statement, int $parent_id ): array {
+		self::check_consent( $consent_statement );
 
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id );
 
 		if ( empty( $response['body'] ) ) {
-			return $state;
+			return array();
 		}
 
 		// Filter to only purchasable products.
@@ -70,34 +128,35 @@ trait ProductsStore {
 		);
 
 		// Re-key array by product ID and merge into state.
-		$keyed_products    = array_column( $purchasable_products, null, 'id' );
-		$state['products'] = array_merge( $state['products'], $keyed_products );
+		$keyed_products  = array_column( $purchasable_products, null, 'id' );
+		self::$products  = array_merge( self::$products, $keyed_products );
+		self::register_state();
 
-		return wp_interactivity_state( self::$store_namespace, $state );
+		return $keyed_products;
 	}
 
 	/**
 	 * Load all variations of a variable product into state.
 	 *
-	 * @param int $parent_id The parent product ID.
+	 * @param string $consent_statement The consent statement string.
+	 * @param int    $parent_id         The parent product ID.
+	 * @return array The variations keyed by ID.
+	 * @throws InvalidArgumentException If consent statement doesn't match.
 	 */
-	public function load_variations( $parent_id ) {
-		$state = wp_interactivity_state( self::$store_namespace );
-
-		if ( ! isset( $state['productVariations'] ) ) {
-			$state['productVariations'] = array();
-		}
+	public static function load_variations( string $consent_statement, int $parent_id ): array {
+		self::check_consent( $consent_statement );
 
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
 
 		if ( empty( $response['body'] ) ) {
-			return $state;
+			return array();
 		}
 
 		// Re-key array by variation ID and merge into state.
-		$keyed_variations           = array_column( $response['body'], null, 'id' );
-		$state['productVariations'] = array_merge( $state['productVariations'], $keyed_variations );
+		$keyed_variations        = array_column( $response['body'], null, 'id' );
+		self::$product_variations = array_merge( self::$product_variations, $keyed_variations );
+		self::register_state();
 
-		return wp_interactivity_state( self::$store_namespace, $state );
+		return $keyed_variations;
 	}
 }

@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 
 /**
  * AddToCartWithOptions class.
@@ -18,7 +17,6 @@ use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 class AddToCartWithOptions extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
-	use ProductsStore;
 
 	/**
 	 * Block name.
@@ -247,7 +245,10 @@ class AddToCartWithOptions extends AbstractBlock {
 			// Load product data based on product type.
 			if ( ProductType::SIMPLE === $product_type ) {
 				// Simple products use the new shared store with full REST API data.
-				$this->load_product( $product->get_id() );
+				wc_interactivity_api_load_product(
+					'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+					$product->get_id()
+				);
 			} else {
 				// Variable/grouped products continue using config.
 				wp_interactivity_config(
