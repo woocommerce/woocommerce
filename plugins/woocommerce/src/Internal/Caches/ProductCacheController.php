@@ -11,16 +11,22 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Controller for product caching functionality.
+ *
+ * @since 10.5.0
  */
 class ProductCacheController {
 
 	/**
 	 * Feature flag name for product instance caching.
+	 *
+	 * @since 10.5.0
 	 */
 	public const FEATURE_NAME = 'product_instance_caching';
 
 	/**
 	 * The product cache instance.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @var ProductCache
 	 */
@@ -28,6 +34,8 @@ class ProductCacheController {
 
 	/**
 	 * Class initialization, invoked by the DI container.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @internal
 	 * @param ProductCache $product_cache The product cache instance.
@@ -64,6 +72,8 @@ class ProductCacheController {
 	 * removed or changed so that the entire object is stored instead of just the ID, this should be revisited and evaluated
 	 * performance impact.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return void
 	 */
 	public function maybe_set_product_cache_group_as_non_persistent() {
@@ -74,6 +84,8 @@ class ProductCacheController {
 
 	/**
 	 * Invalidate the product cache for a given post ID if it's a product or product variation.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param int $post_id The post ID to check and invalidate.
 	 *
@@ -94,6 +106,8 @@ class ProductCacheController {
 
 	/**
 	 * Invalidate the product cache when post meta is updated.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param int $meta_id   The ID of the metadata entry.
 	 * @param int $object_id The ID of the object the metadata is for.
