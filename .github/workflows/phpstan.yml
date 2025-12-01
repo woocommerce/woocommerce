@@ -39,7 +39,7 @@ jobs:
               with:
                   install: '@woocommerce/plugin-woocommerce...'
                   pull-package-deps: '@woocommerce/plugin-woocommerce'
-                  php-version: '7.4'
+                  php-version: '8.4'
 
             - name: 'Create tmp directory'
               working-directory: plugins/woocommerce
