@@ -364,13 +364,13 @@ class Settings {
 			);
 
 			// Add hidden setting for the import interval to display in the client side.
-			$import_interval = \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_import_interval();
+			$import_interval       = \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_import_interval();
 			// format the import interval to a human-readable string.
 			$import_interval_string = human_time_diff( 0, $import_interval );
-			$settings[] = array(
-				'id'          => 'woocommerce_analytics_import_interval',
-				'type'        => 'hidden',
-				'default'     => $import_interval_string,
+			$settings[]             = array(
+				'id'     => 'woocommerce_analytics_import_interval',
+				'type'   => 'hidden',
+				'default'=> $import_interval_string,
 			);
 		}
 
