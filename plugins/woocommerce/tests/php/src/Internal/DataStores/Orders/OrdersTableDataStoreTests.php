@@ -3926,4 +3926,67 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$sync->process_batch( array( $order_id ) );
 		$this->assertEquals( false, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
+
+	/**
+	 * @testdox needs_processing returns correct result when order cache is invalidated after items are saved.
+	 *
+	 * This test verifies the fix for a race condition bug (GitHub issue #62173) where:
+	 * 1. An order is created
+	 * 2. get_items() is called before items are saved (e.g., during HPOS backfill), caching empty items
+	 * 3. Items are then saved to DB
+	 * 4. The order cache is invalidated so new wc_get_order() calls get fresh data
+	 * 5. needs_processing() correctly returns true for physical products
+	 */
+	public function test_needs_processing_with_stale_cached_empty_items() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		// Step 1: Create a simple physical (non-virtual, non-downloadable) product.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( false );
+		$product->set_downloadable( false );
+		$product->save();
+
+		// Step 2: Create an order WITHOUT items first.
+		$order = new WC_Order();
+		$order->save();
+		$order_id = $order->get_id();
+
+		// Step 3: Simulate the race condition - load the order and call get_items()
+		// BEFORE items are saved. This sets $this->items['line_items'] = [] in the cached order object
+		// and puts it in the OrderCache.
+		$stale_order = wc_get_order( $order_id );
+		$stale_order->get_items(); // This primes empty items array in the cached object.
+
+		$this->assertCount( 0, $stale_order->get_items(), 'Items should be empty before adding.' );
+
+		// Step 4: Now add items to the ORIGINAL order and save.
+		// The fix should invalidate the OrderCache after items change.
+		$item = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$order->add_item( $item );
+		$order->save();
+
+		// Step 5: Verify the fix - a NEW wc_get_order() call should return fresh data
+		// because the cache was invalidated when items were saved.
+		// This simulates what happens when payment gateway fetches the order after checkout.
+		$fresh_order = wc_get_order( $order_id );
+
+		$this->assertCount(
+			1,
+			$fresh_order->get_items(),
+			'New wc_get_order() after items saved should return items from DB.'
+		);
+
+		$this->assertTrue(
+			$fresh_order->needs_processing(),
+			'Order with physical product should need processing.'
+		);
+	}
 }
