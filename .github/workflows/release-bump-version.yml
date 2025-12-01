@@ -169,7 +169,13 @@ jobs:
             --message 'Bump version to ${{ steps.compute-new-version.outputs.nextVersion }}.'
           git push origin ${branch_name}
 
-          # Set milestone argument (empty if not provided)
+          # Determine reviewer (when running as a standalone workflow).
+          reviewer_arg=""
+          if [ "${{ contains( github.workflow_ref, 'release-bump-version.yml' ) }}" = "true" ]; then
+            reviewer_arg="--reviewer ${{ github.actor }}"
+          fi
+
+          # Set milestone argument (empty if not provided).
           milestone_arg=""
           if [[ -n "${{ inputs.milestone }}" ]]; then
             milestone_arg="--milestone ${{ inputs.milestone }}"
@@ -182,6 +188,7 @@ jobs:
             --base ${{ inputs.branch }} \
             --head ${branch_name} \
             --label Release \
-            --reviewer "${{ github.actor }}" \
+            ${reviewer_arg} \
             ${milestone_arg}
+
 
