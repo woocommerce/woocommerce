@@ -20,6 +20,13 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Products created during tests for cleanup.
+	 *
+	 * @var array
+	 */
+	private array $created_products = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -38,6 +45,13 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_tax_debug_mode' );
 		delete_option( 'woocommerce_tax_based_on' );
 		delete_option( 'woocommerce_calc_taxes' );
+		delete_option( 'woocommerce_default_country' );
+
+		foreach ( $this->created_products as $product ) {
+			$product->delete( true );
+		}
+		$this->created_products = array();
+
 		TaxDebug::reset_notices_flag();
 		wc_clear_notices();
 		parent::tearDown();
@@ -292,6 +306,8 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$product = \WC_Helper_Product::create_simple_product();
 		$product->set_tax_status( 'taxable' );
 		$product->save();
+
+		$this->created_products[] = $product;
 
 		WC()->cart->empty_cart();
 		WC()->cart->add_to_cart( $product->get_id() );
