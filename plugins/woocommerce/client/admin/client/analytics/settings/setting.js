@@ -64,7 +64,7 @@ class Setting extends Component {
 			case 'button':
 				return (
 					<Button
-						variant="tertiary"
+						variant="secondary"
 						onClick={ this.handleInputCallback }
 						disabled={ disabled }
 					>
