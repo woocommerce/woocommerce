@@ -490,15 +490,8 @@ class WC_Gateway_Paypal_Request {
 				continue;
 			}
 
-			$timestamp = strtotime( $item['update_time'] );
-
-			if ( false === $timestamp ) {
-				continue;
-			}
-
-			// If this is the first valid timestamp, or the most recent so far, track it.
-			if ( ! isset( $latest_time ) || $timestamp > $latest_time ) {
-				$latest_time = $timestamp;
+			if ( null === $latest_time || $item['update_time'] > $latest_time ) {
+				$latest_time = $item['update_time'];
 				$latest_item = $item;
 			}
 		}
