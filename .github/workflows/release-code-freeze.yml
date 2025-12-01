@@ -254,9 +254,10 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
-            :ice_cube: Feature Freeze completed for `${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}` :checking:
-            If you need a fix or change to be included in this release, please request a backport following the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
-            <${{ needs.publish-dev-release.outputs.release-zip }}|Download zip>
+            :ice_cube: *Feature Freeze completed for ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }} (`${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}`)*
+
+            • To include any new fixes in this release, please follow the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
+            • <${{ needs.publish-dev-release.outputs.release-zip }}|Download WooCommerce ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}-dev>.
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
       - name: Find open PRs in now frozen milestone
@@ -270,26 +271,32 @@ jobs:
                 q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open milestone:"${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}"`,
                 sort: 'created',
                 order: 'desc',
-                per_page: 10
+                per_page: 11
               } );
 
               if ( 0 === prs.total_count ) {
                 core.setOutput( 'current-milestone-open-prs', '' );
+                core.setOutput( 'milestone-url', '' );
                 return;
               }
 
-              // Format PR list for Slack
-              const prList = prs.items
+              // Get milestone URL.
+              const milestoneUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/milestone/${prs.items[0].milestone.number}`;
+              core.setOutput( 'milestone-url', milestoneUrl );
+
+              // Format PR list for Slack.
+              const prList = prs
+                .items
+                .slice( 0, prs.total_count <= 11 ? prs.total_count : 10 )
                 .map( pr => `• <${pr.html_url}|#${pr.number}>: ${pr.title}` )
                 .join( '\n' );
 
               let message = prList;
 
-              // If there are more PRs than displayed, add overflow message
-              if ( prs.total_count > 10 ) {
-                const remaining = prs.total_count - 10;
-                const milestoneUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/milestone/${prs.items[0].milestone.number}`;
-                message += `\n_...and ${remaining} more. <${milestoneUrl}|View all PRs in milestone>_`;
+              // If there are more than 2 remaining PRs after displaying, add overflow message.
+              const remaining = prs.total_count <= 11 ? 0 : prs.total_count - 10;
+              if ( remaining > 0 ) {
+                message += `\n_... <${milestoneUrl}|and ${remaining} more>._`;
               }
 
               core.setOutput( 'current-milestone-open-prs', message );
@@ -304,10 +311,11 @@ jobs:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
-            *Currently open PRs in `${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}` milestone:*
-            Please review these PRs to ensure the milestone is still valid or change it accordingly.
+            *Currently open PRs in <${{ steps.find-prs.outputs.milestone-url }}|`${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}` milestone>:*
 
             ${{ steps.find-prs.outputs.current-milestone-open-prs }}
+
+            Review these PRs to ensure the milestone is still valid or change it accordingly.
           slack-optional-thread_ts: ${{ fromJson( steps.notify-success.outputs.slack-result ).response.message.ts }}
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
