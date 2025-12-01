@@ -196,9 +196,19 @@ class TaxDebug {
 	 */
 	private function is_local_pickup_selected(): bool {
 		$chosen_methods = wc_get_chosen_shipping_method_ids();
+
+		// Normalize chosen methods to base IDs by stripping instance suffixes (e.g., "local_pickup:1" -> "local_pickup").
+		$chosen_base_ids = array_map(
+			function ( $method_id ) {
+				$parts = explode( ':', $method_id );
+				return $parts[0];
+			},
+			$chosen_methods
+		);
+
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in abstract-wc-order.php:1761
 		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
-		$matching_methods     = array_intersect( $chosen_methods, $local_pickup_methods );
+		$matching_methods     = array_intersect( $chosen_base_ids, $local_pickup_methods );
 
 		return count( $matching_methods ) > 0;
 	}
