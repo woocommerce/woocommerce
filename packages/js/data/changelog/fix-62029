@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Navigation store: don't call deprecated onHistoryChange

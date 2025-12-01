@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataS
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * OrdersScheduler Class.
@@ -86,10 +87,13 @@ class OrdersScheduler extends ImportScheduler {
 			// Schedule recurring batch processor.
 			add_action( 'action_scheduler_ensure_recurring_actions', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
 		}
-		// Watch for changes to the immediate import option.
-		add_action( 'add_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_added' ), 10, 2 );
-		add_action( 'update_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_change' ), 10, 2 );
-		add_action( 'delete_option', array( __CLASS__, 'handle_immediate_import_option_before_delete' ), 10, 1 );
+
+		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
+			// Watch for changes to the immediate import option.
+			add_action( 'add_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_added' ), 10, 2 );
+			add_action( 'update_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_change' ), 10, 2 );
+			add_action( 'delete_option', array( __CLASS__, 'handle_immediate_import_option_before_delete' ), 10, 1 );
+		}
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -679,12 +683,20 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Check if immediate import is enabled.
+	 * Check whether immediate import is enabled.
+	 *
+	 * When the "analytics-scheduled-import" feature is disabled, only immediate
+	 * import is supported (returns true). When enabled, checks the option value.
 	 *
 	 * @internal
 	 * @return bool
 	 */
 	private static function is_immediate_import_enabled(): bool {
+		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
+			// If the feature is disabled, only immediate import is supported.
+			return true;
+		}
+
 		return 'no' !== get_option( self::IMMEDIATE_IMPORT_OPTION, self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE );
 	}
 }
