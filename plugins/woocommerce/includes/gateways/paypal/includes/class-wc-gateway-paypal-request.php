@@ -454,9 +454,9 @@ class WC_Gateway_Paypal_Request {
 						'user_action'           => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
 						'shipping_preference'   => $shipping_preference,
 						// Customer redirected here on approval.
-						'return_url'            => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+						'return_url'            => $this->normalize_url_for_paypal( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 						// Customer redirected here on cancellation.
-						'cancel_url'            => esc_url_raw( $order->get_cancel_order_url_raw() ),
+						'cancel_url'            => $this->normalize_url_for_paypal( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
 						'locale'                => str_replace( '_', '-', $src_locale ),
 						'app_switch_preference' => array(
@@ -488,7 +488,7 @@ class WC_Gateway_Paypal_Request {
 		) ) {
 			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
-				'callback_url'    => esc_url_raw( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
+				'callback_url'    => $this->normalize_url_for_paypal( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
 			);
 		}
 
@@ -513,7 +513,7 @@ class WC_Gateway_Paypal_Request {
 					),
 					$request_origin
 				);
-				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = esc_url_raw( $cancel_url );
+				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $this->normalize_url_for_paypal( $cancel_url );
 			}
 		}
 
@@ -779,6 +779,39 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return $alpha2;
+	}
+
+	/**
+	 * Normalize a URL for PayPal. PayPal requires absolute URLs with protocol.
+	 *
+	 * @param string $url The URL to check.
+	 * @return string Normalized URL.
+	 */
+	private function normalize_url_for_paypal( $url ) {
+		// Replace encoded ampersand with actual ampersand.
+		// In some cases, the URL may contain encoded ampersand but PayPal expects the actual ampersand.
+		// PayPal request fails if the URL contains encoded ampersand.
+		$url = str_replace( '&#038;', '&', $url );
+
+		// If the URL is already the home URL, return it.
+		if ( strpos( $url, home_url() ) === 0 ) {
+			return esc_url_raw( $url );
+		}
+
+		// Return the URL if it is already absolute (contains ://).
+		if ( strpos( $url, '://' ) !== false ) {
+			return esc_url_raw( $url );
+		}
+
+		$home_url = untrailingslashit( home_url() );
+
+		// If the URL is relative (starts with /), prepend the home URL.
+		if ( strpos( $url, '/' ) === 0 ) {
+			return esc_url_raw( $home_url . $url );
+		}
+
+		// Prepend home URL with a slash.
+		return esc_url_raw( $home_url . '/' . $url );
 	}
 
 	/**

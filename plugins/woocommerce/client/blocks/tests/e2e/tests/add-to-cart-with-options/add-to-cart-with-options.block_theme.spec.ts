@@ -624,10 +624,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await test.step( 'verify letters are reset to min value in simple products', async () => {
 				// Playwright doesn't support filling a numeric input with a
-				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// string, but we still want to test this case as users on older/mobile browsers
+				// are able to type letters directly in the input field .
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -697,9 +700,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await test.step( 'verify letters are reset to min value in variable products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -730,7 +736,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				name: 'T-Shirt',
 			} );
 
-			await expect( quantityInput ).toHaveValue( '' );
+			await expect( quantityInput ).toHaveValue( '0' );
 			const increaseQuantityButton = page.getByLabel(
 				'Increase quantity of T-Shirt'
 			);
@@ -788,25 +794,28 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify empty strings are not reset in grouped products', async () => {
+			await test.step( 'verify empty strings are reset to 0 in grouped products', async () => {
 				await quantityInput.fill( '' );
 				await quantityInput.blur();
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify letters are reset to an empty string in grouped products', async () => {
+			await test.step( 'verify letters are reset to 0 in grouped products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
 					} );
 				} );
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 		} );

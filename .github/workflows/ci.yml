@@ -188,20 +188,45 @@ jobs:
         if: ${{ matrix.testEnv.shouldCreate }}
         env: ${{ matrix.testEnv.envVars }}
         run: |
-          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
-          min=10
-          max=99
-          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
-          httpport="${randomized}80"
-          mysqlport="${randomized}36"
-
-          # provision the environment to propagate the randomized ports
-          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
-          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
-          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
-          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
+          # Retry logic: attempt up to 2 times (1 initial + 1 retry)
+          # This handles transient failures like 429 (Too Many Requests), network issues, etc.
+          MAX_ATTEMPTS=2
+          ATTEMPT=1
           
-          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "Attempt $ATTEMPT of $MAX_ATTEMPTS to start test environment"
+            
+            # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
+            min=10
+            max=99
+            randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
+            httpport="${randomized}80"
+            mysqlport="${randomized}36"
+
+            # provision the environment to propagate the randomized ports
+            echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
+            echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
+            # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
+            echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
+            
+            # Try to start the environment
+            if WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}; then
+              echo "✓ Test environment started successfully on attempt $ATTEMPT"
+              exit 0
+            else
+              EXIT_CODE=$?
+              echo "✗ Failed to start test environment on attempt $ATTEMPT (exit code: $EXIT_CODE)"
+              
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "Retrying in 5 seconds..."
+                sleep 5
+                ATTEMPT=$((ATTEMPT + 1))
+              else
+                echo "All attempts to start test environment failed"
+                exit $EXIT_CODE
+              fi
+            fi
+          done
 
       - name: 'Determine BuildKite Analytics Message'
         env:
