@@ -365,10 +365,10 @@ class TaxDebug {
 
 		list( $country, $state, $postcode, $city ) = $location;
 
-		$address_parts = array_filter( array( $country, $state, $postcode ) );
+		$address_parts = array_filter( array( $country, $state, $postcode, $city ) );
 
 		$notice = sprintf(
-			/* translators: 1: address (country, state, postcode), 2: tax class name */
+			/* translators: 1: address (country, state, postcode, city), 2: tax class name */
 			__( 'No tax rates found for: %1$s (tax class: %2$s)', 'woocommerce' ),
 			implode( ', ', $address_parts ),
 			$tax_class ? $tax_class : __( 'Standard', 'woocommerce' )
