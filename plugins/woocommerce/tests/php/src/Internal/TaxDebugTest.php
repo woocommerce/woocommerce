@@ -27,11 +27,20 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 	private array $created_products = array();
 
 	/**
+	 * Original default country value to restore after tests.
+	 *
+	 * @var string|false
+	 */
+	private $original_default_country;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new TaxDebug();
+
+		$this->original_default_country = get_option( 'woocommerce_default_country' );
 
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		TaxDebug::reset_notices_flag();
@@ -45,7 +54,12 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_tax_debug_mode' );
 		delete_option( 'woocommerce_tax_based_on' );
 		delete_option( 'woocommerce_calc_taxes' );
-		delete_option( 'woocommerce_default_country' );
+
+		if ( false === $this->original_default_country ) {
+			delete_option( 'woocommerce_default_country' );
+		} else {
+			update_option( 'woocommerce_default_country', $this->original_default_country );
+		}
 
 		foreach ( $this->created_products as $product ) {
 			$product->delete( true );
