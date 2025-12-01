@@ -32,6 +32,13 @@ class TaxDebug {
 	private static bool $notices_shown = false;
 
 	/**
+	 * Data key used to identify tax debug notices.
+	 *
+	 * @var string
+	 */
+	private const NOTICE_DATA_KEY = 'tax_debug';
+
+	/**
 	 * Initialize the class and set up hooks.
 	 *
 	 * @internal
@@ -60,6 +67,10 @@ class TaxDebug {
 		}
 
 		self::$notices_shown = true;
+
+		// Clear any existing tax debug notices before adding fresh ones.
+		// This prevents duplicate notices when address changes on block checkout.
+		$this->clear_tax_debug_notices();
 
 		$this->show_tax_location_notice( $cart );
 		$this->show_applied_rates_notice( $cart );
@@ -115,9 +126,7 @@ class TaxDebug {
 		$location_info = $this->get_tax_location_info( $customer );
 		$notice        = $this->format_tax_location_notice( $location_info );
 
-		if ( ! wc_has_notice( $notice, 'notice' ) ) {
-			wc_add_notice( $notice, 'notice' );
-		}
+		$this->add_tax_debug_notice( $notice );
 	}
 
 	/**
@@ -252,9 +261,7 @@ class TaxDebug {
 		$has_compound = $this->has_compound_rates( $rate_details );
 		$notice       = $this->format_rates_notice( $rate_details, $has_compound );
 
-		if ( ! wc_has_notice( $notice, 'notice' ) ) {
-			wc_add_notice( $notice, 'notice' );
-		}
+		$this->add_tax_debug_notice( $notice );
 	}
 
 	/**
@@ -358,9 +365,7 @@ class TaxDebug {
 			$tax_class ?: __( 'Standard', 'woocommerce' )
 		);
 
-		if ( ! wc_has_notice( $notice, 'notice' ) ) {
-			wc_add_notice( $notice, 'notice' );
-		}
+		$this->add_tax_debug_notice( $notice );
 	}
 
 	/**
@@ -395,9 +400,7 @@ class TaxDebug {
 			implode( ', ', array_unique( $class_names ) )
 		);
 
-		if ( ! wc_has_notice( $notice, 'notice' ) ) {
-			wc_add_notice( $notice, 'notice' );
-		}
+		$this->add_tax_debug_notice( $notice );
 	}
 
 	/**
@@ -438,6 +441,39 @@ class TaxDebug {
 		}
 
 		return reset( $tax_classes );
+	}
+
+	/**
+	 * Add a tax debug notice with identifying data attribute.
+	 *
+	 * @param string $message Notice message.
+	 */
+	private function add_tax_debug_notice( string $message ): void {
+		wc_add_notice( $message, 'notice', array( self::NOTICE_DATA_KEY => true ) );
+	}
+
+	/**
+	 * Clear all existing tax debug notices.
+	 */
+	private function clear_tax_debug_notices(): void {
+		$all_notices = wc_get_notices();
+
+		if ( empty( $all_notices['notice'] ) ) {
+			return;
+		}
+
+		// Filter out tax debug notices.
+		$all_notices['notice'] = array_filter(
+			$all_notices['notice'],
+			function ( $notice ) {
+				return empty( $notice['data'][ self::NOTICE_DATA_KEY ] );
+			}
+		);
+
+		// Re-index array to avoid gaps.
+		$all_notices['notice'] = array_values( $all_notices['notice'] );
+
+		wc_set_notices( $all_notices );
 	}
 
 	/**
