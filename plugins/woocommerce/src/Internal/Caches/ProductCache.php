@@ -73,6 +73,17 @@ class ProductCache extends ObjectCache {
 	}
 
 	/**
+	 * Remove a product from the cache.
+	 *
+	 * @param int|string $id The id of the product to remove.
+	 *
+	 * @return bool True if the product is removed successfully, false otherwise.
+	 */
+	public function remove( $id ): bool {
+		return parent::remove( (int) $id );
+	}
+
+	/**
 	 * Retrieve a cached product, and if no product is cached with the given id,
 	 * try to get one via get_from_datastore callback and then cache it.
 	 *
