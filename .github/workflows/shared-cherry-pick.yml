@@ -292,7 +292,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: newPr.number,
-                reviewers: [context.actor, context.payload.pull_request.user.login]
+                reviewers: [context.actor]
               });
 
               core.setOutput('pr_number', newPr.number.toString());
