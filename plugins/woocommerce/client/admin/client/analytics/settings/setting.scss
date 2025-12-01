@@ -27,6 +27,7 @@
 		}
 	}
 
+	// No need to style the radio control label as it already has the expected styles.
 	label:not(.components-radio-control__label) {
 		width: 100%;
 		display: block;
