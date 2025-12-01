@@ -20,6 +20,8 @@ class ProductCacheController {
 	 * Feature flag name for product instance caching.
 	 *
 	 * @since 10.5.0
+	 *
+	 * @var string
 	 */
 	public const FEATURE_NAME = 'product_instance_caching';
 
@@ -38,9 +40,12 @@ class ProductCacheController {
 	 * @since 10.5.0
 	 *
 	 * @internal
+	 *
 	 * @param ProductCache $product_cache The product cache instance.
+	 *
+	 * @return void
 	 */
-	final public function init( ProductCache $product_cache ) {
+	final public function init( ProductCache $product_cache ): void {
 		$this->product_cache = $product_cache;
 
 		add_action( 'before_woocommerce_init', array( $this, 'maybe_set_product_cache_group_as_non_persistent' ) );
@@ -115,7 +120,7 @@ class ProductCacheController {
 	 * @return void
 	 */
 	public function maybe_invalidate_product_cache_by_meta( $meta_id, $object_id ) {
-		if ( get_post_type( $object_id ) === 'product' ) {
+		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
 			$this->maybe_invalidate_product_cache( $object_id );
 		}
 	}
