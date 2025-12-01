@@ -117,6 +117,13 @@ const Settings = ( { createNotice, query } ) => {
 	const handleInputChange = ( e ) => {
 		const { checked, name, type, value } = e.target;
 
+		console.warn( 'name==>', name === IMMEDIATE_IMPORT_SETTING_NAME );
+		console.warn(
+			'wcAdminSettings[ name ]==>',
+			wcAdminSettings[ name ] === 'no'
+		);
+		console.warn( 'value==>', value === 'yes' );
+
 		// Intercept import mode change from scheduled to immediate
 		if (
 			name === IMMEDIATE_IMPORT_SETTING_NAME &&
@@ -125,6 +132,7 @@ const Settings = ( { createNotice, query } ) => {
 		) {
 			setPendingImportModeChange( { name, value } );
 			setIsImportModeModalOpen( true );
+
 			return;
 		}
 
