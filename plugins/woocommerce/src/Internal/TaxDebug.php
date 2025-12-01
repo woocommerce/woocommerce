@@ -20,6 +20,10 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class to display tax debug notices on cart/checkout.
  *
+ * This class uses the notice data key 'woocommerce_internal_tax_debug' to identify
+ * its notices. This key is reserved for internal WooCommerce use and should not be
+ * used by extensions.
+ *
  * @since 10.5.0
  */
 class TaxDebug {
@@ -34,9 +38,12 @@ class TaxDebug {
 	/**
 	 * Data key used to identify tax debug notices.
 	 *
+	 * This key is reserved for internal WooCommerce use. Extensions should not
+	 * use this key in notice data attributes.
+	 *
 	 * @var string
 	 */
-	private const NOTICE_DATA_KEY = 'tax_debug';
+	private const NOTICE_DATA_KEY = 'woocommerce_internal_tax_debug';
 
 	/**
 	 * Initialize the class and set up hooks.
