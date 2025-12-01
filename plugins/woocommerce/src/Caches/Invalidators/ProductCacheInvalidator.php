@@ -663,16 +663,16 @@ class ProductCacheInvalidator {
 	/**
 	 * Invalidate product cache and notify listeners via WordPress action.
 	 *
-	 * @param int|string $product_id The product ID.
-	 * @param string     $operation The operation that triggered invalidation.
-	 * @param array      $context Additional context about the invalidation. See hook documentation
-	 *                            for possible context keys.
+	 * @param int    $product_id The product ID.
+	 * @param string $operation The operation that triggered invalidation.
+	 * @param array  $context Additional context about the invalidation. See hook documentation
+	 *                        for possible context keys.
 	 *
 	 * @return void
 	 *
 	 * @since 10.5.0
 	 */
-	public function invalidate( $product_id, string $operation, array $context = array() ): void {
+	public function invalidate( int $product_id, string $operation, array $context = array() ): void {
 		wc_get_container()->get( VersionStringGenerator::class )->delete_version( "product_{$product_id}" );
 
 		/**
@@ -690,7 +690,7 @@ class ProductCacheInvalidator {
 		 *
 		 * @since 10.5.0
 		 *
-		 * @param int|string $product_id The product ID.
+		 * @param int $product_id The product ID.
 		 * @param string     $operation The operation that triggered the invalidation.
 		 *                              Possible values:
 		 *                              - 'create': Product created
