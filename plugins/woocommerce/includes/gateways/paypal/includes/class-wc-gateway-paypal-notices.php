@@ -122,7 +122,7 @@ class WC_Gateway_Paypal_Notices {
 		);
 
 		$notice_html = '<div class="notice notice-warning is-dismissible">'
-			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '"></a>'
+			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '" aria-label="' . esc_attr__( 'Dismiss this notice', 'woocommerce' ) . '"></a>'
 			. '<p>' . $message . '</p>'
 			. '</div>';
 
@@ -155,7 +155,7 @@ class WC_Gateway_Paypal_Notices {
 		);
 
 		$notice_html = '<div class="notice notice-error is-dismissible">'
-			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '"></a>'
+			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '" aria-label="' . esc_attr__( 'Dismiss this notice', 'woocommerce' ) . '"></a>'
 			. '<p><strong>' . esc_html__( 'PayPal Account Restricted', 'woocommerce' ) . '</strong></p>'
 			. '<p>' . $message . '</p>'
 			. '</div>';
