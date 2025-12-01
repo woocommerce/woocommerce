@@ -44,6 +44,9 @@ const config: PlaywrightTestConfig = {
 					{
 						outputDir: `${ __dirname }/artifacts/test-results`,
 						outputFile: `ctrf-report-${ Date.now() }.json`,
+						branchName: process.env.GITHUB_REF_NAME || '',
+						appName: 'woocommerce-blocks',
+						repositoryName: process.env.GITHUB_REPOSITORY || '',
 					},
 				],
 		  ]

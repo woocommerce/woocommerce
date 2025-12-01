@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add currency data to the order item response in REST API V4

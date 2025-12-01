@@ -113,7 +113,7 @@ test.describe( `${ blockData.name } editor`, () => {
 		await editor.selectBlocks( productImageGalleryBlock );
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery' )
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
 		).toBeHidden();
 
 		await page
@@ -123,7 +123,7 @@ test.describe( `${ blockData.name } editor`, () => {
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery' )
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
 		).toBeVisible();
 	} );
 } );

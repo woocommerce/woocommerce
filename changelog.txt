@@ -1,5 +1,20 @@
 == Changelog ==
 
+= 10.3.5 2025-11-12 =
+
+**WooCommerce**
+
+* Fix - Add a new line when concatenating translations in a script for the Mini-Cart block [#61918](https://github.com/woocommerce/woocommerce/pull/61918)
+* Fix - Disable the Deactivate menu option for bundled payment gateways. [#61841](https://github.com/woocommerce/woocommerce/pull/61841)
+* Fix - Fix 'shows password form in products protected with password' e2e tests in WP 6.9 [#61911](https://github.com/woocommerce/woocommerce/pull/61911)
+* Fix - Fixes CSV import where hierarchical brands could not be imported. [#61873](https://github.com/woocommerce/woocommerce/pull/61873)
+* Fix - Legacy assets: respect theme support when using Classic Template or Product Image Gallery blocks with block themes. [#61837](https://github.com/woocommerce/woocommerce/pull/61837)
+* Fix - WP 6.9: load WP Button block styles when rendering the Add to Cart Button [#61911](https://github.com/woocommerce/woocommerce/pull/61911)
+* Update - Onboarding: Remove onboarding step to Customize Your Store flow [#61911](https://github.com/woocommerce/woocommerce/pull/61911)
+* Dev - e2e tests: skip block-based product editor tests [#61911](https://github.com/woocommerce/woocommerce/pull/61911)
+* Dev - Remove price filter widget accounting script deprecation notice [#61844](https://github.com/woocommerce/woocommerce/pull/61844)
+
+
 = 10.3.4 2025-10-31 =
 
 **WooCommerce**

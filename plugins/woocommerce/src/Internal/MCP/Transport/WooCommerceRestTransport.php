@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\MCP\Transport;
 
-use WP\MCP\Transport\Http\RestTransport;
+use WP\MCP\Transport\HttpTransport;
 use WP\MCP\Transport\Infrastructure\McpTransportContext;
 use WP_REST_Request;
 use WP_Error;
@@ -17,10 +17,10 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WooCommerce MCP REST Transport class.
  *
- * Extends the base RestTransport with standalone WooCommerce REST API key authentication.
+ * Extends the base HttpTransport with standalone WooCommerce REST API key authentication.
  * Uses X-MCP-API-Key header with consumer_key:consumer_secret format.
  */
-class WooCommerceRestTransport extends RestTransport {
+class WooCommerceRestTransport extends HttpTransport {
 
 	/**
 	 * Current MCP user's API key permissions.

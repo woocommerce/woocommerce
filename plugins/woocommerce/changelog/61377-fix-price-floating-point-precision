@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix floating-point precision bug in price conversion where prices like 10.04 would display as 10.03.
