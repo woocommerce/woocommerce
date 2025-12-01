@@ -57,7 +57,7 @@ jobs:
                 core.setOutput('release-event-date', date);
                 core.setOutput('release-event-title', upcomingReleaseEvents[0].summary);
               } else {
-                console.log(`No Code Freeze events found in the specified range.`);
+                console.log(`No Feature Freeze events found in the specified range.`);
                 core.setOutput('release-event-found', 'false');
               }
             } catch (error) {

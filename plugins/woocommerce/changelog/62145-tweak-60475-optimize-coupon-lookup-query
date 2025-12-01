@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Rely on case-insensitive collation when looking coupon codes up.
