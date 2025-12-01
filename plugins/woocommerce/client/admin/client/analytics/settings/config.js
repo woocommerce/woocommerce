@@ -12,7 +12,6 @@ import DefaultDate from './default-date';
 import { getAdminSetting, ORDER_STATUSES } from '~/utils/admin-settings';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
-
 export const DEFAULT_ACTIONABLE_STATUSES = [ 'processing', 'on-hold' ];
 export const DEFAULT_ORDER_STATUSES = [
 	'completed',
@@ -156,13 +155,13 @@ const baseConfig = {
 	},
 };
 
-const importInterval = getAdminSetting(
-	'woocommerce_analytics_import_interval',
-	__( '12 hours', 'woocommerce' ) // Default value for the import interval.
-);
-
 // Add import mode setting if feature is enabled
 if ( !! window.wcAdminFeatures[ 'analytics-scheduled-import' ] ) {
+	const importInterval = getAdminSetting(
+		'woocommerce_analytics_import_interval',
+		__( '12 hours', 'woocommerce' ) // Default value for the import interval.
+	);
+
 	baseConfig[ IMMEDIATE_IMPORT_SETTING_NAME ] = {
 		name: IMMEDIATE_IMPORT_SETTING_NAME,
 		label: __( 'Updates:', 'woocommerce' ),
