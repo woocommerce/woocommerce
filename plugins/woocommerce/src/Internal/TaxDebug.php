@@ -57,6 +57,7 @@ class TaxDebug {
 	/**
 	 * Check if tax debug mode is enabled.
 	 *
+	 * @internal
 	 * @return bool
 	 */
 	public static function is_debug_mode_enabled(): bool {
@@ -66,6 +67,7 @@ class TaxDebug {
 	/**
 	 * Display debug notices if conditions are met.
 	 *
+	 * @internal
 	 * @param \WC_Cart $cart Cart object.
 	 */
 	public function maybe_show_debug_notices( $cart ): void {
