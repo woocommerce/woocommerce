@@ -12,6 +12,7 @@ import DefaultDate from './default-date';
 import { getAdminSetting, ORDER_STATUSES } from '~/utils/admin-settings';
 
 const SETTINGS_FILTER = 'woocommerce_admin_analytics_settings';
+
 export const DEFAULT_ACTIONABLE_STATUSES = [ 'processing', 'on-hold' ];
 export const DEFAULT_ORDER_STATUSES = [
 	'completed',
@@ -23,6 +24,8 @@ export const DEFAULT_ORDER_STATUSES = [
 	'on-hold',
 ];
 export const DEFAULT_DATE_RANGE = 'period=month&compare=previous_year';
+export const IMMEDIATE_IMPORT_SETTING_NAME =
+	'woocommerce_analytics_immediate_import';
 
 const filteredOrderStatuses = Object.keys( ORDER_STATUSES )
 	.filter( ( status ) => status !== 'refunded' )
@@ -80,7 +83,7 @@ const orderStatusOptions = [
  * @filter woocommerce_admin_analytics_settings
  * @param {Object} reportSettings Report settings.
  */
-export const config = applyFilters( SETTINGS_FILTER, {
+const baseConfig = {
 	woocommerce_excluded_report_order_statuses: {
 		label: __( 'Excluded statuses:', 'woocommerce' ),
 		inputType: 'checkboxGroup',
@@ -151,4 +154,45 @@ export const config = applyFilters( SETTINGS_FILTER, {
 			'woocommerce'
 		),
 	},
-} );
+};
+
+const importInterval = getAdminSetting(
+	'woocommerce_analytics_import_interval',
+	__( '12 hours', 'woocommerce' ) // Default value for the import interval.
+);
+
+// Add import mode setting if feature is enabled
+if ( !! window.wcAdminFeatures[ 'analytics-scheduled-import' ] ) {
+	baseConfig[ IMMEDIATE_IMPORT_SETTING_NAME ] = {
+		name: IMMEDIATE_IMPORT_SETTING_NAME,
+		label: __( 'Updates:', 'woocommerce' ),
+		inputType: 'radio',
+		options: [
+			{
+				label: __( 'Scheduled (recommended)', 'woocommerce' ),
+				value: 'no',
+				description: sprintf(
+					/* translators: %s: import interval, e.g. "12 hours" */
+					__(
+						'Updates automatically every %s. Lowest impact on your site.',
+						'woocommerce'
+					),
+					importInterval
+				),
+			},
+			{
+				label: __( 'Immediately', 'woocommerce' ),
+				value: 'yes',
+				description: __(
+					'Updates as soon as new data is available. May slow busy stores.',
+					'woocommerce'
+				),
+			},
+		],
+		// This default value is mainly used when resetting this setting via the "Reset defaults" button.
+		// We assign 'no' (Scheduled) because this is the intended default for new installations.
+		defaultValue: 'no',
+	};
+}
+
+export const config = applyFilters( SETTINGS_FILTER, baseConfig );
