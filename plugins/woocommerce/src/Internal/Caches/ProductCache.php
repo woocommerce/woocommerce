@@ -31,7 +31,7 @@ class ProductCache extends ObjectCache {
 	 *
 	 * @param WC_Product $product The product to be cached.
 	 *
-	 * @return int|string|null The id of the object, or null if it can't be determined.
+	 * @return int The id of the object.
 	 */
 	protected function get_object_id( $product ) {
 		return $product->get_id();
@@ -111,7 +111,7 @@ class ProductCache extends ObjectCache {
 	 * @return WC_Product|null Cached product, or null if it's not cached and can't be retrieved from datastore or via callback.
 	 * @throws \Automattic\WooCommerce\Caching\CacheException Invalid id parameter.
 	 */
-	public function get( $id, int $expiration = self::DEFAULT_EXPIRATION, ?callable $get_from_datastore_callback = null ) {
+	public function get( $id, int $expiration = self::DEFAULT_EXPIRATION, ?callable $get_from_datastore_callback = null ): ?WC_Product {
 		$id      = (int) $id;
 		$product = parent::get( $id, $expiration, $get_from_datastore_callback );
 
