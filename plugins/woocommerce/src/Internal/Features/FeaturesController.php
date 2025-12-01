@@ -561,7 +561,7 @@ class FeaturesController {
 			'rest_api_caching'              => array(
 				'name'                         => __( 'REST API Caching', 'woocommerce' ),
 				'description'                  => sprintf(
-					/* translators: %1$s and %2$s are opening and closing <a> tags */
+				/* translators: %1$s and %2$s are opening and closing <a> tags */
 					__( 'Enable backend caching and cache control headers for REST API responses via the <code>RestApiCache</code> trait. ⚙️ %1$sConfiguration%2$s', 'woocommerce' ),
 					'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=rest_api_caching' ) . '">',
 					'</a>'
@@ -571,6 +571,17 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			'product_instance_caching'        => array(
+				'name'                         => __( 'Cache Product Objects', 'woocommerce' ),
+				'description'                  => __(
+					'[Performance] Speeds up your store by caching product objects during each request, preventing duplicate product loads. Can improve page load times on product-heavy pages.',
+					'woocommerce'
+				),
+				'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
 			),
 		);
 
