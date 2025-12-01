@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Caches;
+namespace Automattic\WooCommerce\Internal\Caches;
 
 use Automattic\WooCommerce\Caching\ObjectCache;
 use WC_Product;

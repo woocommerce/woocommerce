@@ -8,7 +8,7 @@
  * @version 3.0.0
  */
 
-use Automattic\WooCommerce\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Enums\ProductType;
 
 defined( 'ABSPATH' ) || exit;

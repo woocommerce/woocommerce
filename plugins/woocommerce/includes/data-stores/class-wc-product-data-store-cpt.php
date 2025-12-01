@@ -6,7 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;

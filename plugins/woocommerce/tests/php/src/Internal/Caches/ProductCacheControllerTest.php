@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
-use Automattic\WooCommerce\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Helper_Product;

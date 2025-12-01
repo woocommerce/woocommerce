@@ -106,7 +106,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 		}
 
 		// Clear cache to ensure fresh retrieval.
-		$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\ProductCache::class );
+		$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
 		$product_cache->remove( $product_id );
 
 		// Get product via factory (first time - will cache it).
@@ -186,7 +186,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 		$product_id   = $test_product->get_id();
 
 		// Clear cache.
-		$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\ProductCache::class );
+		$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
 		$product_cache->remove( $product_id );
 
 		// Verify not cached initially.
@@ -224,7 +224,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 		$product = WC()->product_factory->get_product( $product_id );
 
 		// Verify product is retrieved but not cached.
-		$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\ProductCache::class );
+		$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
 		$this->assertFalse( $product_cache->is_cached( $product_id ), 'Product should not be cached when feature is disabled' );
 
 		// Verify product is still valid.
