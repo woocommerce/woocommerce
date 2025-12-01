@@ -2,7 +2,7 @@
 /**
  * TaxDebugTest class file.
  */
-
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal;
 
 use Automattic\WooCommerce\Internal\TaxDebug;
@@ -123,7 +123,7 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$notices = wc_get_notices( 'notice' );
 		$this->assertNotEmpty( $notices );
 
-		$notice_messages = array_map(
+		$notice_messages     = array_map(
 			function ( $notice ) {
 				return $notice['notice'];
 			},
