@@ -87,10 +87,14 @@ class TaxDebug {
 	/**
 	 * Determine if debug notices should be shown.
 	 *
-	 * @param \WC_Cart|null $cart Cart object.
+	 * @param \WC_Cart|mixed $cart Cart object.
 	 * @return bool
 	 */
 	private function should_show_notices( $cart ): bool {
+		if ( ! $cart instanceof \WC_Cart ) {
+			return false;
+		}
+
 		if ( ! self::is_debug_mode_enabled() ) {
 			return false;
 		}
@@ -112,7 +116,7 @@ class TaxDebug {
 			return false;
 		}
 
-		if ( ! $cart || $cart->is_empty() ) {
+		if ( $cart->is_empty() ) {
 			return false;
 		}
 
