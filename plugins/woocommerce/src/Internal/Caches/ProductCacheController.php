@@ -7,7 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Caches;
 
-use Automattic\WooCommerce\Caches\ProductCache;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**

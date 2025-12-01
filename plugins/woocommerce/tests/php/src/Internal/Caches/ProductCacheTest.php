@@ -1,9 +1,10 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Caches;
+namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
-use Automattic\WooCommerce\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Data;
 use WC_Helper_Product;
@@ -166,7 +167,7 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_integration_with_feature_enabled() {
 		// Check if feature is enabled.
-		if ( ! FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME ) ) {
+		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
 			$this->markTestSkipped( 'Product instance caching feature is not enabled.' );
 		}
 
@@ -205,7 +206,7 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 	 * Test that caching respects the feature flag being disabled.
 	 */
 	public function test_respects_feature_flag_disabled() {
-		if ( FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME ) ) {
+		if ( FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
 			$this->markTestSkipped( 'Product instance caching feature is enabled. This test requires it to be disabled.' );
 		}
 
