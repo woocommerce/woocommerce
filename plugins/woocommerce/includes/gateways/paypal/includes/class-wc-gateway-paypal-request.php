@@ -438,6 +438,7 @@ class WC_Gateway_Paypal_Request {
 					$order->update_meta_data( '_paypal_capture_id', $capture_id );
 					$order->update_meta_data( '_paypal_status', $capture_data['status'] ?? WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
 					$order->save();
+					WC_Gateway_Paypal::log( 'Storing capture ID from Paypal. Order ID: ' . $order->get_id() . '; capture ID: ' . $capture_id );
 					return null;
 				}
 
@@ -451,6 +452,7 @@ class WC_Gateway_Paypal_Request {
 					$authorization_id = $authorization_data['id'];
 					$order->update_meta_data( '_paypal_authorization_id', $authorization_id );
 					$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
+					WC_Gateway_Paypal::log( 'Storing authorization ID from Paypal. Order ID: ' . $order->get_id() . '; authorization ID: ' . $authorization_id );
 					$order->save();
 				} else {
 					// Store '_paypal_authorization_checked' flag to prevent repeated API calls for orders with no authorization data.
@@ -470,7 +472,7 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
-	 * Get the latest item from an the authorizations or captures array based on update_time.
+	 * Get the latest item from the authorizations or captures array based on update_time.
 	 *
 	 * @param array $items Array of authorizations or captures.
 	 * @return array|null The latest authorization or capture or null if array is empty or no valid update_time found.
