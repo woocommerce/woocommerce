@@ -230,10 +230,10 @@ class WC_Gateway_Paypal_Notices {
 	 * add_filter( 'woocommerce_paypal_account_restriction_notices_enabled', '__return_false' );
 	 *
 	 * @param int        $http_code     The HTTP status code from the PayPal API response.
-	 * @param array|null $response_data The decoded response data from the PayPal API, or null if decoding failed.
+	 * @param array      $response_data The decoded response data from the PayPal API, or null if decoding failed.
 	 * @return void
 	 */
-	public function manage_account_restriction_status( int $http_code, $response_data ): void {
+	public function manage_account_restriction_status( int $http_code, array $response_data ): void {
 		/**
 		 * Filters whether account restriction notices should be enabled.
 		 *

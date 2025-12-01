@@ -161,7 +161,7 @@ class WC_Gateway_Paypal_Request {
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
-			$response_data = json_decode( $body, true );
+			$response_data = json_decode( $body, true ) ?? array();
 
 			/**
 			 * Fires after receiving a response from PayPal order creation.
