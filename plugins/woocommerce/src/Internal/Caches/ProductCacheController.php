@@ -97,6 +97,7 @@ class ProductCacheController {
 	 * @return void
 	 */
 	public function maybe_invalidate_product_cache( $post_id ) {
+		$post_id = (int) $post_id;
 		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
 			return;
 		}
@@ -120,6 +121,7 @@ class ProductCacheController {
 	 * @return void
 	 */
 	public function maybe_invalidate_product_cache_by_meta( $meta_id, $object_id ) {
+		$object_id = (int) $object_id;
 		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
 			$this->maybe_invalidate_product_cache( $object_id );
 		}
