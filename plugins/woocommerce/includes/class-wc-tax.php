@@ -242,8 +242,9 @@ class WC_Tax {
 			return array();
 		}
 
+		$debug_mode        = 'yes' === get_option( 'woocommerce_tax_debug_mode', 'no' );
 		$cache_key         = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'wc_tax_rates_' . md5( sprintf( '%s+%s+%s+%s+%s', $country, $state, $city, $postcode, $tax_class ) );
-		$matched_tax_rates = wp_cache_get( $cache_key, 'taxes' );
+		$matched_tax_rates = $debug_mode ? false : wp_cache_get( $cache_key, 'taxes' );
 
 		if ( false === $matched_tax_rates ) {
 			$matched_tax_rates = self::get_matched_tax_rates( $country, $state, $postcode, $city, $tax_class );
