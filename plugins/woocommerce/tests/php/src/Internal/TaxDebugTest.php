@@ -152,20 +152,12 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$notices = wc_get_notices( 'notice' );
 		$this->assertNotEmpty( $notices );
 
-		$notice_messages     = array_map(
-			function ( $notice ) {
-				return $notice['notice'];
-			},
-			$notices
+		$notice_messages = implode( "\n", wp_list_pluck( $notices, 'notice' ) );
+		$this->assertStringContainsString(
+			'Tax calculated based on',
+			$notice_messages,
+			'Expected tax location notice to be added'
 		);
-		$has_location_notice = false;
-		foreach ( $notice_messages as $message ) {
-			if ( strpos( $message, 'Tax calculated based on' ) !== false ) {
-				$has_location_notice = true;
-				break;
-			}
-		}
-		$this->assertTrue( $has_location_notice, 'Expected tax location notice to be added' );
 	}
 
 	/**
@@ -181,15 +173,12 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_show_debug_notices( $cart );
 
 		$notices         = wc_get_notices( 'notice' );
-		$notice_messages = wp_list_pluck( $notices, 'notice' );
-		$found           = false;
-		foreach ( $notice_messages as $message ) {
-			if ( strpos( $message, 'shipping address' ) !== false ) {
-				$found = true;
-				break;
-			}
-		}
-		$this->assertTrue( $found, 'Expected notice to mention shipping address' );
+		$notice_messages = implode( "\n", wp_list_pluck( $notices, 'notice' ) );
+		$this->assertStringContainsString(
+			'shipping address',
+			$notice_messages,
+			'Expected notice to mention shipping address'
+		);
 	}
 
 	/**
@@ -205,15 +194,12 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_show_debug_notices( $cart );
 
 		$notices         = wc_get_notices( 'notice' );
-		$notice_messages = wp_list_pluck( $notices, 'notice' );
-		$found           = false;
-		foreach ( $notice_messages as $message ) {
-			if ( strpos( $message, 'billing address' ) !== false ) {
-				$found = true;
-				break;
-			}
-		}
-		$this->assertTrue( $found, 'Expected notice to mention billing address' );
+		$notice_messages = implode( "\n", wp_list_pluck( $notices, 'notice' ) );
+		$this->assertStringContainsString(
+			'billing address',
+			$notice_messages,
+			'Expected notice to mention billing address'
+		);
 	}
 
 	/**
@@ -229,15 +215,12 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_show_debug_notices( $cart );
 
 		$notices         = wc_get_notices( 'notice' );
-		$notice_messages = wp_list_pluck( $notices, 'notice' );
-		$found           = false;
-		foreach ( $notice_messages as $message ) {
-			if ( strpos( $message, 'store base address' ) !== false ) {
-				$found = true;
-				break;
-			}
-		}
-		$this->assertTrue( $found, 'Expected notice to mention store base address' );
+		$notice_messages = implode( "\n", wp_list_pluck( $notices, 'notice' ) );
+		$this->assertStringContainsString(
+			'store base address',
+			$notice_messages,
+			'Expected notice to mention store base address'
+		);
 	}
 
 	/**
@@ -271,15 +254,12 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_show_debug_notices( $cart );
 
 		$notices         = wc_get_notices( 'notice' );
-		$notice_messages = wp_list_pluck( $notices, 'notice' );
-		$found           = false;
-		foreach ( $notice_messages as $message ) {
-			if ( strpos( $message, 'No tax rates found' ) !== false ) {
-				$found = true;
-				break;
-			}
-		}
-		$this->assertTrue( $found, 'Expected no tax rates found notice' );
+		$notice_messages = implode( "\n", wp_list_pluck( $notices, 'notice' ) );
+		$this->assertStringContainsString(
+			'No tax rates found',
+			$notice_messages,
+			'Expected no tax rates found notice'
+		);
 	}
 
 	/**
@@ -299,15 +279,12 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$this->sut->maybe_show_debug_notices( $cart );
 
 		$notices         = wc_get_notices( 'notice' );
-		$notice_messages = wp_list_pluck( $notices, 'notice' );
-		$found           = false;
-		foreach ( $notice_messages as $message ) {
-			if ( strpos( $message, 'Tax rate applied' ) !== false ) {
-				$found = true;
-				break;
-			}
-		}
-		$this->assertTrue( $found, 'Expected tax rate applied notice' );
+		$notice_messages = implode( "\n", wp_list_pluck( $notices, 'notice' ) );
+		$this->assertStringContainsString(
+			'Tax rate applied',
+			$notice_messages,
+			'Expected tax rate applied notice'
+		);
 
 		\WC_Tax::_delete_tax_rate( $tax_rate_id );
 	}
