@@ -15,14 +15,6 @@ interface ImportModeConfirmationModalProps {
 	onConfirm: () => void;
 }
 
-/**
- * Confirmation modal for switching to immediate import mode.
- *
- * @param {Object}   props
- * @param {boolean}  props.isOpen    - Whether the modal is open.
- * @param {Function} props.onClose   - Callback when the modal is closed (cancel).
- * @param {Function} props.onConfirm - Callback when the user confirms the switch.
- */
 export const ImportModeConfirmationModal = ( {
 	isOpen,
 	onClose,
