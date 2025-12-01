@@ -143,8 +143,9 @@ class TaxDebug {
 	 * @return array{source: string, country: string, state: string, postcode: string, city: string, is_local_pickup: bool}
 	 */
 	private function get_tax_location_info( $customer ): array {
-		$tax_based_on     = get_option( 'woocommerce_tax_based_on', 'shipping' );
-		$is_local_pickup  = $this->is_local_pickup_selected();
+		$tax_based_on    = get_option( 'woocommerce_tax_based_on', 'shipping' );
+		$is_local_pickup = $this->is_local_pickup_selected();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in abstract-wc-order.php:1747
 		$apply_base_taxes = apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true );
 
 		if ( $is_local_pickup && $apply_base_taxes ) {
@@ -190,9 +191,10 @@ class TaxDebug {
 	 * @return bool
 	 */
 	private function is_local_pickup_selected(): bool {
-		$chosen_methods        = wc_get_chosen_shipping_method_ids();
-		$local_pickup_methods  = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
-		$matching_methods      = array_intersect( $chosen_methods, $local_pickup_methods );
+		$chosen_methods = wc_get_chosen_shipping_method_ids();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented in abstract-wc-order.php:1761
+		$local_pickup_methods = apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) );
+		$matching_methods     = array_intersect( $chosen_methods, $local_pickup_methods );
 
 		return count( $matching_methods ) > 0;
 	}
@@ -354,8 +356,8 @@ class TaxDebug {
 			return;
 		}
 
-		$location   = $customer->get_taxable_address();
-		$tax_class  = $this->get_primary_tax_class_from_cart( $cart );
+		$location  = $customer->get_taxable_address();
+		$tax_class = $this->get_primary_tax_class_from_cart( $cart );
 
 		if ( count( $location ) < 4 ) {
 			return;
@@ -369,7 +371,7 @@ class TaxDebug {
 			/* translators: 1: address (country, state, postcode), 2: tax class name */
 			__( 'No tax rates found for: %1$s (tax class: %2$s)', 'woocommerce' ),
 			implode( ', ', $address_parts ),
-			$tax_class ?: __( 'Standard', 'woocommerce' )
+			$tax_class ? $tax_class : __( 'Standard', 'woocommerce' )
 		);
 
 		$this->add_tax_debug_notice( $notice );
