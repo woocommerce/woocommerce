@@ -1388,5 +1388,4 @@ class WC_Gateway_Paypal_Request {
 
 		return number_format( (float) $price, $decimals, '.', '' );
 	}
-
 }
