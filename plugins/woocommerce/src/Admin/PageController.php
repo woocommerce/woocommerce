@@ -6,6 +6,8 @@
 namespace Automattic\WooCommerce\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Admin\Features\Features;
+
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
@@ -68,6 +70,8 @@ class PageController {
 
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 		add_action( 'admin_head', array( $this, 'remove_app_entry_page_menu_item' ), 20 );
+		// Using low priority to run before other hooks.
+		add_action( 'admin_init', array( $this, 'maybe_redirect_payment_tasks_to_settings' ), 1 );
 	}
 
 	/**
@@ -252,6 +256,19 @@ class PageController {
 	 * @return string Current screen ID.
 	 */
 	public function get_current_screen_id() {
+		// Return early if this is a REST API request.
+		if ( wp_is_serving_rest_request() ) {
+			/**
+			 * Filter the current screen ID for REST API requests.
+			 *
+			 * @since 3.9.0
+			 *
+			 * @param string|boolean $screen_id The screen id or false if not identified.
+			 * @param WP_Screen      $current_screen The current WP_Screen.
+			 */
+			return apply_filters( 'woocommerce_navigation_current_screen_id', false, null );
+		}
+
 		$current_screen = get_current_screen();
 		if ( ! $current_screen ) {
 			// Filter documentation below.
@@ -574,11 +591,99 @@ class PageController {
 	}
 
 	/**
+	 * Returns true if we are on a settings page.
+	 */
+	public static function is_settings_page() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		return isset( $_GET['page'] ) && 'wc-settings' === $_GET['page'];
+		// phpcs:enable WordPress.Security.NonceVerification
+	}
+
+	/**
 	 *  Returns true if we are on a "classic" (non JS app) powered admin page.
 	 *
 	 * TODO: See usage in `admin.php`. This needs refactored and implemented properly in core.
 	 */
 	public static function is_embed_page() {
 		return wc_admin_is_connected_page();
+	}
+
+	/**
+	 * Returns true if we are on a modern settings page.
+	 */
+	public static function is_modern_settings_page() {
+		return self::is_settings_page() && Features::is_enabled( 'settings' );
+	}
+
+	/**
+	 * Redirect payment tasks to the settings page.
+	 *
+	 * Redirects both 'payments' and 'woocommerce-payments' tasks to the Payments settings page,
+	 * when it is safe to do so in terms of backwards compatibility.
+	 */
+	public function maybe_redirect_payment_tasks_to_settings() {
+		// Bail if we are not in the WP admin or not on a WC admin page.
+		if ( ! is_admin() || ! self::is_admin_page() ) {
+			return;
+		}
+
+		// Bail if we are not requesting a page for a WooCommerce task.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( empty( $_GET['task'] ) ) {
+			return;
+		}
+
+		// Only sufficiently capable users should be redirected.
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		// Get the current task ID.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$task_id = wc_clean( wp_unslash( $_GET['task'] ) );
+
+		// Bail if the task is not a payments task.
+		if ( ! in_array( $task_id, array( 'payments', 'woocommerce-payments' ), true ) ) {
+			return;
+		}
+
+		$redirect_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&from=WCADMIN_PAYMENT_TASK' );
+
+		// The WooPayments task is always redirected to the settings page.
+		if ( 'woocommerce-payments' === $task_id ) {
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		// The generic payments task is only redirected if the request is a regular user request,
+		// not part of an onboarding flow or other special case.
+		$special_request_params = array(
+			// This is used by the legacy, Payments task-based suggestions onboarding flow.
+			// Nobody should be using this anymore, but just in case.
+			'connection-return',
+			// This is used by the legacy, Payments task-based suggestions onboarding flow.
+			// Nobody should be using this anymore, but just in case.
+			'id',
+			// Some params for gateway IDs, just in case.
+			'gateway_id',
+			'gateway-id',
+			// Sometimes the gateway is referred to as 'method'. Stay clear of it.
+			'method',
+			// If there is a success or error param, better not redirect.
+			'success',
+			'error',
+			// If the URL is nonced, better not redirect.
+			'_wpnonce',
+		);
+		foreach ( $special_request_params as $param ) {
+			// phpcs:ignore WordPress.Security.NonceVerification
+			if ( isset( $_GET[ $param ] ) ) {
+				return;
+			}
+		}
+
+		// If we reach this point, we can safely redirect to the settings page.
+		wp_safe_redirect( $redirect_url );
+		exit;
 	}
 }

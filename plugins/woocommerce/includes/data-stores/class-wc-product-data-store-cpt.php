@@ -237,7 +237,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( ! empty( $sku ) && WC()->is_rest_api_request() && ! $this->obtain_lock_on_sku_for_concurrent_requests( $product ) ) {
 				$product->delete( true );
 				// translators: 1: SKU.
-				throw new Exception( esc_html( sprintf( __( 'The SKU (%1$s) you are trying to insert is already under processing', 'woocommerce' ), $sku ) ) );
+				throw new Exception( esc_html( sprintf( __( 'The product with SKU (%1$s) you are trying to insert is already present in the lookup table', 'woocommerce' ), $sku ) ) );
 			}
 
 			// get the post object so that we can set the status
@@ -486,6 +486,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$set_props['category_ids']      = $this->get_term_ids( $product, 'product_cat' );
 		$set_props['tag_ids']           = $this->get_term_ids( $product, 'product_tag' );
+		$set_props['brand_ids']         = $this->get_term_ids( $product, 'product_brand' );
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 
@@ -882,7 +883,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		if ( array_intersect( $this->updated_props, array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' ) ) ) {
+		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
+		if ( $this->cogs_feature_is_enabled() ) {
+			$props_in_lookup_table[] = 'cogs_value';
+		}
+		if ( array_intersect( $this->updated_props, $props_in_lookup_table ) ) {
 			$this->update_lookup_table( $product->get_id(), 'wc_product_meta_lookup' );
 		}
 
@@ -915,11 +920,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		}
+		if ( $force || array_key_exists( 'brand_ids', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), $product->get_brand_ids( 'edit' ), 'product_brand', false );
+		}
 		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 		}
-
-		_wc_recount_terms_by_product( $product->get_id() );
 	}
 
 	/**
@@ -1016,6 +1022,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			// Note, we use wp_slash to add extra level of escaping. See https://codex.wordpress.org/Function_Reference/update_post_meta#Workaround.
 			$this->update_or_delete_post_meta( $product, '_product_attributes', wp_slash( $meta_values ) );
+
+			/**
+			 * Fires after WooCommerce product attributes have been updated.
+			 *
+			 * @since 10.2.0
+			 * @param WC_Product $product The product object whose attributes were updated.
+			 * @param bool $force Indicates if the update was forced.
+			 */
+			do_action( 'woocommerce_product_attributes_updated', $product, $force );
 		}
 	}
 
@@ -1921,25 +1936,27 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$search_terms = array( $term_group );
 			}
 
-			$term_group_query = '';
-			$searchand        = '';
+			$term_group_query = array();
 
 			foreach ( $search_terms as $search_term ) {
 				$like = '%' . $wpdb->esc_like( $search_term ) . '%';
 
+				// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- an array of placeholders is a valid arg.
+				$term_query = $wpdb->prepare(
+					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s )',
+					array_fill( 0, 4, $like )
+				);
+
 				// Variations should also search the parent's meta table for fallback fields.
 				if ( $include_variations ) {
-					$variation_query = $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s ) ", $like );
-				} else {
-					$variation_query = '';
+					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s )", $like );
 				}
 
-				$term_group_query .= $wpdb->prepare( " {$searchand} ( ( posts.post_title LIKE %s) OR ( posts.post_excerpt LIKE %s) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) $variation_query)", $like, $like, $like, $like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$searchand         = ' AND ';
+				$term_group_query[] = "( {$term_query} )";
 			}
 
 			if ( $term_group_query ) {
-				$search_queries[] = $term_group_query;
+				$search_queries[] = implode( ' AND ', $term_group_query );
 			}
 		}
 
@@ -2389,6 +2406,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'tax_status'     => get_post_meta( $id, '_tax_status', true ),
 				'tax_class'      => get_post_meta( $id, '_tax_class', true ),
 			);
+			if ( $this->use_cogs_lookup_column() ) {
+				$cogs_value                       = get_post_meta( $id, '_cogs_total_value', true );
+				$product_data['cogs_total_value'] = '' === $cogs_value ? null : (float) $cogs_value;
+			}
 			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
 				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
 			}
@@ -2437,5 +2458,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected function cogs_feature_is_enabled(): bool {
 		return wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
+	}
+
+	/**
+	 * Check if the COGS value column from the product meta lookup table can be used.
+	 *
+	 * @return bool
+	 */
+	protected function use_cogs_lookup_column(): bool {
+		$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
+		return $cogs_controller->feature_is_enabled() && $cogs_controller->product_meta_lookup_table_cogs_value_columns_exist();
 	}
 }

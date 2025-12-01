@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { TabPanel, Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Pill } from '@woocommerce/components';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { pluginsStore } from '@woocommerce/data';
 import { flatMapDeep, uniqBy } from 'lodash';
 
 /**
@@ -60,7 +60,7 @@ export const PluginsTabPanel = ( {
 	const [ currentPlugin, setCurrentPlugin ] = useState< string | null >(
 		null
 	);
-	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 	const { loadInstalledPluginsAfterActivation } =
 		useInstalledPluginsWithoutChannels();
 

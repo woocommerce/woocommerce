@@ -1,5 +1,13 @@
-const { test: baseTest, expect, tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
+ * Internal dependencies
+ */
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const couponData = {
 	minimumSpend: {
@@ -80,18 +88,20 @@ const couponData = {
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	coupon: async ( { api }, use ) => {
+	coupon: async ( { restApi }, use ) => {
 		const coupon = {};
 		await use( coupon );
-		await api.delete( `coupons/${ coupon.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/coupons/${ coupon.id }`, {
+			force: true,
+		} );
 	},
 
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product = {};
 		const productName = `Product ${ Date.now() }`;
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: productName,
 				regular_price: '100',
 			} )
@@ -102,14 +112,16 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Product cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 
-	brand: async ( { api }, use ) => {
+	brand: async ( { restApi }, use ) => {
 		let brand = {};
 
-		await api
-			.post( 'products/brands', {
+		await restApi
+			.post( `${ WC_API_PATH }/products/brands`, {
 				name: couponData.excludeProductBrands.excludeProductBrands[ 0 ],
 			} )
 			.then( ( response ) => {
@@ -119,7 +131,10 @@ const test = baseTest.extend( {
 		await use( brand );
 
 		// Brand cleanup
-		await api.delete( `products/brands/${ brand.id }`, { force: true } );
+		await restApi.delete(
+			`${ WC_API_PATH }/products/brands/${ brand.id }`,
+			{ force: true }
+		);
 	},
 } );
 

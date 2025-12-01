@@ -56,6 +56,7 @@ class Products extends AbstractRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => $this->get_collection_params(),
+				'allow_batch'         => [ 'v1' => true ],
 			],
 			'schema' => [ $this->schema, 'get_public_item_schema' ],
 		];
@@ -86,8 +87,11 @@ class Products extends AbstractRoute {
 			$query_results = $product_query->get_results( $request );
 		}
 
-		$response = ( new Pagination() )->add_headers( $response, $request, $query_results['total'], $query_results['pages'] );
-		$response->header( 'Last-Modified', $product_query->get_last_modified() );
+		$response      = ( new Pagination() )->add_headers( $response, $request, $query_results['total'], $query_results['pages'] );
+		$last_modified = $product_query->get_last_modified();
+		if ( $last_modified ) {
+			$response->header( 'Last-Modified', $last_modified );
+		}
 
 		return $response;
 	}
@@ -286,14 +290,30 @@ class Products extends AbstractRoute {
 		);
 
 		$params['category'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a set of category IDs or slugs, separated by commas.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'wp_parse_id_list',
+			'sanitize_callback' => 'wp_parse_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['category_operator'] = array(
 			'description'       => __( 'Operator to compare product category terms.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => [ 'in', 'not_in', 'and' ],
+			'default'           => 'in',
+			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['brand'] = array(
+			'description'       => __( 'Limit result set to products assigned a set of brand IDs or slugs, separated by commas.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['brand_operator'] = array(
+			'description'       => __( 'Operator to compare product brand terms.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => [ 'in', 'not_in', 'and' ],
 			'default'           => 'in',
@@ -309,15 +329,15 @@ class Products extends AbstractRoute {
 
 			if ( str_starts_with( $param, '_unstable_tax_' ) && ! str_ends_with( $param, '_operator' ) ) {
 				$params[ $param ] = array(
-					'description'       => __( 'Limit result set to products assigned a specific category ID.', 'woocommerce' ),
+					'description'       => __( 'Limit result set to products assigned a set of taxonomies IDs or slugs, separated by commas.', 'woocommerce' ),
 					'type'              => 'string',
-					'sanitize_callback' => 'wp_parse_id_list',
+					'sanitize_callback' => 'wp_parse_list',
 					'validate_callback' => 'rest_validate_request_arg',
 				);
 			}
 			if ( str_starts_with( $param, '_unstable_tax_' ) && str_ends_with( $param, '_operator' ) ) {
 				$params[ $param ] = array(
-					'description'       => __( 'Operator to compare product category terms.', 'woocommerce' ),
+					'description'       => __( 'Operator to compare product taxonomies terms.', 'woocommerce' ),
 					'type'              => 'string',
 					'enum'              => [ 'in', 'not_in', 'and' ],
 					'default'           => 'in',
@@ -328,9 +348,9 @@ class Products extends AbstractRoute {
 		}
 
 		$params['tag'] = array(
-			'description'       => __( 'Limit result set to products assigned a specific tag ID.', 'woocommerce' ),
+			'description'       => __( 'Limit result set to products assigned a set of tag IDs or slugs, separated by commas.', 'woocommerce' ),
 			'type'              => 'string',
-			'sanitize_callback' => 'wp_parse_id_list',
+			'sanitize_callback' => 'wp_parse_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

@@ -5,8 +5,18 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { dispatch, useDispatch } from '@wordpress/data';
-import { PAYMENT_SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { paymentSettingsStore } from '@woocommerce/data';
 import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * Internal dependencies
+ */
+import { recordPaymentsEvent } from '~/settings-payments/utils';
+import {
+	wooPaymentsExtensionSlug,
+	wooPaymentsProviderId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
 
 interface ReactivateLivePaymentsButtonProps {
 	/**
@@ -29,13 +39,18 @@ export const ReactivateLivePaymentsButton = ( {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 	const { createSuccessNotice, createErrorNotice } =
 		dispatch( 'core/notices' );
-	const { invalidateResolutionForStoreSelector } = useDispatch(
-		PAYMENT_SETTINGS_STORE_NAME
-	);
+	const { invalidateResolutionForStoreSelector } =
+		useDispatch( paymentSettingsStore );
 
 	const disableTestModePayments = ( e: React.MouseEvent ) => {
 		e.preventDefault();
 		setIsUpdating( true );
+
+		recordPaymentsEvent( 'reactivate_payments_button_click', {
+			provider_id: wooPaymentsProviderId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
+			suggestion_id: wooPaymentsSuggestionId,
+		} );
 
 		apiFetch( {
 			path: '/wc/v3/payments/settings',
@@ -60,6 +75,8 @@ export const ReactivateLivePaymentsButton = ( {
 					}
 				);
 
+				// Note: Switching from test to live payments is tracked on the backend (the `provider_live_payments_enabled` event).
+
 				// Force the providers to be refreshed.
 				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
 
@@ -68,6 +85,12 @@ export const ReactivateLivePaymentsButton = ( {
 			.catch( () => {
 				// In case of errors, redirect to the gateway settings page.
 				setIsUpdating( false );
+
+				recordPaymentsEvent( 'reactivate_payments_error', {
+					provider_id: wooPaymentsProviderId,
+					provider_extension_slug: wooPaymentsExtensionSlug,
+					suggestion_id: wooPaymentsSuggestionId,
+				} );
 
 				createErrorNotice(
 					sprintf(

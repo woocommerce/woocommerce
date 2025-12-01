@@ -13,9 +13,13 @@ type OverwriteConfirmationModalProps = {
 	overwrittenItems: string[];
 };
 
-export const OverwriteConfirmationModal: React.FC<
-	OverwriteConfirmationModalProps
-> = ( { isOpen, isImporting, onClose, onConfirm, overwrittenItems } ) => {
+export const OverwriteConfirmationModal = ( {
+	isOpen,
+	isImporting,
+	onClose,
+	onConfirm,
+	overwrittenItems,
+}: OverwriteConfirmationModalProps ) => {
 	if ( ! isOpen ) return null;
 	return (
 		<Modal
@@ -25,12 +29,18 @@ export const OverwriteConfirmationModal: React.FC<
 			) }
 			onRequestClose={ onClose }
 			className="woocommerce-blueprint-overwrite-modal"
+			isDismissible={ ! isImporting }
 		>
 			<p className="woocommerce-blueprint-overwrite-modal__description">
-				{ __(
-					'Importing the file will overwrite the current configuration for the following items in WooCommerce Settings:',
-					'woocommerce'
-				) }
+				{ overwrittenItems.length
+					? __(
+							'Importing the file will overwrite the current configuration for the following items in WooCommerce Settings:',
+							'woocommerce'
+					  )
+					: __(
+							'Importing the file will overwrite the current configuration in WooCommerce Settings.',
+							'woocommerce'
+					  ) }
 			</p>
 
 			<ul className="woocommerce-blueprint-overwrite-modal__list">
@@ -44,6 +54,7 @@ export const OverwriteConfirmationModal: React.FC<
 					className="woocommerce-blueprint-overwrite-modal__actions-cancel"
 					variant="tertiary"
 					onClick={ onClose }
+					disabled={ isImporting }
 				>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>

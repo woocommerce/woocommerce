@@ -109,16 +109,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 					'setup'     => function () {
 						$version = WC()->version;
 						// Next major version. (e.g. 9.0.1 -> 10.0.0).
-						$next_version = implode(
-							'.',
-							array_map(
-								function ( $n, $i ) {
-									return 0 === $i ? $n + 1 : 0;
-								},
-								explode( '.', $version ),
-								array_keys( explode( '.', $version ) )
-							)
-						);
+						$next_version = sprintf( '%d.0.0', explode( '.', $version, 2 )[0] + 1 );
 
 						set_site_transient( RemoteLogger::WC_NEW_VERSION_TRANSIENT, $next_version, WEEK_IN_SECONDS );
 					},
@@ -369,7 +360,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'less severe than critical' => array(
 					fn() => null,
 					'error',
-					false,
+					true,
 				),
 				'critical level'            => array(
 					fn() => null,
@@ -550,7 +541,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 				'Missing backtrace'         => array(
 					'Some error message',
 					array( 'source' => 'fatal-errors' ),
-					false,
+					true,
 				),
 			);
 		}

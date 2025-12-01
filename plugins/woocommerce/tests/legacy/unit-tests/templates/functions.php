@@ -119,6 +119,78 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined.
+	 */
+	public function test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" aria-label="Size for product" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => 'Size for product',
+			)
+		);
+	}
+
+	/**
+	 * Test: test_wc_dropdown_variation_attribute_options_escapes_aria_label_attribute.
+	 */
+	public function test_wc_dropdown_variation_attribute_options_escapes_aria_label_attribute() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" aria-label="&quot; onload=&quot;alert(&#039;XSS&#039;)&quot;" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => '" onload="alert(\'XSS\')"',
+			)
+		);
+	}
+
+	/**
+	 * Test: test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
+	 *
+	 * @dataProvider data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values
+	 *
+	 * @param mixed $attribute_value The falsey attribute value to test.
+	 */
+	public function test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values( $attribute_value ) {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => $attribute_value,
+			)
+		);
+	}
+
+	/**
+	 * Data provider for test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
+	 *
+	 * @return array[] Data provider
+	 */
+	public function data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values() {
+		return array(
+			'false'        => array( false ),
+			'null'         => array( null ),
+			'0 (int)'      => array( 0 ),
+			'0 (string)'   => array( '0' ),
+			'0.0 (float)'  => array( 0.0 ),
+			'empty string' => array( '' ),
+			'empty array'  => array( array() ),
+		);
+	}
+
+	/**
 	 * Test wc_query_string_form_fields.
 	 *
 	 * @return void
@@ -159,7 +231,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		// Include a payment gateway that supports "pay button".
 		add_filter(
 			'woocommerce_payment_gateways',
-			function( $gateways ) {
+			function ( $gateways ) {
 				$gateways[] = 'WC_Mock_Payment_Gateway';
 
 				return $gateways;
@@ -182,18 +254,20 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	public function test_hidden_field() {
-		$actual_html = woocommerce_form_field('test',
-		array(
-			'type' => 'hidden',
-			'id' => 'test_field',
-			'input_class' => array( 'test-field' ),
-			'custom_attributes' => array( 'data-total' => '10' ),
-			'return' => true
-		), 'test value');
+		$actual_html   = woocommerce_form_field(
+			'test',
+			array(
+				'type'              => 'hidden',
+				'id'                => 'test_field',
+				'input_class'       => array( 'test-field' ),
+				'custom_attributes' => array( 'data-total' => '10' ),
+				'return'            => true,
+			),
+			'test value'
+		);
 		$expected_html = '<p class="form-row " id="test_field_field" data-priority=""><span class="woocommerce-input-wrapper"><input type="hidden" class="input-hidden test-field" name="test" id="test_field" value="test value" data-total="10" /></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
-
 	}
 
 	/**
@@ -276,5 +350,65 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$expected_html = '<p class="form-row validate-required" id="test_field" data-priority=""><span class="woocommerce-input-wrapper"><label class="checkbox " ><input type="checkbox" name="test" id="test" value="1" class="input-checkbox "  checked=\'checked\' aria-required="true" /> Checkbox&nbsp;<span class="required" aria-hidden="true">*</span></label></span></p>';
 
 		$this->assertEquals( $expected_html, $actual_html );
+	}
+
+	/**
+	 * Test wc_add_aria_label_to_pagination_numbers with basic pagination links
+	 */
+	public function test_wc_add_aria_label_to_pagination_numbers_basic() {
+		$input_html = '<span class="page-numbers current">1</span> <a class="page-numbers" href="#">2</a>';
+		$args       = array( 'current' => 1 );
+
+		$output = wc_add_aria_label_to_pagination_numbers( $input_html, $args );
+
+		$this->assertStringContainsString( 'aria-label="Page 1"', $output );
+		$this->assertStringContainsString( 'aria-label="Page 2"', $output );
+	}
+
+	/**
+	 * Test wc_add_aria_label_to_pagination_numbers with prev/next navigation
+	 */
+	public function test_wc_add_aria_label_to_pagination_numbers_with_navigation() {
+		$input_html = '<a class="prev page-numbers" href="#">Previous</a> ' .
+					'<span class="page-numbers current">2</span> ' .
+					'<a class="next page-numbers" href="#">Next</a>';
+		$args       = array( 'current' => 2 );
+
+		$output = wc_add_aria_label_to_pagination_numbers( $input_html, $args );
+
+		$this->assertStringNotContainsString( 'aria-label="Page Previous"', $output );
+		$this->assertStringNotContainsString( 'aria-label="Page Next"', $output );
+		$this->assertStringContainsString( 'aria-label="Page 2"', $output );
+	}
+
+	/**
+	 * Test wc_add_aria_label_to_pagination_numbers with non-standard elements
+	 */
+	public function test_wc_add_aria_label_to_pagination_numbers_with_non_standard_elements() {
+		$input_html = '<div class="page-numbers">1</div> ' .
+					'<span class="page-numbers current">2</span> ' .
+					'<p class="page-numbers">3</p>';
+		$args       = array( 'current' => 2 );
+
+		$output = wc_add_aria_label_to_pagination_numbers( $input_html, $args );
+
+		$this->assertStringNotContainsString( '<div class="page-numbers" aria-label="Page 1">', $output );
+		$this->assertStringContainsString( 'aria-label="Page 2"', $output );
+		$this->assertStringNotContainsString( '<p class="page-numbers" aria-label="Page 3">', $output );
+	}
+
+	/**
+	 * Test wc_add_aria_label_to_pagination_numbers with malformed arguments
+	 */
+	public function test_wc_add_aria_label_to_pagination_numbers_malformed_args() {
+		$input_html     = '<span class="page-numbers current">1</span> <a class="page-numbers" href="#">2</a>';
+		$malformed_args = array( 'current' => 'a' );
+
+		$output = wc_add_aria_label_to_pagination_numbers( $input_html, $malformed_args );
+
+		// When args['current'] is not a valid number, the function should gracefully handle it
+		// by defaulting to page 0 and still add appropriate aria-labels to maintain accessibility.
+		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
+		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
 	}
 }

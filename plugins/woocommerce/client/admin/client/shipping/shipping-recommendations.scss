@@ -1,11 +1,4 @@
 .woocommerce-recommended-shipping-extensions {
-	&__more_options_cta {
-		// adding some breathing room between the "external" icon and the text
-		.gridicon {
-			margin-left: $gap-smallest;
-		}
-	}
-
 	// overwriting the list's default colors/behavior
 	.woocommerce-list__item {
 		> .woocommerce-list__item-inner {

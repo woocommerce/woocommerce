@@ -1,7 +1,7 @@
 name: 🔧 Performance issue report
 description: Report a performance issue if something isn't performing well in WooCommerce Core.
 title: "[Performance]: "
-labels: [ "type: enhancement", "focus: performance", "team: Flux"]
+labels: [ "Enhancement", "Performance", "team: Flux"]
 projects: ["woocommerce/220"]
 body:
   - type: markdown

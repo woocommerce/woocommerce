@@ -18,7 +18,7 @@ export type CollapsedProps = {
 	hintText?: string;
 } & React.HTMLAttributes< HTMLDivElement >;
 
-export const CollapsibleContent: React.FC< CollapsedProps > = ( {
+export const CollapsibleContent = ( {
 	initialCollapsed = true,
 	toggleText,
 	children,

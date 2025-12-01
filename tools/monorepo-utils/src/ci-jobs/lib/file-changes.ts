@@ -23,25 +23,30 @@ export interface ProjectFileChanges {
  */
 function getProjectPaths( graph: ProjectNode ): { [ name: string ]: string } {
 	const projectPaths: { [ name: string ]: string } = {};
+	const pathSorted: Array< [ name: string, path: string, depth: number ] > =
+		[];
 
 	const queue = [ graph ];
 	const visited: { [ name: string ]: boolean } = {};
 	while ( queue.length > 0 ) {
 		const node = queue.shift();
-		if ( ! node ) {
+		if ( ! node || visited[ node.name ] ) {
 			continue;
 		}
 
-		if ( visited[ node.name ] ) {
-			continue;
-		}
-
-		projectPaths[ node.name ] = node.path;
-
+		pathSorted.push( [
+			node.name,
+			node.path,
+			node.path.split( '/' ).length,
+		] );
 		visited[ node.name ] = true;
-
 		queue.push( ...node.dependencies );
 	}
+
+	pathSorted.sort( ( a, b ) => b[ 2 ] - a[ 2 ] );
+	pathSorted.forEach(
+		( entry ) => ( projectPaths[ entry[ 0 ] ] = entry[ 1 ] )
+	);
 
 	return projectPaths;
 }
@@ -61,7 +66,7 @@ function getChangedFilesForProject(
 
 	// Find all of the files that have changed in the project.
 	for ( const filePath of changedFiles ) {
-		if ( ! filePath.startsWith( projectPath ) ) {
+		if ( ! filePath.startsWith( projectPath + '/' ) ) {
 			continue;
 		}
 
@@ -79,16 +84,30 @@ function getChangedFilesForProject(
  *
  * @param {Object} projectGraph The project graph to assign changes for.
  * @param {string} baseRef      The git ref to compare against for changes.
+ * @param {string} prNumber     The PR number referencing the changes.
  * @return {Object|true} A map of changed files keyed by the project name or true if all projects should be marked as changed.
  */
 export function getFileChanges(
 	projectGraph: ProjectNode,
-	baseRef: string
+	baseRef: string,
+	prNumber: string
 ): ProjectFileChanges | true {
 	// We're going to use git to figure out what files have changed.
-	const output = execSync( `git diff --name-only ${ baseRef }`, {
-		encoding: 'utf8',
-	} );
+	let output = '';
+	try {
+		const command =
+			( prNumber && `gh pr diff ${ prNumber } --name-only` ) ||
+			`git diff --name-only ${ baseRef }`;
+
+		output = execSync( command, {
+			encoding: 'utf8',
+		} );
+	} catch ( error ) {
+		// eslint-disable-next-line no-console
+		console.error( 'GitHub CLI Error: ' + error.stderr );
+		return true;
+	}
+
 	const changedFilePaths = output.split( '\n' );
 
 	// If the root lockfile has been changed we have no easy way
@@ -111,7 +130,9 @@ export function getFileChanges(
 
 		const projectChanges = getChangedFilesForProject(
 			projectPaths[ projectName ],
-			changedFilePaths
+			changedFilePaths.filter(
+				( filePath ) => ! ownedFilePaths.includes( filePath )
+			)
 		);
 		if ( projectChanges.length === 0 ) {
 			continue;
@@ -144,6 +165,84 @@ export function getFileChanges(
 
 		changes[ projectName ] = projectChanges;
 		break;
+	}
+
+	// Third iteration: assign files to projects based on CI config patterns.
+	// This allows projects to claim files that match their CI config patterns,
+	// even if those files are in nested package directories.
+	const allNodes: ProjectNode[] = [];
+	const queue: ProjectNode[] = [ projectGraph ];
+	const visited = new Set< string >();
+	while ( queue.length > 0 ) {
+		const node = queue.shift();
+		if ( ! node || visited.has( node.name ) ) {
+			continue;
+		}
+		allNodes.push( node );
+		visited.add( node.name );
+		queue.push( ...node.dependencies );
+	}
+
+	for ( const node of allNodes ) {
+		if ( ! node.ciConfig || ! node.path ) {
+			continue;
+		}
+
+		// Collect all change patterns from all jobs in this project
+		const jobs = node.ciConfig.jobs ?? [];
+		if ( jobs.length === 0 ) {
+			continue;
+		}
+
+		const changePatterns: RegExp[] = [];
+		for ( const job of jobs ) {
+			if ( job.changes ) {
+				// Normalize flags: drop stateful g/y to avoid lastIndex side effects.
+				for ( const re of job.changes ) {
+					changePatterns.push(
+						re.global || re.sticky
+							? new RegExp(
+									re.source,
+									re.flags.replace( /[gy]/g, '' )
+							  )
+							: re
+					);
+				}
+			}
+		}
+
+		if ( changePatterns.length === 0 ) {
+			continue;
+		}
+
+		// Check all changed files to see if any match this project's patterns
+		for ( const filePath of changedFilePaths ) {
+			// Skip files that don't start with this project's path
+			if ( ! filePath.startsWith( node.path + '/' ) ) {
+				continue;
+			}
+
+			const relativePath = filePath.slice(
+				node.path.length + Number( node.path !== '' )
+			);
+
+			// Check if this file matches any of the project's CI config patterns
+			const matchesPattern = changePatterns.some( ( pattern ) => {
+				// Defensive: prevent stateful regex from skipping matches
+				pattern.lastIndex = 0;
+				return pattern.test( relativePath );
+			} );
+
+			if ( matchesPattern ) {
+				// Add this file to the project's changes if not already present
+				if ( ! changes[ node.name ] ) {
+					changes[ node.name ] = [];
+				}
+				if ( ! changes[ node.name ].includes( relativePath ) ) {
+					changes[ node.name ].push( relativePath );
+				}
+			}
+		}
 	}
 
 	return changes;

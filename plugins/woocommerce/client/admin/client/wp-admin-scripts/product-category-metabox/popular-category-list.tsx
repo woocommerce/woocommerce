@@ -21,10 +21,13 @@ export type CategoryTerm = {
 	count: number;
 };
 
-export const PopularCategoryList: React.FC< {
+export const PopularCategoryList = ( {
+	selected,
+	onChange,
+}: {
 	selected: CategoryTerm[];
 	onChange: ( selected: CategoryTerm[] ) => void;
-} > = ( { selected, onChange } ) => {
+} ) => {
 	const [ popularCategories, setPopularCategories ] = useState<
 		CategoryTerm[]
 	>( [] );

@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement } from '@wordpress/element';
-import React from 'react';
 
 /**
  * Internal dependencies
@@ -10,7 +9,7 @@ import React from 'react';
 import { ImageGallery, ImageGalleryItem } from '../';
 import { MockMediaUpload } from '../../media-uploader/stories/mock-media-uploader';
 
-export const Basic: React.FC = () => {
+export const Basic = () => {
 	return (
 		<ImageGallery
 			MediaUploadComponent={ MockMediaUpload }
@@ -63,7 +62,7 @@ export const Basic: React.FC = () => {
 	);
 };
 
-export const Cover: React.FC = () => {
+export const Cover = () => {
 	return (
 		<ImageGallery MediaUploadComponent={ MockMediaUpload }>
 			<ImageGalleryItem
@@ -79,7 +78,7 @@ export const Cover: React.FC = () => {
 	);
 };
 
-export const Columns: React.FC = () => {
+export const Columns = () => {
 	return (
 		<ImageGallery columns={ 3 } MediaUploadComponent={ MockMediaUpload }>
 			<ImageGalleryItem

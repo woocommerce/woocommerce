@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
-import { PaymentExtensionSuggestionProvider } from '@woocommerce/data';
+import {
+	PaymentsExtensionSuggestionProvider,
+	PaymentsEntity,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -16,9 +18,8 @@ import { EllipsisMenuWrapper as EllipsisMenu } from '~/settings-payments/compone
 import {
 	isWooPayments,
 	hasIncentive,
-	isActionIncentive,
-	isIncentiveDismissedInContext,
 	isWooPayEligible,
+	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
 import { DefaultDragHandle } from '~/settings-payments/components/sortable';
 import { StatusBadge } from '~/settings-payments/components/status-badge';
@@ -29,18 +30,24 @@ type PaymentExtensionSuggestionListItemProps = {
 	/**
 	 * The payment extension suggestion to display.
 	 */
-	extension: PaymentExtensionSuggestionProvider;
+	suggestion: PaymentsExtensionSuggestionProvider;
 	/**
 	 * The ID of the plugin currently being installed, or `null` if none.
 	 */
 	installingPlugin: string | null;
 	/**
-	 * Callback function to handle the setup of the plugin. Receives the plugin ID, slug, and onboarding URL (if available).
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__main_suggestion').
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
-		onboardingUrl: string | null
+	setUpPlugin: (
+		provider: PaymentsEntity,
+		onboardingUrl: string | null,
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	/**
 	 * Indicates whether the plugin is already installed.
@@ -50,6 +57,10 @@ type PaymentExtensionSuggestionListItemProps = {
 	 * Callback function to handle accepting an incentive. Receives the incentive ID as a parameter.
 	 */
 	acceptIncentive: ( id: string ) => void;
+	/**
+	 * Indicates whether the incentive should be highlighted.
+	 */
+	shouldHighlightIncentive?: boolean;
 };
 
 /**
@@ -58,74 +69,73 @@ type PaymentExtensionSuggestionListItemProps = {
  * for installation or enabling the plugin. The component highlights incentive if available.
  */
 export const PaymentExtensionSuggestionListItem = ( {
-	extension,
+	suggestion,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	pluginInstalled,
 	acceptIncentive,
+	shouldHighlightIncentive = false,
 	...props
 }: PaymentExtensionSuggestionListItemProps ) => {
-	const incentive = hasIncentive( extension ) ? extension._incentive : null;
-	const shouldHighlightIncentive =
-		hasIncentive( extension ) &&
-		( ! isActionIncentive( extension._incentive ) ||
-			isIncentiveDismissedInContext(
-				extension._incentive,
-				'wc_settings_payments__banner'
-			) );
+	const incentive = hasIncentive( suggestion ) ? suggestion._incentive : null;
 
 	// Determine the CTA button label based on the extension state.
 	let ctaButtonLabel = __( 'Install', 'woocommerce' );
 	if ( pluginInstalled ) {
 		ctaButtonLabel = __( 'Enable', 'woocommerce' );
-	} else if ( installingPlugin === extension.id ) {
+	} else if ( installingPlugin === suggestion.id ) {
 		ctaButtonLabel = __( 'Installing', 'woocommerce' );
 	}
 
 	return (
 		<div
-			id={ extension.id }
+			id={ suggestion.id }
 			className={ `transitions-disabled woocommerce-list__item woocommerce-list__item-enter-done ${
-				shouldHighlightIncentive ? `has-incentive` : ''
+				hasIncentive( suggestion ) && shouldHighlightIncentive
+					? `has-incentive`
+					: ''
 			}` }
 			{ ...props }
 		>
 			<div className="woocommerce-list__item-inner">
 				<div className="woocommerce-list__item-before">
 					<DefaultDragHandle />
-					{ extension.icon && (
+					{ suggestion.icon && (
 						<img
 							className={ 'woocommerce-list__item-image' }
-							src={ extension.icon }
-							alt={ extension.title + ' logo' }
+							src={ suggestion.icon }
+							alt={ suggestion.title + ' logo' }
 						/>
 					) }
 				</div>
 				<div className="woocommerce-list__item-text">
 					<span className="woocommerce-list__item-title">
-						{ extension.title }{ ' ' }
-						{ ! hasIncentive( extension ) &&
-							isWooPayments( extension.id ) && (
+						{ suggestion.title }{ ' ' }
+						{ ! hasIncentive( suggestion ) &&
+							isWooPayments( suggestion.id ) && (
 								<StatusBadge status="recommended" />
 							) }
 						{ incentive && (
 							<IncentiveStatusBadge incentive={ incentive } />
 						) }
 						{ /* All payment extension suggestions are official. */ }
-						<OfficialBadge variant="expanded" />
+						<OfficialBadge
+							variant="expanded"
+							suggestionId={ suggestion.id }
+						/>
 					</span>
 					<span
 						className="woocommerce-list__item-content"
 						dangerouslySetInnerHTML={ sanitizeHTML(
-							decodeEntities( extension.description )
+							decodeEntities( suggestion.description )
 						) }
 					/>
-					{ isWooPayments( extension.id ) && (
+					{ isWooPayments( suggestion.id ) && (
 						<WooPaymentsMethodsLogos
 							maxElements={ 10 }
 							tabletWidthBreakpoint={ 1080 } // Reduce the number of logos earlier.
 							mobileWidthBreakpoint={ 768 } // Reduce the number of logos earlier.
-							isWooPayEligible={ isWooPayEligible( extension ) }
+							isWooPayEligible={ isWooPayEligible( suggestion ) }
 						/>
 					) }
 				</div>
@@ -134,18 +144,35 @@ export const PaymentExtensionSuggestionListItem = ( {
 						<Button
 							variant="primary"
 							onClick={ () => {
+								if ( pluginInstalled ) {
+									// Record the event when user clicks on a suggestion's enable button.
+									recordPaymentsProviderEvent(
+										'enable_click',
+										suggestion,
+										{
+											incentive_id: incentive
+												? incentive.promo_id
+												: 'none',
+										}
+									);
+								}
+
 								if ( incentive ) {
 									acceptIncentive( incentive.promo_id );
 								}
 
-								setupPlugin(
-									extension.id,
-									extension.plugin.slug,
-									extension.onboarding?._links.onboard.href ??
-										null
+								setUpPlugin(
+									suggestion,
+									suggestion.onboarding?._links?.onboard
+										?.href ?? null,
+									pluginInstalled
+										? null
+										: suggestion._links?.attach?.href ??
+												null,
+									'wc_settings_payments__main_suggestion'
 								);
 							} }
-							isBusy={ installingPlugin === extension.id }
+							isBusy={ installingPlugin === suggestion.id }
 							disabled={ !! installingPlugin }
 						>
 							{ ctaButtonLabel }
@@ -156,10 +183,10 @@ export const PaymentExtensionSuggestionListItem = ( {
 					<div className="woocommerce-list__item-after__actions">
 						<EllipsisMenu
 							label={ __(
-								'Payment Provider Options',
+								'Payment provider actions',
 								'woocommerce'
 							) }
-							provider={ extension }
+							provider={ suggestion }
 						/>
 					</div>
 				</div>

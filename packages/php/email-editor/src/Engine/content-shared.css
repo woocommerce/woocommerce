@@ -1,0 +1,27 @@
+/*
+ * Styles for both the email editor and renderer.
+ */
+
+/* Automatic padding for blocks with background color */
+.email-text-block.has-background,
+p.has-background,
+h1.has-background,
+h2.has-background,
+h3.has-background,
+h4.has-background,
+h5.has-background,
+h6.has-background {
+	padding: 16px 24px;
+}
+
+/* Specific padding for list elements */
+ul.has-background,
+ol.has-background {
+	padding: 20px 40px;
+}
+
+/* Remove default browser underline from site title link */
+.wp-block-site-title a:not(.wp-element-button) {
+	text-decoration: none !important;
+	color: inherit;
+}

@@ -16,6 +16,11 @@
 			font-weight: 600;
 			line-height: 20px;
 			margin: 0 0 8px;
+
+			> span {
+				font-weight: inherit;
+				font-size: inherit;
+			}
 		}
 
 		&-description {

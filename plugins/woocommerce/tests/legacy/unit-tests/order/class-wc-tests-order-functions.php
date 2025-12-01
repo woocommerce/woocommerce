@@ -9,6 +9,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Caches\OrderCountCache;
 
 /**
  * Class Functions.
@@ -103,43 +104,30 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 
 		// Fake some datastores and order types for testing.
 		$test_counts = array(
-			'order'           => array(
-				array( OrderInternalStatus::ON_HOLD, 2 ),
-				array( OrderStatus::TRASH, 1 ),
+			'shop_order'      => array(
+				OrderInternalStatus::ON_HOLD => 2,
+				OrderStatus::TRASH           => 1,
 			),
 			'order-fake-type' => array(
-				array( OrderInternalStatus::ON_HOLD, 3 ),
-				array( OrderStatus::TRASH, 0 ),
+				OrderInternalStatus::ON_HOLD => 3,
+				OrderStatus::TRASH           => 0,
 			),
 		);
 
-		$mock_datastores = array();
-		foreach ( array( 'order', 'order-fake-type' ) as $order_type ) {
-			$mock_datastores[ $order_type ] = $this->getMockBuilder( 'Abstract_WC_Order_Data_Store_CPT' )
-				->setMethods( array( 'get_order_count' ) )
-				->getMock();
+		$add_mock_order_type = function ( $order_types ) use ( $test_counts ) {
+			return array_keys( $test_counts );
+		};
+		add_filter( 'wc_order_types', $add_mock_order_type );
 
-			$mock_datastores[ $order_type ]
-				->method( 'get_order_count' )
-				->will( $this->returnValueMap( $test_counts[ $order_type ] ) );
+		$order_count_cache = new OrderCountCache();
+		foreach ( $test_counts as $order_type => $counts ) {
+			foreach ( $counts as $status => $count ) {
+				$order_count_cache->set( $order_type, $status, $count );
+			}
 		}
 
-		$add_mock_datastores          = function ( $stores ) use ( $mock_datastores ) {
-			return array_merge( $stores, $mock_datastores );
-		};
-		$add_mock_order_type          = function ( $order_types ) use ( $mock_datastores ) {
-			return array( 'shop_order', 'order-fake-type' );
-		};
-		$return_mock_order_data_store = function ( $stores ) use ( $mock_datastores ) {
-			return $mock_datastores['order'];
-		};
-
-		add_filter( 'woocommerce_data_stores', $add_mock_datastores );
-		add_filter( 'wc_order_types', $add_mock_order_type );
-		add_filter( 'woocommerce_order_data_store', $return_mock_order_data_store, 1000, 2 );
-
 		// Check counts for specific order types.
-		$this->assertEquals( 2, wc_orders_count( OrderStatus::ON_HOLD, 'shop_order' ) );
+		$this->assertEquals( 2, wc_orders_count( OrderInternalStatus::ON_HOLD, 'shop_order' ) );
 		$this->assertEquals( 1, wc_orders_count( OrderStatus::TRASH, 'shop_order' ) );
 		$this->assertEquals( 3, wc_orders_count( OrderStatus::ON_HOLD, 'order-fake-type' ) );
 		$this->assertEquals( 0, wc_orders_count( OrderStatus::TRASH, 'order-fake-type' ) );
@@ -148,9 +136,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 5, wc_orders_count( OrderStatus::ON_HOLD ) );
 		$this->assertEquals( 1, wc_orders_count( OrderStatus::TRASH ) );
 
-		remove_filter( 'woocommerce_data_stores', $add_mock_datastores );
 		remove_filter( 'wc_order_types', $add_mock_order_type );
-		remove_filter( 'woocommerce_order_data_store', $return_mock_order_data_store, 1000 );
 
 		// Confirm that everything's back to normal.
 		wp_cache_flush();

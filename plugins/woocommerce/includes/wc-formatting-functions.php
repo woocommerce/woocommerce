@@ -288,6 +288,10 @@ function wc_format_refund_total( $amount ) {
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$number = $number ?? '';
 
+	if ( '' === $number ) {
+		return '';
+	}
+
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
@@ -375,12 +379,19 @@ function wc_format_coupon_code( $value ) {
  *
  * Due to the unfiltered_html captability that some (admin) users have, we need to account for slashes.
  *
+ * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
+ * and other HTML entities. Without this decoding step, coupon codes with special characters would fail to match
+ * during application, causing legitimate coupons to be rejected.
+ *
+ * @see WC_Cart_Test::test_coupon_codes_with_special_characters
+ *
  * @since  3.6.0
+ * @since  10.0.0 Decode HTML entities here instead of via woocommerce_coupon_code filter.
  * @param  string $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = wp_kses( sanitize_post_field( 'post_title', $value ?? '', 0, 'db' ), 'entities' );
+	$value = wp_kses( sanitize_post_field( 'post_title', html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) ), 0, 'db' ), 'entities' );
 	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
 }
 
@@ -478,7 +489,24 @@ function wc_array_overlay( $a1, $a2 ) {
  * @return int|float
  */
 function wc_stock_amount( $amount ) {
-	return apply_filters( 'woocommerce_stock_amount', $amount );
+	/**
+	 * Filter the stock amount. If an invalid value is returned by hooks, falls back to intval( $amount ).
+	 *
+	 * @since  2.3
+	 * @param int|float $amount Stock amount.
+	 * @return int|float
+	 */
+	return NumberUtil::normalize( apply_filters( 'woocommerce_stock_amount', $amount ), intval( $amount ) );
+}
+
+/**
+ * Check if the stock amount is an integer.
+ *
+ * @since 10.1.0
+ * @return bool
+ */
+function wc_is_stock_amount_integer() {
+	return wc_stock_amount( 1 ) === 1;
 }
 
 /**
@@ -559,6 +587,8 @@ function wc_get_price_decimals() {
  *                                      Defaults the result of wc_get_price_decimals().
  *     @type string $price_format       Price format depending on the currency position.
  *                                      Defaults the result of get_woocommerce_price_format().
+ *     @type bool   $in_span            Whether to enclose the formatted price in an HTML <span> element.
+ *                                      Defaults to true.
  * }
  * @return string
  */
@@ -574,6 +604,8 @@ function wc_price( $price, $args = array() ) {
 				'thousand_separator' => wc_get_price_thousand_separator(),
 				'decimals'           => wc_get_price_decimals(),
 				'price_format'       => get_woocommerce_price_format(),
+				'in_span'            => true,
+				'aria-hidden'        => false,
 			)
 		)
 	);
@@ -610,8 +642,14 @@ function wc_price( $price, $args = array() ) {
 		$price = wc_trim_zeros( $price );
 	}
 
-	$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
-	$return          = '<span class="woocommerce-Price-amount amount"><bdi>' . $formatted_price . '</bdi></span>';
+	if ( $args['in_span'] ) {
+		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
+		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
+		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
+	} else {
+		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
+		$return          = $formatted_price;
+	}
 
 	if ( $args['ex_tax_label'] && wc_tax_enabled() ) {
 		$return .= ' <small class="woocommerce-Price-taxLabel tax_label">' . WC()->countries->ex_tax_or_vat() . '</small>';
@@ -1191,11 +1229,28 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_de
 function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''.
 
-	wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	// Clear existing scheduled events.
+	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+	} else {
+		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
+	}
 
 	if ( '' !== $value ) {
+		/**
+		 * Filters the interval at which to cancel unpaid orders in minutes.
+		 *
+		 * @since 5.1.0
+		 *
+		 * @param int $cancel_unpaid_interval The interval at which to cancel unpaid orders in minutes.
+		 */
 		$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $value ) );
-		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+
+		if ( function_exists( 'as_schedule_single_action' ) ) {
+			as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+		} else {
+			wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
+		}
 	}
 
 	return $value;
@@ -1331,7 +1386,15 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
  */
 function wc_format_price_range( $from, $to ) {
 	/* translators: 1: price from 2: price to */
-	$price = sprintf( _x( '%1$s &ndash; %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from ) : $from, is_numeric( $to ) ? wc_price( $to ) : $to );
+	$price  = sprintf( _x( '%1$s <span aria-hidden="true">&ndash;</span> %2$s', 'Price range: from-to', 'woocommerce' ), is_numeric( $from ) ? wc_price( $from, array( 'aria-hidden' => true ) ) : $from, is_numeric( $to ) ? wc_price( $to, array( 'aria-hidden' => true ) ) : $to );
+	$price .= '<span class="screen-reader-text">';
+	$price .= sprintf(
+		/* translators: 1: price from 2: price to */
+		__( 'Price range: %1$s through %2$s', 'woocommerce' ),
+		is_numeric( $from ) ? wp_strip_all_tags( wc_price( $from ) ) : wp_strip_all_tags( $from ),
+		is_numeric( $to ) ? wp_strip_all_tags( wc_price( $to ) ) : wp_strip_all_tags( $to )
+	);
+	$price .= '</span>';
 	return apply_filters( 'woocommerce_format_price_range', $price, $from, $to );
 }
 
@@ -1568,6 +1631,51 @@ function wc_parse_relative_date_option( $raw_value ) {
 function wc_sanitize_endpoint_slug( $raw_value ) {
 	return sanitize_title( $raw_value ?? '' );
 }
+
+/**
+ * Removes useless non-displayable and problematic Unicode characters from a string.
+ *
+ * This function eliminates characters that can cause formatting issues, invisible text,
+ * or unexpected behavior in copy-pasted text. Specifically, it removes:
+ *
+ * - **Soft hyphen (`U+00AD`)** – Invisible unless text is broken across lines.
+ * - **Zero-width spaces & joiners (`U+200B–U+200D`)** – Invisible and can cause copy/paste issues.
+ * - **Directional markers (`U+200E–U+200F`, `U+202A–U+202E`)** – Can affect text rendering.
+ * - **Byte Order Mark (BOM) (`U+FEFF`)** – Can interfere with encoding.
+ * - **Interlinear annotation characters (`U+FFF9–U+FFFB`)** – Rarely used and unnecessary in checkout fields.
+ *
+ * It does **not** remove:
+ *
+ * - **Non-breaking space (`U+00A0`)** – Useful for preventing line breaks in addresses.
+ * - **Word joiner (`U+2060`)** – Sometimes needed for proper text rendering in certain scripts.
+ *
+ * @param string $raw_value The input string to sanitize.
+ *
+ * @return string The sanitized string without problematic characters.
+ * @since 9.9.0
+ */
+function wc_remove_non_displayable_chars( string $raw_value ): string {
+	$remove_chars = array(
+		"\u{00AD}", // Soft Hyphen.
+		"\u{200B}", // Zero Width Space.
+		"\u{200C}", // Zero Width Non-Joiner.
+		"\u{200D}", // Zero Width Joiner.
+		"\u{200E}", // Left-to-Right Mark.
+		"\u{200F}", // Right-to-Left Mark.
+		"\u{202A}", // Left-to-Right Embedding.
+		"\u{202B}", // Right-to-Left Embedding.
+		"\u{202C}", // Pop Directional Formatting.
+		"\u{202D}", // Left-to-Right Override.
+		"\u{202E}", // Right-to-Left Override.
+		"\u{FEFF}", // Byte Order Mark (BOM).
+		"\u{FFF9}", // Interlinear Annotation Anchor.
+		"\u{FFFA}", // Interlinear Annotation Separator.
+		"\u{FFFB}", // Interlinear Annotation Terminator.
+	);
+
+	return str_replace( $remove_chars, '', $raw_value );
+}
+
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_pay_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_order_received_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_add_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

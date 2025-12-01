@@ -5,9 +5,7 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const CustomTemplatedPathPlugin = require( '@wordpress/custom-templated-path-webpack-plugin' );
-const BundleAnalyzerPlugin =
-	require( 'webpack-bundle-analyzer' ).BundleAnalyzerPlugin;
+const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
@@ -15,7 +13,8 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
 /**
  * Internal dependencies
  */
-const UnminifyWebpackPlugin = require( './unminify' );
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-style-build' );
@@ -58,13 +57,16 @@ const wcAdminPackages = [
 	'onboarding',
 	'block-templates',
 	'product-editor',
+	'sanitize',
 	'settings-editor',
 	'remote-logging',
+	'email-editor',
 ];
 
 const getEntryPoints = () => {
 	const entryPoints = {
-		app: './client/index.js',
+		app: './client/index.tsx',
+		embed: './client/embed.tsx',
 		settings: './client/settings/index.js',
 	};
 	wcAdminPackages.forEach( ( name ) => {
@@ -138,10 +140,13 @@ const webpackConfig = {
 							[ '@babel/preset-typescript' ],
 						],
 						plugins: [
-							'@babel/plugin-proposal-class-properties',
 							! isProduction &&
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
+							isProduction &&
+								require.resolve(
+									'babel-plugin-transform-react-remove-prop-types'
+								),
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,
@@ -218,6 +223,19 @@ const webpackConfig = {
 			],
 		} ),
 
+		// The email-editor assets for the rich-text.js file need to be copied to the build directory.
+		new CopyWebpackPlugin( {
+			patterns: [
+				{
+					from: path.join(
+						__dirname,
+						'../../../../packages/js/email-editor/assets'
+					),
+					to: './email-editor/assets',
+				},
+			],
+		} ),
+
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 
@@ -225,18 +243,32 @@ const webpackConfig = {
 		! process.env.STORYBOOK &&
 			new WooCommerceDependencyExtractionWebpackPlugin( {
 				requestToExternal( request ) {
-					if ( request === '@wordpress/components/build/ui' ) {
-						// The external wp.components does not include ui components, so we need to skip requesting to external here.
-						return null;
+					switch ( request ) {
+						case 'react/jsx-runtime':
+						case 'react/jsx-dev-runtime':
+							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
+							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
+							// For backward compatibility reasons we need to skip requesting to external here.
+							return null;
 					}
 
 					if ( request.startsWith( '@wordpress/dataviews' ) ) {
 						return null;
 					}
 
-					if ( request.startsWith( '@wordpress/edit-site' ) ) {
-						// The external wp.editSite does not include edit-site components, so we need to skip requesting to external here. We can remove this once the edit-site components are exported in the external wp.editSite.
-						// We use the edit-site components in the customize store.
+					// Skip requesting to external if the import path is from the build or build-module directory for WordPress packages.
+					// This is required for @wordpress/edit-site to work and also can reduce the bundle size when we don't need to load the entire WordPress package.
+					if (
+						request.match( /^@wordpress\/.*\/build(?:-module)?/ )
+					) {
+						return null;
+					}
+
+					// Skip requesting to external if the import path is from the build or build-module directory for WooCommerce packages.
+					// This can reduce the bundle size when we don't need to load the entire WooCommerce package.
+					if (
+						request.match( /^@woocommerce\/.*\/build(?:-module)?/ )
+					) {
 						return null;
 					}
 				},

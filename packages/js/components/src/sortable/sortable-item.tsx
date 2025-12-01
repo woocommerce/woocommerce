@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import React, { DragEvent, useEffect } from 'react';
-import classnames from 'classnames';
+import { DragEvent, useEffect } from 'react';
+import clsx from 'clsx';
 import { createElement, useRef, useContext } from '@wordpress/element';
 import { Draggable } from '@wordpress/components';
 
@@ -54,7 +54,7 @@ export const SortableItem = ( {
 		<div
 			{ ...props }
 			aria-selected={ isSelected }
-			className={ classnames( 'woocommerce-sortable__item', className, {
+			className={ clsx( 'woocommerce-sortable__item', className, {
 				'is-dragging': isDragging,
 				'is-selected': isSelected,
 			} ) }

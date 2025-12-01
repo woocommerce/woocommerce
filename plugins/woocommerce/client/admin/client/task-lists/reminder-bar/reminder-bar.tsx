@@ -4,10 +4,10 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import {
-	ONBOARDING_STORE_NAME,
-	OPTIONS_STORE_NAME,
+	optionsStore,
 	TaskType,
 	getVisibleTasks,
+	onboardingStore,
 } from '@woocommerce/data';
 import { Button } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -39,10 +39,7 @@ type ReminderTextProps = {
 
 const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
 
-const ReminderText: React.FC< ReminderTextProps > = ( {
-	remainingCount,
-	tracksProps,
-} ) => {
+const ReminderText = ( { remainingCount, tracksProps }: ReminderTextProps ) => {
 	const translationText =
 		remainingCount === 1
 			? /* translators: 1: remaining tasks count */
@@ -82,11 +79,11 @@ const ReminderText: React.FC< ReminderTextProps > = ( {
 	);
 };
 
-export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
+export const TasksReminderBar = ( {
 	taskListId,
 	updateBodyMargin,
-} ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+}: ReminderBarProps ) => {
+	const { updateOptions } = useDispatch( optionsStore );
 	const {
 		remainingCount,
 		loading,
@@ -99,23 +96,19 @@ export const TasksReminderBar: React.FC< ReminderBarProps > = ( {
 			const {
 				getTaskList,
 				hasFinishedResolution: onboardingHasFinishedResolution,
-			} = select( ONBOARDING_STORE_NAME );
+			} = select( onboardingStore );
 			const {
 				getOption,
 				hasFinishedResolution: optionHasFinishedResolution,
-			} = select( OPTIONS_STORE_NAME );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			} = select( optionsStore );
 			const reminderBarHiddenOption = getOption(
 				REMINDER_BAR_HIDDEN_OPTION
 			);
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			const taskList = getTaskList( taskListId );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			const taskListIsResolved = onboardingHasFinishedResolution(
 				'getTaskList',
 				[ taskListId ]
 			);
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			const optionIsResolved = optionHasFinishedResolution( 'getOption', [
 				REMINDER_BAR_HIDDEN_OPTION,
 			] );

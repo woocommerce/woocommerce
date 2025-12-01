@@ -8,7 +8,9 @@
 
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner as CustomOrdersTableCLIRunner;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\CLIRunner as ProductAttributesLookupCLIRunner;
+use Automattic\WooCommerce\Internal\Integrations\WPPostsImporter;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Runner;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,6 +24,23 @@ class WC_CLI {
 	public function __construct() {
 		$this->includes();
 		$this->hooks();
+
+		/**
+		 * Adds the blueprint CLI initialization to the 'init' hook to prevent premature translation loading.
+		 *
+		 * The hook is required because FeaturesUtil::feature_is_enabled() loads translations during the
+		 * blueprint CLI check. This hook can be removed once FeaturesUtil::feature_is_enabled() is
+		 * refactored to not load translations.
+		 *
+		 * @see https://github.com/woocommerce/woocommerce/issues/56305
+		 */
+		add_action( 'init', array( $this, 'add_blueprint_cli_hook' ) );
+
+		/**
+		 * Register the WP Posts importer.
+		 */
+		$wp_posts_importer = wc_get_container()->get( WPPostsImporter::class );
+		$wp_posts_importer->register();
 	}
 
 	/**
@@ -35,7 +54,6 @@ class WC_CLI {
 		require_once __DIR__ . '/cli/class-wc-cli-tracker-command.php';
 		require_once __DIR__ . '/cli/class-wc-cli-com-command.php';
 		require_once __DIR__ . '/cli/class-wc-cli-com-extension-command.php';
-		$this->maybe_include_blueprint_cli();
 	}
 
 	/**
@@ -48,22 +66,22 @@ class WC_CLI {
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_Tracker_Command::register_commands' );
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_COM_Command::register_commands' );
 		WP_CLI::add_hook( 'after_wp_load', 'WC_CLI_COM_Extension_Command::register_commands' );
+		if ( defined( 'WOOCOMMERCE_MIGRATOR_ENABLED' ) && WOOCOMMERCE_MIGRATOR_ENABLED ) {
+			WP_CLI::add_hook( 'after_wp_load', 'Automattic\WooCommerce\Internal\CLI\Migrator\Runner::register_commands' );
+		}
 		$cli_runner = wc_get_container()->get( CustomOrdersTableCLIRunner::class );
 		WP_CLI::add_hook( 'after_wp_load', array( $cli_runner, 'register_commands' ) );
 		$cli_runner = wc_get_container()->get( ProductAttributesLookupCLIRunner::class );
 		WP_CLI::add_hook( 'after_wp_load', fn() => \WP_CLI::add_command( 'wc palt', $cli_runner ) );
-
-		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) && class_exists( \Automattic\WooCommerce\Blueprint\Cli::class ) ) {
-			WP_CLI::add_hook( 'after_wp_load', 'Automattic\WooCommerce\Blueprint\Cli::register_commands' );
-		}
 	}
 
 	/**
 	 * Include Blueprint CLI if it's available.
 	 */
-	private function maybe_include_blueprint_cli() {
-		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
-			require_once dirname( WC_PLUGIN_FILE ) . '/vendor/woocommerce/blueprint/src/Cli.php';
+	public function add_blueprint_cli_hook() {
+		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) && class_exists( \Automattic\WooCommerce\Blueprint\Cli::class ) ) {
+			require_once dirname( WC_PLUGIN_FILE ) . '/packages/blueprint/src/Cli.php';
+			WP_CLI::add_hook( 'after_wp_load', 'Automattic\WooCommerce\Blueprint\Cli::register_commands' );
 		}
 	}
 }

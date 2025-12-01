@@ -20,7 +20,7 @@ import {
 	useAsyncFilter,
 } from '@woocommerce/components';
 import { CurrencyContext } from '@woocommerce/currency';
-import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
+import { productsStore, Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -59,7 +59,7 @@ export function AddProductsModal( {
 		async ( search = '' ) => {
 			setProducts( [] );
 
-			return resolveSelect( PRODUCTS_STORE_NAME )
+			return resolveSelect( productsStore )
 				.getProducts( {
 					search,
 					orderby: 'title',

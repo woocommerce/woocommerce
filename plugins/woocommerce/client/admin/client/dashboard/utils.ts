@@ -2,17 +2,11 @@
  * External dependencies
  */
 import { decodeEntities } from '@wordpress/html-entities';
-import { without } from 'lodash';
 import {
 	OnboardingProductType,
 	OnboardingProductTypes,
 	ProfileItems,
 } from '@woocommerce/data';
-
-/**
- * Internal dependencies
- */
-import { getAdminSetting } from '~/utils/admin-settings';
 
 /**
  * Gets the country code from a country:state value string.
@@ -27,19 +21,6 @@ export function getCountryCode( countryState = '' ) {
 	}
 
 	return countryState.split( ':' )[ 0 ];
-}
-
-export function getCurrencyRegion( countryState: string ) {
-	let region = getCountryCode( countryState );
-	const euCountries = without(
-		getAdminSetting( 'onboarding', { euCountries: [] } ).euCountries,
-		'GB'
-	);
-	if ( region !== null && euCountries.includes( region ) ) {
-		region = 'EU';
-	}
-
-	return region;
 }
 
 /**

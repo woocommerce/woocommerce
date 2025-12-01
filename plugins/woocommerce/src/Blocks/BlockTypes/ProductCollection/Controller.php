@@ -4,12 +4,15 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use WP_Query;
 
 /**
  * Controller class.
  */
 class Controller extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -67,6 +70,9 @@ class Controller extends AbstractBlock {
 			2
 		);
 
+		// Register the backend settings so they can be used in the editor.
+		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
+
 		// Update the query for Editor.
 		add_filter( 'rest_product_query', array( $this, 'update_rest_query_in_editor' ), 10, 2 );
 
@@ -101,7 +107,7 @@ class Controller extends AbstractBlock {
 			$is_anchor = $p->next_tag( array( 'tag_name' => 'a' ) );
 
 			if ( $is_anchor ) {
-				$p->set_attribute( 'data-wc-on--click', 'woocommerce/product-collection::actions.viewProduct' );
+				$p->set_attribute( 'data-wp-on--click', 'woocommerce/product-collection::actions.viewProduct' );
 
 				$block_content = $p->get_updated_html();
 			}
@@ -117,32 +123,14 @@ class Controller extends AbstractBlock {
 	 * @return boolean
 	 */
 	private function is_block_compatible( $block_name ) {
-		// Check for explicitly unsupported blocks.
-		$unsupported_blocks = array(
-			'core/post-content',
-			'woocommerce/mini-cart',
-			'woocommerce/featured-product',
-			'woocommerce/active-filters',
-			'woocommerce/price-filter',
-			'woocommerce/stock-filter',
-			'woocommerce/attribute-filter',
-			'woocommerce/rating-filter',
-		);
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( $block_name );
+		// Client side navigation can be true in two states:
+		// - supports.interactivity === true;
+		// - supports.interactivity.clientNavigation === true; .
+		$supports_interactivity     = isset( $block_type->supports['interactivity'] ) && true === $block_type->supports['interactivity'];
+		$supports_client_navigation = isset( $block_type->supports['interactivity']['clientNavigation'] ) && true === $block_type->supports['interactivity']['clientNavigation'];
 
-		if ( in_array( $block_name, $unsupported_blocks, true ) ) {
-			return false;
-		}
-
-		// Check for supported prefixes.
-		if (
-			str_starts_with( $block_name, 'core/' ) ||
-			str_starts_with( $block_name, 'woocommerce/' )
-		) {
-			return true;
-		}
-
-		// Otherwise block is unsupported.
-		return false;
+		return $supports_interactivity || $supports_client_navigation;
 	}
 
 	/**
@@ -192,25 +180,21 @@ class Controller extends AbstractBlock {
 					}
 
 					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
-						$p = new \WP_HTML_Tag_Processor( $content );
-						if ( $p->next_tag() ) {
-							$p->set_attribute( 'data-wc-navigation-disabled', 'true' );
-						}
-						$content = $p->get_updated_html();
+						wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
 						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;
 					}
 
 					array_pop( $enhanced_query_stack );
 
 					if ( empty( $enhanced_query_stack ) ) {
-						remove_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback );
+						remove_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 5 );
 						$render_product_collection_callback = null;
 					}
 
 					return $content;
 				};
 
-				add_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 10, 2 );
+				add_filter( 'render_block_woocommerce/product-collection', $render_product_collection_callback, 5, 2 );
 			}
 		} elseif (
 			! empty( $enhanced_query_stack ) &&
@@ -241,6 +225,30 @@ class Controller extends AbstractBlock {
 	}
 
 	/**
+	 * Exposes settings used by the Product Collection block when manipulating
+	 * the default query.
+	 */
+	public function register_settings() {
+		register_setting(
+			'options',
+			'woocommerce_default_catalog_orderby',
+			array(
+				'type'         => 'object',
+				'description'  => __( 'How should products be sorted in the catalog by default?', 'woocommerce' ),
+				'label'        => __( 'Default product sorting', 'woocommerce' ),
+				'show_in_rest' => array(
+					'name'   => 'woocommerce_default_catalog_orderby',
+					'schema' => array(
+						'type' => 'string',
+						'enum' => array( 'menu_order', 'popularity', 'rating', 'date', 'price', 'price-desc' ),
+					),
+				),
+				'default'      => 'menu_order',
+			)
+		);
+	}
+
+	/**
 	 * Update the query for the product query block in Editor.
 	 *
 	 * @param array           $query   Query args.
@@ -267,20 +275,23 @@ class Controller extends AbstractBlock {
 			$collection_args = call_user_func( $handlers['editor_args'], $collection_args, $query, $request );
 		}
 
+		$orderby = $request->get_param( 'orderby' );
+
 		// When requested, short-circuit the query and return the preview query args.
 		$preview_state = $request->get_param( 'previewState' );
 		if ( isset( $preview_state['isPreview'] ) && 'true' === $preview_state['isPreview'] ) {
-			return $this->query_builder->get_preview_query_args( $collection_args, $query, $request );
+			return $this->query_builder->get_preview_query_args( $collection_args, array_merge( $query, array( 'orderby' => $orderby ) ), $request );
 		}
 
-		$orderby             = $request->get_param( 'orderby' );
-		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
-		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
-		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
-		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
-		$featured            = $request->get_param( 'featured' );
-		$time_frame          = $request->get_param( 'timeFrame' );
-		$price_range         = $request->get_param( 'priceRange' );
+		$on_sale                        = $request->get_param( 'woocommerceOnSale' ) === 'true';
+		$stock_status                   = $request->get_param( 'woocommerceStockStatus' );
+		$product_attributes             = $request->get_param( 'woocommerceAttributes' );
+		$handpicked_products            = $request->get_param( 'woocommerceHandPickedProducts' );
+		$featured                       = $request->get_param( 'featured' );
+		$time_frame                     = $request->get_param( 'timeFrame' );
+		$price_range                    = $request->get_param( 'priceRange' );
+		$raw_tax_query_from_rest_params = $query['tax_query'] ?? array();
+
 		// This argument is required for the tests to PHP Unit Tests to run correctly.
 		// Most likely this argument is being accessed in the test environment image.
 		$query['author'] = '';
@@ -298,6 +309,7 @@ class Controller extends AbstractBlock {
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
+				'taxonomies_query'    => $raw_tax_query_from_rest_params,
 			)
 		);
 	}

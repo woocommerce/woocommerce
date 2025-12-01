@@ -9,17 +9,19 @@ import Search from '../search/search';
 
 export default function Header() {
 	return (
-		<header className="woocommerce-marketplace__header">
-			<HeaderTitle />
-			<Tabs
-				additionalClassNames={ [
-					'woocommerce-marketplace__header-tabs',
-				] }
-			/>
-			<Search />
-			<div className="woocommerce-marketplace__header-meta">
-				<HeaderAccount />
-			</div>
-		</header>
+		<div className="woocommerce-marketplace__header-container">
+			<header className="woocommerce-marketplace__header">
+				<HeaderTitle />
+				<Tabs
+					additionalClassNames={ [
+						'woocommerce-marketplace__header-tabs',
+					] }
+				/>
+				<Search />
+				<div className="woocommerce-marketplace__header-meta">
+					<HeaderAccount page="wc-addons" />
+				</div>
+			</header>
+		</div>
 	);
 }

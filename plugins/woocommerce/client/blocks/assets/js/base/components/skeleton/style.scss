@@ -1,0 +1,11 @@
+.wc-block-components-skeleton {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+// To display .wc-block-components-skeleton__element in Storybook,
+// we cannot nest it within .wc-block-components-skeleton.
+.wc-block-components-skeleton__element {
+	@include skeleton-animation();
+}

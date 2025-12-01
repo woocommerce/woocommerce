@@ -66,6 +66,7 @@ const ShippingRateInput = ( {
 			) }
 			{ ( ! zone.toggleable || values[ `${ zone.id }_enabled` ] ) && (
 				<TextControlWithAffixes
+					__nextHasNoMarginBottom
 					label={ __( 'Shipping cost', 'woocommerce' ) }
 					required
 					className={ textControlClassName }

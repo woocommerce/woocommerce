@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { PaymentGatewayLink } from '@woocommerce/data';
+import { PaymentsProviderLink } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import { EllipsisMenuContent } from '../';
 
-const links: PaymentGatewayLink[] = [
+const links: PaymentsProviderLink[] = [
 	{
 		_type: 'about',
 		url: 'http://example.com/about',
@@ -37,6 +37,7 @@ describe( 'EllipsisMenuContent component', () => {
 		const { getByText } = render(
 			<EllipsisMenuContent
 				isSuggestion={ true }
+				suggestionId={ 'bogus' }
 				links={ links }
 				providerId={ 'bogus' }
 				pluginFile={ 'bogus/bogus' }

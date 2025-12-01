@@ -1,0 +1,28 @@
+---
+description: Rules for various git actions that happen with this project. 
+globs: 
+---
+
+# Creating Branches
+
+Branch names should go by the following structure (anything in "{}" brackets is a placeholder). "{short-slug}" should be replaced with a short name that best describes the changes - do ask for confirmation if needed.
+- `release/{version}` for release branches.
+- `refactor/{short-slug}` for refactors.
+- `test/{short-slug}` for changes that are only test updates or additions.
+- `fix/{short-slug}` for changes that fix a bug. Prompt the user for the issue number the fix is for and include that in the branch name.
+- `add/{short-slug}` for changes that are adding a new feature.
+
+# Commits
+
+Make sure each commit addresses an atomic unit of work that independently works.
+
+Make sure the commit message has a subject line which includes a brief description of the change and (if needed), why it was necessary. Write the subject in the imperative, start with a verb, and do not end with a period. The subject line should be no longer than 50 characters.
+
+There must be an empty line between the subject line and the rest of the commit message (if any). The commit body should be no longer than 72 characters.
+
+The commit message should explain what caused the problem and what its consequences are (if helpful for understanding the changes).
+
+The commit message should explain how the changes achieve the goal, but only if it isn't obvious.
+
+
+

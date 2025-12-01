@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 type UseIntroductionBanner = {
@@ -16,7 +16,7 @@ const OPTION_NAME_BANNER_DISMISSED =
 const OPTION_VALUE_YES = 'yes';
 
 export const useIntroductionBanner = (): UseIntroductionBanner => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const dismissIntroductionBanner = () => {
 		updateOptions( {
@@ -26,15 +26,12 @@ export const useIntroductionBanner = (): UseIntroductionBanner => {
 	};
 
 	const { loading, data } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			loading: ! hasFinishedResolution( 'getOption', [
 				OPTION_NAME_BANNER_DISMISSED,
 			] ),
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			data: getOption( OPTION_NAME_BANNER_DISMISSED ),
 		};
 	}, [] );

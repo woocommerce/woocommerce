@@ -9,7 +9,7 @@ const staticDirs = [
 if ( process.env.NODE_ENV && process.env.NODE_ENV === 'production' ) {
 	// Add WooCommerce Blocks Storybook for build process.
 	staticDirs.push( {
-		from: '../../../plugins/woocommerce-blocks/storybook/dist',
+		from: '../../../plugins/woocommerce/client/blocks/storybook/dist',
 		to: '/assets/woocommerce-blocks',
 	} );
 }

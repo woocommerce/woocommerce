@@ -116,7 +116,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'Exception',
 		);
 		$this->expectExceptionMessage(
-			'The SKU (DUMMY SKU) you are trying to insert is already under processing'
+			'The product with SKU (DUMMY SKU) you are trying to insert is already present in the lookup table'
 		);
 
 		// exception is only thrown during the REST API request.

@@ -124,6 +124,15 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					'id'            => 'woocommerce_shipping_cost_requires_address',
 					'default'       => 'no',
 					'type'          => 'checkbox',
+					'checkboxgroup' => '',
+				),
+
+				array(
+					'desc'          => __( 'Hide shipping rates when free shipping is available', 'woocommerce' ),
+					'id'            => 'woocommerce_shipping_hide_rates_when_free',
+					'default'       => 'no',
+					'type'          => 'checkbox',
+					'autoload'      => false,
 					'checkboxgroup' => 'end',
 				),
 
@@ -332,6 +341,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'no'                                  => __( 'No', 'woocommerce' ),
 				'default_zone_name'                   => __( 'Zone', 'woocommerce' ),
 				'delete_shipping_method_confirmation' => __( 'Are you sure you want to delete this shipping method?', 'woocommerce' ),
+				'invalid_number_format'               => __( 'Please enter a valid number.', 'woocommerce' ),
 			),
 		);
 

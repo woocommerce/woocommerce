@@ -1,0 +1,261 @@
+$max-button-columns: 6;
+$min-button-width: 80px;
+$max-button-width: calc(100% / #{$max-button-columns});
+
+.wc-block-editor-product-collection-inspector-toolspanel__filters {
+	.wc-block-editor-product-collection-inspector__taxonomy-control:not(
+			:last-child
+		) {
+		margin-bottom: $grid-unit-30;
+	}
+}
+
+.wc-block-editor-product-collection__display-settings {
+	.components-popover__content {
+		min-width: 230px;
+	}
+}
+
+// Need to override high-specificity styles
+.wc-blocks-product-collection__placeholder {
+	.components-placeholder__fieldset {
+		display: block;
+	}
+
+	&.is-medium,
+	&.is-small {
+		.components-button {
+			width: auto;
+		}
+	}
+
+	.components-button.wc-blocks-product-collection__collection-button {
+		margin: 0;
+	}
+}
+
+.wc-blocks-product-collection__placeholder,
+.wc-blocks-product-collection__modal {
+	.components-placeholder__instructions {
+		width: 100%;
+		margin: $gap-small 0;
+		text-align: center;
+	}
+
+	.wc-blocks-product-collection__collections-grid {
+		.wc-blocks-product-collection__collections-create {
+			width: 100%;
+		}
+	}
+
+	.wc-blocks-product-collection__collections-dropdown {
+		display: flex;
+		justify-content: center;
+		flex-wrap: wrap;
+		width: 100%;
+	}
+
+	.wc-blocks-product-collection__selection-subtitle {
+		margin-bottom: $gap-large;
+	}
+
+	.wc-blocks-product-collection__collections-section {
+		display: grid;
+		grid-template-columns: repeat(
+			auto-fit,
+			minmax(max(#{$min-button-width}, #{$max-button-width}), 1fr)
+		);
+		grid-auto-rows: 1fr;
+		margin: $gap-small auto;
+		max-width: 1000px;
+		width: 100%;
+	}
+
+	.wc-blocks-product-collection__collection-button {
+		box-shadow: none;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-items: center;
+		height: auto;
+		padding: $gap-small;
+		margin: 0;
+
+		&:hover {
+			color: var(--wp-admin-theme-color);
+			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.04);
+
+			&:not(:focus) {
+				box-shadow: none;
+			}
+		}
+
+		&:focus {
+			color: var(--wp-admin-theme-color);
+			background-color: rgba(var(--wp-admin-theme-color--rgb), 0.08);
+		}
+
+		&-icon {
+			width: 100%;
+		}
+
+		&-title {
+			@include font-size(small);
+			width: 100%;
+			text-wrap: balance;
+			text-align: center;
+			margin: 0;
+		}
+	}
+
+	.wc-blocks-product-collection__collections-create {
+		padding: 0 $gap-smallest;
+		text-align: center;
+
+		button {
+			color: var(--wp-admin-theme-color);
+			padding: 0;
+			margin-left: $gap-smallest;
+
+			&:hover {
+				color: var(--wp-admin-theme-color-darker-20);
+			}
+		}
+	}
+
+	.wc-blocks-product-collection__footer {
+		text-align: end;
+		margin: $gap-small 0;
+	}
+}
+
+.wc-blocks-product-collection__collections-dropdown-content {
+	.components-popover__content {
+		width: 20em;
+		display: flex;
+		flex: flex-grow;
+		flex-direction: column;
+	}
+}
+
+// Price Range Filter
+.wc-block-product-price-range-control {
+	input {
+		text-align: end;
+	}
+}
+
+.editor-styles-wrapper
+	.wp-block-woocommerce-product-collection
+	.wp-block-post-title {
+	a:where(:not(.wp-element-button)) {
+		pointer-events: none;
+	}
+}
+
+.wp-block-woocommerce-product-collection {
+	.wc-block-next-previous-buttons {
+		pointer-events: none;
+
+		.wc-block-next-previous-buttons__button {
+			// Since blocks are overlaping here, we need to override the pointer-events: none.
+			// This is the way to make the block selectable in editor.
+			pointer-events: auto;
+		}
+	}
+}
+
+// Preview mode
+.wc-block-product-collection__preview-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	transform: translateY(-100%);
+	font-family: var(--wp--preset--font-family--system-sans-serif);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	cursor: default;
+
+	&.is-primary:focus:not(:disabled) {
+		outline: none;
+		box-shadow: none;
+	}
+
+	&:hover.is-primary:not(:disabled),
+	&:active.is-primary:not(:disabled) {
+		background: var(
+			--wp-components-color-accent,
+			var(--wp-admin-theme-color, #3858e9)
+		);
+		color: var(--wp-components-color-accent-inverted, #fff);
+	}
+}
+
+// Editor Product Picker
+.wc-blocks-product-collection__editor-product-picker {
+	.wc-blocks-product-collection__info-icon {
+		fill: var(--wp--preset--color--luminous-vivid-orange, #e26f56);
+	}
+
+	.woocommerce-search-list__search {
+		margin: 0;
+	}
+}
+
+// Product to Show Radio Control
+.wc-block-product-collection-product-reference-radio {
+	width: 100%;
+
+	// Current gap is really small so we increase it
+	.components-flex {
+		gap: 8px;
+	}
+}
+
+// Linked Product Control
+.wc-block-product-collection-linked-product-control {
+	width: 100%;
+	text-align: left;
+
+	&__button {
+		width: 100%;
+		height: 100%;
+		padding: 10px;
+		border: 1px solid $gray-300;
+	}
+
+	&__image-container {
+		flex-shrink: 0;
+		width: 45px;
+		height: 45px;
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+	}
+
+	&__content {
+		text-align: left;
+	}
+}
+
+.wc-block-product-collection-linked-product__popover-content
+	.components-popover__content {
+	width: 100%;
+
+	.woocommerce-search-list__search {
+		border: 0;
+		padding: 0;
+	}
+}
+
+.wc-block-editor-product-collection__carousel-warning {
+	margin-bottom: $gap-small;
+
+	.components-notice__content {
+		margin-right: 0;
+	}
+}

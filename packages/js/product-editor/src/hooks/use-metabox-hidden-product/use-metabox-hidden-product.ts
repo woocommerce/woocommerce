@@ -23,17 +23,20 @@ export function useMetaboxHiddenProduct() {
 
 	async function saveMetaboxhiddenProduct(
 		value: string[]
-	): Promise< WCUser< 'capabilities' > > {
+	): Promise< WCUser > {
 		try {
 			setIsSaving( true );
 
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error saveEntityRecord is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
 			const { saveEntityRecord } = dispatch( coreStore );
-			const currentUser: WCUser< 'capabilities' > =
-				( await saveEntityRecord( 'root', 'user', {
+			const currentUser: WCUser = ( await saveEntityRecord(
+				'root',
+				'user',
+				{
 					id: user.id,
 					metaboxhidden_product: value,
-				} ) ) as never;
+				}
+			) ) as never;
 
 			return currentUser;
 		} finally {

@@ -1,0 +1,147 @@
+.wc-block-components-form .wc-block-components-text-input,
+.wc-block-components-text-input {
+	position: relative;
+	margin-top: $gap-small;
+	white-space: nowrap;
+	// Resetting line-height to avoid any unnecessary space around the input
+	line-height: 0;
+
+	.wc-block-components-text-input__wrapper {
+		position: relative;
+	}
+
+	label {
+		@include reset-color();
+		@include reset-typography();
+		font-size: 16px;
+		line-height: 22px;
+		position: absolute;
+		transform: translateY(-50%);
+		left: $gap-smaller * 1.25;
+		top: 25px;
+		transform-origin: top left;
+		transition: all 200ms ease;
+		margin: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{2 * $gap-small});
+		cursor: text;
+
+		.has-dark-controls & {
+			color: $input-placeholder-dark;
+		}
+		@media screen and (prefers-reduced-motion: reduce) {
+			transition: none;
+		}
+	}
+
+	input[type="tel"],
+	input[type="url"],
+	input[type="text"],
+	input[type="number"],
+	input[type="password"],
+	input[type="email"] {
+		@include reset-typography();
+		@include font-regular-locked;
+		padding: $gap $gap-small;
+		width: 100%;
+		border-radius: $universal-border-radius;
+		border: 1px solid $universal-border-strong;
+
+		margin: 0;
+		box-sizing: border-box;
+		min-height: 0;
+		background-color: $input-background-light;
+		color: $input-text-light;
+
+		// We are hardcoding the height to reserve space for a wider border that
+		// we apply for focused state. Without it, when focusing the input its
+		// height will increase by 1px, causing the rest of the form to shift.
+		// height = font line-height + vertical padding + focused top/bottom border
+		// Don't worry, this calculation won't be performed at runtime, SCSS
+		// is transforming it into a singular value during build time.
+		height: calc(15px + 16px * 2 + 1.5px * 2);
+
+		&:focus {
+			background-color: $input-background-light;
+			color: $input-text-light;
+			border: 1.5px solid currentColor;
+		}
+
+		.has-dark-controls & {
+			background-color: $input-background-dark;
+			border-color: $input-border-dark;
+			color: $input-text-dark;
+
+			&:focus {
+				background-color: $input-background-dark;
+				color: $input-text-dark;
+				border: 1.5px solid currentColor;
+			}
+		}
+	}
+
+	input[type="number"] {
+		appearance: textfield;
+		-moz-appearance: textfield;
+
+		&::-webkit-outer-spin-button,
+		&::-webkit-inner-spin-button {
+			appearance: none;
+			margin: 0;
+		}
+	}
+
+	input:-webkit-autofill,
+	&.is-active input[type="tel"],
+	&.is-active input[type="url"],
+	&.is-active input[type="text"],
+	&.is-active input[type="number"],
+	&.is-active input[type="password"],
+	&.is-active input[type="email"] {
+		padding: $gap-large $gap-smaller + 1px $gap-smaller;
+
+		&:focus {
+			padding-top: $gap-large;
+			padding-left: $gap-smaller + 0.5px;
+		}
+	}
+
+	&.is-active label,
+	input:-webkit-autofill + label {
+		// We use scale transform as we can animate it.
+		transform: scale(0.82);
+		top: $gap-smaller * 0.75;
+	}
+
+	&.has-error input {
+		&,
+		&:hover,
+		&:focus,
+		&:active {
+			border-color: $alert-red;
+		}
+		&:focus {
+			box-shadow: 0 0 0 0.5px $alert-red;
+		}
+
+		.has-dark-controls &,
+		.has-dark-controls &:hover,
+		.has-dark-controls &:focus,
+		.has-dark-controls &:active {
+			border-color: color.adjust($alert-red, $lightness: 30%);
+		}
+
+		.has-dark-controls &:focus {
+			box-shadow: 0 0 0 0.5px color.adjust($alert-red, $lightness: 30%);
+		}
+	}
+
+	&.has-error label {
+		color: $alert-red;
+
+		.has-dark-controls & {
+			color: color.adjust($alert-red, $lightness: 30%);
+		}
+	}
+}

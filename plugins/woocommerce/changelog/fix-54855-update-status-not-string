@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Avoid a fatal error when trying to set an order status and the given status is not a valid type

@@ -9,11 +9,7 @@ import {
 } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import {
-	useUserPreferences,
-	ONBOARDING_STORE_NAME,
-	OPTIONS_STORE_NAME,
-} from '@woocommerce/data';
+import { useUserPreferences, optionsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -22,6 +18,7 @@ import { recordEvent } from '@woocommerce/tracks';
 import { DisplayIcon } from './icons/display';
 import { SingleColumnIcon } from './icons/single-column';
 import { TwoColumnsIcon } from './icons/two-columns';
+import { isTaskListActive } from '../../hooks/use-tasklists-state';
 
 const { Fill, Slot } = createSlotFill( 'DisplayOptions' );
 
@@ -51,26 +48,21 @@ const LAYOUTS = [
 ];
 
 export const DisplayOptions = () => {
-	const { defaultHomescreenLayout, taskListComplete, isTaskListHidden } =
-		useSelect( ( select ) => {
-			const { getOption } = select( OPTIONS_STORE_NAME );
-			const { getTaskList } = select( ONBOARDING_STORE_NAME );
-			const taskList = getTaskList( 'setup' );
+	const { defaultHomescreenLayout } = useSelect( ( select ) => {
+		const { getOption } = select( optionsStore );
 
-			return {
-				defaultHomescreenLayout:
-					getOption( 'woocommerce_default_homepage_layout' ) ||
-					'single_column',
-				taskListComplete: taskList?.isComplete,
-				isTaskListHidden: taskList?.isHidden,
-			};
-		} );
+		return {
+			defaultHomescreenLayout:
+				getOption( 'woocommerce_default_homepage_layout' ) ||
+				'single_column',
+		};
+	} );
+
 	const { updateUserPreferences, homepage_layout: layout } =
 		useUserPreferences();
 
-	const shouldShowStoreLinks = taskListComplete || isTaskListHidden;
 	const hasTwoColumnContent =
-		shouldShowStoreLinks || window.wcAdminFeatures.analytics;
+		! isTaskListActive( 'setup' ) || window.wcAdminFeatures.analytics;
 
 	return (
 		<Slot>

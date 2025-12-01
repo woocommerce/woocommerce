@@ -110,3 +110,15 @@ changes.json
 /artifacts
 /plugins/*/artifacts
 /tools/*/artifacts
+
+# Claude related files
+**/.claude/**/*.local.*
+
+# Cursor related files
+.cursorignore
+.cursorindexingignore
+.cursor/rules/custom-*
+.cursor/rules/local-*
+
+# Docusaurus
+.docusaurus

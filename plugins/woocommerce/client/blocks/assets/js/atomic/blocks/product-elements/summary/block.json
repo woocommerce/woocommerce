@@ -1,0 +1,86 @@
+{
+	"name": "woocommerce/product-summary",
+	"icon": "page",
+	"title": "Product Summary",
+	"description": "Display a short description about a product.",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"productId": {
+			"type": "number",
+			"default": 0
+		},
+		"isDescendentOfQueryLoop": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfSingleProductTemplate": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendantOfAllProducts": {
+			"type": "boolean",
+			"default": false
+		},
+		"showDescriptionIfEmpty": {
+			"type": "boolean",
+			"default": false
+		},
+		"showLink": {
+			"type": "boolean",
+			"default": false
+		},
+		"summaryLength": {
+			"type": "number",
+			"default": 0
+		},
+		"linkText": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"color": {
+			"text": true,
+			"background": true,
+			"link": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"textAlign": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"__experimentalSelector": ".wc-block-components-product-summary"
+	},
+	"ancestor": [
+		"woocommerce/all-products",
+		"woocommerce/featured-product",
+		"woocommerce/single-product",
+		"woocommerce/product-template",
+		"core/post-template"
+	],
+	"usesContext": [ "query", "queryId", "postId" ],
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

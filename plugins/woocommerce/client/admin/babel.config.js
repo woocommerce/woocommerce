@@ -15,13 +15,7 @@ module.exports = function ( api ) {
 			'@wordpress/babel-preset-default',
 		],
 		sourceType: 'unambiguous',
-		plugins: [
-			/**
-			 * This allows arrow functions as class methods so that binding
-			 * methods to `this` in the constructor isn't required.
-			 */
-			'@babel/plugin-proposal-class-properties',
-		],
+		plugins: [],
 		ignore: [ 'packages/**/node_modules' ],
 		env: {
 			production: {},

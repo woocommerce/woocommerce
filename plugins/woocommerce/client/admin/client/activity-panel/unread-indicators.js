@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	NOTES_STORE_NAME,
-	USER_STORE_NAME,
-	QUERY_DEFAULTS,
-} from '@woocommerce/data';
+import { notesStore, userStore, QUERY_DEFAULTS } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -23,9 +19,9 @@ const UNREAD_NOTES_QUERY = {
 };
 
 export function hasUnreadNotes( select ) {
-	const { getNotes, getNotesError, isResolving } = select( NOTES_STORE_NAME );
+	const { getNotes, getNotesError, isResolving } = select( notesStore );
 
-	const { getCurrentUser } = select( USER_STORE_NAME );
+	const { getCurrentUser } = select( userStore );
 	const userData = getCurrentUser();
 	const lastRead = parseInt(
 		userData &&

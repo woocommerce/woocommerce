@@ -7,7 +7,7 @@
 		"monorepo-merge": "./bin/run"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce",
-	"license": "GPLv2",
+	"license": "GPL-2.0-or-later",
 	"main": "dist/index.js",
 	"repository": "woocommerce/woocommerce",
 	"files": [
@@ -34,14 +34,13 @@
 		"@types/node": "20.x.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.55.0",
-		"globby": "^11.1.0",
 		"jscodeshift": "^0.13.1",
 		"oclif": "^2.7.0",
 		"shx": "^0.3.4",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",
 		"typescript": "5.7.x",
-		"wireit": "0.14.10"
+		"wireit": "0.14.12"
 	},
 	"oclif": {
 		"bin": "monorepo-merge",

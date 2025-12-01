@@ -4,11 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import {
-	PLUGINS_STORE_NAME,
-	useUser,
-	useUserPreferences,
-} from '@woocommerce/data';
+import { pluginsStore, useUser, useUserPreferences } from '@woocommerce/data';
 import { H } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
@@ -77,7 +73,7 @@ export const InstallJetpackCTA = () => {
 	const { canUserInstallPlugins, jetpackInstallState, isBusy } = useSelect(
 		( select ) => {
 			const { getPluginInstallState, isPluginsRequesting } =
-				select( PLUGINS_STORE_NAME );
+				select( pluginsStore );
 			const installState = getPluginInstallState( 'jetpack' );
 			const busyState =
 				isPluginsRequesting( 'getJetpackConnectUrl' ) ||
@@ -92,7 +88,7 @@ export const InstallJetpackCTA = () => {
 		}
 	);
 
-	const { installJetpackAndConnect } = useDispatch( PLUGINS_STORE_NAME );
+	const { installJetpackAndConnect } = useDispatch( pluginsStore );
 
 	if ( ! canUserInstallPlugins ) {
 		return null;

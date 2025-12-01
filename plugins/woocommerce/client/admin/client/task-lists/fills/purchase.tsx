@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { registerPlugin } from '@wordpress/plugins';
 import { WooOnboardingTaskListItem } from '@woocommerce/onboarding';
 import { useState, useCallback } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { onboardingStore, pluginsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -26,17 +25,13 @@ const PurchaseTaskItem = ( { defaultTaskItem }: PurchaseTaskItemProps ) => {
 
 	const { installedPlugins, productTypes, profileItems } = useSelect(
 		( select ) => {
-			const { getProductTypes, getProfileItems } = select(
-				ONBOARDING_STORE_NAME
-			);
-			const { getInstalledPlugins } = select( PLUGINS_STORE_NAME );
+			const { getProductTypes, getProfileItems } =
+				select( onboardingStore );
+			const { getInstalledPlugins } = select( pluginsStore );
 
 			return {
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				installedPlugins: getInstalledPlugins(),
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				productTypes: getProductTypes(),
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				profileItems: getProfileItems(),
 			};
 		},

@@ -229,6 +229,26 @@ export const deleteGithubBranch = async (
 	);
 };
 
+export const addLabelsToIssue = async (
+	options: {
+		owner?: string;
+		name?: string;
+	},
+	issueNumber: number,
+	labels: string[]
+): Promise< void > => {
+	const { owner, name } = options;
+	await octokitWithAuth().request(
+		'POST /repos/{owner}/{repo}/issues/{issue_number}/labels',
+		{
+			owner,
+			repo: name,
+			issue_number: issueNumber,
+			labels,
+		}
+	);
+};
+
 /**
  * Create a pull request from branches on Github.
  *

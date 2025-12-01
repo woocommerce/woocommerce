@@ -220,6 +220,9 @@ class ProductVariationTemplate extends AbstractProductFormTemplate implements Pr
 					'property' => 'description',
 					'label'    => __( 'Note', 'woocommerce' ),
 					'help'     => 'Enter an optional note displayed on the product page when customers select this variation.',
+					'lock'     => array(
+						'move' => true,
+					),
 				),
 			)
 		);

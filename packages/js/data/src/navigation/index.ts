@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { registerStore } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
 import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
-import { Reducer, AnyAction } from 'redux';
+import { createReduxStore, register } from '@wordpress/data';
+import deprecated from '@wordpress/deprecated';
 
 /**
  * Internal dependencies
@@ -14,19 +14,53 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer, { State } from './reducer';
 import * as resolvers from './resolvers';
-import initDispatchers from './dispatchers';
+import initDispatchers, { INTERNAL_CALL } from './dispatchers';
 import { WPDataActions, WPDataSelectors } from '../types';
 import { PromiseifySelectors } from '../types/promiseify-selectors';
 
-registerStore< State >( STORE_NAME, {
-	reducer: reducer as Reducer< State, AnyAction >,
-	actions,
+export { type State };
+
+// Generic wrapper that applies deprecate() to all functions.
+function wrapWithDeprecate< T extends Record< string, unknown > >( obj: T ): T {
+	const wrapped = {} as T;
+	for ( const key in obj ) {
+		const value = obj[ key ];
+		if ( typeof value === 'function' ) {
+			wrapped[ key ] = function ( this: unknown, ...args: unknown[] ) {
+				// Skip deprecation message for:
+				// - onLoad (automatically called by initDispatchers)
+				// - onHistoryChange when called internally with true flag
+				const shouldSkipDeprecation =
+					( key === 'onLoad' || key === 'onHistoryChange' ) &&
+					args[ 0 ] === INTERNAL_CALL;
+
+				if ( ! shouldSkipDeprecation ) {
+					deprecated( 'Navigation store', {} );
+				}
+				return ( value as ( ...args: unknown[] ) => unknown ).apply(
+					this,
+					args
+				);
+			} as T[ Extract< keyof T, string > ];
+		} else {
+			wrapped[ key ] = value;
+		}
+	}
+	return wrapped;
+}
+
+export const store = createReduxStore( STORE_NAME, {
+	reducer,
+	actions: wrapWithDeprecate( actions ),
 	controls,
+	selectors: wrapWithDeprecate( selectors ),
 	resolvers,
-	selectors,
 } );
 
+register( store );
+
 initDispatchers();
+
 export const NAVIGATION_STORE_NAME = STORE_NAME;
 
 declare module '@wordpress/data' {

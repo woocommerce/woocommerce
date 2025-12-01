@@ -103,6 +103,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'downloadable'       => false,
 		'category_ids'       => array(),
 		'tag_ids'            => array(),
+		'brand_ids'          => array(),
 		'shipping_class_id'  => 0,
 		'downloads'          => array(),
 		'image_id'           => '',
@@ -547,7 +548,12 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_attributes( $context = 'view' ) {
-		return $this->get_prop( 'attributes', $context );
+		$attributes = $this->get_prop( 'attributes', $context );
+		if ( ! is_array( $attributes ) ) {
+			return array();
+		}
+
+		return $attributes;
 	}
 
 	/**
@@ -603,6 +609,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_tag_ids( $context = 'view' ) {
 		return $this->get_prop( 'tag_ids', $context );
+	}
+
+	/**
+	 * Get brand ids.
+	 *
+	 * @since 10.3.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return array
+	 */
+	public function get_brand_ids( $context = 'view' ) {
+		return $this->get_prop( 'brand_ids', $context );
 	}
 
 	/**
@@ -1221,6 +1238,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_tag_ids( $term_ids ) {
 		$this->set_prop( 'tag_ids', array_unique( array_map( 'intval', $term_ids ) ) );
+	}
+
+	/**
+	 * Set the product brands.
+	 *
+	 * @since 10.3.0
+	 * @param array $term_ids List of terms IDs.
+	 */
+	public function set_brand_ids( $term_ids ) {
+		$this->set_prop( 'brand_ids', array_unique( array_map( 'intval', $term_ids ) ) );
 	}
 
 	/**
@@ -1948,6 +1975,40 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	}
 
 	/**
+	 * Returns the Cost of Goods Sold value in html format.
+	 *
+	 * @return string
+	 */
+	public function get_cogs_value_html() {
+		$value = $this->get_cogs_total_value();
+
+		if ( 0.0 === $value ) {
+			/**
+			 * Filter to customize how an empty Cost of Goods Sold value for a product gets rendered to HTML.
+			 *
+			 * @param string $html The rendered HTML.
+			 * @param WC_Product $product The product for which the cost is rendered.
+			 *
+			 * @since 9.8.0
+			 */
+			$html = apply_filters( 'woocommerce_product_empty_cogs_html', '', $this );
+		} else {
+			$html = wc_price( $value ) . $this->get_price_suffix();
+		}
+
+		/**
+		 * Filter to customize how the Cost of Goods Sold value for a product gets rendered to HTML.
+		 *
+		 * @param string $html The rendered HTML.
+		 * @param float $value The cost value that is being rendered.
+		 * @param WC_Product $product The product for which the cost is rendered.
+		 *
+		 * @since 9.8.0
+		 */
+		return apply_filters( 'woocommerce_product_get_cogs_html', $html, $value, $this );
+	}
+
+	/**
 	 * Get product name with SKU or ID. Used within admin.
 	 *
 	 * @return string Formatted product name
@@ -1965,20 +2026,54 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * Get min quantity which can be purchased at once.
 	 *
 	 * @since  3.0.0
-	 * @return int
+	 * @return int|float
 	 */
 	public function get_min_purchase_quantity() {
-		return 1;
+		/**
+		 * Filters the minimum quantity which can be purchased at once.
+		 *
+		 * @since 10.1.0
+		 * @param int|float $quantity The minimum quantity.
+		 * @param \WC_Product $this The product object.
+		 * @return int|float The minimum quantity.
+		 */
+		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_min', 1, $this ) );
 	}
 
 	/**
 	 * Get max quantity which can be purchased at once.
 	 *
 	 * @since  3.0.0
-	 * @return int Quantity or -1 if unlimited.
+	 * @return int|float Quantity or -1 if unlimited.
 	 */
 	public function get_max_purchase_quantity() {
-		return $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->managing_stock() ? -1 : $this->get_stock_quantity() );
+		/**
+		 * Filters the maximum quantity which can be purchased at once.
+		 *
+		 * @since 10.1.0
+		 * @param int|float $quantity The maximum quantity.
+		 * @param \WC_Product $this The product object.
+		 * @return int|float The maximum quantity.
+		 */
+		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_max', $this->is_sold_individually() ? 1 : ( $this->backorders_allowed() || ! $this->managing_stock() ? -1 : $this->get_stock_quantity() ), $this ) );
+	}
+
+	/**
+	 * The step for the quantity input and the multiple_of by which the quantity can be purchased.
+	 *
+	 * @since 10.1.0
+	 * @return int|float
+	 */
+	public function get_purchase_quantity_step() {
+		/**
+		 * Filters the step for the quantity input for this product.
+		 *
+		 * @since 10.1.0
+		 * @param int|float $step The step.
+		 * @param \WC_Product $this The product object.
+		 * @return int|float The step.
+		 */
+		return wc_stock_amount( apply_filters( 'woocommerce_quantity_input_step', 1, $this ) );
 	}
 
 	/**
@@ -2047,7 +2142,14 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_image( $size = 'woocommerce_thumbnail', $attr = array(), $placeholder = true ) {
 		$image = '';
 		if ( $this->get_image_id() ) {
-			$image = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
+			$image_alt = get_post_meta( $this->get_image_id(), '_wp_attachment_image_alt', true );
+			$attr      = wp_parse_args(
+				$attr,
+				array(
+					'alt' => $image_alt ? $image_alt : $this->get_name(),
+				)
+			);
+			$image     = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
 		} elseif ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
 			if ( $parent_product ) {

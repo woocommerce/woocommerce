@@ -1,23 +1,5 @@
-'package: @woocommerce/api':
-  - packages/js/api/**/*
-
-'package: @woocommerce/e2e-utils':
-  - packages/js/e2e-utils/**/*
-    
 'package: @woocommerce/e2e-utils-playwright':
   - packages/js/e2e-utils-playwright/**/*
-
-'package: @woocommerce/e2e-environment':
-  - packages/js/e2e-environment/**/*
-
-'package: @woocommerce/api-core-tests':
-  - packages/js/api-core-tests/**/*
-
-'package: @woocommerce/e2e-core-tests':
-  - packages/js/e2e-core-tests/**/*
-
-'package: @woocommerce/admin-e2e-tests':
-  - packages/js/admin-e2e-tests/**/*
 
 'package: @woocommerce/components':
   - packages/js/components/**/*
@@ -67,19 +49,18 @@
 'plugin: woocommerce beta tester':
   - plugins/woocommerce-beta-tester/**/*
 
-'plugin: woo-ai':
-  - plugins/woo-ai/**/*
-
 'focus: performance tests':
   - plugins/woocommerce/tests/performance/**/*
+  - plugins/woocommerce/tests/metrics/**/*
 
 'focus: api tests':
-  - plugins/woocommerce/tests/api-core-tests/**/*
+  - plugins/woocommerce/tests/e2e-pw/tests/api-tests/**/*
 
 'focus: e2e tests':
   - plugins/woocommerce/tests/e2e-pw/**/*
+  - plugins/woocommerce/client/blocks/tests/e2e/**/*
 
-'focus: documentation':
+'Documentation':
   - docs/**/*
 
 'focus: monorepo infrastructure':

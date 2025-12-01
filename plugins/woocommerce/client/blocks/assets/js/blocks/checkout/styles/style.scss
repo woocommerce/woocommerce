@@ -1,0 +1,194 @@
+.wp-block-woocommerce-checkout {
+	margin: 0;
+	padding-top: $gap-large;
+
+	// Don't remove this, it marks the container for container queries used in inner blocks.
+	container-type: inline-size;
+	width: 100%;
+
+	.with-scroll-to-top__scroll-point {
+		top: -96px;
+	}
+	.wc-block-components-shipping-rates-control__package {
+		border-bottom: 0;
+		margin: 0 0 1em;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+
+		.wc-block-components-radio-control
+			.wc-block-components-radio-control__input {
+			// We want it to stick to the top, since it has position: absolute we
+			// can position it to be aligned with the top padding value.
+			top: $gap;
+			transform: none;
+		}
+	}
+	.wc-block-checkout__login-prompt {
+		float: right;
+		margin-top: -$gap-large;
+		font-weight: 400;
+		line-height: $gap * 1.25;
+		@include font-regular-locked;
+	}
+	.wc-block-checkout__create-account {
+		margin-top: $gap !important;
+	}
+	.wc-block-checkout__guest-checkout-notice {
+		@include font-small-locked;
+		margin: $gap-smallest 0 0;
+	}
+}
+
+.wp-block-woocommerce-checkout.is-loading {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0 auto $gap;
+	position: relative;
+
+	&:has(> :last-child.wp-block-woocommerce-checkout-fields-block) {
+		flex-direction: row-reverse;
+	}
+
+	.wp-block-woocommerce-checkout-totals-block {
+		width: 35%;
+		padding-left: math.percentage(math.div($gap-large, 1060px));
+	}
+	.wp-block-woocommerce-checkout-fields-block {
+		width: 65%;
+		// ~1060px is the default width of the content area in Storefront.
+		padding-right: math.percentage(math.div($gap-largest, 1060px));
+	}
+
+	.wp-block-woocommerce-checkout-fields-block {
+		display: flex;
+		flex-direction: column;
+	}
+	.wp-block-woocommerce-checkout-totals-block,
+	.wp-block-woocommerce-checkout-fields-block {
+		box-sizing: border-box;
+		margin: 0;
+
+		// Hide all inner children of the block
+		> * {
+			display: none;
+			border: none;
+			// Hide merchant added blocks content
+			> * {
+				display: none;
+			}
+		}
+
+		> div {
+			@include skeleton-animation();
+			@include skeleton-animation-fade();
+			margin: 0 0 35px 0;
+		}
+
+		// Show main inner blocks skeletons
+		.wp-block-woocommerce-checkout-express-payment-block {
+			height: 130px;
+			display: block;
+		}
+		.wp-block-woocommerce-checkout-contact-information-block {
+			height: 120px;
+			display: block;
+		}
+		.wp-block-woocommerce-checkout-shipping-method-block {
+			height: 120px;
+			display: block;
+		}
+
+		.wp-block-woocommerce-checkout-payment-block {
+			height: 280px;
+			display: block;
+		}
+		.wp-block-woocommerce-checkout-shipping-address-block {
+			height: 300px;
+			display: block;
+		}
+		.wp-block-woocommerce-checkout-actions-block {
+			width: 190px;
+			height: 58px;
+			display: block;
+			align-self: flex-end;
+		}
+		.wp-block-woocommerce-checkout-order-summary-block {
+			height: 460px;
+			display: block;
+		}
+
+		.wp-block-woocommerce-checkout-order-note-block {
+			height: 20px;
+			display: block;
+		}
+		.wp-block-woocommerce-checkout-terms-block {
+			height: 15px;
+			display: block;
+		}
+
+		.wc-block-components-panel > h2 {
+			@include font-size(regular);
+			@include reset-box();
+			@include reset-color();
+			@include reset-typography();
+			.wc-block-components-panel__button {
+				font-weight: 400;
+			}
+		}
+		.wc-block-components-totals-item,
+		.wc-block-components-panel {
+			padding-left: $gap;
+			padding-right: $gap;
+		}
+		.wc-block-components-totals-coupon-link {
+			margin-left: $gap;
+			margin-right: $gap;
+		}
+	}
+}
+
+// Skeleton is shown before mobile classes are appended.
+@media only screen and (max-width: 700px) {
+	.wp-block-woocommerce-checkout.is-loading {
+		flex-direction: column;
+		margin: 0 auto $gap;
+
+		.wp-block-woocommerce-checkout-fields-block {
+			padding: 0;
+			width: 100%;
+		}
+		.wp-block-woocommerce-checkout-totals-block {
+			padding: 0;
+			width: 100%;
+			.wc-block-components-totals-item,
+			.wc-block-components-panel {
+				padding-left: 0;
+				padding-right: 0;
+			}
+			.wc-block-components-totals-coupon-link {
+				margin-left: 0;
+				margin-right: 0;
+			}
+			.wp-block-woocommerce-checkout-order-summary-block {
+				height: 55px;
+			}
+		}
+	}
+}
+
+// For Twenty Twenty we need to increase specificity a bit more.
+.theme-twentytwenty .wp-block-woocommerce-checkout.is-loading {
+	.wp-block-woocommerce-checkout-totals-block
+		.wc-block-components-panel
+		> h2 {
+		@include font-size(large);
+		@include reset-box();
+	}
+}
+
+.theme-twentytwenty .wp-block-woocommerce-checkout,
+.theme-twentytwentyone .wp-block-woocommerce-checkout {
+	margin: 0 auto;
+}

@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -27,6 +28,7 @@ $line_items          = $order->get_items( apply_filters( 'woocommerce_admin_orde
 $discounts           = $order->get_items( 'discount' );
 $line_items_fee      = $order->get_items( 'fee' );
 $line_items_shipping = $order->get_items( 'shipping' );
+$cogs_is_enabled     = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 
 if ( wc_tax_enabled() ) {
 	$order_taxes      = $order->get_taxes();
@@ -41,7 +43,10 @@ if ( wc_tax_enabled() ) {
 			<tr>
 				<th class="item sortable" colspan="2" data-sort="string-ins"><?php esc_html_e( 'Item', 'woocommerce' ); ?></th>
 				<?php do_action( 'woocommerce_admin_order_item_headers', $order ); ?>
-				<th class="item_cost sortable" data-sort="float"><?php esc_html_e( 'Cost', 'woocommerce' ); ?></th>
+				<?php if ( $cogs_is_enabled ) : ?>
+					<th class="item_cost_of_goods sortable" data-sort="float"><?php esc_html_e( 'Cost', 'woocommerce' ); ?></th>
+				<?php endif; ?>
+				<th class="item_cost sortable" data-sort="float"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
 				<th class="quantity sortable" data-sort="int"><?php esc_html_e( 'Qty', 'woocommerce' ); ?></th>
 				<th class="line_cost sortable" data-sort="float"><?php esc_html_e( 'Total', 'woocommerce' ); ?></th>
 				<?php
@@ -125,7 +130,7 @@ if ( wc_tax_enabled() ) {
 						$coupon_info = json_decode( $coupon_info, true );
 						$post_id     = $coupon_info[0]; //phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					} else {
-						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", $item->get_code(), $order->get_date_created()->format( 'Y-m-d H:i:s' ) ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
+						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", wc_sanitize_coupon_code( $item->get_code() ), $order->get_date_created()->format( 'Y-m-d H:i:s' ) ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
 					$class = $order->is_editable() ? 'code editable' : 'code';
 					?>
@@ -280,6 +285,20 @@ if ( wc_tax_enabled() ) {
 				</td>
 			</tr>
 
+		</table>
+	<?php endif; ?>
+
+	<?php if ( $cogs_is_enabled ) : ?>
+		<div class="clear"></div>
+
+		<table class="wc-order-totals">
+			<tr>
+				<td class="label cost-total"><?php esc_html_e( 'Cost Total', 'woocommerce' ); ?>:</td>
+				<td width="1%"></td>
+				<td class="total cost-total">
+					<?php echo wp_kses_post( $order->get_cogs_total_value_html() ); ?>
+				</td>
+			</tr>
 		</table>
 	<?php endif; ?>
 

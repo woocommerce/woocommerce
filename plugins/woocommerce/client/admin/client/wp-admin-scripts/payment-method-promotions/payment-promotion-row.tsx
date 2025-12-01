@@ -5,12 +5,13 @@ import { Button } from '@wordpress/components';
 import { EllipsisMenu, Link } from '@woocommerce/components';
 import { useState, useEffect } from '@wordpress/element';
 import {
-	PLUGINS_STORE_NAME,
-	PAYMENT_GATEWAYS_STORE_NAME,
+	pluginsStore,
+	paymentGatewaysStore,
+	paymentSettingsStore,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import { __ } from '@wordpress/i18n';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
 
@@ -18,13 +19,12 @@ import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
  * Internal dependencies
  */
 import './payment-promotion-row.scss';
-import { getAdminSetting } from '~/utils/admin-settings';
 
-function sanitizeHTML( html: string ) {
+function sanitizeHTMLForReact( html: string ) {
 	return {
-		__html: sanitize( html, {
-			ALLOWED_TAGS: [ 'a', 'img', 'br' ],
-			ALLOWED_ATTR: [ 'href', 'src', 'class', 'alt', 'target' ],
+		__html: sanitizeHTML( html, {
+			tags: [ 'a', 'img', 'br' ],
+			attr: [ 'href', 'src', 'class', 'alt', 'target' ],
 		} ),
 	};
 }
@@ -44,27 +44,25 @@ type PaymentPromotionRowProps = {
 	subTitleContent?: string;
 };
 
-export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
+export const PaymentPromotionRow = ( {
 	paymentMethod,
 	title,
 	subTitleContent,
 	columns,
-} ) => {
+}: PaymentPromotionRowProps ) => {
 	const { gatewayId, pluginSlug, url } = paymentMethod;
 	const [ installing, setInstalling ] = useState( false );
 	const [ isVisible, setIsVisible ] = useState( true );
-	const { installAndActivatePlugins } = useDispatch( PLUGINS_STORE_NAME );
+	const { installAndActivatePlugins } = useDispatch( pluginsStore );
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updatePaymentGateway } = useDispatch( PAYMENT_GATEWAYS_STORE_NAME );
+	const { updatePaymentGateway } = useDispatch( paymentGatewaysStore );
 	const { gatewayIsActive, paymentGateway } = useSelect( ( select ) => {
-		const { getPaymentGateway } = select( PAYMENT_GATEWAYS_STORE_NAME );
+		const { getPaymentGateway } = select( paymentGatewaysStore );
 		const activePlugins: string[] =
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			select( PLUGINS_STORE_NAME ).getActivePlugins();
+			select( pluginsStore ).getActivePlugins();
 		const isActive = activePlugins && activePlugins.includes( pluginSlug );
 		let paymentGatewayData;
 		if ( isActive ) {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			paymentGatewayData = getPaymentGateway(
 				pluginSlug.replace( /\-/g, '_' )
 			);
@@ -74,6 +72,11 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 			gatewayIsActive: isActive,
 			paymentGateway: paymentGatewayData,
 		};
+	}, [] );
+
+	const isWooPayEligible = useSelect( ( select ) => {
+		const store = select( paymentSettingsStore );
+		return store.getIsWooPayEligible();
 	}, [] );
 
 	useEffect( () => {
@@ -120,8 +123,6 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 		return null;
 	}
 
-	const isWooPayEligible = getAdminSetting( 'isWooPayEligible', false );
-
 	return (
 		<>
 			{ columns.map( ( column ) => {
@@ -154,7 +155,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 									<div
 										className="pre-install-payment-gateway__subtitle"
 										// eslint-disable-next-line react/no-danger -- innerHTML from the element with class name: gateway-subtitle.
-										dangerouslySetInnerHTML={ sanitizeHTML(
+										dangerouslySetInnerHTML={ sanitizeHTMLForReact(
 											subTitleContent
 										) }
 									></div>
@@ -219,7 +220,7 @@ export const PaymentPromotionRow: React.FC< PaymentPromotionRowProps > = ( {
 								? {
 										__html: column.html,
 								  }
-								: sanitizeHTML( column.html )
+								: sanitizeHTMLForReact( column.html )
 						}
 					></td>
 				);

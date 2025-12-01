@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Component, createRef } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import PropTypes from 'prop-types';
 
@@ -29,7 +29,7 @@ class AnimationSlider extends Component {
 
 	render() {
 		const { children, animationKey, animate } = this.props;
-		const containerClasses = classnames(
+		const containerClasses = clsx(
 			'woocommerce-slide-animation',
 			animate && `animate-${ animate }`
 		);

@@ -49,7 +49,6 @@ export const useRecommendedPluginsWithoutChannels =
 			loading: loadingRecommendedPlugins,
 			data: dataRecommendedPlugins,
 		} = useSelect( ( select ) => {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			const { getRecommendedPlugins, hasFinishedResolution } =
 				select( marketingStore );
 
@@ -64,7 +63,6 @@ export const useRecommendedPluginsWithoutChannels =
 			data: dataRecommendedChannels,
 		} = useRecommendedChannels();
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const { invalidateResolution, installAndActivateRecommendedPlugin } =
 			useDispatch( marketingStore );
 

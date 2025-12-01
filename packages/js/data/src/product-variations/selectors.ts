@@ -37,3 +37,8 @@ export const generateProductVariationsError = (
 	);
 	return state.errors[ itemQuery ];
 };
+
+export type CustomSelectors = {
+	isGeneratingVariations: typeof isGeneratingVariations;
+	generateProductVariationsError: typeof generateProductVariationsError;
+};

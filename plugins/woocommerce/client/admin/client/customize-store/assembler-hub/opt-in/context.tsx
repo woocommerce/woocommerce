@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import React, { createContext, useState } from '@wordpress/element';
 import type { ReactNode } from 'react';
@@ -27,10 +27,8 @@ export const OptInContextProvider = ( {
 } ) => {
 	const isAllowTrackingEnabled = useSelect(
 		( select ) =>
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			select( OPTIONS_STORE_NAME ).getOption(
-				'woocommerce_allow_tracking'
-			) === 'yes',
+			select( optionsStore ).getOption( 'woocommerce_allow_tracking' ) ===
+			'yes',
 		[]
 	);
 

@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Optimize `task-list.spec.js` by using the REST API to reset the home task list.

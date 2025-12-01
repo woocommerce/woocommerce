@@ -1,0 +1,285 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "settings": {
+    "color": {
+      "customGradient": false,
+      "defaultGradients": false,
+      "gradients": [],
+      "background": true,
+      "text": true,
+      "link": true,
+      "customDuotone": false,
+      "defaultDuotone": false
+    },
+    "layout": {
+      "contentSize": "660px",
+      "wideSize": "",
+      "allowEditing": false,
+      "allowCustomContentAndWideSize": false
+    },
+    "background": {
+      "backgroundImage": true
+    },
+    "spacing": {
+      "units": ["px"],
+      "blockGap": false,
+      "padding": true,
+      "margin": false,
+      "spacingSizes": [
+        {
+          "name": "1",
+          "size": "10px",
+          "slug": "10"
+        },
+        {
+          "name": "2",
+          "size": "20px",
+          "slug": "20"
+        },
+        {
+          "name": "3",
+          "size": "30px",
+          "slug": "30"
+        },
+        {
+          "name": "4",
+          "size": "40px",
+          "slug": "40"
+        },
+        {
+          "name": "5",
+          "size": "50px",
+          "slug": "50"
+        },
+        {
+          "name": "6",
+          "size": "60px",
+          "slug": "60"
+        }
+      ]
+    },
+    "border": {
+      "radius": true,
+      "color": true,
+      "style": true,
+      "width": true
+    },
+    "typography": {
+      "dropCap": false,
+      "fontWeight": true,
+      "lineHeight": true,
+      "defaultFontSizes": true,
+      "fontFamilies": [
+        {
+          "name": "Arial",
+          "slug": "arial",
+          "fontFamily": "Arial, 'Helvetica Neue', Helvetica, sans-serif"
+        },
+        {
+          "name": "Comic Sans MS",
+          "slug": "comic-sans-ms",
+          "fontFamily": "'Comic Sans MS', 'Marker Felt-Thin', Arial, sans-serif"
+        },
+        {
+          "name": "Courier New",
+          "slug": "courier-new",
+          "fontFamily": "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace"
+        },
+        {
+          "name": "Georgia",
+          "slug": "georgia",
+          "fontFamily": "Georgia, Times, 'Times New Roman', serif"
+        },
+        {
+          "name": "Lucida",
+          "slug": "lucida",
+          "fontFamily": "'Lucida Sans Unicode', 'Lucida Grande', sans-serif"
+        },
+        {
+          "name": "Tahoma",
+          "slug": "tahoma",
+          "fontFamily": "'Tahoma, Verdana, Segoe, sans-serif'"
+        },
+        {
+          "name": "Times New Roman",
+          "slug": "times-new-roman",
+          "fontFamily": "'Times New Roman', Times, Baskerville, Georgia, serif"
+        },
+        {
+          "name": "Trebuchet MS",
+          "slug": "trebuchet-ms",
+          "fontFamily": "'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif"
+        },
+        {
+          "name": "Verdana",
+          "slug": "verdana",
+          "fontFamily": "'Verdana, Geneva, sans-serif'"
+        },
+        {
+          "name": "Arvo",
+          "slug": "arvo",
+          "fontFamily": "'arvo, courier, georgia, serif'"
+        },
+        {
+          "name": "Lato",
+          "slug": "lato",
+          "fontFamily": "lato, 'helvetica neue', helvetica, arial, sans-serif"
+        },
+        {
+          "name": "Lora",
+          "slug": "lora",
+          "fontFamily": "lora, georgia, 'times new roman', serif"
+        },
+        {
+          "name": "Merriweather",
+          "slug": "merriweather",
+          "fontFamily": "merriweather, georgia, 'times new roman', serif"
+        },
+        {
+          "name": "Merriweather Sans",
+          "slug": "merriweather-sans",
+          "fontFamily": "'merriweather sans', 'helvetica neue', helvetica, arial, sans-serif"
+        },
+        {
+          "name": "Noticia Text",
+          "slug": "noticia-text",
+          "fontFamily": "'noticia text', georgia, 'times new roman', serif"
+        },
+        {
+          "name": "Open Sans",
+          "slug": "open-sans",
+          "fontFamily": "'open sans', 'helvetica neue', helvetica, arial, sans-serif"
+        },
+        {
+          "name": "Playfair Display",
+          "slug": "playfair-display",
+          "fontFamily": "'playfair display', georgia, 'times new roman', serif"
+        },
+        {
+          "name": "Roboto",
+          "slug": "roboto",
+          "fontFamily": "roboto, 'helvetica neue', helvetica, arial, sans-serif"
+        },
+        {
+          "name": "Source Sans Pro",
+          "slug": "source-sans-pro",
+          "fontFamily": "'source sans pro', 'helvetica neue', helvetica, arial, sans-serif"
+        },
+        {
+          "name": "Oswald",
+          "slug": "oswald",
+          "fontFamily": "Oswald, 'Trebuchet MS', 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', Tahoma, sans-serif"
+        },
+        {
+          "name": "Raleway",
+          "slug": "raleway",
+          "fontFamily": "Raleway, 'Century Gothic', CenturyGothic, AppleGothic, sans-serif"
+        },
+        {
+          "name": "Permanent Marker",
+          "slug": "permanent-marker",
+          "fontFamily": "'Permanent Marker', Tahoma, Verdana, Segoe, sans-serif"
+        },
+        {
+          "name": "Pacifico",
+          "slug": "pacifico",
+          "fontFamily": "Pacifico, 'Arial Narrow', Arial, sans-serif"
+        }
+      ],
+      "fontSizes": [
+        {
+          "name": "small",
+          "size": "13px",
+          "slug": "small"
+        },
+        {
+          "name": "medium",
+          "size": "16px",
+          "slug": "medium"
+        },
+        {
+          "name": "large",
+          "size": "24px",
+          "slug": "large"
+        },
+        {
+          "name": "extra-large",
+          "size": "32px",
+          "slug": "x-large"
+        },
+		{
+			"name": "extra-extra-large",
+			"size": "40px",
+			"slug": "xx-large"
+		}
+      ]
+    },
+    "useRootPaddingAwareAlignments": true
+  },
+  "styles": {
+    "spacing": {
+      "blockGap": "16px",
+      "padding": {
+        "bottom": "20px",
+        "left": "20px",
+        "right": "20px",
+        "top": "20px"
+      }
+    },
+    "color": {
+      "background": "#ffffff",
+      "text": "#1e1e1e"
+    },
+    "typography": {
+      "fontFamily": "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "fontStyle": "normal",
+      "letterSpacing": "0",
+      "lineHeight": "1.5",
+      "textDecoration": "none",
+      "textTransform": "none"
+    },
+    "elements": {
+      "heading": {
+        "typography": {
+          "fontFamily": "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+          "fontWeight": "400",
+          "fontStyle": "normal",
+          "lineHeight": "1.2"
+        }
+      },
+	  "h1": {
+        "typography": {
+          "fontSize": "40px"
+        }
+      },
+      "h2": {
+        "typography": {
+          "fontSize": "32px"
+        }
+      },
+      "h3": {
+        "typography": {
+          "fontSize": "24px"
+        }
+      },
+      "h4": {
+        "typography": {
+          "fontSize": "16px"
+        }
+      },
+      "h5": {
+        "typography": {
+          "fontSize": "14px"
+        }
+      },
+      "h6": {
+        "typography": {
+          "fontSize": "12px"
+        }
+      }
+    }
+  }
+}

@@ -18,6 +18,7 @@ export interface NoticeProps {
 	icon?: string;
 	isDismissible: boolean;
 	variant: string;
+	className?: string;
 	onClose?: () => void;
 	onLoad?: () => void;
 }
@@ -39,6 +40,7 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 		icon,
 		isDismissible = true,
 		variant = 'info',
+		className,
 		onClose,
 		onLoad,
 	} = props;
@@ -69,7 +71,8 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 		`woocommerce-marketplace__notice--${ variant }`,
 		{
 			'is-dismissible': isDismissible,
-		}
+		},
+		className
 	);
 
 	const iconElement = iconMap[ ( icon || 'info' ) as IconKey ];

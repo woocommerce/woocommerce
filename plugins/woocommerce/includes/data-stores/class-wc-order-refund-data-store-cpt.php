@@ -46,17 +46,24 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	 * @param array    $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$order, $args = array() ) {
-		$id               = $order->get_id();
-		$parent_order_id  = $order->get_parent_id();
-		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $parent_order_id;
+		$id = $order->get_id();
 
 		if ( ! $id ) {
 			return;
 		}
 
+		$parent_order_id  = $order->get_parent_id();
+		$refund_cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $parent_order_id;
 		wp_delete_post( $id );
 		wp_cache_delete( $refund_cache_key, 'orders' );
 		$order->set_id( 0 );
+
+		/**
+		 * Fires when a refund is deleted.
+		 *
+		 * @param int $id The refund ID.
+		 * @since 3.0.0
+		 */
 		do_action( 'woocommerce_delete_order_refund', $id );
 	}
 
@@ -70,14 +77,39 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	protected function read_order_data( &$refund, $post_object ) {
 		parent::read_order_data( $refund, $post_object );
 		$id = $refund->get_id();
+
+		$post_meta = get_post_meta( $id );
+
+		$refunded_by = $post_meta['_refunded_by'][0] ?? null;
+		$reason      = $post_meta['_refund_reason'][0] ?? '';
+
 		$refund->set_props(
 			array(
-				'amount'           => get_post_meta( $id, '_refund_amount', true ),
-				'refunded_by'      => metadata_exists( 'post', $id, '_refunded_by' ) ? get_post_meta( $id, '_refunded_by', true ) : absint( $post_object->post_author ),
-				'refunded_payment' => wc_string_to_bool( get_post_meta( $id, '_refunded_payment', true ) ),
-				'reason'           => metadata_exists( 'post', $id, '_refund_reason' ) ? get_post_meta( $id, '_refund_reason', true ) : $post_object->post_excerpt,
+				'amount'           => $post_meta['_refund_amount'][0] ?? 0,
+				'refunded_by'      => metadata_exists( 'post', $id, '_refunded_by' ) ? $refunded_by : absint( $post_object->post_author ),
+				'refunded_payment' => wc_string_to_bool( $post_meta['_refunded_payment'][0] ?? false ),
+				'reason'           => metadata_exists( 'post', $id, '_refund_reason' ) ? $reason : $post_object->post_excerpt,
 			)
 		);
+	}
+
+	/**
+	 * Method to update a refund in the database.
+	 *
+	 * @param \WC_Order_Refund $refund Refund object.
+	 */
+	public function update( &$refund ) {
+		parent::update( $refund );
+
+		/**
+		 * Fires when an order refund is updated.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param int              $refund_id The order refund ID.
+		 * @param \WC_Order_Refund $refund    The order refund object.
+		 */
+		do_action( 'woocommerce_update_order_refund', $refund->get_id(), $refund );
 	}
 
 	/**

@@ -3,30 +3,30 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import {
-	PaymentProviderState,
-	PaymentProviderOnboardingState,
+	PaymentGatewayProvider,
+	PaymentsProviderIncentive,
+	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import {
+	isWooPayments,
+	recordPaymentsOnboardingEvent,
+	recordPaymentsProviderEvent,
+} from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
+import { WooPaymentsUpdateRequiredModal } from '~/settings-payments/components/modals';
 
 interface CompleteSetupButtonProps {
 	/**
-	 * The ID of the gateway to activate payments for.
+	 * The provider details for the payment gateway.
 	 */
-	gatewayId: string;
-	/**
-	 * The state of the gateway.
-	 */
-	gatewayState: PaymentProviderState;
-	/**
-	 * The onboarding state for this gateway.
-	 */
-	onboardingState: PaymentProviderOnboardingState;
+	gatewayProvider: PaymentGatewayProvider;
 	/**
 	 * The settings URL to navigate to, if we don't have an onboarding URL.
 	 */
@@ -47,6 +47,32 @@ interface CompleteSetupButtonProps {
 	 * ID of the plugin that is being installed.
 	 */
 	installingPlugin: string | null;
+	/**
+	 * Function to set the onboarding modal open.
+	 */
+	setOnboardingModalOpen: ( isOnboardingModalOpen: boolean ) => void;
+	/**
+	 * The onboarding type for the gateway.
+	 */
+	onboardingType?: string;
+	/**
+	 * Callback used when an incentive is accepted.
+	 *
+	 * @param id Incentive ID.
+	 */
+	acceptIncentive?: ( id: string ) => void;
+	/**
+	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
+	 */
+	incentive?: PaymentsProviderIncentive | null;
+	/**
+	 * Whether the button should be disabled.
+	 */
+	disabled?: boolean;
+	/**
+	 * Accessible label for screen readers, especially useful when button is disabled.
+	 */
+	ariaLabel?: string;
 }
 
 /**
@@ -55,28 +81,68 @@ interface CompleteSetupButtonProps {
  * or settings) based on the gateway's and onboarding state.
  */
 export const CompleteSetupButton = ( {
-	gatewayId,
-	gatewayState,
-	onboardingState,
+	gatewayProvider,
 	settingsHref,
 	onboardingHref,
 	gatewayHasRecommendedPaymentMethods,
 	installingPlugin,
 	buttonText = __( 'Complete setup', 'woocommerce' ),
+	setOnboardingModalOpen,
+	onboardingType,
+	acceptIncentive = () => {},
+	incentive = null,
+	disabled = false,
+	ariaLabel,
 }: CompleteSetupButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
+	const [ showUpdateModal, setShowUpdateModal ] = useState( false );
 
-	const accountConnected = gatewayState.account_connected;
-	const onboardingStarted = onboardingState.started;
-	const onboardingCompleted = onboardingState.completed;
+	// Get the store's `select` function to trigger selector resolution later (in useEffect).
+	// We don't need to select data directly here, just the function itself.
+	const { select } = useSelect(
+		( selectFn ) => ( { select: selectFn } ),
+		[]
+	);
+
+	const accountConnected = gatewayProvider.state.account_connected;
+	const onboardingStarted = gatewayProvider.onboarding.state.started;
+	const onboardingCompleted = gatewayProvider.onboarding.state.completed;
+
+	useEffect( () => {
+		// Prefetch WooPayments onboarding data if conditions are met
+		if (
+			isWooPayments( gatewayProvider.id ) &&
+			onboardingType === 'native_in_context' &&
+			! onboardingCompleted
+		) {
+			// Calling the selector triggers the data fetch
+			select( woopaymentsOnboardingStore ).getOnboardingData();
+		}
+	}, [ gatewayProvider.id, onboardingCompleted, onboardingType, select ] );
 
 	const completeSetup = () => {
+		// Record the click of this button.
+		recordPaymentsProviderEvent( 'complete_setup_click', gatewayProvider );
+
 		setIsUpdating( true );
 
-		if ( ! accountConnected || ! onboardingStarted ) {
+		if ( incentive ) {
+			acceptIncentive( incentive.promo_id );
+		}
+
+		if ( onboardingType === 'native_in_context' ) {
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_opened',
+				{
+					from: 'complete_setup_button',
+					source: wooPaymentsOnboardingSessionEntrySettings,
+				}
+			);
+			setOnboardingModalOpen( true );
+		} else if ( ! accountConnected || ! onboardingStarted ) {
 			if ( gatewayHasRecommendedPaymentMethods ) {
-				const history = getHistory();
-				history.push( getNewPath( {}, '/payment-methods' ) );
+				setShowUpdateModal( true );
+				setIsUpdating( false );
 			} else {
 				// Redirect to the gateway's onboarding URL if it needs setup.
 				window.location.href = onboardingHref;
@@ -100,14 +166,21 @@ export const CompleteSetupButton = ( {
 	};
 
 	return (
-		<Button
-			key={ gatewayId }
-			variant={ 'primary' }
-			isBusy={ isUpdating }
-			disabled={ isUpdating || !! installingPlugin }
-			onClick={ completeSetup }
-		>
-			{ buttonText }
-		</Button>
+		<>
+			<Button
+				key={ gatewayProvider.id }
+				variant="primary"
+				isBusy={ isUpdating }
+				disabled={ disabled || isUpdating || !! installingPlugin }
+				onClick={ completeSetup }
+				aria-label={ ariaLabel }
+			>
+				{ buttonText }
+			</Button>
+			<WooPaymentsUpdateRequiredModal
+				isOpen={ showUpdateModal }
+				onClose={ () => setShowUpdateModal( false ) }
+			/>
+		</>
 	);
 };

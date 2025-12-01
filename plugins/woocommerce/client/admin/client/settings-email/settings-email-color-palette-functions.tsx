@@ -42,7 +42,8 @@ export const areColorsChanged = ( colors: DefaultColors ): boolean => {
 			inputId
 		) as HTMLInputElement;
 		if (
-			inputElement.value !== colors[ colorName as keyof DefaultColors ]
+			inputElement.value.toLowerCase() !==
+			colors[ colorName as keyof DefaultColors ].toLowerCase()
 		) {
 			return true;
 		}

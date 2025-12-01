@@ -13,6 +13,24 @@
 class WC_Tests_Install extends WC_Unit_Test_Case {
 
 	/**
+	 * Restore test environment after class completion.
+	 */
+	public static function tearDownAfterClass(): void {
+		parent::tearDownAfterClass();
+
+		// Reinstall WooCommerce to ensure test environment is clean.
+		WC_Install::install();
+
+		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
+		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
+			$GLOBALS['wp_roles']->reinit();
+		} else {
+			$GLOBALS['wp_roles'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			wp_roles();
+		}
+	}
+
+	/**
 	 * Test check version.
 	 */
 	public function test_check_version() {
@@ -38,14 +56,8 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	/**
 	 * Test - install.
 	public function test_install() {
-		// clean existing install first.
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', true );
-			define( 'WC_REMOVE_ALL_DATA', true );
-		}
-
-		include dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/uninstall.php';
-		delete_transient( 'wc_installing' );
+		// Clean existing install first.
+		self::uninstall();
 
 		WC_Install::install();
 
@@ -100,12 +112,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles.
 	 */
 	public function test_create_roles() {
-		// Clean existing install first.
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', true );
-			define( 'WC_REMOVE_ALL_DATA', true );
-		}
-		include dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/uninstall.php';
+		self::uninstall();
 
 		WC_Install::create_roles();
 
@@ -131,19 +138,24 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * @group core-only
 	 */
 	public function test_get_tables() {
-		global $wpdb;
+		// Make WC_Install::get_schema() accessible.
+		$wc_install = new \ReflectionClass( WC_Install::class );
+		$get_schema = $wc_install->getMethod( 'get_schema' );
+		$get_schema->setAccessible( true );
+		$schema = $get_schema->invoke( null );
+		preg_match_all( '/CREATE TABLE (.*?)\s*\(/i', $schema, $matches, PREG_PATTERN_ORDER );
 
-		$tables = $wpdb->get_col(
-			"SHOW TABLES WHERE `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}woocommerce\_%'
-			OR `Tables_in_{$wpdb->dbname}` LIKE '{$wpdb->prefix}wc\_%'"
-		);
-		$result = WC_Install::get_tables();
-		$diff   = array_diff( $result, $tables );
+		$this->assertNotEmpty( $matches );
+		$this->assertNotEmpty( $matches[1] );
+
+		$tables_from_schema = $matches[1];
+		$tables_to_remove   = WC_Install::get_tables();
+		$diff               = array_diff( $tables_from_schema, $tables_to_remove );
 
 		$this->assertEmpty(
 			$diff,
 			sprintf(
-				'The following table(s) were returned from WC_Install::get_tables() but do not exist: %s',
+				'The following table(s) were returned from WC_Install::get_schema() but are not listed in WC_Install::get_tables(): %s',
 				implode( ', ', $diff )
 			)
 		);
@@ -167,4 +179,16 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
 	}
 
+	/**
+	 * Uninstall the plugin.
+	 */
+	private static function uninstall() {
+		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+			define( 'WP_UNINSTALL_PLUGIN', true );
+			define( 'WC_REMOVE_ALL_DATA', true );
+		}
+
+		include dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/uninstall.php';
+		delete_transient( 'wc_installing' );
+	}
 }

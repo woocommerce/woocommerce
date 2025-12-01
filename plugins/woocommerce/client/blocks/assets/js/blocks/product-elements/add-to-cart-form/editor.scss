@@ -1,0 +1,40 @@
+.wc-block-editor-add-to-cart-form-container {
+	cursor: help;
+	gap: 10px;
+	display: flex;
+	flex-direction: column;
+	width: 400px;
+	max-width: 100%;
+	.components-disabled {
+		display: flex;
+
+		// Remove the default block button margin when inside add to cart form in classic themes.
+		// This is required to vertically center the quantity input.
+		.wp-block-button {
+			margin: 0 !important;
+
+			.single_add_to_cart_button {
+				border: none;
+				margin: 0;
+			}
+		}
+
+		.quantity {
+			display: flex;
+			align-items: stretch;
+		}
+
+		> .quantity:not(.wc-block-components-quantity-selector) .qty {
+			padding: 0 5px;
+			margin-right: 0.5em;
+		}
+	}
+}
+
+.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
+	.wc-block-components-quantity-selector {
+		margin: 0 4px 0 0;
+		background: #fff;
+		width: unset !important;
+	}
+}

@@ -1,8 +1,16 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_API_PATH,
+	WC_ADMIN_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
-import { test, expect, tags } from '../../fixtures/fixtures';
-import { getFakeCustomer, getFakeProduct } from '../../utils/data';
+import { test, expect } from '../../fixtures/fixtures';
+import { getFakeProduct } from '../../utils/data';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 // a representation of the menu structure for WC
@@ -61,7 +69,7 @@ const wcPages = [
 				text: 'Filter by product type',
 			},
 			{
-				name: 'Add New',
+				name: 'Add new product',
 				heading: 'Add New',
 				element: '.duplication',
 				text: 'Copy to a new draft',
@@ -172,96 +180,126 @@ const wcPages = [
 				name: 'Coupons',
 				heading: 'Coupons',
 				element: '.page-title-action',
-				// WP6.6: "Add coupon", WP6.7: "Add new coupon"
-				text: /Add coupon|Add new coupon/,
+				text: /Add new coupon/,
 			},
 		],
 	},
 ];
 
-for ( const currentPage of wcPages ) {
-	test.describe(
-		`WooCommerce Page Load > Load ${ currentPage.name } sub pages`,
-		{ tag: [ tags.GUTENBERG, tags.SERVICES ] },
-		() => {
-			const product = getFakeProduct();
-			const customer = getFakeCustomer();
-			let orderId;
+const product = getFakeProduct();
+let orderId;
 
-			test.use( { storageState: ADMIN_STATE_PATH } );
+test.use( { storageState: ADMIN_STATE_PATH } );
 
-			test.beforeAll( async ( { api, wcAdminApi } ) => {
-				// skip onboarding
-				const response = await wcAdminApi.post( 'onboarding/profile', {
-					skipped: true,
-				} );
-				expect( response.status ).toEqual( 200 );
-
-				// create a simple product
-				await api.post( 'products', product ).then( ( r ) => {
-					product.id = r.data.id;
-				} );
-
-				// create an order
-				await api
-					.post( 'orders', {
-						line_items: [
-							{
-								product_id: product.id,
-								quantity: 1,
-							},
-						],
-					} )
-					.then( ( r ) => {
-						orderId = r.data.id;
-					} );
-
-				// create customer
-				await api
-					.post( 'customers', customer )
-					.then( ( r ) => ( customer.id = r.data.id ) );
-			} );
-
-			test.afterAll( async ( { api } ) => {
-				await api.delete( `orders/${ orderId }`, { force: true } );
-				await api.delete( `products/${ product.id }`, {
-					force: true,
-				} );
-				await api.delete( `customers/${ customer.id }`, {
-					force: true,
-				} );
-			} );
-
-			for ( let i = 0; i < currentPage.subpages.length; i++ ) {
-				test( `Can load ${ currentPage.subpages[ i ].name }`, async ( {
-					page,
-				} ) => {
-					await page.goto( currentPage.url );
-					await page
-						.locator(
-							`li.wp-menu-open > ul.wp-submenu > li a:has-text("${ currentPage.subpages[ i ].name }")`
-						)
-						.click();
-
-					await expect(
-						page
-							.getByRole( 'heading', {
-								name: currentPage.subpages[ i ].heading,
-							} )
-							.first()
-					).toBeVisible();
-
-					await expect(
-						page
-							.locator( currentPage.subpages[ i ].element )
-							.first()
-					).toBeVisible();
-
-					await expect(
-						page.locator( currentPage.subpages[ i ].element )
-					).toContainText( currentPage.subpages[ i ].text );
-				} );
-			}
+test.beforeAll( async ( { restApi } ) => {
+	// skip onboarding
+	const response = await restApi.post(
+		`${ WC_ADMIN_API_PATH }/onboarding/profile`,
+		{
+			skipped: true,
 		}
 	);
+
+	expect( response.status ).toEqual( 200 );
+
+	// create a simple product
+	await restApi
+		.post( `${ WC_API_PATH }/products`, product )
+		.then( ( r ) => {
+			product.id = r.data.id;
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to create product ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+
+	// create an order
+	await restApi
+		.post( `${ WC_API_PATH }/orders`, {
+			line_items: [
+				{
+					product_id: product.id,
+					quantity: 1,
+				},
+			],
+		} )
+		.then( ( r ) => {
+			orderId = r.data.id;
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to create order ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+} );
+
+test.afterAll( async ( { restApi } ) => {
+	await restApi
+		.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+			force: true,
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to delete order ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+	await restApi
+		.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} )
+		.catch( ( e ) => {
+			console.error(
+				`Failed to delete product ${
+					e.data ? JSON.stringify( e.data ) : ''
+				}`
+			);
+			throw e;
+		} );
+} );
+
+for ( const currentPage of wcPages ) {
+	for ( let i = 0; i < currentPage.subpages.length; i++ ) {
+		test( `can load ${ currentPage.name } > ${ currentPage.subpages[ i ].name } page`, async ( {
+			page,
+		} ) => {
+			await page.goto( currentPage.url );
+
+			// needs a Regexp on link name to match exact text and also match the possible counter
+			// E.g. should match "Orders 3" or "Orders", but should not match "Quick Orders"
+			await page
+				.locator( 'li.wp-menu-open > ul.wp-submenu' )
+				.getByRole( 'link', {
+					name: new RegExp(
+						`^${ currentPage.subpages[ i ].name }( \\d+)?$`
+					),
+				} )
+				.click();
+
+			await expect(
+				page
+					.getByRole( 'heading', {
+						name: currentPage.subpages[ i ].heading,
+					} )
+					.first()
+			).toBeVisible();
+
+			await expect(
+				page.locator( currentPage.subpages[ i ].element ).first()
+			).toBeVisible();
+
+			await expect(
+				page.locator( currentPage.subpages[ i ].element )
+			).toContainText( currentPage.subpages[ i ].text );
+		} );
+	}
 }

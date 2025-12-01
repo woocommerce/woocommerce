@@ -131,6 +131,10 @@
 		&.is-static {
 			position: static;
 		}
+
+		&.is-virtual {
+			overflow: hidden;
+		}
 	}
 
 	.woocommerce-select-control__option {

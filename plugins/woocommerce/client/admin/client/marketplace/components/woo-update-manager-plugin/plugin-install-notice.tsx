@@ -14,10 +14,21 @@ import {
 } from '../constants';
 import './woo-update-manager-plugin.scss';
 
-export default function PluginInstallNotice() {
+export default function PluginInstallNotice( props: { selectedTab: string } ) {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
 	if ( ! wccomSettings?.isConnected ) {
 		return null;
+	}
+
+	const { selectedTab } = props;
+
+	// If we're not on the my subscriptions tab...
+	if ( selectedTab !== 'my-subscriptions' ) {
+		// And the my subscriptions tab has been visited in the past, don't show the notice.
+		if ( wccomSettings?.mySubscriptionsTabLoaded ) {
+			return null;
+		}
 	}
 
 	if (

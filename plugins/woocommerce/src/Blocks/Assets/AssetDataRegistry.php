@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Assets;
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
@@ -81,27 +82,26 @@ class AssetDataRegistry {
 	 */
 	protected function get_core_data() {
 		return [
-			'adminUrl'                 => admin_url(),
-			'countries'                => WC()->countries->get_countries(),
-			'currency'                 => $this->get_currency_data(),
-			'currentUserId'            => get_current_user_id(),
-			'currentUserIsAdmin'       => current_user_can( 'manage_woocommerce' ),
-			'currentThemeIsFSETheme'   => wc_current_theme_is_fse_theme(),
-			'dateFormat'               => wc_date_format(),
-			'homeUrl'                  => esc_url( home_url( '/' ) ),
-			'locale'                   => $this->get_locale_data(),
-			'isRemoteLoggingEnabled'   => wc_get_container()->get( RemoteLogger::class )->is_remote_logging_allowed(),
-			'dashboardUrl'             => wc_get_account_endpoint_url( 'dashboard' ),
-			'orderStatuses'            => $this->get_order_statuses(),
-			'placeholderImgSrc'        => wc_placeholder_img_src(),
-			'productsSettings'         => $this->get_products_settings(),
-			'siteTitle'                => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
-			'storePages'               => $this->get_store_pages(),
-			'wcAssetUrl'               => plugins_url( 'assets/', WC_PLUGIN_FILE ),
-			'wcVersion'                => defined( 'WC_VERSION' ) ? WC_VERSION : '',
-			'wpLoginUrl'               => wp_login_url(),
-			'wpVersion'                => get_bloginfo( 'version' ),
-			'__experimentalUseReact18' => defined( 'WC_EXPERIMENTAL_USE_REACT_18' ) && WC_EXPERIMENTAL_USE_REACT_18,
+			'adminUrl'               => admin_url(),
+			'countries'              => WC()->countries->get_countries(),
+			'currency'               => $this->get_currency_data(),
+			'currentUserId'          => get_current_user_id(),
+			'currentUserIsAdmin'     => current_user_can( 'manage_woocommerce' ),
+			'currentThemeIsFSETheme' => wp_is_block_theme(),
+			'dateFormat'             => wc_date_format(),
+			'homeUrl'                => esc_url( home_url( '/' ) ),
+			'locale'                 => $this->get_locale_data(),
+			'isRemoteLoggingEnabled' => wc_get_container()->get( RemoteLogger::class )->is_remote_logging_allowed(),
+			'dashboardUrl'           => wc_get_account_endpoint_url( 'dashboard' ),
+			'orderStatuses'          => $this->get_order_statuses(),
+			'placeholderImgSrc'      => wc_placeholder_img_src(),
+			'productsSettings'       => $this->get_products_settings(),
+			'siteTitle'              => wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES ),
+			'storePages'             => $this->get_store_pages(),
+			'wcAssetUrl'             => plugins_url( 'assets/', WC_PLUGIN_FILE ),
+			'wcVersion'              => defined( 'WC_VERSION' ) ? WC_VERSION : '',
+			'wpLoginUrl'             => wp_login_url(),
+			'wpVersion'              => get_bloginfo( 'version' ),
 		];
 	}
 
@@ -254,8 +254,10 @@ class AssetDataRegistry {
 			);
 		}
 
+		$core_data                            = $this->get_core_data();
+		$core_data['experimentalWcRestApiV4'] = Features::is_enabled( 'rest-api-v4' );
 		// note this WILL wipe any data already registered to these keys because they are protected.
-		$this->data = array_replace_recursive( $settings, $this->get_core_data() );
+		$this->data = array_replace_recursive( $settings, $core_data );
 	}
 
 	/**
@@ -388,7 +390,7 @@ class AssetDataRegistry {
 			$this->execute_lazy_data();
 
 			$data                          = rawurlencode( wp_json_encode( $this->data ) );
-			$wc_settings_script            = "var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
+			$wc_settings_script            = "var wcSettings = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 			$preloaded_api_requests_script = '';
 
 			if ( count( $this->preloaded_api_requests ) > 0 ) {

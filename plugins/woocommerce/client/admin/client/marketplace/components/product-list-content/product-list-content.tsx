@@ -12,7 +12,7 @@ import './product-list-content.scss';
 import '~/customize-store/intro/intro.scss';
 import '~/customize-store/style.scss';
 import ProductCard from '../product-card/product-card';
-import { Product, ProductType } from '../product-list/types';
+import { Product, ProductCardType, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
 import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { NoAIBanner } from '~/customize-store/intro/intro-banners';
@@ -22,17 +22,14 @@ export default function ProductListContent( props: {
 	group?: string;
 	productGroup?: string;
 	type: ProductType;
+	cardType?: ProductCardType;
 	className?: string;
 	searchTerm?: string;
 	category?: string;
 } ): JSX.Element {
 	const wccomHelperSettings = getAdminSetting( 'wccomHelper', {} );
 
-	const classes = clsx(
-		'woocommerce-marketplace__product-list-content',
-		props.className
-	);
-
+	const [ productsToShow, setProductsToShow ] = useState( props.products );
 	const [ columns, setColumns ] = useState( 1 );
 
 	const updateColumns = () => {
@@ -50,22 +47,79 @@ export default function ProductListContent( props: {
 
 	useEffect( () => {
 		updateColumns();
+
 		// Update columns on screen resize to adjust for responsive layout
 		window.addEventListener( 'resize', updateColumns );
 
 		return () => window.removeEventListener( 'resize', updateColumns );
 	}, [] );
 
+	/**
+	 * If the product group is set, we are showing featured products. This a curated list
+	 * of products, fetched from WooCommerce.com API.
+	 *
+	 * As a design choice, we decided to:
+	 * - Always try to show a full row.
+	 * - Show two, three or four products per row depending on the design.
+	 *
+	 * To do this, this useEffect listens for changes to columns and calculates the number
+	 * rows. Depending on the number of rows, it will slice the props.products.
+	 */
+	useEffect( () => {
+		/**
+		 * If the product group is not set, don't operate. This could be a search or category result, where we
+		 * want to show the full result set.
+		 *
+		 * If the productGroups set, component is likely used on Discover or NoResult component.
+		 */
+		if ( ! props.productGroup ) {
+			setProductsToShow( props.products );
+			return;
+		}
+
+		// For compact cards, show all products.
+		if ( props.cardType === ProductCardType.compact ) {
+			setProductsToShow( props.products );
+			return;
+		}
+
+		// If we don't have enough products to fill a row, show all products.
+		if ( props.products.length < columns ) {
+			setProductsToShow( props.products );
+
+			return;
+		}
+
+		// Calculate the number of complete rows we can show.
+		let completeRows = Math.floor( props.products.length / columns );
+
+		if ( columns === 1 ) {
+			completeRows = Math.min( completeRows, 4 );
+		}
+
+		if ( columns === 2 ) {
+			completeRows = Math.min( completeRows, 2 );
+		}
+
+		// Slice the products, this will get rid of any rows that are not fully filled.
+		setProductsToShow( props.products.slice( 0, completeRows * columns ) );
+	}, [ columns, props.products, props.productGroup, props.cardType ] );
+
 	const bannerPosition = columns * 2 - 1;
+
+	const classes = clsx(
+		'woocommerce-marketplace__product-list-content',
+		props.className
+	);
 
 	return (
 		<>
 			<div className={ classes }>
-				{ props.products.map( ( product, index ) => (
+				{ productsToShow.map( ( product, index ) => (
 					<Fragment key={ product.id }>
 						<ProductCard
-							key={ product.id }
 							type={ props.type }
+							cardType={ props.cardType }
 							product={ {
 								id: product.id,
 								slug: product.slug,

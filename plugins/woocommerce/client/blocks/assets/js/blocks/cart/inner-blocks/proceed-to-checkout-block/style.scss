@@ -1,0 +1,67 @@
+.wc-block-cart__submit {
+	position: relative;
+	margin: 0 0 $gap 0;
+}
+
+.wc-block-cart__submit-button {
+	width: 100%;
+	margin: 0;
+	box-sizing: border-box;
+
+	// Hides labels when the spinner is shown.
+	&--loading {
+		.wc-block-components-button__text {
+			visibility: hidden;
+		}
+		.wc-block-components-spinner {
+			visibility: visible;
+		}
+	}
+}
+.wc-block-cart__submit-button[aria-disabled="true"] {
+	.wc-block-components-button__text {
+		opacity: 0.5;
+	}
+}
+
+.wc-block-cart {
+	.wc-block-cart__submit-container {
+		padding: 0;
+	}
+}
+
+@include breakpoint("<782px") {
+	.wc-block-cart .wc-block-cart__submit-container--sticky {
+		background: $white;
+		bottom: 0;
+		left: 0;
+		padding: $gap;
+		position: fixed;
+		width: 100%;
+		z-index: 9999;
+		box-sizing: border-box;
+
+		&::before {
+			box-shadow: 0 -10px 20px 10px currentColor;
+			color: color.adjust($gray-400, $alpha: -0.7);
+			content: "";
+			height: 100%;
+			left: 0;
+			position: absolute;
+			right: 0;
+			top: 0;
+		}
+	}
+}
+
+@include breakpoint(">781px") {
+	.wc-block-cart .wc-block-cart__submit-container--sticky {
+		display: none;
+	}
+}
+
+@media screen and (max-height: 500px) {
+	.wc-block-cart .wc-block-cart__submit-container--sticky {
+		display: none;
+	}
+}

@@ -12,10 +12,16 @@
 /playwright-report/
 /storybook/
 /tests/
+/test-results/
+/vendor/*/*/tests
+/packages/*/tests
+/packages/*/changelog
+/packages/*/node_modules
+/packages/*/vendor
+/packages/email-editor/tasks
 /e2e/
 babel.config.js
-blocks.ini
-composer.*
+# Do not exclude composer.* files. They will be cleaned up separately.
 contributors.html
 docker-compose.yaml
 Dockerfile
@@ -29,11 +35,13 @@ packages/woocommerce-blocks/docs
 phpcs.xml
 phpunit.xml
 phpunit.xml.dist
+phpunit-*.xml.dist
 postcss.config.js
 project.json
 README.md
 renovate.json
 tsconfig.*
 webpack.config.js
-client/legacy/
+/client/legacy/
 /client/admin/
+/client/blocks/

@@ -31,10 +31,13 @@ function getCategoryTermKey( item: CategoryTerm | null ): string {
 	return String( item?.term_id );
 }
 
-export const CategoryAddNew: React.FC< {
+export const CategoryAddNew = ( {
+	selectedCategoryTerms,
+	onChange,
+}: {
 	selectedCategoryTerms: CategoryTerm[];
 	onChange: ( selected: CategoryTerm[] ) => void;
-} > = ( { selectedCategoryTerms, onChange } ) => {
+} ) => {
 	const [ showAddNew, setShowAddNew ] = useState( false );
 	const [ newCategoryName, setNewCategoryName ] = useState( '' );
 	const [ categoryCreateError, setCategoryCreateError ] = useState( '' );

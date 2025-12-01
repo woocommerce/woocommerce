@@ -1,0 +1,46 @@
+{
+	"name": "woocommerce/email-editor-lib",
+	"description": "A package for hiding re-namespaced dependencies and executing them",
+	"prefer-stable": true,
+	"minimum-stability": "dev",
+	"require": {
+		"php": ">=7.4"
+	},
+    "require-dev": {
+        "pelago/emogrifier": "7.3.0"
+    },
+	"config": {
+		"platform": {
+			"php": "7.4"
+		}
+	},
+	"scripts": {
+		"post-install-cmd": [
+			"\"../../../../plugins/woocommerce/vendor/bin/mozart\" compose"
+		],
+		"post-update-cmd": [
+			"\"../../../../plugins/woocommerce/vendor/bin/mozart\" compose"
+		]
+	},
+	"extra": {
+		"mozart": {
+			"dep_namespace": "Automattic\\WooCommerce\\EmailEditorVendor\\",
+			"dep_directory": "/packages/",
+			"packages": [
+				"pelago/emogrifier"
+			],
+			"excluded_packages": [
+			],
+			"override_autoload": {
+				"thecodingmachine/safe": {
+					"psr-4": {
+						"Safe\\": ""
+					}
+				}
+			},
+			"classmap_directory": "/classes/",
+			"classmap_prefix": "EmailEditorVendor_",
+			"delete_vendor_directories": true
+		} 
+	}
+}

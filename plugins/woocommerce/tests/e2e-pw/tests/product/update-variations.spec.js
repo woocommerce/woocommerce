@@ -1,7 +1,10 @@
-const { test, expect } = require( '@playwright/test' );
-const { variableProducts: utils } = require( '../../utils' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { variableProducts as utils } from '../../utils';
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
 const {
 	createVariableProduct,
 	showVariableProductTour,
@@ -103,6 +106,25 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		await deleteProductsAddedByTests();
 	} );
 
+	async function gotToVariationsTab( page ) {
+		await test.step( 'Click on the "Variations" tab.', async () => {
+			await expect( async () => {
+				await page
+					.getByRole( 'link', { name: 'Variations' } )
+					.last()
+					.click();
+
+				// Sometimes the click on link is too fast and the initial tab (General) is still visible
+				// so we need to wait make sure some content from the variations tab is visible.
+				const expandButton = page
+					.getByRole( 'link', { name: 'Expand' } )
+					.first();
+
+				await expect( expandButton ).toBeVisible();
+			} ).toPass();
+		} );
+	}
+
 	test( 'can individually edit variations', async ( { page } ) => {
 		const variationRows = page.locator( '.woocommerce_variation' );
 		const firstVariation = variationRows.filter( {
@@ -121,15 +143,13 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.click();
 		} );
 
 		await test.step( 'Edit the first variation.', async () => {
@@ -204,15 +224,13 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			await expect( saveButton ).toBeDisabled();
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.click();
 		} );
 
 		await test.step( 'Expect the first variation to be virtual.', async () => {
@@ -295,12 +313,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Select the \'Toggle "Downloadable"\' bulk action.', async () => {
 			await page
@@ -309,7 +322,10 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Expand all variations.', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.click();
 		} );
 
 		await test.step( 'Expect all "Downloadable" checkboxes to be checked.', async () => {
@@ -331,13 +347,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
-
+		await gotToVariationsTab( page );
 		await test.step( 'Select the bulk action "Delete all variations".', async () => {
 			page.on( 'dialog', ( dialog ) => dialog.accept() );
 			await page.locator( '#field_to_edit' ).selectOption( 'delete_all' );
@@ -357,12 +367,13 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page.getByRole( 'link', { name: 'Variations' } ).click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Expand all variations', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.click();
 		} );
 
 		const variationContainer = page.locator(
@@ -407,10 +418,16 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 
 		await test.step( 'Click "Save changes"', async () => {
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
+			await page.waitForFunction(
+				() => ! Boolean( document.querySelector( '.blockUI' ) )
+			);
 		} );
 
 		await test.step( 'Expand all variations', async () => {
-			await page.getByRole( 'link', { name: 'Expand' } ).first().click();
+			const expandButton = page
+				.getByRole( 'link', { name: 'Expand' } )
+				.first();
+			await expandButton.click();
 		} );
 
 		await test.step( 'Expect the stock quantity to be saved correctly', async () => {
@@ -441,12 +458,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Wait for block overlay to disappear.', async () => {
 			await expect( page.locator( '.blockOverlay' ) ).toBeHidden();
@@ -500,12 +512,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 			);
 		} );
 
-		await test.step( 'Click on the "Variations" tab.', async () => {
-			await page
-				.getByRole( 'link', { name: 'Variations' } )
-				.last()
-				.click();
-		} );
+		await gotToVariationsTab( page );
 
 		await test.step( 'Click "Remove" on a variation', async () => {
 			page.on( 'dialog', ( dialog ) => dialog.accept() );

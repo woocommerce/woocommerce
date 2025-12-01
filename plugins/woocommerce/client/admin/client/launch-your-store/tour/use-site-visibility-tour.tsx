@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { OPTIONS_STORE_NAME, useUserPreferences } from '@woocommerce/data';
+import { optionsStore, useUserPreferences } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { useState } from 'react';
 
@@ -11,10 +11,8 @@ export const useSiteVisibilityTour = () => {
 	// Tour should only be shown if the user has not seen it before and the `woocommerce_show_lys_tour` option is "yes" (for sites upgrading from a previous WooCommerce version)
 	const shouldStoreShowLYSTour = useSelect(
 		( select ) =>
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			select( OPTIONS_STORE_NAME ).getOption(
-				'woocommerce_show_lys_tour'
-			) === 'yes',
+			select( optionsStore ).getOption( 'woocommerce_show_lys_tour' ) ===
+			'yes',
 		[]
 	);
 
@@ -24,7 +22,7 @@ export const useSiteVisibilityTour = () => {
 	 * It will be removed in WC 9.4.
 	 */
 	const hasUserDismissedTourMeta = useSelect( ( select ) => {
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+		// @ts-expect-error Selector is not typed.
 		const currentUser = select( 'core' ).getCurrentUser();
 		if ( ! currentUser ) {
 			// If the user is not logged in, we don't want to show the tour.

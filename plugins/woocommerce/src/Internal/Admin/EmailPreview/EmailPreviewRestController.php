@@ -159,7 +159,7 @@ class EmailPreviewRestController extends RestApiControllerBase {
 				'type'              => 'string',
 				'description'       => 'The key for the transient. Must be one of the allowed options.',
 				'validate_callback' => function ( $key ) {
-					if ( ! in_array( $key, EmailPreview::get_all_email_settings_ids(), true ) ) {
+					if ( ! in_array( $key, EmailPreview::get_all_email_setting_ids(), true ) ) {
 						return new \WP_Error(
 							'woocommerce_rest_not_allowed_key',
 							sprintf( 'The provided key "%s" is not allowed.', $key ),
@@ -276,7 +276,19 @@ class EmailPreviewRestController extends RestApiControllerBase {
 	 */
 	public function send_email_preview( WP_REST_Request $request ) {
 		$email_address = $request->get_param( 'email' );
-		$email_content = $this->email_preview->render();
+		// Start output buffering to prevent partial renders with PHP notices or warnings.
+		ob_start();
+		try {
+			$email_content = $this->email_preview->render();
+		} catch ( \Throwable $e ) {
+			ob_end_clean();
+			return new WP_Error(
+				'woocommerce_rest_email_preview_not_rendered',
+				__( 'There was an error rendering an email preview.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+		ob_end_clean();
 		$email_subject = $this->email_preview->get_subject();
 		$email         = new \WC_Emails();
 		$sent          = $email->send( $email_address, $email_subject, $email_content );

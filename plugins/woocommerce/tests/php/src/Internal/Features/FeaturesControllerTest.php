@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\Features;
 
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -39,38 +40,20 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function ( $features_controller ) {
-				$this->reset_features_list( $this->sut );
-
-				$features = array(
-					'mature1'       => array(
-						'name'            => 'Mature feature 1',
-						'description'     => 'The mature feature number 1',
-						'is_experimental' => false,
-					),
-					'mature2'       => array(
-						'name'            => 'Mature feature 2',
-						'description'     => 'The mature feature number 2',
-						'is_experimental' => false,
-					),
-					'experimental1' => array(
-						'name'            => 'Experimental feature 1',
-						'description'     => 'The experimental feature number 1',
-						'is_experimental' => true,
-					),
-					'experimental2' => array(
-						'name'            => 'Experimental feature 2',
-						'description'     => 'The experimental feature number 2',
-						'is_experimental' => true,
-					),
-				);
-
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
-			},
-			11
+			array( $this, 'register_dummy_features' ),
+			11,
+			1
 		);
+
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+		$dummy_feature_registerer = new class() {
+			public function add_feature_definition( $features_controller ) {
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing
+		$container = wc_get_container();
+		$container->replace( CustomOrdersTableController::class, $dummy_feature_registerer );
+		$container->replace( CostOfGoodsSoldController::class, $dummy_feature_registerer );
 
 		$this->sut = new FeaturesController();
 		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
@@ -81,6 +64,42 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_feature_experimental2_enabled' );
 
 		remove_all_filters( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION );
+	}
+
+	/**
+	 * Register dummy features for unit tests.
+	 *
+	 * @param FeaturesController $features_controller The instance of FeaturesController to register the features in.
+	 */
+	public function register_dummy_features( $features_controller ) {
+		$features = array(
+			'mature1'       => array(
+				'name'                         => 'Mature feature 1',
+				'description'                  => 'The mature feature number 1',
+				'is_experimental'              => false,
+				'default_plugin_compatibility' => 'compatible',
+			),
+			'mature2'       => array(
+				'name'                         => 'Mature feature 2',
+				'description'                  => 'The mature feature number 2',
+				'is_experimental'              => false,
+				'default_plugin_compatibility' => 'compatible',
+			),
+			'experimental1' => array(
+				'name'                         => 'Experimental feature 1',
+				'description'                  => 'The experimental feature number 1',
+				'is_experimental'              => true,
+				'default_plugin_compatibility' => 'compatible',
+			),
+			'experimental2' => array(
+				'name'                         => 'Experimental feature 2',
+				'description'                  => 'The experimental feature number 2',
+				'is_experimental'              => true,
+				'default_plugin_compatibility' => 'compatible',
+			),
+		);
+
+		$this->reset_features_list( $features_controller, $features );
 	}
 
 	/**
@@ -109,8 +128,19 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 				return $plugins;
 			}
+
+			public function get_wp_plugin_id( $plugin_file ) {
+				// For test fakes like 'the_plugin', return as-is (assume normalized).
+				return $plugin_file;
+			}
 		};
 		// phpcs:enable Squiz.Commenting
+
+		// Set private $proxy via reflection (fixes null error).
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $this->fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
 
 		$this->fake_plugin_util->set_active_plugins(
 			array(
@@ -123,26 +153,45 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Resets the array of registered features so we can populate it with test features.
+	 * Resets the array of registered features and repopulates it with test features.
 	 *
 	 * @param FeaturesController $sut The instance of the FeaturesController class.
+	 * @param array              $features The list of features to repopulate the controller with.
 	 *
 	 * @return void
 	 */
-	private function reset_features_list( $sut ) {
+	private function reset_features_list( $sut, $features ) {
 		$reflection_class = new \ReflectionClass( $sut );
 
-		$features = $reflection_class->getProperty( 'features' );
-		$features->setAccessible( true );
-		$features->setValue( $sut, array() );
+		$features_property = $reflection_class->getProperty( 'features' );
+		$features_property->setAccessible( true );
+		$features_property->setValue( $sut, array() );
+
+		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
+		$compat_property->setAccessible( true );
+		$compat_property->setValue( $sut, array() );
+
+		foreach ( $features as $slug => $definition ) {
+			$sut->add_feature_definition( $slug, $definition['name'], $definition );
+		}
+
+		$init_compat_info = $reflection_class->getMethod( 'init_compatibility_info_by_feature' );
+		$init_compat_info->setAccessible( true );
+		$init_compat_info->invoke( $sut );
 	}
 
 	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		$this->reset_features_list( $this->sut );
-		remove_all_actions( 'woocommerce_register_feature_definitions' );
+		remove_action(
+			'woocommerce_register_feature_definitions',
+			array( $this, 'register_dummy_features' ),
+			11,
+			1
+		);
+		$this->reset_container_replacements();
+		$this->reset_container_resolutions();
 
 		parent::tearDown();
 	}
@@ -324,6 +373,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$result = $this->sut->declare_compatibility( 'experimental2', 'the_plugin', false );
 		$this->assertTrue( $result );
 
+		// Allow the lazy/deffered processing to happen.
+		$this->sut->get_compatible_plugins_for_feature( '' );
+
 		$compatibility_info_prop = new \ReflectionProperty( $this->sut, 'compatibility_info_by_plugin' );
 		$compatibility_info_prop->setAccessible( true );
 		$compatibility_info = $compatibility_info_prop->getValue( $this->sut );
@@ -359,6 +411,9 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $result );
 		$result = $this->sut->declare_compatibility( 'experimental2', 'the_plugin_2', true );
 		$this->assertTrue( $result );
+
+		// Allow the lazy/deffered processing to happen.
+		$this->sut->get_compatible_plugins_for_feature( '' );
 
 		$compatibility_info_prop = new \ReflectionProperty( $this->sut, 'compatibility_info_by_feature' );
 		$compatibility_info_prop->setAccessible( true );
@@ -406,6 +461,8 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', false );
+		// Allow the lazy/deffered processing to happen.
+		$this->sut->get_compatible_plugins_for_feature( '' );
 	}
 
 	/**
@@ -492,48 +549,52 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		add_action(
 			'woocommerce_register_feature_definitions',
 			function ( $features_controller ) {
-				$this->reset_features_list( $this->sut );
-
 				$features = array(
 					'mature1'       => array(
-						'name'            => 'Mature feature 1',
-						'description'     => 'The mature feature number 1',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 1',
+						'description'                  => 'The mature feature number 1',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'mature2'       => array(
-						'name'            => 'Mature feature 2',
-						'description'     => 'The mature feature number 2',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 2',
+						'description'                  => 'The mature feature number 2',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'mature3'       => array(
-						'name'            => 'Mature feature 3',
-						'description'     => 'The mature feature number 3',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 3',
+						'description'                  => 'The mature feature number 3',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental1' => array(
-						'name'            => 'Experimental feature 1',
-						'description'     => 'The experimental feature number 1',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 1',
+						'description'                  => 'The experimental feature number 1',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental2' => array(
-						'name'            => 'Experimental feature 2',
-						'description'     => 'The experimental feature number 2',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 2',
+						'description'                  => 'The experimental feature number 2',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental3' => array(
-						'name'            => 'Experimental feature 3',
-						'description'     => 'The experimental feature number 3',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 3',
+						'description'                  => 'The experimental feature number 3',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$this->sut = new FeaturesController();
+		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
 		$this->simulate_inside_before_woocommerce_init_hook();
 
 		$this->sut->declare_compatibility( 'mature1', 'the_plugin', true );
@@ -819,6 +880,12 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			}
 		};
 
+		// Set private $proxy via reflection (fixes null error).
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
+
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'is_plugin_active' => function ( $plugin ) {
@@ -828,34 +895,31 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		);
 		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
-		$local_sut = new FeaturesController();
-
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function ( $features_controller ) use ( $local_sut ) {
-				$this->reset_features_list( $local_sut );
-
+			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => true,
-						'enabled_by_default' => false,
+						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'              => true,
+						'enabled_by_default'           => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'cart_checkout_blocks' => array(
-						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-						'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
-						'is_experimental' => false,
-						'disable_ui'      => true,
+						'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'is_experimental'              => false,
+						'disable_ui'                   => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$local_sut = new FeaturesController();
 		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
 		$plugins = array( 'compatible_plugin1', 'compatible_plugin2' );
 		$fake_plugin_util->set_active_plugins( $plugins );
@@ -910,7 +974,17 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			public function get_plugins_excluded_from_compatibility_ui() {
 				return array();
 			}
+			public function get_wp_plugin_id( $plugin_file ) {
+				// For test fakes like 'the_plugin', return as-is (assume normalized).
+				return $plugin_file;
+			}
 		};
+
+		// Set private $proxy via reflection.
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
@@ -919,40 +993,36 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 				},
 			)
 		);
-        // phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
-
-		$local_sut = new FeaturesController();
-		$local_sut->change_feature_enable( 'custom_order_tables', $hpos_is_enabled );
+		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UnusedFunctionParameter.Found
 
 		add_action(
 			'woocommerce_register_feature_definitions',
-			function ( $features_controller ) use ( $local_sut ) {
-				$this->reset_features_list( $local_sut );
-
+			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => false,
-						'enabled_by_default' => false,
-						'option_key'         => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-						'plugins_are_incompatible_by_default' => true,
+						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'              => false,
+						'enabled_by_default'           => false,
+						'option_key'                   => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+						'default_plugin_compatibility' => 'incompatible',
 					),
 					'cart_checkout_blocks' => array(
-						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-						'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
-						'is_experimental' => false,
-						'disable_ui'      => true,
+						'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'is_experimental'              => false,
+						'disable_ui'                   => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 
-				foreach ( $features as $slug => $definition ) {
-					$features_controller->add_feature_definition( $slug, $definition['name'], $definition );
-				}
+				$this->reset_features_list( $features_controller, $features );
 			},
 			20
 		);
 
+		$local_sut = new FeaturesController();
 		$local_sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
+		$local_sut->change_feature_enable( 'custom_order_tables', $hpos_is_enabled );
 		$plugins = array( 'compatible_plugin', 'incompatible_plugin' );
 		$fake_plugin_util->set_active_plugins( $plugins );
 		$local_sut->declare_compatibility( 'custom_order_tables', 'compatible_plugin' );
@@ -977,5 +1047,200 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 
 		$expected = $hpos_is_enabled ? array( 'incompatible_plugin' ) : array();
 		$this->assertEquals( $expected, array_keys( $incompatible_plugins->call( $local_sut ) ) );
+	}
+
+	/**
+	 * @testdox Declarations are queued lazily and processed only on query.
+	 */
+	public function test_lazy_declaration_and_processing() {
+		$this->simulate_inside_before_woocommerce_init_hook();
+
+		// Goal: Replace $this->sut's ->plugin_util with a mocked version that
+		// doesn't scan the disk, but resolves fake paths for plugin1 and plugin2, and
+		// checks how often get_wp_plugin_id() is called.
+
+		// Mock PluginUtil, including methods that could introduce environmental noise.
+		$plugin_util_mock = $this->getMockBuilder( PluginUtil::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_wp_plugin_id', 'get_woocommerce_aware_plugins' ) )
+			->getMock();
+
+		$plugin_util_mock->expects( $this->exactly( 2 ) ) // Called once per each file during processing.
+			->method( 'get_wp_plugin_id' )
+			->willReturnMap(
+				array(
+					array( '/path/to/plugin1.php', 'plugin1/plugin1.php' ),
+					array( '/path/to/plugin2.php', 'plugin2/plugin2.php' ),
+				)
+			);
+
+		$plugin_util_mock->method( 'get_woocommerce_aware_plugins' )
+			->willReturn( array() ); // Mock to empty to avoid real/environmental plugins in 'uncertain'.
+
+		// Manually set private $proxy on the mock via reflection on the parent class.
+		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
+		// been set, and crash.
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $plugin_util_mock, wc_get_container()->get( LegacyProxy::class ) );
+
+		// Inject the mock into $sut's $plugin_util via reflection.
+		$sut_reflection   = new \ReflectionClass( $this->sut );
+		$plugin_util_prop = $sut_reflection->getProperty( 'plugin_util' );
+		$plugin_util_prop->setAccessible( true );
+		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
+
+		// Queue declarations without processing.
+		$result1 = $this->sut->declare_compatibility( 'mature1', '/path/to/plugin1.php', true );
+		$result2 = $this->sut->declare_compatibility( 'experimental1', '/path/to/plugin2.php', false );
+		$this->assertTrue( $result1 );
+		$this->assertTrue( $result2 );
+
+		// Inspect pending queue - there should be 2 pending declarations.
+		$pending_prop = $sut_reflection->getProperty( 'pending_declarations' );
+		$pending_prop->setAccessible( true );
+		$pending = $pending_prop->getValue( $this->sut );
+		$this->assertCount( 2, $pending );
+
+		$this->simulate_after_woocommerce_init_hook();
+
+		// Query triggers processing.
+		$compat = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
+		$this->assertEquals(
+			array(
+				'compatible'   => array( 'plugin1/plugin1.php' ),
+				'incompatible' => array(),
+				'uncertain'    => array(),
+			),
+			$compat
+		);
+
+		// Pending queue should be cleared after processing.
+		$pending = $pending_prop->getValue( $this->sut );
+		$this->assertEmpty( $pending );
+
+		// Second query shouldn't re-process.
+		$this->sut->get_compatible_plugins_for_feature( 'experimental1' );
+		$pending = $pending_prop->getValue( $this->sut );
+		$this->assertEmpty( $pending );
+	}
+
+	/**
+	 * @testdox Conflicts are detected after lazy processing.
+	 */
+	public function test_lazy_conflict_detection() {
+		$this->simulate_inside_before_woocommerce_init_hook();
+
+		// Goal: Replace $this->sut's ->plugin_util with a mocked version that
+		// doesn't scan the disk, but resolves fake paths for our non-existant plugin.php.
+		$plugin_util_mock = $this->getMockBuilder( PluginUtil::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_wp_plugin_id' ) )
+			->getMock();
+
+		$plugin_util_mock->expects( $this->atLeastOnce() )
+			->method( 'get_wp_plugin_id' )
+			->willReturn( 'plugin/plugin.php' ); // All plugins resolve to the same path (we only register 1 anyway).
+
+		// Set private $proxy on the mock via reflection on parent.
+		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
+		// been set, and crash.
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $plugin_util_mock, wc_get_container()->get( LegacyProxy::class ) );
+
+		// Inject mock into $sut.
+		$sut_reflection   = new \ReflectionClass( $this->sut );
+		$plugin_util_prop = $sut_reflection->getProperty( 'plugin_util' );
+		$plugin_util_prop->setAccessible( true );
+		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
+
+		// Queue conflicting declarations (same file/path).
+		$this->sut->declare_compatibility( 'mature1', '/path/to/plugin.php', true );
+		$this->sut->declare_compatibility( 'mature1', '/path/to/plugin.php', false );
+
+		$this->simulate_after_woocommerce_init_hook();
+
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessageMatches( '/trying to declare itself as incompatible.*already declared itself as compatible/' );
+
+		// Query triggers processing and throws on conflict.
+		$this->sut->get_compatible_features_for_plugin( 'plugin/plugin.php' );
+	}
+
+	/**
+	 * @testdox Deactivation clears compatibility info even after lazy processing.
+	 */
+	public function test_deactivation_after_lazy_processing() {
+		$this->simulate_inside_before_woocommerce_init_hook();
+
+		// Goal: Replace $this->sut's ->plugin_util with a mocked version that
+		// doesn't scan the disk, but resolves fake paths for our non-existant plugin.php.
+		// Also replace get_woocommerce_aware_plugins to simulate deactivation.
+		$plugin_util_mock = $this->getMockBuilder( PluginUtil::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_wp_plugin_id', 'get_woocommerce_aware_plugins' ) )
+			->getMock();
+
+		$plugin_util_mock->expects( $this->atLeastOnce() )
+			->method( 'get_wp_plugin_id' )
+			->willReturn( 'plugin/plugin.php' );
+
+		// Control get_woocommerce_aware_plugins to simulate before/after deactivation.
+		$deactivated   = false; // Flag to toggle in callback.
+		$aware_plugins = array( 'plugin/plugin.php', 'other/plugin.php' ); // Controlled list.
+		$plugin_util_mock->method( 'get_woocommerce_aware_plugins' )
+					->will(
+						$this->returnCallback(
+							function ( $active_only ) use ( &$deactivated, $aware_plugins ) {
+								if ( $deactivated && $active_only ) {
+									// After deactivation, exclude from active-only list.
+									return array_filter(
+										$aware_plugins,
+										function ( $p ) {
+											return 'plugin/plugin.php' !== $p;
+										}
+									);
+								}
+								// Otherwise, return full list (includes inactive if !active_only).
+								return $aware_plugins;
+							}
+						)
+					);
+
+		// Set private $proxy on mock via parent reflection.
+		// If we don't, the mocked PluginUtil will try to call things using ->proxy, which hasn't
+		// been set, and crash.
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $plugin_util_mock, wc_get_container()->get( LegacyProxy::class ) );
+
+		// Inject mock into sut.
+		$sut_reflection   = new \ReflectionClass( $this->sut );
+		$plugin_util_prop = $sut_reflection->getProperty( 'plugin_util' );
+		$plugin_util_prop->setAccessible( true );
+		$plugin_util_prop->setValue( $this->sut, $plugin_util_mock );
+
+		// Queue declaration.
+		$this->sut->declare_compatibility( 'mature1', '/path/to/plugin.php', true );
+
+		$this->simulate_after_woocommerce_init_hook();
+
+		// Trigger processing and check before deactivation.
+		$compat_before = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
+		$this->assertContains( 'plugin/plugin.php', $compat_before['compatible'] );
+		$this->assertNotContains( 'plugin/plugin.php', $compat_before['uncertain'] );
+
+		// Simulate deactivation: set flag (for mock callback) and trigger action (to unset compatibility).
+		$deactivated = true;
+		do_action( 'deactivated_plugin', 'plugin/plugin.php' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
+		// Check after: compatibility unset, so moves to 'uncertain' (still in aware list when ! active_only).
+		$compat_after = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
+		$this->assertNotContains( 'plugin/plugin.php', $compat_after['compatible'] );
+		$this->assertContains( 'plugin/plugin.php', $compat_after['uncertain'] );
 	}
 }

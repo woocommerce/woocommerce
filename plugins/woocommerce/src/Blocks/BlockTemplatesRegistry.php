@@ -1,4 +1,5 @@
 <?php
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -12,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductBrandTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
@@ -47,6 +49,7 @@ class BlockTemplatesRegistry {
 				ProductCategoryTemplate::SLUG      => new ProductCategoryTemplate(),
 				ProductTagTemplate::SLUG           => new ProductTagTemplate(),
 				ProductAttributeTemplate::SLUG     => new ProductAttributeTemplate(),
+				ProductBrandTemplate::SLUG         => new ProductBrandTemplate(),
 				ProductSearchResultsTemplate::SLUG => new ProductSearchResultsTemplate(),
 				CartTemplate::SLUG                 => new CartTemplate(),
 				CheckoutTemplate::SLUG             => new CheckoutTemplate(),
@@ -64,7 +67,7 @@ class BlockTemplatesRegistry {
 				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
 				CheckoutHeaderTemplate::SLUG => new CheckoutHeaderTemplate(),
 			);
-			if ( Features::is_enabled( 'blockified-add-to-cart' ) && wc_current_theme_is_fse_theme() ) {
+			if ( wp_is_block_theme() ) {
 				$product_types = wc_get_product_types();
 				if ( count( $product_types ) > 0 ) {
 					add_filter( 'default_wp_template_part_areas', array( $this, 'register_add_to_cart_with_options_template_part_area' ), 10, 1 );
@@ -85,25 +88,46 @@ class BlockTemplatesRegistry {
 		} else {
 			$template_parts = array();
 		}
-		$this->templates = array_merge( $templates, $template_parts );
 
 		// Init all templates.
-		foreach ( $this->templates as $template ) {
+		foreach ( $templates as $template ) {
 			$template->init();
+
+			// Taxonomy templates are registered automatically by WordPress and
+			// are made available through the Add Template menu.
+			if ( ! $template->is_taxonomy_template ) {
+				$directory          = BlockTemplateUtils::get_templates_directory( 'wp_template' );
+				$template_file_path = $directory . '/' . $template::SLUG . '.html';
+				register_block_template(
+					'woocommerce//' . $template::SLUG,
+					array(
+						'title'       => $template->get_template_title(),
+						'description' => $template->get_template_description(),
+						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+						'content'     => file_get_contents( $template_file_path ),
+					)
+				);
+			}
 		}
+
+		foreach ( $template_parts as $template_part ) {
+			$template_part->init();
+		}
+
+		$this->templates = array_merge( $templates, $template_parts );
 	}
 
 	/**
-	 * Add Add to Cart with Options to the default template part areas.
+	 * Add Add to Cart + Options to the default template part areas.
 	 *
 	 * @param array $default_area_definitions An array of supported area objects.
-	 * @return array The supported template part areas including the Add to Cart with Options one.
+	 * @return array The supported template part areas including the Add to Cart + Options one.
 	 */
 	public function register_add_to_cart_with_options_template_part_area( $default_area_definitions ) {
 		$add_to_cart_with_options_template_part_area = array(
 			'area'        => 'add-to-cart-with-options',
-			'label'       => __( 'Add to Cart with Options', 'woocommerce' ),
-			'description' => __( 'The Add to Cart with Options templates allow defining a different layout for each product type.', 'woocommerce' ),
+			'label'       => __( 'Add to Cart + Options', 'woocommerce' ),
+			'description' => __( 'The Add to Cart + Options templates allow defining a different layout for each product type.', 'woocommerce' ),
 			'icon'        => 'add-to-cart-with-options',
 			'area_tag'    => 'add-to-cart-with-options',
 		);

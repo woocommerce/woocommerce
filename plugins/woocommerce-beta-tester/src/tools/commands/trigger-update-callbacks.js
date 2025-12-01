@@ -8,24 +8,24 @@ import { useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '../data/constants';
+import { store } from '../data';
 
 export const TRIGGER_UPDATE_CALLBACKS_ACTION_NAME =
 	'runSelectedUpdateCallbacks';
 
 export const TriggerUpdateCallbacks = () => {
 	const dbUpdateVersions = useSelect(
-		( select ) => select( STORE_KEY ).getDBUpdateVersions(),
+		( select ) => select( store ).getDBUpdateVersions(),
 		[]
 	);
 	const selectedVersion = useSelect(
 		( select ) =>
-			select( STORE_KEY ).getCommandParams(
+			select( store ).getCommandParams(
 				TRIGGER_UPDATE_CALLBACKS_ACTION_NAME
 			).runSelectedUpdateCallbacks.version,
 		[]
 	);
-	const { updateCommandParams } = useDispatch( STORE_KEY );
+	const { updateCommandParams } = useDispatch( store );
 
 	function onChange( version ) {
 		updateCommandParams( TRIGGER_UPDATE_CALLBACKS_ACTION_NAME, {

@@ -54,7 +54,9 @@ export const generateProductVariations = function* (
 		default_attributes?: ProductDefaultAttribute[];
 		meta_data?: Product[ 'meta_data' ];
 	},
-	data: GenerateRequest,
+	data: GenerateRequest & {
+		meta_data?: Product[ 'meta_data' ];
+	},
 	saveAttributes = true
 ) {
 	const urlParameters = getUrlParameters(
@@ -141,8 +143,18 @@ export function* batchUpdateProductVariations(
 	}
 }
 
+export type CustomActions = {
+	generateProductVariationsRequest: typeof generateProductVariationsRequest;
+	generateProductVariationsError: typeof generateProductVariationsError;
+	generateProductVariationsSuccess: typeof generateProductVariationsSuccess;
+	generateProductVariations: typeof generateProductVariations;
+	batchUpdateProductVariationsError: typeof batchUpdateProductVariationsError;
+	batchUpdateProductVariations: typeof batchUpdateProductVariations;
+};
+
 export type Actions = ReturnType<
 	| typeof generateProductVariationsRequest
 	| typeof generateProductVariationsError
 	| typeof generateProductVariationsSuccess
+	| typeof batchUpdateProductVariationsError
 >;

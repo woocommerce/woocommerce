@@ -333,7 +333,11 @@ class WC_Query {
 		if ( $this->is_showing_page_on_front( $q ) ) {
 
 			// Fix for endpoints on the homepage.
-			if ( ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
+			$current_page_id = absint( $q->get( 'page_id' ) );
+			if ( ! $current_page_id ) {
+				$current_page_id = get_queried_object_id();
+			}
+			if ( ! $this->page_on_front_is( $current_page_id ) ) {
 				$_query = wp_parse_args( $q->query );
 				if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->get_query_vars() ) ) ) {
 					$q->is_page     = true;
@@ -374,7 +378,23 @@ class WC_Query {
 		}
 
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
-		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		$shop_id = wc_get_page_id( 'shop' );
+		$page_id = absint( $q->get( 'page_id' ) );
+
+		// Fallback 1: Check queried object ID if page_id not set.
+		if ( ! $page_id ) {
+			$page_id = get_queried_object_id();
+		}
+
+		// Fallback 2: Slug comparison when page_id still not resolved.
+		if ( ! $page_id && $q->get( 'pagename' ) ) {
+			$shop_page = get_post( $shop_id );
+			if ( $shop_page && $shop_page->post_name === $q->get( 'pagename' ) ) {
+				$page_id = $shop_id;
+			}
+		}
+
+		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && $page_id === $shop_id ) {
 			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
@@ -587,7 +607,15 @@ class WC_Query {
 		// Get ordering from query string unless defined.
 		if ( ! $orderby ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$orderby_value = isset( $_GET['orderby'] ) ? wc_clean( (string) wp_unslash( $_GET['orderby'] ) ) : wc_clean( get_query_var( 'orderby' ) );
+			if ( isset( $_GET['orderby'] ) ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$orderby_value = wc_clean( wp_unslash( $_GET['orderby'] ) );
+				if ( is_array( $orderby_value ) ) {
+					$orderby_value = $orderby_value[0];
+				}
+			} else {
+				$orderby_value = wc_clean( get_query_var( 'orderby' ) );
+			}
 
 			if ( ! $orderby_value ) {
 				if ( is_search() ) {
@@ -605,8 +633,11 @@ class WC_Query {
 
 		// Convert to correct format.
 		$orderby = strtolower( is_array( $orderby ) ? (string) current( $orderby ) : (string) $orderby );
+		// ID can already be added and requires to be capitalized.
+		$orderby = str_replace( ' id', ' ID', $orderby );
 		$order   = strtoupper( is_array( $order ) ? (string) current( $order ) : (string) $order );
-		$args    = array(
+
+		$args = array(
 			'orderby'  => $orderby,
 			'order'    => ( 'DESC' === $order ) ? 'DESC' : 'ASC',
 			'meta_key' => '', // @codingStandardsIgnoreLine
@@ -630,8 +661,9 @@ class WC_Query {
 			case 'rand':
 				$args['orderby'] = 'rand'; // @codingStandardsIgnoreLine
 				break;
+			case 'modified':
 			case 'date':
-				$args['orderby'] = 'date ID';
+				$args['orderby'] = $orderby . ' ID';
 				$args['order']   = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
 				break;
 			case 'price':
@@ -662,8 +694,18 @@ class WC_Query {
 	public function price_filter_post_clauses( $args, $wp_query ) {
 		global $wpdb;
 
+		/**
+		 * Filter whether to add the filter post clauses
+		 *
+		 * @param bool     $is_main_query Whether the current query is 'is_main_query'.
+		 * @param WP_Query $wp_query      The current WP_Query object.
+		 *
+		 * @since 9.9.0
+		 */
+		$enable_filtering = apply_filters( 'woocommerce_enable_post_clause_filtering', $wp_query->is_main_query(), $wp_query );
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $wp_query->is_main_query() || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
+		if ( ! $enable_filtering || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
 			return $args;
 		}
 
@@ -924,6 +966,10 @@ class WC_Query {
 			if ( ! empty( $_GET ) ) {
 				foreach ( $_GET as $key => $value ) {
 					if ( 0 === strpos( $key, 'filter_' ) ) {
+						if ( ! is_string( $value ) ) {
+							continue;
+						}
+
 						$attribute    = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
 						$taxonomy     = wc_attribute_taxonomy_name( $attribute );
 						$filter_terms = ! empty( $value ) ? explode( ',', wc_clean( wp_unslash( $value ) ) ) : array();

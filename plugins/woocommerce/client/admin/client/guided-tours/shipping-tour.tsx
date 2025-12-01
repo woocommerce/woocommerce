@@ -11,7 +11,7 @@ import {
 	useRef,
 	createPortal,
 } from '@wordpress/element';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
@@ -32,7 +32,7 @@ const FLOATER_CLASS =
 
 const SHIPPING_ZONES_SETTINGS_TABLE_CLASS = 'table.wc-shipping-zones';
 
-const WCS_LINK_SELECTOR = 'a[href*="woocommerce-services-settings"]';
+const WCSHIPPING_LINK_SELECTOR = 'a[href*="woocommerce-shipping-settings"]';
 
 const SHIPPING_RECOMMENDATIONS_SELECTOR =
 	'div.woocommerce-recommended-shipping-extensions';
@@ -44,31 +44,24 @@ const useShowShippingTour = () => {
 		businessCountry,
 		isLoading,
 	} = useSelect( ( select ) => {
-		const { hasFinishedResolution, getOption } =
-			select( OPTIONS_STORE_NAME );
+		const { hasFinishedResolution, getOption } = select( optionsStore );
 
 		return {
 			isLoading:
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					CREATED_DEFAULTS_OPTION,
 				] ) &&
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					REVIEWED_DEFAULTS_OPTION,
 				] ) &&
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				! hasFinishedResolution( 'getOption', [
 					'woocommerce_default_country',
 				] ),
 			hasCreatedDefaultShippingZones:
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				getOption( CREATED_DEFAULTS_OPTION ) === 'yes',
 			hasReviewedDefaultShippingOptions:
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				getOption( REVIEWED_DEFAULTS_OPTION ) === 'yes',
 			businessCountry: getCountryCode(
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				getOption( 'woocommerce_default_country' ) as string
 			),
 		};
@@ -217,10 +210,12 @@ const TourFloaterWrapper = ( { step }: { step: number } ) => {
 	);
 };
 
-export const ShippingTour: React.FC< {
+export const ShippingTour = ( {
+	showShippingRecommendationsStep,
+}: {
 	showShippingRecommendationsStep: boolean;
-} > = ( { showShippingRecommendationsStep } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+} ) => {
+	const { updateOptions } = useDispatch( optionsStore );
 	const { show: showTour, isUspsDhlEligible } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
 	const { createNotice } = useDispatch( 'core/notices' );
@@ -343,19 +338,21 @@ export const ShippingTour: React.FC< {
 		},
 	};
 
-	const isWcsSectionPresent = document.querySelector( WCS_LINK_SELECTOR );
+	const isWcShippingSectionPresent = document.querySelector(
+		WCSHIPPING_LINK_SELECTOR
+	);
 
-	if ( isWcsSectionPresent && isUspsDhlEligible ) {
+	if ( isWcShippingSectionPresent && isUspsDhlEligible ) {
 		tourConfig.steps.push( {
 			referenceElements: {
-				desktop: WCS_LINK_SELECTOR,
+				desktop: WCSHIPPING_LINK_SELECTOR,
 			},
 			meta: {
 				name: 'woocommerce-shipping',
 				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
-						'Print USPS and DHL labels straight from your Woo dashboard and save on shipping thanks to discounted rates. You can manage WooCommerce Shipping in this section.',
+						'Print USPS, UPS, and DHL labels straight from your Woo dashboard and save on shipping thanks to discounted rates. You can manage WooCommerce Shipping in this section.',
 						'woocommerce'
 					),
 				},

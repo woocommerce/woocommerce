@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update sample block __experimentalRole to use role instead.

@@ -5,8 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import {
-	IMPORT_STORE_NAME,
-	NOTES_STORE_NAME,
+	importStore,
+	notesStore,
 	QUERY_DEFAULTS,
 	SECOND,
 } from '@woocommerce/data';
@@ -140,9 +140,8 @@ class HistoricalData extends Component {
 
 export default compose( [
 	withSelect( ( select ) => {
-		const { getNotes } = select( NOTES_STORE_NAME );
-		const { getImportStarted, getFormSettings } =
-			select( IMPORT_STORE_NAME );
+		const { getNotes } = select( notesStore );
+		const { getImportStarted, getFormSettings } = select( importStore );
 
 		const notesQuery = {
 			page: 1,
@@ -164,9 +163,9 @@ export default compose( [
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateNote } = dispatch( NOTES_STORE_NAME );
+		const { updateNote } = dispatch( notesStore );
 		const { invalidateResolution, setImportStarted } =
-			dispatch( IMPORT_STORE_NAME );
+			dispatch( importStore );
 
 		return {
 			invalidateResolution,

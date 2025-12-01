@@ -19,7 +19,7 @@ export const Header = ( {
 	return (
 		<VStack
 			className={ clsx(
-				'woocommerce-settings-header edit-site-page-header',
+				'woocommerce-settings-header woocommerce-site-page-header',
 				{
 					'woocommerce-settings-header--has-tabs': hasTabs,
 				}
@@ -27,12 +27,12 @@ export const Header = ( {
 			as="header"
 			spacing={ 0 }
 		>
-			<HStack className="edit-site-page-header__page-title">
+			<HStack className="woocommerce-site-page-header__page-title">
 				<Heading
 					as="h2"
 					level={ 3 }
 					weight={ 500 }
-					className="edit-site-page-header__title"
+					className="woocommerce-site-page-header__title"
 					truncate
 				>
 					{ pageTitle }

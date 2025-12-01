@@ -28,7 +28,7 @@ import { LearnMarketing } from './LearnMarketing';
 import Promotions from '~/marketplace/components/promotions/promotions';
 import './MarketingOverviewMultichannel.scss';
 
-export const MarketingOverviewMultichannel: React.FC = () => {
+export const MarketingOverviewMultichannel = () => {
 	const {
 		loading: loadingIntroductionBanner,
 		isIntroductionBannerDismissed,

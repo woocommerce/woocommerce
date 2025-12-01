@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
-	ONBOARDING_STORE_NAME,
+	onboardingStore,
 	TaskType,
 	useUserPreferences,
 } from '@woocommerce/data';
@@ -29,12 +29,12 @@ export type TaskListItemProps = {
 	};
 };
 
-export const TaskListItem: React.FC< TaskListItemProps > = ( {
+export const TaskListItem = ( {
 	isExpandable = false,
 	isExpanded = false,
 	setExpandedTask,
 	task,
-} ) => {
+}: TaskListItemProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { layoutString } = useLayoutContext();
 
@@ -45,7 +45,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		undoSnoozeTask,
 		visitedTask,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( ONBOARDING_STORE_NAME );
+	} = useDispatch( onboardingStore );
 	const userPreferences = useUserPreferences();
 
 	const {
@@ -187,6 +187,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 					key={ id }
 					title={ title }
 					badge={ badge }
+					inProgress={ false } // In progress design is not supported for "Things to do next" task list.
+					inProgressLabel={ '' } // In progress design is not supported for "Things to do next" task list.
 					content={ content }
 					additionalInfo={ additionalInfo }
 					time={ time }

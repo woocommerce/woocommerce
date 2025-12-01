@@ -95,6 +95,7 @@ export const IntroOptIn = ( {
 				</Button>
 				<div className="woocommerce-profiler-intro-opt-in__footer">
 					<CheckboxControl
+						__nextHasNoMarginBottom
 						className="core-profiler__checkbox"
 						// @ts-expect-error - Type definition is not correct. Label can be a string or JSX.Element.
 						label={ interpolateComponents( {

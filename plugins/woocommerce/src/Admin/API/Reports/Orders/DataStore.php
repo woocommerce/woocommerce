@@ -7,13 +7,12 @@ namespace Automattic\WooCommerce\Admin\API\Reports\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
-use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
-use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Traits\OrderAttributionMeta;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 
 /**
@@ -23,6 +22,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	use OrderAttributionMeta;
 
 	/**
+	 * The cache key for order statuses.
+	 */
+	const ORDERS_STATUSES_ALL_CACHE_KEY = 'woocommerce_analytics_orders_statuses_all';
+
+	/**
 	 * Dynamically sets the date column name based on configuration
 	 *
 	 * @override ReportsDataStore::__construct()
@@ -30,6 +34,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public function __construct() {
 		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
 		parent::__construct();
+	}
+
+	/**
+	 * Set up all the hooks for maintaining data consistency (transients and co).
+	 *
+	 * @internal
+	 */
+	final public static function init() {
+		add_action( 'woocommerce_analytics_update_order_stats', array( __CLASS__, 'maybe_update_order_statuses_cache' ) );
 	}
 
 	/**
@@ -489,8 +502,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						ELSE product_id
 					END
 				)
-			WHERE
-				order_id IN ({$included_order_ids})
+			WHERE order_id IN ({$included_order_ids})
+				AND product_qty > 0
 			",
 			ARRAY_A
 		);
@@ -607,26 +620,50 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get all statuses that have been synced.
 	 *
-	 * @return array Unique order statuses.
+	 * @return string[] Unique order statuses.
 	 */
 	public static function get_all_statuses() {
 		global $wpdb;
 
-		$cache_key = 'orders-all-statuses';
-		$statuses  = Cache::get( $cache_key );
-
+		$statuses = wp_cache_get( self::ORDERS_STATUSES_ALL_CACHE_KEY, 'woocommerce_analytics' );
 		if ( false === $statuses ) {
-			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$table_name = self::get_db_table_name();
-			$statuses   = $wpdb->get_col(
-				"SELECT DISTINCT status FROM {$table_name}"
-			);
-			/* phpcs:enable */
-
-			Cache::set( $cache_key, $statuses );
+			$statuses   = $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT status FROM %i', $table_name ) );
+			wp_cache_set( self::ORDERS_STATUSES_ALL_CACHE_KEY, $statuses, 'woocommerce_analytics', YEAR_IN_SECONDS );
 		}
 
 		return $statuses;
+	}
+
+	/**
+	 * Ensure the order status will present in `get_all_statuses` call result.
+	 *
+	 * @internal
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public static function maybe_update_order_statuses_cache( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( $order ) {
+			$status   = self::normalize_order_status( $order->get_status() );
+			$statuses = self::get_all_statuses();
+			if ( ! in_array( $status, $statuses, true ) ) {
+				$statuses[] = $status;
+				wp_cache_set( self::ORDERS_STATUSES_ALL_CACHE_KEY, $statuses, 'woocommerce_analytics', YEAR_IN_SECONDS );
+			}
+		}
+	}
+
+	/**
+	 * Ensure the order status will present in `get_all_statuses` call result.
+	 *
+	 * @deprecated 10.3.0 Use maybe_update_order_statuses_cache().
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public static function maybe_update_order_statuses_transient( $order_id ) {
+		wc_deprecated_function( __METHOD__, '10.3.0', __CLASS__ . '::maybe_update_order_statuses_cache()' );
+		self::maybe_update_order_statuses_cache( $order_id );
 	}
 
 	/**

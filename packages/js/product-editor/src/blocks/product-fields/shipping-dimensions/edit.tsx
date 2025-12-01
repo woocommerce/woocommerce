@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import {
-	OPTIONS_STORE_NAME,
-	Product,
-	ProductDimensions,
-} from '@woocommerce/data';
+import { optionsStore, Product, ProductDimensions } from '@woocommerce/data';
 import { useEntityProp } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import {
@@ -60,12 +56,10 @@ export function Edit( {
 	const [ highlightSide, setHighlightSide ] = useState< HighlightSides >();
 
 	const { dimensionUnit, weightUnit } = useSelect( ( select ) => {
-		const { getOption } = select( OPTIONS_STORE_NAME );
+		const { getOption } = select( optionsStore );
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			dimensionUnit: getOption( 'woocommerce_dimension_unit' ),
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			weightUnit: getOption( 'woocommerce_weight_unit' ),
+			dimensionUnit: getOption( 'woocommerce_dimension_unit' ) as string,
+			weightUnit: getOption( 'woocommerce_weight_unit' ) as string,
 		};
 	}, [] );
 

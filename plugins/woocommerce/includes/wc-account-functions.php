@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -106,7 +107,7 @@ function wc_get_account_menu_items() {
 		'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
-		'edit-address'    => _n( 'Address', 'Addresses', ( 1 + (int) wc_shipping_enabled() ), 'woocommerce' ),
+		'edit-address'    => _n( 'Address', 'Addresses', ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) ? 2 : 1, 'woocommerce' ),
 		'payment-methods' => __( 'Payment methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		'customer-logout' => __( 'Log out', 'woocommerce' ),
@@ -123,7 +124,7 @@ function wc_get_account_menu_items() {
 	if ( isset( $items['payment-methods'] ) ) {
 		$support_payment_methods = false;
 		foreach ( WC()->payment_gateways->get_available_payment_gateways() as $gateway ) {
-			if ( $gateway->supports( 'add_payment_method' ) || $gateway->supports( 'tokenization' ) ) {
+			if ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHOD ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 				$support_payment_methods = true;
 				break;
 			}

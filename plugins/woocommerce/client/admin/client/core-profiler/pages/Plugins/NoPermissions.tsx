@@ -64,7 +64,7 @@ export const NoPermissionsError = ( {
 						'woocommerce'
 					) }
 					subTitle={ __(
-						'Enhance your store by installing these free business features. No commitment required – you can remove them at any time.',
+						'No commitment required – you can remove them at any time.',
 						'woocommerce'
 					) }
 				/>

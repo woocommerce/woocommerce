@@ -14,7 +14,7 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -89,9 +89,7 @@ function ComboboxControlOption(
 	return <div className="item-wrapper">{ item.label }</div>;
 }
 
-const AttributesComboboxControl: React.FC<
-	AttributesComboboxControlComponent
-> = ( {
+const AttributesComboboxControl = ( {
 	label,
 	help,
 	current = null,
@@ -100,7 +98,7 @@ const AttributesComboboxControl: React.FC<
 	isLoading = false,
 	onAddNew,
 	onChange,
-} ) => {
+}: AttributesComboboxControlComponent ) => {
 	const [ createNewAttributeOption, updateCreateNewAttributeOption ] =
 		useState< ComboboxControlOption >( createNewAttributeOptionDefault );
 
@@ -210,12 +208,9 @@ const AttributesComboboxControl: React.FC<
 
 	return (
 		<div
-			className={ classnames(
-				'woocommerce-attributes-combobox-container',
-				{
-					'no-items': ! options.length,
-				}
-			) }
+			className={ clsx( 'woocommerce-attributes-combobox-container', {
+				'no-items': ! options.length,
+			} ) }
 			ref={ comboRef }
 		>
 			<BaseControl label={ label } help={ help } id={ labelFor }>

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { createElement } from '@wordpress/element';
 import { createRegistry, RegistryProvider } from '@wordpress/data';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -26,7 +25,7 @@ registry.register( coreDataStore );
 // @ts-ignore No types for this exist yet.
 registry.register( blockEditorStore );
 
-export const Basic: React.FC = () => {
+export const Basic = () => {
 	return (
 		<RegistryProvider value={ registry }>
 			<RichTextEditor blocks={ [] } onChange={ () => null } />
@@ -34,7 +33,7 @@ export const Basic: React.FC = () => {
 	);
 };
 
-export const MultipleEditors: React.FC = () => {
+export const MultipleEditors = () => {
 	return (
 		<RegistryProvider value={ registry }>
 			<RichTextEditor blocks={ [] } onChange={ () => null } />

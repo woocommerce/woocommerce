@@ -315,16 +315,17 @@ class WC_Logger implements WC_Logger_Interface {
 	 * Clear entries for a chosen file/source.
 	 *
 	 * @param string $source Source/handle to clear.
+	 * @param bool   $quiet  Whether to suppress the deletion message.
 	 * @return bool
 	 */
-	public function clear( $source = '' ) {
+	public function clear( $source = '', $quiet = false ) {
 		if ( ! $source ) {
 			return false;
 		}
 
 		foreach ( $this->get_handlers() as $handler ) {
 			if ( is_callable( array( $handler, 'clear' ) ) ) {
-				$handler->clear( $source );
+				$handler->clear( $source, $quiet );
 			}
 		}
 

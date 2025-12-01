@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 bootstrap="tests/integration/bootstrap.php"
+		 backupGlobals="false"
+		 colors="true"
+		 convertErrorsToExceptions="true"
+		 convertNoticesToExceptions="true"
+		 convertWarningsToExceptions="true"
+		 verbose="true"
+		 xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+	<testsuites>
+		<testsuite name="Integration">
+			<directory suffix="_Test.php">./tests/integration</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

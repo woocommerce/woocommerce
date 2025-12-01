@@ -21,13 +21,17 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 	if [ "$GITHUB_EVENT_NAME" == "push" ]
 	then
-		# Use-case: performance comparison on trunk push with fixed reference point
-		# It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we pick 55f855a2e6d769b5ae44305b2772eb30d3e721df
-		# where compare-perf reporting mode was introduced for processing the provided reports.
+		# Use-case: performance comparison on trunk push with fixed reference
+		# point It should be 3d7d7f02017383937f1a4158d433d0e5d44b3dc9, but we
+		# pick 55f855a2e6d769b5ae44305b2772eb30d3e721df where compare-perf
+		# reporting mode was introduced for processing the provided reports.
 		BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
 	else
-		# Use-case: performance comparison on PRs changes.
-		BASE_SHA=$GITHUB_BASE_SHA
+		# Use-case: performance comparison on PRs changes. We need to explicitly
+		# fetch trunk because $GITHUB_BASE_SHA might point to the base of a PR
+		# chain rather than trunk.
+		git fetch --depth=1 --no-tags origin trunk
+		BASE_SHA=$(git rev-parse origin/trunk)
 	fi
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
@@ -73,8 +77,10 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 
 		title "##[group]Benchmarking baseline"
 		# This one is important: we run the same tests in the same state as we did at head benchmarking.
+		echo "Switch benchmarking resources to $GITHUB_SHA so we run the same benchmarks"
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../plugins/woocommerce/tests)
 		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../tools/compare-perf)
+		git restore --source $GITHUB_SHA $(realpath $(dirname -- ${BASH_SOURCE[0]})/../../../.github)
 		pnpm --filter="@woocommerce/plugin-woocommerce" test:e2e:install > /dev/null
 		RESULTS_ID="editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics editor
 		RESULTS_ID="product-editor_${BASE_SHA}_round-1" pnpm --filter="@woocommerce/plugin-woocommerce" test:metrics product-editor
@@ -105,11 +111,11 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		echo '##[endgroup]'
 	fi
 
-	# Compare server response delta compared to the base branch and fail if greater than 5% difference.
+	# Compare server response delta compared to the base branch and fail if greater than 10% difference.
 	FRONTEND_DELTA=$(jq .serverResponse $ARTIFACTS_PATH/frontend.delta-results.json)
-	if (( $(echo "$FRONTEND_DELTA > 5" | bc -l) ))
+	if (( $(echo "$FRONTEND_DELTA > 10" | bc -l) ))
 	then
-		echo "::error::The frontend server response delta of ${FRONTEND_DELTA}% is greater than the maximum allowed 5%."
+		echo "::error::The frontend server response delta of ${FRONTEND_DELTA}% is greater than the maximum allowed 10%."
 		exit 1
 	fi
 

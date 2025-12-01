@@ -1,16 +1,11 @@
 /**
  * External dependencies
  */
-import {
-	apiFetch,
-	select,
-	dispatch as depreciatedDispatch,
-} from '@wordpress/data-controls';
+import { apiFetch } from '@wordpress/data-controls';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { DispatchFromMap } from '@automattic/data-stores';
 import { controls } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
-
 /**
  * Internal dependencies
  */
@@ -27,13 +22,8 @@ import {
 	PluginsResponse,
 	PluginNames,
 	JetpackConnectionDataResponse,
+	Plugin,
 } from './types';
-
-// Can be removed in WP 5.9, wp.data is supported in >5.7.
-const dispatch =
-	controls && controls.dispatch ? controls.dispatch : depreciatedDispatch;
-const resolveSelect =
-	controls && controls.resolveSelect ? controls.resolveSelect : select;
 
 class PluginError extends Error {
 	constructor( message: string, public data: unknown ) {
@@ -139,13 +129,16 @@ export function updateJetpackConnectUrl(
 	};
 }
 
-export const createErrorNotice = (
-	errorMessage: string
-): {
-	type: 'CREATE_NOTICE';
-	[ key: string ]: unknown;
-} => {
-	return dispatch( 'core/notices', 'createNotice', 'error', errorMessage );
+export const createErrorNotice = ( errorMessage: string ) => {
+	return controls.dispatch(
+		'core/notices',
+		'createNotice',
+		'error',
+		errorMessage
+	) as {
+		type: 'CREATE_NOTICE';
+		[ key: string ]: unknown;
+	};
 };
 
 export function setPaypalOnboardingStatus(
@@ -217,7 +210,8 @@ function* handlePluginAPIError(
 // Action Creator Generators
 export function* installPlugins(
 	plugins: Partial< PluginNames >[],
-	async = false
+	async = false,
+	source?: string
 ) {
 	yield setIsRequesting( 'installPlugins', true );
 
@@ -225,7 +219,7 @@ export function* installPlugins(
 		const results: InstallPluginsResponse = yield apiFetch( {
 			path: `${ WC_ADMIN_NAMESPACE }/plugins/install`,
 			method: 'POST',
-			data: { plugins: plugins.join( ',' ), async },
+			data: { plugins: plugins.join( ',' ), async, source },
 		} );
 
 		if ( results.data.installed?.length ) {
@@ -274,14 +268,19 @@ export function* activatePlugins( plugins: Partial< PluginNames >[] ) {
 	}
 }
 
-export function* installAndActivatePlugins( plugins: string[] ) {
+export function* installAndActivatePlugins(
+	plugins: string[],
+	source?: string
+) {
 	try {
-		const installations: InstallPluginsResponse = yield dispatch(
+		const installations: InstallPluginsResponse = yield controls.dispatch(
 			STORE_NAME,
 			'installPlugins',
-			plugins
+			plugins,
+			false,
+			source
 		);
-		const activations: InstallPluginsResponse = yield dispatch(
+		const activations: InstallPluginsResponse = yield controls.dispatch(
 			STORE_NAME,
 			'activatePlugins',
 			plugins
@@ -295,14 +294,14 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 			},
 		};
 
-		// If everything was a success and we both installed and activated, make the success message more informative.
+		// If everything was a success and we BOTH installed and activated, make the success message more informative.
 		if (
 			installations.success &&
 			Object.keys( installations.data.results ).length &&
 			activations.success &&
 			activations.data.activated.length
 		) {
-			// If only one plugin was installed, use the plugin details to create a more informative message.
+			// If only ONE plugin was installed, use the plugin details to create a more informative message.
 			if ( activations.data.activated.length === 1 ) {
 				const plugin_slug = activations.data.activated[ 0 ];
 				const plugin = activations.data.plugin_details?.[ plugin_slug ];
@@ -329,6 +328,28 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 					'woocommerce'
 				);
 			}
+		} else if (
+			// If everything was a success, and we ONLY activated ONE plugin, make the success message more informative.
+			installations.success &&
+			! Object.keys( installations.data.results ).length &&
+			activations.success &&
+			activations.data.activated.length === 1
+		) {
+			const plugin_slug = activations.data.activated[ 0 ];
+			const plugin = activations.data.plugin_details?.[ plugin_slug ];
+
+			if ( plugin ) {
+				response.message = sprintf(
+					/* translators: %1$s: plugin name */
+					__( '%1$s was successfully activated.', 'woocommerce' ),
+					plugin.name
+				);
+			} else {
+				response.message = __(
+					'A plugin was successfully activated.',
+					'woocommerce'
+				);
+			}
 		}
 
 		return response;
@@ -340,14 +361,14 @@ export function* installAndActivatePlugins( plugins: string[] ) {
 export function* connectToJetpack(
 	getAdminLink: ( endpoint: string ) => string
 ) {
-	const url: string = yield resolveSelect(
+	const url: string = yield controls.resolveSelect(
 		STORE_NAME,
 		'getJetpackConnectUrl',
 		{
 			redirect_url: getAdminLink( 'admin.php?page=wc-admin' ),
 		}
 	);
-	const error: string = yield resolveSelect(
+	const error: string = yield controls.resolveSelect(
 		STORE_NAME,
 		'getPluginsError',
 		'getJetpackConnectUrl'
@@ -365,10 +386,10 @@ export function* installJetpackAndConnect(
 	getAdminLink: ( endpoint: string ) => string
 ) {
 	try {
-		yield dispatch( STORE_NAME, 'installPlugins', [ 'jetpack' ] );
-		yield dispatch( STORE_NAME, 'activatePlugins', [ 'jetpack' ] );
+		yield controls.dispatch( STORE_NAME, 'installPlugins', [ 'jetpack' ] );
+		yield controls.dispatch( STORE_NAME, 'activatePlugins', [ 'jetpack' ] );
 
-		const url: string = yield dispatch(
+		const url: string = yield controls.dispatch(
 			STORE_NAME,
 			'connectToJetpack',
 			getAdminLink
@@ -389,7 +410,7 @@ export function* connectToJetpackWithFailureRedirect(
 	getAdminLink: ( endpoint: string ) => string
 ) {
 	try {
-		const url: string = yield dispatch(
+		const url: string = yield controls.dispatch(
 			STORE_NAME,
 			'connectToJetpack',
 			getAdminLink
@@ -411,7 +432,7 @@ export function* dismissRecommendedPlugins( type: RecommendedTypes ) {
 	if ( ! SUPPORTED_TYPES.includes( type ) ) {
 		return [];
 	}
-	const plugins: Plugin[] = yield resolveSelect(
+	const plugins: Plugin[] = yield controls.resolveSelect(
 		STORE_NAME,
 		'getRecommendedPlugins',
 		type

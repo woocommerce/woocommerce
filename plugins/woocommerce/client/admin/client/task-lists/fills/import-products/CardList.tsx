@@ -19,7 +19,7 @@ type CardListProps = {
 	items: Card[];
 };
 
-const CardList: React.FC< CardListProps > = ( { items } ) => {
+const CardList = ( { items }: CardListProps ) => {
 	return (
 		<div className="woocommerce-products-card-list">
 			<List items={ items } />

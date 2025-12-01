@@ -290,12 +290,12 @@ We use the `@woocommerce/onboarding` package to render the onboarding task lists
 Using the `@woocommerce/data` package, the following selectors and actions are available to interact with the task lists under the onboarding store.
 
 ```js
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { onboardingStore } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 
-const { snoozeTask } = useDispatch( ONBOARDING_STORE_NAME );
+const { snoozeTask } = useDispatch( onboardingStore );
 const { taskLists } = useSelect( ( select ) => {
-  const { getTaskLists } = select( ONBOARDING_STORE_NAME );
+  const { getTaskLists } = select( onboardingStore );
 
   return {
     taskLists: getTaskLists(),

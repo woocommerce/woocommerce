@@ -11,7 +11,7 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useState, useContext, useEffect } from '@wordpress/element';
+import { useState, useContext } from '@wordpress/element';
 import { __unstableMotion as motion } from '@wordpress/components';
 import {
 	// @ts-expect-error No types for this exist yet.
@@ -43,11 +43,6 @@ import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
 import { Transitional } from '../transitional';
 import { CustomizeStoreContext } from './';
-import { AiOfflineModal } from '~/customize-store/assembler-hub/onboarding-tour/ai-offline-modal';
-import { useQuery } from '@woocommerce/navigation';
-import { FlowType } from '../types';
-import { isOfflineAIFlow } from '../guards';
-import { isWooExpress } from '~/utils/is-woo-express';
 import { trackEvent } from '../tracking';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
 import './gutenberg-styles/layout.scss';
@@ -59,21 +54,7 @@ const ANIMATION_DURATION = 0.5;
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
 
-	const { sendEvent, currentState, context } = useContext(
-		CustomizeStoreContext
-	);
-
-	const { customizing } = useQuery();
-
-	const [ showAiOfflineModal, setShowAiOfflineModal ] = useState(
-		isOfflineAIFlow( context.flowType ) && customizing !== 'true'
-	);
-
-	useEffect( () => {
-		setShowAiOfflineModal(
-			isOfflineAIFlow( context.flowType ) && customizing !== 'true'
-		);
-	}, [ context.flowType, customizing ] );
+	const { currentState } = useContext( CustomizeStoreContext );
 
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
@@ -89,13 +70,11 @@ export const Layout = () => {
 		// Click on "Take a tour" button
 		trackEvent( 'customize_your_store_assembler_hub_tour_start' );
 		setShowWelcomeTour( false );
-		setShowAiOfflineModal( false );
 	};
 
 	const skipTour = () => {
 		trackEvent( 'customize_your_store_assembler_hub_tour_skip' );
 		onClose();
-		setShowAiOfflineModal( false );
 	};
 
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
@@ -110,7 +89,6 @@ export const Layout = () => {
 	const { record: template } = useEditedEntityRecord();
 	const { id: templateId, type: templateType } = template;
 
-	const [ isSurveyOpen, setSurveyOpen ] = useState( false );
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
 	if (
@@ -125,16 +103,7 @@ export const Layout = () => {
 					type={ templateType }
 					id={ templateId }
 				>
-					<Transitional
-						sendEvent={ sendEvent }
-						isWooExpress={ isWooExpress() }
-						isSurveyOpen={ isSurveyOpen }
-						setSurveyOpen={ setSurveyOpen }
-						hasCompleteSurvey={
-							!! context?.transitionalScreen?.hasCompleteSurvey
-						}
-						aiOnline={ context?.flowType === FlowType.AIOnline }
-					/>
+					<Transitional />
 				</EntityProvider>
 			</EntityProvider>
 		);
@@ -246,24 +215,12 @@ export const Layout = () => {
 								) }
 							</div>
 						</div>
-						{ ! isEditorLoading &&
-							shouldTourBeShown &&
-							( FlowType.AIOnline === context.flowType ||
-								FlowType.noAI === context.flowType ) && (
-								<OnboardingTour
-									skipTour={ skipTour }
-									takeTour={ takeTour }
-									onClose={ onClose }
-									flowType={ context.flowType }
-									{ ...onboardingTourProps }
-								/>
-							) }
-
-						{ ! isEditorLoading && showAiOfflineModal && (
-							<AiOfflineModal
-								shouldTourBeShown={ shouldTourBeShown }
+						{ ! isEditorLoading && shouldTourBeShown && (
+							<OnboardingTour
 								skipTour={ skipTour }
 								takeTour={ takeTour }
+								onClose={ onClose }
+								{ ...onboardingTourProps }
 							/>
 						) }
 					</EntityProvider>

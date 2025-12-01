@@ -1,0 +1,57 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-checkbox-list",
+	"title": "List",
+	"description": "Display a list of filter options.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filter-attribute",
+		"woocommerce/product-filter-status",
+		"woocommerce/product-filter-taxonomy",
+		"woocommerce/product-filter-rating"
+	],
+	"supports": {
+		"interactivity": true
+	},
+	"usesContext": [ "filterData" ],
+	"attributes": {
+		"optionElementBorder": {
+			"type": "string",
+			"default": ""
+		},
+		"customOptionElementBorder": {
+			"type": "string",
+			"default": ""
+		},
+		"optionElementSelected": {
+			"type": "string",
+			"default": ""
+		},
+		"customOptionElementSelected": {
+			"type": "string",
+			"default": ""
+		},
+		"optionElement": {
+			"type": "string",
+			"default": ""
+		},
+		"customOptionElement": {
+			"type": "string",
+			"default": ""
+		},
+		"labelElement": {
+			"type": "string",
+			"default": ""
+		},
+		"customLabelElement": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"viewScriptModule": "woocommerce/product-filter-checkbox-list",
+	"style": "file:../woocommerce/product-filter-checkbox-list-style.css",
+	"editorStyle": "file:../woocommerce/product-filter-checkbox-list-editor.css"
+}

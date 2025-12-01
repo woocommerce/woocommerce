@@ -365,6 +365,24 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Trim zeros and round.
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
 
+		// Use a null value.
+		$this->assertEquals( '', wc_format_decimal( null ) );
+
+		// DP of zero, null value.
+		$this->assertEquals( '', wc_format_decimal( null, 0 ) );
+
+		// DP of zero, zero value.
+		$this->assertEquals( '0', wc_format_decimal( '0', false ) );
+
+		// DP of two, zero value.
+		$this->assertEquals( '0.00', wc_format_decimal( '0', 2 ) );
+
+		// DP false, empty value.
+		$this->assertEquals( '', wc_format_decimal( '', false ) );
+
+		// DP of zero, empty value.
+		$this->assertEquals( '', wc_format_decimal( '', 0 ) );
+
 		update_option( 'woocommerce_price_num_decimals', '8' );
 
 		// Floats.
@@ -418,7 +436,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_coupon_code() {
-		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'FOO#bar<script>alert();</script>' ) );
+		$this->assertEquals( 'foo#baralert();', wc_format_coupon_code( 'foo#bar<script>alert();</script>' ) );
 	}
 
 	/**
@@ -604,6 +622,9 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// Negative price.
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi>-<span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( -1.17 ) );
+
+		// Aria hidden option.
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi>-<span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( -1.17, array( 'aria-hidden' => true ) ) );
 
 		// Bogus prices.
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( null ) );
@@ -941,7 +962,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_price_range() {
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span> &ndash; <span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span>', wc_format_price_range( '10', '5' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span> <span aria-hidden="true">&ndash;</span> <span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span><span class="screen-reader-text">Price range: &#36;10.00 through &#36;5.00</span>', wc_format_price_range( '10', '5' ) );
 	}
 
 	/**
@@ -1080,5 +1101,39 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( 'a-valid-slug', wc_sanitize_endpoint_slug( 'a-valid-slug' ) );
 		$this->assertEquals( 'an-invalid-slug', wc_sanitize_endpoint_slug( 'An invalid slug' ) );
 		$this->assertEquals( 'case-slug', wc_sanitize_endpoint_slug( 'case-SLUG' ) );
+	}
+
+	/**
+	 * Test wc_remove_non_displayable_chars().
+	 *
+	 * @since 9.9.0
+	 */
+	public function test_wc_remove_non_displayable_chars() {
+		// Basic string with no special characters (should remain unchanged).
+		$this->assertEquals( 'Hello World', wc_remove_non_displayable_chars( 'Hello World' ) );
+
+		// String with soft hyphen (U+00AD), should be removed.
+		$this->assertEquals( 'HelloWorld', wc_remove_non_displayable_chars( "Hello\xC2\xADWorld" ) );
+
+		// String with zero-width space (U+200B), should be removed.
+		$this->assertEquals( 'HelloWorld', wc_remove_non_displayable_chars( "Hello\xE2\x80\x8BWorld" ) );
+
+		// String with directional markers (U+202A - U+202E), should be removed.
+		$this->assertEquals( '123', wc_remove_non_displayable_chars( "\xE2\x80\xAA123\xE2\x80\xAC" ) );
+
+		// String with Byte Order Mark (U+FEFF), should be removed.
+		$this->assertEquals( 'Test', wc_remove_non_displayable_chars( "\xEF\xBB\xBFTest" ) );
+
+		// String with interlinear annotation characters (U+FFF9 - U+FFFB), should be removed.
+		$this->assertEquals( 'Annotation', wc_remove_non_displayable_chars( "Anno\xEF\xBF\xB9tation" ) );
+
+		// String with a mix of removable and non-removable characters.
+		$this->assertEquals( 'Valid 123 Address ', wc_remove_non_displayable_chars( "\xE2\x80\x8BValid 123 Address\xC2\xA0" ) );
+
+		// String with non-breaking space (U+00A0), should be preserved.
+		$this->assertEquals( "Hello\xC2\xA0World", wc_remove_non_displayable_chars( "Hello\xC2\xA0World" ) );
+
+		// String with word joiner (U+2060), should be preserved.
+		$this->assertEquals( "Join\xE2\x81\xA0Me", wc_remove_non_displayable_chars( "Join\xE2\x81\xA0Me" ) );
 	}
 }

@@ -7,18 +7,18 @@ import { useDispatch, useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { STORE_KEY } from '../data/constants';
+import { store } from '../data';
 
 export const TRIGGER_CRON_ACTION_NAME = 'runSelectedCronJob';
 
 export const TriggerCronJob = () => {
 	const { cronList } = useSelect( ( select ) => {
-		const { getCronJobs } = select( STORE_KEY );
+		const { getCronJobs } = select( store );
 		return {
 			cronList: getCronJobs(),
 		};
 	} );
-	const { updateCommandParams } = useDispatch( STORE_KEY );
+	const { updateCommandParams } = useDispatch( store );
 
 	function onCronChange( selectedValue ) {
 		const { hook, signature } = cronList[ selectedValue ];

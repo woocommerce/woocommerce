@@ -1,0 +1,62 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"styles": {
+		"blocks": {
+			"core/button": {
+				"variations": {}
+			},
+			"core/quote": {
+				"border": {
+					"style": "solid",
+					"width": "0 0 0 1px",
+					"color": "currentColor"
+				},
+				"spacing": {
+					"margin": {
+						"right": "0",
+						"left": "0"
+					},
+					"padding": {
+						"top": "20px",
+						"right": "20px",
+						"bottom": "20px",
+						"left": "20px"
+					}
+				},
+				"typography": {
+					"fontSize": "20px"
+				},
+				"elements": {
+					"cite": {
+						"typography": {
+							"fontSize": "13px",
+							"fontStyle": "italic",
+							"fontWeight": "300"
+						}
+					}
+				},
+				"css": "&.has-text-align-right { border-width: 0 1px 0 0; } &.has-text-align-center { border-width: 0; border-inline: 0; padding-inline: 0; }",
+				"variations": {}
+			},
+			"core/table": {
+				"spacing": {
+					"margin": {
+						"top": "0",
+						"bottom": "0"
+					},
+					"padding": {
+						"top": "10px",
+						"right": "10px",
+						"bottom": "10px",
+						"left": "10px"
+					}
+				},
+				"typography": {},
+				"border": {},
+				"css": "& table { border-collapse: collapse; width: 100%; } & th, & td { border: 1px solid currentColor; padding: 8px; } & thead th { font-weight: bold; } & .has-text-align-left { text-align: left; } & .has-text-align-center { text-align: center; } & .has-text-align-right { text-align: right; }",
+				"variations": {}
+			}
+		}
+	}
+}

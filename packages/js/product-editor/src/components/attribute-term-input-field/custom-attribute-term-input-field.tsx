@@ -30,9 +30,13 @@ function isNewTermItem(
 	return item !== null && typeof item === 'object' && !! item.label;
 }
 
-export const CustomAttributeTermInputField: React.FC<
-	CustomAttributeTermInputFieldProps
-> = ( { value = [], onChange, placeholder, disabled, label } ) => {
+export const CustomAttributeTermInputField = ( {
+	value = [],
+	onChange,
+	placeholder,
+	disabled,
+	label,
+}: CustomAttributeTermInputFieldProps ) => {
 	const [ listItems, setListItems ] =
 		useState< Array< string | NewTermItem > >( value );
 

@@ -9,7 +9,7 @@ import { controls, dispatch } from '@wordpress/data';
  */
 import TYPES from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { STORE_NAME } from './constants';
+import { store } from './';
 
 import { DeprecatedTasks } from './deprecated-tasks';
 import { STORE_NAME as OPTIONS_STORE_NAME } from '../options/constants';
@@ -25,6 +25,7 @@ import {
 	CoreProfilerCompletedSteps,
 } from './types';
 import { Plugin, PluginNames } from '../plugins/types';
+import { optionsStore } from '..';
 
 export function getFreeExtensionsError( error: unknown ) {
 	return {
@@ -338,11 +339,10 @@ export function* updateProfileItems( items: ProfileItems ) {
 		yield setIsRequesting( 'updateProfileItems', false );
 		throw error;
 	} finally {
-		yield dispatch( OPTIONS_STORE_NAME ).invalidateResolution(
-			'getOption',
-			[ 'woocommerce_onboarding_profile' ]
-		);
-		yield dispatch( STORE_NAME ).invalidateResolution( 'getProfileItems' );
+		yield dispatch( optionsStore ).invalidateResolution( 'getOption', [
+			'woocommerce_onboarding_profile',
+		] );
+		yield dispatch( store ).invalidateResolution( 'getProfileItems', [] );
 	}
 }
 
@@ -371,14 +371,17 @@ export function* updateCoreProfilerStep( step: CoreProfilerStep ) {
 		yield setIsRequesting( 'updateCoreProfilerStep', false );
 		throw error;
 	} finally {
-		yield dispatch( STORE_NAME ).invalidateResolution(
-			'getProfileProgress'
+		yield dispatch( store ).invalidateResolution(
+			'getProfileProgress',
+			[]
 		);
-		yield dispatch( STORE_NAME ).invalidateResolution(
-			'getCoreProfilerCompletedSteps'
+		yield dispatch( store ).invalidateResolution(
+			'getCoreProfilerCompletedSteps',
+			[]
 		);
-		yield dispatch( STORE_NAME ).invalidateResolution(
-			'getMostRecentCoreProfilerStep'
+		yield dispatch( store ).invalidateResolution(
+			'getMostRecentCoreProfilerStep',
+			[]
 		);
 	}
 }
@@ -524,7 +527,10 @@ export function* actionTask( id: string ) {
 }
 
 export function* installAndActivatePluginsAsync(
-	plugins: Partial< PluginNames >[]
+	plugins: Partial< PluginNames >[],
+	// Indicate the origin of the installation request (e.g., core-profiler, marketplace)
+	// this can be used in the backend to track or do some specific actions based on the source.
+	source?: string
 ) {
 	yield setIsRequesting( 'installAndActivatePluginsAsync', true );
 
@@ -533,7 +539,7 @@ export function* installAndActivatePluginsAsync(
 			{
 				path: `${ WC_ADMIN_NAMESPACE }/onboarding/plugins/install-and-activate-async`,
 				method: 'POST',
-				data: { plugins },
+				data: { plugins, source },
 			}
 		);
 
@@ -542,6 +548,31 @@ export function* installAndActivatePluginsAsync(
 		throw error;
 	} finally {
 		yield setIsRequesting( 'installAndActivatePluginsAsync', false );
+	}
+}
+
+export function* updateStoreCurrencyAndMeasurementUnits( countryCode: string ) {
+	yield setIsRequesting( 'updateStoreCurrencyAndMeasurementUnits', true );
+
+	try {
+		const results: {
+			results: null;
+			status: string;
+		} = yield apiFetch( {
+			path: `${ WC_ADMIN_NAMESPACE }/onboarding/profile/update-store-currency-and-measurement-units`,
+			method: 'POST',
+			data: {
+				country_code: countryCode,
+			},
+		} );
+		return results;
+	} catch ( error ) {
+		throw error;
+	} finally {
+		yield setIsRequesting(
+			'updateStoreCurrencyAndMeasurementUnits',
+			false
+		);
 	}
 }
 

@@ -156,7 +156,6 @@ export function DownloadsMenuItem( {
 					<MenuGroup>
 						<MediaUpload
 							modalClass={ MODAL_CLASS_NAME }
-							// @ts-expect-error multiple also accepts string.
 							multiple={ 'add' }
 							value={ downloadsIds }
 							onSelect={ handleMediaUploadSelect }

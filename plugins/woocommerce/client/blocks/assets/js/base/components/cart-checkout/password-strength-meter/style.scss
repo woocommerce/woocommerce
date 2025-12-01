@@ -1,0 +1,82 @@
+.wc-block-components-password-strength {
+	display: flex;
+	flex-direction: row;
+	gap: $gap-smaller;
+	height: 1em;
+	padding: $gap-smaller 0 0 0;
+	@include font-size(smaller);
+	align-items: center;
+	line-height: 1;
+	text-align: right;
+
+	&.hidden {
+		opacity: 0;
+	}
+	.wc-block-components-password-strength__meter {
+		margin: 0;
+		width: 100%;
+		display: block;
+		height: $gap-smaller;
+		border-radius: calc($gap-smaller / 2);
+		border: 0;
+		background-color: $universal-border-light;
+		color: $alert-red;
+
+		&::-webkit-meter-bar,
+		&::-webkit-meter-inner-element {
+			background: none;
+			border: 0;
+			height: $gap-smaller;
+			vertical-align: middle;
+		}
+		&::-webkit-meter-optimum-value,
+		&::-webkit-meter-even-less-good-value,
+		&::-webkit-meter-suboptimum-value {
+			background: none;
+			background-color: currentColor;
+			transition: 0.2s ease;
+			border-radius: calc($gap-smaller / 2);
+			border: 0;
+			height: $gap-smaller;
+			vertical-align: middle;
+		}
+
+		&:-moz-meter-optimum::-moz-meter-bar,
+		&:-moz-meter-sub-optimum::-moz-meter-bar,
+		&:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+			background: none;
+			background-color: currentColor;
+			transition: 0.2s ease;
+			border-radius: calc($gap-smaller / 2);
+			border: 0;
+			height: $gap-smaller;
+			vertical-align: middle;
+		}
+	}
+	.wc-block-components-password-strength__result {
+		color: $alert-red;
+		&::after {
+			content: "\00a0 ";
+		}
+	}
+	.wc-block-components-password-strength__meter[value="1"],
+	.wc-block-components-password-strength__meter[value="1"]
+		+ .wc-block-components-password-strength__result {
+		color: $alert-red;
+	}
+	.wc-block-components-password-strength__meter[value="2"],
+	.wc-block-components-password-strength__meter[value="2"]
+		+ .wc-block-components-password-strength__result {
+		color: $alert-red;
+	}
+	.wc-block-components-password-strength__meter[value="3"],
+	.wc-block-components-password-strength__meter[value="3"]
+		+ .wc-block-components-password-strength__result {
+		color: $alert-yellow;
+	}
+	.wc-block-components-password-strength__meter[value="4"],
+	.wc-block-components-password-strength__meter[value="4"]
+		+ .wc-block-components-password-strength__result {
+		color: $alert-green;
+	}
+}

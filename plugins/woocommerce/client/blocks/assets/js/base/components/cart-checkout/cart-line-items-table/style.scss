@@ -1,0 +1,200 @@
+table.wc-block-cart-items,
+table.wc-block-cart-items th,
+table.wc-block-cart-items td {
+	// Override Storefront theme gray table background.
+	background: none !important;
+	// Remove borders on default themes.
+	border: 0;
+	margin: 0;
+}
+
+.editor-styles-wrapper table.wc-block-cart-items,
+table.wc-block-cart-items {
+	width: 100%;
+
+	.wc-block-cart-items__header {
+		@include font-regular-locked;
+		text-transform: uppercase;
+
+		.wc-block-cart-items__header-image {
+			width: 80px;
+		}
+		.wc-block-cart-items__header-product {
+			visibility: hidden;
+		}
+		.wc-block-cart-items__header-total {
+			width: 100px;
+			text-align: right;
+		}
+		th {
+			font-weight: 500;
+		}
+	}
+	.wc-block-cart-items__row {
+		.wc-block-cart-item__wrap > *,
+		.wc-block-components-quantity-selector {
+			margin-bottom: $gap-smaller * 1.25;
+		}
+
+		.wc-block-cart-item__wrap > *:last-child {
+			margin-bottom: 0;
+		}
+
+		.wc-block-cart-item__image img {
+			width: 100%;
+			margin: 0;
+		}
+		.wc-block-cart-item__prices {
+			@include font-regular-locked;
+		}
+
+		.wc-block-cart-item__quantity {
+			display: flex;
+			flex-direction: column;
+			align-items: start;
+
+			.wc-block-cart-item__remove-link {
+				@include link-button();
+				@include hover-effect();
+				@include font-size(smaller);
+
+				text-transform: none;
+				white-space: nowrap;
+				&[hidden] {
+					display: none;
+				}
+			}
+		}
+		.wc-block-components-product-name {
+			@include font-regular-locked;
+			display: block;
+			max-width: max-content;
+			line-height: 1.4;
+			&[hidden] {
+				display: none;
+			}
+		}
+		.wc-block-cart-item__total {
+			@include font-regular-locked;
+			text-align: right;
+			line-height: 1.8;
+		}
+
+		&.is-disabled {
+			opacity: 0.5;
+			pointer-events: none;
+			transition: opacity 200ms ease;
+		}
+	}
+}
+
+@mixin cart-items-table-styles() {
+	table.wc-block-cart-items {
+		td {
+			padding: 0;
+			margin: 0;
+		}
+		.wc-block-cart-items__header {
+			display: none;
+		}
+		.wc-block-cart-item__remove-link {
+			display: none;
+		}
+		&:not(.wc-block-mini-cart-items):not(:last-child) {
+			.wc-block-cart-items__row {
+				border-bottom: 1px solid $universal-border-light;
+			}
+		}
+		.wc-block-cart-items__row {
+			display: grid;
+			grid-template-columns: 80px 132px;
+			padding: $gap 0;
+
+			.wc-block-cart-item__image {
+				grid-column-start: 1;
+				grid-row-start: 1;
+				padding-right: $gap;
+			}
+			.wc-block-cart-item__product {
+				grid-column-start: 2;
+				grid-column-end: 4;
+				grid-row-start: 1;
+				justify-self: stretch;
+				padding: 0;
+			}
+			.wc-block-cart-item__quantity {
+				grid-column-start: 1;
+				grid-row-start: 2;
+				vertical-align: bottom;
+				padding-right: $gap;
+				align-self: end;
+				padding-top: 0;
+			}
+			.wc-block-cart-item__total {
+				grid-row-start: 1;
+
+				.wc-block-components-formatted-money-amount {
+					display: inline-block;
+				}
+			}
+		}
+	}
+}
+
+// Styles for the cart block; we are targeting the cart block because it has a progressive loading enabled
+// and we want to prevent content jumping before the is- classes are applied
+@include cart-checkout-below-large-container {
+	.wc-block-cart {
+		@include cart-items-table-styles();
+	}
+}
+
+// Styles for the mini cart block which is not a container and still uses the `is-` classes
+.is-medium,
+.is-small,
+.is-mobile {
+	@include cart-items-table-styles();
+}
+
+@include cart-checkout-large-container {
+	.wc-block-cart__main {
+		.wc-block-cart-items {
+			border-spacing: 0;
+			border-bottom: 1px solid $universal-border-light;
+
+			th {
+				padding: $gap-smaller $gap $gap-small 0;
+				white-space: nowrap;
+			}
+			td {
+				border-top: 1px solid $universal-border-light;
+				padding: $gap * 1.25 0 $gap * 1.25 $gap;
+				vertical-align: top;
+			}
+			th:last-child {
+				padding-right: $gap;
+			}
+			td:last-child {
+				padding-right: $gap;
+			}
+		}
+	}
+}
+
+@include cart-checkout-large-container {
+	.wc-block-cart {
+		margin-bottom: 3em;
+
+		&.has-dark-controls {
+			.wc-block-cart-items {
+				border-color: $input-border-dark;
+				th {
+					color: $input-text-dark;
+				}
+				td {
+					border-color: $input-border-dark;
+				}
+			}
+		}
+	}
+}

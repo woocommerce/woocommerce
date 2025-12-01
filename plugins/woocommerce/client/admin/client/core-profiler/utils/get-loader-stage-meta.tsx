@@ -21,6 +21,13 @@ const LightbulbStage = {
 		{
 			label: __( '#FunWooFact: ', 'woocommerce' ),
 			text: __(
+				'Explore powerful extensions and themes at WooCommerce.com to enhance your store.',
+				'woocommerce'
+			),
+		},
+		{
+			label: __( '#FunWooFact: ', 'woocommerce' ),
+			text: __(
 				'The Woo team is made up of over 350 talented individuals, distributed across 30+ countries.',
 				'woocommerce'
 			),

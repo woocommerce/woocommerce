@@ -8,8 +8,15 @@ import {
 	MenuGroup,
 	MenuItem as OriginalMenuItem,
 } from '@wordpress/components';
-import { Icon, commentAuthorAvatar, external, linkOff } from '@wordpress/icons';
+import {
+	Icon,
+	commentAuthorAvatar,
+	external,
+	linkOff,
+	chevronDown,
+} from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -27,21 +34,30 @@ interface MenuItemProps extends ComponentProps< typeof OriginalMenuItem > {
 
 const MenuItem = ( props: MenuItemProps ) => <OriginalMenuItem { ...props } />;
 
-export default function HeaderAccount(): JSX.Element {
+interface HeaderAccountProps {
+	page?: string;
+}
+
+export default function HeaderAccount( {
+	page = 'wc-admin',
+}: HeaderAccountProps ): JSX.Element {
 	const [ isModalOpen, setIsModalOpen ] = useState( false );
+	const [ useDefaultAvatar, setUseDefaultAvatar ] = useState( false );
+
 	const openModal = () => setIsModalOpen( true );
 
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 	const isConnected = wccomSettings?.isConnected ?? false;
-	const connectionURL = connectUrl();
+	const connectionURL = connectUrl( page );
 	const userEmail = wccomSettings?.userEmail;
 	const avatarURL = wccomSettings?.userAvatar ?? commentAuthorAvatar;
 
 	const accountURL = MARKETPLACE_HOST + '/my-dashboard/';
 	const accountOrConnect = isConnected ? accountURL : connectionURL;
+	const isInApp = page === 'wc-addons';
 
 	const avatar = () => {
-		if ( ! isConnected ) {
+		if ( ! isConnected || useDefaultAvatar ) {
 			return commentAuthorAvatar;
 		}
 
@@ -50,13 +66,43 @@ export default function HeaderAccount(): JSX.Element {
 				src={ avatarURL }
 				alt=""
 				className="woocommerce-marketplace__menu-avatar-image"
+				onError={ () => setUseDefaultAvatar( true ) }
 			/>
 		);
 	};
 
+	const dropdownTrigger = () => {
+		if ( ! isInApp ) {
+			return avatar();
+		}
+
+		return (
+			<span className="woocommerce-marketplace__header-account-trigger">
+				{ avatar() }
+				<span
+					className="woocommerce-marketplace__header-account-trigger__email"
+					title={
+						isConnected
+							? userEmail
+							: __( 'Connect to WooCommerce.com', 'woocommerce' )
+					}
+				>
+					{ isConnected
+						? userEmail
+						: __( 'Connect to WooCommerce.com', 'woocommerce' ) }
+				</span>
+				<Icon
+					icon={ chevronDown }
+					size={ 24 }
+					className="woocommerce-marketplace__header-account-trigger__expand-icon"
+				/>
+			</span>
+		);
+	};
+
 	const connectionStatusText = isConnected
-		? __( 'Connected', 'woocommerce' )
-		: __( 'Not Connected', 'woocommerce' );
+		? __( 'Connected to WooCommerce.com', 'woocommerce' )
+		: __( 'Connect to WooCommerce.com', 'woocommerce' );
 
 	const connectionDetails = () => {
 		if ( isConnected ) {
@@ -96,37 +142,80 @@ export default function HeaderAccount(): JSX.Element {
 	return (
 		<>
 			<DropdownMenu
-				className="woocommerce-marketplace__user-menu"
-				icon={ avatar() }
+				className="woocommerce-layout__activity-panel-tab woocommerce-marketplace__user-menu"
+				icon={ dropdownTrigger() }
 				label={ __( 'User options', 'woocommerce' ) }
+				toggleProps={ {
+					className: 'woocommerce-layout__activity-panel-tab',
+					onClick: () =>
+						recordEvent( 'header_account_click', { page } ),
+				} }
+				popoverProps={ {
+					className: 'woocommerce-layout__activity-panel-popover',
+				} }
 			>
 				{ () => (
 					<>
 						<MenuGroup
 							className="woocommerce-layout__homescreen-display-options"
-							label={ connectionStatusText }
+							label={
+								isInApp && ! isConnected
+									? undefined
+									: connectionStatusText
+							}
 						>
 							<MenuItem
 								className="woocommerce-marketplace__menu-item"
 								href={ accountOrConnect }
+								onClick={ () => {
+									if ( isConnected ) {
+										recordEvent(
+											'header_account_view_click',
+											{ page }
+										);
+									} else {
+										recordEvent(
+											'header_account_connect_click',
+											{ page }
+										);
+									}
+								} }
 							>
 								{ connectionDetails() }
 							</MenuItem>
-							<MenuItem href={ accountURL }>
-								<Icon
-									icon={ external }
-									size={ 24 }
-									className="woocommerce-marketplace__menu-icon"
-								/>
-								{ __(
-									'WooCommerce.com account',
-									'woocommerce'
-								) }
-							</MenuItem>
+							{ page === 'wc-addons' && ! isConnected && (
+								<MenuItem
+									href={ accountURL }
+									onClick={ () =>
+										recordEvent(
+											'header_account_view_click',
+											{ page }
+										)
+									}
+								>
+									<Icon
+										icon={ external }
+										size={ 24 }
+										className="woocommerce-marketplace__menu-icon"
+									/>
+									{ __(
+										'WooCommerce.com account',
+										'woocommerce'
+									) }
+								</MenuItem>
+							) }
 						</MenuGroup>
 						{ isConnected && (
 							<MenuGroup className="woocommerce-layout__homescreen-display-options">
-								<MenuItem onClick={ openModal }>
+								<MenuItem
+									onClick={ () => {
+										recordEvent(
+											'header_account_disconnect_click',
+											{ page }
+										);
+										openModal();
+									} }
+								>
 									<Icon
 										icon={ linkOff }
 										size={ 24 }

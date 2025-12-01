@@ -1,0 +1,153 @@
+@import "../../../base/components/skeleton/style";
+@import "../../../base/components/quantity-selector/style";
+
+.wc-block-add-to-cart-form {
+	/**
+	* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
+	*
+	* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
+	*/
+	.input-text {
+		font-size: var(--wp--preset--font-size--small);
+		padding: 0.9rem 1.1rem;
+	}
+}
+
+/*
+ * Set the layout of the add-to-cart form to a grid.
+ */
+.wp-block-woocommerce-add-to-cart-form {
+	width: unset;
+	.variations_button,
+	form.cart {
+		&::before {
+			grid-column: 1 / -1;
+		}
+		grid-template-columns: min-content auto auto;
+		grid-auto-flow: column;
+		display: grid;
+
+		.quantity {
+			display: inline-flex;
+			align-items: stretch;
+		}
+
+		> *:not(.quantity) {
+			// Hack to ensure input + button stat on the same row, together.
+			grid-column: 1 / -1;
+		}
+
+		> .single_add_to_cart_button {
+			justify-self: start;
+			grid-column: 2 / 3;
+		}
+
+		> .quantity:not(.wc-block-components-quantity-selector) .qty {
+			margin-right: 0.5em;
+			padding: 0 5px;
+		}
+
+		&.grouped_form {
+			width: fit-content;
+			word-break: normal;
+			button[type="submit"] {
+				grid-column: 1 / -1;
+			}
+		}
+	}
+
+	.quantity {
+		margin-right: 4px;
+		// WooCommerce core styles: https://github.com/woocommerce/woocommerce/blob/c9f62609155825cd817976c7611b9b0415e90f2f/plugins/woocommerce/client/legacy/css/woocommerce.scss/#L111-L112
+		.qty {
+			box-sizing: content-box;
+			width: 3.631em;
+			text-align: center;
+		}
+	}
+}
+
+// Stepper CSS
+div.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
+	form.cart {
+		div.wc-block-components-quantity-selector.quantity {
+			display: inline-flex;
+			width: unset;
+			background-color: #fff;
+			margin-right: 0.5em;
+			margin-bottom: 0;
+			grid-column: 1;
+		}
+	}
+
+	// Grouped Product
+	table.woocommerce-grouped-product-list.group_table > tbody {
+		td .wc-block-components-quantity-selector {
+			input.input-text.qty.text {
+				min-width: 60px;
+			}
+		}
+
+		// Grouped Product
+		td.woocommerce-grouped-product-list-item__label,
+		td.woocommerce-grouped-product-list-item__price {
+			vertical-align: middle;
+		}
+	}
+
+	// Product Variation
+	.woocommerce-variation-add-to-cart.variations_button.woocommerce-variation-add-to-cart-enabled,
+	.woocommerce-variation-add-to-cart.variations_button.woocommerce-variation-add-to-cart-disabled {
+		.wc-block-components-quantity-selector {
+			height: unset;
+		}
+	}
+
+	.wc-block-components-quantity-selector {
+		.input-text {
+			font-size: var(--wp--preset--font-size--small);
+		}
+
+		input[type="number"]::-webkit-inner-spin-button,
+		input[type="number"]::-webkit-outer-spin-button {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+
+		input[type="number"].input-text.qty.text {
+			-moz-appearance: textfield;
+			border: unset;
+			text-align: center;
+			order: 2;
+			margin: 0;
+			/**
+			* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
+			*
+			* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
+			*/
+			padding: 0.9rem 0;
+			margin-right: unset;
+			font-size: var(--wp--preset--font-size--small);
+		}
+	}
+}
+
+// Inner of Single Product Block
+.wp-block-woocommerce-single-product {
+	.wc-block-add-to-cart-form.wc-block-add-to-cart-form--stepper {
+		.wc-block-components-quantity-selector {
+			width: 107px;
+		}
+	}
+}
+
+// Express payment button spacing
+:where(.wp-block-woocommerce-add-to-cart-form > * + *) {
+	margin-top: 12px;
+	padding: 0 4px;
+}
+
+// WooCommerce Payments has its own spacing already.
+:where(.wp-block-woocommerce-add-to-cart-form .wcpay-express-checkout-wrapper) {
+	padding: 0;
+}

@@ -248,7 +248,41 @@ class ProductSchema extends AbstractSchema {
 							'readonly'    => true,
 						],
 						'link' => [
-							'description' => __( 'Tag link', 'woocommerce' ),
+							'description' => __( 'Tag link.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
+				],
+			],
+			'brands'              => [
+				'description' => __( 'List of brands, if applicable.', 'woocommerce' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'items'       => [
+					'type'       => 'object',
+					'properties' => [
+						'id'   => [
+							'description' => __( 'Brand ID', 'woocommerce' ),
+							'type'        => 'number',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'name' => [
+							'description' => __( 'Brand name', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'slug' => [
+							'description' => __( 'Brand slug', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'link' => [
+							'description' => __( 'Brand link', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => [ 'view', 'edit' ],
 							'readonly'    => true,
@@ -419,7 +453,7 @@ class ProductSchema extends AbstractSchema {
 			],
 			'low_stock_remaining' => [
 				'description' => __( 'Quantity left in stock if stock is low, or null if not applicable.', 'woocommerce' ),
-				'type'        => [ 'integer', 'null' ],
+				'type'        => [ 'number', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
@@ -455,22 +489,28 @@ class ProductSchema extends AbstractSchema {
 					],
 					'minimum'     => [
 						'description' => __( 'The minimum quantity that can be added to the cart.', 'woocommerce' ),
-						'type'        => 'integer',
+						'type'        => 'number',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'maximum'     => [
 						'description' => __( 'The maximum quantity that can be added to the cart.', 'woocommerce' ),
-						'type'        => 'integer',
+						'type'        => 'number',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 					],
 					'multiple_of' => [
 						'description' => __( 'The amount that quantities increment by. Quantity must be an multiple of this value.', 'woocommerce' ),
-						'type'        => 'integer',
+						'type'        => 'number',
 						'context'     => [ 'view', 'edit' ],
 						'readonly'    => true,
 						'default'     => 1,
+					],
+					'single_text' => [
+						'description' => __( 'Button text in the single product page.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
 					],
 				],
 			],
@@ -505,6 +545,7 @@ class ProductSchema extends AbstractSchema {
 			'images'              => $this->get_images( $product ),
 			'categories'          => $this->get_term_list( $product, 'product_cat' ),
 			'tags'                => $this->get_term_list( $product, 'product_tag' ),
+			'brands'              => $this->get_term_list( $product, 'product_brand' ),
 			'attributes'          => $this->get_attributes( $product ),
 			'variations'          => $this->get_variations( $product ),
 			'grouped_products'    => $this->get_grouped_products( $product ),
@@ -523,6 +564,7 @@ class ProductSchema extends AbstractSchema {
 					'text'        => $this->prepare_html_response( $product->add_to_cart_text() ),
 					'description' => $this->prepare_html_response( $product->add_to_cart_description() ),
 					'url'         => $this->prepare_html_response( $product->add_to_cart_url() ),
+					'single_text' => $this->prepare_html_response( $product->single_add_to_cart_text() ),
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
@@ -547,7 +589,7 @@ class ProductSchema extends AbstractSchema {
 	 * Gets remaining stock amount for a product.
 	 *
 	 * @param \WC_Product $product Product instance.
-	 * @return integer|null
+	 * @return int|float|null
 	 */
 	protected function get_remaining_stock( \WC_Product $product ) {
 		if ( is_null( $product->get_stock_quantity() ) ) {
@@ -560,7 +602,7 @@ class ProductSchema extends AbstractSchema {
 	 * If a product has low stock, return the remaining stock amount for display.
 	 *
 	 * @param \WC_Product $product Product instance.
-	 * @return integer|null
+	 * @return int|float|null
 	 */
 	protected function get_low_stock_remaining( \WC_Product $product ) {
 		$remaining_stock = $this->get_remaining_stock( $product );
@@ -618,7 +660,7 @@ class ProductSchema extends AbstractSchema {
 		$attributes                  = array_filter( $product->get_attributes(), [ $this, 'filter_variation_attribute' ] );
 		$default_variation_meta_data = array_reduce(
 			$attributes,
-			function( $defaults, $attribute ) use ( $product ) {
+			function ( $defaults, $attribute ) use ( $product ) {
 				$meta_key              = wc_variation_attribute_name( $attribute->get_name() );
 				$defaults[ $meta_key ] = [
 					'name'  => wc_attribute_label( $attribute->get_name(), $product ),
@@ -667,7 +709,7 @@ class ProductSchema extends AbstractSchema {
 		 */
 		$attributes_by_variation = array_reduce(
 			$variation_meta_data,
-			function( $values, $data ) use ( $default_variation_meta_keys ) {
+			function ( $values, $data ) use ( $default_variation_meta_keys ) {
 				// The query above only includes the keys of $default_variation_meta_data so we know all of the attributes
 				// being processed here apply to this product. However, we need an additional check here because the
 				// cache may have been primed elsewhere and include keys from other products.

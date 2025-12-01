@@ -1,0 +1,60 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-template",
+	"title": "Product Template",
+	"category": "woocommerce",
+	"description": "Contains the block elements used to render a product.",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"usesContext": [
+		"queryId",
+		"query",
+		"queryContext",
+		"displayLayout",
+		"templateSlug",
+		"postId",
+		"queryContextIncludes",
+		"collection",
+		"__privateProductCollectionPreviewState"
+	],
+	"supports": {
+		"interactivity": true,
+		"inserter": false,
+		"reusable": false,
+		"html": false,
+		"align": [ "wide", "full" ],
+		"anchor": true,
+		"color": {
+			"gradients": true,
+			"link": true,
+			"__experimentalDefaultControls": {
+				"background": true,
+				"text": true
+			}
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalFontStyle": true,
+			"__experimentalTextTransform": true,
+			"__experimentalTextDecoration": true,
+			"__experimentalLetterSpacing": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"layout": {
+			"allowEditing": false,
+			"allowSwitching": false,
+			"allowInheriting": false,
+			"allowSizingOnChildren": false,
+			"allowVerticalAlignment": false
+		},
+		"email": true
+	},
+	"editorStyle": "file:../woocommerce/product-template-editor.css",
+	"style": "file:../woocommerce/product-template-style.css"
+}

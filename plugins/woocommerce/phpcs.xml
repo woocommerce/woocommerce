@@ -17,6 +17,9 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>lib/</exclude-pattern>
 
+	<!-- Only check PHP files. -->
+	<arg name="extensions" value="php" />
+
 	<!-- Show progress, show the error codes for each message (source). -->
 	<arg value="ps" />
 
@@ -43,7 +46,9 @@
 
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="woocommerce" />
+			<property name="text_domain" type="array">
+				<element value="woocommerce" />
+			</property>
 		</properties>
 	</rule>
 

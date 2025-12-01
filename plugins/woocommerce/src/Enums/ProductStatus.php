@@ -13,47 +13,47 @@ final class ProductStatus {
 	 *
 	 * @var string
 	 */
-	const AUTO_DRAFT = 'auto-draft';
+	public const AUTO_DRAFT = 'auto-draft';
 
 	/**
 	 * The product is in draft status.
 	 *
 	 * @var string
 	 */
-	const DRAFT = 'draft';
+	public const DRAFT = 'draft';
 
 	/**
 	 * The product is in pending status.
 	 *
 	 * @var string
 	 */
-	const PENDING = 'pending';
+	public const PENDING = 'pending';
 
 	/**
 	 * The product is in private status.
 	 *
 	 * @var string
 	 */
-	const PRIVATE = 'private';
+	public const PRIVATE = 'private';
 
 	/**
 	 * The product is in publish status.
 	 *
 	 * @var string
 	 */
-	const PUBLISH = 'publish';
+	public const PUBLISH = 'publish';
 
 	/**
 	 * The product is in trash status.
 	 *
 	 * @var string
 	 */
-	const TRASH = 'trash';
+	public const TRASH = 'trash';
 
 	/**
 	 * The product is in future status.
 	 *
 	 * @var string
 	 */
-	const FUTURE = 'future';
+	public const FUTURE = 'future';
 }

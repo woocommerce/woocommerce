@@ -12,8 +12,8 @@ import { Icon, check } from '@wordpress/icons';
 import { Button, Tooltip } from '@wordpress/components';
 import NoticeOutline from 'gridicons/dist/notice-outline';
 import { EllipsisMenu } from '@woocommerce/components';
-import classnames from 'classnames';
-import { sanitize } from 'dompurify';
+import clsx from 'clsx';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
@@ -24,12 +24,6 @@ import { VerticalCSSTransition } from '../../vertical-css-transition';
 const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
 const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
 
-const sanitizeHTML = ( html: string ) => {
-	return {
-		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
-	};
-};
-
 type TaskLevel = 1 | 2 | 3;
 
 type ActionArgs = {
@@ -39,6 +33,8 @@ type ActionArgs = {
 type TaskItemProps = {
 	title: string;
 	completed: boolean;
+	inProgress: boolean;
+	inProgressLabel: string;
 	onClick?: React.MouseEventHandler< HTMLElement >;
 	onCollapse?: () => void;
 	onDelete?: () => void;
@@ -62,11 +58,15 @@ type TaskItemProps = {
 	children?: React.ReactNode;
 };
 
-const OptionalTaskTooltip: React.FC< {
+const OptionalTaskTooltip = ( {
+	level,
+	completed,
+	children,
+}: {
 	level: TaskLevel;
 	completed: boolean;
 	children: JSX.Element;
-} > = ( { level, completed, children } ) => {
+} ) => {
 	let tooltip = '';
 	if ( level === 1 && ! completed ) {
 		tooltip = __(
@@ -85,11 +85,15 @@ const OptionalTaskTooltip: React.FC< {
 	return <Tooltip text={ tooltip }>{ children }</Tooltip>;
 };
 
-const OptionalExpansionWrapper: React.FC< {
+const OptionalExpansionWrapper = ( {
+	children,
+	expandable,
+	expanded,
+}: {
 	expandable: boolean;
 	expanded: boolean;
 	children: JSX.Element;
-} > = ( { children, expandable, expanded } ) => {
+} ) => {
 	if ( ! expandable ) {
 		return expanded ? <>{ children }</> : null;
 	}
@@ -109,6 +113,8 @@ const OptionalExpansionWrapper: React.FC< {
 
 export const TaskItem = ( {
 	completed,
+	inProgress,
+	inProgressLabel,
 	title,
 	badge,
 	onDelete,
@@ -133,7 +139,7 @@ export const TaskItem = ( {
 		setTaskExpanded( expanded );
 	}, [ expanded ] );
 
-	const className = classnames( 'woocommerce-task-list__item', {
+	const className = clsx( 'woocommerce-task-list__item', {
 		complete: completed,
 		expanded: isTaskExpanded,
 		'level-2': level === 2 && ! completed,
@@ -204,9 +210,12 @@ export const TaskItem = ( {
 							{ expandable && ! completed && additionalInfo && (
 								<div
 									className="woocommerce-task__additional-info"
-									dangerouslySetInnerHTML={ sanitizeHTML(
-										additionalInfo
-									) }
+									dangerouslySetInnerHTML={ {
+										__html: sanitizeHTML( additionalInfo, {
+											tags: ALLOWED_TAGS,
+											attr: ALLOWED_ATTR,
+										} ),
+									} }
 								></div>
 							) }
 							{ ! completed && showActionButton && (
@@ -231,9 +240,12 @@ export const TaskItem = ( {
 					{ ! expandable && ! completed && additionalInfo && (
 						<div
 							className="woocommerce-task__additional-info"
-							dangerouslySetInnerHTML={ sanitizeHTML(
-								additionalInfo
-							) }
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML( additionalInfo, {
+									tags: ALLOWED_TAGS,
+									attr: ALLOWED_ATTR,
+								} ),
+							} }
 						></div>
 					) }
 					{ time && (
@@ -242,6 +254,11 @@ export const TaskItem = ( {
 						</div>
 					) }
 				</Text>
+				{ inProgress && inProgressLabel && (
+					<div className="woocommerce-task-list__item-progress">
+						{ inProgressLabel }
+					</div>
+				) }
 			</div>
 			{ showEllipsisMenu && (
 				<EllipsisMenu

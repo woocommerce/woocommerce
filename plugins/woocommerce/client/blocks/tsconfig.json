@@ -1,0 +1,21 @@
+{
+	"extends": "./tsconfig.base.json",
+	"include": [
+		"./assets/js/**/*",
+		"./assets/js/**/*.json",
+		"./packages/checkout/**/*",
+		"./packages/components/**/*",
+		"./assets/js/blocks/**/block.json",
+		"./assets/js/atomic/blocks/**/block.json",
+		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
+		"./storybook/**/*",
+		"./tests/integration/**/*",
+		"./tests/js/**/*"
+	],
+	"exclude": [
+		"./storybook/build",
+		"./storybook/webpack.config.js",
+		"./storybook/preview.js",
+		"./bin"
+	]
+}

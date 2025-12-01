@@ -1,0 +1,33 @@
+.wc-block-checkout__actions {
+	margin-bottom: $gap-larger;
+
+	.wc-block-checkout__actions_row {
+		@include font-regular-locked;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: $gap-smaller;
+
+		&--justify-flex-end {
+			justify-content: flex-end;
+		}
+
+		.wc-block-components-checkout-place-order-button--full-width {
+			width: 100%;
+		}
+	}
+}
+
+@include cart-checkout-mobile-container {
+	.wc-block-checkout__actions {
+		.wc-block-checkout__actions_row {
+			flex-direction: column-reverse;
+			justify-content: center;
+			gap: $gap;
+		}
+
+		.wc-block-components-checkout-place-order-button {
+			width: 100%;
+		}
+	}
+}

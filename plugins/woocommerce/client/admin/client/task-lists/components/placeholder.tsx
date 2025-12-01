@@ -10,10 +10,10 @@ export type TasksPlaceholderProps = {
 	};
 };
 
-export const TasksPlaceholder: React.FC< TasksPlaceholderProps > = ( {
+export const TasksPlaceholder = ( {
 	numTasks = 5,
 	query,
-} ) => {
+}: TasksPlaceholderProps ) => {
 	const isSingleTask = Boolean( query.task );
 
 	if ( isSingleTask ) {

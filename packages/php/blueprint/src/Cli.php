@@ -51,7 +51,6 @@ class Cli {
 			function ( $args, $assoc_args ) {
 				$export = new ExportCli( $args[0] );
 				$steps  = array();
-				$format = $assoc_args['format'] ?? 'json';
 
 				if ( isset( $assoc_args['steps'] ) ) {
 					$steps = array_map(
@@ -64,7 +63,7 @@ class Cli {
 				$export->run(
 					array(
 						'steps'  => $steps,
-						'format' => $format,
+						'format' => 'json',
 					)
 				);
 			},
@@ -79,13 +78,6 @@ class Cli {
 						'type'     => 'assoc',
 						'name'     => 'steps',
 						'optional' => true,
-					),
-					array(
-						'type'     => 'assoc',
-						'name'     => 'format',
-						'optional' => true,
-						'default'  => 'json',
-						'options'  => array( 'json', 'zip' ),
 					),
 				),
 				'when'     => 'after_wp_load',

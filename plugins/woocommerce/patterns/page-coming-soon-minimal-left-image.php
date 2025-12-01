@@ -5,10 +5,8 @@
  * Categories: WooCommerce
  * Template Types: coming-soon
  * Inserter: false
- * Feature Flag: coming-soon-newsletter-template
  */
 
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 
 $fonts                 = ComingSoonTemplate::get_font_families();
@@ -16,7 +14,7 @@ $heading_font_family   = $fonts['heading'];
 $body_font_family      = $fonts['body'];
 $paragraph_font_family = isset( $fonts['paragraph'] ) ? $fonts['paragraph'] : null;
 
-$default_image = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/green-glass-jars-on-stairs.jpg' );
+$default_image = plugins_url( 'assets/images/pattern-placeholders/green-glass-jars-on-stairs.jpg', WC_PLUGIN_FILE );
 
 $site_tagline = get_bloginfo( 'description' );
 
@@ -30,8 +28,8 @@ $store_description = ! empty( $site_tagline )
 	);
 
 ?>
-<!-- wp:woocommerce/coming-soon {"comingSoonPatternId":"page-coming-soon-minimal-left-image","className":"woocommerce-coming-soon-entire-site woocommerce-coming-soon-minimal-left-image","style":{"color":{"background":"#f9f9f9","text":"#000000"},"elements":{"link":{"color":{"text":"#000000"}}}}} -->
-<div class="wp-block-woocommerce-coming-soon woocommerce-coming-soon-entire-site woocommerce-coming-soon-minimal-left-image has-text-color has-background has-link-color" style="color:#000000;background-color:#f9f9f9"><!-- wp:cover {"customOverlayColor":"transparent","isUserOverlayColor":true,"minHeight":100,"minHeightUnit":"vh","className":"coming-soon-is-vertically-aligned-center coming-soon-cover","style":{"spacing":{"padding":{"top":"0px","bottom":"0px","left":"24px","right":"24px"}},"color":{"text":"inherit"},"elements":{"link":{"color":{"text":"inherit"}}}},"layout":{"type":"default"}} -->
+<!-- wp:woocommerce/coming-soon {"comingSoonPatternId":"page-coming-soon-minimal-left-image","className":"woocommerce-coming-soon-default woocommerce-coming-soon-minimal-left-image","style":{"color":{"background":"#f9f9f9","text":"#000000"},"elements":{"link":{"color":{"text":"#000000"}}}}} -->
+<div class="wp-block-woocommerce-coming-soon woocommerce-coming-soon-default woocommerce-coming-soon-minimal-left-image has-text-color has-background has-link-color" style="color:#000000;background-color:#f9f9f9"><!-- wp:cover {"customOverlayColor":"transparent","isUserOverlayColor":true,"minHeight":100,"minHeightUnit":"vh","className":"coming-soon-is-vertically-aligned-center coming-soon-cover","style":{"spacing":{"padding":{"top":"0px","bottom":"0px","left":"24px","right":"24px"}},"color":{"text":"inherit"},"elements":{"link":{"color":{"text":"inherit"}}}},"layout":{"type":"default"}} -->
 <div class="wp-block-cover coming-soon-is-vertically-aligned-center coming-soon-cover has-text-color has-link-color" style="color:inherit;padding-top:0px;padding-right:24px;padding-bottom:0px;padding-left:24px;min-height:100vh"><span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim" style="background-color:transparent"></span><div class="wp-block-cover__inner-container"><!-- wp:group {"align":"full","style":{"dimensions":{"minHeight":"100vh"}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignfull" style="min-height:100vh"><!-- wp:group {"align":"wide","className":"woocommerce-coming-soon-header has-background","style":{"spacing":{"padding":{"top":"26px","bottom":"14px"}}},"layout":{"type":"constrained"}} -->
 <div class="wp-block-group alignwide woocommerce-coming-soon-header has-background" style="padding-top:26px;padding-bottom:14px"><!-- wp:group {"align":"wide","layout":{"type":"flex","justifyContent":"space-between","flexWrap":"wrap"}} -->

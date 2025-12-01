@@ -1,0 +1,82 @@
+:where(.wc-block-add-to-cart-with-options) {
+	:where(.quantity) {
+		display: inline-flex;
+		align-items: stretch;
+	}
+
+	/**
+	* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
+	*
+	* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
+	*/
+	:where(.quantity .input-text) {
+		font-size: var(--wp--preset--font-size--small);
+		padding: 0.9rem 1.1rem;
+	}
+}
+
+:where(.wc-block-add-to-cart-with-options__quantity-selector--hidden) {
+	display: none;
+}
+
+// Set the height to 100% so when the quantity selector is inside a flex
+// container with `verticalAlignment: stretch` (that's the default in WC core
+// templates), the quantity selector will stretch to the height of the container.
+:where(.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector) {
+	height: 100%;
+}
+
+:where(.wc-block-add-to-cart-with-options__quantity-selector),
+:where(.wc-block-add-to-cart-with-options-grouped-product-item-selector) {
+	// This resets some WC component styles, so we need it to have specificity
+	// until those stylesheets are updated.
+	.wc-block-components-quantity-selector.wc-block-components-quantity-selector {
+		display: inline-flex;
+		width: unset;
+		margin-bottom: 0;
+		margin-right: 0;
+	}
+	:where(.wc-block-components-quantity-selector) {
+		&::after {
+			border: 1px solid currentColor;
+			opacity: 0.3;
+		}
+
+		:where(.input-text) {
+			font-size: inherit;
+		}
+
+		:where(input[type="number"].qty) {
+			-moz-appearance: textfield;
+			border: unset;
+			text-align: center;
+			order: 2;
+			font-weight: 600;
+			background-color: transparent;
+			color: currentColor;
+			margin: 0;
+			font-size: 0.8em;
+			box-sizing: content-box;
+			padding: 0.7rem 0;
+			margin-right: unset;
+			max-width: 3.631em; /* This value is based on the WC core styles. */
+
+			&:focus {
+				border-radius: unset;
+			}
+		}
+
+		:where(input[type="number"]::-webkit-inner-spin-button),
+		:where(input[type="number"]::-webkit-outer-spin-button) {
+			-webkit-appearance: none;
+			margin: 0;
+		}
+	}
+}
+
+// `cursor` needs to override some styles from WordPress core, that's why we
+// need extra specificity.
+:where(.wc-block-add-to-cart-with-options.is-invalid) .wp-block-woocommerce-product-button .wc-block-components-product-button__button {
+	cursor: not-allowed;
+	opacity: 0.5;
+}

@@ -12,7 +12,7 @@ import {
 	MenuTitle,
 	Link,
 } from '@woocommerce/components';
-import { useUserPreferences, PLUGINS_STORE_NAME } from '@woocommerce/data';
+import { useUserPreferences, pluginsStore } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
 import { Text } from '@woocommerce/experimental';
@@ -49,7 +49,7 @@ export const StatsOverview = () => {
 	);
 
 	const jetPackIsConnectedAndActivated = useSelect( ( select ) => {
-		const store = select( PLUGINS_STORE_NAME );
+		const store = select( pluginsStore );
 		return (
 			store.isJetpackConnected() &&
 			store.getPluginInstallState( 'jetpack' ) === 'activated'

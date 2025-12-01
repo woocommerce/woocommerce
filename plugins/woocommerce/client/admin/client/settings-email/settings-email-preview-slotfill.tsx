@@ -5,6 +5,7 @@ import { createSlotFill, Spinner } from '@wordpress/components';
 import { SelectControlSingleSelectionProps } from '@wordpress/components/build-types/select-control/types';
 import { registerPlugin } from '@wordpress/plugins';
 import { useEffect, useState } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import { debounce } from 'lodash';
 
 /**
@@ -20,6 +21,7 @@ import { EmailPreviewHeader } from './settings-email-preview-header';
 import { EmailPreviewIframe } from './settings-email-preview-iframe';
 import { EmailPreviewSend } from './settings-email-preview-send';
 import { EmailPreviewType } from './settings-email-preview-type';
+import { EmailCesFeedback } from './settings-email-ces-feedback';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
@@ -37,11 +39,11 @@ const wpMenuWidth = document.getElementById( 'adminmenu' )?.clientWidth || 160;
 // Calculation: WP menu + email settings + email preview + padding
 const FLOATING_PREVIEW_WIDTH_LIMIT = wpMenuWidth + 666 + 684 + 40;
 
-const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
+const EmailPreviewFill = ( {
 	emailTypes,
 	previewUrl,
 	settingsIds,
-} ) => {
+}: EmailPreviewFillProps ) => {
 	const [ deviceType, setDeviceType ] =
 		useState< string >( DEVICE_TYPE_DESKTOP );
 	const isSingleEmail = emailTypes.length === 1;
@@ -69,8 +71,16 @@ const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
 		};
 	}, [ isSingleEmail ] );
 
+	const cesQuestion = __(
+		'I am able to customize my email designs to match my store’s brand.',
+		'woocommerce'
+	);
+
 	return (
 		<Fill>
+			{ ! isWide && ! isSingleEmail && (
+				<h2>{ __( 'Email preview', 'woocommerce' ) }</h2>
+			) }
 			<div
 				className={ `wc-settings-email-preview-container ${
 					isWide ? 'wc-settings-email-preview-container-floating' : ''
@@ -107,6 +117,12 @@ const EmailPreviewFill: React.FC< EmailPreviewFillProps > = ( {
 						setIsLoading={ setIsLoading }
 						settingsIds={ settingsIds }
 					/>
+					<div className="wc-settings-email-preview-ces-feedback">
+						<EmailCesFeedback
+							action="email_improvements_feedback"
+							question={ cesQuestion }
+						/>
+					</div>
 				</div>
 			</div>
 		</Fill>
@@ -129,7 +145,7 @@ export const registerSettingsEmailPreviewFill = () => {
 		emailTypes = JSON.parse( emailTypesData || '' );
 	} catch ( e ) {}
 	const settingsIdsData = slotElement.getAttribute(
-		'data-email-settings-ids'
+		'data-email-setting-ids'
 	);
 	let settingsIds: string[] = [];
 	try {

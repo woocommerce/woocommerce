@@ -68,3 +68,4 @@ require 'remote-logging/remote-logging.php';
 require 'tools/wccom-request-errors.php';
 require 'tools/set-wccom-base-url.php';
 require 'tools/reset-launch-your-store.php';
+require 'tools/load-template-version.php';

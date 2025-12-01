@@ -65,7 +65,7 @@ class ComingSoonTemplate extends AbstractPageTemplate {
 			'body'    => 'inter',
 		);
 
-		if ( ! wc_current_theme_is_fse_theme() ) {
+		if ( ! wp_is_block_theme() ) {
 			return $default_fonts;
 		}
 

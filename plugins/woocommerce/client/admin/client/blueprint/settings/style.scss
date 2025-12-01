@@ -1,12 +1,31 @@
+.woocommerce_page_wc-settings-advanced-blueprint {
+	.blueprint-settings-slotfill {
+		min-height: 100%;
+	}
+
+	.components-snackbar .components-snackbar__content-with-icon {
+		padding-left: 0;
+	}
+
+	.components-snackbar .components-snackbar__icon {
+		display: flex;
+		margin-right: $gap-smaller;
+	}
+
+	.components-snackbar__content {
+		align-items: center;
+	}
+}
+
 .blueprint-settings-slotfill {
 	max-width: 598px;
-
+	color: #2f2f2f;
 	label {
 		cursor: pointer;
 	}
 
 	h3 {
-		margin-bottom: 8px;
+		margin: 0 0 8px 0;
 		color: #23282d;
 		font-size: 18px;
 		font-style: normal;
@@ -122,10 +141,6 @@
 
 	}
 
-	h3 {
-		margin-top: 1.5em;
-	}
-
 	.woocommerce-blueprint-import-button {
 		margin-top: 24px;
 	}
@@ -157,6 +172,32 @@
 
 	.blueprint-settings-export-button {
 		margin-top: 14px;
+	}
+
+	.components-notice {
+		padding: 12px;
+
+		button.components-notice__dismiss {
+			align-self: inherit;
+			svg {
+				fill: #1e1e1e;
+				width: 15px;
+			}
+		}
+
+		.components-notice__content,
+		&.is-error .components-notice__content pre {
+			margin: 0;
+			color: $gray-900;
+			line-height: 24px; /* 184.615% */
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			text-wrap: auto;
+		}
+	}
+
+	.components-notice.is-error {
+		background: #fce2e4;
+		border-left-color: #cc1818;
 	}
 }
 
@@ -227,7 +268,14 @@
 			width: 132px;
 			justify-content: center;
 			align-items: center;
+
+			svg {
+				margin: 0;
+			}
 		}
 	}
 }
 
+.blueprint-export-error {
+	margin: 16px 0;
+}

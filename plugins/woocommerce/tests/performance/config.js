@@ -1,6 +1,8 @@
 /* eslint-disable no-undef */
-export const base_url = __ENV.URL || 'http://localhost:8086';
-export const base_host = __ENV.HOST || 'localhost:8086';
+export const base_url =
+	__ENV.URL || 'http://localhost:' + ( __ENV.WP_ENV_TESTS_PORT || '8086' );
+export const base_host =
+	__ENV.HOST || 'localhost:' + ( __ENV.WP_ENV_TESTS_PORT || '8086' );
 
 export const STORE_NAME = __ENV.STORE_NAME || 'WooCommerce Core E2E Test Suite';
 export const FOOTER_TEXT = 'Built with WooCommerce';

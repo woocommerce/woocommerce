@@ -14,6 +14,10 @@ const resultsFiles = [
 		file: 'product-editor.performance-results.json',
 		metricsPrefix: 'product-editor-',
 	},
+	{
+		file: 'frontend.performance-results.json',
+		metricsPrefix: 'frontend-',
+	},
 ];
 const ARTIFACTS_PATH =
 	process.env.WP_ARTIFACTS_PATH || path.join( process.cwd(), 'artifacts' );
@@ -22,46 +26,45 @@ const performanceResults = resultsFiles.map( ( { file } ) =>
 	JSON.parse( fs.readFileSync( path.join( ARTIFACTS_PATH, file ), 'utf8' ) )
 );
 
-const data = new TextEncoder().encode(
-	JSON.stringify( {
-		branch,
-		hash,
-		baseHash,
-		timestamp,
-		metrics: resultsFiles.reduce( ( result, { metricsPrefix }, index ) => {
-			return {
-				...result,
-				...Object.fromEntries(
-					Object.entries(
-						performanceResults[ index ][ hash ] ?? {}
-					).map( ( [ key, value ] ) => [
+const data = JSON.stringify( {
+	branch,
+	hash,
+	baseHash,
+	timestamp,
+	metrics: resultsFiles.reduce( ( result, { metricsPrefix }, index ) => {
+		return {
+			...result,
+			...Object.fromEntries(
+				Object.entries( performanceResults[ index ][ hash ] ?? {} ).map(
+					( [ key, value ] ) => [
 						metricsPrefix + key,
-						value,
-					] )
-				),
-			};
-		}, {} ),
-		baseMetrics: resultsFiles.reduce(
-			( result, { metricsPrefix }, index ) => {
-				return {
-					...result,
-					...Object.fromEntries(
-						Object.entries(
-							performanceResults[ index ][ baseHash ] ?? {}
-						).map( ( [ key, value ] ) => [
-							metricsPrefix + key,
-							value,
-						] )
-					),
-				};
-			},
-			{}
-		),
-	} )
-);
+						typeof value === 'object'
+							? value.q50
+							: Number( value || 0.00001 ).toFixed( 5 ),
+					]
+				)
+			),
+		};
+	}, {} ),
+	baseMetrics: resultsFiles.reduce( ( result, { metricsPrefix }, index ) => {
+		return {
+			...result,
+			...Object.fromEntries(
+				Object.entries(
+					performanceResults[ index ][ baseHash ] ?? {}
+				).map( ( [ key, value ] ) => [
+					metricsPrefix + key,
+					typeof value === 'object'
+						? value.q50
+						: Number( value || 0.00001 ).toFixed( 5 ),
+				] )
+			),
+		};
+	}, {} ),
+} );
 
 const options = {
-	hostname: 'www.codevitals.run',
+	hostname: 'codehealth.vercel.app',
 	port: 443,
 	path: '/api/log?token=' + token,
 	method: 'POST',
@@ -72,7 +75,9 @@ const options = {
 };
 
 const req = https.request( options, ( res ) => {
+	console.log( `hostname: ${ options.hostname }` );
 	console.log( `statusCode: ${ res.statusCode }` );
+	console.log( `statusMessage: ${ res.statusMessage }` );
 
 	res.on( 'data', ( d ) => {
 		process.stdout.write( d );

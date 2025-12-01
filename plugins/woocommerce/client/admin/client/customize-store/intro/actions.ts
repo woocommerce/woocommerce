@@ -8,33 +8,10 @@ import { TaskReferralRecord } from '@woocommerce/onboarding';
  * Internal dependencies
  */
 import { customizeStoreStateMachineEvents } from '..';
-import {
-	customizeStoreStateMachineContext,
-	FlowType,
-	RecommendThemesAPIResponse,
-} from '../types';
+import { customizeStoreStateMachineContext } from '../types';
 import { events } from './';
 import { isIframe } from '~/customize-store/utils';
 import { trackEvent } from '../tracking';
-
-export const assignThemeData = assign<
-	customizeStoreStateMachineContext,
-	customizeStoreStateMachineEvents // this is actually the wrong type for the event but I still don't know how to type this properly
->( {
-	intro: ( context, event ) => {
-		const apiResponse = (
-			event as DoneInvokeEvent< {
-				themeData: RecommendThemesAPIResponse;
-			} >
-		 ).data.themeData;
-
-		// type coercion workaround for now
-		return {
-			...context.intro,
-			themeData: apiResponse,
-		};
-	},
-} );
 
 export const assignActiveTheme = assign<
 	customizeStoreStateMachineContext,
@@ -63,10 +40,6 @@ export const assignTaskReferral = assign<
 		return { ...context.intro, taskReferral };
 	},
 } );
-
-export const recordTracksDesignWithAIClicked = () => {
-	trackEvent( 'customize_your_store_intro_design_with_ai_click' );
-};
 
 export const recordTracksDesignWithoutAIClicked = () => {
 	trackEvent( 'customize_your_store_intro_design_without_ai_click' );
@@ -109,20 +82,6 @@ export const assignFetchIntroDataError = assign<
 >( {
 	intro: ( context ) => {
 		return { ...context.intro, hasErrors: true };
-	},
-} );
-
-export const assignCurrentThemeIsAiGenerated = assign<
-	customizeStoreStateMachineContext,
-	customizeStoreStateMachineEvents
->( {
-	intro: ( context, event ) => {
-		const currentThemeIsAiGenerated = (
-			event as DoneInvokeEvent< {
-				currentThemeIsAiGenerated: boolean;
-			} >
-		 ).data.currentThemeIsAiGenerated;
-		return { ...context.intro, currentThemeIsAiGenerated };
 	},
 } );
 
@@ -205,9 +164,5 @@ export const assignFlags = assign<
 		const isPTKPatternsAPIAvailable =
 			window.parent.__wcCustomizeStore.isPTKPatternsAPIAvailable || false;
 		return isPTKPatternsAPIAvailable;
-	},
-	flowType: ( _context, event ) => {
-		const flowTypeData = event as DoneInvokeEvent< FlowType >;
-		return flowTypeData.data;
 	},
 } );

@@ -134,28 +134,60 @@ class WC_Tests_Cart_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_add_to_cart_message
+	 * Test wc_add_to_cart_message with cart page defined.
 	 */
-	public function test_wc_add_to_cart_message() {
-		$product         = WC_Helper_Product::create_simple_product();
+	public function test_wc_add_to_cart_message_with_cart_page_defined() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '' );
+
+		$cart_page_url = wc_get_page_permalink( 'cart' );
+
 		$wp_button_class = esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), false, true );
-		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="http://' . WP_TESTS_DOMAIN . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="' . $cart_page_url . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), false, true );
-		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="http://' . WP_TESTS_DOMAIN . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="' . $cart_page_url . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), true, true );
-		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="http://' . WP_TESTS_DOMAIN . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="' . $cart_page_url . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
 
 		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), true, true );
-		$this->assertEquals( '3 &times; &ldquo;Dummy Product&rdquo; have been added to your cart. <a href="http://' . WP_TESTS_DOMAIN . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
+		$this->assertEquals( '3 &times; &ldquo;Dummy Product&rdquo; have been added to your cart. <a href="' . $cart_page_url . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
 
 		$message = wc_add_to_cart_message( $product->get_id(), false, true );
-		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="http://' . WP_TESTS_DOMAIN . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="' . $cart_page_url . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
 
 		$message = wc_add_to_cart_message( $product->get_id(), true, true );
-		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="http://' . WP_TESTS_DOMAIN . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart. <a href="' . $cart_page_url . '" class="button wc-forward' . $wp_button_class . '">View cart</a>', $message );
+
+		delete_option( 'woocommerce_cart_page_id' );
+	}
+
+	/**
+	 * Test wc_add_to_cart_message with cart page not defined.
+	 */
+	public function test_wc_add_to_cart_message_with_cart_page_not_defined() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), false, true );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), false, true );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( array( $product->get_id() => 1 ), true, true );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( array( $product->get_id() => 3 ), true, true );
+		$this->assertEquals( '3 &times; &ldquo;Dummy Product&rdquo; have been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( $product->get_id(), false, true );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
+
+		$message = wc_add_to_cart_message( $product->get_id(), true, true );
+		$this->assertEquals( '&ldquo;Dummy Product&rdquo; has been added to your cart.', $message );
 	}
 }

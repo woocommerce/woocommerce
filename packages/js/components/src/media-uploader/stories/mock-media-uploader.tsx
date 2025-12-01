@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { createElement } from 'react';
+import { createElement } from 'react';
 import { Modal } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 

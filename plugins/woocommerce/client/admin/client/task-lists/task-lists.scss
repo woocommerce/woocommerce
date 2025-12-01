@@ -1,5 +1,6 @@
 .woocommerce-task-dashboard__container {
-	.woocommerce-task-card {
+	.woocommerce-task-card,
+	.woocommerce-task-marketplace-link {
 		max-width: 680px;
 		margin-left: auto;
 		margin-right: auto;
@@ -252,5 +253,11 @@
 		.woocommerce-task-list__item-title {
 			color: var(--wp-admin-theme-color);
 		}
+	}
+}
+
+@include breakpoint( "<782px" ) {
+	.woocommerce-task-dashboard__container .woocommerce-task-marketplace-link {
+		padding: 0 $gap;
 	}
 }

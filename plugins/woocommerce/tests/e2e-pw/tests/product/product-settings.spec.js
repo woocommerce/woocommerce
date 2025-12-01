@@ -1,5 +1,11 @@
-const { test, expect } = require( '@playwright/test' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../fixtures/fixtures.js';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+// Suppress unused variable warnings
+/* eslint-disable no-unused-vars */
 
 test.describe( 'WooCommerce Products > Downloadable Product Settings', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );

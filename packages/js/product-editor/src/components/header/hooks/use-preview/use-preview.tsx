@@ -45,7 +45,7 @@ export function usePreview( {
 			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			const isSaving = isSavingEntityRecord(
 				'postType',
 				productType,
@@ -54,7 +54,7 @@ export function usePreview( {
 
 			return {
 				isDisabled: isSaving,
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				// @ts-expect-error Selector is not typed
 				hasEdits: hasEditsForEntityRecord(
 					'postType',
 					productType,

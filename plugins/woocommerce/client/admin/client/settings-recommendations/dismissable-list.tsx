@@ -3,7 +3,7 @@
  */
 import { useDispatch, useSelect } from '@wordpress/data';
 import { Button, Card, CardHeader } from '@wordpress/components';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { EllipsisMenu } from '@woocommerce/components';
 import { __ } from '@wordpress/i18n';
 import { createContext, useContext } from '@wordpress/element';
@@ -24,7 +24,7 @@ export const DismissableListHeading = ( {
 	children: React.ReactNode;
 	onDismiss?: () => void;
 } ) => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 	const dismissOptionName = useContext( OptionNameContext );
 
 	const handleDismissClick = () => {
@@ -66,15 +66,12 @@ export const DismissableList = ( {
 } ) => {
 	const isVisible = useSelect(
 		( select ) => {
-			const { getOption, hasFinishedResolution } =
-				select( OPTIONS_STORE_NAME );
+			const { getOption, hasFinishedResolution } = select( optionsStore );
 
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			const hasFinishedResolving = hasFinishedResolution( 'getOption', [
 				dismissOptionName,
 			] );
 
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			const isDismissed = getOption( dismissOptionName ) === 'yes';
 
 			return hasFinishedResolving && ! isDismissed;

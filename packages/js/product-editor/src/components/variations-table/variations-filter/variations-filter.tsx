@@ -3,8 +3,8 @@
  */
 import { FormEvent, KeyboardEvent, UIEvent, useEffect, useRef } from 'react';
 import {
-	EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME,
 	ProductAttributeTerm,
+	experimentalProductAttributeTermsStore,
 } from '@woocommerce/data';
 import { useDebounce, useInstanceId } from '@wordpress/compose';
 import { resolveSelect } from '@wordpress/data';
@@ -58,9 +58,7 @@ export function VariationsFilter( {
 			const {
 				getProductAttributeTerms,
 				getProductAttributeTermsTotalCount,
-			} = resolveSelect(
-				EXPERIMENTAL_PRODUCT_ATTRIBUTE_TERMS_STORE_NAME
-			);
+			} = resolveSelect( experimentalProductAttributeTermsStore );
 
 			const sharedRequestArgs = {
 				attribute_id: attributeId,

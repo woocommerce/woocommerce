@@ -5,8 +5,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import {
 	type OfflinePaymentMethodProvider,
-	PAYMENT_SETTINGS_STORE_NAME,
-	type PaymentSettingsSelectors,
+	paymentSettingsStore,
 } from '@woocommerce/data';
 
 /**
@@ -14,7 +13,8 @@ import {
  */
 import './settings-payments-offline.scss';
 import './settings-payments-body.scss';
-import { OfflinePaymentGateways } from './components/offline-payment-gateways';
+import { ListPlaceholder } from '~/settings-payments/components/list-placeholder';
+import { OfflinePaymentGatewayList } from '~/settings-payments/components/offline-payment-gateway-list';
 
 /**
  * A component for managing offline payment gateways in WooCommerce.
@@ -24,20 +24,16 @@ import { OfflinePaymentGateways } from './components/offline-payment-gateways';
 export const SettingsPaymentsOffline = () => {
 	// Retrieve offline payment gateways and loading state from the store.
 	const { offlinePaymentGateways, isFetching } = useSelect( ( select ) => {
-		const paymentSettings = select(
-			PAYMENT_SETTINGS_STORE_NAME
-		) as PaymentSettingsSelectors;
+		const paymentSettings = select( paymentSettingsStore );
 		return {
-			isFetching: paymentSettings.isFetching(),
 			offlinePaymentGateways: paymentSettings.getOfflinePaymentGateways(),
+			isFetching: paymentSettings.isFetching(),
 		};
 	}, [] );
 
 	// Dispatch function to update the ordering of payment gateways.
-	const { updateProviderOrdering } = useDispatch(
-		PAYMENT_SETTINGS_STORE_NAME
-	);
-	// State to hold the sorted gateways in case of changing the order, otherwise it will be null
+	const { updateProviderOrdering } = useDispatch( paymentSettingsStore );
+	// State to hold the sorted gateways in case of changing the order, otherwise it will be null.
 	const [ sortedOfflinePaymentGateways, setSortedOfflinePaymentGateways ] =
 		useState< OfflinePaymentMethodProvider[] | null >( null );
 
@@ -52,12 +48,12 @@ export const SettingsPaymentsOffline = () => {
 	 * Handles updating the order of offline payment gateways.
 	 */
 	function handleOrderingUpdate( sorted: OfflinePaymentMethodProvider[] ) {
-		// Extract the existing _order values in the sorted order
+		// Extract the existing _order values in the sorted order.
 		const updatedOrderValues = sorted
 			.map( ( gateway ) => gateway._order )
 			.sort( ( a, b ) => a - b );
 
-		// Build the orderMap by assigning the sorted _order values
+		// Build the orderMap by assigning the sorted _order values.
 		const orderMap: Record< string, number > = {};
 		sorted.forEach( ( gateway, index ) => {
 			orderMap[ gateway.id ] = updatedOrderValues[ index ];
@@ -65,20 +61,23 @@ export const SettingsPaymentsOffline = () => {
 
 		updateProviderOrdering( orderMap );
 
-		// Set the sorted providers to the state to give a real-time update
+		// Set the sorted providers to the state to give a real-time update.
 		setSortedOfflinePaymentGateways( sorted );
 	}
 
 	return (
-		<div className="settings-payments-offline__container">
-			<OfflinePaymentGateways
-				isFetching={ isFetching }
-				updateOrdering={ handleOrderingUpdate }
-				offlinePaymentGateways={
-					sortedOfflinePaymentGateways || offlinePaymentGateways
-				}
-			/>
-		</div>
+		<>
+			{ isFetching ? (
+				<ListPlaceholder rows={ 3 } />
+			) : (
+				<OfflinePaymentGatewayList
+					gateways={
+						sortedOfflinePaymentGateways || offlinePaymentGateways
+					}
+					setGateways={ handleOrderingUpdate }
+				/>
+			) }
+		</>
 	);
 };
 

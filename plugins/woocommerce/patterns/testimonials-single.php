@@ -5,10 +5,9 @@
  * Categories: WooCommerce, Reviews
  */
 
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
-$testimonials_title = $content['titles'][0]['default'] ?? '';
-$description        = $content['descriptions'][0]['default'] ?? '';
+$testimonials_title = __( 'A ‘brewtiful’ experience :-)', 'woocommerce' );
+$description        = __( 'Exceptional flavors, sustainable choices. The carefully curated collection of coffee pots and accessories turned my kitchen into a haven of style and taste.', 'woocommerce' );
 ?>
 
 <!-- wp:group {"metadata":{"name":"Testimonials Single"},"align":"full","style":{"spacing":{"padding":{"top":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","bottom":"calc( 0.5 * var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal)))","left":"var(--wp--style--root--padding-left, var(--wp--custom--gap--horizontal))","right":"var(--wp--style--root--padding-right, var(--wp--custom--gap--horizontal))"},"margin":{"top":"0","bottom":"0"}}},"layout":{"type":"constrained","justifyContent":"center"}} -->
@@ -22,7 +21,7 @@ $description        = $content['descriptions'][0]['default'] ?? '';
 		<div class="wp-block-column is-vertically-aligned-center" style="flex-basis:160px">
 			<!-- wp:image {"width":"164px","className":"is-style-rounded"} -->
 			<figure class="wp-block-image is-resized is-style-rounded">
-				<img src="<?php echo esc_url( PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/portrait.png' ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image with the avatar of the user who is writing the testimonial.', 'woocommerce' ); ?>" style="width:164px"/>
+				<img src="<?php echo esc_url( plugins_url( 'assets/images/pattern-placeholders/portrait.png', WC_PLUGIN_FILE ) ); ?>" alt="<?php esc_attr_e( 'Placeholder image with the avatar of the user who is writing the testimonial.', 'woocommerce' ); ?>" style="width:164px"/>
 			</figure>
 			<!-- /wp:image -->
 		</div>

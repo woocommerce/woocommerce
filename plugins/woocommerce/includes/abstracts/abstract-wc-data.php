@@ -19,10 +19,25 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Implemented by classes using the same CRUD(s) pattern.
  *
- * @version  2.6.0
+ * @since    2.6.0
+ * @version  10.2.0
  * @package  WooCommerce\Abstracts
  */
 abstract class WC_Data {
+
+	/**
+	 * Clone mode constant: Duplicate mode clears meta IDs (default, for backward compatibility).
+	 *
+	 * @since 10.4.0
+	 */
+	const CLONE_MODE_DUPLICATE = 'duplicate';
+
+	/**
+	 * Clone mode constant: Cache mode preserves meta IDs.
+	 *
+	 * @since 10.4.0
+	 */
+	const CLONE_MODE_CACHE = 'cache';
 
 	/**
 	 * ID for this object.
@@ -103,9 +118,17 @@ abstract class WC_Data {
 	 * Stores additional meta data.
 	 *
 	 * @since 3.0.0
-	 * @var array
+	 * @var WC_Meta_Data[]|null
 	 */
 	protected $meta_data = null;
+
+	/**
+	 * Clone mode for controlling meta ID handling during clone operations.
+	 *
+	 * @since 10.4.0
+	 * @var string Either CLONE_MODE_DUPLICATE (default, clears meta IDs) or CLONE_MODE_CACHE (preserves meta IDs).
+	 */
+	protected $clone_mode = self::CLONE_MODE_DUPLICATE;
 
 	/**
 	 * List of properties that were earlier managed by data store. However, since DataStore is a not a stored entity in itself, they used to store data in metadata of the data object.
@@ -151,7 +174,11 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * When the object is cloned, make sure meta is duplicated correctly.
+	 * When the object is cloned, make sure meta is cloned correctly.
+	 *
+	 * Meta ID handling depends on the clone mode:
+	 * - CLONE_MODE_DUPLICATE (default): Clears meta IDs for duplication (backward compatible).
+	 * - CLONE_MODE_CACHE: Preserves meta IDs for caching purposes.
 	 *
 	 * @since 3.0.2
 	 */
@@ -160,11 +187,41 @@ abstract class WC_Data {
 		if ( ! empty( $this->meta_data ) ) {
 			foreach ( $this->meta_data as $array_key => $meta ) {
 				$this->meta_data[ $array_key ] = clone $meta;
-				if ( ! empty( $meta->id ) ) {
+
+				// Only clear meta IDs in duplicate mode (maintains backward compatibility).
+				if ( self::CLONE_MODE_DUPLICATE === $this->clone_mode && ! empty( $meta->id ) ) {
 					$this->meta_data[ $array_key ]->id = null;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Set the clone mode.
+	 *
+	 * This controls how meta IDs are handled when the object is cloned:
+	 * - CLONE_MODE_DUPLICATE (default): Clears meta IDs for duplication workflows
+	 * - CLONE_MODE_CACHE: Preserves meta IDs for caching workflows
+	 *
+	 * @since 10.4.0
+	 * @param string $mode One of the CLONE_MODE_* constants.
+	 * @throws InvalidArgumentException If an invalid mode is provided.
+	 */
+	public function set_clone_mode( $mode ) {
+		if ( ! in_array( $mode, array( self::CLONE_MODE_DUPLICATE, self::CLONE_MODE_CACHE ), true ) ) {
+			throw new InvalidArgumentException( 'Clone mode must be either WC_Data::CLONE_MODE_DUPLICATE or WC_Data::CLONE_MODE_CACHE' );
+		}
+		$this->clone_mode = $mode;
+	}
+
+	/**
+	 * Get the current clone mode.
+	 *
+	 * @since 10.4.0
+	 * @return string The current clone mode (one of the CLONE_MODE_* constants).
+	 */
+	public function get_clone_mode() {
+		return $this->clone_mode;
 	}
 
 	/**
@@ -485,11 +542,11 @@ abstract class WC_Data {
 			}
 
 			if ( ! empty( $matches ) ) {
-				// Set matches to null so only one key gets the new value.
+				// Update first match and delete the rest.
+				$array_key = array_shift( $matches );
 				foreach ( $matches as $meta_data_array_key ) {
 					$this->meta_data[ $meta_data_array_key ]->value = null;
 				}
-				$array_key = current( $matches );
 			}
 		}
 
@@ -709,8 +766,7 @@ abstract class WC_Data {
 				do_action( "added_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
 
 				$meta->apply_changes();
-			} else {
-				if ( $meta->get_changes() ) {
+			} elseif ( $meta->get_changes() ) {
 					$this->data_store->update_meta( $this, $meta );
 					/**
 					 * Fires immediately after updating metadata.
@@ -723,7 +779,6 @@ abstract class WC_Data {
 					do_action( "updated_{$this->object_type}_meta", $meta->id, $this->get_id(), $meta->key, $meta->value );
 
 					$meta->apply_changes();
-				}
 			}
 		}
 		if ( ! empty( $this->cache_group ) ) {
@@ -907,7 +962,7 @@ abstract class WC_Data {
 			} elseif ( is_numeric( $value ) ) {
 				// Timestamps are handled as UTC timestamps in all cases.
 				$datetime = new WC_DateTime( "@{$value}", new DateTimeZone( 'UTC' ) );
-			} else {
+			} elseif ( is_string( $value ) ) {
 				// Strings are defined in local WP timezone. Convert to UTC.
 				if ( 1 === preg_match( '/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|((-|\+)\d{2}:\d{2}))$/', $value, $date_bits ) ) {
 					$offset    = ! empty( $date_bits[7] ) ? iso8601_timezone_to_offset( $date_bits[7] ) : wc_timezone_offset();
@@ -916,6 +971,9 @@ abstract class WC_Data {
 					$timestamp = wc_string_to_timestamp( get_gmt_from_date( gmdate( 'Y-m-d H:i:s', wc_string_to_timestamp( $value ) ) ) );
 				}
 				$datetime = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
+			} else {
+				// If we get here, the value is not a valid date type.
+				$this->error( 'invalid_date', __( 'Invalid date provided.', 'woocommerce' ) );
 			}
 
 			// Set local timezone or offset.

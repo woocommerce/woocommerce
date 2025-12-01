@@ -5,17 +5,12 @@
 	"title": "Stock level threshold",
 	"category": "widgets",
 	"description": "Stock management minimum quantity.",
-	"keywords": [
-		"products",
-		"inventory",
-		"email",
-		"minimum"
-	],
+	"keywords": [ "products", "inventory", "email", "minimum" ],
 	"textdomain": "default",
 	"attributes": {
 		"name": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		}
 	},
 	"supports": {
@@ -26,6 +21,5 @@
 		"inserter": false,
 		"lock": false,
 		"__experimentalToolbar": false
-	},
-	"editorStyle": "file:./editor.css"
+	}
 }

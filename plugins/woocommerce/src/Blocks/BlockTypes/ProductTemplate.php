@@ -9,6 +9,7 @@ use WP_Block;
  * ProductTemplate class.
  */
 class ProductTemplate extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
 
 	/**
 	 * Block name.
@@ -77,7 +78,13 @@ class ProductTemplate extends AbstractBlock {
 
 		$classnames .= ' wc-block-product-template';
 
-		$wrapper_attributes = get_block_wrapper_attributes( array( 'class' => trim( $classnames ) ) );
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class'              => trim( $classnames ),
+				'data-wp-on--scroll' => 'actions.watchScroll',
+				'data-wp-init'       => 'callbacks.initResizeObserver',
+			)
+		);
 
 		$content = '';
 		while ( $query->have_posts() ) {
@@ -91,30 +98,32 @@ class ProductTemplate extends AbstractBlock {
 			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
 			$block_instance['blockName'] = 'core/null';
 
+			// Relay the block context to the inner blocks.
+			$available_context = array_merge(
+				(array) $block->context,
+				array(
+					'postType' => get_post_type(),
+					'postId'   => $product_id,
+				)
+			);
+
 			// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
 			// `render_callback` and ensure that no wrapper markup is included.
 			$block_content = (
 				new WP_Block(
 					$block_instance,
-					array(
-						'postType' => get_post_type(),
-						'postId'   => $product_id,
-					)
+					$available_context
 				)
 			)->render( array( 'dynamic' => false ) );
-
-			$interactive = array(
-				'namespace' => 'woocommerce/product-collection',
-			);
 
 			$context = array(
 				'productId' => $product_id,
 			);
 
 			$li_directives = '
-				data-wc-interactive=\'' . wp_json_encode( $interactive, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
-				data-wc-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
-				data-wc-key="product-item-' . $product_id . '"
+				data-wp-interactive="woocommerce/product-collection"
+				data-wp-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+				data-wp-key="product-item-' . $product_id . '"
 			';
 
 			// Wrap the render inner blocks in a `li` element with the appropriate post classes.

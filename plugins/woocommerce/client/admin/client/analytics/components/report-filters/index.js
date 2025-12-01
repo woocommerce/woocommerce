@@ -8,7 +8,7 @@ import { omitBy, isUndefined, snakeCase } from 'lodash';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { ReportFilters as Filters } from '@woocommerce/components';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { settingsStore } from '@woocommerce/data';
 import {
 	getCurrentDates,
 	getDateParamsFromQuery,
@@ -162,7 +162,7 @@ ReportFilters.contextType = CurrencyContext;
 export default compose(
 	withSelect( ( select ) => {
 		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
+			settingsStore
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 		return { defaultDateRange };
 	} ),

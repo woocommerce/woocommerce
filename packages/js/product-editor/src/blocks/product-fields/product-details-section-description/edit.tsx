@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
 	Button,
 	Dropdown,
@@ -55,7 +55,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const { productTemplates, productTemplate: selectedProductTemplate } =
 		useSelect( ( select ) => {
 			const { getEditorSettings } = select( 'core/editor' );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			return getEditorSettings();
 		}, [] );
 
@@ -97,7 +97,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const rootClientId = useSelect(
 		( select ) => {
 			const { getBlockRootClientId } = select( 'core/block-editor' );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			return getBlockRootClientId( clientId );
 		},
 		[ clientId ]
@@ -138,7 +138,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				// @ts-expect-error Selector is not typed
 				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',
@@ -261,7 +261,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 					iconPosition="left"
 					role="menuitemradio"
 					onClick={ menuItemClickHandler( productTemplate, onClose ) }
-					className={ classNames( {
+					className={ clsx( {
 						'components-menu-item__button--selected': isSelected,
 					} ) }
 				>

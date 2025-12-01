@@ -1,0 +1,26 @@
+.wc-block-components-payment-method-label--with-icon {
+	display: inline-block;
+	vertical-align: middle;
+	> img,
+	> svg {
+		vertical-align: middle;
+		margin: -2px 4px 0 0;
+	}
+}
+
+@mixin small-mobile-styles {
+	.wc-block-components-payment-method-label--with-icon {
+		> img,
+		> svg {
+			display: none;
+		}
+	}
+}
+
+@include cart-checkout-small-container {
+	@include small-mobile-styles;
+}
+
+@include cart-checkout-mobile-container {
+	@include small-mobile-styles;
+}

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Fragment } from '@wordpress/element';
 import type React from 'react';
 
@@ -40,7 +40,7 @@ export interface StepperProps {
 /**
  * A stepper component to indicate progress in a set number of steps.
  */
-export const Stepper: React.FC< StepperProps > = ( {
+export const Stepper = ( {
 	className,
 	currentStep,
 	steps,
@@ -60,7 +60,7 @@ export const Stepper: React.FC< StepperProps > = ( {
 	};
 
 	const currentIndex = steps.findIndex( ( s ) => currentStep === s.key );
-	const stepperClassName = classnames( 'woocommerce-stepper', className, {
+	const stepperClassName = clsx( 'woocommerce-stepper', className, {
 		'is-vertical': isVertical,
 	} );
 
@@ -71,16 +71,13 @@ export const Stepper: React.FC< StepperProps > = ( {
 					const { key, label, description, isComplete, onClick } =
 						step;
 					const isCurrentStep = key === currentStep;
-					const stepClassName = classnames(
-						'woocommerce-stepper__step',
-						{
-							'is-active': isCurrentStep,
-							'is-complete':
-								typeof isComplete !== 'undefined'
-									? isComplete
-									: currentIndex > i,
-						}
-					);
+					const stepClassName = clsx( 'woocommerce-stepper__step', {
+						'is-active': isCurrentStep,
+						'is-complete':
+							typeof isComplete !== 'undefined'
+								? isComplete
+								: currentIndex > i,
+					} );
 					const icon =
 						isCurrentStep && isPending ? (
 							<Spinner />

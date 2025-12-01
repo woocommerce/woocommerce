@@ -2,7 +2,7 @@
  * External dependencies
  */
 import type { FormEvent } from 'react';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import {
@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
 	Button,
 	ToggleControl,
@@ -55,12 +55,10 @@ export function VariationStockStatusForm( {
 
 	const { canManageStock, isLoadingManageStockOption } = useSelect(
 		( select ) => {
-			const { getOption, isResolving } = select( OPTIONS_STORE_NAME );
+			const { getOption, isResolving } = select( optionsStore );
 
 			return {
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				canManageStock: getOption( MANAGE_STOCK_OPTION ) === 'yes',
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				isLoadingManageStockOption: isResolving( 'getOption', [
 					MANAGE_STOCK_OPTION,
 				] ),
@@ -161,7 +159,7 @@ export function VariationStockStatusForm( {
 						value={ value.stock_quantity }
 						onChange={ handleStockQuantityInputControlChange }
 						onBlur={ validateStockQuantity }
-						className={ classNames( {
+						className={ clsx( {
 							'has-error': errors.stock_quantity,
 						} ) }
 					/>

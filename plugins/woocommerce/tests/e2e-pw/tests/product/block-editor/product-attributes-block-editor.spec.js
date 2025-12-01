@@ -1,11 +1,20 @@
-const { test: baseTest } = require( '../../../fixtures/block-editor-fixtures' );
-const { expect, tags } = require( '../../../fixtures/fixtures' );
-const { updateProduct } = require( '../../../utils/product-block-editor' );
-const { clickOnTab } = require( '../../../utils/simple-products' );
-const attributesData = require( './fixtures/attributes' );
-const {
-	waitForGlobalAttributesLoaded,
-} = require( './helpers/wait-for-global-attributes-loaded' );
+/**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
+ * Internal dependencies
+ */
+import { test as baseTest } from '../../../fixtures/block-editor-fixtures';
+import { expect, tags } from '../../../fixtures/fixtures';
+import { updateProduct } from '../../../utils/product-block-editor';
+import { clickOnTab } from '../../../utils/simple-products';
+import attributesData from './fixtures/attributes';
+import { waitForGlobalAttributesLoaded } from './helpers/wait-for-global-attributes-loaded';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
+
+skipTestsForDeprecatedFeature();
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.
@@ -26,11 +35,11 @@ async function waitForAttributeList( page ) {
 }
 
 const test = baseTest.extend( {
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product;
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				name: `Product ${ Date.now() }`,
 				type: 'simple',
 			} )
@@ -41,14 +50,16 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
-	attributes: async ( { api }, use ) => {
+	attributes: async ( { restApi }, use ) => {
 		let attribute;
 		let terms;
 
-		await api
-			.post( 'products/attributes', {
+		await restApi
+			.post( `${ WC_API_PATH }/products/attributes`, {
 				name: `Color_${ Date.now() }`,
 				slug: `pa_color_${ Date.now() }`,
 			} )
@@ -56,17 +67,20 @@ const test = baseTest.extend( {
 				attribute = response.data;
 			} );
 
-		await api
-			.post( `products/attributes/${ attribute.id }/terms/batch`, {
-				create: [
-					{
-						name: 'red',
-					},
-					{
-						name: 'blue',
-					},
-				],
-			} )
+		await restApi
+			.post(
+				`${ WC_API_PATH }/products/attributes/${ attribute.id }/terms/batch`,
+				{
+					create: [
+						{
+							name: 'red',
+						},
+						{
+							name: 'blue',
+						},
+					],
+				}
+			)
 			.then( ( response ) => {
 				terms = response.data.create;
 			} );
@@ -74,19 +88,19 @@ const test = baseTest.extend( {
 		await use( { attribute, terms } );
 
 		// Cleanup
-		await api.delete( `products/attributes/${ attribute.id }/terms/batch`, {
-			delete: terms.map( ( term ) => term.id ),
-		} );
-		await api.delete( `products/attributes/${ attribute.id }` );
+		await restApi.delete(
+			`${ WC_API_PATH }/products/attributes/${ attribute.id }`
+		);
 	},
-	productWithAttributes: async ( { api, product, attributes }, use ) => {
+	productWithAttributes: async ( { restApi, product, attributes }, use ) => {
 		let updatedProduct;
 		attributes.attribute.options = attributes.terms.map(
 			( term ) => term.name
 		);
 		attributes.attribute.visible = true;
-		await api
-			.put( `products/${ product.id }`, {
+
+		await restApi
+			.put( `${ WC_API_PATH }/products/${ product.id }`, {
 				attributes: [ attributes.attribute ],
 			} )
 			.then( ( response ) => {
@@ -375,7 +389,7 @@ test(
 						page.locator(
 							`button[aria-label="Remove ${ attribute.options[ 0 ] }"]`
 						)
-					).toBeVisible( { timeout: 2000 } );
+					).toBeVisible();
 				},
 				{
 					message: "wait for the attribute's terms to load",

@@ -92,18 +92,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * @return string
 	 */
 	public function sanitize_cost( $value ) {
-		$value = is_null( $value ) ? '' : $value;
-		$value = wp_kses_post( trim( wp_unslash( $value ) ) );
-		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
-
-		$test_value = str_replace( wc_get_price_decimal_separator(), '.', $value );
-		$test_value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ), wc_get_price_thousand_separator() ), '', $test_value );
-
-		if ( $test_value && ! is_numeric( $test_value ) ) {
-			throw new Exception( __( 'Please enter a valid number', 'woocommerce' ) );
-		}
-
-		return $value;
+		return \Automattic\WooCommerce\Utilities\NumberUtil::sanitize_cost_in_current_locale( $value );
 	}
 
 	/**
@@ -247,12 +236,16 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * Static so that's enqueued only once.
 	 */
 	public static function enqueue_admin_js() {
-		wc_enqueue_js(
+		$handle = 'wc-admin-shipping-free-shipping';
+		wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
 			"jQuery( function( $ ) {
 				function wcFreeShippingShowHideMinAmountField( el ) {
-					var form = $( el ).closest( 'form' );
-					var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
-					var ignoreDiscountField = $( '#woocommerce_free_shipping_ignore_discounts', form ).closest( 'tr' );
+					const form = $( el ).closest( 'form' );
+					const minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
+					const ignoreDiscountField = $( '#woocommerce_free_shipping_ignore_discounts', form ).closest( 'tr' );
 					if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
 						minAmountField.hide();
 						ignoreDiscountField.hide();

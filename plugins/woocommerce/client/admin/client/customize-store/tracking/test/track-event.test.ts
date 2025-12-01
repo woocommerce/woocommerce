@@ -8,7 +8,7 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import { trackEvent } from '..';
 import { isWooExpress } from '~/utils/is-woo-express';
-import { isEntrepreneurFlow } from '~/customize-store/design-with-ai/entrepreneur-flow';
+import { isEntrepreneurFlow } from '~/customize-store/entrepreneur-flow';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -18,9 +18,9 @@ jest.mock( '~/utils/is-woo-express', () => ( {
 	isWooExpress: jest.fn().mockReturnValue( false ),
 } ) );
 
-jest.mock( '~/customize-store/design-with-ai/entrepreneur-flow', () => {
+jest.mock( '~/customize-store/entrepreneur-flow', () => {
 	const originalModule = jest.requireActual(
-		'~/customize-store/design-with-ai/entrepreneur-flow'
+		'~/customize-store/entrepreneur-flow'
 	);
 	return {
 		...originalModule,

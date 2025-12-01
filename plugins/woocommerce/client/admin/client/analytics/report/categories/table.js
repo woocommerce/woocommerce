@@ -9,7 +9,7 @@ import { map } from 'lodash';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { Link } from '@woocommerce/components';
 import { formatValue } from '@woocommerce/number';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { itemsStore } from '@woocommerce/data';
 import { CurrencyContext } from '@woocommerce/currency';
 
 /**
@@ -225,8 +225,7 @@ export default compose(
 			return {};
 		}
 
-		const { getItems, getItemsError, isResolving } =
-			select( ITEMS_STORE_NAME );
+		const { getItems, getItemsError, isResolving } = select( itemsStore );
 		const tableQuery = {
 			per_page: -1,
 		};

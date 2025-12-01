@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
 import { isNil } from 'lodash';
 import { SectionHeader } from '@woocommerce/components';
-import { IMPORT_STORE_NAME } from '@woocommerce/data';
+import { importStore } from '@woocommerce/data';
 import { withSelect } from '@wordpress/data';
 
 /**
@@ -105,7 +105,7 @@ class HistoricalDataLayout extends Component {
 
 export default withSelect( ( select, props ) => {
 	const { getImportError, getImportStatus, getImportTotals } =
-		select( IMPORT_STORE_NAME );
+		select( importStore );
 	const {
 		activeImport,
 		cacheNeedsClearing,

@@ -1,4 +1,12 @@
 <?php
+/**
+ * Shipping zones admin page.
+ *
+ * @package WooCommerce\Admin\Shipping
+ */
+
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -10,16 +18,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 </h2>
 <p class="wc-shipping-zone-heading-help-text">
 	<?php
-	echo wp_kses_post(
-		sprintf(
-			/* translators: %s: URL to local pickup settings */
-			__(
-				"A shipping zone consists of the region(s) you'd like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we'll use their shipping address to show them the methods available in their area. To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
-				'woocommerce'
-			),
-			esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
-		)
+	esc_html_e(
+		"A shipping zone consists of the region(s) you'd like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we'll use their shipping address to show them the methods available in their area.",
+		'woocommerce'
 	);
+
+	if ( CartCheckoutUtils::is_checkout_block_default() ) {
+		echo ' ' . wp_kses_post(
+			sprintf(
+			/* translators: %s: URL to local pickup settings */
+				__(
+					"To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
+					'woocommerce'
+				),
+				esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+			)
+		);
+	}
 	?>
 </p>
 <table class="wc-shipping-zones widefat">

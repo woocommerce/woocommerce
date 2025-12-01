@@ -10,13 +10,13 @@ import {
 	useEffect,
 	Fragment,
 } from '@wordpress/element';
-import { Product, ProductQuery } from '@woocommerce/data';
+import { Product, ProductQuery, productsStore } from '@woocommerce/data';
 import { drawerRight, seen, unseen } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
 	__experimentalHeading as Heading,
 	__experimentalText as Text,
@@ -169,7 +169,9 @@ export default function ProductList( {
 			}
 		} );
 		const orderby =
-			view.sort?.field === 'name' ? 'title' : view.sort?.field;
+			view.sort?.field === 'name'
+				? 'title'
+				: ( view.sort?.field as ProductQuery[ 'orderby' ] );
 
 		return {
 			per_page: view.perPage,
@@ -196,13 +198,10 @@ export default function ProductList( {
 	const { records, totalCount, isLoading } = useSelect(
 		( select ) => {
 			const { getProducts, getProductsTotalCount, isResolving } =
-				select( 'wc/admin/products' );
+				select( productsStore );
 			return {
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				records: getProducts( queryParams ) as Product[],
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-				totalCount: getProductsTotalCount( queryParams ) as number,
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				totalCount: getProductsTotalCount( queryParams ),
 				isLoading: isResolving( 'getProducts', [ queryParams ] ),
 			};
 		},
@@ -211,8 +210,10 @@ export default function ProductList( {
 
 	const paginationInfo = useMemo(
 		() => ( {
-			totalItems: totalCount,
-			totalPages: Math.ceil( totalCount / ( view.perPage || PAGE_SIZE ) ),
+			totalItems: totalCount ?? 0,
+			totalPages: Math.ceil(
+				( totalCount ?? 0 ) / ( view.perPage || PAGE_SIZE )
+			),
 		} ),
 		[ totalCount, view.perPage ]
 	);
@@ -222,11 +223,11 @@ export default function ProductList( {
 			const { getPostType, canUser } = select( coreStore );
 			const postTypeData:
 				| { labels: Record< string, string > }
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				// @ts-expect-error Selector is not typed
 				| undefined = getPostType( postType );
 			return {
 				labels: postTypeData?.labels,
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				// @ts-expect-error Selector is not typed
 				canCreateRecord: canUser( 'create', {
 					kind: 'postType',
 					name: postType,
@@ -246,7 +247,7 @@ export default function ProductList( {
 		[ postTypeActions, editAction ]
 	);
 
-	const classes = classNames( 'edit-site-page', className );
+	const classes = clsx( 'edit-site-page', className );
 
 	return (
 		<NavigableRegion

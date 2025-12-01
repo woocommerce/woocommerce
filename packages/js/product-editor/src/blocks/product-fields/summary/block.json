@@ -48,7 +48,7 @@
 		},
 		"content": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		}
 	},
 	"supports": {

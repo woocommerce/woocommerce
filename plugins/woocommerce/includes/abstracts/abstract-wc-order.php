@@ -10,11 +10,11 @@
  * @package     WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -74,7 +74,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
 	 * @since 3.0.0
-	 * @var array
+	 * @var array<string, array<int, \WC_Order_Item>>
 	 */
 	protected $items = array();
 
@@ -82,7 +82,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Order items that need deleting are stored here.
 	 *
 	 * @since 3.0.0
-	 * @var array
+	 * @var array<\WC_Order_Item>
 	 */
 	protected $items_to_delete = array();
 
@@ -225,11 +225,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 
 			$this->save_items();
-
-			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
-				$order_cache = wc_get_container()->get( OrderCache::class );
-				$order_cache->remove( $this->get_id() );
-			}
 
 			/**
 			 * Trigger action after saving to the DB.
@@ -818,6 +813,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			wc_deprecated_argument( 'total_type', '3.0', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
+
+		if ( ! is_string( $value ) || 0 === strlen( $value ) ) {
+			$value = (float) $value;
+		}
+
 		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
 	}
 
@@ -942,7 +942,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function get_values_for_total( $field ) {
 		$items = array_map(
 			function ( $item ) use ( $field ) {
-				return wc_add_number_precision( $item[ $field ], false );
+				return wc_add_number_precision( (float) $item[ $field ], false );
 			},
 			array_values( $this->get_items() )
 		);
@@ -1175,7 +1175,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 					if ( ! isset( $user_ids_and_emails ) ) {
 						$user_alias          = get_current_user_id() ? wp_get_current_user()->ID : sanitize_email( $billing_email );
-						$user_ids_and_emails = $this->get_billing_and_current_user_aliases( $billing_email );
+						$user_ids_and_emails = $this->get_billing_and_current_user_ids_and_aliases( $billing_email );
 					}
 
 					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias );
@@ -1243,23 +1243,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Helper method to get all aliases for current user and provide billing email.
+	 * Helper method to get all aliases and IDs for current user and provided billing email.
 	 *
-	 * @param string $billing_email Billing email provided in form.
+	 * @param string $billing_email Billing email to look up for.
 	 *
-	 * @return array     Array of all aliases.
+	 * @return array     Array of all aliases and IDs.
 	 * @throws Exception When validation fails.
 	 */
-	private function get_billing_and_current_user_aliases( $billing_email ) {
+	private function get_billing_and_current_user_ids_and_aliases( $billing_email ): array {
 		$emails = array( $billing_email );
 		if ( get_current_user_id() ) {
 			$emails[] = wp_get_current_user()->user_email;
 		}
-		$emails              = array_unique(
-			array_map( 'strtolower', array_map( 'sanitize_email', $emails ) )
-		);
-		$customer_data_store = WC_Data_Store::load( 'customer' );
-		$user_ids            = $customer_data_store->get_user_ids_for_billing_email( $emails );
+		$emails   = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+		$user_ids = wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( $emails );
 		return array_merge( $user_ids, $emails );
 	}
 
@@ -1277,7 +1274,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$code   = wc_format_coupon_code( $raw_coupon );
 			$coupon = new WC_Coupon( $code );
 
-			if ( $coupon->get_code() !== $code ) {
+			if ( ! wc_is_same_coupon( $coupon->get_code(), $code ) ) {
 				return new WP_Error( 'invalid_coupon', __( 'Invalid coupon code', 'woocommerce' ) );
 			}
 		} else {
@@ -1287,8 +1284,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Check to make sure coupon is not already applied.
 		$applied_coupons = $this->get_items( 'coupon' );
 		foreach ( $applied_coupons as $applied_coupon ) {
-			if ( $applied_coupon->get_code() === $coupon->get_code() ) {
-				return new WP_Error( 'invalid_coupon', __( 'Coupon code already applied!', 'woocommerce' ) );
+			if ( wc_is_same_coupon( $applied_coupon->get_code(), $coupon->get_code() ) ) {
+				return new WP_Error(
+					'invalid_coupon',
+					sprintf(
+						/* translators: %s: coupon code */
+						esc_html__( 'Coupon code "%s" already applied!', 'woocommerce' ),
+						esc_html( $coupon->get_code() )
+					)
+				);
 			}
 		}
 
@@ -1370,7 +1374,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Remove the coupon line.
 		foreach ( $coupons as $item_id => $coupon ) {
-			if ( $coupon->get_code() === $code ) {
+			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
 				$this->remove_item( $item_id );
 				$coupon_object = new WC_Coupon( $code );
 				$coupon_object->decrease_usage_count( $this->get_user_id() );
@@ -2457,6 +2461,41 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Returns true if the order contains items that need shipping.
+	 *
+	 * @since 9.9.0
+	 * @return bool
+	 */
+	public function needs_shipping() {
+		if ( ! wc_shipping_enabled() || 0 === wc_get_shipping_method_count( true ) ) {
+			return false;
+		}
+		$needs_shipping = false;
+
+		foreach ( $this->get_items() as $item ) {
+			if ( ! is_a( $item, 'WC_Order_Item_Product' ) ) {
+				continue;
+			}
+
+			$product = $item->get_product();
+			if ( is_a( $product, 'WC_Product' ) && $product->needs_shipping() ) {
+				$needs_shipping = true;
+				break;
+			}
+		}
+
+		/**
+		 * Filter to modify the needs shipping value for a given order.
+		 *
+		 * @since 9.9.0
+		 *
+		 * @param bool $needs_shipping The value originally calculated.
+		 * @param WC_Abstract_Order $order The order for which the value is calculated.
+		 */
+		return apply_filters( 'woocommerce_order_needs_shipping', $needs_shipping, $this );
+	}
+
+	/**
 	 * Returns true if the order contains a free product.
 	 *
 	 * @since 2.5.0
@@ -2533,9 +2572,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float The calculated value.
 	 */
 	protected function calculate_cogs_total_value_core(): float {
-		if ( ! $this->has_cogs() || ! $this->cogs_is_enabled( __METHOD__ ) ) {
-			return 0;
-		}
 
 		$value = 0;
 		foreach ( array_keys( $this->item_types_to_group ) as $item_type ) {
@@ -2575,5 +2611,35 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ) {
 			$this->set_prop( 'cogs_total_value', $value );
 		}
+	}
+
+	/**
+	 * Return the HTML to render the total Cost of Goods Sold for the order.
+	 *
+	 * @param array|null $wc_price_arg Arguments to be passed to wc_price, defaults to an array containing only the currency symbol.
+	 * @return string
+	 */
+	public function get_cogs_total_value_html( ?array $wc_price_arg = null ): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
+			return '';
+		}
+
+		$cogs_total_value = $this->get_cogs_total_value();
+
+		/**
+		 * Filter to customize the total Cost of Goods Sold (COGS) value HTML for a given order.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param string   $total_html The formatted total COGS HTML.
+		 * @param float    $total      The total COGS value.
+		 * @param WC_Order $order      The order object.
+		 */
+		return apply_filters(
+			'woocommerce_order_cogs_total_value_html',
+			wc_price( $cogs_total_value, $wc_price_arg ?? array( 'currency' => $this->get_currency() ) ),
+			$cogs_total_value,
+			$this
+		);
 	}
 }

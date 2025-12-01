@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Component, createElement } from '@wordpress/element';
 import {
 	debounce,
@@ -41,6 +41,11 @@ type Props = {
 	 * Class name applied to control wrapper.
 	 */
 	controlClassName?: string;
+	/**
+	 * Whether to ignore diacritics when matching search queries.
+	 * If true, both the user’s query and all option keywords are normalised to their base characters.
+	 */
+	ignoreDiacritics?: boolean;
 	/**
 	 * Allow the select options to be disabled.
 	 */
@@ -156,6 +161,18 @@ type Props = {
 	 * On Blur callback.
 	 */
 	onBlur?: () => void;
+	/**
+	 * Enable virtual scrolling for large lists of options.
+	 */
+	virtualScroll?: boolean;
+	/**
+	 * Height in pixels for each virtual item. Required when virtualScroll is true.
+	 */
+	virtualItemHeight?: number;
+	/**
+	 * Maximum height in pixels for the virtualized list. Default is 300.
+	 */
+	virtualListHeight?: number;
 };
 
 type State = {
@@ -179,6 +196,7 @@ const initialState: State = {
  */
 export class SelectControl extends Component< Props, State > {
 	static defaultProps: Partial< Props > = {
+		ignoreDiacritics: false,
 		excludeSelectedOptions: true,
 		getSearchExpression: identity,
 		inlineTags: false,
@@ -196,6 +214,9 @@ export class SelectControl extends Component< Props, State > {
 		hideBeforeSearch: false,
 		staticList: false,
 		autoComplete: 'off',
+		virtualScroll: false,
+		virtualItemHeight: 35,
+		virtualListHeight: 300,
 	};
 
 	node: HTMLDivElement | null = null;
@@ -227,6 +248,13 @@ export class SelectControl extends Component< Props, State > {
 		this.selectOption = this.selectOption.bind( this );
 		this.setExpanded = this.setExpanded.bind( this );
 		this.setNewValue = this.setNewValue.bind( this );
+	}
+
+	componentDidUpdate( prevProps: Props ) {
+		const { selected } = this.props;
+		if ( selected !== prevProps.selected ) {
+			this.reset( selected );
+		}
 	}
 
 	bindNode( node: HTMLDivElement ) {
@@ -390,12 +418,18 @@ export class SelectControl extends Component< Props, State > {
 	}
 
 	getOptionsByQuery( options: Option[], query: string | null ) {
-		const { getSearchExpression, maxResults, onFilter } = this.props;
+		const { getSearchExpression, maxResults, onFilter, ignoreDiacritics } =
+			this.props;
 		const filtered = [];
 
 		// Create a regular expression to filter the options.
+		const baseQuery = query ? query.trim() : '';
+		const normalizedQuery = ignoreDiacritics
+			? baseQuery.normalize( 'NFD' ).replace( /[\u0300-\u036f]/g, '' )
+			: baseQuery;
+
 		const expression = getSearchExpression!(
-			escapeRegExp( query ? query.trim() : '' )
+			escapeRegExp( normalizedQuery )
 		);
 		const search = expression ? new RegExp( expression, 'i' ) : /^$/;
 
@@ -408,9 +442,15 @@ export class SelectControl extends Component< Props, State > {
 				keywords = [ ...keywords, option.label ];
 			}
 
-			const isMatch = keywords.some( ( keyword ) =>
-				search.test( keyword )
-			);
+			const isMatch = keywords.some( ( keyword ) => {
+				const normalizedKeyword = ignoreDiacritics
+					? keyword
+							.normalize( 'NFD' )
+							.replace( /[\u0300-\u036f]/g, '' )
+					: keyword;
+
+				return search.test( normalizedKeyword );
+			} );
 			if ( ! isMatch ) {
 				continue;
 			}
@@ -518,6 +558,9 @@ export class SelectControl extends Component< Props, State > {
 			instanceId,
 			isSearchable,
 			options,
+			virtualScroll,
+			virtualItemHeight,
+			virtualListHeight,
 		} = this.props;
 		const { isExpanded, isFocused, selectedIndex } = this.state;
 
@@ -533,15 +576,11 @@ export class SelectControl extends Component< Props, State > {
 
 		return (
 			<div
-				className={ classnames(
-					'woocommerce-select-control',
-					className,
-					{
-						'has-inline-tags': hasMultiple && inlineTags,
-						'is-focused': isFocused,
-						'is-searchable': isSearchable,
-					}
-				) }
+				className={ clsx( 'woocommerce-select-control', className, {
+					'has-inline-tags': hasMultiple && inlineTags,
+					'is-focused': isFocused,
+					'is-searchable': isSearchable,
+				} ) }
 				ref={ this.bindNode }
 			>
 				{ autofill && (
@@ -604,6 +643,9 @@ export class SelectControl extends Component< Props, State > {
 						decrementSelectedIndex={ this.decrementSelectedIndex }
 						incrementSelectedIndex={ this.incrementSelectedIndex }
 						setExpanded={ this.setExpanded }
+						virtualScroll={ virtualScroll }
+						virtualItemHeight={ virtualItemHeight }
+						virtualListHeight={ virtualListHeight }
 					/>
 				) }
 			</div>

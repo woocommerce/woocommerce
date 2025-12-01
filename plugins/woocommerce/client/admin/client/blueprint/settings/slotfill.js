@@ -9,15 +9,13 @@ import {
 	Icon,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
-import {
-	useState,
-	useEffect,
-	createInterpolateElement,
-} from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import { useState, createInterpolateElement } from '@wordpress/element';
+import { registerPlugin, getPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { CollapsibleContent } from '@woocommerce/components';
-import { settings, plugins, brush } from '@wordpress/icons';
+import { settings, plugins, layout } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
+import { useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -27,16 +25,17 @@ import { BlueprintUploadDropzone } from '../components/BlueprintUploadDropzone';
 import './style.scss';
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
+const PLUGIN_ID = 'woocommerce-admin-blueprint-settings-slotfill';
 
 const icons = {
 	plugins,
-	brush,
 	settings,
+	layout,
 };
 
 const Blueprint = () => {
 	const [ exportEnabled, setExportEnabled ] = useState( true );
-	const [ error, setError ] = useState( null );
+	const [ exportError, setExportError ] = useState( null );
 
 	const blueprintStepGroups =
 		window.wcSettings?.admin?.blueprint_step_groups || [];
@@ -44,14 +43,17 @@ const Blueprint = () => {
 	const [ checkedState, setCheckedState ] = useState(
 		blueprintStepGroups.reduce( ( acc, group ) => {
 			acc[ group.id ] = group.items.reduce( ( groupAcc, item ) => {
-				groupAcc[ item.id ] = true; // Default all to true
+				groupAcc[ item.id ] = item.checked ?? false;
 				return groupAcc;
 			}, {} );
 			return acc;
 		}, {} )
 	);
 
+	const { currentUserCan } = useUser();
+
 	const exportBlueprint = async ( _steps ) => {
+		setExportError( null );
 		setExportEnabled( false );
 
 		const linkContainer = document.getElementById(
@@ -67,10 +69,8 @@ const Blueprint = () => {
 					steps: _steps,
 				},
 			} );
-			const link = document.createElement( 'a' );
-			link.innerHTML =
-				'Click here in case download does not start automatically';
 
+			const link = document.createElement( 'a' );
 			let url = null;
 
 			if ( response.type === 'zip' ) {
@@ -91,11 +91,49 @@ const Blueprint = () => {
 			if ( url ) {
 				window.URL.revokeObjectURL( url );
 			}
-		} catch ( e ) {
-			setError( e.message );
-		}
 
-		setExportEnabled( true );
+			recordEvent( 'blueprint_export_success', {
+				has_plugins: _steps.plugins?.length > 0,
+				has_themes: _steps.themes?.length > 0,
+				has_settings: _steps.settings?.length > 0,
+				settings_exported: _steps.settings,
+			} );
+		} catch ( e ) {
+			recordEvent( 'blueprint_export_error', {
+				error_message: e.message || 'unknown',
+			} );
+
+			setExportError( e.message );
+
+			switch ( true ) {
+				case e instanceof Error:
+					setExportError( e.message );
+					break;
+				case typeof e === 'string':
+					setExportError( e );
+					break;
+				case e.errors &&
+					e.errors.wooblueprint_insufficient_permissions &&
+					e.errors.wooblueprint_insufficient_permissions.length > 0:
+					setExportError(
+						__(
+							'Sorry, you are not allowed to export the selected settings.',
+							'woocommerce'
+						)
+					);
+					break;
+				default:
+					setExportError(
+						__(
+							'An unknown error occurred while exporting the settings.',
+							'woocommerce'
+						)
+					);
+					break;
+			}
+		} finally {
+			setExportEnabled( true );
+		}
 	};
 
 	// Handle checkbox change
@@ -109,64 +147,68 @@ const Blueprint = () => {
 		} ) );
 	};
 
-	useEffect( () => {
-		const saveButton = document.getElementsByClassName(
-			'woocommerce-save-button'
-		)[ 0 ];
-		if ( saveButton ) {
-			saveButton.style.display = 'none';
-		}
-	} );
-
 	return (
 		<div className="blueprint-settings-slotfill">
-			{ error && (
-				<Notice
-					status="error"
-					onRemove={ () => {
-						setError( null );
-					} }
-					isDismissible
-				>
-					{ error }
-				</Notice>
-			) }
 			<h3>{ __( 'Blueprint', 'woocommerce' ) }</h3>
 			<p className="blueprint-settings-intro-text">
 				{ createInterpolateElement(
 					__(
-						'Blueprints are setup files that contain all the installation instructions, including plugins, themes, and setting. Ease the setup process, allow teams to apply each others’ changes and much more. <docLink />',
+						'Blueprints are setup files containing WooCommerce settings, plugins, and themes. Simplify setup, streamline team collaboration, and <docLink />.',
 						'woocommerce'
 					),
 					{
 						docLink: (
 							<a
-								href="#tba"
+								href="https://woocommerce.com/document/woocommerce-blueprints/"
+								target="_blank"
 								className="woocommerce-admin-inline-documentation-link"
+								rel="noreferrer"
+								onClick={ () => {
+									recordEvent( 'blueprint_learn_more_click' );
+								} }
 							>
-								{ __( 'Learn more', 'woocommerce' ) }
+								{ __( 'more', 'woocommerce' ) }
 							</a>
 						),
 					}
 				) }
 			</p>
-			<h4>{ __( 'Import', 'woocommerce' ) }</h4>
-			<p>
-				{ __(
-					'Import a .zip or .json file, max size 50 MB. Only one Blueprint can be imported at a time.',
-					'woocommerce'
-				) }
-			</p>
-			<BlueprintUploadDropzone />
+			{ currentUserCan( 'manage_options' ) && (
+				<>
+					<h4>{ __( 'Import', 'woocommerce' ) }</h4>
+					<p>
+						{ __(
+							'Import a .json file. You can import only one Blueprint at a time.',
+							'woocommerce'
+						) }
+					</p>
+					<BlueprintUploadDropzone />
+				</>
+			) }
 			<h4>{ __( 'Export', 'woocommerce' ) }</h4>
 			<p className="blueprint-settings-export-intro">
 				{ __(
-					'Choose what you want to include, and export it as a .zip file.',
+					'Select the settings, plugins, and themes to export as a .json file.',
 					'woocommerce'
 				) }
 			</p>
+			{ exportError && (
+				<Notice
+					className="blueprint-export-error"
+					status="error"
+					onRemove={ () => {
+						setExportError( null );
+					} }
+					isDismissible
+				>
+					{ exportError }
+				</Notice>
+			) }
 			{ blueprintStepGroups.map( ( group, index ) => (
-				<div key={ index } className="blueprint-settings-export-group">
+				<div
+					key={ index }
+					className="blueprint-settings-export-group wc-settings-prevent-change-event"
+				>
 					<Icon
 						icon={ icons[ group.icon ] ?? icons.settings }
 						alt={ sprintf(
@@ -176,7 +218,11 @@ const Blueprint = () => {
 						) }
 					/>
 					<span className="blueprint-settings-export-group-item-count">
-						{ group.items.length }
+						{
+							Object.values( checkedState[ group.id ] ).filter(
+								( checked ) => checked
+							).length
+						}
 					</span>
 
 					<CollapsibleContent
@@ -186,6 +232,7 @@ const Blueprint = () => {
 					>
 						{ group.items.map( ( step ) => (
 							<ToggleControl
+								__nextHasNoMarginBottom
 								key={ step.id }
 								label={ step.label }
 								checked={ checkedState[ group.id ][ step.id ] }
@@ -233,7 +280,10 @@ const BlueprintSlotfill = () => {
 };
 
 export const registerBlueprintSlotfill = () => {
-	registerPlugin( 'woocommerce-admin-blueprint-settings-slotfill', {
+	if ( getPlugin( PLUGIN_ID ) ) {
+		return;
+	}
+	registerPlugin( PLUGIN_ID, {
 		scope: 'woocommerce-blueprint-settings',
 		render: BlueprintSlotfill,
 	} );

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
@@ -581,6 +582,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$orders_table = $this->sut::get_orders_table_name();
 		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$orders_table} WHERE id = %d", $order_id ) ) );
 		$this->assertEquals( OrderStatus::TRASH, $wpdb->get_var( $wpdb->prepare( "SELECT post_status FROM {$wpdb->posts} WHERE id = %d", $order_id ) ) );
+		$this->assertNotEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
 
 		$this->sut->read( $order );
 		$this->sut->untrash_order( $order );
@@ -588,7 +590,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( OrderStatus::ON_HOLD, $order->get_status() );
 		$this->assertEquals( OrderInternalStatus::ON_HOLD, get_post_status( $order_id ) );
 
-		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
+		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$this->sut->get_meta_table_name()} WHERE order_id = %d AND meta_key LIKE %s", $order_id, '_wp_trash_meta_%' ) ) );
 		$this->assertEmpty( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key LIKE '_wp_trash_meta_%'", $order_id ) ) );
 		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
 	}
@@ -682,6 +684,92 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 			)
 		);
 		$this->assertEquals( 1, count( $query->orders ) );
+	}
+
+	/**
+	 * @testDox Tests that 'status' query var handles 'any' and 'all' correctly (excluding/including internal statuses).
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_status_any_and_all() {
+		$this->disable_cot_sync();
+
+		// Create orders with valid WooCommerce statuses.
+		$order_pending = new WC_Order();
+		$this->switch_data_store( $order_pending, $this->sut );
+		$order_pending->set_status( OrderStatus::PENDING );
+		$order_pending->save();
+
+		$order_processing = new WC_Order();
+		$this->switch_data_store( $order_processing, $this->sut );
+		$order_processing->set_status( OrderStatus::PROCESSING );
+		$order_processing->save();
+
+		$order_completed = new WC_Order();
+		$this->switch_data_store( $order_completed, $this->sut );
+		$order_completed->set_status( OrderStatus::COMPLETED );
+		$order_completed->save();
+
+		// Create order with internal WordPress status (auto-draft).
+		$order_auto_draft = new WC_Order();
+		$this->switch_data_store( $order_auto_draft, $this->sut );
+		$order_auto_draft->set_status( OrderStatus::AUTO_DRAFT );
+		$order_auto_draft->save();
+
+		// Create order with checkout-draft status (registered WooCommerce status via DraftOrders service).
+		$order_checkout_draft = new WC_Order();
+		$this->switch_data_store( $order_checkout_draft, $this->sut );
+		$order_checkout_draft->set_status( 'checkout-draft' );
+		$order_checkout_draft->save();
+
+		// Test 'status' => 'any' - should return only valid WooCommerce statuses (excludes internal WordPress statuses like auto-draft).
+		$query = new OrdersTableQuery( array( 'status' => 'any' ) );
+		$this->assertEquals( 4, count( $query->orders ), "status='any' should return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "status='any' should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "status='any' should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "status='any' should include completed orders" );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, "status='any' should include checkout-draft orders (registered WC status)" );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, "status='any' should exclude auto-draft orders (internal WordPress status)" );
+
+		// Test 'status' => 'all' - should return all statuses without filtering.
+		$query = new OrdersTableQuery( array( 'status' => 'all' ) );
+		$this->assertEquals( 5, count( $query->orders ), "status='all' should return all orders regardless of status" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "status='all' should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "status='all' should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "status='all' should include completed orders" );
+		$this->assertContains( $order_auto_draft->get_id(), $query->orders, "status='all' should include auto-draft orders" );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, "status='all' should include checkout-draft orders" );
+
+		// Test that internal statuses can still be queried explicitly.
+		$query = new OrdersTableQuery( array( 'status' => OrderStatus::AUTO_DRAFT ) );
+		$this->assertEquals( 1, count( $query->orders ), 'Internal statuses can be queried explicitly' );
+		$this->assertContains( $order_auto_draft->get_id(), $query->orders, 'Explicit query for auto-draft should return auto-draft order' );
+
+		$query = new OrdersTableQuery( array( 'status' => 'checkout-draft' ) );
+		$this->assertEquals( 1, count( $query->orders ), 'Internal statuses can be queried explicitly' );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, 'Explicit query for checkout-draft should return checkout-draft order' );
+
+		// Test with array of statuses including 'any'.
+		$query = new OrdersTableQuery( array( 'status' => array( 'any' ) ) );
+		$this->assertEquals( 4, count( $query->orders ), "status=['any'] should work same as status='any'" );
+
+		// Test empty status (should behave like 'any') - historical and WP_Query like behavior.
+		$query = new OrdersTableQuery( array( 'status' => '' ) );
+		$this->assertEquals( 4, count( $query->orders ), "Empty status should behave like 'any' and return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, 'Empty status should include pending orders' );
+		$this->assertContains( $order_processing->get_id(), $query->orders, 'Empty status should include processing orders' );
+		$this->assertContains( $order_completed->get_id(), $query->orders, 'Empty status should include completed orders' );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, 'Empty status should include checkout-draft orders (registered WC status)' );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, 'Empty status should exclude auto-draft orders (internal WordPress status)' );
+
+		// Test omitted status (should behave like 'any').
+		$query = new OrdersTableQuery( array() );
+		$this->assertEquals( 4, count( $query->orders ), "Omitted status should behave like 'any' and return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, 'Omitted status should include pending orders' );
+		$this->assertContains( $order_processing->get_id(), $query->orders, 'Omitted status should include processing orders' );
+		$this->assertContains( $order_completed->get_id(), $query->orders, 'Omitted status should include completed orders' );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, 'Omitted status should include checkout-draft orders (registered WC status)' );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, 'Omitted status should exclude auto-draft orders (internal WordPress status)' );
 	}
 
 	/**
@@ -1562,9 +1650,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * Test methods get_total_tax_refunded and get_total_shipping_refunded.
+	 * Test methods get_total_tax_refunded, get_total_shipping_refunded, and get_total_shipping_tax_refunded.
 	 */
-	public function test_get_total_tax_refunded_and_get_total_shipping_refunded() {
+	public function test_get_total_tax_refunded_and_get_total_shipping_refunded_and_get_total_shipping_tax_refunded() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
@@ -1628,6 +1716,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEquals( 5, $order->get_data_store()->get_total_tax_refunded( $order ) );
 		$this->assertEquals( 10, $order->get_data_store()->get_total_shipping_refunded( $order ) );
+		$this->assertEquals( 3, $order->get_data_store()->get_total_shipping_tax_refunded( $order ) );
 	}
 
 	/**
@@ -2556,6 +2645,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 		// phpcs:enable Squiz.Commenting
 
+		// Needed for the fake logger to be used.
+		$this->reset_container_resolutions();
+
 		$this->register_legacy_proxy_function_mocks(
 			array(
 				'wc_get_logger' => function () use ( $fake_logger ) {
@@ -2597,6 +2689,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 			// We have to clear the cache after a direct DB update.
 			$this->sut->clear_cached_data( array( $refund->get_id() ) );
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order_cache->remove( $refund->get_id() );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
@@ -3400,7 +3494,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
 
 		// Check that the log entry was created.
-		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+		$serialized_meta_value = '"\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"';
+
+		$log_message = end( $fake_logger->warnings )['message'];
+		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
+		$this->assertStringContainsString( $serialized_meta_value, $log_message );
 
 		// Test deleting meta data containing an object of a non-existent class.
 		$meta_data = $this->sut->read_meta( $order );
@@ -3413,7 +3511,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
 
 		// Check that the log entry was created.
-		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+		$log_message = end( $fake_logger->warnings )['message'];
+		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
+		$this->assertStringContainsString( $serialized_meta_value, $log_message );
 	}
 
 	/**
@@ -3740,5 +3840,90 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$meta_store   = wc_get_container()->get( OrdersTableDataStoreMeta::class );
 		$meta_objects = $meta_store->get_metadata_by_key( $order, '_cogs_total_value' );
 		$this->assertEquals( $expected_saved_value, (float) $meta_objects[0]->meta_value );
+	}
+
+	/**
+	 * @testdox Saving metadata for a non-persisted order doesn't save the order nor the metadata.
+	 */
+	public function test_save_meta_on_non_persisted_order() {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+
+		$meta_key   = 'test_meta_key';
+		$meta_value = 'test_meta_value';
+
+		$query = $wpdb->prepare(
+			"SELECT COUNT(*) FROM {$this->sut::get_meta_table_name()} WHERE meta_key = %s AND meta_value = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- variable is a table name.
+			$meta_key,
+			$meta_value
+		);
+
+		// Confirm there's no meta at the start.
+		$this->assertEquals( $wpdb->get_var( $query ), 0 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Confirm there's no meta.
+		$order = new \WC_Order();
+		$order->add_meta_data( $meta_key, $meta_value );
+		$order->save_meta_data();
+
+		// Confirm there's still no meta after calling `save_meta_data()` on an unsaved order.
+		$this->assertEquals( $wpdb->get_var( $query ), 0 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Confirm that saving the order persists everything.
+		$order->save();
+		$this->assertEquals( $wpdb->get_var( $query ), 1 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+
+		// Calling `save_meta_data()` on an already saved order does update metadata.
+		$order->add_meta_data( $meta_key, $meta_value, false );
+		$order->save_meta_data();
+		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+	}
+
+	/**
+	 * @testdox Sync-on-read should update metadata as well.
+	 */
+	public function test_sync_on_read_updates_metadata() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->save();
+
+		// Update the meta data on the post.
+		update_post_meta( $order->get_id(), 'foo', 'baz' );
+
+		$fresh_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 'baz', get_post_meta( $order->get_id(), 'foo', true ) );
+		$this->assertEquals( 'baz', $fresh_order->get_meta( 'foo', true, 'edit' ) );
+	}
+
+	/**
+	 * @testdox An order deleted from the posts table while sync was off is deleted from the orders table when sync runs.
+	 */
+	public function test_loading_order_deleted_from_posts_table() {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( false );
+
+		// Create a synced order.
+		$this->enable_cot_sync();
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		// Temporarily disable sync and delete order from posts.
+		$this->disable_cot_sync();
+		$order->delete( true );
+
+		// Re-enable sync and attempt to read the order from the HPOS side.
+		$this->enable_cot_sync();
+
+		// Confirm that the order is deleted from HPOS when sync runs.
+		$this->assertEquals( true, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sync = wc_get_container()->get( DataSynchronizer::class );
+		$sync->process_batch( array( $order_id ) );
+		$this->assertEquals( false, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }

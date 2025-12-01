@@ -8,7 +8,7 @@ import { useSelect } from '@wordpress/data';
 import { Badge } from '@woocommerce/components';
 import {
 	getVisibleTasks,
-	ONBOARDING_STORE_NAME,
+	onboardingStore,
 	TaskListType,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -32,7 +32,7 @@ export type TaskListProps = TaskListType & {
 	cesHeader?: boolean;
 };
 
-export const TaskList: React.FC< TaskListProps > = ( {
+export const TaskList = ( {
 	id,
 	eventPrefix,
 	tasks,
@@ -41,12 +41,11 @@ export const TaskList: React.FC< TaskListProps > = ( {
 	isExpandable = false,
 	displayProgressHeader = false,
 	query,
-} ) => {
+}: TaskListProps ) => {
 	const { profileItems } = useSelect( ( select ) => {
-		const { getProfileItems } = select( ONBOARDING_STORE_NAME );
+		const { getProfileItems } = select( onboardingStore );
 
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			profileItems: getProfileItems(),
 		};
 	}, [] );

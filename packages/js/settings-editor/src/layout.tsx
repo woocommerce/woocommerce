@@ -6,35 +6,23 @@ import {
 	useResizeObserver,
 	useReducedMotion,
 } from '@wordpress/compose';
-import { __ } from '@wordpress/i18n';
 /* eslint-disable @woocommerce/dependency-group */
 import {
 	// @ts-expect-error missing type.
 	EditorSnackbars,
-	// @ts-expect-error missing type.
-	privateApis as editorPrivateApis,
 } from '@wordpress/editor';
 import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,
 } from '@wordpress/components';
-import { createElement, Fragment, useRef } from '@wordpress/element';
-/* eslint-disable @woocommerce/dependency-group */
-// @ts-ignore No types for this exist yet.
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-ignore No types for this exist yet.
-import SiteHub from '@wordpress/edit-site/build-module/components/site-hub';
-// @ts-ignore No types for this exist yet.
-import SidebarContent from '@wordpress/edit-site/build-module/components/sidebar';
-/* eslint-enable @woocommerce/dependency-group */
+import { createElement, Fragment } from '@wordpress/element';
+import { SidebarContent } from '@automattic/site-admin';
 
 /**
  * Internal dependencies
  */
 import { Route } from './types';
 import { SectionTabs, Header } from './components';
-
-const { NavigableRegion } = unlock( editorPrivateApis );
 
 const ANIMATION_DURATION = 0.3;
 
@@ -52,7 +40,6 @@ export function Layout( {
 	activeSection,
 }: LayoutProps ) {
 	const [ fullResizer ] = useResizeObserver();
-	const toggleRef = useRef< HTMLAnchorElement >( null );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
 
@@ -61,50 +48,46 @@ export function Layout( {
 	return (
 		<>
 			{ fullResizer }
-			<div className="edit-site-layout">
-				<div className="edit-site-layout__content">
+			<div className="woocommerce-site-layout">
+				<div className="woocommerce-site-layout__content">
 					{ /*
 						The NavigableRegion must always be rendered and not use
 						`inert` otherwise `useNavigateRegions` will fail.
+						NOTE: NavigableRegion has been removed and will be replaced
+						with the new component from @automattic/site-admin.
 					*/ }
 					{ ( ! isMobileViewport || ! areas.mobile ) && (
-						<NavigableRegion
-							ariaLabel={ __( 'Navigation', 'woocommerce' ) }
-							className="edit-site-layout__sidebar-region"
-						>
-							<AnimatePresence>
-								<motion.div
-									initial={ { opacity: 0 } }
-									animate={ { opacity: 1 } }
-									exit={ { opacity: 0 } }
-									transition={ {
-										type: 'tween',
-										duration:
-											// Disable transition in mobile to emulate a full page transition.
-											disableMotion || isMobileViewport
-												? 0
-												: ANIMATION_DURATION,
-										ease: 'easeOut',
-									} }
-									className="edit-site-layout__sidebar"
+						<AnimatePresence>
+							<motion.div
+								initial={ { opacity: 0 } }
+								animate={ { opacity: 1 } }
+								exit={ { opacity: 0 } }
+								transition={ {
+									type: 'tween',
+									duration:
+										// Disable transition in mobile to emulate a full page transition.
+										disableMotion || isMobileViewport
+											? 0
+											: ANIMATION_DURATION,
+									ease: 'easeOut',
+								} }
+								className="woocommerce-site-layout__sidebar a8c-site-admin-sidebar"
+							>
+								<SidebarContent
+									shouldAnimate={ false }
+									routeKey={ routeKey }
 								>
-									<SiteHub
-										ref={ toggleRef }
-										isTransparent={ false }
-									/>
-									<SidebarContent routeKey={ routeKey }>
-										{ areas.sidebar }
-									</SidebarContent>
-								</motion.div>
-							</AnimatePresence>
-						</NavigableRegion>
+									{ areas.sidebar }
+								</SidebarContent>
+							</motion.div>
+						</AnimatePresence>
 					) }
 
 					<EditorSnackbars />
 
 					{ ! isMobileViewport && areas.content && (
 						<div
-							className="edit-site-layout__area"
+							className="woocommerce-site-layout__area"
 							style={ {
 								maxWidth: widths?.content,
 							} }
@@ -124,7 +107,7 @@ export function Layout( {
 
 					{ ! isMobileViewport && areas.edit && (
 						<div
-							className="edit-site-layout__area"
+							className="woocommerce-site-layout__area"
 							style={ {
 								maxWidth: widths?.edit,
 							} }

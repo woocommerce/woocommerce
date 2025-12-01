@@ -1,8 +1,15 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { setOption } = require( '../../utils/options' );
-const { setComingSoon } = require( '../../utils/coming-soon' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { request } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { setOption } from '../../utils/options';
+import { setComingSoon } from '../../utils/coming-soon';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const getPluginLocator = ( page, slug ) => {
 	return page.locator(
@@ -91,12 +98,8 @@ test.describe(
 					.getByRole( 'option', { name: 'Clothing and accessories' } )
 					.click();
 				// select a WooPayments compatible location
-				await page
-					.locator(
-						'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
-					)
-					.last()
-					.click();
+				await page.getByRole( 'combobox' ).last().click();
+				await page.getByRole( 'combobox' ).last().fill( 'Australia' );
 				await page
 					.getByRole( 'option', {
 						name: 'Australia — Northern Territory',
@@ -261,12 +264,8 @@ test.describe(
 					.getByRole( 'option', { name: 'Food and drink' } )
 					.click();
 				// select a WooPayments incompatible location
-				await page
-					.locator(
-						'form.woocommerce-profiler-business-information-form > div > div > div > div > input'
-					)
-					.last()
-					.click();
+				await page.getByRole( 'combobox' ).last().click();
+				await page.getByRole( 'combobox' ).last().fill( 'Afghanistan' );
 				await page
 					.getByRole( 'option', { name: 'Afghanistan' } )
 					.click();
@@ -481,7 +480,7 @@ test.describe(
 	'Store owner can skip the core profiler',
 	{ tag: tags.SKIP_ON_EXTERNAL_ENV },
 	() => {
-		test( 'Can click skip guided setup', async ( { page } ) => {
+		test( 'Can skip the guided setup', async ( { page } ) => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
 			);
@@ -496,6 +495,9 @@ test.describe(
 				} )
 			).toBeVisible();
 			await page.getByLabel( 'Select country/region' ).click();
+			await page
+				.getByLabel( 'Select country/region' )
+				.fill( 'California' );
 			await page
 				.getByRole( 'option', {
 					name: 'United States (US) — California',
@@ -522,57 +524,6 @@ test.describe(
 						.getByRole( 'menuitem' )
 						.filter( { hasText: 'coming soon' } )
 				).toBeVisible();
-			} );
-		} );
-
-		// TODO (E2E Audit): Move this test to the merchant folder as per the Critical Flows list on GitHub. This test should NOT be skipped on WPCOM. Newly created WPCOM sites are not connected to WooCommerce.com by default.
-		test( 'Can connect to WooCommerce.com', async ( { page } ) => {
-			await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
-				await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-				await page
-					.getByRole( 'menuitem', { name: 'Total sales' } )
-					.waitFor( { state: 'visible' } );
-			} );
-
-			await test.step( 'Go to the extensions tab and connect store', async () => {
-				const connectButton = page.getByRole( 'link', {
-					name: 'Connect',
-				} );
-				await page.goto(
-					'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
-				);
-				const waitForSubscriptionsResponse = page.waitForResponse(
-					( response ) =>
-						response
-							.url()
-							.includes(
-								'/wp-json/wc/v3/marketplace/subscriptions'
-							) && response.status() === 200
-				);
-				await expect(
-					page.getByText(
-						'Hundreds of vetted products and services. Unlimited potential.'
-					)
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'button', { name: 'My Subscriptions' } )
-				).toBeVisible();
-				await expect( connectButton ).toBeVisible();
-				await waitForSubscriptionsResponse;
-				await expect( connectButton ).toHaveAttribute(
-					'href',
-					/my-subscriptions/
-				);
-				await connectButton.click();
-			} );
-
-			await test.step( 'Check that we are sent to wp.com', async () => {
-				await expect( page.url() ).toContain( 'wordpress.com/log-in' );
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Log in to your account',
-					} )
-				).toBeVisible( { timeout: 30000 } );
 			} );
 		} );
 	}

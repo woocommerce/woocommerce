@@ -9,7 +9,7 @@ import { dispatch } from '@wordpress/data';
 import { triggerExitPageCesSurvey } from '../customer-effort-score-exit-page';
 
 jest.mock( '@woocommerce/data', () => ( {
-	OPTIONS_STORE_NAME: 'options',
+	optionsStore: 'options',
 } ) );
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),

@@ -5,6 +5,7 @@ import { render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { recordEvent } from '@woocommerce/tracks';
 import { removeAllFilters } from '@wordpress/hooks';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -17,9 +18,25 @@ import {
 } from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
 
+// Mock window.location
+const mockLocation = {
+	href: '',
+	assign: jest.fn(),
+};
+
+Object.defineProperty( window, 'location', {
+	value: mockLocation,
+	writable: true,
+} );
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
-	useSelect: jest.fn(),
+	useSelect: jest.fn().mockImplementation( ( callback ) =>
+		callback( () => ( {
+			getInstalledPlugins: () => [],
+			isPluginsRequesting: () => false,
+		} ) )
+	),
 } ) );
 
 jest.mock( '~/utils/admin-settings', () => ( {
@@ -30,6 +47,10 @@ jest.mock( '../use-create-product-by-type', () => ( {
 	useCreateProductByType: jest
 		.fn()
 		.mockReturnValue( { createProductByType: jest.fn() } ),
+} ) );
+
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
 } ) );
 
 global.fetch = jest.fn().mockImplementation( () =>
@@ -49,6 +70,14 @@ describe( 'Products', () => {
 		jest.clearAllMocks();
 		// @ts-expect-error -- outdated type definition
 		removeAllFilters( SETUP_TASKLIST_PRODUCTS_AFTER_FILTER );
+
+		// Reset location.href
+		mockLocation.href = '';
+
+		// @ts-expect-error -- partial mock
+		window.wcAdminFeatures = {
+			printful: true,
+		};
 	} );
 
 	it( 'should render default products types when onboardingData.profile.productType is null', () => {
@@ -250,5 +279,107 @@ describe( 'Products', () => {
 			container.getElementsByClassName( 'woocommerce-products-stack' )
 				.length
 		).toBeGreaterThanOrEqual( 1 );
+	} );
+
+	it( 'should trigger event tasklist_add_product_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
+		const { getByText } = render( <Products /> );
+
+		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
+
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'tasklist_add_product_visit_marketplace_click',
+			{}
+		);
+	} );
+
+	it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+		( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
+
+		mockLocation.href = 'test';
+		Object.defineProperty( global.window, 'location', {
+			value: mockLocation,
+		} );
+
+		const { getByText } = render( <Products /> );
+
+		userEvent.click( getByText( 'the WooCommerce Marketplace' ) );
+		expect( mockLocation.href ).toContain(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
+		);
+	} );
+
+	describe( 'Printful banner visibility', () => {
+		it( 'should show Printful banner when feature is enabled and plugin is not installed', async () => {
+			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+				callback( () => ( {
+					getInstalledPlugins: () => [],
+					isPluginsRequesting: () => false,
+				} ) )
+			);
+
+			const { getByText } = render( <Products /> );
+
+			await waitFor( () => {
+				expect(
+					getByText( 'Print-on-demand products' )
+				).toBeInTheDocument();
+			} );
+		} );
+
+		it( 'should hide Printful banner when plugin is installed', async () => {
+			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+				callback( () => ( {
+					getInstalledPlugins: () => [
+						'printful-shipping-for-woocommerce',
+					],
+					isPluginsRequesting: () => false,
+				} ) )
+			);
+
+			const { queryByText } = render( <Products /> );
+
+			await waitFor( () => {
+				expect(
+					queryByText( 'Print-on-demand products' )
+				).not.toBeInTheDocument();
+			} );
+		} );
+
+		it( 'should hide Printful banner when feature is disabled', async () => {
+			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+				callback( () => ( {
+					getInstalledPlugins: () => [],
+					isPluginsRequesting: () => false,
+				} ) )
+			);
+
+			window.wcAdminFeatures.printful = false;
+
+			const { queryByText } = render( <Products /> );
+
+			await waitFor( () => {
+				expect(
+					queryByText( 'Print-on-demand products' )
+				).not.toBeInTheDocument();
+			} );
+		} );
+
+		it( 'should hide Printful banner while plugins are being requested', async () => {
+			( useSelect as jest.Mock ).mockImplementation( ( callback ) =>
+				callback( () => ( {
+					getInstalledPlugins: () => [],
+					isPluginsRequesting: () => true,
+				} ) )
+			);
+
+			const { queryByText } = render( <Products /> );
+
+			await waitFor( () => {
+				expect(
+					queryByText( 'Print-on-demand products' )
+				).not.toBeInTheDocument();
+			} );
+		} );
 	} );
 } );

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { Button, Popover, SlotFillProvider } from '@wordpress/components';
 import { createElement, useCallback, useState } from '@wordpress/element';
 

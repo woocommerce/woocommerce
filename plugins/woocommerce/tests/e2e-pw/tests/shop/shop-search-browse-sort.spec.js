@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test, expect, tags } from '../../fixtures/fixtures';
@@ -11,9 +16,9 @@ test.describe(
 		let categories = [];
 		let products = [];
 
-		test.beforeAll( async ( { api } ) => {
-			await api
-				.post( 'products/categories/batch', {
+		test.beforeAll( async ( { restApi } ) => {
+			await restApi
+				.post( `${ WC_API_PATH }/products/categories/batch`, {
 					create: [
 						getFakeCategory( { extraRandomTerm: true } ),
 						getFakeCategory( { extraRandomTerm: true } ),
@@ -31,8 +36,8 @@ test.describe(
 					console.error( error.response );
 				} );
 
-			await api
-				.post( 'products/batch', {
+			await restApi
+				.post( `${ WC_API_PATH }/products/batch`, {
 					create: [
 						{
 							...getFakeProduct( { regular_price: '979.99' } ),
@@ -56,15 +61,15 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { api } ) => {
-			await api.post( 'products/batch', {
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.post( `${ WC_API_PATH }/products/batch`, {
 				delete: [
 					products[ 0 ].id,
 					products[ 1 ].id,
 					products[ 2 ].id,
 				],
 			} );
-			await api.post( 'products/categories/batch', {
+			await restApi.post( `${ WC_API_PATH }/products/categories/batch`, {
 				delete: [
 					categories[ 0 ].id,
 					categories[ 1 ].id,
@@ -130,7 +135,11 @@ test.describe(
 			await test.step( 'Go to the shop and sort by price high to low', async () => {
 				await page.goto( 'shop/' );
 				await expect(
-					page.getByLabel( `Add to cart: “${ products[ 0 ].name }”` )
+					page.getByLabel(
+						new RegExp(
+							`Add to cart: ["|“]${ products[ 0 ].name }["|”]`
+						)
+					)
 				).toBeVisible();
 
 				// sort by price high to low
@@ -162,7 +171,11 @@ test.describe(
 			await test.step( 'Go to the shop and sort by price low to high', async () => {
 				await page.goto( 'shop/' );
 				await expect(
-					page.getByLabel( `Add to cart: “${ products[ 0 ].name }”` )
+					page.getByLabel(
+						new RegExp(
+							`Add to cart: ["|“]${ products[ 0 ].name }["|”]`
+						)
+					)
 				).toBeVisible();
 
 				// sort by price low to high

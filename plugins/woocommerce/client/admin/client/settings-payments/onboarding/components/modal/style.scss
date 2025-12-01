@@ -1,0 +1,172 @@
+.settings-payments-onboarding-modal {
+
+	// Update the default modal styles
+	.components-modal__content {
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+
+		&::before {
+			margin: 0;
+		}
+
+		// Target the unnamed div that's a direct parent of our content
+		> div {
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+		}
+	}
+
+	&__sidebar {
+		width: 280px;
+		background-color: $gray-100;
+		display: flex;
+		flex-direction: column;
+		flex-shrink: 0;
+
+		&--header {
+			padding: 48px $gap-large $gap;
+
+			&-title {
+				font-size: 15px;
+				line-height: 1.333;
+				font-weight: 500;
+				color: $gray-900;
+				margin: 0;
+			}
+
+			&-steps {
+				color: $gray-900;
+				font-size: 12px;
+				font-style: normal;
+				line-height: 20px;
+				padding: $gap-smallest $gap-smaller;
+				background-color: $white;
+				border-radius: 2px;
+				display: none;
+
+				@media (max-width: 768px) {
+					display: block;
+				}
+			}
+
+			@media (max-width: 768px) {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: $gap-large $gap-large 0;
+			}
+		}
+
+		&--list {
+			padding: 0 0 0 $gap;
+			overflow-y: auto;
+			flex: 1;
+
+			&-item {
+				display: flex;
+				align-items: center;
+				gap: $gap-smaller;
+				padding: $gap-smaller;
+				border-radius: 2px;
+				font-size: 13px;
+				line-height: 20px;
+				color: $gray-800;
+				cursor: default;
+
+				&.is-active {
+					background-color: $gray-200;
+					color: $gray-900;
+					font-weight: 500;
+
+					&-icon {
+						color: $gray-900;
+					}
+				}
+
+				&.is-completed {
+					text-decoration: line-through;
+
+					&-icon {
+						color: #00a32a;
+					}
+				}
+
+				&-icon {
+					width: 24px;
+					height: 24px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					font-size: 16px;
+					color: #949494;
+				}
+
+				&-label {
+					flex: 1;
+				}
+			}
+			@media (max-width: 768px) {
+				display: none;
+			}
+		}
+
+		@media (max-width: 768px) {
+			width: 100%;
+		}
+	}
+
+	&__wrapper {
+		display: flex;
+		height: 100%;
+		flex: 1;
+		min-height: 0; // Important for Firefox
+		background-color: $gray-100;
+
+		@media (max-width: 768px) {
+			// The content is displayed in column
+			flex-direction: column;
+		}
+	}
+
+	&__content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		overflow-x: hidden;
+		min-height: 0; // Important for Firefox
+		margin: $gap;
+		background-color: $white;
+		border-radius: $gap-smaller;
+	}
+
+	&__step {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+
+		&--content {
+			padding: $gap 32px;
+			overflow-y: auto; // Enable scrolling in the content area
+			flex: 1;
+			height: 100%;
+		}
+	}
+
+	&__loading {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100%;
+		width: 100%;
+	}
+
+	@media (max-width: 768px) {
+		border-radius: 0;
+		min-height: 100vh;
+		height: 100%;
+	}
+}

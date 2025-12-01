@@ -18,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_WCCOM_Site_Status_Controller
  */
 class WC_REST_WCCOM_Site_Connection_Controller extends WC_REST_WCCOM_Site_Controller {
+	const CONNECTION_DATA_FOUND = 'connection_data_found';
+	const CONNECTION_VALID      = 'connection_valid';
 
 	/**
 	 * Route base.
@@ -39,6 +41,18 @@ class WC_REST_WCCOM_Site_Connection_Controller extends WC_REST_WCCOM_Site_Contro
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'handle_disconnect_request' ),
+					'permission_callback' => array( $this, 'check_permission' ),
+				),
+			),
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/status',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'handle_status_request' ),
 					'permission_callback' => array( $this, 'check_permission' ),
 				),
 			),
@@ -79,6 +93,48 @@ class WC_REST_WCCOM_Site_Connection_Controller extends WC_REST_WCCOM_Site_Contro
 		return $this->get_response(
 			array(
 				'status' => true,
+			)
+		);
+	}
+
+	/**
+	 * Get the status of the WooCommerce.com connection.
+	 *
+	 * @return WP_Error|WP_REST_Response
+	 * @since  9.9.0
+	 */
+	public function handle_status_request() {
+		$auth = WC_Helper_Options::get( 'auth' );
+		if ( empty( $auth['access_token'] ) || empty( $auth['access_token_secret'] ) ) {
+			return $this->get_response(
+				array(
+					self::CONNECTION_DATA_FOUND => false,
+					self::CONNECTION_VALID      => false,
+				)
+			);
+		}
+
+		$connection_data = WC_Helper::fetch_helper_connection_info();
+		if ( $connection_data instanceof WP_Error ) {
+			return $connection_data;
+		}
+
+		if ( null === $connection_data ) {
+			return $this->get_response(
+				array(
+					self::CONNECTION_DATA_FOUND => true,
+					self::CONNECTION_VALID      => false,
+				)
+			);
+		}
+
+		return $this->get_response(
+			array_merge(
+				array(
+					self::CONNECTION_DATA_FOUND => true,
+					self::CONNECTION_VALID      => true,
+				),
+				$connection_data
 			)
 		);
 	}

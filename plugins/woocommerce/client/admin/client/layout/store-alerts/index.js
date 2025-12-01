@@ -17,10 +17,9 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import moment from 'moment';
 import { Icon, chevronLeft, chevronRight, close } from '@wordpress/icons';
 import {
-	NOTES_STORE_NAME,
+	notesStore,
 	QUERY_DEFAULTS,
-	OPTIONS_STORE_NAME,
-	ONBOARDING_STORE_NAME,
+	optionsStore,
 	useUserPreferences,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
@@ -38,7 +37,8 @@ import sanitizeHTML from '../../lib/sanitize-html';
 import StoreAlertsPlaceholder from './placeholder';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getScreenName } from '../../utils';
-import { hasTwoColumnLayout } from '../../homescreen/layout';
+import { hasTwoColumnLayout } from '~/homescreen/utils';
+import { isTaskListActive } from '../../hooks/use-tasklists-state';
 
 import './style.scss';
 
@@ -62,14 +62,9 @@ export const StoreAlerts = () => {
 		alerts = [],
 		isLoading,
 		defaultHomescreenLayout,
-		taskListComplete,
-		isTaskListHidden,
-		isLoadingTaskLists,
 	} = useSelect( ( select ) => {
-		const { getNotes, hasFinishedResolution } = select( NOTES_STORE_NAME );
-		const { getOption } = select( OPTIONS_STORE_NAME );
-		const { getTaskList, hasFinishedResolution: taskListFinishResolution } =
-			select( ONBOARDING_STORE_NAME );
+		const { getNotes, hasFinishedResolution } = select( notesStore );
+		const { getOption } = select( optionsStore );
 
 		return {
 			alerts: getUnactionedVisibleAlerts( getNotes( ALERTS_QUERY ) ),
@@ -77,14 +72,11 @@ export const StoreAlerts = () => {
 			defaultHomescreenLayout:
 				getOption( 'woocommerce_default_homepage_layout' ) ||
 				'single_column',
-			taskListComplete: getTaskList( 'setup' )?.isComplete,
-			isTaskListHidden: getTaskList( 'setup' )?.isHidden,
-			isLoadingTaskLists: ! taskListFinishResolution( 'getTaskLists' ),
 		};
 	} );
 
 	const { triggerNoteAction, updateNote, removeNote } =
-		useDispatch( NOTES_STORE_NAME );
+		useDispatch( notesStore );
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const userPrefs = useUserPreferences();
@@ -239,10 +231,6 @@ export const StoreAlerts = () => {
 		}
 	}
 
-	if ( isLoadingTaskLists ) {
-		return null;
-	}
-
 	const preloadAlertCount = getAdminSetting( 'alertCount', 0, ( count ) =>
 		parseInt( count, 10 )
 	);
@@ -253,8 +241,7 @@ export const StoreAlerts = () => {
 	const hasTwoColumns = hasTwoColumnLayout(
 		userPrefs.homepage_layout,
 		defaultHomescreenLayout,
-		taskListComplete,
-		isTaskListHidden
+		isTaskListActive( 'setup' )
 	);
 
 	if ( preloadAlertCount > 0 && isLoading ) {

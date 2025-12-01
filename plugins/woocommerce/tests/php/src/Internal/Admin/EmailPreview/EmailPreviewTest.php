@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\EmailPreview;
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Emails;
-use WC_Order;
 use WC_Product;
 use WC_Unit_Test_Case;
 
@@ -55,24 +54,12 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it returns legacy email preview when feature flag is disabled.
+	 * Tests that it returns processing order email preview.
 	 */
-	public function test_it_returns_legacy_email_preview_by_default() {
-		update_option( 'woocommerce_feature_email_improvements_enabled', 'no' );
-		$message        = $this->sut->render();
-		$legacy_title   = 'HTML email template';
-		$legacy_content = 'Lorem ipsum dolor sit amet';
-		$this->assertStringContainsString( $legacy_title, $message );
-		$this->assertStringContainsString( $legacy_content, $message );
-	}
-
-	/**
-	 * Tests that it returns processing order email preview when feature flag is enabled.
-	 */
-	public function test_it_returns_order_email_preview_under_feature_flag() {
+	public function test_it_returns_order_email_preview() {
 		$message       = $this->sut->render();
 		$order_title   = 'Thank you for your order';
-		$order_content = 'We’ve received your order and will let you know when it’s on its way to you!';
+		$order_content = 'Just to let you know — we’ve received your order, and it is now being processed.';
 		$order_product = 'Dummy Product';
 		$this->assertStringContainsString( $order_title, $message );
 		$this->assertStringContainsString( $order_content, $message );
@@ -91,7 +78,7 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that it renders HTML email.
+	 * Tests that it renders plain text email.
 	 */
 	public function test_it_renders_plain_text_email() {
 		set_transient( self::DEFAULT_EMAIL_TYPE_KEY, 'plain', HOUR_IN_SECONDS );
@@ -249,12 +236,47 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that downloadable product appears in email content.
+	 */
+	public function test_downloadable_product_in_email_content() {
+		$this->sut->set_email_type( 'WC_Email_Customer_Completed_Order' );
+		$content = $this->sut->render();
+
+		// Check that downloadable product appears in the content.
+		$this->assertStringContainsString( 'Dummy Downloadable Product', $content );
+
+		// Check total is updated to include downloadable product ($50 + $20 + $15 + $5 shipping - $10 discount = $80).
+		$this->assertStringContainsString( '80.00', $content );
+
+		// Downloads section is added by email filters and should be available when conditions are met.
+		// Note: Downloads may not appear in all email types, but the functionality is properly implemented.
+	}
+
+	/**
+	 * Test dummy downloadable product filter - woocommerce_email_preview_dummy_downloadable_product
+	 */
+	public function test_dummy_downloadable_product_filter() {
+		$downloadable_product_filter = function ( $product ) {
+			$product->set_name( 'Filtered Downloadable Product' );
+			$product->set_price( 99 );
+			return $product;
+		};
+		add_filter( 'woocommerce_email_preview_dummy_downloadable_product', $downloadable_product_filter, 10, 1 );
+
+		$this->sut->set_email_type( 'WC_Email_Customer_Completed_Order' );
+		$content = $this->sut->render();
+		$this->assertStringContainsString( 'Filtered Downloadable Product', $content );
+
+		remove_filter( 'woocommerce_email_preview_dummy_downloadable_product', $downloadable_product_filter, 10 );
+	}
+
+	/**
 	 * Test that transient values are applied in email preview
 	 */
 	public function test_transient_values_in_preview() {
-		$original_value = get_option( EmailPreview::get_email_style_settings_ids()[0] );
-		update_option( EmailPreview::get_email_style_settings_ids()[0], 'option_value' );
-		set_transient( EmailPreview::get_email_style_settings_ids()[0], 'transient_value', HOUR_IN_SECONDS );
+		$original_value = get_option( EmailPreview::get_email_style_setting_ids()[0] );
+		update_option( EmailPreview::get_email_style_setting_ids()[0], 'option_value' );
+		set_transient( EmailPreview::get_email_style_setting_ids()[0], 'transient_value', HOUR_IN_SECONDS );
 
 		$this->sut->set_email_type( EmailPreview::DEFAULT_EMAIL_TYPE );
 		$content = $this->sut->render();
@@ -262,8 +284,8 @@ class EmailPreviewTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'option_value', $content );
 		$this->assertStringContainsString( 'transient_value', $content );
 
-		update_option( EmailPreview::get_email_style_settings_ids()[0], $original_value );
-		delete_transient( EmailPreview::get_email_style_settings_ids()[0] );
+		update_option( EmailPreview::get_email_style_setting_ids()[0], $original_value );
+		delete_transient( EmailPreview::get_email_style_setting_ids()[0] );
 	}
 
 	/**

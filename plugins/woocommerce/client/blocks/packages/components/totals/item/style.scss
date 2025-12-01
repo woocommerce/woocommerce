@@ -1,0 +1,16 @@
+.wc-block-components-totals-item {
+	display: flex;
+	flex-wrap: wrap;
+	width: 100%;
+	box-sizing: border-box;
+	align-items: center;
+}
+
+.wc-block-components-totals-item__label {
+	flex-grow: 1;
+}
+
+.wc-block-components-totals-item__description {
+	@include font-size(small);
+	width: 100%;
+}

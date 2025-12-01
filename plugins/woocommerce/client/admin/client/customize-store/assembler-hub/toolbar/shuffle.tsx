@@ -79,7 +79,7 @@ export default function Shuffle( { clientId }: { clientId: string } ) {
 		patternName: string;
 	} = useSelect(
 		( select ) => {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+			// @ts-expect-error Selector is not typed
 			const { getBlockAttributes } = select( blockEditorStore );
 			const attributes = getBlockAttributes( clientId );
 			const categories = attributes?.metadata?.categories;

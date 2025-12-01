@@ -1,0 +1,31 @@
+{
+	"name": "woocommerce/classic-shortcode",
+	"title": "Classic Shortcode",
+	"description": "Renders classic WooCommerce shortcodes.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"supports": {
+		"interactivity": {
+			"clientNavigation": false
+		},
+		"align": true,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": true
+	},
+	"attributes": {
+		"shortcode": {
+			"type": "string",
+			"default": "cart",
+			"enum": [ "cart", "checkout" ]
+		},
+		"align": {
+			"type": "string",
+			"default": "wide"
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

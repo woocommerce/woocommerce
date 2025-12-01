@@ -58,7 +58,7 @@ module.exports = {
 				ignoreRestSiblings: true,
 			},
 		],
-		'react/react-in-jsx-scope': 'error',
+		'react/react-in-jsx-scope': 'off',
 	},
 	settings: {
 		'import/resolver': 'typescript',
@@ -66,7 +66,7 @@ module.exports = {
 		'import/core-modules': [ '@woocommerce/settings', 'lodash', 'react' ],
 		react: {
 			pragma: 'createElement',
-			version: '17.0.2',
+			version: '18.3',
 		},
 	},
 	overrides: [

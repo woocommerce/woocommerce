@@ -37,14 +37,6 @@ final class WC_Cart_Totals {
 	protected $cart;
 
 	/**
-	 * Reference to customer object.
-	 *
-	 * @since 3.2.0
-	 * @var array
-	 */
-	protected $customer;
-
-	/**
 	 * Line items to calculate.
 	 *
 	 * @since 3.2.0
@@ -137,8 +129,12 @@ final class WC_Cart_Totals {
 			throw new Exception( 'A valid WC_Cart object is required' );
 		}
 
+		// Check if customer is VAT exempt, if customer is defined.
+		$customer               = $cart->get_customer();
+		$is_customer_vat_exempt = $customer && $customer->get_is_vat_exempt();
+
 		$this->cart          = $cart;
-		$this->calculate_tax = wc_tax_enabled() && ! $cart->get_customer()->get_is_vat_exempt();
+		$this->calculate_tax = wc_tax_enabled() && ! $is_customer_vat_exempt;
 		$this->calculate();
 	}
 
@@ -338,24 +334,23 @@ final class WC_Cart_Totals {
 	 * @since 3.2.0
 	 */
 	protected function get_shipping_from_cart() {
-		$this->shipping = array();
-
-		if ( ! $this->cart->show_shipping() ) {
-			return;
-		}
-
-		foreach ( $this->cart->calculate_shipping() as $key => $shipping_object ) {
-			$shipping_line            = $this->get_default_shipping_props();
-			$shipping_line->object    = $shipping_object;
-			$shipping_line->tax_class = get_option( 'woocommerce_shipping_tax_class' );
-			$shipping_line->taxable   = true;
-			$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
-			$shipping_line->taxes     = wc_add_number_precision_deep( $shipping_object->taxes, false );
-			$shipping_line->taxes     = array_map( array( $this, 'round_item_subtotal' ), $shipping_line->taxes );
-			$shipping_line->total_tax = array_sum( $shipping_line->taxes );
-
-			$this->shipping[ $key ] = $shipping_line;
-		}
+		$default_shipping_props = $this->get_default_shipping_props();
+		$this->shipping         = array_map(
+			function ( $shipping_object ) use ( $default_shipping_props ) {
+				$shipping_line            = clone $default_shipping_props;
+				$shipping_line->object    = $shipping_object;
+				$shipping_line->tax_class = get_option( 'woocommerce_shipping_tax_class', 'inherit' );
+				$shipping_line->taxable   = true;
+				$shipping_line->total     = wc_add_number_precision_deep( $shipping_object->cost );
+				$shipping_line->taxes     = array_map(
+					array( $this, 'round_item_subtotal' ),
+					wc_add_number_precision_deep( $shipping_object->taxes, false )
+				);
+				$shipping_line->total_tax = array_sum( $shipping_line->taxes );
+				return $shipping_line;
+			},
+			$this->cart->calculate_shipping()
+		);
 	}
 
 	/**
@@ -665,15 +660,17 @@ final class WC_Cart_Totals {
 			$item->total_tax = 0;
 
 			if ( has_filter( 'woocommerce_get_discounted_price' ) ) {
-				/**
-				 * Allow plugins to filter this price like in the legacy cart class.
-				 *
-				 * This is legacy and should probably be deprecated in the future.
-				 * $item->object is the cart item object.
-				 * $this->cart is the cart object.
-				 */
 				$item->total = wc_add_number_precision(
-					apply_filters( 'woocommerce_get_discounted_price', wc_remove_number_precision( $item->total ), $item->object, $this->cart )
+					/**
+					 * Allow plugins to filter this price like in the legacy cart class.
+					 *
+					 * This is legacy and should probably be deprecated in the future.
+					 * $item->object is the cart item object.
+					 * $this->cart is the cart object.
+					 *
+					 * @since 3.2.0
+					 */
+					(float) apply_filters( 'woocommerce_get_discounted_price', wc_remove_number_precision( $item->total ), $item->object, $this->cart )
 				);
 			}
 
@@ -721,7 +718,8 @@ final class WC_Cart_Totals {
 		$merged_subtotal_taxes = array(); // Taxes indexed by tax rate ID for storage later.
 
 		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
-		$is_customer_vat_exempt          = $this->cart->get_customer()->get_is_vat_exempt();
+		$customer                        = $this->cart->get_customer();
+		$is_customer_vat_exempt          = $customer && $customer->get_is_vat_exempt();
 
 		foreach ( $this->items as $item_key => $item ) {
 			if ( $item->price_includes_tax ) {
@@ -760,7 +758,7 @@ final class WC_Cart_Totals {
 
 		// Prices are not rounded here because they should already be rounded based on settings in `get_rounded_items_total` and in `round_line_tax` method calls.
 		$this->set_total( 'items_subtotal', $items_subtotal );
-		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ), 0 );
+		$this->set_total( 'items_subtotal_tax', array_sum( $merged_subtotal_taxes ) );
 
 		$this->cart->set_subtotal( $this->get_total( 'items_subtotal' ) );
 		$this->cart->set_subtotal_tax( $this->get_total( 'items_subtotal_tax' ) );

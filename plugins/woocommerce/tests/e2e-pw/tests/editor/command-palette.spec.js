@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { disableWelcomeModal } from '@woocommerce/e2e-utils-playwright';
+import {
+	disableWelcomeModal,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -35,21 +38,25 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product = {
 			id: 0,
 			name: `Product ${ Date.now() }`,
 			type: 'simple',
 		};
 
-		await api.post( 'products', product ).then( ( response ) => {
-			product = response.data;
-		} );
+		await restApi
+			.post( `${ WC_API_PATH }/products`, product )
+			.then( ( response ) => {
+				product = response.data;
+			} );
 
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 	page: async ( { page }, use ) => {
 		await page.goto( 'wp-admin/post-new.php' );

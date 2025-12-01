@@ -54,11 +54,13 @@ class Features {
 	 * Constructor.
 	 */
 	public function __construct() {
+
+		$this->register_internal_class_aliases();
+
 		if ( ! self::should_load_features() ) {
 			return;
 		}
 
-		$this->register_internal_class_aliases();
 		// Load feature before WooCommerce update hooks.
 		add_action( 'init', array( __CLASS__, 'load_features' ), 4 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'maybe_load_beta_features_modal' ) );
@@ -112,19 +114,17 @@ class Features {
 	 * @return string|null
 	 */
 	public static function get_feature_class( $feature ) {
-		if ( ! self::should_load_features() ) {
-			return null;
-		}
-
 		$feature       = str_replace( '-', '', ucwords( strtolower( $feature ), '-' ) );
 		$feature_class = 'Automattic\\WooCommerce\\Admin\\Features\\' . $feature;
 
-		if ( class_exists( $feature_class ) ) {
+		$should_autoload_class = self::should_load_features();
+
+		if ( class_exists( $feature_class, $should_autoload_class ) ) {
 			return $feature_class;
 		}
 
 		// Handle features contained in subdirectory.
-		if ( class_exists( $feature_class . '\\Init' ) ) {
+		if ( class_exists( $feature_class . '\\Init', $should_autoload_class ) ) {
 			return $feature_class . '\\Init';
 		}
 
@@ -322,7 +322,7 @@ class Features {
 		foreach ( $features as $key ) {
 			$enabled_features[ $key ] = self::is_enabled( $key );
 		}
-		wp_add_inline_script( WC_ADMIN_APP, 'window.wcAdminFeatures = ' . wp_json_encode( $enabled_features ), 'before' );
+		wp_add_inline_script( WC_ADMIN_APP, 'window.wcAdminFeatures = ' . wp_json_encode( $enabled_features, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), 'before' );
 	}
 
 

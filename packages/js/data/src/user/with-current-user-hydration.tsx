@@ -8,7 +8,7 @@ import { createElement } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from './constants';
+import { store } from './';
 import { WCUser } from './types';
 
 /**
@@ -28,20 +28,16 @@ export const withCurrentUserHydration = ( currentUser: WCUser ) =>
 				if ( ! currentUser ) {
 					return;
 				}
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
-				const { isResolving, hasFinishedResolution } =
-					select( STORE_NAME );
-				return (
-					! isResolving( 'getCurrentUser' ) &&
-					! hasFinishedResolution( 'getCurrentUser' )
-				);
-			} );
 
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
+				const { isResolving, hasFinishedResolution } = select( store );
+				return (
+					! isResolving( 'getCurrentUser', [] ) &&
+					! hasFinishedResolution( 'getCurrentUser', [] )
+				);
+			}, [] );
+
 			const { startResolution, finishResolution, receiveCurrentUser } =
-				useDispatch( STORE_NAME );
+				useDispatch( store );
 
 			if ( shouldHydrate ) {
 				startResolution( 'getCurrentUser', [] );

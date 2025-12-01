@@ -5,11 +5,11 @@ export type BaseQueryParams< Fields = string > = {
 	search?: string;
 	after?: string;
 	before?: string;
-	exclude?: string;
+	exclude?: string | number[];
 	include?: string | number[];
 	offset?: number;
 	order?: 'asc' | 'desc';
-	orderby?: 'date' | 'id' | 'include' | 'title' | 'slug';
+	orderby?: 'date' | 'id' | 'include' | 'title' | 'slug' | 'menu_order';
 	parent?: number[];
 	parent_exclude?: number[];
 	_fields?: Fields[];

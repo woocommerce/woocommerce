@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Make sure WC Home task list is enabled at the end of the `task-list.spec.js` E2E test.

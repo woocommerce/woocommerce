@@ -12,10 +12,9 @@ import {
 	getHistory,
 	getPersistedQuery,
 } from '@woocommerce/navigation';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
 import { accessTaskReferralStorage } from '@woocommerce/onboarding';
 
@@ -29,35 +28,29 @@ import {
 	services as introServices,
 	actions as introActions,
 } from './intro';
-import { DesignWithAi, events as designWithAiEvents } from './design-with-ai';
 import { DesignWithoutAi } from './design-without-ai';
 
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import {
-	events as transitionalEvents,
-	services as transitionalServices,
-	actions as transitionalActions,
-} from './transitional';
+import { services as transitionalServices } from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
-	FlowType,
 } from './types';
-import { ThemeCard } from './intro/types';
 import './style.scss';
-import { navigateOrParent, attachParentListeners, isIframe } from './utils';
+import {
+	navigateOrParent,
+	attachParentListeners,
+	isIframe,
+	redirectToThemes,
+} from './utils';
 import useBodyClass from './hooks/use-body-class';
-import { isWooExpress } from '~/utils/is-woo-express';
 import { useXStateInspect } from '~/xstate';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
-	| designWithAiEvents
 	| assemblerHubEvents
-	| transitionalEvents
-	| { type: 'AI_WIZARD_CLOSED_BEFORE_COMPLETION'; payload: { step: string } }
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
@@ -118,23 +111,11 @@ const goBack = () => {
 	redirectToWooHome();
 };
 
-const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
-	if ( isWooExpress() ) {
-		window.location.href =
-			_context?.intro?.themeData?._links?.browse_all?.href ??
-			getAdminLink( 'themes.php' );
-	} else {
-		window.location.href = getAdminLink(
-			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
-		);
-	}
-};
-
 const markTaskComplete = async () => {
 	const currentTemplateId: string | undefined = await resolveSelect(
 		coreStore
 	).getDefaultTemplateId( { slug: 'home' } );
-	return dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+	return dispatch( optionsStore ).updateOptions( {
 		woocommerce_admin_customize_store_completed: 'yes',
 		// We use this on the intro page to determine if this same theme was used in the last customization.
 		woocommerce_admin_customize_store_completed_theme_id: currentTemplateId,
@@ -180,7 +161,6 @@ export const machineActions = {
 
 export const customizeStoreStateMachineActions = {
 	...introActions,
-	...transitionalActions,
 	...machineActions,
 };
 
@@ -198,29 +178,13 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	schema: {
 		context: {} as customizeStoreStateMachineContext,
 		events: {} as customizeStoreStateMachineEvents,
-		services: {} as {
-			fetchThemeCards: { data: ThemeCard[] };
-		},
 	},
 	context: {
 		intro: {
 			hasErrors: false,
-			themeData: {
-				themes: [] as ThemeCard[],
-				_links: {
-					browse_all: {
-						href: getAdminLink( 'themes.php' ),
-					},
-				},
-			},
 			activeTheme: '',
 			customizeStoreTaskCompleted: false,
-			currentThemeIsAiGenerated: false,
 		},
-		transitionalScreen: {
-			hasCompleteSurvey: false,
-		},
-		flowType: FlowType.noAI,
 		isFontLibraryAvailable: null,
 		isPTKPatternsAPIAvailable: null,
 		activeThemeHasMods: undefined,
@@ -229,20 +193,12 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 		src: 'browserPopstateHandler',
 	},
 	on: {
-		GO_BACK_TO_DESIGN_WITH_AI: {
-			target: 'designWithAi',
-			actions: [ { type: 'updateQueryStep', step: 'design-with-ai' } ],
-		},
 		GO_BACK_TO_DESIGN_WITHOUT_AI: {
 			target: 'intro',
 			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
 		},
 		EXTERNAL_URL_UPDATE: {
 			target: 'navigate',
-		},
-		AI_WIZARD_CLOSED_BEFORE_COMPLETION: {
-			target: 'intro',
-			actions: [ { type: 'updateQueryStep', step: 'intro' } ],
 		},
 		NO_AI_FLOW_ERROR: {
 			target: 'intro',
@@ -272,13 +228,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					cond: {
 						type: 'hasStepInUrl',
 						step: 'intro',
-					},
-				},
-				{
-					target: 'designWithAi',
-					cond: {
-						type: 'hasStepInUrl',
-						step: 'design-with-ai',
 					},
 				},
 				{
@@ -324,7 +273,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 								onDone: {
 									target: 'success',
 									actions: [
-										'assignThemeData',
 										'assignActiveTheme',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
@@ -345,10 +293,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 			on: {
 				CLICKED_ON_BREADCRUMB: {
 					actions: 'goBack',
-				},
-				DESIGN_WITH_AI: {
-					actions: [ 'recordTracksDesignWithAIClicked' ],
-					target: 'designWithAi',
 				},
 				DESIGN_WITHOUT_AI: {
 					actions: [ 'recordTracksDesignWithoutAIClicked' ],
@@ -407,29 +351,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					meta: {
 						component: DesignWithoutAi,
 					},
-				},
-			},
-		},
-		designWithAi: {
-			initial: 'preDesignWithAi',
-			states: {
-				preDesignWithAi: {
-					always: {
-						target: 'designWithAi',
-					},
-				},
-				designWithAi: {
-					meta: {
-						component: DesignWithAi,
-					},
-					entry: [
-						{ type: 'updateQueryStep', step: 'design-with-ai' },
-					],
-				},
-			},
-			on: {
-				THEME_SUGGESTED: {
-					target: 'assemblerHub',
 				},
 			},
 		},
@@ -535,7 +456,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						},
 						onDone: {
 							target: 'transitional',
-							actions: [ 'assignHasCompleteSurvey' ],
 						},
 					},
 				},
@@ -548,11 +468,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					],
 					meta: {
 						component: AssemblerHub,
-					},
-					on: {
-						COMPLETE_SURVEY: {
-							actions: 'completeSurvey',
-						},
 					},
 				},
 			},
@@ -601,12 +516,6 @@ export const CustomizeStoreController = ( {
 						pathFragments[ 2 ] === // [0] '', [1] 'customize-store', [2] step slug
 						( cond as { step: string | undefined } ).step
 					);
-				},
-				isAiOnline: ( _ctx ) => {
-					return _ctx.flowType === FlowType.AIOnline;
-				},
-				isAiOffline: ( _ctx ) => {
-					return _ctx.flowType === FlowType.AIOffline;
 				},
 				activeThemeHasMods: ( _ctx ) => {
 					return !! _ctx.activeThemeHasMods;

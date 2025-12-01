@@ -1,0 +1,121 @@
+.wc-block-product-filter-checkbox-list fieldset {
+	display: contents;
+}
+
+.wc-block-product-filter-checkbox-list__label {
+	align-items: center;
+	display: inline-flex;
+	gap: 0.625em;
+}
+
+.wc-block-product-filter-checkbox-list__item
+	.wc-block-product-filter-checkbox-list__label {
+	margin-bottom: 0;
+}
+
+:where(.wc-block-product-filter-checkbox-list__input-wrapper) {
+	display: block;
+	position: relative;
+}
+
+.wc-block-product-filter-checkbox-list__input-wrapper::before {
+	content: "";
+	left: 0;
+	position: absolute;
+	top: 0;
+	background: currentColor;
+	opacity: 0.1;
+	width: 1em;
+	height: 1em;
+	border-radius: 2px;
+	pointer-events: none;
+
+	.has-option-element-color & {
+		display: none;
+	}
+}
+
+input[type="checkbox"].wc-block-product-filter-checkbox-list__input {
+	appearance: none;
+	border-radius: 2px;
+	border: 1px solid
+		var(
+			--wc-product-filter-checkbox-list-option-element-border,
+			transparent
+		);
+	color: inherit;
+	display: block;
+	font-size: inherit;
+	height: 1em;
+	margin: 0;
+	width: 1em;
+	background: var(
+		--wc-product-filter-checkbox-list-option-element,
+		transparent
+	);
+	cursor: pointer;
+}
+
+input[type="checkbox"].wc-block-product-filter-checkbox-list__input:focus {
+	outline-width: 1px;
+	outline-color: var(
+		--wc-product-filter-checkbox-list-option-element-border,
+		currentColor
+	);
+}
+
+svg.wc-block-product-filter-checkbox-list__mark {
+	box-sizing: border-box;
+	display: none;
+	height: 1em;
+	left: 0;
+	padding: 0.2em;
+	position: absolute;
+	top: 0;
+	width: 1em;
+	color: var(
+		--wc-product-filter-checkbox-list-option-element-selected,
+		currentColor
+	);
+}
+
+input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
+	&::before,
+	&::after {
+		content: none;
+	}
+
+	+ .wc-block-product-filter-checkbox-list__mark {
+		display: block;
+		pointer-events: none;
+	}
+}
+
+:where(.wc-block-product-filter-checkbox-list__text-wrapper) {
+	font-size: 0.875em;
+	display: inline-flex;
+	align-items: center;
+	gap: $gap-smallest;
+}
+
+.wc-block-product-filter-checkbox-list__text {
+	display: contents;
+	color: var(
+		--wc-product-filter-checkbox-list-label-element,
+		currentColor
+	);
+}
+
+.wc-block-product-filter-checkbox-list__count {
+	display: contents;
+	white-space: nowrap;
+}
+
+.wc-block-product-filter-checkbox-list__show-more {
+	text-decoration: underline;
+	appearance: none;
+	font-family: inherit;
+	background: transparent;
+	border: none;
+	padding: 0;
+}

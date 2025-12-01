@@ -1,11 +1,17 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-
 /**
  * External dependencies
  */
-import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
+import {
+	addAProductToCart,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
+ * Internal dependencies
+ */
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { checkCartContentInBlocksCart } from '../../utils/cart';
+import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 const productName = `Cart product test ${ Date.now() }`;
 const productPrice = '13.99';
@@ -16,15 +22,9 @@ test.describe(
 	() => {
 		let productId;
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api
-				.post( 'products', {
+		test.beforeAll( async ( { restApi } ) => {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: productName,
 					type: 'simple',
 					regular_price: productPrice,
@@ -39,14 +39,8 @@ test.describe(
 			await context.clearCookies();
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.post( 'products/batch', {
+		test.afterAll( async ( { restApi } ) => {
+			await restApi.post( `${ WC_API_PATH }/products/batch`, {
 				delete: [ productId ],
 			} );
 		} );
@@ -54,49 +48,94 @@ test.describe(
 		test(
 			'should add only one product to the cart with AJAX add to cart buttons disabled and "Geolocate (with page caching support)" as the default customer location',
 			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page, baseURL } ) => {
+			async ( { page, restApi } ) => {
 				// Set settings combination that allowed reproducing the bug.
 				// @see https://github.com/woocommerce/woocommerce/issues/33077
-				const api = new wcApi( {
-					url: baseURL,
-					consumerKey: process.env.CONSUMER_KEY,
-					consumerSecret: process.env.CONSUMER_SECRET,
-					version: 'wc/v3',
-				} );
-				await api.put(
-					'settings/general/woocommerce_default_customer_address',
+				await restApi.put(
+					`${ WC_API_PATH }/settings/general/woocommerce_default_customer_address`,
 					{
 						value: 'geolocation_ajax',
 					}
 				);
-				await api.put(
-					'settings/products/woocommerce_enable_ajax_add_to_cart',
+				await restApi.put(
+					`${ WC_API_PATH }/settings/products/woocommerce_enable_ajax_add_to_cart`,
 					{
 						value: 'no',
 					}
 				);
 				await addAProductToCart( page, productId );
 				await page.goto( 'cart/' );
-				await expect( page.locator( 'td.product-name' ) ).toContainText(
-					productName
+
+				await checkCartContentInBlocksCart(
+					page,
+					[
+						{
+							data: { name: productName, price: productPrice },
+							qty: 1,
+						},
+					],
+					parseFloat( productPrice )
 				);
-				await expect(
-					page.getByLabel( 'Product quantity' )
-				).toHaveValue( '1' );
 
 				// Reset settings.
-				await api.put(
-					'settings/general/woocommerce_default_customer_address',
+				await restApi.put(
+					`${ WC_API_PATH }/settings/general/woocommerce_default_customer_address`,
 					{
 						value: 'base',
 					}
 				);
-				await api.put(
-					'settings/products/woocommerce_enable_ajax_add_to_cart',
+				await restApi.put(
+					`${ WC_API_PATH }/settings/products/woocommerce_enable_ajax_add_to_cart`,
 					{
 						value: 'yes',
 					}
 				);
+			}
+		);
+
+		test(
+			'should be able to navigate and remove item from mini cart using keyboard',
+			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
+			async ( { page } ) => {
+				const wordPressVersion = await getInstalledWordPressVersion();
+				// eslint-disable-next-line playwright/no-skipped-test
+				test.skip(
+					wordPressVersion <= 6.7,
+					'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+				);
+
+				await test.step( 'Add product to cart and open mini cart', async () => {
+					await addAProductToCart( page, productId );
+					const miniCartButton = page.locator(
+						'.wc-block-mini-cart__button'
+					);
+					await miniCartButton.click();
+					await expect(
+						page.locator( '.wc-block-mini-cart__drawer' )
+					).toBeVisible();
+				} );
+
+				await test.step( 'Verify and interact with remove button', async () => {
+					const removeButton = page.locator(
+						'.wc-block-cart-item__remove-link'
+					);
+					await expect( removeButton ).toBeVisible();
+					await removeButton.focus();
+					await page.keyboard.press( 'Space' );
+				} );
+
+				await test.step( 'Verify cart is empty', async () => {
+					await expect(
+						page.locator(
+							'.wc-block-mini-cart__empty-cart-wrapper'
+						)
+					).toBeVisible();
+					await expect(
+						page.locator(
+							'.wc-block-mini-cart__empty-cart-wrapper'
+						)
+					).toContainText( 'Your cart is currently empty!' );
+				} );
 			}
 		);
 	}

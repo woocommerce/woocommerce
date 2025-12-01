@@ -4,7 +4,6 @@
 import { partial } from 'lodash';
 import { createElement } from '@wordpress/element';
 import { getHistory } from '@woocommerce/navigation';
-import React from 'react';
 
 interface LinkProps {
 	/** Type of link. For wp-admin and wc-admin, the correct prefix is appended. */

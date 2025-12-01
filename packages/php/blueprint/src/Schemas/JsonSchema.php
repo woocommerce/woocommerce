@@ -2,10 +2,14 @@
 
 namespace Automattic\WooCommerce\Blueprint\Schemas;
 
+use Automattic\WooCommerce\Blueprint\UseWPFunctions;
+
 /**
  * Class JsonSchema
  */
 class JsonSchema {
+	use UseWPFunctions;
+
 	/**
 	 * The schema.
 	 *
@@ -17,11 +21,24 @@ class JsonSchema {
 	 * JsonSchema constructor.
 	 *
 	 * @param string $json_path The path to the JSON file.
+	 *
+	 * @throws \RuntimeException If the JSON file cannot be read.
 	 * @throws \InvalidArgumentException If the JSON is invalid or missing 'steps' field.
 	 */
 	public function __construct( $json_path ) {
-		// phpcs:ignore
-		$schema       = json_decode( file_get_contents( $json_path ) );
+		$real_path = realpath( $json_path );
+
+		if ( false === $real_path ) {
+			throw new \InvalidArgumentException( 'Invalid schema path' );
+		}
+
+		$contents = $this->wp_filesystem_get_contents( $real_path );
+
+		if ( false === $contents ) {
+			throw new \RuntimeException( "Failed to read the JSON file at {$real_path}." );
+		}
+
+		$schema       = json_decode( $contents );
 		$this->schema = $schema;
 
 		if ( ! $this->validate() ) {
@@ -69,7 +86,7 @@ class JsonSchema {
 			return false;
 		}
 
-		if ( ! isset( $this->schema->steps ) ) {
+		if ( ! isset( $this->schema->steps ) || ! is_array( $this->schema->steps ) ) {
 			return false;
 		}
 

@@ -1,6 +1,7 @@
 module.exports = {
 	extends: [ 'plugin:playwright/recommended' ],
 	rules: {
+		'playwright/no-wait-for-timeout': 'error',
 		'playwright/no-skipped-test': 'off',
 		'no-console': 'off',
 		'jest/no-test-callback': 'off',

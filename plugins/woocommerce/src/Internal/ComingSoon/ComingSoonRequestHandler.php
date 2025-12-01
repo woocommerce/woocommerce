@@ -36,24 +36,29 @@ class ComingSoonRequestHandler {
 	 */
 	final public function init( ComingSoonHelper $coming_soon_helper ) {
 		$this->coming_soon_helper = $coming_soon_helper;
-		// Skip if the site is live.
-		if ( $this->coming_soon_helper->is_site_live() ) {
-			return;
-		}
+		// Hook into plugins_loaded to ensure features are initialized to determine coming soon status.
+		add_action(
+			'plugins_loaded',
+			function () {
+				// Skip if the site is live.
+				if ( $this->coming_soon_helper->is_site_live() ) {
+					return;
+				}
 
-		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
-		add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-		add_action( 'after_setup_theme', array( $this, 'possibly_init_block_templates' ), 999 );
+				add_filter( 'template_include', array( $this, 'handle_template_include' ) );
+				add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
+				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+				add_action( 'after_setup_theme', array( $this, 'possibly_init_block_templates' ), 999 );
+			}
+		);
 	}
-
 
 	/**
 	 * Initializes block templates so we can show coming soon page in non-FSE themes.
 	 */
 	public function possibly_init_block_templates() {
 		// No need to initialize block templates since we've already initialized them in the Block Bootstrap.
-		if ( wc_current_theme_is_fse_theme() || current_theme_supports( 'block-template-parts' ) ) {
+		if ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) {
 			return;
 		}
 
@@ -78,7 +83,7 @@ class ComingSoonRequestHandler {
 		// A coming soon page needs to be displayed. Set a short cache duration to prevents ddos attacks.
 		header( 'Cache-Control: max-age=60' );
 
-		$is_fse_theme         = wc_current_theme_is_fse_theme();
+		$is_fse_theme         = wp_is_block_theme();
 		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
 		add_theme_support( 'block-templates' );
 
@@ -178,9 +183,11 @@ class ComingSoonRequestHandler {
 	}
 
 	/**
-	 * Filters the theme.json data to add the Inter and Cardo fonts when they don't exist.
+	 * Filters the theme.json data to add Coming Soon fonts.
+	 * This runs after child theme merging to ensure parent theme fonts are included.
 	 *
-	 * @param WP_Theme_JSON $theme_json The theme json object.
+	 * @param WP_Theme_JSON_Data $theme_json The theme json data object.
+	 * @return WP_Theme_JSON_Data The filtered theme json data.
 	 */
 	public function experimental_filter_theme_json_theme( $theme_json ) {
 		if ( ! Features::is_enabled( 'launch-your-store' ) ) {
@@ -189,6 +196,36 @@ class ComingSoonRequestHandler {
 
 		$theme_data = $theme_json->get_data();
 		$font_data  = $theme_data['settings']['typography']['fontFamilies']['theme'] ?? array();
+
+		// Check if the current theme is a child theme. And if so, merge the parent theme fonts with the existing fonts.
+		if ( wp_get_theme()->parent() ) {
+			$parent_theme           = wp_get_theme()->parent();
+			$parent_theme_json_file = $parent_theme->get_file_path( 'theme.json' );
+
+			if ( is_readable( $parent_theme_json_file ) ) {
+				$parent_theme_json_data = json_decode( file_get_contents( $parent_theme_json_file ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+				if ( isset( $parent_theme_json_data['settings']['typography']['fontFamilies'] ) ) {
+					$parent_fonts = $parent_theme_json_data['settings']['typography']['fontFamilies'];
+
+					// Merge parent theme fonts with existing fonts.
+					foreach ( $parent_fonts as $parent_font ) {
+						$found = false;
+						foreach ( $font_data as $existing_font ) {
+							if ( isset( $parent_font['name'] ) && isset( $existing_font['name'] ) &&
+							$parent_font['name'] === $existing_font['name'] ) {
+								$found = true;
+								break;
+							}
+						}
+
+						if ( ! $found ) {
+							$font_data[] = $parent_font;
+						}
+					}
+				}
+			}
+		}
 
 		$fonts_to_add = array(
 			array(
@@ -220,7 +257,7 @@ class ComingSoonRequestHandler {
 			),
 		);
 
-		// Loops through all existing fonts and append when the font's name is not found.
+		// Add WooCommerce fonts if they don't already exist.
 		foreach ( $fonts_to_add as $font_to_add ) {
 			$found = false;
 			foreach ( $font_data as $font ) {

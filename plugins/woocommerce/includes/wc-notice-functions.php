@@ -110,7 +110,7 @@ function wc_set_notices( $notices ) {
 		return;
 	}
 
-	WC()->session->set( 'wc_notices', $notices );
+	WC()->session->set( 'wc_notices', empty( $notices ) ? null : $notices );
 }
 
 /**
@@ -237,14 +237,17 @@ function wc_get_notices( $notice_type = '' ) {
 		return;
 	}
 
+	$notices = array();
+	if ( ! WC()->session ) {
+		return $notices;
+	}
+
 	$all_notices = WC()->session->get( 'wc_notices', array() );
 
 	if ( empty( $notice_type ) ) {
 		$notices = $all_notices;
 	} elseif ( isset( $all_notices[ $notice_type ] ) ) {
 		$notices = $all_notices[ $notice_type ];
-	} else {
-		$notices = array();
 	}
 
 	return $notices;

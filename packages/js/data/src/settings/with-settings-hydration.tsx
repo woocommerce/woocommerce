@@ -8,7 +8,7 @@ import { createElement, useRef, useEffect } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { STORE_NAME } from './constants';
+import { store } from './';
 import { Settings } from './types';
 
 export const withSettingsHydration = ( group: string, settings: Settings ) =>
@@ -24,11 +24,11 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 				finishResolution,
 				updateSettingsForGroup,
 				clearIsDirty,
-			} = useDispatch( STORE_NAME );
+			} = useDispatch( store );
 			const { isResolvingGroup, hasFinishedResolutionGroup } = useSelect(
 				( select ) => {
 					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
+						select( store );
 					return {
 						isResolvingGroup: isResolving( 'getSettings', [
 							group,

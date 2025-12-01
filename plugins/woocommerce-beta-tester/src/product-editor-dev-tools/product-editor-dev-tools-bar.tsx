@@ -7,16 +7,11 @@ import { PostTypeContext } from '@woocommerce/product-editor';
 import { Button, NavigableMenu } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet, natively (not until 7.0.0).
-// Including `@types/wordpress__data` as a devDependency causes build issues,
-// so just going type-free for now.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useSelect, select as WPSelect } from '@wordpress/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useEntityProp } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
+import { useEntityProp, store as coreDataStore } from '@wordpress/core-data';
+
+import { store as blockEditorStore } from '@wordpress/block-editor';
+import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -57,14 +52,23 @@ export function ProductEditorDevToolsBar( {
 
 	const [ id ] = useEntityProp( 'postType', postType, 'id' );
 
-	const product = useSelect( ( select: typeof WPSelect ) =>
-		select( 'core' ).getEditedEntityRecord( 'postType', postType, id )
+	const product = useSelect(
+		( select ) =>
+			// @ts-expect-error type definition is not correct. For this reason, we need to cast the return value to Product.
+			select( coreDataStore ).getEditedEntityRecord(
+				'postType',
+				postType,
+				id
+			) as Product,
+		[ id, postType ]
 	);
 
 	const [ lastSelectedBlock, setLastSelectedBlock ] = useState( null );
 
-	const selectedBlock = useSelect( ( select: typeof WPSelect ) =>
-		select( 'core/block-editor' ).getSelectedBlock()
+	const selectedBlock = useSelect(
+		// @ts-expect-error No types for this exist yet. Need to add it to the blockEditorStore types.
+		( select ) => select( blockEditorStore ).getSelectedBlock(),
+		[ id, postType ]
 	);
 
 	useEffect( () => {
@@ -73,14 +77,17 @@ export function ProductEditorDevToolsBar( {
 		}
 	}, [ selectedBlock ] );
 
-	const evaluationContext = {
+	const evaluationContext: {
+		postType: string;
+		editedProduct: Product;
+	} = {
 		postType,
 		editedProduct: product,
 	};
 
 	const [ selectedTab, setSelectedTab ] = useState< string >( 'inspector' );
 
-	function handleNavigate( _childIndex: number, child: HTMLButtonElement ) {
+	function handleNavigate( _childIndex: number, child: HTMLElement ) {
 		child.click();
 	}
 

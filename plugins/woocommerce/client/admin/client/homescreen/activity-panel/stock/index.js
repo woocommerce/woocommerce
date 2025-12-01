@@ -6,7 +6,7 @@ import { compose } from '@wordpress/compose';
 import { withDispatch, withSelect } from '@wordpress/data';
 import PropTypes from 'prop-types';
 import { Section } from '@woocommerce/components';
-import { ITEMS_STORE_NAME } from '@woocommerce/data';
+import { itemsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -117,8 +117,7 @@ StockPanel.defaultProps = {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getItems, getItemsError, isResolving } =
-			select( ITEMS_STORE_NAME );
+		const { getItems, getItemsError, isResolving } = select( itemsStore );
 
 		const products = Array.from(
 			getItems( 'products/low-in-stock', productsQuery ).values()
@@ -135,7 +134,7 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { invalidateResolution, updateProductStock } =
-			dispatch( ITEMS_STORE_NAME );
+			dispatch( itemsStore );
 		const { createNotice } = dispatch( 'core/notices' );
 
 		return {

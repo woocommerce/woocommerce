@@ -40,10 +40,10 @@ export const getLayoutContextValue = (
 	isDescendantOf: ( item ) => layoutParts.includes( item ),
 } );
 
-export const LayoutContextProvider: React.FC< LayoutContextProviderProps > = ( {
+export const LayoutContextProvider = ( {
 	children,
 	value,
-} ) => (
+}: LayoutContextProviderProps ) => (
 	<LayoutContext.Provider value={ value }>
 		{ children }
 	</LayoutContext.Provider>

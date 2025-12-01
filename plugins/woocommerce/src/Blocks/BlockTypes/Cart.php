@@ -51,7 +51,7 @@ class Cart extends AbstractBlock {
 	 * Register block pattern for Empty Cart Message to make it translatable.
 	 */
 	public function register_patterns() {
-		$shop_permalink = wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : '';
+		$shop_permalink = wc_get_page_permalink( 'shop' );
 
 		register_block_pattern(
 			'woocommerce/cart-heading',
@@ -235,8 +235,6 @@ class Cart extends AbstractBlock {
 		parent::enqueue_data( $attributes );
 
 		$this->asset_data_registry->add( 'countryData', CartCheckoutUtils::get_country_data() );
-		$this->asset_data_registry->add( 'baseLocation', wc_get_base_location() );
-		$this->asset_data_registry->add( 'isShippingCalculatorEnabled', filter_var( get_option( 'woocommerce_enable_shipping_calc' ), FILTER_VALIDATE_BOOLEAN ) );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );
 		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
@@ -244,13 +242,14 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
-		$this->asset_data_registry->add( 'isBlockTheme', wc_current_theme_is_fse_theme() );
+		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 
 		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
 		$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
 
 		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
 		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
+		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
 
 		$is_block_editor = $this->is_block_editor();
 

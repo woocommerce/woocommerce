@@ -7,12 +7,11 @@
     * [Updating the autoloader class maps](#updating-the-autoloader-class-maps)
 * [Installing packages](#installing-packages)
 * [The container](#the-container)
-    * [Resolving classes](#resolving-classes)
+    * [Retrieving classes](#retrieving-classes)
         * [From other classes in the `src` directory](#1-other-classes-in-the-src-directory)
         * [From code in the `includes` directory](#2-code-in-the-includes-directory)
-    * [Registering classes](#registering-classes)
-        * [Using concretes](#using-concretes)
         * [A note on legacy classes](#a-note-on-legacy-classes)
+    * [Historical note](#historical-note)
 * [The `Internal` namespace](#the-internal-namespace)
 * [Interacting with legacy code](#interacting-with-legacy-code)
     * [The `LegacyProxy` class](#the-legacyproxy-class)
@@ -67,39 +66,21 @@ composer update
 
 ## The container
 
-### Important notice
+WooCommerce uses a [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible container for retrieving instances of all the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. This container is very simple: explicit class registration is not needed, any class in the `Automattic\Woocommerce` namespace can be retrieved and reflection is used to locate and instantiate classes and their dependencies.
 
-As of version 9.5 WooCommerce uses a new, simpler, custom-made container instead of the old one based on the PHP League's Container package. However, the old container is still in place and it's possible to configure WooCommerce to use it (instead of the new container) by adding one of these snippets:
+The container assumes that all the retrieved classes are single-instance classes: the class will be instantiated the first time it's requested, and further requests will serve a cached version of the created instance. Thus for data-only classes for which multiple instances may be needed, instances should be created directly with `new` instead.
 
-1. `define('WOOCOMMERCE_USE_OLD_DI_CONTAINER', true);`
-2. `add_filter('woocommerce_use_old_di_container', '__return_true');`
+The term "resolve a class" used in this document means instantiating and caching the class if needed, then returning the cached instance of the class.
 
-This should be done **only** if a problem with the new container causes disruption in the site *(and if you discover such a problem, please [create an issue in GitHub](https://github.com/woocommerce/woocommerce/issues/new) so that we can keep track of it and work on a fix)*. This fallback mechanism, together with the old container and the PHP League's Container package, will be removed in WooCommerce 10.0.
+See [Writing unit tests](#writing-unit-tests) for information on how to mock/replace class dependencies in unit tests.
 
-The new container is used in the same way as the old one: it's only for classes in the `src` directory, dependencies are defined in an `init` method of the classes, the container exposes a `get` method and a `has` method, and `wc_get_container` can be used to use the container from [legacy code](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/includes/README.md/?rgh-link-date=2024-10-29T14%3A32%3A58Z#L6-L7); the difference is that explicit class registration is not needed anymore (any class in the `Automattic\Woocommerce` namespace can be resolved). **However**, until WooCommerce 10.0 arrives please keep registering new classes using service providers as instructed below, so that the old container can be used if needed.
+### Retrieving classes
 
-As for the unit tests, they can be forced to use the old container by defining the `USE_OLD_DI_CONTAINER` environment variable.
-
-#### End of important notice
-
-WooCommerce uses a [PSR-11](https://www.php-fig.org/psr/psr-11/) compatible container for registering and resolving all the classes in this directory by using the [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection) pattern. More specifically, we use [the container from The PHP League](https://container.thephpleague.com/); this is relevant when registering classes, but not when resolving them. The full class name of the container used is `Automattic\WooCommerce\Container` (it uses the PHP League's container under the hood).
-
-*Resolving* a class means asking the container to provide an instance of the class (or interface). *Registering* a class means telling the container how the class should be resolved.
-
-In principle, the container should be used to register and resolve all the classes in the `src` directory. The exception might be data-only classes that could be created the old way (using a plain `new` statement); but as a rule of thumb, the container should always be used.
-
-There are two ways to resolve registered classes, depending on from where they are resolved:
-
-* Classes in the `src` directory specify their dependencies as `init` arguments, which are automatically supplied by the container when the class is resolved (this is called *dependency injection*).
-* For code in the `includes` directory there's a `wc_get_container` function that will return the container, then its `get` method can be used to resolve any class.  
-
-### Resolving classes
-
-There are two ways to resolve registered classes, depending on from where they need to be resolved:
+There are two ways to retrieve classes, depending on how they need to be resolved:
 
 #### 1. Other classes in the `src` directory
 
-When a class in the `src` directory depends on other one classes from the same directory, it should use method injection. This means specifying these dependencies as arguments in a `init` method with appropriate type hints, and storing these in private variables, ready to be used when needed:
+When a class in the `src` directory depends on other one classes that are also in `src`, it should use method injection. This means specifying these dependencies as arguments in a `init` method with appropriate type hints, and storing these in private variables, ready to be used when needed:
 
 ```php
 use TheService1Namespace\Service1;
@@ -145,7 +126,7 @@ In general, however, method injection is strongly preferred and the lazy approac
 
 #### 2. Code in the `includes` directory
 
-When you need to use classes defined in the `src` directory from within legacy code in `includes`, use the `wc_get_container` function to get the instance of the container, then resolve the required class with `get`:
+When you need to use classes defined in the `src` directory from within legacy code in `includes`, use the `wc_get_container` function to get the instance of the container, then retrieve the required class with `get`:
 
 ```php
 use TheService1Namespace\Service1;
@@ -158,128 +139,17 @@ function wc_function_that_needs_service_1() {
 
 This is also the recommended approach when moving code from `includes` to `src` while keeping the existing entry points for the old code in place for compatibility.
 
-Worth noting: the container will throw a `ContainerException` when receiving a request for resolving a class that hasn't been registered. All classes need to have been registered prior to being resolved.
-
-### Registering classes
-
-For a class to be resolvable using the container, it needs to have been previously registered in the same container.
-
-The `Container` class is "read-only", in that it has a `get` method to resolve classes but it doesn't have any method to register classes. Instead, class registration is done by using [service providers](https://container.thephpleague.com/3.x/service-providers/). That's how the whole process would go when creating a new class:  
-
-First, create the class in the appropriate namespace (and thus in the matching folder), remember that the base namespace for the classes in the `src` directory is `Automattic\WooCommerce`. If the class depends on other classes from `src`, specify these dependencies as `init` arguments in detailed above.
-
-Example of such a class:
-
-```php
-namespace Automattic\WooCommerce\TheClassNamespace;
-use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
-
-
-class TheClass {
-    private $the_dependency;
-    
-    public function init( TheDependencyClass $dependency ) {
-        $this->the_dependency = $dependency;
-    }
-            
-}
-```
-
-Then, create a `<class name>ServiceProvider` class in the `src/Internal/DependencyManagement/ServiceProviders` folder (and thus in the appropriate namespace) as follows:
-
-```php
-namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
-
-use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
-use Automattic\WooCommerce\TheClassNamespace\TheClass;
-use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
-
-class TheClassServiceProvider extends AbstractServiceProvider {
-
-    protected $provides = array(
-        TheClass::class
-    );
-
-    public function register() {
-        $this->add( TheClass::class )->addArgument( TheDependencyClass::class );
-    }
-}
-```
-
-Last (but certainly not least, don't forget this step!), add the class name of the service provider to the array returned by the `get_service_providers` method in the `Container` class.
-
-Worth noting:
-
-* In the example the service provider is used to register only one class, but service providers can be used to register a group of related classes. The `$provides` property must contain all the names of the classes that the provider can register.
-* The container will invoke the provider `register` method the first time any of the classes in `$provides` is resolved.
-* If you look at [the service provider documentation](https://container.thephpleague.com/3.x/service-providers/) you will see that classes are registered using `this->getContainer()->add`. WooCommerce's `AbstractServiceProvider` adds a utility `add` method itself that serves the same purpose.
-* You can use `share` instead of `add` to register single-instance classes (the class is instantiated only once and cached, so the same instance is returned every time the class is resolved).
-
-If the class being registered has `init` arguments then the `add` (or `share`) method must be followed by as many `addArguments` calls as needed. WooCommerce's `AbstractServiceProvider` adds a utility `add_with_auto_arguments` method (and a sibling `share_with_auto_arguments` method) that uses reflection to figure out and register all the `init` arguments (which need to have type hints). Please have in mind the possible performance penalty incurred by the usage of reflection when using this helper method.
-
-An alternative version of the service provider, which is used to register both the class and its dependency, and which takes advantage of `add_with_auto_arguments`, could be as follows:
-
-```php
-namespace Automattic\WooCommerce\Internal\DependencyManagement\ServiceProviders;
-
-use Automattic\WooCommerce\Internal\DependencyManagement\AbstractServiceProvider;
-use Automattic\WooCommerce\TheClassNamespace\TheClass;
-use Automattic\WooCommerce\TheDependencyNamespace\TheDependencyClass;
-
-class TheClassServiceProvider extends AbstractServiceProvider {
-
-    protected $provides = array(
-        TheClass::class,
-        TheDependencyClass::class
-    );
-
-    public function register() {
-        $this->share( TheDependencyClass::class );
-        $this->share_with_auto_arguments( ActionsProxy::class );
-    }
-}
-```
-
-#### Using concretes
-
-By default, the `add` and `share` methods instruct the container to resolve the registered class by using `new` to create a new instance of the class. But these methods accept an optional `$concrete` argument that can be used to tell the container to resolve the class in a different way. `$concrete` may be one of the following:
-
-* A class name
-
-The supplied class name will be instantiated when the registered class name is resolved. This is especially useful to register interfaces, example:
-
-```php
-$this->add( TheInterface::class, TheClassImplementingTheInterface::class );
-```
-
-* An object
-
-The supplied object will be returned then the registered class name is resolved. Example:
-
-```php
-$instance = new TheClass();
-$this->add( TheClass::class, $instance );
-```
-
-* A closure
-
-The closure will be executed and the result value will be returned when the registered class name is resolved. Example:
-
-```php
-$factory = function( TheDependencyClass $dependency ) {
-    return new TheClass( $dependency );
-};
-
-$this->add( TheClass::class, $factory );
-```
-
-Note that if the closure is defined as a function with arguments, the supplied parameters will be resolved too.
+Worth noting: the container will throw a `ContainerException` when receiving a request for retrieving a class that doesn't exist or is not in the `Automattic\Woocommerce` namespace, or when there's an error preventing the instantiation (for example the class doesn't have a public constructor). You can use the container `has` method to verify that a given class can actually be retrieved, but this method will only verify that the class exists and is in the correct namespace.
 
 #### A note on legacy classes
 
-The container is intended for registering **only** classes in the `src` folder. There is a check in place to prevent classes outside the root `Automattic\Woocommerce` namespace from being registered.
+The container is intended for retrieving **only** classes in the `src` folder, or put another way, classes in the `Automattic\Woocommerce` namespace. An attempt to retrieve a class that is not in that namespace will throw an exception.
 
-This implies that classes outside `src` can't be dependency-injected, and thus must not be used as type hints in `init` arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests.
+This implies that classes outside `src` can't be dependency-injected, and thus must not be used as type hints in `init` arguments. There are mechanisms in place to interact with "outside" code (including code from the `includes` folder and third-party code) in a way that makes it easy to write unit tests - see [The `LegacyProxy` class](#the-legacyproxy-class).
+
+### Historical note
+
+In previous versions WooCommerce used [the PHP League's Container package](https://container.thephpleague.com/) as the underlying dependency injection engine, requiring explicit registration for all the classes intended to be retrieved using it. The new simplified container [was introduced in WooCommerce 9.5](https://developer.woocommerce.com/2024/11/15/developer-advisory-changes-to-the-dependency-injection-container-in-woocommerce/), while the old container package and all the related infrastructure code was removed in WooCommerce 10.0.
 
 ## The `Internal` namespace
 
@@ -349,7 +219,7 @@ Both ways are completely equivalent since the helper methods are just doing `wc_
 
 ### Using the mockable proxy in tests
 
-When unit tests run the container will return an instance of `MockableLegacyProxy` when `LegacyProxy` is resolved. This class has the same public methods as `LegacyProxy` but also the following ones:
+When unit tests run the container will return an instance of `MockableLegacyProxy` when `LegacyProxy` is retrieved. This class has the same public methods as `LegacyProxy` but also the following ones:
 
 * `register_class_mocks`: defines mocks for classes that are retrieved via `get_instance_of`.
 * `register_function_mocks`: defines mocks for functions that are invoked via `call_function`.
@@ -378,7 +248,7 @@ Please see [the code of the MockableLegacyProxy class](https://github.com/woocom
 
 ### But how does `get_instance_of` work?
 
-We use a container to resolve instances of classes in the `src` directory, but how does the legacy proxy's `get_instance_of` know how to resolve legacy classes?
+We use a container to retrieve instances of classes in the `src` directory, but how does the legacy proxy's `get_instance_of` know how to resolve legacy classes?
 
 This is a mostly ad-hoc process. When a class has a special way to be instantiated or retrieved (e.g. a static `instance` method), then that is used; otherwise the method fallbacks to simply creating a new instance of the class using `new`.
 

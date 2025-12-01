@@ -4,7 +4,7 @@
 import { createElement } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import CrossSmallIcon from 'gridicons/dist/cross-small';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -68,7 +68,7 @@ const AdvancedFilterItem = ( props ) => {
 				query={ query }
 			/>
 			<Button
-				className={ classnames(
+				className={ clsx(
 					'woocommerce-filters-advanced__line-item',
 					'woocommerce-filters-advanced__remove'
 				) }

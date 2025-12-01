@@ -1,50 +1,104 @@
 <?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\Block_Scanner;
+
 /**
  * Class containing utility methods for dealing with the Cart and Checkout blocks.
  */
 class CartCheckoutUtils {
 	/**
-	 * Returns true if:
-	 * - The cart page is being viewed.
-	 * - The page contains a cart block, cart shortcode or classic shortcode block with the cart attribute.
+	 * Caches if we're on the cart page.
 	 *
-	 * @return bool
+	 * @var bool
 	 */
-	public static function is_cart_page() {
-		global $post;
+	private static $is_cart_page = null;
 
-		$page_id      = wc_get_page_id( 'cart' );
-		$is_cart_page = $page_id && is_page( $page_id );
+	/**
+	 * Caches if we're on the checkout page.
+	 *
+	 * @var bool
+	 */
+	private static $is_checkout_page = null;
 
-		if ( $is_cart_page ) {
+	/**
+	 * Returns true if the current page is a specific page type (cart or checkout).
+	 *
+	 * This is determined by looking at the global $post object and comparing it to the post ID defined in settings,
+	 * or checking the page contents for a block or shortcode.
+	 *
+	 * This function cannot be used accurately before the `pre_get_posts` action has been run.
+	 *
+	 * @param string $page_type The page type to check for.
+	 * @return bool|null
+	 */
+	private static function is_page_type( string $page_type ): ?bool {
+		if ( ! did_action( 'pre_get_posts' ) ) {
+			return null;
+		}
+
+		$page_id = wc_get_page_id( $page_type );
+
+		if ( $page_id && is_page( $page_id ) ) {
 			return true;
 		}
 
-		// Check page contents for block/shortcode.
-		return is_a( $post, 'WP_Post' ) && ( wc_post_content_has_shortcode( 'woocommerce_cart' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'cart', $post->post_content ) );
+		// If the is_page check returned false, check the page contents for a cart block or shortcode.
+		global $post;
+
+		if ( null === $post ) {
+			return null;
+		}
+
+		if ( $post instanceof \WP_Post ) {
+			return wc_post_content_has_shortcode( 'cart' === $page_type ? 'woocommerce_cart' : 'woocommerce_checkout' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', $page_type, $post->post_content );
+		}
+
+		return false;
 	}
 
 	/**
-	 * Returns true if:
-	 * - The checkout page is being viewed.
-	 * - The page contains a checkout block, checkout shortcode or classic shortcode block with the checkout attribute.
+	 * Returns true on the cart page.
 	 *
 	 * @return bool
 	 */
-	public static function is_checkout_page() {
-		global $post;
-
-		$page_id          = wc_get_page_id( 'checkout' );
-		$is_checkout_page = $page_id && is_page( $page_id );
-
-		if ( $is_checkout_page ) {
-			return true;
+	public static function is_cart_page(): bool {
+		if ( null === self::$is_cart_page ) {
+			self::$is_cart_page = self::is_page_type( 'cart' );
 		}
+		return true === self::$is_cart_page;
+	}
 
-		// Check page contents for block/shortcode.
-		return is_a( $post, 'WP_Post' ) && ( wc_post_content_has_shortcode( 'woocommerce_checkout' ) || self::has_block_variation( 'woocommerce/classic-shortcode', 'shortcode', 'checkout', $post->post_content ) );
+	/**
+	 * Returns true on the checkout page.
+	 *
+	 * @return bool
+	 */
+	public static function is_checkout_page(): bool {
+		if ( null === self::$is_checkout_page ) {
+			self::$is_checkout_page = self::is_page_type( 'checkout' );
+		}
+		return true === self::$is_checkout_page;
+	}
+
+	/**
+	 * Returns true if shipping methods exist in the store. Excludes local pickup and only counts enabled shipping methods.
+	 *
+	 * @return bool true if shipping methods exist.
+	 */
+	public static function shipping_methods_exist() {
+		// Local pickup is included with legacy shipping methods since they do not support shipping zones.
+		$local_pickup_count = count(
+			array_filter(
+				WC()->shipping()->get_shipping_methods(),
+				function ( $method ) {
+					return isset( $method->enabled ) && 'yes' === $method->enabled && ! $method->supports( 'shipping-zones' ) && $method->supports( 'local-pickup' );
+				}
+			)
+		);
+
+		$shipping_methods_count = wc_get_shipping_method_count( true, true ) - $local_pickup_count;
+		return $shipping_methods_count > 0;
 	}
 
 	/**
@@ -53,6 +107,7 @@ class CartCheckoutUtils {
 	 * @param string $block_id The block ID to check for.
 	 * @param string $attribute The attribute to check.
 	 * @param string $value The value to check for.
+	 * @param string $post_content The post content to check.
 	 * @return boolean
 	 */
 	public static function has_block_variation( $block_id, $attribute, $value, $post_content ) {
@@ -60,17 +115,28 @@ class CartCheckoutUtils {
 			return false;
 		}
 
-		if ( has_block( $block_id, $post_content ) ) {
-			$blocks = (array) parse_blocks( $post_content );
+		$scanner = Block_Scanner::create( $post_content );
+		if ( ! $scanner ) {
+			return false;
+		}
 
-			foreach ( $blocks as $block ) {
-				if ( isset( $block['attrs'][ $attribute ] ) && $value === $block['attrs'][ $attribute ] ) {
-					return true;
-				}
-				// Cart is default so it will be empty.
-				if ( 'woocommerce/classic-shortcode' === $block_id && 'shortcode' === $attribute && 'cart' === $value && ! isset( $block['attrs']['shortcode'] ) ) {
-					return true;
-				}
+		while ( $scanner->next_delimiter() ) {
+			if ( ! $scanner->opens_block( $block_id ) ) {
+				continue;
+			}
+
+			$attrs = $scanner->allocate_and_return_parsed_attributes();
+
+			if ( isset( $attrs[ $attribute ] ) && $value === $attrs[ $attribute ] ) {
+				return true;
+			}
+
+			// `Cart` is default for `woocommerce/classic-shortcode` so it will be empty in the block attributes.
+			if ( 'woocommerce/classic-shortcode' === $block_id &&
+				'shortcode' === $attribute &&
+				'cart' === $value &&
+				! isset( $attrs['shortcode'] ) ) {
+				return true;
 			}
 		}
 
@@ -83,7 +149,7 @@ class CartCheckoutUtils {
 	 * @return bool true if the WC cart page is using the Cart block.
 	 */
 	public static function is_cart_block_default() {
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'cart' ), 'wp_template' );
 			foreach ( $templates_from_db as $template ) {
@@ -102,7 +168,7 @@ class CartCheckoutUtils {
 	 * @return bool true if the WC checkout page is using the Checkout block.
 	 */
 	public static function is_checkout_block_default() {
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			// Ignore the pages and check the templates.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'checkout' ), 'wp_template' );
 			foreach ( $templates_from_db as $template ) {
@@ -247,7 +313,7 @@ class CartCheckoutUtils {
 
 		$block = str_replace( 'woocommerce/', '', $block );
 
-		if ( wc_current_theme_is_fse_theme() ) {
+		if ( wp_is_block_theme() ) {
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( 'page-' . $block ) );
 			foreach ( $templates_from_db as $template ) {
 				if ( ! has_block( 'woocommerce/page-content-wrapper', $template->content ) ) {
@@ -268,19 +334,33 @@ class CartCheckoutUtils {
 	public static function get_country_data() {
 		$billing_countries  = WC()->countries->get_allowed_countries();
 		$shipping_countries = WC()->countries->get_shipping_countries();
-		$country_locales    = wc()->countries->get_country_locale();
 		$country_states     = wc()->countries->get_states();
 		$all_countries      = self::deep_sort_with_accents( array_unique( array_merge( $billing_countries, $shipping_countries ) ) );
+		$country_locales    = array_map(
+			function ( $locale ) {
+				foreach ( $locale as $field => $field_data ) {
+					if ( isset( $field_data['priority'] ) ) {
+						$locale[ $field ]['index'] = $field_data['priority'];
+						unset( $locale[ $field ]['priority'] );
+					}
+					if ( isset( $field_data['class'] ) ) {
+						unset( $locale[ $field ]['class'] );
+					}
+				}
+				return $locale;
+			},
+			WC()->countries->get_country_locale()
+		);
 
-		$country_data = [];
+		$country_data = array();
 
 		foreach ( array_keys( $all_countries ) as $country_code ) {
-			$country_data[ $country_code ] = [
+			$country_data[ $country_code ] = array(
 				'allowBilling'  => isset( $billing_countries[ $country_code ] ),
 				'allowShipping' => isset( $shipping_countries[ $country_code ] ),
-				'states'        => $country_states[ $country_code ] ?? [],
-				'locale'        => $country_locales[ $country_code ] ?? [],
-			];
+				'states'        => $country_states[ $country_code ] ?? array(),
+				'locale'        => $country_locales[ $country_code ] ?? array(),
+			);
 		}
 
 		return $country_data;
@@ -289,12 +369,12 @@ class CartCheckoutUtils {
 	/**
 	 * Removes accents from an array of values, sorts by the values, then returns the original array values sorted.
 	 *
-	 * @param array $array Array of values to sort.
+	 * @param array $sort_array Array of values to sort.
 	 * @return array Sorted array.
 	 */
-	protected static function deep_sort_with_accents( $array ) {
-		if ( ! is_array( $array ) || empty( $array ) ) {
-			return $array;
+	protected static function deep_sort_with_accents( $sort_array ) {
+		if ( ! is_array( $sort_array ) || empty( $sort_array ) ) {
+			return $sort_array;
 		}
 
 		$array_without_accents = array_map(
@@ -303,11 +383,11 @@ class CartCheckoutUtils {
 					? self::deep_sort_with_accents( $value )
 					: remove_accents( wc_strtolower( html_entity_decode( $value ) ) );
 			},
-			$array
+			$sort_array
 		);
 
 		asort( $array_without_accents );
-		return array_replace( $array_without_accents, $array );
+		return array_replace( $array_without_accents, $sort_array );
 	}
 
 	/**
@@ -320,31 +400,33 @@ class CartCheckoutUtils {
 		$formatted_shipping_zones   = array_reduce(
 			$shipping_zones,
 			function ( $acc, $zone ) {
-				$acc[] = [
+				$acc[] = array(
 					'id'          => $zone['id'],
 					'title'       => $zone['zone_name'],
 					'description' => $zone['formatted_zone_location'],
-				];
+				);
 				return $acc;
 			},
-			[]
+			array()
 		);
-		$formatted_shipping_zones[] = [
+		$formatted_shipping_zones[] = array(
 			'id'          => 0,
 			'title'       => __( 'International', 'woocommerce' ),
 			'description' => __( 'Locations outside all other zones', 'woocommerce' ),
-		];
+		);
 		return $formatted_shipping_zones;
 	}
 
 	/**
 	 * Recursively search the checkout block to find the express checkout block and
-	 * get the button style attributes
+	 * get the button style attributes using the parse_blocks function.
 	 *
 	 * @param array  $blocks Blocks to search.
 	 * @param string $cart_or_checkout The block type to check.
+	 *
+	 * @return array Block attributes.
 	 */
-	public static function find_express_checkout_attributes( $blocks, $cart_or_checkout ) {
+	public static function find_express_checkout_attributes_in_parsed_blocks( $blocks, $cart_or_checkout ) {
 		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
 		foreach ( $blocks as $block ) {
 			if ( ! empty( $block['blockName'] ) && $express_block_name === $block['blockName'] && ! empty( $block['attrs'] ) ) {
@@ -352,12 +434,46 @@ class CartCheckoutUtils {
 			}
 
 			if ( ! empty( $block['innerBlocks'] ) ) {
-				$answer = self::find_express_checkout_attributes( $block['innerBlocks'], $cart_or_checkout );
+				$answer = self::find_express_checkout_attributes_in_parsed_blocks( $block['innerBlocks'], $cart_or_checkout );
 				if ( $answer ) {
 					return $answer;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Recursively search the checkout block to find the express checkout block and
+	 * get the button style attributes
+	 *
+	 * @param string|array $post_content The post content.
+	 * @param string       $cart_or_checkout The block type to check.
+	 *
+	 * @return array|null Block attributes, if present and valid, otherwise `null`.
+	 */
+	public static function find_express_checkout_attributes( $post_content, $cart_or_checkout ) {
+		if ( is_array( $post_content ) ) {
+			// If an array is passed, assume it's already been parsed with parse_blocks,
+			// use the old method, and show a deprecation warning.
+			wc_deprecated_argument(
+				'post_content',
+				'10.3.0',
+				'Passing parsed blocks as an array in $post_content is deprecated. Please pass the post content as a string.'
+			);
+			return self::find_express_checkout_attributes_in_parsed_blocks( $post_content, $cart_or_checkout );
+		}
+
+		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
+
+		$scanner = Block_Scanner::create( $post_content );
+
+		while ( $scanner->next_delimiter() ) {
+			if ( $scanner->opens_block( $express_block_name ) ) {
+				return $scanner->allocate_and_return_parsed_attributes();
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -378,5 +494,57 @@ class CartCheckoutUtils {
 				self::update_blocks_with_new_attrs( $block['innerBlocks'], $cart_or_checkout, $updated_attrs );
 			}
 		}
+	}
+
+	/**
+	 * Check if the cart page is defined.
+	 *
+	 * @return bool True if the cart page is defined, false otherwise.
+	 */
+	public static function has_cart_page() {
+		return wc_get_page_permalink( 'cart', -1 ) !== -1;
+	}
+
+	/**
+	 * Get product IDs from a user's persistent cart.
+	 *
+	 * This method retrieves product IDs stored in the user's persistent cart meta.
+	 * It can be used for abandoned cart emails, cart-based product collections,
+	 * and other scenarios where cart products need to be retrieved for a user.
+	 *
+	 * @param int|null    $user_id    The user ID. If not provided, will attempt to look up by email.
+	 * @param string|null $user_email The user email. Used to lookup user if ID not provided.
+	 * @return array<int> Array of product IDs from the user's cart, or empty array if none found.
+	 */
+	public static function get_cart_product_ids_for_user( ?int $user_id, ?string $user_email ) {
+		if ( empty( $user_id ) && ! empty( $user_email ) ) {
+			$user = get_user_by( 'email', $user_email );
+			if ( $user ) {
+				$user_id = $user->ID;
+			}
+		}
+
+		if ( empty( $user_id ) ) {
+			return array();
+		}
+
+		$cart_meta = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+
+		if ( empty( $cart_meta ) || ! is_array( $cart_meta ) || empty( $cart_meta['cart'] ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						function ( $cart_item ) {
+							return isset( $cart_item['product_id'] ) ? intval( $cart_item['product_id'] ) : 0;
+						},
+						$cart_meta['cart']
+					)
+				)
+			)
+		);
 	}
 }

@@ -1,17 +1,20 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as setup } from './fixtures';
-import { ADMIN_STATE_PATH } from '../playwright.config';
 import { setComingSoon } from '../utils/coming-soon';
+import { skipOnboardingWizard } from '../utils/onboarding';
 
-setup.use( { storageState: ADMIN_STATE_PATH } );
+setup( 'setup site', async ( { baseURL, restApi } ) => {
+	await setup.step( 'configure HPOS', async () => {
+		const { DISABLE_HPOS } = process.env;
+		console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
 
-setup( 'configure HPOS', async ( { api } ) => {
-	const { DISABLE_HPOS } = process.env;
-	console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
-
-	if ( DISABLE_HPOS ) {
 		const hposSettingRetries = 5;
 		const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
 		let hposConfigured = false;
@@ -23,8 +26,8 @@ setup( 'configure HPOS', async ( { api } ) => {
 						value === 'yes' ? 'on' : 'off'
 					} HPOS...`
 				);
-				const response = await api.post(
-					'settings/advanced/woocommerce_custom_orders_table_enabled',
+				const response = await restApi.post(
+					`${ WC_API_PATH }/settings/advanced/woocommerce_custom_orders_table_enabled`,
 					{ value }
 				);
 				if ( response.data.value === value ) {
@@ -50,69 +53,50 @@ setup( 'configure HPOS', async ( { api } ) => {
 			);
 			process.exit( 1 );
 		}
-	}
 
-	const response = await api.get(
-		'settings/advanced/woocommerce_custom_orders_table_enabled'
-	);
-	const dataValue = response.data.value;
-	const enabledOption = response.data.options[ dataValue ];
-	console.log(
-		`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
-	);
-} );
+		const response = await restApi.get(
+			`${ WC_API_PATH }/settings/advanced/woocommerce_custom_orders_table_enabled`
+		);
+		const dataValue = response.data.value;
+		const enabledOption = response.data.options[ dataValue ];
+		console.log(
+			`HPOS configuration (woocommerce_custom_orders_table_enabled): ${ dataValue } - ${ enabledOption }`
+		);
+	} );
 
-//todo to remove, see https://github.com/woocommerce/woocommerce/issues/50758
-setup( 'convert Cart and Checkout pages to shortcode', async ( { wpApi } ) => {
-	// List all pages
-	const response_list = await wpApi.get(
-		'./wp-json/wp/v2/pages?slug=cart,checkout',
-		{
-			data: {
-				_fields: [ 'id', 'slug' ],
-			},
-			failOnStatusCode: true,
+	await setup.step( 'disable coming soon', async () => {
+		await setComingSoon( { baseURL, enabled: 'no' } );
+	} );
+
+	await setup.step( 'disable onboarding wizard', async () => {
+		await skipOnboardingWizard();
+	} );
+
+	await setup.step( 'determine if multisite', async () => {
+		const response = await restApi.get( `${ WC_API_PATH }/system_status` );
+		const { environment } = response.data;
+
+		if ( environment.wp_multisite === false ) {
+			delete process.env.IS_MULTISITE;
+		} else {
+			process.env.IS_MULTISITE = environment.wp_multisite;
+			console.log( `IS_MULTISITE: ${ process.env.IS_MULTISITE }` );
 		}
-	);
-
-	const list = await response_list.json();
-
-	// Find the cart and checkout pages
-	const cart = list.find( ( page ) => page.slug === 'cart' );
-	const checkout = list.find( ( page ) => page.slug === 'checkout' );
-
-	// Convert their contents to shortcodes
-	await wpApi.put( `./wp-json/wp/v2/pages/${ cart.id }`, {
-		data: {
-			content: {
-				raw: '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->',
-			},
-		},
-		failOnStatusCode: true,
 	} );
 
-	await wpApi.put( `./wp-json/wp/v2/pages/${ checkout.id }`, {
-		data: {
-			content: {
-				raw: '<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->',
-			},
-		},
-		failOnStatusCode: true,
+	await setup.step( 'general settings', async () => {
+		await restApi.post( `${ WC_API_PATH }/settings/general/batch`, {
+			update: [
+				{ id: 'woocommerce_allowed_countries', value: 'all' },
+				{ id: 'woocommerce_currency', value: 'USD' },
+				{ id: 'woocommerce_price_thousand_sep', value: ',' },
+				{ id: 'woocommerce_price_decimal_sep', value: '.' },
+				{ id: 'woocommerce_price_num_decimals', value: '2' },
+				{ id: 'woocommerce_store_address', value: 'addr 1' },
+				{ id: 'woocommerce_store_city', value: 'San Francisco' },
+				{ id: 'woocommerce_default_country', value: 'US:CA' },
+				{ id: 'woocommerce_store_postcode', value: '94107' },
+			],
+		} );
 	} );
-} );
-
-setup( 'disable coming soon', async ( { baseURL } ) => {
-	await setComingSoon( { baseURL, enabled: 'no' } );
-} );
-
-setup( 'determine if multisite', async ( { api } ) => {
-	const response = await api.get( 'system_status' );
-	const { environment } = response.data;
-
-	if ( environment.wp_multisite === false ) {
-		delete process.env.IS_MULTISITE;
-	} else {
-		process.env.IS_MULTISITE = environment.wp_multisite;
-		console.log( `IS_MULTISITE: ${ process.env.IS_MULTISITE }` );
-	}
 } );

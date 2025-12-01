@@ -24,15 +24,21 @@ export type DefaultColors = {
 type EmailColorPaletteFillProps = {
 	defaultColors: DefaultColors;
 	hasThemeJson: boolean;
+	autoSync: boolean;
+	autoSyncInput: HTMLInputElement;
 };
 
-const EmailColorPaletteFill: React.FC< EmailColorPaletteFillProps > = ( {
+const EmailColorPaletteFill = ( {
 	defaultColors,
 	hasThemeJson,
-} ) => {
+	autoSync,
+	autoSyncInput,
+}: EmailColorPaletteFillProps ) => {
 	return (
 		<Fill>
 			<ResetStylesControl
+				autoSync={ autoSync }
+				autoSyncInput={ autoSyncInput }
 				defaultColors={ defaultColors }
 				hasThemeJson={ hasThemeJson }
 			/>
@@ -41,6 +47,13 @@ const EmailColorPaletteFill: React.FC< EmailColorPaletteFillProps > = ( {
 };
 
 export const registerSettingsEmailColorPaletteFill = () => {
+	const autoSyncInput = document.getElementById(
+		'woocommerce_email_auto_sync_with_theme'
+	) as HTMLInputElement;
+	if ( ! autoSyncInput ) {
+		return; // Don't register the plugin if the input doesn't exist
+	}
+	const autoSync = autoSyncInput.value === 'yes';
 	const slotElementId = 'wc_settings_email_color_palette_slotfill';
 	const slotElement = document.getElementById( slotElementId );
 
@@ -50,11 +63,11 @@ export const registerSettingsEmailColorPaletteFill = () => {
 	let defaultColors = {} as DefaultColors;
 	try {
 		const {
-			base_color_default: baseColor,
-			bg_color_default: bgColor,
-			body_bg_color_default: bodyBgColor,
-			body_text_color_default: bodyTextColor,
-			footer_text_color_default: footerTextColor,
+			base: baseColor,
+			bg: bgColor,
+			body_bg: bodyBgColor,
+			body_text: bodyTextColor,
+			footer_text: footerTextColor,
 		} = JSON.parse( defaultColorsData || '' );
 		defaultColors = {
 			baseColor,
@@ -72,6 +85,8 @@ export const registerSettingsEmailColorPaletteFill = () => {
 		scope: 'woocommerce-email-color-palette-settings',
 		render: () => (
 			<EmailColorPaletteFill
+				autoSync={ autoSync }
+				autoSyncInput={ autoSyncInput }
 				defaultColors={ defaultColors }
 				hasThemeJson={ hasThemeJson }
 			/>

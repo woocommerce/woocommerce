@@ -1,0 +1,373 @@
+$admin-bar-height: 32px;
+$thumbnails-gradient-size: 20%;
+$thumbnails-gap: 2%;
+$dialog-padding: 20px;
+
+:where(.wc-block-product-gallery-large-image) {
+	width: 100%;
+	position: relative;
+	flex-grow: 1;
+	overflow: hidden;
+
+	//When Product Image aspect ratio is auto, we are setting constraints
+	//on the large image container and display full images in square container.
+	&:has(.wc-block-components-product-image--aspect-ratio-auto) {
+		aspect-ratio: 1/1;
+	}
+
+	:where(.wc-block-product-gallery-large-image__container) {
+		display: flex;
+		overflow: hidden;
+		align-items: center;
+		margin: 0;
+		padding: 0;
+	}
+
+	:where(.wc-block-product-gallery-large-image__wrapper) {
+		flex-shrink: 0;
+		min-width: 100%;
+		max-width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		&:has(.wc-block-components-product-image--aspect-ratio-auto) {
+			aspect-ratio: 1/1;
+		}
+	}
+
+	// These rules are overriding styles from WooCommerce core, that's why we
+	// can't use `:where()` and they need a higher specificity.
+	.wc-block-components-product-image.wc-block-components-product-image {
+		margin: 0;
+		height: 100%;
+		width: 100%;
+
+		:where(a) {
+			height: 100%;
+		}
+
+		img {
+			height: 100%;
+		}
+
+		&.wc-block-components-product-image--aspect-ratio-auto img {
+			object-fit: contain !important;
+		}
+
+	}
+
+	:where(.wc-block-woocommerce-product-gallery-large-image__image) {
+		display: block;
+		position: relative;
+		transition: all 0.1s linear;
+		z-index: 1;
+
+		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
+		&:where(.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click) {
+			cursor: pointer;
+		}
+
+		&:where(.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom) {
+			cursor: zoom-in;
+		}
+	}
+
+	:where(.wc-block-product-gallery-large-image__inner-blocks) {
+		display: flex;
+		flex-direction: column;
+		position: absolute;
+		width: calc(100% - 10px);
+		height: calc(100% - 10px);
+		top: 5px;
+		left: 5px;
+
+		> * {
+			margin-left: unset;
+			margin-right: unset;
+			z-index: 1;
+		}
+	}
+
+	:where(.wc-block-next-previous-buttons) {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+
+		:where(.wc-block-next-previous-buttons__button) {
+			pointer-events: all;
+		}
+
+		&:where(.alignleft) {
+			justify-content: flex-start;
+			gap: 0;
+		}
+
+		&:where(.alignright) {
+			justify-content: flex-end;
+			gap: 0;
+		}
+
+		&:where(.aligncenter) {
+			justify-content: center;
+			gap: 0;
+		}
+
+		&:where(.aligntop) {
+			align-items: flex-start;
+		}
+
+		&:where(.alignbottom) {
+			align-items: flex-end;
+		}
+	}
+}
+
+// Vertical thumbnails
+.wc-block-product-gallery:not(.is-vertical):not(:has(.is-vertical)) {
+	@include breakpoint(">600px") {
+		:where(.wc-block-product-gallery-thumbnails__scrollable) {
+			flex-direction: column;
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-auto),
+		&:has(.wc-block-components-product-image--aspect-ratio-1) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 1 / calc(100 / var(--wc-block-product-gallery-thumbnails-size));
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 4 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 3);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 3 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 4);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 3 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 2);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 2 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 3);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 16 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 9);
+			}
+		}
+		&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
+			:where(.wc-block-product-gallery-thumbnails) {
+				flex-basis: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+				aspect-ratio: 9 / calc(100 / var(--wc-block-product-gallery-thumbnails-size) * 16);
+			}
+		}
+	}
+}
+
+@mixin horizontal-thumbnails {
+	:where(.wc-block-product-gallery-thumbnails__thumbnail) {
+		height: 100%;
+		width: auto;
+		flex: 0 0 auto;
+	}
+
+	:where(.wc-block-product-gallery-thumbnails__thumbnail__image) {
+		height: 100%;
+		width: auto;
+	}
+
+	:where(.wc-block-product-gallery-thumbnails__scrollable) {
+		flex-direction: row;
+		scrollbar-width: auto;
+		overflow-y: hidden;
+	}
+}
+
+:where(.wc-block-product-gallery-thumbnails) {
+	position: relative;
+
+	$gradient-size: 14%;
+	$gradient-mid-step-size: 6%;
+	$gradient-mid-step: rgba(0, 0, 0, 0.3);
+
+	$gradient: transparent 0, $gradient-mid-step $gradient-mid-step-size,
+		rgb(0, 0, 0) $gradient-size;
+	$gradient-end: rgb(0, 0, 0) calc(100% - $gradient-size),
+		$gradient-mid-step calc(100% - $gradient-mid-step-size), transparent;
+
+	&.wc-block-product-gallery-thumbnails--overflow-top {
+		mask-image: linear-gradient(to bottom, $gradient);
+	}
+
+	&.wc-block-product-gallery-thumbnails--overflow-bottom {
+		mask-image: linear-gradient(to top, $gradient);
+	}
+
+	&.wc-block-product-gallery-thumbnails--overflow-top.wc-block-product-gallery-thumbnails--overflow-bottom {
+		mask-image: linear-gradient(to bottom, $gradient, $gradient-end);
+	}
+
+	&.wc-block-product-gallery-thumbnails--overflow-left {
+		mask-image: linear-gradient(to right, $gradient);
+	}
+
+	&.wc-block-product-gallery-thumbnails--overflow-right {
+		mask-image: linear-gradient(to left, $gradient);
+	}
+
+	&.wc-block-product-gallery-thumbnails--overflow-left.wc-block-product-gallery-thumbnails--overflow-right {
+		mask-image: linear-gradient(to right, $gradient, $gradient-end);
+	}
+}
+
+:where(.wc-block-product-gallery-thumbnails__scrollable) {
+	height: 100%;
+	display: flex;
+	gap: $thumbnails-gap;
+	overflow: auto;
+	scrollbar-width: none;
+	pointer-events: auto;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail) {
+	display: flex;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail__image) {
+	cursor: pointer;
+	max-width: 100%;
+	max-height: 100%;
+	object-fit: cover;
+	width: fit-content;
+	outline-offset: -2px;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {
+	pointer-events: none;
+	cursor: default;
+	filter: brightness(0.8);
+}
+
+:where(.is-vertical .wc-block-product-gallery-thumbnails) {
+	@include horizontal-thumbnails;
+
+	// These are min - max range values for thumbnails size.
+	&:where(.wc-block-product-gallery-thumbnails) {
+		width: 100%;
+		height: calc(var(--wc-block-product-gallery-thumbnails-size) * 1%);
+		aspect-ratio: calc(100 / var(--wc-block-product-gallery-thumbnails-size)) / 1;
+	}
+}
+
+:where(body.wc-block-product-gallery-dialog-open) {
+	overflow: hidden;
+}
+
+:where(.wc-block-product-gallery-dialog) {
+	height: 100vh;
+	width: 100vw;
+	padding: 0;
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1000;
+	overflow: hidden;
+
+	:where(.admin-bar) & {
+		// Subtract the admin bar height.
+		height: calc(100vh - $admin-bar-height);
+		top: $admin-bar-height;
+	}
+}
+
+:where(.wc-block-product-gallery-dialog__close-button) {
+	padding: 5px;
+	position: absolute;
+	right: 25px;
+	top: 25px;
+	background: none;
+	border: none;
+	cursor: pointer;
+}
+
+:where(.wc-block-product-gallery-dialog__content) {
+	// Subtract the top and bottom padding.
+	height: calc(100vh - ($dialog-padding * 2));
+	overflow: hidden;
+	padding: 20px 0;
+
+	@media (min-width: 765px) {
+		padding: 20px 0;
+	}
+
+	:where(.admin-bar) & {
+		// Subtract the admin bar height.
+		height: calc(100vh - ($dialog-padding * 2) - $admin-bar-height);
+	}
+}
+
+:where(.wc-block-product-gallery-dialog__images-container) {
+	height: 100%;
+	overflow-y: auto;
+	box-sizing: border-box;
+	padding: 3px 0;
+}
+
+:where(.wc-block-product-gallery-dialog__images) {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	:where(img) {
+		max-width: 100%;
+		height: auto;
+		margin-bottom: 20px;
+	}
+
+	:where(img:last-child) {
+		margin-bottom: 0;
+	}
+}
+
+// On mobile devices (<600px):
+// - Product gallery groups are stacked vertically
+// - Thumbnails appear below the main gallery image and are arranged horizontally in a row
+// - Next/Previous buttons are hidden
+@include breakpoint("<600px") {
+	:where(.is-vertical.wc-block-product-gallery),
+	:where(.is-horizontal.wc-block-product-gallery),
+	:where(.wc-block-product-gallery) {
+		@include horizontal-thumbnails;
+		flex-direction: column;
+
+		// This rule is overriding a `display: flex` from WordPress core, that's
+		// why it needs a higher specificity.
+		.wc-block-next-previous-buttons.wc-block-next-previous-buttons {
+			display: none;
+		}
+
+		// Fixed size for thumbnails on mobile.
+		:where(.wc-block-product-gallery-thumbnails) {
+			order: 1;
+			width: 100%;
+			height: 20%;
+			aspect-ratio: 5 / 1 !important;
+		}
+	}
+}

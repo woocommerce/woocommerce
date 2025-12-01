@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
  * Meta
@@ -15,6 +16,15 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  * @package WooCommerce\Tests\CRUD
  */
 class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
+	/**
+	 * Tear down the test class.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		remove_all_filters( 'wc_get_price_thousand_separator' );
+		remove_all_filters( 'wc_get_price_decimal_separator' );
+	}
 
 	/**
 	 * Test: get_type
@@ -197,6 +207,37 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->set_total( 5 );
 		$this->assertEquals( 5, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_empty
+	 */
+	public function test_get_total_empty() {
+		$object = new WC_Order();
+		$object->set_total( '' );
+		$this->assertEquals( 0, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_pre_formatted_standard_value
+	 */
+	public function test_get_total_pre_formatted_standard_value() {
+		$object = new WC_Order();
+		$object->set_total( '2,000.00' );
+		$this->assertEquals( 2000, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_pre_formatted_eu_value
+	 */
+	public function test_get_total_pre_formatted_eu_value() {
+		// Simulate a price format like 3.567,89.
+		add_filter( 'wc_get_price_thousand_separator', fn() => '.' );
+		add_filter( 'wc_get_price_decimal_separator', fn() => ',' );
+
+		$object = new WC_Order();
+		$object->set_total( '2.000,00' );
+		$this->assertEquals( 2000, $object->get_total() );
 	}
 
 	/**
@@ -852,6 +893,57 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		$this->assertTrue( $object->has_shipping_method( 'flat_rate_shipping' ) );
+	}
+
+	/**
+	 * Test: needs_shipping
+	 */
+	public function test_needs_shipping() {
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_get_shipping_method_count' => function () {
+					return 1;
+				},
+			)
+		);
+
+		$object = new WC_Order();
+		$object->save();
+
+		$this->assertFalse( $object->needs_shipping() );
+
+		$virtual_product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$virtual_item    = new WC_Order_Item_Product();
+		$virtual_item->set_props(
+			array(
+				'product'  => $virtual_product,
+				'quantity' => 1,
+				'total'    => 100,
+			)
+		);
+		$object->add_item( $virtual_item );
+		$object->save();
+
+		$this->assertFalse( $object->needs_shipping() );
+
+		$physical_product = WC_Helper_Product::create_simple_product();
+		$item             = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $physical_product,
+				'quantity' => 1,
+				'total'    => 100,
+			)
+		);
+		$object->add_item( $item );
+		$object->save();
+
+		$this->assertTrue( $object->needs_shipping() );
+
+		$physical_product->delete( true );
+		// Reload the order to ensure fresh data.
+		$object = wc_get_order( $object->get_id() );
+		$this->assertFalse( $object->needs_shipping() );
 	}
 
 	/**

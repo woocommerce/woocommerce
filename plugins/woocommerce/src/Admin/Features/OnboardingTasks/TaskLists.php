@@ -6,9 +6,9 @@
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks\ReviewShippingOptions;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 /**
  * Task Lists class.
  */
@@ -109,11 +109,9 @@ class TaskLists {
 	 */
 	public static function init_default_lists() {
 		$tasks = array(
-			'CustomizeStore',
 			'StoreDetails',
 			'Products',
 			'Appearance',
-			'WooCommercePayments',
 			'Payments',
 			'Tax',
 			'Shipping',
@@ -122,21 +120,6 @@ class TaskLists {
 
 		if ( Features::is_enabled( 'core-profiler' ) ) {
 			$key = array_search( 'StoreDetails', $tasks, true );
-			if ( false !== $key ) {
-				unset( $tasks[ $key ] );
-			}
-		}
-
-		// Remove the old Personalize your store task if the new CustomizeStore is enabled.
-		$task_to_remove                 = Features::is_enabled( 'customize-store' ) ? 'Appearance' : 'CustomizeStore';
-		$store_customisation_task_index = array_search( $task_to_remove, $tasks, true );
-		if ( false !== $store_customisation_task_index ) {
-			unset( $tasks[ $store_customisation_task_index ] );
-		}
-
-		// If the React-based Payments settings page is enabled, we don't need the dedicated WooPayments task.
-		if ( Features::is_enabled( 'reactify-classic-payments-settings' ) ) {
-			$key = array_search( 'WooCommercePayments', $tasks, true );
 			if ( false !== $key ) {
 				unset( $tasks[ $key ] );
 			}
@@ -465,8 +448,19 @@ class TaskLists {
 	 * @return array
 	 */
 	public static function task_list_preloaded_settings( $settings ) {
-		$settings['visibleTaskListIds'] = array_keys( self::get_visible() );
+		$settings['visibleTaskListIds']   = self::all_hidden() ? array() : array_keys( self::get_visible() );
+		$settings['completedTaskListIds'] = get_option( TaskList::COMPLETED_OPTION, array() );
 
 		return $settings;
+	}
+
+	/**
+	 * Check if all task lists are hidden.
+	 *
+	 * @return bool
+	 */
+	public static function all_hidden() {
+		$hidden_lists = get_option( TaskList::HIDDEN_OPTION, array() );
+		return count( $hidden_lists ) === count( self::get_lists() );
 	}
 }

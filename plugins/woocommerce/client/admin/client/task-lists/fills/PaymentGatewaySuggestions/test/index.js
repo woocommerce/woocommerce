@@ -20,6 +20,10 @@ jest.mock( '@wordpress/data', () => ( {
 
 jest.mock( '@woocommerce/tracks', () => ( { recordEvent: jest.fn() } ) );
 
+jest.mock( '~/utils/features', () => ( {
+	isFeatureEnabled: jest.fn(),
+} ) );
+
 const paymentGatewaySuggestions = [
 	{
 		id: 'stripe',
@@ -381,7 +385,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		} );
 	} );
 
-	test( 'should record event correctly when see more is clicked', () => {
+	test( 'should record event correctly when Official Marketplace link is clicked', () => {
 		const onComplete = jest.fn();
 		const query = {};
 		useSelect.mockImplementation( () => ( {
@@ -400,7 +404,7 @@ describe( 'PaymentGatewaySuggestions', () => {
 		);
 
 		fireEvent.click( screen.getByText( 'Other payment providers' ) );
-		fireEvent.click( screen.getByText( 'See more' ) );
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
 		).toEqual( [ 'tasklist_payment_see_more', {} ] );
@@ -441,5 +445,28 @@ describe( 'PaymentGatewaySuggestions', () => {
 		expect(
 			recordEvent.mock.calls[ recordEvent.mock.calls.length - 1 ]
 		).toEqual( [ 'tasklist_payments_wcpay_bnpl_click' ] );
+	} );
+
+	test( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
+		const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+		isFeatureEnabled.mockReturnValue( true );
+
+		const mockLocation = {
+			href: 'test',
+		};
+
+		mockLocation.href = 'test';
+		Object.defineProperty( global.window, 'location', {
+			value: mockLocation,
+		} );
+
+		render(
+			<PaymentGatewaySuggestions onComplete={ () => {} } query={ {} } />
+		);
+
+		fireEvent.click( screen.getByText( 'the WooCommerce Marketplace' ) );
+		expect( mockLocation.href ).toContain(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+		);
 	} );
 } );

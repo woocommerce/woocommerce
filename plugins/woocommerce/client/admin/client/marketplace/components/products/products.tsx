@@ -12,7 +12,7 @@ import { Button } from '@wordpress/components';
 import clsx from 'clsx';
 import { addQueryArgs } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
-import { ONBOARDING_STORE_NAME, WCSelectorType } from '@woocommerce/data';
+import { onboardingStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -78,11 +78,7 @@ export default function Products( props: ProductsProps ) {
 	} );
 
 	const customizeStoreTask = useSelect( ( select ) => {
-		return (
-			select( ONBOARDING_STORE_NAME ) as WCSelectorType<
-				typeof ONBOARDING_STORE_NAME
-			>
-		 ).getTask( 'customize-store' );
+		return select( onboardingStore ).getTask( 'customize-store' );
 	}, [] );
 
 	// Only show the "View all" button when on search but not showing a specific section of results.

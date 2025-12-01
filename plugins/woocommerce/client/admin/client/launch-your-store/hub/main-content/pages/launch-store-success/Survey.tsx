@@ -103,6 +103,7 @@ export const LysSurvey = ( {
 										) }
 									</label>
 									<TextareaControl
+										__nextHasNoMarginBottom
 										id="launch-your-store-comment"
 										data-testid="launch-your-store-comment"
 										value={ feedbackText }

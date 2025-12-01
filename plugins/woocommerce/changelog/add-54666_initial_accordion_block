@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add new experimental Accordion block. This is a copy of the one ready to be merged into Gutenberg: https://github.com/WordPress/gutenberg/pull/64119.

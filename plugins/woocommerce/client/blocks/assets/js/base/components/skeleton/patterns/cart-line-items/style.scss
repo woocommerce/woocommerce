@@ -1,0 +1,20 @@
+.wc-block-cart-item__image .wc-block-components-skeleton__element {
+	// Force the image to be a square.
+	padding-bottom: 100%;
+}
+
+.wc-block-cart-item__total {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.wc-block-components-order-summary {
+	.wc-block-components-skeleton--cart-line-items-checkout {
+		.wc-block-components-order-summary-item__description {
+			flex-grow: 1;
+			.wc-block-components-skeleton__element {
+				margin-bottom: $gap-smaller;
+			}
+		}
+	}
+}

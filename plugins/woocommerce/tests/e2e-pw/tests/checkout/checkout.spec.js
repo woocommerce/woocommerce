@@ -1,672 +1,509 @@
-const { test, expect, request } = require( '@playwright/test' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
-const { admin, customer } = require( '../../test-data/data' );
-const { setFilterValue, clearFilters } = require( '../../utils/filters' );
-const { setOption } = require( '../../utils/options' );
 /**
  * External dependencies
  */
 import {
 	addAProductToCart,
-	addOneOrMoreProductToCart,
-	getOrderIdFromUrl,
+	fillBillingCheckoutBlocks,
+	fillShippingCheckoutBlocks,
+	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
+import { faker } from '@faker-js/faker';
+
 /**
  * Internal dependencies
  */
-import { tags } from '../../fixtures/fixtures';
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { getFakeCustomer, getFakeProduct } from '../../utils/data';
+import {
+	createClassicCheckoutPage,
+	CLASSIC_CHECKOUT_PAGE,
+} from '../../utils/pages';
+import { logInFromMyAccount } from '../../utils/login';
+import { updateIfNeeded, resetValue } from '../../utils/settings';
 
-const guestEmail = 'checkout-guest@example.com';
+//todo handle other countries and states than the default (US, CA) when filling the addresses
 
-test.describe(
-	'Checkout page',
-	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
-	() => {
-		const singleProductPrice = '9.99';
-		const simpleProductName = 'Checkout Page Product';
-		const twoProductPrice = ( singleProductPrice * 2 ).toString();
-		const threeProductPrice = ( singleProductPrice * 3 ).toString();
+const checkoutPages = [
+	{ name: 'blocks checkout', slug: 'checkout' },
+	CLASSIC_CHECKOUT_PAGE,
+];
 
-		let guestOrderId, customerOrderId, productId, shippingZoneId;
+/* region helpers */
+function isClassicCheckout( page ) {
+	return page.url().includes( CLASSIC_CHECKOUT_PAGE.slug );
+}
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			// Set field visibility options
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_checkout_phone_field',
-				'required'
-			);
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_checkout_company_field',
-				'optional'
-			);
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_checkout_address_2_field',
-				'optional'
-			);
-			// ensure store address is US
-			await api.post( 'settings/general/batch', {
-				update: [
-					{
-						id: 'woocommerce_store_address',
-						value: 'addr 1',
-					},
-					{
-						id: 'woocommerce_store_city',
-						value: 'San Francisco',
-					},
-					{
-						id: 'woocommerce_default_country',
-						value: 'US:CA',
-					},
-					{
-						id: 'woocommerce_store_postcode',
-						value: '94107',
-					},
-				],
-			} );
-			// add product
-			await api
-				.post( 'products', {
-					name: simpleProductName,
-					type: 'simple',
-					regular_price: singleProductPrice,
+async function checkOrderDetails( page, product, qty, tax ) {
+	const expectedTotalPrice = (
+		parseFloat( product.price ) *
+		qty *
+		( 1 + parseFloat( tax.rate ) / 100 )
+	).toLocaleString( 'en-US', {
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	} );
+
+	if ( isClassicCheckout( page ) ) {
+		await expect( page.locator( 'td.product-name' ) ).toHaveText(
+			`${ product.name } × ${ qty }`
+		);
+		await expect( page.locator( 'tr.order-total > td' ) ).toContainText(
+			expectedTotalPrice
+		);
+	} else {
+		await expect(
+			page.getByRole( 'heading', { name: product.name } )
+		).toBeVisible();
+
+		await expect(
+			page.locator( '.wc-block-components-order-summary-item__quantity' )
+		).toContainText( qty.toString() );
+
+		await expect(
+			page.locator(
+				'.wc-block-components-totals-footer-item > .wc-block-components-totals-item__value'
+			)
+		).toContainText( expectedTotalPrice );
+	}
+}
+
+async function addProductToCartAndProceedToCheckout(
+	pageSlug,
+	page,
+	product,
+	qty,
+	tax
+) {
+	await addAProductToCart( page, product.id, qty );
+	await page.goto( pageSlug );
+	await checkOrderDetails( page, product, qty, tax );
+}
+
+async function placeOrder( page ) {
+	if ( ! isClassicCheckout( page ) ) {
+		await page.getByLabel( 'Add a note to your order' ).check();
+		// this helps with flakiness on clicking the Place order button
+		await page
+			.getByPlaceholder( 'Notes about your order' )
+			.fill( 'This order was created by an end-to-end test.' );
+	}
+
+	await page.getByRole( 'button', { name: 'Place order' } ).click();
+
+	await expect(
+		page.getByText( 'Your order has been received' )
+	).toBeVisible();
+}
+
+async function fillBillingDetails( page, data, createAccount ) {
+	if ( isClassicCheckout( page ) ) {
+		await page
+			.getByRole( 'textbox', { name: 'First name' } )
+			.fill( data.first_name );
+		await page
+			.getByRole( 'textbox', { name: 'Last name' } )
+			.fill( data.last_name );
+		await page
+			.getByRole( 'textbox', { name: 'Street address' } )
+			.fill( data.address_1 );
+		await page
+			.getByRole( 'textbox', { name: 'Town / City' } )
+			.fill( data.city );
+		await page
+			.getByRole( 'textbox', { name: 'ZIP Code' } )
+			.fill( data.postcode );
+		await page.getByRole( 'textbox', { name: 'Phone' } ).fill( data.phone );
+		await page
+			.getByRole( 'textbox', { name: 'Email address' } )
+			.fill( data.email );
+
+		if ( createAccount ) {
+			await page.getByText( 'Create an account?' ).check();
+		}
+	} else {
+		await page
+			.getByRole( 'textbox', { name: 'Email address' } )
+			.fill( data.email );
+
+		await fillBillingCheckoutBlocks( page, {
+			firstName: data.first_name,
+			lastName: data.last_name,
+			address: data.address_1,
+			city: data.city,
+			zip: data.postcode,
+			phone: data.phone,
+		} );
+
+		if ( createAccount ) {
+			await page
+				.getByRole( 'checkbox', {
+					name: 'Create an account with',
 				} )
-				.then( ( response ) => {
-					productId = response.data.id;
-				} );
-			// add a shipping zone and method
-			await api
-				.post( 'shipping/zones', {
-					name: 'Free Shipping Oregon',
-				} )
-				.then( ( response ) => {
-					shippingZoneId = response.data.id;
-				} );
-			await api.put( `shipping/zones/${ shippingZoneId }/locations`, [
+				.check();
+		}
+	}
+}
+/* endregion */
+
+/* region fixtures */
+const test = baseTest.extend( {
+	page: async ( { page, restApi }, use ) => {
+		await createClassicCheckoutPage();
+
+		const calcTaxesState = await updateIfNeeded(
+			'general/woocommerce_calc_taxes',
+			'yes'
+		);
+
+		const loginAtCheckoutState = await updateIfNeeded(
+			'account/woocommerce_enable_checkout_login_reminder',
+			'yes'
+		);
+
+		const signUpAtCheckoutState = await updateIfNeeded(
+			'account/woocommerce_enable_signup_and_login_from_checkout',
+			'yes'
+		);
+
+		// Check id COD payment is enabled and enable it if it is not
+		const codResponse = await restApi.get(
+			`${ WC_API_PATH }/payment_gateways/cod`
+		);
+		const codEnabled = codResponse.enabled;
+
+		if ( ! codEnabled ) {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
+				enabled: true,
+			} );
+		}
+
+		// Check id BACS payment is enabled and enable it if it is not
+		const bacsResponse = await restApi.get(
+			`${ WC_API_PATH }/payment_gateways/bacs`
+		);
+		const bacsEnabled = bacsResponse.enabled;
+
+		if ( ! bacsEnabled ) {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
+				enabled: true,
+			} );
+		}
+
+		await page.context().clearCookies();
+		await use( page );
+
+		// revert the settings to initial state
+
+		await resetValue( 'general/woocommerce_calc_taxes', calcTaxesState );
+
+		await resetValue(
+			'account/woocommerce_enable_checkout_login_reminder',
+			loginAtCheckoutState
+		);
+
+		await resetValue(
+			'account/woocommerce_enable_signup_and_login_from_checkout',
+			signUpAtCheckoutState
+		);
+
+		if ( ! codEnabled ) {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
+				enabled: codEnabled,
+			} );
+		}
+
+		if ( ! bacsEnabled ) {
+			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
+				enabled: bacsEnabled,
+			} );
+		}
+	},
+	product: async ( { restApi }, use ) => {
+		let product;
+
+		// Using dec: 0 to avoid small rounding issues
+		await restApi
+			.post( `${ WC_API_PATH }/products`, getFakeProduct( { dec: 0 } ) )
+			.then( ( response ) => {
+				product = response.data;
+			} );
+
+		await use( product );
+
+		// await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+		// 	force: true,
+		// } );
+	},
+	tax: async ( { restApi }, use ) => {
+		let tax;
+		await restApi
+			.post( `${ WC_API_PATH }/taxes`, {
+				country: 'US',
+				state: '*',
+				cities: '*',
+				postcodes: '*',
+				rate: '25',
+				name: 'US Tax',
+				shipping: false,
+			} )
+			.then( ( r ) => {
+				tax = r.data;
+			} );
+
+		await use( tax );
+
+		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
+			force: true,
+		} );
+	},
+	customer: async ( { restApi }, use ) => {
+		const customerData = getFakeCustomer();
+		let customer;
+
+		await restApi
+			.post( `${ WC_API_PATH }/customers`, customerData )
+			.then( ( response ) => {
+				customer = response.data;
+				customer.password = customerData.password;
+			} );
+
+		// add a shipping zone and method for the customer
+		let shippingZoneId;
+		await restApi
+			.post( `${ WC_API_PATH }/shipping/zones`, {
+				name: `Free Shipping ${ customerData.shipping.city }`,
+			} )
+			.then( ( response ) => {
+				shippingZoneId = response.data.id;
+			} );
+		await restApi.put(
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/locations`,
+			[
 				{
-					code: 'US:OR',
+					code: `${ customerData.shipping.country }:${ customerData.shipping.state }`,
 					type: 'state',
 				},
-			] );
-			await api.post( `shipping/zones/${ shippingZoneId }/methods`, {
+			]
+		);
+		await restApi.post(
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/methods`,
+			{
 				method_id: 'free_shipping',
-			} );
-		} );
-
-		test.afterAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			await api.delete( `products/${ productId }`, {
-				force: true,
-			} );
-			await api.delete( `shipping/zones/${ shippingZoneId }`, {
-				force: true,
-			} );
-			await api.put( 'payment_gateways/bacs', {
-				enabled: false,
-			} );
-			await api.put( 'payment_gateways/cod', {
-				enabled: false,
-			} );
-			// delete the orders we created
-			if ( guestOrderId ) {
-				await api.delete( `orders/${ guestOrderId }`, { force: true } );
 			}
-			if ( customerOrderId ) {
-				await api.delete( `orders/${ customerOrderId }`, {
-					force: true,
+		);
+
+		await use( customer );
+
+		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
+			force: true,
+		} );
+		await restApi.delete(
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }`,
+			{
+				force: true,
+			}
+		);
+	},
+} );
+/* endregion */
+
+/* region tests */
+checkoutPages.forEach( ( { name, slug } ) => {
+	test(
+		`guest can checkout paying with cash on delivery on ${ name }`,
+		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
+		async ( { page, product, tax } ) => {
+			await addProductToCartAndProceedToCheckout(
+				slug,
+				page,
+				product,
+				2,
+				tax
+			);
+			const newCustomer = getFakeCustomer();
+			await fillBillingDetails( page, newCustomer.billing, false );
+			await page.getByText( 'Cash on delivery' ).click();
+			await placeOrder( page );
+			await page.goto( 'my-account/' );
+			await expect( page.locator( '#username' ) ).toBeVisible();
+		}
+	);
+} );
+
+checkoutPages.forEach( ( { name, slug } ) => {
+	test(
+		`guest can create an account at checkout on ${ name }`,
+		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
+		async ( { page, product, tax } ) => {
+			await addProductToCartAndProceedToCheckout(
+				slug,
+				page,
+				product,
+				2,
+				tax
+			);
+			const newCustomer = getFakeCustomer();
+			await fillBillingDetails( page, newCustomer.billing, true );
+			await page.getByText( 'Direct bank transfer' ).click();
+			await placeOrder( page );
+			await page.goto( 'my-account/' );
+			await expect(
+				page
+					.getByLabel( 'Account pages' )
+					.getByRole( 'link', { name: 'Log out' } )
+			).toBeVisible();
+		}
+	);
+} );
+
+checkoutPages.forEach( ( { name, slug } ) => {
+	test(
+		`logged in customer can checkout with default addresses and direct bank transfer on ${ name }`,
+		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
+		async ( { page, product, customer, tax } ) => {
+			await page.goto( 'my-account/' );
+			await logInFromMyAccount( page, customer.email, customer.password );
+			await addProductToCartAndProceedToCheckout(
+				slug,
+				page,
+				product,
+				2,
+				tax
+			);
+
+			await page.getByText( 'Direct bank transfer' ).click();
+			await placeOrder( page );
+		}
+	);
+} );
+
+checkoutPages.forEach( ( { name, slug } ) => {
+	test(
+		`customer can login at checkout and place the order with a different shipping address ${ name }`,
+		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
+		async ( { page, product, tax, customer } ) => {
+			const qty = 3;
+			await addProductToCartAndProceedToCheckout(
+				slug,
+				page,
+				product,
+				qty,
+				tax
+			);
+
+			await page
+				.getByRole( 'link', {
+					name: 'Click here to login',
+				} )
+				.or(
+					page.getByRole( 'link', {
+						name: 'Log in',
+					} )
+				)
+				.click();
+
+			await logInFromMyAccount(
+				page,
+				customer.email,
+				customer.password,
+				false
+			);
+
+			// Make sure after login the user is redirected to the right checkout page
+			// Login from classic checkout redirects to default checkout page: https://github.com/woocommerce/woocommerce/issues/56205
+			// Workaround until bug is fixed: extra navigation the test checkout page
+			await page.goto( slug );
+			await expect( page.url() ).toContain( slug );
+
+			await checkOrderDetails( page, product, qty, tax );
+
+			const shippingAddress = {
+				firstName: faker.person.firstName(),
+				lastName: faker.person.lastName(),
+				address: faker.location.streetAddress(),
+				city: faker.location.city(),
+				zip: faker.location.zipCode( '#####' ),
+			};
+
+			if ( isClassicCheckout( page ) ) {
+				await page.getByText( 'Ship to a different address?' ).click();
+
+				await page
+					.locator( '#shipping_first_name' )
+					.fill( shippingAddress.firstName );
+				await page
+					.locator( '#shipping_last_name' )
+					.fill( shippingAddress.lastName );
+				await page
+					.locator( '#shipping_address_1' )
+					.fill( shippingAddress.address );
+				await page
+					.locator( '#shipping_city' )
+					.fill( shippingAddress.city );
+				await page
+					.locator( '#shipping_postcode' )
+					.fill( shippingAddress.zip );
+			} else {
+				await page
+					.getByRole( 'button', { name: 'Edit shipping address' } )
+					.click();
+				await fillShippingCheckoutBlocks( page, shippingAddress );
+			}
+
+			await page.getByText( 'Cash on delivery' ).click();
+			await placeOrder( page );
+		}
+	);
+} );
+
+checkoutPages.forEach( ( { name, slug } ) => {
+	test(
+		`existing customer can update the billing address and place the order with direct bank transfer on ${ name }`,
+		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
+		async ( { page, product, tax, customer } ) => {
+			await page.goto( 'my-account/' );
+			await logInFromMyAccount( page, customer.email, customer.password );
+			await addProductToCartAndProceedToCheckout(
+				slug,
+				page,
+				product,
+				1,
+				tax
+			);
+
+			const billingAddress = {
+				first_name: customer.first_name,
+				last_name: customer.last_name,
+				address_1: faker.location.streetAddress(),
+				city: faker.location.city(),
+				postcode: faker.location.zipCode( '#####' ),
+				phone: faker.phone.number( { style: 'international' } ),
+				email: faker.internet.email(),
+			};
+
+			if ( isClassicCheckout( page ) ) {
+				await fillBillingDetails( page, billingAddress, false );
+			} else {
+				await page
+					.getByRole( 'checkbox', {
+						name: 'Use same address for billing',
+					} )
+					.uncheck();
+				await fillBillingCheckoutBlocks( page, {
+					firstName: billingAddress.first_name,
+					lastName: billingAddress.last_name,
+					address: billingAddress.address_1,
+					city: billingAddress.city,
+					zip: billingAddress.postcode,
+					phone: billingAddress.phone,
+					email: billingAddress.email,
 				} );
 			}
-		} );
 
-		test.beforeEach( async ( { context, baseURL } ) => {
-			// Shopping cart is very sensitive to cookies, so be explicit
-			await context.clearCookies();
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
-			// enable bank transfers and COD for payment
-			await api.put( 'payment_gateways/bacs', {
-				enabled: true,
-			} );
-			await api.put( 'payment_gateways/cod', {
-				enabled: true,
-			} );
-		} );
+			await page.getByText( 'Direct bank transfer' ).click();
+			await placeOrder( page );
+		}
+	);
+} );
 
-		test(
-			'should display cart items in order review',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				await addAProductToCart( page, productId );
-
-				await page.goto( 'checkout/' );
-
-				await expect( page.locator( 'td.product-name' ) ).toContainText(
-					simpleProductName
-				);
-				await expect(
-					page.locator( 'strong.product-quantity' )
-				).toContainText( '1' );
-				let totalPrice = await page
-					.getByRole( 'row', { name: 'Total' } )
-					.last()
-					.locator( 'td' )
-					.textContent();
-				totalPrice = Number(
-					totalPrice.replace( /\$([\d.]+).*/, '$1' )
-				);
-				await expect( totalPrice ).toBeGreaterThanOrEqual(
-					Number( singleProductPrice )
-				);
-			}
-		);
-
-		test(
-			'allows customer to choose available payment methods',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				// this time we're going to add two products to the cart
-				await addOneOrMoreProductToCart( page, simpleProductName, '2' );
-
-				await page.goto( 'checkout/' );
-				await expect(
-					page.locator( 'strong.product-quantity' )
-				).toContainText( '2' );
-				let totalPrice = await page
-					.getByRole( 'row', { name: 'Total' } )
-					.last()
-					.locator( 'td' )
-					.textContent();
-				totalPrice = Number(
-					totalPrice.replace( /\$([\d.]+).*/, '$1' )
-				);
-				await expect( totalPrice ).toBeGreaterThanOrEqual(
-					Number( twoProductPrice )
-				);
-
-				// check the payment methods
-				await expect(
-					page.locator( '#payment_method_bacs' )
-				).toBeEnabled();
-				await expect(
-					page.locator( '#payment_method_cod' )
-				).toBeEnabled();
-			}
-		);
-
-		test(
-			'allows customer to fill billing details',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				// this time we're going to add three products to the cart
-				await addOneOrMoreProductToCart( page, simpleProductName, '3' );
-
-				await page.goto( 'checkout/' );
-				await expect(
-					page.locator( 'strong.product-quantity' )
-				).toContainText( '3' );
-				let totalPrice = await page
-					.getByRole( 'row', { name: 'Total' } )
-					.last()
-					.locator( 'td' )
-					.textContent();
-				totalPrice = Number(
-					totalPrice.replace( /\$([\d.]+).*/, '$1' )
-				);
-				await expect( totalPrice ).toBeGreaterThanOrEqual(
-					Number( threeProductPrice )
-				);
-
-				// asserting that you can fill in the billing details
-				await expect(
-					page.locator( '#billing_first_name' )
-				).toBeEditable();
-				await expect(
-					page.locator( '#billing_last_name' )
-				).toBeEditable();
-				await expect(
-					page.locator( '#billing_company' )
-				).toBeEditable();
-				await expect(
-					page.locator( '#billing_country' )
-				).toBeEnabled();
-				await expect(
-					page.locator( '#billing_address_1' )
-				).toBeEditable();
-				await expect(
-					page.locator( '#billing_address_2' )
-				).toBeEditable();
-				await expect( page.locator( '#billing_city' ) ).toBeEditable();
-				await expect( page.locator( '#billing_state' ) ).toBeEnabled();
-				await expect(
-					page.locator( '#billing_postcode' )
-				).toBeEditable();
-				await expect( page.locator( '#billing_phone' ) ).toBeEditable();
-				await expect( page.locator( '#billing_email' ) ).toBeEditable();
-			}
-		);
-
-		test(
-			'warn when customer is missing required details',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				await addAProductToCart( page, productId );
-
-				await page.goto( 'checkout/' );
-
-				// first try submitting the form with no fields complete
-				await page
-					.getByRole( 'button', { name: 'Place order' } )
-					.click();
-				await expect(
-					page.locator( 'form[name="checkout"]' ).getByRole( 'alert' )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Billing First name is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Billing Last name is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Billing Street address is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Billing Town / City is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Billing ZIP Code is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Billing Phone is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Billing Email address is a required field.',
-					} )
-				).toBeVisible();
-
-				// toggle ship to different address, fill out billing info and confirm error shown
-				await page.getByText( 'Ship to a different address?' ).click();
-				await page.locator( '#billing_first_name' ).fill( 'Homer' );
-				await page.locator( '#billing_last_name' ).fill( 'Simpson' );
-				await page
-					.locator( '#billing_address_1' )
-					.fill( '123 Evergreen Terrace' );
-				await page.locator( '#billing_city' ).fill( 'Springfield' );
-				await page.locator( '#billing_country' ).selectOption( 'US' );
-				await page.locator( '#billing_state' ).selectOption( 'OR' );
-				await page.locator( '#billing_postcode' ).fill( '97403' );
-				await page.locator( '#billing_phone' ).fill( '555 555-5555' );
-				await page.locator( '#billing_email' ).fill( customer.email );
-				await page
-					.getByRole( 'button', { name: 'Place order' } )
-					.click();
-
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Shipping First name is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Shipping Last name is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Shipping Street address is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Shipping Town / City is a required field.',
-					} )
-				).toBeVisible();
-				await expect(
-					page.getByRole( 'link', {
-						name: 'Shipping ZIP Code is a required field.',
-					} )
-				).toBeVisible();
-			}
-		);
-
-		test(
-			'allows customer to fill shipping details',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				await addOneOrMoreProductToCart( page, simpleProductName, '2' );
-
-				await page.goto( 'checkout/' );
-				await expect(
-					page.locator( 'strong.product-quantity' )
-				).toContainText( '2' );
-				let totalPrice = await page
-					.getByRole( 'row', { name: 'Total' } )
-					.last()
-					.locator( 'td' )
-					.textContent();
-				totalPrice = Number(
-					totalPrice.replace( /\$([\d.]+).*/, '$1' )
-				);
-				await expect( totalPrice ).toBeGreaterThanOrEqual(
-					Number( twoProductPrice )
-				);
-
-				await page.locator( '#ship-to-different-address' ).click();
-
-				// asserting that you can fill in the shipping details
-				await expect(
-					page.locator( '#shipping_first_name' )
-				).toBeEditable();
-				await expect(
-					page.locator( '#shipping_last_name' )
-				).toBeEditable();
-				await expect(
-					page.locator( '#shipping_company' )
-				).toBeEditable();
-				await expect(
-					page.locator( '#shipping_country' )
-				).toBeEnabled();
-				await expect(
-					page.locator( '#shipping_address_1' )
-				).toBeEditable();
-				await expect(
-					page.locator( '#shipping_address_2' )
-				).toBeEditable();
-				await expect( page.locator( '#shipping_city' ) ).toBeEditable();
-				await expect( page.locator( '#shipping_state' ) ).toBeEnabled();
-				await expect(
-					page.locator( '#shipping_postcode' )
-				).toBeEditable();
-			}
-		);
-
-		test( 'allows guest customer to place an order', async ( { page } ) => {
-			await test.step( 'Add 2 products to the cart', async () => {
-				await addOneOrMoreProductToCart( page, simpleProductName, '2' );
-			} );
-
-			await test.step( 'Go to checkout and confirm that products and totals are as expected', async () => {
-				await page.goto( 'checkout/' );
-				await expect(
-					page.locator( 'strong.product-quantity' )
-				).toContainText( '2' );
-				let totalPrice = await page
-					.getByRole( 'row', { name: 'Total' } )
-					.last()
-					.locator( 'td' )
-					.textContent();
-				totalPrice = Number(
-					totalPrice.replace( /\$([\d.]+).*/, '$1' )
-				);
-				await expect( totalPrice ).toBeGreaterThanOrEqual(
-					Number( twoProductPrice )
-				); // account for taxes or shipping that may be present
-			} );
-
-			await test.step( 'Complete the checkout form', async () => {
-				await page
-					.getByRole( 'textbox', { name: 'First name' } )
-					.fill( 'Lisa' );
-				await page
-					.getByRole( 'textbox', { name: 'Last name' } )
-					.fill( 'Simpson' );
-				await page
-					.getByRole( 'textbox', { name: 'Street address' } )
-					.fill( '123 Evergreen Terrace' );
-				await page
-					.getByRole( 'textbox', { name: 'Town / City' } )
-					.fill( 'Springfield' );
-				await page.locator( '#billing_state' ).selectOption( 'OR' );
-				await page
-					.getByRole( 'textbox', { name: 'ZIP Code' } )
-					.fill( '97403' );
-				await page
-					.getByRole( 'textbox', { name: 'Phone' } )
-					.fill( '555 555-5555' );
-				await page
-					.getByRole( 'textbox', { name: 'Email address' } )
-					.fill( guestEmail );
-
-				await page.getByText( 'Cash on delivery' ).click();
-
-				await page
-					.getByRole( 'button', { name: 'Place order' } )
-					.click();
-			} );
-
-			await test.step( 'Load the order confirmation page, extract order number', async () => {
-				await expect(
-					page.getByText( 'Your order has been received' )
-				).toBeVisible();
-
-				guestOrderId = getOrderIdFromUrl( page );
-			} );
-
-			await test.step( 'Simulate cookies cleared, but within 10 minute grace period', async () => {
-				// Let's simulate a new browser context (by dropping all cookies), and reload the page. This approximates a
-				// scenario where the server can no longer identify the shopper. However, so long as we are within the 10 minute
-				// grace period following initial order placement, the 'order received' page should still be rendered.
-				await page.context().clearCookies();
-				await page.reload();
-				await expect(
-					page.getByText( 'Your order has been received' )
-				).toBeVisible();
-			} );
-
-			await test.step( 'Simulate cookies cleared, outside 10 minute window', async () => {
-				// Let's simulate a scenario where the 10 minute grace period has expired. This time, we expect the shopper to
-				// be presented with a request to verify their email address.
-				await setFilterValue(
-					page,
-					'woocommerce_order_email_verification_grace_period',
-					0
-				);
-				await page.waitForTimeout( 2000 ); // needs some time before reload for change to take effect.
-				await page.reload();
-				await expect(
-					page.getByText(
-						/confirm the email address linked to the order | verify the email address associated /
-					)
-				).toBeVisible();
-			} );
-
-			await test.step( 'Supply incorrect email address for the order, error', async () => {
-				// Supplying an email address other than the actual order billing email address will take them back to the same
-				// page with an error message.
-				await page
-					.getByLabel( 'Email address' )
-					.fill( 'incorrect@email.address' );
-				await page
-					.getByRole( 'button', { name: /Verify|Confirm/ } )
-					.click();
-				await expect(
-					page.getByText(
-						/confirm the email address linked to the order | verify the email address associated /
-					)
-				).toBeVisible();
-				await expect(
-					page.getByText(
-						'We were unable to verify the email address'
-					)
-				).toBeVisible();
-			} );
-
-			await test.step( 'Supply the correct email address for the order, display order confirmation', async () => {
-				// However if they supply the *correct* billing email address, they should see the order received page again.
-				await page.getByLabel( 'Email address' ).fill( guestEmail );
-				await page
-					.getByRole( 'button', { name: /Verify|Confirm/ } )
-					.click();
-				await expect(
-					page.getByText( 'Your order has been received' )
-				).toBeVisible();
-			} );
-
-			await test.step( 'Confirm order details on the backend (as a merchant)', async () => {
-				await page.goto( 'wp-login.php' );
-				await page
-					.getByLabel( 'Username or Email Address' )
-					.fill( admin.username );
-				await page
-					.getByRole( 'textbox', { name: 'Password' } )
-					.fill( admin.password );
-				await page.getByRole( 'button', { name: 'Log In' } ).click();
-
-				// load the order placed as a guest
-				await page.goto(
-					`wp-admin/post.php?post=${ guestOrderId }&action=edit`
-				);
-
-				await expect(
-					page.getByRole( 'heading', {
-						name: `Order #${ guestOrderId } details`,
-					} )
-				).toBeVisible();
-				await expect(
-					page.locator( '.wc-order-item-name' )
-				).toContainText( simpleProductName );
-				await expect(
-					page.locator( 'td.quantity >> nth=0' )
-				).toContainText( '2' );
-				await expect(
-					page.locator( 'td.item_cost >> nth=0' )
-				).toContainText( singleProductPrice );
-				await expect(
-					page.locator( 'td.line_cost >> nth=0' )
-				).toContainText( twoProductPrice );
-				await clearFilters( page );
-			} );
-		} );
-
-		test( 'allows existing customer to place order', async ( { page } ) => {
-			await page.goto( 'my-account/' );
-			await page
-				.getByLabel( 'Username or Email Address' )
-				.fill( customer.username );
-			await page
-				.getByRole( 'textbox', { name: 'Password' } )
-				.fill( customer.password );
-			await page.getByRole( 'button', { name: 'Log In' } ).click();
-			await expect(
-				page.getByText(
-					`Hello ${ customer.first_name } ${ customer.last_name }`
-				)
-			).toBeVisible();
-
-			await addOneOrMoreProductToCart( page, simpleProductName, '2' );
-
-			await page.goto( 'checkout/' );
-			await expect(
-				page.locator( 'strong.product-quantity' )
-			).toContainText( '2' );
-			let totalPrice = await page
-				.getByRole( 'row', { name: 'Total' } )
-				.last()
-				.locator( 'td' )
-				.textContent();
-			totalPrice = Number( totalPrice.replace( /\$([\d.]+).*/, '$1' ) );
-			await expect( totalPrice ).toBeGreaterThanOrEqual(
-				Number( twoProductPrice )
-			);
-
-			await page.locator( '#billing_first_name' ).fill( 'Homer' );
-			await page.locator( '#billing_last_name' ).fill( 'Simpson' );
-			await page
-				.locator( '#billing_address_1' )
-				.fill( '123 Evergreen Terrace' );
-			await page.locator( '#billing_city' ).fill( 'Springfield' );
-			await page.locator( '#billing_country' ).selectOption( 'US' );
-			await page.locator( '#billing_state' ).selectOption( 'OR' );
-			await page.locator( '#billing_postcode' ).fill( '97403' );
-			await page.locator( '#billing_phone' ).fill( '555 555-5555' );
-			await page.locator( '#billing_email' ).fill( customer.email );
-
-			await page.locator( 'text=Cash on delivery' ).click();
-			await expect(
-				page.locator( 'div.payment_method_cod' )
-			).toBeVisible();
-
-			await page.locator( 'text=Place order' ).click();
-
-			await expect(
-				page.getByText( 'Your order has been received' )
-			).toBeVisible();
-
-			customerOrderId = getOrderIdFromUrl( page );
-
-			// Effect a log out/simulate a new browsing session by dropping all cookies.
-			await page.context().clearCookies();
-			await page.reload();
-
-			// Now we are logged out, return to the confirmation page: we should be asked to log back in.
-			await expect(
-				page.getByText(
-					/Log in here to view your order|log in to your account to view this order/
-				)
-			).toBeVisible();
-
-			// Switch to admin user.
-			await page.goto( 'wp-login.php?loggedout=true' );
-			await page
-				.getByLabel( 'Username or Email Address' )
-				.fill( admin.username );
-			await page
-				.getByRole( 'textbox', { name: 'Password' } )
-				.fill( admin.password );
-			await page.getByRole( 'button', { name: 'Log In' } ).click();
-
-			// load the order placed as a customer
-			await page.goto(
-				`wp-admin/post.php?post=${ customerOrderId }&action=edit`
-			);
-			await expect(
-				page.locator( 'h2.woocommerce-order-data__heading' )
-			).toContainText( `Order #${ customerOrderId } details` );
-			await expect( page.locator( '.wc-order-item-name' ) ).toContainText(
-				simpleProductName
-			);
-			await expect(
-				page.locator( 'td.quantity >> nth=0' )
-			).toContainText( '2' );
-			await expect(
-				page.locator( 'td.item_cost >> nth=0' )
-			).toContainText( singleProductPrice );
-			await expect(
-				page.locator( 'td.line_cost >> nth=0' )
-			).toContainText( twoProductPrice );
-		} );
-	}
-);
+/* endregion */

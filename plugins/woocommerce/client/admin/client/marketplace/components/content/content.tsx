@@ -130,7 +130,6 @@ export default function Content(): JSX.Element {
 
 				speak( __( 'More products loaded', 'woocommerce' ) );
 				setCurrentPage( ( prevPage ) => prevPage + 1 );
-				setIsLoadingMore( false );
 			} )
 			.catch( () => {
 				speak( __( 'Error loading more products', 'woocommerce' ) );
@@ -441,7 +440,9 @@ export default function Content(): JSX.Element {
 			<InstallNewProductModal products={ filteredProducts } />
 			{ selectedTab !== 'business-services' &&
 				selectedTab !== 'my-subscriptions' && <ConnectNotice /> }
-			{ selectedTab !== 'business-services' && <PluginInstallNotice /> }
+			{ selectedTab !== 'business-services' && (
+				<PluginInstallNotice selectedTab={ selectedTab } />
+			) }
 			{ selectedTab !== 'business-services' && (
 				<SubscriptionsExpiredExpiringNotice type="expired" />
 			) }

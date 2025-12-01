@@ -4,7 +4,7 @@
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { getAdminLink } from '@woocommerce/settings';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { MenuItem } from '@wordpress/components';
 import {
 	ALLOW_TRACKING_OPTION_NAME,
@@ -26,14 +26,11 @@ export const ClassicEditorMenuItem = ( {
 	const { showProductMVPFeedbackModal } = useDispatch( CES_STORE_KEY );
 
 	const { allowTracking, resolving: isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
 		const allowTrackingOption =
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
-			getOption( ALLOW_TRACKING_OPTION_NAME ) || 'no';
+			( getOption( ALLOW_TRACKING_OPTION_NAME ) as string ) || 'no';
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const resolving = ! hasFinishedResolution( 'getOption', [
 			ALLOW_TRACKING_OPTION_NAME,
 		] );

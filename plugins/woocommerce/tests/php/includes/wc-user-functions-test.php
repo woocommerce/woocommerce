@@ -61,11 +61,15 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		// Manually trigger the product lookup tables update, since it may take a few moments for it to happen automatically.
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
-		$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
-		$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+		foreach ( array( '__return_true', '__return_false' ) as $lookup_tables ) {
+			add_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_1 ) );
+			$this->assertTrue( wc_customer_bought_product( '', $customer_id_1, $product_id_1 ) );
+			$this->assertTrue( wc_customer_bought_product( 'test@example.com', 0, $product_id_1 ) );
+			$this->assertFalse( wc_customer_bought_product( 'test@example.com', $customer_id_1, $product_id_2 ) );
+			$this->assertFalse( wc_customer_bought_product( 'test2@example.com', $customer_id_2, $product_id_1 ) );
+			remove_filter( 'woocommerce_customer_bought_product_use_lookup_tables', $lookup_tables );
+		}
 	}
 
 	/**

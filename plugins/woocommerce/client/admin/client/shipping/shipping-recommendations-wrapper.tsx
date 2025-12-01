@@ -21,12 +21,12 @@ const ShippingRecommendationsLoader = lazy( () => {
 	);
 } );
 
-export const ShippingRecommendations: React.FC< EmbeddedBodyProps > = ( {
+export const ShippingRecommendations = ( {
 	page,
 	tab,
 	section,
 	zone_id,
-} ) => {
+}: EmbeddedBodyProps ) => {
 	if ( page !== 'wc-settings' ) {
 		return null;
 	}

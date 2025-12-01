@@ -7,7 +7,6 @@ use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\BlockPatterns as TestedBlockPatterns;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
 use Automattic\WooCommerce\Blocks\Domain\Package;
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
 
 /**
  * Unit tests for the BlockPatterns class.
@@ -59,6 +58,15 @@ class BlockPatterns extends \WP_UnitTestCase {
 	 * Tests if patterns are registered with the correct pattern data.
 	 */
 	public function test_block_patterns_registration() {
+
+		ob_start();
+		include __DIR__ . '/patterns/mock-header.php';
+		$mock_header_content = ob_get_clean();
+
+		ob_start();
+		include __DIR__ . '/patterns/mock-footer.php';
+		$mock_footer_content = ob_get_clean();
+
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
@@ -77,8 +85,8 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
+						'content'       => $mock_footer_content,
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 				array(
 					__DIR__ . '/patterns/mock-header.php',
@@ -94,8 +102,8 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
+						'content'       => $mock_header_content,
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 			);
 
@@ -108,8 +116,9 @@ class BlockPatterns extends \WP_UnitTestCase {
 	public function test_cached_block_patterns_registration() {
 		$mock_patterns = array(
 			array(
-				'title'  => 'Mock Cached',
-				'source' => __DIR__ . '/patterns/mock-cached.php',
+				'title'   => 'Mock Cached',
+				'source'  => 'mock-cached.php',
+				'content' => '',
 			),
 		);
 		$pattern_data  = array(
@@ -119,13 +128,16 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
+		$expected_pattern            = $mock_patterns[0];
+		$expected_pattern['source']  = __DIR__ . '/patterns/mock-cached.php';
+		$expected_pattern['content'] = '';
+
 		$this->pattern_registry
 			->expects( $this->exactly( 1 ) )
 			->method( 'register_block_pattern' )
 			->with(
 				__DIR__ . '/patterns/mock-cached.php',
-				$mock_patterns[0],
-				PatternsHelper::get_patterns_dictionary()
+				$expected_pattern,
 			);
 
 		$this->block_patterns->register_block_patterns();
@@ -148,6 +160,14 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
+		ob_start();
+		include __DIR__ . '/patterns/mock-header.php';
+		$mock_header_content = ob_get_clean();
+
+		ob_start();
+		include __DIR__ . '/patterns/mock-footer.php';
+		$mock_footer_content = ob_get_clean();
+
 		$this->pattern_registry
 			->expects( $this->exactly( 2 ) )
 			->method( 'register_block_pattern' )
@@ -166,8 +186,8 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-footer.php',
+						'content'       => $mock_footer_content,
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 				array(
 					__DIR__ . '/patterns/mock-header.php',
@@ -183,8 +203,8 @@ class BlockPatterns extends \WP_UnitTestCase {
 						'featureFlag'   => '',
 						'templateTypes' => '',
 						'source'        => __DIR__ . '/patterns/mock-header.php',
+						'content'       => $mock_header_content,
 					),
-					PatternsHelper::get_patterns_dictionary(),
 				),
 			);
 

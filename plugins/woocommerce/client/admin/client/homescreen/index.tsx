@@ -2,13 +2,9 @@
  * External dependencies
  */
 import { compose } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
+import { withSelect, type select as WCDataSelector } from '@wordpress/data';
 import { useEffect } from '@wordpress/element';
-import {
-	ONBOARDING_STORE_NAME,
-	withOnboardingHydration,
-	WCDataSelector,
-} from '@woocommerce/data';
+import { onboardingStore, withOnboardingHydration } from '@woocommerce/data';
 import { getHistory, getNewPath, useQuery } from '@woocommerce/navigation';
 
 /**
@@ -46,10 +42,9 @@ const Homescreen = ( {
 
 const onboardingData = getAdminSetting( 'onboarding', {} );
 
-const withSelectHandler = ( select: WCDataSelector ) => {
-	const { getProfileItems, hasFinishedResolution } = select(
-		ONBOARDING_STORE_NAME
-	);
+const withSelectHandler = ( select: typeof WCDataSelector ) => {
+	const { getProfileItems, hasFinishedResolution } =
+		select( onboardingStore );
 
 	return {
 		profileItems: getProfileItems(),

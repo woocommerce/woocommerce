@@ -36,6 +36,12 @@ jQuery(
 				var formatted_regular_price = regular_price.replace( '.', woocommerce_admin.mon_decimal_point ),
 				formatted_sale_price        = sale_price.replace( '.', woocommerce_admin.mon_decimal_point );
 
+				var cogs_data = $wc_inline_data.find( '.cogs_value ' );
+				if( cogs_data.length > 0 ) {
+					var formatted_cogs_value = cogs_data.text().replace( '.', woocommerce_admin.mon_decimal_point );
+					$( 'input[name="_cogs_value"]', '.inline-edit-row' ).val( formatted_cogs_value );
+				}
+
 				$( 'input[name="_sku"]', '.inline-edit-row' ).val( sku );
 				$( 'input[name="_regular_price"]', '.inline-edit-row' ).val( formatted_regular_price );
 				$( 'input[name="_sale_price"]', '.inline-edit-row' ).val( formatted_sale_price );

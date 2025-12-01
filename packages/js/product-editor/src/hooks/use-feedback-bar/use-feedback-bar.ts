@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -10,18 +10,15 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME } from '../../constants';
 
 export const useFeedbackBar = () => {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const { shouldShowFeedbackBar } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const showFeedbackBarOption = getOption(
 			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME
 		) as string;
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const resolving = ! hasFinishedResolution( 'getOption', [
 			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME,
 		] );
@@ -41,7 +38,7 @@ export const useFeedbackBar = () => {
 	};
 
 	const getOptions = async () => {
-		const { getOption } = resolveSelect( OPTIONS_STORE_NAME );
+		const { getOption } = resolveSelect( optionsStore );
 
 		const showFeedbackBarOption = ( await getOption(
 			PRODUCT_EDITOR_SHOW_FEEDBACK_BAR_OPTION_NAME

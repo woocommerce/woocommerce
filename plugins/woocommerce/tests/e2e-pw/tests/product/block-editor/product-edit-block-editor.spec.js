@@ -1,12 +1,23 @@
-const { test: baseTest } = require( '../../../fixtures/block-editor-fixtures' );
-const { expect, tags } = require( '../../../fixtures/fixtures' );
+/**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
+ * Internal dependencies
+ */
+import { test as baseTest } from '../../../fixtures/block-editor-fixtures';
+import { expect, tags } from '../../../fixtures/fixtures';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
+
+skipTestsForDeprecatedFeature();
 
 const test = baseTest.extend( {
-	product: async ( { api }, use ) => {
+	product: async ( { restApi }, use ) => {
 		let product;
 
-		await api
-			.post( 'products', {
+		await restApi
+			.post( `${ WC_API_PATH }/products`, {
 				id: 0,
 				name: `Product ${ Date.now() }`,
 				type: 'simple',
@@ -21,7 +32,9 @@ const test = baseTest.extend( {
 		await use( product );
 
 		// Cleanup
-		await api.delete( `products/${ product.id }`, { force: true } );
+		await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
+			force: true,
+		} );
 	},
 } );
 

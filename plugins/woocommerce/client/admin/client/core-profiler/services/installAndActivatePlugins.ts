@@ -3,9 +3,9 @@
  */
 import {
 	ExtensionList,
-	ONBOARDING_STORE_NAME,
-	PLUGINS_STORE_NAME,
+	pluginsStore,
 	PluginNames,
+	onboardingStore,
 } from '@woocommerce/data';
 import { dispatch } from '@wordpress/data';
 import {
@@ -315,11 +315,10 @@ export const pluginInstallerMachine = createMachine(
 				}: {
 					input: { pluginsInstallationQueue: PluginNames[] };
 				} ) => {
-					return dispatch(
-						PLUGINS_STORE_NAME
-					).installAndActivatePlugins( [
-						getPluginSlug( pluginsInstallationQueue[ 0 ] ),
-					] );
+					return dispatch( pluginsStore ).installAndActivatePlugins(
+						[ getPluginSlug( pluginsInstallationQueue[ 0 ] ) ],
+						'core-profiler'
+					);
 				}
 			),
 			queueRemainingPluginsAsync: fromPromise(
@@ -329,11 +328,12 @@ export const pluginInstallerMachine = createMachine(
 					input: { pluginsInstallationQueue: PluginNames[] };
 				} ) => {
 					return dispatch(
-						ONBOARDING_STORE_NAME
+						onboardingStore
 					).installAndActivatePluginsAsync(
 						pluginsInstallationQueue.map(
 							getPluginSlug
-						) as PluginNames[]
+						) as PluginNames[],
+						'core-profiler'
 					);
 				}
 			),

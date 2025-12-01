@@ -10,7 +10,7 @@ import { Date, Link } from '@woocommerce/components';
 import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 import { formatValue } from '@woocommerce/number';
 import { getAdminLink } from '@woocommerce/settings';
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { settingsStore } from '@woocommerce/data';
 import { getCurrentDates, defaultTableDateFormat } from '@woocommerce/date';
 import { CurrencyContext } from '@woocommerce/currency';
 
@@ -209,7 +209,7 @@ DownloadsReportTable.contextType = CurrencyContext;
 
 export default withSelect( ( select ) => {
 	const { woocommerce_default_date_range: defaultDateRange } = select(
-		SETTINGS_STORE_NAME
+		settingsStore
 	).getSetting( 'wc_admin', 'wcAdminSettings' );
 	return { defaultDateRange };
 } )( DownloadsReportTable );

@@ -10,7 +10,7 @@ import {
 	EllipsisMenu,
 } from '@woocommerce/components';
 import { Card, CardHeader, Button, CardFooter } from '@wordpress/components';
-import { NOTES_STORE_NAME, QUERY_DEFAULTS } from '@woocommerce/data';
+import { notesStore, QUERY_DEFAULTS } from '@woocommerce/data';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -214,7 +214,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 		updateNote,
 		triggerNoteAction,
 		invalidateResolutionForStoreSelector,
-	} = useDispatch( NOTES_STORE_NAME );
+	} = useDispatch( notesStore );
 	const screen = getScreenName();
 
 	const inboxQuery = useMemo( () => {
@@ -236,7 +236,7 @@ const InboxPanel = ( { showHeader = true } ) => {
 			getNotesError,
 			isNotesRequesting,
 			hasFinishedResolution,
-		} = select( NOTES_STORE_NAME );
+		} = select( notesStore );
 
 		return {
 			notes: getNotes( inboxQuery ),

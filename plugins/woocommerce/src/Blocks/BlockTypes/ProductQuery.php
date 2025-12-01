@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
@@ -180,9 +182,11 @@ class ProductQuery extends AbstractBlock {
 		if ( self::is_woocommerce_variation( $parsed_block ) ) {
 			// Indicate to interactivity powered components that this block is on the page
 			// and needs refresh to update data.
-			$this->asset_data_registry->add(
-				'needsRefreshForInteractivityAPI',
-				true
+			wp_interactivity_config(
+				'woocommerce',
+				[
+					'needsRefreshForInteractivityAPI' => true,
+				]
 			);
 			// Set this so that our product filters can detect if it's a PHP template.
 			$this->asset_data_registry->add( 'hasFilterableProducts', true );
@@ -288,7 +292,7 @@ class ProductQuery extends AbstractBlock {
 	private function merge_queries( ...$queries ) {
 		$merged_query = array_reduce(
 			$queries,
-			function( $acc, $query ) {
+			function ( $acc, $query ) {
 				if ( ! is_array( $query ) ) {
 					return $acc;
 				}
@@ -506,8 +510,8 @@ class ProductQuery extends AbstractBlock {
 	private function get_query_vars_from_filter_blocks() {
 		$attributes_filter_query_args = array_reduce(
 			array_values( $this->get_filter_by_attributes_query_vars() ),
-			function( $acc, $array ) {
-				return array_merge( array_values( $array ), $acc );
+			function ( $acc, $arr ) {
+				return array_merge( array_values( $arr ), $acc );
 			},
 			array()
 		);
@@ -531,7 +535,7 @@ class ProductQuery extends AbstractBlock {
 
 		return array_reduce(
 			array_values( $query_vars ),
-			function( $acc, $query_vars_filter_block ) {
+			function ( $acc, $query_vars_filter_block ) {
 				return array_merge( $query_vars_filter_block, $acc );
 			},
 			$public_query_vars
@@ -562,7 +566,7 @@ class ProductQuery extends AbstractBlock {
 
 		$this->attributes_filter_query_args = array_reduce(
 			wc_get_attribute_taxonomies(),
-			function( $acc, $attribute ) {
+			function ( $acc, $attribute ) {
 				$acc[ $attribute->attribute_name ] = array(
 					'filter'     => AttributeFilter::FILTER_QUERY_VAR_PREFIX . $attribute->attribute_name,
 					'query_type' => AttributeFilter::QUERY_TYPE_QUERY_VAR_PREFIX . $attribute->attribute_name,
@@ -658,7 +662,7 @@ class ProductQuery extends AbstractBlock {
 
 		$queries = array_reduce(
 			$attributes_filter_query_args,
-			function( $acc, $query_args ) {
+			function ( $acc, $query_args ) {
 				$attribute_name       = $query_args['filter'];
 				$attribute_query_type = $query_args['query_type'];
 
@@ -712,7 +716,7 @@ class ProductQuery extends AbstractBlock {
 
 		$filtered_stock_status_values = array_filter(
 			explode( ',', $filter_stock_status_values ),
-			function( $stock_status ) {
+			function ( $stock_status ) {
 				return in_array( $stock_status, StockFilter::get_stock_status_query_var_values(), true );
 			}
 		);
@@ -825,15 +829,13 @@ class ProductQuery extends AbstractBlock {
 		foreach ( $new as $key => $value ) {
 			if ( is_numeric( $key ) ) {
 				$base[] = $value;
-			} else {
-				if ( is_array( $value ) ) {
-					if ( ! isset( $base[ $key ] ) ) {
-						$base[ $key ] = array();
-					}
-					$base[ $key ] = $this->array_merge_recursive_replace_non_array_properties( $base[ $key ], $value );
-				} else {
-					$base[ $key ] = $value;
+			} elseif ( is_array( $value ) ) {
+				if ( ! isset( $base[ $key ] ) ) {
+					$base[ $key ] = array();
 				}
+					$base[ $key ] = $this->array_merge_recursive_replace_non_array_properties( $base[ $key ], $value );
+			} else {
+				$base[ $key ] = $value;
 			}
 		}
 
@@ -898,7 +900,7 @@ class ProductQuery extends AbstractBlock {
 		}
 
 		$rating_terms = array_map(
-			function( $rating ) use ( $product_visibility_terms ) {
+			function ( $rating ) use ( $product_visibility_terms ) {
 				return $product_visibility_terms[ 'rated-' . $rating ];
 			},
 			$parsed_filter_rating_values
@@ -953,7 +955,7 @@ class ProductQuery extends AbstractBlock {
 		$product_taxonomies = array_diff( get_object_taxonomies( 'product', 'names' ), array( 'product_visibility', 'product_shipping_class' ) );
 		$result             = array_filter(
 			$tax_query,
-			function( $item ) use ( $product_taxonomies ) {
+			function ( $item ) use ( $product_taxonomies ) {
 				return isset( $item['taxonomy'] ) && in_array( $item['taxonomy'], $product_taxonomies, true );
 			}
 		);

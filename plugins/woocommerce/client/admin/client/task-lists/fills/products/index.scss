@@ -51,7 +51,8 @@
 		margin-bottom: 8px;
 	}
 
-	.woocommerce-products-stack {
+	.woocommerce-products-stack,
+	.woocommerce-products-marketplace-link {
 		max-width: 550px;
 		margin-top: 24px;
 
@@ -68,3 +69,8 @@
 	}
 }
 
+@include breakpoint( "<600px" ) {
+	.woocommerce-task-products .woocommerce-products-marketplace-link {
+		padding: 0 $gap;
+	}
+}

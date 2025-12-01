@@ -11,10 +11,10 @@ type NewAttributeListItemProps = {
 	onClick?: () => void;
 };
 
-export const NewAttributeListItem: React.FC< NewAttributeListItemProps > = ( {
+export const NewAttributeListItem = ( {
 	label = __( 'Add attribute', 'woocommerce' ),
 	onClick,
-} ) => {
+}: NewAttributeListItemProps ) => {
 	return (
 		<ListItem className="woocommerce-add-attribute-list-item">
 			<Button

@@ -156,6 +156,29 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Bulk create, update, and delete items.
+	 *
+	 * This method extends the parent batch_items functionality by deferring term counting
+	 * to optimize performance when processing multiple products that may share common terms.
+	 *
+	 * @param WP_REST_Request $request Full details about the request containing arrays of
+	 *                                 products to create, update, or delete.
+	 *
+	 * @return array Array of WP_Error or WP_REST_Response objects for each processed item.
+	 * @since 10.4.0 Added term counting optimization for bulk operations.
+	 */
+	public function batch_items( $request ) {
+		$already_deferred = wp_defer_term_counting();
+		wp_defer_term_counting( true );
+		try {
+			return parent::batch_items( $request );
+		} finally {
+			// Be sure to trigger term counting already processed terms even if there was an exception unless something had already deferred it.
+			wp_defer_term_counting( $already_deferred );
+		}
+	}
+
+	/**
 	 * Prepare a single product output for response.
 	 *
 	 * @param WC_Data         $object  Object data.
@@ -853,6 +876,9 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					break;
 				case 'categories':
 					$base_data['categories'] = $this->get_taxonomy_terms( $product );
+					break;
+				case 'brands':
+					$base_data['brands'] = $this->get_taxonomy_terms( $product, 'brand' );
 					break;
 				case 'tags':
 					$base_data['tags'] = $this->get_taxonomy_terms( $product, 'tag' );
@@ -1929,7 +1955,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				'stock_quantity'        => array(
 					'description' => __( 'Stock quantity.', 'woocommerce' ),
-					'type'        => has_filter( 'woocommerce_stock_amount', 'intval' ) ? 'integer' : 'number',
+					'type'        => wc_is_stock_amount_integer() ? 'integer' : 'number',
 					'context'     => array( 'view', 'edit' ),
 				),
 				'in_stock'              => array(

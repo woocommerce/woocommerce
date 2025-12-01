@@ -12,8 +12,8 @@ import { Chart, AnalyticsError } from '@woocommerce/components';
 import {
 	getReportChartData,
 	getTooltipValueFormat,
-	SETTINGS_STORE_NAME,
-	REPORTS_STORE_NAME,
+	settingsStore,
+	reportsStore,
 } from '@woocommerce/data';
 import {
 	getAllowedIntervalsForQuery,
@@ -345,11 +345,8 @@ export default compose(
 			getChartMode( selectedFilter, query ) ||
 			'time-comparison';
 		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
+			settingsStore
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
-
-		/* eslint @wordpress/no-unused-vars-before-return: "off" */
-		const reportStoreSelector = select( REPORTS_STORE_NAME );
 
 		const newProps = {
 			mode: chartMode,
@@ -371,6 +368,8 @@ export default compose(
 				emptySearchResults: true,
 			};
 		}
+
+		const reportStoreSelector = select( reportsStore );
 
 		const fields = charts && charts.map( ( chart ) => chart.key );
 

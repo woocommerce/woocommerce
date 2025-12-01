@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { settingsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEffect } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
@@ -21,16 +21,12 @@ export const StoreLocation = ( {
 	onLocationComplete: () => void;
 } ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { updateAndPersistSettingsForGroup } =
-		useDispatch( SETTINGS_STORE_NAME );
+	const { updateAndPersistSettingsForGroup } = useDispatch( settingsStore );
 	const { generalSettings, isResolving } = useSelect( ( select ) => {
-		const { getSettings, hasFinishedResolution } =
-			select( SETTINGS_STORE_NAME );
+		const { getSettings, hasFinishedResolution } = select( settingsStore );
 
 		return {
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			generalSettings: getSettings( 'general' )?.general,
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 			isResolving: ! hasFinishedResolution( 'getSettings', [
 				'general',
 			] ),

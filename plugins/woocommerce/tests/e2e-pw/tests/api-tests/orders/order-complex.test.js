@@ -1,8 +1,4 @@
-const {
-	test,
-	expect,
-	tags,
-} = require( '../../../fixtures/api-tests-fixtures' );
+const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const {
 	getOrderExample,
 	getTaxRateExamples,
@@ -76,6 +72,11 @@ const expectedSimpleProductTaxTotal = '1.00';
 const expectedVariableProductTaxTotal = '0.20';
 const expectedExternalProductTaxTotal = '0.00';
 
+/**
+ * Slugs of tax classes to delete at tear down.
+ */
+const taxClassSlugsToTearDown = [];
+
 test.describe( 'Orders API test', () => {
 	test.beforeAll( async ( { request } ) => {
 		/**
@@ -95,17 +96,55 @@ test.describe( 'Orders API test', () => {
 				data: {
 					delete: ids,
 				},
+				failOnStatusCode: true,
 			} );
+		}
+
+		/**
+		 * Create the default "Reduced rate" and "Zero rate" tax classes if they're missing.
+		 * If successfully created, delete them at teardown to revert the list of tax classes.
+		 *
+		 * Allow 400 Bad Request as long as it's due to a duplicate tax class creation attempt.
+		 * If not, fail immediately.
+		 */
+		for ( const name of [ 'Reduced rate', 'Zero rate' ] ) {
+			const responseCreateTaxClasses = await request.post(
+				'./wp-json/wc/v3/taxes/classes',
+				{
+					data: {
+						name,
+					},
+				}
+			);
+
+			if ( responseCreateTaxClasses.status() === 400 ) {
+				const expectedCodes = [
+					'woocommerce_rest_tax_class_exists',
+					'woocommerce_rest_tax_class_slug_exists',
+				];
+				const expectedMessages = [
+					'Tax class already exists',
+					'Tax class slug already exists',
+				];
+				const { code, message } = await responseCreateTaxClasses.json();
+				expect( expectedCodes ).toContain( code );
+				expect( expectedMessages ).toContain( message );
+			}
+
+			if ( responseCreateTaxClasses.ok() ) {
+				const { slug } = await responseCreateTaxClasses.json();
+				taxClassSlugsToTearDown.push( slug );
+			}
 		}
 
 		/**
 		 * Create a tax rate for each tax class, and save their ID's.
 		 */
 		const taxRates = [ standardTaxRate, reducedTaxRate, zeroTaxRate ];
-
 		for ( const taxRate of taxRates ) {
 			const taxResponse = await request.post( './wp-json/wc/v3/taxes', {
 				data: taxRate,
+				failOnStatusCode: true,
 			} );
 			const taxResponseJSON = await taxResponse.json();
 			taxRate.id = taxResponseJSON.id;
@@ -209,54 +248,60 @@ test.describe( 'Orders API test', () => {
 				],
 			},
 		} );
+
+		// Delete tax classes
+		for ( const slug of taxClassSlugsToTearDown ) {
+			await request.delete( `./wp-json/wc/v3/taxes/classes/${ slug }`, {
+				params: {
+					force: true,
+				},
+				failOnStatusCode: true,
+			} );
+		}
 	} );
 
-	test(
-		'can add complex order',
-		{ tag: [ tags.SKIP_ON_PRESSABLE, tags.SKIP_ON_WPCOM ] },
-		async ( { request } ) => {
-			//ensure tax calculations are enabled
-			await request.put(
-				'./wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
-				{
-					data: {
-						value: 'yes',
-					},
-				}
-			);
-
-			// Create the complex order and save its ID.
-			const response = await request.post( './wp-json/wc/v3/orders', {
-				data: order,
-			} );
-			const responseJSON = await response.json();
-
-			order.id = responseJSON.id;
-
-			expect( response.status() ).toEqual( 201 );
-
-			// Verify order and tax totals
-			expect( responseJSON.total ).toEqual( expectedOrderTotal );
-			expect( responseJSON.total_tax ).toEqual( expectedTaxTotal );
-
-			// Verify total tax of each product line item
-			const expectedTaxTotalsPerLineItem = [
-				[ simpleProduct, expectedSimpleProductTaxTotal ],
-				[ variableProduct, expectedVariableProductTaxTotal ],
-				[ groupedProduct, expectedSimpleProductTaxTotal ],
-				[ externalProduct, expectedExternalProductTaxTotal ],
-			];
-			for ( const [
-				product,
-				expectedLineTaxTotal,
-			] of expectedTaxTotalsPerLineItem ) {
-				const { total_tax: actualLineTaxTotal } =
-					responseJSON.line_items.find(
-						( { product_id } ) => product_id === product.id
-					);
-
-				expect( actualLineTaxTotal ).toEqual( expectedLineTaxTotal );
+	test( 'can add complex order', async ( { request } ) => {
+		//ensure tax calculations are enabled
+		await request.put(
+			'./wp-json/wc/v3/settings/general/woocommerce_calc_taxes',
+			{
+				data: {
+					value: 'yes',
+				},
 			}
+		);
+
+		// Create the complex order and save its ID.
+		const response = await request.post( './wp-json/wc/v3/orders', {
+			data: order,
+		} );
+		const responseJSON = await response.json();
+
+		order.id = responseJSON.id;
+
+		expect( response.status() ).toEqual( 201 );
+
+		// Verify order and tax totals
+		expect( responseJSON.total ).toEqual( expectedOrderTotal );
+		expect( responseJSON.total_tax ).toEqual( expectedTaxTotal );
+
+		// Verify total tax of each product line item
+		const expectedTaxTotalsPerLineItem = [
+			[ simpleProduct, expectedSimpleProductTaxTotal ],
+			[ variableProduct, expectedVariableProductTaxTotal ],
+			[ groupedProduct, expectedSimpleProductTaxTotal ],
+			[ externalProduct, expectedExternalProductTaxTotal ],
+		];
+		for ( const [
+			product,
+			expectedLineTaxTotal,
+		] of expectedTaxTotalsPerLineItem ) {
+			const { total_tax: actualLineTaxTotal } =
+				responseJSON.line_items.find(
+					( { product_id } ) => product_id === product.id
+				);
+
+			expect( actualLineTaxTotal ).toEqual( expectedLineTaxTotal );
 		}
-	);
+	} );
 } );

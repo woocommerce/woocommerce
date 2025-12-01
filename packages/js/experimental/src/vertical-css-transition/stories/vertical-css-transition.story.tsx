@@ -20,7 +20,7 @@ export default {
 	decorators: [ ( storyFn, context ) => withConsole()( storyFn )( context ) ],
 } as Meta;
 
-const Parent: React.FC< VerticalCSSTransitionProps > = ( args ) => {
+const Parent = ( args: VerticalCSSTransitionProps ) => {
 	const [ expanded, setExpanded ] = useState( true );
 	return (
 		<>

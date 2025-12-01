@@ -12,8 +12,8 @@ const shopperPages = [
 const merchantPages = [
 	{
 		name: 'WC Dashboard',
-		url: 'wp-admin/admin.php?page=wc-admin/',
-		expectedCount: 50,
+		url: 'wp-admin/admin.php?page=wc-admin',
+		expectedCount: 83,
 	},
 	{
 		name: 'Reports',
@@ -61,6 +61,7 @@ test.describe( 'Keeps track of the number of JS files included on key shopper pa
 				'script[src]',
 				( scripts ) => scripts.length
 			);
+
 			await expect
 				.soft(
 					javascriptFiles,

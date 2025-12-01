@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update consumers of the wc/store/checkout data store to use the StoreDescriptor rather than the key to access it

@@ -9,6 +9,8 @@ declare global {
 			currentUserId: number;
 			currentThemeIsFSETheme: boolean;
 			countries: Record< string, string >;
+			siteTitle: string;
+			homeUrl: string;
 			admin: {
 				woocommerce_payments_nox_profile?: {
 					business_country_code: string;
@@ -37,6 +39,13 @@ declare global {
 				};
 				currentUserId: number;
 				blueprint_upload_nonce?: string;
+				blueprint_max_step_size_bytes?: number;
+				onboarding?: {
+					profile?: {
+						industry?: number[];
+					};
+				};
+				siteVisibilitySettings: Record< string, string >;
 			};
 		};
 		wcAdminFeatures: {
@@ -71,8 +80,6 @@ declare global {
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
 			blueprint: boolean;
-			'reactify-classic-payments-settings': boolean;
-			'add-to-cart-with-options-stepper-layout': boolean;
 		};
 		wp: {
 			updates?: {
@@ -118,9 +125,9 @@ declare global {
 	namespace wp.media {
 		interface frame {
 			open(): void;
-			on(event: string, callback: Function): void;
+			on( event: string, callback: Function ): void;
 			state(): {
-				get(state: string): any;
+				get( state: string ): any;
 			};
 		}
 

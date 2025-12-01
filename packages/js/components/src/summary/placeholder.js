@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Component } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { range } from 'lodash';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
@@ -15,7 +15,7 @@ import { getHasItemsClass } from './utils';
 export const SummaryNumberPlaceholder = ( { className } ) => (
 	<li
 		data-testid="summary-placeholder"
-		className={ classnames(
+		className={ clsx(
 			'woocommerce-summary__item-container is-placeholder',
 			className
 		) }
@@ -42,7 +42,7 @@ class SummaryListPlaceholder extends Component {
 			: this.props.numberOfItems;
 
 		const hasItemsClass = getHasItemsClass( numberOfItems );
-		const classes = classnames( 'woocommerce-summary', {
+		const classes = clsx( 'woocommerce-summary', {
 			[ hasItemsClass ]: ! isDropdownBreakpoint,
 			'is-placeholder': true,
 		} );

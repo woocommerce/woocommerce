@@ -1,6 +1,13 @@
-const { test, expect, tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
+ * Internal dependencies
+ */
+import { tags, expect, test } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 let productId, couponId, orderId;
 
@@ -16,16 +23,10 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { baseURL } ) => {
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
-			} );
+		test.beforeAll( async ( { restApi } ) => {
 			// create a simple product
-			await api
-				.post( 'products', {
+			await restApi
+				.post( `${ WC_API_PATH }/products`, {
 					name: productName,
 					type: 'simple',
 					regular_price: productPrice,
@@ -34,8 +35,8 @@ test.describe(
 					productId = response.data.id;
 				} );
 			// create a $5 off coupon
-			await api
-				.post( 'coupons', {
+			await restApi
+				.post( `${ WC_API_PATH }/coupons`, {
 					code: couponCode,
 					discount_type: 'fixed_product',
 					amount: couponAmount,
@@ -44,8 +45,8 @@ test.describe(
 					couponId = response.data.id;
 				} );
 			// create order
-			await api
-				.post( 'orders', {
+			await restApi
+				.post( `${ WC_API_PATH }/orders`, {
 					line_items: [
 						{
 							product_id: productId,
@@ -63,17 +64,17 @@ test.describe(
 				} );
 		} );
 
-		test.afterAll( async ( { baseURL } ) => {
+		test.afterAll( async ( { restApi } ) => {
 			// cleans up product, coupon and order after run
-			const api = new wcApi( {
-				url: baseURL,
-				consumerKey: process.env.CONSUMER_KEY,
-				consumerSecret: process.env.CONSUMER_SECRET,
-				version: 'wc/v3',
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
+				force: true,
 			} );
-			await api.delete( `products/${ productId }`, { force: true } );
-			await api.delete( `coupons/${ couponId }`, { force: true } );
-			await api.delete( `orders/${ orderId }`, { force: true } );
+			await restApi.delete( `${ WC_API_PATH }/coupons/${ couponId }`, {
+				force: true,
+			} );
+			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
+				force: true,
+			} );
 		} );
 
 		test( 'can apply a coupon', async ( { page } ) => {

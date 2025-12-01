@@ -30,6 +30,7 @@ interface Options {
 	repository: string;
 	refType: string;
 	refName: string;
+	jobsList?: string;
 }
 
 /**
@@ -71,10 +72,10 @@ function getButton( text: string, url: string ): object {
  * @param {boolean} withAttempt - whether to include the run attempt in the url
  * @return {string} the run url
  */
-function getRunUrl( options: Options, withAttempt: boolean ): string {
+export function getRunUrl( options: Options, withAttempt: boolean ): string {
 	const { serverUrl, runId, repository, runAttempt } = options;
-	return `${ serverUrl }/${ repository }/actions/runs/${ runId }/${
-		withAttempt ? `attempts/${ runAttempt }` : ''
+	return `${ serverUrl }/${ repository }/actions/runs/${ runId }${
+		withAttempt ? `/attempts/${ runAttempt }` : ''
 	}`;
 }
 
@@ -101,6 +102,7 @@ export async function createMessage( options: Options ) {
 		repository,
 		refType,
 		refName,
+		jobsList,
 	} = options;
 
 	let target = `for ${ sha }`;
@@ -108,10 +110,15 @@ export async function createMessage( options: Options ) {
 	const buttons = [];
 
 	const lastRunBlock = getTextContextElement(
-		`Run: ${ runId }/${ runAttempt }, triggered by ${ triggeringActor }`
+		eventName === 'schedule'
+			? `Run: ${ runId }/${ runAttempt }`
+			: `Run: ${ runId }/${ runAttempt }, triggered by ${ triggeringActor }`
 	);
 	const actorBlock = getTextContextElement( `Actor: ${ actor }` );
-	const lastRunButtonBlock = getButton( 'Run', getRunUrl( options, false ) );
+	const lastRunButtonBlock = getButton(
+		'View Run',
+		getRunUrl( options, false )
+	);
 	buttons.push( lastRunButtonBlock );
 
 	if ( eventName === 'pull_request' ) {
@@ -137,15 +144,18 @@ export async function createMessage( options: Options ) {
 		target = `on ${ refType } _*${ refName }*_ (${ eventName })`;
 		const truncatedMessage =
 			commitMessage.length > 50
-				? commitMessage.substring( 0, 48 ) + '...'
+				? commitMessage.substring( 0, 50 ) + '...'
 				: commitMessage;
 
 		contextElements.push(
 			getTextContextElement(
 				`Commit: ${ sha.substring( 0, 8 ) } ${ truncatedMessage }`
-			),
-			actorBlock
+			)
 		);
+
+		if ( eventName !== 'schedule' ) {
+			contextElements.push( actorBlock );
+		}
 		buttons.push(
 			getButton(
 				`Commit ${ sha.substring( 0, 8 ) }`,
@@ -175,11 +185,51 @@ export async function createMessage( options: Options ) {
 			type: 'context',
 			elements: contextElements,
 		},
-		{
-			type: 'actions',
-			elements: buttons,
-		},
 	];
+
+	// Add jobs list if provided
+	if ( jobsList && jobsList.trim() !== '' ) {
+		// Split by ### to get header and jobs list
+		const parts = jobsList.split( '###' );
+		const header = parts.length > 1 ? parts[ 0 ].trim() : '';
+		const jobsString = parts.length > 1 ? parts[ 1 ] : parts[ 0 ];
+
+		const jobs = jobsString
+			.split( ',' )
+			.filter( ( job ) => job.trim() !== '' );
+		if ( jobs.length > 0 ) {
+			const maxJobs = 5;
+			const displayJobs =
+				jobs.length > maxJobs ? jobs.slice( 0, maxJobs ) : jobs;
+			const jobsText = displayJobs
+				.map( ( job ) => `• ${ job.trim() }` )
+				.join( '\n' );
+
+			let jobsBlockText = jobsText;
+			if ( jobs.length > maxJobs ) {
+				const remaining = jobs.length - maxJobs;
+				jobsBlockText += `\n• _${ remaining } more_`;
+			}
+			if ( header ) {
+				jobsBlockText = `*${ header }*\n${ jobsBlockText }`;
+			}
+
+			mainMsgBlocks.push( {
+				type: 'context',
+				elements: [
+					{
+						type: 'mrkdwn',
+						text: jobsBlockText,
+					},
+				],
+			} );
+		}
+	}
+
+	mainMsgBlocks.push( {
+		type: 'actions',
+		elements: buttons,
+	} );
 
 	const detailsMsgBlocksChunks = [];
 	// detailsMsgBlocksChunks.push( ...getPlaywrightBlocks() );
@@ -194,7 +244,10 @@ export async function createMessage( options: Options ) {
  * @param {number}   chunkSize - the maximum size of each chunk
  * @return {any[]} the array of chunks
  */
-function getBlocksChunksBySize( blocks: any[], chunkSize: number ): any[] {
+export function getBlocksChunksBySize(
+	blocks: any[],
+	chunkSize: number
+): any[] {
 	const chunks = [];
 	for ( let i = 0; i < blocks.length; i += chunkSize ) {
 		const chunk = blocks.slice( i, i + chunkSize );
@@ -212,7 +265,10 @@ function getBlocksChunksBySize( blocks: any[], chunkSize: number ): any[] {
  * @param {string}   type   - the type property to use as delimiter
  * @return {any[]} the array of chunks
  */
-function getBlocksChunksByType( blocks: string | any[], type: string ): any[] {
+export function getBlocksChunksByType(
+	blocks: string | any[],
+	type: string
+): any[] {
 	const chunks = [];
 	let nextIndex = 0;
 

@@ -33,7 +33,7 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 *
 	 * @var int
 	 */
-	private static $product_id;
+	private $product_id;
 
 	/**
 	 * Set up before class.
@@ -56,12 +56,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		global $wp_rewrite;
 		$wp_rewrite->set_permalink_structure( '/%postname%/' );
 
-		// Create a product.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_status( 'publish' );
-		$product->save();
-		self::$product_id = $product->get_id();
-
 		// Flush rewrite rules.
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules( true );
@@ -76,12 +70,36 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		$wp_rewrite->set_permalink_structure( self::$original_permalink_structure );
 		update_option( 'woocommerce_permalinks', self::$original_wc_permalinks );
 
-		// Clean up product.
-		WC_Helper_Product::delete_product( self::$product_id );
-
 		// Flush rewrite rules one final time.
 		$wp_rewrite->flush_rules();
 		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Initialize environment for tests by creating a simple product.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Create a product.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_status( 'publish' );
+		$product->save();
+		$this->product_id = $product->get_id();
+	}
+
+	/**
+	 * Clean up environment for tests by deleting the simple product.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		// Clean up product.
+		WC_Helper_Product::delete_product( $this->product_id );
 	}
 
 	/**
@@ -264,7 +282,7 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 			array( 'shop', get_permalink( wc_get_page_id( 'shop' ) ), true ),
 			array( 'checkout', get_permalink( wc_get_page_id( 'checkout' ) ), true ),
 			array( 'product archive', get_post_type_archive_link( 'product' ), true ),
-			array( 'product', get_permalink( self::$product_id ), true ),
+			array( 'product', get_permalink( $this->product_id ), true ),
 			// Should return true if a shop page contains a query param.
 			array( 'shop with query', get_permalink( wc_get_page_id( 'shop' ) ) . '?query=test', true ),
 			// Should non-store pages return false.
@@ -399,6 +417,44 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 
 		// Clean up.
 		wp_delete_post( $page_id, true );
+	}
+
+	/**
+	 * Test is_current_page_store_page when checkout page is set to a non-default page.
+	 */
+	public function test_is_current_page_store_page_when_checkout_page_is_set_to_non_default_page() {
+		$default_checkout_page_id = wc_get_page_id( 'checkout' );
+
+		// create a new checkout page with slug "shop-checkout".
+		$page_id = wp_insert_post(
+			array(
+				'post_title'  => 'Shop Checkout',
+				'post_name'   => 'shop-checkout',
+				'post_status' => 'publish',
+				'post_type'   => 'page',
+			)
+		);
+
+		// update the checkout page to the new page.
+		update_option( 'woocommerce_checkout_page_id', $page_id );
+
+		global $wp_rewrite;
+		$wp_rewrite->init();
+		$wp_rewrite->flush_rules( true );
+
+		// go to the new checkout page.
+		$this->go_to( get_permalink( $page_id ) );
+
+		// Test that the new checkout page is a store page.
+		$is_store_page = WCAdminHelper::is_current_page_store_page();
+		$this->assertTrue( $is_store_page, 'Failed to identify new checkout page as store page ' . get_permalink( $page_id ) );
+
+		// go to the default checkout page.
+		$this->go_to( get_permalink( $default_checkout_page_id ) );
+
+		// Test that the default checkout page is not a store page.
+		$is_store_page = WCAdminHelper::is_current_page_store_page();
+		$this->assertFalse( $is_store_page, 'Failed to identify default checkout page as store page ' . get_permalink( $default_checkout_page_id ) );
 	}
 
 	/**

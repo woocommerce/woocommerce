@@ -37,6 +37,7 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 			$this->id             = 'customer_note';
 			$this->customer_email = true;
 			$this->title          = __( 'Customer note', 'woocommerce' );
+			$this->email_group    = 'order-changes';
 			$this->template_html  = 'emails/customer-note.php';
 			$this->template_plain = 'emails/plain/customer-note.php';
 			$this->placeholders   = array(
@@ -52,8 +53,13 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let your shoppers know when you’ve added a note to their order.', 'woocommerce' )
+				? __( 'Send an email to customers notifying them when you’ve added a note to their order', 'woocommerce' )
 				: __( 'Customer note emails are sent when you add a note to an order.', 'woocommerce' );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Customer note added', 'woocommerce' );
+				$this->description = __( 'Notifies customers when you’ve added a note to their order.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -166,6 +172,24 @@ if ( ! class_exists( 'WC_Email_Customer_Note', false ) ) :
 			return $this->email_improvements_enabled
 				? __( 'Thanks again! If you need any help with your order, please contact us at {store_email}.', 'woocommerce' )
 				: __( 'Thanks for reading.', 'woocommerce' );
+		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'customer_note' => $this->customer_note,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
+				)
+			);
 		}
 	}
 

@@ -280,14 +280,16 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	}
 
 	/**
-	 * Get tax status.
+	 * Get tax status for the shipping method.
+	 *
+	 * This looks up the tax status for the shipping method based on the instance ID, and falls back to the default tax status.
 	 *
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
 	 * @return string
 	 */
 	public function get_tax_status( $context = 'view' ) {
-		$shipping_method = WC_Shipping_Zones::get_shipping_method( $this->get_instance_id() );
-		return $shipping_method ? $shipping_method->get_option( 'tax_status' ) : ProductTaxStatus::TAXABLE;
+		$shipping_method = \WC_Shipping_Zones::get_shipping_method( $this->get_instance_id() );
+		return $shipping_method instanceof \WC_Shipping_Method ? $shipping_method->tax_status : ProductTaxStatus::TAXABLE;
 	}
 
 	/*

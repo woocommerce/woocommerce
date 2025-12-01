@@ -1,29 +1,25 @@
-const { test } = require( './fixtures' );
-const { ADMIN_STATE_PATH } = require( '../playwright.config' );
+/**
+ * Internal dependencies
+ */
+import { test as baseTest } from './fixtures';
+import { ADMIN_STATE_PATH } from '../playwright.config';
+import { wpCLI } from '../utils/cli';
 
-exports.test = test.extend( {
-	page: async ( { page, api, wcAdminApi }, use ) => {
-		// Enable product block editor
-		await api.put(
-			'settings/advanced/woocommerce_feature_product_block_editor_enabled',
-			{
-				value: 'yes',
-			}
+export const test = baseTest.extend( {
+	page: async ( { page, restApi }, use ) => {
+		await wpCLI(
+			'wp option set woocommerce_feature_product_block_editor_enabled yes'
 		);
 
 		// Disable the product editor tour
-		await wcAdminApi.post( 'options', {
+		await restApi.post( 'wc-admin/options', {
 			woocommerce_block_product_tour_shown: 'yes',
 		} );
 
 		await use( page );
 
-		// Disable product block editor
-		await api.put(
-			'settings/advanced/woocommerce_feature_product_block_editor_enabled',
-			{
-				value: 'no',
-			}
+		await wpCLI(
+			'wp option set woocommerce_feature_product_block_editor_enabled no'
 		);
 	},
 	storageState: ADMIN_STATE_PATH,

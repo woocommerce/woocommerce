@@ -3,7 +3,7 @@
  */
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { PLUGINS_STORE_NAME, useUser } from '@woocommerce/data';
+import { pluginsStore, useUser } from '@woocommerce/data';
 import { createErrorNotice } from '@woocommerce/data/src/plugins/actions';
 
 export const JetpackPluginStates = {
@@ -40,12 +40,10 @@ export const useJetpackPluginState = () => {
 	} = useSelect(
 		( select ) => {
 			const { getPluginInstallState, getJetpackConnectionData } =
-				select( PLUGINS_STORE_NAME );
-			// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
+				select( pluginsStore );
 			const installState = getPluginInstallState( 'jetpack' );
 
 			return {
-				// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 				jetpackConnectionData: getJetpackConnectionData(),
 				jetpackInstallState: installState,
 				canUserInstallPlugins: currentUserCan( 'install_plugins' ),
@@ -54,7 +52,7 @@ export const useJetpackPluginState = () => {
 		[ currentUserCan ]
 	);
 
-	const { installJetpackAndConnect } = useDispatch( PLUGINS_STORE_NAME );
+	const { installJetpackAndConnect } = useDispatch( pluginsStore );
 
 	const [ pluginState, setPluginState ] = useState< JetpackPluginStates >(
 		JetpackPluginStates.INITIALIZING

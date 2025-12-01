@@ -1,0 +1,178 @@
+.wc-block-components-form {
+	counter-reset: checkout-step;
+}
+
+.wc-block-components-form .wc-block-components-checkout-step {
+	position: relative;
+	border: none;
+	padding: 0;
+	background: none;
+	margin: 0 0 $gap-large 0;
+
+	.wc-block-components-text-input:first-of-type,
+	.wc-block-components-country-input {
+		margin-top: 0;
+	}
+}
+
+.wc-block-components-checkout-step--disabled {
+	opacity: 0.6;
+}
+
+.wc-block-components-checkout-step__container {
+	position: relative;
+
+	textarea {
+		font-style: inherit;
+		font-weight: inherit;
+	}
+}
+
+.wc-block-components-checkout-step__content > * {
+	margin-bottom: $gap;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+}
+
+.wc-block-components-checkout-step--with-step-number
+	.wc-block-components-checkout-step__content
+	> :last-child {
+	margin-bottom: 0;
+}
+
+.wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading {
+	margin-top: 0;
+}
+
+.wc-block-components-checkout-step__heading {
+	position: relative;
+
+	.wc-block-components-express-payment-continue-rule
+		+ .wc-block-components-checkout-step
+		& {
+		margin-top: 0;
+	}
+}
+
+.wc-block-components-checkout-step:first-child
+	.wc-block-components-checkout-step__heading {
+	margin-top: 0;
+}
+
+.wc-block-components-checkout-step__heading-container {
+	display: flex;
+	flex-direction: column;
+	gap: $gap-smaller;
+	margin-bottom: $gap;
+}
+
+.wc-block-components-checkout-step__title {
+	margin: 0;
+	margin-right: $gap-small;
+}
+
+.wc-block-components-checkout-step__heading-content {
+	@include font-size(smaller);
+
+	a {
+		font-weight: bold;
+		color: inherit;
+	}
+}
+
+.wc-block-components-checkout-step__description {
+	@include font-regular-locked;
+	margin: 0;
+}
+
+.wc-block-checkout__form--with-step-numbers {
+	.wc-block-components-checkout-step--with-step-number {
+		padding: 0 0 0 $gap-larger;
+
+		@include cart-checkout-below-medium-container {
+			// This media query is required because on themes where the Checkout
+			// block is rendered alongside something else, e.g. Storefront using
+			// the "Default Template" (which has a sidebar) the checkout block
+			// can get the `.is-small` class, but the screen itself is larger
+			// than 400px.
+			@include breakpoint("<600px") {
+				padding: $gap-larger 0 0 0;
+			}
+		}
+
+		.wc-block-components-checkout-step__title::before {
+			@include reset-box();
+			background: transparent;
+			counter-increment: checkout-step;
+			content: "\00a0"counter(checkout-step) ".";
+			content: "\00a0"counter(checkout-step) "." / "";
+			position: absolute;
+			left: -$gap-large;
+			top: 0;
+			text-align: center;
+			transform: translateX(-50%);
+			white-space: nowrap;
+
+			@include cart-checkout-below-medium-container {
+				position: static;
+				transform: none;
+				left: auto;
+				top: auto;
+				content: counter(checkout-step) ".\00a0";
+				content: counter(checkout-step) ".\00a0"/ "";
+			}
+		}
+
+		.wc-block-components-checkout-step__description,
+		.wc-block-components-checkout-step__content {
+			position: relative;
+		}
+
+		.wc-block-components-checkout-step__description::before,
+		.wc-block-components-checkout-step__content::before {
+			content: "";
+			border-left: 1px solid $universal-border-light;
+			position: absolute;
+			left: -$gap-large;
+			top: 0;
+			bottom: 0;
+
+			.has-dark-controls & {
+				border-left-color: $input-border-dark;
+			}
+		}
+
+		.wc-block-components-checkout-step__description::before {
+			bottom: -$gap;
+		}
+
+		.is-mobile &,
+		.is-small & {
+			padding: 0;
+
+			.wc-block-components-checkout-step__title::before {
+				position: static;
+				transform: none;
+				left: auto;
+				top: auto;
+				content: counter(checkout-step) ".\00a0";
+				content: counter(checkout-step) ".\00a0"/ "";
+			}
+
+			.wc-block-components-checkout-step__description::before,
+			.wc-block-components-checkout-step__content::before {
+				display: none;
+			}
+		}
+	}
+}
+
+.editor-styles-wrapper {
+	.wp-block h4.wc-block-components-checkout-step__title {
+		@include font-size(regular);
+		line-height: 24px;
+		margin: 0 $gap-small 0 0;
+	}
+}

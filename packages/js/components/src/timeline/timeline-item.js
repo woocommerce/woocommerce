@@ -1,13 +1,13 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { format } from '@wordpress/date';
 import PropTypes from 'prop-types';
 import { createElement } from '@wordpress/element';
 
 const TimelineItem = ( { item = {}, className = '', clockFormat } ) => {
-	const itemClassName = classnames( 'woocommerce-timeline-item', className );
+	const itemClassName = clsx( 'woocommerce-timeline-item', className );
 	const itemTimeString = format( clockFormat, item.date );
 
 	return (

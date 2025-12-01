@@ -9,13 +9,12 @@ import {
 } from '@wordpress/blocks';
 import { createElement } from '@wordpress/element';
 import { evaluate } from '@woocommerce/expression-evaluation';
+import { isWpVersion, getSetting } from '@woocommerce/settings';
 import { ComponentType } from 'react';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet, natively (not until 7.0.0).
-// Including `@types/wordpress__data` as a devDependency causes build issues,
-// so just going type-free for now.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { useSelect, select as WPSelect } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
+
+// Define a more generic type for the select function to avoid TypeScript errors
+type SelectType = ( store: string ) => Record< string, unknown >;
 
 interface BlockRepresentation< T extends Record< string, object > > {
 	name?: string;
@@ -24,9 +23,7 @@ interface BlockRepresentation< T extends Record< string, object > > {
 }
 
 type UseEvaluationContext = ( context: Record< string, unknown > ) => {
-	getEvaluationContext: (
-		select: typeof WPSelect
-	) => Record< string, unknown >;
+	getEvaluationContext: ( select: SelectType ) => Record< string, unknown >;
 };
 
 function defaultUseEvaluationContext( context: Record< string, unknown > ) {
@@ -54,8 +51,7 @@ function getEdit<
 		const { getEvaluationContext } = useEvaluationContext( context );
 
 		const { shouldHide, shouldDisable } = useSelect(
-			// @ts-expect-error TODO: react-18-upgrade
-			( select: typeof WPSelect ) => {
+			( select: SelectType ) => {
 				const evaluationContext = getEvaluationContext( select );
 
 				return {
@@ -90,37 +86,61 @@ function getEdit<
 	};
 }
 
+let requiresExperimentalRole = isWpVersion( '6.7', '<' );
+const adminSettings: { gutenberg_version?: string } = getSetting( 'admin' );
+if ( requiresExperimentalRole && adminSettings.gutenberg_version ) {
+	requiresExperimentalRole =
+		parseFloat( adminSettings?.gutenberg_version ) < 19.4;
+}
+
 function augmentAttributes<
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	T extends Record< string, any > = Record< string, any >
 >( attributes: T ) {
 	// Note: If you modify this function, also update the server-side
 	// Automattic\WooCommerce\Admin\Features\ProductBlockEditor\BlockRegistry::augment_attributes() function.
-	return {
+	const augmentedAttributes = {
 		...attributes,
 		...{
 			_templateBlockId: {
 				type: 'string',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 			_templateBlockOrder: {
 				type: 'integer',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 			_templateBlockHideConditions: {
 				type: 'array',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 			_templateBlockDisableConditions: {
 				type: 'array',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 			disabled: attributes.disabled || {
 				type: 'boolean',
-				__experimentalRole: 'content',
+				role: 'content',
 			},
 		},
 	};
+	if ( requiresExperimentalRole ) {
+		return Object.keys( augmentedAttributes ).reduce(
+			( acc, key: keyof T ) => {
+				if ( augmentedAttributes[ key ].role ) {
+					acc[ key ] = {
+						...augmentedAttributes[ key ],
+						__experimentalRole: augmentedAttributes[ key ].role,
+					};
+				} else {
+					acc[ key ] = augmentedAttributes[ key ];
+				}
+				return acc;
+			},
+			{} as T
+		);
+	}
+	return augmentedAttributes;
 }
 
 /**

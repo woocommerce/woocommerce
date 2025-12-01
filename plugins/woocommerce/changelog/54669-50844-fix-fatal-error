@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Avoid fatal error on `WC_Customer_Data_Store_Session`.

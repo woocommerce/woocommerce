@@ -13,7 +13,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { store as productEditorUiStore } from '../../../store/product-editor-ui';
+import { wooProductEditorUiStore } from '../../../store/product-editor-ui';
 import { useErrorHandler } from '../../../hooks/use-error-handler';
 import { recordProductEvent } from '../../../utils/record-product-event';
 import { useFeedbackBar } from '../../../hooks/use-feedback-bar';
@@ -32,7 +32,7 @@ export function PublishButton( {
 }: PublishButtonProps ) {
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { maybeShowFeedbackBar } = useFeedbackBar();
-	const { openPrepublishPanel } = useDispatch( productEditorUiStore );
+	const { openPrepublishPanel } = useDispatch( wooProductEditorUiStore );
 	const { getProductErrorMessageAndProps } = useErrorHandler();
 
 	const [ editedStatus, , prevStatus ] = useEntityProp< Product[ 'status' ] >(

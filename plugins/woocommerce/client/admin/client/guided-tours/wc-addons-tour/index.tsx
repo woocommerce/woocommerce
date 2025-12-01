@@ -5,7 +5,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { TourKit, TourKitTypes } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ import { getSteps } from './get-steps';
 const WCAddonsTour = () => {
 	const [ showTour, setShowTour ] = useState( true );
 
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const steps = getSteps();
 	const defaultAutoScrollBlock: ScrollLogicalPosition = 'center';

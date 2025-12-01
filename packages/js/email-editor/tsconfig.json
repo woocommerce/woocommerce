@@ -1,0 +1,39 @@
+{
+	"extends": "../tsconfig",
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "build-module",
+		"declaration": true,
+		"declarationDir": "build-types",
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"downlevelIteration": true,
+		"jsx": "react-jsx",
+		"jsxFactory": null,
+		"jsxFragmentFactory": null,
+
+		// strict checks
+		"alwaysStrict": true,
+		"strictBindCallApply": false,
+		"strictFunctionTypes": false,
+		"strictNullChecks": false,
+		"strictPropertyInitialization": false,
+		"noImplicitAny": false,
+		"noImplicitThis": false,
+		"forceConsistentCasingInFileNames": true,
+
+		// additional checks
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"typeRoots": [ "./node_modules/@types" ]
+	},
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**"
+	]
+}

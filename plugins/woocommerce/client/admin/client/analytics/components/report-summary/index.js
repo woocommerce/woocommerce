@@ -14,7 +14,7 @@ import {
 	SummaryNumber,
 } from '@woocommerce/components';
 import { calculateDelta, formatValue } from '@woocommerce/number';
-import { getSummaryNumbers, SETTINGS_STORE_NAME } from '@woocommerce/data';
+import { getSummaryNumbers, settingsStore } from '@woocommerce/data';
 import { getDateParamsFromQuery } from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
 import { CurrencyContext } from '@woocommerce/currency';
@@ -222,7 +222,7 @@ export default compose(
 		const fields = charts && charts.map( ( chart ) => chart.key );
 
 		const { woocommerce_default_date_range: defaultDateRange } = select(
-			SETTINGS_STORE_NAME
+			settingsStore
 		).getSetting( 'wc_admin', 'wcAdminSettings' );
 
 		const summaryData = getSummaryNumbers( {

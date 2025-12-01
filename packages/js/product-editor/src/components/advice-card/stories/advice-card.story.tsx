@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Flex } from '@wordpress/components';
-import React from 'react';
 
 /**
  * Internal dependencies

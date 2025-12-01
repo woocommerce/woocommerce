@@ -7,26 +7,25 @@ Under the hood this data store makes use of the [CRUD data store](../crud/README
 
 ## Usage
 
-This data store can be accessed under the `experimental/wc/admin/shipping/zones` name. It is recommended you make use of the export constant `EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME`.
+This data store can be accessed under the `experimental/wc/admin/shipping/zones` name. It is recommended you make use of the export store `experimentalShippingZonesStore`.
 
 Example:
 
 ```ts
 import {
-	EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME,
-	ShippingZonesActions,
+	experimentalShippingZonesStore,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 
 function Component() {
 	const actions = useDispatch(
-		EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME
-	) as ShippingZonesActions;
+		experimentalShippingZonesStore
+	);
 	actions.createShippingZone( { name: 'test' } );
 }
 ```
 
-## Selections and actions:
+## Selections and actions
 
 | Selector                               | Description                                             |
 | -------------------------------------- | ------------------------------------------------------- |
@@ -35,7 +34,7 @@ function Component() {
 | `getShippingZones( query = {} )`       | Get all shipping zones, query object is empty.          |
 | `getShippingZoneesError( query = {} )` | Get the error for a GET request for all shipping zones. |
 
-Example usage: `wp.data.select( EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME ).getShippingZone( 3 );`
+Example usage: `wp.data.select( experimentalShippingZonesStore ).getShippingZone( 3 );`
 
 | Actions                                         | Method | Description                                                               |
 | ----------------------------------------------- | ------ | ------------------------------------------------------------------------- |
@@ -43,4 +42,4 @@ Example usage: `wp.data.select( EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME ).getShip
 | `deleteShippingZone( id )`                      | DELETE | Deletes a shipping class by ID                                            |
 | `updatetShippingZone( id, shippingZoneObject )` | PUT    | Updates a shipping zone, see `ShippingZone` [here](./types.ts) for values |
 
-Example usage: `wp.data.dispatch( EXPERIMENTAL_SHIPPING_ZONES_STORE_NAME ).updateShippingZone( 3, { name: 'New name' } );`
+Example usage: `wp.data.dispatch( experimentalShippingZonesStore ).updateShippingZone( 3, { name: 'New name' } );`

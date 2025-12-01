@@ -85,8 +85,8 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_default_settings_returns_all_settings( $site_is_https ) {
 		$sut = new WC_Settings_Advanced();
 
-		$settings               = $sut->get_settings_for_section( '' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( '' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		update_option( 'home', $site_is_https ? 'https://foo.bar' : 'http://foo.bar' );
 
@@ -120,7 +120,7 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			unset( $expected['unforce_ssl_checkout'], $expected['force_ssl_checkout'] );
 		}
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**
@@ -136,10 +136,10 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_show_marketplace_suggestions' => 'checkbox',
 		);
 
-		$settings               = $sut->get_settings_for_section( 'woocommerce_com' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( 'woocommerce_com' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**
@@ -153,10 +153,10 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_api_enabled' => 'checkbox',
 		);
 
-		$settings               = $sut->get_settings_for_section( 'legacy_api' );
-		$settings_ids_and_types = $this->get_ids_and_types( $settings );
+		$settings              = $sut->get_settings_for_section( 'legacy_api' );
+		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
-		$this->assertEquals( $expected, $settings_ids_and_types );
+		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 
 	/**

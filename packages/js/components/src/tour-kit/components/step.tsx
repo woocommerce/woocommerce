@@ -41,11 +41,7 @@ const getFocusElement = (
 	return document.querySelector< HTMLElement >( focusElementSelector );
 };
 
-const Step: React.FunctionComponent<
-	WooTourStepRendererProps & {
-		isViewportMobile: boolean;
-	}
-> = ( {
+const Step = ( {
 	steps,
 	currentStepIndex,
 	onDismiss,
@@ -54,6 +50,8 @@ const Step: React.FunctionComponent<
 	setInitialFocusedElement,
 	onGoToStep,
 	isViewportMobile,
+}: WooTourStepRendererProps & {
+	isViewportMobile: boolean;
 } ) => {
 	const { descriptions, heading } = steps[ currentStepIndex ].meta;
 	const description =

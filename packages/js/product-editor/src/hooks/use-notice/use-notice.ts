@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -10,17 +10,14 @@ import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { SINGLE_VARIATION_NOTICE_DISMISSED_OPTION } from '../../constants';
 
 export function useNotice() {
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const { dismissedNotices, isResolving } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const dismissedNoticesOption = getOption(
 			SINGLE_VARIATION_NOTICE_DISMISSED_OPTION
 		) as [ number ];
-		// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 		const resolving = ! hasFinishedResolution( 'getOption', [
 			SINGLE_VARIATION_NOTICE_DISMISSED_OPTION,
 		] );
@@ -31,7 +28,7 @@ export function useNotice() {
 	}, [] );
 
 	const getOptions = async () => {
-		const { getOption } = resolveSelect( OPTIONS_STORE_NAME );
+		const { getOption } = resolveSelect( optionsStore );
 
 		const dismissedNoticesOption = ( await getOption(
 			SINGLE_VARIATION_NOTICE_DISMISSED_OPTION

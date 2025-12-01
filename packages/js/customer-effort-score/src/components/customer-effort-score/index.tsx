@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createElement, useState, useEffect } from '@wordpress/element';
-import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 
@@ -13,7 +12,7 @@ import { CustomerFeedbackModal } from '../customer-feedback-modal';
 
 const noop = () => {};
 
-type CustomerEffortScoreProps = {
+export type CustomerEffortScoreProps = {
 	recordScoreCallback: (
 		score: number,
 		secondScore: number,
@@ -67,7 +66,7 @@ type CustomerEffortScoreProps = {
  * @param {Function} props.getExtraFieldsToBeShown   Function that returns the extra fields to be shown.
  * @param {Function} props.validateExtraFields       Function that validates the extra fields.
  */
-const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
+export function CustomerEffortScore( {
 	recordScoreCallback,
 	title,
 	description,
@@ -86,7 +85,7 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 		),
 	getExtraFieldsToBeShown,
 	validateExtraFields,
-} ) => {
+}: CustomerEffortScoreProps ) {
 	const [ shouldCreateNotice, setShouldCreateNotice ] = useState( true );
 	const [ visible, setVisible ] = useState( false );
 	const { createNotice } = useDispatch( 'core/notices2' );
@@ -138,45 +137,4 @@ const CustomerEffortScore: React.VFC< CustomerEffortScoreProps > = ( {
 			validateExtraFields={ validateExtraFields }
 		/>
 	);
-};
-
-CustomerEffortScore.propTypes = {
-	/**
-	 * The function to call to record the score.
-	 */
-	recordScoreCallback: PropTypes.func.isRequired,
-	/**
-	 * The title displayed in the modal.
-	 */
-	title: PropTypes.string,
-	/**
-	 * The function to call when the notice is shown.
-	 */
-	onNoticeShownCallback: PropTypes.func,
-	/**
-	 * The function to call when the notice is dismissed.
-	 */
-	onNoticeDismissedCallback: PropTypes.func,
-	/**
-	 * The function to call when the modal is shown.
-	 */
-	onModalShownCallback: PropTypes.func,
-	/**
-	 * Icon (React component) to be displayed.
-	 */
-	icon: PropTypes.element,
-	/**
-	 * The first survey question.
-	 */
-	firstQuestion: PropTypes.string.isRequired,
-	/**
-	 * The second survey question.
-	 */
-	secondQuestion: PropTypes.string,
-	/**
-	 * A function to determine whether or not the comments field shown be shown.
-	 */
-	shouldShowComments: PropTypes.func,
-};
-
-export { CustomerEffortScore };
+}

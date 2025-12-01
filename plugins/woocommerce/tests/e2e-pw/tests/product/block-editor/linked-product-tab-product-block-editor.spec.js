@@ -1,9 +1,18 @@
-const { test } = require( '../../../fixtures/block-editor-fixtures' );
-const { expect } = require( '@playwright/test' );
+/**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
-const { clickOnTab } = require( '../../../utils/simple-products' );
-const { helpers } = require( '../../../utils' );
-const { tags } = require( '../../../fixtures/fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test } from '../../../fixtures/block-editor-fixtures';
+import { helpers } from '../../../utils';
+import { tags, expect } from '../../../fixtures/fixtures';
+import { clickOnTab } from '../../../utils/simple-products';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
+
+skipTestsForDeprecatedFeature();
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';
@@ -25,9 +34,9 @@ let productId = 0;
 
 test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 	test.describe( 'Linked product', () => {
-		test.beforeAll( async ( { api } ) => {
-			await api
-				.post( 'products/categories', {
+		test.beforeAll( async ( { restApi } ) => {
+			await restApi
+				.post( `${ WC_API_PATH }/products/categories`, {
 					name: categoryName,
 				} )
 				.then( ( response ) => {
@@ -42,26 +51,34 @@ test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 					type: 'simple',
 					categories: [ { id: categoryId } ],
 				};
-				await api.post( 'products', product ).then( ( response ) => {
-					productIds.push( response.data.id );
-					linkedProductsData.push( product );
-				} );
+				await restApi
+					.post( `${ WC_API_PATH }/products`, product )
+					.then( ( response ) => {
+						productIds.push( response.data.id );
+						linkedProductsData.push( product );
+					} );
 			}
 		} );
 
-		test.afterAll( async ( { api } ) => {
+		test.afterAll( async ( { restApi } ) => {
 			for ( const aProductId of productIds ) {
-				await api.delete( `products/${ aProductId }`, {
-					force: true,
-				} );
+				await restApi.delete(
+					`${ WC_API_PATH }/products/${ aProductId }`,
+					{
+						force: true,
+					}
+				);
 			}
-			await api.delete( `products/${ productId }`, {
+			await restApi.delete( `${ WC_API_PATH }/products/${ productId }`, {
 				force: true,
 			} );
 
-			await api.delete( `products/categories/${ categoryId }`, {
-				force: true,
-			} );
+			await restApi.delete(
+				`${ WC_API_PATH }/products/categories/${ categoryId }`,
+				{
+					force: true,
+				}
+			);
 		} );
 
 		test.skip(

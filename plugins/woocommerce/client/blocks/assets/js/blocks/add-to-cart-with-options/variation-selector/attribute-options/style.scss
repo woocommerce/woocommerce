@@ -1,0 +1,67 @@
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills) {
+	display: inline-flex;
+	gap: $grid-unit-10;
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	flex-wrap: wrap;
+}
+
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill) {
+	--pill-color: currentColor;
+	--pill-background-color: transparent;
+	background-color: var(--pill-background-color);
+	border-radius: 2px;
+	border: 1px solid color-mix(in srgb, var(--pill-color) 40%, transparent);
+	color: var(--pill-color);
+	cursor: pointer;
+	font-size: 0.8em;
+	padding: 0.25em 0.75em;
+	user-select: none;
+
+	&:where(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled)) {
+		color: color-mix(in srgb, var(--pill-color) 40%, transparent);
+		cursor: not-allowed;
+		text-decoration: line-through;
+	}
+
+	&:where(:hover:not(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled))) {
+		background-color: color-mix(
+			in srgb,
+			var(--pill-color) 10%,
+			transparent
+		);
+	}
+
+	&:where(:hover:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
+		background-color: color-mix(
+			in srgb,
+			var(--pill-background-color) 85%,
+			transparent
+		);
+	}
+
+	&:where(:focus-within) {
+		outline: 1px solid var(--pill-color);
+		outline-offset: 1px;
+	}
+
+	&:where(:focus-within:has(
+		.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked
+	)) {
+		outline-color: var(--pill-background-color);
+	}
+
+	// We can't make it display: none, otherwise it's not focusable.
+	:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input) {
+		height: 0;
+		width: 0;
+		opacity: 0;
+		position: absolute;
+	}
+}
+
+:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown) {
+	height: 3em;
+	padding: 0.25em 1em;
+}

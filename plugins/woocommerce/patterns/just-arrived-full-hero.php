@@ -5,12 +5,10 @@
  * Categories: WooCommerce, Intro
  */
 
-use Automattic\WooCommerce\Blocks\AIContent\PatternsHelper;
-
-$pattern_title       = $content['titles'][0]['default'] ?? '';
-$pattern_description = $content['descriptions'][0]['default'] ?? '';
-$pattern_button      = $content['buttons'][0]['default'] ?? '';
-$pattern_image       = PatternsHelper::get_image_url( $images, 0, 'assets/images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg' );
+$pattern_title       = __( 'Sound like no other', 'woocommerce' );
+$pattern_description = __( 'Experience your music like never before with our latest generation of hi-fidelity headphones.', 'woocommerce' );
+$pattern_button      = __( 'Shop now', 'woocommerce' );
+$pattern_image       = plugins_url( 'assets/images/pattern-placeholders/man-person-music-black-and-white-white-photography.jpg', WC_PLUGIN_FILE );
 ?>
 
 <!-- wp:cover {"url":"<?php echo esc_url( $pattern_image ); ?>","dimRatio":50,"focalPoint":{"x":0.5,"y":0.21},"minHeight":739,"contentPosition":"center right","align":"full"} -->
@@ -32,7 +30,7 @@ $pattern_image       = PatternsHelper::get_image_url( $images, 0, 'assets/images
 			<div class="wp-block-buttons">
 				<!-- wp:button -->
 				<div class="wp-block-button">
-					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"><?php echo esc_html( $pattern_button ); ?></a>
+					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>"><?php echo esc_html( $pattern_button ); ?></a>
 				</div>
 				<!-- /wp:button -->
 			</div>

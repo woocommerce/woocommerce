@@ -4,7 +4,6 @@
 # Built JS
 /assets/js/*
 /assets/client/*
-/blocks.ini
 
 # Behat/CLI Tests
 tests/cli/installer

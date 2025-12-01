@@ -23,6 +23,7 @@ import {
 import { Subscription } from '../components/my-subscriptions/types';
 import {
 	Product,
+	ProductCardType,
 	ProductType,
 	SearchAPIJSONType,
 	SearchAPIProductType,
@@ -33,9 +34,13 @@ import { noticeStore } from '../contexts/notice-store';
 interface ProductGroup {
 	id: string;
 	title: string;
+	description: string;
 	items: Product[];
 	url: string;
+	url_text: string | null;
+	url_type: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
 	itemType: ProductType;
+	cardType: ProductCardType;
 }
 
 // The fetchCache stores the results of GET fetch/apiFetch calls from the Marketplace, in RAM, for performance
@@ -75,6 +80,7 @@ async function apiFetchWithCache( params: object ): Promise< object > {
 // Wrapper around fetch() that caches results in memory
 async function fetchJsonWithCache(
 	url: string,
+	headers: Record< string, string > = {},
 	abortSignal?: AbortSignal
 ): Promise< object > {
 	// Attempt to fetch from cache:
@@ -86,7 +92,7 @@ async function fetchJsonWithCache(
 
 	// Failing that, fetch from net:
 	return new Promise( ( resolve, reject ) => {
-		fetch( url, { signal: abortSignal } )
+		fetch( url, { signal: abortSignal, headers } )
 			.then( ( response ) => {
 				if ( ! response.ok ) {
 					throw new Error( response.statusText );
@@ -118,15 +124,26 @@ async function fetchSearchResults(
 		params.set( 'locale', LOCALE.userLocale );
 	}
 
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	params.set( 'connection', wccomSettings.isConnected ? '1' : '0' );
+
+	params.set( 'tracking_allowed', wccomSettings.trackingAllowed ? '1' : '0' );
+
 	const url =
 		MARKETPLACE_HOST +
 		MARKETPLACE_SEARCH_API_PATH +
 		'?' +
 		params.toString();
 
+	const headers = {
+		'X-VIP-Go-Segmentation': wccomSettings.isConnected
+			? 'connected'
+			: 'no-connection',
+	};
+
 	// Fetch data from WCCOM API
 	return new Promise( ( resolve, reject ) => {
-		fetchJsonWithCache( url, abortSignal )
+		fetchJsonWithCache( url, headers, abortSignal )
 			.then( ( json ) => {
 				/**
 				 * Product card component expects a Product type.
@@ -189,6 +206,25 @@ async function fetchDiscoverPageData(): Promise< ProductGroup[] > {
 	}
 }
 
+async function fetchProductPreview(
+	productId: number
+): Promise< { data: { html: string; css: string } } > {
+	let url = `/wc/v1/marketplace/product-preview?product_id=${ productId }`;
+
+	if ( LOCALE.userLocale ) {
+		url = `${ url }&locale=${ LOCALE.userLocale }`;
+	}
+
+	try {
+		const response = await apiFetchWithCache( {
+			path: url.toString(),
+		} );
+		return response as { data: { html: string; css: string } };
+	} catch ( error ) {
+		return { data: { html: '', css: '' } };
+	}
+}
+
 function getProductType( tab: string ): ProductType {
 	switch ( tab ) {
 		case 'themes':
@@ -244,6 +280,23 @@ function connectProduct( subscription: Subscription ): Promise< void > {
 		return Promise.resolve();
 	}
 	const url = '/wc/v3/marketplace/subscriptions/connect';
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	return apiFetch( {
+		path: url.toString(),
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
+function activateProductPlugin( subscription: Subscription ): Promise< void > {
+	if ( subscription.active === true ) {
+		return Promise.resolve();
+	}
+	const url = '/wc/v3/marketplace/subscriptions/activate-plugin';
 	const data = new URLSearchParams();
 	data.append( 'product_key', subscription.product_key );
 	return apiFetch( {
@@ -486,15 +539,29 @@ const subscribeUrl = ( subscription: Subscription ): string => {
 	] );
 };
 
-const connectUrl = (): string => {
+// If you need to add support for a different page, make sure to
+// update WC_Helper::get_source_page() in the backend.
+const connectUrl = ( page = 'wc-admin', reconnect = false ): string => {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
 
-	if ( ! wccomSettings.connectURL ) {
+	if ( ! reconnect && ! wccomSettings.connectURL ) {
+		return '';
+	} else if ( reconnect && ! wccomSettings.reConnectURL ) {
 		return '';
 	}
 
-	return appendURLParams( wccomSettings.connectURL, [
-		[ 'redirect_admin_url', encodeURIComponent( window.location.href ) ],
+	const url = reconnect
+		? wccomSettings.reConnectURL
+		: wccomSettings.connectURL;
+
+	// We have to manipulate `page` from the frontend, since `wccomHelper`
+	// settings remain static when switching pages on the frontend.
+	const updatedHref = new URL( window.location.href );
+	updatedHref.searchParams.set( 'page', page );
+
+	return appendURLParams( url, [
+		[ 'redirect_admin_url', encodeURIComponent( updatedHref.toString() ) ],
+		[ 'page', page ],
 	] );
 };
 
@@ -502,10 +569,12 @@ export {
 	ProductGroup,
 	appendURLParams,
 	connectProduct,
+	activateProductPlugin,
 	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
 	fetchSearchResults,
+	fetchProductPreview,
 	getProductType,
 	fetchSubscriptions,
 	refreshSubscriptions,

@@ -12,16 +12,20 @@ on:
             - '!packages/php/blueprint/**'
             - 'tools/**'
             - '**/changelog/**'
-            - 'changelog.txt'
+            - '**/changelog.txt'
+            - '**/readme.txt'
+            - '.gitignore'
+            - '.coderabbit.yml'
+            - 'CODEOWNERS'
             - '**/tests/**'
             - '**/*.md'
             - '.husky/**'
+            - '.cursor/**'
             - '.github/**'
             - '!.github/workflows/pr-build-live-branch.yml'
 
 concurrency:
-    # Cancel concurrent jobs on pull_request but not push, by including the run_id in the concurrency group for the latter.
-    group: build-${{ github.event_name == 'push' && github.run_id || 'pr' }}-${{ github.ref }}
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
     cancel-in-progress: true
 
 env:
@@ -32,7 +36,7 @@ permissions: {}
 jobs:
     build:
         if: github.repository_owner == 'woocommerce' && github.event.pull_request.draft == false && github.event.pull_request.user.login != 'github-actions[bot]'
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
         permissions:
             contents: write
             pull-requests: write
@@ -43,12 +47,10 @@ jobs:
 
             - name: Get current version
               id: version
-              uses: actions/github-script@v6.3.3
-              with:
-                  script:
-                      const { getVersion } = require( './.github/workflows/scripts/get-plugin-version' );
-                      const version = await getVersion( 'woocommerce' );
-                      core.setOutput( 'version', version );
+              run: |
+                  current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+                  echo "Detected version: $current_version"
+                  echo "version=$current_version" >> $GITHUB_OUTPUT
 
             - name: Setup WooCommerce Monorepo
               uses: ./.github/actions/setup-woocommerce-monorepo
@@ -118,7 +120,7 @@ jobs:
                     --form-string "secret=$SECRET"
 
             - name: Comment on PR with WordPress Playground details
-              uses: actions/github-script@v7
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               if: steps.prepare.outputs.plugin-data != '{}' && ! github.event.pull_request.head.repo.fork
               with:
                   script: |

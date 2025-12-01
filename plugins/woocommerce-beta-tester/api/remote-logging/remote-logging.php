@@ -98,7 +98,7 @@ function log_remote_event() {
 	$remote_logger = wc_get_container()->get( RemoteLogger::class );
 	$result        = $remote_logger->handle(
 		time(),
-		'critical',
+		'info',
 		'Test PHP event from WC Beta Tester',
 		array(
 			'source'         => 'wc-beta-tester',

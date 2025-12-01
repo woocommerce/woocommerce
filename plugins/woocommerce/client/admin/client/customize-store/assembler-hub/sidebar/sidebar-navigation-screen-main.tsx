@@ -3,7 +3,7 @@
  */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useContext } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
@@ -11,8 +11,9 @@ import {
 	__experimentalNavigatorButton as NavigatorButton,
 	// @ts-ignore No types for this exist yet.
 	__experimentalHeading as Heading,
+	Button,
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	siteLogo,
 	color,
@@ -28,21 +29,53 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
  * Internal dependencies
  */
 import { SidebarNavigationScreen } from './sidebar-navigation-screen';
-import { CustomizeStoreContext } from '~/customize-store/assembler-hub';
-import { FlowType } from '~/customize-store/types';
-import { trackEvent } from '~/customize-store/tracking';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import {
 	SidebarNavigationAnimationDirection,
 	SidebarNavigationContext,
 } from '../components/sidebar';
 import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
+import { trackEvent } from '~/customize-store/tracking';
+import { redirectToThemes } from '~/customize-store/utils';
+
+const PickYourTheme = () => {
+	return (
+		<div className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner">
+			<h2 className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner__title">
+				{ __( 'Pick your perfect theme', 'woocommerce' ) }
+			</h2>
+			<p className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner__description">
+				{ createInterpolateElement(
+					sprintf(
+						/* translators: %s is a line break */
+						__(
+							'Bring your vision to life%s— no coding required.',
+							'woocommerce'
+						),
+						'<br />'
+					),
+					{
+						br: <br />,
+					}
+				) }
+			</p>
+			<Button
+				variant="tertiary"
+				className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner__button"
+				onClick={ () => {
+					trackEvent(
+						'customize_your_store_sidebar_all_themes_click'
+					);
+					redirectToThemes();
+				} }
+			>
+				{ __( 'Browse free and paid themes', 'woocommerce' ) }
+			</Button>
+		</div>
+	);
+};
 
 export const SidebarNavigationScreenMain = () => {
-	const {
-		context: { flowType },
-	} = useContext( CustomizeStoreContext );
-	const aiOnline = flowType === FlowType.AIOnline;
 	const { navigate } = useContext( SidebarNavigationContext );
 
 	return (
@@ -111,15 +144,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __(
-										'Change the color palette',
-										'woocommerce'
-								  )
-								: __(
-										'Choose your color palette',
-										'woocommerce'
-								  ) }
+							{ __( 'Choose your color palette', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -145,9 +170,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change fonts', 'woocommerce' )
-								: __( 'Choose fonts', 'woocommerce' ) }
+							{ __( 'Choose fonts', 'woocommerce' ) }
 						</NavigatorButton>
 					</ItemGroup>
 					<div className="woocommerce-edit-site-sidebar-navigation-screen-patterns__group-header">
@@ -180,9 +203,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your header', 'woocommerce' )
-								: __( 'Choose your header', 'woocommerce' ) }
+							{ __( 'Choose your header', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -215,9 +236,7 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your homepage', 'woocommerce' )
-								: __( 'Design your homepage', 'woocommerce' ) }
+							{ __( 'Design your homepage', 'woocommerce' ) }
 						</NavigatorButton>
 						<NavigatorButton
 							as={ SidebarNavigationItem }
@@ -243,20 +262,10 @@ export const SidebarNavigationScreenMain = () => {
 								);
 							} }
 						>
-							{ aiOnline
-								? __( 'Change your footer', 'woocommerce' )
-								: __( 'Choose your footer', 'woocommerce' ) }
+							{ __( 'Choose your footer', 'woocommerce' ) }
 						</NavigatorButton>
-						{ /* TODO: Turn on this in Phrase 2  */ }
-						{ /* <NavigatorButton
-							as={ SidebarNavigationItem }
-							path="/customize-store/assembler-hub/pages"
-							withChevron
-							icon={ pages }
-						>
-							{ __( 'Add and edit other pages', 'woocommerce' ) }
-						</NavigatorButton> */ }
 					</ItemGroup>
+					<PickYourTheme />
 				</>
 			}
 		/>

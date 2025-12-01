@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { EllipsisMenu } from '@woocommerce/components';
-import { ONBOARDING_STORE_NAME } from '@woocommerce/data';
+import { onboardingStore } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
 
 export type TaskListMenuProps = {
@@ -12,11 +12,8 @@ export type TaskListMenuProps = {
 	hideTaskListText?: string;
 };
 
-export const TaskListMenu: React.FC< TaskListMenuProps > = ( {
-	id,
-	hideTaskListText,
-} ) => {
-	const { hideTaskList } = useDispatch( ONBOARDING_STORE_NAME );
+export const TaskListMenu = ( { id, hideTaskListText }: TaskListMenuProps ) => {
+	const { hideTaskList } = useDispatch( onboardingStore );
 
 	return (
 		<div className="woocommerce-card__menu woocommerce-card__header-item">

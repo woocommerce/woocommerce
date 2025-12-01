@@ -36,8 +36,20 @@ export const openEditorSettings = async ( { page } ) => {
 	}
 };
 
+/**
+ * Returns the editor canvas frame for Gutenberg interactions.
+ *
+ * The Gutenberg editor content can be contained within an iframe in some contexts.
+ * This helper function returns the content frame of the editor canvas iframe if it exists,
+ * or falls back to the main page if the iframe isn't present.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright page object
+ * @return {Promise<import('@playwright/test').FrameLocator|import('@playwright/test').Page>} The editor canvas frame or the original page
+ */
 export const getCanvas = async ( page ) => {
-	return page.frame( 'editor-canvas' ) || page;
+	return (
+		page.locator( 'iframe[name="editor-canvas"]' ).contentFrame() || page
+	);
 };
 
 export const goToPageEditor = async ( { page } ) => {
@@ -79,12 +91,13 @@ export const insertBlock = async ( page, blockName ) => {
 
 export const insertBlockByShortcut = async ( page, blockName ) => {
 	const canvas = await getCanvas( page );
-	await canvas.getByRole( 'button', { name: 'Add default block' } ).click();
-	await canvas
-		.getByRole( 'document', {
+	const emptyBlockField = canvas.getByText( 'Type / to choose a block' ).or(
+		canvas.getByRole( 'document', {
 			name: 'Empty block; start writing or type forward slash to choose a block',
 		} )
-		.pressSequentially( `/${ blockName }` );
+	);
+	await emptyBlockField.click();
+	await emptyBlockField.pressSequentially( `/${ blockName }` );
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 };
 

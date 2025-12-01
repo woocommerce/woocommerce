@@ -102,7 +102,7 @@ class EditLock {
 		unset( $response['wp-refresh-post-lock'] );
 
 		$order = wc_get_order( $order_id );
-		if ( ! $order || ( ! current_user_can( get_post_type_object( $order->get_type() )->cap->edit_post, $order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) ) {
+		if ( ! $order || ! is_a( $order, \WC_Order::class ) || ( ! current_user_can( get_post_type_object( $order->get_type() )->cap->edit_post, $order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) ) {
 			return $response;
 		}
 
@@ -143,7 +143,7 @@ class EditLock {
 		$order_ids = array_unique( array_map( 'absint', $data['wc-check-locked-orders'] ) );
 		foreach ( $order_ids as $order_id ) {
 			$order = wc_get_order( $order_id );
-			if ( ! $order ) {
+			if ( ! $order || ! is_a( $order, \WC_Order::class ) ) {
 				continue;
 			}
 

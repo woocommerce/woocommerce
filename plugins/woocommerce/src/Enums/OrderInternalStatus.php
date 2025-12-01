@@ -14,47 +14,47 @@ final class OrderInternalStatus {
 	 *
 	 * @var string
 	 */
-	const PENDING = 'wc-pending';
+	public const PENDING = 'wc-pending';
 
 	/**
 	 * The order is processing.
 	 *
 	 * @var string
 	 */
-	const PROCESSING = 'wc-processing';
+	public const PROCESSING = 'wc-processing';
 
 	/**
 	 * The order is on hold.
 	 *
 	 * @var string
 	 */
-	const ON_HOLD = 'wc-on-hold';
+	public const ON_HOLD = 'wc-on-hold';
 
 	/**
 	 * The order is completed.
 	 *
 	 * @var string
 	 */
-	const COMPLETED = 'wc-completed';
+	public const COMPLETED = 'wc-completed';
 
 	/**
 	 * The order is cancelled.
 	 *
 	 * @var string
 	 */
-	const CANCELLED = 'wc-cancelled';
+	public const CANCELLED = 'wc-cancelled';
 
 	/**
 	 * The order is refunded.
 	 *
 	 * @var string
 	 */
-	const REFUNDED = 'wc-refunded';
+	public const REFUNDED = 'wc-refunded';
 
 	/**
 	 * The order is failed.
 	 *
 	 * @var string
 	 */
-	const FAILED = 'wc-failed';
+	public const FAILED = 'wc-failed';
 }

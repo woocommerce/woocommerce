@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { __ } from '@wordpress/i18n';
 import { Button, Modal } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -12,9 +11,16 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './modals.scss';
-import { getWooPaymentsSetupLiveAccountLink } from '~/settings-payments/utils';
+import {
+	getWooPaymentsSetupLiveAccountLink,
+	recordPaymentsEvent,
+} from '~/settings-payments/utils';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
+import {
+	wooPaymentsExtensionSlug,
+	wooPaymentsProviderId,
+	wooPaymentsSuggestionId,
+} from '~/settings-payments/constants';
 
 interface WooPaymentsReadyToTestModalProps {
 	/**
@@ -50,6 +56,13 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	 * Redirects the user to the WooPayments setup live account link.
 	 */
 	const handleActivatePayments = () => {
+		// Record the event when the user clicks on the "Activate Payments" button.
+		recordPaymentsEvent( 'switch_to_live_account_click', {
+			provider_id: wooPaymentsProviderId,
+			suggestion_id: wooPaymentsSuggestionId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
+		} );
+
 		setIsActivatingPayments( true );
 
 		window.location.href = getWooPaymentsSetupLiveAccountLink();
@@ -60,6 +73,13 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 	 * Redirects the user to the WooCommerce admin store setup page.
 	 */
 	const handleContinueStoreSetup = () => {
+		// Record the event when the user clicks on the "Continue Store Setup" button.
+		recordPaymentsEvent( 'continue_store_setup_click', {
+			provider_id: wooPaymentsProviderId,
+			suggestion_id: wooPaymentsSuggestionId,
+			provider_extension_slug: wooPaymentsExtensionSlug,
+		} );
+
 		setIsContinuingStoreSetup( true );
 
 		window.location.href = getAdminLink( 'admin.php?page=wc-admin' );
@@ -89,7 +109,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 										components: {
 											link: (
 												<Link
-													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/"
+													href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/"
 													target="_blank"
 													rel="noreferrer"
 													type="external"
@@ -107,7 +127,8 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 						<div className="woocommerce-woopayments-modal__content__item-flex">
 							<img
 								src={ WC_ASSET_URL + 'images/icons/store.svg' }
-								alt="store icon"
+								alt=""
+								role="presentation"
 							/>
 							<div className="woocommerce-woopayments-modal__content__item-flex__description">
 								<h3>
@@ -130,7 +151,8 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 									src={
 										WC_ASSET_URL + 'images/icons/dollar.svg'
 									}
-									alt="dollar icon"
+									alt=""
+									role="presentation"
 								/>
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>
@@ -143,7 +165,7 @@ export const WooPaymentsPostSandboxAccountSetupModal = ( {
 										<p>
 											{ interpolateComponents( {
 												mixedString: __(
-													'Provide some additional details about your business so you can being accepting real payments. {{link}}Learn more{{/link}}',
+													'Provide some additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
 													'woocommerce'
 												),
 												components: {

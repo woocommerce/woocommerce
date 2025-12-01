@@ -1,0 +1,20 @@
+{
+	"name": "woocommerce/related-products",
+	"title": "Related Products",
+	"icon": "product",
+	"description": "Display related products.",
+	"category": "woocommerce",
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"align": true,
+		"reusable": false,
+		"inserter": false
+	},
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [ "postId", "postType", "queryId" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

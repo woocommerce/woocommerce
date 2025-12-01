@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import { Button } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { IMPORT_STORE_NAME } from '@woocommerce/data';
+import { importStore } from '@woocommerce/data';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 import { recordEvent } from '@woocommerce/tracks';
@@ -189,7 +189,7 @@ function HistoricalDataActions( {
 
 export default compose( [
 	withSelect( ( select ) => {
-		const { getFormSettings } = select( IMPORT_STORE_NAME );
+		const { getFormSettings } = select( importStore );
 
 		const { period: selectedPeriod, skipPrevious: skipChecked } =
 			getFormSettings();
@@ -200,8 +200,7 @@ export default compose( [
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { updateImportation, setImportStarted } =
-			dispatch( IMPORT_STORE_NAME );
+		const { updateImportation, setImportStarted } = dispatch( importStore );
 		const { createNotice } = dispatch( 'core/notices' );
 		return {
 			createNotice,

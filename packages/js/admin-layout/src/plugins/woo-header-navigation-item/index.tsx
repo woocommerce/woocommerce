@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import { Slot, Fill } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
 import {
@@ -11,6 +10,10 @@ import {
 
 export const WC_HEADER_NAVIGATION_SLOT_NAME =
 	'woocommerce_header_navigation_item';
+
+type WooHeaderNavigationItemProps = {
+	order?: number;
+} & Omit< React.ComponentProps< typeof Fill >, 'name' >;
 
 /**
  * Create a Fill for extensions to add items to the WooCommerce Admin
@@ -31,12 +34,10 @@ export const WC_HEADER_NAVIGATION_SLOT_NAME =
  * @param {Array}  param0.children - Node children.
  * @param {Array}  param0.order    - Node order.
  */
-export const WooHeaderNavigationItem: React.FC< {
-	children?: React.ReactNode;
-	order?: number;
-} > & {
-	Slot: React.FC< React.ComponentProps< typeof Slot > >;
-} = ( { children, order = 1 } ) => {
+export const WooHeaderNavigationItem = ( {
+	children,
+	order = 1,
+}: WooHeaderNavigationItemProps ) => {
 	return (
 		<Fill name={ WC_HEADER_NAVIGATION_SLOT_NAME }>
 			{ ( fillProps ) => {
@@ -46,7 +47,11 @@ export const WooHeaderNavigationItem: React.FC< {
 	);
 };
 
-WooHeaderNavigationItem.Slot = ( { fillProps } ) => (
+WooHeaderNavigationItem.Slot = ( {
+	fillProps,
+}: WooHeaderNavigationItemProps & {
+	fillProps?: React.ComponentProps< typeof Slot >[ 'fillProps' ];
+} ) => (
 	<Slot name={ WC_HEADER_NAVIGATION_SLOT_NAME } fillProps={ fillProps }>
 		{ sortFillsByOrder }
 	</Slot>

@@ -4,7 +4,7 @@
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { Link } from '@woocommerce/components';
 import {
-	EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME,
+	experimentalProductShippingClassesStore,
 	ProductShippingClass,
 	PartialProduct,
 } from '@woocommerce/data';
@@ -59,7 +59,7 @@ function mapShippingClassToSelectOption(
 /*
  * Query to fetch shipping classes.
  */
-const shippingClassRequestQuery = {};
+const shippingClassRequestQuery: Partial< ProductShippingClass > = {};
 
 function extractDefaultShippingClassFromProduct(
 	categories?: PartialProduct[ 'categories' ],
@@ -89,7 +89,7 @@ export function Edit( {
 	const blockProps = useWooBlockProps( attributes );
 
 	const { createProductShippingClass } = useDispatch(
-		EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+		experimentalProductShippingClassesStore
 	);
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
@@ -135,12 +135,11 @@ export function Edit( {
 	const { shippingClasses } = useSelect(
 		( select ) => {
 			const { getProductShippingClasses } = select(
-				EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
+				experimentalProductShippingClassesStore
 			);
 			return {
 				shippingClasses:
 					( isInSelectedTab &&
-						// @ts-expect-error Todo: awaiting more global fix, demo: https://github.com/woocommerce/woocommerce/pull/54146
 						getProductShippingClasses(
 							shippingClassRequestQuery
 						) ) ||

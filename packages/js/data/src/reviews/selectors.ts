@@ -15,6 +15,10 @@ export const getReviews = (
 	return ids.map( ( id ) => state.data[ id ] );
 };
 
+export const getReview = ( state: ReviewsState, id: number ) => {
+	return state.data[ id ];
+};
+
 export const getReviewsTotalCount = (
 	state: ReviewsState,
 	query: ReviewsQueryParams
@@ -32,4 +36,8 @@ export const getReviewsError = (
 ) => {
 	const stringifiedQuery = JSON.stringify( query );
 	return state.errors[ stringifiedQuery ];
+};
+
+export const getReviewError = ( state: ReviewsState, id: number ) => {
+	return state.errors[ id ];
 };

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Migrate `Countries` and `Payments Gateways` stores to improve type definitions

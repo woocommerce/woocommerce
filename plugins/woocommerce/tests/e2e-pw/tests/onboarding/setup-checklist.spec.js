@@ -1,86 +1,164 @@
-const { tags, test, expect } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import {
+	WC_ADMIN_API_PATH,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
-const get_task_list_state = async ( wcAdminApi ) => {
-	const {
-		statusText,
-		data: { woocommerce_task_list_hidden },
-	} = await wcAdminApi.get( 'options?options=woocommerce_task_list_hidden' );
+/**
+ * Internal dependencies
+ */
+import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-	expect( statusText ).toEqual( 'OK' );
+const test = baseTest.extend( {
+	storageState: ADMIN_STATE_PATH,
 
-	return woocommerce_task_list_hidden;
-};
+	page: async ( { page, restApi }, use ) => {
+		const initialTaskListState = await restApi.get(
+			`${ WC_ADMIN_API_PATH }/options?options=woocommerce_task_list_hidden`
+		);
 
-const update_task_list_state = async ( wcAdminApi, new_state ) => {
-	// Send request to update task list.
-	const data = { woocommerce_task_list_hidden: new_state };
-	const { statusText } = await wcAdminApi.put( 'options', data );
-	expect( statusText ).toEqual( 'OK' );
-
-	// Verify task list was updated correctly.
-	const actual_state = await get_task_list_state( wcAdminApi );
-	expect( actual_state ).toEqual( new_state );
-};
-
-let init_task_list_state;
-
-// TODO (E2E Audit): This test should be combined with other WC Homepage setup tests like the tests in activate-and-setup/stats-overview.spec.js into a single spec.
-test.describe( 'WC Home Task List >', () => {
-	test.use( { storageState: ADMIN_STATE_PATH } );
-
-	test.beforeAll( async ( { wcAdminApi } ) => {
-		await test.step( 'Remember initial state of task list.', async () => {
-			init_task_list_state = await get_task_list_state( wcAdminApi );
+		// Ensure task list is visible.
+		await restApi.put( `${ WC_ADMIN_API_PATH }/options`, {
+			woocommerce_task_list_hidden: 'no',
 		} );
 
-		await test.step( 'Show the home task list', async () => {
-			// Skip this step if task list is already visible.
-			if ( init_task_list_state === 'no' ) {
-				return;
+		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+
+		await use( page );
+
+		// Reset the task list to its initial state.
+		await restApi.put(
+			`${ WC_ADMIN_API_PATH }/options`,
+			initialTaskListState.data
+		);
+	},
+
+	nonSupportedWooPaymentsCountryPage: async ( { page, restApi }, use ) => {
+		// Ensure store's base country location is a WooPayments non-supported country (e.g. AF).
+		// Otherwise, the WooPayments task page logic or WooPayments redirects will kick in.
+		const initialDefaultCountry = await restApi.get(
+			`${ WC_API_PATH }/settings/general/woocommerce_default_country`
+		);
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_default_country`,
+			{
+				value: 'AF',
 			}
+		);
 
-			await update_task_list_state( wcAdminApi, 'no' );
+		await use( page );
+
+		// Reset the default country to its initial state.
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_default_country`,
+			{
+				value: initialDefaultCountry.data.value,
+			}
+		);
+	},
+} );
+
+test(
+	'Can hide the task list',
+	{ tag: [ tags.NOT_E2E ] },
+	async ( { page } ) => {
+		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+		await test.step( 'Load the WC Admin page.', async () => {
+			await expect(
+				page.getByRole( 'button', { name: 'Choose your theme' } )
+			).toBeVisible();
+			await expect( page.getByText( 'Store management' ) ).toBeHidden();
 		} );
+
+		await test.step( 'Hide the task list', async () => {
+			await page
+				.getByRole( 'button', { name: 'Task List Options' } )
+				.first()
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Hide setup list' } )
+				.click();
+			await expect(
+				page.getByRole( 'heading', {
+					name: 'Start customizing your store',
+				} )
+			).toBeHidden();
+			await expect( page.getByText( 'Store management' ) ).toBeVisible();
+		} );
+	}
+);
+
+test(
+	'Payments task list item links to Payments settings page',
+	{ tag: [ tags.NOT_E2E ] },
+	/**
+	 * @param {{ nonSupportedWooPaymentsCountryPage: import('@playwright/test').Page }} page
+	 */
+	async ( { nonSupportedWooPaymentsCountryPage } ) => {
+		await nonSupportedWooPaymentsCountryPage.goto(
+			'wp-admin/admin.php?page=wc-admin'
+		);
+		await nonSupportedWooPaymentsCountryPage
+			.locator( '.woocommerce-task-list__item' )
+			.filter( { hasText: 'Set up payments' } )
+			.click();
+
+		await expect(
+			nonSupportedWooPaymentsCountryPage.locator(
+				'.woocommerce-layout__header-wrapper > h1'
+			)
+		).toHaveText( 'Settings' );
+	}
+);
+
+test( 'Can connect to WooCommerce.com', async ( { page } ) => {
+	await page.goto( 'wp-admin/admin.php?page=wc-admin' );
+	await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
+		await page
+			.getByRole( 'menuitem', { name: 'Total sales' } )
+			.waitFor( { state: 'visible' } );
 	} );
 
-	test.afterAll( async ( { wcAdminApi } ) => {
-		await test.step( 'Revert task list state', async () => {
-			await update_task_list_state( wcAdminApi, init_task_list_state );
+	await test.step( 'Go to the extensions tab and connect store', async () => {
+		const connectButton = page.getByRole( 'link', {
+			name: 'Connect',
 		} );
+		await page.goto(
+			'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
+		);
+		const waitForSubscriptionsResponse = page.waitForResponse(
+			( response ) =>
+				response
+					.url()
+					.includes( '/wp-json/wc/v3/marketplace/subscriptions' ) &&
+				response.status() === 200
+		);
+		await expect(
+			page.getByText(
+				'Hundreds of vetted products and services. Unlimited potential.'
+			)
+		).toBeVisible();
+		await expect(
+			page.getByRole( 'button', { name: 'My Subscriptions' } )
+		).toBeVisible();
+		await expect( connectButton ).toBeVisible();
+		await waitForSubscriptionsResponse;
+		await expect( connectButton ).toHaveAttribute(
+			'href',
+			/my-subscriptions/
+		);
+		await connectButton.click();
 	} );
 
-	test(
-		'Can hide the task list',
-		{ tag: [ tags.NOT_E2E ] },
-		async ( { page } ) => {
-			await test.step( 'Load the WC Admin page.', async () => {
-				await page.goto( 'wp-admin/admin.php?page=wc-admin' );
-				await expect(
-					page.getByText( 'Customize your store' )
-				).toBeVisible();
-				await expect(
-					page.getByText( 'Store management' )
-				).toBeHidden();
-			} );
-
-			await test.step( 'Hide the task list', async () => {
-				await page
-					.getByRole( 'button', { name: 'Task List Options' } )
-					.first()
-					.click();
-				await page
-					.getByRole( 'button', { name: 'Hide setup list' } )
-					.click();
-				await expect(
-					page.getByRole( 'heading', {
-						name: 'Start customizing your store',
-					} )
-				).toBeHidden();
-				await expect(
-					page.getByText( 'Store management' )
-				).toBeVisible();
-			} );
-		}
-	);
+	await test.step( 'Check that we are sent to wp.com', async () => {
+		await expect( page.url() ).toContain( 'wordpress.com/log-in' );
+		await expect(
+			page.getByRole( 'heading', {
+				name: 'Log in to Woo with WordPress.com',
+			} )
+		).toBeVisible( { timeout: 30000 } );
+	} );
 } );

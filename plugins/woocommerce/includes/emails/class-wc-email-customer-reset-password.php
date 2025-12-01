@@ -60,16 +60,24 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 			$this->customer_email = true;
 
 			$this->title       = __( 'Reset password', 'woocommerce' );
-			$this->description = __( 'Customer "reset password" emails are sent when customers reset their passwords.', 'woocommerce' );
+			$this->description = __( 'Send an email to customers notifying them that their password has been reset', 'woocommerce' );
 
 			$this->template_html  = 'emails/customer-reset-password.php';
 			$this->template_plain = 'emails/plain/customer-reset-password.php';
+
+			$this->email_group = 'accounts';
 
 			// Trigger.
 			add_action( 'woocommerce_reset_password_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.
 			parent::__construct();
+
+			// Must be after parent's constructor which sets `block_email_editor_enabled` property.
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Account password reset', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their password has been reset.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -164,6 +172,27 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 				)
 			);
 		}
+
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'user_id'       => $this->user_id,
+					'user_login'    => $this->user_login,
+					'reset_key'     => $this->reset_key,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
+				)
+			);
+		}
+
 
 		/**
 		 * Default content to show below main email content.

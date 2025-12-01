@@ -1,5 +1,5 @@
-name: 'On demand tests run'
-run-name: On demand tests run - ${{ inputs.trigger }}
+name: 'On demand checks'
+run-name: On demand checks ${{ inputs.custom-trigger != '' && inputs.custom-trigger || inputs.trigger }}
 
 on:
   workflow_dispatch:
@@ -9,12 +9,9 @@ on:
         description: 'Event name: it will be used to filter the jobs to run in ci.yml.'
         required: true
         options:
-          - push
-          - daily-checks
           - pre-release
-          - on-demand
           - custom
-        default: on-demand
+        default: pre-release
       custom-trigger:
         type: string
         description: 'Custom event name: In case the `Event name` choice is `custom`, this field is required.'

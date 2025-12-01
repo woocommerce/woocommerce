@@ -1,0 +1,75 @@
+.wc-block-components-checkout-payment-methods * {
+	pointer-events: all; // Overrides parent disabled component in editor context
+}
+
+.wc-block-checkout__payment-method {
+	.wc-block-components-radio-control__option::after {
+		content: none;
+	}
+
+	.wc-block-components-radio-control-accordion-option
+		.wc-block-components-radio-control__option {
+		border-width: 0;
+	}
+
+	.wc-block-components-radio-control-accordion-option:first-child::after {
+		border-top-left-radius: $universal-border-radius;
+		border-top-right-radius: $universal-border-radius;
+	}
+
+	.wc-block-components-radio-control-accordion-option:last-child::after {
+		border-bottom-left-radius: $universal-border-radius;
+		border-bottom-right-radius: $universal-border-radius;
+	}
+
+	.wc-block-components-radio-control__option:last-child::after,
+	.wc-block-components-radio-control-accordion-option:last-child::after {
+		border-width: 1px;
+	}
+
+	.wc-block-components-radio-control-accordion-option {
+		.wc-block-components-radio-control__option::after {
+			border-width: 0;
+		}
+		.wc-block-components-radio-control__label {
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			border-width: 0;
+		}
+        // Targets payment card icons used in payment options
+		.wc-block-components-radio-control__label > img {
+			height: 24px;
+			max-height: 24px;
+			max-width: 100%;
+			object-fit: contain;
+			object-position: left;
+		}
+	}
+
+	.wc-block-components-radio-control.disable-radio-control {
+		.wc-block-components-radio-control__option {
+			padding-left: $gap;
+		}
+
+		.wc-block-components-radio-control__input {
+			display: none;
+		}
+	}
+
+	.wc-block-components-checkout-step__description-payments-aligned {
+		@include font-regular-locked;
+		margin: 0;
+		padding-top: $gap-small;
+		padding-bottom: $gap-smaller;
+	}
+}
+.wc-block-components-radio-control-accordion-content {
+	@include font-regular-locked;
+	padding: 0 $gap $gap;
+
+	&:empty,
+	&:has(> *:only-child:empty) {
+		display: none;
+	}
+}

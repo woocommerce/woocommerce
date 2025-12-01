@@ -24,6 +24,7 @@ import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
 import Notice from '../notice/notice';
+import MySubscriptionsAccount from './my-subscriptions-account';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -140,11 +141,30 @@ export default function MySubscriptions(): JSX.Element {
 					onClose={ handleConnectNoticeClose }
 				/>
 			) }
+
+			{ ! wccomSettings?.has_host_plan_orders &&
+				wccomSettings?.connection_url_notice && (
+					<Notice
+						id={ 'woo-connection-url-notice' }
+						description={ wccomSettings?.connection_url_notice }
+						isDismissible={ false }
+						variant="error"
+					>
+						<Button
+							href={ connectUrl( 'wc-admin', true ) }
+							variant="secondary"
+						>
+							{ __( 'Reconnect', 'woocommerce' ) }
+						</Button>
+					</Notice>
+				) }
+
 			<div className="woocommerce-marketplace__my-subscriptions">
 				<InstallModal />
 				<section className="woocommerce-marketplace__my-subscriptions__notices">
 					<Notices />
 				</section>
+				<MySubscriptionsAccount />
 				<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 					<header className="woocommerce-marketplace__my-subscriptions__header">
 						<div className="woocommerce-marketplace__my-subscriptions__header-content">

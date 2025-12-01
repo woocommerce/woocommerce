@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { Button, Modal, CheckboxControl } from '@wordpress/components';
 import { withDispatch } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { initializeExPlat } from '@woocommerce/explat';
 
@@ -111,7 +111,7 @@ const BetaFeaturesTrackingModal = ( { updateOptions } ) => {
 
 export const BetaFeaturesTrackingContainer = compose(
 	withDispatch( ( dispatch ) => {
-		const { updateOptions } = dispatch( OPTIONS_STORE_NAME );
+		const { updateOptions } = dispatch( optionsStore );
 		return { updateOptions };
 	} )
 )( BetaFeaturesTrackingModal );

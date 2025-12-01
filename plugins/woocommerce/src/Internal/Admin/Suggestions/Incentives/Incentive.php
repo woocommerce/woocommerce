@@ -178,6 +178,18 @@ abstract class Incentive {
 			'timestamp' => $timestamp ?? time(),
 		);
 
+		/**
+		 * Fires when a payments extension suggestion incentive is dismissed.
+		 *
+		 * @param string $id            The incentive ID.
+		 * @param string $suggestion_id The suggestion ID the incentive belongs to.
+		 * @param string $context       The context ID in which the incentive is dismissed.
+		 *                              Defaults to 'all'.
+		 *
+		 * @since 9.9.0
+		 */
+		do_action( 'woocommerce_admin_payments_extension_suggestion_incentive_dismissed', $id, $this->suggestion_id, $context );
+
 		return $this->save_all_dismissed_incentives( $all_dismissed_incentives );
 	}
 
@@ -238,12 +250,20 @@ abstract class Incentive {
 			return array();
 		}
 
-		$dismissals = array_filter(
-			$dismissed_incentives,
-			fn( $dismissed_incentive ) => $id === $dismissed_incentive['id']
+		$dismissals = array_values(
+			array_filter(
+				$dismissed_incentives,
+				fn( $dismissed_incentive ) => $id === $dismissed_incentive['id']
+			)
 		);
 
-		return array_column( $dismissals, 'context' );
+		return array_map(
+			fn( $dismissed_incentive ) => array(
+				'timestamp' => $dismissed_incentive['timestamp'],
+				'context'   => $dismissed_incentive['context'],
+			),
+			$dismissals
+		);
 	}
 
 	/**

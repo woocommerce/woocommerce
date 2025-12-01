@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Make the E2E test `merchant/settings-woo-com.spec.js` runnable on Pressable.

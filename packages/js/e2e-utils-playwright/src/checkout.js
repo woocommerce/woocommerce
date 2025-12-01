@@ -39,6 +39,7 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 		county = '',
 		prefecture = '',
 		municipality = '',
+		phone = '',
 		isPostalCode = false,
 	} = details;
 
@@ -61,11 +62,6 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 
 	await page
 		.getByRole( 'group', { name: label[ type ] } )
-		.getByLabel( 'Country' )
-		.selectOption( country );
-
-	await page
-		.getByRole( 'group', { name: label[ type ] } )
 		.getByLabel( 'First name' )
 		.fill( firstName );
 
@@ -78,6 +74,13 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 		.getByRole( 'group', { name: label[ type ] } )
 		.getByLabel( 'Address', { exact: true } )
 		.fill( address );
+
+	if ( country ) {
+		await page
+			.getByRole( 'group', { name: label[ type ] } )
+			.getByLabel( 'Country' )
+			.selectOption( country );
+	}
 
 	if ( city ) {
 		await page
@@ -173,6 +176,13 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 			.getByRole( 'group', { name: label[ type ] } )
 			.getByLabel( isPostalCode ? 'Postal code' : 'ZIP Code' )
 			.fill( zip );
+	}
+
+	if ( phone ) {
+		await page
+			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'textbox', { name: 'Phone' } )
+			.fill( phone );
 	}
 }
 

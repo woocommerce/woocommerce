@@ -99,10 +99,12 @@ class DataSynchronizerTests extends \HposTestCase {
 	public function test_get_ids_orders_pending_sync_migration() {
 		$order_collection = $this->init_dirty_orders( 'posts' );
 		$this->assertEquals( 2, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertTrue( $this->sut->has_orders_pending_sync() );
 		$this->assertArraySubset( $order_collection['post_orders'], $this->sut->get_next_batch_to_process( 10 ) );
 
 		$this->sut->process_batch( $order_collection['post_orders'] );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertFalse( $this->sut->has_orders_pending_sync() );
 	}
 
 	/**
@@ -111,10 +113,12 @@ class DataSynchronizerTests extends \HposTestCase {
 	public function test_get_ids_orders_pending_sync_backfill() {
 		$order_collection = $this->init_dirty_orders( 'cot' );
 		$this->assertEquals( 3, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertTrue( $this->sut->has_orders_pending_sync() );
 		$this->assertArraySubset( $order_collection['cot_orders'], $this->sut->get_next_batch_to_process( 10 ) );
 
 		$this->sut->process_batch( $order_collection['cot_orders'] );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertFalse( $this->sut->has_orders_pending_sync() );
 	}
 
 	/**
@@ -125,16 +129,19 @@ class DataSynchronizerTests extends \HposTestCase {
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
 		$order = OrderHelper::create_complex_data_store_order();
 		$this->assertEquals( 1, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertTrue( $this->sut->has_orders_pending_sync() );
 		// Simulate that order was updated some time ago, and we are backfilling just now.
 		$order->set_date_modified( time() - 1000 );
 		$order->save();
 
 		$this->sut->process_batch( array( $order->get_id() ) );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertFalse( $this->sut->has_orders_pending_sync() );
 
 		// So far so good, now if we change the authoritative source to posts, we should still have 0 order pending sync.
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
 		$this->assertEquals( 0, $this->sut->get_current_orders_pending_sync_count() );
+		$this->assertFalse( $this->sut->has_orders_pending_sync() );
 	}
 
 	/**
@@ -499,6 +506,90 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox When an order sync is performed, changes to meta data should propagate from the CPT to the HPOS datastore
+	 * preserving number of values in metadata as well as handling values deleted at the source.
+	 *
+	 * @return void
+	 */
+	public function test_sync_propagates_meta_data_to_hpos(): void {
+		$legacy_handler = wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler::class );
+
+		// Sync disabled, no sync-on-read and legacy authoritative.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_false' );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		// Create (and sync) an order with some metadata.
+		$legacy_order = OrderHelper::create_order();
+		$legacy_order->add_meta_data( 'foo', 'bar' );
+		$legacy_order->add_meta_data( 'quux', 'yes' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		// Load the order from HPOS and confirm metadata matches.
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEquals( $hpos_order->get_meta( 'foo' ), 'bar' );
+		$this->assertEquals( $hpos_order->get_meta( 'quux' ), 'yes' );
+
+		// Add 'baz' to 'foo' meta.
+		$legacy_order = wc_get_order( $legacy_order->get_id() );
+		$legacy_order->add_meta_data( 'foo', 'baz' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEqualsCanonicalizing( array_column( $hpos_order->get_meta( 'foo', false ), 'value' ), array( 'bar', 'baz' ) );
+
+		// Remove 'quux' meta.
+		$legacy_order = wc_get_order( $legacy_order->get_id() );
+		$legacy_order->delete_meta_data( 'quux' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEquals( $hpos_order->get_meta( 'quux' ), '' );
+
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
+	 * @testDox When sync-on-read is enabled, orders with placeholder posts are not updated with placeholder data during sync-on-read.
+	 */
+	public function test_sync_on_read_with_placeholder_post() {
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_billing_first_name( 'Duke' );
+		$order->set_billing_last_name( 'Ellington' );
+		$order->save();
+
+		add_filter( 'pre_option_' . $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, fn() => 'yes', 999 );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+
+		// Ensure placeholder exists.
+		$this->assertEquals( $this->sut::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order->get_id() ) );
+
+		// Read order to trigger sync-on-read.
+		$order = wc_get_order( $order->get_id() );
+
+		// Ensure values were not updated based on placeholder.
+		$this->assertEquals( 'Duke', $order->get_billing_first_name() );
+		$this->assertEquals( 'Ellington', $order->get_billing_last_name() );
+		$this->assertEquals( OrderStatus::PROCESSING, $order->get_status() );
+
+		// Save order to update placeholder.
+		$order->save();
+
+		// Confirm placeholder has been updated.
+		$this->assertNotEquals( $this->sut::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order->get_id() ) );
+
+		remove_all_filters( 'pre_option_' . $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
 	 * @testDox Orders for migration are picked by ID sorted.
 	 */
 	public function test_migration_sort() {
@@ -672,7 +763,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		);
 		$sync_setting = array_values( $sync_setting )[0];
 		$this->assertEquals( $sync_setting['value'], 'no' );
-		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? "There's 1 order pending sync" : "There's currently 1 order out of sync" ) );
+		$this->assertTrue( str_contains( $sync_setting['desc_tip'], $auth_table_change_allowed_with_sync_pending ? "There are orders pending sync" : "There are currently orders out of sync" ) );
 		$this->assertTrue(
 			str_contains(
 				$sync_setting['desc_tip'],

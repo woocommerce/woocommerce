@@ -29,14 +29,14 @@ type EditProductLinkModalProps = {
 	) => Promise< { slug: string; permalink: string } | undefined >;
 };
 
-export const EditProductLinkModal: React.FC< EditProductLinkModalProps > = ( {
+export const EditProductLinkModal = ( {
 	product,
 	permalinkPrefix,
 	permalinkSuffix,
 	onCancel,
 	onSaved,
 	saveHandler,
-} ) => {
+}: EditProductLinkModalProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
 	const [ isSaving, setIsSaving ] = useState< boolean >( false );
 	const [ slug, setSlug ] = useState(

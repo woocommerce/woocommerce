@@ -2,8 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { PLUGINS_STORE_NAME } from '@woocommerce/data';
-import type { PluginSelectors } from '@woocommerce/data';
+import { pluginsStore } from '@woocommerce/data';
 import { differenceWith } from 'lodash';
 
 /**
@@ -25,9 +24,7 @@ export const useRecommendedChannels = (): UseRecommendedChannels => {
 		) as Selectors;
 		const { data, error } = getRecommendedChannels();
 
-		const { getActivePlugins } = select(
-			PLUGINS_STORE_NAME
-		) as PluginSelectors;
+		const { getActivePlugins } = select( pluginsStore );
 		const activePlugins = getActivePlugins();
 
 		/**

@@ -13,6 +13,8 @@ export type TaskType = {
 	isDismissable: boolean;
 	isDismissed: boolean;
 	isSnoozed: boolean;
+	isInProgress: boolean;
+	inProgressLabel: string;
 	isVisible: boolean;
 	isSnoozeable: boolean;
 	isDisabled: boolean;
@@ -36,6 +38,14 @@ export type TaskType = {
 		woocommerceTaxActivated?: boolean;
 		woocommerceShippingActivated?: boolean;
 		wooPaymentsIncentiveId?: string;
+		wooPaymentsIsActive?: boolean;
+		wooPaymentsIsInstalled?: boolean;
+		wooPaymentsSettingsCountryIsSupported?: boolean;
+		wooPaymentsIsOnboarded?: boolean;
+		wooPaymentsHasTestAccount?: boolean;
+		wooPaymentsHasOtherProvidersEnabled?: boolean;
+		wooPaymentsHasOtherProvidersNeedSetup?: boolean;
+		wooPaymentsHasOnlineGatewaysEnabled?: boolean;
 	};
 	// Possibly added in DeprecatedTasks.mergeDeprecatedCallbackFunctions
 	isDeprecated?: boolean;
@@ -137,6 +147,8 @@ export type RevenueTypeSlug =
 	| '50000-250000'
 	| 'more-than-250000';
 
+export type TagsSlug = 'marketplace';
+
 /** Types should match the schema in plugins/woocommerce/src/Admin/API/OnboardingProfile.php */
 export type ProfileItems = {
 	business_extensions?: string[] | null;
@@ -170,7 +182,6 @@ export type CoreProfilerStep =
 	| 'user-profile'
 	| 'business-info'
 	| 'plugins'
-	| 'intro-builder'
 	| 'skip-guided-setup';
 
 export type CoreProfilerCompletedSteps = Record<
@@ -233,11 +244,13 @@ export type Extension = {
 	 * Use this flag if your plugin requires Jetpack Connection to work properly.
 	 */
 	requires_jpc?: boolean;
+	tags?: TagsSlug[];
+	install_external?: boolean;
 };
 
 export type InstallAndActivatePluginsAsyncResponse = {
 	job_id: string;
-	status: 'pendi<ng' | 'in-progress' | 'completed' | 'failed';
+	status: 'pending' | 'in-progress' | 'completed' | 'failed';
 	plugins: Array< {
 		status: 'pending' | 'installing' | 'installed' | 'activated' | 'failed';
 		errors: string[];

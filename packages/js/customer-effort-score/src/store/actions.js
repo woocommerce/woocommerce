@@ -23,18 +23,18 @@ export function setCesSurveyQueue( queue ) {
 /**
  * Add a new CES track to the state.
  *
- * @param {Object} args                All arguments.
- * @param {string} args.action         action name for the survey
- * @param {string} args.title          title for the snackback
- * @param {string} args.description    description for feedback modal.
- * @param {string} args.noticeLabel    noticeLabel for notice.
- * @param {string} args.firstQuestion  first question for modal survey
- * @param {string} args.secondQuestion second question for modal survey
- * @param {string} args.icon           optional icon for notice.
- * @param {string} args.pageNow        value of window.pagenow
- * @param {string} args.adminPage      value of window.adminpage
- * @param {string} args.onsubmitLabel  label for the snackback onsubmit
- * @param {Object} args.props          object for optional props
+ * @param {Object} args                 All arguments.
+ * @param {string} args.action          action name for the survey
+ * @param {string} args.title           title for the snackback
+ * @param {string} args.description     description for feedback modal.
+ * @param {string} args.noticeLabel     noticeLabel for notice.
+ * @param {string} args.firstQuestion   first question for modal survey
+ * @param {string} args.secondQuestion  second question for modal survey
+ * @param {string} [args.icon]          optional icon for notice.
+ * @param {string} [args.pageNow]       optional value of window.pagenow, default to window.pagenow
+ * @param {string} [args.adminPage]     optional value of window.adminpage, default to window.adminpage
+ * @param {string} [args.onsubmitLabel] optional label for the snackback onsubmit, default to undefined
+ * @param {Object} args.props           object for optional props
  */
 export function addCesSurvey( {
 	action,

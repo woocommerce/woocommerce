@@ -1,0 +1,16 @@
+{
+	"name": "woocommerce/add-to-cart-with-options-grouped-product-selector",
+	"title": "Grouped Product Selector (Beta)",
+	"description": "Display a group of products that can be added to the cart.",
+	"category": "woocommerce-product-elements",
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [ "postId" ],
+	"ancestor": [ "woocommerce/add-to-cart-with-options" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"supports": {
+		"interactivity": true
+	},
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/add-to-cart-with-options-grouped-product-selector"
+}

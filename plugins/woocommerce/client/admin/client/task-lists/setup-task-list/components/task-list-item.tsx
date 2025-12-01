@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { ONBOARDING_STORE_NAME, TaskType } from '@woocommerce/data';
+import { onboardingStore, TaskType } from '@woocommerce/data';
 import { TaskItem, useSlot } from '@woocommerce/experimental';
 import { useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
@@ -18,17 +18,15 @@ export type TaskListItemProps = {
 	trackClick: () => void;
 };
 
-export const TaskListItem: React.FC< TaskListItemProps > = ( {
+export const TaskListItem = ( {
 	task,
 	activeTaskId,
 	taskIndex,
 	goToTask,
 	trackClick,
-} ) => {
+}: TaskListItemProps ) => {
 	const { createNotice } = useDispatch( 'core/notices' );
-	const { dismissTask, undoDismissTask } = useDispatch(
-		ONBOARDING_STORE_NAME
-	);
+	const { dismissTask, undoDismissTask } = useDispatch( onboardingStore );
 
 	const {
 		id: taskId,
@@ -37,6 +35,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 		content,
 		time,
 		actionLabel,
+		isInProgress,
+		inProgressLabel,
 		isComplete,
 		additionalInfo,
 		isDismissable,
@@ -66,6 +66,7 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 			const className = clsx(
 				'woocommerce-task-list__item index-' + taskIndex,
 				{
+					in_progress: isInProgress,
 					complete: isComplete,
 					'is-active': taskId === activeTaskId,
 				}
@@ -88,6 +89,8 @@ export const TaskListItem: React.FC< TaskListItemProps > = ( {
 					className={ className }
 					title={ title }
 					badge={ badge }
+					inProgress={ isInProgress }
+					inProgressLabel={ inProgressLabel }
 					completed={ isComplete }
 					additionalInfo={ additionalInfo }
 					content={ content }

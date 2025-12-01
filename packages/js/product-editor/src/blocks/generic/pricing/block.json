@@ -13,7 +13,7 @@
 	"attributes": {
 		"property": {
 			"type": "string",
-			"__experimentalRole": "content"
+			"role": "content"
 		},
 		"label": {
 			"type": "string"

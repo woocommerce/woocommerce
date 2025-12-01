@@ -1,6 +1,13 @@
-const { test, expect } = require( '@playwright/test' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const wcApi = require( '@woocommerce/woocommerce-rest-api' ).default;
+/**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe( 'WooCommerce Tax Settings > enable', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -33,27 +40,21 @@ test.describe( 'WooCommerce Tax Settings > enable', () => {
 test.describe.serial( 'WooCommerce Tax Settings', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test.beforeEach( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.put( 'settings/general/woocommerce_calc_taxes', {
-			value: 'yes',
-		} );
+	test.beforeEach( async ( { restApi } ) => {
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
+			{
+				value: 'yes',
+			}
+		);
 	} );
-	test.afterEach( async ( { baseURL } ) => {
-		const api = new wcApi( {
-			url: baseURL,
-			consumerKey: process.env.CONSUMER_KEY,
-			consumerSecret: process.env.CONSUMER_SECRET,
-			version: 'wc/v3',
-		} );
-		await api.put( 'settings/general/woocommerce_calc_taxes', {
-			value: 'no',
-		} );
+	test.afterEach( async ( { restApi } ) => {
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
+			{
+				value: 'no',
+			}
+		);
 	} );
 
 	test( 'can set tax options', async ( { page } ) => {

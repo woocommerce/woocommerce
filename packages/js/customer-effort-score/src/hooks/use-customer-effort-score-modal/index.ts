@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
-import { OPTIONS_STORE_NAME } from '@woocommerce/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -13,11 +13,10 @@ import { STORE_KEY } from '../../store';
 export const useCustomerEffortScoreModal = () => {
 	const { showCesModal: _showCesModal, showProductMVPFeedbackModal } =
 		useDispatch( STORE_KEY );
-	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+	const { updateOptions } = useDispatch( optionsStore );
 
 	const { wasPreviouslyShown, isLoading } = useSelect( ( select ) => {
-		const { getOption, hasFinishedResolution } =
-			select( OPTIONS_STORE_NAME );
+		const { getOption, hasFinishedResolution } = select( optionsStore );
 
 		const shownForActionsOption =
 			( getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) as string[] ) || [];
@@ -32,10 +31,10 @@ export const useCustomerEffortScoreModal = () => {
 			},
 			isLoading: resolving,
 		};
-	} );
+	}, [] );
 
 	const markCesAsShown = async ( action: string ) => {
-		const { getOption } = resolveSelect( OPTIONS_STORE_NAME );
+		const { getOption } = resolveSelect( optionsStore );
 
 		const shownForActionsOption =
 			( ( await getOption(

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove deprecated `@types/wordpress__core-data`

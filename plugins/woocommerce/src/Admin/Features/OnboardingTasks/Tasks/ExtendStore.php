@@ -36,6 +36,15 @@ class ExtendStore extends Task {
 	}
 
 	/**
+	 * Additional info.
+	 *
+	 * @return string
+	 */
+	public function get_additional_info() {
+		return '';
+	}
+
+	/**
 	 * Time.
 	 *
 	 * @return string

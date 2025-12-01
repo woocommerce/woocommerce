@@ -5,19 +5,20 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import {
-	PaymentProvider,
-	PAYMENT_SETTINGS_STORE_NAME,
+	PaymentsEntity,
+	PaymentsProvider,
+	paymentSettingsStore,
 	WC_ADMIN_NAMESPACE,
+	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo, useRef, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Popover } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
 import InfoOutline from 'gridicons/dist/info-outline';
 import interpolateComponents from '@automattic/interpolate-components';
-import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -25,21 +26,33 @@ import { useDebounce } from '@wordpress/compose';
 import { CountrySelector } from '~/settings-payments/components/country-selector';
 import { ListPlaceholder } from '~/settings-payments/components/list-placeholder';
 import { PaymentGatewayList } from '~/settings-payments/components/payment-gateway-list';
+import { recordPaymentsEvent } from '~/settings-payments/utils';
 
 interface PaymentGatewaysProps {
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	installedPluginSlugs: string[];
 	installingPlugin: string | null;
-	setupPlugin: (
-		id: string,
-		slug: string,
-		onboardingUrl: string | null
+	/**
+	 * Callback to set up the plugin.
+	 *
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__main_suggestion').
+	 */
+	setUpPlugin: (
+		provider: PaymentsEntity,
+		onboardingUrl: string | null,
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	acceptIncentive: ( id: string ) => void;
-	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	shouldHighlightIncentive: boolean;
+	updateOrdering: ( providers: PaymentsProvider[] ) => void;
 	isFetching: boolean;
 	businessRegistrationCountry: string | null;
 	setBusinessRegistrationCountry: ( country: string ) => void;
+	setIsOnboardingModalOpen: ( isOpen: boolean ) => void;
 }
 
 /**
@@ -51,15 +64,21 @@ export const PaymentGateways = ( {
 	providers,
 	installedPluginSlugs,
 	installingPlugin,
-	setupPlugin,
+	setUpPlugin,
 	acceptIncentive,
+	shouldHighlightIncentive,
 	updateOrdering,
 	isFetching,
 	businessRegistrationCountry,
 	setBusinessRegistrationCountry,
+	setIsOnboardingModalOpen,
 }: PaymentGatewaysProps ) => {
-	const { invalidateResolution } = useDispatch( PAYMENT_SETTINGS_STORE_NAME );
+	const { invalidateResolution: invalidateMainStore } =
+		useDispatch( paymentSettingsStore );
+	const { invalidateResolution: invalidateWooPaymentsOnboardingStore } =
+		useDispatch( woopaymentsOnboardingStore );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
+	const buttonRef = useRef< HTMLDivElement >( null );
 	const storeCountryCode = (
 		window.wcSettings?.admin?.preloadSettings?.general
 			?.woocommerce_default_country || 'US'
@@ -87,12 +106,29 @@ export const PaymentGateways = ( {
 		}
 	);
 
-	const hidePopoverDebounced = useDebounce( () => {
+	const handleBusinessLocationIndicatorClick = (
+		event: React.MouseEvent | React.KeyboardEvent
+	) => {
+		const clickedElement = event.target as HTMLElement;
+		const parentDiv = clickedElement.closest(
+			'.settings-payment-gateways__header-select-container--indicator'
+		);
+
+		if ( buttonRef.current && parentDiv !== buttonRef.current ) {
+			return;
+		}
+
+		// Record the event when user clicks on the business location indicator.
+		recordPaymentsEvent( 'business_location_indicator_click', {
+			store_country: storeCountryCode,
+			business_country: businessRegistrationCountry || 'unknown',
+		} );
+
+		setIsPopoverVisible( ( prev ) => ! prev );
+	};
+
+	const handleFocusOutside = () => {
 		setIsPopoverVisible( false );
-	}, 350 );
-	const showPopover = () => {
-		setIsPopoverVisible( true );
-		hidePopoverDebounced.cancel();
 	};
 
 	return (
@@ -113,19 +149,34 @@ export const PaymentGateways = ( {
 							) ?? { key: 'US', name: 'United States (US)' }
 						}
 						options={ countryOptions }
-						onChange={ ( value: string ) => {
+						onChange={ ( currentSelectedCountry: string ) => {
 							// Save selected country and refresh the store by invalidating getPaymentProviders.
 							apiFetch( {
 								path:
 									WC_ADMIN_NAMESPACE +
 									'/settings/payments/country',
 								method: 'POST',
-								data: { location: value },
+								data: { location: currentSelectedCountry },
 							} ).then( () => {
-								setBusinessRegistrationCountry( value );
-								invalidateResolution( 'getPaymentProviders', [
-									value,
+								// Update UI.
+								setBusinessRegistrationCountry(
+									currentSelectedCountry
+								);
+								// Update the window value - this will be updated by the backend on refresh but this keeps state persistent.
+								if (
+									window.wcSettings.admin
+										.woocommerce_payments_nox_profile
+								) {
+									window.wcSettings.admin.woocommerce_payments_nox_profile.business_country_code =
+										currentSelectedCountry;
+								}
+								invalidateMainStore( 'getPaymentProviders', [
+									currentSelectedCountry,
 								] );
+								invalidateWooPaymentsOnboardingStore(
+									'getOnboardingData',
+									[]
+								);
 							} );
 						} }
 					/>
@@ -134,17 +185,16 @@ export const PaymentGateways = ( {
 							className="settings-payment-gateways__header-select-container--indicator"
 							tabIndex={ 0 }
 							role="button"
-							onClick={ () =>
-								setIsPopoverVisible( ! isPopoverVisible )
-							}
-							onMouseEnter={ showPopover }
-							onMouseLeave={ hidePopoverDebounced }
+							ref={ buttonRef }
+							onClick={ handleBusinessLocationIndicatorClick }
 							onKeyDown={ ( event ) => {
 								if (
 									event.key === 'Enter' ||
 									event.key === ' '
 								) {
-									setIsPopoverVisible( ! isPopoverVisible );
+									handleBusinessLocationIndicatorClick(
+										event
+									);
 								}
 							} }
 						>
@@ -161,7 +211,7 @@ export const PaymentGateways = ( {
 									focusOnMount={ true }
 									noArrow={ true }
 									shift={ true }
-									onClose={ hidePopoverDebounced }
+									onFocusOutside={ handleFocusOutside }
 								>
 									<div className="components-popover__content-container">
 										<p>
@@ -178,6 +228,19 @@ export const PaymentGateways = ( {
 															) }
 															target="_blank"
 															type="external"
+															onClick={ () => {
+																// Record the event when user clicks on the edit store location link.
+																recordPaymentsEvent(
+																	'business_location_popover_edit_store_location_click',
+																	{
+																		store_country:
+																			storeCountryCode,
+																		business_country:
+																			businessRegistrationCountry ||
+																			'unknown',
+																	}
+																);
+															} }
 														/>
 													),
 												},
@@ -197,9 +260,11 @@ export const PaymentGateways = ( {
 					providers={ providers }
 					installedPluginSlugs={ installedPluginSlugs }
 					installingPlugin={ installingPlugin }
-					setupPlugin={ setupPlugin }
+					setUpPlugin={ setUpPlugin }
 					acceptIncentive={ acceptIncentive }
+					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ updateOrdering }
+					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
 				/>
 			) }
 		</div>

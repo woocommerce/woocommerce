@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { chevronDown, chevronUp, closeSmall } from '@wordpress/icons';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
 	createElement,
 	useEffect,
@@ -363,17 +363,14 @@ export const SelectTree = function SelectTree( {
 			tabIndex={ -1 }
 		>
 			<div
-				className={ classNames(
-					'woocommerce-experimental-select-control',
-					{
-						'is-read-only': isReadOnly,
-						'is-focused': isFocused,
-						'is-multiple': props.multiple,
-						'has-selected-items':
-							Array.isArray( props.selected ) &&
-							props.selected.length,
-					}
-				) }
+				className={ clsx( 'woocommerce-experimental-select-control', {
+					'is-read-only': isReadOnly,
+					'is-focused': isFocused,
+					'is-multiple': props.multiple,
+					'has-selected-items':
+						Array.isArray( props.selected ) &&
+						props.selected.length,
+				} ) }
 			>
 				<BaseControl
 					label={ props.label }

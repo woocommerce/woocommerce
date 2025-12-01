@@ -1,9 +1,12 @@
 <?php
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use WC_Tax;
 
 /**
@@ -11,7 +14,7 @@ use WC_Tax;
  *
  * Helper class to handle product queries for the API.
  */
-class ProductQuery {
+class ProductQuery implements QueryClausesGenerator {
 	/**
 	 * Prepare query args to pass to WP_Query for a REST API request.
 	 *
@@ -111,8 +114,9 @@ class ProductQuery {
 
 		// Map between taxonomy name and arg key.
 		$default_taxonomies = array(
-			'product_cat' => 'category',
-			'product_tag' => 'tag',
+			'product_cat'   => 'category',
+			'product_tag'   => 'tag',
+			'product_brand' => 'brand',
 		);
 
 		$taxonomies = array_merge( $all_product_taxonomies, $default_taxonomies );
@@ -120,10 +124,11 @@ class ProductQuery {
 		// Set tax_query for each passed arg.
 		foreach ( $taxonomies as $taxonomy => $key ) {
 			if ( ! empty( $request[ $key ] ) ) {
+				$type        = is_numeric( $request[ $key ][0] ) ? 'term_id' : 'slug';
 				$operator    = $request->get_param( $key . '_operator' ) && isset( $operator_mapping[ $request->get_param( $key . '_operator' ) ] ) ? $operator_mapping[ $request->get_param( $key . '_operator' ) ] : 'IN';
 				$tax_query[] = array(
 					'taxonomy' => $taxonomy,
-					'field'    => 'term_id',
+					'field'    => $type,
 					'terms'    => $request[ $key ],
 					'operator' => $operator,
 				);
@@ -318,6 +323,10 @@ class ProductQuery {
 	public function get_objects( $request ) {
 		$results = $this->get_results( $request );
 
+		if ( is_callable( '_prime_post_caches' ) ) {
+			_prime_post_caches( $results['results'] );
+		}
+
 		return array(
 			'objects' => array_map( 'wc_get_product', $results['results'] ),
 			'total'   => $results['total'],
@@ -333,17 +342,19 @@ class ProductQuery {
 	public function get_last_modified() {
 		global $wpdb;
 
-		return strtotime( $wpdb->get_var( "SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' );" ) );
+		$last_modified = $wpdb->get_var( "SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' );" );
+
+		return $last_modified ? strtotime( $last_modified ) : null;
 	}
 
 	/**
 	 * Add in conditional search filters for products.
 	 *
 	 * @param array     $args Query args.
-	 * @param \WC_Query $wp_query WC_Query object.
+	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function add_query_clauses( $args, $wp_query ) {
+	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
 		if ( $wp_query->get( 'search' ) ) {
