@@ -60,6 +60,10 @@ class ProductCache extends ObjectCache {
 	 * @throws \Automattic\WooCommerce\Caching\CacheException Invalid parameter, or null id was passed and get_object_id returns null too.
 	 */
 	public function set( $product, $id = null, int $expiration = self::DEFAULT_EXPIRATION ): bool {
+		if ( null !== $id ) {
+			$id = (int) $id;
+		}
+
 		$original_mode = $product->get_clone_mode();
 		$product->set_clone_mode( \WC_Data::CLONE_MODE_CACHE );
 		$result = parent::set( $product, $id, $expiration );
@@ -83,6 +87,7 @@ class ProductCache extends ObjectCache {
 	 * @throws \Automattic\WooCommerce\Caching\CacheException Invalid id parameter.
 	 */
 	public function get( $id, int $expiration = self::DEFAULT_EXPIRATION, ?callable $get_from_datastore_callback = null ) {
+		$id      = (int) $id;
 		$product = parent::get( $id, $expiration, $get_from_datastore_callback );
 
 		if ( $product instanceof \WC_Product ) {
