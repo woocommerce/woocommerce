@@ -42,6 +42,15 @@ $settings = array(
 		),
 	),
 
+	array(
+		'title'    => __( 'Debug mode', 'woocommerce' ),
+		'desc'     => __( 'Enable debug mode', 'woocommerce' ),
+		'id'       => 'woocommerce_tax_debug_mode',
+		'default'  => 'no',
+		'type'     => 'checkbox',
+		'desc_tip' => __( 'Enable tax debug mode to show tax calculation details and bypass tax rate cache.', 'woocommerce' ),
+	),
+
 	'shipping-tax-class' => array(
 		'title'    => __( 'Shipping tax class', 'woocommerce' ),
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
