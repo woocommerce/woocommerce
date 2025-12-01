@@ -1,4 +1,6 @@
 <?php
+declare( strict_types=1 );
+
 /**
  * ProductCacheController class file.
  */
@@ -36,13 +38,13 @@ class ProductCacheController {
 
 		add_action( 'before_woocommerce_init', array( $this, 'maybe_set_product_cache_group_as_non_persistent' ) );
 
-		// Handle direct WordPress post updates (bypassing CRUD)
+		// Handle direct WordPress post updates (bypassing CRUD).
 		add_action( 'clean_post_cache', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
 
-		// Handle post deletions
+		// Handle post deletions.
 		add_action( 'before_delete_post', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
 
-		// Handle post meta updates (third-party plugins updating via postmeta API)
+		// Handle post meta updates (third-party plugins updating via postmeta API).
 		add_action( 'updated_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
 		add_action( 'added_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
 		add_action( 'deleted_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 4 );
@@ -71,6 +73,12 @@ class ProductCacheController {
 		}
 	}
 
+	/**
+	 * Invalidate the product cache for a given post ID if it's a product or product variation.
+	 *
+	 * @param int $post_id The post ID to check and invalidate.
+	 * @return void
+	 */
 	public function maybe_invalidate_product_cache( $post_id ) {
 		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
 			return;
@@ -84,11 +92,19 @@ class ProductCacheController {
 		$this->product_cache->remove( $post_id );
 	}
 
+	/**
+	 * Invalidate the product cache when post meta is updated.
+	 *
+	 * @param int    $meta_id The ID of the metadata entry.
+	 * @param int    $object_id The ID of the object the metadata is for.
+	 * @param string $meta_key The meta key.
+	 * @param mixed  $meta_value The meta value.
+	 * @return void
+	 */
 	public function maybe_invalidate_product_cache_by_meta( $meta_id, $object_id, $meta_key, $meta_value ) {
-		// Only invalidate for product-related meta keys
+		// Only invalidate for product-related meta keys.
 		if ( str_starts_with( $meta_key, '_' ) && get_post_type( $object_id ) === 'product' ) {
 			$this->maybe_invalidate_product_cache( $object_id );
 		}
 	}
-
 }
