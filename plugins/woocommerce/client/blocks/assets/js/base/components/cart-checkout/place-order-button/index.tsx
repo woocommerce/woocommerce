@@ -4,6 +4,7 @@
 import clsx from 'clsx';
 import {
 	useCheckoutSubmit,
+	usePaymentMethodInterface,
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
 import { check } from '@wordpress/icons';
@@ -14,6 +15,7 @@ import {
 	FormattedMonetaryAmount,
 	Spinner,
 } from '@woocommerce/blocks-components';
+import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -25,6 +27,8 @@ interface PlaceOrderButtonProps {
 	fullWidth?: boolean;
 	showPrice?: boolean;
 	priceSeparator?: string;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	CustomButtonComponent?: CustomPlaceOrderButtonComponent;
 }
 
 const PlaceOrderButton = ( {
@@ -32,6 +36,7 @@ const PlaceOrderButton = ( {
 	fullWidth = false,
 	showPrice = false,
 	priceSeparator = '·',
+	CustomButtonComponent,
 }: PlaceOrderButtonProps ): JSX.Element => {
 	const {
 		onSubmit,
@@ -41,8 +46,28 @@ const PlaceOrderButton = ( {
 		waitingForRedirect,
 	} = useCheckoutSubmit();
 
+	const paymentMethodInterface = usePaymentMethodInterface();
+
 	const { cartTotals, cartIsLoading } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+
+	// when provided, the `CustomButtonComponent` should take precedence over the default button.
+	if ( CustomButtonComponent ) {
+		return (
+			<CustomButtonComponent
+				waitingForProcessing={ waitingForProcessing }
+				waitingForRedirect={ waitingForRedirect }
+				disabled={
+					isCalculating ||
+					isDisabled ||
+					waitingForProcessing ||
+					waitingForRedirect ||
+					cartIsLoading
+				}
+				{ ...paymentMethodInterface }
+			/>
+		);
+	}
 
 	return (
 		<Button

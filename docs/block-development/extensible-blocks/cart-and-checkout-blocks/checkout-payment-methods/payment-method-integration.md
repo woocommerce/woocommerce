@@ -167,37 +167,40 @@ Your custom button component receives all the same props as the payment method `
 
 ```js
 const CustomButton = ( props ) => {
-	const { billing, checkoutStatus, validate, onSubmit } = props;
-	const [ isLoading, setIsLoading ] = React.useState( false );
+	const { validate, onSubmit, disabled } = props;
+  const [
+    isShowingInternalPaymentSheet,
+    setIsShowingInternalPaymentSheet,
+  ] = React.useState( false );
 
-	const handleClick = async () => {
-		setIsLoading( true );
+  const handleClick = async () => {
+    // 1. Validate the checkout form
+    const validationResult = await validate();
 
-		// 1. Validate the checkout form
-		const validationResult = await validate();
+    if ( validationResult.hasError ) {
+      return; // WooCommerce automatically displays validation errors
+    }
 
-		if ( validationResult.hasError ) {
-			setIsLoading( false );
-			return; // WooCommerce automatically displays validation errors
-		}
+    // 2. Show your payment UI (e.g., Google Pay sheet, Apple Pay sheet)
+    // setIsShowingInternalPaymentSheet( true );
+    // const paymentResult = await showPaymentSheet( billing.cartTotal.value );
+    // if ( ! paymentResult.success ) {
+    //     setIsShowingInternalPaymentSheet( false );
+    //     return;
+    // }
 
-		// 2. Show your payment UI (e.g., Google Pay sheet, Apple Pay sheet)
-		// const paymentResult = await showPaymentSheet( billing.cartTotal.value );
-		// if ( ! paymentResult.success ) {
-		//     setIsLoading( false );
-		//     return;
-		// }
-
-		// 3. Submit the checkout
-		onSubmit();
-	};
+    // 3. Submit the checkout
+    onSubmit();
+  };
 
 	return (
 		<button
-			onClick={ handleClick }
-			disabled={ checkoutStatus.isProcessing || isLoading }
-		>
-			{ isLoading ? 'Processing...' : 'Pay with Custom Method' }
+      onClick={ handleClick }
+      disabled={ disabled || isShowingInternalPaymentSheet }
+    >
+      { disabled || isShowingInternalPaymentSheet
+        ? 'Processing...'
+        : 'Pay with Custom Method' }
 		</button>
 	);
 };

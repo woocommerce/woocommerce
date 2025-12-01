@@ -7,10 +7,7 @@ import {
 	PlaceOrderButton,
 	ReturnToCartButton,
 } from '@woocommerce/base-components/cart-checkout';
-import {
-	useCheckoutSubmit,
-	usePaymentMethodInterface,
-} from '@woocommerce/base-context/hooks';
+import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
@@ -45,18 +42,14 @@ const Block = ( {
 	const { paymentMethodButtonLabel, paymentMethodPlaceOrderButton } =
 		useCheckoutSubmit();
 
-	// Get the full payment method interface for custom buttons
-	const paymentMethodInterface = usePaymentMethodInterface();
-
-	// Check if a saved payment token is selected
-	const activeSavedToken = useSelect( ( select ) => {
-		const store = select( paymentStore );
-		return store.getActiveSavedToken();
-	}, [] );
+	const activeSavedToken = useSelect(
+		( select ) => select( paymentStore ).getActiveSavedToken(),
+		[]
+	);
 
 	// not showing the custom button when a saved token is selected - only when the payment method is selected from the list.
 	const CustomButtonComponent = activeSavedToken
-		? null
+		? undefined
 		: paymentMethodPlaceOrderButton;
 
 	const label = applyCheckoutFilter( {
@@ -90,16 +83,13 @@ const Block = ( {
 						{ returnToCartButtonLabel }
 					</ReturnToCartButton>
 				) }
-				{ CustomButtonComponent ? (
-					<CustomButtonComponent { ...paymentMethodInterface } />
-				) : (
-					<PlaceOrderButton
-						label={ label }
-						fullWidth={ ! shouldShowReturnToCart }
-						showPrice={ showPrice }
-						priceSeparator={ priceSeparator }
-					/>
-				) }
+				<PlaceOrderButton
+					CustomButtonComponent={ CustomButtonComponent }
+					label={ label }
+					fullWidth={ ! shouldShowReturnToCart }
+					showPrice={ showPrice }
+					priceSeparator={ priceSeparator }
+				/>
 			</div>
 		</div>
 	);

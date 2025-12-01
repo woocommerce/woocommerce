@@ -6,6 +6,7 @@ import type PaymentMethodLabel from '@woocommerce/base-components/cart-checkout/
 import type PaymentMethodIcons from '@woocommerce/base-components/cart-checkout/payment-method-icons';
 import type LoadingMask from '@woocommerce/base-components/loading-mask';
 import type { ValidationInputError } from '@woocommerce/blocks-components';
+import type { ComponentType } from 'react';
 
 /**
  * Internal dependencies
@@ -191,3 +192,22 @@ export type PaymentMethodInterface = {
 	// A boolean which indicates whether the shopper has checked the save payment method checkbox.
 	shouldSavePayment: boolean;
 };
+
+/**
+ * Complete props interface for custom place order button components.
+ * Includes the standard PaymentMethodInterface plus additional button-specific props.
+ */
+export type CustomPlaceOrderButtonProps = PaymentMethodInterface & {
+	// Whether checkout is waiting for server processing.
+	waitingForProcessing: boolean;
+	// Whether checkout is waiting to redirect after success.
+	waitingForRedirect: boolean;
+	// Whether the button should act "disabled" because of some processing in the background.
+	disabled: boolean;
+};
+
+/**
+ * Type for custom place order button components.
+ */
+export type CustomPlaceOrderButtonComponent =
+	ComponentType< CustomPlaceOrderButtonProps >;
