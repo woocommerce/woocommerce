@@ -84,7 +84,8 @@ class WC_Gateway_Paypal_Request {
 
 		if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
 			require_once __DIR__ . '/class-wc-gateway-paypal-notices.php';
-			new WC_Gateway_Paypal_Notices();
+			// To initialize the notices instance if it is not already initialized.
+			WC_Gateway_Paypal_Notices::get_instance();
 		}
 	}
 

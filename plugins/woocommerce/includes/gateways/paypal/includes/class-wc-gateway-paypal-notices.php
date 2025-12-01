@@ -39,6 +39,25 @@ class WC_Gateway_Paypal_Notices {
 	private $gateway;
 
 	/**
+	 * The *Singleton* instance of this class
+	 *
+	 * @var WC_Gateway_Paypal_Notices
+	 */
+	private static $instance;
+
+	/**
+	 * Returns the *Singleton* instance of this class.
+	 *
+	 * @return WC_Gateway_Paypal_Notices The *Singleton* instance.
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {

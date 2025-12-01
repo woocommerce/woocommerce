@@ -1027,6 +1027,6 @@ add_action(
 		}
 
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
-		new WC_Gateway_Paypal_Notices();
+		WC_Gateway_Paypal_Notices::get_instance();
 	}
 );
