@@ -8,11 +8,15 @@ use WC_Product;
 
 /**
  * A class to cache Product objects.
+ *
+ * @since 10.5.0
  */
 class ProductCache extends ObjectCache {
 
 	/**
 	 * Get the cache key and prefix to use for Products.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return string
 	 */
@@ -23,7 +27,9 @@ class ProductCache extends ObjectCache {
 	/**
 	 * Get the id of an object to be cached.
 	 *
-	 * @param array|object $product The product to be cached.
+	 * @since 10.5.0
+	 *
+	 * @param WC_Product $product The product to be cached.
 	 *
 	 * @return int|string|null The id of the object, or null if it can't be determined.
 	 */
@@ -33,6 +39,8 @@ class ProductCache extends ObjectCache {
 
 	/**
 	 * Validate an object before caching it.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WC_Product $product The product to validate.
 	 *
@@ -51,6 +59,8 @@ class ProductCache extends ObjectCache {
 	 *
 	 * Sets the clone mode to CACHE before storing to ensure meta IDs are preserved
 	 * when WordPress object cache clones the object.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WC_Product      $product The product to be cached.
 	 * @param int|string|null $id Id of the product to be cached, if null, get_object_id will be used to get it.
@@ -75,6 +85,8 @@ class ProductCache extends ObjectCache {
 	/**
 	 * Remove a product from the cache.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param int|string $id The id of the product to remove.
 	 *
 	 * @return bool True if the product is removed successfully, false otherwise.
@@ -89,6 +101,8 @@ class ProductCache extends ObjectCache {
 	 *
 	 * After retrieval, resets the clone mode to DUPLICATE to maintain backward compatibility
 	 * for code that expects cloning to clear meta IDs.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param int|string    $id The id of the product to retrieve.
 	 * @param int           $expiration Expiration of the cached data in seconds from the current time, used if a product is retrieved from datastore and cached.
