@@ -52,6 +52,18 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 <!-- Mention any analysis performed, such as assessing potential impacts on environment attributes and other plugins, performance profiling, or LLM/AI-based analysis. -->
 <!-- Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public pull request. -->
 
+### Milestone
+
+<!-- DO NOT remove or modify this section (other than to check the box). -->
+
+<!-- milestone-target-selection -->
+- [ ] Automatically assign milestone for the **[next WooCommerce version](../blob/trunk/plugins/woocommerce/woocommerce.php#L6)**
+<!-- /milestone-target-selection -->
+
+> **Note:** Check the box above to have the milestone automatically assigned when merged.
+> Alternatively (e.g. for point releases), manually assign the appropriate milestone.
+
+
 ### Changelog entry
 
 <!-- You can optionally choose to enter a changelog entry by checking the box below and supplying data. -->

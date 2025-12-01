@@ -14,6 +14,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
 use WC_Shipping_Zones;
+use WC_Shipping_Zone;
 use WP_Http;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -101,6 +102,12 @@ class Controller extends AbstractController {
 					'permission_callback' => array( $this, 'check_permissions' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::DELETABLE ),
+				),
 			)
 		);
 	}
@@ -120,8 +127,18 @@ class Controller extends AbstractController {
 			);
 		}
 
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return $this->get_authentication_error_by_method( $request->get_method() );
+		$method = $request->get_method();
+
+		if ( 'GET' === $method ) {
+			$context = 'read';
+		} elseif ( 'DELETE' === $method ) {
+			$context = 'delete';
+		} else {
+			$context = 'edit';
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', $context ) ) {
+			return $this->get_authentication_error_by_method( $method );
 		}
 
 		return true;
@@ -214,6 +231,57 @@ class Controller extends AbstractController {
 
 		$request['zone_id'] = $zone->get_id();
 		return $this->prepare_item_for_response( $method, $request );
+	}
+
+	/**
+	 * Delete shipping zone method by ID.
+	 *
+	 * Note: In v2/v3, this endpoint required a `force` parameter, but since shipping zone methods
+	 * do not support trashing, it would either delete (force=true) or return a 501 error (force=false).
+	 * We removed the `force` parameter in v4 as it serves no purpose when soft delete is not supported.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$instance_id = (int) $request['id'];
+
+		// Get the method before deletion to return in response.
+		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+		if ( ! $method ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		$zone = $this->validate_zone_by_method_instance( $instance_id );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		// Prepare response before deletion.
+		$request->set_param( 'context', 'view' );
+		$request['zone_id'] = $zone->get_id();
+		$response           = $this->prepare_item_for_response( $method, $request );
+
+		// Perform the deletion.
+		$result = $zone->delete_shipping_method( $instance_id );
+
+		if ( ! $result ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		/**
+		 * Fires after a shipping zone method is deleted via the REST API.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param WC_Shipping_Method $method   The shipping zone method being deleted.
+		 * @param WC_Shipping_Zone   $zone     The shipping zone the method belonged to.
+		 * @param WP_REST_Response   $response The response data.
+		 * @param WP_REST_Request    $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_shipping_zone_method', $method, $zone, $response, $request );
+
+		return $response;
 	}
 
 	/**

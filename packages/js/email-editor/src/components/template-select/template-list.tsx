@@ -64,7 +64,9 @@ function TemplateListBox( {
 		styles.reduce( ( acc, style ) => {
 			return acc + ( style.css ?? '' );
 		}, '' ) +
-		`.is-root-container { width: ${ layout.contentSize }; margin: 0 auto; }`;
+		`.is-root-container { width: ${
+			layout?.contentSize || '660px'
+		}; margin: 0 auto; }`;
 
 	if ( selectedCategory === 'recent' && templates.length === 0 ) {
 		return <TemplateNoResults />;
