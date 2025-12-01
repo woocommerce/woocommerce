@@ -116,7 +116,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 		$product2 = WC()->product_factory->get_product( $product_id );
 
 		// Verify both retrievals preserve meta ID.
-		$meta1 = $product1->get_meta_data();
+		$meta1     = $product1->get_meta_data();
 		$meta_id_1 = null;
 		foreach ( $meta1 as $meta ) {
 			if ( 'test_cache_key' === $meta->key ) {
@@ -125,7 +125,7 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 			}
 		}
 
-		$meta2 = $product2->get_meta_data();
+		$meta2     = $product2->get_meta_data();
 		$meta_id_2 = null;
 		foreach ( $meta2 as $meta ) {
 			if ( 'test_cache_key' === $meta->key ) {
