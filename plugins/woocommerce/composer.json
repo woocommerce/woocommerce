@@ -65,7 +65,7 @@
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "1.6.6",
-		"php-stubs/wordpress-stubs": "6.8.2",
+		"php-stubs/wordpress-stubs": "^6.8",
 		"phpstan/phpstan": "^2.1",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
