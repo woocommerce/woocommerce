@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer Reset Password email (initial block version)
+ * Customer fulfillment updated email (initial block version)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
@@ -24,33 +24,18 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"> <?php echo esc_html__( 'Reset your password', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Your shipment has been updated', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
 <p><?php
-	/* translators: %s: Customer username */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' );
+	echo esc_html__( 'Some details of your shipment have recently been updated. This may include tracking information, item contents, or delivery status.', 'woocommerce' );
 ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
 <p><?php
-	/* translators: %s: Store name */
-	printf( esc_html__( 'Someone has requested a new password for the following account on %s:', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
-?></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p><?php
-/* translators: %s: Username */
-echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocommerce/customer-username]-->' ), array( 'b' => array() ) );
-?></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p><?php
-	echo esc_html__( 'If you didn’t make this request, just ignore this email. If you’d like to proceed, reset your password via the link below:', 'woocommerce' );
+	echo esc_html__( 'Here’s the latest info we have:', 'woocommerce' );
 ?></p>
 <!-- /wp:paragraph -->
 
@@ -59,6 +44,7 @@ echo wp_kses( sprintf( __( 'Username: <b>%s</b>', 'woocommerce' ), '<!--[woocomm
 <!-- /wp:woocommerce/email-content -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'Thanks for reading.', 'woocommerce' ); ?> </p>
+<p><?php
+echo esc_html__( 'If anything looks off or you have questions, feel free to contact our support team.', 'woocommerce' );
+?></p>
 <!-- /wp:paragraph -->
-
