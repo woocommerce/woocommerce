@@ -6,6 +6,7 @@
 declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\TaxDebug;
 
 /**
@@ -43,6 +44,10 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 
 		$this->original_default_country = get_option( 'woocommerce_default_country' );
 
+		// Ensure constants that would prevent notices are not set.
+		Constants::set_constant( 'WOOCOMMERCE_CHECKOUT', false );
+		Constants::set_constant( 'WC_DOING_AJAX', false );
+
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		TaxDebug::reset_notices_flag();
 		wc_clear_notices();
@@ -66,6 +71,10 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 			$product->delete( true );
 		}
 		$this->created_products = array();
+
+		// Clear test constants.
+		Constants::clear_single_constant( 'WOOCOMMERCE_CHECKOUT' );
+		Constants::clear_single_constant( 'WC_DOING_AJAX' );
 
 		TaxDebug::reset_notices_flag();
 		wc_clear_notices();
