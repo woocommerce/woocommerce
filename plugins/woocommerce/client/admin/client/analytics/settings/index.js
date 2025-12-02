@@ -115,6 +115,10 @@ const Settings = ( { createNotice, query } ) => {
 	};
 
 	const handleInputChange = ( e ) => {
+		if ( isImportModeModalOpen ) {
+			return;
+		}
+
 		const { checked, name, type, value } = e.target;
 
 		// Intercept import mode change from scheduled to immediate
