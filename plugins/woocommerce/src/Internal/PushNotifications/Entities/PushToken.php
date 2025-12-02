@@ -17,7 +17,7 @@ class PushToken {
 	/**
 	 * WordPress post type for storing push tokens.
 	 */
-	const POST_TYPE = 'push_token';
+	const POST_TYPE = 'wc_push_token';
 
 	/**
 	 * Platform identifier for Apple devices.
