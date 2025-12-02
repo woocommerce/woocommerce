@@ -11,8 +11,8 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
  * Provides runtime detection of extensions that use WooCommerce globals
  * (window.wc.*) without properly declaring their PHP script dependencies.
  *
- * Enable by defining WC_DEBUG_DEPENDENCIES as true in wp-config.php:
- * define( 'WC_DEBUG_DEPENDENCIES', true );
+ * This runs by default to warn developers about missing dependencies
+ * during the transition period to iAPI-based checkout blocks.
  *
  * @since 9.8.0
  * @internal
@@ -33,11 +33,7 @@ final class DependencyDetection {
 	 */
 	private const WC_SCRIPT_HANDLES = array(
 		'wc-blocks-checkout',
-		'wc-blocks-registry',
 		'wc-blocks-data-store',
-		'wc-settings',
-		'wc-price-format',
-		'wc-blocks-components',
 	);
 
 	/**
@@ -47,30 +43,7 @@ final class DependencyDetection {
 	 */
 	public function __construct( AssetApi $asset_api ) {
 		$this->api = $asset_api;
-
-		if ( $this->is_enabled() ) {
-			$this->init();
-		}
-	}
-
-	/**
-	 * Check if dependency detection is enabled.
-	 *
-	 * @return bool
-	 */
-	private function is_enabled(): bool {
-		// Enable via constant.
-		if ( defined( 'WC_DEBUG_DEPENDENCIES' ) && WC_DEBUG_DEPENDENCIES ) {
-			return true;
-		}
-
-		/**
-		 * Filter to enable dependency detection.
-		 *
-		 * @since 9.8.0
-		 * @param bool $enabled Whether dependency detection is enabled.
-		 */
-		return (bool) apply_filters( 'woocommerce_blocks_debug_dependencies', false );
+		$this->init();
 	}
 
 	/**
@@ -109,13 +82,7 @@ final class DependencyDetection {
 
 			var WC_GLOBAL_TO_HANDLE = {
 				blocksCheckout: 'wc-blocks-checkout',
-				blocksRegistry: 'wc-blocks-registry',
-				wcBlocksRegistry: 'wc-blocks-registry',
-				blocksData: 'wc-blocks-data-store',
-				wcBlocksData: 'wc-blocks-data-store',
-				wcSettings: 'wc-settings',
-				priceFormat: 'wc-price-format',
-				blocksComponents: 'wc-blocks-components'
+				wcBlocksData: 'wc-blocks-data-store'
 			};
 
 			// Patterns to identify WooCommerce's own scripts (which we should skip).
@@ -207,6 +174,13 @@ final class DependencyDetection {
 					warnedScripts[warningKey] = true;
 				}
 			}
+
+			/**
+			 * Create the proxy immediately.
+			 *
+			 * wc.blocksCheckout doesn't exist initially but will be set by the blocks-checkout script.
+			 * This catches the access before the script gets the actual object, regardless of when blocksCheckout is created.
+			 */
 
 			function createWcProxy(target) {
 				return new Proxy(target, {
