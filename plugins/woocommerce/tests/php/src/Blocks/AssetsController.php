@@ -201,7 +201,7 @@ class AssetsController extends \WP_UnitTestCase {
 				'site_url'    => site_url(),
 			),
 		);
-		set_site_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
+		set_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
 
 		$urls = $this->assets_controller->add_resource_hints( array(), 'prefetch' );
 
@@ -260,7 +260,7 @@ class AssetsController extends \WP_UnitTestCase {
 			),
 			'version' => $mock_version,
 		);
-		set_site_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
+		set_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
 
 		$urls = $this->assets_controller->add_resource_hints( array(), 'prefetch' );
 

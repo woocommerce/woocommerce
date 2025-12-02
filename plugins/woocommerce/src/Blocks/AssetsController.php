@@ -262,7 +262,7 @@ final class AssetsController {
 			return null;
 		}
 
-		$cache = get_site_transient( 'woocommerce_block_asset_resource_hints' );
+		$cache = get_transient( 'woocommerce_block_asset_resource_hints' );
 
 		$current_version = array(
 			'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
@@ -295,7 +295,7 @@ final class AssetsController {
 		);
 
 		$updated['files'][ $filename ] = $data;
-		set_site_transient( 'woocommerce_block_asset_resource_hints', $updated, WEEK_IN_SECONDS );
+		set_transient( 'woocommerce_block_asset_resource_hints', $updated, WEEK_IN_SECONDS );
 	}
 
 	/**
