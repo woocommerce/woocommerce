@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Entities;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use InvalidArgumentException;
 
 /**
@@ -86,7 +85,7 @@ class PushToken {
 	const MAX_TOKEN_LENGTH = 4096;
 
 	/**
-	 * The id of the token.
+	 * The id of the token post.
 	 *
 	 * @var int|null
 	 */
