@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Navigation store: don't call deprecated onHistoryChange
