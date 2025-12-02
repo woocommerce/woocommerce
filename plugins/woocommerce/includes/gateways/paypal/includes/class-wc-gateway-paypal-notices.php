@@ -38,24 +38,6 @@ class WC_Gateway_Paypal_Notices {
 	 */
 	private $gateway;
 
-	/**
-	 * The *Singleton* instance of this class
-	 *
-	 * @var WC_Gateway_Paypal_Notices
-	 */
-	private static $instance;
-
-	/**
-	 * Returns the *Singleton* instance of this class.
-	 *
-	 * @return WC_Gateway_Paypal_Notices The *Singleton* instance.
-	 */
-	public static function get_instance() {
-		if ( null === self::$instance ) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 
 	/**
 	 * Constructor.
@@ -66,12 +48,15 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
-		add_action( 'admin_notices', array( $this, 'add_paypal_notices' ) );
+		// Only register admin notice hooks in the admin area.
+		if ( is_admin() ) {
+			add_action( 'admin_notices', array( $this, 'add_paypal_notices' ) );
 
-		// Use admin_head to inject notice on payments settings page.
-		// This bypasses the suppress_admin_notices() function which removes all admin_notices hooks on the payments page.
-		// This is a workaround to avoid the notice being suppressed by the suppress_admin_notices() function.
-		add_action( 'admin_head', array( $this, 'add_paypal_notices_on_payments_settings_page' ) );
+			// Use admin_head to inject notice on payments settings page.
+			// This bypasses the suppress_admin_notices() function which removes all admin_notices hooks on the payments page.
+			// This is a workaround to avoid the notice being suppressed by the suppress_admin_notices() function.
+			add_action( 'admin_head', array( $this, 'add_paypal_notices_on_payments_settings_page' ) );
+		}
 
 		// Listen for PayPal order responses to manage account restriction notices.
 		add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
@@ -254,6 +239,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public function manage_account_restriction_status( int $http_code, array $response_data, WC_Order $order ): void {
+		wc_get_logger()->debug( 'PayPal account restriction status: ' . $http_code . ' for order: ' . $order->get_id() );
 		/**
 		 * Filters whether account restriction notices should be enabled.
 		 *

@@ -81,12 +81,6 @@ class WC_Gateway_Paypal_Request {
 	public function __construct( $gateway ) {
 		$this->gateway    = $gateway;
 		$this->notify_url = WC()->api_request_url( 'WC_Gateway_Paypal' );
-
-		if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
-			require_once __DIR__ . '/class-wc-gateway-paypal-notices.php';
-			// To initialize the notices instance if it is not already initialized.
-			WC_Gateway_Paypal_Notices::get_instance();
-		}
 	}
 
 	/**
