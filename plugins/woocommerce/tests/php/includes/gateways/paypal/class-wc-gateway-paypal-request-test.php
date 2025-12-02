@@ -837,7 +837,6 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
-		$order->update_meta_data( '_paypal_authorization_id', '' );
 		$order->save();
 
 		$capture_api_call_count = 0;

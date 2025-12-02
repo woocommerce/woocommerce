@@ -457,7 +457,6 @@ class WC_Gateway_Paypal_Request {
 				} else {
 					// Store '_paypal_authorization_checked' flag to prevent repeated API calls for orders with no authorization data.
 					WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
-					$order->update_meta_data( '_paypal_authorization_id', '' );
 					$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
 					$order->save();
 					return null;
