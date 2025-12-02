@@ -259,7 +259,7 @@ class WCTransactionalEmailPostsManager {
 	 * @param int $post_id The post ID.
 	 * @return string The cache key e.g. 'post_id_to_email_type_123'.
 	 */
-	private function get_cache_key_for_post_id( $post_id ) {
+	public function get_cache_key_for_post_id( $post_id ) {
 		return 'post_id_to_email_type_' . $post_id;
 	}
 
