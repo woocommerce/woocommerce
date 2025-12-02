@@ -181,6 +181,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_it_registers_push_token_post_type_when_enabled() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
 		$this->jetpack_connection_manager_mock
 			->expects( $this->once() )
 			->method( 'is_connected' )

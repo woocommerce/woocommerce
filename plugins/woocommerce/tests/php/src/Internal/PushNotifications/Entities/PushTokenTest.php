@@ -561,7 +561,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			PushToken::PLATFORM_ANDROID
 		);
 
-		$this->assertSame( 0, $push_token->get_id() );
+		$this->assertSame( null, $push_token->get_id() );
 		$this->assertSame( 789, $push_token->get_user_id() );
 		$this->assertSame( 'partial_token', $push_token->get_token() );
 		$this->assertNull( $push_token->get_device_uuid() );

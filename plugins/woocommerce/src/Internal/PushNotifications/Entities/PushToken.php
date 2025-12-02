@@ -8,14 +8,13 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use InvalidArgumentException;
-use WC_Data;
 
 /**
  * Object representation of a push token.
  *
  * @since 10.4.0
  */
-class PushToken extends WC_Data {
+class PushToken {
 	/**
 	 * WordPress post type for storing push tokens.
 	 */
@@ -87,14 +86,11 @@ class PushToken extends WC_Data {
 	const MAX_TOKEN_LENGTH = 4096;
 
 	/**
-	 * Constructs the class and initializes the data store.
+	 * The id of the token.
 	 *
-	 * @since 10.5.0
+	 * @var int|null
 	 */
-	public function __construct() {
-		parent::__construct();
-		$this->data_store = wc_get_container()->get( PushTokensDataStore::class );
-	}
+	protected ?int $id = null;
 
 	/**
 	 * The id of the user who owns the token.
@@ -189,6 +185,22 @@ class PushToken extends WC_Data {
 	}
 
 	/**
+	 * Sets the ID.
+	 *
+	 * @param int $id The id of the token post.
+	 * @throws InvalidArgumentException If ID is <= 0.
+	 *
+	 * @since 10.4.0
+	 */
+	public function set_id( int $id ) {
+		if ( $id <= 0 ) {
+			throw new InvalidArgumentException( 'ID must be a positive integer.' );
+		}
+
+		$this->id = $id;
+	}
+
+	/**
 	 * Sets the user ID.
 	 *
 	 * @param int $user_id The id of the user who owns the token.
@@ -274,6 +286,17 @@ class PushToken extends WC_Data {
 		}
 
 		$this->origin = $origin;
+	}
+
+	/**
+	 * Gets the ID.
+	 *
+	 * @return int|null
+	 *
+	 * @since 10.4.0
+	 */
+	public function get_id(): ?int {
+		return $this->id;
 	}
 
 	/**
@@ -391,15 +414,5 @@ class PushToken extends WC_Data {
 				$this->get_device_uuid()
 				|| $this->get_platform() === self::PLATFORM_BROWSER
 			);
-	}
-
-	/**
-	 * Defers to the data store to read the record in the style of WC_Data.
-	 *
-	 * @since 10.5.0
-	 * @return void
-	 */
-	public function read(): void {
-		$this->data_store->read( $this );
 	}
 }
