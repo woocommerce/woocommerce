@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Coupon
  */
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Class Coupon.
  * @package WooCommerce\Tests\Coupon
@@ -30,6 +32,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		WC()->cart->empty_cart();
 		WC()->cart->remove_coupons();
+		Constants::clear_single_constant( 'WOOCOMMERCE_CHECKOUT' );
 
 		parent::tearDown();
 	}
@@ -303,9 +306,7 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		);
 
 		// We need this to have the calculate_totals() method calculate totals.
-		if ( ! defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			define( 'WOOCOMMERCE_CHECKOUT', true );
-		}
+		Constants::set_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
 		// Add 2 products and coupon to cart.
 		WC()->cart->add_to_cart( $product->get_id(), 2 );
