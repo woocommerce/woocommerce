@@ -135,6 +135,8 @@ export const ShippingRatesControlPackage = ( {
 			<Panel
 				className={ clsx(
 					'wc-block-components-shipping-rates-control__package',
+					multiplePackages &&
+						'wc-block-components-address-card wc-block-components-shipping-rates-control__package--multiple',
 					className
 				) }
 				// initialOpen remembers only the first value provided to it, so by the
@@ -153,7 +155,8 @@ export const ShippingRatesControlPackage = ( {
 		<div
 			className={ clsx(
 				'wc-block-components-shipping-rates-control__package',
-				multiplePackages && 'wc-block-components-address-card',
+				multiplePackages &&
+					'wc-block-components-address-card wc-block-components-shipping-rates-control__package--multiple',
 				className
 			) }
 		>
