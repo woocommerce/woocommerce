@@ -1017,7 +1017,7 @@ function wc_get_image_size( $image_size ) {
  *
  * @param string $code Code.
  *
- * @deprecated 10.4.0
+ * @deprecated 10.4.0 Use wp_add_inline_script() instead.
  */
 function wc_enqueue_js( $code ) {
 	global $wc_queued_js;
