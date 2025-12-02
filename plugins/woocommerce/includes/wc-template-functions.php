@@ -2842,6 +2842,13 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		if ( $thumbnail_id ) {
 			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
 			$image        = $image[0];
+			
+			if ( is_array( $image ) && isset( $image[0] ) ) {
+            	$image = $image[0];
+        	} else {
+            	$image = false;
+        	}
+			
 			$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
 			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
 		} else {
