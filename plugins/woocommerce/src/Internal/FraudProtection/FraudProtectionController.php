@@ -44,6 +44,10 @@ class FraudProtectionController {
 		$this->session_manager     = $container->get( SessionClearanceManager::class );
 		$this->features_controller = $container->get( FeaturesController::class );
 
+		// Register email classes and preview handlers (always, even when feature is disabled).
+		add_filter( 'woocommerce_email_classes', array( $this, 'handle_register_email_classes' ), 10, 1 );
+		add_filter( 'woocommerce_prepare_email_for_preview', array( $this, 'handle_prepare_otp_email_for_preview' ), 10, 1 );
+
 		// Only initialize if fraud protection is enabled.
 		if ( $this->is_fraud_protection_enabled() ) {
 			$this->init_hooks();
@@ -281,5 +285,46 @@ class FraudProtectionController {
 			wp_safe_redirect( $shop_url );
 			exit;
 		}
+	}
+
+	/**
+	 * Register fraud protection email classes with WooCommerce.
+	 *
+	 * @internal
+	 *
+	 * @param array $email_classes Existing email classes.
+	 * @return array Modified email classes array.
+	 */
+	public function handle_register_email_classes( $email_classes ) {
+		// Include the email class file.
+		require_once WC()->plugin_path() . '/includes/emails/class-wc-email-fraud-protection-otp.php';
+
+		// Add our email class to the list.
+		$email_classes['WC_Email_Fraud_Protection_Otp'] = new \WC_Email_Fraud_Protection_Otp();
+
+		return $email_classes;
+	}
+
+	/**
+	 * Prepare OTP email for preview with dummy data.
+	 *
+	 * @internal
+	 *
+	 * @param \WC_Email $email Email object being prepared for preview.
+	 * @return \WC_Email Modified email object.
+	 */
+	public function handle_prepare_otp_email_for_preview( $email ) {
+		// Only modify our OTP email class.
+		if ( ! $email instanceof \WC_Email_Fraud_Protection_Otp ) {
+			return $email;
+		}
+
+		// Set dummy data for preview.
+		$email->otp_code           = '123456';
+		$email->expiration_minutes = 60;
+		$email->challenge_id       = 'preview_challenge_id_12345';
+		$email->user_email         = 'customer@example.com';
+
+		return $email;
 	}
 }
