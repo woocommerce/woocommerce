@@ -198,7 +198,7 @@ class AssetsController extends \WP_UnitTestCase {
 			'version' => array(
 				'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 				'wordpress'   => get_bloginfo( 'version' ),
-				'site_url'    => wp_guess_url(),
+				'site_url'    => site_url(),
 			),
 		);
 		set_site_transient( 'woocommerce_block_asset_resource_hints', $mock_cache );
@@ -237,7 +237,7 @@ class AssetsController extends \WP_UnitTestCase {
 		$mock_version         = array(
 			'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 			'wordpress'   => get_bloginfo( 'version' ),
-			'site_url'    => wp_guess_url(),
+			'site_url'    => site_url(),
 		);
 		$mock_version[ $key ] = $value;
 
