@@ -188,8 +188,10 @@ if ( !! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] ) {
 				),
 			},
 		],
-		// This default value is mainly used when resetting this setting via the "Reset defaults" button.
-		// We assign 'no' (Scheduled) because this is the intended default for new installations.
+		// This default value is primarily used when users click "Reset defaults" for settings.
+		// We set 'no' (Scheduled) as the default for new installs, since it is the recommended, lowest-impact option.
+		// Note: The PHP backend defaults to 'yes' (Immediate) to preserve legacy behavior for existing stores and avoid disrupting current site operations.
+		// This intentional difference ensures new stores use the best-practice default, while existing stores are not affected by updates.
 		defaultValue: 'no',
 	};
 }
