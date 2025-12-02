@@ -106,11 +106,22 @@ class WC_Gateway_Paypal_Notices {
 	}
 
 	/**
+	 * Add notice warning about the migration to PayPal Payments on the Payments settings page.
+	 *
+	 * @deprecated 10.4.0 No longer used. Functionality is now handled by add_paypal_notices_on_payments_settings_page().
+	 * @return void
+	 */
+	public function add_paypal_migration_notice_on_payments_settings_page() {
+		wc_deprecated_function( __METHOD__, '10.4.0', 'WC_Gateway_Paypal_Notices::add_paypal_notices_on_payments_settings_page' );
+		$this->add_paypal_notices_on_payments_settings_page();
+	}
+
+	/**
 	 * Add notice warning about the migration to PayPal Payments.
 	 *
 	 * @return void
 	 */
-	private function add_paypal_migration_notice() {
+	public function add_paypal_migration_notice() {
 		// Skip if the notice has been dismissed.
 		if ( $this->is_notice_dismissed( self::PAYPAL_MIGRATION_NOTICE ) ) {
 			return;
@@ -189,6 +200,16 @@ class WC_Gateway_Paypal_Notices {
 	 */
 	private function is_notice_dismissed( string $notice_name ): bool {
 		return (bool) get_user_meta( get_current_user_id(), 'dismissed_' . $notice_name . '_notice', true );
+	}
+
+	/**
+	 * Check if the installation notice has been dismissed.
+	 *
+	 * @deprecated 10.4.0 No longer used. Functionality is now handled by is_notice_dismissed().
+	 * @return bool
+	 */
+	protected static function paypal_migration_notice_dismissed() {
+		return self::is_notice_dismissed( self::PAYPAL_MIGRATION_NOTICE );
 	}
 
 	/**
