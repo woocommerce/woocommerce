@@ -76,6 +76,8 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->clear_scheduled_actions();
+		delete_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION );
+		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		parent::tearDown();
 	}
 
