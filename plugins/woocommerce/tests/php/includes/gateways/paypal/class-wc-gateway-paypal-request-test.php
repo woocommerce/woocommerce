@@ -133,6 +133,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'order_key', $custom_id );
 		$this->assertArrayHasKey( 'site_url', $custom_id );
 		$this->assertArrayHasKey( 'site_id', $custom_id );
+		$this->assertArrayHasKey( 'v', $custom_id );
 
 		return $this->create_paypal_order_success( $value, $parsed_args );
 	}
