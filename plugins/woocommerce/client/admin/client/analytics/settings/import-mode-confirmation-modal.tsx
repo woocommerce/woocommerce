@@ -43,10 +43,24 @@ export const ImportModeConfirmationModal = ( {
 					className="analytics-import-mode-confirmation-modal__buttons"
 					justify="flex-end"
 				>
-					<Button variant="tertiary" onClick={ onClose }>
+					<Button
+						variant="tertiary"
+						onClick={ onClose }
+						aria-label={ __(
+							'Cancel import mode change',
+							'woocommerce'
+						) }
+					>
 						{ __( 'Cancel', 'woocommerce' ) }
 					</Button>
-					<Button variant="primary" onClick={ onConfirm }>
+					<Button
+						variant="primary"
+						onClick={ onConfirm }
+						aria-label={ __(
+							'Confirm switching to immediate import mode',
+							'woocommerce'
+						) }
+					>
 						{ __( 'Confirm', 'woocommerce' ) }
 					</Button>
 				</Flex>
