@@ -44,6 +44,9 @@ class FraudProtectionController {
 		$this->session_manager     = $container->get( SessionClearanceManager::class );
 		$this->features_controller = $container->get( FeaturesController::class );
 
+		// Register Store API routes.
+		add_action( 'rest_api_init', array( $this, 'handle_register_store_api_routes' ), 10, 0 );
+
 		// Register email classes and preview handlers (always, even when feature is disabled).
 		add_filter( 'woocommerce_email_classes', array( $this, 'handle_register_email_classes' ), 10, 1 );
 		add_filter( 'woocommerce_prepare_email_for_preview', array( $this, 'handle_prepare_otp_email_for_preview' ), 10, 1 );
@@ -83,6 +86,71 @@ class FraudProtectionController {
 
 		// Block API requests for blocked sessions.
 		add_filter( 'rest_pre_dispatch', array( $this, 'handle_rest_api_blocked_session' ), 10, 3 );
+	}
+
+	/**
+	 * Register Store API routes for fraud protection OTP endpoints.
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public function handle_register_store_api_routes(): void {
+		$container = wc_get_container();
+
+		// Get dependencies.
+		$api_client        = $container->get( FraudProtectionServiceApiClient::class );
+		$challenge_manager = $container->get( FraudProtectionChallengeManager::class );
+		$session_manager   = $container->get( SessionClearanceManager::class );
+
+		// Get schema controller and create schema instance.
+		$schema_controller = $container->get( \Automattic\WooCommerce\StoreApi\SchemaController::class );
+		$extend_schema     = $container->get( \Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema::class );
+		$schema            = new \Automattic\WooCommerce\StoreApi\Schemas\V1\FraudProtectionOtpSchema( $extend_schema, $schema_controller );
+
+		// Create route instances.
+		$request_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionOtpRequest(
+			$schema_controller,
+			$schema,
+			$api_client,
+			$challenge_manager,
+			$session_manager
+		);
+
+		$verify_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionOtpVerify(
+			$schema_controller,
+			$schema,
+			$api_client,
+			$challenge_manager,
+			$session_manager
+		);
+
+		$resend_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionOtpResend(
+			$schema_controller,
+			$schema,
+			$challenge_manager
+		);
+
+		// Register routes with WordPress REST API under Store API namespace.
+		$namespace = 'wc/store/v1';
+
+		register_rest_route(
+			$namespace,
+			$request_route->get_path(),
+			$request_route->get_args()
+		);
+
+		register_rest_route(
+			$namespace,
+			$verify_route->get_path(),
+			$verify_route->get_args()
+		);
+
+		register_rest_route(
+			$namespace,
+			$resend_route->get_path(),
+			$resend_route->get_args()
+		);
 	}
 
 	/**
@@ -220,16 +288,29 @@ class FraudProtectionController {
 			$version
 		);
 
+		// Get user email if available.
+		$user_email = '';
+		if ( is_user_logged_in() ) {
+			$user       = wp_get_current_user();
+			$user_email = $user->user_email;
+		} elseif ( isset( WC()->session ) && WC()->session instanceof \WC_Session ) {
+			$customer_data = WC()->session->get( 'customer' );
+			if ( is_array( $customer_data ) && ! empty( $customer_data['email'] ) ) {
+				$user_email = $customer_data['email'];
+			}
+		}
+
 		// Pass data to JavaScript.
 		wp_localize_script(
 			'wc-fraud-protection-modal',
 			'wcFraudProtection',
 			array(
 				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
-				'restUrl'       => rest_url( 'wc/v3/fraud-protection/clearance' ),
+				'restUrl'       => rest_url( 'wc/store/v1/fraud-protection/otp' ),
 				'nonce'         => wp_create_nonce( 'wc-fraud-protection' ),
 				'restNonce'     => wp_create_nonce( 'wp_rest' ),
 				'sessionStatus' => $this->session_manager->get_session_status(),
+				'userEmail'     => $user_email,
 				'isCheckout'    => is_checkout(),
 				'isProduct'     => is_product() || is_shop() || is_product_category() || is_product_tag(),
 				'shopUrl'       => get_permalink( wc_get_page_id( 'shop' ) ),
@@ -249,14 +330,14 @@ class FraudProtectionController {
 	 * @return mixed Response.
 	 */
 	public function handle_rest_api_blocked_session( $result, $server, $request ) {
-		// Only check WooCommerce endpoints.
+		// Only check WooCommerce and Store API endpoints.
 		$route = $request->get_route();
 		if ( strpos( $route, '/wc/' ) === false && strpos( $route, '/wc-' ) === false ) {
 			return $result;
 		}
 
-		// Allow the clearance endpoint itself.
-		if ( strpos( $route, '/fraud-protection/clearance' ) !== false ) {
+		// Allow the Store API OTP endpoints themselves.
+		if ( strpos( $route, '/store/v1/fraud-protection/otp' ) !== false ) {
 			return $result;
 		}
 
