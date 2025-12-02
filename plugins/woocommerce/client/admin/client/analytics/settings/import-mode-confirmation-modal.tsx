@@ -28,7 +28,7 @@ export const ImportModeConfirmationModal = ( {
 		<Modal
 			title={ __( 'Are you sure?', 'woocommerce' ) }
 			onRequestClose={ onClose }
-			className="analytics-import-mode-confirmation-modal"
+			className="woocommerce-analytics-import-mode-confirmation-modal"
 			size="medium"
 		>
 			<Flex direction="column" gap={ 6 }>
@@ -40,7 +40,7 @@ export const ImportModeConfirmationModal = ( {
 				</Text>
 				<Flex
 					direction="row"
-					className="analytics-import-mode-confirmation-modal__buttons"
+					className="woocommerce-analytics-import-mode-confirmation-modal__buttons"
 					justify="flex-end"
 				>
 					<Button
