@@ -2,14 +2,14 @@
  * External dependencies
  */
 import { isValidElement } from '@wordpress/element';
-import type { ReactNode, ComponentType } from 'react';
+import type { ReactNode } from 'react';
 import type {
 	PaymentMethodConfiguration,
 	ExpressPaymentMethodConfiguration,
 } from '@woocommerce/types';
 
-export const assertValidPaymentMethodComponent = < T >(
-	component: ComponentType< T >,
+export const assertValidPaymentMethodComponent = (
+	component: () => unknown,
 	componentName: string
 ): void => {
 	if ( typeof component !== 'function' ) {
