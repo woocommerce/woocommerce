@@ -140,19 +140,18 @@ class WCTransactionalEmailPostsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that get_email_type_class_name_from_template_name converts correctly.
+	 * Test that get_email_type_class_name_from_email_id converts correctly.
 	 */
-	public function testGetEmailTypeClassNameFromTemplateNameConvertsCorrectly(): void {
+	public function testGetEmailTypeClassNameFromEmailIdConvertsCorrectly(): void {
 		$test_cases = array(
 			'customer_new_account'      => 'WC_Email_Customer_New_Account',
-			'admin_new_order'           => 'WC_Email_Admin_New_Order',
+			'new_order'                 => 'WC_Email_New_Order',
 			'customer_processing_order' => 'WC_Email_Customer_Processing_Order',
-			'simple_name'               => 'WC_Email_Simple_Name',
-			'single'                    => 'WC_Email_Single',
+			'customer_cancelled_order'  => 'WC_Email_Customer_Cancelled_Order',
 		);
 
-		foreach ( $test_cases as $template_name => $expected_class_name ) {
-			$result = $this->template_manager->get_email_type_class_name_from_template_name( $template_name );
+		foreach ( $test_cases as $email_id => $expected_class_name ) {
+			$result = $this->template_manager->get_email_type_class_name_from_email_id( $email_id );
 			$this->assertEquals( $expected_class_name, $result );
 		}
 	}
