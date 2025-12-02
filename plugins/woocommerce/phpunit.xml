@@ -31,6 +31,7 @@
                 </array>
             </arguments>
 		</listener>
+		<listener class="Automattic\WooCommerce\Tests\TestClassLogger" file="./tests/php/TestClassLogger.php"/>
 	</listeners>
 	<coverage includeUncoveredFiles="true">
 		<include>
