@@ -218,7 +218,7 @@ class Integration {
 
 		$post_manager = WCTransactionalEmailPostsManager::get_instance();
 
-		$email_type = $post_manager->get_email_type_from_post_id( $post_id );
+		$email_type = $post_manager->get_email_type_from_post_id( $post_id, true );
 
 		if ( empty( $email_type ) ) {
 			return;
