@@ -156,7 +156,7 @@ const baseConfig = {
 };
 
 // Add import mode setting if feature is enabled
-if ( !! window.wcAdminFeatures[ 'analytics-scheduled-import' ] ) {
+if ( !! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] ) {
 	const importInterval = getAdminSetting(
 		'woocommerce_analytics_import_interval',
 		__( '12 hours', 'woocommerce' ) // Default value for the import interval.
