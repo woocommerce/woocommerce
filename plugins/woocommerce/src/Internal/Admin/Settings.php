@@ -358,7 +358,7 @@ class Settings {
 				'type'        => 'radio',
 				'default'     => 'yes', // Default to immediate import for backward compatibility to ensure we don't accidentally change the behavior for existing stores.
 				'options'     => array(
-					'no'  => __( 'Scheduled (Recommended)', 'woocommerce' ),
+					'no'  => __( 'Scheduled (recommended)', 'woocommerce' ),
 					'yes' => __( 'Immediately', 'woocommerce' ),
 				),
 			);
