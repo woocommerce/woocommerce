@@ -120,6 +120,7 @@ const Settings = ( { createNotice, query } ) => {
 		// Intercept import mode change from scheduled to immediate
 		if (
 			name === IMMEDIATE_IMPORT_SETTING_NAME &&
+			config[ IMMEDIATE_IMPORT_SETTING_NAME ] &&
 			wcAdminSettings[ name ] === 'no' &&
 			value === 'yes'
 		) {
@@ -196,7 +197,7 @@ const Settings = ( { createNotice, query } ) => {
 			) : (
 				<HistoricalData createNotice={ createNotice } />
 			) }
-			{ config[IMMEDIATE_IMPORT_SETTING_NAME] && (
+			{ config[ IMMEDIATE_IMPORT_SETTING_NAME ] && (
 				<ImportModeConfirmationModal
 					isOpen={ isImportModeModalOpen }
 					onClose={ handleImportModeCancel }
