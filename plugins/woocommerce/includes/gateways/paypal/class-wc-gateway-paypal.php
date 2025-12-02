@@ -719,6 +719,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
+		}
 
 		// Bail if the order is not a PayPal order.
 		if ( self::ID !== $order->get_payment_method() ) {
