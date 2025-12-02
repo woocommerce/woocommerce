@@ -11,11 +11,37 @@
 	<testsuites>
 		<testsuite name="wc-phpunit-legacy">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
+			<!-- BISECT: Excluding second half of legacy tests (o-z) -->
+			<exclude>./tests/legacy/unit-tests/order-items</exclude>
+			<exclude>./tests/legacy/unit-tests/packages</exclude>
+			<exclude>./tests/legacy/unit-tests/page-functions</exclude>
+			<exclude>./tests/legacy/unit-tests/payment-gateways</exclude>
+			<exclude>./tests/legacy/unit-tests/payment-tokens</exclude>
+			<exclude>./tests/legacy/unit-tests/privacy</exclude>
+			<exclude>./tests/legacy/unit-tests/product</exclude>
+			<exclude>./tests/legacy/unit-tests/queue</exclude>
+			<exclude>./tests/legacy/unit-tests/rest-api</exclude>
+			<exclude>./tests/legacy/unit-tests/session</exclude>
+			<exclude>./tests/legacy/unit-tests/settings</exclude>
+			<exclude>./tests/legacy/unit-tests/shipping</exclude>
+			<exclude>./tests/legacy/unit-tests/shortcodes</exclude>
+			<exclude>./tests/legacy/unit-tests/tax</exclude>
+			<exclude>./tests/legacy/unit-tests/templates</exclude>
+			<exclude>./tests/legacy/unit-tests/totals</exclude>
+			<exclude>./tests/legacy/unit-tests/util</exclude>
+			<exclude>./tests/legacy/unit-tests/webhooks</exclude>
+			<exclude>./tests/legacy/unit-tests/widgets</exclude>
+			<exclude>./tests/legacy/unit-tests/woocommerce-admin</exclude>
 		</testsuite>
 		<testsuite name="wc-phpunit-main">
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
+			<!-- BISECT: Excluding second half of main tests (keep Internal for TaxDebugTest) -->
+			<exclude>./tests/php/src/LayoutTemplates</exclude>
+			<exclude>./tests/php/src/Proxies</exclude>
+			<exclude>./tests/php/src/StoreApi</exclude>
+			<exclude>./tests/php/src/Utilities</exclude>
 		</testsuite>
 	</testsuites>
 	<listeners>
