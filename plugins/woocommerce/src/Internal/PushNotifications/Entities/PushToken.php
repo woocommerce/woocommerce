@@ -35,6 +35,13 @@ class PushToken {
 	const PLATFORM_BROWSER = 'browser';
 
 	/**
+	 * Platform identifier for Apple devices.
+	 *
+	 * @deprecated 10.5.0 Use PLATFORM_APPLE instead
+	 */
+	const PLATFORM_IOS = self::PLATFORM_APPLE;
+
+	/**
 	 * Origin identifier for WooCommerce Android app.
 	 */
 	const ORIGIN_WOOCOMMERCE_ANDROID = 'com.woocommerce.android';
