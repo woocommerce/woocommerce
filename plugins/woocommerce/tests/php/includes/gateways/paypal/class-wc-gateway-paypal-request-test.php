@@ -649,18 +649,18 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 										'payments' => array(
 											'authorizations' => array(
 												array(
-													'id'          => 'AUTH_1',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_1',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 												array(
-													'id'          => 'AUTH_3',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_3',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													'update_time' => '2024-02-02T00:00:00Z',
 												),
 												array(
-													'id'          => 'AUTH_2',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_2',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-03T00:00:00Z',
 												),
 											),
@@ -718,20 +718,20 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 										'payments' => array(
 											'authorizations' => array(
 												array(
-													'id'          => 'AUTH_1',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_1',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 											),
 											'captures' => array(
 												array(
-													'id'          => 'CAPTURE_1',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_CAPTURED,
+													'id' => 'CAPTURE_1',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_CAPTURED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 												array(
-													'id'          => 'CAPTURE_2',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_COMPLETED,
+													'id' => 'CAPTURE_2',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_COMPLETED,
 													'update_time' => '2024-02-02T00:00:00Z',
 												),
 											),
@@ -793,8 +793,8 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 										'payments' => array(
 											'authorizations' => array(
 												array(
-													'id'          => 'AUTH_123',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_CAPTURED,
+													'id' => 'AUTH_123',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_CAPTURED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 											),
@@ -934,18 +934,18 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 										'payments' => array(
 											'authorizations' => array(
 												array(
-													'id'          => 'AUTH_OLD',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_OLD',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 												array(
-													'id'          => 'AUTH_NEWEST',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_NEWEST',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-03T00:00:00Z',
 												),
 												array(
-													'id'          => 'AUTH_MIDDLE',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_MIDDLE',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-02T00:00:00Z',
 												),
 											),
@@ -1096,13 +1096,13 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 										'payments' => array(
 											'authorizations' => array(
 												array(
-													'id'          => 'AUTH_NO_TIME',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_NO_TIME',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													// Missing update_time.
 												),
 												array(
-													'id'          => 'AUTH_VALID',
-													'status'      => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'id' => 'AUTH_VALID',
+													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 											),
