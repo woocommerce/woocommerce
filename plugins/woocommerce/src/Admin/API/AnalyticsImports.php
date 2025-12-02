@@ -205,26 +205,26 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			'title'      => 'analytics_import_status',
 			'type'       => 'object',
 			'properties' => array(
-				'mode'                => array(
+				'mode'                              => array(
 					'type'        => 'string',
 					'enum'        => array( 'scheduled', 'immediate' ),
 					'description' => __( 'Current import mode.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'last_processed_date' => array(
+				'last_processed_date'               => array(
 					'type'        => array( 'string', 'null' ),
 					'description' => __( 'Last processed order date (null in immediate mode).', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'next_scheduled'      => array(
+				'next_scheduled'                    => array(
 					'type'        => array( 'string', 'null' ),
 					'description' => __( 'Next scheduled import time (null in immediate mode).', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'manual_triggered_import_scheduled'       => array(
+				'manual_triggered_import_scheduled' => array(
 					'type'        => array( 'boolean', 'null' ),
 					'description' => __( 'Whether a manual triggered import has already been scheduled.', 'woocommerce' ),
 					'context'     => array( 'view' ),
@@ -272,7 +272,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 */
 	private function has_manual_triggered_import_scheduled() {
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		$hook = OrdersScheduler::get_action( 'process_pending_batch' );
+		$hook                 = OrdersScheduler::get_action( 'process_pending_batch' );
 
 		return call_user_func( $has_scheduled_action, $hook, array( null, null ) ) ? true : false;
 	}
