@@ -931,7 +931,7 @@ A placeholder block for email content.
 -   **Ancestor:** 
 -   **Parent:** 
 -	**Supports:** email, ~~inserter~~
--	**Attributes:** emailType
+-	**Attributes:** emailType, postId
 
 ## Featured Category - woocommerce/featured-category
 
