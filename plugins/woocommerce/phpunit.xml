@@ -11,7 +11,16 @@
 	<testsuites>
 		<testsuite name="wc-phpunit-legacy">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
-			<!-- BISECT: Excluding second half of legacy tests (o-z) -->
+			<!-- BISECT ROUND 2: Keep first quarter (a-f), exclude second quarter (g-n) and second half (o-z) -->
+			<!-- Excluding g-n (second quarter of first half) -->
+			<exclude>./tests/legacy/unit-tests/gateways</exclude>
+			<exclude>./tests/legacy/unit-tests/geolocation</exclude>
+			<exclude>./tests/legacy/unit-tests/importer</exclude>
+			<exclude>./tests/legacy/unit-tests/integrations</exclude>
+			<exclude>./tests/legacy/unit-tests/libraries</exclude>
+			<exclude>./tests/legacy/unit-tests/log</exclude>
+			<!-- Excluding o-z (second half) -->
+			<exclude>./tests/legacy/unit-tests/order</exclude>
 			<exclude>./tests/legacy/unit-tests/order-items</exclude>
 			<exclude>./tests/legacy/unit-tests/packages</exclude>
 			<exclude>./tests/legacy/unit-tests/page-functions</exclude>
@@ -37,7 +46,7 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
-			<!-- BISECT: Excluding second half of main tests (keep Internal for TaxDebugTest) -->
+			<!-- BISECT ROUND 2: Keep first half of main tests, exclude second half -->
 			<exclude>./tests/php/src/LayoutTemplates</exclude>
 			<exclude>./tests/php/src/Proxies</exclude>
 			<exclude>./tests/php/src/StoreApi</exclude>
