@@ -69,7 +69,7 @@ class EmailContent extends AbstractBlock {
 
 		if ( isset( $attributes['postId'] ) ) {
 			$email_type_class_name = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_post_id( $attributes['postId'] );
-			$type_param = ! empty( $email_type_class_name ) ? $email_type_class_name : $type_param;
+			$type_param            = ! empty( $email_type_class_name ) ? $email_type_class_name : $type_param;
 		} elseif ( isset( $attributes['emailType'] ) ) {
 			$type_param = sanitize_text_field( wp_unslash( $attributes['emailType'] ) );
 		}

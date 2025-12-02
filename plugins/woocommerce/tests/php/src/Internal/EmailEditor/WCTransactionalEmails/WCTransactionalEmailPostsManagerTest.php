@@ -365,7 +365,6 @@ class WCTransactionalEmailPostsManagerTest extends \WC_Unit_Test_Case {
 		$this->assertNull( $result );
 	}
 
-
 	/**
 	 * Test caching behavior when post_id is provided as string.
 	 */

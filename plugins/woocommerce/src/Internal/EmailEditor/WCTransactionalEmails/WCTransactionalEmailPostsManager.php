@@ -99,7 +99,8 @@ class WCTransactionalEmailPostsManager {
 			return null;
 		}
 
-		$post_id = (int) $post_id;
+		$post_id   = (int) $post_id;
+		$cache_key = $this->get_cache_key_for_post_id( $post_id );
 
 		if ( ! $skip_cache ) {
 			// Check in-memory cache first (fastest).
@@ -108,7 +109,6 @@ class WCTransactionalEmailPostsManager {
 			}
 
 			// Check WordPress object cache.
-			$cache_key  = $this->get_cache_key_for_post_id( $post_id );
 			$email_type = wp_cache_get( $cache_key, self::CACHE_GROUP );
 
 			if ( ! empty( $email_type ) ) {
@@ -135,7 +135,7 @@ class WCTransactionalEmailPostsManager {
 		$email_type = $this->get_email_type_from_option_name( $option_name );
 
 		// Store in both caches.
-		$this->post_id_to_email_type_cache[ (int) $post_id ] = $email_type;
+		$this->post_id_to_email_type_cache[ $post_id ] = $email_type;
 		wp_cache_set( $cache_key, $email_type, self::CACHE_GROUP, self::CACHE_EXPIRATION );
 
 		return $email_type;
@@ -162,7 +162,14 @@ class WCTransactionalEmailPostsManager {
 	public function save_email_template_post_id( $email_type, $post_id ) {
 		$option_name = $this->get_option_name( $email_type );
 
+		$previous_id = get_option( $option_name );
+
 		update_option( $option_name, $post_id );
+
+		// Invalidate caches for the previous mapping (if any).
+		if ( ! empty( $previous_id ) ) {
+			$this->invalidate_cache_for_template( (int) $previous_id, 'post_id' );
+		}
 
 		// Invalidate cache for the new post_id.
 		$this->invalidate_cache_for_template( $email_type, 'email_type' );
@@ -191,8 +198,10 @@ class WCTransactionalEmailPostsManager {
 		$post_id     = get_option( $option_name );
 
 		if ( ! empty( $post_id ) ) {
+			$post_id = (int) $post_id;
+
 			// Store in in-memory cache.
-			$this->post_id_to_email_type_cache[ (int) $post_id ] = $email_type;
+			$this->post_id_to_email_type_cache[ $post_id ] = $email_type;
 		}
 
 		return $post_id;
@@ -305,7 +314,7 @@ class WCTransactionalEmailPostsManager {
 		}
 
 		// Check in-memory cache first.
-		if ( array_key_exists( $email_id, $this->email_class_name_cache ) ) {
+		if ( isset( $this->email_class_name_cache[ $email_id ] ) ) {
 			return $this->email_class_name_cache[ $email_id ];
 		}
 
