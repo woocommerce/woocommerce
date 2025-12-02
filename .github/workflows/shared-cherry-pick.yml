@@ -279,11 +279,26 @@ jobs:
                 title: `[Backport to ${targetBranch}] ${originalPr.title}`,
                 body: prBody
               });
-            
+
+              // Add "Release" label to the PR
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: newPr.number,
+                labels: ['Release']
+              });
+
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: newPr.number,
+                reviewers: [context.actor, originalPr.user.login]
+              });
+
               core.setOutput('pr_number', newPr.number.toString());
               core.setOutput('original_author', originalPr.user?.login || '');
               core.setOutput('original_merger', originalPr.merged_by?.login || '');
-            
+
               core.info(`Created PR #${newPr.number}: ${newPr.html_url}`);
 
             } catch (error) {
