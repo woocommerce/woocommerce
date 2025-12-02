@@ -48,6 +48,7 @@
 	}
 
 	.wc-block-components-shipping-rates-control__package-header {
+		flex: 1;
 		display: flex;
 		flex-direction: column;
 
@@ -69,6 +70,12 @@
 
 		&:first-child {
 			margin-left: $gap-smallest;
+		}
+
+		@media screen and ( max-width: 480px ) {
+			img:nth-child(3) {
+				display: none;
+			}
 		}
 	}
 }
