@@ -49,7 +49,7 @@ class PushTokensDataStore {
 				'post_author' => $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
-				'meta_input'  => $this->get_meta_from_token( $push_token ),
+				'meta_input'  => $this->build_meta_array_from_token( $push_token ),
 			),
 			true
 		);
@@ -87,7 +87,7 @@ class PushTokensDataStore {
 			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
-		$meta = $this->get_meta_from_database( $push_token );
+		$meta = $this->build_meta_array_from_database( $push_token );
 
 		if (
 			empty( $meta['token'] )
@@ -142,7 +142,7 @@ class PushTokensDataStore {
 				'post_author' => $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
-				'meta_input'  => $this->get_meta_from_token( $push_token ),
+				'meta_input'  => $this->build_meta_array_from_token( $push_token ),
 			),
 			true
 		);
@@ -231,7 +231,7 @@ class PushTokensDataStore {
 			$candidate->set_id( (int) $post->ID );
 
 			try {
-				$meta = $this->get_meta_from_database( $candidate );
+				$meta = $this->build_meta_array_from_database( $candidate );
 			} catch ( Exception $e ) {
 				wc_get_logger()->warning(
 					'Failed to load meta for push token.',
@@ -271,7 +271,7 @@ class PushTokensDataStore {
 	 * @return array
 	 * @throws InvalidArgumentException If the token can't be read.
 	 */
-	private function get_meta_from_database( PushToken &$push_token ) {
+	private function build_meta_array_from_database( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
 				'Can\'t read meta for push token because the push token data provided is invalid.',
@@ -297,7 +297,7 @@ class PushTokensDataStore {
 	 * @return array
 	 * @throws InvalidArgumentException If the token can't be read.
 	 */
-	private function get_meta_from_token( PushToken &$push_token ) {
+	private function build_meta_array_from_token( PushToken &$push_token ) {
 		return array_filter(
 			array(
 				'platform'    => $push_token->get_platform(),
