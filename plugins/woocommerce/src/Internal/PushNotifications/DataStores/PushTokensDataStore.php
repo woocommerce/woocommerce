@@ -49,14 +49,7 @@ class PushTokensDataStore {
 				'post_author' => $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
-				'meta_input'  => array_filter(
-					array(
-						'platform'    => $push_token->get_platform(),
-						'token'       => $push_token->get_token(),
-						'device_uuid' => $push_token->get_device_uuid(),
-						'origin'      => $push_token->get_origin(),
-					)
-				),
+				'meta_input'  => $this->get_meta_from_token( $push_token ),
 			),
 			true
 		);
@@ -94,7 +87,7 @@ class PushTokensDataStore {
 			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
-		$meta = $this->get_meta( $push_token );
+		$meta = $this->get_meta_from_database( $push_token );
 
 		if (
 			empty( $meta['token'] )
@@ -149,14 +142,7 @@ class PushTokensDataStore {
 				'post_author' => $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
-				'meta_input'  => array_filter(
-					array(
-						'platform'    => $push_token->get_platform(),
-						'token'       => $push_token->get_token(),
-						'device_uuid' => $push_token->get_device_uuid(),
-						'origin'      => $push_token->get_origin(),
-					)
-				),
+				'meta_input'  => $this->get_meta_from_token( $push_token ),
 			),
 			true
 		);
@@ -245,7 +231,7 @@ class PushTokensDataStore {
 			$candidate->set_id( (int) $post->ID );
 
 			try {
-				$meta = $this->get_meta( $candidate );
+				$meta = $this->get_meta_from_database( $candidate );
 			} catch ( Exception $e ) {
 				wc_get_logger()->warning(
 					'Failed to load meta for push token.',
@@ -277,14 +263,15 @@ class PushTokensDataStore {
 	}
 
 	/**
-	 * Returns an array of post meta objects as key => value pairs.
+	 * Returns an associative array of post meta as key => value pairs for the
+	 * keys defined in SUPPORTED_META; missing keys return null.
 	 *
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return array
 	 * @throws InvalidArgumentException If the token can't be read.
 	 */
-	private function get_meta( PushToken &$push_token ) {
+	private function get_meta_from_database( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
 				'Can\'t read meta for push token because the push token data provided is invalid.',
@@ -298,6 +285,26 @@ class PushTokensDataStore {
 		return array_map(
 			fn ( $key ) => $meta[ $key ][0] ?? $meta[ $key ] ?? null,
 			array_combine( static::SUPPORTED_META, static::SUPPORTED_META )
+		);
+	}
+
+	/**
+	 * Returns an associative array of post meta as key => value pairs, built
+	 * using push token properties.
+	 *
+	 * @since 10.5.0
+	 * @param PushToken $push_token An instance of PushToken.
+	 * @return array
+	 * @throws InvalidArgumentException If the token can't be read.
+	 */
+	private function get_meta_from_token( PushToken &$push_token ) {
+		return array_filter(
+			array(
+				'platform'    => $push_token->get_platform(),
+				'token'       => $push_token->get_token(),
+				'device_uuid' => $push_token->get_device_uuid(),
+				'origin'      => $push_token->get_origin(),
+			)
 		);
 	}
 }
