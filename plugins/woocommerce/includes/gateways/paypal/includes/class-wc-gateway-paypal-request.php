@@ -572,7 +572,7 @@ class WC_Gateway_Paypal_Request {
 				'order_id'  => $order->get_id(),
 				'order_key' => $order->get_order_key(),
 				// Endpoint for the proxy to forward webhooks to.
-				'site_url'  => get_site_url(),
+				'site_url'  => home_url(),
 				'site_id'   => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
 			)
 		);
