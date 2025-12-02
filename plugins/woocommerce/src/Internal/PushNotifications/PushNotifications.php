@@ -63,9 +63,9 @@ class PushNotifications {
 	 * Registers the push token custom post type.
 	 *
 	 * @since 10.5.0
-	 * @internal
+	 * @return void
 	 */
-	public function register_post_types() {
+	public function register_post_types(): void {
 		register_post_type(
 			PushToken::POST_TYPE,
 			array(
