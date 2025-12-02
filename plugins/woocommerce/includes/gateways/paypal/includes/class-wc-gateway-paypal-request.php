@@ -170,6 +170,11 @@ class WC_Gateway_Paypal_Request {
 			 * This hook allows extensions to react to PayPal API responses, such as
 			 * displaying admin notices or logging response data.
 			 *
+			 * Note: This hook fires on EVERY order creation attempt (success or failure),
+			 * and can be called multiple times for the same order if retried. Extensions
+			 * hooking this should be idempotent and check order state/meta before taking
+			 * action to avoid duplicate processing.
+			 *
 			 * @since 10.4.0
 			 *
 			 * @param int        $http_code     The HTTP status code from the PayPal API response.
