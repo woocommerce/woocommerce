@@ -196,11 +196,13 @@ const Settings = ( { createNotice, query } ) => {
 			) : (
 				<HistoricalData createNotice={ createNotice } />
 			) }
-			<ImportModeConfirmationModal
-				isOpen={ isImportModeModalOpen }
-				onClose={ handleImportModeCancel }
-				onConfirm={ handleImportModeConfirm }
-			/>
+			{ config[IMMEDIATE_IMPORT_SETTING_NAME] && (
+				<ImportModeConfirmationModal
+					isOpen={ isImportModeModalOpen }
+					onClose={ handleImportModeCancel }
+					onConfirm={ handleImportModeConfirm }
+				/>
+			) }
 		</Fragment>
 	);
 };
