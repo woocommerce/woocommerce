@@ -1,5 +1,5 @@
 /**
- * Fraud Protection Clearance Modal Styles
+ * Fraud Protection OTP Modal Styles
  */
 
 /* Prevent body scroll when modal is open */
@@ -49,21 +49,58 @@ body.wc-fraud-protection-modal-open {
 	color: #666;
 }
 
-.wc-fraud-protection-modal-content .wc-fraud-protection-notice {
-	font-weight: 500;
-	color: #333;
+/* Step containers */
+.wc-fraud-protection-step {
+	margin-top: 20px;
+}
+
+/* Form groups */
+.wc-fraud-protection-form-group {
 	margin-bottom: 20px;
 }
 
-/* Action buttons */
-.wc-fraud-protection-actions {
-	display: flex;
-	gap: 15px;
-	margin-top: 25px;
+.wc-fraud-protection-form-group label {
+	display: block;
+	margin-bottom: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	color: #333;
 }
 
-.wc-fraud-protection-actions .button {
-	flex: 1;
+/* Input fields */
+.wc-fraud-protection-input {
+	width: 100%;
+	padding: 12px 16px;
+	font-size: 15px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-sizing: border-box;
+	transition: all 0.2s ease;
+
+	&:focus {
+		outline: none;
+		border-color: #2c7d2e;
+		box-shadow: 0 0 0 3px rgba(44, 125, 46, 0.1);
+	}
+
+	&::placeholder {
+		color: #999;
+	}
+}
+
+/* OTP input specific styling */
+.wc-fraud-protection-otp-input {
+	text-align: center;
+	letter-spacing: 0.3em;
+	font-size: 20px;
+	font-weight: 600;
+	font-family: 'Courier New', monospace;
+	padding: 16px;
+}
+
+/* Buttons */
+.wc-fraud-protection-step .button {
+	width: 100%;
 	padding: 12px 24px;
 	font-size: 15px;
 	font-weight: 500;
@@ -72,34 +109,125 @@ body.wc-fraud-protection-modal-open {
 	cursor: pointer;
 	transition: all 0.2s ease;
 	text-align: center;
-}
-
-.wc-fraud-allow-session {
 	background: #2c7d2e;
 	color: #fff;
+	margin-top: 10px;
+
+	&:hover {
+		background: #236621;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(44, 125, 46, 0.3);
+	}
+
+	&:active {
+		transform: translateY(0);
+	}
+
+	&:disabled {
+		background: #ccc;
+		cursor: not-allowed;
+		transform: none;
+		box-shadow: none;
+	}
 }
 
-.wc-fraud-allow-session:hover {
-	background: #236621;
-	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(44, 125, 46, 0.3);
+/* Resend container */
+.wc-fraud-protection-resend-container {
+	margin-top: 15px;
+	text-align: center;
+	font-size: 14px;
 }
 
-.wc-fraud-block-session {
-	background: #d63638;
-	color: #fff;
+.wc-fraud-resend-otp {
+	color: #2c7d2e;
+	text-decoration: none;
+	font-weight: 500;
+	transition: color 0.2s ease;
+
+	&:hover:not(.disabled) {
+		color: #236621;
+		text-decoration: underline;
+	}
+
+	&.disabled {
+		color: #999;
+		cursor: not-allowed;
+		pointer-events: none;
+	}
 }
 
-.wc-fraud-block-session:hover {
-	background: #b32d2e;
-	transform: translateY(-1px);
-	box-shadow: 0 4px 12px rgba(214, 54, 56, 0.3);
+.wc-fraud-resend-countdown {
+	display: block;
+	margin-top: 8px;
+	color: #666;
+	font-size: 13px;
+}
+
+/* Error message */
+.wc-fraud-protection-error-message {
+	background: #fef8f8;
+	border: 1px solid #d63638;
+	border-radius: 4px;
+	padding: 10px 15px;
+	margin-top: 15px;
+	margin-bottom: 10px;
+	font-size: 13px;
+	color: #d63638;
+
+	p {
+		margin: 0;
+		color: #d63638;
+	}
+}
+
+/* Success message */
+.wc-fraud-protection-success-message {
+	background: #f0f9f0;
+	border: 1px solid #2e7d32;
+	border-radius: 4px;
+	padding: 10px 15px;
+	margin-top: 15px;
+	margin-bottom: 10px;
+	font-size: 13px;
+	color: #2e7d32;
+
+	p {
+		margin: 0;
+		color: #2e7d32;
+	}
+}
+
+/* Success state (after verification) */
+.wc-fraud-protection-success {
+	color: #2e7d32;
+	font-size: 15px;
+	margin: 20px 0 0;
+	text-align: center;
+	font-weight: 500;
+}
+
+/* Attempts remaining */
+.wc-fraud-protection-attempts {
+	background: #fff9e6;
+	border: 1px solid #f0ad4e;
+	border-radius: 4px;
+	padding: 8px 12px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	font-size: 13px;
+	color: #856404;
+	text-align: center;
+
+	p {
+		margin: 0;
+		color: #856404;
+	}
 }
 
 /* Loading state */
 .wc-fraud-protection-loading {
 	text-align: center;
-	padding: 20px 0;
+	padding: 30px 0;
 }
 
 .wc-fraud-protection-loading .spinner {
@@ -109,19 +237,9 @@ body.wc-fraud-protection-modal-open {
 }
 
 .wc-fraud-protection-loading p {
-	margin: 0;
+	margin: 10px 0 0;
 	color: #666;
 	font-size: 14px;
-}
-
-/* Error message */
-.wc-fraud-protection-error {
-	background: #fef8f8;
-	border: 1px solid #d63638;
-	border-radius: 4px;
-	padding: 10px 15px;
-	margin-top: 15px;
-	font-size: 13px;
 }
 
 /* Animations */
@@ -146,21 +264,80 @@ body.wc-fraud-protection-modal-open {
 }
 
 /* Responsive styles */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
 	.wc-fraud-protection-modal {
 		width: 95%;
-		padding: 20px;
+		padding: 25px;
+		max-height: 90vh;
+		overflow-y: auto;
 	}
 
 	.wc-fraud-protection-modal-content h2 {
 		font-size: 20px;
 	}
 
-	.wc-fraud-protection-actions {
-		flex-direction: column;
+	.wc-fraud-protection-step .button {
+		padding: 14px 20px;
+		font-size: 16px;
 	}
 
-	.wc-fraud-protection-actions .button {
-		width: 100%;
+	.wc-fraud-protection-input {
+		padding: 14px 16px;
+		font-size: 16px;
+	}
+
+	.wc-fraud-protection-otp-input {
+		font-size: 24px;
+		padding: 18px;
+	}
+}
+
+@media (max-width: 480px) {
+	.wc-fraud-protection-modal {
+		padding: 20px;
+	}
+
+	.wc-fraud-protection-modal-content h2 {
+		font-size: 18px;
+		margin-bottom: 12px;
+	}
+
+	.wc-fraud-protection-modal-content p {
+		font-size: 13px;
+	}
+
+	.wc-fraud-protection-otp-input {
+		font-size: 20px;
+	}
+}
+
+/* Focus states for accessibility */
+.wc-fraud-resend-otp:focus,
+.wc-fraud-protection-step .button:focus {
+	outline: 2px solid #2c7d2e;
+	outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+	.wc-fraud-protection-input {
+		border-width: 2px;
+	}
+
+	.wc-fraud-protection-error-message,
+	.wc-fraud-protection-success-message,
+	.wc-fraud-protection-attempts {
+		border-width: 2px;
+	}
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+	.wc-fraud-protection-modal-overlay,
+	.wc-fraud-protection-modal,
+	.wc-fraud-protection-input,
+	.wc-fraud-protection-step .button {
+		animation: none;
+		transition: none;
 	}
 }
