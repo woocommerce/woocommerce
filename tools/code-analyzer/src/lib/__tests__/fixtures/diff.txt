@@ -7784,12 +7784,11 @@ new file mode 100644
 index 0000000000..bd6cb4938a
 --- /dev/null
 +++ b/packages/js/data/src/items/index.ts
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,47 @@
 +/**
 + * External dependencies
 + */
 +import { registerStore } from '@wordpress/data';
-+import { SelectFromMap, DispatchFromMap } from '@woocommerce/data';
 +import { Reducer, AnyAction } from 'redux';
 +/**
 + * Internal dependencies
@@ -7800,7 +7799,12 @@ index 0000000000..bd6cb4938a
 +import * as resolvers from './resolvers';
 +import reducer, { State } from './reducer';
 +import controls from '../controls';
-+import { WPDataActions, WPDataSelectors } from '../types';
++import {
++ SelectFromMap,
++ DispatchFromMap,
++ WPDataActions,
++ WPDataSelectors
++} from '../types';
 +import { getItemsType } from './selectors';
 +export * from './types';
 +export type { State };
