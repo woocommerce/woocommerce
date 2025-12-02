@@ -6,6 +6,7 @@
 declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\TaxDebug;
 
 /**
@@ -42,6 +43,9 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$this->sut = new TaxDebug();
 
 		$this->original_default_country = get_option( 'woocommerce_default_country' );
+
+		// Clear constants that would prevent notices from being shown.
+		Constants::clear_constants();
 
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		TaxDebug::reset_notices_flag();
