@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Admin\Features\Features;
 
@@ -264,7 +265,7 @@ final class AssetsController {
 		$cache = get_site_transient( 'woocommerce_block_asset_resource_hints' );
 
 		$current_version = array(
-			'woocommerce' => WOOCOMMERCE_VERSION,
+			'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 			'wordpress'   => get_bloginfo( 'version' ),
 			'site_url'    => wp_guess_url(),
 		);
@@ -287,7 +288,7 @@ final class AssetsController {
 		$updated = array(
 			'files'   => $cache ?? array(),
 			'version' => array(
-				'woocommerce' => WOOCOMMERCE_VERSION,
+				'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 				'wordpress'   => get_bloginfo( 'version' ),
 				'site_url'    => wp_guess_url(),
 			),

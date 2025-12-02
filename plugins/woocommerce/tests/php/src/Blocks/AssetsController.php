@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\AssetsController as TestedAssetsController;
 
@@ -195,7 +196,7 @@ class AssetsController extends \WP_UnitTestCase {
 				),
 			),
 			'version' => array(
-				'woocommerce' => WOOCOMMERCE_VERSION,
+				'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 				'wordpress'   => get_bloginfo( 'version' ),
 				'site_url'    => wp_guess_url(),
 			),
@@ -217,7 +218,7 @@ class AssetsController extends \WP_UnitTestCase {
 	 */
 	public function resource_hints_invalid_cache_provider(): array {
 		return array(
-			array( 'woocommerce', WOOCOMMERCE_VERSION . '-old' ),
+			array( 'woocommerce', Constants::get_constant( 'WC_VERSION' ) . '-old' ),
 			array( 'wordpress', get_bloginfo( 'version' ) . '-old' ),
 			array( 'site_url', 'http://old-url.local' ),
 		);
@@ -234,7 +235,7 @@ class AssetsController extends \WP_UnitTestCase {
 	 */
 	public function test_additional_resource_hints_invalid_cache( string $key, string $value ) {
 		$mock_version         = array(
-			'woocommerce' => WOOCOMMERCE_VERSION,
+			'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 			'wordpress'   => get_bloginfo( 'version' ),
 			'site_url'    => wp_guess_url(),
 		);
