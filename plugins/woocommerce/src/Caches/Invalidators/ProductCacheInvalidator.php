@@ -37,6 +37,11 @@ class ProductCacheInvalidator {
 	const OPERATION_UNTRASH = 'untrash';
 
 	/**
+	 * Default cache TTL in seconds for term/taxonomy entity lookups.
+	 */
+	const DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL = 300;
+
+	/**
 	 * Initialize the invalidator and register hooks.
 	 *
 	 * @internal
@@ -573,8 +578,8 @@ class ProductCacheInvalidator {
 			return;
 		}
 
-		$this->invalidate_products_with_attribute(
-			$taxonomy,
+		$this->invalidate_products_with_term(
+			$tt_id,
 			array(
 				'hook'     => 'edited_term',
 				'term_id'  => $term_id,
@@ -620,7 +625,65 @@ class ProductCacheInvalidator {
 	}
 
 	/**
+	 * Invalidate all products and variations that have a specific term assigned.
+	 *
+	 * Uses the indexed wp_term_relationships table for efficient lookups.
+	 * The list of entities associated with the term is cached for performance;
+	 * the TTL can be customized via the 'woocommerce_cache_invalidator_taxonomy_lookup_ttl' filter.
+	 *
+	 * @param int   $tt_id The term taxonomy ID.
+	 * @param array $context Context for the invalidation.
+	 *
+	 * @return void
+	 */
+	private function invalidate_products_with_term( int $tt_id, array $context = array() ): void {
+		global $wpdb;
+
+		$cache_key  = 'wc_cache_inv_term_' . $tt_id;
+		$entity_ids = wp_cache_get( $cache_key, 'woocommerce' );
+
+		if ( false === $entity_ids ) {
+			$entity_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT tr.object_id
+					FROM {$wpdb->term_relationships} tr
+					INNER JOIN {$wpdb->posts} p ON tr.object_id = p.ID
+					WHERE tr.term_taxonomy_id = %d
+					AND p.post_type IN ('product', 'product_variation')",
+					$tt_id
+				)
+			);
+
+			/**
+			 * Filters the cache TTL for queries that find entities associated with a term or taxonomy.
+			 *
+			 * These queries are used during cache invalidation to determine which entities
+			 * (e.g., products, variations) need their cache cleared when a term or attribute changes.
+			 *
+			 * @since 10.5.0
+			 *
+			 * @param int    $ttl   Cache TTL in seconds. Default 300 (5 minutes).
+			 * @param string $class The invalidator class name.
+			 */
+			$ttl = apply_filters( 'woocommerce_cache_invalidator_taxonomy_lookup_ttl', self::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, static::class );
+			wp_cache_set( $cache_key, $entity_ids, 'woocommerce', $ttl );
+		}
+
+		foreach ( $entity_ids as $entity_id ) {
+			$post_type = get_post_type( (int) $entity_id );
+			if ( 'product_variation' === $post_type ) {
+				$this->invalidate_variation_and_parent( (int) $entity_id, self::OPERATION_UPDATE, null, $context );
+			} else {
+				$this->invalidate( (int) $entity_id, self::OPERATION_UPDATE, $context );
+			}
+		}
+	}
+
+	/**
 	 * Invalidate all products using a specific attribute taxonomy.
+	 *
+	 * The list of entities associated with the taxonomy is cached for performance;
+	 * the TTL can be customized via the 'woocommerce_cache_invalidator_taxonomy_lookup_ttl' filter.
 	 *
 	 * @param string $taxonomy The attribute taxonomy slug.
 	 * @param array  $context Context for the invalidation.
@@ -630,28 +693,42 @@ class ProductCacheInvalidator {
 	private function invalidate_products_with_attribute( string $taxonomy, array $context = array() ): void {
 		global $wpdb;
 
-		$product_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT post_id FROM {$wpdb->postmeta}
-				WHERE meta_key = '_product_attributes'
-				AND meta_value LIKE %s",
-				'%' . $wpdb->esc_like( 's:' . strlen( $taxonomy ) . ':"' . $taxonomy . '"' ) . '%'
-			)
-		);
+		$cache_key = 'wc_cache_inv_attr_' . $taxonomy;
+		$cached    = wp_cache_get( $cache_key, 'woocommerce' );
 
-		$variation_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT post_id FROM {$wpdb->postmeta}
-				WHERE meta_key = %s",
-				'attribute_' . $taxonomy
-			)
-		);
+		if ( false === $cached ) {
+			$product_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT post_id FROM {$wpdb->postmeta}
+					WHERE meta_key = '_product_attributes'
+					AND meta_value LIKE %s",
+					'%' . $wpdb->esc_like( 's:' . strlen( $taxonomy ) . ':"' . $taxonomy . '"' ) . '%'
+				)
+			);
 
-		foreach ( $product_ids as $product_id ) {
+			$variation_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT post_id FROM {$wpdb->postmeta}
+					WHERE meta_key = %s",
+					'attribute_' . $taxonomy
+				)
+			);
+
+			$cached = array(
+				'product_ids'   => $product_ids,
+				'variation_ids' => $variation_ids,
+			);
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			$ttl = apply_filters( 'woocommerce_cache_invalidator_taxonomy_lookup_ttl', self::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, static::class );
+			wp_cache_set( $cache_key, $cached, 'woocommerce', $ttl );
+		}
+
+		foreach ( $cached['product_ids'] as $product_id ) {
 			$this->invalidate( (int) $product_id, self::OPERATION_UPDATE, $context );
 		}
 
-		foreach ( $variation_ids as $variation_id ) {
+		foreach ( $cached['variation_ids'] as $variation_id ) {
 			$this->invalidate_variation_and_parent( (int) $variation_id, self::OPERATION_UPDATE, null, $context );
 		}
 	}

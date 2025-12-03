@@ -572,6 +572,9 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 		$product->set_attributes( array( $attribute ) );
 		$product->save();
 
+		// Create term relationships so the product appears in wp_term_relationships.
+		wp_set_object_terms( $product->get_id(), array( $red_term['term_id'], $blue_term['term_id'] ), 'pa_test_color' );
+
 		$this->captured_actions = array();
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -592,6 +595,60 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'pa_test_color', $invalidation['context']['taxonomy'] );
 		$this->assertArrayHasKey( 'term_id', $invalidation['context'] );
 		$this->assertEquals( $red_term['term_id'], $invalidation['context']['term_id'] );
+	}
+
+	/**
+	 * @testdox The taxonomy lookup cache TTL is filterable via woocommerce_cache_invalidator_taxonomy_lookup_ttl.
+	 */
+	public function test_taxonomy_lookup_cache_ttl_is_filterable() {
+		if ( ! $this->is_cpt_data_store() ) {
+			$this->markTestSkipped( 'Attribute hooks only registered for CPT data store' );
+		}
+
+		$filter_calls = array();
+
+		add_filter(
+			'woocommerce_cache_invalidator_taxonomy_lookup_ttl',
+			function ( $ttl, $invalidator_class ) use ( &$filter_calls ) {
+				$filter_calls[] = array(
+					'ttl'   => $ttl,
+					'class' => $invalidator_class,
+				);
+				return 600;
+			},
+			10,
+			2
+		);
+
+		register_taxonomy( 'pa_filter_test', array( 'product' ) );
+		$term = wp_insert_term( 'TestTerm', 'pa_filter_test' );
+
+		if ( is_wp_error( $term ) ) {
+			$this->markTestSkipped( 'Could not create test term' );
+			return;
+		}
+
+		$product   = \WC_Helper_Product::create_simple_product();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'pa_filter_test' );
+		$attribute->set_options( array( $term['term_id'] ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( false );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Clear cache to ensure the filter is called.
+		wp_cache_delete( 'wc_cache_inv_term_' . $term['term_taxonomy_id'], 'woocommerce' );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'edited_term', $term['term_id'], $term['term_taxonomy_id'], 'pa_filter_test' );
+
+		$this->assertNotEmpty( $filter_calls, 'Filter should have been called' );
+		$this->assertSame( ProductCacheInvalidator::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, $filter_calls[0]['ttl'] );
+		$this->assertSame( ProductCacheInvalidator::class, $filter_calls[0]['class'] );
+
+		remove_all_filters( 'woocommerce_cache_invalidator_taxonomy_lookup_ttl' );
 	}
 
 	/**
