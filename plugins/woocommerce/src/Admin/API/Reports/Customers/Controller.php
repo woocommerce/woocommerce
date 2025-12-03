@@ -327,6 +327,9 @@ class Controller extends GenericController implements ExportableInterface {
 			array(
 				'username',
 				'name',
+				'first_name',
+				'last_name',
+				'email',
 				'country',
 				'city',
 				'state',
