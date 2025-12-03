@@ -76,6 +76,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'user_id'          => 'user_id',
 			'username'         => 'username',
 			'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @xxx: What does this mean for RTL?
+			'first_name'       => 'first_name',
+			'last_name'        => 'last_name',
 			'email'            => 'email',
 			'country'          => 'country',
 			'city'             => 'city',

@@ -208,6 +208,24 @@ class Controller extends GenericController implements ExportableInterface {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'first_name'           => array(
+					'description' => __( 'First name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'last_name'            => array(
+					'description' => __( 'Last name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'email'                => array(
+					'description' => __( 'Email address.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'username'             => array(
 					'description' => __( 'Username.', 'woocommerce' ),
 					'type'        => 'string',
