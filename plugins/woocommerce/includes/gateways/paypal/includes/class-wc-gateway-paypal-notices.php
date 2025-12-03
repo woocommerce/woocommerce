@@ -209,7 +209,8 @@ class WC_Gateway_Paypal_Notices {
 	 * @return bool
 	 */
 	protected static function paypal_migration_notice_dismissed() {
-		return self::is_notice_dismissed( self::PAYPAL_MIGRATION_NOTICE );
+		wc_deprecated_function( __METHOD__, '10.4.0', 'WC_Gateway_Paypal_Notices::is_notice_dismissed' );
+		return (bool) get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_completed_notice', true );
 	}
 
 	/**
