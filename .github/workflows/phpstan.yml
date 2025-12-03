@@ -55,20 +55,22 @@ jobs:
 
             - name: 'Run PHPStan'
               working-directory: plugins/woocommerce
-              run: pnpm --filter='@woocommerce/plugin-woocommerce' phpstan:baseline
+              run: pnpm --filter='@woocommerce/plugin-woocommerce' phpstan
 
-            - name: 'Check baselines'
+            - name: 'Check baseline changes'
               if: ${{ github.event_name == 'pull_request' }}
               working-directory: plugins/woocommerce
               run: |
                   BASELINE_FILE="phpstan-baseline.neon"
+                  # Full path from repo root for git commands
+                  BASELINE_PATH="plugins/woocommerce/$BASELINE_FILE"
 
                   # Fetch the base branch for comparison
                   BASE_SHA="${{ github.event.pull_request.base.sha }}"
                   git fetch origin "$BASE_SHA" --depth=1
 
-                  # Check if baseline file exists and has changed (ignoring whitespace-only changes)
-                  if ! git diff --exit-code --ignore-all-space "$BASE_SHA" -- "$BASELINE_FILE"; then
+                  # Check if baseline file has changed
+                  if ! git diff --exit-code --ignore-all-space "$BASE_SHA" -- "$BASELINE_PATH" > /dev/null 2>&1; then
                       # Function to count total errors in baseline (sum of all count fields)
                       count_errors() {
                           local file="$1"
@@ -77,44 +79,45 @@ jobs:
                               return
                           fi
                           # Extract all count values and sum them
-                          # Handle both spaces and tabs for indentation
                           grep -E '^[[:space:]]+count:[[:space:]]*[0-9]+' "$file" 2>/dev/null | sed -E 's/^[[:space:]]+count:[[:space:]]*//' | awk '{sum+=$1} END {print sum+0}'
                       }
-                      
+
                       # Get base version of baseline
                       BASE_BASELINE=$(mktemp)
-                      if git show "$BASE_SHA:$BASELINE_FILE" > "$BASE_BASELINE" 2>/dev/null; then
+                      if git show "$BASE_SHA:$BASELINE_PATH" > "$BASE_BASELINE" 2>/dev/null; then
                           BASE_COUNT=$(count_errors "$BASE_BASELINE")
                       else
                           BASE_COUNT=0
                       fi
                       rm -f "$BASE_BASELINE"
-                      
-                      # Count errors in current baseline
+
+                      # Count errors in current baseline (local file, use relative path)
                       CURRENT_COUNT=$(count_errors "$BASELINE_FILE")
-                      
+
                       # Calculate difference
                       DIFF=$((CURRENT_COUNT - BASE_COUNT))
-                      
-                      if [[ $DIFF -lt 0 ]]; then
+
+                      echo "Base branch baseline errors: $BASE_COUNT"
+                      echo "Current baseline errors: $CURRENT_COUNT"
+
+                      if [[ $DIFF -gt 0 ]]; then
+                          # Baseline increased - block the PR
+                          echo ""
+                          echo "::error file=$BASELINE_PATH::Adding errors to PHPStan baseline is not allowed. This PR adds $DIFF new error(s) (from $BASE_COUNT to $CURRENT_COUNT). Please fix the PHPStan errors instead of adding them to the baseline. Run 'pnpm phpstan' locally to see the errors."
+                          echo ""
+                          echo "New errors added to baseline:"
+                          git diff "$BASE_SHA" -- "$BASELINE_PATH" | grep -A 5 -E '^\+[[:space:]]*message:' | head -150
+                          exit 1
+                      elif [[ $DIFF -lt 0 ]]; then
                           # Baseline decreased - good news!
                           DECREASE=$((DIFF * -1))
-                          echo "::notice file=$BASELINE_FILE::PHPStan baseline decreased by $DECREASE errors (from $BASE_COUNT to $CURRENT_COUNT). Great work! 🎉"
-                      elif [[ $DIFF -eq 0 ]]; then
-                          # Baseline unchanged but file changed (maybe errors were reorganized)
-                          echo "::notice file=$BASELINE_FILE::PHPStan baseline changed but error count remained the same ($CURRENT_COUNT errors)."
+                          echo "::notice file=$BASELINE_PATH::PHPStan baseline reduced by $DECREASE error(s) (from $BASE_COUNT to $CURRENT_COUNT). Great work! 🎉"
                       else
-                          # Baseline increased - show the errors
-                          echo "::error file=$BASELINE_FILE::PHPStan baseline increased by $DIFF errors (from $BASE_COUNT to $CURRENT_COUNT). Please review the new errors below."
-                          echo ""
-                          echo "## New errors added to baseline:"
-                          echo ""
-                          # Show the diff of what was added, focusing on new error entries
-                          git diff "$BASE_SHA" -- "$BASELINE_FILE" | grep -A 5 -E '^\+[[:space:]]*message:' | head -150
-                          echo ""
-                          echo "To update the baseline, run: \`composer phpstan:baseline\`"
-                          exit 1
+                          # Count is same but file changed (errors reorganized or replaced)
+                          echo "::notice file=$BASELINE_PATH::PHPStan baseline changed but error count remained the same ($CURRENT_COUNT errors)."
                       fi
+                  else
+                      echo "Baseline file unchanged."
                   fi
 
             - name: 'Save PHPStan result cache'
