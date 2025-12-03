@@ -19,10 +19,7 @@
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
-			<!-- BISECT: Excluding first half of src subdirs (A-G) -->
-			<exclude>./tests/php/src/Admin</exclude>
-			<exclude>./tests/php/src/Blocks</exclude>
-			<exclude>./tests/php/src/Caching</exclude>
+			<!-- BISECT: Keep excluding Database, Gateways. Re-enable Admin, Blocks, Caching -->
 			<exclude>./tests/php/src/Database</exclude>
 			<exclude>./tests/php/src/Gateways</exclude>
 		</testsuite>
