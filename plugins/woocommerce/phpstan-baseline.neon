@@ -2953,7 +2953,7 @@ parameters:
 			path: includes/admin/class-wc-admin-brands.php
 
 		-
-			message: '#^Cannot cast string\|WP_Error to int\.$#'
+			message: '#^Cannot cast numeric\-string\|WP_Error to int\.$#'
 			identifier: cast.int
 			count: 1
 			path: includes/admin/class-wc-admin-brands.php
@@ -8647,7 +8647,7 @@ parameters:
 			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
 
 		-
-			message: '#^Cannot cast string\|WP_Error to int\.$#'
+			message: '#^Cannot cast numeric\-string\|WP_Error to int\.$#'
 			identifier: cast.int
 			count: 1
 			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
@@ -9301,7 +9301,7 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-order-notes.php
 
 		-
-			message: '#^Cannot cast string\|WP_Error to int\.$#'
+			message: '#^Cannot cast numeric\-string\|WP_Error to int\.$#'
 			identifier: cast.int
 			count: 1
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-categories.php
@@ -28909,6 +28909,12 @@ parameters:
 			path: includes/data-stores/class-wc-data-store-wp.php
 
 		-
+			message: '#^Parameter \#3 \$meta_key of function add_metadata expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/data-stores/class-wc-data-store-wp.php
+
+		-
 			message: '#^Variable \$dates in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
@@ -30825,7 +30831,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$order of method WC_Email_Customer_Fulfillment_Created\:\:maybe_init_fulfillment_for_preview\(\) expects WC_Order, bool\|object given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 3
 			path: includes/emails/class-wc-email-customer-fulfillment-created.php
 
 		-
@@ -30867,7 +30873,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$order of method WC_Email_Customer_Fulfillment_Deleted\:\:maybe_init_fulfillment_for_preview\(\) expects WC_Order, bool\|object given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 3
 			path: includes/emails/class-wc-email-customer-fulfillment-deleted.php
 
 		-
@@ -30909,7 +30915,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$order of method WC_Email_Customer_Fulfillment_Updated\:\:maybe_init_fulfillment_for_preview\(\) expects WC_Order, bool\|object given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 3
 			path: includes/emails/class-wc-email-customer-fulfillment-updated.php
 
 		-
@@ -32479,37 +32485,31 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
+			message: '#^Cannot call method add_order_note\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: includes/gateways/paypal/class-wc-gateway-paypal.php
+
+		-
 			message: '#^Cannot call method add_order_note\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
 			message: '#^Cannot call method get_meta\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method get_meta\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
-			identifier: method.nonObject
-			count: 2
+			count: 3
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
 			message: '#^Cannot call method get_payment_method\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Cannot call method get_payment_method\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method get_transaction_id\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
+			message: '#^Cannot call method get_transaction_id\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -32517,13 +32517,7 @@ parameters:
 		-
 			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method save\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
-			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
@@ -32629,13 +32623,13 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Cannot call method set_transaction_id\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
+			message: '#^Cannot call method set_transaction_id\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Cannot call method update_meta_data\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
+			message: '#^Cannot call method update_meta_data\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -32713,7 +32707,7 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal_Request\:\:capture_authorized_payment\(\) expects WC_Order, bool\|WC_Order\|WC_Order_Refund given\.$#'
+			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal_Request\:\:capture_authorized_payment\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -32731,7 +32725,7 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Parameter \#1 \$order of static method WC_Gateway_Paypal_API_Handler\:\:do_capture\(\) expects WC_Order, bool\|WC_Order\|WC_Order_Refund given\.$#'
+			message: '#^Parameter \#1 \$order of static method WC_Gateway_Paypal_API_Handler\:\:do_capture\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -33181,6 +33175,12 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
+			message: '#^Binary operation "\." between ''PayPal payment is…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_amount\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -33211,8 +33211,20 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
+			message: '#^Cannot access offset ''update_time'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
 			message: '#^Cannot call static method instance\(\) on mixed\.$#'
 			identifier: staticMethod.nonObject
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
+			message: '#^Constant WC_VERSION not found\.$#'
+			identifier: constant.notFound
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
@@ -33230,6 +33242,12 @@ parameters:
 
 		-
 			message: '#^Method WC_Gateway_Paypal_Request\:\:fetch_paypal_client_id\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
+			message: '#^Method WC_Gateway_Paypal_Request\:\:get_latest_transaction_data\(\) should return array\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
@@ -33273,6 +33291,12 @@ parameters:
 		-
 			message: '#^Method WC_Gateway_Paypal_Request\:\:send_wpcom_proxy_request\(\) should return array\|null but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
 			identifier: return.type
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
+			message: '#^Parameter \#1 \$paypal_order_id of method WC_Gateway_Paypal_Request\:\:get_paypal_order_details\(\) expects string, mixed given\.$#'
+			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
@@ -35971,7 +35995,7 @@ parameters:
 			path: includes/libraries/wp-async-request.php
 
 		-
-			message: '#^Parameter \#1 \$action of function check_ajax_referer expects \-1\|string, mixed given\.$#'
+			message: '#^Parameter \#1 \$action of function check_ajax_referer expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/libraries/wp-async-request.php
@@ -36097,7 +36121,7 @@ parameters:
 			path: includes/libraries/wp-background-process.php
 
 		-
-			message: '#^Parameter \#1 \$action of function check_ajax_referer expects \-1\|string, mixed given\.$#'
+			message: '#^Parameter \#1 \$action of function check_ajax_referer expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/libraries/wp-background-process.php
@@ -36680,6 +36704,12 @@ parameters:
 
 		-
 			message: '#^Function wc_update_1040_add_idx_date_paid_status_parent\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/react-admin/wc-admin-update-functions.php
+
+		-
+			message: '#^Function wc_update_1050_add_idx_user_email\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/react-admin/wc-admin-update-functions.php
@@ -46468,12 +46498,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
 
 		-
-			message: '#^Parameter \#1 \$taxonomy of function wc_rest_check_product_term_permissions expects string, int\<min, \-1\>\|int\<1, max\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
-
-		-
 			message: '#^Parameter \#1 \$term of method WC_REST_Terms_Controller\:\:update_term_meta_fields\(\) expects WP_Term, WP_Error\|WP_Term\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -46483,12 +46507,6 @@ parameters:
 			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, int given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
-
-		-
-			message: '#^Parameter \#2 \$taxonomy of function get_term expects string, int\<min, \-1\>\|int\<1, max\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
 
 		-
@@ -49414,7 +49432,7 @@ parameters:
 			path: includes/wc-attribute-functions.php
 
 		-
-			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, string given\.$#'
+			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, non\-falsy\-string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-attribute-functions.php
@@ -52595,6 +52613,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$order of function wc_restock_refunded_items expects WC_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/wc-order-functions.php
+
+		-
+			message: '#^Parameter \#1 \$post_type of function register_post_type expects lowercase\-string&non\-empty\-string, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-order-functions.php
@@ -57250,7 +57274,7 @@ parameters:
 			path: includes/widgets/class-wc-widget-layered-nav.php
 
 		-
-			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, string given\.$#'
+			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, non\-falsy\-string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/widgets/class-wc-widget-layered-nav.php
@@ -68218,12 +68242,6 @@ parameters:
 			path: src/Admin/Features/PaymentGatewaySuggestions/DefaultPaymentGateways.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\PaymentGatewaySuggestions\\EvaluateSuggestion\:\:get_memo_key\(\) should return string but returns false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/Features/PaymentGatewaySuggestions/EvaluateSuggestion.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\PaymentGatewaySuggestions\\EvaluateSuggestion\:\:reset_memo\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -71956,12 +71974,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Cannot access property \$deps on _WP_Dependency\|true\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: src/Blocks/AssetsController.php
-
-		-
 			message: '#^Constant WOOCOMMERCE_VERSION not found\.$#'
 			identifier: constant.notFound
 			count: 2
@@ -75100,6 +75112,12 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
 
 		-
+			message: '#^Unable to resolve the template type T in call to function rest_sanitize_boolean$#'
+			identifier: argument.templateType
+			count: 2
+			path: src/Blocks/BlockTypes/ProductCollection/HandlerRegistry.php
+
+		-
 			message: '#^Cannot access offset ''host'' on array\{scheme\?\: string, host\?\: string, port\?\: int\<0, 65535\>, user\?\: string, pass\?\: string, path\?\: string, query\?\: string, fragment\?\: string\}\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -75502,7 +75520,7 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterActive.php
 
 		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string\>, array\<string, string\|false\> given\.$#'
+			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, string\|false\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterActive.php
@@ -75610,7 +75628,7 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string\>, array\<string, bool\|string\> given\.$#'
+			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
@@ -75748,13 +75766,13 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterPrice.php
 
 		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string\>, array\<string, bool\|string\> given\.$#'
+			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterPrice.php
 
 		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string\>, array\<string, string\|false\> given\.$#'
+			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, string\|false\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterPrice.php
@@ -75838,7 +75856,7 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
 		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string\>, array\<string, bool\|string\> given\.$#'
+			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
@@ -75946,7 +75964,7 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterStatus.php
 
 		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string\>, array\<string, bool\|string\> given\.$#'
+			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterStatus.php
@@ -76030,7 +76048,7 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string\>, array\<string, bool\|string\> given\.$#'
+			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
@@ -76114,7 +76132,7 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
 		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string\>, array\<string, bool\|string\|null\> given\.$#'
+			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\|null\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilters.php
@@ -90430,12 +90448,6 @@ parameters:
 			path: src/Internal/Admin/WCAdminAssets.php
 
 		-
-			message: '#^Cannot access property \$deps on _WP_Dependency\|true\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/Admin/WCAdminAssets.php
-
-		-
 			message: '#^Constant WC_ADMIN_ABSPATH not found\.$#'
 			identifier: constant.notFound
 			count: 6
@@ -90538,7 +90550,7 @@ parameters:
 			path: src/Internal/Admin/WCAdminAssets.php
 
 		-
-			message: '#^Parameter \#1 \$dependency of method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminAssets\:\:maybe_output_preload_link_tag\(\) expects Automattic\\WooCommerce\\Internal\\Admin\\WP_Dependency, _WP_Dependency\|true given\.$#'
+			message: '#^Parameter \#1 \$dependency of method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminAssets\:\:maybe_output_preload_link_tag\(\) expects Automattic\\WooCommerce\\Internal\\Admin\\WP_Dependency, _WP_Dependency given\.$#'
 			identifier: argument.type
 			count: 2
 			path: src/Internal/Admin/WCAdminAssets.php
@@ -91884,12 +91896,6 @@ parameters:
 		-
 			message: '#^Parameter \$object of method Automattic\\WooCommerce\\Internal\\DataStores\\CustomMetaDataStore\:\:add_meta\(\) has invalid type Automattic\\WooCommerce\\Internal\\DataStores\\WC_Data\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Internal/DataStores/CustomMetaDataStore.php
-
-		-
-			message: '#^Unable to resolve the template type T in call to function wp_slash$#'
-			identifier: argument.templateType
 			count: 1
 			path: src/Internal/DataStores/CustomMetaDataStore.php
 
@@ -93955,13 +93961,37 @@ parameters:
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
 
 		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:clear_caches\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:delete_email_template\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_template_post_id\(\) should return int\|false but returns mixed\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_template_post_id\(\) should return int\|false but returns 0\.0\|''''\|''0''\|array\{\}\|int\|false\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_template_post_id\(\) should return int\|false but returns int\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_type_from_post_id\(\) should return string\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
@@ -93975,6 +94005,24 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$email_id of method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_type_class_name_from_email_id\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Parameter \#1 \$post_id of method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_cache_key_for_post_id\(\) expects int, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:invalidate_cache_for_template\(\) expects int\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Property Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:\$post_id_to_email_type_cache \(array\<int\|string, string\|null\>\) does not accept array\<int\|string, mixed\>\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
 
@@ -104233,7 +104281,7 @@ parameters:
 			path: src/StoreApi/Routes/V1/AbstractCartRoute.php
 
 		-
-			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
+			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int\<0, max\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Routes/V1/AbstractCartRoute.php
@@ -104365,7 +104413,7 @@ parameters:
 			path: src/StoreApi/Routes/V1/AbstractTermsRoute.php
 
 		-
-			message: '#^Cannot cast string\|WP_Error to int\.$#'
+			message: '#^Cannot cast numeric\-string\|WP_Error to int\.$#'
 			identifier: cast.int
 			count: 1
 			path: src/StoreApi/Routes/V1/AbstractTermsRoute.php
@@ -104719,7 +104767,7 @@ parameters:
 			path: src/StoreApi/Routes/V1/Batch.php
 
 		-
-			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
+			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int\<0, max\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Routes/V1/Batch.php
@@ -106495,7 +106543,7 @@ parameters:
 			path: src/StoreApi/Schemas/V1/ProductAttributeSchema.php
 
 		-
-			message: '#^Cannot cast string\|WP_Error to int\.$#'
+			message: '#^Cannot cast numeric\-string\|WP_Error to int\.$#'
 			identifier: cast.int
 			count: 1
 			path: src/StoreApi/Schemas/V1/ProductAttributeSchema.php
