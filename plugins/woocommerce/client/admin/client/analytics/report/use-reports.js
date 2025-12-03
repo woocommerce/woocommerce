@@ -134,15 +134,28 @@ const getReports = () => {
 	].filter( Boolean );
 
 	// Wrap the report component with the scheduled updates promotion notice
-	reports.forEach( ( report ) => {
+	// Create a new array to avoid mutating the original, which could lead to
+	// multiple wrappings if getReports() is called multiple times.
+	const wrappedReports = reports.map( ( report ) => {
 		const OriginalComponent = report.component;
-		report.component = function WrappedComponent( props ) {
+
+		function WrappedComponent( props ) {
 			return (
 				<Fragment>
 					<ScheduledUpdatesPromotionNotice />
 					<OriginalComponent { ...props } />
 				</Fragment>
 			);
+		}
+
+		// Add displayName to help with debugging
+		WrappedComponent.displayName = `WithScheduledNotice(${
+			OriginalComponent.displayName || OriginalComponent.name || 'Report'
+		})`;
+
+		return {
+			...report,
+			component: WrappedComponent,
 		};
 	} );
 
@@ -162,7 +175,7 @@ const getReports = () => {
 	 * @filter woocommerce_admin_reports_list
 	 * @param {Array.<report>} reports Report pages list.
 	 */
-	return applyFilters( REPORTS_FILTER, reports );
+	return applyFilters( REPORTS_FILTER, wrappedReports );
 };
 
 export function useReports() {
