@@ -105,6 +105,8 @@ const productCategories = [
 const productAttributes = [ 'Color', 'Size' ];
 
 const errorMessage = 'File is empty. Please upload something more substantial.';
+const errorMessageInvalidFile =
+	'The file is empty or using a different encoding than UTF-8, please try again with a new file.';
 
 test.describe( 'Import Products from a CSV file', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -298,7 +300,7 @@ test.describe( 'Import Products from a CSV file', () => {
 			await fileChooser.setFiles( notValidCsvFilePath );
 			await page.locator( 'button[value="Continue"]' ).click();
 			await expect( page.locator( 'div.error.inline' ) ).toContainText(
-				errorMessage
+				errorMessageInvalidFile
 			);
 		}
 	);
