@@ -23,7 +23,7 @@ jest.mock( '@woocommerce/tracks', () => ( {
 jest.mock( '@woocommerce/data', () => {
 	const originalModule = jest.requireActual( '@woocommerce/data' );
 	return {
-		...originalModule,	
+		...originalModule,
 		useSettings: jest.fn(),
 		useUserPreferences: jest.fn(),
 	};
