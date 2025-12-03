@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
@@ -321,15 +322,35 @@ class WC_Gateway_Paypal_Request {
 	 * @throws Exception If the PayPal payment capture fails.
 	 */
 	public function capture_authorized_payment( $order ) {
-		if ( ! $order || ! $order->get_transaction_id() ) {
-			WC_Gateway_Paypal::log( 'PayPal authorization ID not found. Cannot capture payment.' );
+		if ( ! $order ) {
+			WC_Gateway_Paypal::log( 'Order not found to capture authorized payment.' );
 			return;
 		}
 
+		$paypal_order_id = $order->get_meta( '_paypal_order_id', true );
+		// Skip if the PayPal Order ID is not found. This means the order was not created via the Orders v2 API.
+		if ( ! $paypal_order_id ) {
+			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		$capture_id = $order->get_meta( '_paypal_capture_id', true );
 		// Skip if the payment is already captured.
+		if ( $capture_id ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is already captured. PayPal capture ID: ' . $capture_id . '. Order ID: ' . $order->get_id() );
+			return;
+		}
+
 		$paypal_status = $order->get_meta( '_paypal_status', true );
+		// Skip if the payment is already captured.
 		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		$authorization_id = $this->get_authorization_id_for_capture( $order );
+		if ( ! $authorization_id ) {
+			WC_Gateway_Paypal::log( 'Authorization ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
 			return;
 		}
 
@@ -338,7 +359,8 @@ class WC_Gateway_Paypal_Request {
 		try {
 			$request_body = array(
 				'test_mode'        => $this->gateway->testmode,
-				'authorization_id' => $order->get_transaction_id(),
+				'authorization_id' => $authorization_id,
+				'paypal_order_id'  => $paypal_order_id,
 			);
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT, $request_body );
 
@@ -375,6 +397,108 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Get the authorization ID for the PayPal payment.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string|null
+	 */
+	private function get_authorization_id_for_capture( $order ) {
+		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
+		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
+		$capture_id       = $order->get_meta( '_paypal_capture_id', true );
+
+		// If the PayPal order ID is not found or the capture ID is already set, return null.
+		if ( ! $paypal_order_id || ! empty( $capture_id ) ) {
+			return null;
+		}
+
+		// If '_paypal_authorization_checked' is set to 'yes' and the authorization ID is empty, it means we already checked and found no authorization data.
+		// Return null to avoid repeated API calls.
+		if ( empty( $authorization_id ) && 'yes' === $order->get_meta( '_paypal_authorization_checked', true ) ) {
+			return null;
+		}
+
+		// If the authorization ID is not found, try to retrieve it from the PayPal order details.
+		if ( empty( $authorization_id ) ) {
+			WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
+
+			try {
+				$order_data         = $this->get_paypal_order_details( $paypal_order_id );
+				$authorization_data = $this->get_latest_transaction_data(
+					$order_data['purchase_units'][0]['payments']['authorizations'] ?? array()
+				);
+
+				$capture_data = $this->get_latest_transaction_data(
+					$order_data['purchase_units'][0]['payments']['captures'] ?? array()
+				);
+
+				// If the payment is already captured, store the capture ID and status, and return null as there is no authorization ID that needs to be captured.
+				if ( $capture_data && isset( $capture_data['id'] ) ) {
+					$capture_id = $capture_data['id'];
+					$order->update_meta_data( '_paypal_capture_id', $capture_id );
+					$order->update_meta_data( '_paypal_status', $capture_data['status'] ?? WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
+					$order->save();
+					WC_Gateway_Paypal::log( 'Storing capture ID from Paypal. Order ID: ' . $order->get_id() . '; capture ID: ' . $capture_id );
+					return null;
+				}
+
+				if ( $authorization_data && isset( $authorization_data['id'], $authorization_data['status'] ) ) {
+					// If the payment is already captured, return null as there is no authorization ID that needs to be captured.
+					if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $authorization_data['status'] ) {
+						$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
+						$order->save();
+						return null;
+					}
+					$authorization_id = $authorization_data['id'];
+					$order->update_meta_data( '_paypal_authorization_id', $authorization_id );
+					$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
+					WC_Gateway_Paypal::log( 'Storing authorization ID from Paypal. Order ID: ' . $order->get_id() . '; authorization ID: ' . $authorization_id );
+					$order->save();
+				} else {
+					// Store '_paypal_authorization_checked' flag to prevent repeated API calls for orders with no authorization data.
+					WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
+					$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
+					$order->save();
+					return null;
+				}
+			} catch ( Exception $e ) {
+				WC_Gateway_Paypal::log( 'Error retrieving authorization ID from PayPal order details. Order ID: ' . $order->get_id() . '. Error: ' . $e->getMessage() );
+				return null;
+			}
+		}
+
+		return $authorization_id;
+	}
+
+	/**
+	 * Get the latest item from the authorizations or captures array based on update_time.
+	 *
+	 * @param array $items Array of authorizations or captures.
+	 * @return array|null The latest authorization or capture or null if array is empty or no valid update_time found.
+	 */
+	private function get_latest_transaction_data( $items ) {
+		if ( empty( $items ) || ! is_array( $items ) ) {
+			return null;
+		}
+
+		$latest_item = null;
+		$latest_time = null;
+
+		foreach ( $items as $item ) {
+			if ( empty( $item['update_time'] ) ) {
+				continue;
+			}
+
+			if ( null === $latest_time || $item['update_time'] > $latest_time ) {
+				$latest_time = $item['update_time'];
+				$latest_item = $item;
+			}
+		}
+
+		return $latest_item;
+	}
+
+	/**
 	 * Get the approve link from the response data.
 	 *
 	 * @param int   $http_code The HTTP code of the response.
@@ -405,10 +529,45 @@ class WC_Gateway_Paypal_Request {
 	 * @param string   $payment_source The payment source.
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array
+	 *
+	 * @throws Exception If the order items cannot be built.
 	 */
 	private function get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ) {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
+
+		/**
+		 * Filter the supported currencies for PayPal.
+		 *
+		 * @since 2.0.0
+		 *
+		 * @param array $supported_currencies Array of supported currency codes.
+		 * @return array
+		 */
+		$supported_currencies = apply_filters(
+			'woocommerce_paypal_supported_currencies',
+			WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES
+		);
+		if ( ! in_array( strtoupper( $order->get_currency() ), $supported_currencies, true ) ) {
+			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( $order->get_id() ) );
+		}
+
+		$order_items = $this->get_paypal_order_items( $order );
+		if ( empty( $order_items ) ) {
+			// If we cannot build order items (e.g. negative item amounts),
+			// we should not proceed with the create-order request.
+			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
+		}
+
+		$src_locale = get_locale();
+		// If the locale is longer than PayPal's string limit (10).
+		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
+			// Keep only the main language and region parts.
+			$locale_parts = explode( '_', $src_locale );
+			if ( count( $locale_parts ) > 2 ) {
+				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
+			}
+		}
 
 		$params = array(
 			'intent'         => $this->get_paypal_order_intent(),
@@ -418,11 +577,11 @@ class WC_Gateway_Paypal_Request {
 						'user_action'           => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
 						'shipping_preference'   => $shipping_preference,
 						// Customer redirected here on approval.
-						'return_url'            => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+						'return_url'            => $this->normalize_url_for_paypal( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 						// Customer redirected here on cancellation.
-						'cancel_url'            => esc_url_raw( $order->get_cancel_order_url_raw() ),
+						'cancel_url'            => $this->normalize_url_for_paypal( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
-						'locale'                => str_replace( '_', '-', get_locale() ),
+						'locale'                => str_replace( '_', '-', $src_locale ),
 						'app_switch_preference' => array(
 							'launch_paypal_app' => true,
 						),
@@ -434,7 +593,7 @@ class WC_Gateway_Paypal_Request {
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => $this->get_paypal_order_purchase_unit_amount( $order ),
 					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
-					'items'      => $this->get_paypal_order_items( $order ),
+					'items'      => $order_items,
 					'payee'      => array(
 						'email_address' => $payee_email,
 					),
@@ -442,10 +601,17 @@ class WC_Gateway_Paypal_Request {
 			),
 		);
 
-		if ( WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING !== $shipping_preference ) {
+		if ( ! in_array(
+			$shipping_preference,
+			array(
+				WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING,
+				WC_Gateway_Paypal_Constants::SHIPPING_SET_PROVIDED_ADDRESS,
+			),
+			true
+		) ) {
 			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
-				'callback_url'    => esc_url_raw( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
+				'callback_url'    => $this->normalize_url_for_paypal( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
 			);
 		}
 
@@ -470,7 +636,7 @@ class WC_Gateway_Paypal_Request {
 					),
 					$request_origin
 				);
-				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = esc_url_raw( $cancel_url );
+				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $this->normalize_url_for_paypal( $cancel_url );
 			}
 		}
 
@@ -529,8 +695,9 @@ class WC_Gateway_Paypal_Request {
 				'order_id'  => $order->get_id(),
 				'order_key' => $order->get_order_key(),
 				// Endpoint for the proxy to forward webhooks to.
-				'site_url'  => get_site_url(),
+				'site_url'  => home_url(),
 				'site_id'   => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
+				'v'         => WC_VERSION,
 			)
 		);
 
@@ -551,16 +718,20 @@ class WC_Gateway_Paypal_Request {
 		$items = array();
 
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			$item_amount = $this->get_paypal_order_item_amount( $order, $item );
+			if ( 'line_item' === $item->get_type() && $item_amount < 0 ) {
+				// PayPal does not accept negative item amounts (for line items).
+				WC_Gateway_Paypal::log( sprintf( 'Order item with negative amount for PayPal order items. Order ID: %d, Item ID: %d, Amount: %f', $order->get_id(), $item->get_id(), $item_amount ), 'error' );
+				return array();
+			}
+
 			$items[] = array(
 				'name'        => $this->limit_length( $item->get_name(), WC_Gateway_Paypal_Constants::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
 					// Use the subtotal before discounts.
-					'value'         => wc_format_decimal(
-						'fee' === $item->get_type() ? $item->get_amount() : $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
-						wc_get_price_decimals()
-					),
+					'value'         => wc_format_decimal( $item_amount, wc_get_price_decimals() ),
 				),
 			);
 		}
@@ -576,15 +747,26 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_paypal_order_items_subtotal( $order ) {
 		$total = 0;
-		foreach ( $order->get_items() as $item ) {
-			$total += (float) $item->get_subtotal();
+		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			$total += wc_add_number_precision( $this->get_paypal_order_item_amount( $order, $item ) * $item->get_quantity(), false );
 		}
 
-		foreach ( $order->get_items( 'fee' ) as $fee ) {
-			$total += (float) $fee->get_amount();
-		}
+		return wc_remove_number_precision( $total );
+	}
 
-		return $total;
+	/**
+	 * Get the amount for a specific order item.
+	 *
+	 * @param WC_Order      $order Order object.
+	 * @param WC_Order_Item $item Order item.
+	 * @return float
+	 */
+	private function get_paypal_order_item_amount( $order, $item ) {
+		return (float) (
+			'fee' === $item->get_type()
+				? $item->get_amount()
+				: $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false )
+		);
 	}
 
 	/**
@@ -648,11 +830,25 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
-		// Postal code is typically required, but not always. The create-order request
-		// will fail if it is missing for a country that requires it.
-		// As a simple heuristic, if the postal code is not set, but name and address_line_1 are,
-		// we will assume that postal code is not required.
-		if ( empty( $postcode ) && ( empty( $full_name ) || empty( $address_line_1 ) ) ) {
+		// Make sure the country code is in the correct format.
+		$raw_country = $country;
+		$country     = $this->normalize_paypal_order_shipping_country_code( $raw_country );
+		if ( ! $country ) {
+			WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code. Raw value: %s', $raw_country ), 'error' );
+			return null;
+		}
+
+		// Validate required fields based on country-specific address requirements.
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: The container call can be removed once we migrate this class to the `src` folder.
+		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance();
+		if ( empty( $city ) && $address_requirements->country_requires_city( $country ) ) {
+			WC_Gateway_Paypal::log( sprintf( 'City is required for country: %s', $country ), 'error' );
+			return null;
+		}
+
+		if ( empty( $postcode ) && $address_requirements->country_requires_postal_code( $country ) ) {
+			WC_Gateway_Paypal::log( sprintf( 'Postal code is required for country: %s', $country ), 'error' );
 			return null;
 		}
 
@@ -666,9 +862,80 @@ class WC_Gateway_Paypal_Request {
 				'admin_area_1'   => $this->limit_length( $state, WC_Gateway_Paypal_Constants::PAYPAL_STATE_MAX_LENGTH ),
 				'admin_area_2'   => $this->limit_length( $city, WC_Gateway_Paypal_Constants::PAYPAL_CITY_MAX_LENGTH ),
 				'postal_code'    => $this->limit_length( $postcode, WC_Gateway_Paypal_Constants::PAYPAL_POSTAL_CODE_MAX_LENGTH ),
-				'country_code'   => $country,
+				'country_code'   => strtoupper( $country ),
 			),
 		);
+	}
+
+	/**
+	 * Normalize PayPal order shipping country code.
+	 *
+	 * @param string $country_code Country code to normalize.
+	 * @return string|null
+	 */
+	private function normalize_paypal_order_shipping_country_code( $country_code ) {
+		// Normalize to uppercase.
+		$code = strtoupper( trim( (string) $country_code ) );
+
+		// Check if it's a valid alpha-2 code.
+		if ( strlen( $code ) === WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH ) {
+			if ( WC()->countries->country_exists( $code ) ) {
+				return $code;
+			}
+
+			WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
+			return null;
+		}
+
+		// Log when we get an unexpected country code length.
+		WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $code ), $code ) );
+
+		// Truncate to the expected maximum length (3).
+		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
+		if ( strlen( $code ) > $max_country_code_length ) {
+			$code = substr( $code, 0, $max_country_code_length );
+		}
+
+		// Check if it's a valid alpha-3 code.
+		$alpha2 = wc()->countries->get_country_from_alpha_3_code( $code );
+		if ( null === $alpha2 ) {
+			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
+		}
+
+		return $alpha2;
+	}
+
+	/**
+	 * Normalize a URL for PayPal. PayPal requires absolute URLs with protocol.
+	 *
+	 * @param string $url The URL to check.
+	 * @return string Normalized URL.
+	 */
+	private function normalize_url_for_paypal( $url ) {
+		// Replace encoded ampersand with actual ampersand.
+		// In some cases, the URL may contain encoded ampersand but PayPal expects the actual ampersand.
+		// PayPal request fails if the URL contains encoded ampersand.
+		$url = str_replace( '&#038;', '&', $url );
+
+		// If the URL is already the home URL, return it.
+		if ( strpos( $url, home_url() ) === 0 ) {
+			return esc_url_raw( $url );
+		}
+
+		// Return the URL if it is already absolute (contains ://).
+		if ( strpos( $url, '://' ) !== false ) {
+			return esc_url_raw( $url );
+		}
+
+		$home_url = untrailingslashit( home_url() );
+
+		// If the URL is relative (starts with /), prepend the home URL.
+		if ( strpos( $url, '/' ) === 0 ) {
+			return esc_url_raw( $home_url . $url );
+		}
+
+		// Prepend home URL with a slash.
+		return esc_url_raw( $home_url . '/' . $url );
 	}
 
 	/**

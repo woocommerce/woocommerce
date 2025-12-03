@@ -571,19 +571,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return float|null The calculated value, null if the product associated to the line item no longer exists.
 	 */
 	public function calculate_cogs_value_core(): ?float {
-		// Refund items should always recalculate based on their (negative) quantity.
-		// Preserving would give incorrect values since they're cloned from original items.
-		$is_refund_item = $this->get_quantity() < 0;
-
-		// If this is a regular item (not refund) that has been loaded from the database and has a saved COGS value, preserve it.
-		// COGS values should be "snapshotted" at order creation time, not recalculated later.
-		// This prevents historical orders from having their costs changed when product prices are updated.
-		// Note: cogs_value will be null if the item was loaded but had no _cogs_value metadata.
-		if ( ! $is_refund_item && $this->get_id() > 0 && $this->get_object_read() && isset( $this->data['cogs_value'] ) && ! is_null( $this->data['cogs_value'] ) ) {
-			return $this->get_cogs_value( 'edit' );
-		}
-
-		// For new items, refund items, or items without saved COGS, calculate from the product.
 		$product = $this->get_product();
 		if ( ! $product ) {
 			return null;

@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -73,7 +74,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 			->disableOriginalConstructor()
 			->getMock();
 
-		$this->mock_providers->init( $this->mock_extension_suggestions );
+		$this->mock_providers->init( $this->mock_extension_suggestions, wc_get_container()->get( LegacyProxy::class ) );
 
 		$this->sut = new Payments();
 		$this->sut->init( $this->mock_providers, $this->mock_extension_suggestions );
@@ -288,7 +289,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 					'short_description' => null,
 					'links'             => array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 							'url'   => 'url1',
 						),
 					),
@@ -309,7 +310,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 					'short_description' => 'short description 2',
 					'links'             => array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 							'url'   => 'url2',
 						),
 					),
@@ -332,7 +333,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 					'short_description' => 'short description 5',
 					'links'             => array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 							'url'   => 'url5',
 						),
 					),

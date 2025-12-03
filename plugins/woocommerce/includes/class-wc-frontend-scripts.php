@@ -55,31 +55,7 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
-		add_action( 'shutdown', array( __CLASS__, 'add_legacy_script_warnings' ) );
-	}
-
-	/**
-	 * Add warnings for deprecated script handles.
-	 */
-	public static function add_legacy_script_warnings() {
-		$scripts = self::get_scripts();
-
-		foreach ( $scripts as $handle => $script ) {
-			if ( ! isset( $script['legacy_handle'] ) ) {
-				continue;
-			}
-
-			$exists = wp_script_is( $script['legacy_handle'] );
-
-			if ( $exists ) {
-				wc_deprecated_argument(
-					'wp_enqueue_script',
-					'10.3.0',
-					/* translators: %1$s: new script handle, %2$s: previous script handle */
-					sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), $handle, $script['legacy_handle'] )
-				);
-			}
-		}
+		add_action( 'enqueue_block_assets', array( __CLASS__, 'enqueue_block_assets' ) );
 	}
 
 	/**
@@ -121,16 +97,31 @@ class WC_Frontend_Scripts {
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
-				'woocommerce-blocktheme'  => wp_is_block_theme() ? array(
-					'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
-					'deps'    => '',
-					'version' => $version,
-					'media'   => 'all',
-					'has_rtl' => true,
-				) : false,
 			)
 		);
 		return is_array( $styles ) ? array_filter( $styles ) : array();
+	}
+
+	/**
+	 * Enqueue styles for block assets (both editor and frontend).
+	 * This ensures compatibility with WordPress 6.9+ requirements.
+	 */
+	public static function enqueue_block_assets() {
+		if ( ! wp_is_block_theme() ) {
+			return;
+		}
+
+		$version = Constants::get_constant( 'WC_VERSION' );
+
+		wp_enqueue_style(
+			'woocommerce-blocktheme',
+			self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
+			array(),
+			$version,
+			'all'
+		);
+
+		wp_style_add_data( 'woocommerce-blocktheme', 'rtl', 'replace' );
 	}
 
 	/**
@@ -305,7 +296,7 @@ class WC_Frontend_Scripts {
 				'version'       => '2.7.0-wc.' . $version,
 				'legacy_handle' => 'jquery-blockui',
 			),
-			'wc-jquery-cookie'           => array( // deprecated.
+			'wc-jquery-cookie'           => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '1.4.1-wc.' . $version,

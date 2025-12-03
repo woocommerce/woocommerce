@@ -82,36 +82,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$images_html       = '';
 		$inner_blocks_html = '';
 
-		/**
-		 * ============================================================
-		 * START TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
-		 * ============================================================
-		 * In case Product Gallery Large Image is still used in a
-		 * "standalone" way, with no Product Image block inside,
-		 * we need to render the images manually the "old way".
-		 *
-		 * Includes legacy_get_main_images_html method.
-		 */
-
-		$has_product_image_block = ! empty(
-			array_filter(
-				iterator_to_array( $block->inner_blocks ),
-				function ( $inner_block ) {
-					return 'woocommerce/product-image' === $inner_block->name;
-				}
-			)
-		);
-
-		if ( ! $has_product_image_block ) {
-			$images_html = $this->legacy_get_main_images_html( $block->context, $product );
-		}
-
-		/**
-		 * ==========================================================
-		 * END TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
-		 * ==========================================================
-		 */
-
 		foreach ( $block->inner_blocks as $inner_block ) {
 			if ( 'woocommerce/product-image' === $inner_block->name ) {
 				// Product Image requires special handling because we need to render it once for each image.
@@ -259,67 +229,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		<?php
 		$template = ob_get_clean();
 
-		return wp_interactivity_process_directives( $template );
-	}
-
-	/**
-	 * Get the main images html code. The first element of the array contains the HTML of the first image that is visible, the second element contains the HTML of the other images that are hidden.
-	 *
-	 * @param array       $context The block context.
-	 * @param \WC_Product $product The product object.
-	 *
-	 * @return array
-	 */
-	private function legacy_get_main_images_html( $context, $product ) {
-		$image_data   = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
-		$base_classes = 'wc-block-woocommerce-product-gallery-large-image__image wc-block-woocommerce-product-gallery-large-image__image--legacy';
-
-		if ( ! empty( $context['fullScreenOnClick'] ) ) {
-			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
-		}
-		if ( ! empty( $context['hoverZoom'] ) ) {
-			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
-		}
-
-		ob_start();
-		?>
-			<ul
-				class="wc-block-product-gallery-large-image__container"
-				aria-roledescription="carousel"
-			>
-				<?php foreach ( $image_data as $index => $image ) : ?>
-					<li class="wc-block-product-gallery-large-image__wrapper">
-						<img
-							class="<?php echo esc_attr( $base_classes ); ?>"
-							src="<?php echo esc_attr( $image['src'] ); ?>"
-							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
-							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
-							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
-							alt="<?php echo esc_attr( $image['alt'] ); ?>"
-							data-wp-on--touchstart="actions.onTouchStart"
-							data-wp-on--touchmove="actions.onTouchMove"
-							data-wp-on--touchend="actions.onTouchEnd"
-							<?php if ( $context['hoverZoom'] ) : ?>
-								data-wp-on--mousemove="actions.startZoom"
-								data-wp-on--mouseleave="actions.resetZoom"
-							<?php endif; ?>
-							<?php if ( $context['fullScreenOnClick'] ) : ?>
-								data-wp-on--click="actions.openDialog"
-							<?php endif; ?>
-							<?php if ( 0 === $index ) : ?>
-								fetchpriority="high"
-							<?php else : ?>
-								fetchpriority="low"
-								loading="lazy"
-							<?php endif; ?>
-							tabindex="-1"
-							draggable="false"
-						/>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-		<?php
-		$template = ob_get_clean();
 		return wp_interactivity_process_directives( $template );
 	}
 

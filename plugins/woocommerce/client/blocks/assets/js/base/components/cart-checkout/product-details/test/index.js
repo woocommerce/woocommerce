@@ -29,11 +29,11 @@ describe( 'ProductDetails', () => {
 		expect( listItems ).toHaveLength( 3 );
 
 		// First item should have name and value
-		expect( screen.getByText( 'Lorem' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'Lorem:' ) ).toBeInTheDocument();
 		expect( screen.getAllByText( 'Ipsum' ) ).toHaveLength( 2 ); // First and third items
 
 		// Second item should use display instead of value
-		expect( screen.getByText( 'LOREM' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'LOREM:' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'IPSUM' ) ).toBeInTheDocument();
 
 		// Third item should only have value (no name)
@@ -73,9 +73,9 @@ describe( 'ProductDetails', () => {
 		expect( screen.queryByText( 'Lorem' ) ).not.toBeInTheDocument();
 
 		// Visible items should be rendered
-		expect( screen.getByText( 'LOREM' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'LOREM:' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'IPSUM' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'LOREM 2' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'LOREM 2:' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'IPSUM 2' ) ).toBeInTheDocument();
 	} );
 
@@ -130,7 +130,7 @@ describe( 'ProductDetails', () => {
 		expect( childDivs ).toHaveLength( 1 );
 
 		// Should contain name and value
-		expect( screen.getByText( 'LOREM' ) ).toBeInTheDocument();
+		expect( screen.getByText( 'LOREM:' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'IPSUM' ) ).toBeInTheDocument();
 
 		// Should have proper CSS classes
@@ -200,7 +200,7 @@ describe( 'ProductDetails', () => {
 		);
 		expect( nameSpan ).toBeInTheDocument();
 		expect( nameSpan.querySelector( 'b' ) ).toBeInTheDocument();
-		expect( nameSpan.textContent ).toBe( 'Your Gift Message' );
+		expect( nameSpan.textContent ).toBe( 'Your Gift Message:' );
 
 		// Should render HTML in value (link should be preserved with allowed attributes)
 		const valueSpan = container.querySelector(

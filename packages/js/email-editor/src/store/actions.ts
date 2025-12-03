@@ -46,6 +46,19 @@ export function setEmailPost( postId: number | string, postType: string ) {
 	} as const;
 }
 
+export function setEmailPostType( postType: string ) {
+	if ( ! postType ) {
+		throw new Error(
+			'setEmailPostType requires a valid postType parameter'
+		);
+	}
+
+	return {
+		type: 'SET_EMAIL_POST',
+		state: { postType } as Partial< State >,
+	} as const;
+}
+
 export const setTemplateToPost =
 	( templateSlug ) =>
 	async ( { registry } ) => {
