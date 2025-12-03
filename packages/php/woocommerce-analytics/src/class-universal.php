@@ -90,10 +90,10 @@ class Universal {
 				wcAnalytics.trackEndpoint = '<?php echo esc_url( rest_url( 'woocommerce-analytics/v1/track' ) ); ?>';
 
 				// Set common properties for all events.
-				wcAnalytics.commonProps = <?php echo wp_json_encode( $common_properties, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
+				wcAnalytics.commonProps = <?php echo wp_json_encode( $common_properties, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
 				// Set the event queue.
-				wcAnalytics.eventQueue = <?php echo wp_json_encode( WC_Analytics_Tracking::get_event_queue(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
+				wcAnalytics.eventQueue = <?php echo wp_json_encode( WC_Analytics_Tracking::get_event_queue(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
 				// Features.
 				wcAnalytics.features = {
@@ -102,7 +102,7 @@ class Universal {
 					proxy: <?php echo $is_proxy_tracking_enabled ? 'true' : 'false'; ?>,
 				};
 
-				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
+				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
 				// Page context flags.
 				wcAnalytics.pages = {

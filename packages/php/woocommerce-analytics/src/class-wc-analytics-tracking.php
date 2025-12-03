@@ -356,7 +356,7 @@ class WC_Analytics_Tracking extends WC_Tracks {
 			}
 
 			// Serialize non-indexed arrays to JSON strings.
-			$all_properties[ $key ] = wp_json_encode( $value );
+			$all_properties[ $key ] = wp_json_encode( $value, JSON_UNESCAPED_SLASHES );
 		}
 
 		return $all_properties;
