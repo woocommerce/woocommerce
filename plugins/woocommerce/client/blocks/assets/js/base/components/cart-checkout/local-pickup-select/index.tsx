@@ -18,7 +18,11 @@ interface LocalPickupSelectProps {
 		// This arg signals that the rate is selected in the _client_ (not necessarily the selected shipping rate on the server, yet)
 		// If the server returns a cart with a different selected shipping rate, then after "receiving" the updated cart (`receiveCart`)
 		// this arg, `isSelectedInClient`, will be true for that rate, and the UI will update.
+<<<<<<< HEAD
 		isSelectedInClient: boolean
+=======
+		isSelectedInClient?: boolean
+>>>>>>> parent of 25ca5e7e55 (Pass selected option to callback to allow callback decide what to do)
 	) => RadioControlOptionType;
 	packageCount: number;
 	onChange: ( value: string ) => void;
