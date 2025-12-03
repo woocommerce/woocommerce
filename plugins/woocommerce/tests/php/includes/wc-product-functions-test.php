@@ -242,6 +242,79 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When filter is false and order has no customer but has billing address, use billing address for tax rates.
+	 */
+	public function test_wc_get_price_excluding_tax_uses_billing_address_when_no_customer() {
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_prices_include_tax' => '__return_true',
+			)
+		);
+
+		$find_rates_args = null;
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Tax' => array(
+					'find_rates' => function ( $args ) use ( &$find_rates_args ) {
+						$find_rates_args = $args;
+						return array( 1 => array( 'rate' => 19 ) );
+					},
+					'calc_tax'   => function () {
+						return array( 0 );
+					},
+				),
+			)
+		);
+
+		// phpcs:disable Squiz.Commenting
+		$product = new class() extends WC_Product {
+			public function get_price( $context = 'view' ) {
+				return 100;
+			}
+
+			public function is_taxable() {
+				return true;
+			}
+
+			public function get_tax_class( $context = 'view' ) {
+				return '';
+			}
+		};
+
+		$order = new class() extends WC_Order {
+			public function get_customer_id( $context = 'view' ) {
+				return 0; // No customer - guest order.
+			}
+
+			public function get_billing_country( $context = 'view' ) {
+				return 'DE';
+			}
+
+			public function get_billing_state( $context = 'view' ) {
+				return '';
+			}
+
+			public function get_billing_postcode( $context = 'view' ) {
+				return '10115';
+			}
+
+			public function get_billing_city( $context = 'view' ) {
+				return 'Berlin';
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		wc_get_price_excluding_tax( $product, array( 'order' => $order ) );
+
+		$this->assertNotNull( $find_rates_args, 'WC_Tax::find_rates should have been called' );
+		$this->assertEquals( 'DE', $find_rates_args['country'], 'Tax rates should be looked up for Germany (order billing country)' );
+
+		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+	}
+
+	/**
 	 * @testDox Test 'wc_get_related_products' with actual related products.
 	 */
 	public function test_wc_get_related_products_with_actual_related_products() {
