@@ -9,48 +9,16 @@
 	verbose="true"
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
 	<testsuites>
+		<!-- BISECT: Commenting out legacy testsuite to isolate error -->
+		<!--
 		<testsuite name="wc-phpunit-legacy">
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
-			<!-- BISECT ROUND 2: Keep first quarter (a-f), exclude second quarter (g-n) and second half (o-z) -->
-			<!-- Excluding g-n (second quarter of first half) -->
-			<exclude>./tests/legacy/unit-tests/gateways</exclude>
-			<exclude>./tests/legacy/unit-tests/geolocation</exclude>
-			<exclude>./tests/legacy/unit-tests/importer</exclude>
-			<exclude>./tests/legacy/unit-tests/integrations</exclude>
-			<exclude>./tests/legacy/unit-tests/libraries</exclude>
-			<exclude>./tests/legacy/unit-tests/log</exclude>
-			<!-- Excluding o-z (second half) -->
-			<exclude>./tests/legacy/unit-tests/order</exclude>
-			<exclude>./tests/legacy/unit-tests/order-items</exclude>
-			<exclude>./tests/legacy/unit-tests/packages</exclude>
-			<exclude>./tests/legacy/unit-tests/page-functions</exclude>
-			<exclude>./tests/legacy/unit-tests/payment-gateways</exclude>
-			<exclude>./tests/legacy/unit-tests/payment-tokens</exclude>
-			<exclude>./tests/legacy/unit-tests/privacy</exclude>
-			<exclude>./tests/legacy/unit-tests/product</exclude>
-			<exclude>./tests/legacy/unit-tests/queue</exclude>
-			<exclude>./tests/legacy/unit-tests/rest-api</exclude>
-			<exclude>./tests/legacy/unit-tests/session</exclude>
-			<exclude>./tests/legacy/unit-tests/settings</exclude>
-			<exclude>./tests/legacy/unit-tests/shipping</exclude>
-			<exclude>./tests/legacy/unit-tests/shortcodes</exclude>
-			<exclude>./tests/legacy/unit-tests/tax</exclude>
-			<exclude>./tests/legacy/unit-tests/templates</exclude>
-			<exclude>./tests/legacy/unit-tests/totals</exclude>
-			<exclude>./tests/legacy/unit-tests/util</exclude>
-			<exclude>./tests/legacy/unit-tests/webhooks</exclude>
-			<exclude>./tests/legacy/unit-tests/widgets</exclude>
-			<exclude>./tests/legacy/unit-tests/woocommerce-admin</exclude>
 		</testsuite>
+		-->
 		<testsuite name="wc-phpunit-main">
 			<directory suffix=".php">./tests/php</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
-			<!-- BISECT ROUND 2: Keep first half of main tests, exclude second half -->
-			<exclude>./tests/php/src/LayoutTemplates</exclude>
-			<exclude>./tests/php/src/Proxies</exclude>
-			<exclude>./tests/php/src/StoreApi</exclude>
-			<exclude>./tests/php/src/Utilities</exclude>
 		</testsuite>
 	</testsuites>
 	<listeners>
@@ -66,7 +34,6 @@
                 </array>
             </arguments>
 		</listener>
-		<listener class="Automattic\WooCommerce\Tests\TestClassLogger" file="./tests/php/TestClassLogger.php"/>
 	</listeners>
 	<coverage includeUncoveredFiles="true">
 		<include>
