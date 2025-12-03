@@ -158,7 +158,7 @@ class ProductCacheInvalidator {
 			$this->invalidate_variation_and_parent(
 				$post_id,
 				self::OPERATION_DELETE,
-				null,
+				$post->post_parent,
 				$this->get_context_for_post_hook( 'delete_post', $post )
 			);
 		} elseif ( 'product' === $post->post_type ) {
@@ -235,17 +235,12 @@ class ProductCacheInvalidator {
 		}
 
 		if ( 'product_variation' === $post->post_type ) {
-			$variation = wc_get_product( $post_id );
-			if ( $variation && $variation->get_parent_id() ) {
-				$this->invalidate_variation_and_parent(
-					$post_id,
-					$operation,
-					$variation,
-					$this->get_context_for_post_hook( $hook_name, $post )
-				);
-			} else {
-				$this->invalidate( $post_id, $operation, $this->get_context_for_post_hook( $hook_name, $post ) );
-			}
+			$this->invalidate_variation_and_parent(
+				$post_id,
+				$operation,
+				$post->post_parent,
+				$this->get_context_for_post_hook( $hook_name, $post )
+			);
 		} elseif ( 'product' === $post->post_type ) {
 			$this->invalidate( $post_id, $operation, $this->get_context_for_post_hook( $hook_name, $post ) );
 		}
@@ -267,7 +262,7 @@ class ProductCacheInvalidator {
 		$this->invalidate_variation_and_parent(
 			$variation_id,
 			self::OPERATION_CREATE,
-			$variation,
+			$variation->get_parent_id(),
 			array(
 				'hook'    => 'woocommerce_new_product_variation',
 				'product' => $variation,
@@ -291,7 +286,7 @@ class ProductCacheInvalidator {
 		$this->invalidate_variation_and_parent(
 			$variation_id,
 			self::OPERATION_UPDATE,
-			$variation,
+			$variation->get_parent_id(),
 			array(
 				'hook'    => 'woocommerce_update_product_variation',
 				'product' => $variation,
@@ -552,7 +547,7 @@ class ProductCacheInvalidator {
 		$this->invalidate_variation_and_parent(
 			$variation_id,
 			self::OPERATION_UPDATE,
-			$null,
+			null,
 			array(
 				'hook' => 'woocommerce_updated_product_attribute_summary',
 			)
@@ -591,24 +586,25 @@ class ProductCacheInvalidator {
 	/**
 	 * Invalidate a variation and its parent product.
 	 *
-	 * @param int              $variation_id The variation ID.
-	 * @param string           $operation The operation for the variation.
-	 * @param \WC_Product|null $variation Optional variation object. If not provided, will be loaded.
-	 * @param array            $context Context for the variation invalidation, MUST contain a 'hook' key.
+	 * @param int      $variation_id The variation ID.
+	 * @param string   $operation The operation for the variation.
+	 * @param int|null $parent_id Optional parent product ID. If not provided, will be looked up.
+	 * @param array    $context Context for the variation invalidation, MUST contain a 'hook' key.
 	 *
 	 * @return void
 	 */
-	private function invalidate_variation_and_parent( int $variation_id, string $operation, $variation = null, array $context = array() ): void {
+	private function invalidate_variation_and_parent( int $variation_id, string $operation, ?int $parent_id = null, array $context = array() ): void {
 		$this->invalidate( $variation_id, $operation, $context );
 
-		if ( is_null( $variation ) ) {
-			$variation = wc_get_product( $variation_id );
-			if ( ! $variation ) {
-				return;
+		if ( is_null( $parent_id ) ) {
+			if ( $this->is_using_cpt_data_store() ) {
+				$parent_id = wp_get_post_parent_id( $variation_id );
+			} else {
+				$variation = wc_get_product( $variation_id );
+				$parent_id = $variation ? $variation->get_parent_id() : 0;
 			}
 		}
 
-		$parent_id = $variation->get_parent_id();
 		if ( ! $parent_id ) {
 			return;
 		}
