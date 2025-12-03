@@ -263,12 +263,12 @@ class WC_Gateway_Paypal_Notices {
 	 * Extensions can disable this feature using the filter:
 	 * add_filter( 'woocommerce_paypal_account_restriction_notices_enabled', '__return_false' );
 	 *
-	 * @param int      $http_code     The HTTP status code from the PayPal API response.
-	 * @param array    $response_data The decoded response data from the PayPal API, or null if decoding failed.
-	 * @param WC_Order $order         The WooCommerce order object.
+	 * @param int|string $http_code     The HTTP status code from the PayPal API response.
+	 * @param array      $response_data The decoded response data from the PayPal API.
+	 * @param WC_Order   $order         The WooCommerce order object.
 	 * @return void
 	 */
-	public function manage_account_restriction_status( int $http_code, array $response_data, WC_Order $order ): void {
+	public function manage_account_restriction_status( $http_code, $response_data, $order ): void {
 		/**
 		 * Filters whether account restriction notices should be enabled.
 		 *
@@ -283,13 +283,13 @@ class WC_Gateway_Paypal_Notices {
 		}
 
 		// Clear the restriction flag on successful responses.
-		if ( in_array( $http_code, array( 200, 201 ), true ) ) {
+		if ( in_array( (int) $http_code, array( 200, 201 ), true ) ) {
 			self::clear_account_restriction_flag();
 			return;
 		}
 
 		// Set the restriction flag for account-related errors.
-		if ( 422 === $http_code && is_array( $response_data ) ) {
+		if ( 422 === (int) $http_code && ! empty( $response_data ) ) {
 			$issue = $response_data['details'][0]['issue'] ?? null;
 
 			if ( in_array( $issue, self::PAYPAL_ACCOUNT_RESTRICTION_ISSUES, true ) ) {

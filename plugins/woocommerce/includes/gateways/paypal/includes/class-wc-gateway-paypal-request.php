@@ -156,7 +156,9 @@ class WC_Gateway_Paypal_Request {
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
-			$response_data = json_decode( $body, true ) ?? array();
+			$response_data = json_decode( $body, true );
+
+			$response_array = is_array( $response_data ) ? $response_data : array();
 
 			/**
 			 * Fires after receiving a response from PayPal order creation.
@@ -171,11 +173,11 @@ class WC_Gateway_Paypal_Request {
 			 *
 			 * @since 10.4.0
 			 *
-			 * @param int        $http_code     The HTTP status code from the PayPal API response.
-			 * @param array|null $response_data The decoded response data from the PayPal API, or null if decoding failed.
+			 * @param int|string $http_code     The HTTP status code from the PayPal API response.
+			 * @param array      $response_data The decoded response data from the PayPal API
 			 * @param WC_Order   $order         The WooCommerce order object.
 			 */
-			do_action( 'woocommerce_paypal_standard_order_created_response', $http_code, $response_data, $order );
+			do_action( 'woocommerce_paypal_standard_order_created_response', $http_code, $response_array, $order );
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
