@@ -87,6 +87,7 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['users']               = $request['users'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 		$args['filter_empty']        = $request['filter_empty'];
+		$args['user_type']           = $request['user_type'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
@@ -527,7 +528,17 @@ class Controller extends GenericController implements ExportableInterface {
 				),
 			),
 		);
-
+		$params['user_type']               = array(
+			'description'       => __( 'Limit result to items with specified user type.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'all',
+			'validate_callback' => 'rest_validate_request_arg',
+			'enum'              => array(
+				'all',
+				'customer',
+				'guest',
+			),
+		);
 		return $params;
 	}
 

@@ -365,6 +365,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_clauses[] = "{$customer_lookup_table}.user_id IN ({$included_users})";
 		}
 
+		// Filter by user type.
+		if ( ! empty( $query_args['user_type'] ) && 'all' !== $query_args['user_type'] ) {
+			$user_type       = $query_args['user_type'];
+			$where_clauses[] = "{$customer_lookup_table}.user_id IS " . ( 'customer' === $user_type ? 'NOT NULL' : 'NULL' );
+		}
+
 		$numeric_params = array(
 			'orders_count'    => array(
 				'column' => 'COUNT( order_id )',
