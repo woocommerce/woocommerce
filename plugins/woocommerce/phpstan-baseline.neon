@@ -32485,37 +32485,31 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
+			message: '#^Cannot call method add_order_note\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: includes/gateways/paypal/class-wc-gateway-paypal.php
+
+		-
 			message: '#^Cannot call method add_order_note\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
-			count: 4
+			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
 			message: '#^Cannot call method get_meta\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method get_meta\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
-			identifier: method.nonObject
-			count: 2
+			count: 3
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
 			message: '#^Cannot call method get_payment_method\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Cannot call method get_payment_method\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method get_transaction_id\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
+			message: '#^Cannot call method get_transaction_id\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -32523,13 +32517,7 @@ parameters:
 		-
 			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method save\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
-			identifier: method.nonObject
-			count: 1
+			count: 2
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
@@ -32635,13 +32623,13 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Cannot call method set_transaction_id\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
+			message: '#^Cannot call method set_transaction_id\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Cannot call method update_meta_data\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
+			message: '#^Cannot call method update_meta_data\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -32719,7 +32707,7 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal_Request\:\:capture_authorized_payment\(\) expects WC_Order, bool\|WC_Order\|WC_Order_Refund given\.$#'
+			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal_Request\:\:capture_authorized_payment\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -32737,7 +32725,7 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Parameter \#1 \$order of static method WC_Gateway_Paypal_API_Handler\:\:do_capture\(\) expects WC_Order, bool\|WC_Order\|WC_Order_Refund given\.$#'
+			message: '#^Parameter \#1 \$order of static method WC_Gateway_Paypal_API_Handler\:\:do_capture\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -33187,6 +33175,12 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
+			message: '#^Binary operation "\." between ''PayPal payment is…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_amount\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -33217,8 +33211,20 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
+			message: '#^Cannot access offset ''update_time'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
 			message: '#^Cannot call static method instance\(\) on mixed\.$#'
 			identifier: staticMethod.nonObject
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
+			message: '#^Constant WC_VERSION not found\.$#'
+			identifier: constant.notFound
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
@@ -33236,6 +33242,12 @@ parameters:
 
 		-
 			message: '#^Method WC_Gateway_Paypal_Request\:\:fetch_paypal_client_id\(\) should return string\|null but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
+			message: '#^Method WC_Gateway_Paypal_Request\:\:get_latest_transaction_data\(\) should return array\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
@@ -33279,6 +33291,12 @@ parameters:
 		-
 			message: '#^Method WC_Gateway_Paypal_Request\:\:send_wpcom_proxy_request\(\) should return array\|null but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
 			identifier: return.type
+			count: 1
+			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
+
+		-
+			message: '#^Parameter \#1 \$paypal_order_id of method WC_Gateway_Paypal_Request\:\:get_paypal_order_details\(\) expects string, mixed given\.$#'
+			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
@@ -36686,6 +36704,12 @@ parameters:
 
 		-
 			message: '#^Function wc_update_1040_add_idx_date_paid_status_parent\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/react-admin/wc-admin-update-functions.php
+
+		-
+			message: '#^Function wc_update_1050_add_idx_user_email\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/react-admin/wc-admin-update-functions.php
@@ -93937,13 +93961,37 @@ parameters:
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
 
 		-
+			message: '#^Cannot cast mixed to int\.$#'
+			identifier: cast.int
+			count: 2
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:clear_caches\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:delete_email_template\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_template_post_id\(\) should return int\|false but returns mixed\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_template_post_id\(\) should return int\|false but returns 0\.0\|''''\|''0''\|array\{\}\|int\|false\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_template_post_id\(\) should return int\|false but returns int\|string\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_type_from_post_id\(\) should return string\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
@@ -93957,6 +94005,24 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$email_id of method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_type_class_name_from_email_id\(\) expects string, string\|null given\.$#'
 			identifier: argument.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Parameter \#1 \$post_id of method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_cache_key_for_post_id\(\) expects int, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:invalidate_cache_for_template\(\) expects int\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
+
+		-
+			message: '#^Property Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:\$post_id_to_email_type_cache \(array\<int\|string, string\|null\>\) does not accept array\<int\|string, mixed\>\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsManager.php
 
