@@ -497,7 +497,7 @@ class Checkout extends AbstractBlock {
 			$shipping_methods           = WC()->shipping()->get_shipping_methods();
 			$formatted_shipping_methods = array_reduce(
 				$shipping_methods,
-				function ( $acc, $method ) use ( $local_pickup_method_ids ) {
+				function ( array $acc, $method ) use ( $local_pickup_method_ids ) {
 					if ( in_array( $method->id, $local_pickup_method_ids, true ) ) {
 						return $acc;
 					}
@@ -525,7 +525,7 @@ class Checkout extends AbstractBlock {
 			$payment_methods           = PaymentUtils::get_enabled_payment_gateways();
 			$formatted_payment_methods = array_reduce(
 				$payment_methods,
-				function ( $acc, $method ) {
+				function ( array $acc, $method ) {
 					$acc[] = [
 						'id'          => $method->id,
 						'title'       => $method->get_method_title() !== '' ? $method->get_method_title() : $method->get_title(),
