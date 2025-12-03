@@ -226,7 +226,6 @@ jobs:
 
             const labels = await linearClient.issueLabels({
               filter: {
-                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
                 name: { eq: 'Release' }
               }
             });
