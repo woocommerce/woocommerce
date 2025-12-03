@@ -22,9 +22,11 @@ interface ProductImageProps {
 
 const ShippingPackageItemIcon = ( {
 	packageItem,
-	cartItems,
+	cartItems = [],
 }: ProductImageProps ): JSX.Element => {
-	const cartItem = cartItems.find( ( item ) => item.key === packageItem.key );
+	const cartItem = cartItems?.find(
+		( item ) => item.key === packageItem.key
+	);
 	const images = cartItem?.images || [];
 
 	return (

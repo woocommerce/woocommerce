@@ -209,13 +209,15 @@ const Block = () => {
 		renderPickupLocation,
 	};
 
+	const packageData = shippingRates[ 0 ] || null;
+
 	return (
 		<>
 			<ExperimentalOrderLocalPickupPackages.Slot { ...slotFillProps } />
 			<ExperimentalOrderLocalPickupPackages>
 				<LocalPickupSelect
-					title={ shippingRates[ 0 ].name }
-					packageData={ shippingRates[ 0 ] }
+					title={ packageData?.name }
+					packageData={ packageData }
 					selectedOption={ selectedOption ?? '' }
 					renderPickupLocation={ renderPickupLocation }
 					pickupLocations={ pickupLocations }

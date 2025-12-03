@@ -82,11 +82,13 @@ export const LocalPickupSelect = ( {
 		);
 
 		if ( multiplePackages ) {
+			const packageItems = packageData.items || [];
+
 			header = (
 				<div className="wc-block-components-shipping-rates-control__package-container">
 					{ header }
 					<div className="wc-block-components-shipping-rates-control__package-thumbnails">
-						{ packageData.items.slice( 0, 3 ).map( ( item ) => (
+						{ packageItems.slice( 0, 3 ).map( ( item ) => (
 							<ShippingPackageItemIcon
 								key={ item.key }
 								packageItem={ item }
