@@ -12,7 +12,9 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
 use WC_Shipping_Zones;
+use WC_Shipping_Zone;
 use WP_Http;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -38,6 +40,13 @@ class Controller extends AbstractController {
 	protected $method_schema;
 
 	/**
+	 * Shipping service instance.
+	 *
+	 * @var ShippingZoneMethodService
+	 */
+	protected $shipping_method_service;
+
+	/**
 	 * Custom error constants for shipping-specific errors.
 	 */
 	const INVALID_ZONE_ID     = 'invalid_zone_id';
@@ -48,17 +57,18 @@ class Controller extends AbstractController {
 	 * Initialize the controller with schema dependency injection.
 	 *
 	 * @internal
-	 * @param ShippingMethodSchema $method_schema Schema for shipping methods.
+	 * @param ShippingMethodSchema      $method_schema            Schema for shipping methods.
+	 * @param ShippingZoneMethodService $shipping_method_service Service for shipping method operations.
 	 */
-	final public function init( ShippingMethodSchema $method_schema ) {
-		$this->method_schema = $method_schema;
+	final public function init( ShippingMethodSchema $method_schema, ShippingZoneMethodService $shipping_method_service ) {
+		$this->method_schema           = $method_schema;
+		$this->shipping_method_service = $shipping_method_service;
 	}
 
 	/**
 	 * Register the routes for shipping zone methods.
 	 */
 	public function register_routes() {
-		// POST - Create shipping method.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -70,15 +80,34 @@ class Controller extends AbstractController {
 			)
 		);
 
-		// PUT - Update shipping method.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'check_permissions' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				'schema' => array( $this, 'get_public_item_schema' ),
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::DELETABLE ),
+				),
 			)
 		);
 	}
@@ -98,11 +127,39 @@ class Controller extends AbstractController {
 			);
 		}
 
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return $this->get_authentication_error_by_method( $request->get_method() );
+		$method = $request->get_method();
+
+		if ( 'GET' === $method ) {
+			$context = 'read';
+		} elseif ( 'DELETE' === $method ) {
+			$context = 'delete';
+		} else {
+			$context = 'edit';
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', $context ) ) {
+			return $this->get_authentication_error_by_method( $method );
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get shipping zone method by ID.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		$instance_id = (int) $request['id'];
+
+		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+		if ( ! $method ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		return rest_ensure_response( $this->prepare_item_for_response( $method, $request ) );
 	}
 
 	/**
@@ -112,36 +169,30 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error Response object or WP_Error.
 	 */
 	public function create_item( $request ) {
-		// Validate zone exists.
 		$zone = $this->validate_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
 
-		// Validate method type.
 		$method_validation = $this->validate_method_type( $request['method_id'] );
 		if ( is_wp_error( $method_validation ) ) {
 			return $method_validation;
 		}
 
-		// Add the shipping method to the zone.
 		$instance_id = $zone->add_shipping_method( $request['method_id'] );
 
 		if ( ! $instance_id ) {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 
-		// Get the newly created method instance.
 		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		if ( ! $method ) {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 
-		// Update method settings, enabled status, and order.
-		$result = $method->update_from_api_request( $zone, $instance_id, $request->get_params() );
+		$result = $this->shipping_method_service->update_shipping_zone_method( $method, $instance_id, $request->get_params(), $zone->get_id() );
 		if ( is_wp_error( $result ) ) {
-			// Delete the method instance to rollback the creation.
-			// This ensures a failed POST would not leave an orphaned method.
+			// Rollback: delete the method instance to prevent orphaned records.
 			$zone->delete_shipping_method( $instance_id );
 			return $result;
 		}
@@ -171,17 +222,66 @@ class Controller extends AbstractController {
 			return $zone;
 		}
 
-		// Update method settings, enabled status, and order if any updates provided.
 		if ( isset( $request['enabled'] ) || isset( $request['settings'] ) || isset( $request['order'] ) ) {
-			$result = $method->update_from_api_request( $zone, $instance_id, $request->get_params() );
+			$result = $this->shipping_method_service->update_shipping_zone_method( $method, $instance_id, $request->get_params(), $zone->get_id() );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		}
 
 		$request['zone_id'] = $zone->get_id();
 		return $this->prepare_item_for_response( $method, $request );
+	}
+
+	/**
+	 * Delete shipping zone method by ID.
+	 *
+	 * Note: In v2/v3, this endpoint required a `force` parameter, but since shipping zone methods
+	 * do not support trashing, it would either delete (force=true) or return a 501 error (force=false).
+	 * We removed the `force` parameter in v4 as it serves no purpose when soft delete is not supported.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$instance_id = (int) $request['id'];
+
+		// Get the method before deletion to return in response.
+		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+		if ( ! $method ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		$zone = $this->validate_zone_by_method_instance( $instance_id );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		// Prepare response before deletion.
+		$request->set_param( 'context', 'view' );
+		$request['zone_id'] = $zone->get_id();
+		$response           = $this->prepare_item_for_response( $method, $request );
+
+		// Perform the deletion.
+		$result = $zone->delete_shipping_method( $instance_id );
+
+		if ( ! $result ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		/**
+		 * Fires after a shipping zone method is deleted via the REST API.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param WC_Shipping_Method $method   The shipping zone method being deleted.
+		 * @param WC_Shipping_Zone   $zone     The shipping zone the method belonged to.
+		 * @param WP_REST_Response   $response The response data.
+		 * @param WP_REST_Request    $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_shipping_zone_method', $method, $zone, $response, $request );
+
+		return $response;
 	}
 
 	/**

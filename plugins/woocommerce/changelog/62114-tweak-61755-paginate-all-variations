@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Auto-paginate variation loading in the `ProductControl` component.

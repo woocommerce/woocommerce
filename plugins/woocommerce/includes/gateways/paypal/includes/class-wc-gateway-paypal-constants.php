@@ -26,9 +26,10 @@ class WC_Gateway_Paypal_Constants {
 	/**
 	 * PayPal payment statuses.
 	 */
-	const STATUS_COMPLETED = 'COMPLETED';
-	const STATUS_APPROVED  = 'APPROVED';
-	const STATUS_CAPTURED  = 'CAPTURED';
+	const STATUS_COMPLETED  = 'COMPLETED';
+	const STATUS_APPROVED   = 'APPROVED';
+	const STATUS_CAPTURED   = 'CAPTURED';
+	const STATUS_AUTHORIZED = 'AUTHORIZED';
 
 	/**
 	 * PayPal payment intents.
@@ -91,5 +92,38 @@ class WC_Gateway_Paypal_Constants {
 		'phone',
 		'phone_number',
 		'national_number',
+	);
+
+	/**
+	 * List of currencies supported by PayPal (Orders API V2).
+	 *
+	 * @var array<string>
+	 */
+	const SUPPORTED_CURRENCIES = array(
+		'AUD', // Australian Dollar.
+		'BRL', // Brazilian Real.
+		'CAD', // Canadian Dollar.
+		'CNY', // Chinese Renminbi.
+		'CZK', // Czech Koruna.
+		'DKK', // Danish Krone.
+		'EUR', // Euro.
+		'HKD', // Hong Kong Dollar.
+		'HUF', // Hungarian Forint.
+		'ILS', // Israeli New Shekel.
+		'JPY', // Japanese Yen.
+		'MYR', // Malaysian Ringgit.
+		'MXN', // Mexican Peso.
+		'TWD', // New Taiwan Dollar.
+		'NZD', // New Zealand Dollar.
+		'NOK', // Norwegian Krone.
+		'PHP', // Philippine Peso.
+		'PLN', // Polish Złoty.
+		'GBP', // Pound Sterling.
+		'SGD', // Singapore Dollar.
+		'SEK', // Swedish Krona.
+		'CHF', // Swiss Franc.
+		'THB', // Thai Baht.
+		'USD', // United States Dollar.
+		'RUB', // Russian Ruble.
 	);
 }

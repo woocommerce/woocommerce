@@ -22,7 +22,6 @@ import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
 import { createStore, storeName, initStoreOverrides } from './store';
-import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 import {
 	initEventCollector,
@@ -104,7 +103,6 @@ function onInit( config: EmailEditorConfig ) {
 	initContentValidationMiddleware();
 	initializeLayout();
 	initBlocks();
-	initHooks();
 	initTextHooks();
 	initStoreOverrides( config );
 }

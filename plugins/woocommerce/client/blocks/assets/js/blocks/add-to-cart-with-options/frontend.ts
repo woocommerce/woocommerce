@@ -18,6 +18,7 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 import { getMatchedVariation } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
+import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 import type { NormalizedProductData, NormalizedVariationData } from './types';
 
@@ -33,6 +34,23 @@ export type AddToCartError = {
 	code: string;
 	group: string;
 	message: string;
+};
+
+/**
+ * Manually dispatches a 'change' event on the quantity input element.
+ *
+ * When users click the plus/minus stepper buttons, no 'change' event is fired
+ * since there is no direct interaction with the input. However, some extensions
+ * rely on the change event to detect quantity changes. This function ensures
+ * those extensions continue working by programmatically dispatching the event.
+ *
+ * @see https://github.com/woocommerce/woocommerce/issues/53031
+ *
+ * @param inputElement - The quantity input element to dispatch the event on.
+ */
+const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
+	const event = new Event( 'change', { bubbles: true } );
+	inputElement.dispatchEvent( event );
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -174,7 +192,7 @@ const { actions, state } = store<
 			},
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
-				return context.quantity || {};
+				return context.quantity;
 			},
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
@@ -222,10 +240,16 @@ const { actions, state } = store<
 			},
 			setQuantity( productId: number, value: number ) {
 				const context = getContext< Context >();
+				const quantitySelectorContext =
+					getContext< QuantitySelectorContext >(
+						'woocommerce/add-to-cart-with-options-quantity-selector'
+					);
+				const inputElement = quantitySelectorContext?.inputElement;
 				const { products } = getConfig(
 					'woocommerce'
 				) as WooCommerceConfig;
 				const variations = products?.[ productId ].variations;
+				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
 				if ( variations ) {
 					const variationIds = Object.keys( variations );
@@ -234,9 +258,24 @@ const { actions, state } = store<
 					const idsToUpdate = [ productId, ...variationIds ];
 
 					idsToUpdate.forEach( ( id ) => {
+						if ( isValueNaN ) {
+							// Null the value first before setting the real value to ensure that
+							// a signal update happens.
+							context.quantity[ Number( id ) ] = null;
+						}
+
 						context.quantity[ Number( id ) ] = value;
 					} );
 				} else {
+					if ( isValueNaN ) {
+						// Null the value first before setting the real value to ensure that
+						// a signal update happens.
+						context.quantity = {
+							...context.quantity,
+							[ productId ]: null,
+						};
+					}
+
 					context.quantity = {
 						...context.quantity,
 						[ productId ]: value,
@@ -247,6 +286,10 @@ const { actions, state } = store<
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );
+				}
+
+				if ( inputElement ) {
+					dispatchChangeEvent( inputElement );
 				}
 			},
 			addError: ( error: AddToCartError ): string => {
