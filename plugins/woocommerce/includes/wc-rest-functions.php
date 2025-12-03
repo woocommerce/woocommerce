@@ -245,12 +245,17 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 			$permission = current_user_can( $post_type_object->cap->$cap );
 
 			// Special handling when object ID is provided for object-level permissions.
-			if ( $object_id && 'edit_posts' === $cap ) {
-				$permission = $permission && current_user_can( $post_type_object->cap->edit_post, $object_id );
-			} elseif ( $object_id && 'delete_posts' === $cap ) {
-				$permission = $permission && current_user_can( $post_type_object->cap->delete_post, $object_id );
-			} elseif ( $object_id && 'read_private_posts' === $cap ) {
-				$permission = $permission && current_user_can( $post_type_object->cap->read_post, $object_id );
+			if ( $object_id ) {
+				// For read operations, we can return true if the user has access to all posts or a specific post by ID.
+				if ( 'read_private_posts' === $cap ) {
+					$permission = $permission || current_user_can( $post_type_object->cap->read_post, $object_id );
+				}
+
+				// For edit and delete operations, user must be able to edit posts and edit the specific post by ID.
+				if ( in_array( $cap, array( 'edit_posts', 'delete_posts' ), true ) ) {
+					$check_permission = 'edit_posts' === $cap ? $post_type_object->cap->edit_post : $post_type_object->cap->delete_post;
+					$permission       = $permission && current_user_can( $check_permission, $object_id );
+				}
 			}
 		}
 	}
