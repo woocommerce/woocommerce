@@ -53,6 +53,12 @@ class TaxDebugTest extends \WC_Unit_Test_Case {
 		$container_tax_debug = wc_get_container()->get( TaxDebug::class );
 		remove_action( 'woocommerce_after_calculate_totals', array( $container_tax_debug, 'maybe_show_debug_notices' ), 999 );
 
+		// Clear any tax rates left over from other tests (e.g., OrderHelper::create_complex_wp_post_order creates global rates).
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		\WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		TaxDebug::reset_notices_flag();
 		wc_clear_notices();

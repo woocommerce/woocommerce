@@ -17,10 +17,6 @@
 		-->
 		<testsuite name="wc-phpunit-main">
 			<directory suffix=".php">./tests/php</directory>
-			<exclude>./tests/php/helpers</exclude>
-			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
-			<!-- BISECT: Keep excluding Gateways. Re-enable Database -->
-			<exclude>./tests/php/src/Gateways</exclude>
 		</testsuite>
 	</testsuites>
 	<listeners>
