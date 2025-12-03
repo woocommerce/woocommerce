@@ -24,8 +24,8 @@ export default function ScheduledUpdatesPromotionNotice() {
 		return null;
 	}
 
-	// Check if this is an existing install (option is null)
-	if ( wcAdminSettings?.[ IMMEDIATE_IMPORT_OPTION ] === null ) {
+	// If option is set, the site has already migrated to scheduled updates or it's a new site.
+	if ( wcAdminSettings?.[ IMMEDIATE_IMPORT_OPTION ] ) {
 		return null;
 	}
 
