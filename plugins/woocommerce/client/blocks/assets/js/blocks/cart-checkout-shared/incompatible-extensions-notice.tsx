@@ -119,7 +119,9 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 					) ) }
 				</ul>
 			) }
-			<em>{ __( '(Only administrators see this notice)', 'woocommerce' ) }</em>
+			<em>
+				{ __( '(Only administrators see this notice)', 'woocommerce' ) }
+			</em>
 		</NoticeBanner>
 	);
 };
