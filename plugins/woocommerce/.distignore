@@ -45,3 +45,6 @@ webpack.config.js
 /client/legacy/
 /client/admin/
 /client/blocks/
+phpstan.neon
+phpstan-baseline.neon
+/php-stubs/
