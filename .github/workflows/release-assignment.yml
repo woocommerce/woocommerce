@@ -346,9 +346,9 @@ jobs:
 
             let parentIssue;
             const labelId = '${{ steps.get-linear-data.outputs.releaseLabelId }}' || null;
+            const assigneeId = '${{ steps.process-kickoff-templates.outputs.userId }}' || null;
 
             try {
-              const assigneeId = '${{ steps.process-kickoff-templates.outputs.userId }}' || null;
               const stateId = '${{ steps.get-linear-data.outputs.inProgressStateId }}' || null;
 
               const parentResult = await linearClient.createIssue({
