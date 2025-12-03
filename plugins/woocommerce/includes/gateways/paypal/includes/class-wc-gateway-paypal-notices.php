@@ -219,7 +219,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return bool
 	 */
 	private function has_account_restriction_flag(): bool {
-		return 'yes' === $this->gateway->get_option( 'paypal_account_restricted', 'no' );
+		return 'yes' === get_option( 'woocommerce_paypal_account_restricted_status', 'no' );
 	}
 
 	/**
@@ -228,9 +228,8 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public static function set_account_restriction_flag(): void {
-		$gateway = WC_Gateway_Paypal::get_instance();
-		if ( $gateway && 'no' === $gateway->get_option( 'paypal_account_restricted', 'no' ) ) {
-			$gateway->update_option( 'paypal_account_restricted', 'yes' );
+		if ( 'no' === get_option( 'woocommerce_paypal_account_restricted_status', 'no' ) ) {
+			update_option( 'woocommerce_paypal_account_restricted_status', 'yes', false );
 		}
 	}
 
@@ -240,9 +239,8 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public static function clear_account_restriction_flag(): void {
-		$gateway = WC_Gateway_Paypal::get_instance();
-		if ( $gateway && 'yes' === $gateway->get_option( 'paypal_account_restricted', 'no' ) ) {
-			$gateway->update_option( 'paypal_account_restricted', 'no' );
+		if ( 'yes' === get_option( 'woocommerce_paypal_account_restricted_status', 'no' ) ) {
+			update_option( 'woocommerce_paypal_account_restricted_status', 'no' );
 		}
 	}
 
@@ -261,7 +259,6 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public function manage_account_restriction_status( int $http_code, array $response_data, WC_Order $order ): void {
-		wc_get_logger()->debug( 'PayPal account restriction status: ' . $http_code . ' for order: ' . $order->get_id() );
 		/**
 		 * Filters whether account restriction notices should be enabled.
 		 *
