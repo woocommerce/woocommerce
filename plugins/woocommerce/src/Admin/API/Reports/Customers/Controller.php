@@ -140,7 +140,10 @@ class Controller extends GenericController implements ExportableInterface {
 		// Last active date is local time.
 		$data['date_last_active_gmt'] = wc_rest_prepare_date_response( $data['date_last_active'], false );
 		$data['date_last_active']     = wc_rest_prepare_date_response( $data['date_last_active'] );
-		$data                         = $this->filter_response_by_context( $data, $context );
+		// Trim name field to prevent whitespace issues.
+		$data['name'] = trim( $data['name'] );
+
+		$data = $this->filter_response_by_context( $data, $context );
 
 		// Wrap the data in a response object.
 		$response = rest_ensure_response( $data );
