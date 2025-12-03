@@ -132,6 +132,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$transaction_id = $event['resource']['id'] ?? null;
 		$status         = $event['resource']['status'] ?? null;
 		$order->set_transaction_id( $transaction_id );
+		$order->update_meta_data( '_paypal_capture_id', $transaction_id );
 		$order->update_meta_data( '_paypal_status', $status );
 		$order->payment_complete();
 		$order->add_order_note(
@@ -166,6 +167,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$status         = $event['resource']['status'] ?? null;
 		$reason         = $event['resource']['status_details']['reason'] ?? 'Unknown';
 		$order->set_transaction_id( $transaction_id );
+		$order->update_meta_data( '_paypal_capture_id', $transaction_id );
 		$order->update_meta_data( '_paypal_status', $status );
 		/* translators: %s: reason */
 		$order->update_status( OrderStatus::ON_HOLD, sprintf( __( 'Payment pending (reason: %s).', 'woocommerce' ), $reason ) );
@@ -192,6 +194,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 
 		$transaction_id = $event['resource']['id'] ?? null;
 		$order->set_transaction_id( $transaction_id );
+		$order->update_meta_data( '_paypal_authorization_id', $transaction_id );
+		$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */
