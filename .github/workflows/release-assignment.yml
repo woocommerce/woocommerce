@@ -377,6 +377,7 @@ jobs:
                     parentId: parentIssue.id,
                     priority: 2,
                     ...(labelId && { labelIds: [labelId] }),
+                    ...(assigneeId && { assigneeId })
                   });
                 } catch (error) {
                   console.log(`Failed to create sub-issue in Linear: ${error.message}`);
