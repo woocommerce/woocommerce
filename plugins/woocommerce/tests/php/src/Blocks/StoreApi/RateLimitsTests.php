@@ -187,8 +187,8 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 
 		$authentication          = new ReflectionClass( Authentication::class );
 		$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
-		$is_only_post_request->setAccessible( true );
 		$authentication_instance = $authentication->newInstance();
+		$is_only_post_request->setAccessible( true );
 
 		// Test cases: [ REQUEST_METHOD, HTTP_X_HTTP_METHOD_OVERRIDE (null = unset), expected ].
 		$test_cases = array(
