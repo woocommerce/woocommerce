@@ -3,13 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
-import { lazy } from '@wordpress/element';
+import { lazy, Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 import { useFilterHook } from '~/utils/use-filter-hook';
+import { ScheduledUpdatesPromotionNotice } from '~/analytics/components';
 
 const RevenueReport = lazy( () =>
 	import( /* webpackChunkName: "analytics-report-revenue" */ './revenue' )
@@ -131,6 +132,19 @@ const getReports = () => {
 			},
 		},
 	].filter( Boolean );
+
+	// Wrap the report component with the scheduled updates promotion notice
+	reports.forEach( ( report ) => {
+		const OriginalComponent = report.component;
+		report.component = function WrappedComponent( props ) {
+			return (
+				<Fragment>
+					<ScheduledUpdatesPromotionNotice />
+					<OriginalComponent { ...props } />
+				</Fragment>
+			);
+		};
+	} );
 
 	/**
 	 * An object defining a report page.
