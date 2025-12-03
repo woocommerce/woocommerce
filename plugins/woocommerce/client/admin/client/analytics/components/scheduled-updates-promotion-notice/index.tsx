@@ -24,8 +24,9 @@ export default function ScheduledUpdatesPromotionNotice() {
 		return null;
 	}
 
-	// If option is set, the site has already migrated to scheduled updates or it's a new site.
-	if ( wcAdminSettings?.[ IMMEDIATE_IMPORT_OPTION ] ) {
+	const optionValue = wcAdminSettings?.[ IMMEDIATE_IMPORT_OPTION ];
+	// No need to show notice if option is already set.
+	if ( optionValue === 'no' || optionValue === 'yes' ) {
 		return null;
 	}
 
