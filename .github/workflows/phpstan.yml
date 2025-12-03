@@ -1,0 +1,65 @@
+name: 'PHPStan Analysis'
+
+on:
+    pull_request:
+        paths:
+            - 'plugins/woocommerce/**/*.php'
+            - 'plugins/woocommerce/composer.json'
+            - 'plugins/woocommerce/composer.lock'
+            - 'plugins/woocommerce/phpstan.neon'
+            - 'plugins/woocommerce/phpstan-baseline.neon'
+    push:
+        paths:
+            - 'plugins/woocommerce/**/*.php'
+            - 'plugins/woocommerce/composer.json'
+            - 'plugins/woocommerce/composer.lock'
+            - 'plugins/woocommerce/phpstan.neon'
+            - 'plugins/woocommerce/phpstan-baseline.neon'
+        branches:
+            - 'trunk'
+            - 'release/*'
+
+concurrency:
+    group: phpstan-${{ github.event_name == 'push' && github.run_id || github.event_name }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    FORCE_COLOR: 1
+
+jobs:
+    phpstan:
+        name: 'PHPStan Analysis'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              id: 'setup-monorepo'
+              with:
+                  install: '@woocommerce/plugin-woocommerce...'
+                  pull-package-deps: '@woocommerce/plugin-woocommerce'
+                  php-version: '8.4'
+
+            - name: 'Create tmp directory'
+              working-directory: plugins/woocommerce
+              run: mkdir -p tmp
+
+            - name: 'Restore PHPStan result cache'
+              uses: actions/cache/restore@v4
+              with:
+                  path: plugins/woocommerce/tmp
+                  key: phpstan-result-cache-${{ github.run_id }}
+                  restore-keys: |
+                      phpstan-result-cache-
+
+            - name: 'Run PHPStan'
+              working-directory: plugins/woocommerce
+              run: pnpm --filter='@woocommerce/plugin-woocommerce' phpstan
+
+            - name: 'Save PHPStan result cache'
+              uses: actions/cache/save@v4
+              if: ${{ !cancelled() }}
+              with:
+                  path: plugins/woocommerce/tmp
+                  key: phpstan-result-cache-${{ github.run_id }}
