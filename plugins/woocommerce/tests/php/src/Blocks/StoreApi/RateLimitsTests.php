@@ -174,4 +174,46 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 			$get_rate_limiting_id->invokeArgs( $authentication, array( false ) )
 		);
 	}
+
+	/**
+	 * Tests that is_only_post_request() correctly identifies true POST requests
+	 * and rejects requests with X-HTTP-Method-Override header set to another method.
+	 *
+	 * @return void
+	 * @throws ReflectionException On failing invoked private method through reflection class.
+	 */
+	public function test_is_only_post_request_method() {
+		$original_server = $_SERVER;
+
+		$authentication          = new ReflectionClass( Authentication::class );
+		$is_only_post_request    = $authentication->getMethod( 'is_only_post_request' );
+		$is_only_post_request->setAccessible( true );
+		$authentication_instance = $authentication->newInstance();
+
+		// Test cases: [ REQUEST_METHOD, HTTP_X_HTTP_METHOD_OVERRIDE (null = unset), expected ].
+		$test_cases = array(
+			array( 'POST', null, true ),      // Pure POST - should return true.
+			array( 'POST', 'PUT', false ),    // POST overridden to PUT - should return false.
+			array( 'POST', 'DELETE', false ), // POST overridden to DELETE - should return false.
+			array( 'POST', 'POST', true ),    // POST with POST override - should return true.
+			array( 'GET', null, false ),      // GET request - should return false.
+			array( 'PUT', null, false ),      // PUT request - should return false.
+		);
+
+		foreach ( $test_cases as $case ) {
+			list( $method, $override, $expected ) = $case;
+
+			$_SERVER['REQUEST_METHOD'] = $method;
+
+			if ( null === $override ) {
+				unset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] );
+			} else {
+				$_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] = $override;
+			}
+
+			$this->assertSame( $expected, $is_only_post_request->invoke( $authentication_instance ) );
+		}
+
+		$_SERVER = $original_server;
+	}
 }

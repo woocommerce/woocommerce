@@ -265,14 +265,10 @@ class Authentication {
 	}
 
 	/**
-	 * Check if the request method is POST and validate X-HTTP-Method-Override header.
-	 * This is used to allow PUT requests to be made, as wp.apiFetch sends PUT over POST with the X-HTTP-Method-Override header.
-	 * 
-	 * @see https://github.com/wordpress/gutenberg/blob/trunk/packages/api-fetch/src/middlewares/http-v1.ts#L21-L43
+	 * Returns true only for POST requests that are NOT overridden to another method
+	 * via the X-HTTP-Method-Override header (used by wp.apiFetch for PUT/DELETE).
 	 *
-	 * Returns true only if:
-	 * - REQUEST_METHOD is POST, and
-	 * - X-HTTP-Method-Override header (if present) is also POST.
+	 * @see https://github.com/wordpress/gutenberg/blob/trunk/packages/api-fetch/src/middlewares/http-v1.ts#L21-L43
 	 *
 	 * @return bool
 	 */
