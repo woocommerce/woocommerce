@@ -538,7 +538,8 @@ class Checkout extends AbstractBlock {
 			$this->asset_data_registry->add( 'globalPaymentMethods', $formatted_payment_methods );
 		}
 
-		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'incompatibleExtensions' ) ) {
+		// Check `current_user_can` so we can show notices about incompatible extensions in the front-end to admins too.
+		if ( ( $is_block_editor || current_user_can( 'manage_woocommerce' ) ) && ! $this->asset_data_registry->exists( 'incompatibleExtensions' ) ) {
 			if ( ! class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) || ! function_exists( 'get_plugins' ) ) {
 				return;
 			}
