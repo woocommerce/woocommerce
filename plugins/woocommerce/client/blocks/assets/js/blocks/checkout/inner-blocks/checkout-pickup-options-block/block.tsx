@@ -71,7 +71,7 @@ const getPickupDetails = (
 const renderPickupLocation = (
 	option: CartShippingPackageShippingRate,
 	packageCount: number,
-	clientSelectedRate = ''
+	isSelectedInClient = false
 ): RadioControlOptionType => {
 	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
@@ -133,7 +133,7 @@ const renderPickupLocation = (
 			</>
 		) : undefined,
 		secondaryDescription:
-			clientSelectedRate === option?.rate_id && details ? (
+			isSelectedInClient && details ? (
 				<ReadMore maxLines={ 2 }>
 					{ decodeEntities( details ) }
 				</ReadMore>
