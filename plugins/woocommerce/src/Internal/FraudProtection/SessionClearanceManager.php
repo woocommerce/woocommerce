@@ -84,6 +84,7 @@ class SessionClearanceManager {
 	 */
 	public function get_session_status(): string {
 		if ( ! $this->is_session_available() ) {
+			// TODO: Consider using allowed as default
 			return self::STATUS_PENDING;
 		}
 

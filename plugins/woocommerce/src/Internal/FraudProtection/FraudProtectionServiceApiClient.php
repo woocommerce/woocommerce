@@ -102,10 +102,7 @@ class FraudProtectionServiceApiClient {
 		 *
 		 * @param string $url The endpoint URL.
 		 */
-		return apply_filters(
-			'woocommerce_fraud_protection_endpoint_url',
-			'https://public-api.wordpress.com/wpcom/v2/fraud-protection/decision'
-		);
+		return 'https://public-api.wordpress.com/wpcom/v2/fraud-protection/events';
 	}
 
 	/**
@@ -116,6 +113,23 @@ class FraudProtectionServiceApiClient {
 	 * @return array|\WP_Error Response array or WP_Error on failure.
 	 */
 	private function make_request( string $url, array $payload ) {
+		// We'll mock the response for now untill the endpoint is ready
+		switch ( $payload['session_data']['email'] ) {
+			case 'test@example.com':
+				return array(
+					'code' => 200,
+					'body' => '{"result": "success", "decision": "allow"}',
+				);
+			case 'fraudster@example.com':
+				return array(
+					'code' => 200,
+					'body' => '{"result": "success", "decision": "block"}',
+				);
+			default:
+				return new \WP_Error( 'api_error', 'Invalid email address' );
+		}
+
+
 		$request_args = array(
 			'method'  => 'POST',
 			'headers' => array(
