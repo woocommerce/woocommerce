@@ -222,6 +222,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 		$this->assertNotEmpty( $retrieved_variation['attributes'], 'Retrieved variation should have attributes' );
 		$this->assertCount( 1, $retrieved_variation['attributes'], 'Retrieved variation should have 1 attribute' );
 		$this->assertEquals( 'رنگ', $retrieved_variation['attributes'][0]['name'], 'Variation should contain color attribute' );
+		$this->assertEquals( 'pa_رنگ', $retrieved_variation['attributes'][0]['slug'], 'Variation should contain color attribute slug' );
 		$this->assertEquals( 'green', $retrieved_variation['attributes'][0]['option'], 'Variation should contain color option green' );
 	}
 
