@@ -309,7 +309,7 @@ const { state, actions } = store< Store >(
 				{ id, key, quantity, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
-				const { speak } = yield import( '@wordpress/a11y' );
+				const a11yModulePromise = import( '@wordpress/a11y' );
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
@@ -403,6 +403,7 @@ const { state, actions } = store< Store >(
 						'woocommerce'
 					) as WooCommerceConfig;
 					if ( messages?.addedToCartText ) {
+						const { speak } = yield a11yModulePromise;
 						speak( messages.addedToCartText, 'polite' );
 					}
 
@@ -422,7 +423,7 @@ const { state, actions } = store< Store >(
 				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
-				const { speak } = yield import( '@wordpress/a11y' );
+				const a11yModulePromise = import( '@wordpress/a11y' );
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
@@ -559,6 +560,7 @@ const { state, actions } = store< Store >(
 							'woocommerce'
 						) as WooCommerceConfig;
 						if ( messages?.addedToCartText ) {
+							const { speak } = yield a11yModulePromise;
 							speak( messages.addedToCartText, 'polite' );
 						}
 
