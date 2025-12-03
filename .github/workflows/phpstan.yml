@@ -69,8 +69,8 @@ jobs:
                   BASE_SHA="${{ github.event.pull_request.base.sha }}"
                   git fetch origin "$BASE_SHA" --depth=1
 
-                  # Check if baseline file has changed
-                  if ! git diff --exit-code --ignore-all-space "$BASE_SHA" -- "$BASELINE_PATH" > /dev/null 2>&1; then
+                  # Check if baseline file has changed (use relative path since we're in working-directory)
+                  if ! git diff --exit-code --ignore-all-space "$BASE_SHA" -- "$BASELINE_FILE" > /dev/null 2>&1; then
                       # Function to count total errors in baseline (sum of all count fields)
                       count_errors() {
                           local file="$1"
@@ -106,7 +106,7 @@ jobs:
                           echo "::error file=$BASELINE_PATH::Adding errors to PHPStan baseline is not allowed. This PR adds $DIFF new error(s) (from $BASE_COUNT to $CURRENT_COUNT). Please fix the PHPStan errors instead of adding them to the baseline. Run 'pnpm phpstan' locally to see the errors."
                           echo ""
                           echo "New errors added to baseline:"
-                          git diff "$BASE_SHA" -- "$BASELINE_PATH" | grep -A 5 -E '^\+[[:space:]]*message:' | head -150
+                          git diff "$BASE_SHA" -- "$BASELINE_FILE" | grep -A 5 -E '^\+[[:space:]]*message:' | head -150
                           exit 1
                       elif [[ $DIFF -lt 0 ]]; then
                           # Baseline decreased - good news!
