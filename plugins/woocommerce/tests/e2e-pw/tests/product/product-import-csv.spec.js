@@ -14,6 +14,12 @@ const filePath = path.resolve( 'tests/e2e-pw/test-data/sample_products.csv' );
 const filePathOverride = path.resolve(
 	'tests/e2e-pw/test-data/sample_products_override.csv'
 );
+const csvFilePathOctetStream = path.resolve(
+	'tests/e2e-pw/test-data/sample_products_with_0x1F_byte.csv'
+);
+const notValidCsvFilePath = path.resolve(
+	'tests/e2e-pw/test-data/not_valid_csv_file.csv'
+);
 
 const productIds = [];
 const categoryIds = [];
@@ -225,6 +231,75 @@ test.describe( 'Import Products from a CSV file', () => {
 				.allTextContents();
 
 			expect( productTitles.sort() ).toEqual( productNames.sort() );
+		}
+	);
+
+	test(
+		'can upload the CSV file with application/octet-stream and import products',
+		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
+		async ( { page } ) => {
+			await page.goto(
+				'wp-admin/edit.php?post_type=product&page=product_importer'
+			);
+
+			// Select the CSV file and upload it
+			const [ fileChooser ] = await Promise.all( [
+				page.waitForEvent( 'filechooser' ),
+				page.locator( '#upload' ).click(),
+			] );
+			await fileChooser.setFiles( csvFilePathOctetStream );
+			await page.locator( 'button[value="Continue"]' ).click();
+
+			// Click on run the importer
+			await page.locator( 'button[value="Run the importer"]' ).click();
+
+			// Confirm that the import is done
+			await expect(
+				page.locator( '.woocommerce-importer-done' )
+			).toContainText( 'Import complete!', { timeout: 120000 } );
+
+			// View the products
+			await page.locator( 'text=View products' ).click();
+
+			// Search for "import" to narrow the results to just the products we imported
+			await page.locator( '#post-search-input' ).fill( 'Imported' );
+			await page.locator( '#search-submit' ).click();
+
+			// Wait for search results to load completely
+			await page.waitForSelector( 'a.row-title', { timeout: 30000 } );
+
+			// Compare imported products to what's expected
+			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
+				productNames.length,
+				{ timeout: 30000 }
+			);
+
+			const productTitles = await page
+				.locator( 'a.row-title' )
+				.allTextContents();
+
+			expect( productTitles.sort() ).toEqual( productNames.sort() );
+		}
+	);
+
+	test(
+		"can't upload fake CSV file with application/octet-stream and import products",
+		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
+		async ( { page } ) => {
+			await page.goto(
+				'wp-admin/edit.php?post_type=product&page=product_importer'
+			);
+
+			// Select the CSV file and upload it
+			const [ fileChooser ] = await Promise.all( [
+				page.waitForEvent( 'filechooser' ),
+				page.locator( '#upload' ).click(),
+			] );
+			await fileChooser.setFiles( notValidCsvFilePath );
+			await page.locator( 'button[value="Continue"]' ).click();
+			await expect( page.locator( 'div.error.inline' ) ).toContainText(
+				errorMessage
+			);
 		}
 	);
 

@@ -7,7 +7,6 @@
 
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
-use Automattic\WooCommerce\Internal\Utilities\URL;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -517,8 +516,6 @@ class WC_Product_CSV_Importer_Controller {
 				)
 			);
 
-			// Force output the errors in the same page.
-			$this->output_errors();
 			return;
 		}
 
