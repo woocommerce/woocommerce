@@ -112,7 +112,9 @@ final class DependencyDetection {
 			}
 
 			function getFilename(url) {
-				return url.split('/').pop().split('?')[0].split('#')[0];
+				if (!url) return 'unknown';
+				var filename = url.split('/').pop().split('?')[0].split('#')[0];
+				return filename || 'unknown';
 			}
 
 			function parseStackForCallerUrl(stack) {
@@ -120,10 +122,22 @@ final class DependencyDetection {
 				var lines = stack.split('\n');
 				for (var i = 1; i < lines.length; i++) {
 					var line = lines[i];
+					// Skip our own detection script lines.
 					if (line.indexOf('wc-dependency-detection') !== -1) continue;
-					var match = line.match(/(https?:\/\/[^\s\)]+)/);
+					if (line.indexOf('Proxy.') !== -1) continue;
+					if (line.indexOf('Reflect.') !== -1) continue;
+					if (line.indexOf('Object.get') !== -1) continue;
+					if (line.indexOf('checkDependency') !== -1) continue;
+					if (line.indexOf('performCheck') !== -1) continue;
+					if (line.indexOf('getCallerScriptUrl') !== -1) continue;
+					if (line.indexOf('parseStackForCallerUrl') !== -1) continue;
+					// Skip native functions (setTimeout, etc.)
+					if (line.indexOf('[native code]') !== -1) continue;
+					if (/^\s*(at\s+)?setTimeout\s*$/.test(line.trim())) continue;
+					// Match URLs pointing to .js files
+					var match = line.match(/(https?:\/\/[^\s\)\?]+\.js)/);
 					if (match) {
-						return match[1].replace(/:\d+:\d+$/, '').replace(/\?.*$/, '');
+						return match[1];
 					}
 				}
 				return null;
@@ -145,6 +159,7 @@ final class DependencyDetection {
 
 				// If registry not loaded yet, queue the check for later.
 				if (!registryLoaded) {
+					console.warn('[WooCommerce] Dependency registry not loaded yet. Queueing check for later: ' + callerUrl + ' -> ' + prop + ' -> ' + requiredHandle);
 					pendingChecks.push({callerUrl: callerUrl, prop: prop, requiredHandle: requiredHandle});
 					return;
 				}
