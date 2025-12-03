@@ -32,6 +32,16 @@ class WC_Gateway_Paypal_Notices {
 	private const PAYPAL_ACCOUNT_RESTRICTED_NOTICE = 'paypal_account_restricted';
 
 	/**
+	 * PayPal account restriction issue codes from PayPal API.
+	 *
+	 * @var array
+	 */
+	private const PAYPAL_ACCOUNT_RESTRICTION_ISSUES = array(
+		'PAYEE_ACCOUNT_LOCKED_OR_CLOSED',
+		'PAYEE_ACCOUNT_RESTRICTED',
+	);
+
+	/**
 	 * The PayPal gateway instance.
 	 *
 	 * @var WC_Gateway_Paypal
@@ -280,8 +290,9 @@ class WC_Gateway_Paypal_Notices {
 
 		// Set the restriction flag for account-related errors.
 		if ( 422 === $http_code && is_array( $response_data ) ) {
-			$issue = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : null;
-			if ( in_array( $issue, array( 'PAYEE_ACCOUNT_LOCKED_OR_CLOSED', 'PAYEE_ACCOUNT_RESTRICTED' ), true ) ) {
+			$issue = $response_data['details'][0]['issue'] ?? null;
+
+			if ( in_array( $issue, self::PAYPAL_ACCOUNT_RESTRICTION_ISSUES, true ) ) {
 				WC_Gateway_Paypal::log( 'PayPal account restriction flag set due to issues when handling the order: ' . $order->get_id() );
 				self::set_account_restriction_flag();
 			}
