@@ -356,7 +356,7 @@ class Settings {
 				'label'       => __( 'Update', 'woocommerce' ),
 				'description' => __( 'Controls how analytics data is imported from orders.', 'woocommerce' ),
 				'type'        => 'radio',
-				'default'     => 'yes', // Default to immediate import for backward compatibility to ensure we don't accidentally change the behavior for existing stores.
+				'default'     => null, // Default to null so we can know if it's an new site or an existing site. New sites will have the option set.
 				'options'     => array(
 					'no'  => __( 'Scheduled (Recommended)', 'woocommerce' ),
 					'yes' => __( 'Immediately', 'woocommerce' ),
