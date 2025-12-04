@@ -316,6 +316,7 @@ class WC_Install {
 		'10.5.0' => array(
 			'wc_update_1050_migrate_brand_permalink_setting',
 			'wc_update_1050_enable_autoload_options',
+			'wc_update_1050_add_idx_user_email',
 		),
 	);
 
@@ -1816,7 +1817,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
   KEY download_order_product (download_id,order_id,product_id),
   KEY order_id (order_id),
-  KEY user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)
+  KEY user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires),
+  KEY idx_user_email (user_email(100))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id bigint(20) unsigned NOT NULL auto_increment,
