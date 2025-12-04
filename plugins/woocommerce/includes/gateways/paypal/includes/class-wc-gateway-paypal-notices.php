@@ -32,6 +32,13 @@ class WC_Gateway_Paypal_Notices {
 	private const PAYPAL_ACCOUNT_RESTRICTED_NOTICE = 'paypal_account_restricted';
 
 	/**
+	 * The name of the notice for PayPal unsupported currency.
+	 *
+	 * @var string
+	 */
+	private const PAYPAL_UNSUPPORTED_CURRENCY_NOTICE = 'paypal_unsupported_currency';
+
+	/**
 	 * PayPal account restriction issue codes from PayPal API.
 	 *
 	 * @var array
@@ -87,6 +94,7 @@ class WC_Gateway_Paypal_Notices {
 
 		$this->add_paypal_migration_notice();
 		$this->add_paypal_account_restricted_notice();
+		$this->add_paypal_unsupported_currency_notice();
 	}
 
 	/**
@@ -177,6 +185,39 @@ class WC_Gateway_Paypal_Notices {
 		$notice_html = '<div class="notice notice-error is-dismissible">'
 			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '" aria-label="' . esc_attr__( 'Dismiss this notice', 'woocommerce' ) . '"></a>'
 			. '<p><strong>' . esc_html__( 'PayPal Account Restricted', 'woocommerce' ) . '</strong></p>'
+			. '<p>' . $message . '</p>'
+			. '</div>';
+
+		echo wp_kses_post( $notice_html );
+	}
+
+	/**
+	 * Add notice warning when PayPal does not support the store's currency.
+	 *
+	 * @return void
+	 */
+	private function add_paypal_unsupported_currency_notice() {
+		$currency = get_woocommerce_currency();
+
+		// Skip if the currency is supported by PayPal.
+		if ( $this->gateway->is_valid_for_use() ) {
+			return;
+		}
+
+		// Skip if the notice has been dismissed.
+		if ( $this->is_notice_dismissed( self::PAYPAL_UNSUPPORTED_CURRENCY_NOTICE ) ) {
+			return;
+		}
+
+		$dismiss_url = $this->get_dismiss_url( self::PAYPAL_UNSUPPORTED_CURRENCY_NOTICE );
+		$message = sprintf(
+			/* translators: %s: Currency code */
+			esc_html__( 'PayPal Standard does not support your store currency (%s).', 'woocommerce' ),
+			$currency
+		);
+
+		$notice_html = '<div class="notice notice-error is-dismissible">'
+			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '"></a>'
 			. '<p>' . $message . '</p>'
 			. '</div>';
 
