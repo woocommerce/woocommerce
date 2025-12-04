@@ -7,7 +7,6 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Admin\Notes\Note;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -814,7 +813,6 @@ class WC_Helper {
 		if (
 			( 'woocommerce_page_wc-addons' === $current_screen->id ||
 			'woocommerce_page_wc-admin' === $current_screen->id ) &&
-			FeaturesUtil::feature_is_enabled( 'marketplace' ) &&
 			(
 				false === empty( $redirect_admin_url ) ||
 				false === empty( $install_product_key )

@@ -3190,7 +3190,6 @@ function wc_update_1050_enable_autoload_options() {
 
 	$feature_options = array(
 		'fulfillments'         => 'woocommerce_feature_fulfillments_enabled',
-		'marketplace'          => 'woocommerce_feature_marketplace_enabled',
 		'push_notifications'   => 'woocommerce_feature_push_notifications_enabled',
 		'agentic_checkout'     => 'woocommerce_feature_agentic_checkout_enabled',
 		'cart_checkout_blocks' => 'woocommerce_feature_cart_checkout_blocks_enabled',
