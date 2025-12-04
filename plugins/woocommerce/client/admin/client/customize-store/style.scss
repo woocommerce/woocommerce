@@ -42,42 +42,6 @@
 	@media screen and (max-width: 782px) {
 		flex-direction: column;
 	}
-
-	// Mobile header
-	.woocommerce-customize-store__mobile-header {
-		display: none;
-
-		@media screen and (max-width: 782px) {
-			display: flex;
-			align-items: center;
-			padding: 0.5rem;
-			background: #fff;
-			border-bottom: 1px solid #dcdcde;
-			gap: 0.5rem;
-
-			&__back-button {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				min-width: 36px;
-				height: 36px;
-				padding: 0;
-
-				svg {
-					fill: $gray-900;
-				}
-			}
-
-			&__title {
-				font-size: 1rem;
-				font-weight: 600;
-				line-height: 24px;
-				color: $gray-900;
-				margin: 0;
-				flex: 1;
-			}
-		}
-	}
 }
 
 .woocommerce-customize-store-sidebar {

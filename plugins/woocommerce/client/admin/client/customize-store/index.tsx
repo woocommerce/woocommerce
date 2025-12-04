@@ -96,30 +96,8 @@ const CustomizeStoreController = () => {
 
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
 
-	const sidebarTitle = (
-		<Button href={ getNewPath( {}, '/', {} ) }>
-			{ __( 'Customize your store', 'woocommerce' ) }
-		</Button>
-	);
-
-	const sidebarDescription = __(
-		'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
-		'woocommerce'
-	);
-
 	return (
 		<div className="woocommerce-customize-store__container">
-			<div className="woocommerce-customize-store__mobile-header">
-				<Button
-					className="woocommerce-customize-store__mobile-header__back-button"
-					href={ getNewPath( {}, '/', {} ) }
-					icon={ chevronIcon }
-					label={ __( 'Back', 'woocommerce' ) }
-				/>
-				<h1 className="woocommerce-customize-store__mobile-header__title">
-					{ __( 'Customize your store', 'woocommerce' ) }
-				</h1>
-			</div>
 			<div className="woocommerce-customize-store-sidebar">
 				<motion.div
 					className="woocommerce-edit-site-layout__header-container"
@@ -156,13 +134,18 @@ const CustomizeStoreController = () => {
 							level={ 1 }
 							as="h1"
 						>
-							{ sidebarTitle }
+							<Button href={ getNewPath( {}, '/', {} ) }>
+								{ __( 'Customize your store', 'woocommerce' ) }
+							</Button>
 						</Heading>
 					</HStack>
 
 					<div className="woocommerce-edit-site-sidebar-navigation-screen__content">
 						<p className="woocommerce-edit-site-sidebar-navigation-screen__description">
-							{ sidebarDescription }
+							{ __(
+								'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
+								'woocommerce'
+							) }
 						</p>
 					</div>
 				</VStack>
