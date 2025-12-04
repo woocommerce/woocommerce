@@ -1,0 +1,188 @@
+name: Leftover PR Items Review
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to audit'
+        required: false
+        type: number
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Audit merged PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # If PR number specified, use it; otherwise get all PRs merged in last 24 hours
+          if [ -n "${{ github.event.inputs.pr_number }}" ]; then
+            pr_numbers="${{ github.event.inputs.pr_number }}"
+          else
+            echo "Fetching PRs merged in last 24 hours..."
+            pr_numbers=$(gh pr list --repo ${{ github.repository }} --state merged --limit 100 --json number,mergedAt | \
+              jq -r '[.[] | select(.mergedAt | fromdateiso8601 > (now - 86400))] | .[].number' | tr '\n' ' ')
+
+            if [ -z "$pr_numbers" ]; then
+              echo "No PRs merged in the last 24 hours."
+              exit 0
+            fi
+
+            echo "Found PRs: $pr_numbers"
+          fi
+
+          # Create results directory
+          mkdir -p results
+
+          # Count total PRs for rate limiting
+          pr_count=$(echo $pr_numbers | wc -w)
+          current_pr=0
+
+          # Process each PR
+          for pr_num in $pr_numbers; do
+            current_pr=$((current_pr + 1))
+            echo "Processing PR #$pr_num ($current_pr/$pr_count)..."
+
+            pr_data=$(gh pr view $pr_num --repo ${{ github.repository }} --json number,title,body,additions,deletions,changedFiles,files,labels,mergeable)
+            comments=$(gh api "/repos/${{ github.repository }}/issues/$pr_num/comments" --jq '[.[] | {author: .user.login, body: .body, created: .created_at}]')
+            reviews=$(gh api "/repos/${{ github.repository }}/pulls/$pr_num/reviews" --jq '[.[] | {author: .user.login, state: .state, body: .body, submitted: .submitted_at}]')
+            review_comments=$(gh api "/repos/${{ github.repository }}/pulls/$pr_num/comments" --jq '[.[] | {author: .user.login, body: .body, path: .path, created: .created_at}]')
+
+          audit_data=$(jq -n \
+            --arg repo "${{ github.repository }}" \
+            --argjson pr "$pr_data" \
+            --argjson comments "$comments" \
+            --argjson reviews "$reviews" \
+            --argjson review_comments "$review_comments" \
+            '{repository: $repo, pr: $pr, comments: $comments, reviews: $reviews, review_comments: $review_comments}')
+
+          # Create the system prompt in a variable (using || true to handle read's exit code)
+          read -r -d '' SYSTEM_PROMPT << 'PROMPT_EOF' || true
+          You are reviewing WooCommerce pull requests. Analyze the review process to identify unresolved critical issues.
+
+          CRITICAL: Output ONLY raw JSON. No markdown. No code fences. No backticks. No explanation text. Just the JSON object starting with { and ending with }
+
+          Use this exact JSON structure:
+
+          {
+            "pr_number": number,
+            "pr_link": "https://github.com/{repository}/pull/{pr_number}",
+            "issues": [
+              {
+                "title": "brief issue description",
+                "comment_link": "url to specific comment or PR URL if general observation",
+                "status": "seems unaddressed" or "brief context",
+                "criticality": number
+              }
+            ]
+          }
+
+          For comment_link: Use the specific comment URL if the issue comes from a review comment. Use the PR URL if it's a general observation (like missing reviews or merge conflicts).
+
+          Filtering rules:
+          - EXCLUDE: items marked for follow-up, acknowledged future work
+          - INCLUDE: unanswered questions, unaddressed automated tool flags, dismissed concerns without resolution
+          - Only include criticality >= 7
+
+          Priority order:
+          1. Functional bugs (data loss, errors, broken features)
+          2. User-facing behavior issues
+          3. Code quality issues (missing error handling, incorrect implementations)
+          4. Developer experience issues
+
+          Risk assessment:
+          - High-risk changes (payments, orders, security) need extensive review/testing
+          - Flag insufficient review depth for the risk level
+
+          Do not include:
+          - Style/formatting (unless functional impact)
+          - Performance micro-optimizations
+          - Nice-to-haves
+          - "Could also do X" suggestions
+          - Missing changelog entries
+          - Missing linked issues/bugs
+
+          REMEMBER: Raw JSON only. Your response must start with { and end with } - nothing else.
+          PROMPT_EOF
+
+          # Escape the system prompt for JSON
+          SYSTEM_PROMPT_JSON=$(echo "$SYSTEM_PROMPT" | jq -Rs .)
+
+          # Create the user message content (the audit data as JSON string)
+          USER_MESSAGE=$(echo "$audit_data" | jq -c | jq -Rs .)
+
+          echo "Sending to Claude API..."
+
+          # Call Claude API with properly escaped JSON
+          response=$(curl -s https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d @- << JSON_EOF
+          {
+            "model": "claude-sonnet-4-5-20250929",
+            "max_tokens": 20000,
+            "temperature": 1,
+            "system": $SYSTEM_PROMPT_JSON,
+            "messages": [
+              {
+                "role": "user",
+                "content": $USER_MESSAGE
+              },
+              {
+                "role": "assistant",
+                "content": "{"
+              }
+            ]
+          }
+          JSON_EOF
+          )
+
+            # Save raw response for debugging
+            echo "$response" > results/pr-$pr_num-raw-response.json
+
+            # Check if response has error
+            if echo "$response" | jq -e '.error' > /dev/null 2>&1; then
+              echo "API Error occurred for PR #$pr_num:"
+              echo "$response" | jq '.error'
+              echo "$response" | jq -r '.error.message' > results/pr-$pr_num-response.txt
+            else
+              # Save parsed response to file (prepend { since we used prefill)
+              echo "{$(echo "$response" | jq -r '.content[0].text')" > results/pr-$pr_num-response.txt
+              echo "Claude analysis complete for PR #$pr_num"
+            fi
+
+            # Rate limit: wait 60 seconds between PRs (except for the last one)
+            if [ $current_pr -lt $pr_count ]; then
+              echo "Waiting 60 seconds before next PR to avoid rate limits..."
+              sleep 60
+            fi
+          done
+
+          echo ""
+          echo "All PRs processed. Check artifacts for individual results."
+
+          # Create summary report
+          echo "# PR Audit Summary" > results/summary.md
+          echo "" >> results/summary.md
+          pr_count=$(echo $pr_numbers | wc -w | tr -d ' ')
+          echo "Audited $pr_count PR(s): $(echo $pr_numbers | sed 's/\([0-9]*\)/#\1/g')" >> results/summary.md
+          echo "" >> results/summary.md
+
+          for pr_num in $pr_numbers; do
+            if [ -f "results/pr-$pr_num-response.txt" ]; then
+              echo "## PR #$pr_num" >> results/summary.md
+              echo "" >> results/summary.md
+              cat "results/pr-$pr_num-response.txt" >> results/summary.md
+              echo "" >> results/summary.md
+            fi
+          done
+
+      - name: Upload all results
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-audit-results-${{ github.run_number }}
+          path: results/
