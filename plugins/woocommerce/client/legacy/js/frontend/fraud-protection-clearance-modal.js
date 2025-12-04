@@ -35,32 +35,17 @@
 				return;
 			}
 
-			// Check if fraud protection should apply to current page
-			var applyTo = wcFraudProtection.applyTo || 'both';
-			var shouldApplyToCheckout = (applyTo === 'checkout' || applyTo === 'both') && wcFraudProtection.isCheckout;
-			var shouldApplyToCart = (applyTo === 'cart' || applyTo === 'both') && wcFraudProtection.isProduct;
 
-			// If neither applies to current page, do nothing
-			if (!shouldApplyToCheckout && !shouldApplyToCart) {
-				return;
-			}
+		// Create modal HTML
+		this.createModal();
 
-			// Create modal HTML
-			this.createModal();
+		// Bind button actions
+		this.bindActions();
 
-			// Show modal on checkout page automatically (if enabled for checkout)
-			if (shouldApplyToCheckout) {
-				this.showModal();
-			}
+		// Show modal immediately on page load for pending sessions
+		this.showModal();
+	},
 
-			// Intercept add to cart button clicks on product pages (if enabled for cart)
-			if (shouldApplyToCart) {
-				this.interceptAddToCart();
-			}
-
-			// Bind button actions
-			this.bindActions();
-		},
 
 		/**
 		 * Redirect to shop page.
@@ -73,6 +58,7 @@
 
 		/**
 		 * Create modal HTML and append to body.
+		 * TODO: move rendering to the server side.
 		 */
 		createModal: function() {
 			const modalHTML = `
@@ -219,32 +205,6 @@
 			$('.wc-fraud-protection-step-' + this.currentStep).show();
 		},
 
-		/**
-		 * Intercept add to cart button clicks.
-		 */
-		interceptAddToCart: function() {
-			const self = this;
-
-			// For simple add to cart buttons
-			$(document).on('click', '.add_to_cart_button, .single_add_to_cart_button', function(e) {
-				if (wcFraudProtection.sessionStatus !== 'allowed') {
-					e.preventDefault();
-					e.stopImmediatePropagation();
-					self.showModal();
-					return false;
-				}
-			});
-
-			// For variable products form submission
-			$('form.cart').on('submit', function(e) {
-				if (wcFraudProtection.sessionStatus !== 'allowed') {
-					e.preventDefault();
-					e.stopImmediatePropagation();
-					self.showModal();
-					return false;
-				}
-			});
-		},
 
 		/**
 		 * Bind button actions.

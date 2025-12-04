@@ -422,8 +422,8 @@ class FraudProtectionController {
 	 * @return void
 	 */
 	public function handle_enqueue_frontend_assets(): void {
-		// Only load on checkout, cart, and product pages.
-		if ( ! is_checkout() && ! is_cart() && ! is_product() && ! is_shop() && ! is_product_category() && ! is_product_tag() ) {
+		// Only load on cart and checkout pages.
+		if ( ! is_checkout() && ! is_cart() && ! is_product() ) {
 			return;
 		}
 
@@ -466,16 +466,11 @@ class FraudProtectionController {
 			'wc-fraud-protection-modal',
 			'wcFraudProtection',
 			array(
-				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
 				'restUrl'       => rest_url( 'wc/store/v1/fraud-protection/otp' ),
-				'nonce'         => wp_create_nonce( 'wc-fraud-protection' ),
 				'restNonce'     => wp_create_nonce( 'wp_rest' ),
 				'sessionStatus' => $this->session_manager->get_session_status(),
 				'userEmail'     => $user_email,
-				'isCheckout'    => is_checkout(),
-				'isProduct'     => is_product() || is_shop() || is_product_category() || is_product_tag(),
 				'shopUrl'       => get_permalink( wc_get_page_id( 'shop' ) ),
-				'applyTo'       => $this->get_apply_to_setting(),
 			)
 		);
 	}
