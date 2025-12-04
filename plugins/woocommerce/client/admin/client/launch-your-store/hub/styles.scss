@@ -289,7 +289,7 @@
 									}
 								}
 
-								&:hover {
+								&:hover:not(.all-tasks-complete) {
 									background: #ededed;
 									color: $gray-600;
 								}
