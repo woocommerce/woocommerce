@@ -7,7 +7,6 @@ import { searchProduct } from '../requests/shopper/search-product.js';
 import { singleProduct } from '../requests/shopper/single-product.js';
 import { cart } from '../requests/shopper/cart.js';
 import { cartRemoveItem } from '../requests/shopper/cart-remove-item.js';
-import { cartApplyCoupon } from '../requests/shopper/cart-apply-coupon.js';
 import { checkoutGuest } from '../requests/shopper/checkout-guest.js';
 import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-login.js';
 import { myAccount } from '../requests/shopper/my-account.js';
@@ -277,7 +276,6 @@ export function myAccountFlow() {
 }
 export function cartFlow() {
 	cartRemoveItem();
-	cartApplyCoupon();
 }
 export function allMerchantFlow() {
 	wpLogin();
