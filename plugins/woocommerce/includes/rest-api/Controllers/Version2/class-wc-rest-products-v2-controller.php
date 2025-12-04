@@ -197,6 +197,24 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				'schema' => array( $this, 'get_public_batch_schema' ),
 			)
 		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/related',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_related_products' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -721,6 +739,24 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function api_get_related_ids( $product, $context ) {
 		return array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) );
+	}
+
+	/**
+	 * Get related products for a specific product.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function get_related_products( $request ) {
+		$product = $this->get_object( (int) $request['id'] );
+
+		if ( ! $product || 0 === $product->get_id() ) {
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$related_ids = $this->api_get_related_ids( $product, 'view' );
+
+		return rest_ensure_response( array( 'related_ids' => $related_ids ) );
 	}
 
 	/**
