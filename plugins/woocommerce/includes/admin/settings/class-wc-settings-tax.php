@@ -379,8 +379,18 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			return;
 		}
 
+		// Don't show if taxes are disabled.
+		if ( ! wc_tax_enabled() ) {
+			return;
+		}
+
 		// Check if prices are entered with tax.
 		if ( 'yes' !== get_option( 'woocommerce_prices_include_tax' ) ) {
+			return;
+		}
+
+		// Don't show notice if non-base location price adjustment is disabled.
+		if ( ! apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			return;
 		}
 
@@ -390,19 +400,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			return;
 		}
 
-		// Check all tax classes for rates at the base location.
-		$tax_classes   = array_merge( array( '' ), WC_Tax::get_tax_classes() );
-		$has_base_rate = false;
-
-		foreach ( $tax_classes as $tax_class ) {
-			$tax_class_slug = sanitize_title( $tax_class );
-			$base_rates     = WC_Tax::get_base_tax_rates( $tax_class_slug );
-
-			if ( ! empty( $base_rates ) ) {
-				$has_base_rate = true;
-				break;
-			}
-		}
+		$has_base_rate = $this->has_tax_rate_for_country( $base_location['country'] );
 
 		// If no base rates exist, show warning.
 		if ( ! $has_base_rate ) {
@@ -425,8 +423,9 @@ class WC_Settings_Tax extends WC_Settings_Page {
 					<?php
 					echo wp_kses_post(
 						sprintf(
-							/* translators: 1: opening link tag 2: closing link tag */
-							__( 'You have enabled "Prices entered with tax" but have not configured a tax rate for your base location. Please %1$sconfigure tax rates%2$s for your store\'s base location to ensure accurate tax calculations.', 'woocommerce' ),
+							/* translators: 1: country code, 2: opening link tag, 3: closing link tag */
+							__( 'You have enabled "Prices entered with tax" but have not configured a standard tax rate for your base location (%1$s). Please %2$sconfigure standard tax rates%3$s to ensure accurate tax calculations.', 'woocommerce' ),
+							esc_html( $base_location['country'] ),
 							'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=tax&section=standard' ) ) . '">',
 							'</a>'
 						)
@@ -436,6 +435,27 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			</div>
 			<?php
 		}
+	}
+
+	/**
+	 * Check if any tax rate exists for a given country.
+	 *
+	 * @since 10.4.0
+	 *
+	 * @param string $country Country code.
+	 * @return bool True if at least one tax rate exists for the country.
+	 */
+	private function has_tax_rate_for_country( $country ) {
+		global $wpdb;
+
+		$count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = %s OR tax_rate_country = ''",
+				$country
+			)
+		);
+
+		return $count > 0;
 	}
 }
 
