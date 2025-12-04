@@ -20,6 +20,7 @@ jobs:
     name: Run packages release script
     runs-on: ubuntu-latest
     permissions:
+      id-token: write
       contents: read
     steps:
       - uses: actions/checkout@v4
