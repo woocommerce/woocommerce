@@ -45,7 +45,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const token = await core.getIDToken();
+            const token = await core.getIDToken('npmjs.com');
             core.info("OIDC token acquired (redacted). Length: " + token.length)
             core.setOutput("hasToken", !!token);
 
