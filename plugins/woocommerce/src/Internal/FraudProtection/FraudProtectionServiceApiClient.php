@@ -113,22 +113,55 @@ class FraudProtectionServiceApiClient {
 	 * @return array|\WP_Error Response array or WP_Error on failure.
 	 */
 	private function make_request( string $url, array $payload ) {
-		// We'll mock the response for now untill the endpoint is ready
-		switch ( $payload['session_data']['email'] ) {
-			case 'test@example.com':
-				return array(
-					'code' => 200,
-					'body' => '{"result": "success", "decision": "allow"}',
-				);
-			case 'fraudster@example.com':
-				return array(
-					'code' => 200,
-					'body' => '{"result": "success", "decision": "block"}',
-				);
-			default:
-				return new \WP_Error( 'api_error', 'Invalid email address' );
+		$this->log_request( $url, $payload );
+
+		// TODO: remove mock implementation
+		// Mock the response for cart events
+		if ( in_array( $payload['event_name'], array( 'cart_item_added', 'cart_item_updated', 'cart_item_removed', 'cart_item_restored' ), true ) ) {
+			
+			$decision = self::DECISION_ALLOW;
+			if ( $payload['session_data']['cart_total'] > 3 ) {
+				$decision = self::DECISION_BLOCK;
+			} elseif ( $payload['session_data']['cart_total'] > 1 ) {
+				$decision = self::DECISION_CHALLENGE;
+			}
+		
+			return array(
+				'code' => 200,
+				'body' => '{"result": "success", "decision": "' . $decision . '"}',
+			);
 		}
 
+		// Mock the response for challenge events
+		if ( in_array( $payload['event_name'], array( 'challenge_verified' ), true ) ) {
+			// We'll mock the response for now untill the endpoint is ready
+			switch ( $payload['session_data']['email'] ) {
+				case 'test@example.com':
+				case 'test2@example.com':
+					return array(
+						'code' => 200,
+						'body' => '{"result": "success", "decision": "allow"}',
+					);
+				case 'fraudster@example.com':
+					return array(
+						'code' => 200,
+						'body' => '{"result": "success", "decision": "block"}',
+					);
+				case null: // Unknown email address, jsut allow the session
+					return array(
+						'code' => 200,
+						'body' => '{"result": "success", "decision": "allow"}',
+					);
+				default:
+					return new \WP_Error( 'api_error', 'Invalid email address' );
+			}
+		}
+
+		// Allow everything else
+		return array(
+			'code' => 200,
+			'body' => '{"result": "success", "decision": "allow"}',
+		);
 
 		$request_args = array(
 			'method'  => 'POST',
@@ -278,6 +311,18 @@ class FraudProtectionServiceApiClient {
 	private function log_error( string $message ): void {
 		$logger = wc_get_logger();
 		$logger->error( $message, array( 'source' => self::LOGGER_SOURCE ) );
+	}
+
+	/**
+	 * Log a request.
+	 *
+	 * @param string $url     Request URL.
+	 * @param array  $payload Request payload.
+	 * @return void
+	 */
+	private function log_request( string $url, array $payload ): void {
+		$logger = wc_get_logger();
+		$logger->info( 'Request: ' . $url, array( 'source' => self::LOGGER_SOURCE, 'payload' => $payload ) );
 	}
 
 	/**
