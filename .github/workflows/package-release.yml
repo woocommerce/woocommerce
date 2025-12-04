@@ -12,8 +12,7 @@ on:
         required: false
 
 permissions: {
-  # id-token: write  # Required for OIDC
-  contents: read
+  id-token: write  # Required for OIDC
 }
 
 jobs:
