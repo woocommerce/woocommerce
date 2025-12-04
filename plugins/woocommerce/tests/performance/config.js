@@ -19,7 +19,7 @@ export const customer_user_id = __ENV.C_UID || '2';
 export const customer_first_name = 'Jane';
 export const customer_last_name = 'Smith';
 
-export const hpos_status = __ENV.HPOS || false;
+export const hpos_status = __ENV.HPOS || true;
 
 export const admin_orders_base_url = 'edit.php?post_type=shop_order';
 export const hpos_admin_orders_base_url = 'admin.php?page=wc-orders';

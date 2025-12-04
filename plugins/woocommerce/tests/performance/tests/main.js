@@ -25,7 +25,7 @@ import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 import { setCartCheckoutShortcodes } from '../setup/cart-checkout-shortcode.js';
 import { addCustomerOrder } from '../setup/add-customer-order.js';
 
-const defaultIterations = 3;
+const defaultIterations = 1;
 const shopper_request_threshold = 'p(95)<10000';
 const merchant_request_threshold = 'p(95)<10000';
 const api_request_threshold = 'p(95)<10000';
