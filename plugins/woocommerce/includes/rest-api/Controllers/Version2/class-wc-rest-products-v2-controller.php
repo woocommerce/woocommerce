@@ -746,6 +746,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 *
+	 * @internal
 	 */
 	public function get_related_products( $request ) {
 		$product = $this->get_object( (int) $request['id'] );
