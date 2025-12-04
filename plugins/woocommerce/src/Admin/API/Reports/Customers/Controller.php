@@ -233,6 +233,12 @@ class Controller extends GenericController implements ExportableInterface {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'phone'                => array(
+					'description' => __( 'Phone number.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'username'             => array(
 					'description' => __( 'Username.', 'woocommerce' ),
 					'type'        => 'string',

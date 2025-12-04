@@ -72,6 +72,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$customer1->set_last_name( 'Doe' );
 		$customer1->set_billing_state( 'CA' );
 		$customer1->set_billing_country( 'US' );
+		$customer1->set_billing_phone( '+1-555-0100' );
 		$customer1->save();
 		$this->registered_customers[] = $customer1;
 
@@ -80,6 +81,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$customer2->set_last_name( 'Smith' );
 		$customer2->set_billing_state( 'NY' );
 		$customer2->set_billing_country( 'US' );
+		$customer2->set_billing_phone( '+1-555-0200' );
 		$customer2->save();
 		$this->registered_customers[] = $customer2;
 
@@ -88,6 +90,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$customer3->set_last_name( 'Johnson' );
 		$customer3->set_billing_state( 'CA' );
 		$customer3->set_billing_country( 'US' );
+		// Customer3 has no phone number to test empty phone handling.
 		$customer3->save();
 		$this->registered_customers[] = $customer3;
 
@@ -98,6 +101,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 			$order->set_total( 100 + ( $index * 50 ) );
 			$order->set_billing_state( $customer->get_billing_state() );
 			$order->set_billing_country( $customer->get_billing_country() );
+			$order->set_billing_phone( $customer->get_billing_phone() );
 			$order->save();
 		}
 
@@ -108,6 +112,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$guest_order1->set_billing_last_name( 'Customer' );
 		$guest_order1->set_billing_state( 'TX' );
 		$guest_order1->set_billing_country( 'US' );
+		$guest_order1->set_billing_phone( '+1-555-0300' );
 		$guest_order1->set_status( OrderStatus::COMPLETED );
 		$guest_order1->set_total( 50 );
 		$guest_order1->save();
@@ -119,6 +124,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$guest_order2->set_billing_last_name( 'User' );
 		$guest_order2->set_billing_state( 'ON' );
 		$guest_order2->set_billing_country( 'CA' );
+		// Guest order 2 has no phone number to test empty phone handling.
 		$guest_order2->set_status( OrderStatus::COMPLETED );
 		$guest_order2->set_total( 75 );
 		$guest_order2->save();
@@ -638,5 +644,116 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 			$this->assertEquals( 'US', $report['country'], 'All customers should be from US' );
 			$this->assertNotEquals( 'CA', $report['state'], 'No customers should be from CA state' );
 		}
+	}
+
+	/**
+	 * Test phone field is present in API response.
+	 */
+	public function test_phone_field_present() {
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertGreaterThanOrEqual( 1, count( $reports ), 'Should return at least one customer' );
+
+		// Verify phone field exists in all reports.
+		foreach ( $reports as $report ) {
+			$this->assertArrayHasKey( 'phone', $report, 'Phone field should be present in response' );
+		}
+	}
+
+	/**
+	 * Test phone field values for registered customers.
+	 */
+	public function test_phone_field_registered_customers() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'user_type' => 'registered',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Find customers by email to verify phone numbers.
+		$phone_map = array();
+		foreach ( $reports as $report ) {
+			if ( ! empty( $report['email'] ) ) {
+				$phone_map[ $report['email'] ] = $report['phone'];
+			}
+		}
+
+		// Verify customer1 has phone number.
+		$this->assertEquals( '+1-555-0100', $phone_map['customer1@example.com'], 'Customer1 should have correct phone number' );
+
+		// Verify customer2 has phone number.
+		$this->assertEquals( '+1-555-0200', $phone_map['customer2@example.com'], 'Customer2 should have correct phone number' );
+
+		// Verify customer3 has empty phone (was not set).
+		$this->assertEmpty( $phone_map['customer3@example.com'], 'Customer3 should have empty phone number' );
+	}
+
+	/**
+	 * Test phone field values for guest customers.
+	 */
+	public function test_phone_field_guest_customers() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'user_type' => 'guest',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Find customers by email to verify phone numbers.
+		$phone_map = array();
+		foreach ( $reports as $report ) {
+			if ( ! empty( $report['email'] ) ) {
+				$phone_map[ $report['email'] ] = $report['phone'];
+			}
+		}
+
+		// Verify guest1 has phone number.
+		$this->assertEquals( '+1-555-0300', $phone_map['guest1@example.com'], 'Guest1 should have correct phone number' );
+
+		// Verify guest2 has empty phone (was not set).
+		$this->assertEmpty( $phone_map['guest2@example.com'], 'Guest2 should have empty phone number' );
+	}
+
+	/**
+	 * Test phone field with all customer types.
+	 */
+	public function test_phone_field_all_customers() {
+		$request  = new WP_REST_Request( 'GET', $this->endpoint );
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Count customers with and without phone numbers.
+		$with_phone    = 0;
+		$without_phone = 0;
+
+		foreach ( $reports as $report ) {
+			if ( ! empty( $report['phone'] ) ) {
+				++$with_phone;
+			} else {
+				++$without_phone;
+			}
+		}
+
+		// Should have 3 customers with phone (customer1, customer2, guest1).
+		$this->assertGreaterThanOrEqual( 3, $with_phone, 'Should have at least 3 customers with phone numbers' );
+
+		// Should have 2 customers without phone (customer3, guest2).
+		$this->assertGreaterThanOrEqual( 2, $without_phone, 'Should have at least 2 customers without phone numbers' );
 	}
 }

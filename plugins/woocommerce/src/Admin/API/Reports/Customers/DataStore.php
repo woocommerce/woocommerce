@@ -79,6 +79,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'first_name'       => 'first_name',
 			'last_name'        => 'last_name',
 			'email'            => 'email',
+			'phone'            => 'phone',
 			'country'          => 'country',
 			'city'             => 'city',
 			'state'            => 'state',
@@ -643,6 +644,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'first_name'       => $order->get_customer_first_name(),
 			'last_name'        => $order->get_customer_last_name(),
 			'email'            => $order->get_billing_email( 'edit' ),
+			'phone'            => $order->get_billing_phone( 'edit' ),
 			'city'             => $order->get_billing_city( 'edit' ),
 			'state'            => $order->get_billing_state( 'edit' ),
 			'postcode'         => $order->get_billing_postcode( 'edit' ),
@@ -650,6 +652,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'date_last_active' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 		);
 		$format = array(
+			'%s',
 			'%s',
 			'%s',
 			'%s',
@@ -860,6 +863,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'first_name'       => $first_name,
 			'last_name'        => $last_name,
 			'email'            => $customer->get_email( 'edit' ),
+			'phone'            => $customer->get_billing_phone( 'edit' ),
 			'city'             => $customer->get_billing_city( 'edit' ),
 			'state'            => $customer->get_billing_state( 'edit' ),
 			'postcode'         => $customer->get_billing_postcode( 'edit' ),
@@ -869,6 +873,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 		$format      = array(
 			'%d',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
