@@ -29,8 +29,7 @@
 
 	.wc-blocks-components-select__select {
 		@include reset-typography();
-		font-size: 16px;
-		line-height: 22px;
+		@include font-regular-locked();
 		border-radius: $universal-border-radius;
 		width: 100%;
 		appearance: none;
