@@ -218,7 +218,7 @@ class Integration {
 
 		$post_manager = WCTransactionalEmailPostsManager::get_instance();
 
-		$email_type = $post_manager->get_email_type_from_post_id( $post_id );
+		$email_type = $post_manager->get_email_type_from_post_id( $post_id, true );
 
 		if ( empty( $email_type ) ) {
 			return;
@@ -319,10 +319,10 @@ class Integration {
 	 * @return array The updated personalizer context.
 	 */
 	public function update_send_preview_email_personalizer_context( $context ) {
-		$post_manager             = WCTransactionalEmailPostsManager::get_instance();
-		$email_type_template_name = $post_manager->get_email_type_from_post_id( get_the_ID() );
-		$email_type               = $email_type_template_name ? $post_manager->get_email_type_class_name_from_template_name( $email_type_template_name ) : EmailPreview::DEFAULT_EMAIL_TYPE;
-		$email_preview            = wc_get_container()->get( EmailPreview::class );
+		$post_manager  = WCTransactionalEmailPostsManager::get_instance();
+		$email_id      = $post_manager->get_email_type_from_post_id( get_the_ID() );
+		$email_type    = $email_id ? $post_manager->get_email_type_class_name_from_email_id( $email_id ) : EmailPreview::DEFAULT_EMAIL_TYPE;
+		$email_preview = wc_get_container()->get( EmailPreview::class );
 
 		try {
 			$email_preview->set_email_type( $email_type );

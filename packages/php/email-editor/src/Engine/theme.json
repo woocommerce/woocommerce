@@ -200,14 +200,19 @@
         },
         {
           "name": "large",
-          "size": "28px",
+          "size": "24px",
           "slug": "large"
         },
         {
           "name": "extra-large",
-          "size": "42px",
+          "size": "32px",
           "slug": "x-large"
-        }
+        },
+		{
+			"name": "extra-extra-large",
+			"size": "40px",
+			"slug": "xx-large"
+		}
       ]
     },
     "useRootPaddingAwareAlignments": true
@@ -242,24 +247,22 @@
           "fontFamily": "Arial, 'Helvetica Neue', Helvetica, sans-serif",
           "fontWeight": "400",
           "fontStyle": "normal",
-          "lineHeight": "1.5"
+          "lineHeight": "1.2"
         }
       },
-      "h1": {
+	  "h1": {
         "typography": {
-          "fontSize": "42px",
-          "fontWeight": "700",
-          "fontStyle": "normal"
+          "fontSize": "40px"
         }
       },
       "h2": {
         "typography": {
-          "fontSize": "42px"
+          "fontSize": "32px"
         }
       },
       "h3": {
         "typography": {
-          "fontSize": "28px"
+          "fontSize": "24px"
         }
       },
       "h4": {
@@ -269,28 +272,14 @@
       },
       "h5": {
         "typography": {
-          "fontSize": "13px"
+          "fontSize": "14px"
         }
       },
       "h6": {
         "typography": {
-          "fontSize": "13px"
+          "fontSize": "12px"
         }
-      },
-		"button": {
-			"color": {
-				"background": "#32373c",
-				"text": "#ffffff"
-			},
-			"spacing": {
-				"padding": {
-					"bottom": "0.7em",
-					"left": "1.4em",
-					"right": "1.4em",
-					"top": "0.7em"
-				}
-			}
-		}
+      }
     }
   }
 }
