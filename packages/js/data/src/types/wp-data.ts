@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // Type for the basic selectors built into @wordpress/data, note these
 // types define the interface for the public selectors, so state is not an
 // argument.
@@ -34,3 +36,59 @@ export type WPError< ErrorKey extends string = string, ErrorData = unknown > = {
 	error_data?: Record< ErrorKey, ErrorData >;
 	additional_data?: Record< ErrorKey, ErrorData[] >;
 };
+
+/**
+ * Obtain the type finally returned by the generator when it's done iterating.
+ */
+type GeneratorReturnType< T extends ( ...args: any[] ) => Generator > =
+	T extends ( ...args: any ) => Generator< any, infer R, any > ? R : never;
+
+/**
+ * Maps a "raw" actionCreators object to the actions available when registered on the @wordpress/data store.
+ *
+ * @template A Selector map, usually from `import * as actions from './my-store/actions';`
+ */
+export type DispatchFromMap<
+	A extends Record< string, ( ...args: any[] ) => any >
+> = {
+	[ actionCreator in keyof A ]: (
+		...args: Parameters< A[ actionCreator ] >
+	) => A[ actionCreator ] extends ( ...args: any[] ) => Generator
+		? Promise< GeneratorReturnType< A[ actionCreator ] > >
+		: Promise< void >;
+};
+
+/**
+ * Maps a "raw" selector object to the selectors available when registered on the @wordpress/data store.
+ *
+ * @template S Selector map, usually from `import * as selectors from './my-store/selectors';`
+ */
+type FunctionKeys< T extends object > = {
+	[ K in keyof T ]: T[ K ] extends ( ...args: any[] ) => any ? K : never;
+}[ keyof T ];
+
+// See https://github.com/microsoft/TypeScript/issues/46855#issuecomment-974484444
+type Cast< T, U > = T extends U ? T : T & U;
+type CastToFunction< T > = Cast< T, ( ...args: any[] ) => any >;
+
+/**
+ * Parameters type of a function, excluding the first parameter.
+ *
+ * This is useful for typing some @wordpress/data functions that make a leading
+ * `state` argument implicit.
+ */
+// eslint-disable-next-line @typescript-eslint/ban-types
+type TailParameters< F extends Function > = F extends (
+	head: any,
+	...tail: infer T
+) => any
+	? T
+	: never;
+
+export type SelectFromMap< S extends object > = {
+	[ selector in FunctionKeys< S > ]: (
+		...args: TailParameters< CastToFunction< S[ selector ] > >
+	) => ReturnType< CastToFunction< S[ selector ] > >;
+};
+
+/* eslint-enable @typescript-eslint/no-explicit-any */

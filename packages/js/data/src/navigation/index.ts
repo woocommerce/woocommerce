@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { controls } from '@wordpress/data-controls';
-import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
 import { createReduxStore, register } from '@wordpress/data';
 import deprecated from '@wordpress/deprecated';
 
@@ -15,7 +14,12 @@ import * as actions from './actions';
 import reducer, { State } from './reducer';
 import * as resolvers from './resolvers';
 import initDispatchers, { INTERNAL_CALL } from './dispatchers';
-import { WPDataActions, WPDataSelectors } from '../types';
+import {
+	DispatchFromMap,
+	SelectFromMap,
+	WPDataActions,
+	WPDataSelectors,
+} from '../types';
 import { PromiseifySelectors } from '../types/promiseify-selectors';
 
 export { type State };
