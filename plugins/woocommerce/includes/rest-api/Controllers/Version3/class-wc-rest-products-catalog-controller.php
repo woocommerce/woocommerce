@@ -313,7 +313,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				);
 			}
 
-			$args = array( 'fields' => $fields );
+			$args = array( '_fields' => implode( ',', $fields ) );
 
 			$status = $force_generate
 				? $generator->force_regeneration( $args )
