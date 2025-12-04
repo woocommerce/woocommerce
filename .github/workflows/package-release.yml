@@ -11,8 +11,9 @@ on:
         type: boolean
         required: false
 
-permissions: {   
-  id-token: write  # Required for OIDC
+permissions: {
+  # id-token: write  # Required for OIDC
+  contents: read
 }
 
 jobs:
@@ -37,4 +38,18 @@ jobs:
       - name: Execute script
         run: |
           npm install -g npm@latest # Need NPM 11.5.1+ for OIDC support. pnpm publish passes through to npm.
-          ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install
+          npm -v
+
+      - name: Get OIDC token (diagnostic)
+        id: oidc-token
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const token = await core.getIDToken("npmjs.com");
+            core.info("OIDC token acquired (redacted). Length: " + token.length)
+            core.setOutput("hasToken", !!token);
+
+      - name: Show OIDC info in summary
+        run: |
+          echo "OIDC token acquired: ${{ steps.oidc-token.outputs.hasToken }}" >> $GITHUB_STEP_SUMMARY
+          # ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install
