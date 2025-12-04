@@ -10,7 +10,6 @@ import { getAdminLink } from '@woocommerce/settings';
  */
 import { isWooExpress } from '~/utils/is-woo-express';
 import { getAdminSetting } from '~/utils/admin-settings';
-import { isFeatureEnabled } from '~/utils/features';
 import { DEFAULT_LOGO_WIDTH } from './assembler-hub/sidebar/constants';
 
 export function isIframe( windowObject ) {
@@ -202,12 +201,9 @@ export const createAugmentedSteps = ( steps, numOfDupes ) => {
 export const redirectToThemes = () => {
 	if ( isWooExpress() ) {
 		window.location.href = getAdminLink( 'themes.php' );
-	} else if ( isFeatureEnabled( 'marketplace' ) ) {
+	} else {
 		window.location.href = getAdminLink(
 			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
 		);
-	} else {
-		window.location.href =
-			'https://woocommerce.com/product-category/themes/';
 	}
 };

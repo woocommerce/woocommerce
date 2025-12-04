@@ -13,7 +13,6 @@ import { getAdminLink } from '@woocommerce/settings';
 import { TaxChildProps } from '../utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 import './partners.scss';
-import { isFeatureEnabled } from '~/utils/features';
 
 export const Partners = ( {
 	children,
@@ -75,23 +74,17 @@ export const Partners = ( {
 					className:
 						'woocommerce-task-dashboard__container woocommerce-task-marketplace-link',
 				} }
-				message={ __(
-					// translators: {{Link}} is a placeholder for a html element.
-					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
-					'woocommerce'
-				) }
-				eventName="tasklist_tax_visit_marketplace_click"
-				targetUrl={
-					isFeatureEnabled( 'marketplace' )
-						? getAdminLink(
-								'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
-						  )
-						: 'https://woocommerce.com/product-category/woocommerce-extensions/operations/'
-				}
-				linkType={
-					isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
-				}
-			/>
+			message={ __(
+				// translators: {{Link}} is a placeholder for a html element.
+				'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
+				'woocommerce'
+			) }
+			eventName="tasklist_tax_visit_marketplace_click"
+			targetUrl={ getAdminLink(
+				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+			) }
+			linkType="wc-admin"
+		/>
 		</>
 	);
 };
