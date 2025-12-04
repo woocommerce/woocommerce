@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Fragment, useEffect, useRef } from '@wordpress/element';
+import { Fragment, useEffect, useRef, useState } from '@wordpress/element';
 import { compose } from '@wordpress/compose';
 import { withDispatch } from '@wordpress/data';
 import { SectionHeader, ScrollTo } from '@woocommerce/components';
@@ -14,9 +14,10 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './index.scss';
-import { config } from './config';
+import { config, IMMEDIATE_IMPORT_SETTING_NAME } from './config';
 import Setting from './setting';
 import HistoricalData from './historical-data';
+import { ImportModeConfirmationModal } from './import-mode-confirmation-modal';
 
 const Settings = ( { createNotice, query } ) => {
 	const {
@@ -29,6 +30,10 @@ const Settings = ( { createNotice, query } ) => {
 		wcAdminSettings,
 	} = useSettings( 'wc_admin', [ 'wcAdminSettings' ] );
 	const hasSaved = useRef( false );
+	const [ isImportModeModalOpen, setIsImportModeModalOpen ] =
+		useState( false );
+	const [ pendingImportModeChange, setPendingImportModeChange ] =
+		useState( null );
 
 	useEffect( () => {
 		function warnIfUnsavedChanges( event ) {
@@ -110,7 +115,25 @@ const Settings = ( { createNotice, query } ) => {
 	};
 
 	const handleInputChange = ( e ) => {
+		if ( isImportModeModalOpen ) {
+			return;
+		}
+
 		const { checked, name, type, value } = e.target;
+
+		// Intercept import mode change from scheduled to immediate
+		if (
+			name === IMMEDIATE_IMPORT_SETTING_NAME &&
+			config[ IMMEDIATE_IMPORT_SETTING_NAME ] &&
+			wcAdminSettings[ name ] === 'no' &&
+			value === 'yes'
+		) {
+			setPendingImportModeChange( { name, value } );
+			setIsImportModeModalOpen( true );
+
+			return;
+		}
+
 		const nextSettings = { ...wcAdminSettings };
 
 		if ( type === 'checkbox' ) {
@@ -125,6 +148,22 @@ const Settings = ( { createNotice, query } ) => {
 			nextSettings[ name ] = value;
 		}
 		updateSettings( 'wcAdminSettings', nextSettings );
+	};
+
+	const handleImportModeConfirm = () => {
+		if ( pendingImportModeChange ) {
+			const nextSettings = { ...wcAdminSettings };
+			nextSettings[ pendingImportModeChange.name ] =
+				pendingImportModeChange.value;
+			updateSettings( 'wcAdminSettings', nextSettings );
+		}
+		setIsImportModeModalOpen( false );
+		setPendingImportModeChange( null );
+	};
+
+	const handleImportModeCancel = () => {
+		setIsImportModeModalOpen( false );
+		setPendingImportModeChange( null );
 	};
 
 	return (
@@ -143,11 +182,11 @@ const Settings = ( { createNotice, query } ) => {
 					/>
 				) ) }
 				<div className="woocommerce-settings__actions">
-					<Button isSecondary onClick={ resetDefaults }>
+					<Button variant="secondary" onClick={ resetDefaults }>
 						{ __( 'Reset defaults', 'woocommerce' ) }
 					</Button>
 					<Button
-						isPrimary
+						variant="primary"
 						isBusy={ isRequesting }
 						onClick={ saveChanges }
 					>
@@ -161,6 +200,13 @@ const Settings = ( { createNotice, query } ) => {
 				</ScrollTo>
 			) : (
 				<HistoricalData createNotice={ createNotice } />
+			) }
+			{ config[ IMMEDIATE_IMPORT_SETTING_NAME ] && (
+				<ImportModeConfirmationModal
+					isOpen={ isImportModeModalOpen }
+					onClose={ handleImportModeCancel }
+					onConfirm={ handleImportModeConfirm }
+				/>
 			) }
 		</Fragment>
 	);

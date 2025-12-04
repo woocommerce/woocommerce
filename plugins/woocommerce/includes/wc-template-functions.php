@@ -2840,10 +2840,18 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		$thumbnail_id         = get_term_meta( $category->term_id, 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
-			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
-			$image        = $image[0];
-			$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
-			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+			$image_data = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
+
+			// Category image guard - fallback to placeholder.
+			if ( is_array( $image_data ) && isset( $image_data[0] ) ) {
+				$image        = $image_data[0];
+				$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
+				$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+			} else {
+				$image        = wc_placeholder_img_src();
+				$image_srcset = false;
+				$image_sizes  = false;
+			}
 		} else {
 			$image        = wc_placeholder_img_src();
 			$image_srcset = false;
