@@ -13,6 +13,7 @@ import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-log
 import { myAccount } from '../requests/shopper/my-account.js';
 import { myAccountOrders } from '../requests/shopper/my-account-orders.js';
 import { categoryPage } from '../requests/shopper/category-page.js';
+import { wpLogin } from '../requests/merchant/wp-login.js';
 import { products } from '../requests/merchant/products.js';
 import { addProduct } from '../requests/merchant/add-product.js';
 import { coupons } from '../requests/merchant/coupons.js';
@@ -20,11 +21,9 @@ import { orders } from '../requests/merchant/orders.js';
 import { ordersSearch } from '../requests/merchant/orders-search.js';
 import { ordersFilter } from '../requests/merchant/orders-filter.js';
 import { addOrder } from '../requests/merchant/add-order.js';
-import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
-import { wpLogin } from '../requests/merchant/wp-login.js';
-import { myAccountMerchantLogin } from '../requests/merchant/my-account-merchant.js';
 import { ordersAPI } from '../requests/api/orders.js';
-import { admin_acc_login } from '../config.js';
+import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
+import { setCartCheckoutShortcodes } from '../setup/cart-checkout-shortcode.js';
 import { addCustomerOrder } from '../setup/add-customer-order.js';
 
 const shopper_request_threshold = 'p(95)<10000';
@@ -36,53 +35,53 @@ export const options = {
 		shopperBrowseSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 1,
-			maxDuration: '50s',
+			iterations: 3,
+			maxDuration: '180s',
 			exec: 'shopperBrowseFlow',
-		},
-		checkoutGuestSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 1,
-			maxDuration: '50s',
-			startTime: '16s',
-			exec: 'checkoutGuestFlow',
-		},
-		checkoutCustomerLoginSmoke: {
-			executor: 'per-vu-iterations',
-			vus: 1,
-			iterations: 1,
-			maxDuration: '50s',
-			startTime: '32s',
-			exec: 'checkoutCustomerLoginFlow',
 		},
 		myAccountSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 1,
-			maxDuration: '50s',
-			startTime: '48s',
+			iterations: 3,
+			maxDuration: '60s',
+			startTime: '20s',
 			exec: 'myAccountFlow',
 		},
 		cartSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 1,
-			maxDuration: '50s',
-			startTime: '58s',
+			iterations: 3,
+			maxDuration: '60s',
+			startTime: '25s',
 			exec: 'cartFlow',
+		},
+		checkoutGuestSmoke: {
+			executor: 'per-vu-iterations',
+			vus: 1,
+			iterations: 3,
+			maxDuration: '120s',
+			startTime: '30s',
+			exec: 'checkoutGuestFlow',
+		},
+		checkoutCustomerLoginSmoke: {
+			executor: 'per-vu-iterations',
+			vus: 1,
+			iterations: 3,
+			maxDuration: '120s',
+			startTime: '40s',
+			exec: 'checkoutCustomerLoginFlow',
 		},
 		allMerchantSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 2,
+			iterations: 3,
 			maxDuration: '360s',
 			exec: 'allMerchantFlow',
 		},
 		allAPISmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 1,
+			iterations: 3,
 			maxDuration: '120s',
 			exec: 'allAPIFlow',
 		},
@@ -253,6 +252,7 @@ export const options = {
 };
 
 export function setup() {
+	setCartCheckoutShortcodes();
 	addCustomerOrder();
 }
 
@@ -279,14 +279,14 @@ export function cartFlow() {
 	cartRemoveItem();
 	cartApplyCoupon();
 }
-
 export function allMerchantFlow() {
-	if ( admin_acc_login === true ) {
-		myAccountMerchantLogin();
-	} else {
-		wpLogin();
-	}
-	homeWCAdmin();
+	wpLogin();
+	homeWCAdmin( {
+		other: false,
+		orders: false,
+		reviews: false,
+		products: false,
+	} );
 	addOrder();
 	orders();
 	ordersSearch();
