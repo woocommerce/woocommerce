@@ -564,7 +564,7 @@ class Controller extends GenericController implements ExportableInterface {
 			'validate_callback' => 'rest_validate_request_arg',
 			'enum'              => array(
 				'all',
-				'customer',
+				'registered',
 				'guest',
 			),
 		);

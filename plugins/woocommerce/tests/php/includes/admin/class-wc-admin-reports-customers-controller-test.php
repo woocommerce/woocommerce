@@ -172,14 +172,14 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
-	 * Test user_type parameter with 'customer' value.
+	 * Test user_type parameter with 'registered' value.
 	 */
-	public function test_user_type_customer() {
-		// Test with user_type='customer'.
+	public function test_user_type_registered() {
+		// Test with user_type='registered'.
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'user_type' => 'customer',
+				'user_type' => 'registered',
 			)
 		);
 
@@ -196,7 +196,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 
 		// Verify all returned customers have a user_id.
 		foreach ( $reports as $report ) {
-			$this->assertNotNull( $report['user_id'], 'All customers should have a user_id when user_type=customer' );
+			$this->assertNotNull( $report['user_id'], 'All customers should have a user_id when user_type=registered' );
 		}
 	}
 
@@ -256,7 +256,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
-				'user_type' => 'customer',
+				'user_type' => 'registered',
 				'search'    => 'John',
 			)
 		);
