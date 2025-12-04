@@ -382,13 +382,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		/**
-		 * Filters the interval for the recurring batch processor.
-		 *
-		 * @since 10.4.0
-		 * @param int $interval Interval in seconds. Default 12 hours.
-		 */
-		$interval = apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
+		$interval = self::get_import_interval();
 
 		as_schedule_recurring_action( time(), $interval, $action_hook, array(), static::$group, true );
 	}
@@ -559,6 +553,22 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				array( $cursor_date, $cursor_id )
 			);
 		}
+	}
+
+	/**
+	 * Get the import interval.
+	 *
+	 * @internal
+	 * @return int The import interval in seconds.
+	 */
+	public static function get_import_interval() {
+		/**
+		 * Filter the analytics import interval.
+		 *
+		 * @since 10.4.0
+		 * @param int $interval The import interval in seconds. Default is 12 hours.
+		 */
+		return apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
 	}
 
 	/**
