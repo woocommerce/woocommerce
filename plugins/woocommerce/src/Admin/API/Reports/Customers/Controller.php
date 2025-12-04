@@ -235,6 +235,12 @@ class Controller extends GenericController implements ExportableInterface {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'location'             => array(
+					'description' => __( 'Location (state, country).', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 				'country'              => array(
 					'description' => __( 'Country / Region.', 'woocommerce' ),
 					'type'        => 'string',
@@ -333,6 +339,7 @@ class Controller extends GenericController implements ExportableInterface {
 				'first_name',
 				'last_name',
 				'email',
+				'location',
 				'country',
 				'city',
 				'state',

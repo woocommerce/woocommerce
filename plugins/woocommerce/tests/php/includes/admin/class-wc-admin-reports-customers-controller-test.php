@@ -70,34 +70,44 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$customer1 = WC_Helper_Customer::create_customer( 'customer1', 'password', 'customer1@example.com' );
 		$customer1->set_first_name( 'John' );
 		$customer1->set_last_name( 'Doe' );
+		$customer1->set_billing_state( 'CA' );
+		$customer1->set_billing_country( 'US' );
 		$customer1->save();
 		$this->registered_customers[] = $customer1;
 
 		$customer2 = WC_Helper_Customer::create_customer( 'customer2', 'password', 'customer2@example.com' );
 		$customer2->set_first_name( 'Jane' );
 		$customer2->set_last_name( 'Smith' );
+		$customer2->set_billing_state( 'NY' );
+		$customer2->set_billing_country( 'US' );
 		$customer2->save();
 		$this->registered_customers[] = $customer2;
 
 		$customer3 = WC_Helper_Customer::create_customer( 'customer3', 'password', 'customer3@example.com' );
 		$customer3->set_first_name( 'Bob' );
 		$customer3->set_last_name( 'Johnson' );
+		$customer3->set_billing_state( 'CA' );
+		$customer3->set_billing_country( 'US' );
 		$customer3->save();
 		$this->registered_customers[] = $customer3;
 
-		// Create orders for registered customers.
+		// Create orders for registered customers with location data.
 		foreach ( $this->registered_customers as $index => $customer ) {
 			$order = WC_Helper_Order::create_order( $customer->get_id(), $this->product );
 			$order->set_status( OrderStatus::COMPLETED );
 			$order->set_total( 100 + ( $index * 50 ) );
+			$order->set_billing_state( $customer->get_billing_state() );
+			$order->set_billing_country( $customer->get_billing_country() );
 			$order->save();
 		}
 
-		// Create guest orders (no user_id).
+		// Create guest orders (no user_id) with different locations.
 		$guest_order1 = WC_Helper_Order::create_order( 0, $this->product );
 		$guest_order1->set_billing_email( 'guest1@example.com' );
 		$guest_order1->set_billing_first_name( 'Guest' );
 		$guest_order1->set_billing_last_name( 'Customer' );
+		$guest_order1->set_billing_state( 'TX' );
+		$guest_order1->set_billing_country( 'US' );
 		$guest_order1->set_status( OrderStatus::COMPLETED );
 		$guest_order1->set_total( 50 );
 		$guest_order1->save();
@@ -107,6 +117,8 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		$guest_order2->set_billing_email( 'guest2@example.com' );
 		$guest_order2->set_billing_first_name( 'Guest' );
 		$guest_order2->set_billing_last_name( 'User' );
+		$guest_order2->set_billing_state( 'ON' );
+		$guest_order2->set_billing_country( 'CA' );
 		$guest_order2->set_status( OrderStatus::COMPLETED );
 		$guest_order2->set_total( 75 );
 		$guest_order2->save();
@@ -269,5 +281,109 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 			}
 		}
 		$this->assertTrue( $found_john, 'Search should return customer named John' );
+	}
+
+	/**
+	 * Test location ordering parameter (sorts by state, then country).
+	 */
+	public function test_orderby_location() {
+		// Test with orderby='location' ascending.
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'orderby' => 'location',
+				'order'   => 'asc',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		// Should have at least 5 customers (3 registered + 2 guest).
+		$this->assertGreaterThanOrEqual( 5, count( $reports ) );
+
+		// Verify ordering: should sort by state first, then country.
+		// Expected order (ascending by state, then country):
+		// - CA, US (customer1)
+		// - CA, US (customer3)
+		// - NY, US (customer2)
+		// - ON, CA (guest2)
+		// - TX, US (guest1)
+		$previous_state   = '';
+		$previous_country = '';
+		foreach ( $reports as $report ) {
+			$current_state   = $report['state'] ?? '';
+			$current_country = $report['country'] ?? '';
+
+			// If we have a previous entry, verify ordering.
+			if ( '' !== $previous_state ) {
+				// State should be >= previous state (ascending).
+				// If states are equal, country should be >= previous country.
+				$state_comparison = strcmp( $current_state, $previous_state );
+				if ( 0 === $state_comparison ) {
+					// States are equal, so country should be >= (ascending).
+					$this->assertGreaterThanOrEqual(
+						0,
+						strcmp( $current_country, $previous_country ),
+						"When states are equal ({$current_state}), countries should be in ascending order. Previous: {$previous_country}, Current: {$current_country}"
+					);
+				} else {
+					// States are different, current should be >= previous (ascending).
+					$this->assertGreaterThanOrEqual(
+						0,
+						$state_comparison,
+						"States should be in ascending order. Previous: {$previous_state}, Current: {$current_state}"
+					);
+				}
+			}
+
+			$previous_state   = $current_state;
+			$previous_country = $current_country;
+		}
+
+		// Test with orderby='location' descending.
+		$request->set_query_params(
+			array(
+				'orderby' => 'location',
+				'order'   => 'desc',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertGreaterThanOrEqual( 5, count( $reports ) );
+
+		// Verify descending ordering.
+		$previous_state   = '';
+		$previous_country = '';
+		foreach ( $reports as $report ) {
+			$current_state   = $report['state'] ?? '';
+			$current_country = $report['country'] ?? '';
+
+			if ( '' !== $previous_state ) {
+				$state_comparison = strcmp( $current_state, $previous_state );
+				if ( 0 === $state_comparison ) {
+					// States are equal, so country should be <= (descending).
+					$this->assertLessThanOrEqual(
+						0,
+						strcmp( $current_country, $previous_country ),
+						"When states are equal ({$current_state}), countries should be in descending order. Previous: {$previous_country}, Current: {$current_country}"
+					);
+				} else {
+					// States are different, current should be <= previous (descending).
+					$this->assertLessThanOrEqual(
+						0,
+						$state_comparison,
+						"States should be in descending order. Previous: {$previous_state}, Current: {$current_state}"
+					);
+				}
+			}
+
+			$previous_state   = $current_state;
+			$previous_country = $current_country;
+		}
 	}
 }

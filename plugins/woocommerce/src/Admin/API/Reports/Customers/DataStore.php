@@ -179,19 +179,45 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 * Fills ORDER BY clause of SQL request based on user supplied parameters. Overridden here to allow multiple direction
+	 * clauses.
 	 *
-	 * @override ReportsDataStore::normalize_order_by()
-	 *
-	 * @param string $order_by Sorting criterion.
-	 * @return string
+	 * @param array $query_args Parameters supplied by the user.
 	 */
-	protected function normalize_order_by( $order_by ) {
-		if ( 'name' === $order_by ) {
-			return "CONCAT_WS( ' ', first_name, last_name )";
+	protected function add_order_by_sql_params( $query_args ) {
+		if ( isset( $query_args['orderby'] ) || isset( $query_args['order'] ) ) {
+			$order_by_clause = $this->normalize_order_by_clause( $query_args['orderby'] ?? 'date_registered', $query_args['order'] ?? 'desc' );
+		} else {
+			$order_by_clause = '';
 		}
 
-		return $order_by;
+		$this->clear_sql_clause( 'order_by' );
+		$this->add_sql_clause( 'order_by', $order_by_clause );
+	}
+
+	/**
+	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 *
+	 * Handles both order_by and direction.
+	 *
+	 * @param string $order_by Sorting criterion.
+	 * @param string $order Order direction.
+	 * @return string
+	 */
+	protected function normalize_order_by_clause( $order_by, $order = 'desc' ) {
+		$order_by        = esc_sql( $order_by );
+		$order           = esc_sql( $order );
+		$order_by_clause = '';
+
+		if ( 'name' === $order_by ) {
+			$order_by_clause = "CONCAT_WS( ' ', first_name, last_name ) {$order}";
+		} elseif ( 'location' === $order_by ) {
+			$order_by_clause = "state {$order}, country {$order}";
+		} else {
+			$order_by_clause = "{$order_by} {$order}";
+		}
+
+		return $order_by_clause;
 	}
 
 	/**
