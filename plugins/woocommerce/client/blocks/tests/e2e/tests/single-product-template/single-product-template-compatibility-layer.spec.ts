@@ -190,7 +190,7 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the Add to Cart + Options block',
+				name: 'Use the Add to Cart + Options block',
 			} )
 			.click();
 

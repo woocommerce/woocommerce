@@ -61,6 +61,10 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 
 			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->description = __( 'Notifies admins when a new order has been placed.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -259,6 +263,9 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 

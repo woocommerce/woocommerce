@@ -443,4 +443,38 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			'The Product Price block should be interactive when some variations have different prices.'
 		);
 	}
+
+	/**
+	 * Tests that the quantity selector and its steppers are hidden when
+	 * a filter sets min and max quantity to the same value for a product.
+	 */
+	public function test_quantity_selector_hidden_when_min_equals_max() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$product_id = $simple_product->save();
+
+		// Force min and max quantity to be the same via filter for this product only.
+		$filter = function ( $args, $product ) use ( $product_id ) {
+			if ( $product instanceof \WC_Product && $product->get_id() === $product_id ) {
+				$args['min_value'] = 3;
+				$args['max_value'] = 3;
+			}
+			return $args;
+		};
+
+		add_filter( 'woocommerce_quantity_input_args', $filter, 10, 2 );
+
+		try {
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+			// Quantity selector block should not render at all.
+			$this->assertStringContainsString( 'wc-block-add-to-cart-with-options__quantity-selector--hidden', $markup, 'The Quantity Selector block is hidden when min equals max.' );
+
+			// Plus and minus stepper buttons should not be present.
+			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper is not rendered when min equals max.' );
+			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper is not rendered when min equals max.' );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_args', $filter, 10 );
+		}
+	}
 }

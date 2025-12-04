@@ -12,6 +12,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\ShippingZoneService;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -43,6 +44,13 @@ class Controller extends AbstractController {
 	protected $item_schema;
 
 	/**
+	 * Shipping service instance.
+	 *
+	 * @var ShippingZoneSchemaService
+	 */
+	protected $shipping_zone_service;
+
+	/**
 	 * Custom error constant for shipping-specific errors.
 	 */
 	const INVALID_ZONE_ID = 'invalid_zone_id';
@@ -50,11 +58,13 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param ShippingZoneSchema $zone_schema Order schema class.
+	 * @param ShippingZoneSchema  $zone_schema           Order schema class.
+	 * @param ShippingZoneService $shipping_zone_service Service for shipping zone operations.
 	 * @internal
 	 */
-	final public function init( ShippingZoneSchema $zone_schema ) {
-		$this->item_schema = $zone_schema;
+	final public function init( ShippingZoneSchema $zone_schema, ShippingZoneService $shipping_zone_service ) {
+		$this->item_schema           = $zone_schema;
+		$this->shipping_zone_service = $shipping_zone_service;
 	}
 
 	/**
@@ -110,6 +120,12 @@ class Controller extends AbstractController {
 					'permission_callback' => array( $this, 'check_permissions' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::DELETABLE ),
+				),
 			)
 		);
 	}
@@ -143,25 +159,11 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		// Get all zones including "Rest of the World".
-		$zones             = WC_Shipping_Zones::get_zones();
-		$rest_of_the_world = WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
-
-		// Add "Rest of the World" zone at the end.
-		$zones[0] = $rest_of_the_world->get_data();
-
-		// Sort zones by order.
-		uasort(
-			$zones,
-			function ( $a, $b ) {
-				return $a['zone_order'] <=> $b['zone_order'];
-			}
-		);
+		$zones = $this->shipping_zone_service->get_sorted_shipping_zones();
 
 		$items = array();
 		foreach ( $zones as $zone_data ) {
-			// Handle both 'zone_id' (from get_zones()) and 'id' (from get_data()) keys.
-			$zone_id = isset( $zone_data['zone_id'] ) ? $zone_data['zone_id'] : $zone_data['id'];
+			$zone_id = $zone_data['zone_id'];
 			$zone    = WC_Shipping_Zones::get_zone( $zone_id );
 			$items[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $zone, $request ) );
 		}
@@ -197,10 +199,15 @@ class Controller extends AbstractController {
 
 		$method = $request->get_method();
 
-		// GET requests require 'read' permission, all others require 'edit'.
-		$permission_type = ( WP_REST_Server::READABLE === $method ) ? 'read' : 'edit';
+		if ( 'GET' === $method ) {
+			$context = 'read';
+		} elseif ( 'DELETE' === $method ) {
+			$context = 'delete';
+		} else {
+			$context = 'edit';
+		}
 
-		if ( ! wc_rest_check_manager_permissions( 'settings', $permission_type ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', $context ) ) {
 			return $this->get_authentication_error_by_method( $method );
 		}
 
@@ -214,14 +221,11 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
 	 */
 	public function create_item( $request ) {
-		$zone = new WC_Shipping_Zone( null );
-
-		$result = $zone->update_from_api_request( $request->get_params() );
-		if ( is_wp_error( $result ) ) {
-			return $result;
+		$zone = $this->shipping_zone_service->create_shipping_zone( $request->get_params() );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
 		}
 
-		// Verify zone was created successfully.
 		if ( 0 === $zone->get_id() ) {
 			return $this->get_route_error_response(
 				$this->get_error_prefix() . 'cannot_create',
@@ -230,10 +234,34 @@ class Controller extends AbstractController {
 			);
 		}
 
-		// Prepare response.
 		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $zone->get_id() ) ) );
+
+		return $response;
+	}
+
+	/**
+	 * Delete a shipping zone by zone id.
+	 *
+	 * Note: In v2/v3, this endpoint required a `force` parameter, but since shipping zones
+	 * do not support trashing, it would either delete (force=true) or return a 501 error (force=false).
+	 * We removed the `force` parameter in v4 as it serves no purpose when soft delete is not supported.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
+	 */
+	public function delete_item( $request ) {
+		$zone_id = (int) $request['id'];
+
+		$zone = $this->validate_zone( $zone_id );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
+
+		WC_Shipping_Zones::delete_zone( $zone_id );
 
 		return $response;
 	}
@@ -288,22 +316,16 @@ class Controller extends AbstractController {
 	public function update_item( $request ) {
 		$zone_id = (int) $request['id'];
 
-		// Validate zone exists.
 		$zone = $this->validate_zone( $zone_id );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
 
-		// Update zone from request.
-		$result = $zone->update_from_api_request( $request->get_params() );
+		$result = $this->shipping_zone_service->update_shipping_zone( $zone, $request->get_params() );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 
-		// Reload zone to get fresh data after save.
-		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
-
-		// Prepare response.
-		return rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
+		return rest_ensure_response( $this->prepare_item_for_response( $result, $request ) );
 	}
 }

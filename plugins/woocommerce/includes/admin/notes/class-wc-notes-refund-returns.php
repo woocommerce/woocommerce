@@ -24,6 +24,7 @@ class WC_Notes_Refund_Returns {
 	 * Attach hooks.
 	 */
 	public static function init() {
+		add_action( 'wc_notes_refund_returns_page_created', array( __CLASS__, 'possibly_add_note' ) );
 		add_filter( 'woocommerce_get_note_from_db', array( __CLASS__, 'get_note_from_db' ), 10, 1 );
 	}
 
@@ -33,6 +34,10 @@ class WC_Notes_Refund_Returns {
 	 * @param int $page_id The ID of the page.
 	 */
 	public static function possibly_add_note( $page_id ) {
+		if ( ! WC()->is_wc_admin_active() ) {
+			return;
+		}
+
 		$data_store = \WC_Data_Store::load( 'admin-note' );
 
 		// Do we already have this note?

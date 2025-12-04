@@ -116,7 +116,7 @@ class WCTransactionalEmailPostsGenerator {
 	 * @return string The email template.
 	 */
 	public function get_email_template( $email ) {
-		$template_name = str_replace( 'plain', 'block', $email->template_plain );
+		$template_name = ! empty( $email->template_block ) ? $email->template_block : str_replace( 'plain', 'block', $email->template_plain );
 
 		try {
 			$template_html = wc_get_template_html(
@@ -126,6 +126,10 @@ class WCTransactionalEmailPostsGenerator {
 				$email->template_base ?? ''
 			);
 		} catch ( \Exception $e ) {
+			// wc_get_template_html() uses ob_start(), so we need to clean the output buffer if an exception is thrown.
+			if ( ob_get_level() > 0 ) {
+				ob_end_clean();
+			}
 			$template_html = '';
 		}
 
@@ -175,7 +179,11 @@ class WCTransactionalEmailPostsGenerator {
 			return false;
 		}
 
-		set_transient( $this->transient_name, Constants::get_constant( 'WC_VERSION' ), MONTH_IN_SECONDS );
+		set_transient( $this->transient_name, Constants::get_constant( 'WC_VERSION' ), WEEK_IN_SECONDS );
+
+		// Flush rewrite rules to ensure the new templates are loaded.
+		flush_rewrite_rules();
+
 		return true;
 	}
 
@@ -248,10 +256,9 @@ class WCTransactionalEmailPostsGenerator {
 	 * @throws \Exception When post creation fails.
 	 */
 	private function generate_single_template( $email_type, $email_data ) {
-		$email_enabled = $email_data->is_enabled() || $email_data->is_manual();
-		$post_data     = array(
+		$post_data = array(
 			'post_type'    => Integration::EMAIL_POST_TYPE,
-			'post_status'  => $email_enabled ? 'publish' : 'draft',
+			'post_status'  => 'publish',
 			'post_name'    => $email_type,
 			'post_title'   => $email_data->get_title(),
 			'post_excerpt' => $email_data->get_description(),

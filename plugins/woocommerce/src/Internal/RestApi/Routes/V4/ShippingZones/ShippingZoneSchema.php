@@ -125,7 +125,7 @@ class ShippingZoneSchema extends AbstractSchema {
 			'id'        => $zone->get_id(),
 			'name'      => $zone->get_zone_name(),
 			'order'     => $zone->get_zone_order(),
-			'locations' => $this->get_formatted_zone_locations( $zone, isset( $request['id'] ) ? 'detailed' : 'summary' ),
+			'locations' => $this->get_formatted_zone_locations( $zone ),
 			'methods'   => $this->get_formatted_zone_methods( $zone ),
 		);
 	}
@@ -134,10 +134,9 @@ class ShippingZoneSchema extends AbstractSchema {
 	 * Get array of location objects for API response.
 	 *
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
-	 * @param string           $view The view for which the API is requested ('summary' or 'detailed').
 	 * @return array Array of location objects with code, type, and name.
 	 */
-	protected function get_formatted_zone_locations( WC_Shipping_Zone $zone, string $view = 'summary' ): array {
+	protected function get_formatted_zone_locations( WC_Shipping_Zone $zone ): array {
 		if ( 0 === $zone->get_id() ) {
 			return array();
 		}

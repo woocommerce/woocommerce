@@ -1187,6 +1187,7 @@ class WC_Helper {
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 
 		return $activated;
 	}
@@ -1310,6 +1311,8 @@ class WC_Helper {
 		}
 
 		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 
 		return $deactivated;
 	}
