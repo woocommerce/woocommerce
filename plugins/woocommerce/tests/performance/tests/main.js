@@ -25,6 +25,7 @@ import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
 import { setCartCheckoutShortcodes } from '../setup/cart-checkout-shortcode.js';
 import { addCustomerOrder } from '../setup/add-customer-order.js';
 
+const defaultIterations = 3;
 const shopper_request_threshold = 'p(95)<10000';
 const merchant_request_threshold = 'p(95)<10000';
 const api_request_threshold = 'p(95)<10000';
@@ -34,14 +35,14 @@ export const options = {
 		shopperBrowseSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 3,
+			iterations: defaultIterations,
 			maxDuration: '180s',
 			exec: 'shopperBrowseFlow',
 		},
 		myAccountSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 3,
+			iterations: defaultIterations,
 			maxDuration: '60s',
 			startTime: '20s',
 			exec: 'myAccountFlow',
@@ -49,7 +50,7 @@ export const options = {
 		cartSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 3,
+			iterations: defaultIterations,
 			maxDuration: '60s',
 			startTime: '25s',
 			exec: 'cartFlow',
@@ -57,7 +58,7 @@ export const options = {
 		checkoutGuestSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 3,
+			iterations: defaultIterations,
 			maxDuration: '120s',
 			startTime: '30s',
 			exec: 'checkoutGuestFlow',
@@ -65,7 +66,7 @@ export const options = {
 		checkoutCustomerLoginSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 3,
+			iterations: defaultIterations,
 			maxDuration: '120s',
 			startTime: '40s',
 			exec: 'checkoutCustomerLoginFlow',
@@ -73,14 +74,14 @@ export const options = {
 		allMerchantSmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 3,
+			iterations: defaultIterations,
 			maxDuration: '360s',
 			exec: 'allMerchantFlow',
 		},
 		allAPISmoke: {
 			executor: 'per-vu-iterations',
 			vus: 1,
-			iterations: 3,
+			iterations: defaultIterations,
 			maxDuration: '120s',
 			exec: 'allAPIFlow',
 		},
