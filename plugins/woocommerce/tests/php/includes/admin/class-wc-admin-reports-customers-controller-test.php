@@ -305,11 +305,11 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 
 		// Verify ordering: should sort by state first, then country.
 		// Expected order (ascending by state, then country):
-		// - CA, US (customer1)
-		// - CA, US (customer3)
-		// - NY, US (customer2)
-		// - ON, CA (guest2)
-		// - TX, US (guest1)
+		// - CA, US (customer1).
+		// - CA, US (customer3).
+		// - NY, US (customer2).
+		// - ON, CA (guest2).
+		// - TX, US (guest1).
 		$previous_state   = '';
 		$previous_country = '';
 		foreach ( $reports as $report ) {
@@ -384,6 +384,259 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 
 			$previous_state   = $current_state;
 			$previous_country = $current_country;
+		}
+	}
+
+	/**
+	 * Test location_includes parameter with country:state format.
+	 */
+	public function test_location_includes_country_state() {
+		// Test with location_includes='US:CA' (should return 2 customers: customer1 and customer3).
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'location_includes' => 'US:CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports, 'Should return 2 customers from US:CA' );
+		foreach ( $reports as $report ) {
+			$this->assertEquals( 'US', $report['country'], 'All customers should be from US' );
+			$this->assertEquals( 'CA', $report['state'], 'All customers should be from CA' );
+		}
+
+		// Test with location_includes='US:NY' (should return 1 customer: customer2).
+		$request->set_query_params(
+			array(
+				'location_includes' => 'US:NY',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer from US:NY' );
+		$this->assertEquals( 'US', $reports[0]['country'] );
+		$this->assertEquals( 'NY', $reports[0]['state'] );
+
+		// Test with location_includes='CA:ON' (should return 1 customer: guest2).
+		$request->set_query_params(
+			array(
+				'location_includes' => 'CA:ON',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer from CA:ON' );
+		$this->assertEquals( 'CA', $reports[0]['country'] );
+		$this->assertEquals( 'ON', $reports[0]['state'] );
+	}
+
+	/**
+	 * Test location_includes parameter with country format.
+	 */
+	public function test_location_includes_country() {
+		// Test with location_includes='US' (should return 4 customers: customer1, customer2, customer3, guest1).
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'location_includes' => 'US',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 4, $reports, 'Should return 4 customers from US' );
+		foreach ( $reports as $report ) {
+			$this->assertEquals( 'US', $report['country'], 'All customers should be from US' );
+		}
+
+		// Test with location_includes='CA' (should return 1 customer: guest2).
+		$request->set_query_params(
+			array(
+				'location_includes' => 'CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer from CA' );
+		$this->assertEquals( 'CA', $reports[0]['country'] );
+	}
+
+	/**
+	 * Test location_includes parameter with mixed formats.
+	 */
+	public function test_location_includes_mixed() {
+		// Test with location_includes='US:CA,US:NY' (should return 3 customers: customer1, customer2, customer3).
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'location_includes' => 'US:CA,US:NY',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 3, $reports, 'Should return 3 customers from US:CA and US:NY' );
+
+		// Test with location_includes='US:CA,CA' (should return 3 customers: customer1, customer3, guest2).
+		$request->set_query_params(
+			array(
+				'location_includes' => 'US:CA,CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 3, $reports, 'Should return 3 customers from US:CA and CA country' );
+	}
+
+	/**
+	 * Test location_excludes parameter with country:state format.
+	 */
+	public function test_location_excludes_country_state() {
+		// Test with location_excludes='US:CA' (should exclude 2 customers, return 3: customer2, guest1, guest2).
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'location_excludes' => 'US:CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 3, $reports, 'Should return 3 customers excluding US:CA' );
+		foreach ( $reports as $report ) {
+			$location = $report['country'] . ':' . $report['state'];
+			$this->assertNotEquals( 'US:CA', $location, 'No customers should be from US:CA' );
+		}
+
+		// Test with location_excludes='US:TX' (should exclude 1 customer, return 4: customer1, customer2, customer3, guest2).
+		$request->set_query_params(
+			array(
+				'location_excludes' => 'US:TX',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 4, $reports, 'Should return 4 customers excluding US:TX' );
+	}
+
+	/**
+	 * Test location_excludes parameter with country format.
+	 */
+	public function test_location_excludes_country() {
+		// Test with location_excludes='US' (should exclude 4 customers, return 1: guest2).
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'location_excludes' => 'US',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer excluding US' );
+		$this->assertEquals( 'CA', $reports[0]['country'], 'Remaining customer should be from CA' );
+
+		// Test with location_excludes='CA' (should exclude 1 customer, return 4: customer1, customer2, customer3, guest1).
+		$request->set_query_params(
+			array(
+				'location_excludes' => 'CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 4, $reports, 'Should return 4 customers excluding CA' );
+		foreach ( $reports as $report ) {
+			$this->assertEquals( 'US', $report['country'], 'All customers should be from US' );
+		}
+	}
+
+	/**
+	 * Test location_excludes parameter with mixed formats.
+	 */
+	public function test_location_excludes_mixed() {
+		// Test with location_excludes='US:CA,US:TX' (should exclude 3 customers, return 2: customer2, guest2).
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'location_excludes' => 'US:CA,US:TX',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports, 'Should return 2 customers excluding US:CA and US:TX' );
+
+		// Test with location_excludes='US:CA,CA' (should exclude 3 customers, return 2: customer2, guest1).
+		$request->set_query_params(
+			array(
+				'location_excludes' => 'US:CA,CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports, 'Should return 2 customers excluding US:CA and CA country' );
+		foreach ( $reports as $report ) {
+			$this->assertEquals( 'US', $report['country'], 'All remaining customers should be from US' );
+			$this->assertNotEquals( 'CA', $report['state'], 'No customers should be from CA state' );
+		}
+	}
+
+	/**
+	 * Test location_includes and location_excludes combined.
+	 */
+	public function test_location_includes_and_excludes() {
+		// Test with location_includes='US' and location_excludes='US:CA' (should return 2: customer2, guest1).
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'location_includes' => 'US',
+				'location_excludes' => 'US:CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports, 'Should return 2 customers from US excluding US:CA' );
+		foreach ( $reports as $report ) {
+			$this->assertEquals( 'US', $report['country'], 'All customers should be from US' );
+			$this->assertNotEquals( 'CA', $report['state'], 'No customers should be from CA state' );
 		}
 	}
 }

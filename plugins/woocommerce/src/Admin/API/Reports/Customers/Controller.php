@@ -73,6 +73,8 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['email_excludes']      = $request['email_excludes'];
 		$args['country_includes']    = $request['country_includes'];
 		$args['country_excludes']    = $request['country_excludes'];
+		$args['state_includes']      = $request['state_includes'];
+		$args['state_excludes']      = $request['state_excludes'];
 		$args['last_active_before']  = $request['last_active_before'];
 		$args['last_active_after']   = $request['last_active_after'];
 		$args['orders_count_min']    = $request['orders_count_min'];
@@ -88,6 +90,8 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 		$args['filter_empty']        = $request['filter_empty'];
 		$args['user_type']           = $request['user_type'];
+		$args['location_includes']   = $request['location_includes'];
+		$args['location_excludes']   = $request['location_excludes'];
 
 		$between_params_numeric    = array( 'orders_count', 'total_spend', 'avg_order_value' );
 		$normalized_params_numeric = TimeInterval::normalize_between_params( $request, $between_params_numeric, false );
@@ -231,12 +235,6 @@ class Controller extends GenericController implements ExportableInterface {
 				),
 				'username'             => array(
 					'description' => __( 'Username.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'location'             => array(
-					'description' => __( 'Location (state, country).', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -569,6 +567,16 @@ class Controller extends GenericController implements ExportableInterface {
 				'customer',
 				'guest',
 			),
+		);
+		$params['location_includes']       = array(
+			'description'       => __( 'Includes customers by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['location_excludes']       = array(
+			'description'       => __( 'Excludes customers by location (state, country). Provide a comma-separated list of locations. Each location can be a country code (e.g. GB) or combination of country and state (e.g. US:CA).', 'woocommerce' ),
+			'type'              => 'string',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 		return $params;
 	}

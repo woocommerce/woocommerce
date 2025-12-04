@@ -393,6 +393,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_clauses[] = "{$customer_lookup_table}.user_id IN ({$included_users})";
 		}
 
+		// Allow a list of locations to be specified (includes).
+		if ( ! empty( $query_args['location_includes'] ) ) {
+			$where_clauses[] = $this->build_location_filter_clause( $query_args['location_includes'], true );
+		}
+
+		// Allow a list of locations to be excluded.
+		if ( ! empty( $query_args['location_excludes'] ) ) {
+			$where_clauses[] = $this->build_location_filter_clause( $query_args['location_excludes'], false );
+		}
+
 		// Filter by user type.
 		if ( ! empty( $query_args['user_type'] ) && 'all' !== $query_args['user_type'] ) {
 			$user_type       = $query_args['user_type'];
@@ -1036,6 +1046,54 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $updated ) {
 			ReportsCache::invalidate();
 		}
+	}
+
+	/**
+	 * Build location filter SQL clause for includes or excludes.
+	 *
+	 * @param string $locations_string Comma-separated list of locations (e.g., "US:CA,US:NY,GB").
+	 * @param bool   $is_include       True for IN clause, false for NOT IN clause.
+	 * @return string SQL WHERE clause condition.
+	 */
+	protected function build_location_filter_clause( $locations_string, $is_include = true ) {
+		$customer_lookup_table = self::get_db_table_name();
+		$locations_array       = explode( ',', $locations_string );
+		$country_states        = array();
+		$countries             = array();
+
+		foreach ( $locations_array as $location ) {
+			$location = trim( $location );
+			if ( empty( $location ) ) {
+				continue;
+			}
+
+			if ( strstr( $location, ':' ) ) {
+				$country_states[] = esc_sql( $location );
+			} else {
+				$countries[] = esc_sql( $location );
+			}
+		}
+
+		$conditions = array();
+
+		if ( ! empty( $country_states ) ) {
+			$operator     = $is_include ? 'IN' : 'NOT IN';
+			$conditions[] = "CONCAT_WS( ':', {$customer_lookup_table}.country, {$customer_lookup_table}.state ) {$operator} ('" . implode( "','", $country_states ) . "')";
+		}
+
+		if ( ! empty( $countries ) ) {
+			$operator     = $is_include ? 'IN' : 'NOT IN';
+			$conditions[] = "{$customer_lookup_table}.country {$operator} ('" . implode( "','", $countries ) . "')";
+		}
+
+		if ( empty( $conditions ) ) {
+			return '';
+		}
+
+		// Combine conditions with OR for includes, AND for excludes.
+		$connector = $is_include ? ' OR ' : ' AND ';
+
+		return '(' . implode( $connector, $conditions ) . ')';
 	}
 
 	/**
