@@ -315,6 +315,164 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox End-to-end test: manual guest order uses billing address tax rate when filter is false.
+	 */
+	public function test_wc_get_price_excluding_tax_manual_order_end_to_end() {
+		// Enable taxes.
+		$wc_tax_enabled = wc_tax_enabled();
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+		}
+
+		// Set prices to include tax.
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		// Set base country to Germany.
+		$original_base_country = get_option( 'woocommerce_default_country' );
+		update_option( 'woocommerce_default_country', 'DE' );
+
+		// Create German tax rate (19%) - this is the base/shop rate.
+		$german_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '19.0000',
+				'tax_rate_name'     => 'German VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create French tax rate (20%) - this is where the customer is.
+		$french_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'FR',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'French VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create a product priced at 100 (including tax).
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		// Create a guest order with French billing address.
+		$order = wc_create_order();
+		$order->set_customer_id( 0 ); // Guest order.
+		$order->set_billing_country( 'FR' );
+		$order->set_billing_city( 'Paris' );
+		$order->set_billing_postcode( '75001' );
+		$order->save();
+
+		// Enable "same price everywhere" mode.
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		// Calculate the price excluding tax.
+		$price_excluding_tax = wc_get_price_excluding_tax( $product, array( 'order' => $order ) );
+
+		// With filter=false and French customer (20% VAT):
+		// €100 / 1.20 = €83.33 (net price)
+		// Later: €83.33 * 1.20 = €100 (customer pays €100).
+		//
+		// If the bug were present (using base rate instead):
+		// €100 / 1.19 = €84.03 (wrong net price)
+		// Later: €84.03 * 1.20 = €100.84 (customer pays more than €100).
+		$this->assertEquals( 83.33, round( $price_excluding_tax, 2 ), 'Price should use French tax rate (20%) to calculate net, not German base rate (19%)' );
+
+		// Clean up.
+		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		WC_Tax::_delete_tax_rate( $german_tax_rate_id );
+		WC_Tax::_delete_tax_rate( $french_tax_rate_id );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		$order->delete( true );
+		update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		update_option( 'woocommerce_default_country', $original_base_country );
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'no' );
+		}
+	}
+
+	/**
+	 * @testdox When filter is false and order has no customer and no billing address, fall back to get_rates with null.
+	 */
+	public function test_wc_get_price_excluding_tax_fallback_when_no_customer_and_no_billing() {
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_prices_include_tax' => '__return_true',
+			)
+		);
+
+		$get_rates_called_with_null = false;
+		$find_rates_called          = false;
+		StaticMockerHack::add_method_mocks(
+			array(
+				'WC_Tax' => array(
+					'get_rates'  => function ( $tax_class, $customer ) use ( &$get_rates_called_with_null ) {
+						if ( null === $customer ) {
+							$get_rates_called_with_null = true;
+						}
+						return array();
+					},
+					'find_rates' => function () use ( &$find_rates_called ) {
+						$find_rates_called = true;
+						return array();
+					},
+					'calc_tax'   => function () {
+						return array( 0 );
+					},
+				),
+			)
+		);
+
+		// phpcs:disable Squiz.Commenting
+		$product = new class() extends WC_Product {
+			public function get_price( $context = 'view' ) {
+				return 100;
+			}
+
+			public function is_taxable() {
+				return true;
+			}
+
+			public function get_tax_class( $context = 'view' ) {
+				return '';
+			}
+		};
+
+		$order = new class() extends WC_Order {
+			public function get_customer_id( $context = 'view' ) {
+				return 0; // No customer - guest order.
+			}
+
+			public function get_billing_country( $context = 'view' ) {
+				return ''; // Empty billing country.
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		wc_get_price_excluding_tax( $product, array( 'order' => $order ) );
+
+		$this->assertTrue( $get_rates_called_with_null, 'WC_Tax::get_rates should be called with null customer when no billing address' );
+		$this->assertFalse( $find_rates_called, 'WC_Tax::find_rates should NOT be called when no billing address' );
+
+		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+	}
+
+	/**
 	 * @testDox Test 'wc_get_related_products' with actual related products.
 	 */
 	public function test_wc_get_related_products_with_actual_related_products() {
