@@ -228,7 +228,8 @@ test.describe(
 						await menuitem_moveDown.click();
 						await page.waitForResponse(
 							( response ) =>
-								response.url().includes( '/users' ) && response.ok()
+								response.url().includes( '/users' ) &&
+								response.ok()
 						);
 					} );
 
@@ -256,7 +257,8 @@ test.describe(
 						await menuitem_moveUp.click();
 						await page.waitForResponse(
 							( response ) =>
-								response.url().includes( '/users' ) && response.ok()
+								response.url().includes( '/users' ) &&
+								response.ok()
 						);
 					} );
 
@@ -301,6 +303,10 @@ test.describe(
 			await test.step( `Add the Performance section back in.`, async () => {
 				await page.getByTitle( 'Add more sections' ).click();
 				await page.getByTitle( 'Add Performance section' ).click();
+				await page.waitForResponse(
+					( response ) =>
+						response.url().includes( '/users' ) && response.ok()
+				);
 			} );
 
 			await test.step( `Expect the Performance section to be added back.`, async () => {
