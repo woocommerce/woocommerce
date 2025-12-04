@@ -97,12 +97,10 @@ class WC_Gateway_Paypal_Notices {
 	public function add_paypal_notices_on_payments_settings_page() {
 		global $current_tab, $current_section;
 
-		$screen = get_current_screen();
-		if ( ! $screen ) {
-			return;
-		}
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
 
-		$is_payments_settings_page = 'woocommerce_page_wc-settings' === $screen->id && 'checkout' === $current_tab && empty( $current_section );
+		$is_payments_settings_page = 'woocommerce_page_wc-settings' === $screen_id && 'checkout' === $current_tab && empty( $current_section );
 
 		// Only add the notice from this callback on the payments settings page.
 		if ( ! $is_payments_settings_page ) {
@@ -215,7 +213,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @deprecated 10.4.0 No longer used. Functionality is now handled by is_notice_dismissed().
 	 * @return bool
 	 */
-	protected static function paypal_migration_notice_dismissed() {
+	protected static function paypal_migration_notice_dismissed(): bool {
 		wc_deprecated_function( __METHOD__, '10.4.0', 'WC_Gateway_Paypal_Notices::is_notice_dismissed' );
 		return (bool) get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_completed_notice', true );
 	}
@@ -266,9 +264,13 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
+		if ( empty( $response_data ) ) {
+			return;
+		}
+
 		// Set the restriction flag for account-related errors.
-		if ( 422 === (int) $http_code && ! empty( $response_data ) ) {
-			$issue = $response_data['details'][0]['issue'] ?? null;
+		if ( 422 === (int) $http_code ) {
+			$issue = isset ( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
 
 			if ( in_array( $issue, self::PAYPAL_ACCOUNT_RESTRICTION_ISSUES, true ) ) {
 				WC_Gateway_Paypal::log( 'PayPal account restriction flag set due to issues when handling the order: ' . $order->get_id() );
