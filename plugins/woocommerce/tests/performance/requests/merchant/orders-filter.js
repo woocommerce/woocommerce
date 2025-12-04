@@ -33,13 +33,10 @@ const currentDate = `${ year }${ month }`;
 
 // Change URL if HPOS is enabled and being used
 let admin_orders_base;
-let admin_filter_month_assert;
 if ( hpos_status === true ) {
 	admin_orders_base = hpos_admin_orders_base_url;
-	admin_filter_month_assert = `selected='selected' value="${ currentDate }">`;
 } else {
 	admin_orders_base = `${ admin_orders_base_url }&post_status=all`;
-	admin_filter_month_assert = `selected='selected' value='${ currentDate }'>`;
 }
 
 export function ordersFilter() {
@@ -64,8 +61,13 @@ export function ordersFilter() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'body contains: filter set to selected month': ( response ) =>
-				response.body.includes( `${ admin_filter_month_assert }` ),
+			'body contains: filter set to selected month': ( r ) =>
+				r.body.includes(
+					`selected='selected' value="${ currentDate }"`
+				) ||
+				r.body.includes(
+					`selected='selected' value='${ currentDate }'`
+				),
 		} );
 
 		response = http.get(
@@ -78,8 +80,8 @@ export function ordersFilter() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'body contains: filter set to selected customer': ( response ) =>
-				response.body.includes(
+			'body contains: filter set to selected customer': ( r ) =>
+				r.body.includes(
 					`<option value="${ customer_user_id }" selected="selected">`
 				),
 		} );
