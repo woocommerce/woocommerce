@@ -84,12 +84,13 @@ jobs:
           script: |
             const ical = require('node-ical');
             const version = '${{ steps.check-code-freeze-8-weeks.outputs.version }}';
+            const escapedVersion = version.replace('.', '\\.');
 
             const releaseEvents = {
-              'beta-1': `WooCommerce ${version} Beta 1`,
-              'beta-2': `WooCommerce ${version} Beta 2`,
-              'rc-1': `WooCommerce ${version} RC 1`,
-              final: `WooCommerce ${version} Release`,
+              'beta-1': `^WooCommerce ${escapedVersion} Beta 1$`,
+              'beta-2': `^WooCommerce ${escapedVersion} Beta 2$`,
+              'rc-1': `^WooCommerce ${escapedVersion} RC 1$`,
+              'final': `^WooCommerce ${escapedVersion} Release - Team (.+)$`,
             };
 
             const events = await ical.async.fromURL(
@@ -100,16 +101,28 @@ jobs:
               .filter(event => event.type === 'VEVENT')
               .filter(event => event.summary && event.start);
 
-            for (const [eventKey, eventTitle] of Object.entries(releaseEvents)) {
+            let teamName = null;
+
+            for (const [eventKey, regexPattern] of Object.entries(releaseEvents)) {
+              const regex = new RegExp(regexPattern, 'i');
               const matchingEvent = calendarEvents.find(event => 
-                event.summary.trim() === eventTitle
+                regex.test(event.summary.trim())
               );
 
               const date = matchingEvent ? new Date(matchingEvent.start).toISOString().split('T')[0] : null;
               core.setOutput(`event-${eventKey}-date`, date);
-              console.log(`Event: ${eventTitle}, Date: ${date}`);
-            }
+              console.log(`Event: ${eventKey}, Pattern: ${regexPattern}, Date: ${date}`);
 
+              // Capture team name from final release event
+              if (eventKey === 'final' && matchingEvent) {
+                const match = matchingEvent.summary.trim().match(regex);
+                if (match && match[1]) {
+                  teamName = match[1].toLowerCase();
+                  core.setOutput('team', teamName);
+                  console.log(`Team name: ${teamName}`);
+                }
+              }
+            }
   trigger-upcoming-code-freeze-events:
     name: Assign a release lead
     needs: check-upcoming-release-events
@@ -129,6 +142,7 @@ jobs:
 
             const payload = {
               action: 'release-assignment',
+              team: '${{ needs.check-upcoming-release-events.outputs.team }}',
               version: '${{ needs.check-upcoming-release-events.outputs.version }}',
               feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
               status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
