@@ -143,7 +143,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider user_capability_data_provider
 	 * @param string $user_role The role of the user.
-	 * @param bool $should_display Whether the notice should display.
+	 * @param bool   $should_display Whether the notice should display.
 	 */
 	public function test_notices_respect_user_capabilities( string $user_role, bool $should_display ) {
 		$user_id_map = array(
@@ -344,10 +344,10 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_paypal_account_restricted_status', 'yes' );
 
 		// Track calls to update_option for this specific option.
-		$update_calls = 0;
-		$track_updates = function( $value, $old_value, $option ) use ( &$update_calls ) {
+		$update_calls  = 0;
+		$track_updates = function ( $value, $old_value, $option ) use ( &$update_calls ) {
 			if ( 'woocommerce_paypal_account_restricted_status' === $option ) {
-				$update_calls++;
+				++$update_calls;
 			}
 			return $value;
 		};
@@ -387,10 +387,10 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_paypal_account_restricted_status', 'no' );
 
 		// Track calls to update_option for this specific option.
-		$update_calls = 0;
-		$track_updates = function( $value, $old_value, $option ) use ( &$update_calls ) {
+		$update_calls  = 0;
+		$track_updates = function ( $value, $old_value, $option ) use ( &$update_calls ) {
 			if ( 'woocommerce_paypal_account_restricted_status' === $option ) {
-				$update_calls++;
+				++$update_calls;
 			}
 			return $value;
 		};
