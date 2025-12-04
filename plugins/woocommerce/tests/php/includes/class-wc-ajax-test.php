@@ -340,4 +340,118 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		return $result;
 	}
+
+	/**
+	 * Test that calc_line_taxes recalculates line item subtotals when
+	 * woocommerce_adjust_non_base_location_prices is false and prices include tax.
+	 */
+	public function test_calc_line_taxes_recalculates_subtotals_for_fixed_price_mode() {
+		// Enable taxes and set prices to include tax.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		// Create German tax rate (19%).
+		$german_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '19.0000',
+				'tax_rate_name'     => 'German VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create French tax rate (20%).
+		$french_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'FR',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'French VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create a product priced at 100 (including tax).
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		// Create an order with the product.
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		// Enable "same price everywhere" mode.
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		$taxes_controller = wc_get_container()->get( TaxesController::class );
+
+		$item    = current( $order->get_items() );
+		$item_id = $item->get_id();
+
+		$items_array = array(
+			'order_item_id'  => array( $item_id ),
+			'order_item_qty' => array( $item_id => 1 ),
+			'line_subtotal'  => array( $item_id => $item->get_subtotal() ),
+			'line_total'     => array( $item_id => $item->get_total() ),
+		);
+
+		// Recalculate with French billing address (20% VAT).
+		$taxes_controller->calc_line_taxes(
+			array(
+				'order_id' => $order->get_id(),
+				'items'    => http_build_query( $items_array ),
+				'country'  => 'FR',
+				'state'    => '',
+				'postcode' => '',
+				'city'     => '',
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+		$item  = current( $order->get_items() );
+
+		// With 20% French VAT: 100 / 1.20 = 83.33 net.
+		$this->assertEquals( 83.33, round( $item->get_subtotal(), 2 ), 'Subtotal should be recalculated using French tax rate' );
+		$this->assertEquals( 100, round( $order->get_total(), 2 ), 'Total should remain 100 (fixed price)' );
+
+		// Now recalculate with German billing address (19% VAT).
+		$items_array['line_subtotal'] = array( $item_id => $item->get_subtotal() );
+		$items_array['line_total']    = array( $item_id => $item->get_total() );
+
+		$taxes_controller->calc_line_taxes(
+			array(
+				'order_id' => $order->get_id(),
+				'items'    => http_build_query( $items_array ),
+				'country'  => 'DE',
+				'state'    => '',
+				'postcode' => '',
+				'city'     => '',
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+		$item  = current( $order->get_items() );
+
+		// With 19% German VAT: 100 / 1.19 = 84.03 net.
+		$this->assertEquals( 84.03, round( $item->get_subtotal(), 2 ), 'Subtotal should be recalculated using German tax rate' );
+		$this->assertEquals( 100, round( $order->get_total(), 2 ), 'Total should remain 100 (fixed price)' );
+
+		// Clean up.
+		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		WC_Tax::_delete_tax_rate( $german_tax_rate_id );
+		WC_Tax::_delete_tax_rate( $french_tax_rate_id );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		$order->delete( true );
+	}
 }
