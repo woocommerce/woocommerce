@@ -53806,12 +53806,6 @@ parameters:
 			path: includes/wc-template-functions.php
 
 		-
-			message: '#^Cannot access offset 0 on array\{string, int, int, bool\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
 			message: '#^Cannot access offset string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
