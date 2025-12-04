@@ -211,6 +211,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for updating the shipping information on order approval (Orders v2).
 				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
 
+				// Hook for PayPal order responses to manage account restriction notices.
+				add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
+
 				$buttons = new WC_Gateway_Paypal_Buttons( $this );
 				if ( $buttons->is_enabled() && ! $this->needs_setup() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -1019,12 +1022,51 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->update_option( 'transact_onboarding_complete', 'yes' );
 		$this->transact_onboarding_complete = true;
 	}
+
+	/**
+	 * Handle PayPal order response to manage account restriction notices.
+	 *
+	 * This method is called via the 'woocommerce_paypal_standard_order_created_response' hook
+	 * and manages the account restriction flag based on PayPal API responses.
+	 *
+	 * Extensions can disable this feature using the filter:
+	 * add_filter( 'woocommerce_paypal_account_restriction_notices_enabled', '__return_false' );
+	 *
+	 * @param int|string $http_code     The HTTP status code from the PayPal API response.
+	 * @param array      $response_data The decoded response data from the PayPal API.
+	 * @param WC_Order   $order         The WooCommerce order object.
+	 * @return void
+	 */
+	public function manage_account_restriction_status( $http_code, $response_data, $order ): void {
+		/**
+		 * Filters whether account restriction notices should be enabled.
+		 *
+		 * This filter allows extensions to opt out of the account restriction notice functionality.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool $enabled Whether account restriction notices are enabled. Default true.
+		 */
+		if ( ! apply_filters( 'woocommerce_paypal_account_restriction_notices_enabled', true ) ) {
+			return;
+		}
+
+		if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
+		}
+
+		WC_Gateway_Paypal_Notices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
+	}
 }
 
 // Initialize PayPal admin notices handler on 'init' hook to ensure the class loads before admin_init and admin_notices hooks fire.
 add_action(
 	'init',
 	function () {
+		if ( ! is_admin() || ( defined( 'DOING_AJAX' ) && DOING_AJAX ) ) {
+			return;
+		}
+
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
 		new WC_Gateway_Paypal_Notices();
 	}
