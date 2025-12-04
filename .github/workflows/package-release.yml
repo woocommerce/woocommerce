@@ -11,16 +11,15 @@ on:
         type: boolean
         required: false
 
-permissions: {
+permissions:
   id-token: write  # Required for OIDC
-}
 
 jobs:
   release:
     name: Run packages release script
     runs-on: ubuntu-latest
     permissions:
-      id-token: write
+      # id-token: write
       contents: read
     steps:
       - uses: actions/checkout@v4
