@@ -30,6 +30,10 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
 	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
+}
+
 /**
  * WC_Gateway_Paypal Class.
  */
@@ -1049,10 +1053,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		if ( ! apply_filters( 'woocommerce_paypal_account_restriction_notices_enabled', true ) ) {
 			return;
-		}
-
-		if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
 		}
 
 		WC_Gateway_Paypal_Notices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );

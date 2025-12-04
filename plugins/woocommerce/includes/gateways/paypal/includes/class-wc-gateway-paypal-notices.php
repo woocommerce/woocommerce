@@ -36,7 +36,7 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * @var array
 	 */
-	private const PAYPAL_ACCOUNT_RESTRICTION_ISSUES = array(
+	protected const PAYPAL_ACCOUNT_RESTRICTION_ISSUES = array(
 		'PAYEE_ACCOUNT_LOCKED_OR_CLOSED',
 		'PAYEE_ACCOUNT_RESTRICTED',
 	);
@@ -257,7 +257,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @param WC_Order   $order         The WooCommerce order object.
 	 * @return void
 	 */
-	public static function manage_account_restriction_flag_for_notice( $http_code, $response_data, $order ): void {
+	public static function manage_account_restriction_flag_for_notice( $http_code, array $response_data, WC_Order $order ): void {
 		// Clear the restriction flag on successful responses.
 		if ( in_array( (int) $http_code, array( 200, 201 ), true ) ) {
 			self::clear_account_restriction_flag();
