@@ -109,14 +109,14 @@ const CustomizeStoreController = () => {
 
 	return (
 		<div className="woocommerce-customize-store__container">
-			<div className="mobile-header">
+			<div className="woocommerce-customize-store__mobile-header">
 				<Button
-					className="mobile-header__back-button"
+					className="woocommerce-customize-store__mobile-header__back-button"
 					href={ getNewPath( {}, '/', {} ) }
 					icon={ chevronIcon }
 					label={ __( 'Back', 'woocommerce' ) }
 				/>
-				<h1 className="mobile-header__title">
+				<h1 className="woocommerce-customize-store__mobile-header__title">
 					{ __( 'Customize your store', 'woocommerce' ) }
 				</h1>
 			</div>
@@ -171,7 +171,7 @@ const CustomizeStoreController = () => {
 			<div className="woocommerce-customize-store-main">
 				<div className="woocommerce-customize-store-banner">
 					<div className="woocommerce-customize-store-banner-content">
-						<div className="banner-actions">
+						<div className="woocommerce-customize-store__banner-actions">
 							<h2>{ __( 'Design your own', 'woocommerce' ) }</h2>
 							<p>
 								{ __(
@@ -204,7 +204,7 @@ const CustomizeStoreController = () => {
 
 				<div className="woocommerce-customize-store-banner pick-your-theme-banner">
 					<div className="woocommerce-customize-store-banner-content">
-						<div className="banner-actions">
+						<div className="woocommerce-customize-store__banner-actions">
 							<h2>
 								{ __(
 									'Pick your perfect theme',
