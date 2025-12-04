@@ -55,7 +55,29 @@ jobs:
 
             - name: 'Run PHPStan'
               working-directory: plugins/woocommerce
-              run: pnpm --filter='@woocommerce/plugin-woocommerce' phpstan
+              run: |
+                  set +e  # Don't exit immediately on error
+                  set -o pipefail  # But do capture pipeline exit codes
+                  pnpm --filter='@woocommerce/plugin-woocommerce' phpstan 2>&1 | tee /tmp/phpstan-output.txt
+                  PHPSTAN_EXIT=${PIPESTATUS[0]}
+                  if [[ $PHPSTAN_EXIT -ne 0 ]]; then
+                      if grep -q "was not matched in reported errors" /tmp/phpstan-output.txt; then
+                          echo ""
+                          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                          echo "::error::PHPStan baseline is out of date. Some errors in the baseline no longer exist in the code."
+                          echo ""
+                          echo "This typically happens when:"
+                          echo "  • You fixed an error that was previously baselined"
+                          echo "  • Code was refactored and the error location changed"
+                          echo ""
+                          echo "To fix this, regenerate the baseline by running:"
+                          echo "  cd plugins/woocommerce && composer phpstan:baseline"
+                          echo ""
+                          echo "Then commit the updated phpstan-baseline.neon file."
+                          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                      fi
+                      exit $PHPSTAN_EXIT
+                  fi
 
             - name: 'Check baseline changes'
               if: ${{ github.event_name == 'pull_request' }}
