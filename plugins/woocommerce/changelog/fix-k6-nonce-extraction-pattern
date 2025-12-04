@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Fixed K6 performance tests broken by WP6.9 release
+
+
