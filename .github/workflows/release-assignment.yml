@@ -84,13 +84,12 @@ jobs:
           script: |
             const ical = require('node-ical');
             const version = '${{ steps.check-code-freeze-8-weeks.outputs.version }}';
-            const escapedVersion = version.replace('.', '\\.');
 
             const releaseEvents = {
-              'beta-1': `^WooCommerce ${escapedVersion} Beta 1$`,
-              'beta-2': `^WooCommerce ${escapedVersion} Beta 2$`,
-              'rc-1': `^WooCommerce ${escapedVersion} RC 1$`,
-              'final': `^WooCommerce ${escapedVersion} Release - Team (.+)$`,
+              'beta-1': `WooCommerce ${version} Beta 1`,
+              'beta-2': `WooCommerce ${version} Beta 2`,
+              'rc-1': `WooCommerce ${version} RC 1`,
+              final: `WooCommerce ${version} Release`,
             };
 
             const events = await ical.async.fromURL(
@@ -103,26 +102,27 @@ jobs:
 
             let teamName = null;
 
-            for (const [eventKey, regexPattern] of Object.entries(releaseEvents)) {
-              const regex = new RegExp(regexPattern, 'i');
+            for (const [eventKey, eventTitle] of Object.entries(releaseEvents)) {
               const matchingEvent = calendarEvents.find(event => 
-                regex.test(event.summary.trim())
+                event.summary.trim() === eventTitle
               );
 
               const date = matchingEvent ? new Date(matchingEvent.start).toISOString().split('T')[0] : null;
               core.setOutput(`event-${eventKey}-date`, date);
-              console.log(`Event: ${eventKey}, Pattern: ${regexPattern}, Date: ${date}`);
+              console.log(`Event: ${eventTitle}, Date: ${date}`);
 
-              // Capture team name from final release event
-              if (eventKey === 'final' && matchingEvent) {
-                const match = matchingEvent.summary.trim().match(regex);
-                if (match && match[1]) {
-                  teamName = match[1].toLowerCase();
-                  core.setOutput('team', teamName);
-                  console.log(`Team name: ${teamName}`);
+              // Extract team name from final release event description
+              if (eventKey === 'final' && matchingEvent && matchingEvent.description) {
+                const teamMatch = matchingEvent.description.match(/Team\s+(\S+)/i);
+                if (teamMatch && teamMatch[1]) {
+                  teamName = teamMatch[1].toLowerCase();
+                  console.log(`Team name from description: ${teamName}`);
                 }
               }
             }
+            
+            core.setOutput('team-name', teamName);
+            
   trigger-upcoming-code-freeze-events:
     name: Assign a release lead
     needs: check-upcoming-release-events
