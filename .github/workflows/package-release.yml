@@ -13,14 +13,12 @@ on:
 
 permissions:
   id-token: write  # Required for OIDC
+  contents: read
 
 jobs:
   release:
     name: Run packages release script
     runs-on: ubuntu-latest
-    permissions:
-      # id-token: write
-      contents: read
     steps:
       - uses: actions/checkout@v4
 
