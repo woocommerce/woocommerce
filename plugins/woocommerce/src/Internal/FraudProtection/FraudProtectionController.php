@@ -75,9 +75,12 @@ class FraudProtectionController {
 			add_action( 'woocommerce_before_checkout_form', array( $this, 'handle_check_blocked_session_redirect' ), 1, 0 );
 		}
 
-		// Cart friction: block add to cart.
+		// Track cart events (add, update, remove, restore) for fraud signals.
 		if ( 'cart' === $apply_to || 'both' === $apply_to ) {
-			add_filter( 'woocommerce_add_to_cart_validation', array( $this, 'handle_add_to_cart_validation' ), 10, 3 );
+			add_action( 'woocommerce_add_to_cart', array( $this, 'handle_track_cart_item_added' ), 10, 6 );
+			add_action( 'woocommerce_after_cart_item_quantity_update', array( $this, 'handle_track_cart_item_updated' ), 10, 4 );
+			add_action( 'woocommerce_remove_cart_item', array( $this, 'handle_track_cart_item_removed' ), 10, 2 );
+			add_action( 'woocommerce_restore_cart_item', array( $this, 'handle_track_cart_item_restored' ), 10, 2 );
 			add_action( 'woocommerce_before_cart', array( $this, 'handle_check_blocked_session_redirect' ), 1, 0 );
 		}
 
@@ -231,26 +234,184 @@ class FraudProtectionController {
 		return $available_gateways;
 	}
 
+	public function update_session( $event_name, $session_data ) {
+		$container = wc_get_container();
+		$api_client = $container->get( FraudProtectionServiceApiClient::class );
+		$decision = $api_client->track_session_event( $event_name, $session_data );
+		switch ( $decision ) {
+			case 'allow':
+				$this->session_manager->allow_session();
+				break;
+			case 'block':
+				$this->session_manager->block_session();
+				break;
+			case 'challenge':
+				$this->session_manager->challenge_session();
+				break;
+			default: // ! Important: Unknown decision, just allow the session
+				$this->session_manager->allow_session();
+				break;
+		};
+	}
+
 	/**
-	 * Handle add to cart validation.
-	 *
-	 * Blocks add to cart if session is not cleared.
+	 * Track cart item added event.
 	 *
 	 * @internal
 	 *
-	 * @param bool $passed Validation status.
-	 * @param int  $product_id Product ID.
-	 * @param int  $quantity Quantity.
-	 * @return bool Validation status.
+	 * @param string $cart_item_key Cart item key.
+	 * @param int    $product_id Product ID.
+	 * @param int    $quantity Quantity.
+	 * @param int    $variation_id Variation ID.
+	 * @param array  $variation Variation data.
+	 * @param array  $cart_item_data Cart item data.
+	 * @return void
 	 */
-	public function handle_add_to_cart_validation( $passed, $product_id, $quantity ) {
-		// If session is not cleared, block add to cart.
-		if ( ! $this->session_manager->is_session_cleared() ) {
-			// Don't show error notice - we'll handle this via modal.
-			return false;
+	public function handle_track_cart_item_added( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
+		$session_data = $this->build_cart_event_session_data( 'item_added', $product_id, $quantity, $variation_id );
+		$this->update_session( 'cart_item_added', $session_data );
+	}
+
+	/**
+	 * Track cart item quantity updated event.
+	 *
+	 * @internal
+	 *
+	 * @param string $cart_item_key Cart item key.
+	 * @param int    $quantity New quantity.
+	 * @param int    $old_quantity Old quantity.
+	 * @param object $cart Cart object.
+	 * @return void
+	 */
+	public function handle_track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $cart ) {
+		// TODO: some debouncing logic is needed because it's called twice for a single update event
+		$cart_item = isset( $cart->cart_contents[ $cart_item_key ] ) ? $cart->cart_contents[ $cart_item_key ] : null;
+
+		if ( ! $cart_item ) {
+			return;
 		}
 
-		return $passed;
+		$product_id   = isset( $cart_item['product_id'] ) ? $cart_item['product_id'] : 0;
+		$variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
+
+		$session_data = $this->build_cart_event_session_data( 'item_updated', $product_id, $quantity, $variation_id );
+		$session_data['old_quantity'] = $old_quantity;
+		$this->update_session( 'cart_item_updated', $session_data );
+	}
+
+	/**
+	 * Track cart item removed event.
+	 *
+	 * @internal
+	 *
+	 * @param string $cart_item_key Cart item key.
+	 * @param object $cart Cart object.
+	 * @return void
+	 */
+	public function handle_track_cart_item_removed( $cart_item_key, $cart ) {
+		$cart_item = isset( $cart->removed_cart_contents[ $cart_item_key ] ) ? $cart->removed_cart_contents[ $cart_item_key ] : null;
+
+		if ( ! $cart_item ) {
+			return;
+		}
+
+		$product_id   = isset( $cart_item['product_id'] ) ? $cart_item['product_id'] : 0;
+		$variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
+		$quantity     = isset( $cart_item['quantity'] ) ? $cart_item['quantity'] : 0;
+
+		$session_data = $this->build_cart_event_session_data( 'item_removed', $product_id, $quantity, $variation_id );
+		$this->update_session( 'cart_item_removed', $session_data );
+	}
+
+	/**
+	 * Track cart item restored event.
+	 *
+	 * @internal
+	 *
+	 * @param string $cart_item_key Cart item key.
+	 * @param object $cart Cart object.
+	 * @return void
+	 */
+	public function handle_track_cart_item_restored( $cart_item_key, $cart ) {
+		$cart_item = isset( $cart->cart_contents[ $cart_item_key ] ) ? $cart->cart_contents[ $cart_item_key ] : null;
+
+		if ( ! $cart_item ) {
+			return;
+		}
+
+		$product_id   = isset( $cart_item['product_id'] ) ? $cart_item['product_id'] : 0;
+		$variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
+		$quantity     = isset( $cart_item['quantity'] ) ? $cart_item['quantity'] : 0;
+
+		$session_data = $this->build_cart_event_session_data( 'item_restored', $product_id, $quantity, $variation_id );
+		$this->update_session( 'cart_item_restored', $session_data );
+	}
+
+	/**
+	 * Build session data for cart events.
+	 *
+	 * @param string $action Action type (item_added, item_updated, item_removed, item_restored).
+	 * @param int    $product_id Product ID.
+	 * @param int    $quantity Quantity.
+	 * @param int    $variation_id Variation ID.
+	 * @return array Session data.
+	 */
+	private function build_cart_event_session_data( $action, $product_id, $quantity, $variation_id ) {
+		$session_key = $this->get_session_key();
+
+		return [
+			'session_key'  => $session_key,
+			'action'       => $action,
+			'product_id'   => $product_id,
+			'quantity'     => $quantity,
+			'variation_id' => $variation_id,
+			'cart_total'   => WC()->cart ? WC()->cart->get_cart_contents_count() : null, // TODO: fix totals are not updated yet
+			'email'        => $this->get_user_email(),
+		];
+	}
+
+	/**
+	 * Get session key for current session.
+	 *
+	 * @return string Session key.
+	 */
+	private function get_session_key() {
+		if ( isset( WC()->session ) && WC()->session instanceof \WC_Session ) {
+			$customer_id = WC()->session->get_customer_id();
+			if ( $customer_id ) {
+				return $customer_id;
+			}
+		}
+
+		if ( function_exists( 'wp_get_session_token' ) ) {
+			$token = wp_get_session_token();
+			if ( $token ) {
+				return 'guest-' . $token;
+			}
+		}
+
+		return 'no-session';
+	}
+
+	/**
+	 * Get user email if available.
+	 *
+	 * @return string|null User email or null.
+	 */
+	private function get_user_email() {
+		if ( is_user_logged_in() ) {
+			$user = wp_get_current_user();
+			return $user->user_email;
+		}
+
+		if ( isset( WC()->session ) && WC()->session instanceof \WC_Session ) {
+			$customer_data = WC()->session->get( 'customer' );
+			if ( is_array( $customer_data ) && ! empty( $customer_data['email'] ) ) {
+				return $customer_data['email'];
+			}
+		}
+
+		return null;
 	}
 
 	/**

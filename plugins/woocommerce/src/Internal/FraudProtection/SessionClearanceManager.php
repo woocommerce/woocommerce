@@ -67,6 +67,16 @@ class SessionClearanceManager {
 	}
 
 	/**
+	 * Mark the current session as pending (challenge required).
+	 *
+	 * @return void
+	 */
+	public function challenge_session(): void {
+		$this->set_session_status( self::STATUS_PENDING );
+		$this->log_clearance_event( 'challenged' );
+	}
+
+	/**
 	 * Mark the current session as blocked.
 	 *
 	 * @return void
@@ -84,11 +94,10 @@ class SessionClearanceManager {
 	 */
 	public function get_session_status(): string {
 		if ( ! $this->is_session_available() ) {
-			// TODO: Consider using allowed as default
-			return self::STATUS_PENDING;
+			return self::STATUS_ALLOWED;
 		}
 
-		$status = WC()->session->get( self::SESSION_KEY, self::STATUS_PENDING );
+		$status = WC()->session->get( self::SESSION_KEY, self::STATUS_ALLOWED );
 
 		// Validate status value.
 		if ( ! in_array( $status, array( self::STATUS_PENDING, self::STATUS_ALLOWED, self::STATUS_BLOCKED ), true ) ) {
