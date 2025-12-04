@@ -270,7 +270,7 @@ class WC_Gateway_Paypal_Notices {
 
 		// Set the restriction flag for account-related errors.
 		if ( 422 === (int) $http_code ) {
-			$issue = isset ( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
+			$issue = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
 
 			if ( in_array( $issue, self::PAYPAL_ACCOUNT_RESTRICTION_ISSUES, true ) ) {
 				WC_Gateway_Paypal::log( 'PayPal account restriction flag set due to issues when handling the order: ' . $order->get_id() );
