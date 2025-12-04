@@ -258,7 +258,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 	 * Test user_type parameter combined with other filters.
 	 */
 	public function test_user_type_with_other_filters() {
-		// Test user_type='customer' combined with search.
+		// Test user_type='registered' combined with search.
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
 		$request->set_query_params(
 			array(
@@ -275,7 +275,7 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 		// We have one customer named "John Doe".
 		$this->assertGreaterThanOrEqual( 1, count( $reports ) );
 		foreach ( $reports as $report ) {
-			$this->assertNotNull( $report['user_id'], 'All customers should have a user_id when user_type=customer' );
+			$this->assertNotNull( $report['user_id'], 'All customers should have a user_id when user_type=registered' );
 		}
 
 		// Verify the search actually filtered correctly.
