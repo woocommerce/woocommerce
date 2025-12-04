@@ -210,7 +210,7 @@ class WC_Gateway_Paypal_Notices {
 		}
 
 		$dismiss_url = $this->get_dismiss_url( self::PAYPAL_UNSUPPORTED_CURRENCY_NOTICE );
-		$message = sprintf(
+		$message     = sprintf(
 			/* translators: %s: Currency code */
 			esc_html__( 'PayPal Standard does not support your store currency (%s).', 'woocommerce' ),
 			$currency
@@ -240,6 +240,11 @@ class WC_Gateway_Paypal_Notices {
 
 	/**
 	 * Check if the notice has been dismissed.
+	 *
+	 * User meta keys for notice dismissals:
+	 * - dismissed_paypal_migration_completed_notice
+	 * - dismissed_paypal_account_restricted_notice
+	 * - dismissed_paypal_unsupported_currency_notice
 	 *
 	 * @param string $notice_name The name of the notice.
 	 * @return bool
