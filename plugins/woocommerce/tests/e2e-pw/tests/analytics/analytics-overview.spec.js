@@ -226,6 +226,10 @@ test.describe(
 					await test.step( `Move first section down`, async () => {
 						await buttons_ellipsis.first().click();
 						await menuitem_moveDown.click();
+						await page.waitForResponse(
+							( response ) =>
+								response.url().includes( '/users' ) && response.ok()
+						);
 					} );
 
 					await test.step( `Expect the second section to become first, and first becomes second.`, async () => {
@@ -250,6 +254,10 @@ test.describe(
 					await test.step( `Move second section up`, async () => {
 						await buttons_ellipsis.nth( 1 ).click();
 						await menuitem_moveUp.click();
+						await page.waitForResponse(
+							( response ) =>
+								response.url().includes( '/users' ) && response.ok()
+						);
 					} );
 
 					await test.step( `Expect second section becomes first section, first becomes second`, async () => {
