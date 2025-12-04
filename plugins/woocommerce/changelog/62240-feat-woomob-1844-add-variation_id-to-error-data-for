@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add variation_id in error data for `order_item_product_invalid_variation_id` errors.
