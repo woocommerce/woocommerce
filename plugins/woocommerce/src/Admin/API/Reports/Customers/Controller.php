@@ -73,8 +73,6 @@ class Controller extends GenericController implements ExportableInterface {
 		$args['email_excludes']      = $request['email_excludes'];
 		$args['country_includes']    = $request['country_includes'];
 		$args['country_excludes']    = $request['country_excludes'];
-		$args['state_includes']      = $request['state_includes'];
-		$args['state_excludes']      = $request['state_excludes'];
 		$args['last_active_before']  = $request['last_active_before'];
 		$args['last_active_after']   = $request['last_active_after'];
 		$args['orders_count_min']    = $request['orders_count_min'];
