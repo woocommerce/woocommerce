@@ -7,8 +7,101 @@ import { initialize } from './editor';
  * The unique identifier used to register the email editor data store.
  * This store manages the email editor's state and settings.
  */
-export { storeName, createStore } from './store';
-export { useIsEmailEditor } from './hooks';
+export {
+	storeName,
+	createStore,
+	TemplatePreview,
+	EmailBuiltStyles,
+} from './store';
+
+/**
+ * React hooks for email editor functionality.
+ *
+ * These hooks provide access to email editor state, template previews, and styling
+ * capabilities within React components.
+ *
+ * @example
+ * ```jsx
+ * import { useIsEmailEditor, usePreviewTemplates, useEmailCss } from '@woocommerce/email-editor';
+ *
+ * function EmailComponent() {
+ *   // Check if we're in the email editor context
+ *   const isEmailEditor = useIsEmailEditor();
+ *
+ *   // Get template previews
+ *   const [templates, recentPosts, hasRecentPosts] = usePreviewTemplates();
+ *
+ *   // Get CSS styles for the email
+ *   const [styles] = useEmailCss();
+ *
+ *   // Use the data...
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ */
+export {
+	/**
+	 * Hook to detect if the current context is the email editor.
+	 *
+	 * Performs contextual checks to determine if editing an email post or
+	 * associated template. Verifies the email editor store exists and compares
+	 * the current post ID and type against the email editor's configuration.
+	 *
+	 * @return {boolean} True if in the email editor context, false otherwise
+	 *
+	 * @example
+	 * ```js
+	 * const isEmailEditor = useIsEmailEditor();
+	 * if (!isEmailEditor) {
+	 *   return null; // Don't render in non-email contexts
+	 * }
+	 * ```
+	 */
+	useIsEmailEditor,
+
+	/**
+	 * Hook to generate preview data for email templates and recent posts.
+	 *
+	 * Processes email templates and patterns to create preview configurations
+	 * that combine template layouts with content. Merges template blocks with
+	 * pattern blocks by replacing core/post-content blocks with actual content.
+	 * Optionally includes recent email posts.
+	 *
+	 * @param {string}  customEmailContent - Optional custom email content for previews. Pass 'swap' to exclude recent posts
+	 * @param {boolean} includeRecentPosts - Whether to include recent email posts (default: true). Recent posts are only included when this is true AND customEmailContent is not 'swap'
+	 * @return [TemplatePreview[], TemplatePreview[], boolean] Tuple of template previews, recent post previews, and whether recent posts exist
+	 *
+	 * @example
+	 * ```js
+	 * const [templates, recentPosts, hasRecentPosts] = usePreviewTemplates();
+	 * templates.forEach(template => {
+	 *   // Render template preview
+	 * });
+	 * ```
+	 */
+	usePreviewTemplates,
+
+	/**
+	 * Hook to generate complete CSS styles for the email editor.
+	 *
+	 * Merges editor theme settings, user theme customizations, and layout
+	 * configurations to produce final CSS output. Handles responsive design
+	 * by applying device-specific styles and manages root container styles
+	 * including width, padding, and content sizing.
+	 *
+	 * @return [EmailBuiltStyles[]] Array of style objects with CSS rules for the email editor
+	 *
+	 * @example
+	 * ```js
+	 * const [styles] = useEmailCss();
+	 * styles.forEach(style => {
+	 *   // Apply style.css to the document
+	 * });
+	 * ```
+	 */
+	useEmailCss,
+} from './hooks';
 
 /**
  * This method is used to initialize the email editor.

@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Verify if the coming soon cache is displayed when launching the store and alerts the user if it is still present.

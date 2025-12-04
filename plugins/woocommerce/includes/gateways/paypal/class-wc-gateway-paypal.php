@@ -30,6 +30,10 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
 	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
+}
+
 /**
  * WC_Gateway_Paypal Class.
  */
@@ -211,8 +215,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for updating the shipping information on order approval (Orders v2).
 				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
 
+				// Hook for PayPal order responses to manage account restriction notices.
+				add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
+
 				$buttons = new WC_Gateway_Paypal_Buttons( $this );
-				if ( $buttons->is_enabled() ) {
+				if ( $buttons->is_enabled() && ! $this->needs_setup() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
 
@@ -341,6 +348,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Check if the gateway is available for use.
+	 *
+	 * @return bool
+	 */
+	public function is_available() {
+		// For Orders v2, require a valid email address to be set up in the gateway settings.
+		if ( $this->should_use_orders_v2() && $this->needs_setup() ) {
+			return false;
+		}
+
+		return parent::is_available();
+	}
+
+	/**
 	 * Return whether or not this gateway still requires setup to function.
 	 *
 	 * When this gateway is toggled on via AJAX, if this returns true a
@@ -350,7 +371,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function needs_setup() {
-		return ! is_email( $this->email );
+		return empty( $this->email ) || ! is_email( $this->email );
 	}
 
 	/**
@@ -518,11 +539,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_valid_for_use() {
+		if ( $this->should_use_orders_v2() ) {
+			$valid_currencies = WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES;
+		} else {
+			$valid_currencies = array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' );
+		}
 		return in_array(
 			get_woocommerce_currency(),
 			apply_filters(
 				'woocommerce_paypal_supported_currencies',
-				array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' )
+				$valid_currencies
 			),
 			true
 		);
@@ -700,6 +726,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return;
+		}
 
 		// Bail if the order is not a PayPal order.
 		if ( self::ID !== $order->get_payment_method() ) {
@@ -996,6 +1025,37 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$this->update_option( 'transact_onboarding_complete', 'yes' );
 		$this->transact_onboarding_complete = true;
+	}
+
+	/**
+	 * Handle PayPal order response to manage account restriction notices.
+	 *
+	 * This method is called via the 'woocommerce_paypal_standard_order_created_response' hook
+	 * and manages the account restriction flag based on PayPal API responses.
+	 *
+	 * Extensions can disable this feature using the filter:
+	 * add_filter( 'woocommerce_paypal_account_restriction_notices_enabled', '__return_false' );
+	 *
+	 * @param int|string $http_code     The HTTP status code from the PayPal API response.
+	 * @param array      $response_data The decoded response data from the PayPal API.
+	 * @param WC_Order   $order         The WooCommerce order object.
+	 * @return void
+	 */
+	public function manage_account_restriction_status( $http_code, $response_data, $order ): void {
+		/**
+		 * Filters whether account restriction notices should be enabled.
+		 *
+		 * This filter allows extensions to opt out of the account restriction notice functionality.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool $enabled Whether account restriction notices are enabled. Default true.
+		 */
+		if ( ! apply_filters( 'woocommerce_paypal_account_restriction_notices_enabled', true ) ) {
+			return;
+		}
+
+		WC_Gateway_Paypal_Notices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
 	}
 }
 

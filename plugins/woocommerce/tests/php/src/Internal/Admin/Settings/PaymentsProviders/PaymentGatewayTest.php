@@ -7,7 +7,11 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
+use PHPUnit\Framework\MockObject\MockObject;
 use stdClass;
 use WC_Unit_Test_Case;
 
@@ -17,6 +21,11 @@ use WC_Unit_Test_Case;
  * @class PaymentGateway
  */
 class PaymentGatewayTest extends WC_Unit_Test_Case {
+
+	/**
+	 * @var MockableLegacyProxy|MockObject
+	 */
+	protected $mockable_proxy;
 
 	/**
 	 * @var PaymentGateway
@@ -36,7 +45,16 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = new PaymentGateway();
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+
+		$this->mockable_proxy = $container->get( LegacyProxy::class );
+
+		$this->sut = new PaymentGateway( $this->mockable_proxy );
 	}
 
 	/**
@@ -525,6 +543,66 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test needs_setup fallback logic when method returns false but account is not connected.
+	 */
+	public function test_needs_setup_fallback_when_method_returns_false_and_not_connected() {
+		// Arrange - Create a mock gateway with needs_setup method returning false.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'needs_setup' ) )
+			->addMethods( array( 'is_account_connected' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect needs_setup method to return false.
+		$gateway->expects( $this->once() )
+			->method( 'needs_setup' )
+			->willReturn( false );
+
+		// Expect is_account_connected to be called and return false.
+		$gateway->expects( $this->once() )
+			->method( 'is_account_connected' )
+			->willReturn( false );
+
+		// Act.
+		$result = $this->sut->needs_setup( $gateway );
+
+		// Assert - Should return true because account is not connected.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test needs_setup fallback logic when method returns false and account is connected.
+	 */
+	public function test_needs_setup_fallback_when_method_returns_false_and_is_connected() {
+		// Arrange - Create a mock gateway with needs_setup method returning false.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'needs_setup' ) )
+			->addMethods( array( 'is_account_connected' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect needs_setup method to return false.
+		$gateway->expects( $this->once() )
+			->method( 'needs_setup' )
+			->willReturn( false );
+
+		// Expect is_account_connected to be called and return true.
+		$gateway->expects( $this->once() )
+			->method( 'is_account_connected' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->needs_setup( $gateway );
+
+		// Assert - Should return false because account is connected.
+		$this->assertFalse( $result );
+	}
+
+	/**
 	 * Test is_in_test_mode.
 	 */
 	public function test_is_in_test_mode() {
@@ -537,6 +615,129 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		// Test with wrong type.
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'test_mode' => array() ) );
 		$this->assertFalse( $this->sut->is_in_test_mode( $fake_gateway ) );
+	}
+
+	/**
+	 * Test is_in_test_mode with testmode property.
+	 * Use a mock gateway without is_test_mode() method to test property fallback.
+	 */
+	public function test_is_in_test_mode_with_testmode_property() {
+		// Arrange - Create a mock gateway without is_test_mode() or is_in_test_mode() methods.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Test with testmode property set to true.
+		$gateway->testmode = true;
+		$this->assertTrue( $this->sut->is_in_test_mode( $gateway ) );
+
+		// Test with testmode property set to false.
+		$gateway->testmode = false;
+		$this->assertFalse( $this->sut->is_in_test_mode( $gateway ) );
+
+		// Test with string values.
+		$gateway->testmode = 'yes';
+		$this->assertTrue( $this->sut->is_in_test_mode( $gateway ) );
+
+		$gateway->testmode = 'no';
+		$this->assertFalse( $this->sut->is_in_test_mode( $gateway ) );
+	}
+
+	/**
+	 * Test is_in_test_mode with mode option fallback.
+	 * Use a mock gateway without methods or properties to test get_option fallback.
+	 */
+	public function test_is_in_test_mode_with_mode_option() {
+		// Test mode option with 'test' value.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_option' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect get_option to be called for 'test_mode', 'testmode', and 'mode'.
+		$gateway->expects( $this->exactly( 3 ) )
+			->method( 'get_option' )
+			->willReturnCallback(
+				function ( $key, $default_value ) {
+					unset( $default_value ); // Avoid parameter not used PHPCS errors.
+					if ( 'mode' === $key ) {
+						return 'test';
+					}
+					return 'not_found';
+				}
+			);
+
+		$this->assertTrue( $this->sut->is_in_test_mode( $gateway ) );
+
+		// Test with 'sandbox' value.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_option' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		$gateway->expects( $this->exactly( 3 ) )
+			->method( 'get_option' )
+			->willReturnCallback(
+				function ( $key, $default_value ) {
+					unset( $default_value ); // Avoid parameter not used PHPCS errors.
+					if ( 'mode' === $key ) {
+						return 'sandbox';
+					}
+					return 'not_found';
+				}
+			);
+
+		$this->assertTrue( $this->sut->is_in_test_mode( $gateway ) );
+
+		// Test with 'live' value.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_option' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		$gateway->expects( $this->exactly( 3 ) )
+			->method( 'get_option' )
+			->willReturnCallback(
+				function ( $key, $default_value ) {
+					unset( $default_value ); // Avoid parameter not used PHPCS errors.
+					if ( 'mode' === $key ) {
+						return 'live';
+					}
+					return 'not_found';
+				}
+			);
+
+		$this->assertFalse( $this->sut->is_in_test_mode( $gateway ) );
+
+		// Test with 'production' value.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'get_option' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		$gateway->expects( $this->exactly( 3 ) )
+			->method( 'get_option' )
+			->willReturnCallback(
+				function ( $key, $default_value ) {
+					unset( $default_value ); // Avoid parameter not used PHPCS errors.
+					if ( 'mode' === $key ) {
+						return 'production';
+					}
+					return 'not_found';
+				}
+			);
+
+		$this->assertFalse( $this->sut->is_in_test_mode( $gateway ) );
 	}
 
 	/**

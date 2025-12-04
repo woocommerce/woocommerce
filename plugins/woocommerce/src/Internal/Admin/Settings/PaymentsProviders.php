@@ -366,7 +366,7 @@ class PaymentsProviders {
 		/**
 		 * The provider class for the gateway.
 		 *
-		 * @var PaymentGateway|null $provider_class
+		 * @var class-string<PaymentGateway>|null $provider_class
 		 */
 		$provider_class = null;
 		if ( isset( $this->payment_gateways_providers_class_map[ $gateway_id ] ) ) {
@@ -386,16 +386,31 @@ class PaymentsProviders {
 			}
 		}
 
+		// Check that the provider class extends the PaymentGateway class.
+		if ( ! is_null( $provider_class ) && ! is_subclass_of( $provider_class, PaymentGateway::class ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: Gateway ID. */
+					esc_html__( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+					$gateway_id
+				),
+				'10.4.0'
+			);
+			// Return the generic provider as a fallback.
+			$provider_class = null;
+		}
+
 		// If the gateway ID is not mapped to a provider class, return the generic provider.
 		if ( is_null( $provider_class ) ) {
 			if ( ! isset( $this->instances['generic'] ) ) {
-				$this->instances['generic'] = new PaymentGateway();
+				$this->instances['generic'] = new PaymentGateway( $this->proxy );
 			}
 
 			return $this->instances['generic'];
 		}
 
-		$this->instances[ $gateway_id ] = new $provider_class();
+		$this->instances[ $gateway_id ] = new $provider_class( $this->proxy );
 
 		return $this->instances[ $gateway_id ];
 	}
@@ -416,23 +431,36 @@ class PaymentsProviders {
 		/**
 		 * The provider class for the payment extension suggestion (PES).
 		 *
-		 * @var PaymentGateway|null $provider_class
+		 * @var class-string<PaymentGateway>|null $provider_class
 		 */
 		$provider_class = null;
 		if ( isset( $this->payment_extension_suggestions_providers_class_map[ $pes_id ] ) ) {
-			$provider_class = $this->payment_extension_suggestions_providers_class_map[ $pes_id ];
+			if ( ! is_subclass_of( $this->payment_extension_suggestions_providers_class_map[ $pes_id ], PaymentGateway::class ) ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: Payment extension suggestion ID. */
+						esc_html__( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+						$pes_id
+					),
+					'10.4.0'
+				);
+				// Return the generic provider as a fallback.
+			} else {
+				$provider_class = $this->payment_extension_suggestions_providers_class_map[ $pes_id ];
+			}
 		}
 
 		// If the gateway ID is not mapped to a provider class, return the generic provider.
 		if ( is_null( $provider_class ) ) {
 			if ( ! isset( $this->instances['generic'] ) ) {
-				$this->instances['generic'] = new PaymentGateway();
+				$this->instances['generic'] = new PaymentGateway( $this->proxy );
 			}
 
 			return $this->instances['generic'];
 		}
 
-		$this->instances[ $pes_id ] = new $provider_class();
+		$this->instances[ $pes_id ] = new $provider_class( $this->proxy );
 
 		return $this->instances[ $pes_id ];
 	}

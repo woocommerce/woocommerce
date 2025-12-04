@@ -66,7 +66,7 @@ $drawer-animation-duration: 0.3s;
 }
 
 .wc-block-components-drawer {
-	@include with-translucent-border(0 0 0 1px);
+	border-left: 1px solid $universal-translucent-border-color;
 	background: #fff;
 	display: block;
 	height: 100%;

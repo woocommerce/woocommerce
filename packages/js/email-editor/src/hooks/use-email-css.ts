@@ -11,7 +11,10 @@ import deepmerge from 'deepmerge';
  */
 import { EmailTheme, EmailBuiltStyles, storeName } from '../store';
 import { useUserTheme } from './use-user-theme';
-import { useGlobalStylesOutputWithConfig } from '../private-apis';
+import {
+	useGlobalStylesOutputWithConfig,
+	areExternalStylesSupported,
+} from '../private-apis';
 import { unwrapCompressedPresetStyleVariable } from '../style-variables';
 
 // Empty array to avoid re-rendering the component when the array is empty
@@ -51,11 +54,15 @@ export function useEmailCss() {
 		[ editorTheme, userTheme ]
 	);
 
+	// In the Gutenberg version 22.0+ the useGlobalStylesOutputWithConfig hook is not available and we return empty array.
+	// We keep this for now to support WP 6.9 and lower.
 	const [ styles ] = useGlobalStylesOutputWithConfig( mergedConfig );
 
 	let rootContainerStyles = '';
 	if ( layout && deviceType !== 'Mobile' ) {
-		rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;max-width: 100%;`;
+		rootContainerStyles = `display:flow-root; width:${
+			layout?.contentSize || '660px'
+		}; margin: 0 auto;box-sizing: border-box;max-width: 100%;`;
 	}
 	const padding = mergedConfig.styles?.spacing?.padding;
 	if ( padding ) {
@@ -68,6 +75,9 @@ export function useEmailCss() {
 	}
 
 	const finalStyles = useMemo( () => {
+		if ( ! areExternalStylesSupported ) {
+			return EMPTY_ARRAY;
+		}
 		return [
 			...( ( styles as EmailBuiltStyles[] ) ?? [] ),
 			{

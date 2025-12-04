@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Pass input element as context in quantity selector

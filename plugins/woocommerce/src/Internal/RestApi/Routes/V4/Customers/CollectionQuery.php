@@ -70,12 +70,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 				'default'           => array(),
 				'sanitize_callback' => 'wp_parse_id_list',
 			),
-			'offset'   => array(
-				'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
 			'order'    => array(
 				'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 				'type'              => 'string',
@@ -90,21 +84,14 @@ final class CollectionQuery extends AbstractCollectionQuery {
 				'default'           => 'name',
 				'enum'              => array(
 					'id',
-					'include',
 					'name',
 					'registered_date',
+					'order_count',
+					'total_spent',
+					'last_active',
 				),
 				'sanitize_callback' => 'sanitize_key',
 				'validate_callback' => 'rest_validate_request_arg',
-			),
-			'email'    => array(
-				'description'       => __( 'Limit result set to resources with a specific email.', 'woocommerce' ),
-				'type'              => 'string',
-				'format'            => 'email',
-				'sanitize_callback' => 'sanitize_email',
-				'validate_callback' => function ( $value ) {
-					return is_email( $value );
-				},
 			),
 			'role'     => array(
 				'description'       => __( 'Limit result set to resources with a specific role.', 'woocommerce' ),
@@ -128,19 +115,17 @@ final class CollectionQuery extends AbstractCollectionQuery {
 		$prepared_args['include'] = $request['include'];
 		$prepared_args['order']   = $request['order'];
 		$prepared_args['number']  = $request['per_page'];
+		$prepared_args['page']    = max( 1, intval( $request['page'] ) );
 
-		if ( ! empty( $request['offset'] ) ) {
-			$prepared_args['offset'] = $request['offset'];
-		} else {
-			$prepared_args['offset'] = ( $request['page'] - 1 ) * $prepared_args['number'];
-		}
-
-		$orderby_possibles        = array(
+		$orderby_possibles = array(
 			'id'              => 'ID',
-			'include'         => 'include',
 			'name'            => 'display_name',
-			'registered_date' => 'registered',
+			'registered_date' => 'user_registered',
+			'order_count'     => 'wc_order_count',
+			'total_spent'     => 'wc_money_spent',
+			'last_active'     => 'wc_last_active',
 		);
+
 		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
 		$prepared_args['search']  = $request['search'];
 
@@ -148,16 +133,8 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			$prepared_args['search'] = '*' . $prepared_args['search'] . '*';
 		}
 
-		// Filter by email.
-		if ( ! empty( $request['email'] ) ) {
-			$prepared_args['search']         = $request['email'];
-			$prepared_args['search_columns'] = array( 'user_email' );
-		}
-
-		// Filter by role.
-		if ( 'all' !== $request['role'] ) {
-			$prepared_args['role'] = $request['role'];
-		}
+		// Always pass role through (datastore handles 'all' vs 'customer').
+		$prepared_args['role'] = $request['role'];
 
 		/**
 		 * Filter arguments, before passing to WP_User_Query, when querying users via the REST API.
@@ -181,29 +158,22 @@ final class CollectionQuery extends AbstractCollectionQuery {
 	 * @return array
 	 */
 	public function get_query_results( array $query_args, WP_REST_Request $request ): array {
-		$query = new WP_User_Query( $query_args );
+		$method_args = array(
+			'order'    => $query_args['order'] ?? 'asc',
+			'orderby'  => $query_args['orderby'] ?? 'user_registered',
+			'per_page' => $query_args['number'] ?? 10,
+			'search'   => $query_args['search'] ?? '',
+			'role'     => $query_args['role'] ?? 'customer',
+			'include'  => $query_args['include'] ?? array(),
+			'exclude'  => $query_args['exclude'] ?? array(),
+			'page'     => $query_args['page'] ?? 1,
+		);
 
-		$users = array();
-		foreach ( $query->results as $user ) {
-			$users[] = new \WC_Customer( $user->ID );
-		}
-
-		// Store pagination values for headers then unset for count query.
-		$per_page = (int) $query_args['number'];
-		$page     = ceil( ( ( (int) $query_args['offset'] ) / $per_page ) + 1 );
-
-		$query_args['fields'] = 'ID';
-
-		$total_users = $query->get_total();
-		if ( $total_users < 1 ) {
-			// Out-of-bounds, run the query again without LIMIT for total count.
-			unset( $query_args['number'] );
-			unset( $query_args['offset'] );
-			$count_query = new WP_User_Query( $query_args );
-			$total_users = $count_query->get_total();
-		}
-
-		$max_pages = ceil( $total_users / $per_page );
+		$data_store             = \WC_Data_Store::load( 'customer' );
+		$customer_query_results = $data_store->query_customers( $method_args );
+		$users                  = $customer_query_results->customers;
+		$total_users            = $customer_query_results->total;
+		$max_pages              = $customer_query_results->max_num_pages;
 
 		return array(
 			'results' => $users,
