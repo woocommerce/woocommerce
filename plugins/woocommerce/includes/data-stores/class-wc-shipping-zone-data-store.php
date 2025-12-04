@@ -425,6 +425,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @since 10.5.0
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
 	 * @param stdClass         $meta Meta object (containing at least ->id).
+	 * @return array Empty array - no meta was deleted.
 	 */
 	public function delete_meta( &$zone, $meta ) {
 		wc_get_logger()->warning(
@@ -435,18 +436,19 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 				'backtrace' => true,
 			)
 		);
+		return array();
 	}
 
 	/**
 	 * Shipping zones do not support meta data.
 	 *
-	 * Returns false to indicate the operation cannot be performed, consistent with
-	 * WordPress meta functions which return false on failure.
+	 * Returns 0 to indicate no meta was added. Valid meta IDs are always positive
+	 * integers, so 0 indicates failure while remaining type-compatible with parent.
 	 *
 	 * @since 10.5.0
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
 	 * @param stdClass         $meta Meta object (containing ->key and ->value).
-	 * @return false Always returns false as shipping zones do not support meta storage.
+	 * @return int Always returns 0 as shipping zones do not support meta storage.
 	 */
 	public function add_meta( &$zone, $meta ) {
 		wc_get_logger()->warning(
@@ -458,7 +460,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 				'backtrace' => true,
 			)
 		);
-		return false;
+		return 0;
 	}
 
 	/**
@@ -467,6 +469,7 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @since 10.5.0
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
 	 * @param stdClass         $meta Meta object (containing ->id, ->key and ->value).
+	 * @return bool False - meta was not updated.
 	 */
 	public function update_meta( &$zone, $meta ) {
 		wc_get_logger()->warning(
@@ -478,5 +481,6 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 				'backtrace' => true,
 			)
 		);
+		return false;
 	}
 }

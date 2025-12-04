@@ -98,9 +98,9 @@ class WC_Shipping_Zone_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox add_meta() returns false as shipping zones do not support meta storage.
+	 * @testdox add_meta() returns 0 as shipping zones do not support meta storage.
 	 */
-	public function test_add_meta_returns_false() {
+	public function test_add_meta_returns_zero() {
 		$zone = new WC_Shipping_Zone();
 		$zone->set_zone_name( 'Test Zone' );
 		$zone->save();
@@ -112,7 +112,7 @@ class WC_Shipping_Zone_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 		$result    = $datastore->add_meta( $zone, $meta );
 
-		$this->assertFalse( $result );
+		$this->assertSame( 0, $result );
 
 		$zone->delete();
 	}
