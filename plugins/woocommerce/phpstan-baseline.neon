@@ -33013,18 +33013,6 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php
 
 		-
-			message: '#^Cannot access property \$id on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-notices.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Notices\:\:paypal_migration_notice_dismissed\(\) should return bool but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-notices.php
-
-		-
 			message: '#^Binary operation "\." between ''WooCommerce/'' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
