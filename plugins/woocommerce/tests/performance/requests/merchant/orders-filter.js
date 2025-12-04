@@ -12,9 +12,7 @@ import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
  */
 import {
 	base_url,
-	hpos_status,
 	admin_orders_base_url,
-	hpos_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
 	customer_user_id,
@@ -31,14 +29,6 @@ const month = date.toJSON().slice( 5, 7 );
 const year = date.toJSON().slice( 0, 4 );
 const currentDate = `${ year }${ month }`;
 
-// Change URL if HPOS is enabled and being used
-let admin_orders_base;
-if ( hpos_status === true ) {
-	admin_orders_base = hpos_admin_orders_base_url;
-} else {
-	admin_orders_base = `${ admin_orders_base_url }&post_status=all`;
-}
-
 export function ordersFilter() {
 	let response;
 
@@ -52,7 +42,7 @@ export function ordersFilter() {
 		);
 
 		response = http.get(
-			`${ base_url }/wp-admin/${ admin_orders_base }` +
+			`${ base_url }/wp-admin/${ admin_orders_base_url }` +
 				`&s&action=-1&m=${ currentDate }&_customer_user&filter_action=Filter&paged=1&action2=-1`,
 			{
 				headers: requestHeaders,
@@ -71,7 +61,7 @@ export function ordersFilter() {
 		} );
 
 		response = http.get(
-			`${ base_url }/wp-admin/${ admin_orders_base }` +
+			`${ base_url }/wp-admin/${ admin_orders_base_url }` +
 				`&s&action=-1&m=0&_customer_user=${ customer_user_id }&filter_action=Filter&paged=1&action2=-1`,
 			{
 				headers: requestHeaders,
