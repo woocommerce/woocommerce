@@ -170,7 +170,7 @@ export const updateReleaseBranchChangelogs = async (
 	tmpRepoPath: string,
 	releaseBranch: string
 ): Promise< { deletionCommitHash: string; prNumber: number } > => {
-	const { owner, name, version, commitDirectToBase } = options;
+	const { owner, name, version, commitDirectToBase, githubActor } = options;
 	const mainVersion = version.replace( /\.\d+(-.*)?$/, '' ); // For compatibility with Jetpack changelogger which expects X.Y as version.
 
 	try {
@@ -282,6 +282,7 @@ export const updateReleaseBranchChangelogs = async (
 			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -321,7 +322,7 @@ export const updateBranchChangelog = async (
 	releaseBranch: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
 ): Promise< number > => {
-	const { owner, name, version } = options;
+	const { owner, name, version, githubActor } = options;
 	const { deletionCommitHash, prNumber } = releaseBranchChanges;
 
 	// Skip if there were no changelog files to delete
@@ -375,6 +376,7 @@ export const updateBranchChangelog = async (
 			}`,
 			head: branch,
 			base: releaseBranch,
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
