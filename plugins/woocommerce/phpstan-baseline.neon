@@ -99079,12 +99079,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Call to static method load\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Data_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Cannot access offset ''alt'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -103091,12 +103085,6 @@ parameters:
 			identifier: trait.unused
 			count: 1
 			path: src/Internal/Traits/AccessiblePrivateMethods.php
-
-		-
-			message: '#^Trait Automattic\\WooCommerce\\Internal\\Traits\\RestApiCache is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Internal/Traits/RestApiCache.php
 
 		-
 			message: '#^Binary operation "\+" between mixed and int results in an error\.$#'

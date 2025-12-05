@@ -80,6 +80,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param WP_REST_Request $request     The request object.
 	 * @param string|null     $endpoint_id Optional endpoint identifier.
 	 * @return array Cleaned data for ETag generation.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array {
 		return $this->remove_related_ids_from_response_data( $data );
@@ -748,11 +750,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 *
 	 * @internal
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	public function get_related_products( $request ) {
 		$product = $this->get_object( (int) $request['id'] );
 
-		if ( ! $product || 0 === $product->get_id() ) {
+		if ( ! $product instanceof \WC_Product || 0 === $product->get_id() ) {
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 

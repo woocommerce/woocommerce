@@ -157,6 +157,7 @@ trait RestApiCache {
 	 * This MUST be called from the controller's constructor.
 	 */
 	protected function initialize_rest_api_cache(): void {
+		/** @var FeaturesController $features_controller Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 
 		$this->rest_api_caching_feature_enabled = $features_controller->feature_is_enabled( 'rest_api_caching' );
@@ -164,6 +165,7 @@ trait RestApiCache {
 			return;
 		}
 
+		/** @var VersionStringGenerator $generator Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$generator = wc_get_container()->get( VersionStringGenerator::class );
 
 		$backend_caching_enabled        = 'yes' === get_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
@@ -207,6 +209,8 @@ trait RestApiCache {
 	 * @param callable        $callback The original endpoint callback.
 	 * @param array           $config   Caching configuration specified for the endpoint.
 	 * @return WP_REST_Response|\WP_Error The response.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function handle_cacheable_request( WP_REST_Request $request, callable $callback, array $config ) {
 		$backend_caching_enabled = ! is_null( $this->version_string_generator );
@@ -216,13 +220,14 @@ trait RestApiCache {
 			return call_user_func( $callback, $request );
 		}
 
+		$cached_config     = null;
 		$should_skip_cache = ! $this->should_use_cache_for_request( $request );
 		if ( ! $should_skip_cache ) {
 			$cached_config     = $this->build_cache_config( $request, $config );
 			$should_skip_cache = is_null( $cached_config );
 		}
 
-		if ( $should_skip_cache ) {
+		if ( $should_skip_cache || is_null( $cached_config ) ) {
 			$response = call_user_func( $callback, $request );
 			if ( ! is_wp_error( $response ) ) {
 				$response = rest_ensure_response( $response );
@@ -254,6 +259,8 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @return bool True if caching should be used, false otherwise.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function should_use_cache_for_request( WP_REST_Request $request ): bool {
 		$skip_cache   = $request->get_param( '_skip_cache' );
@@ -284,6 +291,8 @@ trait RestApiCache {
 	 * @param array           $config  Raw configuration array passed to with_cache.
 	 * @return array|null Normalized cache config with keys: endpoint_id, entity_type, vary_by_user, cache_ttl, relevant_hooks, include_headers, exclude_headers, cache_key. Returns null if entity type is not available.
 	 * @throws \InvalidArgumentException If include_headers is not false or an array.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function build_cache_config( WP_REST_Request $request, array $config ): ?array {
 		$endpoint_id  = $config['endpoint_id'] ?? null;
@@ -291,7 +300,9 @@ trait RestApiCache {
 		$vary_by_user = $config['vary_by_user'] ?? $this->response_cache_vary_by_user( $request, $endpoint_id );
 
 		if ( ! $entity_type ) {
-			wc_get_container()->get( LegacyProxy::class )->call_function(
+			/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+			$legacy_proxy->call_function(
 				'wc_doing_it_wrong',
 				__METHOD__,
 				'No entity type provided and no default entity type available. Skipping cache.',
@@ -333,6 +344,8 @@ trait RestApiCache {
 	 * @param array                                   $cached_config      Caching configuration from build_cache_config().
 	 * @param bool                                    $add_cache_headers  Whether to add cache control headers.
 	 * @return WP_REST_Response|\WP_Error The response with appropriate cache headers.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function maybe_cache_response( WP_REST_Request $request, $response, array $cached_config, bool $add_cache_headers ) {
 		if ( is_wp_error( $response ) ) {
@@ -394,6 +407,8 @@ trait RestApiCache {
 	 * @param WP_REST_Response|\WP_Error|array|object $response      The response to add headers to.
 	 * @param array                                   $cached_config Caching configuration from build_cache_config().
 	 * @return WP_REST_Response|\WP_Error The response with cache headers.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function maybe_add_cache_headers( WP_REST_Request $request, $response, array $cached_config ) {
 		if ( is_wp_error( $response ) ) {
@@ -413,11 +428,13 @@ trait RestApiCache {
 
 		$request_etag = $request->get_header( 'if-none-match' );
 
-		$is_user_logged_in   = wc_get_container()->get( LegacyProxy::class )->call_function( 'is_user_logged_in' );
+		/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$legacy_proxy        = wc_get_container()->get( LegacyProxy::class );
+		$is_user_logged_in   = $legacy_proxy->call_function( 'is_user_logged_in' );
 		$cache_visibility    = $cached_config['vary_by_user'] && $is_user_logged_in ? 'private' : 'public';
 		$cache_control_value = $cache_visibility . ', must-revalidate, max-age=' . $cached_config['cache_ttl'];
 
-		if ( ! empty( $response_etag ) && $request_etag === $response_etag ) {
+		if ( $request_etag === $response_etag ) {
 			$not_modified_response = $this->create_not_modified_response( $response_etag, $cache_control_value, $request, $cached_config['endpoint_id'] );
 			if ( $not_modified_response ) {
 				return $not_modified_response;
@@ -442,6 +459,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request             The request object.
 	 * @param string|null     $endpoint_id         The endpoint identifier.
 	 * @return WP_REST_Response|null 304 response if allowed, null otherwise.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function create_not_modified_response( string $etag, string $cache_control_value, WP_REST_Request $request, ?string $endpoint_id ): ?WP_REST_Response {
 		$response = new WP_REST_Response( null, 304 );
@@ -485,6 +504,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request     The request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array Cleaned data for ETag generation.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return $data;
@@ -502,6 +523,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request     The request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return bool True to make cache user-specific, false otherwise.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return true;
@@ -516,6 +539,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request     The request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return int Cache TTL in seconds.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_ttl_for_cached_response( WP_REST_Request $request, ?string $endpoint_id = null ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return HOUR_IN_SECONDS;
@@ -535,6 +560,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request     Request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array Array of hook names to track.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return array();
@@ -554,6 +581,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request     Request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array|false Array of header names to include (case-insensitive), or false to use exclusion logic.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_response_headers_to_include_in_caching( WP_REST_Request $request, ?string $endpoint_id = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return false;
@@ -574,6 +603,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request     Request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array Array of header names to exclude (case-insensitive).
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_response_headers_to_exclude_from_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return array();
@@ -592,6 +623,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request       The request object.
 	 * @param string|null     $endpoint_id   Optional friendly identifier for the endpoint.
 	 * @return array Array of entity IDs.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$ids = array();
@@ -608,7 +641,7 @@ trait RestApiCache {
 
 		// Filter out null/false values but keep 0 and empty strings as they could be valid IDs.
 		return array_unique(
-			array_filter( $ids, fn ( $id ) => ! is_null( $id ) && false !== $id )
+			array_filter( $ids, fn ( $id ) => false !== $id )
 		);
 	}
 
@@ -633,6 +666,8 @@ trait RestApiCache {
 	 * @param WP_REST_Response $response        The response object.
 	 * @param string|null      $endpoint_id     Optional friendly identifier for the endpoint.
 	 * @return array Filtered headers array.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function get_headers_to_cache( array $nominal_headers, $include_headers, array $exclude_headers, WP_REST_Request $request, WP_REST_Response $response, ?string $endpoint_id ): array {
 		// Step 1: Determine which headers to consider based on include/exclude.
@@ -695,7 +730,9 @@ trait RestApiCache {
 		);
 
 		if ( ! empty( $reintroduced_headers ) ) {
-			wc_get_container()->get( LegacyProxy::class )->call_function(
+			/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+			$legacy_proxy->call_function(
 				'wc_doing_it_wrong',
 				__METHOD__,
 				sprintf(
@@ -727,6 +764,8 @@ trait RestApiCache {
 	 * @param bool            $vary_by_user Whether to include user ID in cache key.
 	 * @param string|null     $endpoint_id  Optional friendly identifier for the endpoint.
 	 * @return array Array of cache key information parts.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_key_info_for_cached_response( WP_REST_Request $request, bool $vary_by_user = false, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$request_query_params = $request->get_query_params();
@@ -741,7 +780,10 @@ trait RestApiCache {
 		);
 
 		if ( $vary_by_user ) {
-			$user_id           = wc_get_container()->get( LegacyProxy::class )->call_function( 'get_current_user_id' );
+			/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+			// @phpstan-ignore-next-line argument.type -- get_current_user_id returns int at runtime.
+			$user_id           = intval( $legacy_proxy->call_function( 'get_current_user_id' ) );
 			$cache_key_parts[] = "user_{$user_id}";
 		}
 
@@ -756,6 +798,8 @@ trait RestApiCache {
 	 * @param bool            $vary_by_user Whether to include user ID in cache key.
 	 * @param string|null     $endpoint_id  Optional friendly identifier for the endpoint.
 	 * @return string Cache key.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function get_key_for_cached_response( WP_REST_Request $request, string $entity_type, bool $vary_by_user = false, ?string $endpoint_id = null ): string {
 		$cache_key_parts = $this->get_key_info_for_cached_response( $request, $vary_by_user, $endpoint_id );
@@ -823,7 +867,8 @@ trait RestApiCache {
 			$this
 		);
 
-		return md5( wp_json_encode( $cache_hash_data ) );
+		$json = wp_json_encode( $cache_hash_data );
+		return md5( false === $json ? '' : $json );
 	}
 
 	/**
@@ -833,6 +878,8 @@ trait RestApiCache {
 	 * @param array           $cached_config        Built caching configuration from build_cache_config().
 	 * @param bool            $cache_headers_enabled Whether to add cache control headers.
 	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function get_cached_response( WP_REST_Request $request, array $cached_config, bool $cache_headers_enabled ): ?WP_REST_Response {
 		$cache_key      = $cached_config['cache_key'];
@@ -843,11 +890,13 @@ trait RestApiCache {
 		$found  = false;
 		$cached = wp_cache_get( $cache_key, self::$cache_group, false, $found );
 
-		if ( ! $found || ! array_key_exists( 'data', $cached ) || ! isset( $cached['entity_versions'], $cached['created_at'] ) ) {
+		if ( ! $found || ! is_array( $cached ) || ! array_key_exists( 'data', $cached ) || ! isset( $cached['entity_versions'], $cached['created_at'] ) ) {
 			return null;
 		}
 
-		$current_time    = wc_get_container()->get( LegacyProxy::class )->call_function( 'time' );
+		/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$legacy_proxy    = wc_get_container()->get( LegacyProxy::class );
+		$current_time    = $legacy_proxy->call_function( 'time' );
 		$expiration_time = $cached['created_at'] + $cache_ttl;
 		if ( $current_time >= $expiration_time ) {
 			wp_cache_delete( $cache_key, self::$cache_group );
@@ -864,12 +913,14 @@ trait RestApiCache {
 			}
 		}
 
-		foreach ( $cached['entity_versions'] as $entity_id => $cached_version ) {
-			$version_id      = "{$entity_type}_{$entity_id}";
-			$current_version = $this->version_string_generator->get_version( $version_id );
-			if ( $current_version !== $cached_version ) {
-				wp_cache_delete( $cache_key, self::$cache_group );
-				return null;
+		if ( ! is_null( $this->version_string_generator ) ) {
+			foreach ( $cached['entity_versions'] as $entity_id => $cached_version ) {
+				$version_id      = "{$entity_type}_{$entity_id}";
+				$current_version = $this->version_string_generator->get_version( $version_id );
+				if ( $current_version !== $cached_version ) {
+					wp_cache_delete( $cache_key, self::$cache_group );
+					return null;
+				}
 			}
 		}
 
@@ -882,7 +933,9 @@ trait RestApiCache {
 		$response_headers = array();
 
 		if ( $cache_headers_enabled ) {
-			$is_user_logged_in = wc_get_container()->get( LegacyProxy::class )->call_function( 'is_user_logged_in' );
+			/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$legacy_proxy      = wc_get_container()->get( LegacyProxy::class );
+			$is_user_logged_in = $legacy_proxy->call_function( 'is_user_logged_in' );
 			$cache_visibility  = $cached_config['vary_by_user'] && $is_user_logged_in ? 'private' : 'public';
 
 			if ( ! empty( $cached_etag ) ) {
@@ -892,12 +945,13 @@ trait RestApiCache {
 
 			// If the server adds a 'Date' header by itself there will be two such headers in the response.
 			// To help disambiguate them, we add also an 'X-WC-Date' header with the proper value.
-			$created_at                    = gmdate( 'D, d M Y H:i:s', $cached['created_at'] ) . ' GMT';
+			// @phpstan-ignore-next-line argument.type -- created_at is int, stored by store_cached_response.
+			$created_at                    = gmdate( 'D, d M Y H:i:s', intval( $cached['created_at'] ) ) . ' GMT';
 			$response_headers['Date']      = $created_at;
 			$response_headers['X-WC-Date'] = $created_at;
 
 			if ( ! empty( $cached_etag ) && $request_etag === $cached_etag ) {
-				$cache_control         = $response_headers['Cache-Control'] ?? '';
+				$cache_control         = $response_headers['Cache-Control'];
 				$not_modified_response = $this->create_not_modified_response( $cached_etag, $cache_control, $request, $cached_config['endpoint_id'] );
 				if ( $not_modified_response ) {
 					$not_modified_response->header( 'Date', $response_headers['Date'] );
@@ -937,18 +991,22 @@ trait RestApiCache {
 	 */
 	private function store_cached_response( string $cache_key, $data, int $status_code, string $entity_type, array $entity_ids, int $cache_ttl, array $relevant_hooks, array $headers = array(), string $etag = '' ): void {
 		$entity_versions = array();
-		foreach ( $entity_ids as $entity_id ) {
-			$version_id = "{$entity_type}_{$entity_id}";
-			$version    = $this->version_string_generator->get_version( $version_id );
-			if ( $version ) {
-				$entity_versions[ $entity_id ] = $version;
+		if ( ! is_null( $this->version_string_generator ) ) {
+			foreach ( $entity_ids as $entity_id ) {
+				$version_id = "{$entity_type}_{$entity_id}";
+				$version    = $this->version_string_generator->get_version( $version_id );
+				if ( $version ) {
+					$entity_versions[ $entity_id ] = $version;
+				}
 			}
 		}
 
-		$cache_data = array(
+		/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+		$cache_data   = array(
 			'data'            => $data,
 			'entity_versions' => $entity_versions,
-			'created_at'      => wc_get_container()->get( LegacyProxy::class )->call_function( 'time' ),
+			'created_at'      => $legacy_proxy->call_function( 'time' ),
 		);
 
 		if ( 200 !== $status_code ) {
