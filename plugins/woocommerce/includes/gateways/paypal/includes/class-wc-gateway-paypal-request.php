@@ -158,6 +158,27 @@ class WC_Gateway_Paypal_Request {
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
+			$response_array = is_array( $response_data ) ? $response_data : array();
+
+			/**
+			 * Fires after receiving a response from PayPal order creation.
+			 *
+			 * This hook allows extensions to react to PayPal API responses, such as
+			 * displaying admin notices or logging response data.
+			 *
+			 * Note: This hook fires on EVERY order creation attempt (success or failure),
+			 * and can be called multiple times for the same order if retried. Extensions
+			 * hooking this should be idempotent and check order state/meta before taking
+			 * action to avoid duplicate processing.
+			 *
+			 * @since 10.4.0
+			 *
+			 * @param int|string $http_code     The HTTP status code from the PayPal API response.
+			 * @param array      $response_data The decoded response data from the PayPal API
+			 * @param WC_Order   $order         The WooCommerce order object.
+			 */
+			do_action( 'woocommerce_paypal_standard_order_created_response', $http_code, $response_array, $order );
+
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
 				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
