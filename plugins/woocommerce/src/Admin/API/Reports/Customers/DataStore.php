@@ -676,7 +676,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%s',
 			'%s',
 			'%s',
-			'%s',
 		);
 
 		// Add registered customer data.
