@@ -118,6 +118,7 @@ class FraudProtectionController {
 		$api_client        = $container->get( FraudProtectionServiceApiClient::class );
 		$challenge_manager = $container->get( FraudProtectionChallengeManager::class );
 		$session_manager   = $container->get( SessionClearanceManager::class );
+		$data_collector    = $container->get( SessionDataCollector::class );
 
 		// Get schema controller and create schema instance.
 		$schema_controller = $container->get( \Automattic\WooCommerce\StoreApi\SchemaController::class );
@@ -130,7 +131,8 @@ class FraudProtectionController {
 			$schema,
 			$api_client,
 			$challenge_manager,
-			$session_manager
+			$session_manager,
+			$data_collector
 		);
 
 		$verify_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionOtpVerify(
@@ -138,7 +140,8 @@ class FraudProtectionController {
 			$schema,
 			$api_client,
 			$challenge_manager,
-			$session_manager
+			$session_manager,
+			$data_collector
 		);
 
 		$resend_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionOtpResend(

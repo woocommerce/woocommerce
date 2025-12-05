@@ -5,6 +5,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionServiceApiClient;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionChallengeManager;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 
 /**
  * FraudProtectionOtpRequest class.
@@ -43,19 +44,28 @@ class FraudProtectionOtpRequest extends AbstractRoute {
 	private $session_manager;
 
 	/**
+	 * Session data collector instance.
+	 *
+	 * @var SessionDataCollector
+	 */
+	private $data_collector;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param \Automattic\WooCommerce\StoreApi\SchemaController $schema_controller Schema Controller instance.
-	 * @param \Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema $schema Schema class for this route.
-	 * @param FraudProtectionServiceApiClient $api_client API client instance.
-	 * @param FraudProtectionChallengeManager $challenge_manager Challenge manager instance.
-	 * @param SessionClearanceManager $session_manager Session manager instance.
+	 * @param \Automattic\WooCommerce\StoreApi\SchemaController          $schema_controller Schema Controller instance.
+	 * @param \Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema $schema            Schema class for this route.
+	 * @param FraudProtectionServiceApiClient                            $api_client        API client instance.
+	 * @param FraudProtectionChallengeManager                            $challenge_manager Challenge manager instance.
+	 * @param SessionClearanceManager                                    $session_manager   Session manager instance.
+	 * @param SessionDataCollector                                       $data_collector    Session data collector instance.
 	 */
-	public function __construct( $schema_controller, $schema, $api_client, $challenge_manager, $session_manager ) {
+	public function __construct( $schema_controller, $schema, $api_client, $challenge_manager, $session_manager, $data_collector ) {
 		parent::__construct( $schema_controller, $schema );
 		$this->api_client        = $api_client;
 		$this->challenge_manager = $challenge_manager;
 		$this->session_manager   = $session_manager;
+		$this->data_collector    = $data_collector;
 	}
 
 	/**
@@ -103,18 +113,15 @@ class FraudProtectionOtpRequest extends AbstractRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$email = $request['email'];
 
-		// Get session key for API call.
-		$session_key  = $this->get_session_key();
-		$session_data = [
-			'session_key' => $session_key,
-			'email'       => $email,
-		];
+		// Collect full session data using SessionDataCollector.
+		$session_data          = $this->data_collector->collect();
+		$session_data['email'] = $email; // Override with form input.
 
-		// Call WPCOM API to get decision.
-		$decision = $this->api_client->track_session_event( 'challenge_requested', $session_data );
+		// Call WPCOM API to get verdict.
+		$verdict = $this->api_client->track_session_event( 'challenge_requested', $session_data );
 
-		// Handle decision outcomes.
-		if ( 'allow' === $decision ) {
+		// Handle verdict outcomes.
+		if ( FraudProtectionServiceApiClient::DECISION_ALLOW === $verdict ) {
 			$this->session_manager->allow_session();
 			return rest_ensure_response( [
 				'success'        => true,
@@ -123,7 +130,7 @@ class FraudProtectionOtpRequest extends AbstractRoute {
 			] );
 		}
 
-		if ( 'block' === $decision ) {
+		if ( FraudProtectionServiceApiClient::DECISION_BLOCK === $verdict ) {
 			$this->session_manager->block_session();
 			throw new RouteException(
 				'fraud_protection_session_blocked',
@@ -132,8 +139,8 @@ class FraudProtectionOtpRequest extends AbstractRoute {
 			);
 		}
 
-		// Decision is "challenge" - generate and send OTP.
-		$challenge = $this->challenge_manager->create_challenge( $session_key, $email );
+		// Verdict is "challenge" - generate and send OTP.
+		$challenge = $this->challenge_manager->create_challenge( $session_data['session_id'] ?? 'no-session', $email );
 
 		// Send OTP email.
 		$email_sent = $this->send_otp_email( $email, $challenge );
@@ -192,30 +199,6 @@ class FraudProtectionOtpRequest extends AbstractRoute {
 			$this->log_error( 'Exception sending OTP email: ' . $e->getMessage() );
 			return false;
 		}
-	}
-
-	/**
-	 * Get session key for current session.
-	 *
-	 * @return string Session key.
-	 */
-	private function get_session_key() {
-		if ( isset( WC()->session ) && WC()->session instanceof \WC_Session ) {
-			$customer_id = WC()->session->get_customer_id();
-			if ( $customer_id ) {
-				return $customer_id;
-			}
-		}
-
-		// Fallback for guests without session.
-		if ( function_exists( 'wp_get_session_token' ) ) {
-			$token = wp_get_session_token();
-			if ( $token ) {
-				return 'guest-' . $token;
-			}
-		}
-
-		return 'no-session';
 	}
 
 	/**
