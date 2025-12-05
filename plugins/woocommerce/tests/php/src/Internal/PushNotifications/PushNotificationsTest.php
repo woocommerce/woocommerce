@@ -177,9 +177,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests that push_token post type is registered when enabled.
+	 * @testdox Tests that register() hooks register_post_types to init when enabled.
 	 */
-	public function test_it_registers_push_token_post_type_when_enabled() {
+	public function test_it_hooks_register_post_types_when_enabled() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
 		$this->jetpack_connection_manager_mock
@@ -190,11 +190,18 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 		$push_notifications->register();
 
-		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
-		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
+		$callback_priority = has_action( 'init', array( $push_notifications, 'register_post_types' ) );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		do_action( 'init' );
+		$this->assertTrue( (bool) $callback_priority, 'register_post_types should be hooked to init' );
+		$this->assertEquals( 10, $callback_priority, 'register_post_types should have priority 10' );
+	}
+
+	/**
+	 * @testdox Tests that register_post_types() registers push_token post type with correct properties.
+	 */
+	public function test_it_registers_push_token_post_type_with_correct_properties() {
+		$push_notifications = new PushNotifications();
+		$push_notifications->register_post_types();
 
 		$this->assertTrue( post_type_exists( PushToken::POST_TYPE ), 'Push token post type should be registered' );
 
@@ -216,20 +223,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 		$push_notifications->register();
 
-		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
-		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
-
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		do_action( 'init' );
-
 		$this->assertFalse(
-			has_action(
-				'init',
-				array(
-					'Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore',
-					'register_post_type',
-				)
-			)
+			has_action( 'init', array( $push_notifications, 'register_post_types' ) ),
+			'register_post_types should not be hooked to init when disabled'
 		);
 	}
 
