@@ -245,6 +245,8 @@ class WC_Gateway_Paypal_Notices {
 	 * - dismissed_paypal_migration_completed_notice
 	 * - dismissed_paypal_account_restricted_notice
 	 * - dismissed_paypal_unsupported_currency_notice
+	 * 
+	 * The meta keys are set by WC_Admin_Notices when the notice is dismissed by the user.
 	 *
 	 * @param string $notice_name The name of the notice.
 	 * @return bool
