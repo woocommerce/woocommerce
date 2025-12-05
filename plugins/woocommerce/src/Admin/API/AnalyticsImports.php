@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use WP_Error;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 
 defined( 'ABSPATH' ) || exit;
@@ -69,11 +70,11 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 * Check if a given request has access to read import status.
 	 *
 	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
+	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_rest_cannot_view',
 				__( 'Sorry, you cannot view analytics import status.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
@@ -87,11 +88,11 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 * Check if a given request has access to trigger import.
 	 *
 	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
+	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_rest_cannot_create',
 				__( 'Sorry, you cannot trigger analytics imports.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
@@ -141,7 +142,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 
 		// Return error if in immediate mode.
 		if ( $is_immediate_mode ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_rest_analytics_import_immediate_mode',
 				__( 'Manual import is not available in immediate mode. Imports happen automatically.', 'woocommerce' ),
 				array( 'status' => 400 )
@@ -150,7 +151,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 
 		// Determine if a batch import has already been scheduled or is in progress, excluding the recurring import action.
 		if ( $this->has_manual_triggered_import_scheduled() ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_rest_analytics_import_already_scheduled_or_in_progress',
 				__( 'A batch import is already scheduled or in progress. Please wait for it to complete before triggering a new import.', 'woocommerce' ),
 				array( 'status' => 400 )
