@@ -46,20 +46,6 @@ trait ProductItemTrait {
 
 		foreach ( $variation_data as $key => $value ) {
 			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $key ) ) );
-
-			// Ensure $value is a string before attempting taxonomy lookups.
-			// This can happen when a simple product's custom attribute has the same slug as a global attribute
-			// (which returns WC_Product_Attribute objects).
-			if ( $value instanceof \WC_Product_Attribute ) {
-				$options = $value->get_options();
-				if ( is_array( $options ) && ! empty( $options ) ) {
-					// Ensure all options are strings before imploding.
-					$value = implode( ', ', array_map( 'strval', $options ) );
-				} else {
-					$value = '';
-				}
-			}
-
 			if ( taxonomy_exists( $taxonomy ) ) {
 				// If this is a term slug, get the term's nice name.
 				$term = get_term_by( 'slug', $value, $taxonomy );
