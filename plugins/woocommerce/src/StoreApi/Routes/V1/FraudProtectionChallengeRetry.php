@@ -188,7 +188,7 @@ class FraudProtectionChallengeRetry extends AbstractCartRoute {
 	 */
 	private function log_info( $message, $context = [] ) {
 		$logger = wc_get_logger();
-		$logger->info( $message, array_merge( [ 'source' => 'woo-fraud-protection-otp' ], $context ) );
+		$logger->info( $message, array_merge( [ 'source' => 'woo-fraud-protection' ], $context ) );
 	}
 
 	/**
@@ -199,6 +199,6 @@ class FraudProtectionChallengeRetry extends AbstractCartRoute {
 	 */
 	private function log_error( $message, $context = [] ) {
 		$logger = wc_get_logger();
-		$logger->error( $message, array_merge( [ 'source' => 'woo-fraud-protection-otp' ], $context ) );
+		$logger->error( $message, array_merge( [ 'source' => 'woo-fraud-protection' ], $context ) );
 	}
 }

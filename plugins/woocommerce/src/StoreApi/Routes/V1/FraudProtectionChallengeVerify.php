@@ -206,6 +206,6 @@ class FraudProtectionChallengeVerify extends AbstractCartRoute {
 	 */
 	private function log_info( $message, $context = [] ) {
 		$logger = wc_get_logger();
-		$logger->info( $message, array_merge( [ 'source' => 'woo-fraud-protection-otp' ], $context ) );
+		$logger->info( $message, array_merge( [ 'source' => 'woo-fraud-protection' ], $context ) );
 	}
 }
