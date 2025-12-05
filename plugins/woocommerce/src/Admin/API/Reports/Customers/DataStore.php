@@ -182,6 +182,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Fills ORDER BY clause of SQL request based on user supplied parameters. Overridden here to allow multiple direction
 	 * clauses.
 	 *
+	 * @since 10.5.0
 	 * @param array $query_args Parameters supplied by the user.
 	 */
 	protected function add_order_by_sql_params( $query_args ) {
@@ -198,15 +199,32 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
+	 * @override ReportsDataStore::normalize_order_by()
+	 *
+	 * @param string $order_by Sorting criterion.
+	 * @return string
+	 */
+	protected function normalize_order_by( $order_by ) {
+		if ( 'name' === $order_by ) {
+			return "CONCAT_WS( ' ', first_name, last_name )";
+		}
+
+		return $order_by;
+	}
+
+	/**
+	 * Maps ordering specified by the user to columns in the database/fields in the data.
+	 *
 	 * Handles both order_by and direction.
 	 *
+	 * @since 10.5.0
 	 * @param string $order_by Sorting criterion.
 	 * @param string $order Order direction.
 	 * @return string
 	 */
 	protected function normalize_order_by_clause( $order_by, $order = 'desc' ) {
 		$order_by        = esc_sql( $order_by );
-		$order           = esc_sql( $order );
+		$order           = strtolower( $order ) === 'asc' ? 'ASC' : 'DESC';
 		$order_by_clause = '';
 
 		if ( 'name' === $order_by ) {
@@ -1053,6 +1071,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Build location filter SQL clause for includes or excludes.
 	 *
+	 * @since 10.5.0
 	 * @param string $locations_string Comma-separated list of locations (e.g., "US:CA,US:NY,GB").
 	 * @param bool   $is_include       True for IN clause, false for NOT IN clause.
 	 * @return string SQL WHERE clause condition.
@@ -1069,7 +1088,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				continue;
 			}
 
-			if ( strstr( $location, ':' ) ) {
+			if ( false !== strpos( $location, ':' ) ) {
 				$country_states[] = esc_sql( $location );
 			} else {
 				$countries[] = esc_sql( $location );
