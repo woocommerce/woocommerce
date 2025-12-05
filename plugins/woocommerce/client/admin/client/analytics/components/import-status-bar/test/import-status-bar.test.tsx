@@ -68,7 +68,7 @@ describe( 'ImportStatusBar', () => {
 			mode: 'scheduled',
 			last_processed_date: '2024-11-21 00:00:00',
 			next_scheduled: '2024-11-21 12:00:00',
-			manual_triggered_import_scheduled: false,
+			import_in_progress_or_due: false,
 		},
 		isLoading: false,
 		error: null,
@@ -84,7 +84,7 @@ describe( 'ImportStatusBar', () => {
 					mode: 'immediate',
 					last_processed_date: null,
 					next_scheduled: null,
-					manual_triggered_import_scheduled: null,
+					import_in_progress_or_due: null,
 				},
 			} )
 		);
@@ -119,14 +119,14 @@ describe( 'ImportStatusBar', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should show "Updating…" when manual_triggered_import_scheduled is true', () => {
+	it( 'should show "Updating…" when import_in_progress_or_due is true', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
 				status: {
 					mode: 'scheduled',
 					last_processed_date: '2024-11-21 00:00:00',
 					next_scheduled: '2024-11-21 12:00:00',
-					manual_triggered_import_scheduled: true,
+					import_in_progress_or_due: true,
 				},
 			} )
 		);
@@ -139,14 +139,14 @@ describe( 'ImportStatusBar', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'should disable button when manual_triggered_import_scheduled is true', () => {
+	it( 'should disable button when import_in_progress_or_due is true', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
 				status: {
 					mode: 'scheduled',
 					last_processed_date: '2024-11-21 00:00:00',
 					next_scheduled: '2024-11-21 12:00:00',
-					manual_triggered_import_scheduled: true,
+					import_in_progress_or_due: true,
 				},
 			} )
 		);
@@ -245,7 +245,7 @@ describe( 'ImportStatusBar', () => {
 					mode: 'scheduled',
 					last_processed_date: null,
 					next_scheduled: null,
-					manual_triggered_import_scheduled: false,
+					import_in_progress_or_due: false,
 				},
 			} )
 		);

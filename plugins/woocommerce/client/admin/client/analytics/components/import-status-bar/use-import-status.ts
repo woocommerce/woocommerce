@@ -20,7 +20,7 @@ const POLL_INTERVAL = 5000;
  *
  * Features:
  * - Fetches import status from /wc-analytics/imports/status
- * - Auto-polls every 5s when manual_triggered_import_scheduled is true
+ * - Auto-polls every 5s when import_in_progress_or_due is true
  * - Stops polling when flag becomes false
  * - Provides triggerImport function to manually trigger imports
  * - Clean cleanup on unmount

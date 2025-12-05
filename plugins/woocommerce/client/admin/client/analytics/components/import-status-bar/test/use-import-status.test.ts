@@ -31,7 +31,7 @@ describe( 'useImportStatus', () => {
 		mode: 'scheduled',
 		last_processed_date: '2024-11-21 00:00:00',
 		next_scheduled: '2024-11-21 12:00:00',
-		manual_triggered_import_scheduled: false,
+		import_in_progress_or_due: false,
 		...overrides,
 	} );
 
@@ -57,9 +57,9 @@ describe( 'useImportStatus', () => {
 		} );
 	} );
 
-	it( 'should start polling when manual_triggered_import_scheduled is true', async () => {
+	it( 'should start polling when import_in_progress_or_due is true', async () => {
 		const mockStatus = createMockStatus( {
-			manual_triggered_import_scheduled: true,
+			import_in_progress_or_due: true,
 		} );
 		mockApiFetch.mockResolvedValue( mockStatus );
 
@@ -93,12 +93,12 @@ describe( 'useImportStatus', () => {
 		expect( mockApiFetch ).toHaveBeenCalledTimes( 3 );
 	} );
 
-	it( 'should stop polling when manual_triggered_import_scheduled becomes false', async () => {
+	it( 'should stop polling when import_in_progress_or_due becomes false', async () => {
 		const initialStatus = createMockStatus( {
-			manual_triggered_import_scheduled: true,
+			import_in_progress_or_due: true,
 		} );
 		const updatedStatus = createMockStatus( {
-			manual_triggered_import_scheduled: false,
+			import_in_progress_or_due: false,
 		} );
 
 		mockApiFetch
@@ -137,7 +137,7 @@ describe( 'useImportStatus', () => {
 		mockApiFetch.mockClear();
 
 		const updatedStatus = createMockStatus( {
-			manual_triggered_import_scheduled: true,
+			import_in_progress_or_due: true,
 		} );
 		mockApiFetch
 			.mockResolvedValueOnce( {} ) // POST response
@@ -220,7 +220,7 @@ describe( 'useImportStatus', () => {
 
 	it( 'should cleanup interval on unmount', async () => {
 		const mockStatus = createMockStatus( {
-			manual_triggered_import_scheduled: true,
+			import_in_progress_or_due: true,
 		} );
 		mockApiFetch.mockResolvedValue( mockStatus );
 
@@ -241,9 +241,9 @@ describe( 'useImportStatus', () => {
 		expect( mockApiFetch ).toHaveBeenCalledTimes( callCountBeforeUnmount );
 	} );
 
-	it( 'should not start polling when manual_triggered_import_scheduled is false', async () => {
+	it( 'should not start polling when import_in_progress_or_due is false', async () => {
 		const mockStatus = createMockStatus( {
-			manual_triggered_import_scheduled: false,
+			import_in_progress_or_due: false,
 		} );
 		mockApiFetch.mockResolvedValue( mockStatus );
 
