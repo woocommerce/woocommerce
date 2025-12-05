@@ -51,7 +51,23 @@ class FraudProtectionController {
 		add_filter( 'woocommerce_email_classes', array( $this, 'handle_register_email_classes' ), 10, 1 );
 		add_filter( 'woocommerce_prepare_email_for_preview', array( $this, 'handle_prepare_otp_email_for_preview' ), 10, 1 );
 
-		// Only initialize if fraud protection is enabled.
+		// Defer feature check until init action to avoid triggering translation loading
+		// before WooCommerce's textdomain is loaded.
+		// See https://github.com/woocommerce/woocommerce/pull/61424.
+		add_action( 'init', array( $this, 'maybe_init_hooks' ), 0 );
+	}
+
+	/**
+	 * Initialize fraud protection hooks if the feature is enabled.
+	 *
+	 * This is called on the init action to defer the feature check until after
+	 * WooCommerce's textdomain is loaded, avoiding the "translation loaded too early" notice.
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public function maybe_init_hooks(): void {
 		if ( $this->is_fraud_protection_enabled() ) {
 			$this->init_hooks();
 		}
