@@ -72,7 +72,7 @@
 		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm --filter='@woocommerce/block-library' test:e2e:legacy-mini-cart",
 		"test:php:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:php:env",
 		"test:env:start": "pnpm env:test",
-		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/gh-action-pr-requests.js",
+		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/main.js",
 		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
 		"test:perf:install-k6": "bash ./tests/performance/bin/install-k6.sh",
 		"test:php": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit -c ./phpunit.xml",

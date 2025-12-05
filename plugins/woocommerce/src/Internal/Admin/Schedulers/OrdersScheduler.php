@@ -68,6 +68,13 @@ class OrdersScheduler extends ImportScheduler {
 	const IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE = 'yes';
 
 	/**
+	 * Action name for the order batch import.
+	 *
+	 * @var string
+	 */
+	const PROCESS_PENDING_ORDERS_BATCH_ACTION = 'process_pending_batch';
+
+	/**
 	 * Attach order lookup update hooks.
 	 *
 	 * @internal
@@ -127,7 +134,7 @@ class OrdersScheduler extends ImportScheduler {
 		return array_merge(
 			parent::get_scheduler_actions(),
 			array(
-				'process_pending_batch' => 'wc-admin_process_pending_orders_batch',
+				self::PROCESS_PENDING_ORDERS_BATCH_ACTION => 'wc-admin_process_pending_orders_batch',
 			)
 		);
 	}
@@ -142,7 +149,7 @@ class OrdersScheduler extends ImportScheduler {
 		return array_merge(
 			parent::get_batch_sizes(),
 			array(
-				'process_pending_batch' => 100,
+				self::PROCESS_PENDING_ORDERS_BATCH_ACTION => 100,
 			)
 		);
 	}
@@ -196,8 +203,8 @@ class OrdersScheduler extends ImportScheduler {
 			"SELECT COUNT(*) FROM {$wpdb->posts}
 			WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
 			AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
-			{$where_clause}"
-		); // phpcs:ignore unprepared SQL ok.
+			{$where_clause}" // phpcs:ignore unprepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared SQL ok.
+		);
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -374,7 +381,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @internal
 	 */
 	public static function schedule_recurring_batch_processor() {
-		$action_hook = self::get_action( 'process_pending_batch' );
+		$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
 		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
@@ -405,12 +412,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		// If switching from batch processing to immediate import.
 		if ( 'no' === $old_value && 'yes' === $new_value ) {
 			// Unschedule the recurring batch processor.
-			$action_hook = self::get_action( 'process_pending_batch' );
+			$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 			as_unschedule_all_actions( $action_hook, array(), static::$group );
 
 			// Schedule an immediate catchup batch to process all orders up to now.
 			// This ensures no orders are missed during the transition.
-			self::schedule_action( 'process_pending_batch', array( null, null ) );
+			self::schedule_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION, array( null, null ) );
 		} elseif ( 'yes' === $old_value && 'no' === $new_value ) {
 			// Switching from immediate import to batch processing.
 			// Set the last processed order date to now with 1 minute buffer to ensure no orders are missed.
@@ -491,7 +498,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			$cursor_date = $default_cursor_date;
 		}
 
-		$batch_size = self::get_batch_size( 'process_pending_batch' );
+		$batch_size = self::get_batch_size( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 
 		$logger->info(
 			sprintf( 'Starting batch import. Cursor: %s (ID: %d), batch size: %d', $cursor_date, $cursor_id, $batch_size ),
@@ -505,6 +512,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		if ( empty( $orders ) ) {
 			$logger->info( 'No orders to process', $context );
+			// Update the cursor position to the start time of the batch so that the next batch will start from that point.
+			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', (int) $start_time ), false );
+			update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
 			return;
 		}
 
