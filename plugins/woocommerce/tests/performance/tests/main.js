@@ -86,7 +86,7 @@ export const options = {
 	thresholds: {
 		// All checks (assertions) must pass
 		checks: [ 'rate==1' ],
-		// Response time thresholds for all requests: 90% under 1000ms, 95% under 1500ms, 99.9% under 2000ms
+		// Response time thresholds for all requests
 		http_req_duration: [ 'p(90)<1000', 'p(95)<1500', 'p(99.9)<3000' ],
 	},
 };
