@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Exception;
 use InvalidArgumentException;
-use WP_Http;
 
 /**
  * Data store class for push tokens.
@@ -39,9 +38,7 @@ class PushTokensDataStore {
 	public function create( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_created() ) {
 			throw new InvalidArgumentException(
-				'Can\'t create push token because the push token data provided is invalid.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
+				'Can\'t create push token because the push token data provided is invalid.'
 			);
 		}
 
@@ -74,9 +71,7 @@ class PushTokensDataStore {
 	public function read( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
-				'Can\'t read push token because the push token data provided is invalid.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
+				'Can\'t read push token because the push token data provided is invalid.'
 			);
 		}
 
@@ -98,9 +93,7 @@ class PushTokensDataStore {
 			)
 		) {
 			throw new InvalidArgumentException(
-				'Can\'t read push token because the push token record is malformed.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
+				'Can\'t read push token because the push token record is malformed.'
 			);
 		}
 
@@ -123,9 +116,7 @@ class PushTokensDataStore {
 	public function update( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_updated() ) {
 			throw new InvalidArgumentException(
-				'Can\'t update push token because the push token data provided is invalid.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
+				'Can\'t update push token because the push token data provided is invalid.'
 			);
 		}
 
@@ -168,9 +159,7 @@ class PushTokensDataStore {
 	public function delete( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_deleted() ) {
 			throw new InvalidArgumentException(
-				'Can\'t delete push token because the push token data provided is invalid.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
+				'Can\'t delete push token because the push token data provided is invalid.'
 			);
 		}
 
@@ -203,9 +192,7 @@ class PushTokensDataStore {
 			|| ( ! $push_token->get_token() && ! $push_token->get_device_uuid() )
 		) {
 			throw new InvalidArgumentException(
-				'Can\'t retrieve push token because the push token data provided is invalid.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
+				'Can\'t retrieve push token because the push token data provided is invalid.'
 			);
 		}
 
@@ -272,9 +259,7 @@ class PushTokensDataStore {
 	private function build_meta_array_from_database( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
-				'Can\'t read meta for push token because the push token data provided is invalid.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
+				'Can\'t read meta for push token because the push token data provided is invalid.'
 			);
 		}
 
