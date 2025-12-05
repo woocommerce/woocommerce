@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
  *
  * @since 10.4.0
  */
-class FraudProtectionOtpVerify extends AbstractRoute {
+class FraudProtectionOtpVerify extends AbstractCartRoute {
 	/**
 	 * The route identifier.
 	 *

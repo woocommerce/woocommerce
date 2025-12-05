@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionChallengeMana
  *
  * @since 10.4.0
  */
-class FraudProtectionOtpResend extends AbstractRoute {
+class FraudProtectionOtpResend extends AbstractCartRoute {
 	/**
 	 * The route identifier.
 	 *

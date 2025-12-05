@@ -298,7 +298,7 @@
 				}),
 				contentType: 'application/json',
 				beforeSend: function(xhr) {
-					xhr.setRequestHeader('X-WP-Nonce', wcFraudProtection.restNonce);
+					xhr.setRequestHeader('Nonce', wcFraudProtection.storeNonce);
 				},
 				success: function(response) {
 					self.isProcessing = false;
@@ -380,7 +380,7 @@
 				}),
 				contentType: 'application/json',
 				beforeSend: function(xhr) {
-					xhr.setRequestHeader('X-WP-Nonce', wcFraudProtection.restNonce);
+					xhr.setRequestHeader('Nonce', wcFraudProtection.storeNonce);
 				},
 				success: function(response) {
 					self.isProcessing = false;
@@ -483,7 +483,7 @@
 				}),
 				contentType: 'application/json',
 				beforeSend: function(xhr) {
-					xhr.setRequestHeader('X-WP-Nonce', wcFraudProtection.restNonce);
+					xhr.setRequestHeader('Nonce', wcFraudProtection.storeNonce);
 				},
 				success: function(response) {
 					self.isProcessing = false;

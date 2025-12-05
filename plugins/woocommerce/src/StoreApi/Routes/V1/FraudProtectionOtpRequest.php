@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
  *
  * @since 10.4.0
  */
-class FraudProtectionOtpRequest extends AbstractRoute {
+class FraudProtectionOtpRequest extends AbstractCartRoute {
 	/**
 	 * The route identifier.
 	 *
@@ -120,16 +120,7 @@ class FraudProtectionOtpRequest extends AbstractRoute {
 		// Call WPCOM API to get verdict.
 		$verdict = $this->api_client->track_session_event( 'challenge_requested', $session_data );
 
-		// Handle verdict outcomes.
-		if ( FraudProtectionServiceApiClient::DECISION_ALLOW === $verdict ) {
-			$this->session_manager->allow_session();
-			return rest_ensure_response( [
-				'success'        => true,
-				'session_status' => 'allowed',
-				'message'        => __( 'Session verified successfully.', 'woocommerce' ),
-			] );
-		}
-
+		// There is no need to trigger a challenge if the verdict is already blocked.
 		if ( FraudProtectionServiceApiClient::DECISION_BLOCK === $verdict ) {
 			$this->session_manager->block_session();
 			throw new RouteException(

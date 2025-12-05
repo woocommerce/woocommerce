@@ -486,7 +486,7 @@ class FraudProtectionController {
 			'wcFraudProtection',
 			array(
 				'restUrl'       => rest_url( 'wc/store/v1/fraud-protection/otp' ),
-				'restNonce'     => wp_create_nonce( 'wp_rest' ),
+				'storeNonce'    => wp_create_nonce( 'wc_store_api' ),
 				'sessionStatus' => $this->session_manager->get_session_status(),
 				'userEmail'     => $user_email,
 				'shopUrl'       => get_permalink( wc_get_page_id( 'shop' ) ),
