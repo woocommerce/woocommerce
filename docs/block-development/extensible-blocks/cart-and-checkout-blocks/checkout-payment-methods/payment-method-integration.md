@@ -175,11 +175,14 @@ Here's a simple example:
 
 ```js
 const CustomButton = ( props ) => {
-	const { validate, onSubmit, disabled, isEditor, isPreview } = props;
+	const { validate, onSubmit, disabled, isEditor, isPreview, eventRegistration: { onPaymentSetup }, } = props;
+
 	const [
 		isShowingInternalPaymentSheet,
 		setIsShowingInternalPaymentSheet,
 	] = React.useState( false );
+  
+  const paymentResultRef = React.useRef( false );
 
 	const handleClick = async () => {
 		// 1. Validate the checkout form
@@ -192,6 +195,7 @@ const CustomButton = ( props ) => {
 		// 2. Show your payment UI (e.g., Google Pay sheet, Apple Pay sheet)
 		// setIsShowingInternalPaymentSheet( true );
 		// const paymentResult = await showPaymentSheet( billing.cartTotal.value );
+    // paymentResultRef.current = paymentResult.success;
 		// if ( ! paymentResult.success ) {
 		//     setIsShowingInternalPaymentSheet( false );
 		//     return;
@@ -200,6 +204,21 @@ const CustomButton = ( props ) => {
 		// 3. Submit the checkout
 		onSubmit();
 	};
+
+  React.useEffect(
+    () =>
+      onPaymentSetup( () => {
+        return ({
+          type: paymentResultRef.current ? 'success' : 'error',
+          meta: {
+            paymentMethodData: {
+              payment_method: 'your-payment-method',
+            },
+          },
+        });
+      } ),
+    [ onPaymentSetup ]
+  );
 
 	// In editor/preview mode, show a placeholder or preview version
 	if ( isEditor || isPreview ) {
