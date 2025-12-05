@@ -15493,21 +15493,9 @@ parameters:
 			path: includes/class-wc-breadcrumb.php
 
 		-
-			message: '#^Cannot access property \$parent on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-breadcrumb.php
-
-		-
 			message: '#^Cannot access property \$post_parent on WP_Post\|null\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: includes/class-wc-breadcrumb.php
-
-		-
-			message: '#^Cannot access property \$term_id on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
-			count: 2
 			path: includes/class-wc-breadcrumb.php
 
 		-
@@ -33011,18 +32999,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-ipn-handler.php
-
-		-
-			message: '#^Cannot access property \$id on WP_Screen\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-notices.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Notices\:\:paypal_migration_notice_dismissed\(\) should return bool but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-notices.php
 
 		-
 			message: '#^Binary operation "\." between ''WooCommerce/'' and mixed results in an error\.$#'
@@ -53801,12 +53777,6 @@ parameters:
 
 		-
 			message: '#^Cannot access offset ''value'' on mixed\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Cannot access offset 0 on array\{string, int, int, bool\}\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: includes/wc-template-functions.php
@@ -82726,56 +82696,8 @@ parameters:
 			path: src/Internal/Admin/MobileAppBanner.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\CustomizeStoreWithBlocks'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
 			message: '#^Cannot access offset ''setup_client'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
 
@@ -82792,76 +82714,10 @@ parameters:
 			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
 			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\|object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\CustomizingProductCatalog'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
 
 		-
 			message: '#^Cannot access property \$products on array\|object\.$#'
@@ -82872,42 +82728,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$total on array\|object\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizingProductCatalog\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizingProductCatalog\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizingProductCatalog\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
 
@@ -82924,108 +82744,6 @@ parameters:
 			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizingProductCatalog\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizingProductCatalog\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizingProductCatalog\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizingProductCatalog\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizingProductCatalog\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\EUVATNumber'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 2
@@ -83036,108 +82754,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EUVATNumber.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\EditProductsOnTheMove'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
@@ -83152,184 +82768,10 @@ parameters:
 			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\EmailImprovements'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:is_applicable\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/EmailImprovements.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\FirstProduct'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
 
 		-
 			message: '#^Cannot access offset ''setup_client'' on mixed\.$#'
@@ -83340,42 +82782,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$total on array\|object\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\FirstProduct\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\FirstProduct\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\FirstProduct\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/FirstProduct.php
 
@@ -83392,108 +82798,6 @@ parameters:
 			path: src/Internal/Admin/Notes/FirstProduct.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\FirstProduct\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\FirstProduct\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\FirstProduct\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\FirstProduct\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\FirstProduct\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/FirstProduct.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\GivingFeedbackNotes'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 1
@@ -83502,60 +82806,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:is_applicable\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
 
@@ -83574,31 +82824,13 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
 			identifier: method.notFound
-			count: 5
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\InstallJPAndWCSPlugins'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
 
 		-
 			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
 
 		-
@@ -83609,24 +82841,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:action_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
@@ -83650,62 +82864,8 @@ parameters:
 			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:on_install_error\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\InstallJPAndWCSPlugins\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
 
@@ -83714,54 +82874,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\LaunchChecklist'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
@@ -83776,76 +82888,10 @@ parameters:
 			path: src/Internal/Admin/Notes/LaunchChecklist.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
 			message: '#^Parameter \#1 \$var of function count expects array\|Countable, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/LaunchChecklist.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MagentoMigration'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
 
 		-
 			message: '#^Cannot access offset ''other_platform'' on mixed\.$#'
@@ -83860,49 +82906,7 @@ parameters:
 			path: src/Internal/Admin/Notes/MagentoMigration.php
 
 		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:is_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:note_exists\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/MagentoMigration.php
@@ -83914,106 +82918,10 @@ parameters:
 			path: src/Internal/Admin/Notes/MagentoMigration.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:save_note\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MagentoMigration.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\ManageOrdersOnTheGo'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note\|null but empty return statement found\.$#'
@@ -84024,60 +82932,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:is_applicable\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
 
@@ -84096,30 +82950,12 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
 			identifier: method.notFound
-			count: 5
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MarketingJetpack'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
 		-
 			message: '#^Cannot access offset ''product_id'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
 			count: 2
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
@@ -84132,7 +82968,7 @@ parameters:
 		-
 			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
 		-
@@ -84144,24 +82980,6 @@ parameters:
 		-
 			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
 			identifier: constant.notFound
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
@@ -84178,76 +82996,10 @@ parameters:
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:possibly_add_note\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Parameter \#2 \$note2 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MarketingJetpack\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|Automattic\\WooCommerce\\Admin\\Notes\\WC_Admin_Note given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MigrateFromShopify'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
 
 		-
 			message: '#^Cannot access offset ''other_platform'' on mixed\.$#'
@@ -84268,42 +83020,6 @@ parameters:
 			path: src/Internal/Admin/Notes/MigrateFromShopify.php
 
 		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 4
@@ -84316,108 +83032,6 @@ parameters:
 			path: src/Internal/Admin/Notes/MigrateFromShopify.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MigrateFromShopify.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MobileApp'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 1
@@ -84426,60 +83040,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:is_applicable\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/MobileApp.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/MobileApp.php
 
@@ -84508,37 +83068,7 @@ parameters:
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\NewSalesRecord'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
 			message: '#^Cannot call method get_content_data\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
@@ -84556,24 +83086,6 @@ parameters:
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but returns false\.$#'
 			identifier: return.type
 			count: 1
@@ -84586,25 +83098,7 @@ parameters:
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:possibly_update_note\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
@@ -84634,33 +83128,9 @@ parameters:
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
 
 		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
 			message: '#^Parameter \#1 \$format of function date_i18n expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
 
 		-
@@ -84682,12 +83152,6 @@ parameters:
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
 
 		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/NewSalesRecord.php
-
-		-
 			message: '#^Parameter \#4 \$total of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\NewSalesRecord\:\:get_note_with_record_data\(\) expects string, Automattic\\WooCommerce\\Internal\\Admin\\Notes\\floatval given\.$#'
 			identifier: argument.type
 			count: 1
@@ -84696,54 +83160,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\OnboardingPayments'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/OnboardingPayments.php
 
@@ -84760,72 +83176,6 @@ parameters:
 			path: src/Internal/Admin/Notes/OnboardingPayments.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/OnboardingPayments.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\OnlineClothingStore'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
 			message: '#^Cannot access offset ''industry'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -84834,42 +83184,6 @@ parameters:
 		-
 			message: '#^Cannot access offset ''setup_client'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/OnlineClothingStore.php
 
@@ -84886,61 +83200,7 @@ parameters:
 			path: src/Internal/Admin/Notes/OnlineClothingStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
 			message: '#^Parameter \#1 \$industries of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:is_in_fashion_industry\(\) expects array, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/OnlineClothingStore.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/OnlineClothingStore.php
@@ -85012,56 +83272,8 @@ parameters:
 			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\PaymentsMoreInfoNeeded'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
 			message: '#^Cannot call method has_incentive\(\) on Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
 
@@ -85078,116 +83290,14 @@ parameters:
 			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsMoreInfoNeeded\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
-
-		-
 			message: '#^Binary operation "\-" between int\<1, max\> and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\PaymentsRemindMeLater'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
 			message: '#^Cannot call method has_incentive\(\) on Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
 
@@ -85204,108 +83314,6 @@ parameters:
 			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PaymentsRemindMeLater\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\PerformanceOnMobile'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 4
@@ -85318,110 +83326,8 @@ parameters:
 			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
-
-		-
 			message: '#^Binary operation "\." between ''post\.php\?post\='' and mixed results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\PersonalizeStore'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/PersonalizeStore.php
 
@@ -85438,108 +83344,6 @@ parameters:
 			path: src/Internal/Admin/Notes/PersonalizeStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/PersonalizeStore.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\RealTimeOrderAlerts'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 2
@@ -85552,104 +83356,8 @@ parameters:
 			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\SellingOnlineCourses'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
 			message: '#^Cannot access offset ''industry'' on object\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
 			count: 1
 			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
 
@@ -85660,124 +83368,10 @@ parameters:
 			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:is_applicable\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\SellingOnlineCourses\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\TrackingOptIn'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note\|null but empty return statement found\.$#'
@@ -85792,62 +83386,8 @@ parameters:
 			path: src/Internal/Admin/Notes/TrackingOptIn.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:opt_in_to_tracking\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/TrackingOptIn.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/TrackingOptIn.php
 
@@ -85890,31 +83430,13 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
 			identifier: method.notFound
-			count: 6
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\WooCommercePayments'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
+			count: 2
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
 
 		-
 			message: '#^Cannot call method get_action\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
 
 		-
@@ -85926,30 +83448,12 @@ parameters:
 		-
 			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
 
 		-
 			message: '#^Cannot call method set_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
 
@@ -85972,51 +83476,9 @@ parameters:
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:possibly_add_note\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommercePayments\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
 
 		-
@@ -86032,68 +83494,8 @@ parameters:
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
 
 		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommercePayments.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
-			identifier: method.notFound
-			count: 4
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\WooCommerceSubscriptions'' and ''get_note'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
 			message: '#^Cannot access offset ''product_types'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Cannot call method get_is_deleted\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:can_be_added\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:delete_if_not_applicable\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
 
@@ -86106,60 +83508,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:is_applicable\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:note_exists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:possibly_add_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:possibly_delete_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:possibly_update_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Parameter \#1 \$arr1 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Parameter \#1 \$data of method WC_Data_Store\:\:delete\(\) expects WC_Data, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{Automattic\\WooCommerce\\Admin\\Notes\\Note, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Parameter \#1 \$note1 of static method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:update_note_field_if_changed\(\) expects Automattic\\WooCommerce\\Admin\\Notes\\Note, Automattic\\WooCommerce\\Admin\\Notes\\Note\|true given\.$#'
-			identifier: argument.type
-			count: 7
-			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
-
-		-
-			message: '#^Parameter \#2 \$arr2 of function array_udiff expects array\<\(int&TK\)\|\(string&TK\), mixed\>, mixed given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
 

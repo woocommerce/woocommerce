@@ -205,11 +205,12 @@ jobs:
   bump-version-in-trunk:
     name: Bump version in trunk for next development cycle
     uses: ./.github/workflows/release-bump-version.yml
-    needs: [run-feature-freeze]
+    needs: [prepare-for-feature-freeze, run-feature-freeze]
     secrets: inherit
     with:
       branch: trunk
       bump-type: dev
+      milestone: ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}
 
   build-dev-release:
     name: 'Build WooCommerce -dev release'
@@ -243,18 +244,82 @@ jobs:
     name: Notify Slack
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [publish-dev-release, prepare-for-feature-freeze]
+    outputs:
+      message-ts: ${{ steps.notify-success.outputs.ts }}
     steps:
       - name: Notify Slack on success
+        id: notify-success
         uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
-            :ice_cube: Feature Freeze completed for `${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}` :checking:
-            If you need a fix or change to be included in this release, please request a backport following the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
-            <${{ needs.publish-dev-release.outputs.release-zip }}|Download zip>
+            :ice_cube: *Feature Freeze completed for ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }} (`${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}`)*
+
+            • To include any new fixes in this release, please follow the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
+            • <${{ needs.publish-dev-release.outputs.release-zip }}|Download WooCommerce ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}-dev>.
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
+      - name: Find open PRs in now frozen milestone
+        id: find-prs
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            // Find open PRs with milestone matching the next release version.
+            try {
+              const { data: prs } = await github.rest.search.issuesAndPullRequests( {
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open milestone:"${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}"`,
+                sort: 'created',
+                order: 'desc',
+                per_page: 11
+              } );
+
+              if ( 0 === prs.total_count ) {
+                core.setOutput( 'current-milestone-open-prs', '' );
+                core.setOutput( 'milestone-url', '' );
+                return;
+              }
+
+              // Get milestone URL.
+              const milestoneUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/milestone/${prs.items[0].milestone.number}`;
+              core.setOutput( 'milestone-url', milestoneUrl );
+
+              // Format PR list for Slack.
+              const prList = prs
+                .items
+                .slice( 0, prs.total_count <= 11 ? prs.total_count : 10 )
+                .map( pr => `• <${pr.html_url}|#${pr.number}>: ${pr.title}` )
+                .join( '\n' );
+
+              let message = prList;
+
+              // If there are more than 2 remaining PRs after displaying, add overflow message.
+              const remaining = prs.total_count <= 11 ? 0 : prs.total_count - 10;
+              if ( remaining > 0 ) {
+                message += `\n_... <${milestoneUrl}|and ${remaining} more>._`;
+              }
+
+              core.setOutput( 'current-milestone-open-prs', message );
+            } catch ( error ) {
+              console.error( `Error searching for PRs: ${error.message}` );
+              core.setOutput( 'current-milestone-open-prs', '' );
+            }
+      - name: Post PR list as threaded reply
+        if: steps.find-prs.outputs.current-milestone-open-prs != ''
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-text: |
+            *Currently open PRs in <${{ steps.find-prs.outputs.milestone-url }}|`${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}` milestone>:*
+
+            ${{ steps.find-prs.outputs.current-milestone-open-prs }}
+
+            Review these PRs to ensure the milestone is still valid or change it accordingly.
+          slack-optional-thread_ts: ${{ fromJson( steps.notify-success.outputs.slack-result ).response.message.ts }}
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false
+
 
   trigger-webhook:
     name: Trigger Release Webhook
