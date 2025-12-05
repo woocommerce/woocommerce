@@ -679,10 +679,11 @@ final class BlockTypesController {
 	 * @internal
 	 */
 	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type ) {
-		if ( 'product' === $post_type ) {
-			$settings['taxonomy'] = 'product_cat';
+		if ( ! is_array( $settings ) || 'product' !== $post_type ) {
+			return $settings;
 		}
 
+		$settings['taxonomy'] = 'product_cat';
 		return $settings;
 	}
 }
