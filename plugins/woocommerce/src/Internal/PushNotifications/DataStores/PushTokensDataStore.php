@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\DataStores;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Exception;
 use InvalidArgumentException;
 use WP_Http;
@@ -56,7 +57,7 @@ class PushTokensDataStore {
 
 		if ( is_wp_error( $id ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( $id->get_error_message(), WP_Http::INTERNAL_SERVER_ERROR );
+			throw new Exception( $id->get_error_message() );
 		}
 
 		$push_token->set_id( $id );
@@ -68,8 +69,7 @@ class PushTokensDataStore {
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be read.
-	 * @throws Exception If the token can't be found.
-	 * @throws Exception If the ID doesn't belong to a push token.
+	 * @throws PushTokenNotFoundException If the token can't be found.
 	 */
 	public function read( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
@@ -83,8 +83,7 @@ class PushTokensDataStore {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
+			throw new PushTokenNotFoundException( 'Push token could not be found.' );
 		}
 
 		$meta = $this->build_meta_array_from_database( $push_token );
@@ -118,6 +117,7 @@ class PushTokensDataStore {
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be updated.
+	 * @throws PushTokenNotFoundException If the token can't be found.
 	 * @throws Exception If the token update fails.
 	 */
 	public function update( PushToken &$push_token ) {
@@ -133,7 +133,7 @@ class PushTokensDataStore {
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
+			throw new PushTokenNotFoundException( 'Push token could not be found.' );
 		}
 
 		$result = wp_update_post(
@@ -149,7 +149,7 @@ class PushTokensDataStore {
 
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( $result->get_error_message(), WP_Http::INTERNAL_SERVER_ERROR );
+			throw new Exception( $result->get_error_message() );
 		}
 
 		if ( null === $push_token->get_device_uuid() ) {
@@ -163,8 +163,7 @@ class PushTokensDataStore {
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be deleted.
-	 * @throws Exception If the item to delete is not a push token.
-	 * @return void
+	 * @throws PushTokenNotFoundException If the token can't be found.
 	 */
 	public function delete( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_deleted() ) {
@@ -178,8 +177,7 @@ class PushTokensDataStore {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
+			throw new PushTokenNotFoundException( 'Push token could not be found.' );
 		}
 
 		wp_delete_post( $push_token->get_id(), true );
