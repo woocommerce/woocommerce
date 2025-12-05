@@ -95,19 +95,18 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		$mode              = $is_immediate_mode ? 'immediate' : 'scheduled';
 
 		$response = array(
-			'mode'                              => $mode,
-			'last_processed_date'               => null,
-			'next_scheduled'                    => null,
-			'manual_triggered_import_scheduled' => null,
+			'mode'                      => $mode,
+			'last_processed_date'       => null,
+			'next_scheduled'            => null,
+			'import_in_progress_or_due' => null,
 		);
 
 		// For scheduled mode, populate additional fields.
 		if ( ! $is_immediate_mode ) {
-			$last_processed_gmt              = get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, null );
-			$response['last_processed_date'] = $last_processed_gmt ? get_date_from_gmt( $last_processed_gmt, 'Y-m-d H:i:s' ) : null;
-			$response['next_scheduled']      = $this->get_next_scheduled_time();
-
-			$response['manual_triggered_import_scheduled'] = $this->has_manual_triggered_import_scheduled();
+			$last_processed_gmt                    = get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, null );
+			$response['last_processed_date']       = $last_processed_gmt ? get_date_from_gmt( $last_processed_gmt, 'Y-m-d H:i:s' ) : null;
+			$response['next_scheduled']            = $this->get_next_scheduled_time();
+			$response['import_in_progress_or_due'] = $this->is_import_in_progress_or_due();
 		}
 
 		return rest_ensure_response( $response );
@@ -131,22 +130,25 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Determine if a batch import has already been scheduled or is in progress, excluding the recurring import action.
-		if ( $this->has_manual_triggered_import_scheduled() ) {
+		// Check if an import is already in progress or due to run soon.
+		if ( $this->is_import_in_progress_or_due() ) {
 			return new WP_Error(
-				'woocommerce_rest_analytics_import_already_scheduled_or_in_progress',
-				__( 'A batch import is already scheduled or in progress. Please wait for it to complete before triggering a new import.', 'woocommerce' ),
+				'woocommerce_rest_analytics_import_in_progress',
+				__( 'A batch import is already in progress or scheduled to run soon. Please wait for it to complete before triggering a new import.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}
 
-		// Schedule the batch import action.
-		OrdersScheduler::schedule_action( 'process_pending_batch', array( null, null ) );
+		// Trigger the batch import immediately by rescheduling the recurring processor.
+		// This unschedules the current recurring action and reschedules it to run now.
+		$action_hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+		WC()->queue()->cancel_all( $action_hook, array(), OrdersScheduler::$group );
+		OrdersScheduler::schedule_recurring_batch_processor();
 
 		return rest_ensure_response(
 			array(
 				'success' => true,
-				'message' => __( 'Batch import scheduled successfully.', 'woocommerce' ),
+				'message' => __( 'Batch import triggered successfully.', 'woocommerce' ),
 			)
 		);
 	}
@@ -166,15 +168,15 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 * @return string|null Datetime string in site timezone or null if not scheduled.
 	 */
 	private function get_next_scheduled_time() {
-		$action_hook = OrdersScheduler::get_action( 'process_pending_batch' );
-		$next_time   = as_next_scheduled_action( $action_hook );
+		$action_hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+		$next_time   = WC()->queue()->get_next( $action_hook, array(), OrdersScheduler::$group );
 
-		if ( false === $next_time ) {
+		if ( ! $next_time ) {
 			return null;
 		}
 
 		// Convert UTC timestamp to site timezone.
-		return get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $next_time ), 'Y-m-d H:i:s' );
+		return get_date_from_gmt( $next_time->format( 'Y-m-d H:i:s' ), 'Y-m-d H:i:s' );
 	}
 
 	/**
@@ -188,28 +190,28 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			'title'      => 'analytics_import_status',
 			'type'       => 'object',
 			'properties' => array(
-				'mode'                              => array(
+				'mode'                => array(
 					'type'        => 'string',
 					'enum'        => array( 'scheduled', 'immediate' ),
 					'description' => __( 'Current import mode.', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'last_processed_date'               => array(
+				'last_processed_date' => array(
 					'type'        => array( 'string', 'null' ),
 					'description' => __( 'Last processed order date (null in immediate mode).', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'next_scheduled'                    => array(
+				'next_scheduled'      => array(
 					'type'        => array( 'string', 'null' ),
 					'description' => __( 'Next scheduled import time (null in immediate mode).', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
-				'manual_triggered_import_scheduled' => array(
+				'import_in_progress_or_due' => array(
 					'type'        => array( 'boolean', 'null' ),
-					'description' => __( 'Whether a manual triggered import has already been scheduled.', 'woocommerce' ),
+					'description' => __( 'Whether a batch import is currently running or scheduled to run within the next minute (null in immediate mode).', 'woocommerce' ),
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 				),
@@ -249,13 +251,37 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check if a manual triggered import has already been scheduled.
+	 * Check if a batch import is currently in progress or due to run soon.
 	 *
-	 * @return bool True if a manual triggered import has already been scheduled, false otherwise.
+	 * @return bool True if a batch import is in progress or scheduled to run within the next minute, false otherwise.
 	 */
-	private function has_manual_triggered_import_scheduled() {
-		$hook = OrdersScheduler::get_action( 'process_pending_batch' );
+	private function is_import_in_progress_or_due() {
+		$hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 
-		return as_has_scheduled_action( $hook, array( null, null ) );
+		// Check for actions with 'running' status.
+		$in_progress_actions = WC()->queue()->search(
+			array(
+				'hook'     => $hook,
+				'status'   => \ActionScheduler_Store::STATUS_RUNNING,
+				'per_page' => 1,
+			),
+			'ids'
+		);
+
+		if ( ! empty( $in_progress_actions ) ) {
+			return true;
+		}
+
+		// Check if the next scheduled import is due within 1 minute.
+		$next_scheduled = WC()->queue()->get_next( $hook, array(), OrdersScheduler::$group );
+		if ( $next_scheduled ) {
+			$time_until_next = $next_scheduled->getTimestamp() - time();
+			// Consider it "due" if it's scheduled to run within the next 60 seconds.
+			if ( $time_until_next <= MINUTE_IN_SECONDS ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

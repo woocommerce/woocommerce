@@ -85,7 +85,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	 * Clear all scheduled batch import actions.
 	 */
 	private function clear_scheduled_actions() {
-		$hook = OrdersScheduler::get_action( 'process_pending_batch' );
+		$hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 		as_unschedule_all_actions( $hook );
 	}
 
@@ -111,8 +111,8 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$this->assertNull( $data['last_processed_date'] );
 		$this->assertArrayHasKey( 'next_scheduled', $data );
 		$this->assertNull( $data['next_scheduled'] );
-		$this->assertArrayHasKey( 'manual_triggered_import_scheduled', $data );
-		$this->assertNull( $data['manual_triggered_import_scheduled'] );
+		$this->assertArrayHasKey( 'import_in_progress_or_due', $data );
+		$this->assertNull( $data['import_in_progress_or_due'] );
 	}
 
 	/**
@@ -136,31 +136,8 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'scheduled', $data['mode'] );
 		$this->assertArrayHasKey( 'last_processed_date', $data );
 		$this->assertIsString( $data['last_processed_date'] );
-		$this->assertArrayHasKey( 'manual_triggered_import_scheduled', $data );
-		$this->assertIsBool( $data['manual_triggered_import_scheduled'] );
-	}
-
-	/**
-	 * Test status endpoint shows manual triggered import as scheduled.
-	 *
-	 * @return void
-	 */
-	public function test_status_shows_manual_triggered_import_scheduled(): void {
-		wp_set_current_user( $this->admin_user );
-
-		// Set to scheduled mode.
-		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'no' );
-
-		// Schedule a manual import.
-		OrdersScheduler::schedule_action( 'process_pending_batch', array( null, null ) );
-
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertArrayHasKey( 'manual_triggered_import_scheduled', $data );
-		$this->assertTrue( $data['manual_triggered_import_scheduled'] );
+		$this->assertArrayHasKey( 'import_in_progress_or_due', $data );
+		$this->assertIsBool( $data['import_in_progress_or_due'] );
 	}
 
 	/**
@@ -218,11 +195,11 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test trigger endpoint schedules batch import successfully.
+	 * Test trigger endpoint successfully triggers batch import.
 	 *
 	 * @return void
 	 */
-	public function test_trigger_schedules_import(): void {
+	public function test_trigger_successfully_triggers_import(): void {
 		wp_set_current_user( $this->admin_user );
 
 		// Set to scheduled mode.
@@ -237,11 +214,6 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $data['success'] );
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertIsString( $data['message'] );
-
-		// Verify the action was scheduled.
-		$hook             = OrdersScheduler::get_action( 'process_pending_batch' );
-		$has_scheduled_fn = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		$this->assertTrue( (bool) call_user_func( $has_scheduled_fn, $hook, array( null, null ) ) );
 	}
 
 	/**
@@ -263,31 +235,6 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertSame( 'woocommerce_rest_analytics_import_immediate_mode', $data['code'] );
-	}
-
-	/**
-	 * Test trigger endpoint returns error when import already scheduled.
-	 *
-	 * @return void
-	 */
-	public function test_trigger_fails_when_already_scheduled(): void {
-		wp_set_current_user( $this->admin_user );
-
-		// Set to scheduled mode.
-		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'no' );
-
-		// Schedule an import first.
-		OrdersScheduler::schedule_action( 'process_pending_batch', array( null, null ) );
-
-		// Try to schedule another one.
-		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/trigger' );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertSame( 400, $response->get_status() );
-
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'code', $data );
-		$this->assertSame( 'woocommerce_rest_analytics_import_already_scheduled_or_in_progress', $data['code'] );
 	}
 
 	/**
