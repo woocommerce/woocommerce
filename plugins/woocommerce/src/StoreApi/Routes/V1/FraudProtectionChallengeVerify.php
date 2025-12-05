@@ -142,18 +142,10 @@ class FraudProtectionChallengeVerify extends AbstractCartRoute {
 			throw new RouteException( $error_code, $error_msg, $http_status );
 		}
 
-		// Get challenge data for email difference tracking.
-		$challenge = $this->challenge_manager->get_challenge( $challenge_id );
-		if ( ! $challenge ) {
-			throw new RouteException(
-				'challenge_not_found',
-				__( 'Challenge not found.', 'woocommerce' ),
-				404
-			);
-		}
-
+		
 		// Collect full session data using SessionDataCollector.
 		$session_data    = $this->data_collector->collect();
+		$challenge       = $result['challenge'];
 		$original_email  = $session_data['email'];
 		$challenge_email = $challenge['email'];
 
@@ -173,7 +165,7 @@ class FraudProtectionChallengeVerify extends AbstractCartRoute {
 		}
 
 		// Track successful verification with WPCOM API.
-		$verdict = $this->api_client->track_session_event( 'challenge_succeeded', $session_data );
+		$verdict = $this->api_client->track_session_event( 'challenge_verified', $session_data );
 
 		// Handle API verdict.
 		if ( FraudProtectionServiceApiClient::DECISION_ALLOW === $verdict ) {

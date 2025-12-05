@@ -166,7 +166,7 @@ class SessionClearanceManager {
 	 *
 	 * @return string Session identifier.
 	 */
-	private function get_session_key(): string {
+	private function get_session_id(): string {
 		if ( ! $this->is_session_available() ) {
 			return 'no-session';
 		}
@@ -196,7 +196,7 @@ class SessionClearanceManager {
 	private function log_clearance_event( string $action ): void {
 		$logger = wc_get_logger();
 
-		$session_id = $this->get_session_key();
+		$session_id = $this->get_session_id();
 		$user_id    = get_current_user_id();
 		$user_info  = $user_id ? "User: {$user_id}" : 'User: guest';
 		$ip_address = $this->get_client_ip();

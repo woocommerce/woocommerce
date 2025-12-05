@@ -88,12 +88,12 @@ class FraudProtectionServiceApiClient {
 		}
 
 		// Parse and validate response.
-		$decision = $this->parse_response( $response );
+		$verdict = $this->parse_response( $response );
 
-		// Log successful decision.
-		$this->log_success( $event_type, $decision, $session_data );
+		// Log successful verdict.
+		$this->log_success( $event_type, $verdict, $session_data );
 
-		return $decision;
+		return $verdict;
 	}
 
 	/**
@@ -102,63 +102,120 @@ class FraudProtectionServiceApiClient {
 	 * @param array $payload Request payload (flat schema).
 	 * @return array|\WP_Error Response array with 'code' and 'body' keys, or WP_Error on failure.
 	 */
-	private function make_request( string $url, array $payload ) {
+	private function make_request( array $payload ) {
+		$this->log_request( $payload );
 		// Mock the response for cart events
 		// Use number of items in the cart to simulate various fraud decisions
-		if ( in_array( $payload['event_name'], array( 'cart_item_added', 'cart_item_updated', 'cart_item_removed', 'cart_item_restored' ), true ) ) {
-			
+		if ( in_array( $payload['event_type'], array( 'cart_item_added', 'cart_item_updated', 'cart_item_removed', 'cart_item_restored' ), true ) ) {
+
 			$decision = self::DECISION_ALLOW;
-			if ( $payload['session_data']['cart_total'] > 3 ) {
+			$risk_score = 10;
+			$reason_tags = array();
+
+			if ( isset( $payload['cart_total'] ) && $payload['cart_total'] > 3 ) {
 				$decision = self::DECISION_BLOCK;
-			} elseif ( $payload['session_data']['cart_total'] > 1 ) {
+				$risk_score = 95;
+				$reason_tags = array( 'high_cart_total', 'suspicious_behavior' );
+			} elseif ( isset( $payload['cart_total'] ) && $payload['cart_total'] > 1 ) {
 				$decision = self::DECISION_CHALLENGE;
+				$risk_score = 55;
+				$reason_tags = array( 'moderate_risk', 'requires_verification' );
 			}
-		
+
 			return array(
 				'code' => 200,
-				'body' => '{"result": "success", "decision": "' . $decision . '"}',
+				'body' => wp_json_encode( array(
+					'success' => true,
+					'fraud_event_id' => wp_rand( 1000, 9999 ),
+					'verdict' => $decision,
+					'risk_score' => $risk_score,
+					'reason_tags' => $reason_tags,
+				) ),
 			);
 		}
 
 		// Mock the response for challenge requested events to proceed with the challenge.
 		// We do not track challenge retry events, so no need to mock that.
-		if ( in_array( $payload['event_name'], array( 'challenge_requested' ), true ) ) {
+		if ( in_array( $payload['event_type'], array( 'challenge_requested' ), true ) ) {
 			// We won't block the session on challenge request for now.
 			return array(
 				'code' => 200,
-				'body' => '{"result": "success", "decision": "challenge"}',
+				'body' => wp_json_encode( array(
+					'success' => true,
+					'fraud_event_id' => wp_rand( 1000, 9999 ),
+					'verdict' => self::DECISION_CHALLENGE,
+					'risk_score' => 50,
+					'reason_tags' => array( 'initial_challenge' ),
+				) ),
 			);
 		}
 
-		// Mock the response for challenge ver
-		if ( in_array( $payload['event_name'], array( 'challenge_verified' ), true ) ) {
-			// We'll mock the response for now untill the endpoint is ready
-			switch ( $payload['session_data']['email'] ) {
+		// Mock the response for challenge verification
+		if ( in_array( $payload['event_type'], array( 'challenge_verified' ), true ) ) {
+			// Mock different responses based on email for testing
+			$email = isset( $payload['email'] ) ? $payload['email'] : null;
+
+			switch ( $email ) {
 				case 'test@example.com':
 				case 'test2@example.com':
 					return array(
 						'code' => 200,
-						'body' => '{"result": "success", "decision": "allow"}',
+						'body' => wp_json_encode( array(
+							'success' => true,
+							'fraud_event_id' => wp_rand( 1000, 9999 ),
+							'verdict' => self::DECISION_ALLOW,
+							'risk_score' => 15,
+							'reason_tags' => array( 'verification_passed' ),
+						) ),
 					);
 				case 'fraudster@example.com':
+				case 'fraud@example.com':
 					return array(
 						'code' => 200,
-						'body' => '{"result": "success", "decision": "block"}',
+						'body' => wp_json_encode( array(
+							'success' => true,
+							'fraud_event_id' => wp_rand( 1000, 9999 ),
+							'verdict' => self::DECISION_BLOCK,
+							'risk_score' => 98,
+							'reason_tags' => array( 'known_fraudster', 'email_blacklist' ),
+						) ),
 					);
-				case null: // Unknown email address, jsut allow the session
+				case null: // Unknown email address, allow the session
 					return array(
 						'code' => 200,
-						'body' => '{"result": "success", "decision": "allow"}',
+						'body' => wp_json_encode( array(
+							'success' => true,
+							'fraud_event_id' => wp_rand( 1000, 9999 ),
+							'verdict' => self::DECISION_ALLOW,
+							'risk_score' => 20,
+							'reason_tags' => array( 'no_email', 'low_risk' ),
+						) ),
 					);
 				default:
-					return new \WP_Error( 'api_error', 'Invalid email address' );
+					// Default: allow for most emails
+					return array(
+						'code' => 200,
+						'body' => wp_json_encode( array(
+							'success' => true,
+							'fraud_event_id' => wp_rand( 1000, 9999 ),
+							'verdict' => self::DECISION_ALLOW,
+							'risk_score' => 25,
+							'reason_tags' => array( 'verification_passed' ),
+						) ),
+					);
 			}
 		}
 
 		// Allow everything else
 		return array(
 			'code' => 200,
-			'body' => '{"result": "success", "decision": "allow"}',
+			'body' => wp_json_encode( array(
+				'success' => true,
+				'fraud_event_id' => wp_rand( 1000, 9999 ),
+				'verdict' => self::DECISION_ALLOW,
+				'risk_score' => 10,
+				'reason_tags' => array( 'default_allow' ),
+			) ),
 		);
 
 		// TODO: Add some safety checks to confirm that Jetpack Connection is available.
@@ -309,13 +366,12 @@ class FraudProtectionServiceApiClient {
 	/**
 	 * Log a request.
 	 *
-	 * @param string $url     Request URL.
 	 * @param array  $payload Request payload.
 	 * @return void
 	 */
-	private function log_request( string $url, array $payload ): void {
+	private function log_request( array $payload ): void {
 		$logger = wc_get_logger();
-		$logger->info( 'Request: ' . $url, array( 'source' => self::LOGGER_SOURCE, 'payload' => $payload ) );
+		$logger->info( 'FraudProtectionServiceRequestSent for event: ' . $payload['event_type'], array( 'source' => self::LOGGER_SOURCE, 'payload' => $payload ) );
 	}
 
 	/**

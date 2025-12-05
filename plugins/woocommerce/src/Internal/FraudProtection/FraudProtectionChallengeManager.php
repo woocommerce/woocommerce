@@ -76,11 +76,11 @@ class FraudProtectionChallengeManager {
 	 * Generates a unique challenge ID and a 6-digit OTP code, then stores
 	 * the challenge data in a transient with 60-minute expiration.
 	 *
-	 * @param string $session_key WooCommerce session key.
+	 * @param string $session_id  WooCommerce session key.
 	 * @param string $email       Email address for the challenge.
 	 * @return array Challenge data with keys: challenge_id, otp_code, expires_at, attempts_remaining.
 	 */
-	public function create_challenge( string $session_key, string $email ): array {
+	public function create_challenge( string $session_id, string $email ): array {
 		$challenge_id = $this->generate_challenge_id();
 		$otp_code     = $this->generate_otp_code();
 		$generated_at = time();
@@ -88,7 +88,7 @@ class FraudProtectionChallengeManager {
 
 		$challenge_data = array(
 			'challenge_id' => $challenge_id,
-			'session_key'  => $session_key,
+			'session_id'  => $session_id,
 			'email'        => $email,
 			'otp_code'     => $otp_code,
 			'generated_at' => $generated_at,
@@ -102,7 +102,7 @@ class FraudProtectionChallengeManager {
 			sprintf(
 				'OTP challenge created: %s | Session: %s | Email: %s | Expires: %s',
 				$challenge_id,
-				$session_key,
+				$session_id,
 				$email,
 				gmdate( 'Y-m-d H:i:s', $expires_at )
 			)
@@ -159,7 +159,7 @@ class FraudProtectionChallengeManager {
 				sprintf(
 					'Verification failed - challenge expired: %s | Session: %s',
 					$challenge_id,
-					$challenge['session_key']
+					$challenge['session_id']
 				)
 			);
 			return new \WP_Error(
@@ -175,7 +175,7 @@ class FraudProtectionChallengeManager {
 				sprintf(
 					'Verification failed - max attempts reached: %s | Session: %s',
 					$challenge_id,
-					$challenge['session_key']
+					$challenge['session_id']
 				)
 			);
 			return new \WP_Error(
@@ -188,6 +188,8 @@ class FraudProtectionChallengeManager {
 		$challenge['attempts']++;
 		$this->save_challenge( $challenge_id, $challenge );
 
+		// TODO: Maybe also verify session_id is the same.
+
 		// Verify OTP code.
 		if ( $otp_code !== $challenge['otp_code'] ) {
 			$remaining_attempts = self::MAX_ATTEMPTS - $challenge['attempts'];
@@ -195,7 +197,7 @@ class FraudProtectionChallengeManager {
 				sprintf(
 					'Verification failed - invalid OTP: %s | Session: %s | Attempts remaining: %d',
 					$challenge_id,
-					$challenge['session_key'],
+					$challenge['session_id'],
 					$remaining_attempts
 				)
 			);
@@ -210,14 +212,11 @@ class FraudProtectionChallengeManager {
 			);
 		}
 
-		// Verification successful - delete challenge.
-		$this->delete_challenge( $challenge_id );
-
 		$this->log_info(
 			sprintf(
 				'OTP verification successful: %s | Session: %s | Email: %s',
 				$challenge_id,
-				$challenge['session_key'],
+				$challenge['session_id'],
 				$challenge['email']
 			)
 		);

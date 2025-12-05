@@ -121,6 +121,7 @@ class FraudProtectionController {
 		$api_client        = $container->get( FraudProtectionServiceApiClient::class );
 		$challenge_manager = $container->get( FraudProtectionChallengeManager::class );
 		$session_manager   = $container->get( SessionClearanceManager::class );
+		$data_collector    = $container->get( SessionDataCollector::class );
 
 		// Get schema controller and create schema instance.
 		$schema_controller = $container->get( \Automattic\WooCommerce\StoreApi\SchemaController::class );
@@ -133,7 +134,8 @@ class FraudProtectionController {
 			$schema,
 			$api_client,
 			$challenge_manager,
-			$session_manager
+			$session_manager,
+			$data_collector
 		);
 
 		$verify_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionChallengeVerify(
@@ -141,7 +143,8 @@ class FraudProtectionController {
 			$schema,
 			$api_client,
 			$challenge_manager,
-			$session_manager
+			$session_manager,
+			$data_collector
 		);
 
 		$retry_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionChallengeRetry(
@@ -250,18 +253,29 @@ class FraudProtectionController {
 		return $available_gateways;
 	}
 
-	public function update_session( $event_name, $session_data ) {
+	/**
+	 * Update session status according to fraud protection decision for given event and data.
+	 *
+	 * Calls the FraudProtectionServiceApiClient to track the session event and then updates
+	 * WooCommerce session state (allowed, blocked, or challenge) according to decision received.
+	 * Defaults to allowing the session on unknown or unrecognized decisions.
+	 *
+	 * @param string $event_type   The type of event to track (e.g. 'cart_item_added', 'challenge_requested').
+	 * @param array  $session_data The flat session data array to pass to the API client.
+	 * @return void
+	 */
+	public function update_session( $event_type, $session_data ) {
 		$container = wc_get_container();
 		$api_client = $container->get( FraudProtectionServiceApiClient::class );
-		$decision = $api_client->track_session_event( $event_name, $session_data );
+		$decision = $api_client->track_session_event( $event_type, $session_data );
 		switch ( $decision ) {
-			case 'allow':
+			case FraudProtectionServiceApiClient::DECISION_ALLOW:
 				$this->session_manager->allow_session();
 				break;
-			case 'block':
+			case FraudProtectionServiceApiClient::DECISION_BLOCK:
 				$this->session_manager->block_session();
 				break;
-			case 'challenge':
+			case FraudProtectionServiceApiClient::DECISION_CHALLENGE:
 				$this->session_manager->challenge_session();
 				break;
 			default: // ! Important: Unknown decision, just allow the session
@@ -373,10 +387,10 @@ class FraudProtectionController {
 	 * @return array Session data.
 	 */
 	private function build_cart_event_session_data( $action, $product_id, $quantity, $variation_id ) {
-		$session_key = $this->get_session_key();
+		$session_id = $this->get_session_id();
 
 		return [
-			'session_key'  => $session_key,
+			'session_id'  => $session_id,
 			'action'       => $action,
 			'product_id'   => $product_id,
 			'quantity'     => $quantity,
@@ -387,11 +401,11 @@ class FraudProtectionController {
 	}
 
 	/**
-	 * Get session key for current session.
+	 * Get session id for current session.
 	 *
-	 * @return string Session key.
+	 * @return string Session id.
 	 */
-	private function get_session_key() {
+	private function get_session_id() {
 		if ( isset( WC()->session ) && WC()->session instanceof \WC_Session ) {
 			$customer_id = WC()->session->get_customer_id();
 			if ( $customer_id ) {
