@@ -12,11 +12,6 @@ import { withSelect } from '@wordpress/data';
 import { H } from '@woocommerce/components';
 import { settingsStore, useUserPreferences } from '@woocommerce/data';
 import { getQuery } from '@woocommerce/navigation';
-import {
-	getCurrentDates,
-	getDateParamsFromQuery,
-	isoDateFormat,
-} from '@woocommerce/date';
 import { recordEvent } from '@woocommerce/tracks';
 import {
 	CurrencyContext,
@@ -247,20 +242,6 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 	};
 
 	const renderDashboardReports = () => {
-		const { period, compare, before, after } = getDateParamsFromQuery(
-			query,
-			defaultDateRange
-		);
-		const { primary: primaryDate, secondary: secondaryDate } =
-			getCurrentDates( query, defaultDateRange );
-		const dateQuery = {
-			period,
-			compare,
-			before,
-			after,
-			primaryDate,
-			secondaryDate,
-		};
 		const visibleSectionKeys = sections
 			.filter( ( section ) => section.isVisible )
 			.map( ( section ) => section.key );
