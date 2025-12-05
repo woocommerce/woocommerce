@@ -14,9 +14,7 @@ import {
  */
 import {
 	base_url,
-	hpos_status,
 	admin_orders_base_url,
-	hpos_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
 } from '../../config.js';
@@ -34,13 +32,7 @@ import {
 let heartbeat_nonce;
 let jar;
 
-// Change URL if HPOS is enabled and being used
-let admin_orders_base;
-if ( hpos_status === true ) {
-	admin_orders_base = hpos_admin_orders_base_url;
-} else {
-	admin_orders_base = admin_orders_base_url;
-}
+const admin_orders_base = admin_orders_base_url;
 
 export function ordersHeartbeat() {
 	let response;
