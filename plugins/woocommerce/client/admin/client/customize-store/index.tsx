@@ -76,22 +76,47 @@ const CustomizeStoreController = () => {
 		};
 	}, [] );
 
-	const markTaskComplete = () => {
-		updateOptions( {
+	const markTaskComplete = async () => {
+		await updateOptions( {
 			woocommerce_admin_customize_store_completed: 'yes',
 		} );
 	};
 
-	const handleDesignClick = () => {
+	const isNewTabClick = ( event: React.MouseEvent ) => {
+		// Middle mouse button, Cmd+Click (Mac), or Ctrl+Click (Windows/Linux)
+		return event.button === 1 || event.metaKey || event.ctrlKey;
+	};
+
+	const handleClick = async (
+		event: React.MouseEvent< HTMLAnchorElement >,
+		href: string
+	) => {
+		if ( isNewTabClick( event ) ) {
+			// New tab: page stays open, so fire-and-forget is safe
+			markTaskComplete();
+			return;
+		}
+
+		event.preventDefault();
+		await markTaskComplete();
+		window.location.href = href;
+	};
+
+	const handleDesignClick = async (
+		event: React.MouseEvent< HTMLAnchorElement >
+	) => {
 		recordEvent( 'customize_your_store_intro_customize_click', {
 			theme_type: isBlockTheme ? 'block' : 'classic',
 		} );
-		markTaskComplete();
+
+		await handleClick( event, designUrl );
 	};
 
-	const handleMarketplaceClick = () => {
+	const handleMarketplaceClick = async (
+		event: React.MouseEvent< HTMLAnchorElement >
+	) => {
 		recordEvent( 'customize_your_store_intro_browse_all_themes_click' );
-		markTaskComplete();
+		await handleClick( event, marketplaceUrl );
 	};
 
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
