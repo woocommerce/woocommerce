@@ -2097,7 +2097,6 @@ CREATE TABLE {$wpdb->prefix}wc_customer_lookup (
 	first_name varchar(255) NOT NULL,
 	last_name varchar(255) NOT NULL,
 	email varchar(100) NULL default NULL,
-	phone varchar(100) DEFAULT '' NOT NULL,
 	date_last_active timestamp NULL default null,
 	date_registered timestamp NULL default null,
 	country char(2) DEFAULT '' NOT NULL,
