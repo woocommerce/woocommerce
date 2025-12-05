@@ -203,7 +203,7 @@ class OrdersScheduler extends ImportScheduler {
 			"SELECT COUNT(*) FROM {$wpdb->posts}
 			WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
 			AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
-			{$where_clause}",
+			{$where_clause}" // phpcs:ignore unprepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared SQL ok.
 		);
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
