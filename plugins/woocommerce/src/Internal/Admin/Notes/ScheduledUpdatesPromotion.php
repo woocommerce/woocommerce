@@ -79,7 +79,7 @@ class ScheduledUpdatesPromotion {
 		$note = new Note();
 
 		$note->set_title( __( 'Analytics now supports scheduled updates', 'woocommerce' ) );
-		$note->set_content( __( 'This provides improved performance to your store, enable it in Settings.', 'woocommerce' ) );
+		$note->set_content( __( 'This provides improved performance to your store, enable it in Analytics > Settings.', 'woocommerce' ) );
 		$note->set_content_data( (object) array() );
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
