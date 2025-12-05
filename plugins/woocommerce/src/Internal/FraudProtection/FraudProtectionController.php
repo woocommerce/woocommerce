@@ -108,7 +108,7 @@ class FraudProtectionController {
 	}
 
 	/**
-	 * Register Store API routes for fraud protection OTP endpoints.
+	 * Register Store API routes for fraud protection challenge endpoints.
 	 *
 	 * @internal
 	 *
@@ -121,7 +121,6 @@ class FraudProtectionController {
 		$api_client        = $container->get( FraudProtectionServiceApiClient::class );
 		$challenge_manager = $container->get( FraudProtectionChallengeManager::class );
 		$session_manager   = $container->get( SessionClearanceManager::class );
-		$data_collector    = $container->get( SessionDataCollector::class );
 
 		// Get schema controller and create schema instance.
 		$schema_controller = $container->get( \Automattic\WooCommerce\StoreApi\SchemaController::class );
@@ -129,25 +128,23 @@ class FraudProtectionController {
 		$schema            = new \Automattic\WooCommerce\StoreApi\Schemas\V1\FraudProtectionOtpSchema( $extend_schema, $schema_controller );
 
 		// Create route instances.
-		$request_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionOtpRequest(
+		$request_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionChallengeRequest(
 			$schema_controller,
 			$schema,
 			$api_client,
 			$challenge_manager,
-			$session_manager,
-			$data_collector
+			$session_manager
 		);
 
-		$verify_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionOtpVerify(
+		$verify_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionChallengeVerify(
 			$schema_controller,
 			$schema,
 			$api_client,
 			$challenge_manager,
-			$session_manager,
-			$data_collector
+			$session_manager
 		);
 
-		$resend_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionOtpResend(
+		$retry_route = new \Automattic\WooCommerce\StoreApi\Routes\V1\FraudProtectionChallengeRetry(
 			$schema_controller,
 			$schema,
 			$challenge_manager
@@ -170,8 +167,8 @@ class FraudProtectionController {
 
 		register_rest_route(
 			$namespace,
-			$resend_route->get_path(),
-			$resend_route->get_args()
+			$retry_route->get_path(),
+			$retry_route->get_args()
 		);
 	}
 
@@ -485,7 +482,7 @@ class FraudProtectionController {
 			'wc-fraud-protection-modal',
 			'wcFraudProtection',
 			array(
-				'restUrl'       => rest_url( 'wc/store/v1/fraud-protection/otp' ),
+				'restUrl'       => rest_url( 'wc/store/v1/fraud-protection/challenge' ),
 				'storeNonce'    => wp_create_nonce( 'wc_store_api' ),
 				'sessionStatus' => $this->session_manager->get_session_status(),
 				'userEmail'     => $user_email,
@@ -511,8 +508,8 @@ class FraudProtectionController {
 			return $result;
 		}
 
-		// Allow the Store API OTP endpoints themselves.
-		if ( strpos( $route, '/store/v1/fraud-protection/otp' ) !== false ) {
+		// Allow the Store API challenge endpoints themselves.
+		if ( strpos( $route, '/store/v1/fraud-protection/challenge' ) !== false ) {
 			return $result;
 		}
 

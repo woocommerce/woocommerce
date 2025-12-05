@@ -5,19 +5,20 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionChallengeManager;
 
 /**
- * FraudProtectionOtpResend class.
+ * FraudProtectionChallengeRetry class.
  *
- * Handles OTP resend endpoint.
+ * Handles fraud protection challenge retry endpoint.
+ * Generic endpoint that can be used by any challenge method (OTP, SMS, etc).
  *
  * @since 10.4.0
  */
-class FraudProtectionOtpResend extends AbstractCartRoute {
+class FraudProtectionChallengeRetry extends AbstractCartRoute {
 	/**
 	 * The route identifier.
 	 *
 	 * @var string
 	 */
-	const IDENTIFIER = 'fraud-protection-otp-resend';
+	const IDENTIFIER = 'fraud-protection-challenge-retry';
 
 	/**
 	 * Challenge manager instance.
@@ -44,7 +45,7 @@ class FraudProtectionOtpResend extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return '/fraud-protection/otp/resend';
+		return '/fraud-protection/challenge/retry';
 	}
 
 	/**
@@ -60,7 +61,7 @@ class FraudProtectionOtpResend extends AbstractCartRoute {
 				'permission_callback' => '__return_true',
 				'args'                => [
 					'challenge_id' => [
-						'description' => __( 'Unique identifier for the OTP challenge.', 'woocommerce' ),
+						'description' => __( 'Unique identifier for the challenge.', 'woocommerce' ),
 						'type'        => 'string',
 						'required'    => true,
 					],

@@ -476,7 +476,7 @@
 
 			// Make REST API call
 			$.ajax({
-				url: wcFraudProtection.restUrl + '/resend',
+				url: wcFraudProtection.restUrl + '/retry',
 				method: 'POST',
 				data: JSON.stringify({
 					challenge_id: this.challengeId

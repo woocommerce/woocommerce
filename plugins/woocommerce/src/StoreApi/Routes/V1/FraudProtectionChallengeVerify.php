@@ -8,19 +8,20 @@ use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 
 /**
- * FraudProtectionOtpRequest class.
+ * FraudProtectionChallengeVerify class.
  *
- * Handles OTP challenge request endpoint.
+ * Handles fraud protection challenge verification endpoint.
+ * Generic endpoint that can be used by any challenge method (OTP, SMS, etc).
  *
  * @since 10.4.0
  */
-class FraudProtectionOtpRequest extends AbstractCartRoute {
+class FraudProtectionChallengeVerify extends AbstractCartRoute {
 	/**
 	 * The route identifier.
 	 *
 	 * @var string
 	 */
-	const IDENTIFIER = 'fraud-protection-otp-request';
+	const IDENTIFIER = 'fraud-protection-challenge-verify';
 
 	/**
 	 * API client instance.
@@ -74,7 +75,7 @@ class FraudProtectionOtpRequest extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return '/fraud-protection/otp/request';
+		return '/fraud-protection/challenge/verify';
 	}
 
 	/**
@@ -89,14 +90,18 @@ class FraudProtectionOtpRequest extends AbstractCartRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => [
-					'email' => [
-						'description'       => __( 'Email address for OTP challenge.', 'woocommerce' ),
+					'challenge_id' => [
+						'description' => __( 'Unique identifier for the challenge.', 'woocommerce' ),
+						'type'        => 'string',
+						'required'    => true,
+					],
+					'otp_code'     => [
+						'description'       => __( 'Verification code (six-digit OTP for email challenges).', 'woocommerce' ),
 						'type'              => 'string',
 						'required'          => true,
 						'validate_callback' => function( $param ) {
-							return is_email( $param );
+							return preg_match( '/^\d{6}$/', $param );
 						},
-						'sanitize_callback' => 'sanitize_email',
 					],
 				],
 			],
@@ -106,23 +111,86 @@ class FraudProtectionOtpRequest extends AbstractCartRoute {
 	/**
 	 * Handle the request and return a valid response for this endpoint.
 	 *
+	 * On successful OTP verification, tracks `challenge_succeeded` event.
+	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$email = $request['email'];
+		$challenge_id = $request['challenge_id'];
+		$otp_code     = $request['otp_code'];
+
+		// Verify OTP.
+		$result = $this->challenge_manager->verify_otp( $challenge_id, $otp_code );
+
+		// Handle verification errors.
+		if ( is_wp_error( $result ) ) {
+			$error_code = $result->get_error_code();
+			$error_msg  = $result->get_error_message();
+
+			// Map error codes to HTTP status codes.
+			$status_map = [
+				'challenge_not_found' => 404,
+				'otp_expired'         => 400,
+				'max_attempts'        => 429,
+				'otp_invalid'         => 400,
+			];
+
+			$http_status = isset( $status_map[ $error_code ] ) ? $status_map[ $error_code ] : 400;
+
+			throw new RouteException( $error_code, $error_msg, $http_status );
+		}
+
+		// Get challenge data for email difference tracking.
+		$challenge = $this->challenge_manager->get_challenge( $challenge_id );
+		if ( ! $challenge ) {
+			throw new RouteException(
+				'challenge_not_found',
+				__( 'Challenge not found.', 'woocommerce' ),
+				404
+			);
+		}
 
 		// Collect full session data using SessionDataCollector.
-		$session_data          = $this->data_collector->collect();
-		$session_data['email'] = $email; // Override with form input.
+		$session_data    = $this->data_collector->collect();
+		$original_email  = $session_data['email'];
+		$challenge_email = $challenge['email'];
 
-		// Call WPCOM API to get verdict.
-		$verdict = $this->api_client->track_session_event( 'challenge_requested', $session_data );
+		// Override email with challenge email for API call.
+		$session_data['email'] = $challenge_email;
 
-		// There is no need to trigger a challenge if the verdict is already blocked.
+		// Log email difference if detected.
+		if ( $original_email && $original_email !== $challenge_email ) {
+			$this->log_info(
+				'Email difference detected during OTP verification',
+				[
+					'original_email'  => $original_email,
+					'challenge_email' => $challenge_email,
+					'challenge_id'    => $challenge_id,
+				]
+			);
+		}
+
+		// Track successful verification with WPCOM API.
+		$verdict = $this->api_client->track_session_event( 'challenge_succeeded', $session_data );
+
+		// Handle API verdict.
+		if ( FraudProtectionServiceApiClient::DECISION_ALLOW === $verdict ) {
+			$this->session_manager->allow_session();
+			$this->challenge_manager->delete_challenge( $challenge_id );
+
+			return rest_ensure_response( [
+				'success'        => true,
+				'session_status' => 'allowed',
+				'message'        => __( 'Verification successful.', 'woocommerce' ),
+			] );
+		}
+
 		if ( FraudProtectionServiceApiClient::DECISION_BLOCK === $verdict ) {
 			$this->session_manager->block_session();
+			$this->challenge_manager->delete_challenge( $challenge_id );
+
 			throw new RouteException(
 				'fraud_protection_session_blocked',
 				__( 'Your session has been blocked due to security concerns.', 'woocommerce' ),
@@ -130,66 +198,12 @@ class FraudProtectionOtpRequest extends AbstractCartRoute {
 			);
 		}
 
-		// Verdict is "challenge" - generate and send OTP.
-		$challenge = $this->challenge_manager->create_challenge( $session_data['session_id'] ?? 'no-session', $email );
-
-		// Send OTP email.
-		$email_sent = $this->send_otp_email( $email, $challenge );
-
-		// If email fails, allow session with logging (fail-open pattern).
-		if ( ! $email_sent ) {
-			$this->session_manager->allow_session();
-			$this->log_error( 'Failed to send OTP email, allowing session (fail-open)' );
-			return rest_ensure_response( [
-				'success'        => true,
-				'session_status' => 'allowed',
-				'message'        => __( 'Session verified successfully.', 'woocommerce' ),
-			] );
-		}
-
-		// Calculate time until expiration.
-		$expires_in = $challenge['expires_at'] - time();
-
-		return rest_ensure_response( [
-			'success'            => true,
-			'challenge_id'       => $challenge['challenge_id'],
-			'expires_in'         => max( 0, $expires_in ),
-			'attempts_remaining' => 3 - $challenge['attempts'],
-			'message'            => __( 'Verification code sent to your email.', 'woocommerce' ),
-		] );
-	}
-
-	/**
-	 * Send OTP email.
-	 *
-	 * @param string $email Email address.
-	 * @param array  $challenge Challenge data.
-	 * @return bool Whether email was sent successfully.
-	 */
-	private function send_otp_email( $email, $challenge ) {
-		try {
-			$mailer       = WC()->mailer();
-			$emails       = $mailer->get_emails();
-			$otp_email    = isset( $emails['WC_Email_Fraud_Protection_Otp'] ) ? $emails['WC_Email_Fraud_Protection_Otp'] : null;
-
-			if ( ! $otp_email ) {
-				$this->log_error( 'OTP email class not found' );
-				return false;
-			}
-
-			$otp_email->trigger(
-				$email,
-				$challenge['otp_code'],
-				$challenge['challenge_id'],
-				60 // expiration minutes
-			);
-
-			$this->log_info( 'OTP email sent successfully', [ 'challenge_id' => $challenge['challenge_id'] ] );
-			return true;
-		} catch ( \Exception $e ) {
-			$this->log_error( 'Exception sending OTP email: ' . $e->getMessage() );
-			return false;
-		}
+		// Challenge verdict - should not happen after successful verification, but handle gracefully.
+		throw new RouteException(
+			'unexpected_api_response',
+			__( 'Unexpected response from verification service.', 'woocommerce' ),
+			500
+		);
 	}
 
 	/**
@@ -201,16 +215,5 @@ class FraudProtectionOtpRequest extends AbstractCartRoute {
 	private function log_info( $message, $context = [] ) {
 		$logger = wc_get_logger();
 		$logger->info( $message, array_merge( [ 'source' => 'woo-fraud-protection-otp' ], $context ) );
-	}
-
-	/**
-	 * Log an error message.
-	 *
-	 * @param string $message Message to log.
-	 * @param array  $context Additional context.
-	 */
-	private function log_error( $message, $context = [] ) {
-		$logger = wc_get_logger();
-		$logger->error( $message, array_merge( [ 'source' => 'woo-fraud-protection-otp' ], $context ) );
 	}
 }
