@@ -13,6 +13,7 @@ import type { UseImportStatusReturn } from '../types';
 
 jest.mock( '../use-import-status' );
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: jest.fn(),
 } ) );
 jest.mock( '@wordpress/date', () => ( {
@@ -22,18 +23,7 @@ jest.mock( '@wordpress/date', () => ( {
 		return 'Nov 21 00:00';
 	} ),
 } ) );
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( { children, onClick, disabled, className, ...props }: any ) => (
-		<button
-			onClick={ onClick }
-			disabled={ disabled }
-			className={ className }
-			{ ...props }
-		>
-			{ children }
-		</button>
-	),
-} ) );
+
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn( ( key, defaultValue ) => {
 		if ( key === 'formats' ) {
