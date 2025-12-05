@@ -3928,57 +3928,40 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testdox needs_processing returns correct result when order cache is invalidated after items are saved.
+	 * @testdox needs_processing returns correct result when COGS filter triggers get_items() during order hydration.
 	 *
-	 * This test verifies the fix for a race condition bug (GitHub issue #62173) where:
-	 * 1. An order is created with items added before save()
-	 * 2. During create(), woocommerce_new_order fires BEFORE items are in DB
-	 * 3. A hook calls wc_get_order() and get_items(), priming empty items in the cache
-	 * 4. save_items() runs after create() returns, saving items to DB
-	 * 5. The fix invalidates the cache in save_items() so subsequent wc_get_order() calls get fresh data
+	 * Reproduces GitHub issue #62173: woocommerce_new_order fires before items are in DB.
+	 * If a hook loads the order and triggers get_items() (e.g., via COGS filter calling get_data()),
+	 * empty items get cached. The fix invalidates the cache when items are saved.
 	 */
-	public function test_needs_processing_with_stale_cached_empty_items() {
+	public function test_needs_processing_with_cogs_filter_triggering_get_items() {
 		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cogs_feature();
 
-		// Verify cache is enabled - if not, this test cannot verify the fix.
 		$this->assertTrue(
 			OrderUtil::orders_cache_usage_is_enabled(),
-			'Order cache must be enabled for this test to verify the fix.'
+			'Order cache must be enabled for this test.'
 		);
 
-		$order_cache = wc_get_container()->get( OrderCache::class );
-
-		// Create a simple physical (non-virtual, non-downloadable) product.
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_virtual( false );
 		$product->set_downloadable( false );
 		$product->save();
 
-		// Track cache state after save_items() runs.
-		$order_id_to_track        = null;
-		$cached_after_object_save = null;
-
-		// Check cache state after save completes (after save_items runs).
-		// Note: woocommerce_after_order_object_save passes the order object, not the ID.
-		$after_object_save_check = function ( $order ) use ( $order_cache, &$cached_after_object_save, &$order_id_to_track ) {
-			$order_id = $order->get_id();
-			if ( $order_id_to_track && $order_id === $order_id_to_track ) {
-				$cached_after_object_save = $order_cache->is_cached( $order_id );
-			}
+		// COGS filter that calls get_data() (which calls get_items()), priming empty items.
+		$cogs_filter = function ( $cogs_value, $order ) {
+			$order->get_data();
+			return $cogs_value;
 		};
-		add_action( 'woocommerce_after_order_object_save', $after_object_save_check, 1, 1 );
+		add_filter( 'woocommerce_load_order_cogs_value', $cogs_filter, 10, 2 );
 
-		// Hook into woocommerce_new_order to simulate the case of wc_get_order()
-		// and get_items() being called before items are saved.
-		// This primes the cache with empty items, creating the race condition.
-		$hook_callback = function ( $order_id ) use ( &$order_id_to_track ) {
-			$order_in_hook = wc_get_order( $order_id );
-			$order_in_hook->get_items(); // Primes empty items in the cached order.
-			$order_id_to_track = $order_id;
+		// Load order during woocommerce_new_order (before items are in DB), caching it with empty items.
+		$new_order_hook = function ( $order_id ) {
+			wc_get_order( $order_id );
 		};
-		add_action( 'woocommerce_new_order', $hook_callback, 10, 1 );
+		add_action( 'woocommerce_new_order', $new_order_hook, 10, 1 );
 
-		// Create order with items added BEFORE save().
+		// Create order with item. woocommerce_new_order fires before save_items().
 		$order = new WC_Order();
 		$item  = new WC_Order_Item_Product();
 		$item->set_props(
@@ -3993,29 +3976,13 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->save();
 		$order_id = $order->get_id();
 
-		remove_action( 'woocommerce_new_order', $hook_callback, 10 );
-		remove_action( 'woocommerce_after_order_object_save', $after_object_save_check, 1 );
+		remove_filter( 'woocommerce_load_order_cogs_value', $cogs_filter, 10 );
+		remove_action( 'woocommerce_new_order', $new_order_hook, 10 );
 
-		// THE KEY ASSERTION: With the fix, the cache should have been invalidated in save_items().
-		// Without the fix, the cache would still contain the order (with stale empty items).
-		$this->assertFalse(
-			$cached_after_object_save,
-			'Cache should be invalidated after items are saved (the fix removes it). ' .
-			'Without the fix, order would still be cached with stale empty items.'
-		);
-
-		// Verify fresh wc_get_order() returns correct data.
+		// Without fix: returns cached order with empty items. With fix: fresh data from DB.
 		$fresh_order = wc_get_order( $order_id );
 
-		$this->assertCount(
-			1,
-			$fresh_order->get_items(),
-			'wc_get_order() should return order with items from DB.'
-		);
-
-		$this->assertTrue(
-			$fresh_order->needs_processing(),
-			'Order with physical product should need processing.'
-		);
+		$this->assertCount( 1, $fresh_order->get_items(), 'Order should have items from DB.' );
+		$this->assertTrue( $fresh_order->needs_processing(), 'Order with physical product should need processing.' );
 	}
 }
