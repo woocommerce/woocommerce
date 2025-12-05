@@ -274,7 +274,11 @@ class PushTokensDataStore {
 					return $meta[ $key ][0];
 				}
 
-				return $meta[ $key ] ?? null;
+				if ( isset( $meta[ $key ] ) ) {
+					return $meta[ $key ];
+				}
+
+				return null;
 			},
 			array_combine( static::SUPPORTED_META, static::SUPPORTED_META )
 		);
