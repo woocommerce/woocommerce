@@ -36,6 +36,13 @@ class FraudProtectionController {
 	private $features_controller;
 
 	/**
+	 * Session data collector instance.
+	 *
+	 * @var SessionDataCollector
+	 */
+	private $data_collector;
+
+	/**
 	 * Constructor. Sets up hooks on instantiation.
 	 */
 	public function __construct() {
@@ -43,6 +50,7 @@ class FraudProtectionController {
 		$container = wc_get_container();
 		$this->session_manager     = $container->get( SessionClearanceManager::class );
 		$this->features_controller = $container->get( FeaturesController::class );
+		$this->data_collector    = $container->get( SessionDataCollector::class );
 
 		// Register Store API routes.
 		add_action( 'rest_api_init', array( $this, 'handle_register_store_api_routes' ), 10, 0 );
@@ -389,7 +397,7 @@ class FraudProtectionController {
 	private function build_cart_event_session_data( $action, $product_id, $quantity, $variation_id ) {
 		$session_id = $this->get_session_id();
 
-		return [
+		$cart_event_session_data = [
 			'session_id'  => $session_id,
 			'action'       => $action,
 			'product_id'   => $product_id,
@@ -398,6 +406,9 @@ class FraudProtectionController {
 			'cart_total'   => WC()->cart ? WC()->cart->get_cart_contents_count() : null, // TODO: fix totals are not updated yet
 			'email'        => $this->get_user_email(),
 		];
+
+		$session_data = $this->data_collector->collect();
+		return array_merge( $cart_event_session_data, $session_data );
 	}
 
 	/**
