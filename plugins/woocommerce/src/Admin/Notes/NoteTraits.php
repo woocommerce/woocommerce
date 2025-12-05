@@ -43,7 +43,7 @@ trait NoteTraits {
 	 * @throws NotesUnavailableException Throws exception when notes are unavailable.
 	 */
 	public static function note_exists(): bool {
-		/** @var DataStore $data_store */
+		/** @var DataStore $data_store Data store instance. */
 		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 		return ! empty( $note_ids );
@@ -118,7 +118,7 @@ trait NoteTraits {
 	 */
 	public static function delete_if_not_applicable(): void {
 		if ( ! self::is_applicable() ) {
-			/** @var DataStore $data_store */
+			/** @var DataStore $data_store Data store instance. */
 			$data_store = Notes::load_data_store();
 			$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
@@ -141,7 +141,7 @@ trait NoteTraits {
 	 * @throws NotesUnavailableException Throws exception when notes are unavailable.
 	 */
 	public static function possibly_delete_note(): void {
-		/** @var DataStore $data_store */
+		/** @var DataStore $data_store Data store instance. */
 		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
@@ -168,8 +168,8 @@ trait NoteTraits {
 		}
 
 		// Backwards compatibility for checking if the note class has a get_note method.
-		/** @phpstan-ignore-next-line */
-		if (  ! method_exists( self::class, 'get_note' ) ) {
+		/** @phpstan-ignore-next-line Backwards compatibility check. */
+		if ( ! method_exists( self::class, 'get_note' ) ) {
 			return;
 		}
 
@@ -205,7 +205,7 @@ trait NoteTraits {
 	 * @throws NotesUnavailableException Throws exception when notes are unavailable.
 	 */
 	public static function has_note_been_actioned(): bool {
-		/** @var DataStore $data_store */
+		/** @var DataStore $data_store Data store instance. */
 		$data_store = Notes::load_data_store();
 		$note_ids   = $data_store->get_notes_with_name( self::NOTE_NAME );
 
@@ -230,10 +230,10 @@ trait NoteTraits {
 	 */
 	private static function update_note_field_if_changed( $note1, $note2, string $field_name ): bool {
 		// We need to serialize the stdObject to compare it.
-		/** @var callable $getter1 */
-		$getter1 = array( $note1, 'get_' . $field_name );
-		/** @var callable $getter2 */
-		$getter2 = array( $note2, 'get_' . $field_name );
+		/** @var callable $getter1 Getter method for note1. */
+		$getter1            = array( $note1, 'get_' . $field_name );
+		/** @var callable $getter2 Getter method for note2. */
+		$getter2            = array( $note2, 'get_' . $field_name );
 		$note1_field_value = self::possibly_convert_object_to_array(
 			call_user_func( $getter1 )
 		);
@@ -247,16 +247,22 @@ trait NoteTraits {
 			$diff        = array_udiff(
 				(array) $note1_field_value,
 				(array) $note2_field_value,
-				function( $action1, $action2 ): int {
-					/** @var object{name?: string, label?: string, query?: string} $action1 */
-					/** @var object{name?: string, label?: string, query?: string} $action2 */
+				function ( $action1, $action2 ): int {
+					/** @var object{name?: string, label?: string, query?: string} $action1 First action object. */
+					/** @var object{name?: string, label?: string, query?: string} $action2 Second action object. */
 					if (
 						isset(
-							$action1->name, $action2->name, $action1->label, $action2->label, $action1->query, $action2->query
+							$action1->name,
+							$action2->name,
+							$action1->label,
+							$action2->label,
+							$action1->query,
+							$action2->query
 						) &&
 						$action1->name === $action2->name &&
 						$action1->label === $action2->label &&
-						$action1->query === $action2->query ) {
+						$action1->query === $action2->query
+					) {
 						return 0;
 					}
 					return -1;
@@ -268,10 +274,10 @@ trait NoteTraits {
 		}
 
 		if ( $need_update ) {
-			/** @var callable $getter2_again */
+			/** @var callable $getter2_again Getter method for note2 field. */
 			$getter2_again = array( $note2, 'get_' . $field_name );
-			/** @var callable $setter1 */
-			$setter1 = array( $note1, 'set_' . $field_name );
+			/** @var callable $setter1 Setter method for note1 field. */
+			$setter1       = array( $note1, 'set_' . $field_name );
 			// Get note2 field again because it may have been changed during the comparison.
 			call_user_func( $setter1, call_user_func( $getter2_again ) );
 			return true;
