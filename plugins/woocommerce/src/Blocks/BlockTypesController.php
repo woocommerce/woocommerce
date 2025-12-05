@@ -675,6 +675,8 @@ final class BlockTypesController {
 	 * @param array  $settings The settings for the breadcrumbs block.
 	 * @param string $post_type The post type.
 	 * @return array The settings for the breadcrumbs block.
+	 *
+	 * @internal
 	 */
 	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type ) {
 		if ( 'product' === $post_type ) {
