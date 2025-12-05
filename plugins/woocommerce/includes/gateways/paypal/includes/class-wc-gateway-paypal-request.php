@@ -1019,7 +1019,7 @@ class WC_Gateway_Paypal_Request {
 			array(
 				'headers' => array(
 					'Content-Type' => 'application/json',
-					'User-Agent'   => 'TransactGateway/woocommerce/' . WC_VERSION,
+					'User-Agent'   => 'TransactGateway/woocommerce/' . WC()->version,
 				),
 				'method'  => $method,
 				'timeout' => WC_Gateway_Paypal_Constants::WPCOM_PROXY_REQUEST_TIMEOUT,
