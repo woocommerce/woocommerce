@@ -103,22 +103,65 @@ class FraudProtectionServiceApiClient {
 	 * @return array|\WP_Error Response array with 'code' and 'body' keys, or WP_Error on failure.
 	 */
 	private function make_request( string $url, array $payload ) {
-		// We'll mock the response for now untill the endpoint is ready
-		switch ( $payload['session_data']['email'] ) {
-			case 'test@example.com':
-				return array(
-					'code' => 200,
-					'body' => '{"result": "success", "decision": "allow"}',
-				);
-			case 'fraudster@example.com':
-				return array(
-					'code' => 200,
-					'body' => '{"result": "success", "decision": "block"}',
-				);
-			default:
-				return new \WP_Error( 'api_error', 'Invalid email address' );
+		// Mock the response for cart events
+		// Use number of items in the cart to simulate various fraud decisions
+		if ( in_array( $payload['event_name'], array( 'cart_item_added', 'cart_item_updated', 'cart_item_removed', 'cart_item_restored' ), true ) ) {
+			
+			$decision = self::DECISION_ALLOW;
+			if ( $payload['session_data']['cart_total'] > 3 ) {
+				$decision = self::DECISION_BLOCK;
+			} elseif ( $payload['session_data']['cart_total'] > 1 ) {
+				$decision = self::DECISION_CHALLENGE;
+			}
+		
+			return array(
+				'code' => 200,
+				'body' => '{"result": "success", "decision": "' . $decision . '"}',
+			);
 		}
 
+		// Mock the response for challenge requested events to proceed with the challenge.
+		// We do not track challenge retry events, so no need to mock that.
+		if ( in_array( $payload['event_name'], array( 'challenge_requested' ), true ) ) {
+			// We won't block the session on challenge request for now.
+			return array(
+				'code' => 200,
+				'body' => '{"result": "success", "decision": "challenge"}',
+			);
+		}
+
+		// Mock the response for challenge ver
+		if ( in_array( $payload['event_name'], array( 'challenge_verified' ), true ) ) {
+			// We'll mock the response for now untill the endpoint is ready
+			switch ( $payload['session_data']['email'] ) {
+				case 'test@example.com':
+				case 'test2@example.com':
+					return array(
+						'code' => 200,
+						'body' => '{"result": "success", "decision": "allow"}',
+					);
+				case 'fraudster@example.com':
+					return array(
+						'code' => 200,
+						'body' => '{"result": "success", "decision": "block"}',
+					);
+				case null: // Unknown email address, jsut allow the session
+					return array(
+						'code' => 200,
+						'body' => '{"result": "success", "decision": "allow"}',
+					);
+				default:
+					return new \WP_Error( 'api_error', 'Invalid email address' );
+			}
+		}
+
+		// Allow everything else
+		return array(
+			'code' => 200,
+			'body' => '{"result": "success", "decision": "allow"}',
+		);
+
+		// TODO: Add some safety checks to confirm that Jetpack Connection is available.
 		// Use Jetpack Connection for authenticated WPCOM requests.
 		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
 			self::WPCOM_ENDPOINT_PATH,
