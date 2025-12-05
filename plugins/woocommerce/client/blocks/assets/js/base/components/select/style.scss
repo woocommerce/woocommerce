@@ -38,12 +38,14 @@
 		border: 1px solid $universal-border-strong;
 		box-sizing: border-box;
 
-		padding: $gap + $gap-smallest $gap-small 0;
+		padding: $gap $gap-smaller + 1px 0;
 		height: 50px;
 
 		&:focus {
 			border-color: currentColor;
 			border-width: 1.5px;
+
+			padding: $gap $gap-smaller + .5px 0;
 		}
 
 		.has-dark-controls & {
