@@ -370,6 +370,7 @@ class Settings {
 			$import_interval_string = human_time_diff( 0, $import_interval );
 			$settings[]             = array(
 				'id'      => 'woocommerce_analytics_import_interval',
+				'option_key'  => 'woocommerce_analytics_import_interval',
 				'type'    => 'hidden',
 				'default' => $import_interval_string,
 			);
