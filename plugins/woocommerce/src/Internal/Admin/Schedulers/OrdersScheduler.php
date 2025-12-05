@@ -513,7 +513,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		if ( empty( $orders ) ) {
 			$logger->info( 'No orders to process', $context );
 			// Update the cursor position to the start time of the batch so that the next batch will start from that point.
-			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', $start_time ), false );
+			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', (int) $start_time ), false );
 			update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
 			return;
 		}

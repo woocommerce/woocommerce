@@ -18,7 +18,6 @@ defined( 'ABSPATH' ) || exit;
  * REST API Analytics Imports Controller.
  *
  * @internal
- * @extends WC_REST_Data_Controller
  */
 class AnalyticsImports extends \WC_REST_Data_Controller {
 	/**
@@ -37,8 +36,10 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 
 	/**
 	 * Register routes.
+	 *
+	 * @return void
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/status',
@@ -69,7 +70,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	/**
 	 * Check if a given request has access to analytics imports.
 	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
 	public function permissions_check( $request ) {
@@ -87,7 +88,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	/**
 	 * Get the current import status.
 	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_status( $request ) {
@@ -104,7 +105,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		// For scheduled mode, populate additional fields.
 		if ( ! $is_immediate_mode ) {
 			$last_processed_gmt                    = get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, null );
-			$response['last_processed_date']       = $last_processed_gmt ? get_date_from_gmt( $last_processed_gmt, 'Y-m-d H:i:s' ) : null;
+			$response['last_processed_date']       = ( is_string( $last_processed_gmt ) && $last_processed_gmt ) ? get_date_from_gmt( $last_processed_gmt, 'Y-m-d H:i:s' ) : null;
 			$response['next_scheduled']            = $this->get_next_scheduled_time();
 			$response['import_in_progress_or_due'] = $this->is_import_in_progress_or_due();
 		}
@@ -115,7 +116,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	/**
 	 * Trigger a manual import.
 	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
+	 * @param  \WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function trigger_import( $request ) {
@@ -142,7 +143,14 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		// Trigger the batch import immediately by rescheduling the recurring processor.
 		// This unschedules the current recurring action and reschedules it to run now.
 		$action_hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
-		WC()->queue()->cancel_all( $action_hook, array(), OrdersScheduler::$group );
+		if ( ! is_string( $action_hook ) ) {
+			return new WP_Error(
+				'woocommerce_rest_analytics_import_invalid_action',
+				__( 'Invalid action hook for batch import.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+		WC()->queue()->cancel_all( $action_hook, array(), (string) OrdersScheduler::$group );
 		OrdersScheduler::schedule_recurring_batch_processor();
 
 		return rest_ensure_response(
@@ -169,7 +177,10 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 */
 	private function get_next_scheduled_time() {
 		$action_hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
-		$next_time   = WC()->queue()->get_next( $action_hook, array(), OrdersScheduler::$group );
+		if ( ! is_string( $action_hook ) ) {
+			return null;
+		}
+		$next_time = WC()->queue()->get_next( $action_hook, array(), (string) OrdersScheduler::$group );
 
 		if ( ! $next_time ) {
 			return null;
@@ -257,12 +268,16 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 */
 	private function is_import_in_progress_or_due() {
 		$hook = OrdersScheduler::get_action( OrdersScheduler::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+		if ( ! is_string( $hook ) ) {
+			return false;
+		}
 
 		// Check for actions with 'running' status.
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 		$in_progress_actions = WC()->queue()->search(
 			array(
 				'hook'     => $hook,
-				'status'   => \ActionScheduler_Store::STATUS_RUNNING,
+				'status'   => 'running',
 				'per_page' => 1,
 			),
 			'ids'
@@ -273,7 +288,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		}
 
 		// Check if the next scheduled import is due within 1 minute.
-		$next_scheduled = WC()->queue()->get_next( $hook, array(), OrdersScheduler::$group );
+		$next_scheduled = WC()->queue()->get_next( $hook, array(), (string) OrdersScheduler::$group );
 		if ( $next_scheduled ) {
 			$time_until_next = $next_scheduled->getTimestamp() - time();
 			// Consider it "due" if it's scheduled to run within the next 60 seconds.
