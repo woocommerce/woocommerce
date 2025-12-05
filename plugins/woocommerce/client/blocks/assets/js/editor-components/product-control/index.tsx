@@ -53,7 +53,7 @@ interface ProductControlProps {
 	/**
 	 * The total number of variations.
 	 */
-	totalVariations?: Record< string, number | null >;
+	totalVariations?: Record< number, number | null >;
 	/**
 	 * Callback to search products by their name.
 	 */

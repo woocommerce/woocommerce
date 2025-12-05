@@ -16,7 +16,7 @@ export interface WithInjectedProductVariations {
 	variations: Record< number, ProductResponseItem[] >;
 	variationsLoading: boolean;
 	onLoadMoreVariations?: () => void;
-	totalVariations?: Record< string, number | null > | undefined;
+	totalVariations?: Record< number, number | null > | undefined;
 }
 
 export interface WithInjectedSearchedProducts {

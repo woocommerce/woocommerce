@@ -27,8 +27,8 @@ interface WithProductVariationsProps {
 interface State {
 	error: ErrorObject | null;
 	loading: boolean;
-	variations: { [ key: string ]: ProductResponseVariationsItem[] | null };
-	totalVariations: { [ key: string ]: number | null };
+	variations: { [ key: number ]: ProductResponseVariationsItem[] | null };
+	totalVariations: { [ key: number ]: number | null };
 }
 
 /**
