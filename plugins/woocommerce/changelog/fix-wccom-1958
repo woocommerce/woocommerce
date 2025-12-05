@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Add index to user_email within woocommerce_downloadable_product_permissions to improve performance

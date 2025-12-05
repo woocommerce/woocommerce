@@ -158,6 +158,27 @@ class WC_Gateway_Paypal_Request {
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
 
+			$response_array = is_array( $response_data ) ? $response_data : array();
+
+			/**
+			 * Fires after receiving a response from PayPal order creation.
+			 *
+			 * This hook allows extensions to react to PayPal API responses, such as
+			 * displaying admin notices or logging response data.
+			 *
+			 * Note: This hook fires on EVERY order creation attempt (success or failure),
+			 * and can be called multiple times for the same order if retried. Extensions
+			 * hooking this should be idempotent and check order state/meta before taking
+			 * action to avoid duplicate processing.
+			 *
+			 * @since 10.4.0
+			 *
+			 * @param int|string $http_code     The HTTP status code from the PayPal API response.
+			 * @param array      $response_data The decoded response data from the PayPal API
+			 * @param WC_Order   $order         The WooCommerce order object.
+			 */
+			do_action( 'woocommerce_paypal_standard_order_created_response', $http_code, $response_array, $order );
+
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
 				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
@@ -322,15 +343,35 @@ class WC_Gateway_Paypal_Request {
 	 * @throws Exception If the PayPal payment capture fails.
 	 */
 	public function capture_authorized_payment( $order ) {
-		if ( ! $order || ! $order->get_transaction_id() ) {
-			WC_Gateway_Paypal::log( 'PayPal authorization ID not found. Cannot capture payment.' );
+		if ( ! $order ) {
+			WC_Gateway_Paypal::log( 'Order not found to capture authorized payment.' );
 			return;
 		}
 
+		$paypal_order_id = $order->get_meta( '_paypal_order_id', true );
+		// Skip if the PayPal Order ID is not found. This means the order was not created via the Orders v2 API.
+		if ( ! $paypal_order_id ) {
+			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		$capture_id = $order->get_meta( '_paypal_capture_id', true );
 		// Skip if the payment is already captured.
+		if ( $capture_id ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is already captured. PayPal capture ID: ' . $capture_id . '. Order ID: ' . $order->get_id() );
+			return;
+		}
+
 		$paypal_status = $order->get_meta( '_paypal_status', true );
+		// Skip if the payment is already captured.
 		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		$authorization_id = $this->get_authorization_id_for_capture( $order );
+		if ( ! $authorization_id ) {
+			WC_Gateway_Paypal::log( 'Authorization ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
 			return;
 		}
 
@@ -339,7 +380,8 @@ class WC_Gateway_Paypal_Request {
 		try {
 			$request_body = array(
 				'test_mode'        => $this->gateway->testmode,
-				'authorization_id' => $order->get_transaction_id(),
+				'authorization_id' => $authorization_id,
+				'paypal_order_id'  => $paypal_order_id,
 			);
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT, $request_body );
 
@@ -373,6 +415,108 @@ class WC_Gateway_Paypal_Request {
 			}
 			$order->add_order_note( $note_message );
 		}
+	}
+
+	/**
+	 * Get the authorization ID for the PayPal payment.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string|null
+	 */
+	private function get_authorization_id_for_capture( $order ) {
+		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
+		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
+		$capture_id       = $order->get_meta( '_paypal_capture_id', true );
+
+		// If the PayPal order ID is not found or the capture ID is already set, return null.
+		if ( ! $paypal_order_id || ! empty( $capture_id ) ) {
+			return null;
+		}
+
+		// If '_paypal_authorization_checked' is set to 'yes' and the authorization ID is empty, it means we already checked and found no authorization data.
+		// Return null to avoid repeated API calls.
+		if ( empty( $authorization_id ) && 'yes' === $order->get_meta( '_paypal_authorization_checked', true ) ) {
+			return null;
+		}
+
+		// If the authorization ID is not found, try to retrieve it from the PayPal order details.
+		if ( empty( $authorization_id ) ) {
+			WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
+
+			try {
+				$order_data         = $this->get_paypal_order_details( $paypal_order_id );
+				$authorization_data = $this->get_latest_transaction_data(
+					$order_data['purchase_units'][0]['payments']['authorizations'] ?? array()
+				);
+
+				$capture_data = $this->get_latest_transaction_data(
+					$order_data['purchase_units'][0]['payments']['captures'] ?? array()
+				);
+
+				// If the payment is already captured, store the capture ID and status, and return null as there is no authorization ID that needs to be captured.
+				if ( $capture_data && isset( $capture_data['id'] ) ) {
+					$capture_id = $capture_data['id'];
+					$order->update_meta_data( '_paypal_capture_id', $capture_id );
+					$order->update_meta_data( '_paypal_status', $capture_data['status'] ?? WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
+					$order->save();
+					WC_Gateway_Paypal::log( 'Storing capture ID from Paypal. Order ID: ' . $order->get_id() . '; capture ID: ' . $capture_id );
+					return null;
+				}
+
+				if ( $authorization_data && isset( $authorization_data['id'], $authorization_data['status'] ) ) {
+					// If the payment is already captured, return null as there is no authorization ID that needs to be captured.
+					if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $authorization_data['status'] ) {
+						$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
+						$order->save();
+						return null;
+					}
+					$authorization_id = $authorization_data['id'];
+					$order->update_meta_data( '_paypal_authorization_id', $authorization_id );
+					$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
+					WC_Gateway_Paypal::log( 'Storing authorization ID from Paypal. Order ID: ' . $order->get_id() . '; authorization ID: ' . $authorization_id );
+					$order->save();
+				} else {
+					// Store '_paypal_authorization_checked' flag to prevent repeated API calls for orders with no authorization data.
+					WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
+					$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
+					$order->save();
+					return null;
+				}
+			} catch ( Exception $e ) {
+				WC_Gateway_Paypal::log( 'Error retrieving authorization ID from PayPal order details. Order ID: ' . $order->get_id() . '. Error: ' . $e->getMessage() );
+				return null;
+			}
+		}
+
+		return $authorization_id;
+	}
+
+	/**
+	 * Get the latest item from the authorizations or captures array based on update_time.
+	 *
+	 * @param array $items Array of authorizations or captures.
+	 * @return array|null The latest authorization or capture or null if array is empty or no valid update_time found.
+	 */
+	private function get_latest_transaction_data( $items ) {
+		if ( empty( $items ) || ! is_array( $items ) ) {
+			return null;
+		}
+
+		$latest_item = null;
+		$latest_time = null;
+
+		foreach ( $items as $item ) {
+			if ( empty( $item['update_time'] ) ) {
+				continue;
+			}
+
+			if ( null === $latest_time || $item['update_time'] > $latest_time ) {
+				$latest_time = $item['update_time'];
+				$latest_item = $item;
+			}
+		}
+
+		return $latest_item;
 	}
 
 	/**
@@ -572,8 +716,9 @@ class WC_Gateway_Paypal_Request {
 				'order_id'  => $order->get_id(),
 				'order_key' => $order->get_order_key(),
 				// Endpoint for the proxy to forward webhooks to.
-				'site_url'  => get_site_url(),
+				'site_url'  => home_url(),
 				'site_id'   => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
+				'v'         => WC_VERSION,
 			)
 		);
 
