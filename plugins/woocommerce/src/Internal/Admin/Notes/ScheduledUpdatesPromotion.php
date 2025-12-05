@@ -17,6 +17,8 @@ use Automattic\WooCommerce\Admin\Notes\NoteTraits;
 
 /**
  * ScheduledUpdatesPromotion
+ *
+ * @since 10.5.0
  */
 class ScheduledUpdatesPromotion {
 	/**
