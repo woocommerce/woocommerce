@@ -74,17 +74,17 @@ export const Partners = ( {
 					className:
 						'woocommerce-task-dashboard__container woocommerce-task-marketplace-link',
 				} }
-			message={ __(
-				// translators: {{Link}} is a placeholder for a html element.
-				'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
-				'woocommerce'
-			) }
-			eventName="tasklist_tax_visit_marketplace_click"
-			targetUrl={ getAdminLink(
-				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
-			) }
-			linkType="wc-admin"
-		/>
+				message={ __(
+					// translators: {{Link}} is a placeholder for a html element.
+					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more tax solutions.',
+					'woocommerce'
+				) }
+				eventName="tasklist_tax_visit_marketplace_click"
+				targetUrl={ getAdminLink(
+					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=operations'
+				) }
+				linkType="wc-admin"
+			/>
 		</>
 	);
 };
