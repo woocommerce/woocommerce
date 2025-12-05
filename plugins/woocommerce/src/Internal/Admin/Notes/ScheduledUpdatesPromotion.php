@@ -102,8 +102,9 @@ class ScheduledUpdatesPromotion {
 	 * Enable scheduled updates when the action is triggered.
 	 *
 	 * @param Note $note The note being actioned.
+	 * @return void
 	 */
-	public function enable_scheduled_updates( $note ) {
+	public function enable_scheduled_updates( $note ): void {
 		// Verify this is our note.
 		if ( self::NOTE_NAME !== $note->get_name() ) {
 			return;
