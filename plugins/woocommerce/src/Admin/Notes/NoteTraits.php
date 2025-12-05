@@ -203,7 +203,7 @@ trait NoteTraits {
 				self::update_note_field_if_changed( $note_in_db, $note, 'type' ),
 				self::update_note_field_if_changed( $note_in_db, $note, 'locale' ),
 				self::update_note_field_if_changed( $note_in_db, $note, 'source' ),
-				self::update_note_field_if_changed( $note_in_db, $note, 'actions' )
+				self::update_note_field_if_changed( $note_in_db, $note, 'actions' ),
 			),
 			true
 		);
@@ -261,7 +261,7 @@ trait NoteTraits {
 		 *
 		 * @var callable $getter2
 		 */
-		$getter2 = array( $note2, 'get_' . $field_name );
+		$getter2           = array( $note2, 'get_' . $field_name );
 		$note1_field_value = self::possibly_convert_object_to_array(
 			call_user_func( $getter1 )
 		);
