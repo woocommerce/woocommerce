@@ -272,9 +272,8 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 * @return bool True if a manual triggered import has already been scheduled, false otherwise.
 	 */
 	private function has_manual_triggered_import_scheduled() {
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		$hook                 = OrdersScheduler::get_action( 'process_pending_batch' );
+		$hook = OrdersScheduler::get_action( 'process_pending_batch' );
 
-		return call_user_func( $has_scheduled_action, $hook, array( null, null ) ) ? true : false;
+		return as_has_scheduled_action( $hook, array( null, null ) );
 	}
 }
