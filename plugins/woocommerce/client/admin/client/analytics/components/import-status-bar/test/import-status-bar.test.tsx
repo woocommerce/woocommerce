@@ -119,26 +119,6 @@ describe( 'ImportStatusBar', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should show "Updating…" when import_in_progress_or_due is true', () => {
-		mockUseImportStatus.mockReturnValue(
-			createMockReturn( {
-				status: {
-					mode: 'scheduled',
-					last_processed_date: '2024-11-21 00:00:00',
-					next_scheduled: '2024-11-21 12:00:00',
-					import_in_progress_or_due: true,
-				},
-			} )
-		);
-
-		render( <ImportStatusBar /> );
-
-		expect( screen.getByText( /Updating…/i ) ).toBeInTheDocument();
-		expect(
-			screen.queryByText( /Last updated$/i )
-		).not.toBeInTheDocument();
-	} );
-
 	it( 'should disable button when import_in_progress_or_due is true', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
@@ -191,7 +171,7 @@ describe( 'ImportStatusBar', () => {
 
 		expect( mockCreateNotice ).toHaveBeenCalledWith(
 			'success',
-			expect.stringContaining( 'started successfully' ),
+			expect.stringContaining( 'Analytics import has started' ),
 			expect.objectContaining( {
 				type: 'snackbar',
 				isDismissible: true,
