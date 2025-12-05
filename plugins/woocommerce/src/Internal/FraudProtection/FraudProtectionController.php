@@ -501,6 +501,7 @@ class FraudProtectionController {
 				'sessionStatus' => $this->session_manager->get_session_status(),
 				'userEmail'     => $user_email,
 				'shopUrl'       => get_permalink( wc_get_page_id( 'shop' ) ),
+				'applyTo'       => $this->get_apply_to_setting(),
 			)
 		);
 	}
