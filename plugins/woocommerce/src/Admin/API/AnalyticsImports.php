@@ -186,7 +186,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 */
 	public function get_status_schema() {
 		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'$schema'    => 'https://json-schema.org/draft-04/schema#',
 			'title'      => 'analytics_import_status',
 			'type'       => 'object',
 			'properties' => array(
@@ -228,7 +228,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 */
 	public function get_trigger_schema() {
 		$schema = array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'$schema'    => 'https://json-schema.org/draft-04/schema#',
 			'title'      => 'analytics_import_trigger',
 			'type'       => 'object',
 			'properties' => array(
