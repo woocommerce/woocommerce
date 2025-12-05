@@ -5,6 +5,7 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionServiceApiClient;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionChallengeManager;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 
 /**
  * FraudProtectionOtpVerify class.
@@ -43,19 +44,28 @@ class FraudProtectionOtpVerify extends AbstractRoute {
 	private $session_manager;
 
 	/**
+	 * Session data collector instance.
+	 *
+	 * @var SessionDataCollector
+	 */
+	private $data_collector;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param \Automattic\WooCommerce\StoreApi\SchemaController $schema_controller Schema Controller instance.
-	 * @param \Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema $schema Schema class for this route.
-	 * @param FraudProtectionServiceApiClient $api_client API client instance.
-	 * @param FraudProtectionChallengeManager $challenge_manager Challenge manager instance.
-	 * @param SessionClearanceManager $session_manager Session manager instance.
+	 * @param \Automattic\WooCommerce\StoreApi\SchemaController          $schema_controller Schema Controller instance.
+	 * @param \Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema $schema            Schema class for this route.
+	 * @param FraudProtectionServiceApiClient                            $api_client        API client instance.
+	 * @param FraudProtectionChallengeManager                            $challenge_manager Challenge manager instance.
+	 * @param SessionClearanceManager                                    $session_manager   Session manager instance.
+	 * @param SessionDataCollector                                       $data_collector    Session data collector instance.
 	 */
-	public function __construct( $schema_controller, $schema, $api_client, $challenge_manager, $session_manager ) {
+	public function __construct( $schema_controller, $schema, $api_client, $challenge_manager, $session_manager, $data_collector ) {
 		parent::__construct( $schema_controller, $schema );
 		$this->api_client        = $api_client;
 		$this->challenge_manager = $challenge_manager;
 		$this->session_manager   = $session_manager;
+		$this->data_collector    = $data_collector;
 	}
 
 	/**
@@ -100,6 +110,8 @@ class FraudProtectionOtpVerify extends AbstractRoute {
 	/**
 	 * Handle the request and return a valid response for this endpoint.
 	 *
+	 * On successful OTP verification, tracks `challenge_succeeded` event.
+	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
@@ -139,18 +151,13 @@ class FraudProtectionOtpVerify extends AbstractRoute {
 			);
 		}
 
-		// Track verification with WPCOM API.
-		$session_key     = $this->get_session_key();
-		$original_email  = $this->get_original_email();
+		// Collect full session data using SessionDataCollector.
+		$session_data    = $this->data_collector->collect();
+		$original_email  = $session_data['email'];
 		$challenge_email = $challenge['email'];
 
-		$session_data = [
-			'session_key'         => $session_key,
-			'email'               => $original_email ? $original_email : $challenge_email,
-			'challenge_email'     => $challenge_email,
-			'challenge_id'        => $challenge_id,
-			'verification_status' => 'success',
-		];
+		// Override email with challenge email for API call.
+		$session_data['email'] = $challenge_email;
 
 		// Log email difference if detected.
 		if ( $original_email && $original_email !== $challenge_email ) {
@@ -164,10 +171,11 @@ class FraudProtectionOtpVerify extends AbstractRoute {
 			);
 		}
 
-		$decision = $this->api_client->track_session_event( 'challenge_verified', $session_data );
+		// Track successful verification with WPCOM API.
+		$verdict = $this->api_client->track_session_event( 'challenge_succeeded', $session_data );
 
-		// Handle API decision.
-		if ( 'allow' === $decision ) {
+		// Handle API verdict.
+		if ( FraudProtectionServiceApiClient::DECISION_ALLOW === $verdict ) {
 			$this->session_manager->allow_session();
 			$this->challenge_manager->delete_challenge( $challenge_id );
 
@@ -178,7 +186,7 @@ class FraudProtectionOtpVerify extends AbstractRoute {
 			] );
 		}
 
-		if ( 'block' === $decision ) {
+		if ( FraudProtectionServiceApiClient::DECISION_BLOCK === $verdict ) {
 			$this->session_manager->block_session();
 			$this->challenge_manager->delete_challenge( $challenge_id );
 
@@ -189,56 +197,12 @@ class FraudProtectionOtpVerify extends AbstractRoute {
 			);
 		}
 
-		// Challenge decision - should not happen after successful verification, but handle gracefully.
+		// Challenge verdict - should not happen after successful verification, but handle gracefully.
 		throw new RouteException(
 			'unexpected_api_response',
 			__( 'Unexpected response from verification service.', 'woocommerce' ),
 			500
 		);
-	}
-
-	/**
-	 * Get session key for current session.
-	 *
-	 * @return string Session key.
-	 */
-	private function get_session_key() {
-		if ( isset( WC()->session ) && WC()->session instanceof \WC_Session ) {
-			$customer_id = WC()->session->get_customer_id();
-			if ( $customer_id ) {
-				return $customer_id;
-			}
-		}
-
-		if ( function_exists( 'wp_get_session_token' ) ) {
-			$token = wp_get_session_token();
-			if ( $token ) {
-				return 'guest-' . $token;
-			}
-		}
-
-		return 'no-session';
-	}
-
-	/**
-	 * Get original email from session (if available).
-	 *
-	 * @return string|null Original email or null.
-	 */
-	private function get_original_email() {
-		if ( is_user_logged_in() ) {
-			$user = wp_get_current_user();
-			return $user->user_email;
-		}
-
-		if ( isset( WC()->session ) && WC()->session instanceof \WC_Session ) {
-			$customer_data = WC()->session->get( 'customer' );
-			if ( is_array( $customer_data ) && ! empty( $customer_data['email'] ) ) {
-				return $customer_data['email'];
-			}
-		}
-
-		return null;
 	}
 
 	/**

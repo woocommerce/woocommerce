@@ -7,13 +7,15 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
+use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Handles communication with the mock WPCOM fraud decision endpoint.
+ * Handles communication with the WPCOM fraud protection endpoint.
  *
- * This is a prototype/POC implementation that calls a mock WPCOM endpoint
- * to determine fraud protection decisions (allow, block, or challenge).
+ * Uses Jetpack Connection for authenticated requests to the WPCOM endpoint
+ * to get fraud protection verdicts (allow, block, or challenge).
  *
  * @since 10.4.0
  */
@@ -28,6 +30,16 @@ class FraudProtectionServiceApiClient {
 	 * Logger source identifier.
 	 */
 	private const LOGGER_SOURCE = 'woo-fraud-protection';
+
+	/**
+	 * WPCOM API version.
+	 */
+	private const WPCOM_API_VERSION = '2';
+
+	/**
+	 * WPCOM fraud protection events endpoint path.
+	 */
+	private const WPCOM_ENDPOINT_PATH = '/fraud-protection/events';
 
 	/**
 	 * Decision type: allow session.
@@ -50,22 +62,19 @@ class FraudProtectionServiceApiClient {
 	 * Implements fail-open pattern: if the endpoint is unreachable or times out,
 	 * returns "allow" decision and logs the error.
 	 *
-	 * @param string $event_name   Name of the event being tracked (e.g., 'challenge_requested', 'challenge_verified').
+	 * @param string $event_type   Type of event being tracked (e.g., 'challenge_requested', 'challenge_succeeded').
 	 * @param array  $session_data Session data to send to the endpoint.
 	 * @return string Decision: "allow", "block", or "challenge".
 	 */
-	public function track_session_event( string $event_name, array $session_data ): string {
-		$endpoint_url = $this->get_endpoint_url();
-
-		// Build request payload.
-		$payload = array(
-			'event_name'   => $event_name,
-			'session_data' => $session_data,
-			'timestamp'    => time(),
+	public function track_session_event( string $event_type, array $session_data ): string {
+		// Build flat payload matching WPCOM endpoint schema.
+		$payload = array_merge(
+			array( 'event_type' => $event_type ),
+			array_filter( $session_data, fn( $value ) => null !== $value ) // Filter out null values
 		);
 
 		// Make the API request.
-		$response = $this->make_request( $endpoint_url, $payload );
+		$response = $this->make_request( $payload );
 
 		// Handle errors with fail-open pattern.
 		if ( is_wp_error( $response ) ) {
@@ -82,98 +91,48 @@ class FraudProtectionServiceApiClient {
 		$decision = $this->parse_response( $response );
 
 		// Log successful decision.
-		$this->log_success( $event_name, $decision, $session_data );
+		$this->log_success( $event_type, $decision, $session_data );
 
 		return $decision;
 	}
 
 	/**
-	 * Get the WPCOM endpoint URL.
+	 * Make an HTTP POST request to the WPCOM endpoint via Jetpack Connection.
 	 *
-	 * @return string Endpoint URL.
-	 */
-	private function get_endpoint_url(): string {
-		/**
-		 * Filter the WPCOM fraud decision endpoint URL.
-		 *
-		 * This allows configuration of the mock endpoint URL for POC/testing.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param string $url The endpoint URL.
-		 */
-		return 'https://public-api.wordpress.com/wpcom/v2/fraud-protection/events';
-	}
-
-	/**
-	 * Make an HTTP POST request to the endpoint.
-	 *
-	 * @param string $url     Endpoint URL.
-	 * @param array  $payload Request payload.
-	 * @return array|\WP_Error Response array or WP_Error on failure.
+	 * @param array $payload Request payload (flat schema).
+	 * @return array|\WP_Error Response array with 'code' and 'body' keys, or WP_Error on failure.
 	 */
 	private function make_request( string $url, array $payload ) {
-		$this->log_request( $url, $payload );
-
-		// TODO: remove mock implementation
-		// Mock the response for cart events
-		if ( in_array( $payload['event_name'], array( 'cart_item_added', 'cart_item_updated', 'cart_item_removed', 'cart_item_restored' ), true ) ) {
-			
-			$decision = self::DECISION_ALLOW;
-			if ( $payload['session_data']['cart_total'] > 3 ) {
-				$decision = self::DECISION_BLOCK;
-			} elseif ( $payload['session_data']['cart_total'] > 1 ) {
-				$decision = self::DECISION_CHALLENGE;
-			}
-		
-			return array(
-				'code' => 200,
-				'body' => '{"result": "success", "decision": "' . $decision . '"}',
-			);
+		// We'll mock the response for now untill the endpoint is ready
+		switch ( $payload['session_data']['email'] ) {
+			case 'test@example.com':
+				return array(
+					'code' => 200,
+					'body' => '{"result": "success", "decision": "allow"}',
+				);
+			case 'fraudster@example.com':
+				return array(
+					'code' => 200,
+					'body' => '{"result": "success", "decision": "block"}',
+				);
+			default:
+				return new \WP_Error( 'api_error', 'Invalid email address' );
 		}
 
-		// Mock the response for challenge events
-		if ( in_array( $payload['event_name'], array( 'challenge_verified' ), true ) ) {
-			// We'll mock the response for now untill the endpoint is ready
-			switch ( $payload['session_data']['email'] ) {
-				case 'test@example.com':
-				case 'test2@example.com':
-					return array(
-						'code' => 200,
-						'body' => '{"result": "success", "decision": "allow"}',
-					);
-				case 'fraudster@example.com':
-					return array(
-						'code' => 200,
-						'body' => '{"result": "success", "decision": "block"}',
-					);
-				case null: // Unknown email address, jsut allow the session
-					return array(
-						'code' => 200,
-						'body' => '{"result": "success", "decision": "allow"}',
-					);
-				default:
-					return new \WP_Error( 'api_error', 'Invalid email address' );
-			}
-		}
-
-		// Allow everything else
-		return array(
-			'code' => 200,
-			'body' => '{"result": "success", "decision": "allow"}',
-		);
-
-		$request_args = array(
-			'method'  => 'POST',
-			'headers' => array(
-				'Content-Type' => 'application/json',
+		// Use Jetpack Connection for authenticated WPCOM requests.
+		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+			self::WPCOM_ENDPOINT_PATH,
+			self::WPCOM_API_VERSION,
+			array(
+				'headers' => array(
+					'Content-Type' => 'application/json',
+				),
+				'method'  => 'POST',
+				'timeout' => $this->get_timeout(),
 			),
-			'body'    => wp_json_encode( $payload ),
-			'timeout' => $this->get_timeout(),
+			wp_json_encode( $payload ),
+			'wpcom'
 		);
-
-		// TODO: use Jetpack Connection for sending requests
-		$response = wp_remote_post( $url, $request_args );
 
 		// Check for connection errors.
 		if ( is_wp_error( $response ) ) {
@@ -204,11 +163,13 @@ class FraudProtectionServiceApiClient {
 	/**
 	 * Parse and validate the API response.
 	 *
-	 * Expected response format:
+	 * Expected WPCOM response format:
 	 * {
-	 *   "result": "success|error",
-	 *   "decision": "allow|block|challenge",
-	 *   "error": [...]
+	 *   "success": true,
+	 *   "fraud_event_id": 123,
+	 *   "verdict": "allow|block|challenge",
+	 *   "risk_score": 45,
+	 *   "reason_tags": ["failures_per_ip"]
 	 * }
 	 *
 	 * @param array $response Response array with 'code' and 'body' keys.
@@ -228,59 +189,48 @@ class FraudProtectionServiceApiClient {
 			return self::DECISION_ALLOW;
 		}
 
-		// Validate response structure.
-		if ( ! isset( $data['result'] ) ) {
+		// Validate response structure - check for success field.
+		if ( ! isset( $data['success'] ) ) {
 			$this->log_error(
-				'Response missing "result" field. Failing open with "allow" decision.'
+				'Response missing "success" field. Failing open with "allow" decision.'
 			);
 			return self::DECISION_ALLOW;
 		}
 
-		// Handle error result.
-		if ( 'error' === $data['result'] ) {
-			$error_details = isset( $data['error'] ) ? wp_json_encode( $data['error'] ) : 'No error details provided';
+		// Handle error response.
+		if ( true !== $data['success'] ) {
+			$error_details = isset( $data['message'] ) ? $data['message'] : 'No error details provided';
 			$this->log_error(
 				sprintf(
-					'Endpoint returned error result: %s. Failing open with "allow" decision.',
+					'Endpoint returned error: %s. Failing open with "allow" decision.',
 					$error_details
 				)
 			);
 			return self::DECISION_ALLOW;
 		}
 
-		// Handle success result.
-		if ( 'success' === $data['result'] ) {
-			if ( ! isset( $data['decision'] ) ) {
-				$this->log_error(
-					'Success result missing "decision" field. Failing open with "allow" decision.'
-				);
-				return self::DECISION_ALLOW;
-			}
-
-			$decision = $data['decision'];
-
-			// Validate decision value.
-			if ( ! in_array( $decision, array( self::DECISION_ALLOW, self::DECISION_BLOCK, self::DECISION_CHALLENGE ), true ) ) {
-				$this->log_error(
-					sprintf(
-						'Invalid decision value "%s". Failing open with "allow" decision.',
-						$decision
-					)
-				);
-				return self::DECISION_ALLOW;
-			}
-
-			return $decision;
+		// Handle success response - get verdict.
+		if ( ! isset( $data['verdict'] ) ) {
+			$this->log_error(
+				'Success response missing "verdict" field. Failing open with "allow" decision.'
+			);
+			return self::DECISION_ALLOW;
 		}
 
-		// Handle unexpected result value.
-		$this->log_error(
-			sprintf(
-				'Unexpected result value "%s". Failing open with "allow" decision.',
-				$data['result']
-			)
-		);
-		return self::DECISION_ALLOW;
+		$verdict = $data['verdict'];
+
+		// Validate verdict value.
+		if ( ! in_array( $verdict, array( self::DECISION_ALLOW, self::DECISION_BLOCK, self::DECISION_CHALLENGE ), true ) ) {
+			$this->log_error(
+				sprintf(
+					'Invalid verdict value "%s". Failing open with "allow" decision.',
+					$verdict
+				)
+			);
+			return self::DECISION_ALLOW;
+		}
+
+		return $verdict;
 	}
 
 	/**
@@ -328,20 +278,20 @@ class FraudProtectionServiceApiClient {
 	/**
 	 * Log a successful API call.
 	 *
-	 * @param string $event_name   Event name that was tracked.
-	 * @param string $decision     Decision received.
+	 * @param string $event_type   Event type that was tracked.
+	 * @param string $verdict      Verdict received.
 	 * @param array  $session_data Session data sent.
 	 * @return void
 	 */
-	private function log_success( string $event_name, string $decision, array $session_data ): void {
+	private function log_success( string $event_type, string $verdict, array $session_data ): void {
 		$logger = wc_get_logger();
 
-		$session_id = isset( $session_data['session_key'] ) ? $session_data['session_key'] : 'unknown';
+		$session_id = isset( $session_data['session_id'] ) ? $session_data['session_id'] : 'unknown';
 
 		$message = sprintf(
-			'Fraud decision received: %s | Event: %s | Session: %s | Timestamp: %s',
-			$decision,
-			$event_name,
+			'Fraud verdict received: %s | Event: %s | Session: %s | Timestamp: %s',
+			$verdict,
+			$event_type,
 			$session_id,
 			current_time( 'mysql' )
 		);
