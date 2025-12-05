@@ -46,7 +46,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_status' ),
-					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
 				),
 				'schema' => array( $this, 'get_status_schema' ),
 			)
@@ -59,7 +59,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'trigger_import' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'permission_callback' => array( $this, 'permissions_check' ),
 				),
 				'schema' => array( $this, 'get_trigger_schema' ),
 			)
@@ -67,34 +67,16 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check if a given request has access to read import status.
+	 * Check if a given request has access to analytics imports.
 	 *
 	 * @param  \WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_item_permissions_check( $request ) {
+	public function permissions_check( $request ) {
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new WP_Error(
-				'woocommerce_rest_cannot_view',
-				__( 'Sorry, you cannot view analytics import status.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to trigger import.
-	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function create_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return new WP_Error(
-				'woocommerce_rest_cannot_create',
-				__( 'Sorry, you cannot trigger analytics imports.', 'woocommerce' ),
+				'woocommerce_rest_cannot_access',
+				__( 'Sorry, you cannot access analytics imports.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
