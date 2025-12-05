@@ -58,9 +58,8 @@ export function ordersHeartbeat() {
 			);
 			check( response, {
 				'is status 200': ( r ) => r.status === 200,
-				// eslint-disable-next-line no-shadow
-				"body contains: 'Orders' header": ( response ) =>
-					response.body.includes( 'Orders</h1>' ),
+				"body contains: 'Orders' header": ( r ) =>
+					r.body.includes( 'Orders</h1>' ),
 			} );
 
 			// Correlate nonce values for use in subsequent requests.

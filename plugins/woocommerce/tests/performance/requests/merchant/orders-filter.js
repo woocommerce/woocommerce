@@ -1,5 +1,4 @@
 /* eslint-disable import/no-unresolved */
-/* eslint-disable no-shadow */
 /**
  * External dependencies
  */
@@ -54,8 +53,8 @@ export function ordersFilter() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'body contains: filter set to selected month': ( response ) =>
-				response.body.includes( `${ admin_filter_month_assert }` ),
+			'body contains: filter set to selected month': ( r ) =>
+				r.body.includes( `${ admin_filter_month_assert }` ),
 		} );
 
 		response = http.get(
@@ -68,8 +67,8 @@ export function ordersFilter() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'body contains: filter set to selected customer': ( response ) =>
-				response.body.includes(
+			'body contains: filter set to selected customer': ( r ) =>
+				r.body.includes(
 					`<option value="${ customer_user_id }" selected="selected">`
 				),
 		} );

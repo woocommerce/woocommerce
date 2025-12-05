@@ -1,5 +1,4 @@
 /* eslint-disable import/no-unresolved */
-/* eslint-disable no-shadow */
 /**
  * External dependencies
  */
@@ -52,8 +51,8 @@ export function ordersSearch() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( `${ admin_search_assert }` ),
+			"body contains: 'Search results' subtitle": ( r ) =>
+				r.body.includes( `${ admin_search_assert }` ),
 		} );
 
 		response = http.get(
@@ -67,8 +66,8 @@ export function ordersSearch() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( `${ admin_search_assert }` ),
+			"body contains: 'Search results' subtitle": ( r ) =>
+				r.body.includes( `${ admin_search_assert }` ),
 		} );
 
 		response = http.get(
@@ -82,8 +81,8 @@ export function ordersSearch() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( `${ admin_search_assert }` ),
+			"body contains: 'Search results' subtitle": ( r ) =>
+				r.body.includes( `${ admin_search_assert }` ),
 		} );
 	} );
 
