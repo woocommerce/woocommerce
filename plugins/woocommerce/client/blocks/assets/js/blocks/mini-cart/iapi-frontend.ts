@@ -420,11 +420,11 @@ const { state: cartItemState } = store(
 			// state.cartItem to get the cart item.
 			get cartItem() {
 				const {
-					cartItem: { key },
+					cartItem: { id, key },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				const cartItem = ( woocommerceState.cart.items.find(
-					( item ) => item.key === key
+				const cartItem = ( woocommerceState.cart.items.find( ( item ) =>
+					key ? item.key === key : item.id === id
 				) || {} ) as CartItem;
 
 				cartItem.variation = cartItem.variation || [];

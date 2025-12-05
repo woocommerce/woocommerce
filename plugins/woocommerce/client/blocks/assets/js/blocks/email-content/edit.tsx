@@ -17,18 +17,6 @@ import { store as editorStore } from '@wordpress/editor';
  */
 import metadata from './block.json';
 
-declare global {
-	interface Window {
-		// eslint-disable-next-line @typescript-eslint/naming-convention
-		WooCommerceEmailEditor?: {
-			email_types: Array< {
-				value: string;
-				id: string;
-			} >;
-		};
-	}
-}
-
 function HoverContent() {
 	return (
 		<div
@@ -48,24 +36,15 @@ function HoverContent() {
 	);
 }
 
-const getEmailType = ( value: string ) => {
-	return window.WooCommerceEmailEditor?.email_types?.find(
-		( emailType ) => emailType.value === value
-	)?.id;
-};
-
-const DEFAULT_EMAIL_TYPE = 'WC_Email_Customer_Processing_Order';
-
 export default function Edit() {
 	const [ isHovered, setIsHovered ] = useState( false );
 	const blockProps = useBlockProps();
-	const { postSlug } = useSelect(
+	const { postId } = useSelect(
 		( select ) => ( {
-			postSlug: select( editorStore ).getCurrentPost?.()?.slug,
+			postId: select( editorStore ).getCurrentPostId?.() ?? 0,
 		} ),
 		[]
 	);
-	const emailType = getEmailType( postSlug || '' ) || DEFAULT_EMAIL_TYPE;
 
 	return (
 		<div
@@ -82,7 +61,7 @@ export default function Edit() {
 		>
 			<ServerSideRender
 				block={ metadata.name }
-				attributes={ { emailType } }
+				attributes={ { postId } }
 			></ServerSideRender>
 
 			{ isHovered && (

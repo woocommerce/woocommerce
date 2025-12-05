@@ -55,6 +55,7 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
+		add_action( 'enqueue_block_assets', array( __CLASS__, 'enqueue_block_assets' ) );
 	}
 
 	/**
@@ -96,16 +97,31 @@ class WC_Frontend_Scripts {
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
-				'woocommerce-blocktheme'  => wp_is_block_theme() ? array(
-					'src'     => self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
-					'deps'    => '',
-					'version' => $version,
-					'media'   => 'all',
-					'has_rtl' => true,
-				) : false,
 			)
 		);
 		return is_array( $styles ) ? array_filter( $styles ) : array();
+	}
+
+	/**
+	 * Enqueue styles for block assets (both editor and frontend).
+	 * This ensures compatibility with WordPress 6.9+ requirements.
+	 */
+	public static function enqueue_block_assets() {
+		if ( ! wp_is_block_theme() ) {
+			return;
+		}
+
+		$version = Constants::get_constant( 'WC_VERSION' );
+
+		wp_enqueue_style(
+			'woocommerce-blocktheme',
+			self::get_asset_url( 'assets/css/woocommerce-blocktheme.css' ),
+			array(),
+			$version,
+			'all'
+		);
+
+		wp_style_add_data( 'woocommerce-blocktheme', 'rtl', 'replace' );
 	}
 
 	/**

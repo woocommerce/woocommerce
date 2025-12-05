@@ -121,15 +121,23 @@ jobs:
           echo "Using branch: $SELECTED_BRANCH"
           echo "selected_branch=${SELECTED_BRANCH}" >> $GITHUB_OUTPUT
 
+      - name: Checkout release branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.check-branch.outputs.selected_branch }}
+          path: release-branch
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+            /plugins/woocommerce/readme.txt
+          sparse-checkout-cone-mode: false
+
       - name: Validate input version matches current version in the selected branch
         id: validate-selected-branch-version
         env:
           VERSION: ${{ steps.validate-version.outputs.version }}
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
         run: |
-          git fetch origin ${SELECTED_BRANCH}
-          git checkout ${SELECTED_BRANCH}
-          current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+          current_version=$( cat release-branch/plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
 
           echo "Current version from woocommerce.php: '$current_version'"
           echo "Input version: '$VERSION'"
@@ -140,9 +148,6 @@ jobs:
           fi
 
           echo "current_version=$current_version" >> $GITHUB_OUTPUT
-
-          # Go back to trunk.
-          git checkout trunk
 
       - name: Setup PNPM
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -177,14 +182,9 @@ jobs:
           if [[ -z "${{ github.event.inputs.append_changelog }}" || "${{ github.event.inputs.append_changelog }}" == "auto" ]]; then
             # If a prerelease, append if there's already content in the changelog.
             if [[ "$VERSION" == *"-"* || "$VERSION" =~ \.0$ ]]; then
-              git checkout ${SELECTED_BRANCH}
-
-              if sed -n '/== Changelog ==/,$p' plugins/woocommerce/readme.txt | grep -Fq '**WooCommerce**'; then
+              if sed -n '/== Changelog ==/,$p' release-branch/plugins/woocommerce/readme.txt | grep -Fq '**WooCommerce**'; then
                 APPEND_CHANGELOG="--append-changelog"
               fi
-
-              # Go back to trunk to run the tools.
-              git checkout trunk
             fi
           elif [[ "${{ github.event.inputs.append_changelog }}" == "append" ]]; then
             # append_changelog: append.
@@ -196,4 +196,4 @@ jobs:
             OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
           fi
 
-          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE
+          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE -ga ${{ github.actor }}
