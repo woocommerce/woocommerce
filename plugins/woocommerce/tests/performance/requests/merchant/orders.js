@@ -15,7 +15,9 @@ import {
  */
 import {
 	base_url,
+	hpos_status,
 	admin_orders_base_url,
+	hpos_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
 } from '../../config.js';
@@ -31,7 +33,16 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
-const admin_orders_completed = 'status=wc-completed';
+// Change URL if HPOS is enabled and being used
+let admin_orders_base;
+let admin_orders_completed;
+if ( hpos_status === true ) {
+	admin_orders_base = hpos_admin_orders_base_url;
+	admin_orders_completed = 'status=wc-completed';
+} else {
+	admin_orders_base = admin_orders_base_url;
+	admin_orders_completed = 'post_status=wc-completed';
+}
 
 export function orders( includeTests = {} ) {
 	let response;
@@ -55,7 +66,7 @@ export function orders( includeTests = {} ) {
 			commonNonStandardHeaders
 		);
 
-		response = http.get( `${ base_url }/wp-admin/${ admin_orders_base_url }`, {
+		response = http.get( `${ base_url }/wp-admin/${ admin_orders_base }`, {
 			headers: requestHeaders,
 			tags: { name: 'Merchant - All Orders' },
 		} );
@@ -172,7 +183,7 @@ export function orders( includeTests = {} ) {
 			);
 
 			response = http.get(
-				`${ base_url }/wp-admin/${ admin_orders_base_url }&${ admin_orders_completed }`,
+				`${ base_url }/wp-admin/${ admin_orders_base }&${ admin_orders_completed }`,
 				{
 					headers: requestHeaders,
 					tags: { name: 'Merchant - Completed Orders' },

@@ -12,7 +12,9 @@ import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
  */
 import {
 	base_url,
+	hpos_status,
 	admin_orders_base_url,
+	hpos_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
 	product_search_term,
@@ -26,7 +28,16 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
-const admin_search_assert = 'tbody id="the-list"';
+// Change URL if HPOS is enabled and being used
+let admin_orders_base;
+let admin_search_assert;
+if ( hpos_status === true ) {
+	admin_orders_base = hpos_admin_orders_base_url;
+	admin_search_assert = 'tbody id="the-list"';
+} else {
+	admin_orders_base = `${ admin_orders_base_url }&post_status=all`;
+	admin_search_assert = 'Search results for:';
+}
 
 export function ordersSearch() {
 	let response;
@@ -41,7 +52,7 @@ export function ordersSearch() {
 		);
 
 		response = http.get(
-			`${ base_url }/wp-admin/${ admin_orders_base_url }` +
+			`${ base_url }/wp-admin/${ admin_orders_base }` +
 				`&s=${ product_search_term }&action=-1&m=0&_customer_user&` +
 				`paged=1&action2=-1`,
 			{
@@ -56,7 +67,7 @@ export function ordersSearch() {
 		} );
 
 		response = http.get(
-			`${ base_url }/wp-admin/${ admin_orders_base_url }` +
+			`${ base_url }/wp-admin/${ admin_orders_base }` +
 				`&s=${ addresses_customer_billing_email }&action=-1&m=0&_customer_user&` +
 				`paged=1&action2=-1`,
 			{
@@ -71,7 +82,7 @@ export function ordersSearch() {
 		} );
 
 		response = http.get(
-			`${ base_url }/wp-admin/${ admin_orders_base_url }` +
+			`${ base_url }/wp-admin/${ admin_orders_base }` +
 				`&s=${ addresses_customer_billing_postcode }&action=-1&m=0&_customer_user&` +
 				`paged=1&action2=-1`,
 			{

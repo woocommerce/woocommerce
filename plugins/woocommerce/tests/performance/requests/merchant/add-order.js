@@ -14,6 +14,7 @@ import {
  */
 import {
 	base_url,
+	hpos_status,
 	addresses_guest_billing_first_name,
 	addresses_guest_billing_last_name,
 	addresses_guest_billing_company,
@@ -41,21 +42,45 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
-// HPOS order URLs and assertions
-const admin_new_order_base = 'admin.php?page=wc-orders&action=new';
-const admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
-const admin_new_order_assert = 'post_status" type="hidden" value="auto-draft';
-const admin_open_order_assert = 'post_status" type="hidden" value="';
-const admin_created_order_assert = 'Order updated.';
-const admin_update_order_assert = 'Order updated.';
+// Change URL if HPOS is enabled and being used
+let admin_new_order_base;
+let admin_new_order_assert;
+let admin_created_order_assert;
+let admin_open_order_base;
+let admin_open_order_assert;
+let admin_update_order_base;
+let admin_update_order;
+let admin_update_order_id;
+let admin_update_order_params;
+let admin_update_order_assert;
+
+if ( hpos_status === true ) {
+	admin_new_order_base = 'admin.php?page=wc-orders&action=new';
+	admin_update_order_base = 'admin.php?page=wc-orders&action=edit';
+	admin_new_order_assert = 'post_status" type="hidden" value="pending';
+	admin_open_order_assert = 'post_status" type="hidden" value="pending';
+	admin_created_order_assert = 'Order updated.';
+	admin_update_order_assert = 'changed from Pending payment to Completed';
+} else {
+	admin_new_order_base = 'post-new.php?post_type=shop_order';
+	admin_update_order_base = 'post.php';
+	admin_new_order_assert = 'Add new order';
+	admin_open_order_assert = 'Edit order</h1>';
+	admin_created_order_assert = 'Order updated.';
+	admin_update_order_assert = 'Order updated.';
+}
 
 const global_order_date = new Date().toJSON().slice( 0, 10 );
 
 export function addOrder( includeTests = {} ) {
 	let ajax_nonce_add_meta;
 	let wpnonce;
+	let closed_postboxes_nonce;
+	let sample_permalink_nonce;
 	let woocommerce_meta_nonce;
+	let meta_box_order_nonce;
 	let post_id;
+	let hpos_post_id;
 	let api_x_wp_nonce;
 	let apiNonceHeader;
 	let heartbeat_nonce;
@@ -103,12 +128,32 @@ export function addOrder( includeTests = {} ) {
 			.find( 'input[id=_wpnonce]' )
 			.first()
 			.attr( 'value' );
+		closed_postboxes_nonce = response
+			.html()
+			.find( 'input[id=closedpostboxesnonce]' )
+			.first()
+			.attr( 'value' );
+		sample_permalink_nonce = response
+			.html()
+			.find( 'input[id=samplepermalinknonce]' )
+			.first()
+			.attr( 'value' );
 		woocommerce_meta_nonce = response
 			.html()
 			.find( 'input[id=woocommerce_meta_nonce]' )
 			.first()
 			.attr( 'value' );
-		post_id = findBetween(
+		meta_box_order_nonce = response
+			.html()
+			.find( 'input[id=meta-box-order-nonce]' )
+			.first()
+			.attr( 'value' );
+		post_id = response
+			.html()
+			.find( 'input[id=post_ID]' )
+			.first()
+			.attr( 'value' );
+		hpos_post_id = findBetween(
 			response.body,
 			';id=',
 			'" method="post" id="order"'
@@ -279,6 +324,96 @@ export function addOrder( includeTests = {} ) {
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
 				[ '_wp_http_referer', '' ],
+				[ '_wp_original_http_referer', '' ],
+				[ '_wpnonce', `${ wpnonce }` ],
+				[ 'action', 'editpost' ],
+				[ 'auto_draft', '1' ], //no
+				[ 'closedpostboxesnonce', `${ closed_postboxes_nonce }` ],
+				[ 'customer_user', '' ],
+				[ 'excerpt', '' ],
+				[ 'meta-box-order-nonce', `${ meta_box_order_nonce }` ],
+				[ 'metakeyinput', '' ],
+				[ 'metakeyselect', '%23NONE%23' ],
+				[ 'metavalue', '' ],
+				[ 'order_date', `${ order_date }` ],
+				[ 'order_date_hour', '01' ],
+				[ 'order_date_minute', '01' ],
+				[ 'order_date_second', '01' ],
+				[ 'order_note', '' ],
+				[ 'order_note_type', '' ],
+				[ 'order_status', 'wc-pending' ],
+				[ 'original_post_status', 'auto-draft' ],
+				[ 'original_post_title', '' ],
+				[ 'originalaction', 'editpost' ],
+				[ 'post_ID', `${ post_id }` ],
+				[ 'post_author', '1' ],
+				[ 'post_status', 'auto-draft' ],
+				[ 'post_title', '%2COrder' ],
+				[ 'post_type', 'shop_order' ],
+				[ 'referredby', '' ],
+				[ 'samplepermalinknonce', `${ sample_permalink_nonce }` ],
+				[ 'save', 'Create' ],
+				[ 'user_ID', '1' ],
+				[ 'wc_order_action', '' ],
+				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
+			] );
+
+			const hposOrderParams = new URLSearchParams( [
+				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
+				[ '_billing_city', `${ addresses_guest_billing_city }` ],
+				[ '_billing_company', `${ addresses_guest_billing_company }` ],
+				[ '_billing_country', `${ addresses_guest_billing_country }` ],
+				[ '_billing_email', `${ addresses_guest_billing_email }` ],
+				[
+					'_billing_first_name',
+					`${ addresses_guest_billing_first_name }`,
+				],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
+				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
+				[ '_billing_state', `${ addresses_guest_billing_state }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
+				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
+				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
+				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
+				[
+					'_shipping_first_name',
+					`${ addresses_guest_billing_first_name }`,
+				],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
+				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
+				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
+				[ '_payment_method', `${ payment_method }` ],
+				[ '_transaction_id', '' ],
+				[ '_wp_http_referer', '' ],
 				[ '_wpnonce', `${ wpnonce }` ],
 				[ 'action', 'edit_order' ],
 				[ 'customer_user', '' ],
@@ -301,9 +436,17 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
+			if ( hpos_status === true ) {
+				admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
+				admin_update_order_params = hposOrderParams.toString();
+			} else {
+				admin_update_order = admin_update_order_base;
+				admin_update_order_params = orderParams.toString();
+			}
+
 			const response = http.post(
-				`${ base_url }/wp-admin/${ admin_update_order_base }&id=${ post_id }`,
-				orderParams.toString(),
+				`${ base_url }/wp-admin/${ admin_update_order }`,
+				admin_update_order_params.toString(),
 				{
 					headers: requestHeaders,
 					tags: { name: 'Merchant - Create New Order' },
@@ -333,8 +476,14 @@ export function addOrder( includeTests = {} ) {
 				commonNonStandardHeaders
 			);
 
+			if ( hpos_status === true ) {
+				admin_open_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
+			} else {
+				admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
+			}
+
 			const response = http.get(
-				`${ base_url }/wp-admin/${ admin_update_order_base }&id=${ post_id }&action=edit`,
+				`${ base_url }/wp-admin/${ admin_open_order_base }&action=edit`,
 				{
 					headers: requestHeaders,
 					tags: { name: 'Merchant - Open Order' },
@@ -419,6 +568,95 @@ export function addOrder( includeTests = {} ) {
 				[ '_payment_method', `${ payment_method }` ],
 				[ '_transaction_id', '' ],
 				[ '_wp_http_referer', '' ],
+				[ '_wp_original_http_referer', '' ],
+				[ '_wpnonce', `${ wpnonce }` ],
+				[ 'action', 'editpost' ],
+				[ 'closedpostboxesnonce', `${ closed_postboxes_nonce }` ],
+				[ 'customer_user', '' ],
+				[ 'excerpt', '' ],
+				[ 'meta-box-order-nonce', `${ meta_box_order_nonce }` ],
+				[ 'metakeyinput', '' ],
+				[ 'metakeyselect', '%23NONE%23' ],
+				[ 'metavalue', '' ],
+				[ 'order_date', `${ global_order_date }` ],
+				[ 'order_date_hour', '01' ],
+				[ 'order_date_minute', '01' ],
+				[ 'order_date_second', '01' ],
+				[ 'order_note', '' ],
+				[ 'order_note_type', '' ],
+				[ 'order_status', 'wc-completed' ],
+				[ 'original_post_status', 'wc-pending' ],
+				[ 'original_post_title', '' ],
+				[ 'originalaction', 'editpost' ],
+				[ 'post_ID', `${ post_id }` ],
+				[ 'post_author', '1' ],
+				[ 'post_status', 'pending' ],
+				[ 'post_title', '%2COrder' ],
+				[ 'post_type', 'shop_order' ],
+				[ 'referredby', '' ],
+				[ 'samplepermalinknonce', `${ sample_permalink_nonce }` ],
+				[ 'save', 'Update' ],
+				[ 'user_ID', '1' ],
+				[ 'wc_order_action', '' ],
+				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
+			] );
+
+			const hposOrderParams = new URLSearchParams( [
+				[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
+				[
+					'_billing_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_billing_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
+				[ '_billing_city', `${ addresses_guest_billing_city }` ],
+				[ '_billing_company', `${ addresses_guest_billing_company }` ],
+				[ '_billing_country', `${ addresses_guest_billing_country }` ],
+				[ '_billing_email', `${ addresses_guest_billing_email }` ],
+				[
+					'_billing_first_name',
+					`${ addresses_guest_billing_first_name }`,
+				],
+				[
+					'_billing_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
+				[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
+				[
+					'_billing_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
+				[ '_billing_state', `${ addresses_guest_billing_state }` ],
+				[
+					'_shipping_address_1',
+					`${ addresses_guest_billing_address_1 }`,
+				],
+				[
+					'_shipping_address_2',
+					`${ addresses_guest_billing_address_2 }`,
+				],
+				[ '_shipping_city', `${ addresses_guest_billing_city }` ],
+				[ '_shipping_company', `${ addresses_guest_billing_company }` ],
+				[ '_shipping_country', `${ addresses_guest_billing_country }` ],
+				[
+					'_shipping_first_name',
+					`${ addresses_guest_billing_first_name }`,
+				],
+				[
+					'_shipping_last_name',
+					`${ addresses_guest_billing_last_name }`,
+				],
+				[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
+				[
+					'_shipping_postcode',
+					`${ addresses_guest_billing_postcode }`,
+				],
+				[ '_shipping_state', `${ addresses_guest_billing_state }` ],
+				[ '_payment_method', `${ payment_method }` ],
+				[ '_transaction_id', '' ],
+				[ '_wp_http_referer', '' ],
 				[ '_wpnonce', `${ wpnonce }` ],
 				[ 'action', 'edit_order' ],
 				[ 'customer_user', '' ],
@@ -441,9 +679,17 @@ export function addOrder( includeTests = {} ) {
 				[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 			] );
 
+			if ( hpos_status === true ) {
+				admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
+				admin_update_order_params = hposOrderParams.toString();
+			} else {
+				admin_update_order_params = orderParams.toString();
+				admin_update_order_id = `${ admin_open_order_base }`;
+			}
+
 			const response = http.post(
-				`${ base_url }/wp-admin/${ admin_update_order_base }&id=${ post_id }`,
-				orderParams.toString(),
+				`${ base_url }/wp-admin/${ admin_update_order_id }`,
+				admin_update_order_params.toString(),
 				{
 					headers: requestHeaders,
 					tags: { name: 'Merchant - Update Existing Order Status' },
@@ -503,6 +749,72 @@ export function addOrder( includeTests = {} ) {
 			[ '_payment_method', `${ payment_method }` ],
 			[ '_transaction_id', '' ],
 			[ '_wp_http_referer', '' ],
+			[ '_wp_original_http_referer', '' ],
+			[ '_wpnonce', `${ wpnonce }` ],
+			[ 'action', 'editpost' ],
+			[ 'auto_draft', '1' ], //no
+			[ 'closedpostboxesnonce', `${ closed_postboxes_nonce }` ],
+			[ 'customer_user', '' ],
+			[ 'excerpt', '' ],
+			[ 'meta-box-order-nonce', `${ meta_box_order_nonce }` ],
+			[ 'metakeyinput', '' ],
+			[ 'metakeyselect', '%23NONE%23' ],
+			[ 'metavalue', '' ],
+			[ 'order_date', `${ order_date }` ],
+			[ 'order_date_hour', '01' ],
+			[ 'order_date_minute', '01' ],
+			[ 'order_date_second', '01' ],
+			[ 'order_note', '' ],
+			[ 'order_note_type', '' ],
+			[ 'order_status', 'wc-pending' ],
+			[ 'original_post_status', 'auto-draft' ],
+			[ 'original_post_title', '' ],
+			[ 'originalaction', 'editpost' ],
+			[ 'post_ID', `${ post_id }` ],
+			[ 'post_author', '1' ],
+			[ 'post_status', 'auto-draft' ],
+			[ 'post_title', '%2COrder' ],
+			[ 'post_type', 'shop_order' ],
+			[ 'referredby', '' ],
+			[ 'samplepermalinknonce', `${ sample_permalink_nonce }` ],
+			[ 'save', 'Create' ],
+			[ 'user_ID', '1' ],
+			[ 'wc_order_action', '' ],
+			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
+		] );
+
+		const hposOrderParams = new URLSearchParams( [
+			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
+			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
+			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+			[ '_billing_city', `${ addresses_guest_billing_city }` ],
+			[ '_billing_company', `${ addresses_guest_billing_company }` ],
+			[ '_billing_country', `${ addresses_guest_billing_country }` ],
+			[ '_billing_email', `${ addresses_guest_billing_email }` ],
+			[
+				'_billing_first_name',
+				`${ addresses_guest_billing_first_name }`,
+			],
+			[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+			[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
+			[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+			[ '_billing_state', `${ addresses_guest_billing_state }` ],
+			[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
+			[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+			[ '_shipping_city', `${ addresses_guest_billing_city }` ],
+			[ '_shipping_company', `${ addresses_guest_billing_company }` ],
+			[ '_shipping_country', `${ addresses_guest_billing_country }` ],
+			[
+				'_shipping_first_name',
+				`${ addresses_guest_billing_first_name }`,
+			],
+			[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+			[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
+			[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+			[ '_shipping_state', `${ addresses_guest_billing_state }` ],
+			[ '_payment_method', `${ payment_method }` ],
+			[ '_transaction_id', '' ],
+			[ '_wp_http_referer', '' ],
 			[ '_wpnonce', `${ wpnonce }` ],
 			[ 'action', 'edit_order' ],
 			[ 'customer_user', '' ],
@@ -525,9 +837,17 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
+		if ( hpos_status === true ) {
+			admin_update_order = `${ admin_update_order_base }&id=${ hpos_post_id }`;
+			admin_update_order_params = hposOrderParams.toString();
+		} else {
+			admin_update_order = admin_update_order_base;
+			admin_update_order_params = orderParams.toString();
+		}
+
 		const response = http.post(
-			`${ base_url }/wp-admin/${ admin_update_order_base }&id=${ post_id }`,
-			orderParams.toString(),
+			`${ base_url }/wp-admin/${ admin_update_order }`,
+			admin_update_order_params.toString(),
 			{
 				headers: requestHeaders,
 				tags: { name: 'Merchant - Create New Order' },
@@ -553,8 +873,14 @@ export function addOrder( includeTests = {} ) {
 			commonNonStandardHeaders
 		);
 
+		if ( hpos_status === true ) {
+			admin_open_order_base = `${ admin_update_order_base }&id=${ hpos_post_id }`;
+		} else {
+			admin_open_order_base = `${ admin_update_order_base }?post=${ post_id }`;
+		}
+
 		const response = http.get(
-			`${ base_url }/wp-admin/${ admin_update_order_base }&id=${ post_id }&action=edit`,
+			`${ base_url }/wp-admin/${ admin_open_order_base }&action=edit`,
 			{
 				headers: requestHeaders,
 				tags: { name: 'Merchant - Open Order' },
@@ -611,6 +937,71 @@ export function addOrder( includeTests = {} ) {
 			[ '_payment_method', `${ payment_method }` ],
 			[ '_transaction_id', '' ],
 			[ '_wp_http_referer', '' ],
+			[ '_wp_original_http_referer', '' ],
+			[ '_wpnonce', `${ wpnonce }` ],
+			[ 'action', 'editpost' ],
+			[ 'closedpostboxesnonce', `${ closed_postboxes_nonce }` ],
+			[ 'customer_user', '' ],
+			[ 'excerpt', '' ],
+			[ 'meta-box-order-nonce', `${ meta_box_order_nonce }` ],
+			[ 'metakeyinput', '' ],
+			[ 'metakeyselect', '%23NONE%23' ],
+			[ 'metavalue', '' ],
+			[ 'order_date', `${ global_order_date }` ],
+			[ 'order_date_hour', '01' ],
+			[ 'order_date_minute', '01' ],
+			[ 'order_date_second', '01' ],
+			[ 'order_note', '' ],
+			[ 'order_note_type', '' ],
+			[ 'order_status', 'wc-completed' ],
+			[ 'original_post_status', 'wc-pending' ],
+			[ 'original_post_title', '' ],
+			[ 'originalaction', 'editpost' ],
+			[ 'post_ID', `${ post_id }` ],
+			[ 'post_author', '1' ],
+			[ 'post_status', 'pending' ],
+			[ 'post_title', '%2COrder' ],
+			[ 'post_type', 'shop_order' ],
+			[ 'referredby', '' ],
+			[ 'samplepermalinknonce', `${ sample_permalink_nonce }` ],
+			[ 'save', 'Update' ],
+			[ 'user_ID', '1' ],
+			[ 'wc_order_action', '' ],
+			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
+		] );
+
+		const hposOrderParams = new URLSearchParams( [
+			[ '_ajax_nonce-add-meta', `${ ajax_nonce_add_meta }` ],
+			[ '_billing_address_1', `${ addresses_guest_billing_address_1 }` ],
+			[ '_billing_address_2', `${ addresses_guest_billing_address_2 }` ],
+			[ '_billing_city', `${ addresses_guest_billing_city }` ],
+			[ '_billing_company', `${ addresses_guest_billing_company }` ],
+			[ '_billing_country', `${ addresses_guest_billing_country }` ],
+			[ '_billing_email', `${ addresses_guest_billing_email }` ],
+			[
+				'_billing_first_name',
+				`${ addresses_guest_billing_first_name }`,
+			],
+			[ '_billing_last_name', `${ addresses_guest_billing_last_name }` ],
+			[ '_billing_phone', `${ addresses_guest_billing_phone }` ],
+			[ '_billing_postcode', `${ addresses_guest_billing_postcode }` ],
+			[ '_billing_state', `${ addresses_guest_billing_state }` ],
+			[ '_shipping_address_1', `${ addresses_guest_billing_address_1 }` ],
+			[ '_shipping_address_2', `${ addresses_guest_billing_address_2 }` ],
+			[ '_shipping_city', `${ addresses_guest_billing_city }` ],
+			[ '_shipping_company', `${ addresses_guest_billing_company }` ],
+			[ '_shipping_country', `${ addresses_guest_billing_country }` ],
+			[
+				'_shipping_first_name',
+				`${ addresses_guest_billing_first_name }`,
+			],
+			[ '_shipping_last_name', `${ addresses_guest_billing_last_name }` ],
+			[ '_shipping_phone', `${ addresses_guest_billing_phone }` ],
+			[ '_shipping_postcode', `${ addresses_guest_billing_postcode }` ],
+			[ '_shipping_state', `${ addresses_guest_billing_state }` ],
+			[ '_payment_method', `${ payment_method }` ],
+			[ '_transaction_id', '' ],
+			[ '_wp_http_referer', '' ],
 			[ '_wpnonce', `${ wpnonce }` ],
 			[ 'action', 'edit_order' ],
 			[ 'customer_user', '' ],
@@ -633,9 +1024,17 @@ export function addOrder( includeTests = {} ) {
 			[ 'woocommerce_meta_nonce', `${ woocommerce_meta_nonce }` ],
 		] );
 
+		if ( hpos_status === true ) {
+			admin_update_order_id = `${ admin_update_order_base }&id=${ hpos_post_id }`;
+			admin_update_order_params = hposOrderParams.toString();
+		} else {
+			admin_update_order_params = orderParams.toString();
+			admin_update_order_id = `${ admin_open_order_base }`;
+		}
+
 		const response = http.post(
-			`${ base_url }/wp-admin/${ admin_update_order_base }&id=${ post_id }`,
-			orderParams.toString(),
+			`${ base_url }/wp-admin/${ admin_update_order_id }`,
+			admin_update_order_params.toString(),
 			{
 				headers: requestHeaders,
 				tags: { name: 'Merchant - Update Existing Order Status' },
