@@ -15,11 +15,14 @@ require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
 
 /**
  * Class WC_Gateway_Paypal_Notices.
+ *
+ * @since 10.3.0
  */
 class WC_Gateway_Paypal_Notices {
 	/**
 	 * The name of the notice for PayPal migration.
 	 *
+	 * @since 10.4.0
 	 * @var string
 	 */
 	private const PAYPAL_MIGRATION_NOTICE = 'paypal_migration_completed';
@@ -27,6 +30,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * The name of the notice for PayPal account restriction.
 	 *
+	 * @since 10.4.0
 	 * @var string
 	 */
 	private const PAYPAL_ACCOUNT_RESTRICTED_NOTICE = 'paypal_account_restricted';
@@ -34,6 +38,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * The name of the notice for PayPal unsupported currency.
 	 *
+	 * @since 10.4.0
 	 * @var string
 	 */
 	private const PAYPAL_UNSUPPORTED_CURRENCY_NOTICE = 'paypal_unsupported_currency';
@@ -41,6 +46,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * PayPal account restriction issue codes from PayPal API.
 	 *
+	 * @since 10.4.0
 	 * @var array
 	 */
 	protected const PAYPAL_ACCOUNT_RESTRICTION_ISSUES = array(
@@ -79,6 +85,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Add PayPal Standard notices.
 	 *
+	 * @since 10.4.0
 	 * @return void
 	 */
 	public function add_paypal_notices() {
@@ -100,6 +107,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Add PayPal notices on the payments settings page.
 	 *
+	 * @since 10.4.0
 	 * @return void
 	 */
 	public function add_paypal_notices_on_payments_settings_page() {
@@ -132,6 +140,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Add notice warning about the migration to PayPal Payments.
 	 *
+	 * @since 10.3.0
 	 * @return void
 	 */
 	public function add_paypal_migration_notice() {
@@ -160,6 +169,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Add notice warning about PayPal account restriction.
 	 *
+	 * @since 10.4.0
 	 * @return void
 	 */
 	private function add_paypal_account_restricted_notice() {
@@ -194,6 +204,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Add notice warning when PayPal does not support the store's currency.
 	 *
+	 * @since 10.4.0
 	 * @return void
 	 */
 	private function add_paypal_unsupported_currency_notice() {
@@ -227,6 +238,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Get the dismiss URL for a notice.
 	 *
+	 * @since 10.4.0
 	 * @param string $notice_name The name of the notice.
 	 * @return string
 	 */
@@ -248,6 +260,7 @@ class WC_Gateway_Paypal_Notices {
 	 *
 	 * The meta keys are set by WC_Admin_Notices when the notice is dismissed by the user.
 	 *
+	 * @since 10.4.0
 	 * @param string $notice_name The name of the notice.
 	 * @return bool
 	 */
@@ -269,6 +282,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Check if there's a flag indicating PayPal account restriction.
 	 *
+	 * @since 10.4.0
 	 * @return bool
 	 */
 	private function has_account_restriction_flag(): bool {
@@ -278,6 +292,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Set the flag indicating PayPal account restriction.
 	 *
+	 * @since 10.4.0
 	 * @return void
 	 */
 	public static function set_account_restriction_flag(): void {
@@ -289,6 +304,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Clear the flag indicating PayPal account restriction.
 	 *
+	 * @since 10.4.0
 	 * @return void
 	 */
 	public static function clear_account_restriction_flag(): void {
@@ -300,6 +316,7 @@ class WC_Gateway_Paypal_Notices {
 	/**
 	 * Handle PayPal order response to manage account restriction notices.
 	 *
+	 * @since 10.4.0
 	 * @param int|string $http_code     The HTTP status code from the PayPal API response.
 	 * @param array      $response_data The decoded response data from the PayPal API.
 	 * @param WC_Order   $order         The WooCommerce order object.
