@@ -44,7 +44,7 @@ class PushTokensDataStore {
 
 		$id = wp_insert_post(
 			array(
-				'post_author' => $push_token->get_user_id(),
+				'post_author' => (int) $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
 				'meta_input'  => $this->build_meta_array_from_token( $push_token ),
@@ -129,8 +129,8 @@ class PushTokensDataStore {
 
 		$result = wp_update_post(
 			array(
-				'ID'          => $push_token->get_id(),
-				'post_author' => $push_token->get_user_id(),
+				'ID'          => (int) $push_token->get_id(),
+				'post_author' => (int) $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
 				'meta_input'  => $this->build_meta_array_from_token( $push_token ),
@@ -155,8 +155,9 @@ class PushTokensDataStore {
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be deleted.
 	 * @throws PushTokenNotFoundException If the token can't be found.
+	 * @return bool
 	 */
-	public function delete( PushToken &$push_token ) {
+	public function delete( PushToken &$push_token ): bool {
 		if ( ! $push_token->can_be_deleted() ) {
 			throw new InvalidArgumentException(
 				'Can\'t delete push token because the push token data provided is invalid.'
@@ -169,7 +170,9 @@ class PushTokensDataStore {
 			throw new PushTokenNotFoundException( 'Push token could not be found.' );
 		}
 
-		wp_delete_post( $push_token->get_id(), true );
+		wp_delete_post( (int) $push_token->get_id(), true );
+
+		return true;
 	}
 
 	/**
@@ -266,7 +269,13 @@ class PushTokensDataStore {
 		$meta = get_post_meta( $push_token->get_id() );
 
 		return array_map(
-			fn ( $key ) => $meta[ $key ][0] ?? $meta[ $key ] ?? null,
+			function ( $key ) {
+				if ( is_array( $meta[ $key ] ) ) {
+					return $meta[ $key ][0];
+				}
+
+				return $meta[ $key ] ?? null;
+			},
 			array_combine( static::SUPPORTED_META, static::SUPPORTED_META )
 		);
 	}

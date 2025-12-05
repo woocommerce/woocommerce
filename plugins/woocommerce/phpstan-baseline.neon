@@ -74653,14 +74653,20 @@ parameters:
 			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$postarr of function wp_insert_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{post_author\: int\|null, post_type\: ''push_token'', post_status\: ''private'', meta_input\: array\{platform\: string\|null, token\: string\|null, device_uuid\?\: string, origin\: string\|null\}\} given\.$#'
+			message: '#^Parameter \#2 \$array of function array_map expects array, array\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$postarr of function wp_update_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{ID\: int\|null, post_author\: int\|null, post_type\: ''push_token'', post_status\: ''private'', meta_input\: array\{platform\: string\|null, token\: string\|null, device_uuid\?\: string, origin\: string\|null\}\} given\.$#'
-			identifier: argument.type
+			message: '#^Undefined variable\: \$meta$#'
+			identifier: variable.undefined
+			count: 2
+			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
+
+		-
+			message: '#^Variable \$meta on left side of \?\? is never defined\.$#'
+			identifier: nullCoalesce.variable
 			count: 1
 			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
 
