@@ -16,6 +16,7 @@ import {
 	Spinner,
 } from '@woocommerce/blocks-components';
 import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
+import { useEditorContext } from '../../../context/providers/editor-context';
 
 /**
  * Internal dependencies
@@ -47,6 +48,7 @@ const PlaceOrderButton = ( {
 	} = useCheckoutSubmit();
 
 	const paymentMethodInterface = usePaymentMethodInterface();
+	const { isEditor, isPreview = false } = useEditorContext();
 
 	const { cartTotals, cartIsLoading } = useStoreCart();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
@@ -64,6 +66,8 @@ const PlaceOrderButton = ( {
 					waitingForRedirect ||
 					cartIsLoading
 				}
+				isEditor={ isEditor }
+				isPreview={ isPreview }
 				{ ...paymentMethodInterface }
 			/>
 		);

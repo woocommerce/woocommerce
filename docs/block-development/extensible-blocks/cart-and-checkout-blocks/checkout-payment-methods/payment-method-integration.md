@@ -163,44 +163,61 @@ The options you feed the configuration instance should be an object in this shap
 
 The `placeOrderButton` property allows you to replace the default "Place Order" button with a custom component. This is useful for payment methods that require custom button styling (e.g., Google Pay, Apple Pay) or need to show a payment UI before submitting the order.
 
-Your custom button component receives all the same props as the payment method `content` component via the `PaymentMethodInterface`. Here's a simple example:
+Your custom button component receives all the same props as the payment method `content` component via the `PaymentMethodInterface`, plus additional button-specific props:
+
+- `waitingForProcessing` - Whether the checkout is processing
+- `waitingForRedirect` - Whether the checkout is waiting to redirect after success
+- `disabled` - Whether the button should be disabled
+- `isEditor` - Whether the button is being rendered in the block editor
+- `isPreview` - Whether the button is being rendered in preview mode
+
+Here's a simple example:
 
 ```js
 const CustomButton = ( props ) => {
-	const { validate, onSubmit, disabled } = props;
-  const [
-    isShowingInternalPaymentSheet,
-    setIsShowingInternalPaymentSheet,
-  ] = React.useState( false );
+	const { validate, onSubmit, disabled, isEditor, isPreview } = props;
+	const [
+		isShowingInternalPaymentSheet,
+		setIsShowingInternalPaymentSheet,
+	] = React.useState( false );
 
-  const handleClick = async () => {
-    // 1. Validate the checkout form
-    const validationResult = await validate();
+	const handleClick = async () => {
+		// 1. Validate the checkout form
+		const validationResult = await validate();
 
-    if ( validationResult.hasError ) {
-      return; // WooCommerce automatically displays validation errors
-    }
+		if ( validationResult.hasError ) {
+			return; // WooCommerce automatically displays validation errors
+		}
 
-    // 2. Show your payment UI (e.g., Google Pay sheet, Apple Pay sheet)
-    // setIsShowingInternalPaymentSheet( true );
-    // const paymentResult = await showPaymentSheet( billing.cartTotal.value );
-    // if ( ! paymentResult.success ) {
-    //     setIsShowingInternalPaymentSheet( false );
-    //     return;
-    // }
+		// 2. Show your payment UI (e.g., Google Pay sheet, Apple Pay sheet)
+		// setIsShowingInternalPaymentSheet( true );
+		// const paymentResult = await showPaymentSheet( billing.cartTotal.value );
+		// if ( ! paymentResult.success ) {
+		//     setIsShowingInternalPaymentSheet( false );
+		//     return;
+		// }
 
-    // 3. Submit the checkout
-    onSubmit();
-  };
+		// 3. Submit the checkout
+		onSubmit();
+	};
+
+	// In editor/preview mode, show a placeholder or preview version
+	if ( isEditor || isPreview ) {
+		return (
+			<button disabled>
+				Pay with Custom Method (Preview)
+			</button>
+		);
+	}
 
 	return (
 		<button
-      onClick={ handleClick }
-      disabled={ disabled || isShowingInternalPaymentSheet }
-    >
-      { disabled || isShowingInternalPaymentSheet
-        ? 'Processing...'
-        : 'Pay with Custom Method' }
+			onClick={ handleClick }
+			disabled={ disabled || isShowingInternalPaymentSheet }
+		>
+			{ disabled || isShowingInternalPaymentSheet
+				? 'Processing...'
+				: 'Pay with Custom Method' }
 		</button>
 	);
 };

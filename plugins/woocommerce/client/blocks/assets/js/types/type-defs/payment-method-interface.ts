@@ -204,6 +204,10 @@ export type CustomPlaceOrderButtonProps = PaymentMethodInterface & {
 	waitingForRedirect: boolean;
 	// Whether the button should act "disabled" because of some processing in the background.
 	disabled: boolean;
+	// Whether the button is being rendered in the block editor.
+	isEditor: boolean;
+	// Whether the button is being rendered in preview mode.
+	isPreview: boolean;
 };
 
 /**
