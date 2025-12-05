@@ -426,6 +426,11 @@
 						}
 
 						// Handle specific error codes
+					if (xhr.responseJSON.code === 'fraud_protection_session_blocked') {
+						wcFraudProtection.sessionStatus = 'blocked';
+						self.redirectToShop();
+						return;
+					} else
 						if (xhr.responseJSON.code === 'otp_expired') {
 							errorMessage = 'Your verification code has expired. Please request a new one.';
 							setTimeout(function() {
