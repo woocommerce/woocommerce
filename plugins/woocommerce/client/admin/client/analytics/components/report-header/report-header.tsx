@@ -38,7 +38,9 @@ export default function ReportHeader( props: ReportHeaderProps ): JSX.Element {
 		<div className="woocommerce-analytics-report-header">
 			{ /* @ts-expect-error - ReportFilters is a valid component but not typed */ }
 			<ReportFilters { ...props } />
-			<ImportStatusBar />
+			{ !! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] && (
+				<ImportStatusBar />
+			) }
 		</div>
 	);
 }
