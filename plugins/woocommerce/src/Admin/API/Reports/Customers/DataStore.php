@@ -184,6 +184,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @since 10.5.0
 	 * @param array $query_args Parameters supplied by the user.
+	 * @return void
 	 */
 	protected function add_order_by_sql_params( $query_args ) {
 		if ( isset( $query_args['orderby'] ) || isset( $query_args['order'] ) ) {
