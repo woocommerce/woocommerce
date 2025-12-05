@@ -16,7 +16,7 @@ import {
 	Spinner,
 } from '@woocommerce/blocks-components';
 import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
-import { useEditorContext } from '../../../context/providers/editor-context';
+import { useEditorContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
