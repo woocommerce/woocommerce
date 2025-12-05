@@ -269,7 +269,7 @@ class PushTokensDataStore {
 		$meta = get_post_meta( $push_token->get_id() );
 
 		return array_map(
-			function ( $key ) use ( $meta ) {
+			function ( string $key ) use ( $meta ) {
 				if ( is_array( $meta[ $key ] ) ) {
 					return $meta[ $key ][0];
 				}
