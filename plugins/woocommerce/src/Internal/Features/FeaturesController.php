@@ -769,6 +769,8 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id Unique feature id.
 	 * @return array|null The feature definition array, or null if the feature doesn't exist.
+	 *
+	 * @since 10.5.0
 	 */
 	private function get_feature_definition( string $feature_id ): ?array {
 		return $this->get_feature_definitions()[ $feature_id ] ?? null;
@@ -781,6 +783,8 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id       The feature id being checked.
 	 * @param string $deprecated_since The version since which the feature is deprecated.
+	 *
+	 * @since 10.5.0
 	 */
 	private function log_deprecated_feature_usage( string $feature_id, string $deprecated_since ): void {
 		static $logged = array();
@@ -823,7 +827,7 @@ class FeaturesController {
 		// Handle deprecated features - return the backwards-compatible value.
 		if ( ! empty( $feature['deprecated_since'] ) ) {
 			$this->log_deprecated_feature_usage( $feature_id, $feature['deprecated_since'] );
-			return (bool) $feature['deprecated_value'];
+			return (bool) ( $feature['deprecated_value'] ?? false );
 		}
 
 		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {

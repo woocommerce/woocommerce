@@ -252,14 +252,14 @@ const Marketing = ( { onComplete }: MarketingProps ) => {
 						"Boost your store's potential",
 						'woocommerce'
 					) }
-				text={ __(
-					'Discover hand-picked extensions to grow your business in' +
-						' the WooCommerce marketplace.',
-					'woocommerce'
-				) }
-				buttonHref={ getAdminLink(
-					'admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=marketing-extensions'
-				) }
+					text={ __(
+						'Discover hand-picked extensions to grow your business in' +
+							' the WooCommerce marketplace.',
+						'woocommerce'
+					) }
+					buttonHref={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=%2Fextensions&category=marketing-extensions'
+					) }
 					buttonText={ __( 'Start growing', 'woocommerce' ) }
 					onButtonClick={ trackPromoButtonClick }
 				/>
