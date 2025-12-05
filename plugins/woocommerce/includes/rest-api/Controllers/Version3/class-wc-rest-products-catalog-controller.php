@@ -50,10 +50,18 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 					'permission_callback' => array( $this, 'request_catalog_permissions_check' ),
 					'args'                => array(
 						'fields'         => array(
-							'description'       => __( 'Product/variation fields to include in the catalog. Can be an array or comma-separated string.', 'woocommerce' ),
+							'description'       => __( 'Product fields to include in the catalog. Can be an array or comma-separated string.', 'woocommerce' ),
 							'type'              => array( 'array', 'string' ),
 							'items'             => array( 'type' => 'string' ),
 							'required'          => true,
+							'validate_callback' => array( $this, 'validate_fields_arg' ),
+							'sanitize_callback' => array( $this, 'sanitize_fields_arg' ),
+						),
+						'variation_fields' => array(
+							'description'       => __( 'Variation fields to include in the catalog. Can be an array or comma-separated string.', 'woocommerce' ),
+							'type'              => array( 'array', 'string' ),
+							'items'             => array( 'type' => 'string' ),
+							'required'          => false,
 							'validate_callback' => array( $this, 'validate_fields_arg' ),
 							'sanitize_callback' => array( $this, 'sanitize_fields_arg' ),
 						),
@@ -80,14 +88,15 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 */
 	public function request_catalog( $request ) {
 		$fields         = $this->sanitize_fields_arg( $request->get_param( 'fields' ) ?? array() );
+		$variation_fields = $this->sanitize_fields_arg( $request->get_param( 'variation_fields' ) ?? array() );
 		$force_generate = $request->get_param( 'force_generate' ) ?? false;
 
 		// Use AsyncGenerator if the Product Feed plugin is available.
 		if ( $this->is_async_generator_available() ) {
-			return $this->request_catalog_async( $fields, $force_generate );
+			return $this->request_catalog_async( $fields, $variation_fields, $force_generate );
 		}
 
-		$file_info = $this->get_catalog_file_info( $fields );
+		$file_info = $this->get_catalog_file_info( $fields, $variation_fields );
 
 		if ( is_wp_error( $file_info ) ) {
 			return $file_info;
@@ -241,10 +250,11 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	/**
 	 * Get catalog file information based on fields.
 	 *
-	 * @param array $fields Product/variation fields to include in the catalog.
+	 * @param array $fields Product fields to include in the catalog.
+	 * @param array $variation_fields Variation fields to include in the catalog.
 	 * @return array|WP_Error Array with 'filepath', 'url', and 'directory' keys, or WP_Error on failure.
 	 */
-	private function get_catalog_file_info( $fields ) {
+	private function get_catalog_file_info( $fields, $variation_fields ) {
 		$upload_dir = wp_upload_dir();
 
 		if ( ! empty( $upload_dir['error'] ) ) {
@@ -255,7 +265,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		$catalog_url = trailingslashit( $upload_dir['baseurl'] ) . 'wc-catalog/';
 
 		$today        = gmdate( 'Y-m-d' );
-		$catalog_hash = wp_hash( $today . wp_json_encode( $fields ) );
+		$catalog_hash = wp_hash( $today . wp_json_encode( $fields ) . wp_json_encode( $variation_fields ) );
 		$filename     = "products-{$today}-{$catalog_hash}.json";
 
 		return array(
@@ -293,7 +303,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * @param bool  $force_generate Whether to force regenerate the catalog.
 	 * @return WP_Error|WP_REST_Response
 	 */
-	private function request_catalog_async( $fields, $force_generate ) {
+	private function request_catalog_async( $fields, $variation_fields, $force_generate ) {
 		try {
 			$plugin = \Automattic\WooCommerce\ProductFeedForOpenAI\Core\Plugin::get_instance();
 			if ( ! $plugin ) {
@@ -313,7 +323,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				);
 			}
 
-			$args = array( '_fields' => implode( ',', $fields ) );
+			$args = array( '_fields' => implode( ',', $fields ), '_variation_fields' => implode( ',', $variation_fields ) );
 
 			$status = $force_generate
 				? $generator->force_regeneration( $args )
