@@ -1,0 +1,147 @@
+/**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+import { dateI18n } from '@wordpress/date';
+import { Button } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
+// import { getSetting } from '@woocommerce/settings';
+
+/**
+ * Internal dependencies
+ */
+import { useImportStatus } from './use-import-status';
+import './import-status-bar.scss';
+
+/**
+ * Analytics Import Status Bar Component
+ *
+ * Displays the current analytics import status including:
+ * - Last processed date
+ * - Next scheduled import time
+ * - Manual "Update now" button
+ *
+ * Only displays in scheduled mode. Hidden in immediate mode.
+ *
+ * @return {JSX.Element|null} The status bar component or null if hidden
+ */
+export function ImportStatusBar(): JSX.Element | null {
+	const { status, isLoading, error, triggerImport, isTriggeringImport } =
+		useImportStatus();
+	const { createNotice } = useDispatch( 'core/notices' );
+
+	// Don't render if mode is 'immediate' or still loading initial data
+	if ( isLoading || ! status || status.mode === 'immediate' ) {
+		return null;
+	}
+
+	/**
+	 * Format a date string for display
+	 *
+	 * @param {string|null} date - Date string in 'Y-m-d H:i:s' format (site timezone)
+	 * @return {string} Formatted date string or "Never"
+	 */
+	const formatLastProcessedDate = ( date: string | null ): string => {
+		if ( ! date ) {
+			return __( 'Never', 'woocommerce' );
+		}
+		return dateI18n( 'M j H:i', date, undefined );
+	};
+
+	const formatNextScheduledDate = ( date: string | null ): string => {
+		if ( ! date ) {
+			return __( 'Never', 'woocommerce' );
+		}
+
+		return dateI18n(
+			/**
+			 * translators: The time of day the Analytics import is scheduled for.
+			 * Example: "Nov 21 at 12:00"
+			 */
+			__( 'M j \\a\\t H:i', 'woocommerce' ),
+			date,
+			undefined
+		);
+	};
+
+	/**
+	 * Handle manual import trigger
+	 */
+	const handleTriggerImport = async (): Promise< void > => {
+		try {
+			await triggerImport();
+			createNotice(
+				'success',
+				__(
+					'Analytics import has started. Your store data will be updated soon.',
+					'woocommerce'
+				),
+				{
+					type: 'snackbar',
+					isDismissible: true,
+				}
+			);
+		} catch ( err ) {
+			createNotice(
+				'error',
+				error ||
+					__( 'Failed to trigger analytics update.', 'woocommerce' ),
+				{
+					isDismissible: true,
+				}
+			);
+		}
+	};
+
+	// Disable button when an import is already scheduled/running or currently triggering
+	const isButtonDisabled =
+		status.import_in_progress_or_due || isTriggeringImport;
+
+	return (
+		<div className="woocommerce-analytics-import-status-bar-wrapper">
+			<div className="woocommerce-analytics-import-status-bar-wrapper__label">
+				{ __( 'Data status:', 'woocommerce' ) }
+			</div>
+			<div
+				className="woocommerce-analytics-import-status-bar"
+				role="status"
+				aria-live="polite"
+				aria-atomic="true"
+			>
+				<div className="woocommerce-analytics-import-status-bar__content">
+					<span className="woocommerce-analytics-import-status-bar__item">
+						<span className="woocommerce-analytics-import-status-bar__label">
+							{ __( 'Last updated', 'woocommerce' ) }
+						</span>
+						<span className="woocommerce-analytics-import-status-bar__value">
+							{ formatLastProcessedDate(
+								status.last_processed_date
+							) }
+						</span>
+					</span>
+					<span className="woocommerce-analytics-import-status-bar__item">
+						<span className="woocommerce-analytics-import-status-bar__label">
+							{ __( 'Next update', 'woocommerce' ) }
+						</span>
+						<span className="woocommerce-analytics-import-status-bar__value">
+							{ formatNextScheduledDate( status.next_scheduled ) }
+						</span>
+					</span>
+					<Button
+						variant="tertiary"
+						onClick={ handleTriggerImport }
+						disabled={ isButtonDisabled }
+						isBusy={ isTriggeringImport }
+						className="woocommerce-analytics-import-status-bar__trigger"
+						aria-label={ __(
+							'Manually trigger analytics data import',
+							'woocommerce'
+						) }
+					>
+						{ __( 'Update now', 'woocommerce' ) }
+					</Button>
+				</div>
+			</div>
+		</div>
+	);
+}

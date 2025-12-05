@@ -29,7 +29,7 @@ import {
 import './style.scss';
 import defaultSections, { DEFAULT_SECTIONS_FILTER } from './default-sections';
 import Section from './section';
-import ReportFilters from '../analytics/components/report-filters';
+import { ReportHeader } from '../analytics/components/report-header';
 
 const DASHBOARD_FILTERS_FILTER = 'woocommerce_admin_dashboard_filters';
 
@@ -267,12 +267,10 @@ const CustomizableDashboard = ( { defaultDateRange, path, query } ) => {
 
 		return (
 			<>
-				<ReportFilters
+				<ReportHeader
 					report="dashboard"
 					query={ query }
 					path={ path }
-					dateQuery={ dateQuery }
-					isoDateFormat={ isoDateFormat }
 					filters={ filters }
 				/>
 				{ sections.map( ( section, index ) => {
