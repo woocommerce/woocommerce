@@ -204,6 +204,8 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 
 		// Set to scheduled mode.
 		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'no' );
+		// Clear any scheduled actions that may have been created when setting the option.
+		$this->clear_scheduled_actions();
 
 		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/trigger' );
 		$response = $this->server->dispatch( $request );
@@ -261,6 +263,8 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 
 		// Set to scheduled mode.
 		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'no' );
+		// Clear any scheduled actions that may have been created when setting the option.
+		$this->clear_scheduled_actions();
 
 		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/trigger' );
 		$response = $this->server->dispatch( $request );
