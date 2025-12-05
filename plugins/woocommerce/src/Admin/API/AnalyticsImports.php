@@ -272,12 +272,11 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 			return false;
 		}
 
-		// Check for actions with 'running' status.
-		// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		// Check for actions with 'in-progress' status.
 		$in_progress_actions = WC()->queue()->search(
 			array(
 				'hook'     => $hook,
-				'status'   => 'running',
+				'status'   => 'in-progress',
 				'per_page' => 1,
 			),
 			'ids'
