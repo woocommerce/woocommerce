@@ -132,7 +132,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 2, $cart_item['quantity'], 'Cart item should have quantity 2' );
 
 		WC()->cart->calculate_totals();
-		$initial_subtotal = WC()->cart->get_subtotal( 'edit' );
+		$initial_subtotal = WC()->cart->get_subtotal();
 		$initial_quantity = $cart_item['quantity'];
 
 		$product->set_sold_individually( true );
@@ -149,7 +149,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $cart_item_after['quantity'], 'Cart item quantity should be reduced to 1' );
 
 		WC()->cart->calculate_totals();
-		$final_subtotal = WC()->cart->get_subtotal( 'edit' );
+		$final_subtotal = WC()->cart->get_subtotal();
 
 		$this->assertEquals( $initial_subtotal / $initial_quantity, $final_subtotal, 'Cart subtotal should be recalculated based on quantity 1', 0.01 );
 
