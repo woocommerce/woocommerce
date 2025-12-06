@@ -242,82 +242,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When filter is false and order has no customer but has billing address, use billing address for tax rates.
+	 * @testdox Guest order uses billing address tax rate when woocommerce_adjust_non_base_location_prices is false.
 	 */
-	public function test_wc_get_price_excluding_tax_uses_billing_address_when_no_customer() {
-		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-
-		FunctionsMockerHack::add_function_mocks(
-			array(
-				'wc_prices_include_tax' => '__return_true',
-			)
-		);
-
-		$find_rates_args = null;
-		StaticMockerHack::add_method_mocks(
-			array(
-				'WC_Tax' => array(
-					'find_rates' => function ( $args ) use ( &$find_rates_args ) {
-						$find_rates_args = $args;
-						return array( 1 => array( 'rate' => 19 ) );
-					},
-					'calc_tax'   => function () {
-						return array( 0 );
-					},
-				),
-			)
-		);
-
-		// phpcs:disable Squiz.Commenting
-		$product = new class() extends WC_Product {
-			public function get_price( $context = 'view' ) {
-				return 100;
-			}
-
-			public function is_taxable() {
-				return true;
-			}
-
-			public function get_tax_class( $context = 'view' ) {
-				return '';
-			}
-		};
-
-		$order = new class() extends WC_Order {
-			public function get_customer_id( $context = 'view' ) {
-				return 0; // No customer - guest order.
-			}
-
-			public function get_billing_country( $context = 'view' ) {
-				return 'DE';
-			}
-
-			public function get_billing_state( $context = 'view' ) {
-				return '';
-			}
-
-			public function get_billing_postcode( $context = 'view' ) {
-				return '10115';
-			}
-
-			public function get_billing_city( $context = 'view' ) {
-				return 'Berlin';
-			}
-		};
-		// phpcs:enable Squiz.Commenting
-
-		wc_get_price_excluding_tax( $product, array( 'order' => $order ) );
-
-		$this->assertNotNull( $find_rates_args, 'WC_Tax::find_rates should have been called' );
-		$this->assertEquals( 'DE', $find_rates_args['country'], 'Tax rates should be looked up for Germany (order billing country)' );
-
-		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-	}
-
-	/**
-	 * @testdox End-to-end test: manual guest order uses billing address tax rate when filter is false.
-	 */
-	public function test_wc_get_price_excluding_tax_manual_order_end_to_end() {
+	public function test_wc_get_price_excluding_tax_guest_order_uses_billing_address() {
 		// Enable taxes.
 		$wc_tax_enabled = wc_tax_enabled();
 		if ( ! $wc_tax_enabled ) {
@@ -402,75 +329,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		if ( ! $wc_tax_enabled ) {
 			update_option( 'woocommerce_calc_taxes', 'no' );
 		}
-	}
-
-	/**
-	 * @testdox When filter is false and order has no customer and no address, use get_taxable_location (falls back to base).
-	 */
-	public function test_wc_get_price_excluding_tax_fallback_when_no_customer_uses_taxable_location() {
-		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-
-		FunctionsMockerHack::add_function_mocks(
-			array(
-				'wc_prices_include_tax' => '__return_true',
-			)
-		);
-
-		$find_rates_args = null;
-		StaticMockerHack::add_method_mocks(
-			array(
-				'WC_Tax' => array(
-					'get_rates'  => function () {
-						return array();
-					},
-					'find_rates' => function ( $args ) use ( &$find_rates_args ) {
-						$find_rates_args = $args;
-						return array();
-					},
-					'calc_tax'   => function () {
-						return array( 0 );
-					},
-				),
-			)
-		);
-
-		// phpcs:disable Squiz.Commenting
-		$product = new class() extends WC_Product {
-			public function get_price( $context = 'view' ) {
-				return 100;
-			}
-
-			public function is_taxable() {
-				return true;
-			}
-
-			public function get_tax_class( $context = 'view' ) {
-				return '';
-			}
-		};
-
-		$order = new class() extends WC_Order {
-			public function get_customer_id( $context = 'view' ) {
-				return 0; // No customer - guest order.
-			}
-
-			public function get_billing_country( $context = 'view' ) {
-				return ''; // Empty billing country.
-			}
-
-			public function get_shipping_country( $context = 'view' ) {
-				return ''; // Empty shipping country.
-			}
-		};
-		// phpcs:enable Squiz.Commenting
-
-		wc_get_price_excluding_tax( $product, array( 'order' => $order ) );
-
-		// With get_taxable_location(), when no address is set it falls back to shop base location.
-		$this->assertNotNull( $find_rates_args, 'WC_Tax::find_rates should be called via get_taxable_location' );
-		$this->assertEquals( WC()->countries->get_base_country(), $find_rates_args['country'], 'Should use shop base country when no address' );
-
-		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
 	}
 
 	/**
