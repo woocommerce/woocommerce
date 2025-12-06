@@ -84,60 +84,70 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 * This is critical for the caching feature to work correctly.
 	 */
 	public function test_factory_cached_product_preserves_meta_ids() {
-		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching feature is not enabled.' );
-		}
+		// Enable the feature for this test.
+		$option_name    = 'woocommerce_feature_' . \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME . '_enabled';
+		$original_value = get_option( $option_name );
+		update_option( $option_name, 'yes' );
 
-		// Create product with meta.
-		$test_product = WC_Helper_Product::create_simple_product();
-		$test_product->add_meta_data( 'test_cache_key', 'test_cache_value', true );
-		$test_product->save();
+		try {
+			// Create product with meta.
+			$test_product = WC_Helper_Product::create_simple_product();
+			$test_product->add_meta_data( 'test_cache_key', 'test_cache_value', true );
+			$test_product->save();
 
-		$product_id = $test_product->get_id();
+			$product_id = $test_product->get_id();
 
-		// Get original meta ID.
-		$original_meta    = $test_product->get_meta_data();
-		$original_meta_id = null;
-		foreach ( $original_meta as $meta ) {
-			if ( 'test_cache_key' === $meta->key ) {
-				$original_meta_id = $meta->id;
-				break;
+			// Get original meta ID.
+			$original_meta    = $test_product->get_meta_data();
+			$original_meta_id = null;
+			foreach ( $original_meta as $meta ) {
+				if ( 'test_cache_key' === $meta->key ) {
+					$original_meta_id = $meta->id;
+					break;
+				}
+			}
+
+			// Clear cache to ensure fresh retrieval.
+			$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
+			$product_cache->remove( $product_id );
+
+			// Get product via factory (first time - will cache it).
+			$product1 = WC()->product_factory->get_product( $product_id );
+
+			// Get product again (second time - should come from cache).
+			$product2 = WC()->product_factory->get_product( $product_id );
+
+			// Verify both retrievals preserve meta ID.
+			$meta1     = $product1->get_meta_data();
+			$meta_id_1 = null;
+			foreach ( $meta1 as $meta ) {
+				if ( 'test_cache_key' === $meta->key ) {
+					$meta_id_1 = $meta->id;
+					break;
+				}
+			}
+
+			$meta2     = $product2->get_meta_data();
+			$meta_id_2 = null;
+			foreach ( $meta2 as $meta ) {
+				if ( 'test_cache_key' === $meta->key ) {
+					$meta_id_2 = $meta->id;
+					break;
+				}
+			}
+
+			$this->assertEquals( $original_meta_id, $meta_id_1, 'First retrieval should preserve meta ID' );
+			$this->assertEquals( $original_meta_id, $meta_id_2, 'Cached retrieval should preserve meta ID' );
+			$this->assertEquals( 'test_cache_value', $product1->get_meta( 'test_cache_key' ) );
+			$this->assertEquals( 'test_cache_value', $product2->get_meta( 'test_cache_key' ) );
+		} finally {
+			// Restore original option value.
+			if ( false === $original_value ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $original_value );
 			}
 		}
-
-		// Clear cache to ensure fresh retrieval.
-		$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
-		$product_cache->remove( $product_id );
-
-		// Get product via factory (first time - will cache it).
-		$product1 = WC()->product_factory->get_product( $product_id );
-
-		// Get product again (second time - should come from cache).
-		$product2 = WC()->product_factory->get_product( $product_id );
-
-		// Verify both retrievals preserve meta ID.
-		$meta1     = $product1->get_meta_data();
-		$meta_id_1 = null;
-		foreach ( $meta1 as $meta ) {
-			if ( 'test_cache_key' === $meta->key ) {
-				$meta_id_1 = $meta->id;
-				break;
-			}
-		}
-
-		$meta2     = $product2->get_meta_data();
-		$meta_id_2 = null;
-		foreach ( $meta2 as $meta ) {
-			if ( 'test_cache_key' === $meta->key ) {
-				$meta_id_2 = $meta->id;
-				break;
-			}
-		}
-
-		$this->assertEquals( $original_meta_id, $meta_id_1, 'First retrieval should preserve meta ID' );
-		$this->assertEquals( $original_meta_id, $meta_id_2, 'Cached retrieval should preserve meta ID' );
-		$this->assertEquals( 'test_cache_value', $product1->get_meta( 'test_cache_key' ) );
-		$this->assertEquals( 'test_cache_value', $product2->get_meta( 'test_cache_key' ) );
 	}
 
 	/**
@@ -178,35 +188,45 @@ class WC_Tests_Product_Factory extends WC_Unit_Test_Case {
 	 * Test that cache is used when retrieving the same product multiple times.
 	 */
 	public function test_factory_uses_cache_for_repeated_retrievals() {
-		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching feature is not enabled.' );
+		// Enable the feature for this test.
+		$option_name    = 'woocommerce_feature_' . \Automattic\WooCommerce\Internal\Caches\ProductCacheController::FEATURE_NAME . '_enabled';
+		$original_value = get_option( $option_name );
+		update_option( $option_name, 'yes' );
+
+		try {
+			$test_product = WC_Helper_Product::create_simple_product();
+			$product_id   = $test_product->get_id();
+
+			// Clear cache.
+			$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
+			$product_cache->remove( $product_id );
+
+			// Verify not cached initially.
+			$this->assertFalse( $product_cache->is_cached( $product_id ), 'Product should not be cached initially' );
+
+			// Get product (should cache it).
+			$product1 = WC()->product_factory->get_product( $product_id );
+
+			// Verify it's now cached.
+			$this->assertTrue( $product_cache->is_cached( $product_id ), 'Product should be cached after first retrieval' );
+
+			// Get product again (should use cache).
+			$product2 = WC()->product_factory->get_product( $product_id );
+
+			// Verify both are valid products with same ID.
+			$this->assertEquals( $product_id, $product1->get_id() );
+			$this->assertEquals( $product_id, $product2->get_id() );
+
+			// Verify they are different instances (cache returns clones).
+			$this->assertNotSame( $product1, $product2, 'Cached products should be different instances' );
+		} finally {
+			// Restore original option value.
+			if ( false === $original_value ) {
+				delete_option( $option_name );
+			} else {
+				update_option( $option_name, $original_value );
+			}
 		}
-
-		$test_product = WC_Helper_Product::create_simple_product();
-		$product_id   = $test_product->get_id();
-
-		// Clear cache.
-		$product_cache = wc_get_container()->get( \Automattic\WooCommerce\Internal\Caches\ProductCache::class );
-		$product_cache->remove( $product_id );
-
-		// Verify not cached initially.
-		$this->assertFalse( $product_cache->is_cached( $product_id ), 'Product should not be cached initially' );
-
-		// Get product (should cache it).
-		$product1 = WC()->product_factory->get_product( $product_id );
-
-		// Verify it's now cached.
-		$this->assertTrue( $product_cache->is_cached( $product_id ), 'Product should be cached after first retrieval' );
-
-		// Get product again (should use cache).
-		$product2 = WC()->product_factory->get_product( $product_id );
-
-		// Verify both are valid products with same ID.
-		$this->assertEquals( $product_id, $product1->get_id() );
-		$this->assertEquals( $product_id, $product2->get_id() );
-
-		// Verify they are different instances (cache returns clones).
-		$this->assertNotSame( $product1, $product2, 'Cached products should be different instances' );
 	}
 
 	/**

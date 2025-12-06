@@ -28,12 +28,27 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	private $product_cache;
 
 	/**
+	 * Original feature option value.
+	 *
+	 * @var mixed
+	 */
+	private $original_feature_value;
+
+	/**
+	 * Feature option name.
+	 *
+	 * @var string
+	 */
+	private $feature_option_name;
+
+	/**
 	 * Setup test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->product_cache = wc_get_container()->get( ProductCache::class );
-		$this->sut           = wc_get_container()->get( ProductCacheController::class );
+		$this->product_cache       = wc_get_container()->get( ProductCache::class );
+		$this->sut                 = wc_get_container()->get( ProductCacheController::class );
+		$this->feature_option_name = 'woocommerce_feature_' . ProductCacheController::FEATURE_NAME . '_enabled';
 	}
 
 	/**
@@ -41,7 +56,38 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->product_cache->flush();
+		$this->restore_feature_option();
 		parent::tearDown();
+	}
+
+	/**
+	 * Enable the product instance caching feature for a test.
+	 */
+	private function enable_feature(): void {
+		$this->original_feature_value = get_option( $this->feature_option_name );
+		update_option( $this->feature_option_name, 'yes' );
+	}
+
+	/**
+	 * Disable the product instance caching feature for a test.
+	 */
+	private function disable_feature(): void {
+		$this->original_feature_value = get_option( $this->feature_option_name );
+		update_option( $this->feature_option_name, 'no' );
+	}
+
+	/**
+	 * Restore the original feature option value.
+	 */
+	private function restore_feature_option(): void {
+		if ( isset( $this->original_feature_value ) ) {
+			if ( false === $this->original_feature_value ) {
+				delete_option( $this->feature_option_name );
+			} else {
+				update_option( $this->feature_option_name, $this->original_feature_value );
+			}
+			$this->original_feature_value = null;
+		}
 	}
 
 	/**
@@ -92,9 +138,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when product is saved via CRUD.
 	 */
 	public function test_cache_invalidated_on_product_save() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Original Name' );
@@ -123,9 +167,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when stock is updated via direct SQL.
 	 */
 	public function test_cache_invalidated_on_stock_update() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_manage_stock( true );
@@ -156,9 +198,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when stock is increased.
 	 */
 	public function test_cache_invalidated_on_stock_increase() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_manage_stock( true );
@@ -188,9 +228,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when stock is decreased.
 	 */
 	public function test_cache_invalidated_on_stock_decrease() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_manage_stock( true );
@@ -220,9 +258,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when total sales is updated.
 	 */
 	public function test_cache_invalidated_on_sales_update() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_total_sales( 0 );
@@ -252,9 +288,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when product meta is added directly.
 	 */
 	public function test_cache_invalidated_on_meta_add() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product    = WC_Helper_Product::create_simple_product();
 		$product_id = $product->get_id();
@@ -280,9 +314,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when product meta is updated directly.
 	 */
 	public function test_cache_invalidated_on_meta_update() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->add_meta_data( '_test_meta', 'original_value', true );
@@ -311,9 +343,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when product meta is deleted directly.
 	 */
 	public function test_cache_invalidated_on_meta_delete() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->add_meta_data( '_test_meta', 'test_value', true );
@@ -342,9 +372,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Product cache is invalidated when product is deleted.
 	 */
 	public function test_cache_invalidated_on_product_delete() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$product    = WC_Helper_Product::create_simple_product();
 		$product_id = $product->get_id();
@@ -369,9 +397,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Variation cache is invalidated when variation is updated.
 	 */
 	public function test_cache_invalidated_on_variation_update() {
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is not enabled.' );
-		}
+		$this->enable_feature();
 
 		$variable_product = WC_Helper_Product::create_variation_product();
 		$variations       = $variable_product->get_children();
@@ -398,9 +424,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 * @testdox Cache invalidation respects feature flag being disabled.
 	 */
 	public function test_invalidation_respects_feature_flag() {
-		if ( FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching is enabled. This test requires it to be disabled.' );
-		}
+		$this->disable_feature();
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );

@@ -48,7 +48,7 @@ class ProductCache extends ObjectCache {
 	 */
 	protected function validate( $product ): ?array {
 		if ( ! $product instanceof WC_Product ) {
-			return array( 'The supplied product is not an instance of WC_Product, ' . gettype( $product ) );
+			return array( 'The supplied product is not an instance of WC_Product' );
 		}
 
 		return null;

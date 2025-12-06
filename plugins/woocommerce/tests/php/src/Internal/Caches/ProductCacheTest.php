@@ -166,40 +166,48 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 	 * when the feature is enabled.
 	 */
 	public function test_integration_with_feature_enabled() {
-		// Check if feature is enabled.
-		if ( ! FeaturesUtil::feature_is_enabled( ProductCacheController::FEATURE_NAME ) ) {
-			$this->markTestSkipped( 'Product instance caching feature is not enabled.' );
+		// Enable the feature for this test.
+		$original_value = get_option( 'woocommerce_feature_' . ProductCacheController::FEATURE_NAME . '_enabled' );
+		update_option( 'woocommerce_feature_' . ProductCacheController::FEATURE_NAME . '_enabled', 'yes' );
+
+		try {
+			// Create a product with meta.
+			$product = WC_Helper_Product::create_simple_product();
+			$product->add_meta_data( 'test_key', 'test_value', true );
+			$product->save();
+
+			$product_id = $product->get_id();
+
+			// Clear any existing cache.
+			$this->sut->remove( $product_id );
+
+			// Get product via factory (should cache it).
+			$factory_product = wc_get_product( $product_id );
+
+			// Verify product was cached.
+			$this->assertTrue( $this->sut->is_cached( $product_id ), 'Product should be cached after retrieval' );
+
+			// Verify product has DUPLICATE mode (ready for normal use).
+			$this->assertEquals( WC_Data::CLONE_MODE_DUPLICATE, $factory_product->get_clone_mode() );
+
+			// Get product again (should come from cache).
+			$cached_product = wc_get_product( $product_id );
+
+			// Verify it's a different instance (cloned from cache).
+			$this->assertNotSame( $factory_product, $cached_product, 'Cached retrieval should return a new instance' );
+
+			// Verify meta is preserved.
+			$cached_meta = $cached_product->get_meta_data();
+			$this->assertNotNull( $cached_meta[0]->id, 'Meta ID should be preserved from cache' );
+			$this->assertEquals( 'test_value', $cached_product->get_meta( 'test_key' ) );
+		} finally {
+			// Restore original option value.
+			if ( false === $original_value ) {
+				delete_option( 'woocommerce_feature_' . ProductCacheController::FEATURE_NAME . '_enabled' );
+			} else {
+				update_option( 'woocommerce_feature_' . ProductCacheController::FEATURE_NAME . '_enabled', $original_value );
+			}
 		}
-
-		// Create a product with meta.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->add_meta_data( 'test_key', 'test_value', true );
-		$product->save();
-
-		$product_id = $product->get_id();
-
-		// Clear any existing cache.
-		$this->sut->remove( $product_id );
-
-		// Get product via factory (should cache it).
-		$factory_product = wc_get_product( $product_id );
-
-		// Verify product was cached.
-		$this->assertTrue( $this->sut->is_cached( $product_id ), 'Product should be cached after retrieval' );
-
-		// Verify product has DUPLICATE mode (ready for normal use).
-		$this->assertEquals( WC_Data::CLONE_MODE_DUPLICATE, $factory_product->get_clone_mode() );
-
-		// Get product again (should come from cache).
-		$cached_product = wc_get_product( $product_id );
-
-		// Verify it's a different instance (cloned from cache).
-		$this->assertNotSame( $factory_product, $cached_product, 'Cached retrieval should return a new instance' );
-
-		// Verify meta is preserved.
-		$cached_meta = $cached_product->get_meta_data();
-		$this->assertNotNull( $cached_meta[0]->id, 'Meta ID should be preserved from cache' );
-		$this->assertEquals( 'test_value', $cached_product->get_meta( 'test_key' ) );
 	}
 
 	/**

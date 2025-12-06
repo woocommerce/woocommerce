@@ -177,13 +177,15 @@ abstract class WC_Data {
 	 * When the object is cloned, make sure meta is cloned correctly.
 	 *
 	 * Meta ID handling depends on the clone mode:
-	 * - CLONE_MODE_DUPLICATE (default): Clears meta IDs for duplication (backward compatible).
+	 * - CLONE_MODE_DUPLICATE (default): Forces reading of Meta and clears meta IDs for duplication (backward compatible).
 	 * - CLONE_MODE_CACHE: Preserves meta IDs for caching purposes.
 	 *
 	 * @since 3.0.2
 	 */
 	public function __clone() {
-		$this->maybe_read_meta_data();
+		if ( self::CLONE_MODE_DUPLICATE === $this->clone_mode ) {
+			$this->maybe_read_meta_data();
+		}
 		if ( ! empty( $this->meta_data ) ) {
 			foreach ( $this->meta_data as $array_key => $meta ) {
 				$this->meta_data[ $array_key ] = clone $meta;
