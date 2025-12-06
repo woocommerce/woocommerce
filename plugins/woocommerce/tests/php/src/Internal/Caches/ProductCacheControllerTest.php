@@ -96,7 +96,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	public function test_controller_registers_hooks() {
 		// Verify clean_post_cache hook is registered.
 		$this->assertNotFalse(
-			has_action( 'clean_post_cache', array( $this->sut, 'maybe_invalidate_product_cache' ) ),
+			has_action( 'clean_post_cache', array( $this->sut, 'maybe_invalidate_product_cache_on_clean' ) ),
 			'clean_post_cache hook should be registered'
 		);
 

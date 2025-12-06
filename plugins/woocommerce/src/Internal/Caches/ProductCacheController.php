@@ -51,10 +51,7 @@ class ProductCacheController {
 		add_action( 'before_woocommerce_init', array( $this, 'maybe_set_product_cache_group_as_non_persistent' ) );
 
 		// Handle direct WordPress post updates (bypassing CRUD).
-		add_action( 'clean_post_cache', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
-
-		// Handle post deletions.
-		add_action( 'before_delete_post', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
+		add_action( 'clean_post_cache', array( $this, 'maybe_invalidate_product_cache_on_clean' ), 10, 2 );
 
 		// Handle post meta updates (third-party plugins updating via postmeta API).
 		add_action( 'updated_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 2 );
@@ -85,6 +82,29 @@ class ProductCacheController {
 		if ( FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
 			wp_cache_add_non_persistent_groups( array( $this->product_cache->get_object_type() ) );
 		}
+	}
+
+	/**
+	 * Invalidate the product cache when the post cache is cleaned.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param int      $post_id The post ID.
+	 * @param \WP_Post $post    The post object.
+	 *
+	 * @return void
+	 */
+	public function maybe_invalidate_product_cache_on_clean( $post_id, $post ) {
+		$post_id = (int) $post_id;
+		/**
+		 * It's important not to trigger get_post() during this callback as some extensions may attempt to clean cache
+		 * prior to updating the database and a call to get_post() would cause the post to be added back to cache before the update.
+		 */
+		if ( ! ( $post instanceof \WP_Post ) || ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			return;
+		}
+
+		$this->product_cache->remove( $post_id );
 	}
 
 	/**
