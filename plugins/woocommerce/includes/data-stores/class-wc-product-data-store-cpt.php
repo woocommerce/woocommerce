@@ -1108,6 +1108,50 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_id() );
 	}
 
+	/**
+	 * Prime cache for raw meta data for products in bulk.
+	 *
+	 * This method fetches the `meta_id` field which WooCommerce uses and caches,
+	 * unlike WordPress's built-in metadata priming which doesn't include meta_id.
+	 *
+	 * Note: Caching logic is implemented here rather than in the parent WC_Data_Store_WP class
+	 * because the cache group ('products') is determined by the WC_Data subclass (WC_Product),
+	 * not by the data store. This maintains backward compatibility with code that may extend
+	 * these classes and ensures cache groups remain consistent with their corresponding
+	 * WC_Data subclasses.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param array $product_ids Product IDs to prime cache for.
+	 */
+	protected function prime_raw_meta_cache_for_products( $product_ids ) {
+		if ( empty( $product_ids ) ) {
+			return;
+		}
+
+		$cache_group        = 'products';
+		$cache_keys_mapping = array();
+		foreach ( $product_ids as $product_id ) {
+			$cache_keys_mapping[ $product_id ] = \WC_Product::generate_meta_cache_key( $product_id, $cache_group );
+		}
+
+		$cache_values   = wc_cache_get_multiple( array_values( $cache_keys_mapping ), $cache_group );
+		$non_cached_ids = array();
+		foreach ( $product_ids as $product_id ) {
+			if ( false === $cache_values[ $cache_keys_mapping[ $product_id ] ] ) {
+				$non_cached_ids[] = $product_id;
+			}
+		}
+
+		if ( empty( $non_cached_ids ) ) {
+			return;
+		}
+
+		$raw_meta_data_collection = $this->read_meta_for_ids( $non_cached_ids );
+
+		\WC_Product::prime_raw_meta_data_cache( $raw_meta_data_collection, $cache_group );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| wc-product-functions.php methods
@@ -2365,6 +2409,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( isset( $query_vars['return'] ) && 'objects' === $query_vars['return'] && ! empty( $query->posts ) ) {
 			// Prime caches before grabbing objects.
 			update_post_caches( $query->posts, array( 'product', 'product_variation' ) );
+		}
+
+		// Prime WC meta cache (with meta_id) before loading products to avoid N+1 queries
+		// when product instance caching is enabled.
+		$will_load_products = ! isset( $query_vars['return'] ) || 'ids' !== $query_vars['return'];
+		if ( $will_load_products && ! empty( $query->posts ) ) {
+			$this->prime_raw_meta_cache_for_products( wp_list_pluck( $query->posts, 'ID' ) );
 		}
 
 		$products = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_product', $query->posts ) );

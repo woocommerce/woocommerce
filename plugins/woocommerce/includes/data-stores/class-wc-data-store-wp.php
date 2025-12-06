@@ -81,20 +81,62 @@ class WC_Data_Store_WP {
 	 * @return array
 	 */
 	public function read_meta( &$object ) {
+		$raw_meta_data = $this->read_meta_for_ids( array( $object->get_id() ) );
+		$object_meta   = $raw_meta_data[ $object->get_id() ] ?? array();
+		return $this->filter_raw_meta_data( $object, $object_meta );
+	}
+
+	/**
+	 * Reads raw meta data from the database for multiple object IDs in a single query.
+	 *
+	 * This method performs a batch database read and returns unfiltered meta data.
+	 * Filtering of internal meta keys should be done by the caller using filter_raw_meta_data().
+	 *
+	 * Note: This method intentionally does not handle caching. Cache operations are left to
+	 * specific data store implementations (e.g., WC_Product_Data_Store_CPT) because the cache
+	 * group is determined by the WC_Data subclass (e.g., WC_Product uses 'products'), not by
+	 * this base data store class. This maintains backward compatibility with existing code
+	 * that may extend these classes and ensures cache groups remain consistent with their
+	 * corresponding WC_Data subclasses.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param array $object_ids Array of object IDs to fetch meta for.
+	 * @return array Associative array of object_id => array of meta row objects.
+	 *               Each meta row object has properties: meta_id, meta_key, meta_value.
+	 */
+	public function read_meta_for_ids( array $object_ids ): array {
 		global $wpdb;
-		$db_info       = $this->get_db_info();
+
+		if ( empty( $object_ids ) ) {
+			return array();
+		}
+
+		$db_info = $this->get_db_info();
+
+		// Initialize result with empty arrays for all requested IDs.
+		$meta_data = array_fill_keys( $object_ids, array() );
+
+		$object_ids_in = implode( ',', array_map( 'absint', $object_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$raw_meta_data = $wpdb->get_results(
-			$wpdb->prepare(
-				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				"SELECT {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
-				FROM {$db_info['table']}
-				WHERE {$db_info['object_id_field']} = %d
-				ORDER BY {$db_info['meta_id_field']}",
-				// phpcs:enable
-				$object->get_id()
-			)
+			"SELECT {$db_info['object_id_field']} as object_id, {$db_info['meta_id_field']} as meta_id, meta_key, meta_value
+			FROM {$db_info['table']}
+			WHERE {$db_info['object_id_field']} IN ( $object_ids_in )
+			ORDER BY {$db_info['object_id_field']}, {$db_info['meta_id_field']}"
 		);
-		return $this->filter_raw_meta_data( $object, $raw_meta_data );
+		// phpcs:enable
+
+		foreach ( $raw_meta_data as $meta_row ) {
+			$object_id = (int) $meta_row->object_id;
+			unset( $meta_row->object_id ); // Remove object_id from the row, keeping only meta_id, meta_key, meta_value.
+			if ( isset( $meta_data[ $object_id ] ) ) {
+				$meta_data[ $object_id ][] = $meta_row;
+			}
+		}
+
+		return $meta_data;
 	}
 
 	/**
