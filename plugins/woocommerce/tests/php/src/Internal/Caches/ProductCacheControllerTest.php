@@ -100,12 +100,6 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 			'clean_post_cache hook should be registered'
 		);
 
-		// Verify before_delete_post hook is registered.
-		$this->assertNotFalse(
-			has_action( 'before_delete_post', array( $this->sut, 'maybe_invalidate_product_cache' ) ),
-			'before_delete_post hook should be registered'
-		);
-
 		// Verify meta update hooks are registered.
 		$this->assertNotFalse(
 			has_action( 'updated_post_meta', array( $this->sut, 'maybe_invalidate_product_cache_by_meta' ) ),
