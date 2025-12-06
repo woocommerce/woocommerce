@@ -96,6 +96,9 @@ class TaxesController {
 				continue;
 			}
 
+			$existing_subtotal = (float) $item->get_subtotal();
+			$existing_total    = (float) $item->get_total();
+
 			$new_subtotal = wc_get_price_excluding_tax(
 				$product,
 				array(
@@ -104,8 +107,16 @@ class TaxesController {
 				)
 			);
 
+			// Preserve any existing discount ratio (e.g., from coupons).
+			if ( $existing_subtotal > 0 ) {
+				$discount_ratio = $existing_total / $existing_subtotal;
+				$new_total      = $new_subtotal * $discount_ratio;
+			} else {
+				$new_total = $new_subtotal;
+			}
+
 			$item->set_subtotal( $new_subtotal );
-			$item->set_total( $new_subtotal );
+			$item->set_total( $new_total );
 			$item->save();
 		}
 	}
