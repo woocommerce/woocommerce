@@ -113,6 +113,66 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox check_cart_items should reduce quantity to 1 when product is marked as sold individually after being added to cart
+	 */
+	public function test_check_cart_items_reduces_sold_individually_quantity() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 2 );
+		$this->assertNotFalse( $cart_item_key, 'Product should be added to cart' );
+
+		$cart_contents = WC()->cart->get_cart();
+		$this->assertCount( 1, $cart_contents, 'Cart should have one item' );
+		$cart_item = array_values( $cart_contents )[0];
+		$this->assertEquals( 2, $cart_item['quantity'], 'Cart item should have quantity 2' );
+
+		WC()->cart->calculate_totals();
+		$initial_subtotal = WC()->cart->get_subtotal( 'edit' );
+		$initial_quantity = $cart_item['quantity'];
+
+		$product->set_sold_individually( true );
+		$product->save();
+
+		WC()->session->set( 'wc_notices', null );
+
+		$result = WC()->cart->check_cart_items();
+		$this->assertFalse( $result, 'check_cart_items should return false when fixing sold individually quantity (indicating an issue was found)' );
+
+		$cart_contents_after = WC()->cart->get_cart();
+		$this->assertCount( 1, $cart_contents_after, 'Cart should still have one item' );
+		$cart_item_after = array_values( $cart_contents_after )[0];
+		$this->assertEquals( 1, $cart_item_after['quantity'], 'Cart item quantity should be reduced to 1' );
+
+		WC()->cart->calculate_totals();
+		$final_subtotal = WC()->cart->get_subtotal( 'edit' );
+
+		$this->assertEquals( $initial_subtotal / $initial_quantity, $final_subtotal, 'Cart subtotal should be recalculated based on quantity 1', 0.01 );
+
+		$notices = wc_get_notices();
+		$this->assertArrayHasKey( 'error', $notices, 'Should have error notices' );
+		$this->assertNotEmpty( $notices['error'], 'Should have at least one error notice' );
+
+		$found_notice = false;
+		foreach ( $notices['error'] as $notice ) {
+			$notice_text = is_array( $notice ) && isset( $notice['notice'] ) ? $notice['notice'] : (string) $notice;
+			if ( strpos( $notice_text, 'You can only have 1' ) !== false ) {
+				$found_notice = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found_notice, 'Should find notice about sold individually quantity limit' );
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox should throw a notice to the cart if an "any" attribute is empty.
 	 */
 	public function test_add_variation_to_the_cart_with_empty_attributes() {
