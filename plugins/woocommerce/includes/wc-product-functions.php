@@ -1297,7 +1297,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		} elseif ( $customer_id ) {
 			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
-		} elseif ( $order && method_exists( $order, 'get_taxable_location' ) ) {
+		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
 			$tax_location = $order->get_taxable_location();
 			$tax_rates    = WC_Tax::find_rates(
 				array(
