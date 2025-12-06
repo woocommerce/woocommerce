@@ -47,77 +47,9 @@ class TaxesController {
 
 		// Grab the order and recalculate taxes.
 		$order = wc_get_order( $order_id );
-
-		if ( ! $order ) {
-			throw new \Exception( __( 'Invalid order', 'woocommerce' ) );
-		}
-
-		// When prices include tax and we want fixed prices regardless of location,
-		// recalculate line item subtotals based on the customer's tax rate.
-		$this->maybe_recalculate_line_item_subtotals( $order, $calculate_tax_args );
-
 		$order->calculate_taxes( $calculate_tax_args );
 		$order->calculate_totals( false );
 
 		return $order;
-	}
-
-	/**
-	 * Recalculate line item subtotals when prices include tax and the
-	 * woocommerce_adjust_non_base_location_prices filter is false.
-	 *
-	 * This ensures that when a merchant wants to charge the same total price
-	 * regardless of customer location, the net price is recalculated based on
-	 * the customer's tax rate rather than the shop's base rate.
-	 *
-	 * @param \WC_Order $order              The order to recalculate.
-	 * @param array     $calculate_tax_args Tax location arguments (country, state, postcode, city).
-	 */
-	private function maybe_recalculate_line_item_subtotals( \WC_Order $order, array $calculate_tax_args ): void {
-		// Only applies when prices include tax and we don't want to adjust for location.
-		if ( ! wc_prices_include_tax() || apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
-			return;
-		}
-
-		// Need a country to calculate tax rates.
-		if ( empty( $calculate_tax_args['country'] ) ) {
-			return;
-		}
-
-		// Temporarily set billing address so wc_get_price_excluding_tax can use it.
-		$order->set_billing_country( $calculate_tax_args['country'] );
-		$order->set_billing_state( $calculate_tax_args['state'] ?? '' );
-		$order->set_billing_postcode( $calculate_tax_args['postcode'] ?? '' );
-		$order->set_billing_city( $calculate_tax_args['city'] ?? '' );
-
-		foreach ( $order->get_items( 'line_item' ) as $item ) {
-			$product = $item->get_product();
-			if ( ! $product || ! $product->is_taxable() ) {
-				continue;
-			}
-
-			$existing_subtotal = (float) $item->get_subtotal();
-			$existing_total    = (float) $item->get_total();
-
-			$new_subtotal = wc_get_price_excluding_tax(
-				$product,
-				array(
-					'qty'   => $item->get_quantity(),
-					'order' => $order,
-				)
-			);
-
-			// Preserve any existing discount ratio (e.g., from coupons).
-			if ( $existing_subtotal > 0 ) {
-				$discount_ratio = $existing_total / $existing_subtotal;
-				$new_total      = $new_subtotal * $discount_ratio;
-			} else {
-				$new_total = $new_subtotal;
-			}
-
-			$item->set_subtotal( $new_subtotal );
-			$item->set_total( $new_total );
-			$item->save();
-		}
 	}
 }
