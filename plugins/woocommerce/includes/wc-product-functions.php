@@ -1297,13 +1297,14 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		} elseif ( $customer_id ) {
 			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
-		} elseif ( $order && method_exists( $order, 'get_billing_country' ) && $order->get_billing_country() ) {
-			$tax_rates = WC_Tax::find_rates(
+		} elseif ( $order && method_exists( $order, 'get_taxable_location' ) ) {
+			$tax_location = $order->get_taxable_location();
+			$tax_rates    = WC_Tax::find_rates(
 				array(
-					'country'   => $order->get_billing_country(),
-					'state'     => $order->get_billing_state(),
-					'postcode'  => $order->get_billing_postcode(),
-					'city'      => $order->get_billing_city(),
+					'country'   => $tax_location['country'],
+					'state'     => $tax_location['state'],
+					'postcode'  => $tax_location['postcode'],
+					'city'      => $tax_location['city'],
 					'tax_class' => $product->get_tax_class(),
 				)
 			);

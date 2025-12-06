@@ -405,9 +405,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When filter is false and order has no customer and no billing address, fall back to get_rates with null.
+	 * @testdox When filter is false and order has no customer and no address, use get_taxable_location (falls back to base).
 	 */
-	public function test_wc_get_price_excluding_tax_fallback_when_no_customer_and_no_billing() {
+	public function test_wc_get_price_excluding_tax_fallback_when_no_customer_uses_taxable_location() {
 		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
 
 		FunctionsMockerHack::add_function_mocks(
@@ -416,19 +416,15 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$get_rates_called_with_null = false;
-		$find_rates_called          = false;
+		$find_rates_args = null;
 		StaticMockerHack::add_method_mocks(
 			array(
 				'WC_Tax' => array(
-					'get_rates'  => function ( $tax_class, $customer ) use ( &$get_rates_called_with_null ) {
-						if ( null === $customer ) {
-							$get_rates_called_with_null = true;
-						}
+					'get_rates'  => function () {
 						return array();
 					},
-					'find_rates' => function () use ( &$find_rates_called ) {
-						$find_rates_called = true;
+					'find_rates' => function ( $args ) use ( &$find_rates_args ) {
+						$find_rates_args = $args;
 						return array();
 					},
 					'calc_tax'   => function () {
@@ -461,13 +457,18 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			public function get_billing_country( $context = 'view' ) {
 				return ''; // Empty billing country.
 			}
+
+			public function get_shipping_country( $context = 'view' ) {
+				return ''; // Empty shipping country.
+			}
 		};
 		// phpcs:enable Squiz.Commenting
 
 		wc_get_price_excluding_tax( $product, array( 'order' => $order ) );
 
-		$this->assertTrue( $get_rates_called_with_null, 'WC_Tax::get_rates should be called with null customer when no billing address' );
-		$this->assertFalse( $find_rates_called, 'WC_Tax::find_rates should NOT be called when no billing address' );
+		// With get_taxable_location(), when no address is set it falls back to shop base location.
+		$this->assertNotNull( $find_rates_args, 'WC_Tax::find_rates should be called via get_taxable_location' );
+		$this->assertEquals( WC()->countries->get_base_country(), $find_rates_args['country'], 'Should use shop base country when no address' );
 
 		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
 	}
