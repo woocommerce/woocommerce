@@ -1289,7 +1289,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	$line_price = $price * $qty;
 
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
-		$order       = $args['order'] ?? null;
+		$order       = ArrayUtil::get_value_or_default( $args, 'order' );
 		$customer_id = $order ? $order->get_customer_id() : 0;
 
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
