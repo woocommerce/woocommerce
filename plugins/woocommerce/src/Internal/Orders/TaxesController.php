@@ -48,6 +48,10 @@ class TaxesController {
 		// Grab the order and recalculate taxes.
 		$order = wc_get_order( $order_id );
 
+		if ( ! $order ) {
+			throw new \Exception( __( 'Invalid order', 'woocommerce' ) );
+		}
+
 		// When prices include tax and we want fixed prices regardless of location,
 		// recalculate line item subtotals based on the customer's tax rate.
 		$this->maybe_recalculate_line_item_subtotals( $order, $calculate_tax_args );
