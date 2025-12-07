@@ -27,16 +27,10 @@ module.exports = {
 		'add-report': {
 			pluginTemplatesPath: join( __dirname, 'variants/add-report' ),
 			blockTemplatesPath: null,
-			customScripts: {
-				postinstall: 'rm block.json && composer install',
-			},
 		},
 		'add-task': {
 			pluginTemplatesPath: join( __dirname, 'variants/add-task' ),
 			blockTemplatesPath: null,
-			customScripts: {
-				postinstall: 'rm block.json && composer install',
-			},
 			npmDependencies: [
 				...defaultDependencies,
 				'@woocommerce/onboarding',
@@ -48,16 +42,14 @@ module.exports = {
 				'variants/dashboard-section'
 			),
 			blockTemplatesPath: null,
-			customScripts: {
-				postinstall: 'rm block.json && composer install',
-			},
 		},
 		'table-column': {
 			pluginTemplatesPath: join( __dirname, 'variants/table-column' ),
 			blockTemplatesPath: null,
-			customScripts: {
-				postinstall: 'rm block.json && composer install',
-			},
+		},
+		'sql-modification': {
+			pluginTemplatesPath: join( __dirname, 'variants/sql-modification' ),
+			blockTemplatesPath: null,
 		},
 	},
 };

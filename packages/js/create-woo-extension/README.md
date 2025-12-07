@@ -29,14 +29,16 @@ See the new plugin activated from the WordPress plugins page and navigate to `wp
 
 ## Variations
 
+You can also create different types of WooCommerce extensions by specifying a variant.
+
 ```bash
 npx @wordpress/create-block -t @woocommerce/create-woo-extension --variant=add-report my-extension-name
 ```
 
-- `add-report` - Create a "Hello World" report page.
-- `add-task` - Create a custom task for the onboarding task list.
-- `dashboard-section` - Adding a custom "section" to the Analytics Overview area.
-- `table-column` - An example of how to add column(s) to any report.
+- `add-report` - Creates a new example report page under the Analytics menu.
+- `add-task` - Creates a custom task for the onboarding task list.
+- `dashboard-section` - Adds a custom section to the Analytics Overview area.
+- `table-column` - Adds new column(s) to the Products Analytics report.
 
 ## Development
 
