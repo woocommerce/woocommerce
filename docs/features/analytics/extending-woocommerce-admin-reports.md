@@ -1,7 +1,7 @@
 ---
 post_title: How to extend WooCommerce analytics reports
 sidebar_label: Extend analytics reports
-
+sidebar_position: 1
 ---
 
 # How to extend WooCommerce analytics reports
@@ -9,8 +9,6 @@ sidebar_label: Extend analytics reports
 ## Introduction
 
 This document serves as a guide to extending WC-Admin Reports with a basic UI dropdown, added query parameters, and modification of SQL queries and resulting report data. This example will create a currency selector for viewing the Orders Report based on a specific currency.
-
-Code from this guide can be viewed in the [woocommerce code repository](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/admin/docs/examples/extensions/sql-modification).
 
 ## Getting started
 
