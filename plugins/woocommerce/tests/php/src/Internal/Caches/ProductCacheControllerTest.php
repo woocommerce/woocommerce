@@ -426,14 +426,22 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 
 		$product_id = $product->get_id();
 
-		// Verify product is NOT cached (feature disabled).
-		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Product should not be cached when feature is disabled' );
+		// Prime the normal retrieval path and verify it does not populate the cache when the feature is disabled.
+		wc_get_product( $product_id );
+		$this->assertFalse(
+			$this->product_cache->is_cached( $product_id ),
+			'Product should not be cached when feature is disabled, even after retrieval'
+		);
 
 		// Update product.
 		$product->set_name( 'Updated Product' );
 		$product->save();
 
-		// Verify still not cached.
-		$this->assertFalse( $this->product_cache->is_cached( $product_id ), 'Product should still not be cached after update' );
+		// After an update and another retrieval, the cache should still not be used.
+		wc_get_product( $product_id );
+		$this->assertFalse(
+			$this->product_cache->is_cached( $product_id ),
+			'Product should still not be cached after update when feature is disabled'
+		);
 	}
 }
