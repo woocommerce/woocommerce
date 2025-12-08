@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * POS Catalog API Controller.
  */
 class ApiController {
-	const ROUTE_NAMESPACE = 'wc/product-catalog/v1';
+	const ROUTE_NAMESPACE = 'wc/pos/v1/product-catalog';
 
 	/**
 	 * Container instance.
