@@ -35,6 +35,8 @@ const Settings = ( { createNotice, query } ) => {
 	const [ pendingImportModeChange, setPendingImportModeChange ] =
 		useState( null );
 
+	console.log( 'wcAdminSettings', wcAdminSettings );
+
 	useEffect( () => {
 		function warnIfUnsavedChanges( event ) {
 			if ( isDirty ) {
@@ -166,6 +168,18 @@ const Settings = ( { createNotice, query } ) => {
 		setPendingImportModeChange( null );
 	};
 
+	const getSettingValue = ( setting ) => {
+		if (
+			setting === SCHEDULED_IMPORT_SETTING_NAME &&
+			! wcAdminSettings[ setting ]
+		) {
+			// If scheduled import setting is not set, return 'no' to show the immediate import option by default
+			return 'no';
+		}
+
+		return wcAdminSettings[ setting ];
+	};
+
 	return (
 		<Fragment>
 			<SectionHeader
@@ -175,7 +189,7 @@ const Settings = ( { createNotice, query } ) => {
 				{ Object.keys( config ).map( ( setting ) => (
 					<Setting
 						handleChange={ handleInputChange }
-						value={ wcAdminSettings[ setting ] }
+						value={ getSettingValue( setting ) }
 						key={ setting }
 						name={ setting }
 						{ ...config[ setting ] }
