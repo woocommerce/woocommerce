@@ -723,29 +723,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test wc_enqueue_js and wc_print_js functions.
-	 *
-	 * @expectedDeprecated wc_enqueue_js
-	 *
-	 * @return void
-	 */
-	public function test_wc_enqueue_js_wc_print_js() {
-		$js = 'alert( "test" );';
-
-		ob_start();
-		wc_print_js();
-		$printed_js = ob_get_clean();
-		$this->assertStringNotContainsString( $js, $printed_js );
-
-		wc_enqueue_js( $js );
-
-		ob_start();
-		wc_print_js();
-		$printed_js = ob_get_clean();
-		$this->assertStringContainsString( $js, $printed_js );
-	}
-
-	/**
 	 * Test wc_get_log_file_name function.
 	 *
 	 * @return void
