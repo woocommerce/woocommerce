@@ -414,10 +414,16 @@ class WC_Gateway_Paypal_Request {
 			// This flag indicates that we've made an API call to capture PayPal payment and no authorization object was found with this authorization ID.
 			// This prevents repeated API calls for orders that have no authorization data.
 			if ( 404 === $http_code ) {
+				$paypal_dashboard_url = $this->gateway->testmode
+					? 'https://www.sandbox.paypal.com/unifiedtransactions'
+					: 'https://www.paypal.com/unifiedtransactions';
+
 				$note_message .= sprintf(
-					/* translators: %s: Authorization ID */
-					__( '. Authorization ID: %s not found', 'woocommerce' ),
+					/* translators: %1$s: Authorization ID, %2$s: open link tag, %3$s: close link tag */
+					__( '. Authorization ID: %1$s not found. Please log into your %2$sPayPal account%3$s to capture the payment', 'woocommerce' ),
 					$authorization_id,
+					'<a href="' . esc_url( $paypal_dashboard_url ) . '" target="_blank">',
+					'</a>'
 				);
 				$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
 			}
@@ -498,7 +504,7 @@ class WC_Gateway_Paypal_Request {
 					$order->save();
 				} else {
 					// Scenario 2: Order details API call returned empty authorization array (authorization object does not exist).
-                    // Store '_paypal_authorization_checked' flag to prevent repeated API calls.
+					// Store '_paypal_authorization_checked' flag to prevent repeated API calls.
 					// This flag indicates that we've made an API call to get PayPal order details and confirmed no authorization object exists.
 					WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
 					$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
