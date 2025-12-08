@@ -445,9 +445,9 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
-		// If '_paypal_authorization_checked' is set to 'yes' and the authorization ID is empty, it means we already checked and found no authorization data.
+		// If '_paypal_authorization_checked' is set to 'yes', it means we already checked and found no authorization data.
 		// Return null to avoid repeated API calls.
-		if ( empty( $authorization_id ) && 'yes' === $order->get_meta( '_paypal_authorization_checked', true ) ) {
+		if ( 'yes' === $order->get_meta( '_paypal_authorization_checked', true ) ) {
 			return null;
 		}
 
