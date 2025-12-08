@@ -410,8 +410,8 @@ class WC_Gateway_Paypal_Request {
 
 			// If the authorization ID is not found, set the '_paypal_authorization_checked' flag to 'yes' to prevent repeated API calls.
 			if ( 404 === $http_code ) {
-				$note_message = sprintf(
-					__( '. Authorization ID: %s not found.', 'woocommerce' ),
+				$note_message .= sprintf(
+					__( '. Authorization ID: %s not found', 'woocommerce' ),
 					$authorization_id,
 				);
 				$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
@@ -426,6 +426,7 @@ class WC_Gateway_Paypal_Request {
 			}
 
 			$order->add_order_note( $note_message );
+			$order->save();
 		}
 	}
 
