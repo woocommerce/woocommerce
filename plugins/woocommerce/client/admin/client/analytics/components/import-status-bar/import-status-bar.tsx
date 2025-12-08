@@ -3,9 +3,9 @@
  */
 import { __ } from '@wordpress/i18n';
 import { dateI18n } from '@wordpress/date';
-import { Button } from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-// import { getSetting } from '@woocommerce/settings';
+import { useSettings } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -29,9 +29,19 @@ export function ImportStatusBar(): JSX.Element | null {
 	const { status, isLoading, error, triggerImport, isTriggeringImport } =
 		useImportStatus();
 	const { createNotice } = useDispatch( 'core/notices' );
+	const { wcAdminSettings } = useSettings( 'wc_admin', [
+		'wcAdminSettings',
+	] ) as unknown as {
+		wcAdminSettings: {
+			woocommerce_analytics_immediate_import: 'yes' | 'no';
+		};
+	};
 
-	// Don't render if mode is 'immediate' or still loading initial data
-	if ( isLoading || ! status || status.mode === 'immediate' ) {
+	// Don't render if immediate import is enabled
+	if (
+		! wcAdminSettings.woocommerce_analytics_immediate_import ||
+		wcAdminSettings.woocommerce_analytics_immediate_import === 'yes'
+	) {
 		return null;
 	}
 
@@ -96,7 +106,7 @@ export function ImportStatusBar(): JSX.Element | null {
 
 	// Disable button when an import is already scheduled/running or currently triggering
 	const isButtonDisabled =
-		status.import_in_progress_or_due || isTriggeringImport;
+		status?.import_in_progress_or_due || isTriggeringImport;
 
 	return (
 		<div className="woocommerce-analytics-import-status-bar-wrapper">
@@ -115,8 +125,12 @@ export function ImportStatusBar(): JSX.Element | null {
 							{ __( 'Last updated', 'woocommerce' ) }
 						</span>
 						<span className="woocommerce-analytics-import-status-bar__value">
-							{ formatLastProcessedDate(
-								status.last_processed_date
+							{ isLoading ? (
+								<Spinner />
+							) : (
+								formatLastProcessedDate(
+									status?.last_processed_date || null
+								)
 							) }
 						</span>
 					</span>
@@ -125,13 +139,19 @@ export function ImportStatusBar(): JSX.Element | null {
 							{ __( 'Next update', 'woocommerce' ) }
 						</span>
 						<span className="woocommerce-analytics-import-status-bar__value">
-							{ formatNextScheduledDate( status.next_scheduled ) }
+							{ isLoading ? (
+								<Spinner />
+							) : (
+								formatNextScheduledDate(
+									status?.next_scheduled || null
+								)
+							) }
 						</span>
 					</span>
 					<Button
 						variant="tertiary"
 						onClick={ handleTriggerImport }
-						disabled={ isButtonDisabled }
+						disabled={ isButtonDisabled || isLoading }
 						isBusy={ isTriggeringImport }
 						className="woocommerce-analytics-import-status-bar__trigger"
 						aria-label={ __(
