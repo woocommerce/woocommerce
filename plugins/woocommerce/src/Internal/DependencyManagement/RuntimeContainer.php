@@ -65,9 +65,9 @@ class RuntimeContainer {
 	 *
 	 * @template T of object
 	 * @param string $class_name Class name.
+	 * @phpstan-param class-string<T> $class_name
 	 *
 	 * @return T Object instance.
-	 * @psalm-param class-string<T> $class_name
 	 * @throws ContainerException Error when resolving the class to an object instance.
 	 * @throws \Exception Exception thrown in the constructor or in the 'init' method of one of the resolved classes.
 	 */
