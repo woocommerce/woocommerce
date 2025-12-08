@@ -14,7 +14,6 @@ import { NAME_SPACE } from './constants';
 import { modifyTemplateSidebar } from './templates';
 import { modifySidebar } from './sidebar_settings';
 import { registerEmailValidationRules } from './email-validation';
-import { registerCouponCodeBlock } from './blocks/coupon-code';
 
 import './style.scss';
 
@@ -54,5 +53,4 @@ addFilter(
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
-registerCouponCodeBlock();
 initializeEditor( 'woocommerce-email-editor' );

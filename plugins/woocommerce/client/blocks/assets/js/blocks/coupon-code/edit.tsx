@@ -9,7 +9,7 @@ import {
 	ComboboxControl,
 	Spinner,
 } from '@wordpress/components';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import type { CSSProperties } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { applyFilters } from '@wordpress/hooks';
@@ -30,7 +30,7 @@ interface Coupon {
  * @param {BlockEditProps} props - Block properties.
  * @return {JSX.Element} The edit component.
  */
-export function Edit( props: BlockEditProps ): JSX.Element {
+export default function Edit( props: BlockEditProps ): JSX.Element {
 	const { attributes, setAttributes } = props;
 	const couponCode = attributes.couponCode as string;
 
@@ -41,8 +41,11 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	} = useBlockProps();
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ coupons, setCoupons ] = useState< Coupon[] >( [] );
-	const [ isLoading, setIsLoading ] = useState( true );
-	const [ isTruncated, setIsTruncated ] = useState( false );
+	const [ isLoading, setIsLoading ] = useState( false );
+	const debounceTimerRef = useRef< ReturnType< typeof setTimeout > | null >(
+		null
+	);
+	const abortControllerRef = useRef< AbortController | null >( null );
 
 	// Handler for creating a new coupon - uses a filter so integrators can customize behavior
 	const handleCreateCoupon = () => {
@@ -62,89 +65,77 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 		}
 	};
 
-	// Fetch coupons from WooCommerce API with pagination
-	useEffect( () => {
-		const controller = new AbortController();
-		const PER_PAGE = 100;
-		const MAX_PAGES = 10; // Safety cap to prevent infinite loops
+	// Debounced coupon search function
+	const searchCoupons = useCallback( ( search: string ) => {
+		// Cancel any pending request
+		if ( abortControllerRef.current ) {
+			abortControllerRef.current.abort();
+		}
 
-		const fetchCoupons = async () => {
-			try {
-				setIsLoading( true );
-				setIsTruncated( false );
+		// Don't search if search term is too short
+		if ( search.length < 2 ) {
+			setCoupons( [] );
+			setIsLoading( false );
+			return;
+		}
 
-				const allCoupons: Coupon[] = [];
-				let currentPage = 1;
-				let totalPages: number | null = null;
-				let hasMorePages = true;
+		setIsLoading( true );
+		abortControllerRef.current = new AbortController();
 
-				while ( hasMorePages && currentPage <= MAX_PAGES ) {
-					const response = await apiFetch< Response >( {
-						path: `/wc/v3/coupons?per_page=${ PER_PAGE }&page=${ currentPage }`,
-						signal: controller.signal,
-						parse: false,
-					} );
-
-					// Extract pagination headers
-					const totalPagesHeader =
-						response.headers.get( 'X-WP-TotalPages' );
-
-					if ( totalPagesHeader ) {
-						totalPages = parseInt( totalPagesHeader, 10 );
-					}
-
-					// Parse response body
-					const pageCoupons: Coupon[] = await response.json();
-
-					allCoupons.push( ...pageCoupons );
-
-					// Determine if we should continue fetching
-					if ( totalPages !== null ) {
-						// Use header-based pagination if available
-						hasMorePages = currentPage < totalPages;
-					} else {
-						// Fallback: check if we got fewer items than per_page
-						hasMorePages = pageCoupons.length === PER_PAGE;
-					}
-
-					// Safety check: if we've reached max pages and there are more, mark as truncated
-					if ( currentPage >= MAX_PAGES && hasMorePages ) {
-						setIsTruncated( true );
-						break;
-					}
-
-					currentPage++;
-				}
-
-				setCoupons( allCoupons );
-			} catch ( error ) {
+		apiFetch< Coupon[] >( {
+			path: `/wc/v3/coupons?per_page=20&search=${ encodeURIComponent(
+				search
+			) }`,
+			signal: abortControllerRef.current.signal,
+		} )
+			.then( ( results ) => {
+				setCoupons( results );
+				setIsLoading( false );
+			} )
+			.catch( ( error ) => {
 				if ( error instanceof Error && error.name === 'AbortError' ) {
 					return;
 				}
 				// eslint-disable-next-line no-console
 				console.error( 'Error fetching coupons:', error );
-				setCoupons( [] );
-			} finally {
 				setIsLoading( false );
+			} );
+	}, [] );
+
+	// Handle search value changes with debouncing
+	useEffect( () => {
+		// Clear any existing timer
+		if ( debounceTimerRef.current ) {
+			clearTimeout( debounceTimerRef.current );
+		}
+
+		// Set new timer for debounced search
+		debounceTimerRef.current = setTimeout( () => {
+			searchCoupons( searchValue );
+		}, 300 );
+
+		// Cleanup function
+		return () => {
+			if ( debounceTimerRef.current ) {
+				clearTimeout( debounceTimerRef.current );
 			}
 		};
+	}, [ searchValue, searchCoupons ] );
 
-		fetchCoupons();
-
+	// Cleanup abort controller on unmount
+	useEffect( () => {
 		return () => {
-			controller.abort();
+			if ( abortControllerRef.current ) {
+				abortControllerRef.current.abort();
+			}
 		};
 	}, [] );
 
-	// Convert coupons to options format and filter based on search
-	const couponOptions = coupons
-		.map( ( coupon ) => ( {
-			value: coupon.code,
-			label: coupon.code,
-		} ) )
-		.filter( ( option ) =>
-			option.label.toLowerCase().includes( searchValue.toLowerCase() )
-		);
+	// Convert coupons to options format
+	const couponOptions = coupons.map( ( coupon ) => ( {
+		value: coupon.code,
+		label: coupon.code,
+	} ) );
 
 	// Strip block-level background/border styles off the wrapper so we can
 	// fully control visual presentation on the coupon element itself.
@@ -266,57 +257,51 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 				>
 					<div style={ { marginBottom: '16px' } }>
 						<div>
-							{ __( 'Select an existing coupon', 'woocommerce' ) }
+							{ __(
+								'Search for an existing coupon',
+								'woocommerce'
+							) }
 						</div>
-						{ isLoading ? (
+						<ComboboxControl
+							label={ __( 'Search coupons', 'woocommerce' ) }
+							hideLabelFromVision
+							value={ couponCode }
+							onChange={ ( value ) => {
+								setAttributes( {
+									couponCode: value || '',
+								} );
+							} }
+							onFilterValueChange={ ( value ) => {
+								setSearchValue( value );
+							} }
+							options={ couponOptions }
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
+							help={
+								isLoading
+									? __(
+											'Searching coupons...',
+											'woocommerce'
+									  )
+									: searchValue.length > 0 &&
+									  searchValue.length < 2
+									? __(
+											'Type at least 2 characters to search',
+											'woocommerce'
+									  )
+									: null
+							}
+						/>
+						{ isLoading && (
 							<div
 								style={ {
-									padding: '10px',
-									textAlign: 'center',
+									display: 'flex',
+									alignItems: 'center',
+									marginTop: '8px',
 								} }
 							>
 								<Spinner />
 							</div>
-						) : (
-							<>
-								<ComboboxControl
-									label={ __(
-										'Search coupons',
-										'woocommerce'
-									) }
-									hideLabelFromVision
-									value={ couponCode }
-									onChange={ ( value ) => {
-										setAttributes( {
-											couponCode: value || '',
-										} );
-									} }
-									onFilterValueChange={ ( value ) => {
-										setSearchValue( value );
-									} }
-									options={ couponOptions }
-									__nextHasNoMarginBottom
-									__next40pxDefaultSize
-								/>
-								{ isTruncated && (
-									<div
-										style={ {
-											marginTop: '8px',
-											padding: '8px',
-											backgroundColor: '#fff3cd',
-											border: '1px solid #ffc107',
-											borderRadius: '4px',
-											fontSize: '12px',
-											color: '#856404',
-										} }
-									>
-										{ __(
-											'Note: Only the first 1,000 coupons are shown. Use the search to find specific coupons.',
-											'woocommerce'
-										) }
-									</div>
-								) }
-							</>
 						) }
 					</div>
 					<div>
