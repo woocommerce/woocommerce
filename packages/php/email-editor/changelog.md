@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0](https://github.com/woocommerce/email-editor/releases/tag/2.1.0) - 2025-11-30 
+
+-   Minor - Email Editor: retrieve image width in a more efficient manner. [#62118]
+
 ## [2.0.1](https://github.com/woocommerce/email-editor/releases/tag/2.0.1) - 2025-11-25 
 
 -   Patch - Swap core/post-content render callback only during email rendering to prevent conflicts with other plugins like MailPoet. [#61874]

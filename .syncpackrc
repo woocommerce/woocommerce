@@ -329,7 +329,16 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.50.1"
+			"pinVersion": "^1.57.0"
+		},
+		{
+			"dependencies": [
+				"playwright-ctrf-json-reporter"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.0.27"
 		},
 		{
 			"dependencies": [

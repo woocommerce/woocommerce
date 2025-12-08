@@ -73,6 +73,15 @@ class WCTransactionalEmails {
 			$emails[] = 'customer_pos_refunded_order';
 		}
 
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$fulfillment_emails = array(
+				'customer_fulfillment_created',
+				'customer_fulfillment_updated',
+				'customer_fulfillment_deleted',
+			);
+			$emails             = array_merge( $emails, $fulfillment_emails );
+		}
+
 		/**
 		 * Filter the transactional emails for the block editor.
 		 *

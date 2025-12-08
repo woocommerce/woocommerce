@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update UserPreferences type to include scheduled_updates_promotion_notice_dismissed field
