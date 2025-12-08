@@ -37,9 +37,10 @@ class FraudProtectionServiceApiClient {
 	private const WPCOM_API_VERSION = '2';
 
 	/**
-	 * WPCOM fraud protection events endpoint path.
+	 * WPCOM fraud protection events endpoint path (relative, without leading slash).
+	 * Must be combined with sites/{blog_id}/ prefix for site-specific endpoints.
 	 */
-	private const WPCOM_ENDPOINT_PATH = '/fraud-protection/events';
+	private const WPCOM_ENDPOINT_PATH = 'fraud-protection/events';
 
 	/**
 	 * Decision type: allow session.
@@ -104,124 +105,30 @@ class FraudProtectionServiceApiClient {
 	 */
 	private function make_request( array $payload ) {
 		$this->log_request( $payload );
-		// Mock the response for cart events
-		// Use number of items in the cart to simulate various fraud decisions
-		if ( in_array( $payload['event_type'], array( 'cart_item_added', 'cart_item_updated', 'cart_item_removed', 'cart_item_restored' ), true ) ) {
 
-			$decision = self::DECISION_ALLOW;
-			$risk_score = 10;
-			$reason_tags = array();
-
-			if ( isset( $payload['cart_total'] ) && $payload['cart_total'] > 3 ) {
-				$decision = self::DECISION_BLOCK;
-				$risk_score = 95;
-				$reason_tags = array( 'high_cart_total', 'suspicious_behavior' );
-			} elseif ( isset( $payload['cart_total'] ) && $payload['cart_total'] > 1 ) {
-				$decision = self::DECISION_CHALLENGE;
-				$risk_score = 55;
-				$reason_tags = array( 'moderate_risk', 'requires_verification' );
-			}
-
-			return array(
-				'code' => 200,
-				'body' => wp_json_encode( array(
-					'success' => true,
-					'fraud_event_id' => wp_rand( 1000, 9999 ),
-					'verdict' => $decision,
-					'risk_score' => $risk_score,
-					'reason_tags' => $reason_tags,
-				) ),
+		// Check if Jetpack Connection is available.
+		if ( ! class_exists( Jetpack_Connection_Client::class ) ) {
+			return new \WP_Error(
+				'jetpack_not_available',
+				'Jetpack Connection is not available'
 			);
 		}
 
-		// Mock the response for challenge requested events to proceed with the challenge.
-		// We do not track challenge retry events, so no need to mock that.
-		if ( in_array( $payload['event_type'], array( 'challenge_requested' ), true ) ) {
-			// We won't block the session on challenge request for now.
-			return array(
-				'code' => 200,
-				'body' => wp_json_encode( array(
-					'success' => true,
-					'fraud_event_id' => wp_rand( 1000, 9999 ),
-					'verdict' => self::DECISION_CHALLENGE,
-					'risk_score' => 50,
-					'reason_tags' => array( 'initial_challenge' ),
-				) ),
+		// Get the Jetpack blog ID for site-specific endpoint.
+		$blog_id = \Jetpack_Options::get_option( 'id' );
+		if ( ! $blog_id ) {
+			return new \WP_Error(
+				'no_blog_id',
+				'Jetpack blog ID not found. Is the site connected to WordPress.com?'
 			);
 		}
 
-		// Mock the response for challenge verification
-		if ( in_array( $payload['event_type'], array( 'challenge_verified' ), true ) ) {
-			// Mock different responses based on email for testing
-			$email = isset( $payload['email'] ) ? $payload['email'] : null;
+		// Build site-specific endpoint path: sites/{blog_id}/fraud-protection/events
+		$path = sprintf( 'sites/%d/%s', $blog_id, self::WPCOM_ENDPOINT_PATH );
 
-			switch ( $email ) {
-				case 'test@example.com':
-				case 'test2@example.com':
-					return array(
-						'code' => 200,
-						'body' => wp_json_encode( array(
-							'success' => true,
-							'fraud_event_id' => wp_rand( 1000, 9999 ),
-							'verdict' => self::DECISION_ALLOW,
-							'risk_score' => 15,
-							'reason_tags' => array( 'verification_passed' ),
-						) ),
-					);
-				case 'fraudster@example.com':
-				case 'fraud@example.com':
-					return array(
-						'code' => 200,
-						'body' => wp_json_encode( array(
-							'success' => true,
-							'fraud_event_id' => wp_rand( 1000, 9999 ),
-							'verdict' => self::DECISION_BLOCK,
-							'risk_score' => 98,
-							'reason_tags' => array( 'known_fraudster', 'email_blacklist' ),
-						) ),
-					);
-				case null: // Unknown email address, allow the session
-					return array(
-						'code' => 200,
-						'body' => wp_json_encode( array(
-							'success' => true,
-							'fraud_event_id' => wp_rand( 1000, 9999 ),
-							'verdict' => self::DECISION_ALLOW,
-							'risk_score' => 20,
-							'reason_tags' => array( 'no_email', 'low_risk' ),
-						) ),
-					);
-				default:
-					// Default: allow for most emails
-					return array(
-						'code' => 200,
-						'body' => wp_json_encode( array(
-							'success' => true,
-							'fraud_event_id' => wp_rand( 1000, 9999 ),
-							'verdict' => self::DECISION_ALLOW,
-							'risk_score' => 25,
-							'reason_tags' => array( 'verification_passed' ),
-						) ),
-					);
-			}
-		}
-
-		// Allow everything else
-		return array(
-			'code' => 200,
-			'body' => wp_json_encode( array(
-				'success' => true,
-				'fraud_event_id' => wp_rand( 1000, 9999 ),
-				'verdict' => self::DECISION_ALLOW,
-				'risk_score' => 10,
-				'reason_tags' => array( 'default_allow' ),
-			) ),
-		);
-
-		// TODO: Add some safety checks to confirm that Jetpack Connection is available.
 		// Use Jetpack Connection for authenticated WPCOM requests.
 		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
-			self::WPCOM_ENDPOINT_PATH,
+			$path,
 			self::WPCOM_API_VERSION,
 			array(
 				'headers' => array(

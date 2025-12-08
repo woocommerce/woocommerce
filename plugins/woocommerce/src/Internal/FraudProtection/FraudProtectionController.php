@@ -398,13 +398,12 @@ class FraudProtectionController {
 		$session_id = $this->get_session_id();
 
 		$cart_event_session_data = [
-			'session_id'  => $session_id,
-			'action'       => $action,
-			'product_id'   => $product_id,
-			'quantity'     => $quantity,
-			'variation_id' => $variation_id,
-			'cart_total'   => WC()->cart ? WC()->cart->get_cart_contents_count() : null, // TODO: fix totals are not updated yet
-			'email'        => $this->get_user_email(),
+			'session_id'      => $session_id,
+			'product_id'      => $product_id,
+			'quantity'        => $quantity,
+			'variation_id'    => $variation_id,
+			'cart_item_count' => WC()->cart ? WC()->cart->get_cart_contents_count() : null, // TODO: fix totals are not updated yet
+			'email'           => $this->get_user_email(),
 		];
 
 		$session_data = $this->data_collector->collect();
