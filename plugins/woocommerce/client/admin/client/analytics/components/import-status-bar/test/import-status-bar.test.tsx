@@ -3,6 +3,7 @@
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useDispatch } from '@wordpress/data';
+import { useSettings } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -12,9 +13,12 @@ import { useImportStatus } from '../use-import-status';
 import type { UseImportStatusReturn } from '../types';
 
 jest.mock( '../use-import-status' );
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn(),
+	useDispatch: jest.fn().mockImplementation( () => ( {
+		createNotice: jest.fn(),
+	} ) ),
 } ) );
 jest.mock( '@wordpress/date', () => ( {
 	dateI18n: jest.fn( ( format, date ) => {
@@ -22,6 +26,14 @@ jest.mock( '@wordpress/date', () => ( {
 		if ( ! date ) return 'Never';
 		return 'Nov 21 00:00';
 	} ),
+} ) );
+jest.mock( '@woocommerce/data', () => ( {
+	...jest.requireActual( '@woocommerce/data' ),
+	useSettings: jest.fn().mockImplementation( () => ( {
+		wcAdminSettings: {
+			woocommerce_analytics_immediate_import: 'no',
+		},
+	} ) ),
 } ) );
 
 jest.mock( '@woocommerce/settings', () => ( {
@@ -40,6 +52,10 @@ const mockUseDispatch = useDispatch as jest.MockedFunction<
 	typeof useDispatch
 >;
 
+const mockUseSettings = useSettings as jest.MockedFunction<
+	typeof useSettings
+>;
+
 describe( 'ImportStatusBar', () => {
 	const mockCreateNotice = jest.fn();
 	const mockTriggerImport = jest.fn();
@@ -49,6 +65,11 @@ describe( 'ImportStatusBar', () => {
 		mockUseDispatch.mockReturnValue( {
 			createNotice: mockCreateNotice,
 		} );
+		mockUseSettings.mockReturnValue( {
+			wcAdminSettings: {
+				woocommerce_analytics_immediate_import: 'no',
+			},
+		} as unknown as ReturnType< typeof useSettings > );
 	} );
 
 	const createMockReturn = (
@@ -68,22 +89,19 @@ describe( 'ImportStatusBar', () => {
 	} );
 
 	it( 'should not render when mode is immediate', () => {
-		mockUseImportStatus.mockReturnValue(
-			createMockReturn( {
-				status: {
-					mode: 'immediate',
-					last_processed_date: null,
-					next_scheduled: null,
-					import_in_progress_or_due: null,
-				},
-			} )
-		);
+		mockUseSettings.mockReturnValue( {
+			wcAdminSettings: {
+				woocommerce_analytics_immediate_import: 'yes',
+			},
+		} as unknown as ReturnType< typeof useSettings > );
+		// Mock useImportStatus to avoid destructuring error even though component returns early
+		mockUseImportStatus.mockReturnValue( createMockReturn() );
 
 		const { container } = render( <ImportStatusBar /> );
 		expect( container ).toBeEmptyDOMElement();
 	} );
 
-	it( 'should not render when loading', () => {
+	it( 'should show spinners when loading', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
 				status: null,
@@ -91,8 +109,14 @@ describe( 'ImportStatusBar', () => {
 			} )
 		);
 
-		const { container } = render( <ImportStatusBar /> );
-		expect( container ).toBeEmptyDOMElement();
+		render( <ImportStatusBar /> );
+
+		// Component should render and show spinners when loading
+		expect( screen.getByText( /Last updated$/i ) ).toBeInTheDocument();
+		expect( screen.getByText( /Next update$/i ) ).toBeInTheDocument();
+		// Check for spinner elements (they have role="presentation" and are SVGs)
+		const spinners = screen.getAllByRole( 'presentation' );
+		expect( spinners.length ).toBeGreaterThan( 0 );
 	} );
 
 	it( 'should render status when mode is scheduled', () => {
@@ -298,7 +322,7 @@ describe( 'ImportStatusBar', () => {
 		);
 	} );
 
-	it( 'should not render if status is null', () => {
+	it( 'should show "Never" when status is null', () => {
 		mockUseImportStatus.mockReturnValue(
 			createMockReturn( {
 				status: null,
@@ -306,7 +330,12 @@ describe( 'ImportStatusBar', () => {
 			} )
 		);
 
-		const { container } = render( <ImportStatusBar /> );
-		expect( container ).toBeEmptyDOMElement();
+		render( <ImportStatusBar /> );
+
+		// Component should render and show "Never" for dates when status is null
+		expect( screen.getByText( /Last updated$/i ) ).toBeInTheDocument();
+		expect( screen.getByText( /Next update$/i ) ).toBeInTheDocument();
+		const neverTexts = screen.getAllByText( /Never/i );
+		expect( neverTexts ).toHaveLength( 2 ); // Last updated: Never, Next update: Never
 	} );
 } );
