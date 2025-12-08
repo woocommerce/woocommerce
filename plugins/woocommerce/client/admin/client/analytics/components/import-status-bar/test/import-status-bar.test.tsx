@@ -306,7 +306,7 @@ describe( 'ImportStatusBar', () => {
 
 		expect( mockCreateNotice ).toHaveBeenCalledWith(
 			'error',
-			expect.stringContaining( 'Failed to trigger' ),
+			expect.stringContaining( 'API Error' ),
 			expect.objectContaining( {
 				isDismissible: true,
 			} )
