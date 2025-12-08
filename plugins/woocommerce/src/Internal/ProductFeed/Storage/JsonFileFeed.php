@@ -130,7 +130,7 @@ class JsonFileFeed implements FeedInterface {
 				esc_html(
 					sprintf(
 						/* translators: %s: directory path */
-						__( 'Unable to open feed file for writing: %s', 'woocommerce-product-feed-openai' ),
+						__( 'Unable to open feed file for writing: %s', 'woocommerce' ),
 						$this->file_path
 					)
 				)
@@ -205,7 +205,7 @@ class JsonFileFeed implements FeedInterface {
 					esc_html(
 						sprintf(
 							/* translators: %1$s: file path, %2$s: error message */
-							__( 'Unable to move feed file %1$s to upload directory: %2$s', 'woocommerce-product-feed-openai' ),
+							__( 'Unable to move feed file %1$s to upload directory: %2$s', 'woocommerce' ),
 							$this->file_path,
 							( esc_html( $error['message'] ) ?? 'Unknown error' )
 						)
@@ -256,7 +256,7 @@ class JsonFileFeed implements FeedInterface {
 				esc_html(
 					sprintf(
 						/* translators: %s: directory path */
-						__( 'Unable to create feed directory: %s', 'woocommerce-product-feed-openai' ),
+						__( 'Unable to create feed directory: %s', 'woocommerce' ),
 						$directory_path
 					)
 				)
