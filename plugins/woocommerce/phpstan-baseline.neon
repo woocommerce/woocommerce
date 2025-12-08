@@ -631,30 +631,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Cannot call method find_user_ids_by_billing_email_for_coupons_usage_lookup\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Cannot call method get_instance_of\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Cannot call method get_quantity\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -1249,12 +1225,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-payment-gateway.php
 
 		-
-			message: '#^Cannot call method sanitize\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-payment-gateway.php
-
-		-
 			message: '#^Expected 3 @param tags, found 2\.$#'
 			identifier: paramTag.count
 			count: 1
@@ -1479,30 +1449,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:update\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
-			message: '#^Cannot call method on_product_changed\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
-			message: '#^Cannot call method on_product_deleted\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/abstracts/abstract-wc-product.php
 
@@ -2287,12 +2233,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-session.php
 
 		-
-			message: '#^Cannot call method sanitize\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-settings-api.php
-
-		-
 			message: '#^Method WC_Settings_API\:\:add_error\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2729,18 +2669,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/class-wc-admin-api-keys.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
-			message: '#^Cannot call method get_general_cost_edit_field_tooltip\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/admin/class-wc-admin-assets.php
 
 		-
 			message: '#^Constant WC_ADMIN_ABSPATH not found\.$#'
@@ -3739,12 +3667,6 @@ parameters:
 			path: includes/admin/class-wc-admin-help.php
 
 		-
-			message: '#^Cannot call method register\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-importers.php
-
-		-
 			message: '#^Constant WC_ABSPATH not found\.$#'
 			identifier: constant.notFound
 			count: 3
@@ -4021,18 +3943,6 @@ parameters:
 			path: includes/admin/class-wc-admin-menus.php
 
 		-
-			message: '#^Cannot call method custom_orders_table_usage_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-menus.php
-
-		-
-			message: '#^Cannot call method setup\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/admin/class-wc-admin-menus.php
-
-		-
 			message: '#^Method WC_Admin_Menus\:\:add_nav_menu_meta_boxes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4306,12 +4216,6 @@ parameters:
 			message: '#^Cannot access offset ''license_key'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: includes/admin/class-wc-admin-notices.php
-
-		-
-			message: '#^Cannot call method get_legacy_webhooks_count\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: includes/admin/class-wc-admin-notices.php
 
 		-
@@ -4708,12 +4612,6 @@ parameters:
 			message: '#^Cannot access property \$post_type on mixed\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: includes/admin/class-wc-admin-post-types.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: includes/admin/class-wc-admin-post-types.php
 
 		-
@@ -5599,12 +5497,6 @@ parameters:
 			path: includes/admin/class-wc-admin-status.php
 
 		-
-			message: '#^Cannot call method render\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-status.php
-
-		-
 			message: '#^Method WC_Admin_Status\:\:flush_db_logs\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5758,12 +5650,6 @@ parameters:
 			message: '#^Cannot access property \$term_id on mixed\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: includes/admin/class-wc-admin-taxonomies.php
-
-		-
-			message: '#^Cannot call method schedule_action\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/admin/class-wc-admin-taxonomies.php
 
 		-
@@ -5929,12 +5815,6 @@ parameters:
 			path: includes/admin/class-wc-admin-webhooks-table-list.php
 
 		-
-			message: '#^Cannot call method get_legacy_webhooks_count\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-webhooks-table-list.php
-
-		-
 			message: '#^Method WC_Admin_Webhooks_Table_List\:\:display_tablenav\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6087,24 +5967,6 @@ parameters:
 		-
 			message: '#^Binary operation "\." between ''plugin\-install\.php…'' and array\|string results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/class-wc-admin.php
-
-		-
-			message: '#^Cannot call method ensure_links_open_in_new_tab\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/admin/class-wc-admin.php
-
-		-
-			message: '#^Cannot call method render\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/admin/class-wc-admin.php
-
-		-
-			message: '#^Cannot call method set_email_type\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/admin/class-wc-admin.php
 
@@ -7531,18 +7393,6 @@ parameters:
 			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
 
 		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
-
-		-
-			message: '#^Cannot call method handle_csv_upload\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
-
-		-
 			message: '#^Constant WC_ABSPATH not found\.$#'
 			identifier: constant.notFound
 			count: 1
@@ -7841,12 +7691,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/importers/class-wc-tax-rate-importer.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/importers/mappings/default.php
 
 		-
 			message: '#^Parameter \#2 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, mixed given\.$#'
@@ -8401,12 +8245,6 @@ parameters:
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
-			message: '#^Property WC_Admin_List_Table_Orders\:\:\$orders_list_table \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\ListTable\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
-
-		-
 			message: '#^Return type \(string\) of method WC_Admin_List_Table_Orders\:\:get_primary_column\(\) should be compatible with return type \(array\) of method WC_Admin_List_Table\:\:get_primary_column\(\)$#'
 			identifier: method.childReturnType
 			count: 1
@@ -8445,12 +8283,6 @@ parameters:
 		-
 			message: '#^Cannot access an offset on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
 
@@ -8636,12 +8468,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method managing_stock\(\) on object\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
-
-		-
-			message: '#^Cannot call method product_meta_lookup_table_cogs_value_columns_exist\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
@@ -9013,12 +8839,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php
 
 		-
-			message: '#^Cannot call method get_base_page_url\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-order-actions.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -9382,12 +9202,6 @@ parameters:
 			message: '#^Cannot access offset int\<0, max\> on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-data.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-data.php
 
 		-
@@ -9817,12 +9631,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-item.php
 
 		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/views/html-order-item.php
-
-		-
 			message: '#^Parameter \#1 \$price of function wc_price expects float, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -9878,12 +9686,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method can_refund_order\(\) on WC_Payment_Gateway\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/views/html-order-items.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-items.php
@@ -10069,19 +9871,7 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-product-data-attributes.php
 
 		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/views/html-product-data-general.php
-
-		-
 			message: '#^Cannot call method get_button_text\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/views/html-product-data-general.php
-
-		-
-			message: '#^Cannot call method get_general_cost_edit_field_tooltip\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/admin/meta-boxes/views/html-product-data-general.php
@@ -10217,12 +10007,6 @@ parameters:
 			identifier: variable.undefined
 			count: 5
 			path: includes/admin/meta-boxes/views/html-product-data-shipping.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/meta-boxes/views/html-product-data-variations.php
 
 		-
 			message: '#^Cannot call method get_name\(\) on mixed\.$#'
@@ -11935,12 +11719,6 @@ parameters:
 			path: includes/admin/settings/class-wc-settings-accounts.php
 
 		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/settings/class-wc-settings-advanced.php
-
-		-
 			message: '#^Method WC_Settings_Advanced\:\:notices\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11979,12 +11757,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:get_title\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/admin/settings/class-wc-settings-emails.php
-
-		-
-			message: '#^Cannot call method change_feature_enable\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/admin/settings/class-wc-settings-emails.php
 
@@ -12095,12 +11867,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/settings/class-wc-settings-emails.php
-
-		-
-			message: '#^Cannot call method get_providers\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/settings/class-wc-settings-general.php
 
 		-
 			message: '#^Constant WC_VERSION not found\.$#'
@@ -12715,9 +12481,75 @@ parameters:
 			path: includes/admin/views/html-admin-page-status-report.php
 
 		-
+			message: '#^Cannot access offset ''active_plugins'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''database'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''dropins_mu_plugins'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''environment'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''inactive_plugins'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''logging'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
 			message: '#^Cannot access offset ''offers'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 3
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''pages'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''post_type_counts'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''security'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''settings'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Cannot access offset ''theme'' on array\|WP_Error\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
 			path: includes/admin/views/html-admin-page-status-report.php
 
 		-
@@ -12730,18 +12562,6 @@ parameters:
 			message: '#^Cannot access offset 0 on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 2
-			path: includes/admin/views/html-admin-page-status-report.php
-
-		-
-			message: '#^Cannot call method get_endpoint_data\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
-
-		-
-			message: '#^Cannot call method get_wp_plugin_id\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/admin/views/html-admin-page-status-report.php
 
 		-
@@ -12809,12 +12629,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/views/html-admin-settings.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/views/html-bulk-edit-product.php
 
 		-
 			message: '#^Parameter \#1 \$dimensions_unit of static method Automattic\\WooCommerce\\Utilities\\I18nUtil\:\:get_dimensions_unit_label\(\) expects string, mixed given\.$#'
@@ -12887,12 +12701,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/views/html-notice-wp-php-minimum-requirements.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/views/html-quick-edit-product.php
 
 		-
 			message: '#^Parameter \#1 \$value of function wc_format_localized_decimal expects string, int given\.$#'
@@ -13417,19 +13225,7 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method add_coupon_discount_via_ajax\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method add_item\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method add_meta_ajax\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -13448,12 +13244,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method add_product\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method calc_line_taxes_via_ajax\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -13483,18 +13273,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method check_locked_orders_ajax\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method create_all_product_variations\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -13510,18 +13288,6 @@ parameters:
 			message: '#^Cannot call method delete\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method delete_meta_ajax\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: includes/class-wc-ajax.php
 
 		-
@@ -13693,12 +13459,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method refresh_lock_ajax\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method remove_coupon\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -13714,12 +13474,6 @@ parameters:
 			message: '#^Cannot call method save\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 8
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method search_metakeys_ajax\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
@@ -14547,7 +14301,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$maybeint of function absint expects array\|bool\|float\|int\|resource\|string\|null, mixed given\.$#'
 			identifier: argument.type
-			count: 27
+			count: 28
 			path: includes/class-wc-ajax.php
 
 		-
@@ -16939,18 +16693,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Cannot call method get_checkout_order_received_url\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -17332,12 +17074,6 @@ parameters:
 			message: '#^Call to static method add_hook\(\) on an unknown class WP_CLI\.$#'
 			identifier: class.notFound
 			count: 10
-			path: includes/class-wc-cli.php
-
-		-
-			message: '#^Cannot call method register\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/class-wc-cli.php
 
 		-
@@ -20137,18 +19873,6 @@ parameters:
 			path: includes/class-wc-frontend-scripts.php
 
 		-
-			message: '#^Cannot call method get_providers\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-frontend-scripts.php
-
-		-
-			message: '#^Cannot call method get_providers\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-frontend-scripts.php
-
-		-
 			message: '#^Constant WC_VERSION not found\.$#'
 			identifier: constant.notFound
 			count: 4
@@ -20245,12 +19969,6 @@ parameters:
 			path: includes/class-wc-frontend-scripts.php
 
 		-
-			message: '#^Parameter \#1 \$object of function method_exists expects object\|string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-frontend-scripts.php
-
-		-
 			message: '#^Parameter \#1 \$string of function wc_string_to_bool expects bool\|string, mixed given\.$#'
 			identifier: argument.type
 			count: 4
@@ -20271,6 +19989,12 @@ parameters:
 		-
 			message: '#^Parameter \#4 \$version of static method WC_Frontend_Scripts\:\:register_style\(\) expects string, mixed given\.$#'
 			identifier: argument.type
+			count: 1
+			path: includes/class-wc-frontend-scripts.php
+
+		-
+			message: '#^Property WC_Address_Provider\:\:\$branding_html \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
 			count: 1
 			path: includes/class-wc-frontend-scripts.php
 
@@ -20452,72 +20176,6 @@ parameters:
 			message: '#^Cannot access property \$download_link on array\|object\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method change_feature_enable\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method get_all_active_valid_plugins\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method get_compatible_plugins_for_feature\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method get_database_schema\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method get_legacy_webhooks_count\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method get_max_index_length\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method get_missing_tables\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method get_table_creation_sql\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method init_feature\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Cannot call method install_plugin\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/class-wc-install.php
 
 		-
@@ -21025,15 +20683,15 @@ parameters:
 			path: includes/class-wc-order-factory.php
 
 		-
-			message: '#^Cannot call method get\(\) on mixed\.$#'
+			message: '#^Cannot call method get_id\(\) on array\|object\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-order-factory.php
 
 		-
-			message: '#^Cannot call method set\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
+			message: '#^Method WC_Order_Factory\:\:get_order\(\) should return bool\|WC_Order but returns array\|object\|false\.$#'
+			identifier: return.type
+			count: 1
 			path: includes/class-wc-order-factory.php
 
 		-
@@ -21067,6 +20725,12 @@ parameters:
 			path: includes/class-wc-order-factory.php
 
 		-
+			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Caching\\ObjectCache\:\:get\(\) expects int\|string, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-order-factory.php
+
+		-
 			message: '#^Parameter \#1 \$input of function array_flip expects array\<int\|string\>, array\<int\<min, \-1\>\|int\<1, max\>\|true\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -21074,6 +20738,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$order_id of static method WC_Order_Factory\:\:get_class_name_for_order_id\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-order-factory.php
+
+		-
+			message: '#^Parameter \#2 \$id of method Automattic\\WooCommerce\\Caching\\ObjectCache\:\:set\(\) expects int\|string\|null, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-order-factory.php
@@ -21849,18 +21519,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$value on mixed\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-order-item.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-order-item.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-order-item.php
 
@@ -22801,7 +22459,7 @@ parameters:
 			path: includes/class-wc-payment-gateways.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
+			message: '#^Cannot call method info\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-payment-gateways.php
@@ -23041,27 +22699,9 @@ parameters:
 			path: includes/class-wc-post-data.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-post-data.php
-
-		-
 			message: '#^Cannot call method get_type\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Cannot call method on_product_changed\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Cannot call method on_product_deleted\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 4
 			path: includes/class-wc-post-data.php
 
 		-
@@ -23151,6 +22791,12 @@ parameters:
 		-
 			message: '#^Method WC_Post_Data\:\:force_default_term\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/class-wc-post-data.php
+
+		-
+			message: '#^Method WC_Post_Data\:\:get_post_type\(\) should return string but returns mixed\.$#'
+			identifier: return.type
 			count: 1
 			path: includes/class-wc-post-data.php
 
@@ -23302,6 +22948,18 @@ parameters:
 			message: '#^Parameter \#1 \$post_id of function wc_delete_product_transients expects int, int\|false given\.$#'
 			identifier: argument.type
 			count: 1
+			path: includes/class-wc-post-data.php
+
+		-
+			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:on_product_changed\(\) expects int\|WC_Product, mixed given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wc-post-data.php
+
+		-
+			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\:\:on_product_deleted\(\) expects int\|WC_Product, mixed given\.$#'
+			identifier: argument.type
+			count: 4
 			path: includes/class-wc-post-data.php
 
 		-
@@ -23671,24 +23329,6 @@ parameters:
 			path: includes/class-wc-product-attribute.php
 
 		-
-			message: '#^Cannot call method add_approved_directory\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-download.php
-
-		-
-			message: '#^Cannot call method get_mode\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-download.php
-
-		-
-			message: '#^Cannot call method is_valid_path\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-product-download.php
-
-		-
 			message: '#^Class WC_Product_Download implements generic interface ArrayAccess but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
@@ -23762,6 +23402,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$string of function substr expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-product-download.php
+
+		-
+			message: '#^Parameter \#1 \$url of method Automattic\\WooCommerce\\Internal\\ProductDownloads\\ApprovedDirectories\\Register\:\:add_approved_directory\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-product-download.php
@@ -24469,12 +24115,6 @@ parameters:
 			path: includes/class-wc-query.php
 
 		-
-			message: '#^Property WC_Query\:\:\$filterer \(Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\Filterer\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/class-wc-query.php
-
-		-
 			message: '#^Static property WC_Query\:\:\$chosen_attributes \(array\) does not accept null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -25028,12 +24668,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method delete\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-session-handler.php
@@ -26545,6 +26179,12 @@ parameters:
 			path: includes/class-wc-tracker.php
 
 		-
+			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
+			identifier: foreach.nonIterable
+			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
 			message: '#^Call to function is_callable\(\) with ''WC_Helper_Options\:…'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -26553,6 +26193,36 @@ parameters:
 		-
 			message: '#^Call to function is_callable\(\) with array\{Automattic\\Jetpack\\Status, ''in_safe_mode''\} will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
+			message: '#^Cannot access offset ''Author'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
+			message: '#^Cannot access offset ''Name'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
+			message: '#^Cannot access offset ''Network'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
+			message: '#^Cannot access offset ''PluginURI'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
+			message: '#^Cannot access offset ''Version'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: includes/class-wc-tracker.php
 
@@ -26571,48 +26241,12 @@ parameters:
 		-
 			message: '#^Cannot access offset mixed on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
+			count: 3
 			path: includes/class-wc-tracker.php
 
 		-
 			message: '#^Cannot access offset non\-falsy\-string on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Cannot call method get_data\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Cannot call method get_preferred_provider\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Cannot call method get_providers\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Cannot call method init\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Cannot call method is_woocommerce_aware_plugin\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-tracker.php
 
@@ -26701,6 +26335,18 @@ parameters:
 			path: includes/class-wc-tracker.php
 
 		-
+			message: '#^Parameter \#1 \$plugin_file_or_data of method Automattic\\WooCommerce\\Utilities\\PluginUtil\:\:is_woocommerce_aware_plugin\(\) expects array\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
+			message: '#^Parameter \#1 \$plugin_name of static method Automattic\\WooCommerce\\Utilities\\FeaturesUtil\:\:get_compatible_features_for_plugin\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
 			message: '#^Parameter \#1 \$size of function wc_let_to_num expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -26710,6 +26356,12 @@ parameters:
 			message: '#^Parameter \#1 \$str of function trim expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
+			path: includes/class-wc-tracker.php
+
+		-
+			message: '#^Parameter \#1 \$text of function wp_strip_all_tags expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 5
 			path: includes/class-wc-tracker.php
 
 		-
@@ -26797,12 +26449,6 @@ parameters:
 			path: includes/class-wc-webhook.php
 
 		-
-			message: '#^Cannot call method get_endpoint_data\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-webhook.php
-
-		-
 			message: '#^Cannot call method get_status\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -26852,6 +26498,12 @@ parameters:
 
 		-
 			message: '#^Method WC_Webhook\:\:get_user_id\(\) should return int but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Method WC_Webhook\:\:get_wp_api_payload\(\) should return array but returns array\|WP_Error\.$#'
 			identifier: return.type
 			count: 1
 			path: includes/class-wc-webhook.php
@@ -27031,42 +26683,6 @@ parameters:
 			path: includes/class-woocommerce.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Cannot call method call_static\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Cannot call method get_global\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Cannot call method get_instance_of\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Cannot call method register\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 20
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Cannot call method register_additional_features\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
 			message: '#^Constant WC_ABSPATH not found\.$#'
 			identifier: constant.notFound
 			count: 143
@@ -27241,12 +26857,6 @@ parameters:
 			path: includes/class-woocommerce.php
 
 		-
-			message: '#^Method WooCommerce\:\:register_remote_log_handler\(\) should return array\<WC_Log_Handler\> but returns array\<mixed\>\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
 			message: '#^Method WooCommerce\:\:register_wp_admin_settings\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -27267,6 +26877,12 @@ parameters:
 		-
 			message: '#^Method WooCommerce\:\:wpdb_table_fix\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Parameter \#1 \$class_name of method Automattic\\WooCommerce\\Proxies\\LegacyProxy\:\:get_instance_of\(\) expects class\-string\<object\>, string given\.$#'
+			identifier: argument.type
 			count: 1
 			path: includes/class-woocommerce.php
 
@@ -27313,9 +26929,15 @@ parameters:
 			path: includes/class-woocommerce.php
 
 		-
+			message: '#^Property WooCommerce\:\:\$api \(WC_API\) does not accept Automattic\\WooCommerce\\Internal\\Utilities\\LegacyRestApiStub\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: includes/class-woocommerce.php
+
+		-
 			message: '#^Property WooCommerce\:\:\$api \(WC_API\) does not accept mixed\.$#'
 			identifier: assign.propertyType
-			count: 2
+			count: 1
 			path: includes/class-woocommerce.php
 
 		-
@@ -27327,6 +26949,12 @@ parameters:
 		-
 			message: '#^Property WooCommerce\:\:\$session \(WC_Session\) does not accept object\.$#'
 			identifier: assign.propertyType
+			count: 1
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Automattic\\WooCommerce\\Proxies\\LegacyProxy\:\:get_instance_of\(\)$#'
+			identifier: argument.templateType
 			count: 1
 			path: includes/class-woocommerce.php
 
@@ -28147,12 +27775,6 @@ parameters:
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Cannot call method remove\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Cannot call method update\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -28341,18 +27963,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:update_metadata\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/abstract-wc-order-item-type-data-store.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/abstract-wc-order-item-type-data-store.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/data-stores/abstract-wc-order-item-type-data-store.php
 
@@ -28576,12 +28186,6 @@ parameters:
 			message: '#^Access to an undefined property object\:\:\$meta_key\.$#'
 			identifier: property.notFound
 			count: 7
-			path: includes/data-stores/class-wc-customer-data-store.php
-
-		-
-			message: '#^Cannot call method custom_orders_table_usage_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/data-stores/class-wc-customer-data-store.php
 
 		-
@@ -29215,18 +28819,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Class WC_Order referenced with incorrect case\: WC_order\.$#'
 			identifier: class.nameCase
 			count: 1
@@ -29827,12 +29419,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
 			message: '#^Cannot call method getOffsetTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -29846,18 +29432,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_attributes\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
-			message: '#^Cannot call method maybe_schedule_adjust_download_permissions\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
-			message: '#^Cannot call method product_meta_lookup_table_cogs_value_columns_exist\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
@@ -31609,12 +31183,6 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^Cannot call method maybe_render_block_email\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
 			message: '#^Constant WC_VERSION not found\.$#'
 			identifier: constant.notFound
 			count: 1
@@ -31801,12 +31369,6 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^Property WC_Email\:\:\$personalizer \(Automattic\\WooCommerce\\Internal\\EmailEditor\\TransactionalEmailPersonalizer\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
 			message: '#^Variable \$template in empty\(\) always exists and is not falsy\.$#'
 			identifier: empty.variable
 			count: 1
@@ -31965,12 +31527,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$total on array\|stdClass\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: includes/export/class-wc-product-csv-exporter.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/export/class-wc-product-csv-exporter.php
 
@@ -33193,12 +32749,6 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
-			message: '#^Cannot call static method instance\(\) on mixed\.$#'
-			identifier: staticMethod.nonObject
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
 			message: '#^Constant WC_VERSION not found\.$#'
 			identifier: constant.notFound
 			count: 1
@@ -33622,12 +33172,6 @@ parameters:
 			message: '#^Call to function is_wp_error\(\) with mixed will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 3
-			path: includes/import/class-wc-product-csv-importer.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/import/class-wc-product-csv-importer.php
 
 		-
@@ -42553,12 +42097,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-tools-v2-controller.php
 
 		-
-			message: '#^Cannot call method recreate_order_address_fts_index\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-tools-v2-controller.php
-
-		-
 			message: '#^Method WC_REST_System_Status_Tools_V2_Controller\:\:get_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -42657,30 +42195,6 @@ parameters:
 		-
 			message: '#^Cannot access offset ''version'' on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
-
-		-
-			message: '#^Cannot call method data_sync_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
-
-		-
-			message: '#^Cannot call method get_all_active_valid_plugins\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
-
-		-
-			message: '#^Cannot call method get_features\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
-
-		-
-			message: '#^Cannot call method get_mode\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
 
@@ -43417,12 +42931,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-data-currencies-controller.php
 
 		-
-			message: '#^Cannot call method instantiate_layout_templates\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-layout-templates-controller.php
-
-		-
 			message: '#^Method WC_REST_Layout_Templates_Controller\:\:get_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -43543,18 +43051,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-order-refunds-controller.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-order-refunds-controller.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-order-refunds-controller.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -43659,18 +43155,6 @@ parameters:
 		-
 			message: '#^Cannot assign offset ''status'' to WP_REST_Request\.$#'
 			identifier: offsetAssign.dimType
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller.php
 
@@ -44914,19 +44398,7 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
 			message: '#^Cannot call method delete\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
@@ -45420,18 +44892,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$term_id on WP_Term\|false\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
@@ -46246,12 +45706,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
 
 		-
-			message: '#^Cannot call method schedule_action\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
-
-		-
 			message: '#^Method WC_REST_Terms_Controller\:\:batch_items_permissions_check\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -46594,8 +46048,8 @@ parameters:
 			path: includes/rest-api/Package.php
 
 		-
-			message: '#^Cannot call method get_instance_of\(\) on mixed\.$#'
-			identifier: method.nonObject
+			message: '#^Call to an undefined method object\:\:register_routes\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: includes/rest-api/Server.php
 
@@ -46608,6 +46062,18 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\RestApi\\Server\:\:register_rest_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/rest-api/Server.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Automattic\\WooCommerce\\Container\:\:get\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: includes/rest-api/Server.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Automattic\\WooCommerce\\Proxies\\LegacyProxy\:\:get_instance_of\(\)$#'
+			identifier: argument.templateType
 			count: 1
 			path: includes/rest-api/Server.php
 
@@ -50140,12 +49606,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Cannot call method get_default_handler\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Default value of the parameter \#3 \$sale_price \(string\) of function _wc_save_product_price\(\) is incompatible with type float\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -52306,12 +51766,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Cannot call method get_billing_email\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -52726,12 +52180,6 @@ parameters:
 			path: includes/wc-order-step-logger-functions.php
 
 		-
-			message: '#^Cannot call method enqueue_processor\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-step-logger-functions.php
-
-		-
 			message: '#^Function extract_order_safe_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -52954,31 +52402,13 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Cannot call method delete_product_specific_transients\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Cannot call method get_customer_id\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Cannot call method get_instance_of\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Cannot call method get_permalink\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Cannot call method is_enabled\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/wc-product-functions.php
@@ -53849,18 +53279,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method is_search\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Cannot call method read_fulfillments\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Cannot call method styled_post_content\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/wc-template-functions.php
@@ -54784,6 +54202,12 @@ parameters:
 			path: includes/wc-template-functions.php
 
 		-
+			message: '#^Parameter \#2 \$entity_id of method Automattic\\WooCommerce\\Internal\\DataStores\\Fulfillments\\FulfillmentsDataStore\:\:read_fulfillments\(\) expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
 			message: '#^Parameter \#2 \$fallback of function sanitize_html_class expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -55342,85 +54766,7 @@ parameters:
 			path: includes/wc-update-functions.php
 
 		-
-			message: '#^Cannot call method check_lookup_table_exists\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method create_table_primary_index\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
 			message: '#^Cannot call method get_items\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method get_table\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method get_table_exists\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method in_progress\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method init_feature\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method init_hooks\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method initiate_regeneration\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method lookup_table_has_data\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method maybe_assign_default_product_cat\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method recreate_order_address_fts_index\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Cannot call method regeneration_is_in_progress\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/wc-update-functions.php
@@ -56196,12 +55542,6 @@ parameters:
 		-
 			message: '#^Cannot call method set_customer_id\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Cannot call static method get_orders_table_name\(\) on mixed\.$#'
-			identifier: staticMethod.nonObject
 			count: 1
 			path: includes/wc-user-functions.php
 
@@ -57220,12 +56560,6 @@ parameters:
 			path: includes/widgets/class-wc-widget-layered-nav.php
 
 		-
-			message: '#^Cannot call method get_filtered_term_product_counts\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/widgets/class-wc-widget-layered-nav.php
-
-		-
 			message: '#^Constant WC_VERSION not found\.$#'
 			identifier: constant.notFound
 			count: 1
@@ -57810,12 +57144,6 @@ parameters:
 		-
 			message: '#^Call to method set_data\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Init.php
-
-		-
-			message: '#^Cannot call method lazy_load_namespace\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Admin/API/Init.php
 
@@ -68500,18 +67828,6 @@ parameters:
 			path: src/Admin/Features/ProductBlockEditor/Init.php
 
 		-
-			message: '#^Cannot call method is_registered\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
-			message: '#^Cannot call method register\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Admin/Features/ProductBlockEditor/Init.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init\:\:dequeue_conflicting_styles\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -69978,12 +69294,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$version on array\|object\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Admin/PluginsHelper.php
-
-		-
-			message: '#^Cannot call method get_all_active_valid_plugins\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Admin/PluginsHelper.php
 
@@ -71848,12 +71158,6 @@ parameters:
 			path: src/Blocks/Assets/AssetDataRegistry.php
 
 		-
-			message: '#^Cannot call method is_remote_logging_allowed\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/Assets/AssetDataRegistry.php
-
-		-
 			message: '#^Class Automattic\\WooCommerce\\Blocks\\Assets\\Api referenced with incorrect case\: Automattic\\WooCommerce\\Blocks\\Assets\\API\.$#'
 			identifier: class.nameCase
 			count: 1
@@ -73241,12 +72545,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method allocate_and_return_parsed_attributes\(\) on Automattic\\Block_Scanner\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/Checkout.php
-
-		-
-			message: '#^Cannot call method get_providers\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Blocks/BlockTypes/Checkout.php
@@ -75550,12 +74848,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
-			message: '#^Cannot call method with\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:delete_default_attribute_id_transient\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -75712,12 +75004,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterPrice.php
 
 		-
-			message: '#^Cannot call method with\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPrice\:\:get_filtered_price\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -75798,12 +75084,6 @@ parameters:
 		-
 			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
-			message: '#^Cannot call method with\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
@@ -75904,12 +75184,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterStatus.php
 
 		-
-			message: '#^Cannot call method with\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterStatus\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -75964,24 +75238,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Cannot call method get_hierarchy_map\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
-			message: '#^Cannot call method get_param\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
-			message: '#^Cannot call method with\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterTaxonomy\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -76024,12 +75280,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Parameter \#1 \$taxonomy of function get_taxonomy expects string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterTaxonomy\:\:get_taxonomy_term_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
@@ -76062,12 +75312,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$parsed_block on mixed\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Cannot call method get_param_keys\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
@@ -78490,12 +77734,6 @@ parameters:
 			path: src/Blocks/Payments/PaymentMethodRegistry.php
 
 		-
-			message: '#^Cannot call method get_lookup_table_name\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/QueryFilters.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\QueryFilters\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -79882,12 +79120,6 @@ parameters:
 			path: src/Caching/CacheException.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Caching\\ObjectCache\:\:get_cache_engine_instance\(\) should return Automattic\\WooCommerce\\Caching\\CacheEngine but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Caching/ObjectCache.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Caching\\ObjectCache\:\:get_id_from_object_if_null\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
@@ -80044,12 +79276,6 @@ parameters:
 			path: src/Checkout/Helpers/ReserveStock.php
 
 		-
-			message: '#^Template type T of method Automattic\\WooCommerce\\Container\:\:get\(\) is not referenced in a parameter\.$#'
-			identifier: method.templateTypeNotInParameter
-			count: 1
-			path: src/Container.php
-
-		-
 			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
 			identifier: class.notFound
 			count: 10
@@ -80098,81 +79324,9 @@ parameters:
 			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
 
 		-
-			message: '#^Cannot call method backfill_order_to_datastore\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method change_feature_enable\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method check_orders_table_exists\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method cleanup_post_data\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method count_orders_for_cleanup\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method create_database_tables\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method custom_orders_table_usage_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
 			message: '#^Cannot call method flush\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method get_compatible_plugins_for_feature\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method get_diff_for_order\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method get_items_considered_incompatible\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method get_orders_for_cleanup\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
-
-		-
-			message: '#^Cannot call method get_total_pending_count\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
 
 		-
@@ -80386,12 +79540,6 @@ parameters:
 			path: src/Database/Migrations/CustomOrderTable/PostsToOrdersMigrationController.php
 
 		-
-			message: '#^Cannot call method clear_cached_data\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Database/Migrations/CustomOrderTable/PostsToOrdersMigrationController.php
-
-		-
 			message: '#^Cannot call method query\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -80532,18 +79680,6 @@ parameters:
 		-
 			message: '#^Binary operation "\." between ''`'' and array\<string\>\|string results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: src/Database/Migrations/MigrationHelper.php
-
-		-
-			message: '#^Cannot call method check_orders_table_exists\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Database/Migrations/MigrationHelper.php
-
-		-
-			message: '#^Cannot call method generate_on_duplicate_statement_clause\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Database/Migrations/MigrationHelper.php
 
@@ -80752,12 +79888,6 @@ parameters:
 			path: src/Internal/Admin/Agentic/AgenticCommerceIntegration.php
 
 		-
-			message: '#^Cannot call method register\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticController\:\:on_init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -80876,12 +80006,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Agentic/AgenticWebhookPayloadBuilder.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Analytics.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Analytics\:\:get_instance\(\) has no return type specified\.$#'
@@ -81598,6 +80722,12 @@ parameters:
 			path: src/Internal/Admin/EmailPreview/EmailPreview.php
 
 		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Internal/Admin/EmailPreview/EmailPreview.php
+
+		-
 			message: '#^Cannot access offset string on array\<class\-string\<WC_Email\>, WC_Email\>\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -81617,12 +80747,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_email_type\(\) on WC_Email\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/EmailPreview/EmailPreview.php
-
-		-
-			message: '#^Cannot call method get_woo_content\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Admin/EmailPreview/EmailPreview.php
@@ -81736,12 +80860,6 @@ parameters:
 			path: src/Internal/Admin/EmailPreview/EmailPreview.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function add_filter expects callable\(\)\: mixed, array\{mixed, ''prepare_css''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/EmailPreview/EmailPreview.php
-
-		-
 			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -81786,12 +80904,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\EmailPreview\\EmailPreviewRestController\:\:send_email_preview\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Admin/EmailPreview/EmailPreviewRestController.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\EmailPreview\\EmailPreviewRestController\:\:\$email_preview \(Automattic\\WooCommerce\\Internal\\Admin\\EmailPreview\\EmailPreview\) does not accept mixed\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/Admin/EmailPreview/EmailPreviewRestController.php
 
@@ -82426,18 +81538,6 @@ parameters:
 			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Logging\\LogHandlerFileV2\:\:\$file_controller \(Automattic\\WooCommerce\\Internal\\Admin\\Logging\\FileV2\\FileController\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Logging\\LogHandlerFileV2\:\:\$settings \(Automattic\\WooCommerce\\Internal\\Admin\\Logging\\Settings\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Logging/LogHandlerFileV2.php
-
-		-
 			message: '#^Call to protected method prepare_column_headers\(\) of class WC_Admin_Log_Table_List\.$#'
 			identifier: method.protected
 			count: 1
@@ -82486,14 +81586,14 @@ parameters:
 			path: src/Internal/Admin/Logging/PageController.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
+			message: '#^Binary operation "\." between mixed and ''/wc\-logs/'' results in an error\.$#'
+			identifier: binaryOp.invalid
 			count: 1
 			path: src/Internal/Admin/Logging/Settings.php
 
 		-
-			message: '#^Cannot call method get_log_directory_size\(\) on mixed\.$#'
-			identifier: method.nonObject
+			message: '#^Cannot access offset ''basedir'' on mixed\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Internal/Admin/Logging/Settings.php
 
@@ -82640,12 +81740,6 @@ parameters:
 			identifier: argument.type
 			count: 2
 			path: src/Internal/Admin/Marketing/MarketingSpecs.php
-
-		-
-			message: '#^Cannot call method change_feature_enable\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Marketplace.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Marketplace\:\:enqueue_scripts\(\) has no return type specified\.$#'
@@ -84088,12 +83182,6 @@ parameters:
 			path: src/Internal/Admin/Orders/Edit.php
 
 		-
-			message: '#^Cannot call method lock\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/Edit.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Orders\\Edit\:\:add_order_meta_boxes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -84190,12 +83278,6 @@ parameters:
 			path: src/Internal/Admin/Orders/Edit.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\Edit\:\:\$custom_meta_box \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\MetaBoxes\\CustomMetaBox\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/Edit.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\Edit\:\:\$custom_meta_box \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\MetaBoxes\\CustomMetaBox\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 1
@@ -84214,20 +83296,8 @@ parameters:
 			path: src/Internal/Admin/Orders/Edit.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\Edit\:\:\$orders_page_controller \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/Edit.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\Edit\:\:\$orders_page_controller \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
-			count: 1
-			path: src/Internal/Admin/Orders/Edit.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\Edit\:\:\$taxonomies_meta_box \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\MetaBoxes\\TaxonomiesMetaBox\) does not accept mixed\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/Admin/Orders/Edit.php
 
@@ -84271,18 +83341,6 @@ parameters:
 			message: '#^Cannot access property \$display_name on WP_User\|false\.$#'
 			identifier: property.nonObject
 			count: 2
-			path: src/Internal/Admin/Orders/EditLock.php
-
-		-
-			message: '#^Cannot call method get_base_page_url\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/EditLock.php
-
-		-
-			message: '#^Cannot call method get_edit_url\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: src/Internal/Admin/Orders/EditLock.php
 
 		-
@@ -84394,12 +83452,6 @@ parameters:
 			path: src/Internal/Admin/Orders/ListTable.php
 
 		-
-			message: '#^Cannot call method custom_orders_table_usage_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
 			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -84431,18 +83483,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_status\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Cannot call method is_locked_by_another_user\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Cannot call method untrash_order\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Admin/Orders/ListTable.php
@@ -84610,6 +83650,12 @@ parameters:
 			path: src/Internal/Admin/Orders/ListTable.php
 
 		-
+			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:untrash_order\(\) expects WC_Order, bool\|WC_Order\|WC_Order_Refund given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/Admin/Orders/ListTable.php
+
+		-
 			message: '#^Parameter \#1 \$str of function sanitize_text_field expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 10
@@ -84718,12 +83764,6 @@ parameters:
 			path: src/Internal/Admin/Orders/MetaBoxes/CustomMetaBox.php
 
 		-
-			message: '#^Cannot call method get_meta_keys\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/MetaBoxes/CustomMetaBox.php
-
-		-
 			message: '#^Cannot call method save\(\) on WC_Order\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -84750,12 +83790,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Orders\\MetaBoxes\\CustomMetaBox\:\:handle_metadata_changes\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Orders/MetaBoxes/CustomMetaBox.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Orders\\MetaBoxes\\CustomMetaBox\:\:order_meta_keys_autofill\(\) should return array but returns array\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Internal/Admin/Orders/MetaBoxes/CustomMetaBox.php
 
@@ -85060,49 +84094,7 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Cannot call method current_action\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot call method custom_orders_table_usage_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Cannot call method get_type\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot call method handle_bulk_actions\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot call method is_locked_by_another_user\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot call method lock\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot call method render_dialog\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot call method setup\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Admin/Orders/PageController.php
@@ -85180,12 +84172,6 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$orders_table \(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\ListTable\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$redirection_controller is never read, only written\.$#'
 			identifier: property.onlyWritten
 			count: 1
@@ -85194,12 +84180,6 @@ parameters:
 		-
 			message: '#^Binary operation "\." between mixed and ''\-post_'' results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: src/Internal/Admin/Orders/PostsRedirectionController.php
-
-		-
-			message: '#^Cannot call method custom_orders_table_usage_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Admin/Orders/PostsRedirectionController.php
 
@@ -86788,24 +85768,6 @@ parameters:
 			path: src/Internal/Admin/Settings/PaymentsProviders/Vivacom.php
 
 		-
-			message: '#^Call to an undefined method object\:\:has_connected_owner\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php
-
-		-
-			message: '#^Call to an undefined method object\:\:is_connected\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php
-
-		-
-			message: '#^Call to an undefined method object\:\:is_connection_owner\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php
-
-		-
 			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Logging\\SafeGlobalFunctionProxy\:\:wc_get_logger\(\)\.$#'
 			identifier: staticMethod.notFound
 			count: 5
@@ -88060,22 +87022,10 @@ parameters:
 			path: src/Internal/Admin/WcPayWelcomePage.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\:\:\$suggestion_incentives \(Automattic\\WooCommerce\\Internal\\Admin\\Suggestions\\PaymentsExtensionSuggestionIncentives\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Admin/WcPayWelcomePage.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\AssignDefaultCategory\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/AssignDefaultCategory.php
-
-		-
-			message: '#^@param object\|null \$processor does not accept actual type of parameter\: mixed\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
 
 		-
 			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
@@ -88108,6 +87058,12 @@ parameters:
 			path: src/Internal/BatchProcessing/BatchProcessingController.php
 
 		-
+			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Container\:\:get\(\) expects class\-string\<object\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/BatchProcessing/BatchProcessingController.php
+
+		-
 			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Container\:\:has\(\) expects class\-string, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -88122,6 +87078,12 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, object\|null given\.$#'
 			identifier: argument.type
+			count: 1
+			path: src/Internal/BatchProcessing/BatchProcessingController.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Automattic\\WooCommerce\\Container\:\:get\(\)$#'
+			identifier: argument.templateType
 			count: 1
 			path: src/Internal/BatchProcessing/BatchProcessingController.php
 
@@ -88306,15 +87268,9 @@ parameters:
 			path: src/Internal/CLI/Migrator/Core/PlatformRegistry.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\CLI\\Migrator\\Core\\PlatformRegistry\:\:get_mapper\(\) should return Automattic\\WooCommerce\\Internal\\CLI\\Migrator\\Interfaces\\PlatformMapperInterface but returns mixed\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/CLI/Migrator/Core/PlatformRegistry.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\CLI\\Migrator\\Core\\PlatformRegistry\:\:get_mapper\(\) should return Automattic\\WooCommerce\\Internal\\CLI\\Migrator\\Interfaces\\PlatformMapperInterface but returns object\.$#'
 			identifier: return.type
-			count: 1
+			count: 2
 			path: src/Internal/CLI/Migrator/Core/PlatformRegistry.php
 
 		-
@@ -89296,12 +88252,6 @@ parameters:
 			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
 
 		-
-			message: '#^Cannot call method get_features_page_url\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/DataStores/Orders/CustomOrdersTableController.php
-
-		-
 			message: '#^Filter callback return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
@@ -89398,12 +88348,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
 
 		-
-			message: '#^Cannot call method delete\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/DataSynchronizer.php
-
-		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -89411,24 +88355,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_data_store\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/DataSynchronizer.php
-
-		-
-			message: '#^Cannot call method order_exists\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/DataSynchronizer.php
-
-		-
-			message: '#^Cannot call method read\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/DataSynchronizer.php
-
-		-
-			message: '#^Cannot call method toggle_flag\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
@@ -89752,12 +88678,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot access constant PLACEHOLDER_ORDER_POST_TYPE on mixed\.$#'
-			identifier: classConstant.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot access offset ''class_name'' on array\|bool\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -89806,43 +88726,7 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot call method cache_objects\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method data_sync_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot call method delete\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method delete_cache_group\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method delete_cached_object\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -89855,12 +88739,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method get_cached_objects\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -89899,18 +88777,6 @@ parameters:
 			message: '#^Cannot call method prime_caches_for_orders\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method read_order_from_datastore\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot call method remove\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
@@ -90193,6 +89059,12 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
+			message: '#^Parameter \#1 \$keys of method Automattic\\WooCommerce\\Caching\\WPCacheEngine\:\:get_cached_objects\(\) expects array\<string\>, array\<int\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
 			message: '#^Parameter \#1 \$order of method Abstract_WC_Order_Data_Store_CPT\:\:delete_items\(\) expects WC_Order, WC_Abstract_Order given\.$#'
 			identifier: argument.type
 			count: 1
@@ -90206,6 +89078,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$order of method Abstract_WC_Order_Data_Store_CPT\:\:read\(\) expects WC_Order, WC_Abstract_Order given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:read_order_from_datastore\(\) expects WC_Abstract_Order, object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -90463,26 +89341,8 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStoreMeta.php
 
 		-
-			message: '#^Cannot call method cache_objects\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStoreMeta.php
-
-		-
-			message: '#^Cannot call method delete_cache_group\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStoreMeta.php
-
-		-
-			message: '#^Cannot call method delete_cached_object\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStoreMeta.php
-
-		-
-			message: '#^Cannot call method get_cached_objects\(\) on mixed\.$#'
-			identifier: method.nonObject
+			message: '#^Parameter \#1 \$keys of method Automattic\\WooCommerce\\Caching\\WPCacheEngine\:\:get_cached_objects\(\) expects array\<string\>, array\<int\> given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStoreMeta.php
 
@@ -90523,30 +89383,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableMetaQuery.php
 
 		-
-			message: '#^Cannot call method format_object_value_for_db\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
-
-		-
-			message: '#^Cannot call method get_all_order_column_mappings\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
-
-		-
-			message: '#^Cannot call method get_wpdb_format_for_type\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
-
-		-
-			message: '#^Cannot call static method get_all_table_names_with_id\(\) on mixed\.$#'
-			identifier: staticMethod.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableQuery\:\:build_count_query\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -90561,12 +89397,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @var has invalid value \(OrdersTableSearchQuery\?\)\: Unexpected token "\?", expected TOKEN_HORIZONTAL_WS at offset 64 on line 4$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(mixed, string\)\: mixed\)\|null, array\{mixed, ''format_object_value…''\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
 
@@ -90620,12 +89450,6 @@ parameters:
 
 		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableQuery\:\:\$fields \(array\) does not accept string\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableQuery\:\:\$order_datastore \(Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\) does not accept mixed\.$#'
 			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
@@ -90709,12 +89533,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
 
 		-
-			message: '#^Cannot call method data_sync_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableRefundDataStore\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -90790,12 +89608,6 @@ parameters:
 			message: '#^Binary operation "\." between ''\\'''' and non\-empty\-array\|string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableSearchQuery.php
-
-		-
-			message: '#^Cannot call method sanitise_boolean_fts_search_term\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: src/Internal/DataStores/Orders/OrdersTableSearchQuery.php
 
 		-
@@ -90991,12 +89803,6 @@ parameters:
 			path: src/Internal/DownloadPermissionsAdjuster.php
 
 		-
-			message: '#^Cannot call method get_instance_of\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/DownloadPermissionsAdjuster.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DownloadPermissionsAdjuster\:\:adjust_download_permissions\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -91011,6 +89817,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DownloadPermissionsAdjuster\:\:maybe_schedule_adjust_download_permissions\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Internal/DownloadPermissionsAdjuster.php
+
+		-
+			message: '#^Property Automattic\\WooCommerce\\Internal\\DownloadPermissionsAdjuster\:\:\$downloads_data_store \(Automattic\\WooCommerce\\Internal\\WC_Data_Store\) does not accept WC_Data_Store\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/DownloadPermissionsAdjuster.php
 
@@ -91093,32 +89905,14 @@ parameters:
 			path: src/Internal/EmailEditor/Integration.php
 
 		-
-			message: '#^Cannot call method generate_placeholder_content\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/EmailEditor/Integration.php
-
-		-
-			message: '#^Cannot call method get_email\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/EmailEditor/Integration.php
-
-		-
-			message: '#^Cannot call method prepare_context_data\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/EmailEditor/Integration.php
-
-		-
-			message: '#^Cannot call method set_email_type\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/EmailEditor/Integration.php
-
-		-
 			message: '#^Cannot cast mixed to int\.$#'
 			identifier: cast.int
+			count: 1
+			path: src/Internal/EmailEditor/Integration.php
+
+		-
+			message: '#^Dead catch \- InvalidArgumentException is never thrown in the try block\.$#'
+			identifier: catch.neverThrown
 			count: 1
 			path: src/Internal/EmailEditor/Integration.php
 
@@ -91153,6 +89947,18 @@ parameters:
 			path: src/Internal/EmailEditor/Integration.php
 
 		-
+			message: '#^Parameter \#1 \$email_type of method Automattic\\WooCommerce\\Internal\\Admin\\EmailPreview\\EmailPreview\:\:set_email_type\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/EmailEditor/Integration.php
+
+		-
+			message: '#^Parameter \#1 \$email_type_class_name of method Automattic\\WooCommerce\\Internal\\Admin\\EmailPreview\\EmailPreview\:\:generate_placeholder_content\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/EmailEditor/Integration.php
+
+		-
 			message: '#^Parameter \#1 \$post_id of method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:get_email_type_from_post_id\(\) expects int\|string, int\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -91167,24 +89973,6 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$post_id of method Automattic\\WooCommerce\\Internal\\EmailEditor\\Integration\:\:update_email_preview_data\(\) expects int, string given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Internal/EmailEditor/Integration.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\EmailEditor\\Integration\:\:\$editor_page_renderer \(Automattic\\WooCommerce\\Internal\\EmailEditor\\PageRenderer\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/EmailEditor/Integration.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\EmailEditor\\Integration\:\:\$email_api_controller \(Automattic\\WooCommerce\\Internal\\EmailEditor\\EmailApiController\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/EmailEditor/Integration.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\EmailEditor\\Integration\:\:\$template_api_controller \(Automattic\\WooCommerce\\Internal\\EmailEditor\\EmailTemplates\\TemplateApiController\) does not accept mixed\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/EmailEditor/Integration.php
 
@@ -91426,12 +90214,6 @@ parameters:
 			message: '#^Cannot access property \$id on string\.$#'
 			identifier: property.nonObject
 			count: 1
-			path: src/Internal/Features/FeaturesController.php
-
-		-
-			message: '#^Cannot call method add_feature_definition\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: src/Internal/Features/FeaturesController.php
 
 		-
@@ -91939,12 +90721,6 @@ parameters:
 			path: src/Internal/Fulfillments/Fulfillment.php
 
 		-
-			message: '#^Cannot call method read\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/Fulfillment.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment\:\:get_date_fulfilled\(\) should return string\|null but returns mixed\.$#'
 			identifier: return.type
 			count: 1
@@ -91981,12 +90757,6 @@ parameters:
 			path: src/Internal/Fulfillments/Fulfillment.php
 
 		-
-			message: '#^Property WC_Data\:\:\$data_store \(object\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/Fulfillments/Fulfillment.php
-
-		-
 			message: '#^Binary operation "\*" between string and 1\|3\|7 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -92001,30 +90771,6 @@ parameters:
 		-
 			message: '#^Cannot access offset int on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Cannot call method get_icon\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Cannot call method get_key\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Cannot call method get_name\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Cannot call method get_tracking_url\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Fulfillments/FulfillmentUtils.php
 
@@ -92059,30 +90805,6 @@ parameters:
 			path: src/Internal/Fulfillments/FulfillmentUtils.php
 
 		-
-			message: '#^Cannot call method dbdelta\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsController.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsController.php
-
-		-
-			message: '#^Cannot call method get_max_index_length\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsController.php
-
-		-
-			message: '#^Cannot call method register\(\) on class\-string\|object\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsController\:\:delete_legacy_order_fulfillment_meta\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -92095,20 +90817,20 @@ parameters:
 			path: src/Internal/Fulfillments/FulfillmentsController.php
 
 		-
-			message: '#^Parameter \#1 \$object of function method_exists expects object\|string, mixed given\.$#'
+			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Container\:\:get\(\) expects class\-string\<object\>, string given\.$#'
 			identifier: argument.type
+			count: 1
+			path: src/Internal/Fulfillments/FulfillmentsController.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Automattic\\WooCommerce\\Container\:\:get\(\)$#'
+			identifier: argument.templateType
 			count: 1
 			path: src/Internal/Fulfillments/FulfillmentsController.php
 
 		-
 			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
-			count: 2
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Cannot call method read_fulfillments\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 2
 			path: src/Internal/Fulfillments/FulfillmentsManager.php
 
@@ -92162,12 +90884,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Cannot call method read_fulfillments\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
@@ -92299,12 +91015,6 @@ parameters:
 			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
 
 		-
-			message: '#^Cannot call method read_fulfillments\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsSettings.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsSettings\:\:init_settings_auto_fulfill\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -92348,12 +91058,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_customer_id\(\) on WC_Order\|WC_Order_Refund\|true\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Cannot call method read_fulfillments\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
@@ -92719,18 +91423,6 @@ parameters:
 			path: src/Internal/Logging/RemoteLogger.php
 
 		-
-			message: '#^Cannot call method add\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Logging/RemoteLogger.php
-
-		-
-			message: '#^Cannot call method do_server_side_stats\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Logging/RemoteLogger.php
-
-		-
 			message: '#^Constant WC_ABSPATH not found\.$#'
 			identifier: constant.notFound
 			count: 2
@@ -92845,12 +91537,6 @@ parameters:
 			path: src/Internal/MCP/MCPAdapterProvider.php
 
 		-
-			message: '#^Cannot call method get_abilities_ids\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/MCP/MCPAdapterProvider.php
-
-		-
 			message: '#^Parameter \#1 \$str of function sanitize_text_field expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -92873,24 +91559,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Cannot call method enqueue_processor\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/OrderCouponDataMigrator.php
-
-		-
-			message: '#^Cannot call method is_enqueued\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: src/Internal/OrderCouponDataMigrator.php
-
-		-
-			message: '#^Cannot call method remove_processor\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/OrderCouponDataMigrator.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\OrderCouponDataMigrator\:\:convert_item\(\) has no return type specified\.$#'
@@ -93535,18 +92203,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/CLIRunner.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\CLIRunner\:\:\$data_regenerator \(Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\DataRegenerator\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/ProductAttributesLookup/CLIRunner.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\CLIRunner\:\:\$lookup_data_store \(Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\LookupDataStore\) does not accept mixed\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/ProductAttributesLookup/CLIRunner.php
-
-		-
 			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
 			identifier: class.notFound
 			count: 1
@@ -93586,30 +92242,6 @@ parameters:
 			message: '#^Callback expects 1 parameter, \$accepted_args is set to 999\.$#'
 			identifier: arguments.count
 			count: 1
-			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
-
-		-
-			message: '#^Cannot call method create_primary_key\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
-
-		-
-			message: '#^Cannot call method dbdelta\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
-
-		-
-			message: '#^Cannot call method drop_table_index\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
-
-		-
-			message: '#^Cannot call method get_index_columns\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
 			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
 
 		-
@@ -94051,30 +92683,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
-			message: '#^Cannot call method get_progress\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/SyncUI.php
-
-		-
-			message: '#^Cannot call method in_progress\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/SyncUI.php
-
-		-
-			message: '#^Cannot call method start\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/SyncUI.php
-
-		-
-			message: '#^Cannot call method stop\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/SyncUI.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductDownloads\\ApprovedDirectories\\Admin\\SyncUI\:\:cancel_sync\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -94109,18 +92717,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/SyncUI.php
-
-		-
-			message: '#^Cannot call method count\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 4
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/Table.php
-
-		-
-			message: '#^Cannot call method list\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/Table.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductDownloads\\ApprovedDirectories\\Admin\\Table\:\:display_tablenav\(\) has no return type specified\.$#'
@@ -94175,36 +92771,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/Table.php
-
-		-
-			message: '#^Cannot call method delete_by_id\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/UI.php
-
-		-
-			message: '#^Cannot call method disable_all\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/UI.php
-
-		-
-			message: '#^Cannot call method disable_by_id\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/UI.php
-
-		-
-			message: '#^Cannot call method enable_all\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/UI.php
-
-		-
-			message: '#^Cannot call method enable_by_id\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/UI.php
 
 		-
 			message: '#^Cannot cast mixed to int\.$#'
@@ -94319,12 +92885,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/ProductDownloads/ApprovedDirectories/Admin/UI.php
-
-		-
-			message: '#^Cannot call method init_hooks\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: src/Internal/ProductDownloads/ApprovedDirectories/Register.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductDownloads\\ApprovedDirectories\\Register\:\:init\(\) has no return type specified\.$#'
@@ -94513,12 +93073,6 @@ parameters:
 			path: src/Internal/ProductFilters/FilterDataProvider.php
 
 		-
-			message: '#^Cannot call method get_lookup_table_name\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ProductFilters/QueryClauses.php
-
-		-
 			message: '#^Parameter \#1 \$args of function get_terms expects array\{taxonomy\?\: array\<string\>\|string, object_ids\?\: array\<int\>\|int, orderby\?\: string, order\?\: string, hide_empty\?\: bool\|int, include\?\: array\<int\>\|string, exclude\?\: array\<int\>\|string, exclude_tree\?\: array\<int\>\|string, \.\.\.\}, array\{taxonomy\: non\-empty\-list\<\(int\|string\)\>, slug\: array\<mixed\>, hide_empty\: false\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -94699,13 +93253,7 @@ parameters:
 			path: src/Internal/PushNotifications/Entities/PushToken.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/PushNotifications/PushNotifications.php
-
-		-
-			message: '#^Cannot call method get_instance_of\(\) on mixed\.$#'
+			message: '#^Cannot call method error\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/PushNotifications/PushNotifications.php
@@ -94853,24 +93401,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/ReceiptRendering/ReceiptRenderingEngine.php
-
-		-
-			message: '#^Cannot call method generate_receipt\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ReceiptRendering/ReceiptRenderingRestController.php
-
-		-
-			message: '#^Cannot call method get_existing_receipt\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ReceiptRendering/ReceiptRenderingRestController.php
-
-		-
-			message: '#^Cannot call method get_public_url\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/ReceiptRendering/ReceiptRenderingRestController.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ReceiptRendering\\ReceiptRenderingRestController\:\:create_order_receipt\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
@@ -95875,18 +94405,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
-
-		-
 			message: '#^Cannot unset offset ''cogs_value'' on array\{id\: int, name\: string, image\: string, product_id\: int, product_data\: array\|null, quantity\: int, price\: mixed, tax_class\: string, \.\.\.\}\.$#'
 			identifier: unset.offset
 			count: 1
@@ -95921,18 +94439,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderSchema.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderSchema.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Schema\\OrderSchema\:\:get_item_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
@@ -96069,18 +94575,6 @@ parameters:
 		-
 			message: '#^Cannot access offset ''value'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/UpdateUtils.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/UpdateUtils.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Orders/UpdateUtils.php
 
@@ -96507,18 +95001,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$term_id on WP_Term\|false\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
@@ -97353,18 +95835,6 @@ parameters:
 		-
 			message: '#^Call to method get_total\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Refunds\\Schema\\WC_Order_Item\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
 
@@ -99193,12 +97663,6 @@ parameters:
 			path: src/Internal/RestockRefundedItemsAdjuster.php
 
 		-
-			message: '#^Cannot call method get_instance_of\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/RestockRefundedItemsAdjuster.php
-
-		-
 			message: '#^Cannot call method get_qty_refunded_for_item\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -99225,6 +97689,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestockRefundedItemsAdjuster\:\:initialize_restock_refunded_items\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Internal/RestockRefundedItemsAdjuster.php
+
+		-
+			message: '#^Property Automattic\\WooCommerce\\Internal\\RestockRefundedItemsAdjuster\:\:\$order_factory \(Automattic\\WooCommerce\\Internal\\WC_Order_Factory\) does not accept WC_Order_Factory\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/RestockRefundedItemsAdjuster.php
 
@@ -99485,18 +97955,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: src/Internal/StockNotifications/Admin/NotificationEditPage.php
-
-		-
-			message: '#^Cannot call method prepare_items\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Admin/NotificationsPage.php
-
-		-
-			message: '#^Cannot call method process_actions\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Admin/NotificationsPage.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\NotificationsPage\:\:create\(\) has no return type specified\.$#'
@@ -100435,12 +98893,6 @@ parameters:
 			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
 
 		-
-			message: '#^Cannot call method on_woo_install_or_update\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/StockNotifications.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\StockNotifications\:\:init_hooks\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -100486,18 +98938,6 @@ parameters:
 			message: '#^Cannot access offset ''basedir'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 6
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Cannot call method exit\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 4
 			path: src/Internal/TransientFiles/TransientFilesEngine.php
 
 		-
@@ -100759,9 +99199,9 @@ parameters:
 			path: src/Internal/Utilities/DatabaseUtil.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 2
+			message: '#^Method Automattic\\WooCommerce\\Internal\\Utilities\\FilesystemUtil\:\:get_wp_filesystem_method_or_direct\(\) should return string\|false but returns mixed\.$#'
+			identifier: return.type
+			count: 1
 			path: src/Internal/Utilities/FilesystemUtil.php
 
 		-
@@ -100903,12 +99343,6 @@ parameters:
 			path: src/Internal/Utilities/PluginInstaller.php
 
 		-
-			message: '#^Cannot call method get_all_active_valid_plugins\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Utilities/PluginInstaller.php
-
-		-
 			message: '#^Constant WC_ABSPATH not found\.$#'
 			identifier: constant.notFound
 			count: 2
@@ -100981,7 +99415,7 @@ parameters:
 			path: src/Internal/Utilities/PluginInstaller.php
 
 		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
+			message: '#^Cannot call method warning\(\) on mixed\.$#'
 			identifier: method.nonObject
 			count: 3
 			path: src/Internal/Utilities/PostMetaUtil.php
@@ -101086,12 +99520,6 @@ parameters:
 			message: '#^@param Automattic\\WooCommerce\\Internal\\Utilities\\WC_Order \$order does not accept actual type of parameter\: bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: parameter.phpDocType
 			count: 1
-			path: src/Internal/Utilities/Users.php
-
-		-
-			message: '#^Cannot call method call_function\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
 			path: src/Internal/Utilities/Users.php
 
 		-
@@ -104761,12 +103189,6 @@ parameters:
 			path: src/StoreApi/Utilities/OrderController.php
 
 		-
-			message: '#^Cannot call method find_user_ids_by_billing_email_for_coupons_usage_lookup\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Utilities/OrderController.php
-
-		-
 			message: '#^Cannot call method get_data_store\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -105085,12 +103507,6 @@ parameters:
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-
-			message: '#^Cannot call method with\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Utilities/ProductQueryFilters.php
-
-		-
 			message: '#^Cannot unset offset ''outofstock'' on list\<string\>\.$#'
 			identifier: unset.offset
 			count: 1
@@ -105289,84 +103705,6 @@ parameters:
 			path: src/Utilities/ArrayUtil.php
 
 		-
-			message: '#^Cannot call method allow_activating_plugins_with_incompatible_features\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/FeaturesUtil.php
-
-		-
-			message: '#^Cannot call method allow_enabling_features_with_incompatible_plugins\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/FeaturesUtil.php
-
-		-
-			message: '#^Cannot call method declare_compatibility\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/FeaturesUtil.php
-
-		-
-			message: '#^Cannot call method feature_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/FeaturesUtil.php
-
-		-
-			message: '#^Cannot call method get_compatible_features_for_plugin\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/FeaturesUtil.php
-
-		-
-			message: '#^Cannot call method get_compatible_plugins_for_feature\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/FeaturesUtil.php
-
-		-
-			message: '#^Cannot call method get_features\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/FeaturesUtil.php
-
-		-
-			message: '#^Cannot call method get_default_handler\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/LoggingUtil.php
-
-		-
-			message: '#^Cannot call method get_level_threshold\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/LoggingUtil.php
-
-		-
-			message: '#^Cannot call method get_log_directory_size\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/LoggingUtil.php
-
-		-
-			message: '#^Cannot call method get_logs_tab_url\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/LoggingUtil.php
-
-		-
-			message: '#^Cannot call method get_retention_period\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/LoggingUtil.php
-
-		-
-			message: '#^Cannot call method logging_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/LoggingUtil.php
-
-		-
 			message: '#^Constant WC_ROUNDING_PRECISION not found\.$#'
 			identifier: constant.notFound
 			count: 1
@@ -105397,96 +103735,6 @@ parameters:
 			path: src/Utilities/NumberUtil.php
 
 		-
-			message: '#^Cannot call method custom_orders_table_usage_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method get_edit_url\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method get_new_page_url\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method get_order_admin_screen\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method get_order_type\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method get_post_or_object_meta\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method get_post_or_order_id\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method get_table_for_order_meta\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method get_table_for_orders\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method hpos_data_caching_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method init_theorder_object\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method is_custom_order_tables_in_sync\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method is_order\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method is_order_screen\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: src/Utilities/OrderUtil.php
-
-		-
-			message: '#^Cannot call method orders_cache_usage_is_enabled\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Utilities/OrderUtil.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Utilities\\OrderUtil\:\:get_post_or_order_id\(\) has parameter \$post_or_order_object with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -105495,6 +103743,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Utilities\\OrderUtil\:\:init_theorder_object\(\) has invalid return type Automattic\\WooCommerce\\Utilities\\WC_Order_Refund\.$#'
 			identifier: class.notFound
+			count: 1
+			path: src/Utilities/OrderUtil.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Utilities\\OrderUtil\:\:init_theorder_object\(\) should return Automattic\\WooCommerce\\Utilities\\WC_Order_Refund\|bool\|WC_Order but returns Automattic\\WooCommerce\\Internal\\Utilities\\WC_Order_Refund\|bool\|WC_Order\.$#'
+			identifier: return.type
 			count: 1
 			path: src/Utilities/OrderUtil.php
 
@@ -105513,12 +103767,6 @@ parameters:
 		-
 			message: '#^Cannot access offset ''Name'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Utilities/PluginUtil.php
-
-		-
-			message: '#^Cannot call method get_default_plugin_compatibility\(\) on mixed\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: src/Utilities/PluginUtil.php
 
