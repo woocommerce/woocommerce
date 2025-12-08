@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix issue in which regular Checkout requests were getting counted toward rate limit if rate limiting is enabled.
