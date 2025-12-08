@@ -297,7 +297,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		 * By default, the deepest category (most ancestors) is selected. This filter allows
 		 * customization of which category is used in the product permalink.
 		 *
-		 * @since 2.5.0
+		 * @since 2.4.0
 		 *
 		 * @param WP_Term   $deepest_term The selected category term object.
 		 * @param WP_Term[] $terms        All category terms assigned to the product.
