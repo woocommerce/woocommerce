@@ -17,6 +17,9 @@ class ProductMapperTest extends \WC_Unit_Test_Case {
 	 */
 	private ProductMapper $sut;
 
+	/**
+	 * Set up test fixtures.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
@@ -24,6 +27,9 @@ class ProductMapperTest extends \WC_Unit_Test_Case {
 		$this->sut->init(); // Could be done through DI, but there are no parameter dependencies.
 	}
 
+	/**
+	 * Clean up test fixtures.
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
 

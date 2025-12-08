@@ -26,6 +26,9 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 	 */
 	private $mock_async_generator;
 
+	/**
+	 * Set up test fixtures.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
@@ -37,17 +40,25 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 		$this->sut = wc_get_container()->get( ApiController::class );
 	}
 
+	/**
+	 * Clean up test fixtures.
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		wc_get_container()->reset_all_replacements();
 	}
 
+	/**
+	 * Data provider for generate_feed tests.
+	 *
+	 * @return array Test scenarios.
+	 */
 	public function provider_generate_feed(): array {
-		return [
-			'No force-generation check, no fields'   => [ false, null ],
-			'No force-generation check, with fields' => [ false, 'id,name' ],
-			'Force generation, with fields'          => [ true, 'id,name' ],
-		];
+		return array(
+			'No force-generation check, no fields'   => array( false, null ),
+			'No force-generation check, with fields' => array( false, 'id,name' ),
+			'Force generation, with fields'          => array( true, 'id,name' ),
+		);
 	}
 
 	/**
@@ -69,13 +80,13 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 
 		$this->mock_async_generator->expects( $this->once() )
 			->method( $force_regeneration ? 'force_regeneration' : 'get_status' )
-			->with( $fields ? [ '_product_fields' => $fields ] : [] )
+			->with( $fields ? array( '_product_fields' => $fields ) : array() )
 			->willReturn(
-				[
+				array(
 					'action_id' => 6789,
 					'path'      => '/tmp/random_path.json',
 					'url'       => 'https://example.com/feed.json',
-				]
+				)
 			);
 
 		$response      = $this->sut->generate_feed( $request );

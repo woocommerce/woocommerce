@@ -18,44 +18,48 @@ use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
  * ProductWalkerTest class.
  */
 class ProductWalkerTest extends \WC_Unit_Test_Case {
-	public function setUp(): void {
-		parent::setUp();
-	}
-
+	/**
+	 * Clean up test fixtures.
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		remove_all_filters( 'woocommerce_product_feed_args' );
 		wc_get_container()->reset_all_replacements();
 	}
 
+	/**
+	 * Data provider for walker tests.
+	 *
+	 * @return array Test scenarios.
+	 */
 	public function provider_walker(): array {
-		return [
-			'No Results'                        => [
+		return array(
+			'No Results'                        => array(
 				'number_of_products' => 0,
 				'batch_size'         => 10,
 				'add_args_filter'    => true,
-			],
-			'Single batch'                      => [
+			),
+			'Single batch'                      => array(
 				'number_of_products' => 10,
 				'batch_size'         => 100,
 				'add_args_filter'    => false,
-			],
-			'Multiple batches, half last batch' => [
+			),
+			'Multiple batches, half last batch' => array(
 				'number_of_products' => 5 * 12 - 6,
 				'batch_size'         => 12,
 				'add_args_filter'    => true,
-			],
-			'Multiple batches, full last batch' => [
+			),
+			'Multiple batches, full last batch' => array(
 				'number_of_products' => 5 * 13,
 				'batch_size'         => 13,
 				'add_args_filter'    => false,
-			],
-			'High number of batches, proper memory management' => [
+			),
+			'High number of batches, proper memory management' => array(
 				'number_of_products' => 15 * 2,
 				'batch_size'         => 2,
 				'add_args_filter'    => false,
-			],
-		];
+			),
+		);
 	}
 
 	/**
@@ -76,27 +80,27 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		$expected_iterations = max( 1, (int) ceil( $number_of_products / $batch_size ) );
 
 		// Generate products, group them into resulting batches.
-		$loader_results     = [];
+		$loader_results     = array();
 		$generated_products = 0;
 		for ( $i = 0; $i < $expected_iterations; $i++ ) {
-			$page = [];
+			$page = array();
 			for ( $j = 1; $j <= $batch_size && $generated_products++ < $number_of_products; $j++ ) {
 				$page[] = WC_Helper_Product::create_simple_product();
 			}
 
-			$loader_results[] = (object) [
+			$loader_results[] = (object) array(
 				'products'      => $page,
 				'total'         => $number_of_products,
 				'max_num_pages' => $expected_iterations,
-			];
+			);
 		}
 
 		// Additional parameters for the query.
 		$parent_exclude        = -156;
-		$additional_query_args = [
+		$additional_query_args = array(
 			'parent_exclude' => $parent_exclude,
-			'category'       => [ 'shirts' ],
-		];
+			'category'       => array( 'shirts' ),
+		);
 
 		// The 11th product will always be rejected due to a validation error.
 		$validation_compensation = ( $number_of_products > 10 ? 1 : 0 );
@@ -145,7 +149,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 							$this->assertArrayNotHasKey( 'category', $args );
 						} else {
 							$this->assertArrayHasKey( 'category', $args );
-							$this->assertEquals( [ 'shirts' ], $args['category'] );
+							$this->assertEquals( array( 'shirts' ), $args['category'] );
 						}
 						return true;
 					}
@@ -163,9 +167,9 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 			->with( $this->isInstanceOf( WC_Product::class ) )
 			->willReturnCallback(
 				function ( WC_Product $product ) {
-					return [
+					return array(
 						'id' => $product->get_id(),
-					];
+					);
 				}
 			);
 
@@ -181,9 +185,9 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 					// Pick a "random" product to invalidate.
 					$validated_products++;
 					if ( 11 === $validated_products ) {
-						return [ 'error' => 'Some validation error' ];
+						return array( 'error' => 'Some validation error' );
 					}
-					return [];
+					return array();
 				}
 			);
 

@@ -17,11 +17,17 @@ if ( ! function_exists( 'WP_Filesystem' ) ) {
  * JsonFileFeedTest class.
  */
 class JsonFileFeedTest extends \WC_Unit_Test_Case {
+	/**
+	 * Clean up test fixtures.
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		remove_all_filters( 'woocommerce_product_feed_time' );
 	}
 
+	/**
+	 * Test that feed file is created correctly.
+	 */
 	public function test_feed_file_is_created() {
 		// Use the current time for the test as the time in the SUT to avoid flakiness.
 		$current_time = time();
@@ -48,17 +54,20 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( '/product-feeds/', (string) $url );
 	}
 
+	/**
+	 * Test that feed file is created with entries.
+	 */
 	public function test_feed_file_is_created_with_entries() {
-		$data = [
-			[
+		$data = array(
+			array(
 				'name'  => 'First Entry',
 				'price' => 100,
-			],
-			[
+			),
+			array(
 				'name'  => 'Second Entry',
 				'price' => 333,
-			],
-		];
+			),
+		);
 
 		$feed = new JsonFileFeed( 'test-feed' );
 		$feed->start();
@@ -73,6 +82,9 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Test that get_file_url returns null if feed is not completed.
+	 */
 	public function test_get_file_url_returns_null_if_not_completed() {
 		$feed = new JsonFileFeed( 'test-feed' );
 		$feed->start();
@@ -80,18 +92,27 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		$feed->end();
 	}
 
+	/**
+	 * Test that add_entry before start throws type error.
+	 */
 	public function test_add_entry_before_start_throws_type_error() {
 		$feed = new JsonFileFeed( 'test-feed' );
 		$this->expectException( \TypeError::class );
-		$feed->add_entry( [ 'name' => 'oops' ] );
+		$feed->add_entry( array( 'name' => 'oops' ) );
 	}
 
+	/**
+	 * Test that end before start throws type error.
+	 */
 	public function test_end_before_start_throws_type_error() {
 		$feed = new JsonFileFeed( 'test-feed' );
 		$this->expectException( \TypeError::class );
 		$feed->end();
 	}
 
+	/**
+	 * Test that get_file_url throws when directory cannot be created.
+	 */
 	public function test_get_file_url_throws_when_directory_cannot_be_created() {
 		// Ensure clean state then create a FILE where the directory should be.
 		$this->get_and_delete_dir();

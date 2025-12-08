@@ -5,6 +5,8 @@
  * @package Automattic\WooCommerce\Internal\ProductFeed
  */
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductMapperInterface;
@@ -68,9 +70,10 @@ class ProductMapper implements ProductMapperInterface {
 	/**
 	 * Initialize the mapper.
 	 *
+	 * @internal
 	 * @return void
 	 */
-	public function init(): void {
+	final public function init(): void {
 		$this->products_controller   = new WC_REST_Products_Controller();
 		$this->variations_controller = new WC_REST_Product_Variations_Controller();
 	}
@@ -118,10 +121,10 @@ class ProductMapper implements ProductMapperInterface {
 			$response = rest_filter_response_fields( $response, null, $request );
 		}
 
-		$row = [
+		$row = array(
 			'type' => $product->get_type(),
 			'data' => $response->get_data(),
-		];
+		);
 
 		/**
 		 * Filter mapped catalog product data.

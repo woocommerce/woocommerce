@@ -266,10 +266,10 @@ class JsonFileFeed implements FeedInterface {
 		$directory_url = $upload_dir['baseurl'] . '/' . self::UPLOAD_DIR . '/';
 
 		// Follow the format, returned by `wp_upload_dir()`.
-		$prepared = [
+		$prepared = array(
 			'path' => $directory_path,
 			'url'  => $directory_url,
-		];
+		);
 		return $prepared;
 	}
 }

@@ -30,6 +30,9 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	// Option key for tests.
 	private const OPTION_KEY = 'product_feed_async_test';
 
+	/**
+	 * Set up test fixtures.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
@@ -41,6 +44,9 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut = wc_get_container()->get( AsyncGenerator::class );
 	}
 
+	/**
+	 * Clean up test fixtures.
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
 
@@ -48,18 +54,21 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		wc_get_container()->reset_all_replacements();
 	}
 
+	/**
+	 * Test that feed generation action forwards arguments to mapper.
+	 */
 	public function test_feed_generation_action_forwards_args() {
 		// Make sure at least one product is present. We will not check it here.
 		WC_Helper_Product::create_simple_product();
 
 		// Set the initial option to indicate scheduled state.
-		$status = [
+		$status = array(
 			'state' => AsyncGenerator::STATE_SCHEDULED,
-			'args'  => [
+			'args'  => array(
 				'_product_fields'   => 'id,name',
 				'_variation_fields' => 'id,name,url',
-			],
-		];
+			),
+		);
 		update_option( self::OPTION_KEY, $status );
 
 		// Expect the mapper to be called with the fields.
@@ -72,7 +81,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 			->with( 'id,name,url' );
 		$mock_mapper->expects( $this->atLeast( 1 ) )
 			->method( 'map_product' )
-			->willReturn( [] );
+			->willReturn( array() );
 
 		// Replace the mapper with the integration.
 		$this->mock_integration->expects( $this->atLeast( 1 ) )

@@ -119,10 +119,10 @@ class ProductWalker {
 		FeedInterface $feed
 	): self {
 		$query_args = array_merge(
-			[
-				'status' => [ 'publish' ],
+			array(
+				'status' => array( 'publish' ),
 				'return' => 'objects',
-			],
+			),
 			$integration->get_product_feed_query_args()
 		);
 
@@ -238,15 +238,15 @@ class ProductWalker {
 	 * @param int   $limit The maximum number of products to iterate through.
 	 * @return object The result of the query.
 	 */
-	private function iterate( array $args = [], int $page = 1, int $limit = 100 ): object {
+	private function iterate( array $args = array(), int $page = 1, int $limit = 100 ): object {
 		$result = $this->product_loader->get_products(
 			array_merge(
 				$args,
-				[
+				array(
 					'page'     => $page,
 					'limit'    => $limit,
 					'paginate' => true,
-				]
+				)
 			)
 		);
 
