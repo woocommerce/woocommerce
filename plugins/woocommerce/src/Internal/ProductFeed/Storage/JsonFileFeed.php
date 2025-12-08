@@ -102,7 +102,7 @@ class JsonFileFeed implements FeedInterface {
 		 * @param int           $time The current time.
 		 * @param FeedInterface $feed The feed instance.
 		 * @return int The current time.
-		 * @since 0.1.0
+		 * @since 10.5.0
 		 */
 		$current_time    = apply_filters( 'woocommerce_product_feed_time', time(), $this );
 		$hash_data       = $this->base_name . gmdate( 'r', $current_time );

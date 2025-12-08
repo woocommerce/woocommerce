@@ -131,7 +131,7 @@ class ProductWalker {
 		 *
 		 * Variable products are not included by default, as their variations will be included.
 		 *
-		 * @since 0.1.0
+		 * @since 10.5.0
 		 *
 		 * @param array                $query_args The arguments to pass to wc_get_products().
 		 * @param IntegrationInterface $integration The integration that the query belongs to.

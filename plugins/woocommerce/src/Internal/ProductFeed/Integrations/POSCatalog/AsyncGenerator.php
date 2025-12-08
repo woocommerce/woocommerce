@@ -319,7 +319,7 @@ class AsyncGenerator {
 		 *
 		 * @param int $stuck_time The stuck time in seconds.
 		 * @return int The stuck time in seconds.
-		 * @since 0.1.0
+		 * @since 10.5.0
 		 */
 		$scheduled_timeout = apply_filters( 'woocommerce_product_feed_scheduled_timeout', 10 * MINUTE_IN_SECONDS );
 		if (

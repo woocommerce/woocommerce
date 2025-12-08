@@ -126,7 +126,7 @@ class ProductMapper implements ProductMapperInterface {
 		/**
 		 * Filter mapped catalog product data.
 		 *
-		 * @since 1.0.0
+		 * @since 10.5.0
 		 * @param array      $row     Mapped product data.
 		 * @param WC_Product $product Product object.
 		 */
