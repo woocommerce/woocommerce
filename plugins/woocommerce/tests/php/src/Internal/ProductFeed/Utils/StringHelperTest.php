@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFeed\Utils;
 use Automattic\WooCommerce\Internal\ProductFeed\Utils\StringHelper;
 
 /**
- * Demo test class for OpenAI Product Feed plugin.
+ * StringHelper test class.
  */
 class StringHelperTest extends \WC_Unit_Test_Case {
 	/**
