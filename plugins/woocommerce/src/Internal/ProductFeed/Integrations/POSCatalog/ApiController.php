@@ -33,7 +33,7 @@ class ApiController {
 	 *
 	 * @param Container $container The container instance. Everything else will be dynamic.
 	 */
-	public function init( Container $container ) {
+	public function init( $container ) {
 		$this->container = $container;
 	}
 
