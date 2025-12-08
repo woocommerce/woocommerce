@@ -92,6 +92,26 @@ class WC_Tracks {
 	 * Record an event in Tracks - this is the preferred way to record events from PHP.
 	 * Note: the event request won't be made if $properties has a member called `error`.
 	 *
+	 * Array values in event properties are automatically converted to prevent invalid property names:
+	 * - Indexed arrays (e.g., ['a', 'b', 'c']) become comma-separated strings: 'a,b,c'
+	 * - Associative arrays (e.g., ['key' => 'val']) become JSON strings: '{"key":"val"}'
+	 * - Empty arrays become empty strings
+	 *
+	 * Examples:
+	 *     // Indexed array - becomes comma-separated string
+	 *     WC_Tracks::record_event( 'checkout_viewed', array(
+	 *         'blocks' => array( 'woocommerce/cart-items', 'woocommerce/checkout-totals' )
+	 *     ) );
+	 *     // Results in: blocks=woocommerce%2Fcart-items%2Cwoocommerce%2Fcheckout-totals
+	 *
+	 *     // Associative array - becomes JSON string
+	 *     WC_Tracks::record_event( 'settings_changed', array(
+	 *         'options' => array( 'enabled' => true, 'count' => 5 )
+	 *     ) );
+	 *     // Results in: options=%7B%22enabled%22%3Atrue%2C%22count%22%3A5%7D
+	 *
+	 * For complex structures, consider explicitly JSON-encoding before passing to record_event().
+	 *
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
 	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.

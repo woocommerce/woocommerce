@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes breadcrumbs sometimes throwing errors when categories inconsistencies happened in the Database.

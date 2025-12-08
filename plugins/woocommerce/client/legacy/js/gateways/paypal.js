@@ -11,6 +11,11 @@ jQuery(function ($) {
 			return;
 		}
 
+		// If PayPal is not loaded, don't try to render the buttons.
+		if ( typeof paypal === 'undefined' ) {
+			return;
+		}
+
 		applyStyles();
 
 		/**

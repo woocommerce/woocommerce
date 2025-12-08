@@ -54,7 +54,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItRendersContent(): void {
 		$template          = new \WP_Block_Template();
 		$template->id      = 'template-id';
-		$template->content = '<!-- wp:core/post-content /-->';
+		$template->content = '<!-- wp:post-content /-->';
 		$content           = $this->renderer->render(
 			$this->email_post,
 			$template
@@ -68,7 +68,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItInlinesContentStyles(): void {
 		$template          = new \WP_Block_Template();
 		$template->id      = 'template-id';
-		$template->content = '<!-- wp:core/post-content /-->';
+		$template->content = '<!-- wp:post-content /-->';
 		$rendered          = $this->renderer->render( $this->email_post, $template );
 		$paragraph_styles  = $this->getStylesValueForTag( $rendered, 'p' );
 		$this->assertIsString( $paragraph_styles );
