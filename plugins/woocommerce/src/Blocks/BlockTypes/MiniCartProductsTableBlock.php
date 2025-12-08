@@ -111,7 +111,12 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 						data-wp-each--cart-item="woocommerce::state.cart.items"
 						data-wp-each-key="state.cartItem.key"
 					>
-						<tr class="wc-block-cart-items__row" data-wp-run="callbacks.filterCartItemClass" tabindex="-1">
+						<tr
+							class="wc-block-cart-items__row"
+							data-wp-bind--hidden="!state.cartItem.key"
+							data-wp-run="callbacks.filterCartItemClass"
+							tabindex="-1"
+						>
 							<td data-wp-context='{ "isImageHidden": false }' class="wc-block-cart-item__image" aria-hidden="true">
 								<img
 									data-wp-bind--hidden="!state.isProductHiddenFromCatalog"

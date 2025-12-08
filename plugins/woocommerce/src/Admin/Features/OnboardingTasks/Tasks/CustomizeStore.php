@@ -19,13 +19,6 @@ class CustomizeStore extends Task {
 	public function __construct( $task_list ) {
 		parent::__construct( $task_list );
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_site_editor_scripts' ) );
-
-		add_action( 'show_admin_bar', array( $this, 'possibly_hide_wp_admin_bar' ) );
-
-		// Hook to remove unwanted UI elements when users are viewing with ?cys-hide-admin-bar=true.
-		add_action( 'wp_head', array( $this, 'possibly_remove_unwanted_ui_elements' ) );
-
 		add_action( 'save_post_wp_global_styles', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
 		add_action( 'save_post_wp_template', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
 		add_action( 'save_post_wp_template_part', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
