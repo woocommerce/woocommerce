@@ -38,6 +38,7 @@ export function ImportStatusBar(): JSX.Element | null {
 	};
 
 	// Don't render if immediate import is enabled
+	// Use the value from the settings hook rather than the status object; accessing settings is faster because they are preloaded.
 	if (
 		! wcAdminSettings.woocommerce_analytics_immediate_import ||
 		wcAdminSettings.woocommerce_analytics_immediate_import === 'yes'
