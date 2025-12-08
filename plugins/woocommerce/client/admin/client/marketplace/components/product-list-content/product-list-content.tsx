@@ -3,19 +3,15 @@
  */
 import { Fragment, useEffect, useState } from '@wordpress/element';
 import clsx from 'clsx';
-import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import './product-list-content.scss';
-import '~/customize-store/intro/intro.scss';
-import '~/customize-store/style.scss';
 import ProductCard from '../product-card/product-card';
 import { Product, ProductCardType, ProductType } from '../product-list/types';
 import { appendURLParams } from '../../utils/functions';
-import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
-import { NoAIBanner } from '~/customize-store/intro/intro-banners';
+import { getAdminSetting } from '~/utils/admin-settings';
 
 export default function ProductListContent( props: {
 	products: Product[];
@@ -105,8 +101,6 @@ export default function ProductListContent( props: {
 		setProductsToShow( props.products.slice( 0, completeRows * columns ) );
 	}, [ columns, props.products, props.productGroup, props.cardType ] );
 
-	const bannerPosition = columns * 2 - 1;
-
 	const classes = clsx(
 		'woocommerce-marketplace__product-list-content',
 		props.className
@@ -183,23 +177,6 @@ export default function ProductListContent( props: {
 								} ),
 							} }
 						/>
-						{ index === bannerPosition &&
-							props.type === 'theme' && (
-								<NoAIBanner
-									redirectToCYSFlow={ () => {
-										const customizeStoreDesignUrl =
-											addQueryArgs(
-												`${ ADMIN_URL }admin.php`,
-												{
-													page: 'wc-admin',
-													path: '/customize-store/design',
-												}
-											);
-										window.location.href =
-											customizeStoreDesignUrl;
-									} }
-								/>
-							) }
 					</Fragment>
 				) ) }
 			</div>
