@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
 use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
 use Automattic\WooCommerce\Internal\Admin\Notes\SellingOnlineCourses;
 use Automattic\WooCommerce\Internal\Admin\Notes\MagentoMigration;
+use Automattic\WooCommerce\Internal\Admin\Notes\ScheduledUpdatesPromotion;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstaller;
@@ -189,6 +190,7 @@ class FeaturePlugin {
 		new InstallJPAndWCSPlugins();
 		new SellingOnlineCourses();
 		new MagentoMigration();
+		new ScheduledUpdatesPromotion();
 	}
 
 	/**

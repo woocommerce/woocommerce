@@ -1,0 +1,28 @@
+includes:
+	- phpstan-baseline.neon
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+	tmpDir: tmp
+	level: 9
+	phpVersion: 70400
+	paths:
+		- woocommerce.php
+		- src/
+		- includes/
+	excludePaths:
+		# Matches the prior test implementation; GeoIP relies on data files.
+		- includes/class-wc-geo-ip.php
+		- includes/react-admin/feature-config.php (?)
+	bootstrapFiles:
+		- vendor/autoload.php
+	scanDirectories:
+		- vendor/wordpress/abilities-api
+	scanFiles:
+		- php-stubs/wc-admin-feature-config.php
+	treatPhpDocTypesAsCertain: false
+	ignoreErrors:
+		- identifier: missingType.iterableValue
+	parallel:
+		maximumNumberOfProcesses: 4
+

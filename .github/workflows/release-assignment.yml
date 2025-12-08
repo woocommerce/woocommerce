@@ -226,7 +226,6 @@ jobs:
 
             const labels = await linearClient.issueLabels({
               filter: {
-                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
                 name: { eq: 'Release' }
               }
             });
@@ -346,10 +345,12 @@ jobs:
             const { parent, ...subIssues } = ${{ steps.process-kickoff-templates.outputs.processed-templates }};
 
             let parentIssue;
+            const labelId = '${{ steps.get-linear-data.outputs.releaseLabelId }}' || null;
+            const assigneeId = '${{ steps.process-kickoff-templates.outputs.userId }}' || null;
+
             try {
-              const assigneeId = '${{ steps.process-kickoff-templates.outputs.userId }}' || null;
               const stateId = '${{ steps.get-linear-data.outputs.inProgressStateId }}' || null;
-              const labelId = '${{ steps.get-linear-data.outputs.releaseLabelId }}' || null;
+
               const parentResult = await linearClient.createIssue({
                 teamId: '${{ secrets.LINEAR_TEAM_ID }}',
                 title: `${parent.title}`,
@@ -375,7 +376,8 @@ jobs:
                     description: subIssue.body,
                     parentId: parentIssue.id,
                     priority: 2,
-                    labelIds: ['${{ steps.get-linear-data.outputs.releaseLabelId }}']
+                    ...(labelId && { labelIds: [labelId] }),
+                    ...(assigneeId && { assigneeId })
                   });
                 } catch (error) {
                   console.log(`Failed to create sub-issue in Linear: ${error.message}`);
