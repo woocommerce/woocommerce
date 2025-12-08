@@ -266,6 +266,10 @@ class WC_Breadcrumb {
 	protected function add_crumbs_category() {
 		$this_category = get_category( $GLOBALS['wp_query']->get_queried_object() );
 
+		if ( is_wp_error( $this_category ) || ! $this_category ) {
+			return;
+		}
+
 		if ( 0 !== intval( $this_category->parent ) ) {
 			$this->term_ancestors( $this_category->term_id, 'category' );
 		}
