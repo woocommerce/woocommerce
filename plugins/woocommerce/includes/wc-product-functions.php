@@ -1299,16 +1299,21 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
 		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
 			$tax_location = $order->get_taxable_location();
-			$tax_rates    = WC_Tax::find_rates(
-				array(
-					'country'   => $tax_location['country'],
-					'state'     => $tax_location['state'],
-					'postcode'  => $tax_location['postcode'],
-					'city'      => $tax_location['city'],
-					'tax_class' => $product->get_tax_class(),
-				)
-			);
-		} else {
+			if ( is_array( $tax_location ) && isset( $tax_location['country'] ) ) {
+				$tax_rates = WC_Tax::find_rates(
+					array(
+						'country'   => $tax_location['country'],
+						'state'     => $tax_location['state'] ?? '',
+						'postcode'  => $tax_location['postcode'] ?? '',
+						'city'      => $tax_location['city'] ?? '',
+						'tax_class' => $product->get_tax_class(),
+					)
+				);
+			}
+		}
+
+		// Fallback if no tax rates were determined.
+		if ( ! isset( $tax_rates ) ) {
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), null );
 		}
 
