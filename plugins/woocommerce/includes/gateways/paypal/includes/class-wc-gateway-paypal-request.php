@@ -421,7 +421,7 @@ class WC_Gateway_Paypal_Request {
 				$note_message .= sprintf(
 					/* translators: %1$s: Authorization ID, %2$s: open link tag, %3$s: close link tag */
 					__( '. Authorization ID: %1$s not found. Please log into your %2$sPayPal account%3$s to capture the payment', 'woocommerce' ),
-					$authorization_id,
+					esc_html( $authorization_id ),
 					'<a href="' . esc_url( $paypal_dashboard_url ) . '" target="_blank">',
 					'</a>'
 				);
