@@ -403,9 +403,20 @@ class WC_Gateway_Paypal_Request {
 			$order->save();
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
+
 			$note_message = sprintf(
 				__( 'PayPal capture authorized payment failed', 'woocommerce' ),
 			);
+
+			// If the authorization ID is not found, set the '_paypal_authorization_checked' flag to 'yes' to prevent repeated API calls.
+			if ( 404 === $http_code ) {
+				$note_message = sprintf(
+					__( '. Authorization ID: %s not found.', 'woocommerce' ),
+					$authorization_id,
+				);
+				$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
+			}
+
 			if ( $paypal_debug_id ) {
 				$note_message .= sprintf(
 					/* translators: %s: PayPal debug ID */
@@ -414,10 +425,6 @@ class WC_Gateway_Paypal_Request {
 				);
 			}
 
-			// If the authorization ID is not found, set the '_paypal_authorization_checked' flag to 'yes' to prevent repeated API calls.
-			if ( 404 === $http_code ) {
-				$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
-			}
 			$order->add_order_note( $note_message );
 		}
 	}
