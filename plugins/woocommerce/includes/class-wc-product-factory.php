@@ -36,7 +36,7 @@ class WC_Product_Factory {
 		if ( $use_product_cache && empty( $deprecated ) ) {
 			// Nothing should be using the $deprecated argument still, but avoid using cache if they are.
 			$product_cache = wc_get_container()->get( ProductCache::class );
-			$product       = $product_cache->get( $product_id );
+			$product       = $product_cache->get( (int) $product_id );
 			if ( $product ) {
 				return $product;
 			}
@@ -57,7 +57,7 @@ class WC_Product_Factory {
 
 		try {
 			$product = new $classname( $product_id, $deprecated );
-			if ( $use_product_cache && isset( $product_cache ) ) {
+			if ( $use_product_cache && isset( $product_cache ) && $product instanceof \WC_Product ) {
 				$product_cache->set( $product );
 			}
 			return $product;

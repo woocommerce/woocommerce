@@ -115,10 +115,11 @@ class ProductCache extends ObjectCache {
 		$id      = (int) $id;
 		$product = parent::get( $id, $expiration, $get_from_datastore_callback );
 
-		if ( $product instanceof \WC_Product ) {
+		if ( $product instanceof WC_Product ) {
 			$product->set_clone_mode( \WC_Data::CLONE_MODE_DUPLICATE );
+			return $product;
 		}
 
-		return $product;
+		return null;
 	}
 }
