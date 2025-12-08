@@ -25,3 +25,5 @@ You can make changes to Javascript and PHP files in the example and see changes 
 
 - `add-report` - Create a "Hello World" report page.
 - `add-task` - Create a custom task for the onboarding task list.
+
+> **Note:** Some of the previous examples have been moved to the [@woocommerce/create-woo-extension](https://www.npmjs.com/package/@woocommerce/create-woo-extension) package as extension variants for easier scaffolding of new extensions. See the [Create Woo Extension README](../../../../../../../packages/js/create-woo-extension/README.md) for more information.
