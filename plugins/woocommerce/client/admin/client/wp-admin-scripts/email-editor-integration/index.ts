@@ -43,7 +43,10 @@ addFilter(
  */
 addFilter( 'woocommerce_email_editor_create_coupon_handler', NAME_SPACE, () => {
 	// Get the create coupon URL from localized data (provided by PHP)
-	const editorStore = window.wp?.data?.select( 'woocommerce/email-editor' );
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const editorStore = ( window as any ).wp?.data?.select(
+		'woocommerce/email-editor'
+	);
 	const urls = editorStore?.getUrls?.();
 	const createCouponUrl = urls?.createCoupon;
 

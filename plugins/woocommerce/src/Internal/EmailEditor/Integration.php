@@ -128,7 +128,7 @@ class Integration {
 	/**
 	 * Register the coupon code block.
 	 */
-	public function register_coupon_code_block() {
+	public function register_coupon_code_block(): void {
 		$editor_container        = \Automattic\WooCommerce\EmailEditor\Email_Editor_Container::container();
 		$woocommerce_integration = $editor_container->get( \Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Initializer::class );
 
