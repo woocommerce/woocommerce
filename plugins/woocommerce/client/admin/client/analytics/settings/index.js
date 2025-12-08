@@ -14,7 +14,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './index.scss';
-import { config, IMMEDIATE_IMPORT_SETTING_NAME } from './config';
+import { config, SCHEDULED_IMPORT_SETTING_NAME } from './config';
 import Setting from './setting';
 import HistoricalData from './historical-data';
 import { ImportModeConfirmationModal } from './import-mode-confirmation-modal';
@@ -123,10 +123,10 @@ const Settings = ( { createNotice, query } ) => {
 
 		// Intercept import mode change from scheduled to immediate
 		if (
-			name === IMMEDIATE_IMPORT_SETTING_NAME &&
-			config[ IMMEDIATE_IMPORT_SETTING_NAME ] &&
-			wcAdminSettings[ name ] === 'no' &&
-			value === 'yes'
+			name === SCHEDULED_IMPORT_SETTING_NAME &&
+			config[ SCHEDULED_IMPORT_SETTING_NAME ] &&
+			wcAdminSettings[ name ] === 'yes' &&
+			value === 'no'
 		) {
 			setPendingImportModeChange( { name, value } );
 			setIsImportModeModalOpen( true );
@@ -201,7 +201,7 @@ const Settings = ( { createNotice, query } ) => {
 			) : (
 				<HistoricalData createNotice={ createNotice } />
 			) }
-			{ config[ IMMEDIATE_IMPORT_SETTING_NAME ] && (
+			{ config[ SCHEDULED_IMPORT_SETTING_NAME ] && (
 				<ImportModeConfirmationModal
 					isOpen={ isImportModeModalOpen }
 					onClose={ handleImportModeCancel }

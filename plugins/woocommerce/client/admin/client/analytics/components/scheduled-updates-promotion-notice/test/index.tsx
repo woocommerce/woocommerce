@@ -113,10 +113,10 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 	} );
 
 	describe( 'Option value check', () => {
-		test( 'should not render when option is set to "yes"', () => {
+		test( 'should not render when option is set to "no"', () => {
 			mockUseSettings.mockReturnValue( {
 				wcAdminSettings: {
-					woocommerce_analytics_immediate_import: 'yes',
+					woocommerce_analytics_scheduled_import: 'no',
 				},
 			} as unknown as ReturnType< typeof useSettings > );
 
@@ -125,10 +125,10 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 			expect( container.firstChild ).toBeNull();
 		} );
 
-		test( 'should not render when option is set to "no"', () => {
+		test( 'should not render when option is set to "yes"', () => {
 			mockUseSettings.mockReturnValue( {
 				wcAdminSettings: {
-					woocommerce_analytics_immediate_import: 'no',
+					woocommerce_analytics_scheduled_import: 'yes',
 				},
 			} as unknown as ReturnType< typeof useSettings > );
 
@@ -161,7 +161,7 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 		test( 'should render when option is null', () => {
 			mockUseSettings.mockReturnValue( {
 				wcAdminSettings: {
-					woocommerce_analytics_immediate_import: null,
+					woocommerce_analytics_scheduled_import: null,
 				},
 			} as unknown as ReturnType< typeof useSettings > );
 
@@ -383,7 +383,7 @@ describe( 'ScheduledUpdatesPromotionNotice', () => {
 
 			mockUseSettings.mockReturnValue( {
 				wcAdminSettings: {
-					woocommerce_analytics_immediate_import: 'yes',
+					woocommerce_analytics_scheduled_import: 'no',
 				},
 			} as unknown as ReturnType< typeof useSettings > );
 

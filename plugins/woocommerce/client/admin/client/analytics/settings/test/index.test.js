@@ -68,7 +68,7 @@ describe( 'Settings - Import Mode Modal', () => {
 			updateAndPersistSettings: jest.fn(),
 			updateSettings: mockUpdateSettings,
 			wcAdminSettings: {
-				[ IMMEDIATE_IMPORT_SETTING_NAME ]: 'no',
+				[ SCHEDULED_IMPORT_SETTING_NAME ]: 'yes',
 			},
 		} );
 
@@ -168,7 +168,7 @@ describe( 'Settings - Import Mode Modal', () => {
 
 		// Setting should be updated.
 		expect( mockUpdateSettings ).toHaveBeenCalledWith( 'wcAdminSettings', {
-			woocommerce_analytics_immediate_import: 'yes',
+			woocommerce_analytics_scheduled_import: 'no',
 		} );
 	} );
 
@@ -182,7 +182,7 @@ describe( 'Settings - Import Mode Modal', () => {
 			updateAndPersistSettings: jest.fn(),
 			updateSettings: mockUpdateSettings,
 			wcAdminSettings: {
-				woocommerce_analytics_immediate_import: 'yes',
+				woocommerce_analytics_scheduled_import: 'no',
 			},
 		} );
 
@@ -199,7 +199,7 @@ describe( 'Settings - Import Mode Modal', () => {
 
 		// Setting should be updated immediately.
 		expect( mockUpdateSettings ).toHaveBeenCalledWith( 'wcAdminSettings', {
-			woocommerce_analytics_immediate_import: 'no',
+			woocommerce_analytics_scheduled_import: 'yes',
 		} );
 	} );
 } );
