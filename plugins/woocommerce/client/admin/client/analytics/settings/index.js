@@ -35,8 +35,6 @@ const Settings = ( { createNotice, query } ) => {
 	const [ pendingImportModeChange, setPendingImportModeChange ] =
 		useState( null );
 
-	console.log( 'wcAdminSettings', wcAdminSettings );
-
 	useEffect( () => {
 		function warnIfUnsavedChanges( event ) {
 			if ( isDirty ) {
