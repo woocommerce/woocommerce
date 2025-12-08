@@ -280,20 +280,24 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 							options={ couponOptions }
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
-							help={
-								isLoading
-									? __(
-											'Searching coupons...',
-											'woocommerce'
-									  )
-									: searchValue.length > 0 &&
-									  searchValue.length < 2
-									? __(
-											'Type at least 2 characters to search',
-											'woocommerce'
-									  )
-									: null
-							}
+							help={ ( () => {
+								if ( isLoading ) {
+									return __(
+										'Searching coupons…',
+										'woocommerce'
+									);
+								}
+								if (
+									searchValue.length > 0 &&
+									searchValue.length < 2
+								) {
+									return __(
+										'Type at least 2 characters to search',
+										'woocommerce'
+									);
+								}
+								return null;
+							} )() }
 						/>
 						{ isLoading && (
 							<div
