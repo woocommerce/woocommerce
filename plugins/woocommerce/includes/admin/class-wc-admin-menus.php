@@ -38,7 +38,7 @@ class WC_Admin_Menus {
 	 */
 	public function __construct() {
 		// Add menus.
-		add_action( 'admin_menu', array( $this, 'menu_highlight' ), 0 );
+		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
 		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
 		add_action( 'admin_menu', array( $this, 'maybe_add_new_product_management_experience' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
