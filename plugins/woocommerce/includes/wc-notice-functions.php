@@ -79,6 +79,12 @@ function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
 		return;
 	}
 
+	// If this is called before the session is initialized, for example if a plugin includes this file incorrectly on
+	// the admin, skip doing anything to prevent errors.
+	if ( ! WC()->session ) {
+		return;
+	}
+
 	$notices = WC()->session->get( 'wc_notices', array() );
 
 	// Backward compatibility.
