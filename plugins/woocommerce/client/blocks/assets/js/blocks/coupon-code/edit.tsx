@@ -49,10 +49,13 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 
 	// Handler for creating a new coupon - uses a filter so integrators can customize behavior
 	const handleCreateCoupon = () => {
+		// Get the handler from the filter (integrations provide the default handler)
+		// Integrators can customize this filter for SPA routing, custom workflows, etc.
 		const createCouponHandler = applyFilters(
 			'woocommerce_email_editor_create_coupon_handler',
 			() => {
-				// Default fallback: open in new tab
+				// This is the ultimate fallback if no integration provides a handler
+				// May not work correctly in subdirectory installations
 				window.open(
 					'/wp-admin/post-new.php?post_type=shop_coupon',
 					'_blank'

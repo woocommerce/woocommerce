@@ -37,18 +37,30 @@ addFilter(
 );
 
 /**
- * Register handler for creating coupons in WooCommerce.
- * This uses a callback approach to support SPA routing instead of static URLs.
+ * Register default handler for creating coupons in WooCommerce.
+ * Uses the localized admin URL from PHP to support subdirectory installations.
+ * Integrators can override this filter to customize behavior (e.g., SPA routing).
  */
-addFilter(
-	'woocommerce_email_editor_create_coupon_handler',
-	NAME_SPACE,
-	() => () => {
-		// Navigate to coupon creation page in a new tab
-		// Integrators could customize this to use SPA routing (e.g., history.push for React Router)
-		window.open( '/wp-admin/post-new.php?post_type=shop_coupon', '_blank' );
-	}
-);
+addFilter( 'woocommerce_email_editor_create_coupon_handler', NAME_SPACE, () => {
+	// Get the create coupon URL from localized data (provided by PHP)
+	const editorStore = window.wp?.data?.select( 'woocommerce/email-editor' );
+	const urls = editorStore?.getUrls?.();
+	const createCouponUrl = urls?.createCoupon;
+
+	// Return the handler function
+	return () => {
+		if ( createCouponUrl ) {
+			// Use the localized URL from PHP (supports subdirectory installations)
+			window.open( createCouponUrl, '_blank' );
+		} else {
+			// Fallback: relative path (may not work in subdirectory installations)
+			window.open(
+				'/wp-admin/post-new.php?post_type=shop_coupon',
+				'_blank'
+			);
+		}
+	};
+} );
 
 modifySidebar();
 modifyTemplateSidebar();
