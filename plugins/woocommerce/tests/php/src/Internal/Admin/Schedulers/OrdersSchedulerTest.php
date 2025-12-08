@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Schedulers;
 
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use WC_Unit_Test_Case;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * OrdersScheduler Test.
@@ -12,6 +13,16 @@ use WC_Unit_Test_Case;
  * @class OrdersSchedulerTest
  */
 class OrdersSchedulerTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Set up the test environment.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Enable the analytics-scheduled-import feature.
+		Features::enable( 'analytics-scheduled-import' );
+	}
 
 	/**
 	 * Tear down the test environment.
@@ -26,6 +37,8 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		// Clean up any scheduled actions.
 		$this->clear_scheduled_batch_processor();
+
+		Features::disable( 'analytics-scheduled-import' );
 	}
 
 	/**

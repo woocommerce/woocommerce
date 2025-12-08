@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add import mode control to Analytics settings, allowing users to choose between scheduled (every 12 hours) and immediate updates

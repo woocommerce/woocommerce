@@ -25,13 +25,13 @@ import { chevronRight, chevronLeft } from '@wordpress/icons';
 import { useFullScreen } from '~/utils';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { isFeatureEnabled } from '~/utils/features';
-import { SiteHub } from './site-hub';
+import { SiteHub } from './assembler-hub/site-hub';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
-import banner1Shape from './assets/banner-1-shape.svg';
-import banner2Shape from './assets/banner-2-shape.svg';
-import banner1Illu from './assets/banner-1-illu.svg';
-import banner2Illu from './assets/banner-2-illu.svg';
+import banner1Shape from './assets/images/banner-1-shape.svg';
+import banner2Shape from './assets/images/banner-2-shape.svg';
+import banner1Illu from './assets/images/banner-1-illu.svg';
+import banner2Illu from './assets/images/banner-2-illu.svg';
 import './style.scss';
 
 const CustomizeStoreController = () => {
@@ -76,50 +76,53 @@ const CustomizeStoreController = () => {
 		};
 	}, [] );
 
-	const markTaskComplete = () => {
-		updateOptions( {
+	const markTaskComplete = async () => {
+		await updateOptions( {
 			woocommerce_admin_customize_store_completed: 'yes',
 		} );
 	};
 
-	const handleDesignClick = () => {
+	const isNewTabClick = ( event: React.MouseEvent ) => {
+		// Middle mouse button, Cmd+Click (Mac), or Ctrl+Click (Windows/Linux)
+		return event.button === 1 || event.metaKey || event.ctrlKey;
+	};
+
+	const handleClick = async (
+		event: React.MouseEvent< HTMLAnchorElement >,
+		href: string
+	) => {
+		if ( isNewTabClick( event ) ) {
+			// New tab: page stays open, so fire-and-forget is safe
+			markTaskComplete();
+			return;
+		}
+
+		event.preventDefault();
+		await markTaskComplete();
+		window.location.href = href;
+	};
+
+	const handleDesignClick = async (
+		event: React.MouseEvent< HTMLAnchorElement >
+	) => {
 		recordEvent( 'customize_your_store_intro_customize_click', {
 			theme_type: isBlockTheme ? 'block' : 'classic',
 		} );
-		markTaskComplete();
+
+		await handleClick( event, designUrl );
 	};
 
-	const handleMarketplaceClick = () => {
+	const handleMarketplaceClick = async (
+		event: React.MouseEvent< HTMLAnchorElement >
+	) => {
 		recordEvent( 'customize_your_store_intro_browse_all_themes_click' );
-		markTaskComplete();
+		await handleClick( event, marketplaceUrl );
 	};
 
 	const chevronIcon = isRTL() ? chevronRight : chevronLeft;
 
-	const sidebarTitle = (
-		<Button href={ getNewPath( {}, '/', {} ) }>
-			{ __( 'Customize your store', 'woocommerce' ) }
-		</Button>
-	);
-
-	const sidebarDescription = __(
-		'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
-		'woocommerce'
-	);
-
 	return (
 		<div className="woocommerce-customize-store__container">
-			<div className="mobile-header">
-				<Button
-					className="mobile-header__back-button"
-					href={ getNewPath( {}, '/', {} ) }
-					icon={ chevronIcon }
-					label={ __( 'Back', 'woocommerce' ) }
-				/>
-				<h1 className="mobile-header__title">
-					{ __( 'Customize your store', 'woocommerce' ) }
-				</h1>
-			</div>
 			<div className="woocommerce-customize-store-sidebar">
 				<motion.div
 					className="woocommerce-edit-site-layout__header-container"
@@ -156,13 +159,18 @@ const CustomizeStoreController = () => {
 							level={ 1 }
 							as="h1"
 						>
-							{ sidebarTitle }
+							<Button href={ getNewPath( {}, '/', {} ) }>
+								{ __( 'Customize your store', 'woocommerce' ) }
+							</Button>
 						</Heading>
 					</HStack>
 
 					<div className="woocommerce-edit-site-sidebar-navigation-screen__content">
 						<p className="woocommerce-edit-site-sidebar-navigation-screen__description">
-							{ sidebarDescription }
+							{ __(
+								'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
+								'woocommerce'
+							) }
 						</p>
 					</div>
 				</VStack>
@@ -171,7 +179,7 @@ const CustomizeStoreController = () => {
 			<div className="woocommerce-customize-store-main">
 				<div className="woocommerce-customize-store-banner">
 					<div className="woocommerce-customize-store-banner-content">
-						<div className="banner-actions">
+						<div className="woocommerce-customize-store__banner-actions">
 							<h2>{ __( 'Design your own', 'woocommerce' ) }</h2>
 							<p>
 								{ __(
@@ -204,7 +212,7 @@ const CustomizeStoreController = () => {
 
 				<div className="woocommerce-customize-store-banner pick-your-theme-banner">
 					<div className="woocommerce-customize-store-banner-content">
-						<div className="banner-actions">
+						<div className="woocommerce-customize-store__banner-actions">
 							<h2>
 								{ __(
 									'Pick your perfect theme',

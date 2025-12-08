@@ -250,7 +250,7 @@ export const addLabelsToIssue = async (
 };
 
 /**
- * Create a pull request from branches on Github.
+ * Create a pull request from branches on GitHub.
  *
  * @param {Object} options       pull request options.
  * @param {string} options.head  branch name containing the changes you want to merge.
@@ -260,6 +260,7 @@ export const addLabelsToIssue = async (
  * @param {string} options.title pull request title.
  * @param {string} options.body  pull request body.
  * @return {Promise<object>}     pull request data.
+ * @param {string[]} options.reviewers list of GitHub usernames to request a review from.
  */
 export const createPullRequest = async ( options: {
 	head: string;
@@ -268,8 +269,9 @@ export const createPullRequest = async ( options: {
 	name: string;
 	title: string;
 	body: string;
+	reviewers?: string[];
 } ): Promise< CreatePullRequestEndpointResponse[ 'data' ] > => {
-	const { head, base, owner, name, title, body } = options;
+	const { head, base, owner, name, title, body, reviewers } = options;
 	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
 		{
@@ -281,6 +283,18 @@ export const createPullRequest = async ( options: {
 			base,
 		}
 	);
+
+	if ( reviewers && reviewers.length > 0 ) {
+		await octokitWithAuth().request(
+			'POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers',
+			{
+				owner,
+				repo: name,
+				pull_number: pullRequest.data.number,
+				reviewers,
+			}
+		);
+	}
 
 	return pullRequest.data;
 };

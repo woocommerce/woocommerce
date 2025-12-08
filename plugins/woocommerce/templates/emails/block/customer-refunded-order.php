@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer refunded order email (inital block version)
+ * Customer refunded order email (initial block version)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.2.0
+ * @version 10.5.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
