@@ -89,7 +89,7 @@ $dialog-padding: 20px;
 		}
 	}
 
-	:where(.wc-block-next-previous-buttons) {
+	.wc-block-next-previous-buttons {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -101,26 +101,26 @@ $dialog-padding: 20px;
 			pointer-events: all;
 		}
 
-		&:where(.alignleft) {
+		&.alignleft {
 			justify-content: flex-start;
 			gap: 0;
 		}
 
-		&:where(.alignright) {
+		&.alignright {
 			justify-content: flex-end;
 			gap: 0;
 		}
 
-		&:where(.aligncenter) {
+		&.aligncenter {
 			justify-content: center;
 			gap: 0;
 		}
 
-		&:where(.aligntop) {
+		&.aligntop {
 			align-items: flex-start;
 		}
 
-		&:where(.alignbottom) {
+		&.alignbottom {
 			align-items: flex-end;
 		}
 	}

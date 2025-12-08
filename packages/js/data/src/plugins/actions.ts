@@ -3,16 +3,15 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { DispatchFromMap } from '@automattic/data-stores';
 import { controls } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import { DispatchFromMap, isRestApiError } from '../types';
 import { STORE_NAME } from './constants';
 import { ACTION_TYPES as TYPES } from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { isRestApiError } from '../types';
 import {
 	PaypalOnboardingStatus,
 	SelectorKeysWithActions,
