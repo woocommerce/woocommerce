@@ -186,22 +186,54 @@ jobs:
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
-        env: ${{ matrix.testEnv.envVars }}
         run: |
-          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
-          min=10
-          max=99
-          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
-          httpport="${randomized}80"
-          mysqlport="${randomized}36"
+          # Explicitly set all wp-env ports
+          echo "WP_ENV_PORT=8888" >> "$GITHUB_ENV"
+          echo "WP_ENV_MYSQL_PORT=58888" >> "$GITHUB_ENV"
+          echo "WP_ENV_TESTS_PORT=8086" >> "$GITHUB_ENV"
+          echo "WP_ENV_TESTS_MYSQL_PORT=58086" >> "$GITHUB_ENV"
+          # WP_BASE_URL is set to satisfy blocks E2Es setup (setupRest)
+          echo "WP_BASE_URL=http://localhost:8086" >> "$GITHUB_ENV"
 
-          # provision the environment to propagate the randomized ports
-          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
-          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
-          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
-          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
-          
-          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+          # Export for current step
+          export WP_ENV_PORT=8888
+          export WP_ENV_MYSQL_PORT=58888
+          export WP_ENV_TESTS_PORT=8086
+          export WP_ENV_TESTS_MYSQL_PORT=58086
+
+          # Debug: Show current state before starting wp-env
+          echo "::group::Pre-start diagnostics"
+          echo "=== wp-env ports ==="
+          echo "WP_ENV_PORT=$WP_ENV_PORT"
+          echo "WP_ENV_MYSQL_PORT=$WP_ENV_MYSQL_PORT"
+          echo "WP_ENV_TESTS_PORT=$WP_ENV_TESTS_PORT"
+          echo "WP_ENV_TESTS_MYSQL_PORT=$WP_ENV_TESTS_MYSQL_PORT"
+          echo "=== Docker containers ==="
+          docker ps -a || true
+          echo "=== Docker networks ==="
+          docker network ls || true
+          echo "=== Ports in use ==="
+          ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+          echo "::endgroup::"
+
+          # Try to start wp-env, capture output for diagnostics on failure
+          if ! pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}; then
+            echo "::error::wp-env start failed"
+            echo "::group::Post-failure diagnostics"
+            echo "=== Docker containers after failure ==="
+            docker ps -a || true
+            echo "=== Docker logs from mysql containers ==="
+            docker ps -a --filter "name=mysql" --format "{{.Names}}" | xargs -I {} docker logs {} 2>&1 | tail -50 || true
+            echo "=== Ports in use after failure ==="
+            ss -tlnp 2>/dev/null || netstat -tlnp 2>/dev/null || true
+            echo "=== Processes using common wp-env ports ==="
+            for port in $WP_ENV_PORT $WP_ENV_MYSQL_PORT $WP_ENV_TESTS_PORT $WP_ENV_TESTS_MYSQL_PORT 3306; do
+              echo "--- Port $port ---"
+              lsof -i :$port 2>/dev/null || ss -tlnp "sport = :$port" 2>/dev/null || true
+            done
+            echo "::endgroup::"
+            exit 1
+          fi
 
       - name: 'Determine BuildKite Analytics Message'
         env:
