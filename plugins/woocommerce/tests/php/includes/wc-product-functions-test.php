@@ -384,57 +384,33 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	public function test_wc_product_post_type_link_uses_deepest_category() {
 		/*
 		 * Reproduce the bug from WOOPLUG-5957:
-		 * 1. Create a 4-level deep hierarchy FIRST (gets lower term_ids)
-		 * 2. Create a shallow competing branch SECOND (gets higher term_ids)
-		 * 3. The shallow branch's parent will have a higher term_id than any category in the deep hierarchy
-		 * 4. Old buggy code sorted by parent DESC, so it would select the shallow category
-		 * 5. Fixed code should select the deepest category (level 4)
+		 * Create categories "out of sequence" so term_ids don't match hierarchy depth.
+		 * Per the issue: "Level 2 ID should be higher than all other levels."
+		 *
+		 * We create Level 2 LAST so it has the highest term_id. Then we update parent
+		 * relationships. This means Level 3's parent (Level 2) has a higher term_id
+		 * than Level 4's parent (Level 3).
+		 *
+		 * Old buggy code sorted by parent DESC, so it would select Level 3 (parent=Level 2
+		 * with high term_id) instead of Level 4 (the actual deepest category).
 		 */
 
-		// Create 4-level deep hierarchy first (these get lower term_ids).
+		// Create Level 1 first (gets lowest term_id).
 		$level1_term = wp_insert_term( 'Level 1', 'product_cat' );
-		$level2_term = wp_insert_term(
-			'Level 2',
-			'product_cat',
-			array( 'parent' => $level1_term['term_id'] )
-		);
-		$level3_term = wp_insert_term(
-			'Level 3',
-			'product_cat',
-			array( 'parent' => $level2_term['term_id'] )
-		);
-		$level4_term = wp_insert_term(
-			'Level 4 Deepest',
-			'product_cat',
-			array( 'parent' => $level3_term['term_id'] )
-		);
 
-		// Create shallow branch SECOND (gets higher term_ids).
-		// This simulates creating categories "out of sequence" as described in the issue.
-		$shallow_root_term  = wp_insert_term( 'Shallow Root', 'product_cat' );
-		$shallow_child_term = wp_insert_term(
-			'Shallow Child',
-			'product_cat',
-			array( 'parent' => $shallow_root_term['term_id'] )
-		);
+		// Create Level 3 and Level 4 without parents initially.
+		$level3_term = wp_insert_term( 'Level 3', 'product_cat' );
+		$level4_term = wp_insert_term( 'Level 4 Deepest', 'product_cat' );
 
-		// Verify test setup: shallow_root has higher term_id than all deep hierarchy categories.
-		// This means shallow_child's parent ID is higher than level4's parent ID.
-		$level4_obj        = get_term( $level4_term['term_id'], 'product_cat' );
-		$shallow_child_obj = get_term( $shallow_child_term['term_id'], 'product_cat' );
-		$this->assertGreaterThan(
-			$level4_obj->parent,
-			$shallow_child_obj->parent,
-			'Test setup: shallow category parent ID should be higher than level4 parent ID'
-		);
+		// Create Level 2 LAST (gets highest term_id).
+		$level2_term = wp_insert_term( 'Level 2', 'product_cat' );
 
-		// Verify depths.
-		$level4_ancestors  = get_ancestors( $level4_term['term_id'], 'product_cat' );
-		$shallow_ancestors = get_ancestors( $shallow_child_term['term_id'], 'product_cat' );
-		$this->assertCount( 3, $level4_ancestors, 'Level 4 should have 3 ancestors' );
-		$this->assertCount( 1, $shallow_ancestors, 'Shallow child should have 1 ancestor' );
+		// Set up hierarchy: Level 1 > Level 2 > Level 3 > Level 4.
+		wp_update_term( $level2_term['term_id'], 'product_cat', array( 'parent' => $level1_term['term_id'] ) );
+		wp_update_term( $level3_term['term_id'], 'product_cat', array( 'parent' => $level2_term['term_id'] ) );
+		wp_update_term( $level4_term['term_id'], 'product_cat', array( 'parent' => $level3_term['term_id'] ) );
 
-		// Assign product to ALL categories (as per issue reproduction steps).
+		// Assign product to all categories.
 		$product = WC_Helper_Product::create_simple_product();
 		wp_set_object_terms(
 			$product->get_id(),
@@ -443,8 +419,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 				$level2_term['term_id'],
 				$level3_term['term_id'],
 				$level4_term['term_id'],
-				$shallow_root_term['term_id'],
-				$shallow_child_term['term_id'],
 			),
 			'product_cat'
 		);
@@ -457,25 +431,18 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$permalink = wc_product_post_type_link( '/shop/%product_cat%/' . $product_post->post_name . '/', $product_post );
 
 		// Get slugs for assertions.
-		$level1_slug       = get_term( $level1_term['term_id'], 'product_cat' )->slug;
-		$level2_slug       = get_term( $level2_term['term_id'], 'product_cat' )->slug;
-		$level3_slug       = get_term( $level3_term['term_id'], 'product_cat' )->slug;
-		$level4_slug       = get_term( $level4_term['term_id'], 'product_cat' )->slug;
-		$shallow_root_slug = get_term( $shallow_root_term['term_id'], 'product_cat' )->slug;
+		$level1_slug = get_term( $level1_term['term_id'], 'product_cat' )->slug;
+		$level2_slug = get_term( $level2_term['term_id'], 'product_cat' )->slug;
+		$level3_slug = get_term( $level3_term['term_id'], 'product_cat' )->slug;
+		$level4_slug = get_term( $level4_term['term_id'], 'product_cat' )->slug;
 
 		// The permalink should contain the full hierarchical path of the deepest category (level 4).
+		// The old buggy code would select Level 3 (parent=Level 2 with high term_id) instead of Level 4.
 		$expected_path = $level1_slug . '/' . $level2_slug . '/' . $level3_slug . '/' . $level4_slug;
 		$this->assertStringContainsString(
 			$expected_path,
 			$permalink,
 			'Permalink should contain the full path of the deepest category (level 4)'
-		);
-
-		// The shallow branch should NOT be in the permalink.
-		$this->assertStringNotContainsString(
-			$shallow_root_slug,
-			$permalink,
-			'Permalink should NOT contain the shallow branch with higher parent ID'
 		);
 
 		// Clean up (delete children before parents).
@@ -484,20 +451,17 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		wp_delete_term( $level3_term['term_id'], 'product_cat' );
 		wp_delete_term( $level2_term['term_id'], 'product_cat' );
 		wp_delete_term( $level1_term['term_id'], 'product_cat' );
-		wp_delete_term( $shallow_child_term['term_id'], 'product_cat' );
-		wp_delete_term( $shallow_root_term['term_id'], 'product_cat' );
 	}
 
 	/**
-	 * @testdox Product permalink works correctly when product has only root-level categories.
+	 * @testdox Product permalink uses first root category when product has only root-level categories.
 	 */
 	public function test_wc_product_post_type_link_with_only_root_categories() {
-		// Create multiple root-level categories (no parents).
+		// Create multiple root categories - first one (lowest term_id) should be selected.
 		$root1_term = wp_insert_term( 'Root Category One', 'product_cat' );
 		$root2_term = wp_insert_term( 'Root Category Two', 'product_cat' );
 		$root3_term = wp_insert_term( 'Root Category Three', 'product_cat' );
 
-		// Create product and assign to all root categories.
 		$product = WC_Helper_Product::create_simple_product();
 		wp_set_object_terms(
 			$product->get_id(),
@@ -505,40 +469,22 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			'product_cat'
 		);
 
-		// Set up permalink structure to include product_cat.
 		update_option( 'woocommerce_permalinks', array( 'product_base' => '/shop/%product_cat%' ) );
 		$product_post = get_post( $product->get_id() );
 
-		// Call wc_product_post_type_link - should not error and should use one of the root categories.
 		$permalink = wc_product_post_type_link( '/shop/%product_cat%/' . $product_post->post_name . '/', $product_post );
 
-		// Get all root category slugs.
+		// First root category (lowest term_id) should be used.
 		$root1_slug = get_term( $root1_term['term_id'], 'product_cat' )->slug;
-		$root2_slug = get_term( $root2_term['term_id'], 'product_cat' )->slug;
-		$root3_slug = get_term( $root3_term['term_id'], 'product_cat' )->slug;
-
-		// Permalink should contain exactly one of the root category slugs (order depends on get_the_terms).
-		$contains_root1 = str_contains( $permalink, '/' . $root1_slug . '/' );
-		$contains_root2 = str_contains( $permalink, '/' . $root2_slug . '/' );
-		$contains_root3 = str_contains( $permalink, '/' . $root3_slug . '/' );
-
-		$this->assertTrue(
-			$contains_root1 || $contains_root2 || $contains_root3,
-			'Permalink should contain one of the root category slugs'
+		$this->assertStringContainsString(
+			'/' . $root1_slug . '/',
+			$permalink,
+			'Permalink should contain the first root category slug'
 		);
 
-		// Verify only ONE root category is used (not multiple).
-		$count = (int) $contains_root1 + (int) $contains_root2 + (int) $contains_root3;
-		$this->assertEquals(
-			1,
-			$count,
-			'Permalink should contain exactly one root category, not multiple'
-		);
-
-		// Clean up.
 		WC_Helper_Product::delete_product( $product->get_id() );
-		wp_delete_term( $root1_term['term_id'], 'product_cat' );
-		wp_delete_term( $root2_term['term_id'], 'product_cat' );
 		wp_delete_term( $root3_term['term_id'], 'product_cat' );
+		wp_delete_term( $root2_term['term_id'], 'product_cat' );
+		wp_delete_term( $root1_term['term_id'], 'product_cat' );
 	}
 }
