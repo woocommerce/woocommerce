@@ -376,6 +376,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		$paypal_debug_id = null;
+		$http_code       = null;
 
 		try {
 			$request_body = array(
