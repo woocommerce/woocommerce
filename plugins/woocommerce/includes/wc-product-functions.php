@@ -1291,6 +1291,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$order       = ArrayUtil::get_value_or_default( $args, 'order' );
 		$customer_id = $order ? $order->get_customer_id() : 0;
+		$tax_rates   = false;
 
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
@@ -1313,7 +1314,7 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 		}
 
 		// Fallback if no tax rates were determined.
-		if ( ! isset( $tax_rates ) ) {
+		if ( false === $tax_rates ) {
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), null );
 		}
 
