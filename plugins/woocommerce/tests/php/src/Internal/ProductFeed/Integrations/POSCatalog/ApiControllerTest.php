@@ -34,8 +34,7 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 		$this->mock_async_generator = $this->createMock( AsyncGenerator::class );
 		wc_get_container()->replace( AsyncGenerator::class, $this->mock_async_generator );
 
-		$this->sut = new ApiController();
-		$this->sut->init( wc_get_container() );
+		$this->sut = wc_get_container()->get( ApiController::class );
 	}
 
 	public function tearDown(): void {
