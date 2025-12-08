@@ -285,15 +285,15 @@ function wc_get_order_types( $for = '' ) {
 			}
 			break;
 		case 'admin-menu':
-			$order_types = array_intersect(
-				array_keys( $wc_order_types ),
-				get_post_types(
-					array(
-						'show_ui'      => true,
-						'show_in_menu' => 'woocommerce',
-					)
-				)
-			);
+			// Get order types with show_ui => true that should appear in admin menus.
+			// This includes types with show_in_menu => 'woocommerce' (legacy behavior)
+			// and show_in_menu => true (for order types with their own top-level menu).
+			foreach ( $wc_order_types as $type => $args ) {
+				$post_type_obj = get_post_type_object( $type );
+				if ( $post_type_obj && $post_type_obj->show_ui && false !== $post_type_obj->show_in_menu ) {
+					$order_types[] = $type;
+				}
+			}
 			break;
 		default:
 			$order_types = array_keys( $wc_order_types );
