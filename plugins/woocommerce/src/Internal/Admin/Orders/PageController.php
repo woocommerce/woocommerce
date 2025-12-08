@@ -455,6 +455,20 @@ class PageController {
 					// Change the screen ID and base to what plugins expect.
 					$screen->id = $hook_mappings[ $screen->original_id ];
 					$screen->base = $hook_mappings[ $screen->original_id ];
+
+					// Update JavaScript adminpage variable to match the expected screen ID.
+					// WordPress sets this in admin-header.php from the sanitized hook suffix.
+					$adminpage = preg_replace( '/[^a-z0-9_-]+/i', '-', $screen->id );
+					add_action(
+						'admin_head',
+						function () use ( $adminpage ) {
+							printf(
+								'<script>window.adminpage = %s;</script>' . "\n",
+								wp_json_encode( $adminpage )
+							);
+						},
+						1
+					);
 				}
 			},
 			1
