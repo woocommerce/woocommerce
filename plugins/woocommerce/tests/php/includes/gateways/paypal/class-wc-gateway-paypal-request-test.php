@@ -546,25 +546,22 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		$capture_api_call_count = 0;
 		$authorization_id       = 'AUTH_123';
-		add_filter(
-			'pre_http_request',
-			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
-				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
-					++$capture_api_call_count;
-					return $this->return_capture_error( 404, array() );
-				}
 
-				return $value;
-			},
-			10,
-			3
-		);
+		$filter_callback = function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
+			// Track if capture_auth endpoint is called.
+			if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				++$capture_api_call_count;
+				return $this->return_capture_error( 404, array() );
+			}
+
+			return $value;
+		};
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
 
 		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
-		remove_all_filters( 'pre_http_request' );
+		remove_filter( 'pre_http_request', $filter_callback, 10 );
 
 		// Verify capture_auth API was called (but returned 404).
 		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
