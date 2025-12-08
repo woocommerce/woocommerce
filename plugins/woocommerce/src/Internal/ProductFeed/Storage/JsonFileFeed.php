@@ -104,7 +104,7 @@ class JsonFileFeed implements FeedInterface {
 		 * @return int The current time.
 		 * @since 0.1.0
 		 */
-		$current_time    = apply_filters( 'wpfoai_feed_time', time(), $this );
+		$current_time    = apply_filters( 'woocommerce_product_feed_time', time(), $this );
 		$hash_data       = $this->base_name . gmdate( 'r', $current_time );
 		$this->file_name = sprintf(
 			'%s-%s-%s.json',

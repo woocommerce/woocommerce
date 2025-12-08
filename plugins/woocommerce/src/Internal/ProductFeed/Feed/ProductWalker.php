@@ -138,7 +138,7 @@ class ProductWalker {
 		 * @return array
 		 */
 		$query_args = apply_filters(
-			'wpfoai_product_feed_args',
+			'woocommerce_product_feed_args',
 			$query_args,
 			$integration
 		);
@@ -147,8 +147,8 @@ class ProductWalker {
 			$integration->get_product_mapper(),
 			$integration->get_feed_validator(),
 			$feed,
-			wpfoai_get_service( ProductLoader::class ),
-			wpfoai_get_service( MemoryManager::class ),
+			wc_get_container()->get( ProductLoader::class ),
+			wc_get_container()->get( MemoryManager::class ),
 			$query_args
 		);
 

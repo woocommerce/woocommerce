@@ -27,14 +27,14 @@ class AsyncGenerator {
 	 *
 	 * @var string
 	 */
-	const FEED_GENERATION_ACTION = 'wpfoai_feed_generation';
+	const FEED_GENERATION_ACTION = 'woocommerce_product_feed_generation';
 
 	/**
 	 * The Action Scheduler action hook for the feed deletion.
 	 *
 	 * @var string
 	 */
-	const FEED_DELETION_ACTION = 'wpfoai_feed_deletion';
+	const FEED_DELETION_ACTION = 'woocommerce_product_feed_deletion';
 
 	/**
 	 * Feed expiry time, once completed.
@@ -100,7 +100,7 @@ class AsyncGenerator {
 		}
 
 		// Clear all previous actions to avoid race conditions.
-		as_unschedule_all_actions( self::FEED_GENERATION_ACTION, [ $option_key ], 'wpfoai' );
+		as_unschedule_all_actions( self::FEED_GENERATION_ACTION, [ $option_key ], 'woo-product-feed' );
 
 		$status = [
 			'scheduled_at' => time(),
@@ -121,7 +121,7 @@ class AsyncGenerator {
 		as_enqueue_async_action(
 			self::FEED_GENERATION_ACTION,
 			[ $option_key ],
-			'wpfoai',
+			'woo-product-feed',
 			true,
 			1
 		);
@@ -195,7 +195,7 @@ class AsyncGenerator {
 				$option_key,
 				$feed->get_file_path(),
 			],
-			'wpfoai',
+			'woo-product-feed',
 			true
 		);
 	}
@@ -321,7 +321,7 @@ class AsyncGenerator {
 		 * @return int The stuck time in seconds.
 		 * @since 0.1.0
 		 */
-		$scheduled_timeout = apply_filters( 'wpfoai_scheduled_timeout', 10 * MINUTE_IN_SECONDS );
+		$scheduled_timeout = apply_filters( 'woocommerce_product_feed_scheduled_timeout', 10 * MINUTE_IN_SECONDS );
 		if (
 			self::STATE_SCHEDULED === $status['state']
 			&& (
