@@ -318,6 +318,12 @@ class PageController {
 			}
 
 			$post_type = get_post_type_object( $order_type );
+
+			// Skip if the post type is not registered (misconfigured or missing custom order type).
+			if ( ! $post_type ) {
+				continue;
+			}
+
 			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
 
 			// Determine menu parent: prefer WooCommerce menu if user can access it, then Orders, then top-level.
