@@ -27,6 +27,10 @@ on:
         description: Type of version bump to perform
         type: string
         required: true
+      milestone:
+        description: Milestone to set on the PR (optional)
+        type: string
+        required: false
 
 permissions:
   contents: write
@@ -165,12 +169,26 @@ jobs:
             --message 'Bump version to ${{ steps.compute-new-version.outputs.nextVersion }}.'
           git push origin ${branch_name}
 
-          # Open PR.
+          # Determine reviewer (when running as a standalone workflow).
+          reviewer_arg=""
+          if [ "${{ contains( github.workflow_ref, 'release-bump-version.yml' ) }}" = "true" ]; then
+            reviewer_arg="--reviewer ${{ github.actor }}"
+          fi
+
+          # Set milestone argument (empty if not provided).
+          milestone_arg=""
+          if [[ -n "${{ inputs.milestone }}" ]]; then
+            milestone_arg="--milestone ${{ inputs.milestone }}"
+          fi
+
+          # Create PR
           gh pr create \
             --title 'Bump WooCommerce version to ${{ steps.compute-new-version.outputs.nextVersion }}' \
             --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
             --base ${{ inputs.branch }} \
             --head ${branch_name} \
             --label Release \
-            --reviewer "${{ github.actor }}"
+            ${reviewer_arg} \
+            ${milestone_arg}
+
 
