@@ -278,10 +278,10 @@ class Authentication {
 			return false;
 		}
 
-		// Check X-HTTP-Method-Override header if it exists - it must also be POST.
+		// Check X-HTTP-Method-Override header if it exists and is not empty - it must also be POST.
 		if ( isset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) ) {
 			$method_override = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) ) );
-			if ( 'POST' !== $method_override ) {
+			if ( '' !== $method_override && 'POST' !== $method_override ) {
 				return false;
 			}
 		}

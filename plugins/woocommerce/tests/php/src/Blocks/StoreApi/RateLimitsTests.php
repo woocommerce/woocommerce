@@ -202,6 +202,11 @@ class RateLimitsTests extends WP_Test_REST_TestCase {
 				'override' => 'POST',
 				'expected' => true,
 			),
+			'POST request with empty override header'      => array(
+				'method'   => 'POST',
+				'override' => '',
+				'expected' => true,
+			),
 			'GET request without override header'          => array(
 				'method'   => 'GET',
 				'override' => null,
