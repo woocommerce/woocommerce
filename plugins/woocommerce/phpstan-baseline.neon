@@ -52612,12 +52612,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Parameter \#1 \$input_list of function wp_list_sort expects array, array\<WP_Term\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Parameter \#1 \$maybeint of function absint expects array\|bool\|float\|int\|resource\|string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -52705,12 +52699,6 @@ parameters:
 			message: '#^Parameter \#2 \$product of function wc_attribute_label expects WC_Product, WC_Product_Variation\|false given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, array\<int, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/wc-product-functions.php
 
 		-
