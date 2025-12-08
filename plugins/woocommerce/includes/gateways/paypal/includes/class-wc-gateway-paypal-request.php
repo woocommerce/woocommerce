@@ -413,6 +413,11 @@ class WC_Gateway_Paypal_Request {
 					$paypal_debug_id
 				);
 			}
+
+			// If the authorization ID is not found, set the '_paypal_authorization_checked' flag to 'yes' to prevent repeated API calls.
+			if ( 404 === $http_code ) {
+				$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
+			}
 			$order->add_order_note( $note_message );
 		}
 	}
