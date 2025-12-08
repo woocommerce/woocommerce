@@ -1017,7 +1017,10 @@ class WC_Gateway_Paypal_Request {
 			sprintf( '/sites/%d/%s/%s', $site_id, self::WPCOM_PROXY_REST_BASE, $endpoint ),
 			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
 			array(
-				'headers' => array( 'Content-Type' => 'application/json' ),
+				'headers' => array(
+					'Content-Type' => 'application/json',
+					'User-Agent'   => 'TransactGateway/woocommerce/' . WC()->version,
+				),
 				'method'  => $method,
 				'timeout' => WC_Gateway_Paypal_Constants::WPCOM_PROXY_REQUEST_TIMEOUT,
 			),
