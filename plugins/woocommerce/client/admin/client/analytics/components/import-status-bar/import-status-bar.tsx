@@ -55,8 +55,9 @@ export function ImportStatusBar(): JSX.Element | null {
 
 		return dateI18n(
 			/**
-			 * translators: The time of day the Analytics import is scheduled for.
-			 * Example: "Nov 21 at 12:00"
+			 * translators: %s: formatted date and time in site timezone.
+			 * Used to display the next scheduled time for the Analytics import, e.g. "Nov 21 at 12:00".
+			 * "M j" shows the month and day, "at" as literal, "H:i" shows time (24-hour format).
 			 */
 			__( 'M j \\a\\t H:i', 'woocommerce' ),
 			date,
