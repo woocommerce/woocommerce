@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.4.0-rc.1 2025-12-01 =
+= 10.4.0-rc.1 2025-12-09 =
 
 **WooCommerce**
 
@@ -244,6 +244,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix fatal error in needs_shipping() when order contains permanently deleted product [#62103](https://github.com/woocommerce/woocommerce/pull/62103)
 * Fix - Fix PHP 8.4 fatal error in WooCommerce Helper updater when transient contains malformed data [#62094](https://github.com/woocommerce/woocommerce/pull/62094)
 * Fix - Restore original HPOS status filtering behavior to exclude internal order statuses when status='any', matching post-based storage behavior. [#62106](https://github.com/woocommerce/woocommerce/pull/62106)
+* Fix - Fix issue in which regular Checkout requests were getting counted toward rate limit if rate limiting is enabled. [#62318](https://github.com/woocommerce/woocommerce/pull/62318)
+* Fix - Fix Mini Cart showing undefined product title on slow network connections. [#62275](https://github.com/woocommerce/woocommerce/pull/62275)
+* Fix - Fix PayPal webhook endpoint URL to use home URL instead of site URL. [#62199](https://github.com/woocommerce/woocommerce/pull/62199)
+* Fix - Fix text visibility in select inputs [#62292](https://github.com/woocommerce/woocommerce/pull/62292)
+* Fix - Revert payment options icon selector change [#62291](https://github.com/woocommerce/woocommerce/pull/62291)
 * Add - Add Agentic Commerce checkout `complete` endpoint and `agentic_commerce` payment gateway feature support. [#61271](https://github.com/woocommerce/woocommerce/pull/61271)
 * Add - Add an entity versions cache [#61600](https://github.com/woocommerce/woocommerce/pull/61600)
 * Add - Add a new line when concatenating translations in a script for the Mini-Cart block [#61923](https://github.com/woocommerce/woocommerce/pull/61923)
@@ -264,6 +269,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Refactor WooCommerce block entity registration and settings [#61131](https://github.com/woocommerce/woocommerce/pull/61131)
 * Add - Support for reply-to address in transactional emails [#61355](https://github.com/woocommerce/woocommerce/pull/61355)
 * Add - V4 sorting options in rest api for customers [#61507](https://github.com/woocommerce/woocommerce/pull/61507)
+* Add - Display an admin notice when the store's currency is not supported by PayPal Standard. [#62285](https://github.com/woocommerce/woocommerce/pull/62285)
+* Add - Display a notice when merchant's PayPal Standard account is locked or restricted by PayPal. [#62252](https://github.com/woocommerce/woocommerce/pull/62252)
 * Update - Add back the : symbol to the cart item data name element [#61839](https://github.com/woocommerce/woocommerce/pull/61839)
 * Update - Added display support for "Unique product id" in wp-admin products table. [#60049](https://github.com/woocommerce/woocommerce/pull/60049)
 * Update - Add notice to Add to Cart + Options block encouraging users to upgrade from Product Image Gallery block to Product Gallery [#61201](https://github.com/woocommerce/woocommerce/pull/61201)
@@ -294,6 +301,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update payments recommendations in South Africa. [#61922](https://github.com/woocommerce/woocommerce/pull/61922)
 * Update - Update WooCommerce email titles and descriptions when the block email editor is enabled. [#61883](https://github.com/woocommerce/woocommerce/pull/61883)
 * Update - Use 'publish' as the default post status for new email editor posts. [#61814](https://github.com/woocommerce/woocommerce/pull/61814)
+* Update - Add order meta to prevent duplicate PayPal Standard API calls when we have already received a 404 response for a capture request on an authorised payment. [#62314](https://github.com/woocommerce/woocommerce/pull/62314)
+* Update - Ensure PayPal Standard capture later flow uses the correct authorization ID. [#62212](https://github.com/woocommerce/woocommerce/pull/62212)
+* Update - Include WooCommerce version in PayPal Standard gateway requests. [#62203](https://github.com/woocommerce/woocommerce/pull/62203)
+* Update - Include WooCommerce version in the PayPal Standard request header. [#62286](https://github.com/woocommerce/woocommerce/pull/62286)
 * Dev - Add wc/v4/shipping-zone-method endpoint for creating a shipping zone with Core Data compatibility and modern v4 architecture patterns. [#61275](https://github.com/woocommerce/woocommerce/pull/61275)
 * Dev - Add wc/v4/shipping-zone-method endpoint for updating a shipping zone with Core Data compatibility and modern v4 architecture patterns. [#61337](https://github.com/woocommerce/woocommerce/pull/61337)
 * Dev - Add wc/v4/shipping-zone-method endpoints (POST/PUT) for creating and updating shipping methods with Core Data compatibility and modern v4 architecture patterns. [#61124](https://github.com/woocommerce/woocommerce/pull/61124)
@@ -320,6 +331,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Remove duplicated label when connecting to WooCommerce.com [#61431](https://github.com/woocommerce/woocommerce/pull/61431)
 * Tweak - Switch to the cssinliner package to the WooCommerce namespaced version to prevent conflict with other plugins [#61191](https://github.com/woocommerce/woocommerce/pull/61191)
 * Tweak - Use pagination in hand-picked product collection queries on large catalog stores. [#61960](https://github.com/woocommerce/woocommerce/pull/61960)
+* Tweak - Temporarily disable deprecation notice for wc_enqueue_js() until 10.5.0 [#62217](https://github.com/woocommerce/woocommerce/pull/62217)
 * Performance - Change loading of WooCommerce Analytics REST namespace to be on-demand. [#60684](https://github.com/woocommerce/woocommerce/pull/60684)
 * Performance - Defer term counting when running BATCH REST requests against products. [#61383](https://github.com/woocommerce/woocommerce/pull/61383)
 * Performance - Implement batch processing for analytics order imports to resolve performance issues on high-traffic sites [#61603](https://github.com/woocommerce/woocommerce/pull/61603)
