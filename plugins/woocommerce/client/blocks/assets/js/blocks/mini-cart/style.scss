@@ -154,6 +154,10 @@ h2.wc-block-mini-cart__title {
 			padding-top: $gap-smaller;
 			padding-bottom: $gap-smaller;
 
+			&[hidden] {
+				display: none;
+			}
+
 			&:last-child::after {
 				content: none;
 			}
