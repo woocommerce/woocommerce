@@ -28,10 +28,11 @@ class LegacyProxy {
 	 * of existing factory methods such as e.g. 'load'.
 	 *
 	 * @template T of object
-	 * @param class-string<T> $class_name Class name.
-	 * @param mixed  ...$args Parameters to be passed to the class constructor or to the appropriate internal 'get_instance_of_' method.
+	 * @param string $class_name Class name.
+	 * @param mixed  ...$args    Parameters to be passed to the class constructor or to the appropriate internal 'get_instance_of_' method.
 	 *
 	 * @return T The instance of the class.
+	 * @psalm-param class-string<T> $class_name
 	 * @throws \Exception The requested class has a namespace starting with ' Automattic\WooCommerce', or there was an error creating an instance of the class.
 	 */
 	public function get_instance_of( string $class_name, ...$args ) {

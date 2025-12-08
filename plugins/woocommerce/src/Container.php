@@ -56,9 +56,10 @@ final class Container {
 	 * See the comment about ContainerException in RuntimeContainer::get.
 	 *
 	 * @template T of object
-	 * @param class-string<T> $id Class name.
+	 * @param string $id Class name.
 	 *
 	 * @return T Object instance.
+	 * @psalm-param class-string<T> $id
 	 *
 	 * @throws ContainerException Error when resolving the class to an object instance, or class not found.
 	 * @throws \Exception Exception thrown in the constructor or in the 'init' method of one of the resolved classes.

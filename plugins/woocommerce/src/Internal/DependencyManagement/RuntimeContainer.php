@@ -64,9 +64,10 @@ class RuntimeContainer {
 	 * Note that this method throwing ContainerException implies that code fixes are needed, it's not an error condition that's recoverable at runtime.
 	 *
 	 * @template T of object
-	 * @param class-string<T> $class_name Class name.
+	 * @param string $class_name Class name.
 	 *
 	 * @return T Object instance.
+	 * @psalm-param class-string<T> $class_name
 	 * @throws ContainerException Error when resolving the class to an object instance.
 	 * @throws \Exception Exception thrown in the constructor or in the 'init' method of one of the resolved classes.
 	 */
