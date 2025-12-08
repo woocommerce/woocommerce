@@ -250,4 +250,22 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 
 		WC()->session = $original_session;
 	}
+
+	/**
+	 * Test wc_add_notice() with no session.
+	 */
+	public function test_wc_add_notice_no_session() {
+		$original_session = WC()->session;
+
+		WC()->session = null;
+
+		// Should not throw an error when session is null.
+		wc_add_notice( 'Test Notice' );
+
+		WC()->session = $original_session;
+
+		// Notice should not have been added since there was no session.
+		$notices = wc_get_notices();
+		$this->assertEmpty( $notices );
+	}
 }
