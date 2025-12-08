@@ -26,7 +26,7 @@ import './import-status-bar.scss';
  * @return {JSX.Element|null} The status bar component or null if hidden
  */
 export function ImportStatusBar(): JSX.Element | null {
-	const { status, isLoading, error, triggerImport, isTriggeringImport } =
+	const { status, isLoading, triggerImport, isTriggeringImport } =
 		useImportStatus();
 	const { createNotice } = useDispatch( 'core/notices' );
 	const { wcAdminSettings } = useSettings( 'wc_admin', [
@@ -40,7 +40,7 @@ export function ImportStatusBar(): JSX.Element | null {
 	// Don't render if immediate import is enabled
 	// Use the value from the settings hook rather than the status object; accessing settings is faster because they are preloaded.
 	if (
-		! wcAdminSettings.woocommerce_analytics_immediate_import ||
+		! wcAdminSettings?.woocommerce_analytics_immediate_import ||
 		wcAdminSettings.woocommerce_analytics_immediate_import === 'yes'
 	) {
 		return null;
@@ -96,8 +96,12 @@ export function ImportStatusBar(): JSX.Element | null {
 		} catch ( err ) {
 			createNotice(
 				'error',
-				error ||
-					__( 'Failed to trigger analytics update.', 'woocommerce' ),
+				err instanceof Error
+					? err.message
+					: __(
+							'Failed to trigger analytics update.',
+							'woocommerce'
+					  ),
 				{
 					isDismissible: true,
 				}

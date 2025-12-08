@@ -16,7 +16,6 @@
 	}
 }
 
-
 .woocommerce-analytics-import-status-bar {
 	display: flex;
 	align-items: center;
@@ -51,11 +50,6 @@
 
 	&__value {
 		color: $gray-900;
-	}
-
-	&__updating {
-		color: $gray-900;
-		flex: 1;
 	}
 
 	&__trigger {
