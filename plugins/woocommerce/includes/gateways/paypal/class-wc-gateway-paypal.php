@@ -563,7 +563,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function admin_options() {
 		if ( $this->is_valid_for_use() ) {
 			parent::admin_options();
-		} else {
+		} elseif ( ! $this->should_use_orders_v2() ) {
 			?>
 			<div class="inline error">
 				<p>
