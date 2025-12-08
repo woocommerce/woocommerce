@@ -119,6 +119,7 @@ export function ImportStatusBar(): JSX.Element | null {
 				role="status"
 				aria-live="polite"
 				aria-atomic="true"
+				aria-busy={ isLoading || isTriggeringImport }
 			>
 				<div className="woocommerce-analytics-import-status-bar__content">
 					<span className="woocommerce-analytics-import-status-bar__item">

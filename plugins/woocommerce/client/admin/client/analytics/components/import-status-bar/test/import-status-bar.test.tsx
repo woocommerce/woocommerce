@@ -36,15 +36,6 @@ jest.mock( '@woocommerce/data', () => ( {
 	} ) ),
 } ) );
 
-jest.mock( '@woocommerce/settings', () => ( {
-	getSetting: jest.fn( ( key, defaultValue ) => {
-		if ( key === 'formats' ) {
-			return { datetimeAbbreviated: 'M j, Y g:i a' };
-		}
-		return defaultValue;
-	} ),
-} ) );
-
 const mockUseImportStatus = useImportStatus as jest.MockedFunction<
 	typeof useImportStatus
 >;
