@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Temporarily disable deprecation notice for wc_enqueue_js() until 10.5.0
