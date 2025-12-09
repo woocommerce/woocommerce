@@ -60,7 +60,7 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wp-interactive'  => 'woocommerce/mini-cart',
-				'data-wp-context'      => 'woocommerce/store-notices::' . $context,
+				'data-wp-context'      => $context,
 				'data-wp-bind--hidden' => 'state.cartIsEmpty',
 			)
 		);

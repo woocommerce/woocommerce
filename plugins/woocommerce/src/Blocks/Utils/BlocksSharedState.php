@@ -204,8 +204,9 @@ class BlocksSharedState {
 	public static function get_cart_error_notices( string $consent_statement ): array {
 		self::check_consent( $consent_statement );
 
+		// Ensure cart state is loaded so this method works independently.
 		if ( null === self::$blocks_shared_cart_state ) {
-			return array();
+			self::load_cart_state( $consent_statement );
 		}
 
 		$errors  = self::$blocks_shared_cart_state['errors'] ?? array();
