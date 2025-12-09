@@ -74659,18 +74659,6 @@ parameters:
 			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
 
 		-
-			message: '#^Undefined variable\: \$meta$#'
-			identifier: variable.undefined
-			count: 2
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Variable \$meta on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_device_uuid\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
