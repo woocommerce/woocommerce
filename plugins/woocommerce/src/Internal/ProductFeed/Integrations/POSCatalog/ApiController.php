@@ -38,14 +38,14 @@ class ApiController {
 	 * @param Container $container The container instance. Everything else will be dynamic.
 	 * @internal
 	 */
-	final public function init( Container $container ) {
+	final public function init( Container $container ): void {
 		$this->container = $container;
 	}
 
 	/**
 	 * Register the routes for the API controller.
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		register_rest_route(
 			self::ROUTE_NAMESPACE,
 			'/create',
@@ -88,10 +88,10 @@ class ApiController {
 	/**
 	 * Starts generating a feed.
 	 *
-	 * @param WP_REST_Request $request The request object.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request object.
 	 * @return WP_REST_Response The response object.
 	 */
-	public function generate_feed( WP_REST_Request $request ) {
+	public function generate_feed( WP_REST_Request $request ): WP_REST_Response { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		$generator = $this->container->get( AsyncGenerator::class );
 		try {
 			$params = array();

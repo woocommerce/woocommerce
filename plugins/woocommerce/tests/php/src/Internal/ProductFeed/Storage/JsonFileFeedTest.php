@@ -93,21 +93,23 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that add_entry before start throws type error.
+	 * Test that add_entry before start is a no-op (does not throw).
 	 */
-	public function test_add_entry_before_start_throws_type_error() {
+	public function test_add_entry_before_start_is_noop() {
 		$feed = new JsonFileFeed( 'test-feed' );
-		$this->expectException( \TypeError::class );
+		// Should not throw - silently returns when file handle is not ready.
 		$feed->add_entry( array( 'name' => 'oops' ) );
+		$this->assertNull( $feed->get_file_path() );
 	}
 
 	/**
-	 * Test that end before start throws type error.
+	 * Test that end before start is a no-op (does not throw).
 	 */
-	public function test_end_before_start_throws_type_error() {
+	public function test_end_before_start_is_noop() {
 		$feed = new JsonFileFeed( 'test-feed' );
-		$this->expectException( \TypeError::class );
+		// Should not throw - silently returns when file handle is not ready.
 		$feed->end();
+		$this->assertNull( $feed->get_file_path() );
 	}
 
 	/**

@@ -246,9 +246,11 @@ class ProductWalker {
 	 * @param array $args The arguments to pass to wc_get_products().
 	 * @param int   $page The page number to iterate through.
 	 * @param int   $limit The maximum number of products to iterate through.
-	 * @return object The result of the query.
+	 * @return \stdClass The result of the query with properties: products, total, max_num_pages.
 	 */
-	private function iterate( array $args = array(), int $page = 1, int $limit = 100 ): object {
+	private function iterate( array $args = array(), int $page = 1, int $limit = 100 ): \stdClass {
+		// Result is always stdClass when paginate=true.
+		/** @var \stdClass $result */
 		$result = $this->product_loader->get_products(
 			array_merge(
 				$args,

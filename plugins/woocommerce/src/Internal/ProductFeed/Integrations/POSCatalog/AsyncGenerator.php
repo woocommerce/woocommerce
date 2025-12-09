@@ -66,7 +66,7 @@ class AsyncGenerator {
 	 * @param POSIntegration $integration The integration instance.
 	 * @internal
 	 */
-	final public function init( POSIntegration $integration ) {
+	final public function init( POSIntegration $integration ): void {
 		$this->integration = $integration;
 	}
 
@@ -97,12 +97,12 @@ class AsyncGenerator {
 		$status     = get_option( $option_key );
 
 		// For existing jobs, make sure that everything in the status makes sense.
-		if ( false !== $status && ! $this->validate_status( $status ) ) {
+		if ( is_array( $status ) && ! $this->validate_status( $status ) ) {
 			$status = false;
 		}
 
 		// If the status is an array, it means that there is nothing to schedule in this method.
-		if ( false !== $status ) {
+		if ( is_array( $status ) ) {
 			return $status;
 		}
 
@@ -223,7 +223,7 @@ class AsyncGenerator {
 		$status     = get_option( $option_key );
 
 		// If there is no option, there is nothing to force. If the option is invalid, we can restart.
-		if ( false === $status || ! $this->validate_status( $status ) ) {
+		if ( ! is_array( $status ) || ! $this->validate_status( $status ) ) {
 			return $this->get_status( $args );
 		}
 
@@ -238,7 +238,7 @@ class AsyncGenerator {
 
 			case self::STATE_COMPLETED:
 				// Delete the existing file, clear the option and let generation start again.
-				wp_delete_file( $status['path'] );
+				wp_delete_file( (string) $status['path'] );
 				delete_option( $option_key );
 				return $this->get_status( $args );
 

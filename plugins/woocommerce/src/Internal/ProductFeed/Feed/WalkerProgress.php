@@ -14,7 +14,7 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Feed;
  *
  * @since 10.5.0
  */
-class WalkerProgress {
+final class WalkerProgress {
 	/**
 	 * Total number of items to process.
 	 *
@@ -48,11 +48,11 @@ class WalkerProgress {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param object $result The result object from wc_get_products().
-	 * @return static
+	 * @param \stdClass $result The result object from wc_get_products() with total and max_num_pages properties.
+	 * @return self
 	 */
-	public static function from_wc_get_products_result( object $result ): self {
-		$progress = new static();
+	public static function from_wc_get_products_result( \stdClass $result ): self {
+		$progress = new self();
 
 		$progress->total_count       = $result->total;
 		$progress->total_batch_count = $result->max_num_pages;

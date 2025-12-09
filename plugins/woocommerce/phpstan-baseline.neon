@@ -103860,3 +103860,58 @@ parameters:
 			count: 1
 			path: woocommerce.php
 
+
+		-
+			message: '#^Function as_unschedule_all_actions not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/ProductFeed/Integrations/POSCatalog/AsyncGenerator.php
+
+		-
+			message: '#^Function as_enqueue_async_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/ProductFeed/Integrations/POSCatalog/AsyncGenerator.php
+
+		-
+			message: '#^Function as_schedule_single_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/ProductFeed/Integrations/POSCatalog/AsyncGenerator.php
+
+		-
+			message: '#^Access to an undefined property object::\$group_ops\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Internal/ProductFeed/Utils/MemoryManager.php
+
+		-
+			message: '#^Access to an undefined property object::\$stats\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Internal/ProductFeed/Utils/MemoryManager.php
+
+		-
+			message: '#^Access to an undefined property object::\$memcache_debug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Internal/ProductFeed/Utils/MemoryManager.php
+
+		-
+			message: '#^Access to an undefined property object::\$cache\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Internal/ProductFeed/Utils/MemoryManager.php
+
+
+		-
+			message: '#^Property Automattic\\WooCommerce\\Internal\\ProductFeed\\Integrations\\POSCatalog\\ProductMapper::\$products_request \(WP_REST_Request<array<string, mixed>>\|null\) is never assigned WP_REST_Request<array<string, mixed>> so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Internal/ProductFeed/Integrations/POSCatalog/ProductMapper.php
+
+		-
+			message: '#^Property Automattic\\WooCommerce\\Internal\\ProductFeed\\Integrations\\POSCatalog\\ProductMapper::\$variations_request \(WP_REST_Request<array<string, mixed>>\|null\) is never assigned WP_REST_Request<array<string, mixed>> so it can be removed from the property type\.$#'
+			identifier: property.unusedType
+			count: 1
+			path: src/Internal/ProductFeed/Integrations/POSCatalog/ProductMapper.php

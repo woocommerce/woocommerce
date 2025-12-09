@@ -28,7 +28,14 @@ class StringHelper {
 	 * @return string 'true' or 'false'.
 	 */
 	public static function bool_string( $value ): string {
-		$value = strtolower( (string) $value );
+		if ( is_bool( $value ) ) {
+			return $value ? 'true' : 'false';
+		}
+		if ( is_scalar( $value ) || null === $value ) {
+			$value = strtolower( (string) $value );
+		} else {
+			$value = '';
+		}
 		return ( 'true' === $value || '1' === $value || 'yes' === $value ) ? 'true' : 'false';
 	}
 

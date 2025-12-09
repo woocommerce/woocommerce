@@ -38,7 +38,7 @@ class POSIntegration implements IntegrationInterface {
 	 * @param Container $container Dependency container.
 	 * @internal
 	 */
-	final public function init( Container $container ) {
+	final public function init( Container $container ): void {
 		$this->container = $container;
 	}
 

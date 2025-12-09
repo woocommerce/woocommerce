@@ -27,10 +27,10 @@ class ProductLoader {
 	 * @see wc_get_products()
 	 *
 	 * @param array $args The arguments to pass to wc_get_products().
-	 * @return array|stdClass Number of pages and an array of product objects if
-	 *                        paginate is true, or just an array of values.
+	 * @return array|\stdClass Number of pages and an array of product objects if
+	 *                         paginate is true, or just an array of values.
 	 */
-	public function get_products( $args ) {
+	public function get_products( array $args ) {
 		return wc_get_products( $args );
 	}
 }

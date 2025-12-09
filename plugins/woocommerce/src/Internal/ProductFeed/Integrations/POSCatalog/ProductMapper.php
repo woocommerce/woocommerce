@@ -58,14 +58,14 @@ class ProductMapper implements ProductMapperInterface {
 	/**
 	 * Cached REST request instance for products.
 	 *
-	 * @var WP_REST_Request|null
+	 * @var WP_REST_Request<array<string, mixed>>|null
 	 */
 	private ?WP_REST_Request $products_request = null;
 
 	/**
 	 * Cached REST request instance for variations.
 	 *
-	 * @var WP_REST_Request|null
+	 * @var WP_REST_Request<array<string, mixed>>|null
 	 */
 	private ?WP_REST_Request $variations_request = null;
 
@@ -113,6 +113,7 @@ class ProductMapper implements ProductMapperInterface {
 	 *
 	 * @param WC_Product $product Product to map.
 	 * @return array Mapped product data array.
+	 * @throws \RuntimeException If the controller is not initialized.
 	 */
 	public function map_product( WC_Product $product ): array {
 		$is_variation = $product->is_type( 'variation' );
@@ -120,13 +121,18 @@ class ProductMapper implements ProductMapperInterface {
 			? $this->variations_controller
 			: $this->products_controller;
 
+		// This should never be the case, as the class should be loaded through DI.
+		if ( null === $controller ) {
+			throw new \RuntimeException( 'ProductMapper::init() must be called before map_product().' );
+		}
+
 		$request  = $is_variation ? $this->get_variations_request() : $this->get_products_request();
 		$response = $controller->prepare_object_for_response( $product, $request );
 
 		// Apply _fields filtering (normally done by REST server dispatch).
 		$fields = $is_variation ? $this->variation_fields : $this->fields;
 		if ( null !== $fields ) {
-			$response = rest_filter_response_fields( $response, null, $request );
+			$response = rest_filter_response_fields( $response, rest_get_server(), $request );
 		}
 
 		$row = array(
@@ -147,7 +153,7 @@ class ProductMapper implements ProductMapperInterface {
 	/**
 	 * Get the REST request instance for products.
 	 *
-	 * @return WP_REST_Request
+	 * @return WP_REST_Request<array<string, mixed>>
 	 */
 	protected function get_products_request(): WP_REST_Request {
 		if ( null === $this->products_request ) {
@@ -165,7 +171,7 @@ class ProductMapper implements ProductMapperInterface {
 	/**
 	 * Get the REST request instance for variations.
 	 *
-	 * @return WP_REST_Request
+	 * @return WP_REST_Request<array<string, mixed>>
 	 */
 	protected function get_variations_request(): WP_REST_Request {
 		if ( null === $this->variations_request ) {

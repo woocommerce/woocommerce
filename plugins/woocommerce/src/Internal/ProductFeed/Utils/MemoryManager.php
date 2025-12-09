@@ -41,7 +41,7 @@ class MemoryManager {
 	 *
 	 * @since 10.5.0
 	 */
-	public function flush_caches() {
+	public function flush_caches(): void {
 		global $wpdb, $wp_object_cache;
 
 		$wpdb->queries = array();
@@ -68,7 +68,7 @@ class MemoryManager {
 	/**
 	 * Collect garbage.
 	 */
-	private function collect_garbage() {
+	private function collect_garbage(): void {
 		static $gc_threshold         = 5000;
 		static $gc_too_low_in_a_row  = 0;
 		static $gc_too_high_in_a_row = 0;

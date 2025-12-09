@@ -57,7 +57,7 @@ class JsonFileFeed implements FeedInterface {
 	/**
 	 * The file handle.
 	 *
-	 * @var resource|null
+	 * @var resource|false|null
 	 */
 	private $file_handle = null;
 
@@ -150,13 +150,20 @@ class JsonFileFeed implements FeedInterface {
 	 * @return void
 	 */
 	public function add_entry( array $entry ): void {
+		if ( ! is_resource( $this->file_handle ) ) {
+			return;
+		}
+
 		if ( ! $this->has_entries ) {
 			$this->has_entries = true;
 		} else {
 			fwrite( $this->file_handle, ',' );
 		}
 
-		fwrite( $this->file_handle, wp_json_encode( $entry ) );
+		$json = wp_json_encode( $entry );
+		if ( false !== $json ) {
+			fwrite( $this->file_handle, $json );
+		}
 	}
 
 	/**
@@ -165,6 +172,10 @@ class JsonFileFeed implements FeedInterface {
 	 * @return void
 	 */
 	public function end(): void {
+		if ( ! is_resource( $this->file_handle ) ) {
+			return;
+		}
+
 		// Close the array and the file.
 		fwrite( $this->file_handle, ']' );
 		fclose( $this->file_handle );
@@ -202,14 +213,15 @@ class JsonFileFeed implements FeedInterface {
 			$this->file_path = $upload_dir['path'] . $this->file_name;
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			if ( ! @copy( $tmp_path, $this->file_path ) ) {
-				$error = error_get_last();
+				$error         = error_get_last();
+				$error_message = is_array( $error ) ? $error['message'] : 'Unknown error';
 				throw new Exception(
 					esc_html(
 						sprintf(
 							/* translators: %1$s: file path, %2$s: error message */
 							__( 'Unable to move feed file %1$s to upload directory: %2$s', 'woocommerce' ),
 							$this->file_path,
-							( esc_html( $error['message'] ) ?? 'Unknown error' )
+							$error_message
 						)
 					)
 				);
