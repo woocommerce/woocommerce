@@ -218,9 +218,9 @@ class AsyncGenerator {
 				)
 			);
 
-			$status['state']      = self::STATE_FAILED;
-			$status['error']      = $e->getMessage();
-			$status['failed_at']  = time();
+			$status['state']     = self::STATE_FAILED;
+			$status['error']     = $e->getMessage();
+			$status['failed_at'] = time();
 			update_option( $option_key, $status );
 		}
 	}
