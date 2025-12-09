@@ -176,7 +176,7 @@ jobs:
           milestone="${{ steps.compute-new-version.outputs.prMilestone }}"
           milestone_arg=""
           if [[ -n "$milestone" ]]; then
-            if [ "$(gh api repos/${{ github.repository }}/milestones --jq 'any(.[]; .title=="$milestone")')" = "true" ]; then
+            if [ "$(gh api repos/${{ github.repository }}/milestones --jq "any(.[]; .title==\"$milestone\")")" = "true" ]; then
               milestone_arg="--milestone $milestone"
             fi
           fi
