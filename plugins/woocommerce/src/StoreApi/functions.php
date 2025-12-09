@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\StoreApi\StoreApi;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\POSUtils;
 
 if ( ! function_exists( 'woocommerce_store_api_register_endpoint_data' ) ) {
 
@@ -83,5 +84,20 @@ if ( ! function_exists( 'woocommerce_store_api_get_formatter' ) ) {
 	 */
 	function woocommerce_store_api_get_formatter( $name ) {
 		return StoreApi::container()->get( ExtendSchema::class )->get_formatter( $name );
+	}
+}
+
+if ( ! function_exists( 'wc_is_pos_session' ) ) {
+
+	/**
+	 * Check if the current request is using a POS session.
+	 *
+	 * POS sessions are authenticated Store API requests that allow
+	 * different validation rules (e.g., skipping address requirements).
+	 *
+	 * @return bool True if the current session is a POS session.
+	 */
+	function wc_is_pos_session() {
+		return POSUtils::is_pos_session();
 	}
 }
