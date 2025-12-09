@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.4.0 2025-12-09 =
+= 10.4.0 2025-12-10 =
 
 **WooCommerce**
 
@@ -305,6 +305,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Ensure PayPal Standard capture later flow uses the correct authorization ID. [#62212](https://github.com/woocommerce/woocommerce/pull/62212)
 * Update - Include WooCommerce version in PayPal Standard gateway requests. [#62203](https://github.com/woocommerce/woocommerce/pull/62203)
 * Update - Include WooCommerce version in the PayPal Standard request header. [#62286](https://github.com/woocommerce/woocommerce/pull/62286)
+* Update - Update version requirements to WordPress 6.8 and PHP 7.4 in readme.txt and woocommerce.php. [#62341](https://github.com/woocommerce/woocommerce/pull/62341)
 * Dev - Add wc/v4/shipping-zone-method endpoint for creating a shipping zone with Core Data compatibility and modern v4 architecture patterns. [#61275](https://github.com/woocommerce/woocommerce/pull/61275)
 * Dev - Add wc/v4/shipping-zone-method endpoint for updating a shipping zone with Core Data compatibility and modern v4 architecture patterns. [#61337](https://github.com/woocommerce/woocommerce/pull/61337)
 * Dev - Add wc/v4/shipping-zone-method endpoints (POST/PUT) for creating and updating shipping methods with Core Data compatibility and modern v4 architecture patterns. [#61124](https://github.com/woocommerce/woocommerce/pull/61124)
