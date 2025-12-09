@@ -28,14 +28,14 @@ class Setup {
 		}
 
 		$script_path       = '/build/index.js';
-		$script_asset_path = dirname( {{slugSnakeCase}}_MAIN_PLUGIN_FILE ) . '/build/index.asset.php';
+		$script_asset_path = dirname( {{slugConstantCase}}_MAIN_PLUGIN_FILE ) . '/build/index.asset.php';
 		$script_asset      = file_exists( $script_asset_path )
 			? require $script_asset_path
 			: array(
 				'dependencies' => array(),
-				'version'      => filemtime( dirname( {{slugSnakeCase}}_MAIN_PLUGIN_FILE ) . $script_path ),
+				'version'      => filemtime( dirname( {{slugConstantCase}}_MAIN_PLUGIN_FILE ) . $script_path ),
 			);
-		$script_url        = plugins_url( $script_path, {{slugSnakeCase}}_MAIN_PLUGIN_FILE );
+		$script_url        = plugins_url( $script_path, {{slugConstantCase}}_MAIN_PLUGIN_FILE );
 
 		wp_register_script(
 			'{{slug}}',

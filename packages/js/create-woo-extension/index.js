@@ -22,6 +22,15 @@ module.exports = {
 		customScripts: {
 			postinstall: 'rm -f block.json && composer install',
 		},
+		transformer: ( view ) => {
+			return {
+				...view,
+				namespaceConstantCase: view.namespace
+					.toUpperCase()
+					.replace( /-/g, '_' ),
+				slugConstantCase: view.slug.toUpperCase().replace( /-/g, '_' ),
+			};
+		},
 	},
 	variants: {
 		'add-report': {
