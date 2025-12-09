@@ -255,11 +255,13 @@ class WC_Tests_Notice_Functions extends WC_Unit_Test_Case {
 	 * Test wc_add_notice() with no session.
 	 */
 	public function test_wc_add_notice_no_session() {
+		$this->setExpectedIncorrectUsage( 'wc_add_notice' );
+
 		$original_session = WC()->session;
 
 		WC()->session = null;
 
-		// Should not throw an error when session is null.
+		// Should not throw an error when session is null, but should trigger doing_it_wrong.
 		wc_add_notice( 'Test Notice' );
 
 		WC()->session = $original_session;
