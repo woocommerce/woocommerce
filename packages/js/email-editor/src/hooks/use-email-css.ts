@@ -19,8 +19,8 @@ const EMPTY_ARRAY = [];
 
 export function useEmailCss() {
 	const { userTheme } = useUserTheme();
-	const { editorTheme, layout, deviceType, editorSettingsStyles } = useSelect(
-		( select ) => {
+	const { editorTheme, layout, deviceType, initialEditorSettingsStyles } =
+		useSelect( ( select ) => {
 			const {
 				getEditorSettings,
 				// @ts-expect-error getDeviceType is not in types.
@@ -29,17 +29,20 @@ export function useEmailCss() {
 
 			const editorSettings = getEditorSettings();
 
+			// Get initial styles from our email editor store to avoid circular dependency
+			// when we add our generated styles back to settings
+			const initialSettings =
+				select( storeName ).getInitialEditorSettings();
+
 			return {
 				editorTheme: select( storeName ).getTheme(),
 				// @ts-expect-error There are no types for the experimental features settings.
 				// eslint-disable-next-line no-underscore-dangle
 				layout: editorSettings?.__experimentalFeatures?.layout,
 				deviceType: getDeviceType(),
-				editorSettingsStyles: editorSettings?.styles,
+				initialEditorSettingsStyles: initialSettings?.styles,
 			};
-		},
-		[]
-	);
+		}, [] );
 
 	const mergedConfig = useMemo(
 		() =>
@@ -79,9 +82,9 @@ export function useEmailCss() {
 			{
 				css: `.is-root-container{ ${ rootContainerStyles } }`,
 			},
-			...( editorSettingsStyles ?? [] ),
+			...( initialEditorSettingsStyles ?? [] ),
 		];
-	}, [ styles, editorSettingsStyles, rootContainerStyles ] );
+	}, [ styles, initialEditorSettingsStyles, rootContainerStyles ] );
 
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	return [ finalStyles || EMPTY_ARRAY ];

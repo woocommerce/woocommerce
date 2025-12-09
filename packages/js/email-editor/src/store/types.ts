@@ -40,6 +40,7 @@ export type EmailEditorSettings = EditorSettings &
 	ExperimentalSettings & {
 		isPreviewMode: boolean;
 		allowedIframeStyleHandles?: string[];
+		styles?: EmailBuiltStyles[];
 	};
 
 export type EmailTheme = Omit< GlobalStylesConfig, 'styles' > & {
