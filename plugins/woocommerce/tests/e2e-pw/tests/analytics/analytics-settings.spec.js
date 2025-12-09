@@ -80,11 +80,6 @@ test.describe(
 				page.getByRole( 'heading', { name: 'Are you sure?' } )
 			).toBeVisible();
 
-			// Verify modal title
-			await expect(
-				page.getByRole( 'heading', { name: 'Are you sure?' } )
-			).toBeVisible();
-
 			// Click "Cancel" button
 			await page
 				.getByRole( 'button', { name: /Cancel/i, exact: false } )
