@@ -249,6 +249,44 @@ export const addLabelsToIssue = async (
 	);
 };
 
+export const addMilestoneToIssue = async (
+	options: {
+		owner?: string;
+		name?: string;
+	},
+	issueNumber: number,
+	milestoneName: string
+): Promise< void > => {
+	const { owner, name } = options;
+
+	// Try to find milestone by name.
+	const { data } = await octokitWithAuth().request(
+		'GET /repos/{owner}/{repo}/milestones',
+		{
+			owner,
+			repo: name,
+			state: 'all',
+			direction: 'desc',
+			per_page: 100,
+		}
+	);
+
+	const milestone = data.find( ( m ) => m.title === milestoneName );
+
+	if ( milestone ) {
+		await octokitWithAuth().request(
+			'PATCH /repos/{owner}/{repo}/issues/{issue_number}',
+			{
+				owner,
+				repo: name,
+				issue_number: issueNumber,
+				milestone: milestone.number,
+			}
+		);
+	}
+
+}
+
 /**
  * Create a pull request from branches on GitHub.
  *
@@ -259,8 +297,8 @@ export const addLabelsToIssue = async (
  * @param {string} options.name  repository name.
  * @param {string} options.title pull request title.
  * @param {string} options.body  pull request body.
- * @return {Promise<object>}     pull request data.
  * @param {string[]} options.reviewers list of GitHub usernames to request a review from.
+ * @return {Promise<object>}     pull request data.
  */
 export const createPullRequest = async ( options: {
 	head: string;
@@ -271,7 +309,8 @@ export const createPullRequest = async ( options: {
 	body: string;
 	reviewers?: string[];
 } ): Promise< CreatePullRequestEndpointResponse[ 'data' ] > => {
-	const { head, base, owner, name, title, body, reviewers } = options;
+	const { head, base, owner, name, title, body, reviewers, milestone } =
+		options;
 	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
 		{
