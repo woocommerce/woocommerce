@@ -36,7 +36,7 @@ const warnings = [];
 const errors = [];
 let totalPackages = 0;
 let completedCount = 0;
-let startTime = Date.now();
+const startTime = Date.now();
 const currentlyBuilding = new Set();
 
 // Packages that are in scope but don't have build:project scripts
@@ -66,7 +66,9 @@ function getPackageName( path ) {
 	if ( path === '.' ) {
 		return 'woocommerce';
 	}
-	const clean = path.replace( '../../packages/js/', '' ).replace( 'client/', '' );
+	const clean = path
+		.replace( '../../packages/js/', '' )
+		.replace( 'client/', '' );
 	return clean.split( ' ' )[ 0 ];
 }
 
@@ -168,20 +170,32 @@ function processLine( rawLine ) {
 		line.includes( 'DEPRECATION' )
 	) {
 		const cleanWarning = line.split( ': ' ).slice( 1 ).join( ': ' ).trim();
-		if ( cleanWarning && ! warnings.some( ( w ) => w.includes( cleanWarning.substring( 0, 50 ) ) ) ) {
+		if (
+			cleanWarning &&
+			! warnings.some( ( w ) =>
+				w.includes( cleanWarning.substring( 0, 50 ) )
+			)
+		) {
 			warnings.push( cleanWarning );
 		}
 		return;
 	}
 
 	// Capture errors
-	if ( line.toLowerCase().includes( 'error' ) && ! line.includes( 'ERROR in breakpoint' ) ) {
+	if (
+		line.toLowerCase().includes( 'error' ) &&
+		! line.includes( 'ERROR in breakpoint' )
+	) {
 		errors.push( line );
 		return;
 	}
 
 	// Parse completion lines - format: "path build:project:type: ✅ Ran X scripts..."
-	if ( line.includes( 'Ran' ) && line.includes( 'scripts' ) && line.includes( ' in ' ) ) {
+	if (
+		line.includes( 'Ran' ) &&
+		line.includes( 'scripts' ) &&
+		line.includes( ' in ' )
+	) {
 		const parts = line.split( ' ' );
 		const path = parts[ 0 ];
 		const buildInfo = parts[ 1 ] || '';
@@ -216,7 +230,6 @@ function processLine( rawLine ) {
 		}
 
 		updateProgress();
-		return;
 	}
 }
 
@@ -228,9 +241,7 @@ function printSummary() {
 	process.stdout.write( `\x1b[2K\x1b[1A\x1b[2K\r` );
 
 	console.log( '' );
-	console.log(
-		`${ colors.dim }───────────────────────────────────────────────────────────────${ colors.reset }`
-	);
+
 	console.log(
 		`${ colors.bold } WooCommerce Build - ${ packages.size } packages built${ colors.reset } ${ colors.dim }(${ totalPackages } in scope)${ colors.reset }`
 	);
@@ -331,14 +342,24 @@ function printSummary() {
 	// Print warnings
 	if ( warnings.length > 0 ) {
 		console.log( '' );
-		console.log( `${ colors.yellow }⚠️  Warnings: ${ warnings.length }${ colors.reset }` );
+		console.log(
+			`${ colors.yellow }⚠️  Warnings: ${ warnings.length }${ colors.reset }`
+		);
 		const uniqueWarnings = [ ...new Set( warnings ) ].slice( 0, 5 );
 		for ( const warning of uniqueWarnings ) {
 			const shortWarning = warning.substring( 0, 70 );
-			console.log( `  ${ colors.dim }- ${ shortWarning }${ warning.length > 70 ? '...' : '' }${ colors.reset }` );
+			console.log(
+				`  ${ colors.dim }- ${ shortWarning }${
+					warning.length > 70 ? '...' : ''
+				}${ colors.reset }`
+			);
 		}
 		if ( warnings.length > 5 ) {
-			console.log( `  ${ colors.dim }  ... and ${ warnings.length - 5 } more${ colors.reset }` );
+			console.log(
+				`  ${ colors.dim }  ... and ${ warnings.length - 5 } more${
+					colors.reset
+				}`
+			);
 		}
 	}
 
@@ -365,11 +386,22 @@ function main() {
 	console.log( '' );
 	console.log( '' ); // Extra line for two-line progress display
 
-	const build = spawn( 'pnpm', [ 'build' ], {
-		cwd: __dirname + '/..',
-		shell: true,
-		stdio: [ 'inherit', 'pipe', 'pipe' ],
-	} );
+	// Run the actual build command (same as the original "build" script)
+	const build = spawn(
+		'pnpm',
+		[
+			'--if-present',
+			'--workspace-concurrency=Infinity',
+			'--stream',
+			'--filter=@woocommerce/plugin-woocommerce...',
+			'/^build:project:.*$/',
+		],
+		{
+			cwd: __dirname + '/..',
+			shell: true,
+			stdio: [ 'inherit', 'pipe', 'pipe' ],
+		}
+	);
 
 	let buffer = '';
 
