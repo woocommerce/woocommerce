@@ -52,6 +52,7 @@ class AsyncGenerator {
 	const STATE_SCHEDULED   = 'scheduled';
 	const STATE_IN_PROGRESS = 'in_progress';
 	const STATE_COMPLETED   = 'completed';
+	const STATE_FAILED      = 'failed';
 
 	/**
 	 * Integration instance.
@@ -162,51 +163,66 @@ class AsyncGenerator {
 		$status['state'] = self::STATE_IN_PROGRESS;
 		update_option( $option_key, $status );
 
-		$feed   = $this->integration->create_feed();
-		$walker = ProductWalker::from_integration( $this->integration, $feed );
+		try {
+			$feed   = $this->integration->create_feed();
+			$walker = ProductWalker::from_integration( $this->integration, $feed );
 
-		// Add dynamic args to the mapper.
-		$args = $status['args'] ?? array();
-		if (
-			isset( $args['_product_fields'] )
-			&& is_string( $args['_product_fields'] ) &&
-			! empty( $args['_product_fields'] )
-		) {
-			$this->integration->get_product_mapper()->set_fields( $args['_product_fields'] );
-		}
-		if (
-			isset( $args['_variation_fields'] )
-			&& is_string( $args['_variation_fields'] ) &&
-			! empty( $args['_variation_fields'] )
-		) {
-			$this->integration->get_product_mapper()->set_variation_fields( $args['_variation_fields'] );
-		}
-
-		$walker->walk(
-			function ( WalkerProgress $progress ) use ( &$status, $option_key ) {
-				$status = $this->update_feed_progress( $status, $progress );
-				update_option( $option_key, $status );
+			// Add dynamic args to the mapper.
+			$args = $status['args'] ?? array();
+			if (
+				isset( $args['_product_fields'] )
+				&& is_string( $args['_product_fields'] ) &&
+				! empty( $args['_product_fields'] )
+			) {
+				$this->integration->get_product_mapper()->set_fields( $args['_product_fields'] );
 			}
-		);
+			if (
+				isset( $args['_variation_fields'] )
+				&& is_string( $args['_variation_fields'] ) &&
+				! empty( $args['_variation_fields'] )
+			) {
+				$this->integration->get_product_mapper()->set_variation_fields( $args['_variation_fields'] );
+			}
 
-		// Store the final details.
-		$status['state']        = self::STATE_COMPLETED;
-		$status['url']          = $feed->get_file_url();
-		$status['path']         = $feed->get_file_path();
-		$status['completed_at'] = time();
-		update_option( $option_key, $status );
+			$walker->walk(
+				function ( WalkerProgress $progress ) use ( &$status, $option_key ) {
+					$status = $this->update_feed_progress( $status, $progress );
+					update_option( $option_key, $status );
+				}
+			);
 
-		// Schedule another action to delete the file after the expiry time.
-		as_schedule_single_action(
-			time() + self::FEED_EXPIRY,
-			self::FEED_DELETION_ACTION,
-			array(
-				$option_key,
-				$feed->get_file_path(),
-			),
-			'woo-product-feed',
-			true
-		);
+			// Store the final details.
+			$status['state']        = self::STATE_COMPLETED;
+			$status['url']          = $feed->get_file_url();
+			$status['path']         = $feed->get_file_path();
+			$status['completed_at'] = time();
+			update_option( $option_key, $status );
+
+			// Schedule another action to delete the file after the expiry time.
+			as_schedule_single_action(
+				time() + self::FEED_EXPIRY,
+				self::FEED_DELETION_ACTION,
+				array(
+					$option_key,
+					$feed->get_file_path(),
+				),
+				'woo-product-feed',
+				true
+			);
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				'Feed generation failed',
+				array(
+					'error'      => $e->getMessage(),
+					'option_key' => $option_key,
+				)
+			);
+
+			$status['state']      = self::STATE_FAILED;
+			$status['error']      = $e->getMessage();
+			$status['failed_at']  = time();
+			update_option( $option_key, $status );
+		}
 	}
 
 	/**
@@ -239,6 +255,11 @@ class AsyncGenerator {
 			case self::STATE_COMPLETED:
 				// Delete the existing file, clear the option and let generation start again.
 				wp_delete_file( (string) $status['path'] );
+				delete_option( $option_key );
+				return $this->get_status( $args );
+
+			case self::STATE_FAILED:
+				// Clear the failed status and restart generation.
 				delete_option( $option_key );
 				return $this->get_status( $args );
 
