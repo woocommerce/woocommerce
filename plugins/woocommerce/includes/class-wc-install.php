@@ -1187,8 +1187,10 @@ class WC_Install {
 	 * This ensures existing installations are not affected.
 	 *
 	 * @since 10.5.0
+	 *
+	 * @return void
 	 */
-	public static function enable_analytics_scheduled_import() {
+	public static function enable_analytics_scheduled_import(): void {
 		// add_option only sets if option doesn't exist, returns false if it already exists.
 		add_option( 'woocommerce_analytics_scheduled_import', 'yes' );
 	}
