@@ -13,6 +13,7 @@ import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import type { CSSProperties } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { applyFilters } from '@wordpress/hooks';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -51,6 +52,10 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 	const handleCreateCoupon = () => {
 		// Get the handler from the filter (integrations provide the default handler)
 		// Integrators can customize this filter for SPA routing, custom workflows, etc.
+		// Filter: woocommerce_email_editor_create_coupon_handler
+		// @since 10.5.0
+		// @param {() => void} handler - Function called when user clicks "Create new coupon"
+		// @return {() => void} Modified handler function. The returned function should open the coupon creation UI.
 		const createCouponHandler = applyFilters(
 			'woocommerce_email_editor_create_coupon_handler',
 			() => {
@@ -99,7 +104,19 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 				if ( error instanceof Error && error.name === 'AbortError' ) {
 					return;
 				}
-				// eslint-disable-next-line no-console
+				// Check if it's a permissions error
+				if ( error.code === 'rest_forbidden' || error.status === 403 ) {
+					dispatch( 'core/notices' ).createErrorNotice(
+						__(
+							'You do not have permission to view coupons.',
+							'woocommerce'
+						),
+						{
+							id: 'coupon-code-permission-error',
+							type: 'snackbar',
+						}
+					);
+				}
 				console.error( 'Error fetching coupons:', error );
 				setIsLoading( false );
 			} );
