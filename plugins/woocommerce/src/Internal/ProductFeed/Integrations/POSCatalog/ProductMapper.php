@@ -141,7 +141,7 @@ class ProductMapper implements ProductMapperInterface {
 		 * @param array      $row     Mapped product data.
 		 * @param WC_Product $product Product object.
 		 */
-		return apply_filters( 'oapfw_map_catalog_product', $row, $product );
+		return apply_filters( 'woocommerce_pos_catalog_map_product', $row, $product );
 	}
 
 	/**
