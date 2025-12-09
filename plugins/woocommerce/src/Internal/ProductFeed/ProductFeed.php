@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFeed;
 
+use Automattic\WooCommerce\Internal\ProductFeed\Integrations\IntegrationInterface;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSIntegration;
@@ -43,6 +44,17 @@ final class ProductFeed implements RegisterHooksInterface {
 	): void {
 		$this->integration_registry = $integration_registry;
 		$this->integration_registry->register_integration( $pos_integration );
+	}
+
+	/**
+	 * Allows extensions to register integrations.
+	 *
+	 * @since 10.5.0
+	 * @param IntegrationInterface $integration The integration to register.
+	 * @return void
+	 */
+	public function register_integration( IntegrationInterface $integration ): void {
+		$this->integration_registry->register_integration( $integration );
 	}
 
 	/**
