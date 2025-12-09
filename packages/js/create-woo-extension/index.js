@@ -20,7 +20,7 @@ module.exports = {
 		namespace: 'extension',
 		license: 'GPL-3.0+',
 		customScripts: {
-			postinstall: 'rm block.json && composer install',
+			postinstall: 'rm -f block.json && composer install',
 		},
 	},
 	variants: {
