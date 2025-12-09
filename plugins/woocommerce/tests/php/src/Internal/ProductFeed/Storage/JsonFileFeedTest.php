@@ -22,6 +22,7 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
+		$this->get_and_delete_dir();
 		remove_all_filters( 'woocommerce_product_feed_time' );
 	}
 
@@ -124,11 +125,12 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		// Create a file to block directory creation.
 		file_put_contents( $block_path, 'blocking file' );
 
+		$this->expectException( \Exception::class );
+
 		try {
 			$feed = new JsonFileFeed( 'test-feed' );
 			$feed->start();
 			$feed->end();
-			$this->expectException( \Exception::class );
 			$feed->get_file_url();
 		} finally {
 			// Cleanup: remove blocking file.
