@@ -368,6 +368,11 @@ class OrderController {
 	 * @param bool      $needs_shipping Whether the order needs shipping.
 	 */
 	protected function validate_addresses( \WC_Order $order, bool $needs_shipping ) {
+		// POS sessions don't require customer addresses - skip address validation entirely.
+		if ( wc_is_pos_session() ) {
+			return;
+		}
+
 		$errors           = new \WP_Error();
 		$billing_country  = $order->get_billing_country();
 		$shipping_country = $order->get_shipping_country();

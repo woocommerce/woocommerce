@@ -58,10 +58,17 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Checks if a nonce is required for the route.
 	 *
+	 * Nonce is required unless the request has a valid cart token or is an authenticated POS session.
+	 *
 	 * @param \WP_REST_Request $request Request.
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
+		// POS sessions are authenticated via Application Passwords, so they don't need CSRF protection.
+		if ( wc_is_pos_session() ) {
+			return false;
+		}
+
 		return ! $this->has_cart_token( $request );
 	}
 
@@ -239,6 +246,12 @@ class Checkout extends AbstractCartRoute {
 				'param'    => 'additional_fields',
 			],
 		];
+
+		// POS sessions don't require customer addresses - skip address validation.
+		if ( wc_is_pos_session() ) {
+			unset( $validate_contexts['shipping_address'] );
+			unset( $validate_contexts['billing_address'] );
+		}
 
 		if ( ! WC()->cart->needs_shipping() ) {
 			unset( $validate_contexts['shipping_address'] );
