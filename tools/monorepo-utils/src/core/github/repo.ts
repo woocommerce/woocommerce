@@ -321,14 +321,16 @@ export const createPullRequest = async ( options: {
 		}
 	);
 
-	if ( reviewers && reviewers.length > 0 ) {
+	const filteredReviewers = reviewers?.filter( ( reviewer ) => reviewer !== pullRequest.data.user.login );
+
+	if ( filteredReviewers && filteredReviewers.length > 0 ) {
 		await octokitWithAuth().request(
 			'POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers',
 			{
 				owner,
 				repo: name,
 				pull_number: pullRequest.data.number,
-				reviewers,
+				filteredReviewers,
 			}
 		);
 	}
