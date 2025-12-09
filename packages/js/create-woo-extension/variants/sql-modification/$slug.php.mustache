@@ -54,15 +54,15 @@ function {{slugSnakeCase}}_activate() {
 	}
 }
 
-if ( ! class_exists( '{{slugSnakeCase}}' ) ) :
+if ( ! class_exists( '{{slugPascalCase}}' ) ) :
 	/**
-	 * The {{slugSnakeCase}} class.
+	 * The {{slugPascalCase}} class.
 	 */
-	class {{slugSnakeCase}} {
+	class {{slugPascalCase}} {
 		/**
 		 * This class instance.
 		 *
-		 * @var \{{slugSnakeCase}} single instance of this class.
+		 * @var \{{slugPascalCase}} single instance of this class.
 		 */
 		private static $instance;
 
@@ -263,7 +263,7 @@ if ( ! class_exists( '{{slugSnakeCase}}' ) ) :
 		 *
 		 * Ensures only one instance can be loaded.
 		 *
-		 * @return \{{slugSnakeCase}}
+		 * @return \{{slugPascalCase}}
 		 */
 		public static function instance() {
 
@@ -291,6 +291,6 @@ function {{slugSnakeCase}}_init() {
 		return;
 	}
 
-	{{slugSnakeCase}}::instance();
+	{{slugPascalCase}}::instance();
 
 }
