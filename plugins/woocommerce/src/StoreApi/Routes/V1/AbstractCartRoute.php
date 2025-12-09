@@ -262,11 +262,19 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Checks if a nonce is required for the route.
 	 *
+	 * Nonce is required for update requests (POST, PUT, PATCH, DELETE) to prevent CSRF attacks,
+	 * unless the request has a valid cart token or is an authenticated POS session.
+	 *
 	 * @param \WP_REST_Request $request Request.
 	 *
 	 * @return bool
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
+		// POS sessions are authenticated via Application Passwords, so they don't need CSRF protection.
+		if ( wc_is_pos_session() ) {
+			return false;
+		}
+
 		return $this->is_update_request( $request ) && ! $this->has_cart_token( $request );
 	}
 
