@@ -34,14 +34,14 @@ const GlobalPrices = () => {
 		<Card className="woocommerce-dashboard__chart-block woocommerce-analytics__card">
 			<CardHeader>
 				<h3>
-					{__('Global Apple Prices', 'my-test-dashboard-section')}
+					{__('Global Apple Prices', '{{textdomain}}')}
 				</h3>
 			</CardHeader>
 			<CardBody>
 				<Chart
 					title={__(
 						'Global Apple Prices',
-						'my-test-dashboard-section'
+						'{{textdomain}}'
 					)}
 					interval="day"
 					data={[...data].reverse()}
