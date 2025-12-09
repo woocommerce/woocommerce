@@ -136,6 +136,8 @@ const test = base.extend<
 			} );
 		} catch ( error ) {
 			// Ignore errors if page is already closed/navigated away
+			// eslint-disable-next-line no-console
+			console.log( 'Failed to clear localStorage:', error.message );
 		}
 
 		// Dispose the current APIRequestContext to free up resources.
