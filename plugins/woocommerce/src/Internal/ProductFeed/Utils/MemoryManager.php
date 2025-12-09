@@ -28,7 +28,7 @@ class MemoryManager {
 	 */
 	public function get_available_memory(): int {
 		$memory_limit = wp_convert_hr_to_bytes( ini_get( 'memory_limit' ) );
-		if ( -1 === $memory_limit ) {
+		if ( 0 >= $memory_limit ) {
 			// Some systems have "unlimited" memory.
 			// We should treat that as if there is none left.
 			return 0;
