@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WC_Session;
 
 defined( 'ABSPATH' ) || exit;
@@ -20,13 +19,6 @@ defined( 'ABSPATH' ) || exit;
  * Note: This duplicates SessionHandler because that class is marked final.
  */
 final class POSSessionHandler extends WC_Session {
-	/**
-	 * Token from HTTP headers.
-	 *
-	 * @var string
-	 */
-	protected $token = '';
-
 	/**
 	 * Table name for session data.
 	 *
@@ -45,7 +37,6 @@ final class POSSessionHandler extends WC_Session {
 	 * Constructor for the session class.
 	 */
 	public function __construct() {
-		$this->token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
 		$this->table = $GLOBALS['wpdb']->prefix . 'woocommerce_sessions';
 	}
 
@@ -53,19 +44,28 @@ final class POSSessionHandler extends WC_Session {
 	 * Init hooks and session data.
 	 */
 	public function init() {
-		$this->init_session_from_token();
+		$this->init_session_for_pos();
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 	}
 
 	/**
-	 * Process the token header to load the correct session.
+	 * Initialize session for POS.
+	 *
+	 * For POS sessions, we use the authenticated user's ID directly
+	 * rather than relying on a cart token from headers.
 	 */
-	protected function init_session_from_token() {
-		$payload = CartTokenUtils::get_cart_token_payload( $this->token );
+	protected function init_session_for_pos() {
+		// Use the authenticated user's ID for the session.
+		$user_id = get_current_user_id();
 
-		$this->_customer_id       = $payload['user_id'];
-		$this->session_expiration = $payload['exp'];
-		$this->_data              = (array) $this->get_session( $this->get_customer_id(), array() );
+		// Generate a unique session key for this POS user to avoid conflicts with their web cart.
+		$this->_customer_id = 'pos_' . $user_id;
+
+		// Set expiration to 48 hours from now (same as default cart token).
+		$this->session_expiration = time() + ( DAY_IN_SECONDS * 2 );
+
+		// Load existing session data if any.
+		$this->_data = (array) $this->get_session( $this->get_customer_id(), array() );
 	}
 
 	/**
