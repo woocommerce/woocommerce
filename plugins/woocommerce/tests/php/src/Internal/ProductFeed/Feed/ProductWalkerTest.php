@@ -19,12 +19,27 @@ use Automattic\WooCommerce\Internal\ProductFeed\Feed\ProductWalker;
  */
 class ProductWalkerTest extends \WC_Unit_Test_Case {
 	/**
+	 * Test container.
+	 *
+	 * @var TestContainer
+	 */
+	private $test_container;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->test_container = wc_get_container();
+	}
+
+	/**
 	 * Clean up test fixtures.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		remove_all_filters( 'woocommerce_product_feed_args' );
-		wc_get_container()->reset_all_replacements();
+		$this->test_container->reset_all_replacements();
 	}
 
 	/**
@@ -109,10 +124,10 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 		 * Set up all dependencies, including mocks.
 		 */
 		$mock_loader = $this->createMock( ProductLoader::class );
-		wc_get_container()->replace( ProductLoader::class, $mock_loader );
+		$this->test_container->replace( ProductLoader::class, $mock_loader );
 
 		$mock_memory_manager = $this->createMock( MemoryManager::class );
-		wc_get_container()->replace( MemoryManager::class, $mock_memory_manager );
+		$this->test_container->replace( MemoryManager::class, $mock_memory_manager );
 
 		$mock_feed = $this->createMock( FeedInterface::class );
 

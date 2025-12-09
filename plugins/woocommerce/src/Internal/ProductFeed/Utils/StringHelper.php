@@ -17,7 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * String utility helper functions
  */
 class StringHelper {
-
 	/**
 	 * Convert value to boolean string ('true' or 'false')
 	 *

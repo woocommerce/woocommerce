@@ -62,8 +62,9 @@ class AsyncGenerator {
 	 * Dependency injector.
 	 *
 	 * @param POSIntegration $integration The integration instance.
+	 * @internal
 	 */
-	public function init( POSIntegration $integration ) {
+	final public function init( POSIntegration $integration ) {
 		$this->integration = $integration;
 	}
 
@@ -73,8 +74,8 @@ class AsyncGenerator {
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		add_action( self::FEED_GENERATION_ACTION, [ $this, 'feed_generation_action' ] );
-		add_action( self::FEED_DELETION_ACTION, [ $this, 'feed_deletion_action' ], 10, 2 );
+		add_action( self::FEED_GENERATION_ACTION, array( $this, 'feed_generation_action' ) );
+		add_action( self::FEED_DELETION_ACTION, array( $this, 'feed_deletion_action' ), 10, 2 );
 	}
 
 	/**
@@ -100,17 +101,17 @@ class AsyncGenerator {
 		}
 
 		// Clear all previous actions to avoid race conditions.
-		as_unschedule_all_actions( self::FEED_GENERATION_ACTION, [ $option_key ], 'woo-product-feed' );
+		as_unschedule_all_actions( self::FEED_GENERATION_ACTION, array( $option_key ), 'woo-product-feed' );
 
-		$status = [
+		$status = array(
 			'scheduled_at' => time(),
 			'completed_at' => null,
 			'state'        => self::STATE_SCHEDULED,
 			'progress'     => 0,
 			'processed'    => 0,
 			'total'        => -1,
-			'args'         => $args ?? [],
-		];
+			'args'         => $args ?? array(),
+		);
 
 		update_option(
 			$option_key,
@@ -120,7 +121,7 @@ class AsyncGenerator {
 		// Start an immediate async action to generate the feed.
 		as_enqueue_async_action(
 			self::FEED_GENERATION_ACTION,
-			[ $option_key ],
+			array( $option_key ),
 			'woo-product-feed',
 			true,
 			1
@@ -146,7 +147,7 @@ class AsyncGenerator {
 		$status = get_option( $option_key );
 
 		if ( ! is_array( $status ) || ! isset( $status['state'] ) || self::STATE_SCHEDULED !== $status['state'] ) {
-			wc_get_logger()->error( 'Invalid feed generation status', [ 'status' => $status ] );
+			wc_get_logger()->error( 'Invalid feed generation status', array( 'status' => $status ) );
 			return;
 		}
 
@@ -157,7 +158,7 @@ class AsyncGenerator {
 		$walker = ProductWalker::from_integration( $this->integration, $feed );
 
 		// Add dynamic args to the mapper.
-		$args = $status['args'] ?? [];
+		$args = $status['args'] ?? array();
 		if (
 			isset( $args['_product_fields'] )
 			&& is_string( $args['_product_fields'] ) &&
@@ -191,10 +192,10 @@ class AsyncGenerator {
 		as_schedule_single_action(
 			time() + self::FEED_EXPIRY,
 			self::FEED_DELETION_ACTION,
-			[
+			array(
 				$option_key,
 				$feed->get_file_path(),
-			],
+			),
 			'woo-product-feed',
 			true
 		);
@@ -255,7 +256,7 @@ class AsyncGenerator {
 	 * @return string          The option key.
 	 */
 	private function get_option_key( ?array $args = null ): string {
-		$normalized_args = $args ?? [];
+		$normalized_args = $args ?? array();
 		if ( ! empty( $normalized_args ) ) {
 			ksort( $normalized_args );
 		}
@@ -264,10 +265,10 @@ class AsyncGenerator {
 			// WPCS dislikes serialize for security reasons, but it will be hashed immediately.
 			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
 			serialize(
-				[
+				array(
 					'integration' => $this->integration->get_id(),
 					'args'        => $normalized_args,
-				]
+				)
 			)
 		);
 	}

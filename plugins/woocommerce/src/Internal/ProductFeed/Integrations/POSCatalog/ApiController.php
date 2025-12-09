@@ -5,6 +5,8 @@
  * @package Automattic\WooCommerce\Internal\ProductFeed
  */
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use Automattic\WooCommerce\Container;
@@ -32,8 +34,9 @@ class ApiController {
 	 * Dependency injector.
 	 *
 	 * @param Container $container The container instance. Everything else will be dynamic.
+	 * @internal
 	 */
-	public function init( Container $container ) {
+	final public function init( Container $container ) {
 		$this->container = $container;
 	}
 
@@ -44,28 +47,28 @@ class ApiController {
 		register_rest_route(
 			self::ROUTE_NAMESPACE,
 			'/create',
-			[
+			array(
 				'methods'             => 'POST',
-				'callback'            => [ $this, 'generate_feed' ],
-				'permission_callback' => [ $this, 'is_authorized' ],
-				'args'                => [
-					'force'             => [
+				'callback'            => array( $this, 'generate_feed' ),
+				'permission_callback' => array( $this, 'is_authorized' ),
+				'args'                => array(
+					'force'             => array(
 						'type'        => 'boolean',
 						'default'     => false,
 						'description' => 'Force regeneration of the feed. NOOP if generation is in progress.',
-					],
-					'_product_fields'   => [
+					),
+					'_product_fields'   => array(
 						'type'        => 'string',
 						'description' => 'Comma-separated list of fields to include for non-variable products.',
 						'required'    => false,
-					],
-					'_variation_fields' => [
+					),
+					'_variation_fields' => array(
 						'type'        => 'string',
 						'description' => 'Comma-separated list of fields to include for variations.',
 						'required'    => false,
-					],
-				],
-			]
+					),
+				),
+			)
 		);
 	}
 
@@ -89,7 +92,7 @@ class ApiController {
 	public function generate_feed( WP_REST_Request $request ) {
 		$generator = $this->container->get( AsyncGenerator::class );
 		try {
-			$params = [];
+			$params = array();
 			if ( null !== $request['_product_fields'] ) {
 				$params['_product_fields'] = $request['_product_fields'];
 			}
@@ -118,10 +121,10 @@ class ApiController {
 			}
 		} catch ( \Exception $e ) {
 			return new WP_REST_Response(
-				[
+				array(
 					'success' => false,
 					'message' => $e->getMessage(),
-				],
+				),
 				500
 			);
 		}

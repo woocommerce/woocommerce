@@ -29,14 +29,17 @@ final class ProductFeed implements RegisterHooksInterface {
 	private IntegrationRegistry $integration_registry;
 
 	/**
-	 * Private constructor
+	 * Dependency injector.
+	 *
+	 * @param IntegrationRegistry $integration_registry The integration registry.
+	 * @param POSIntegration      $pos_integration The POS integration.
+	 * @internal
 	 */
-	public function init(
+	public function init( // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingFinal
 		IntegrationRegistry $integration_registry,
-		POSIntegration $pos_integration,
+		POSIntegration $pos_integration
 	) {
 		$this->integration_registry = $integration_registry;
-
 		$this->integration_registry->register_integration( $pos_integration );
 	}
 

@@ -27,17 +27,24 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 	private $mock_async_generator;
 
 	/**
+	 * Test container.
+	 *
+	 * @var TestContainer
+	 */
+	private $test_container;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		// Reset first to ensure fresh instances.
-
+		$this->test_container       = wc_get_container();
 		$this->mock_async_generator = $this->createMock( AsyncGenerator::class );
-		wc_get_container()->replace( AsyncGenerator::class, $this->mock_async_generator );
+		$this->test_container->replace( AsyncGenerator::class, $this->mock_async_generator );
 
-		$this->sut = wc_get_container()->get( ApiController::class );
+		$this->sut = $this->test_container->get( ApiController::class );
 	}
 
 	/**
@@ -45,7 +52,7 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		wc_get_container()->reset_all_replacements();
+		$this->test_container->reset_all_replacements();
 	}
 
 	/**

@@ -27,6 +27,6 @@ final class FeedValidator implements FeedValidatorInterface {
 	 * @return array Array of validation issues.
 	 */
 	public function validate_entry( array $entry, \WC_Product $product ): array { //phpcs:ignore VariableAnalysis
-		return [];
+		return array();
 	}
 }

@@ -27,6 +27,13 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 	 */
 	private $mock_integration;
 
+	/**
+	 * Test container.
+	 *
+	 * @var TestContainer
+	 */
+	private $test_container;
+
 	// Option key for tests.
 	private const OPTION_KEY = 'product_feed_async_test';
 
@@ -37,11 +44,12 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Reset first to ensure AsyncGenerator gets the mock, not a cached real instance.
+		$this->test_container = wc_get_container();
 
 		$this->mock_integration = $this->createMock( POSIntegration::class );
-		wc_get_container()->replace( POSIntegration::class, $this->mock_integration );
+		$this->test_container->replace( POSIntegration::class, $this->mock_integration );
 
-		$this->sut = wc_get_container()->get( AsyncGenerator::class );
+		$this->sut = $this->test_container->get( AsyncGenerator::class );
 	}
 
 	/**
@@ -51,7 +59,7 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 
 		delete_option( self::OPTION_KEY );
-		wc_get_container()->reset_all_replacements();
+		$this->test_container->reset_all_replacements();
 	}
 
 	/**

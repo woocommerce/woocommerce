@@ -24,7 +24,7 @@ class IntegrationRegistry {
 	 *
 	 * @var array<string,IntegrationInterface>
 	 */
-	private array $integrations = [];
+	private array $integrations = array();
 
 	/**
 	 * Register an Integration.

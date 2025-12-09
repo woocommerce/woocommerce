@@ -5,6 +5,8 @@
  * @package Automattic\WooCommerce\Internal\ProductFeed
  */
 
+declare(strict_types=1);
+
 namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
 use Automattic\WooCommerce\Container;
@@ -32,8 +34,9 @@ class POSIntegration implements IntegrationInterface {
 	 * Dependency injector.
 	 *
 	 * @param Container $container Dependency container.
+	 * @internal
 	 */
-	public function init( Container $container ) {
+	final public function init( Container $container ) {
 		$this->container = $container;
 	}
 
@@ -48,16 +51,16 @@ class POSIntegration implements IntegrationInterface {
 	 * {@inheritdoc}
 	 */
 	public function get_product_feed_query_args(): array {
-		return [
-			'type' => [ 'simple', 'variable', 'variation' ],
-		];
+		return array(
+			'type' => array( 'simple', 'variable', 'variation' ),
+		);
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
 	public function register_hooks(): void {
-		add_action( 'rest_api_init', [ $this, 'rest_api_init' ] );
+		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 		$this->container->get( AsyncGenerator::class )->register_hooks();
 	}
 
