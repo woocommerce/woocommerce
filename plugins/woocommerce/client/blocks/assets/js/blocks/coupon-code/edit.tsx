@@ -49,8 +49,14 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 
 	// Handler for creating a new coupon - uses a filter so integrators can customize behavior
 	const handleCreateCoupon = () => {
-		// Get the handler from the filter (integrations provide the default handler)
-		// Integrators can customize this filter for SPA routing, custom workflows, etc.
+		/*
+		 * Get the handler from the filter (integrations provide the default handler)
+		 * Integrators can customize this filter for SPA routing, custom workflows, etc.
+		 * Filter: woocommerce_email_editor_create_coupon_handler
+		 * @since 10.5.0
+		 * @param {() => void} handler - Function called when user clicks "Create new coupon"
+		 * @return {() => void} Modified handler function. The returned function should open the coupon creation UI.
+		*/
 		const createCouponHandler = applyFilters(
 			'woocommerce_email_editor_create_coupon_handler',
 			() => {

@@ -100,9 +100,6 @@ class Initializer {
 			case 'woocommerce/product-button':
 				$renderer = new Product_Button();
 				break;
-			case 'woocommerce/coupon-code':
-				$renderer = new Coupon_Code();
-				break;
 			default:
 				$renderer = new Fallback();
 				break;
