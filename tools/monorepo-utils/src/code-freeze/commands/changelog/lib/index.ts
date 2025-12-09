@@ -348,18 +348,6 @@ export const updateBranchChangelog = async (
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
-	// Read plugin file version in branch to determine milestone.
-	let milestone = '';
-	const pluginFile = readFileSync(
-		path.join( tmpRepoPath, 'plugins/woocommerce/woocommerce.php' ),
-		'utf8'
-	);
-	const m = pluginFile.match( /\*\s+Version:\s+(\d+\.\d+)\.\d+/ );
-
-	if ( m ) {
-		milestone = `${ m[ 1 ] }.0`;
-	}
-
 	try {
 		await git.checkout( releaseBranch );
 		const branch = `delete/${ releaseBranch }-changelog-from-${ version }`;
@@ -370,6 +358,18 @@ export const updateBranchChangelog = async (
 			'-b': null,
 			[ branch ]: null,
 		} );
+
+		// Read plugin file version in branch to determine milestone.
+		let milestone = '';
+		const pluginFile = readFileSync(
+			path.join( tmpRepoPath, 'plugins/woocommerce/woocommerce.php' ),
+			'utf8'
+		);
+		const m = pluginFile.match( /\*\s+Version:\s+(\d+\.\d+)\.\d+/ );
+
+		if ( m ) {
+			milestone = `${ m[ 1 ] }.0`;
+		}
 
 		try {
 			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
