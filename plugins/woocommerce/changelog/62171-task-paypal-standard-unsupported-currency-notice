@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Display an admin notice when the store's currency is not supported by PayPal Standard.

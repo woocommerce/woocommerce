@@ -186,11 +186,7 @@ jobs:
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
-        run: |
-          # WP_BASE_URL is set to satisfy blocks E2Es setup (setupRest)
-          echo "WP_BASE_URL=http://localhost:8086" >> "$GITHUB_ENV"
-
-          pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+        run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
       - name: 'Determine BuildKite Analytics Message'
         env:
