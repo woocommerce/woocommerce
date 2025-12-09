@@ -104,12 +104,27 @@ class WC_Gateway_POS_Cash extends WC_Payment_Gateway {
 		// Add order note indicating POS cash payment.
 		$order->add_order_note( __( 'Payment received via POS cash transaction.', 'woocommerce' ) );
 
-		// Clear the cart.
-		WC()->cart->empty_cart();
+		// Start a fresh transaction for the next POS customer.
+		$this->start_new_pos_transaction();
 
 		return array(
 			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		);
+	}
+
+	/**
+	 * Start a new POS transaction by clearing the transaction ID.
+	 *
+	 * This ensures that customer data from one transaction doesn't carry over
+	 * to the next. In POS, each transaction serves a different customer.
+	 *
+	 * The next POS request will get a fresh session with a new transaction ID
+	 * because POSSessionHandler checks if the cart is empty when initializing.
+	 */
+	private function start_new_pos_transaction() {
+		// Simply empty the cart. The POSSessionHandler will detect an empty cart
+		// on the next request and create a fresh session with a new transaction ID.
+		WC()->cart->empty_cart();
 	}
 }

@@ -112,7 +112,9 @@ class OrderController {
 		$this->update_addresses_from_cart( $order );
 		$order->set_currency( get_woocommerce_currency() );
 		$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
-		$order->set_customer_id( get_current_user_id() );
+		// For POS sessions, create guest orders (customer_id = 0).
+		// The logged-in user is the store operator, not the customer.
+		$order->set_customer_id( wc_is_pos_session() ? 0 : get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
 		$order->set_payment_method( PaymentUtils::get_default_payment_method() );

@@ -191,6 +191,37 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		}
 		$this->cart_controller->load_cart();
 		$this->cart_controller->normalize_cart();
+
+		// For POS sessions, clear the store operator's data from the customer object.
+		// The customer being served is not the logged-in user (the store operator).
+		$this->maybe_clear_pos_customer_data();
+	}
+
+	/**
+	 * Clear customer data that was auto-populated from the store operator's account.
+	 *
+	 * In POS, the logged-in user is the store operator, not the customer. If the
+	 * session has no customer data (fresh transaction), we need to clear any data
+	 * that was loaded from the operator's WordPress user account.
+	 */
+	protected function maybe_clear_pos_customer_data(): void {
+		if ( ! wc_is_pos_session() ) {
+			return;
+		}
+
+		// Check if this is a fresh transaction (no customer data in session).
+		$session_customer = wc()->session->get( 'customer' );
+		if ( ! empty( $session_customer ) ) {
+			// Session has customer data, don't override it.
+			return;
+		}
+
+		// Clear the billing email that was loaded from the store operator's account.
+		// The WC_Customer was created with the logged-in user's ID, which loads their email.
+		$customer = wc()->customer;
+		if ( $customer && $customer->get_id() > 0 ) {
+			$customer->set_billing_email( '' );
+		}
 	}
 
 	/**

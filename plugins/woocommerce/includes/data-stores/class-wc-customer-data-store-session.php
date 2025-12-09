@@ -167,7 +167,9 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 				$customer->set_shipping_state( $customer->get_billing_state() );
 			}
 
-			if ( ! $customer->get_billing_email() && is_user_logged_in() ) {
+			// Don't auto-fill billing email from logged-in user for POS sessions.
+			// In POS, the logged-in user is the store operator, not the customer.
+			if ( ! $customer->get_billing_email() && is_user_logged_in() && ! wc_is_pos_session() ) {
 				$current_user = wp_get_current_user();
 				$customer->set_billing_email( $current_user->user_email );
 			}

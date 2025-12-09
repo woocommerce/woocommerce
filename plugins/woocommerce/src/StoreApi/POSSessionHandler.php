@@ -51,21 +51,74 @@ final class POSSessionHandler extends WC_Session {
 	/**
 	 * Initialize session for POS.
 	 *
-	 * For POS sessions, we use the authenticated user's ID directly
-	 * rather than relying on a cart token from headers.
+	 * POS sessions use a transaction-based approach: each transaction gets a fresh
+	 * session when the cart is empty. This prevents customer data (email, addresses)
+	 * from carrying over between different customers' transactions.
+	 *
+	 * The session key includes a transaction ID that changes when:
+	 * - The cart is empty (starting a new transaction)
+	 * - No existing transaction ID exists
 	 */
 	protected function init_session_for_pos() {
-		// Use the authenticated user's ID for the session.
 		$user_id = get_current_user_id();
 
-		// Generate a unique session key for this POS user to avoid conflicts with their web cart.
-		$this->_customer_id = 'pos_' . $user_id;
+		// Check if we have an existing transaction ID for this user.
+		$transaction_id = $this->get_existing_transaction_id( $user_id );
 
-		// Set expiration to 48 hours from now (same as default cart token).
-		$this->session_expiration = time() + ( DAY_IN_SECONDS * 2 );
+		// Load the existing session to check if cart is empty.
+		if ( $transaction_id ) {
+			$this->_customer_id       = 'pos_' . $user_id . '_' . $transaction_id;
+			$this->session_expiration = time() + ( DAY_IN_SECONDS * 2 );
+			$this->_data              = (array) $this->get_session( $this->get_customer_id(), array() );
 
-		// Load existing session data if any.
-		$this->_data = (array) $this->get_session( $this->get_customer_id(), array() );
+			// If cart is empty, start a fresh transaction.
+			$cart = $this->_data['cart'] ?? '';
+			if ( empty( $cart ) || maybe_unserialize( $cart ) === array() ) {
+				// Delete the old session from database to clean up.
+				$this->delete_session( $this->get_customer_id() );
+				$transaction_id = null; // Will generate new ID below.
+			}
+		}
+
+		// Generate a new transaction ID if needed (new transaction).
+		if ( ! $transaction_id ) {
+			$transaction_id           = $this->generate_transaction_id();
+			$this->_customer_id       = 'pos_' . $user_id . '_' . $transaction_id;
+			$this->session_expiration = time() + ( DAY_IN_SECONDS * 2 );
+			$this->_data              = array(); // Fresh session data - no cart, no customer.
+
+			// Store the transaction ID so subsequent requests can find it.
+			$this->save_transaction_id( $user_id, $transaction_id );
+		}
+	}
+
+	/**
+	 * Get an existing transaction ID for a user, if one exists.
+	 *
+	 * @param int $user_id The user ID.
+	 * @return string|null The transaction ID or null if none exists.
+	 */
+	private function get_existing_transaction_id( int $user_id ): ?string {
+		return get_transient( 'wc_pos_transaction_' . $user_id ) ?: null;
+	}
+
+	/**
+	 * Save a transaction ID for a user.
+	 *
+	 * @param int    $user_id        The user ID.
+	 * @param string $transaction_id The transaction ID.
+	 */
+	private function save_transaction_id( int $user_id, string $transaction_id ): void {
+		set_transient( 'wc_pos_transaction_' . $user_id, $transaction_id, DAY_IN_SECONDS * 2 );
+	}
+
+	/**
+	 * Generate a unique transaction ID.
+	 *
+	 * @return string A unique transaction ID.
+	 */
+	private function generate_transaction_id(): string {
+		return wp_generate_uuid4();
 	}
 
 	/**
@@ -119,6 +172,41 @@ final class POSSessionHandler extends WC_Session {
 
 			$this->_dirty = false;
 		}
+	}
+
+	/**
+	 * Destroy the current session and clear the transaction ID.
+	 *
+	 * This allows starting a fresh transaction for the next POS customer.
+	 */
+	public function destroy_session(): void {
+		$this->delete_session( $this->get_customer_id() );
+
+		// Clear the transaction ID so the next request gets a fresh session.
+		$user_id = get_current_user_id();
+		delete_transient( 'wc_pos_transaction_' . $user_id );
+
+		// Reset session data and mark as not dirty.
+		$this->_data  = array();
+		$this->_dirty = false;
+
+		// Remove the shutdown hook so save_data() won't recreate the session.
+		remove_action( 'shutdown', array( $this, 'save_data' ), 20 );
+	}
+
+	/**
+	 * Delete a session from the database.
+	 *
+	 * @param string $customer_id Customer ID.
+	 */
+	public function delete_session( $customer_id ): void {
+		global $wpdb;
+
+		if ( ! $customer_id ) {
+			return;
+		}
+
+		$wpdb->delete( $this->table, array( 'session_key' => $customer_id ) );
 	}
 
 	/**
