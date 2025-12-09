@@ -15241,12 +15241,6 @@ parameters:
 			path: includes/class-wc-breadcrumb.php
 
 		-
-			message: '#^Cannot access property \$labels on WP_Taxonomy\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-breadcrumb.php
-
-		-
 			message: '#^Cannot access property \$post_parent on WP_Post\|null\.$#'
 			identifier: property.nonObject
 			count: 1
