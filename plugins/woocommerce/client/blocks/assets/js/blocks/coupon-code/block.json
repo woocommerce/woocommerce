@@ -34,6 +34,5 @@
 			"default": ""
 		}
 	},
-	"textdomain": "woocommerce",
-	"editorScript": "file:./index.tsx"
+	"textdomain": "woocommerce"
 }

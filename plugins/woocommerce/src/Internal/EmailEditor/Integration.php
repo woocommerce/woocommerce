@@ -9,7 +9,6 @@ use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
-use Automattic\WooCommerce\Internal\EmailEditor\Renderer\Blocks\WooContent;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
@@ -122,26 +121,6 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
-		add_action( 'init', array( $this, 'register_coupon_code_block' ) );
-	}
-
-	/**
-	 * Register the coupon code block.
-	 */
-	public function register_coupon_code_block(): void {
-		$editor_container        = \Automattic\WooCommerce\EmailEditor\Email_Editor_Container::container();
-		$woocommerce_integration = $editor_container->get( \Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Initializer::class );
-
-		register_block_type(
-			'woocommerce/coupon-code',
-			array(
-				'title'                 => 'Coupon Code',
-				'supports'              => array(
-					'email' => true,
-				),
-				'render_email_callback' => array( $woocommerce_integration, 'render_block' ),
-			)
-		);
 	}
 
 	/**

@@ -140,6 +140,17 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		label: coupon.code,
 	} ) );
 
+	// If there's a selected coupon code that's not in the search results, add it to the options
+	if (
+		couponCode &&
+		! couponOptions.some( ( option ) => option.value === couponCode )
+	) {
+		couponOptions.unshift( {
+			value: couponCode,
+			label: couponCode,
+		} );
+	}
+
 	// Strip block-level background/border styles off the wrapper so we can
 	// fully control visual presentation on the coupon element itself.
 	const { background, backgroundColor, border, ...restStyle } =
@@ -334,7 +345,7 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 					{ couponCode
 						? couponCode
 						: __(
-								'Coupon Code block - No coupon selected',
+								'Coupon Code block – No coupon selected',
 								'woocommerce'
 						  ) }
 				</span>
