@@ -167,18 +167,13 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	/**
 	 * Load the cart session before handling responses.
 	 *
+	 * @throws RouteException If POS header is present but user is not authorized.
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
-		if ( $this->should_use_pos_session( $request ) ) {
-			// Use POS session handler for authenticated POS requests.
-			add_filter(
-				'woocommerce_session_handler',
-				function () {
-					return POSSessionHandler::class;
-				}
-			);
-		} elseif ( $this->has_cart_token( $request ) ) {
+		$this->maybe_use_pos_session( $request );
+
+		if ( $this->has_cart_token( $request ) ) {
 			// Overrides the core session class.
 			add_filter(
 				'woocommerce_session_handler',
@@ -192,23 +187,37 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	}
 
 	/**
-	 * Check if this request should use a POS session.
+	 * Check if this request should use a POS session and set up the handler.
 	 *
 	 * POS sessions require:
 	 * 1. The X-WC-POS header to be present
 	 * 2. An authenticated user with the manage_woocommerce capability
 	 *
+	 * @throws RouteException If POS header is present but user is not authorized.
 	 * @param \WP_REST_Request $request Request object.
-	 * @return bool
 	 */
-	protected function should_use_pos_session( \WP_REST_Request $request ): bool {
+	protected function maybe_use_pos_session( \WP_REST_Request $request ): void {
 		$pos_header = $request->get_header( 'X-WC-POS' );
 
 		if ( ! $pos_header ) {
-			return false;
+			return;
 		}
 
-		return POSUtils::current_user_can_pos();
+		if ( ! POSUtils::current_user_can_pos() ) {
+			throw new RouteException(
+				'woocommerce_rest_pos_unauthorized',
+				__( 'POS requests require authentication with a user that has the manage_woocommerce capability.', 'woocommerce' ),
+				401
+			);
+		}
+
+		// Use POS session handler for authenticated POS requests.
+		add_filter(
+			'woocommerce_session_handler',
+			function () {
+				return POSSessionHandler::class;
+			}
+		);
 	}
 
 	/**
