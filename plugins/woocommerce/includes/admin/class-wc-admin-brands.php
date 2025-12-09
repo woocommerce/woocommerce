@@ -370,6 +370,23 @@ class WC_Brands_Admin {
 						jQuery('.remove_image_button').hide();
 						return false;
 					});
+
+					jQuery( document ).on( 'ajaxComplete', function( event, request, options ) {
+						if ( request && 4 === request.readyState && 200 === request.status
+							&& options.data && 0 <= options.data.indexOf( 'action=add-tag' ) ) {
+
+							var res = wpAjax.parseAjaxResponse( request.responseXML, 'ajax-response' );
+							if ( ! res || res.errors ) {
+								return;
+							}
+							// Clear Thumbnail fields on submit
+							jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
+							jQuery( '#product_cat_thumbnail_id' ).val( '' );
+							jQuery( '.remove_image_button' ).hide();
+
+							return;
+						}
+					} );
 				});
 
 			</script>
