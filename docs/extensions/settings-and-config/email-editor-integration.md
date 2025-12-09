@@ -314,7 +314,7 @@ Use the `woocommerce_email_editor_integration_personalizer_context_data` filter 
 **Filter details:**
 
 | Property | Value |
-|----------|-------|
+| -------- | ----- |
 | Hook name | `woocommerce_email_editor_integration_personalizer_context_data` |
 | Since | 10.5.0 |
 | Parameters | `$context` (array), `$email` (\WC_Email) |
