@@ -22,7 +22,6 @@ import { ordersFilter } from '../requests/merchant/orders-filter.js';
 import { addOrder } from '../requests/merchant/add-order.js';
 import { ordersAPI } from '../requests/api/orders.js';
 import { homeWCAdmin } from '../requests/merchant/home-wc-admin.js';
-import { setCartCheckoutShortcodes } from '../setup/cart-checkout-shortcode.js';
 import { addCustomerOrder } from '../setup/add-customer-order.js';
 
 const defaultIterations = 3;
@@ -92,7 +91,6 @@ export const options = {
 };
 
 export function setup() {
-	setCartCheckoutShortcodes();
 	addCustomerOrder();
 }
 
