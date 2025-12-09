@@ -122,10 +122,14 @@ class ApiController {
 				unset( $response['path'] );
 			}
 		} catch ( \Exception $e ) {
+			wc_get_logger()->error(
+				'Feed generation failed',
+				array( 'error' => $e->getMessage() )
+			);
 			return new WP_REST_Response(
 				array(
 					'success' => false,
-					'message' => $e->getMessage(),
+					'message' => __( 'An error occurred while generating the feed.', 'woocommerce' ),
 				),
 				500
 			);

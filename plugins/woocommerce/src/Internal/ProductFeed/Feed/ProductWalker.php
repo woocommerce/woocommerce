@@ -168,6 +168,10 @@ class ProductWalker {
 	 * @return self
 	 */
 	public function set_batch_size( int $batch_size ): self {
+		if ( $batch_size < 1 ) {
+			$batch_size = 1;
+		}
+
 		$this->per_page = $batch_size;
 		return $this;
 	}
@@ -181,6 +185,10 @@ class ProductWalker {
 	 * @return self
 	 */
 	public function add_time_limit( int $time_limit ): self {
+		if ( $time_limit < 0 ) {
+			$time_limit = 0;
+		}
+
 		$this->time_limit = $time_limit;
 		return $this;
 	}
