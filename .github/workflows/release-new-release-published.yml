@@ -56,10 +56,10 @@ jobs:
           git fetch origin ${BRANCH_NAME}
           git checkout ${BRANCH_NAME}
           current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
-          
+
           echo "Current version from woocommerce.php: '$current_version'"
           echo "Release tag version: '$RELEASE_TAG'"
-          
+
           if [[ "$current_version" != "$RELEASE_TAG" ]]; then
             echo "::warning::The version in woocommerce.php ($current_version) does not match the release tag version ($RELEASE_TAG). Skipping notification."
             echo "versions_match=false" >> $GITHUB_OUTPUT
@@ -103,7 +103,6 @@ jobs:
           sparse-checkout: |
             /changelog.txt
             /.github/workflows/scripts/release-readme-to-changelog.php
-            /plugins/woocommerce/woocommerce.php
           sparse-checkout-cone-mode: false
           path: trunk
       - name: 'Update changelog.txt'
@@ -128,7 +127,7 @@ jobs:
           git push origin "$branch_name"
 
           # Determine milestone from trunk version.
-          milestone=$( cat ./trunk/plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+\(-dev\)\?$/.0/' )
+          milestone=$( cat ./woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+$/.0/' )
 
           # Open a PR.
           gh pr create \
@@ -137,4 +136,5 @@ jobs:
             --base trunk \
             --head "$branch_name" \
             --reviewer "${{ github.actor }}" \
+            --label "Release" \
             --milestone "$milestone"
