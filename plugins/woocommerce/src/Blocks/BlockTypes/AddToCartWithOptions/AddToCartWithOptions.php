@@ -662,6 +662,9 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * @return string The rendered store notices HTML.
 	 */
 	protected function render_interactivity_notices_region( $form_html ) {
+		// Enqueue the store-notices store before directives are processed.
+		wp_enqueue_script_module( '@woocommerce/stores/store-notices' );
+
 		$context_directive = wp_interactivity_data_wp_context(
 			array(
 				'notices' => array(),

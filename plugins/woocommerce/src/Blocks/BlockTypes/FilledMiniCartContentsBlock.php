@@ -76,7 +76,6 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 				class="wc-block-components-notices"
 				data-wp-interactive="woocommerce/store-notices"
 				data-wp-context="<?php echo esc_attr( $context ); ?>"
-				data-wp-init="woocommerce/store-notices::callbacks.renderNoticeContent"
 			>
 				<template
 					data-wp-each--notice="context.notices"
@@ -94,7 +93,7 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 							<path data-wp-bind--d="state.iconPath"></path>
 						</svg>
 						<div class="wc-block-components-notice-banner__content">
-							<span data-wp-watch="callbacks.renderNoticeContent"></span>
+							<span data-wp-init="callbacks.renderNoticeContent"></span>
 						</div>
 						<button
 							data-wp-bind--hidden="!context.notice.dismissible"
