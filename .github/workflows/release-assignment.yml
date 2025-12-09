@@ -19,6 +19,7 @@ jobs:
       beta-2-release-date: ${{ steps.get-all-events-for-version.outputs.event-beta-2-date }}
       rc-1-release-date: ${{ steps.get-all-events-for-version.outputs.event-rc-1-date }}
       final-release-date: ${{ steps.get-all-events-for-version.outputs.event-final-date }}
+      team-name: ${{ steps.get-all-events-for-version.outputs.team-name }}
     steps:
       - name: Install node-ical
         run: npm install node-ical
@@ -142,7 +143,7 @@ jobs:
 
             const payload = {
               action: 'release-assignment',
-              team: '${{ needs.check-upcoming-release-events.outputs.team }}',
+              team: '${{ needs.check-upcoming-release-events.outputs.team-name }}',
               version: '${{ needs.check-upcoming-release-events.outputs.version }}',
               feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
               status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
