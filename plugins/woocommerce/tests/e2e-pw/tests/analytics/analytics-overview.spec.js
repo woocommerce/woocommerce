@@ -1,4 +1,4 @@
-const { test, expect, request, Page } = require( '@playwright/test' );
+const { test, expect, request, Page, Locator } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const { tags } = require( '../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
