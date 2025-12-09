@@ -2,8 +2,41 @@
  * External dependencies
  */
 import { PartialProduct, ProductDimensions } from '@woocommerce/data';
+import { getSetting } from '@woocommerce/settings';
 import { isEmpty } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Check if WordPress version is 6.9 or later
+ */
+const isWP69OrLater = (): boolean => {
+	const wpVersion = getSetting( 'wpVersion' );
+	if ( ! wpVersion ) {
+		return false;
+	}
+	const [ major, minor ] = wpVersion.split( '.' ).map( Number );
+	return major > 6 || ( major === 6 && minor >= 9 );
+};
+
+/**
+ * Get accordion block names based on WordPress version
+ */
+const getAccordionBlockNames = () => {
+	if ( isWP69OrLater() ) {
+		return {
+			group: 'core/accordion',
+			item: 'core/accordion-item',
+			header: 'core/accordion-heading',
+			panel: 'core/accordion-panel',
+		};
+	}
+	return {
+		group: 'woocommerce/accordion-group',
+		item: 'woocommerce/accordion-item',
+		header: 'woocommerce/accordion-header',
+		panel: 'woocommerce/accordion-panel',
+	};
+};
 
 export const isAdditionalProductDataEmpty = (
 	product: PartialProduct
@@ -16,7 +49,6 @@ export const isAdditionalProductDataEmpty = (
 			)
 		);
 	};
-
 	return (
 		isEmpty( product.weight ) &&
 		isDimensionsEmpty( product.dimensions ) &&
@@ -36,9 +68,11 @@ export const getTemplate = (
 		isAdditionalProductDataEmpty( product ) &&
 		isInnerBlockOfSingleProductBlock;
 
+	const blockNames = getAccordionBlockNames();
+
 	return [
 		[
-			'woocommerce/accordion-group',
+			blockNames.group,
 			{
 				metadata: {
 					isDescendantOfProductDetails: true,
@@ -46,18 +80,18 @@ export const getTemplate = (
 			},
 			[
 				[
-					'woocommerce/accordion-item',
+					blockNames.item,
 					{
 						openByDefault: true,
 					},
 					[
 						[
-							'woocommerce/accordion-header',
+							blockNames.header,
 							{ title: __( 'Description', 'woocommerce' ) },
 							[],
 						],
 						[
-							'woocommerce/accordion-panel',
+							blockNames.panel,
 							{},
 							[ [ 'woocommerce/product-description', {}, [] ] ],
 						],
@@ -66,11 +100,11 @@ export const getTemplate = (
 				...( ! additionalProductDataEmpty
 					? [
 							[
-								'woocommerce/accordion-item',
+								blockNames.item,
 								{},
 								[
 									[
-										'woocommerce/accordion-header',
+										blockNames.header,
 										{
 											title: __(
 												'Additional Information',
@@ -80,7 +114,7 @@ export const getTemplate = (
 										[],
 									],
 									[
-										'woocommerce/accordion-panel',
+										blockNames.panel,
 										{},
 										[
 											[
@@ -94,16 +128,16 @@ export const getTemplate = (
 					  ]
 					: [] ),
 				[
-					'woocommerce/accordion-item',
+					blockNames.item,
 					{},
 					[
 						[
-							'woocommerce/accordion-header',
+							blockNames.header,
 							{ title: __( 'Reviews', 'woocommerce' ) },
 							[],
 						],
 						[
-							'woocommerce/accordion-panel',
+							blockNames.panel,
 							{},
 							[ [ 'woocommerce/product-reviews', {} ] ],
 						],
