@@ -54,18 +54,18 @@ class OrdersScheduler extends ImportScheduler {
 	const LAST_PROCESSED_ORDER_ID_OPTION = 'woocommerce_admin_scheduler_last_processed_order_id';
 
 	/**
-	 * Option name for storing whether to enable immediate order import.
+	 * Option name for storing whether to enable scheduled order import.
 	 *
 	 * @var string
 	 */
-	const IMMEDIATE_IMPORT_OPTION = 'woocommerce_analytics_immediate_import';
+	const SCHEDULED_IMPORT_OPTION = 'woocommerce_analytics_scheduled_import';
 
 	/**
-	 * Default value for the immediate import option.
+	 * Default value for the scheduled import option.
 	 *
 	 * @var string
 	 */
-	const IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE = 'yes';
+	const SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE = 'no';
 
 	/**
 	 * Action name for the order batch import.
@@ -84,22 +84,22 @@ class OrdersScheduler extends ImportScheduler {
 		\Automattic\WooCommerce\Admin\Overrides\Order::add_filters();
 		\Automattic\WooCommerce\Admin\Overrides\OrderRefund::add_filters();
 
-		if ( self::is_immediate_import_enabled() ) {
+		if ( self::is_scheduled_import_enabled() ) {
+			// Schedule recurring batch processor.
+			add_action( 'action_scheduler_ensure_recurring_actions', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
+		} else {
 			// Schedule import immediately on order create/update/delete.
 			add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
-		} else {
-			// Schedule recurring batch processor.
-			add_action( 'action_scheduler_ensure_recurring_actions', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
 		}
 
 		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
-			// Watch for changes to the immediate import option.
-			add_action( 'add_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_added' ), 10, 2 );
-			add_action( 'update_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_change' ), 10, 2 );
-			add_action( 'delete_option', array( __CLASS__, 'handle_immediate_import_option_before_delete' ), 10, 1 );
+			// Watch for changes to the scheduled import option.
+			add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
+			add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
+			add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
 		}
 
 		OrdersStatsDataStore::init();
@@ -297,9 +297,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 	/**
 	 * Schedule this import if the post is an order or refund.
-	 * Note: This method is only called when immediate import is enabled
-	 * via the 'woocommerce_analytics_enable_immediate_import' filter.
-	 * Otherwise, orders are processed in batches periodically.
+	 * Note: This method is only called when scheduled import is disabled
+	 * (immediate mode). Otherwise, orders are processed in batches periodically.
 	 *
 	 * @param int $order_id Post ID.
 	 *
@@ -307,7 +306,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @returns int The order id
 	 */
 	public static function possibly_schedule_import( $order_id ) {
-		if ( ! self::is_immediate_import_enabled() ) {
+		if ( self::is_scheduled_import_enabled() ) {
 			return $order_id;
 		}
 
@@ -395,12 +394,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Handle changes to the immediate import option.
+	 * Handle changes to the scheduled import option.
 	 *
-	 * When switching from batch processing to immediate import,
+	 * When switching from scheduled to immediate import,
 	 * we need to run a final catchup batch to ensure no orders are missed.
 	 *
-	 * When switching from immediate import to batch processing,
+	 * When switching from immediate to scheduled import,
 	 * we need to reschedule the recurring batch processor.
 	 *
 	 * @internal
@@ -408,9 +407,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @param mixed $new_value The new value of the option.
 	 * @return void
 	 */
-	public static function handle_immediate_import_option_change( $old_value, $new_value ) {
-		// If switching from batch processing to immediate import.
-		if ( 'no' === $old_value && 'yes' === $new_value ) {
+	public static function handle_scheduled_import_option_change( $old_value, $new_value ) {
+		// If switching from scheduled to immediate import.
+		if ( 'yes' === $old_value && 'no' === $new_value ) {
 			// Unschedule the recurring batch processor.
 			$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 			as_unschedule_all_actions( $action_hook, array(), static::$group );
@@ -418,8 +417,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			// Schedule an immediate catchup batch to process all orders up to now.
 			// This ensures no orders are missed during the transition.
 			self::schedule_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION, array( null, null ) );
-		} elseif ( 'yes' === $old_value && 'no' === $new_value ) {
-			// Switching from immediate import to batch processing.
+		} elseif ( 'no' === $old_value && 'yes' === $new_value ) {
+			// Switching from immediate to scheduled import.
 			// Set the last processed order date to now with 1 minute buffer to ensure no orders are missed.
 			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', time() - MINUTE_IN_SECONDS ) );
 			update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
@@ -430,7 +429,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Handle addition of the immediate import option.
+	 * Handle addition of the scheduled import option.
 	 *
 	 * @internal
 	 * @param string $option_name The name of the option that was added.
@@ -438,30 +437,30 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 *
 	 * @return void
 	 */
-	public static function handle_immediate_import_option_added( $option_name, $value ) {
-		if ( self::IMMEDIATE_IMPORT_OPTION !== $option_name ) {
+	public static function handle_scheduled_import_option_added( $option_name, $value ) {
+		if ( self::SCHEDULED_IMPORT_OPTION !== $option_name ) {
 			return;
 		}
 
-		self::handle_immediate_import_option_change( self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE, $value );
+		self::handle_scheduled_import_option_change( self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE, $value );
 	}
 
 	/**
-	 * Handle deletion of the immediate import option.
+	 * Handle deletion of the scheduled import option.
 	 *
 	 * @internal
 	 * @param string $option_name The name of the option that was deleted.
 	 *
 	 * @return void
 	 */
-	public static function handle_immediate_import_option_before_delete( $option_name ) {
-		if ( self::IMMEDIATE_IMPORT_OPTION !== $option_name ) {
+	public static function handle_scheduled_import_option_before_delete( $option_name ) {
+		if ( self::SCHEDULED_IMPORT_OPTION !== $option_name ) {
 			return;
 		}
 
-		self::handle_immediate_import_option_change(
-			get_option( self::IMMEDIATE_IMPORT_OPTION, self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE ),
-			self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE,
+		self::handle_scheduled_import_option_change(
+			get_option( self::SCHEDULED_IMPORT_OPTION, self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE ),
+			self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE,
 		);
 	}
 
@@ -703,20 +702,20 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Check whether immediate import is enabled.
+	 * Check whether scheduled import is enabled.
 	 *
 	 * When the "analytics-scheduled-import" feature is disabled, only immediate
-	 * import is supported (returns true). When enabled, checks the option value.
+	 * import is supported (returns false). When enabled, checks the option value.
 	 *
 	 * @internal
 	 * @return bool
 	 */
-	private static function is_immediate_import_enabled(): bool {
+	private static function is_scheduled_import_enabled(): bool {
 		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
 			// If the feature is disabled, only immediate import is supported.
-			return true;
+			return false;
 		}
 
-		return 'no' !== get_option( self::IMMEDIATE_IMPORT_OPTION, self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE );
+		return 'yes' === get_option( self::SCHEDULED_IMPORT_OPTION, self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE );
 	}
 }
