@@ -174,13 +174,22 @@ Next, add a WHERE clause
 
 ```php
 function add_where_subquery( $clauses ) {
+  global $wpdb;
+
 	$currency = 'USD';
 
 	if ( isset( $_GET['currency'] ) ) {
 		$currency = sanitize_text_field( wp_unslash( $_GET['currency'] ) );
 	}
 
-	$clauses[] = "AND currency_postmeta.meta_key = '_order_currency' AND currency_postmeta.meta_value = '{$currency}'";
+  // Use $wpdb->prepare to safely escape the currency value for SQL.
+  $prepared_clause = $wpdb->prepare(
+      'AND currency_postmeta.meta_key = %s AND currency_postmeta.meta_value = %s',
+      '_order_currency',
+      $currency
+  );
+  
+  $clauses[] = $prepared_clause;
 
 	return $clauses;
 }

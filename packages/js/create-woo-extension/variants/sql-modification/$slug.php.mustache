@@ -219,6 +219,8 @@ if ( ! class_exists( '{{slugPascalCase}}' ) ) :
 		 * @return array Augmented clauses.
 		 */
 		public function add_where_subquery( $clauses ) {
+			global $wpdb;
+
 			$currency = 'USD';
 
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended
@@ -227,7 +229,14 @@ if ( ! class_exists( '{{slugPascalCase}}' ) ) :
 			}
 			// phpcs:enable
 
-			$clauses[] = "AND currency_postmeta.meta_key = '_order_currency' AND currency_postmeta.meta_value = '{$currency}'";
+			// Use $wpdb->prepare to safely escape the currency value for SQL.
+			$prepared_clause = $wpdb->prepare(
+				'AND currency_postmeta.meta_key = %s AND currency_postmeta.meta_value = %s',
+				'_order_currency',
+				$currency
+			);
+
+			$clauses[] = $prepared_clause;
 
 			return $clauses;
 		}
