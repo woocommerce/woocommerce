@@ -76,7 +76,7 @@ class ApiControllerTest extends \WC_Unit_Test_Case {
 	 * @param string|null $fields The fields to include in the feed.
 	 */
 	public function test_generate_feed( bool $force_regeneration, ?string $fields = null ) {
-		$request = new WP_REST_Request( 'POST', '/wc/product-catalog/v1/create' );
+		$request = new WP_REST_Request( 'POST', '/wc/pos/v1/product-catalog/create' );
 
 		if ( $force_regeneration ) {
 			$request->set_param( 'force', true );

@@ -49,7 +49,7 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 		$url   = $feed->get_file_url();
 		$path2 = $feed->get_file_path();
 		$this->assertNotNull( $url );
-		$this->assertStringContainsString( 'uploads/product-feed', $path2 );
+		$this->assertStringContainsString( 'uploads/product-feeds', $path2 );
 		$this->assertStringEndsWith( '.json', (string) $url );
 		$this->assertStringContainsString( '/product-feeds/', (string) $url );
 	}
