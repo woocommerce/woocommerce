@@ -65,6 +65,21 @@ class TransactionalEmailPersonalizer {
 	 * @return array Context data for personalization
 	 */
 	public function prepare_context_data( array $context, \WC_Email $email ): array {
+
+		/**
+		 * Filters the context data for email personalization.
+		 *
+		 * @since 10.5.0
+		 * @param array     $context Previous version of context data.
+		 * @param \WC_Email $email The WooCommerce email object.
+		 * @return array Context data for personalization
+		 */
+		$integration_context = apply_filters( 'woocommerce_email_editor_integration_personalizer_context_data', $context, $email );
+
+		if ( ! empty( $integration_context ) && is_array( $integration_context ) ) {
+			$context = array_merge( $context, $integration_context );
+		}
+
 		$context['recipient_email'] = $email->get_recipient();
 		$context['order']           = $email->object instanceof \WC_Order ? $email->object : null;
 		// For emails of type new_user or reset_password we want to set user directly from the object.
