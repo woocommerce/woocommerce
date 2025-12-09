@@ -76,7 +76,7 @@ class TransactionalEmailPersonalizer {
 		 */
 		$integration_context = apply_filters( 'woocommerce_email_editor_integration_personalizer_context_data', $context, $email );
 
-		if ( ! empty( $integration_context ) && is_array( $integration_context ) ) {
+		if ( is_array( $integration_context ) ) {
 			$context = array_merge( $context, $integration_context );
 		}
 

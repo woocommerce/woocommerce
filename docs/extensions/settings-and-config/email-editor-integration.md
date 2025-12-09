@@ -329,7 +329,7 @@ Use the `woocommerce_email_editor_integration_personalizer_context_data` filter 
 
 Return an array of custom context data. This array will be merged with the existing context, making your custom data available to all personalization tag callbacks via the `$context` parameter.
 
-**Example: Adding subscription data to context**
+#### Example: Adding subscription data to context
 
 ```php
 /**
@@ -362,7 +362,7 @@ function your_plugin_add_subscription_context( $context, $email ) {
 add_filter( 'woocommerce_email_editor_integration_personalizer_context_data', 'your_plugin_add_subscription_context', 10, 2 );
 ```
 
-**Example: Using custom context in a personalization tag callback**
+#### Example: Using custom context in a personalization tag callback
 
 Once you've added custom data to the context, your personalization tag callbacks can access it:
 
@@ -393,6 +393,7 @@ function your_plugin_get_subscription_end_date( $context, $args = array() ) {
 - Always check if the email type is relevant before adding context data to avoid unnecessary processing.
 - Use unique keys for your context data to prevent conflicts with WooCommerce core or other extensions.
 - The `$email->object` property typically contains the main object associated with the email (e.g., `WC_Order` for order emails, `WP_User` for user-related emails).
+- When using context data in personalization tags, ensure proper escaping based on the output context (e.g., `esc_html()`, `esc_attr()`, `esc_url()`).
 
 ## Complete example
 
