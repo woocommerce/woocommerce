@@ -10,10 +10,12 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
+use Automattic\WooCommerce\StoreApi\POSSessionHandler;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\POSUtils;
 
 /**
  * Abstract Cart Route
@@ -168,7 +170,15 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
-		if ( $this->has_cart_token( $request ) ) {
+		if ( $this->should_use_pos_session( $request ) ) {
+			// Use POS session handler for authenticated POS requests.
+			add_filter(
+				'woocommerce_session_handler',
+				function () {
+					return POSSessionHandler::class;
+				}
+			);
+		} elseif ( $this->has_cart_token( $request ) ) {
 			// Overrides the core session class.
 			add_filter(
 				'woocommerce_session_handler',
@@ -179,6 +189,26 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		}
 		$this->cart_controller->load_cart();
 		$this->cart_controller->normalize_cart();
+	}
+
+	/**
+	 * Check if this request should use a POS session.
+	 *
+	 * POS sessions require:
+	 * 1. The X-WC-POS header to be present
+	 * 2. An authenticated user with the manage_woocommerce capability
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return bool
+	 */
+	protected function should_use_pos_session( \WP_REST_Request $request ): bool {
+		$pos_header = $request->get_header( 'X-WC-POS' );
+
+		if ( ! $pos_header ) {
+			return false;
+		}
+
+		return POSUtils::current_user_can_pos();
 	}
 
 	/**
