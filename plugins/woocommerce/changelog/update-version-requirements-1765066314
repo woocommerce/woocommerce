@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update version requirements to WordPress 6.8 and PHP 7.4 in readme.txt and woocommerce.php.
