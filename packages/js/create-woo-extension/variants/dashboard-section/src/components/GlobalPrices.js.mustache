@@ -44,7 +44,7 @@ const GlobalPrices = () => {
 						'my-test-dashboard-section'
 					)}
 					interval="day"
-					data={data.reverse()}
+					data={[...data].reverse()}
 					dateParser="%Y-%m-%dT%H:%M:%S"
 					{{=<% %>=}}legendTotals={{ primary: average }}<%={{ }}=%>
 					showHeaderControls={false}
