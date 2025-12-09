@@ -249,8 +249,11 @@ class ProductWalker {
 	 * @return \stdClass The result of the query with properties: products, total, max_num_pages.
 	 */
 	private function iterate( array $args = array(), int $page = 1, int $limit = 100 ): \stdClass {
-		// Result is always stdClass when paginate=true.
-		/** @var \stdClass $result */
+		/**
+		 * Result is always stdClass when paginate=true.
+		 *
+		 * @var \stdClass $result
+		 */
 		$result = $this->product_loader->get_products(
 			array_merge(
 				$args,
