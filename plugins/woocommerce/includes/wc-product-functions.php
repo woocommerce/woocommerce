@@ -1291,12 +1291,33 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$order       = ArrayUtil::get_value_or_default( $args, 'order' );
 		$customer_id = $order ? $order->get_customer_id() : 0;
+		$tax_rates   = false;
+
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-		} else {
-			$customer  = $customer_id ? wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id ) : null;
+		} elseif ( $customer_id ) {
+			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
+		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
+			$tax_location = $order->get_taxable_location();
+			if ( is_array( $tax_location ) && isset( $tax_location['country'] ) ) {
+				$tax_rates = WC_Tax::find_rates(
+					array(
+						'country'   => $tax_location['country'],
+						'state'     => $tax_location['state'] ?? '',
+						'postcode'  => $tax_location['postcode'] ?? '',
+						'city'      => $tax_location['city'] ?? '',
+						'tax_class' => $product->get_tax_class(),
+					)
+				);
+			}
 		}
+
+		// Fallback if no tax rates were determined.
+		if ( false === $tax_rates ) {
+			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), null );
+		}
+
 		$remove_taxes = WC_Tax::calc_tax( $line_price, $tax_rates, true );
 		$return_price = $line_price - array_sum( $remove_taxes ); // Unrounded since we're dealing with tax inclusive prices. Matches logic in cart-totals class. @see adjust_non_base_location_price.
 	} else {

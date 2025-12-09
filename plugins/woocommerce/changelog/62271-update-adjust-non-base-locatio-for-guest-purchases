@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix tax calculation for manual orders when using fixed total price mode (woocommerce_adjust_non_base_location_prices filter).
