@@ -192,7 +192,21 @@ class PushTokensDataStore {
 			! $push_token->get_user_id()
 			|| ! $push_token->get_platform()
 			|| ! $push_token->get_origin()
-			|| ( ! $push_token->get_token() && ! $push_token->get_device_uuid() )
+			|| (
+				/**
+				 * Platforms iOS and Android require token OR device UUID.
+				 */
+				$push_token->get_platform() !== PushToken::PLATFORM_BROWSER
+				&& ! $push_token->get_token()
+				&& ! $push_token->get_device_uuid()
+			)
+			|| (
+				/**
+				 * Browsers don't have device UUIDs, so require token.
+				 */
+				$push_token->get_platform() === PushToken::PLATFORM_BROWSER
+				&& ! $push_token->get_token()
+			)
 		) {
 			throw new InvalidArgumentException(
 				'Can\'t retrieve push token because the push token data provided is invalid.'
@@ -270,15 +284,15 @@ class PushTokensDataStore {
 
 		return array_map(
 			function ( string $key ) use ( $meta ) {
+				if ( ! isset( $meta[ $key ] ) ) {
+					return null;
+				}
+
 				if ( is_array( $meta[ $key ] ) ) {
-					return $meta[ $key ][0];
+					$meta[ $key ] = array_shift( $meta[ $key ] );
 				}
 
-				if ( isset( $meta[ $key ] ) ) {
-					return $meta[ $key ];
-				}
-
-				return null;
+				return $meta[ $key ];
 			},
 			array_combine( static::SUPPORTED_META, static::SUPPORTED_META )
 		);
