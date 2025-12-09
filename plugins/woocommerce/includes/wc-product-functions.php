@@ -304,7 +304,8 @@ function wc_product_post_type_link( $permalink, $post ) {
 		 * @param WP_Post   $post         The product post object.
 		 */
 		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $deepest_term, $terms, $post );
-		$product_cat     = ! $category_object instanceof WP_Term ? $deepest_term->slug : $category_object->slug;
+		$category_object = ! $category_object instanceof WP_Term ? $deepest_term : $category_object;
+		$product_cat     = $category_object->slug;
 
 		if ( $category_object->parent ) {
 			// Reuse cached ancestors if the filter didn't change the category, otherwise fetch them.
