@@ -168,7 +168,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set line taxes and totals for passed in taxes.
 	 *
-	 * @param array $raw_tax_data Raw tax data.
+	 * @since 10.5.0 Handles legacy scalar tax values by converting to arrays.
+	 *               When legacy data is detected, attempts to infer tax rate ID from order context.
+	 *
+	 * @param array $raw_tax_data Raw tax data. 'total' and 'subtotal' should be arrays keyed by tax rate ID,
+	 *                            but scalar values (floats/strings) are accepted for legacy compatibility.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
@@ -177,8 +181,35 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			'subtotal' => array(),
 		);
 		if ( ! empty( $raw_tax_data['total'] ) && ! empty( $raw_tax_data['subtotal'] ) ) {
-			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $raw_tax_data['subtotal'] );
-			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
+			$subtotal = $raw_tax_data['subtotal'];
+			$total    = $raw_tax_data['total'];
+
+			// Handle legacy data where total/subtotal might be floats/strings instead of arrays.
+			// Convert scalar values to array format to preserve the tax amount.
+			$has_legacy_data = ! is_array( $subtotal ) || ! is_array( $total );
+
+			if ( ! is_array( $subtotal ) ) {
+				$subtotal = $this->convert_legacy_tax_value_to_array( $subtotal );
+			}
+			if ( ! is_array( $total ) ) {
+				$total = $this->convert_legacy_tax_value_to_array( $total );
+			}
+
+			// Notify developers about legacy data format for debugging purposes.
+			if ( $has_legacy_data ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %d: order item ID */
+						__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
+						$this->get_id()
+					),
+					'10.5.0'
+				);
+			}
+
+			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $subtotal );
+			$tax_data['total']    = array_map( 'wc_format_decimal', $total );
 
 			// Subtotal cannot be less than total!
 			if ( NumberUtil::array_sum( $tax_data['subtotal'] ) < NumberUtil::array_sum( $tax_data['total'] ) ) {
@@ -194,6 +225,51 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->set_total_tax( NumberUtil::array_sum( array_map( 'wc_round_tax_total', $tax_data['total'] ) ) );
 			$this->set_subtotal_tax( NumberUtil::array_sum( array_map( 'wc_round_tax_total', $tax_data['subtotal'] ) ) );
 		}
+	}
+
+	/**
+	 * Convert a legacy scalar tax value to array format.
+	 *
+	 * Legacy orders may have tax data stored as floats/strings
+	 * instead of arrays keyed by tax rate ID. This method attempts to infer the
+	 * appropriate tax rate ID from the order context.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param float|string $value The legacy scalar tax value.
+	 * @return array Tax data as array, keyed by tax rate ID (or 0 if unknown).
+	 */
+	protected function convert_legacy_tax_value_to_array( $value ) {
+		$rate_id = 0;
+
+		// Try to infer tax rate ID from order context.
+		$order = $this->get_order();
+		if ( $order ) {
+			$tax_items = $order->get_taxes();
+			if ( ! empty( $tax_items ) ) {
+				// Use the first tax rate ID from the order as a best-effort match.
+				$first_tax_item = reset( $tax_items );
+				if ( $first_tax_item ) {
+					$rate_id = $first_tax_item->get_rate_id();
+				}
+			}
+		}
+
+		$converted = array( $rate_id => $value );
+
+		/**
+		 * Filter the converted legacy tax value.
+		 *
+		 * Allows plugins to customize how legacy scalar tax values are converted
+		 * to the expected array format.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param array              $converted The converted tax data array.
+		 * @param float|string       $value     The original legacy scalar value.
+		 * @param WC_Order_Item_Product $item   The order item being processed.
+		 */
+		return apply_filters( 'woocommerce_order_item_legacy_tax_conversion', $converted, $value, $this );
 	}
 
 	/**
