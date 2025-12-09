@@ -284,19 +284,18 @@ export const addMilestoneToIssue = async (
 			}
 		);
 	}
-
-}
+};
 
 /**
  * Create a pull request from branches on GitHub.
  *
- * @param {Object} options       pull request options.
- * @param {string} options.head  branch name containing the changes you want to merge.
- * @param {string} options.base  branch name you want the changes pulled into.
- * @param {string} options.owner repository owner.
- * @param {string} options.name  repository name.
- * @param {string} options.title pull request title.
- * @param {string} options.body  pull request body.
+ * @param {Object}   options           pull request options.
+ * @param {string}   options.head      branch name containing the changes you want to merge.
+ * @param {string}   options.base      branch name you want the changes pulled into.
+ * @param {string}   options.owner     repository owner.
+ * @param {string}   options.name      repository name.
+ * @param {string}   options.title     pull request title.
+ * @param {string}   options.body      pull request body.
  * @param {string[]} options.reviewers list of GitHub usernames to request a review from.
  * @return {Promise<object>}     pull request data.
  */
@@ -309,8 +308,7 @@ export const createPullRequest = async ( options: {
 	body: string;
 	reviewers?: string[];
 } ): Promise< CreatePullRequestEndpointResponse[ 'data' ] > => {
-	const { head, base, owner, name, title, body, reviewers, milestone } =
-		options;
+	const { head, base, owner, name, title, body, reviewers } = options;
 	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
 		{

@@ -343,7 +343,10 @@ export const updateBranchChangelog = async (
 
 	// Read plugin file version in branch to determine milestone.
 	let milestone = '';
-	const pluginFile = readFileSync( path.join( tmpRepoPath, 'plugins/woocommerce/woocommerce.php' ), 'utf8' );
+	const pluginFile = readFileSync(
+		path.join( tmpRepoPath, 'plugins/woocommerce/woocommerce.php' ),
+		'utf8'
+	);
 	const m = pluginFile.match( /\*\s+Version:\s+(\d+\.\d+)\.\d+/ );
 
 	if ( m ) {
@@ -387,7 +390,7 @@ export const updateBranchChangelog = async (
 			}`,
 			head: branch,
 			base: releaseBranch,
-			reviewers: [ githubActor ]
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
