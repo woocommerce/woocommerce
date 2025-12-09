@@ -269,4 +269,23 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 
 		WC_Helper_Product::delete_product( $product_without_cogs->get_id() );
 	}
+
+	/**
+	 * @testdox set_variation_id throws exception with variation_id in error data for invalid ID.
+	 */
+	public function test_set_variation_id_throws_exception_with_data_for_invalid_id() {
+		$invalid_id = 999999;
+		$item       = new WC_Order_Item_Product();
+
+		try {
+			$item->set_variation_id( $invalid_id );
+			$this->fail( 'Setting an invalid variation ID should have thrown an exception.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertEquals( 'order_item_product_invalid_variation_id', $e->getErrorCode() );
+			$error_data = $e->getErrorData();
+			$this->assertEquals( 400, $error_data['status'] );
+			$this->assertArrayHasKey( 'variation_id', $error_data );
+			$this->assertEquals( $invalid_id, $error_data['variation_id'] );
+		}
+	}
 }

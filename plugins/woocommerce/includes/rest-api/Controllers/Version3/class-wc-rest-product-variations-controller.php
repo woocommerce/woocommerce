@@ -350,7 +350,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				// Check ID for global attributes or name for product attributes.
 				if ( ! empty( $attribute['id'] ) ) {
 					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					$attribute_name = sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
 				} elseif ( ! empty( $attribute['name'] ) ) {
 					$attribute_name = sanitize_title( $attribute['name'] );
 				}
