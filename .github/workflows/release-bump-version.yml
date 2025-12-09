@@ -27,10 +27,6 @@ on:
         description: Type of version bump to perform
         type: string
         required: true
-      milestone:
-        description: Milestone to set on the PR (optional)
-        type: string
-        required: false
 
 permissions:
   contents: write
@@ -119,6 +115,7 @@ jobs:
             core.setOutput( 'nextVersion', newVersion );
             core.setOutput( 'nextStable', newVersion.replace( /-(dev|(beta|rc)\.\d+)/, '' ) );
             core.setOutput( 'clearChangelog', '' === prerelease );
+            core.setOutput( 'prMilestone', `${ baseVersion }.0` );
 
       - name: Bump version in files
         env:
@@ -175,10 +172,13 @@ jobs:
             reviewer_arg="--reviewer ${{ github.actor }}"
           fi
 
-          # Set milestone argument (empty if not provided).
+          # Check milestone exists.
+          milestone="${{ steps.compute-new-version.outputs.prMilestone }}"
           milestone_arg=""
-          if [[ -n "${{ inputs.milestone }}" ]]; then
-            milestone_arg="--milestone ${{ inputs.milestone }}"
+          if [[ -n "$milestone" ]]; then
+            if [ "$(gh api repos/${{ github.repository }}/milestones --jq 'any(.[]; .title=="$milestone")')" = "true" ]; then
+              milestone_arg="--milestone $milestone"
+            fi
           fi
 
           # Create PR
