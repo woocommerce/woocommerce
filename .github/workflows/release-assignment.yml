@@ -114,9 +114,9 @@ jobs:
 
               // Extract team name from final release event description
               if (eventKey === 'final' && matchingEvent && matchingEvent.description) {
-                const teamMatch = matchingEvent.description.match(/Team\s+(\S+)/i);
+                const teamMatch = matchingEvent.description.match(/Team\s+(.+)/i);
                 if (teamMatch && teamMatch[1]) {
-                  teamName = teamMatch[1].toLowerCase().replace(/\s+/g, '-');
+                  teamName = teamMatch[1].trim().toLowerCase().replace(/\s+/g, '-');
                   console.log(`Team name from description: ${teamName}`);
                 }
               }
