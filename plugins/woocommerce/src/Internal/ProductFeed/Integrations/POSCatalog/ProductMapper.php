@@ -23,6 +23,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Product Mapper for the POS catalog.
  *
  * Uses WooCommerce REST API controllers to map product data.
+ *
+ * @since 10.5.0
  */
 class ProductMapper implements ProductMapperInterface {
 	/**
@@ -81,6 +83,8 @@ class ProductMapper implements ProductMapperInterface {
 	/**
 	 * Set fields to include in the product mapping.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param string|null $fields Fields to include in the product mapping.
 	 * @return void
 	 */
@@ -92,6 +96,8 @@ class ProductMapper implements ProductMapperInterface {
 	/**
 	 * Set fields to include in the variation mapping.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param string|null $fields Fields to include in the variation mapping.
 	 * @return void
 	 */
@@ -102,6 +108,8 @@ class ProductMapper implements ProductMapperInterface {
 
 	/**
 	 * Map WooCommerce product to catalog row
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WC_Product $product Product to map.
 	 * @return array Mapped product data array.

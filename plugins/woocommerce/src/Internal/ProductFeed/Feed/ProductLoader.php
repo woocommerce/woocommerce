@@ -15,10 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Loader for products.
+ *
+ * @since 10.5.0
  */
 class ProductLoader {
 	/**
 	 * Retrieves products from WooCommerce.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @see wc_get_products()
 	 *

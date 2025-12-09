@@ -18,6 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Walker for products.
+ *
+ * @since 10.5.0
  */
 class ProductWalker {
 	/**
@@ -110,6 +112,8 @@ class ProductWalker {
 	 * The walker will mostly be set up based on the integration.
 	 * The feed is provided externally, as it might be based on the context (CLI, REST, Action Scheduler, etc.).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param IntegrationInterface $integration The integration.
 	 * @param FeedInterface        $feed        The feed.
 	 * @return self The ProductWalker instance.
@@ -158,6 +162,8 @@ class ProductWalker {
 	/**
 	 * Set the number of products to iterate through per batch.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param int $batch_size The number of products to iterate through per batch.
 	 * @return self
 	 */
@@ -169,6 +175,8 @@ class ProductWalker {
 	/**
 	 * Set the time limit to extend the execution time limit per batch.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param int $time_limit Time limit in seconds.
 	 * @return self
 	 */
@@ -179,6 +187,8 @@ class ProductWalker {
 
 	/**
 	 * Walks through all products.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param callable $callback The callback to call after each batch of products is processed.
 	 * @return int The total number of products processed.

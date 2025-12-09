@@ -15,10 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * String utility helper functions
+ *
+ * @since 10.5.0
  */
 class StringHelper {
 	/**
 	 * Convert value to boolean string ('true' or 'false')
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param mixed $value Value to convert.
 	 * @return string 'true' or 'false'.
@@ -30,6 +34,8 @@ class StringHelper {
 
 	/**
 	 * Truncate text to specified length
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param string $text Text to truncate.
 	 * @param int    $max_length Maximum length.

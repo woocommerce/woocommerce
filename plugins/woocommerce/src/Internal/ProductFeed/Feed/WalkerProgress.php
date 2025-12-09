@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Feed;
 
 /**
  * Simple class that tracks/indicates the progress of a walker.
+ *
+ * @since 10.5.0
  */
 class WalkerProgress {
 	/**
@@ -43,6 +45,8 @@ class WalkerProgress {
 
 	/**
 	 * Creates a WalkerProgress instance from a WooCommerce products query result.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param object $result The result object from wc_get_products().
 	 * @return static

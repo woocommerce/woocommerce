@@ -219,7 +219,7 @@ class ProductWalkerTest extends \WC_Unit_Test_Case {
 			$number_of_products,
 			$expected_iterations,
 			&$processed_iterations,
-			$batch_size,
+			$batch_size
 		) {
 			$this->assertEquals( $number_of_products, $progress->total_count );
 			$this->assertEquals( $expected_iterations, $progress->total_batch_count );

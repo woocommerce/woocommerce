@@ -19,6 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * IntegrationInterface
+ *
+ * @since 10.5.0
  */
 interface IntegrationInterface {
 	/**

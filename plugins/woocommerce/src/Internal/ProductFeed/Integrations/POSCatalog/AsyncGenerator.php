@@ -20,6 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Async Generator for feeds.
+ *
+ * @since 10.5.0
  */
 class AsyncGenerator {
 	/**
@@ -71,6 +73,8 @@ class AsyncGenerator {
 	/**
 	 * Register hooks for the async generator.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return void
 	 */
 	public function register_hooks(): void {
@@ -81,6 +85,8 @@ class AsyncGenerator {
 	/**
 	 * Returns the current feed generation status.
 	 * Initiates one if not already running.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param array|null $args The arguments to pass to the action.
 	 * @return array           The feed generation status.
@@ -139,6 +145,8 @@ class AsyncGenerator {
 
 	/**
 	 * Action scheduler callback for the feed generation.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param string $option_key The option key for the feed generation status.
 	 * @return void
@@ -204,6 +212,8 @@ class AsyncGenerator {
 	/**
 	 * Forces a regeneration of the feed.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param array|null $args The arguments to pass to the action.
 	 * @return array The feed generation status.
 	 * @throws \Exception When there is a reason why the regeneration cannot be forced.
@@ -239,6 +249,8 @@ class AsyncGenerator {
 
 	/**
 	 * Action scheduler callback for the feed deletion after expiry.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param string $option_key The option key for the feed generation status.
 	 * @param string $path       The path to the feed file.

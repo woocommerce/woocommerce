@@ -18,7 +18,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Main plugin class.
+ * Main Product Feed class.
+ *
+ * @since 10.5.0
  */
 final class ProductFeed implements RegisterHooksInterface {
 	/**
@@ -45,6 +47,8 @@ final class ProductFeed implements RegisterHooksInterface {
 
 	/**
 	 * Initialize plugin components
+	 *
+	 * @since 10.5.0
 	 */
 	public function register(): void {
 		// Let all integrations register their hooks.
@@ -55,6 +59,8 @@ final class ProductFeed implements RegisterHooksInterface {
 
 	/**
 	 * Plugin activation
+	 *
+	 * @since 10.5.0
 	 */
 	public function activate(): void {
 		foreach ( $this->integration_registry->get_integrations() as $integration ) {
@@ -64,6 +70,8 @@ final class ProductFeed implements RegisterHooksInterface {
 
 	/**
 	 * Plugin deactivation
+	 *
+	 * @since 10.5.0
 	 */
 	public function deactivate(): void {
 		foreach ( $this->integration_registry->get_integrations() as $integration ) {

@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\Internal\ProductFeed\Feed;
 
 /**
  * Product Mapper Interface.
+ *
+ * @since 10.5.0
  */
 interface ProductMapperInterface {
 	/**

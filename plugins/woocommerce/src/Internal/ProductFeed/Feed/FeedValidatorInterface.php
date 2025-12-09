@@ -9,6 +9,11 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFeed\Feed;
 
+/**
+ * Feed Validator Interface.
+ *
+ * @since 10.5.0
+ */
 interface FeedValidatorInterface {
 	/**
 	 * Validate a single entry.

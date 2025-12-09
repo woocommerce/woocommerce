@@ -17,6 +17,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Simple field validator for the POS catalog.
+ *
+ * @since 10.5.0
  */
 final class FeedValidator implements FeedValidatorInterface {
 	/**

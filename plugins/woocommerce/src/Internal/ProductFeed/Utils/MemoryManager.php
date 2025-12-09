@@ -15,10 +15,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Helper class for managing memory.
+ *
+ * @since 10.5.0
  */
 class MemoryManager {
 	/**
 	 * Get available memory as a percentage of the total memory limit.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return int Available memory as a percentage of the total memory limit.
 	 */
@@ -33,7 +37,9 @@ class MemoryManager {
 	}
 
 	/**
-	 * Flush all caches caches.
+	 * Flush all caches.
+	 *
+	 * @since 10.5.0
 	 */
 	public function flush_caches() {
 		global $wpdb, $wp_object_cache;

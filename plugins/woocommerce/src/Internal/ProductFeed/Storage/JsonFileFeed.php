@@ -20,6 +20,8 @@ use Exception;
  * File-backed JSON feed storage.
  *
  * This class writes JSON directly to a file, entry by entry, without keeping everything in memory.
+ *
+ * @since 10.5.0
  */
 class JsonFileFeed implements FeedInterface {
 	public const UPLOAD_DIR = 'product-feeds';
