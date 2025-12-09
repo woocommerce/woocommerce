@@ -116,7 +116,7 @@ jobs:
               if (eventKey === 'final' && matchingEvent && matchingEvent.description) {
                 const teamMatch = matchingEvent.description.match(/Team\s+(\S+)/i);
                 if (teamMatch && teamMatch[1]) {
-                  teamName = teamMatch[1].toLowerCase();
+                  teamName = teamMatch[1].toLowerCase().replace(/\s+/g, '-');
                   console.log(`Team name from description: ${teamName}`);
                 }
               }
