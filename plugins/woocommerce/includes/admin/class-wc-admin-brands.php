@@ -332,6 +332,12 @@ class WC_Brands_Admin {
 					// Uploading files
 					var file_frame;
 
+					function clearThumbnailField() {
+						jQuery('#product_cat_thumbnail img').attr('src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>');
+						jQuery('#product_cat_thumbnail_id').val('');
+						jQuery('.remove_image_button').hide();
+					}
+
 					jQuery(document).on( 'click', '.upload_image_button', function( event ){
 
 						event.preventDefault();
@@ -365,9 +371,7 @@ class WC_Brands_Admin {
 					});
 
 					jQuery(document).on( 'click', '.remove_image_button', function( event ){
-						jQuery('#product_cat_thumbnail img').attr('src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>');
-						jQuery('#product_cat_thumbnail_id').val('');
-						jQuery('.remove_image_button').hide();
+						clearThumbnailField();
 						return false;
 					});
 
@@ -379,10 +383,8 @@ class WC_Brands_Admin {
 							if ( ! res || res.errors ) {
 								return;
 							}
-							// Clear Thumbnail fields on submit
-							jQuery( '#product_cat_thumbnail' ).find( 'img' ).attr( 'src', '<?php echo esc_js( wc_placeholder_img_src() ); ?>' );
-							jQuery( '#product_cat_thumbnail_id' ).val( '' );
-							jQuery( '.remove_image_button' ).hide();
+
+							clearThumbnailField();
 
 							return;
 						}
