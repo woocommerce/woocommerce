@@ -52,10 +52,11 @@ class MemoryManager {
 			return;
 		}
 
-		$wp_object_cache->group_ops      = array();
-		$wp_object_cache->stats          = array();
-		$wp_object_cache->memcache_debug = array();
-		$wp_object_cache->cache          = array();
+		// These properties exist on various object cache implementations.
+		$wp_object_cache->group_ops      = array(); // @phpstan-ignore property.notFound
+		$wp_object_cache->stats          = array(); // @phpstan-ignore property.notFound
+		$wp_object_cache->memcache_debug = array(); // @phpstan-ignore property.notFound
+		$wp_object_cache->cache          = array(); // @phpstan-ignore property.notFound
 
 		// This method is specific to certain memcached implementations.
 		if ( method_exists( $wp_object_cache, '__remoteset' ) ) {

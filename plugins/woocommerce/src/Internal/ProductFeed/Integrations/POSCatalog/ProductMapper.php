@@ -157,7 +157,13 @@ class ProductMapper implements ProductMapperInterface {
 	 */
 	protected function get_products_request(): WP_REST_Request {
 		if ( null === $this->products_request ) {
-			$this->products_request = new WP_REST_Request( 'GET' );
+			/**
+			 * Type hint for PHPStan generics.
+			 *
+			 * @var WP_REST_Request<array<string, mixed>> $request
+			 * */
+			$request                = new WP_REST_Request( 'GET' );
+			$this->products_request = $request;
 			$this->products_request->set_param( 'context', 'view' );
 
 			if ( null !== $this->fields ) {
@@ -175,7 +181,13 @@ class ProductMapper implements ProductMapperInterface {
 	 */
 	protected function get_variations_request(): WP_REST_Request {
 		if ( null === $this->variations_request ) {
-			$this->variations_request = new WP_REST_Request( 'GET' );
+			/**
+			 * Type hint for PHPStan generics.
+			 *
+			 * @var WP_REST_Request<array<string, mixed>> $request
+			 */
+			$request                  = new WP_REST_Request( 'GET' );
+			$this->variations_request = $request;
 			$this->variations_request->set_param( 'context', 'view' );
 
 			if ( null !== $this->variation_fields ) {
