@@ -34,7 +34,7 @@ class ScheduledUpdatesPromotion {
 	/**
 	 * Name of the option to check.
 	 */
-	const OPTION_NAME = 'woocommerce_analytics_immediate_import';
+	const OPTION_NAME = 'woocommerce_analytics_scheduled_import';
 
 	/**
 	 * Constructor - attach action hooks.
@@ -111,6 +111,6 @@ class ScheduledUpdatesPromotion {
 		}
 
 		// Update the option to enable scheduled mode.
-		update_option( self::OPTION_NAME, 'no' );
+		update_option( self::OPTION_NAME, 'yes' );
 	}
 }
