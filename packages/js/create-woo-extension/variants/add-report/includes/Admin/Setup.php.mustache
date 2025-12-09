@@ -34,7 +34,7 @@ class Setup {
 			? require $script_asset_path
 			: array(
 				'dependencies' => array(),
-				'version'      => filemtime( $script_path ),
+				'version'      => filemtime( dirname( {{slugSnakeCase}}_MAIN_PLUGIN_FILE ) . $script_path ),
 			);
 		$script_url        = plugins_url( $script_path, {{slugSnakeCase}}_MAIN_PLUGIN_FILE );
 
