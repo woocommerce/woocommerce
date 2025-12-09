@@ -1,5 +1,6 @@
 <?php
-declare( strict_types=1 );
+
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Utilities;
 
@@ -14,7 +15,8 @@ use WC_Product;
 /**
  * EligibilityService class file.
  */
-class EligibilityService {
+class EligibilityService
+{
 
 	/**
 	 * The spam threshold for notifications.
@@ -37,27 +39,33 @@ class EligibilityService {
 	 *
 	 * @param StockManagementHelper $stock_management_helper The stock management helper instance.
 	 */
-	final public function init( StockManagementHelper $stock_management_helper ): void {
+	final public function init(StockManagementHelper $stock_management_helper): void
+	{
 		$this->stock_management_helper = $stock_management_helper;
 	}
 
 	/**
-	 * Validate product type and other basic criteria for notifications.
+	 * Validate product type, if notification signups are allowed, and other basic criteria for notifications.
 	 *
 	 * @param WC_Product|null $product The product to check.
 	 * @return bool True if the product is eligible for notifications, false otherwise.
 	 */
-	public function is_product_eligible( ?WC_Product $product ): bool {
-		if ( ! $product instanceof WC_Product ) {
+	public function is_product_eligible(?WC_Product $product): bool
+	{
+		if (! Config::allows_signups()) {
 			return false;
 		}
 
-		if ( ! $product->is_type( Config::get_supported_product_types() ) ) {
+		if (! $product instanceof WC_Product) {
+			return false;
+		}
+
+		if (! $product->is_type(Config::get_supported_product_types())) {
 			return false;
 		}
 
 		// Check for invalid product statuses.
-		if ( in_array( $product->get_status(), array( ProductStatus::TRASH, ProductStatus::AUTO_DRAFT, ProductStatus::PENDING, ProductStatus::FUTURE ), true ) ) {
+		if (in_array($product->get_status(), array(ProductStatus::TRASH, ProductStatus::AUTO_DRAFT, ProductStatus::PENDING, ProductStatus::FUTURE), true)) {
 			return false;
 		}
 
@@ -71,7 +79,7 @@ class EligibilityService {
 		 * @param WC_Product $product The product to check.
 		 * @return bool True if the product is valid for notifications, false otherwise.
 		 */
-		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_product_is_valid', true, $product );
+		return (bool) apply_filters('woocommerce_customer_stock_notifications_product_is_valid', true, $product);
 	}
 
 	/**
@@ -80,17 +88,18 @@ class EligibilityService {
 	 * @param WC_Product $product The product to check.
 	 * @return bool True if the product allows signups, false otherwise.
 	 */
-	public function product_allows_signups( WC_Product $product ): bool {
-		if ( $product->is_type( ProductType::VARIATION ) ) {
-			$parent_product = wc_get_product( $product->get_parent_id() );
-			if ( ! $parent_product instanceof WC_Product ) {
+	public function product_allows_signups(WC_Product $product): bool
+	{
+		if ($product->is_type(ProductType::VARIATION)) {
+			$parent_product = wc_get_product($product->get_parent_id());
+			if (! $parent_product instanceof WC_Product) {
 				return false;
 			}
 
-			return $this->product_allows_signups( $parent_product );
+			return $this->product_allows_signups($parent_product);
 		}
 
-		return 'no' !== $product->get_meta( Config::get_product_signups_meta_key() );
+		return 'no' !== $product->get_meta(Config::get_product_signups_meta_key());
 	}
 
 	/**
@@ -99,8 +108,9 @@ class EligibilityService {
 	 * @param string $stock_status The stock status to check.
 	 * @return bool True if the stock status is eligible for notifications, false otherwise.
 	 */
-	public function is_stock_status_eligible( string $stock_status ): bool {
-		return in_array( $stock_status, Config::get_eligible_stock_statuses(), true );
+	public function is_stock_status_eligible(string $stock_status): bool
+	{
+		return in_array($stock_status, Config::get_eligible_stock_statuses(), true);
 	}
 
 	/**
@@ -109,14 +119,15 @@ class EligibilityService {
 	 * @param WC_Product $product The product to check.
 	 * @return bool True if the product has active notifications, false otherwise.
 	 */
-	public function has_active_notifications( WC_Product $product ): bool {
-		$lookup_ids = $this->get_target_product_ids( $product );
+	public function has_active_notifications(WC_Product $product): bool
+	{
+		$lookup_ids = $this->get_target_product_ids($product);
 
-		if ( empty( $lookup_ids ) ) {
+		if (empty($lookup_ids)) {
 			return false;
 		}
 
-		return NotificationQuery::product_has_active_notifications( $lookup_ids );
+		return NotificationQuery::product_has_active_notifications($lookup_ids);
 	}
 
 	/**
@@ -135,11 +146,12 @@ class EligibilityService {
 	 * @param WC_Product $product The product to check.
 	 * @return array<int> Array of product IDs to check for notifications.
 	 */
-	public function get_target_product_ids( WC_Product $product ): array {
-		$lookup_ids = array( $product->get_id() );
-		if ( $product->is_type( ProductType::VARIABLE ) ) {
-			$children_ids = $this->stock_management_helper->get_managed_variations( $product );
-			$lookup_ids   = array_merge( $lookup_ids, $children_ids );
+	public function get_target_product_ids(WC_Product $product): array
+	{
+		$lookup_ids = array($product->get_id());
+		if ($product->is_type(ProductType::VARIABLE)) {
+			$children_ids = $this->stock_management_helper->get_managed_variations($product);
+			$lookup_ids   = array_merge($lookup_ids, $children_ids);
 		}
 
 		return $lookup_ids;
@@ -152,17 +164,18 @@ class EligibilityService {
 	 * @param WC_Product   $product The product to check.
 	 * @return bool True if the notification is eligible for sending, false otherwise.
 	 */
-	public function should_skip_notification( Notification $notification, WC_Product $product ): bool {
-		$is_throttled         = $this->is_notification_throttled( $notification );
-		$is_product_published = in_array( $product->get_status(), Config::get_supported_product_statuses(), true );
+	public function should_skip_notification(Notification $notification, WC_Product $product): bool
+	{
+		$is_throttled         = $this->is_notification_throttled($notification);
+		$is_product_published = in_array($product->get_status(), Config::get_supported_product_statuses(), true);
 		$should_skip          = $is_throttled || ! $is_product_published;
 
 		// Bypass for privileged users.
-		if ( $should_skip ) {
+		if ($should_skip) {
 			$user_id = $notification->get_user_id();
-			if ( $user_id ) {
-				$user = get_user_by( 'id', $user_id );
-				if ( $user && ( user_can( $user, 'manage_woocommerce' ) || user_can( $user, 'manage_options' ) ) ) {
+			if ($user_id) {
+				$user = get_user_by('id', $user_id);
+				if ($user && (user_can($user, 'manage_woocommerce') || user_can($user, 'manage_options'))) {
 					$should_skip = false;
 				}
 			}
@@ -179,7 +192,7 @@ class EligibilityService {
 		 * @param int  $notification_id The notification ID.
 		 * @return bool
 		 */
-		return (bool) apply_filters( 'woocommerce_customer_stock_notification_should_skip_sending', $should_skip, $notification->get_id() );
+		return (bool) apply_filters('woocommerce_customer_stock_notification_should_skip_sending', $should_skip, $notification->get_id());
 	}
 
 	/**
@@ -188,7 +201,8 @@ class EligibilityService {
 	 * @param Notification $notification The notification object.
 	 * @return bool
 	 */
-	private function is_notification_throttled( Notification $notification ): bool {
+	private function is_notification_throttled(Notification $notification): bool
+	{
 
 		/**
 		 * Filter: woocommerce_customer_stock_notification_throttle_threshold
@@ -197,13 +211,13 @@ class EligibilityService {
 		 *
 		 * @param int $threshold Throttle time in seconds should pass from the last notification delivery time.
 		 */
-		$threshold = (int) apply_filters( 'woocommerce_customer_stock_notification_throttle_threshold', self::SPAM_THRESHOLD );
-		if ( $threshold <= 0 ) {
+		$threshold = (int) apply_filters('woocommerce_customer_stock_notification_throttle_threshold', self::SPAM_THRESHOLD);
+		if ($threshold <= 0) {
 			return false;
 		}
 
 		$last_notified = $notification->get_date_notified();
-		$is_throttled  = $last_notified instanceof \WC_DateTime && $last_notified->getTimestamp() > ( time() - $threshold );
+		$is_throttled  = $last_notified instanceof \WC_DateTime && $last_notified->getTimestamp() > (time() - $threshold);
 
 		return $is_throttled;
 	}
