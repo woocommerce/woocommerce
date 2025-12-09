@@ -284,7 +284,6 @@ export const updateReleaseBranchChangelogs = async (
 			head: branch,
 			base: releaseBranch,
 			reviewers: [ githubActor ],
-			milestone: `${ mainVersion }.0`,
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -295,6 +294,14 @@ export const updateReleaseBranchChangelogs = async (
 		} catch {
 			Logger.warn(
 				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
+		}
+
+		try {
+			await addMilestoneToIssue( options, pullRequest.number, `${ mainVersion }.0` );
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ mainVersion }.0" to PR ${ pullRequest.number }`
 			);
 		}
 
