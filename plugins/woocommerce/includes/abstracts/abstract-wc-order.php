@@ -10,6 +10,7 @@
  * @package     WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -303,6 +304,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $items_changed ) {
 			delete_transient( 'wc_order_' . $this->get_id() . '_needs_processing' );
+
+			// Invalidate the order cache to prevent stale item data.
+			// This fixes a race condition where get_items() may have been called
+			// before items were saved, caching empty items arrays.
+			// See https://github.com/woocommerce/woocommerce/issues/62173.
+			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+				wc_get_container()->get( OrderCache::class )->remove( $this->get_id() );
+			}
 		}
 	}
 

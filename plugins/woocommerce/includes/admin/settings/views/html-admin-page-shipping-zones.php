@@ -68,7 +68,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '" data-id="' . esc_attr( $method->instance_id ) . '">' . esc_html( $method->get_title() ) . '</li>';
 					}
 				} else {
-					echo '<li>' . esc_html_e( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+					echo '<li>' . esc_html__( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
 				}
 				?>
 			</ul>

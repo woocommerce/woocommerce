@@ -355,6 +355,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
@@ -1177,6 +1178,21 @@ class WC_Install {
 	 */
 	public static function enable_customer_stock_notifications_signups() {
 		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
+	}
+
+	/**
+	 * Set scheduled import mode as the default for new installations.
+	 *
+	 * Uses add_option() which only sets the option if it doesn't already exist.
+	 * This ensures existing installations are not affected.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return void
+	 */
+	public static function enable_analytics_scheduled_import(): void {
+		// add_option only sets if option doesn't exist, returns false if it already exists.
+		add_option( 'woocommerce_analytics_scheduled_import', 'yes' );
 	}
 
 	/**
@@ -2782,7 +2798,7 @@ $stock_notifications_table_schema;
 	 * @return string The content for the page
 	 */
 	private static function get_refunds_return_policy_page_content() {
-		return <<<EOT
+		return <<<'EOT'
 <!-- wp:paragraph -->
 <p><b>This is a sample page.</b></p>
 <!-- /wp:paragraph -->
