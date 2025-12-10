@@ -14,6 +14,10 @@
  * @package WooCommerce
  */
 
+use Automattic\Jetpack\Connection\Manager;
+use Automattic\WooCommerce\Admin\API\OnboardingPlugins;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
@@ -65,3 +69,27 @@ $GLOBALS['woocommerce'] = WC();
 if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
 	\Automattic\Jetpack\Connection\Rest_Authentication::init();
 }
+
+
+add_filter( 'woocommerce_settings_advanced', function( $tabs ) {
+	$request = new WP_REST_Request();
+	$request->set_param( 'redirect_url', admin_url() );
+	$plugin_onboarding = new OnboardingPlugins();
+	$result = $plugin_onboarding->get_jetpack_authorization_url( $request );
+
+	if ( ! empty( $result['url'] ) ) {
+		$result['url'] = add_query_arg(
+			array(
+				// We use the new WooDNA value.
+				'from'         => 'woocommerce-onboarding',
+				// We inform Calypso that this is a WooPayments onboarding flow.
+				'plugin_name'  => 'woocommerce-payments',
+				// Use the current user's WP admin color scheme.
+				'color_scheme' => $result['color_scheme'],
+			),
+			$result['url']
+		);
+	}
+
+	?> <div> <a href="<?php echo esc_url( $result['url'] ); ?>">Connect to WordPress.com</a> </div> <?php
+}, 100, 1 );
