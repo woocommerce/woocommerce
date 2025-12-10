@@ -33,7 +33,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		// Clean up options.
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION );
-		delete_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION );
+		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
 
 		// Clean up any scheduled actions.
 		$this->clear_scheduled_batch_processor();
@@ -113,9 +113,9 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that handle_immediate_import_option_change unschedules batch processor when switching to immediate import.
+	 * Test that handle_scheduled_import_option_change unschedules batch processor when switching to immediate import.
 	 */
-	public function test_handle_immediate_import_option_change_unschedules_batch_when_enabling_immediate() {
+	public function test_handle_scheduled_import_option_change_unschedules_batch_when_disabling_scheduled() {
 		// Clear any existing scheduled actions.
 		$this->clear_scheduled_batch_processor();
 
@@ -126,8 +126,8 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			'Batch processor should be scheduled initially'
 		);
 
-		// Switch from batch processing ('no') to immediate import ('yes').
-		OrdersScheduler::handle_immediate_import_option_change( 'no', 'yes' );
+		// Switch from scheduled import ('yes') to immediate import ('no').
+		OrdersScheduler::handle_scheduled_import_option_change( 'yes', 'no' );
 
 		// Verify the batch processor is unscheduled.
 		$this->assertFalse(
@@ -137,26 +137,26 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that handle_immediate_import_option_change schedules batch processor when switching from immediate import.
+	 * Test that handle_scheduled_import_option_change schedules batch processor when switching to scheduled import.
 	 */
-	public function test_handle_immediate_import_option_change_schedules_batch_when_disabling_immediate() {
+	public function test_handle_scheduled_import_option_change_schedules_batch_when_enabling_scheduled() {
 		// Clear any existing scheduled actions.
 		$this->clear_scheduled_batch_processor();
 
-		// Switch from immediate import ('yes') to batch processing ('no').
-		OrdersScheduler::handle_immediate_import_option_change( 'yes', 'no' );
+		// Switch from immediate import ('no') to scheduled import ('yes').
+		OrdersScheduler::handle_scheduled_import_option_change( 'no', 'yes' );
 
 		// Verify the batch processor is scheduled.
 		$this->assertTrue(
 			$this->is_batch_processor_scheduled(),
-			'Batch processor should be scheduled when switching from immediate import to batch processing'
+			'Batch processor should be scheduled when switching from immediate import to scheduled import'
 		);
 
 		// Verify the last processed date is set to approximately 1 minute ago.
 		$last_date = get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		$this->assertNotFalse(
 			$last_date,
-			'Last processed date should be set when switching to batch processing'
+			'Last processed date should be set when switching to scheduled import'
 		);
 
 		$expected_timestamp = time() - MINUTE_IN_SECONDS;
@@ -179,29 +179,29 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that handle_immediate_import_option_change does nothing for other transitions.
+	 * Test that handle_scheduled_import_option_change does nothing for other transitions.
 	 */
-	public function test_handle_immediate_import_option_change_ignores_other_transitions() {
+	public function test_handle_scheduled_import_option_change_ignores_other_transitions() {
 		// Clear any existing scheduled actions.
 		$this->clear_scheduled_batch_processor();
 
 		$action_hook = OrdersScheduler::get_action( 'process_pending_batch' );
 
-		// Test transition from 'yes' to 'yes' (no change).
-		OrdersScheduler::handle_immediate_import_option_change( 'yes', 'yes' );
+		// Test transition from 'no' to 'no' (no change - stays immediate import).
+		OrdersScheduler::handle_scheduled_import_option_change( 'no', 'no' );
 		$this->assertFalse(
 			$this->is_batch_processor_scheduled(),
 			'Batch processor should not be scheduled when option stays as immediate import'
 		);
 
-		// Test transition from 'no' to 'no' (no change).
+		// Test transition from 'yes' to 'yes' (no change - stays scheduled import).
 		OrdersScheduler::schedule_recurring_batch_processor();
 		$scheduled_time = as_next_scheduled_action( $action_hook );
-		OrdersScheduler::handle_immediate_import_option_change( 'no', 'no' );
+		OrdersScheduler::handle_scheduled_import_option_change( 'yes', 'yes' );
 		$this->assertEquals(
 			$scheduled_time,
 			as_next_scheduled_action( $action_hook ),
-			'Batch processor should remain scheduled when option stays as batch processing'
+			'Batch processor should remain scheduled when option stays as scheduled import'
 		);
 	}
 
