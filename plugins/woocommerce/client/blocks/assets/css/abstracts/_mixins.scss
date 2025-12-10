@@ -392,6 +392,17 @@ $fontSizes: (
 	}
 }
 
+@mixin card-styles() {
+	@include font-regular-locked;
+	border: 1px solid $universal-border-light;
+	padding: $gap;
+	margin: 0;
+	border-radius: $universal-border-radius;
+	display: flex;
+	justify-content: flex-start;
+	align-items: flex-start;
+}
+
 @keyframes wc-skeleton-shimmer {
 	100% {
 		transform: translateX(100%);

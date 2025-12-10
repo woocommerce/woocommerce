@@ -107,7 +107,8 @@ export const LocalPickupSelect = ( {
 		<div
 			className={ clsx(
 				'wc-block-components-local-pickup-select',
-				multiplePackages && 'wc-block-components-address-card'
+				multiplePackages &&
+					'wc-block-components-local-pickup-select--multiple'
 			) }
 		>
 			{ header }

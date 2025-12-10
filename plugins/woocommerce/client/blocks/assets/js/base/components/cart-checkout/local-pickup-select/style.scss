@@ -14,3 +14,7 @@
 		width: 100%;
 	}
 }
+
+.wc-block-components-local-pickup-select--multiple {
+	@include card-styles();
+}
