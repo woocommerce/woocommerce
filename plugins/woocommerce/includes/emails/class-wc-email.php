@@ -1025,7 +1025,8 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_from_name( $from_name = '' ) {
-		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name' ), $this, $from_name );
+		$default = get_bloginfo( 'name', 'display' );
+		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name', $default ), $this, $from_name );
 		return wp_specialchars_decode( esc_html( $from_name ), ENT_QUOTES );
 	}
 

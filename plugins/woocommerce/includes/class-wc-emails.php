@@ -321,7 +321,8 @@ class WC_Emails {
 	 * @return string
 	 */
 	public function get_from_name() {
-		return wp_specialchars_decode( get_option( 'woocommerce_email_from_name' ), ENT_QUOTES );
+		$default = get_bloginfo( 'name', 'display' );
+		return wp_specialchars_decode( esc_html( get_option( 'woocommerce_email_from_name', $default ) ), ENT_QUOTES );
 	}
 
 	/**
