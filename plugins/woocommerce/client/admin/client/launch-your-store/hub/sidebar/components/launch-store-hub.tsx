@@ -56,7 +56,7 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 	);
 
 	const sidebarDescription = __(
-		'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to WooCommerce | Settings | Site visibility.',
+		'Ready to start selling? Before you launch your store, make sure you’ve completed these essential tasks. If you’d like to change your store visibility, go to WooCommerce > Settings > Site visibility.',
 		'woocommerce'
 	);
 

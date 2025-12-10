@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Add order meta to prevent duplicate PayPal Standard API calls when we have already received a 404 response for a capture request on an authorised payment.

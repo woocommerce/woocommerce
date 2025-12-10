@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PayPal webhook endpoint URL to use home URL instead of site URL.
