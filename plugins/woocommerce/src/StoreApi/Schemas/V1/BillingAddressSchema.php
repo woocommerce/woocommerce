@@ -31,6 +31,10 @@ class BillingAddressSchema extends AbstractAddressSchema {
 	 */
 	public function get_properties() {
 		$properties = parent::get_properties();
+
+		// POS sessions don't require email - it's optional for in-person sales.
+		$email_required = ! wc_is_pos_session();
+
 		return array_merge(
 			$properties,
 			[
@@ -38,7 +42,7 @@ class BillingAddressSchema extends AbstractAddressSchema {
 					'description' => __( 'Email', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
-					'required'    => true,
+					'required'    => $email_required,
 				],
 			]
 		);

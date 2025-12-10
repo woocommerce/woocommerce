@@ -341,6 +341,12 @@ class OrderController {
 	protected function validate_email( \WC_Order $order ) {
 		$email = $order->get_billing_email();
 
+		// POS sessions don't require an email address for most orders.
+		// Email is only needed for products that require delivery (downloads, gift cards).
+		if ( wc_is_pos_session() && empty( $email ) ) {
+			return;
+		}
+
 		if ( empty( $email ) ) {
 			throw new RouteException(
 				'woocommerce_rest_missing_email_address',
