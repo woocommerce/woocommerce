@@ -40,14 +40,6 @@ let completedCount = 0;
 const startTime = Date.now();
 const currentlyBuilding = new Set();
 
-// Packages that are in scope but don't have build:project scripts
-const NO_BUILD_PACKAGES = [
-	'dependency-extraction-webpack-plugin',
-	'eslint-plugin',
-	'eslint-plugin-woocommerce',
-	'internal-style-build',
-];
-
 // Categorize package by path
 function getCategory( path ) {
 	if ( path.startsWith( '../../packages/js/' ) ) {
@@ -259,8 +251,13 @@ function printSummary() {
 
 	console.log( '' );
 
+	const noBuildCount = totalPackages - packages.size;
+	const scopeInfo =
+		noBuildCount > 0
+			? `${ totalPackages } in scope, ${ noBuildCount } without build scripts`
+			: `${ totalPackages } in scope`;
 	console.log(
-		`${ colors.bold } WooCommerce Build - ${ packages.size } packages built${ colors.reset } ${ colors.dim }(${ totalPackages } in scope)${ colors.reset }`
+		`${ colors.bold } WooCommerce Build - ${ packages.size } packages built${ colors.reset } ${ colors.dim }(${ scopeInfo })${ colors.reset }`
 	);
 	console.log(
 		`${ colors.dim }───────────────────────────────────────────────────────────────${ colors.reset }`
@@ -272,22 +269,8 @@ function printSummary() {
 		'packages/js': [],
 		client: [],
 		'plugins/woocommerce': [],
-		'packages/js (no build)': [],
 		other: [],
 	};
-
-	// Only add no-build packages if we actually built something
-	if ( packages.size > 0 ) {
-		for ( const name of NO_BUILD_PACKAGES ) {
-			categories[ 'packages/js (no build)' ].push( {
-				name,
-				category: 'packages/js (no build)',
-				buildTypes: [],
-				totalTime: 0,
-				noBuild: true,
-			} );
-		}
-	}
 
 	for ( const [ , pkg ] of packages ) {
 		categories[ pkg.category ].push( pkg );
@@ -306,9 +289,7 @@ function printSummary() {
 
 		for ( const pkg of pkgs ) {
 			let status;
-			if ( pkg.noBuild ) {
-				status = `${ colors.dim }·  (no build)${ colors.reset }`;
-			} else if ( packagesWithErrors.has( pkg.name ) ) {
+			if ( packagesWithErrors.has( pkg.name ) ) {
 				status = `${ colors.red }·  (error) ${ colors.reset }`;
 			} else if ( pkg.cached ) {
 				status = `${ colors.dim }·  (cached)${ colors.reset }`;
@@ -319,10 +300,7 @@ function printSummary() {
 				pkg.buildTypes.length > 0
 					? `(${ pkg.buildTypes.join( ', ' ) })`
 					: '';
-			const time =
-				pkg.cached || pkg.noBuild
-					? ''
-					: `${ pkg.totalTime.toFixed( 1 ) }s`;
+			const time = pkg.cached ? '' : `${ pkg.totalTime.toFixed( 1 ) }s`;
 
 			const namePadded = pkg.name.padEnd( 25 );
 			const typesPadded = types.padEnd( 20 );
