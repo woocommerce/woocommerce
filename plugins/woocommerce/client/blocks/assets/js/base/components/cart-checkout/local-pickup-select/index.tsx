@@ -72,7 +72,9 @@ export const LocalPickupSelect = ( {
 				<div
 					className="wc-block-components-shipping-rates-control__package-title"
 					dangerouslySetInnerHTML={ {
-						__html: sanitizeHTML( String( packageData.name ?? '' ) ),
+						__html: sanitizeHTML(
+							String( packageData.name ?? '' )
+						),
 					} }
 				/>
 				{ shouldShowItems && (
