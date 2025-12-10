@@ -8,7 +8,7 @@ import { createInterpolateElement } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 
-const IMMEDIATE_IMPORT_OPTION = 'woocommerce_analytics_immediate_import';
+const SCHEDULED_IMPORT_OPTION = 'woocommerce_analytics_scheduled_import';
 
 export default function ScheduledUpdatesPromotionNotice() {
 	// Get settings to check option value (hooks must be called before early returns)
@@ -24,9 +24,9 @@ export default function ScheduledUpdatesPromotionNotice() {
 		return null;
 	}
 
-	const optionValue = wcAdminSettings?.[ IMMEDIATE_IMPORT_OPTION ];
+	const optionValue = wcAdminSettings?.[ SCHEDULED_IMPORT_OPTION ];
 	// No need to show notice if option is already set.
-	if ( optionValue === 'no' || optionValue === 'yes' ) {
+	if ( optionValue === 'yes' || optionValue === 'no' ) {
 		return null;
 	}
 
