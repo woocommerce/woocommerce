@@ -102,11 +102,15 @@ jobs:
 
             METHOD
             1. FIRST: Fetch and catalog all existing BC review comments (see DEDUPLICATION above)
-            2. Get the PR diff and analyze for backwards compatibility issues
-            3. For each potential issue:
+            2. Get the PR diff using: gh pr diff ${{ github.event.pull_request.number }}
+               DO NOT use shell redirects (>, >>, |) - they are blocked. Just run the command directly.
+            3. Analyze the diff for backwards compatibility issues
+            4. For each potential issue:
                - Cite exact `file:line` from the PR diff
                - Check if already covered by an existing comment (skip if so)
-               - If new, post an inline comment with: non-breaking approach, shim, and staged deprecation timeline
+               - If new, add to the comments batch
+            5. After analysis, use the Write tool to create ./bc_review_payload.json (NOT /tmp/, must be in working directory)
+            6. Submit the review using: gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" -X POST --input bc_review_payload.json
 
           claude_args: >
             --allowedTools "Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
