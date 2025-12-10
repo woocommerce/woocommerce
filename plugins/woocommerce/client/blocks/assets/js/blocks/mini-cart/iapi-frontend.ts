@@ -64,7 +64,7 @@ const scalePrice = ( {
 }: ScalePriceArgs ) => {
 	const scaledPrice = price * Math.pow( 10, outputDecimals - inputDecimals );
 	// Remove extra decimals.
-	return scaledPrice.toFixed( 0 );
+	return Math.round( scaledPrice );
 };
 
 // Inject style tags for badge styles based on background colors of the document.
