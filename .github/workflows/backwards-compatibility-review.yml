@@ -42,8 +42,9 @@ jobs:
 
             OUTPUT RULES
             - At most ONE inline comment per file + line + concern. Merge related points into a single comment.
+            - DO NOT post comments one at a time. Collect ALL comments, then submit as a SINGLE batched review (see POSTING COMMENTS below).
 
-            INLINE COMMENT TEMPLATE (use exactly with blank lines between sections)
+            INLINE COMMENT FORMAT (for each comment in the batch)
             ```
             Backwards Compatibility Review
 
@@ -59,7 +60,7 @@ jobs:
                gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments?per_page=100" --paginate
             2. Filter to comments from "claude[bot]" that contain "Backwards Compatibility Review"
             3. Build a list of already-covered concerns: for each existing comment, note the file path, line number, and the breaking change described
-            4. When you find a potential BC issue, check your list - if an existing comment ALREADY covers the same concern on the same file (same or nearby lines within 5 lines), SKIP posting
+            4. When you find a potential BC issue, check your list - if an existing comment ALREADY covers the same concern on the same file (same or nearby lines within 5 lines), SKIP it
             5. Two comments cover the same concern if they warn about the SAME breaking change, even if worded differently:
                - "REST API namespace contract" and "endpoint URL becomes permanent" on the same route = SAME concern
                - "hook name is public API" and "hook signature is a contract" on the same hook = SAME concern
@@ -67,7 +68,27 @@ jobs:
 
             DO NOT use HTML markers for deduplication.
             DO NOT try to PATCH/update existing comments.
-            Simply SKIP posting if the concern is already covered by an existing comment.
+            Simply SKIP adding to batch if the concern is already covered by an existing comment.
+
+            POSTING COMMENTS (CRITICAL - use batched review API)
+            Post ALL comments as a SINGLE review to avoid spamming notifications:
+            1. Collect all new comments into a JSON array
+            2. Get the latest commit SHA: gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" --jq '.head.sha'
+            3. Submit as one batched review using:
+               gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+                 -X POST \
+                 -f commit_id="<SHA>" \
+                 -f event="COMMENT" \
+                 -f body="Backwards Compatibility Review - Found <N> potential issues" \
+                 --input <(echo '{"comments": [{"path": "file.php", "line": 42, "body": "..."}, ...]}')
+
+            The comments array format:
+            [
+              {"path": "relative/file/path.php", "line": <line_number>, "body": "<comment text>"},
+              ...
+            ]
+
+            If there are NO new issues to report, do not create a review.
 
             ANALYSIS BOUNDARIES
             Include:
@@ -85,4 +106,4 @@ jobs:
                - If new, post an inline comment with: non-breaking approach, shim, and staged deprecation timeline
 
           claude_args: >
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
+            --allowedTools "Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
