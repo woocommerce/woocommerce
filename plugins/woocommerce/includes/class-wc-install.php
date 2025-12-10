@@ -1110,7 +1110,10 @@ class WC_Install {
 				foreach ( $section->get_settings( $subsection ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
 						$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-						add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+						$skip_initial_save = isset( $value['skip_initial_save'] ) ? (bool) $value['skip_initial_save'] : false;
+						if ( ! $skip_initial_save ) {
+							add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+						}
 					}
 				}
 			}

@@ -123,14 +123,15 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( '"From" name', 'woocommerce' ),
-					'desc'     => '',
-					'id'       => 'woocommerce_email_from_name',
-					'type'     => 'text',
-					'css'      => 'min-width:400px;',
-					'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
-					'autoload' => false,
-					'desc_tip' => true,
+					'title'             => __( '"From" name', 'woocommerce' ),
+					'desc'              => '',
+					'id'                => 'woocommerce_email_from_name',
+					'type'              => 'text',
+					'css'               => 'min-width:400px;',
+					'default'           => esc_attr( get_bloginfo( 'name', 'display' ) ),
+					'autoload'          => false,
+					'desc_tip'          => true,
+					'skip_initial_save' => true,
 				),
 
 				array(
