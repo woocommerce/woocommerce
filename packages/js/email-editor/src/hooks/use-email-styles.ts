@@ -125,7 +125,7 @@ function cleanupUserStyles( obj ) {
 			}
 
 			for ( const key in current ) {
-				if ( current.hasOwnProperty( key ) ) {
+				if ( Object.prototype.hasOwnProperty.call( current, key ) ) {
 					const cleanedValue = cleanObject( current[ key ] );
 					if (
 						cleanedValue === undefined ||

@@ -47,6 +47,10 @@ export type EmailTheme = Omit< GlobalStylesConfig, 'styles' > & {
 	styles: EmailStyles;
 };
 
+export type GlobalEmailStylesPost = EmailTheme & {
+	id: number;
+};
+
 export interface TypographyProperties {
 	fontSize: string;
 	fontFamily: string;

@@ -12,12 +12,7 @@ import { EmailTheme, storeName } from '../store';
 
 export function useUserTheme() {
 	const { globalStylePost } = useSelect( ( select ) => {
-		const post =
-			( select(
-				storeName
-			).getGlobalEmailStylesPost() as unknown as EmailTheme & {
-				id: number;
-			} ) || null;
+		const post = select( storeName ).getGlobalEmailStylesPost() || null;
 		return {
 			globalStylePost: post,
 		};
