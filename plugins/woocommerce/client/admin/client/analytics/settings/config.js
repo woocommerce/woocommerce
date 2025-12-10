@@ -23,8 +23,8 @@ export const DEFAULT_ORDER_STATUSES = [
 	'on-hold',
 ];
 export const DEFAULT_DATE_RANGE = 'period=month&compare=previous_year';
-export const IMMEDIATE_IMPORT_SETTING_NAME =
-	'woocommerce_analytics_immediate_import';
+export const SCHEDULED_IMPORT_SETTING_NAME =
+	'woocommerce_analytics_scheduled_import';
 
 const filteredOrderStatuses = Object.keys( ORDER_STATUSES )
 	.filter( ( status ) => status !== 'refunded' )
@@ -162,14 +162,14 @@ if ( !! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] ) {
 		__( '12 hours', 'woocommerce' ) // Default value for the import interval.
 	);
 
-	baseConfig[ IMMEDIATE_IMPORT_SETTING_NAME ] = {
-		name: IMMEDIATE_IMPORT_SETTING_NAME,
+	baseConfig[ SCHEDULED_IMPORT_SETTING_NAME ] = {
+		name: SCHEDULED_IMPORT_SETTING_NAME,
 		label: __( 'Updates:', 'woocommerce' ),
 		inputType: 'radio',
 		options: [
 			{
 				label: __( 'Scheduled (recommended)', 'woocommerce' ),
-				value: 'no',
+				value: 'yes',
 				description: sprintf(
 					/* translators: %s: import interval, e.g. "12 hours" */
 					__(
@@ -181,7 +181,7 @@ if ( !! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] ) {
 			},
 			{
 				label: __( 'Immediately', 'woocommerce' ),
-				value: 'yes',
+				value: 'no',
 				description: __(
 					'Updates as soon as new data is available. May slow busy stores.',
 					'woocommerce'
@@ -189,10 +189,10 @@ if ( !! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] ) {
 			},
 		],
 		// This default value is primarily used when users click "Reset defaults" for settings.
-		// We set 'no' (Scheduled) as the default for new installs, since it is the recommended, lowest-impact option.
-		// Note: The PHP backend defaults to 'yes' (Immediate) to preserve legacy behavior for existing stores and avoid disrupting current site operations.
+		// We set 'yes' (Scheduled) as the default for new installs, since it is the recommended, lowest-impact option.
+		// Note: The PHP backend defaults to 'no' (Immediate) to preserve legacy behavior for existing stores and avoid disrupting current site operations.
 		// This intentional difference ensures new stores use the best-practice default, while existing stores are not affected by updates.
-		defaultValue: 'no',
+		defaultValue: 'yes',
 	};
 }
 

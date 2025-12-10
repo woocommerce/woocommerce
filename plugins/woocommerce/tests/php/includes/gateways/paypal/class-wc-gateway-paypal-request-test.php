@@ -535,6 +535,57 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test capture handles 404 error and sets authorization_checked flag.
+	 */
+	public function test_capture_authorized_payment_handles_404_error_and_sets_authorization_checked_flag() {
+		$order = WC_Helper_Order::create_order();
+		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
+		$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
+		$order->save();
+
+		$capture_api_call_count = 0;
+		$authorization_id       = 'AUTH_123';
+
+		$filter_callback = function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
+			// Track if capture_auth endpoint is called.
+			if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				++$capture_api_call_count;
+				return $this->return_capture_error( 404, array() );
+			}
+
+			return $value;
+		};
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request->capture_authorized_payment( $order );
+
+		remove_filter( 'pre_http_request', $filter_callback, 10 );
+
+		// Verify capture_auth API was called (but returned 404).
+		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
+		// Verify order note was added with authorization ID message.
+		$order = wc_get_order( $order->get_id() );
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 1,
+			)
+		);
+
+		$this->assertNotEmpty( $notes );
+		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $notes[0]->content );
+		$this->assertStringContainsString( 'Authorization ID: ' . $authorization_id . ' not found', $notes[0]->content );
+		// Verify authorization_checked flag was set.
+		$this->assertEquals( 'yes', $order->get_meta( '_paypal_authorization_checked', true ), 'Expected _paypal_authorization_checked flag to be set to yes' );
+		// Verify capture ID was not set.
+		$this->assertEmpty( $order->get_meta( '_paypal_capture_id', true ) );
+		// Verify status was not updated.
+		$this->assertEquals( WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED, $order->get_meta( '_paypal_status', true ) );
+	}
+
+	/**
 	 * Test capture handles WP_Error response.
 	 */
 	public function test_capture_authorized_payment_handles_wp_error_response() {
