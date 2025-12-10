@@ -370,7 +370,8 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	/**
 	 * Display admin notice when tax-inclusive pricing is enabled without a base tax rate.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
+	 * @internal This method is public only because it is used as a hook callback.
 	 */
 	public function tax_configuration_validation_notice() {
 		// Only show on WooCommerce settings pages.
@@ -389,7 +390,17 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			return;
 		}
 
-		// Don't show notice if non-base location price adjustment is disabled.
+		/**
+		 * Filters if taxes should be removed from locations outside the store base location.
+		 *
+		 * The woocommerce_adjust_non_base_location_prices filter can stop base taxes being taken off when dealing
+		 * with out of base locations. e.g. If a product costs 10 including tax, all users will pay 10
+		 * regardless of location and taxes.
+		 *
+		 * @since 2.4.7
+		 *
+		 * @param bool $adjust_non_base_location_prices True by default.
+		 */
 		if ( ! apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			return;
 		}
@@ -407,7 +418,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			/**
 			 * Filter whether to show the tax configuration incomplete notice.
 			 *
-			 * @since 10.4.0
+			 * @since 10.5.0
 			 *
 			 * @param bool $show_notice Whether to show the notice. Default true.
 			 */
@@ -438,19 +449,19 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	}
 
 	/**
-	 * Check if any tax rate exists for a given country.
+	 * Check if a standard tax rate exists for a given country.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 *
 	 * @param string $country Country code.
-	 * @return bool True if at least one tax rate exists for the country.
+	 * @return bool True if at least one standard tax rate exists for the country.
 	 */
 	private function has_tax_rate_for_country( $country ) {
 		global $wpdb;
 
 		$count = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = %s OR tax_rate_country = ''",
+				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE (tax_rate_country = %s OR tax_rate_country = '') AND tax_rate_class = ''",
 				$country
 			)
 		);
