@@ -348,7 +348,11 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	 * @see https://github.com/woocommerce/woocommerce/issues/60233
 	 */
 	public function test_set_taxes_with_legacy_float_values_does_not_throw_error() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
 		$item = new WC_Order_Item_Product();
+		$item->set_order_id( $order->get_id() );
 
 		// Legacy/corrupted tax data: floats instead of arrays.
 		// This format may exist in old orders due to data corruption or legacy data formats.
@@ -372,6 +376,8 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		// Use reset() to get first value regardless of key (rate_id may be inferred from order context).
 		$this->assertEquals( 24.00, (float) reset( $taxes['total'] ) );
 		$this->assertEquals( 24.00, (float) reset( $taxes['subtotal'] ) );
+
+		$order->delete( true );
 	}
 
 	/**
@@ -381,7 +387,11 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	 * metadata contains serialized floats instead of arrays.
 	 */
 	public function test_set_taxes_with_serialized_legacy_float_values_does_not_throw_error() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
 		$item = new WC_Order_Item_Product();
+		$item->set_order_id( $order->get_id() );
 
 		// Serialized legacy data with floats (as stored in wp_woocommerce_order_itemmeta).
 		$serialized_legacy_data = serialize(
@@ -405,13 +415,19 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		// Use reset() to get first value regardless of key (rate_id may be inferred from order context).
 		$this->assertEquals( 144.00, (float) reset( $taxes['total'] ) );
 		$this->assertEquals( 144.00, (float) reset( $taxes['subtotal'] ) );
+
+		$order->delete( true );
 	}
 
 	/**
 	 * @testdox set_taxes handles mixed format (one array, one float) without fatal error.
 	 */
 	public function test_set_taxes_with_mixed_array_and_float_does_not_throw_error() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
 		$item = new WC_Order_Item_Product();
+		$item->set_order_id( $order->get_id() );
 
 		// Mixed format: subtotal is array, total is float.
 		$mixed_tax_data = array(
@@ -434,6 +450,8 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 24.00, (float) reset( $taxes['total'] ) );
 		// Subtotal was already an array with key 1, so it should preserve that key.
 		$this->assertEquals( 24.00, (float) $taxes['subtotal'][1] );
+
+		$order->delete( true );
 	}
 
 	/**
@@ -464,7 +482,11 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	 * @testdox set_taxes handles string values for total/subtotal without fatal error.
 	 */
 	public function test_set_taxes_with_string_values_does_not_throw_error() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
 		$item = new WC_Order_Item_Product();
+		$item->set_order_id( $order->get_id() );
 
 		// String values instead of arrays.
 		$string_tax_data = array(
@@ -486,6 +508,8 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		// Use reset() to get first value regardless of key (rate_id may be inferred from order context).
 		$this->assertEquals( 24.00, (float) reset( $taxes['total'] ) );
 		$this->assertEquals( 24.00, (float) reset( $taxes['subtotal'] ) );
+
+		$order->delete( true );
 	}
 
 	/**
@@ -533,7 +557,12 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	 * @testdox set_taxes filter allows plugins to customize legacy tax conversion.
 	 */
 	public function test_set_taxes_legacy_conversion_filter() {
+		// Create an order - the filter is only called when an order context exists.
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
 		$item = new WC_Order_Item_Product();
+		$item->set_order_id( $order->get_id() );
 
 		// Add a filter to customize the conversion.
 		$filter_callback = function ( $converted, $value, $order_item ) {
@@ -558,5 +587,8 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 
 		// Clean up filter.
 		remove_filter( 'woocommerce_order_item_legacy_tax_conversion', $filter_callback );
+
+		// Clean up order.
+		$order->delete( true );
 	}
 }
