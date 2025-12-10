@@ -13,6 +13,9 @@
 
 const { spawn } = require( 'child_process' );
 
+// Configuration
+const PROGRESS_BAR_WIDTH = 30;
+
 // ANSI color codes
 const colors = {
 	reset: '\x1b[0m',
@@ -23,6 +26,7 @@ const colors = {
 	red: '\x1b[31m',
 	cyan: '\x1b[36m',
 	magenta: '\x1b[35m',
+	bgGreen: '\x1b[42m',
 };
 
 // Strip ANSI codes from string
@@ -85,38 +89,59 @@ function parseTiming( line ) {
 	return 0;
 }
 
+// Create a progress bar string
+function createProgressBar( percent ) {
+	const clampedPercent = Math.min( 100, Math.max( 0, percent ) );
+	const filled = Math.round( ( clampedPercent / 100 ) * PROGRESS_BAR_WIDTH );
+	const empty = PROGRESS_BAR_WIDTH - filled;
+	const bar =
+		colors.bgGreen +
+		' '.repeat( filled ) +
+		colors.reset +
+		colors.dim +
+		'░'.repeat( empty ) +
+		colors.reset;
+	return bar;
+}
+
 // Update the progress line
 function updateProgress() {
 	const elapsed = ( ( Date.now() - startTime ) / 1000 ).toFixed( 1 );
 	const buildingList = [ ...currentlyBuilding ];
-	const building = buildingList.slice( 0, 5 ).join( ', ' );
+	const building = buildingList.slice( 0, 3 ).join( ', ' );
 	const more =
-		currentlyBuilding.size > 5
-			? ` +${ currentlyBuilding.size - 5 } more`
+		currentlyBuilding.size > 3
+			? ` +${ currentlyBuilding.size - 3 } more`
 			: '';
 
-	// Clear both lines and write progress
-	// Move up one line, clear it, then clear current line
-	process.stdout.write( `\x1b[2K\x1b[1A\x1b[2K\r` );
+	// Calculate percentage
+	const percent =
+		totalPackages > 0
+			? Math.round( ( completedCount / totalPackages ) * 100 )
+			: 0;
+	const bar = createProgressBar( percent );
 
-	let statusLine;
+	// Build the current packages display
+	let currentDisplay;
 	if ( currentlyBuilding.size === 0 && completedCount === 0 ) {
-		statusLine = `${ colors.dim }Starting...${ colors.reset }`;
+		currentDisplay = `${ colors.dim }starting...${ colors.reset }`;
 	} else if ( currentlyBuilding.size > 0 ) {
-		statusLine = `${ colors.yellow }${ currentlyBuilding.size } active${ colors.reset } ${ colors.dim }(${ building }${ more })${ colors.reset }`;
+		currentDisplay = `${ colors.cyan }${ building }${ colors.reset }${ colors.dim }${ more }${ colors.reset }`;
 	} else {
-		statusLine = `${ colors.dim }Finishing...${ colors.reset }`;
+		currentDisplay = `${ colors.dim }finishing...${ colors.reset }`;
 	}
 
-	process.stdout.write(
-		`${ colors.dim }...${ colors.reset } ` +
-			`${ colors.bold }${ completedCount }/${
-				totalPackages || '?'
-			} done${ colors.reset } ` +
-			statusLine +
-			`\n` +
-			`   ${ colors.dim }Elapsed: ${ elapsed }s${ colors.reset }`
-	);
+	// Single line progress with bar
+	const progressLine =
+		`${ colors.bold }Building${ colors.reset } ` +
+		`${ bar } ` +
+		`${ colors.green }${ percent }%${ colors.reset } ` +
+		`(${ completedCount }/${ totalPackages || '?' }) ` +
+		`${ colors.dim }${ elapsed }s${ colors.reset } ` +
+		currentDisplay;
+
+	// Clear line and write progress
+	process.stdout.write( '\r\x1b[K' + progressLine );
 }
 
 // Process a line of output
@@ -167,14 +192,22 @@ function processLine( rawLine ) {
 		line.includes( 'Browserslist:' ) ||
 		line.includes( 'DEPRECATION' )
 	) {
-		const cleanWarning = line.split( ': ' ).slice( 1 ).join( ': ' ).trim();
+		// Extract package name if present (format: "path/to/package task: message")
+		const packageMatch = line.match( /^([^\s]+)\s+build:project:[^:]+:\s*(.*)$/ );
+		let warningText;
+		if ( packageMatch ) {
+			const pkgName = getPackageName( packageMatch[ 1 ] );
+			warningText = `[${ pkgName }] ${ packageMatch[ 2 ] }`;
+		} else {
+			warningText = line.trim();
+		}
+
+		// Deduplicate by checking if we already have a similar warning
 		if (
-			cleanWarning &&
-			! warnings.some( ( w ) =>
-				w.includes( cleanWarning.substring( 0, 50 ) )
-			)
+			warningText &&
+			! warnings.some( ( w ) => w === warningText )
 		) {
-			warnings.push( cleanWarning );
+			warnings.push( warningText );
 		}
 		return;
 	}
@@ -246,8 +279,8 @@ function processLine( rawLine ) {
 function printSummary() {
 	const totalTime = ( Date.now() - startTime ) / 1000;
 
-	// Clear both progress lines
-	process.stdout.write( `\x1b[2K\x1b[1A\x1b[2K\r` );
+	// Clear progress line
+	process.stdout.write( '\r\x1b[K' );
 
 	console.log( '' );
 
@@ -367,10 +400,8 @@ function printSummary() {
 // Main
 function main() {
 	console.log(
-		`${ colors.cyan }🔨 Building WooCommerce...${ colors.reset }`
+		`${ colors.cyan }🔨 Building WooCommerce...${ colors.reset }\n`
 	);
-	console.log( '' );
-	console.log( '' ); // Extra line for two-line progress display
 
 	// Run the actual build command (same as the original "build" script)
 	const build = spawn(
