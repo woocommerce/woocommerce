@@ -2,27 +2,15 @@
  * External dependencies
  */
 import { PartialProduct, ProductDimensions } from '@woocommerce/data';
-import { getSetting } from '@woocommerce/settings';
+import { isWpVersion } from '@woocommerce/settings';
 import { isEmpty } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
-
-/**
- * Check if WordPress version is 6.9 or later
- */
-const isWP69OrLater = (): boolean => {
-	const wpVersion = getSetting( 'wpVersion' );
-	if ( ! wpVersion ) {
-		return false;
-	}
-	const [ major, minor ] = wpVersion.split( '.' ).map( Number );
-	return major > 6 || ( major === 6 && minor >= 9 );
-};
 
 /**
  * Get accordion block names based on WordPress version
  */
 const getAccordionBlockNames = () => {
-	if ( isWP69OrLater() ) {
+	if ( isWpVersion( '6.9', '>=' ) ) {
 		return {
 			group: 'core/accordion',
 			item: 'core/accordion-item',
