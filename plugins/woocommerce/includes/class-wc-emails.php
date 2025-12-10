@@ -309,7 +309,7 @@ class WC_Emails {
 	/**
 	 * Return the email classes - used in admin to load settings.
 	 *
-	 * @return WC_Email[]
+	 * @return array<string, WC_Email> Email classes.
 	 */
 	public function get_emails() {
 		return $this->emails;
