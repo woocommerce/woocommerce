@@ -34,6 +34,7 @@ function stripAnsi( str ) {
 const packages = new Map();
 const warnings = [];
 const errors = [];
+const packagesWithErrors = new Set();
 let totalPackages = 0;
 let completedCount = 0;
 const startTime = Date.now();
@@ -95,27 +96,32 @@ function parseTiming( line ) {
 // Update the progress line
 function updateProgress() {
 	const elapsed = ( ( Date.now() - startTime ) / 1000 ).toFixed( 1 );
-	const building = [ ...currentlyBuilding ].slice( 0, 3 ).join( ', ' );
+	const buildingList = [ ...currentlyBuilding ];
+	const building = buildingList.slice( 0, 5 ).join( ', ' );
 	const more =
-		currentlyBuilding.size > 3
-			? ` +${ currentlyBuilding.size - 3 } more`
+		currentlyBuilding.size > 5
+			? ` +${ currentlyBuilding.size - 5 } more`
 			: '';
 
 	// Clear both lines and write progress
 	// Move up one line, clear it, then clear current line
 	process.stdout.write( `\x1b[2K\x1b[1A\x1b[2K\r` );
 
-	const buildingLabel =
-		building.length > 0
-			? `${ colors.dim }Building:${ colors.reset } ${ building }${ more }`
-			: `${ colors.dim }Starting...${ colors.reset }`;
+	let statusLine;
+	if ( currentlyBuilding.size === 0 && completedCount === 0 ) {
+		statusLine = `${ colors.dim }Starting...${ colors.reset }`;
+	} else if ( currentlyBuilding.size > 0 ) {
+		statusLine = `${ colors.yellow }${ currentlyBuilding.size } active${ colors.reset } ${ colors.dim }(${ building }${ more })${ colors.reset }`;
+	} else {
+		statusLine = `${ colors.dim }Finishing...${ colors.reset }`;
+	}
 
 	process.stdout.write(
-		`${ colors.cyan }⏳${ colors.reset } ` +
-			`${ colors.bold }${ completedCount }/${ totalPackages || '?' }${
-				colors.reset
-			} ` +
-			buildingLabel +
+		`${ colors.dim }...${ colors.reset } ` +
+			`${ colors.bold }${ completedCount }/${
+				totalPackages || '?'
+			} done${ colors.reset } ` +
+			statusLine +
 			`\n` +
 			`   ${ colors.dim }Elapsed: ${ elapsed }s${ colors.reset }`
 	);
@@ -187,13 +193,22 @@ function processLine( rawLine ) {
 		! line.includes( 'ERROR in breakpoint' )
 	) {
 		errors.push( line );
+		// Extract package name from error line (format: "../../packages/js/currency build:project:esm: ...")
+		const errorParts = line.split( ' ' );
+		if ( errorParts[ 0 ] ) {
+			const errorPackageName = getPackageName( errorParts[ 0 ] );
+			if ( errorPackageName ) {
+				packagesWithErrors.add( errorPackageName );
+			}
+		}
 		return;
 	}
 
-	// Parse completion lines - format: "path build:project:type: ✅ Ran X scripts..."
+	// Parse completion lines - format: "path build:project:type: ✅ Ran X script(s)..."
+	// Note: "script" (singular) when 1 script runs, "scripts" (plural) otherwise
 	if (
 		line.includes( 'Ran' ) &&
-		line.includes( 'scripts' ) &&
+		line.includes( 'script' ) &&
 		line.includes( ' in ' )
 	) {
 		const parts = line.split( ' ' );
@@ -224,8 +239,10 @@ function processLine( rawLine ) {
 		}
 		pkg.totalTime = Math.max( pkg.totalTime, timing );
 
-		// Check if cached (skipped means cached)
-		if ( line.includes( 'skipped' ) ) {
+		// Check if cached (skipped > 0 means cached)
+		// Match "skipped N" where N > 0
+		const skippedMatch = line.match( /skipped (\d+)/ );
+		if ( skippedMatch && parseInt( skippedMatch[ 1 ], 10 ) > 0 ) {
 			pkg.cached = true;
 		}
 
@@ -291,10 +308,12 @@ function printSummary() {
 			let status;
 			if ( pkg.noBuild ) {
 				status = `${ colors.dim }·  (no build)${ colors.reset }`;
+			} else if ( packagesWithErrors.has( pkg.name ) ) {
+				status = `${ colors.red }·  (error) ${ colors.reset }`;
 			} else if ( pkg.cached ) {
 				status = `${ colors.dim }·  (cached)${ colors.reset }`;
 			} else {
-				status = `${ colors.green }✅${ colors.reset }`;
+				status = `${ colors.green }·  (done)${ colors.reset }`;
 			}
 			const types =
 				pkg.buildTypes.length > 0
@@ -347,21 +366,9 @@ function printSummary() {
 		console.log(
 			`${ colors.yellow }⚠️  Warnings: ${ warnings.length }${ colors.reset }`
 		);
-		const uniqueWarnings = [ ...new Set( warnings ) ].slice( 0, 5 );
+		const uniqueWarnings = [ ...new Set( warnings ) ];
 		for ( const warning of uniqueWarnings ) {
-			const shortWarning = warning.substring( 0, 70 );
-			console.log(
-				`  ${ colors.dim }- ${ shortWarning }${
-					warning.length > 70 ? '...' : ''
-				}${ colors.reset }`
-			);
-		}
-		if ( warnings.length > 5 ) {
-			console.log(
-				`  ${ colors.dim }  ... and ${ warnings.length - 5 } more${
-					colors.reset
-				}`
-			);
+			console.log( `  ${ colors.dim }- ${ warning }${ colors.reset }` );
 		}
 	}
 
@@ -371,8 +378,7 @@ function printSummary() {
 		console.log(
 			`${ colors.red }❌ Errors: ${ errors.length }${ colors.reset }`
 		);
-		for ( const error of errors.slice( 0, 10 ) ) {
-			// Show more of the error message
+		for ( const error of errors ) {
 			console.log( `  ${ colors.red }- ${ error }${ colors.reset }` );
 		}
 	}
