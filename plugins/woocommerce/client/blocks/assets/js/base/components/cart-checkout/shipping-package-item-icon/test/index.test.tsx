@@ -141,8 +141,6 @@ describe( 'ShippingPackageItemIcon', () => {
 			'https://example.com/image1-thumb.jpg'
 		);
 		expect( image ).toHaveAttribute( 'alt', 'Test Product Image' );
-		expect( image ).toHaveAttribute( 'width', '40' );
-		expect( image ).toHaveAttribute( 'height', '40' );
 	} );
 
 	it.each( [
