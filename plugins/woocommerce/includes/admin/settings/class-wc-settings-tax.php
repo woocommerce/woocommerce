@@ -372,8 +372,10 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 *
 	 * @since 10.5.0
 	 * @internal This method is public only because it is used as a hook callback.
+	 *
+	 * @return void
 	 */
-	public function tax_configuration_validation_notice() {
+	public function tax_configuration_validation_notice(): void {
 		// Only show on WooCommerce settings pages.
 		$screen = get_current_screen();
 		if ( ! $screen || 'woocommerce_page_wc-settings' !== $screen->id ) {
