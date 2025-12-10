@@ -34,8 +34,6 @@ const ShippingPackageItemIcon = ( {
 			<ProductImage
 				image={ images.length ? images[ 0 ] : {} }
 				fallbackAlt={ cartItem?.name || '' }
-				width={ 40 }
-				height={ 40 }
 			/>
 		</>
 	);
