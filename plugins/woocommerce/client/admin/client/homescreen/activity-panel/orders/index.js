@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useMemo, useContext } from '@wordpress/element';
+import { useMemo, useContext, createInterpolateElement } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
-import interpolateComponents from '@automattic/interpolate-components';
 import {
 	EmptyContent,
 	Flag,
@@ -71,16 +70,6 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 		return renderEmptyCard();
 	}
 
-	const getCustomerString = ( customer ) => {
-		const { name } = customer || {};
-
-		if ( ! name ) {
-			return '';
-		}
-
-		return `{{customerLink}}${ name }{{/customerLink}}`;
-	};
-
 	const orderCardTitle = ( order ) => {
 		const {
 			id: orderId,
@@ -99,51 +88,42 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
+		const customerName = customer?.name || '';
+		const formattedString = sprintf(
+			/* translators: 1: order number, 2: customer name */
+			__(
+				'<orderLink>Order #%1$s</orderLink> <customerLink>%2$s</customerLink>',
+				'woocommerce'
+			),
+			orderNumber,
+			customerName
+		);
+
 		return (
 			<>
-				{ interpolateComponents( {
-					mixedString: sprintf(
-						/* translators: 1: order number, 2: customer name */
-						__(
-							'{{orderLink}}Order #%(orderNumber)s{{/orderLink}} %(customerString)s',
-							'woocommerce'
-						),
-						{
-							orderNumber,
-							customerString: getCustomerString( customer ),
-						}
+				{ createInterpolateElement( formattedString, {
+					orderLink: (
+						<Link
+							href={ getAdminLink(
+								'post.php?action=edit&post=' + orderId
+							) }
+							onClick={ () =>
+								recordOrderEvent( 'order_number' )
+							}
+							type="wp-admin"
+						/>
 					),
-					components: {
-						orderLink: (
-							<Link
-								href={ getAdminLink(
-									'post.php?action=edit&post=' + orderId
-								) }
-								onClick={ () =>
-									recordOrderEvent( 'order_number' )
-								}
-								type="wp-admin"
-							/>
-						),
-						destinationFlag:
-							customer && customer.country ? (
-								<Flag
-									code={ customer && customer.country }
-									round={ false }
-								/>
-							) : null,
-						customerLink: customerUrl ? (
-							<Link
-								href={ customerUrl }
-								onClick={ () =>
-									recordOrderEvent( 'customer_name' )
-								}
-								type="wc-admin"
-							/>
-						) : (
-							<span />
-						),
-					},
+					customerLink: customerUrl ? (
+						<Link
+							href={ customerUrl }
+							onClick={ () =>
+								recordOrderEvent( 'customer_name' )
+							}
+							type="wc-admin"
+						/>
+					) : (
+						<span />
+					),
 				} ) }
 			</>
 		);
