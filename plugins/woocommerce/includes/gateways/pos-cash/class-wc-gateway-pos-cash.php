@@ -104,6 +104,9 @@ class WC_Gateway_POS_Cash extends WC_Payment_Gateway {
 		// Mark the order as paid - cash has been received at the point of sale.
 		$order->payment_complete();
 
+		// Remove the filter to avoid affecting other orders in the same request.
+		remove_filter( 'woocommerce_payment_complete_order_status', array( $this, 'set_completed_order_status' ) );
+
 		// Add order note indicating POS cash payment.
 		$order->add_order_note( __( 'Payment received via POS cash transaction.', 'woocommerce' ) );
 
