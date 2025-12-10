@@ -540,6 +540,7 @@ class PageController {
 	public function register_store_details_page() {
 		wc_admin_register_page(
 			array(
+				'id'     => 'setup-wizard',
 				'title'  => __( 'Setup Wizard', 'woocommerce' ),
 				'parent' => '',
 				'path'   => '/setup-wizard',
