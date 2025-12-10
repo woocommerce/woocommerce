@@ -1,7 +1,12 @@
+export enum ProductGalleryActiveThumbnailStyle {
+	OVERLAY = 'overlay',
+	OUTLINE = 'outline',
+}
+
 export type ProductGalleryThumbnailsBlockAttributes = {
 	thumbnailSize: string;
 	aspectRatio: string;
-	activeThumbnailStyle: 'overlay' | 'outline';
+	activeThumbnailStyle: ProductGalleryActiveThumbnailStyle;
 };
 
 export type ProductGalleryThumbnailsSettingsProps = {

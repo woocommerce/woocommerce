@@ -14,9 +14,9 @@ import {
 /**
  * Internal dependencies
  */
-import type {
-	ProductGalleryThumbnailsSettingsProps,
-	ProductGalleryThumbnailsBlockAttributes,
+import {
+	type ProductGalleryThumbnailsSettingsProps,
+	ProductGalleryActiveThumbnailStyle,
 } from '../types';
 
 const minValue = 10;
@@ -71,11 +71,11 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 
 	const activeThumbnailStyleOptions = [
 		{
-			value: 'overlay',
+			value: ProductGalleryActiveThumbnailStyle.OVERLAY,
 			label: __( 'Overlay', 'woocommerce' ),
 		},
 		{
-			value: 'outline',
+			value: ProductGalleryActiveThumbnailStyle.OUTLINE,
 			label: __( 'Outline', 'woocommerce' ),
 		},
 	];
@@ -131,10 +131,14 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 				options={ activeThumbnailStyleOptions }
 				label={ __( 'Active Thumbnail Style', 'woocommerce' ) }
 				onChange={ ( value ) => {
-					setAttributes( {
-						activeThumbnailStyle:
-							value as ProductGalleryThumbnailsBlockAttributes[ 'activeThumbnailStyle' ],
-					} );
+					if (
+						value === ProductGalleryActiveThumbnailStyle.OVERLAY ||
+						value === ProductGalleryActiveThumbnailStyle.OUTLINE
+					) {
+						setAttributes( {
+							activeThumbnailStyle: value,
+						} );
+					}
 				} }
 				help={ __(
 					'Choose how the active thumbnail is highlighted.',
