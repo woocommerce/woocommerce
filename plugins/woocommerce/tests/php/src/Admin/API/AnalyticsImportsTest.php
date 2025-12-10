@@ -76,7 +76,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->clear_scheduled_actions();
-		delete_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION );
+		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		parent::tearDown();
 	}
@@ -97,8 +97,8 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	public function test_status_returns_immediate_mode(): void {
 		wp_set_current_user( $this->admin_user );
 
-		// Set to immediate mode.
-		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'yes' );
+		// Set to immediate mode (scheduled disabled).
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
 
 		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
 		$response = $this->server->dispatch( $request );
@@ -123,8 +123,8 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	public function test_status_returns_scheduled_mode(): void {
 		wp_set_current_user( $this->admin_user );
 
-		// Set to scheduled mode.
-		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'no' );
+		// Set to scheduled mode (scheduled enabled).
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'yes' );
 		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, '2025-11-26 05:30:00' );
 
 		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/status' );
@@ -149,7 +149,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_user );
 
 		// Set to scheduled mode.
-		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'no' );
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'yes' );
 
 		// Set last processed date in GMT.
 		$gmt_date = '2025-11-26 05:30:00';
@@ -203,7 +203,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_user );
 
 		// Set to scheduled mode.
-		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'no' );
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'yes' );
 		// Clear any scheduled actions that may have been created when setting the option.
 		$this->clear_scheduled_actions();
 
@@ -226,8 +226,8 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 	public function test_trigger_fails_in_immediate_mode(): void {
 		wp_set_current_user( $this->admin_user );
 
-		// Set to immediate mode.
-		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'yes' );
+		// Set to immediate mode (scheduled disabled).
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
 
 		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/trigger' );
 		$response = $this->server->dispatch( $request );
@@ -262,7 +262,7 @@ class AnalyticsImportsTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->shop_manager_user );
 
 		// Set to scheduled mode.
-		update_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, 'no' );
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'yes' );
 		// Clear any scheduled actions that may have been created when setting the option.
 		$this->clear_scheduled_actions();
 
