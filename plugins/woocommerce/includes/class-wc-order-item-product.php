@@ -203,7 +203,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 						__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
 						$this->get_id()
 					),
-					'10.5.0'
+					array(
+						'source'        => 'woocommerce-order-item-product',
+						'order_item_id' => $this->get_id(),
+						'order_id'      => $order->get_id(),
+					)
 				);
 			}
 
