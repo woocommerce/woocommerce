@@ -217,4 +217,19 @@ final class POSSessionHandler extends WC_Session {
 	public function is_pos_session(): bool {
 		return true;
 	}
+
+	/**
+	 * Check if we have an active session.
+	 *
+	 * POS sessions are always active - if this handler is in use, the user
+	 * is authenticated and has a valid session.
+	 *
+	 * Note: If we implement transaction-scoped sessions in the future, we may
+	 * need to reconsider this and check for an active transaction instead.
+	 *
+	 * @return bool Always returns true for POS sessions.
+	 */
+	public function has_session(): bool {
+		return true;
+	}
 }
