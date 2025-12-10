@@ -98,6 +98,9 @@ class WC_Gateway_POS_Cash extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
+		// POS orders go directly to 'completed' - the customer takes items in-person.
+		add_filter( 'woocommerce_payment_complete_order_status', array( $this, 'set_completed_order_status' ) );
+
 		// Mark the order as paid - cash has been received at the point of sale.
 		$order->payment_complete();
 
@@ -111,6 +114,19 @@ class WC_Gateway_POS_Cash extends WC_Payment_Gateway {
 			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		);
+	}
+
+	/**
+	 * Set the order status to completed for POS orders.
+	 *
+	 * POS orders go directly to 'completed' because the customer takes items
+	 * in-person - there's no shipping to process.
+	 *
+	 * @param string $status Default order status.
+	 * @return string Order status.
+	 */
+	public function set_completed_order_status( $status ) {
+		return OrderStatus::COMPLETED;
 	}
 
 	/**
