@@ -13,7 +13,7 @@ import { setupServer } from 'msw/node';
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 import blockJson from '../block.json';
 import '../';
-import '../inner-blocks/product-gallery-viewer';
+import '../inner-blocks/product-gallery-large-image';
 import '../inner-blocks/product-gallery-thumbnails';
 import '../../next-previous-buttons';
 import '../../single-product';
