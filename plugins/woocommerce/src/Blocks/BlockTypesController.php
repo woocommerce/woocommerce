@@ -473,7 +473,7 @@ final class BlockTypesController {
 			'ProductFilterChips',
 			'ProductFilterTaxonomy',
 			'ProductGallery',
-			'ProductGalleryViewer',
+			'ProductGalleryLargeImage',
 			'ProductGalleryThumbnails',
 			'ProductImage',
 			'ProductImageGallery',
