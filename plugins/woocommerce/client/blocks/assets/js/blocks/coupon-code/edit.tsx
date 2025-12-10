@@ -169,13 +169,11 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 
 	// Strip block-level background/border styles off the wrapper so we can
 	// fully control visual presentation on the coupon element itself.
-	const { background, backgroundColor, border, ...restStyle } =
+	const { background, backgroundColor, border, ...baseStyle } =
 		( blockStyle || {} ) as CSSProperties;
-	const baseStyle = restStyle;
-	const couponStyles: CSSProperties = {
-		// Mirror PHP defaults so the editor view matches the previewed email.
-		display: 'inline-block',
-		boxSizing: 'border-box',
+
+	// Default styles mirror PHP CouponCode::DEFAULT_STYLES for editor/email parity.
+	const defaultStyles: CSSProperties = {
 		fontSize: '1.2em',
 		padding: '12px 20px',
 		borderWidth: '2px',
@@ -186,53 +184,17 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		backgroundColor: '#f5f5f5',
 		fontWeight: 'bold',
 		letterSpacing: '1px',
-		textAlign: 'center',
-		...baseStyle,
 	};
 
-	if ( ! couponStyles.borderStyle ) {
-		couponStyles.borderStyle = 'dashed';
-	}
-
-	if ( ! couponStyles.padding ) {
-		couponStyles.padding = '12px 20px';
-	}
-
-	if ( ! couponStyles.borderWidth ) {
-		couponStyles.borderWidth = '2px';
-	}
-
-	if ( ! couponStyles.borderColor ) {
-		couponStyles.borderColor = '#cccccc';
-	}
-
-	if ( ! couponStyles.borderRadius ) {
-		couponStyles.borderRadius = '4px';
-	}
-
-	if ( ! couponStyles.fontSize ) {
-		couponStyles.fontSize = '1.2em';
-	}
-
-	if ( ! couponStyles.backgroundColor && ! couponStyles.background ) {
-		couponStyles.backgroundColor = '#f5f5f5';
-	}
-
-	if ( ! couponStyles.color ) {
-		couponStyles.color = '#000000';
-	}
-
-	if ( ! couponStyles.fontWeight ) {
-		couponStyles.fontWeight = 'bold';
-	}
-
-	if ( ! couponStyles.letterSpacing ) {
-		couponStyles.letterSpacing = '1px';
-	}
-
-	couponStyles.display = 'inline-block';
-	couponStyles.boxSizing = 'border-box';
-	couponStyles.textAlign = 'center';
+	// Merge: defaults first, then baseStyle overrides, then forced values.
+	const couponStyles: CSSProperties = {
+		...defaultStyles,
+		...baseStyle,
+		// These values must always be set regardless of baseStyle.
+		display: 'inline-block',
+		boxSizing: 'border-box',
+		textAlign: 'center',
+	};
 
 	const supportedAlignments: Array< CSSProperties[ 'textAlign' ] > = [
 		'left',
