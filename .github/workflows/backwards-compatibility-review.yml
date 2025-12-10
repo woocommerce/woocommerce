@@ -71,25 +71,27 @@ jobs:
             DO NOT try to PATCH/update existing comments.
             Simply SKIP adding to batch if the concern is already covered by an existing comment.
 
-            POSTING COMMENTS (CRITICAL - use batched review API)
-            Post ALL comments as a SINGLE review to avoid spamming notifications:
-            1. Collect all new comments into a JSON array
-            2. Get the latest commit SHA: gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" --jq '.head.sha'
-            3. Submit as one batched review using:
-               gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
-                 -X POST \
-                 -f commit_id="<SHA>" \
-                 -f event="COMMENT" \
-                 -f body="Backwards Compatibility Review - Found <N> potential issues" \
-                 --input <(echo '{"comments": [{"path": "file.php", "line": 42, "body": "..."}, ...]}')
+            POSTING COMMENTS (CRITICAL - use batched review API via file)
+            Post ALL comments as a SINGLE review to avoid spamming notifications.
 
-            The comments array format:
-            [
-              {"path": "relative/file/path.php", "line": <line_number>, "body": "<comment text>"},
-              ...
-            ]
+            Step 1: Get the latest commit SHA:
+               gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" --jq '.head.sha'
 
-            If there are NO new issues to report, do not create a review.
+            Step 2: Use the Write tool to create a JSON file at ./bc_review_payload.json with this structure:
+               {
+                 "commit_id": "<SHA from step 1>",
+                 "event": "COMMENT",
+                 "body": "Backwards Compatibility Review - Found <N> potential issues",
+                 "comments": [
+                   {"path": "relative/file/path.php", "line": <line_number>, "body": "<comment text>"},
+                   ...
+                 ]
+               }
+
+            Step 3: Submit the review using the file as input:
+               gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" -X POST --input bc_review_payload.json
+
+            If there are NO new issues to report, do not create the file or submit a review.
 
             ANALYSIS BOUNDARIES
             Include:
@@ -107,4 +109,4 @@ jobs:
                - If new, post an inline comment with: non-breaking approach, shim, and staged deprecation timeline
 
           claude_args: >
-            --allowedTools "Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
+            --allowedTools "Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
