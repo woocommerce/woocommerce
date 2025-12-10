@@ -86,7 +86,7 @@ class WC_Product_Factory {
 	 * @param  int $product_id Product ID.
 	 * @return string|false
 	 */
-	public static function get_product_type( $product_id ) {
+	public static function get_product_type( int $product_id ): string|false {
 		// Allow the overriding of the lookup in this function. Return the product type here.
 		$override = apply_filters( 'woocommerce_product_type_query', false, $product_id );
 		if ( ! $override ) {
