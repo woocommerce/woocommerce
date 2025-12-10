@@ -206,7 +206,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 					array(
 						'source'        => 'woocommerce-order-item-product',
 						'order_item_id' => $this->get_id(),
-						'order_id'      => $order->get_id(),
+						'order_id'      => $order ? $order->get_id() : 'unknown',
 					)
 				);
 			}
@@ -240,14 +240,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @since 10.5.0
 	 *
 	 * @param float|string $value The legacy scalar tax value.
-	 * @param WC_Order     $order The order object.
+	 * @param WC_Order     $order The order object, or false/null if unavailable.
 	 * @return array Tax data as array, keyed by tax rate ID (or 0 if unknown).
 	 */
-	protected function convert_legacy_tax_value_to_array( $value, $order ) {
+	protected function convert_legacy_tax_value_to_array( $value, $order = null ) {
 		$rate_id = 0;
 
 		// Try to infer tax rate ID from order context.
-		$tax_items = $order->get_taxes();
+		$tax_items = $order ? $order->get_taxes() : array();
 		if ( ! empty( $tax_items ) ) {
 			// Use the first tax rate ID from the order as a best-effort match.
 			$first_tax_item = reset( $tax_items );

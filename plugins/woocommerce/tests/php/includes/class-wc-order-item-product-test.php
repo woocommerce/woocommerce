@@ -554,6 +554,34 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox set_taxes uses rate_id 0 when order is null or false for legacy data.
+	 */
+	public function test_set_taxes_with_legacy_data_uses_rate_id_zero_when_order_is_null() {
+		// Create an item NOT associated with any order (get_order() will return false).
+		$item = new WC_Order_Item_Product();
+
+		// Legacy tax data as float.
+		$legacy_tax_data = array(
+			'total'    => 24.00,
+			'subtotal' => 24.00,
+		);
+
+		// This should NOT throw an error even though order is null/false.
+		$item->set_taxes( $legacy_tax_data );
+
+		$taxes = $item->get_taxes();
+		$this->assertIsArray( $taxes );
+		$this->assertIsArray( $taxes['total'] );
+		$this->assertIsArray( $taxes['subtotal'] );
+
+		// Without order context, the rate_id should default to 0.
+		$this->assertArrayHasKey( 0, $taxes['total'] );
+		$this->assertArrayHasKey( 0, $taxes['subtotal'] );
+		$this->assertEquals( 24.00, (float) $taxes['total'][0] );
+		$this->assertEquals( 24.00, (float) $taxes['subtotal'][0] );
+	}
+
+	/**
 	 * @testdox set_taxes filter allows plugins to customize legacy tax conversion.
 	 */
 	public function test_set_taxes_legacy_conversion_filter() {
