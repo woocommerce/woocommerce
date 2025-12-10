@@ -213,14 +213,14 @@ class Controller extends AbstractController {
 			),
 			'order-notes'     => array(
 				'href'       => add_query_arg(
-					array( 'order_id' => $item->get_id() ),
+					array( 'order_id' => (int) $item->get_id() ),
 					rest_url( sprintf( '/%s/order-notes', $this->namespace ) )
 				),
 				'embeddable' => true,
 			),
 			'refunds'         => array(
 				'href'       => add_query_arg(
-					array( 'order_id' => $item->get_id() ),
+					array( 'order_id' => (int) $item->get_id() ),
 					rest_url( sprintf( '/%s/refunds', $this->namespace ) )
 				),
 				'embeddable' => true,
