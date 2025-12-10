@@ -327,7 +327,7 @@ Use the `woocommerce_email_editor_integration_personalizer_context_data` filter 
 
 **Return value:**
 
-Return an array of custom context data. This array will be merged with the existing context, making your custom data available to all personalization tag callbacks via the `$context` parameter.
+Return an array of custom context data along with Woo core context data. This array will be accessible to all personalization tag callbacks through the `$context` parameter.
 
 #### Example: Adding subscription data to context
 
