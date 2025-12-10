@@ -8,7 +8,7 @@
  * - Showing a summary with timing per package
  * - Collecting warnings/errors at the end
  *
- * Usage: node scripts/build-pretty.js
+ * Usage: node bin/build-pretty.js
  */
 
 const { spawn } = require( 'child_process' );

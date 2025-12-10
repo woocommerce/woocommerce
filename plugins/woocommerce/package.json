@@ -10,7 +10,7 @@
 	},
 	"license": "GPL-2.0-or-later",
 	"scripts": {
-		"build": "node scripts/build-pretty.js",
+		"build": "node bin/build-pretty.js",
 		"build:raw": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:admin": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/admin-library...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
 		"build:blocks": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/block-library...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
