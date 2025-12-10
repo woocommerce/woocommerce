@@ -42,6 +42,15 @@ final class StoreApi {
 			11
 		);
 
+		// Make billing_address optional for POS checkout requests.
+		// This filter runs before validation, allowing us to provide a default.
+		add_filter(
+			'rest_pre_dispatch',
+			array( $this, 'maybe_default_pos_billing_address' ),
+			10,
+			3
+		);
+
 		add_action(
 			'woocommerce_blocks_pre_get_routes_from_namespace',
 			function ( $routes, $ns ) {
@@ -129,5 +138,43 @@ final class StoreApi {
 			}
 		);
 		return $container;
+	}
+
+	/**
+	 * Provide a default empty billing_address for POS checkout requests.
+	 *
+	 * POS sessions don't require billing address, but the REST API schema marks it
+	 * as required. This filter runs before validation, allowing us to provide a
+	 * default so the request passes validation. The actual address validation is
+	 * already bypassed for POS in Checkout.php.
+	 *
+	 * @param mixed            $result  Response to replace the requested version with.
+	 * @param \WP_REST_Server  $server  Server instance.
+	 * @param \WP_REST_Request $request Request used to generate the response.
+	 * @return mixed
+	 */
+	public function maybe_default_pos_billing_address( $result, $server, $request ) {
+		// Only apply to checkout POST requests.
+		$route = $request->get_route();
+		if ( ! preg_match( '#^/wc/store(/v1)?/checkout$#', $route ) ) {
+			return $result;
+		}
+
+		if ( 'POST' !== $request->get_method() ) {
+			return $result;
+		}
+
+		// Only apply to POS sessions (requires X-WC-POS header).
+		$pos_header = $request->get_header( 'X-WC-POS' );
+		if ( ! $pos_header ) {
+			return $result;
+		}
+
+		// Provide default empty billing_address if not set.
+		if ( null === $request->get_param( 'billing_address' ) ) {
+			$request->set_param( 'billing_address', array() );
+		}
+
+		return $result;
 	}
 }
