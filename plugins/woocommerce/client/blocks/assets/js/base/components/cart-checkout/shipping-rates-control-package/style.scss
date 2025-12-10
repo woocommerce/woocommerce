@@ -87,6 +87,15 @@
 }
 
 .wc-block-components-shipping-rates-control__package--multiple {
+	@include font-regular-locked;
+	border: 1px solid $universal-border-light;
+	padding: $gap;
+	margin: 0;
+	border-radius: $universal-border-radius;
+	display: flex;
+	justify-content: flex-start;
+	align-items: flex-start;
+
 	.wc-block-components-panel__content,
 	.wc-block-components-radio-control,
 	.wc-block-components-radio-control__option-layout {
