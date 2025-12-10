@@ -259,15 +259,17 @@ function printSummary() {
 		other: [],
 	};
 
-	// Add no-build packages
-	for ( const name of NO_BUILD_PACKAGES ) {
-		categories[ 'packages/js (no build)' ].push( {
-			name,
-			category: 'packages/js (no build)',
-			buildTypes: [],
-			totalTime: 0,
-			noBuild: true,
-		} );
+	// Only add no-build packages if we actually built something
+	if ( packages.size > 0 ) {
+		for ( const name of NO_BUILD_PACKAGES ) {
+			categories[ 'packages/js (no build)' ].push( {
+				name,
+				category: 'packages/js (no build)',
+				buildTypes: [],
+				totalTime: 0,
+				noBuild: true,
+			} );
+		}
 	}
 
 	for ( const [ , pkg ] of packages ) {
