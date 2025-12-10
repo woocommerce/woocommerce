@@ -117,7 +117,6 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 						}
 					);
 				}
-				console.error( 'Error fetching coupons:', error );
 				setIsLoading( false );
 			} );
 	}, [] );
