@@ -344,9 +344,9 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 */
 	public function provide_test_is_available_with_invalid_item_amount(): array {
 		return array(
-			'zero price item'     => [ 0.0, false ],
-			'negative price item' => [ -10.0, false ],
-			'valid price item'    => [ 25.0, true ],
+			'zero price item'     => array( 0.0, false ),
+			'negative price item' => array( -10.0, false ),
+			'valid price item'    => array( 25.0, true ),
 		);
 	}
 }
