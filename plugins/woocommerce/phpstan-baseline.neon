@@ -27781,12 +27781,6 @@ parameters:
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Cannot call method warning\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
 			count: 2
@@ -27837,12 +27831,6 @@ parameters:
 		-
 			message: '#^Method Abstract_WC_Order_Data_Store_CPT\:\:set_order_props\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
-
-		-
-			message: '#^Method Abstract_WC_Order_Data_Store_CPT\:\:set_order_props\(\) has parameter \$order with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
@@ -88354,6 +88342,12 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataCleanup.php
 
 		-
+			message: '#^Access to protected property WC_Order\:\:\$data_store\.$#'
+			identifier: property.protected
+			count: 1
+			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
+
+		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -88367,18 +88361,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method object\:\:get_current_class_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
-			message: '#^Call to an undefined method object\:\:read\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
@@ -88402,19 +88384,7 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:get_order_from_datastore\(\) should return WC_Order but returns WC_Abstract_Order\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:read_order_from_datastore\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
@@ -88426,13 +88396,13 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:is_order_newer_than_post\(\) expects WC_Abstract_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
-			identifier: argument.type
+			message: '#^PHPDoc tag @var with type WC_Order is not subtype of native type \$this\(Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\)\.$#'
+			identifier: varTag.nativeType
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:read_order_from_datastore\(\) expects WC_Abstract_Order, object given\.$#'
+			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:is_order_newer_than_post\(\) expects WC_Abstract_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
@@ -88440,12 +88410,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$props of method WC_Data\:\:set_props\(\) expects array, array\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
-			message: '#^Property WC_Data_Store\:\:\$instance \(WC_Data_Store\) does not accept object\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
@@ -88928,12 +88892,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$order of method Abstract_WC_Order_Data_Store_CPT\:\:read\(\) expects WC_Order, WC_Abstract_Order given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:read_order_from_datastore\(\) expects WC_Abstract_Order, object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
