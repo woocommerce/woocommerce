@@ -24,11 +24,11 @@ import { recordEvent, recordEventOnce } from '../../events';
 const TemplateCategories: Array< { name: TemplateCategory; label: string } > = [
 	{
 		name: 'recent',
-		label: 'Recent',
+		label: __( 'Recent', 'woocommerce' ),
 	},
 	{
 		name: 'basic',
-		label: 'Basic',
+		label: __( 'Basic', 'woocommerce' ),
 	},
 ];
 
