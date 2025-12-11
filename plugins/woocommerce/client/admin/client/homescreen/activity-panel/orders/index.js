@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { useMemo, useContext, createInterpolateElement } from '@wordpress/element';
+import {
+	useMemo,
+	useContext,
+	createInterpolateElement,
+} from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
@@ -107,9 +111,7 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 							href={ getAdminLink(
 								'post.php?action=edit&post=' + orderId
 							) }
-							onClick={ () =>
-								recordOrderEvent( 'order_number' )
-							}
+							onClick={ () => recordOrderEvent( 'order_number' ) }
 							type="wp-admin"
 						/>
 					),
