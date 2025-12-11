@@ -233,7 +233,7 @@ class PushTokensDataStore {
 			return null;
 		}
 
-		foreach ( $query->posts as $post_id ) {
+		foreach ( $posts as $post_id ) {
 			$candidate = new PushToken();
 			$candidate->set_id( $post_id );
 
