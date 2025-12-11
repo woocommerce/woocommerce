@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix PHP warning undefined array key "post_type".

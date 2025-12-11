@@ -92,13 +92,21 @@ export function getFileChanges(
 	baseRef: string,
 	prNumber: string
 ): ProjectFileChanges | true {
-	const command =
-		( prNumber && `gh pr diff ${ prNumber } --name-only` ) ||
-		`git diff --name-only ${ baseRef }`;
 	// We're going to use git to figure out what files have changed.
-	const output = execSync( command, {
-		encoding: 'utf8',
-	} );
+	let output = '';
+	try {
+		const command =
+			( prNumber && `gh pr diff ${ prNumber } --name-only` ) ||
+			`git diff --name-only ${ baseRef }`;
+
+		output = execSync( command, {
+			encoding: 'utf8',
+		} );
+	} catch ( error ) {
+		// eslint-disable-next-line no-console
+		console.error( 'GitHub CLI Error: ' + error.stderr );
+		return true;
+	}
 
 	const changedFilePaths = output.split( '\n' );
 

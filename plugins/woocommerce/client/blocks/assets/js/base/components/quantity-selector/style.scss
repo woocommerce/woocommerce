@@ -12,26 +12,13 @@
 }
 
 .wc-block-components-quantity-selector {
+	border: 1px solid $universal-translucent-border-color;
 	border-radius: $universal-border-radius;
-	// needed so that buttons fill the container.
-	box-sizing: content-box;
+	box-sizing: border-box;
 	display: flex;
 	margin: 0 0 0.25em 0;
 	position: relative;
 	width: 107px;
-
-	&::after {
-		border-radius: $universal-border-radius;
-		border: 1px solid currentColor;
-		bottom: 0;
-		content: "";
-		left: 0;
-		pointer-events: none;
-		position: absolute;
-		right: 0;
-		top: 0;
-		opacity: 0.3;
-	}
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-components-quantity-selector__input {

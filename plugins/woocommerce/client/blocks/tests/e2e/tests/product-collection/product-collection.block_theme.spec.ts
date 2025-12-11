@@ -453,14 +453,6 @@ test.describe( 'Product Collection', () => {
 				.getByRole( 'button', { name: 'Single Item: Product' } )
 				.click();
 
-			if ( wpCoreVersion >= 6.9 ) {
-				await page
-					.getByRole( 'button', {
-						name: 'Product For a specific item',
-					} )
-					.click();
-			}
-
 			await page
 				.getByRole( 'option', {
 					name: `Cap http://localhost:${

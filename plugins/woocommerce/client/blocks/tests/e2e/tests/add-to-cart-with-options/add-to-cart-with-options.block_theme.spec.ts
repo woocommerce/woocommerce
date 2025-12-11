@@ -59,7 +59,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -91,7 +98,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		productGalleryPageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		const variationDescription =
 			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
@@ -196,7 +210,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			const visibleImage =
-				await productGalleryPageObject.getVisibleLargeImageId();
+				await productGalleryPageObject.getViewerImageId();
 			expect( visibleImage ).toBe( '34' );
 
 			await colorBlueOption.click();
@@ -218,10 +232,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 				page.getByText( variationDescription )
 			).toBeVisible();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '35' );
+				expect( newViewerImageId ).toBe( '35' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -239,10 +253,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '34' );
+				expect( newViewerImageId ).toBe( '34' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -274,7 +288,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		// Make Hoodie with Logo to be sold individually.
 		const cliOutput = await wpCLI(
 			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
@@ -603,10 +624,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await test.step( 'verify letters are reset to min value in simple products', async () => {
 				// Playwright doesn't support filling a numeric input with a
-				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// string, but we still want to test this case as users on older/mobile browsers
+				// are able to type letters directly in the input field .
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -676,9 +700,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await test.step( 'verify letters are reset to min value in variable products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -709,7 +736,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				name: 'T-Shirt',
 			} );
 
-			await expect( quantityInput ).toHaveValue( '' );
+			await expect( quantityInput ).toHaveValue( '0' );
 			const increaseQuantityButton = page.getByLabel(
 				'Increase quantity of T-Shirt'
 			);
@@ -767,25 +794,28 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify empty strings are not reset in grouped products', async () => {
+			await test.step( 'verify empty strings are reset to 0 in grouped products', async () => {
 				await quantityInput.fill( '' );
 				await quantityInput.blur();
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify letters are reset to an empty string in grouped products', async () => {
+			await test.step( 'verify letters are reset to 0 in grouped products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
 					} );
 				} );
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 		} );
@@ -795,7 +825,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
 
 		await pageObject.updateSingleProductTemplate();
@@ -907,7 +944,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding simple products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 't-shirt' );
 
 		const addToCartButton = page.getByRole( 'button', {
@@ -922,7 +966,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variable products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 'hoodie' );
 
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
@@ -946,7 +997,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variations to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock(
 			'hoodie',
 			'hoodie-blue-yes'
@@ -966,7 +1024,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 'logo-collection' );
 
 		const increaseQuantityButton = page.getByLabel(
@@ -1004,7 +1069,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the blockified Product Gallery',
+				name: 'Upgrade to the Product Gallery block',
 			} )
 			.click();
 

@@ -63,6 +63,7 @@ final class BlockTypesController {
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
+		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 2 );
 	}
 
 	/**
@@ -666,5 +667,23 @@ final class BlockTypesController {
 		$args['style']         = array();
 
 		return $args;
+	}
+
+	/**
+	 * Change the preferred taxonomy for the breadcrumbs block on the product post type.
+	 *
+	 * @param array  $settings The settings for the breadcrumbs block.
+	 * @param string $post_type The post type.
+	 * @return array The settings for the breadcrumbs block.
+	 *
+	 * @internal
+	 */
+	public function set_product_breadcrumbs_preferred_taxonomy( $settings, $post_type ) {
+		if ( ! is_array( $settings ) || 'product' !== $post_type ) {
+			return $settings;
+		}
+
+		$settings['taxonomy'] = 'product_cat';
+		return $settings;
 	}
 }

@@ -38,7 +38,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 			$this->id             = 'customer_fulfillment_created';
 			$this->customer_email = true;
 			$this->title          = __( 'Fulfillment created', 'woocommerce' );
-			$this->email_group    = 'order-processing';
+			$this->email_group    = 'order-updates';
 			$this->template_html  = 'emails/customer-fulfillment-created.php';
 			$this->template_plain = 'emails/plain/customer-fulfillment-created.php';
 			$this->placeholders   = array(
@@ -53,6 +53,8 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 			parent::__construct();
 
 			$this->description = __( 'Fulfillment created emails are sent to the customer when the merchant creates a fulfillment for the order, and marks it as fulfilled. The notification isn’t sent for draft fulfillments.', 'woocommerce' );
+
+			$this->template_block_content = 'emails/block/general-block-content-for-fulfillment-emails.php';
 		}
 
 		/**
@@ -142,6 +144,25 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
 					'email'              => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			$this->maybe_init_fulfillment_for_preview( $this->object );
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'fulfillment'   => $this->fulfillment,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
 				)
 			);
 		}

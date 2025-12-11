@@ -39,6 +39,17 @@ const config: PlaywrightTestConfig = {
 						includeProjectInTestName: true,
 					},
 				],
+				[
+					'playwright-ctrf-json-reporter',
+					{
+						outputDir: `${ __dirname }/artifacts/test-results`,
+						outputFile: `ctrf-report-${ Date.now() }.json`,
+						branchName: process.env.GITHUB_REF_NAME || '',
+						commit: process.env.GITHUB_SHA || '',
+						appName: 'woocommerce-blocks',
+						repositoryName: process.env.GITHUB_REPOSITORY || '',
+					},
+				],
 		  ]
 		: 'list',
 	use: {

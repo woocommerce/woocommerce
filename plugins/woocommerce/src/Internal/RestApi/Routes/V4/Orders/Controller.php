@@ -215,7 +215,18 @@ class Controller extends AbstractController {
 				'href'       => rest_url( sprintf( '/%s/order-notes?order_id=%d', $this->namespace, $item->get_id() ) ),
 				'embeddable' => true,
 			),
+			'refunds'         => array(
+				'href'       => rest_url( sprintf( '/%s/refunds?order_id=%d', $this->namespace, $item->get_id() ) ),
+				'embeddable' => true,
+			),
 		);
+
+		if ( $item->get_payment_method() ) {
+			$links['payment_gateway'] = array(
+				'href'       => rest_url( sprintf( '/%s/settings/payment-gateways/%s', $this->namespace, rawurlencode( $item->get_payment_method() ) ) ),
+				'embeddable' => true,
+			);
+		}
 
 		if ( $item->get_customer_id() ) {
 			$links['customer'] = array(
@@ -266,8 +277,27 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$query_args = $this->collection_query->get_query_args( $request );
-		$results    = $this->collection_query->get_query_results( array_merge( $query_args, array( 'post_type' => $this->post_type ) ), $request );
+		/**
+		 * Filter collection query args before executing the query.
+		 *
+		 * @param array           $query_args Query arguments for WC_Order_Query.
+		 * @param WP_REST_Request $request    The REST request object.
+		 * @param Controller      $controller The controller instance.
+		 * @since 10.4.0
+		 */
+		$query_args = (array) apply_filters(
+			$this->get_hook_prefix() . 'collection_query_args',
+			$this->collection_query->get_query_args( $request ),
+			$request,
+			$this
+		);
+		$query_args = wp_parse_args(
+			$query_args,
+			array(
+				'post_type' => $this->post_type,
+			)
+		);
+		$results    = $this->collection_query->get_query_results( $query_args, $request );
 		$items      = array();
 
 		foreach ( $results['results'] as $result ) {

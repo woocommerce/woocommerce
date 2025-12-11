@@ -24,7 +24,10 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMet
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Controller as GeneralSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Controller as EmailSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax\Controller as TaxSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Controller as EmailsSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Account\Controller as AccountSettingsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -241,8 +244,11 @@ class Server {
 			'offline-payment-methods'   => OfflinePaymentMethodsController::class,
 			'settings-general'          => GeneralSettingsController::class,
 			'settings-email'            => EmailSettingsController::class,
+			'settings-emails'           => EmailsSettingsController::class,
 			'settings-products'         => SettingsProductsController::class,
 			'settings-payment-gateways' => PaymentGatewaysController::class,
+			'settings-tax'              => TaxSettingsController::class,
+			'settings-account'          => AccountSettingsController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'                  => 'WC_REST_Settings_V4_Controller',
 		);

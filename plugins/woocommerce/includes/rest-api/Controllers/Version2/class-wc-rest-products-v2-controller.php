@@ -614,7 +614,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
-						'slug'   => $name,
+						'slug'   => rawurldecode( $name ),
 						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
 					);
 				} else {

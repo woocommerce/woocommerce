@@ -88,7 +88,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	 * Test that the email data is returned correctly for a supported email type.
 	 */
 	public function test_get_email_data_returns_email_data_for_supported_type(): void {
-		// Set up a WC_Email mock and inject it into the controller's emails array.
+		// Set up a WC_Email mock.
 		$mock_email     = $this->createMock( \WC_Email::class );
 		$mock_email->id = $this->email_type;
 		$mock_email->method( 'get_option' )->willReturnMap(
@@ -108,14 +108,17 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 				'recipient' => array(),
 			)
 		);
-		// Inject the mock into the controller.
-		$reflection  = new \ReflectionClass( $this->email_api_controller );
-		$emails_prop = $reflection->getProperty( 'emails' );
-		$emails_prop->setAccessible( true );
-		$emails_prop->setValue( $this->email_api_controller, array( $mock_email ) );
+
+		// Create a partial mock of the controller to override get_emails().
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $mock_email ) );
+		$controller->init();
 
 		$post_data = array( 'id' => $this->email_post->ID );
-		$result    = $this->email_api_controller->get_email_data( $post_data );
+		$result    = $controller->get_email_data( $post_data );
 		$this->assertEquals( 'Test Subject', $result['subject'] );
 		$this->assertEquals( 'Default Subject', $result['default_subject'] );
 		$this->assertEquals( 'Test Preheader', $result['preheader'] );
@@ -130,11 +133,13 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		// Set up a real WC_Email instance for testing.
 		$email = new EmailStub();
 
-		// Inject the email into the controller.
-		$reflection  = new \ReflectionClass( $this->email_api_controller );
-		$emails_prop = $reflection->getProperty( 'emails' );
-		$emails_prop->setAccessible( true );
-		$emails_prop->setValue( $this->email_api_controller, array( $email ) );
+		// Create a partial mock of the controller to override get_emails().
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $email ) );
+		$controller->init();
 
 		$data = array(
 			'subject'   => 'Updated Subject',
@@ -143,7 +148,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			'cc'        => 'cc@example.com',
 			'bcc'       => 'bcc@example.com',
 		);
-		$this->email_api_controller->save_email_data( $data, $this->email_post );
+		$controller->save_email_data( $data, $this->email_post );
 		$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
 		$this->assertEquals( 'Updated Subject', $option['subject'] );
 		$this->assertEquals( 'Updated Preheader', $option['preheader'] );
@@ -223,13 +228,17 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			// No 'recipient' key here.
 			)
 		);
-		$reflection  = new \ReflectionClass( $this->email_api_controller );
-		$emails_prop = $reflection->getProperty( 'emails' );
-		$emails_prop->setAccessible( true );
-		$emails_prop->setValue( $this->email_api_controller, array( $mock_email ) );
+
+		// Create a partial mock of the controller to override get_emails().
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $mock_email ) );
+		$controller->init();
 
 		$post_data = array( 'id' => $this->email_post->ID );
-		$result    = $this->email_api_controller->get_email_data( $post_data );
+		$result    = $controller->get_email_data( $post_data );
 		$this->assertNull( $result['recipient'] );
 	}
 
@@ -240,11 +249,13 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		// Set up a real WC_Email instance for testing.
 		$email = new EmailStub();
 
-		// Inject the email into the controller.
-		$reflection  = new \ReflectionClass( $this->email_api_controller );
-		$emails_prop = $reflection->getProperty( 'emails' );
-		$emails_prop->setAccessible( true );
-		$emails_prop->setValue( $this->email_api_controller, array( $email ) );
+		// Create a partial mock of the controller to override get_emails().
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $email ) );
+		$controller->init();
 
 		// Save new email data.
 		$data = array(
@@ -254,11 +265,11 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			'cc'        => 'immediate-cc@example.com',
 			'bcc'       => 'immediate-bcc@example.com',
 		);
-		$this->email_api_controller->save_email_data( $data, $this->email_post );
+		$controller->save_email_data( $data, $this->email_post );
 
 		// Immediately retrieve the data.
 		$post_data = array( 'id' => $this->email_post->ID );
-		$result    = $this->email_api_controller->get_email_data( $post_data );
+		$result    = $controller->get_email_data( $post_data );
 
 		// Verify that the retrieved data matches what was saved.
 		$this->assertEquals( 'Immediately Updated Subject', $result['subject'] );

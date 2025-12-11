@@ -5,14 +5,13 @@ import { createHigherOrderComponent } from '@wordpress/compose';
 
 import { useSelect, useDispatch } from '@wordpress/data';
 import { createElement, useEffect } from '@wordpress/element';
-import { SelectFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
 import * as selectors from './selectors';
-import { WPDataSelectors } from '../types';
+import { SelectFromMap, WPDataSelectors } from '../types';
 
 type PluginHydrationData = {
 	installedPlugins: string[];

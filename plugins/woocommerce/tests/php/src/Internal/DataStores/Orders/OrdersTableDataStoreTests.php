@@ -687,6 +687,92 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Tests that 'status' query var handles 'any' and 'all' correctly (excluding/including internal statuses).
+	 *
+	 * @return void
+	 */
+	public function test_cot_query_status_any_and_all() {
+		$this->disable_cot_sync();
+
+		// Create orders with valid WooCommerce statuses.
+		$order_pending = new WC_Order();
+		$this->switch_data_store( $order_pending, $this->sut );
+		$order_pending->set_status( OrderStatus::PENDING );
+		$order_pending->save();
+
+		$order_processing = new WC_Order();
+		$this->switch_data_store( $order_processing, $this->sut );
+		$order_processing->set_status( OrderStatus::PROCESSING );
+		$order_processing->save();
+
+		$order_completed = new WC_Order();
+		$this->switch_data_store( $order_completed, $this->sut );
+		$order_completed->set_status( OrderStatus::COMPLETED );
+		$order_completed->save();
+
+		// Create order with internal WordPress status (auto-draft).
+		$order_auto_draft = new WC_Order();
+		$this->switch_data_store( $order_auto_draft, $this->sut );
+		$order_auto_draft->set_status( OrderStatus::AUTO_DRAFT );
+		$order_auto_draft->save();
+
+		// Create order with checkout-draft status (registered WooCommerce status via DraftOrders service).
+		$order_checkout_draft = new WC_Order();
+		$this->switch_data_store( $order_checkout_draft, $this->sut );
+		$order_checkout_draft->set_status( 'checkout-draft' );
+		$order_checkout_draft->save();
+
+		// Test 'status' => 'any' - should return only valid WooCommerce statuses (excludes internal WordPress statuses like auto-draft).
+		$query = new OrdersTableQuery( array( 'status' => 'any' ) );
+		$this->assertEquals( 4, count( $query->orders ), "status='any' should return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "status='any' should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "status='any' should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "status='any' should include completed orders" );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, "status='any' should include checkout-draft orders (registered WC status)" );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, "status='any' should exclude auto-draft orders (internal WordPress status)" );
+
+		// Test 'status' => 'all' - should return all statuses without filtering.
+		$query = new OrdersTableQuery( array( 'status' => 'all' ) );
+		$this->assertEquals( 5, count( $query->orders ), "status='all' should return all orders regardless of status" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, "status='all' should include pending orders" );
+		$this->assertContains( $order_processing->get_id(), $query->orders, "status='all' should include processing orders" );
+		$this->assertContains( $order_completed->get_id(), $query->orders, "status='all' should include completed orders" );
+		$this->assertContains( $order_auto_draft->get_id(), $query->orders, "status='all' should include auto-draft orders" );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, "status='all' should include checkout-draft orders" );
+
+		// Test that internal statuses can still be queried explicitly.
+		$query = new OrdersTableQuery( array( 'status' => OrderStatus::AUTO_DRAFT ) );
+		$this->assertEquals( 1, count( $query->orders ), 'Internal statuses can be queried explicitly' );
+		$this->assertContains( $order_auto_draft->get_id(), $query->orders, 'Explicit query for auto-draft should return auto-draft order' );
+
+		$query = new OrdersTableQuery( array( 'status' => 'checkout-draft' ) );
+		$this->assertEquals( 1, count( $query->orders ), 'Internal statuses can be queried explicitly' );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, 'Explicit query for checkout-draft should return checkout-draft order' );
+
+		// Test with array of statuses including 'any'.
+		$query = new OrdersTableQuery( array( 'status' => array( 'any' ) ) );
+		$this->assertEquals( 4, count( $query->orders ), "status=['any'] should work same as status='any'" );
+
+		// Test empty status (should behave like 'any') - historical and WP_Query like behavior.
+		$query = new OrdersTableQuery( array( 'status' => '' ) );
+		$this->assertEquals( 4, count( $query->orders ), "Empty status should behave like 'any' and return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, 'Empty status should include pending orders' );
+		$this->assertContains( $order_processing->get_id(), $query->orders, 'Empty status should include processing orders' );
+		$this->assertContains( $order_completed->get_id(), $query->orders, 'Empty status should include completed orders' );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, 'Empty status should include checkout-draft orders (registered WC status)' );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, 'Empty status should exclude auto-draft orders (internal WordPress status)' );
+
+		// Test omitted status (should behave like 'any').
+		$query = new OrdersTableQuery( array() );
+		$this->assertEquals( 4, count( $query->orders ), "Omitted status should behave like 'any' and return only valid WooCommerce statuses" );
+		$this->assertContains( $order_pending->get_id(), $query->orders, 'Omitted status should include pending orders' );
+		$this->assertContains( $order_processing->get_id(), $query->orders, 'Omitted status should include processing orders' );
+		$this->assertContains( $order_completed->get_id(), $query->orders, 'Omitted status should include completed orders' );
+		$this->assertContains( $order_checkout_draft->get_id(), $query->orders, 'Omitted status should include checkout-draft orders (registered WC status)' );
+		$this->assertNotContains( $order_auto_draft->get_id(), $query->orders, 'Omitted status should exclude auto-draft orders (internal WordPress status)' );
+	}
+
+	/**
 	 * @testDox Tests meta queries in the `OrdersTableQuery` class.
 	 *
 	 * @return void
@@ -3839,5 +3925,64 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$sync = wc_get_container()->get( DataSynchronizer::class );
 		$sync->process_batch( array( $order_id ) );
 		$this->assertEquals( false, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * @testdox needs_processing returns correct result when COGS filter triggers get_items() during order hydration.
+	 *
+	 * Reproduces GitHub issue #62173: woocommerce_new_order fires before items are in DB.
+	 * If a hook loads the order and triggers get_items() (e.g., via COGS filter calling get_data()),
+	 * empty items get cached. The fix invalidates the cache when items are saved.
+	 */
+	public function test_needs_processing_with_cogs_filter_triggering_get_items() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cogs_feature();
+
+		$this->assertTrue(
+			OrderUtil::orders_cache_usage_is_enabled(),
+			'Order cache must be enabled for this test.'
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( false );
+		$product->set_downloadable( false );
+		$product->save();
+
+		// COGS filter that calls get_data() (which calls get_items()), priming empty items.
+		$cogs_filter = function ( $cogs_value, $order ) {
+			$order->get_data();
+			return $cogs_value;
+		};
+		add_filter( 'woocommerce_load_order_cogs_value', $cogs_filter, 10, 2 );
+
+		// Load order during woocommerce_new_order (before items are in DB), caching it with empty items.
+		$new_order_hook = function ( $order_id ) {
+			wc_get_order( $order_id );
+		};
+		add_action( 'woocommerce_new_order', $new_order_hook, 10, 1 );
+
+		// Create order with item. woocommerce_new_order fires before save_items().
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$order->add_item( $item );
+		$order->save();
+		$order_id = $order->get_id();
+
+		remove_filter( 'woocommerce_load_order_cogs_value', $cogs_filter, 10 );
+		remove_action( 'woocommerce_new_order', $new_order_hook, 10 );
+
+		// Without fix: returns cached order with empty items. With fix: fresh data from DB.
+		$fresh_order = wc_get_order( $order_id );
+
+		$this->assertCount( 1, $fresh_order->get_items(), 'Order should have items from DB.' );
+		$this->assertTrue( $fresh_order->needs_processing(), 'Order with physical product should need processing.' );
 	}
 }
