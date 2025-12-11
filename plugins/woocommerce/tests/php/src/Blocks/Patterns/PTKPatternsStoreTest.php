@@ -506,7 +506,12 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		// The action should still be scheduled (unscheduling is deferred).
 		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Action should still be scheduled before action_scheduler_init fires' );
 
-		// Now simulate action_scheduler_init firing.
+		/**
+		 * Simulate action_scheduler_init firing.
+		 *
+		 * @since 10.4.1
+		 * @return void
+		 */
 		do_action( 'action_scheduler_init' );
 
 		// After action_scheduler_init fires, the action should be unscheduled.
