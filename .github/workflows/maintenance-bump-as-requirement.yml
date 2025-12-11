@@ -86,14 +86,17 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        cd plugins/woocommerce
+        # Fetch all branches from origin.
+        git fetch origin
 
-        # Check if branch already exists.
-        branch_name="update/action-scheduler-${{ needs.check-version.outputs.version }}"
-        if git ls-remote --exit-code --heads origin "$branch_name" >/dev/null 2>&1; then
-          echo "Branch $branch_name already exists. Skipping PR creation."
-          exit 0
-        fi
+        # Branch name hardcoded to avoid conflicts.
+        branch_name="update-action-scheduler-via-automation"
+
+        # Delete local branch if it exists and create fresh from trunk.
+        git branch -D "$branch_name" 2>/dev/null || true
+        git checkout -b "$branch_name" origin/trunk
+
+        cd plugins/woocommerce
 
         # Update A-S version.
         jq --tab -r ".require[\"woocommerce/action-scheduler\"] |= \"${{ needs.check-version.outputs.version }}\"" composer.json > composer.json.new
@@ -106,29 +109,48 @@ jobs:
 
         composer update woocommerce/action-scheduler --no-scripts
 
-        git checkout -b ${branch_name}
-
         composer exec -- changelogger add \
           --significance minor \
           --type update \
           --entry "Update the Action Scheduler package to version ${{ needs.check-version.outputs.version }}." \
           --no-interaction
 
-        # Push changes.
+        # Commit changes.
         git add composer.lock composer.json changelog/
         git commit \
           --message "Update Action Scheduler to '${{ needs.check-version.outputs.version }}'."
-        git push origin ${branch_name}
 
-        # Calculate milestone from trunk version.
-        milestone=$( cat woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+\(-dev\)\?$/.0/' )
+        # Push only if remote branch doesn't exist or differs from our changes.
+        if ! git ls-remote --exit-code --heads origin "$branch_name" >/dev/null 2>&1 || ! git diff --quiet HEAD origin/"$branch_name"; then
+          echo "Pushing changes to remote branch."
+          git push --force origin "$branch_name"
+        else
+          echo "No changes compared to remote branch. Skipping push."
+        fi
 
-        # Open PR and capture PR number.
-        gh pr create \
-          --title 'Bump Action Scheduler version to ${{ needs.check-version.outputs.version }}' \
-          --body 'This PR updates the Action Scheduler package requirement for WooCommerce core.' \
-          --base trunk \
-          --head ${branch_name} \
-          --reviewer "${{ github.actor }}" \
-          --label 'Release' \
-          --milestone "$milestone"
+        # Prepare PR content.
+        pr_title="Bump Action Scheduler version to ${{ needs.check-version.outputs.version }}"
+        pr_body="This PR updates the Action Scheduler package requirement for WooCommerce core."
+
+        # Check if PR already exists.
+        pr_number=$(gh pr list --head "$branch_name" --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+        if [[ -n "$pr_number" ]]; then
+          echo "PR #$pr_number already exists. Updating title, body, and milestone."
+
+          gh pr edit "$pr_number" \
+            --title "$pr_title" \
+            --body "$pr_body"
+        else
+          # Get WooCommerce version for milestone from trunk.
+          milestone=$( git show origin/trunk:plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+\(-dev\)\?$/.0/' )
+
+          echo "Creating new PR."
+          gh pr create \
+            --title "$pr_title" \
+            --body "$pr_body" \
+            --base trunk \
+            --head "$branch_name" \
+            --label 'Release' \
+            --milestone "$milestone"
+        fi
