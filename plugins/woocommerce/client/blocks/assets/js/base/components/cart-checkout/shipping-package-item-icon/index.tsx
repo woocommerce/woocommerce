@@ -9,7 +9,7 @@ import type { CartItem } from '@woocommerce/types';
 import type { PackageItem } from '../shipping-rates-control-package/types';
 import ProductImage from '../product-image';
 
-interface ProductImageProps {
+interface ShippingPackageItemIconProps {
 	packageItem: PackageItem;
 	cartItems: CartItem[];
 }
@@ -23,19 +23,17 @@ interface ProductImageProps {
 const ShippingPackageItemIcon = ( {
 	packageItem,
 	cartItems = [],
-}: ProductImageProps ): JSX.Element => {
+}: ShippingPackageItemIconProps ): JSX.Element => {
 	const cartItem = cartItems?.find(
 		( item ) => item.key === packageItem.key
 	);
 	const images = cartItem?.images || [];
 
 	return (
-		<>
-			<ProductImage
-				image={ images.length ? images[ 0 ] : {} }
-				fallbackAlt={ cartItem?.name || '' }
-			/>
-		</>
+		<ProductImage
+			image={ images.length ? images[ 0 ] : {} }
+			fallbackAlt={ cartItem?.name || '' }
+		/>
 	);
 };
 
