@@ -73288,24 +73288,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:initialize_shared_config\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:placeholder_image\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:prevent_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:print_lazy_load_scripts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -73447,12 +73429,6 @@ parameters:
 			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$scripts_to_lazy_load \(array\<string\>\) does not accept array\<array\<string, mixed\>\|string\>\.$#'
 			identifier: assign.propertyType
 			count: 2
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
@@ -74092,24 +74068,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductButton.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:initialize_shared_config\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:placeholder_image\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductButton\:\:prevent_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductButton.php
-
-		-
 			message: '#^Parameter \#3 \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:enqueue_assets\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
 			identifier: argument.type
 			count: 1
@@ -74130,7 +74088,7 @@ parameters:
 		-
 			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
-			count: 2
+			count: 1
 			path: src/Blocks/BlockTypes/ProductButton.php
 
 		-
@@ -75316,24 +75274,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:initialize_shared_config\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:placeholder_image\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:prevent_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:render\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -75366,12 +75306,6 @@ parameters:
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
@@ -75598,24 +75532,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductPrice.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:initialize_shared_config\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductPrice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:placeholder_image\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductPrice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:prevent_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductPrice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -75630,12 +75546,6 @@ parameters:
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductPrice.php
-
-		-
-			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Blocks/BlockTypes/ProductPrice.php
 
@@ -76048,24 +75958,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductStockIndicator.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductStockIndicator\:\:initialize_shared_config\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductStockIndicator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductStockIndicator\:\:placeholder_image\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductStockIndicator.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductStockIndicator\:\:prevent_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductStockIndicator.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductStockIndicator\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -76074,12 +75966,6 @@ parameters:
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductStockIndicator\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductStockIndicator.php
-
-		-
-			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Blocks/BlockTypes/ProductStockIndicator.php
 
@@ -78472,24 +78358,6 @@ parameters:
 			path: src/Blocks/Templates/SingleProductTemplate.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\SingleProductTemplate\:\:initialize_shared_config\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/SingleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\SingleProductTemplate\:\:placeholder_image\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/SingleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\SingleProductTemplate\:\:prevent_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/SingleProductTemplate.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\SingleProductTemplate\:\:render_block_template\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -78499,12 +78367,6 @@ parameters:
 			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, mixed given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Blocks/Templates/SingleProductTemplate.php
-
-		-
-			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
 			path: src/Blocks/Templates/SingleProductTemplate.php
 
 		-
@@ -78812,6 +78674,12 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/Utils/BlockTemplateUtils.php
+
+		-
+			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
+			identifier: isset.property
+			count: 1
+			path: src/Blocks/Utils/BlocksSharedState.php
 
 		-
 			message: '#^Cannot access offset ''value'' on mixed\.$#'
