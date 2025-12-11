@@ -12,7 +12,6 @@ import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
 import {
 	EmptyContent,
-	Flag,
 	H,
 	Link,
 	OrderStatus,
