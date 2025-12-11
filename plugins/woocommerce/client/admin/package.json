@@ -221,6 +221,7 @@
 		"webpack-cli": "5.1.x",
 		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
+		"whatwg-fetch": "^3.6.20",
 		"@automattic/webpack-rtl-plugin": "6.0.x",
 		"wireit": "0.14.12"
 	},
