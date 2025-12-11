@@ -34,8 +34,9 @@ class PushTokensDataStore {
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be created.
 	 * @throws Exception If the token creation fails.
+	 * @return void
 	 */
-	public function create( PushToken &$push_token ) {
+	public function create( PushToken &$push_token ): void {
 		if ( ! $push_token->can_be_created() ) {
 			throw new InvalidArgumentException(
 				'Can\'t create push token because the push token data provided is invalid.'
@@ -67,8 +68,9 @@ class PushTokensDataStore {
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be read.
 	 * @throws PushTokenNotFoundException If the token can't be found.
+	 * @return void
 	 */
-	public function read( PushToken &$push_token ) {
+	public function read( PushToken &$push_token ): void {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
 				'Can\'t read push token because the push token data provided is invalid.'
@@ -112,8 +114,9 @@ class PushTokensDataStore {
 	 * @throws InvalidArgumentException If the token can't be updated.
 	 * @throws PushTokenNotFoundException If the token can't be found.
 	 * @throws Exception If the token update fails.
+	 * @return void
 	 */
-	public function update( PushToken &$push_token ) {
+	public function update( PushToken &$push_token ): void {
 		if ( ! $push_token->can_be_updated() ) {
 			throw new InvalidArgumentException(
 				'Can\'t update push token because the push token data provided is invalid.'
@@ -144,7 +147,7 @@ class PushTokensDataStore {
 		}
 
 		if ( null === $push_token->get_device_uuid() ) {
-			delete_post_meta( $push_token->get_id(), 'device_uuid' );
+			delete_post_meta( (int) $push_token->get_id(), 'device_uuid' );
 		}
 	}
 
@@ -155,9 +158,9 @@ class PushTokensDataStore {
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be deleted.
 	 * @throws PushTokenNotFoundException If the token can't be found.
-	 * @return bool
+	 * @return void
 	 */
-	public function delete( PushToken &$push_token ): bool {
+	public function delete( PushToken &$push_token ): void {
 		if ( ! $push_token->can_be_deleted() ) {
 			throw new InvalidArgumentException(
 				'Can\'t delete push token because the push token data provided is invalid.'
@@ -171,8 +174,6 @@ class PushTokensDataStore {
 		}
 
 		wp_delete_post( (int) $push_token->get_id(), true );
-
-		return true;
 	}
 
 	/**
@@ -280,22 +281,20 @@ class PushTokensDataStore {
 			);
 		}
 
-		$meta = get_post_meta( $push_token->get_id() );
+		$meta        = (array) get_post_meta( (int) $push_token->get_id() );
+		$meta_by_key = (array) array_combine( static::SUPPORTED_META, static::SUPPORTED_META );
 
-		return array_map(
-			function ( string $key ) use ( $meta ) {
-				if ( ! isset( $meta[ $key ] ) ) {
-					return null;
-				}
+		foreach ( static::SUPPORTED_META as $key ) {
+			if ( ! isset( $meta[ $key ] ) ) {
+				$meta_by_key[ $key ] = null;
+			} else if ( is_array( $meta[ $key ] ) ) {
+				$meta_by_key[ $key ] = $meta[ $key ][0];
+			} else {
+				$meta_by_key[ $key ] = $meta[ $key ];
+			}
+		}
 
-				if ( is_array( $meta[ $key ] ) ) {
-					$meta[ $key ] = array_shift( $meta[ $key ] );
-				}
-
-				return $meta[ $key ];
-			},
-			array_combine( static::SUPPORTED_META, static::SUPPORTED_META )
-		);
+		return $meta;
 	}
 
 	/**
