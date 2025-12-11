@@ -74,6 +74,26 @@ To ensure the correct functionality of the Email Editor and its features, you mu
 The required minimum version of this package is stored in the assets directory.
 If your WordPress installation does not use the Gutenberg plugin or does not include the required version, replace the existing `@wordpress/rich-text` package with the one provided in the assets directory.
 
+#### Global Styles Engine
+
+The email editor depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
+
+**Impact**: If your build configuration marks all `@wordpress/*` packages as externals (common in webpack configs), you will encounter runtime errors: `"Cannot find module '@wordpress/global-styles-engine'"`.
+
+**Solution**: Configure your webpack dependency extraction plugin to bundle this package instead of treating it as an external:
+
+```javascript
+new DependencyExtractionWebpackPlugin( {
+    requestToExternal( request ) {
+        if ( request === '@wordpress/global-styles-engine' ) {
+            // Return null to bundle this package instead of treating it as external
+            return null;
+        }
+        // ... handle other dependencies
+    }
+} )
+```
+
 ### Email Editor
 
 -   Bootstrapped in the plugin in the [email editor controller](https://github.com/mailpoet/mailpoet/blob/13bf305aeb29bbadd0695ee02a3735e62cc4f21f/mailpoet/lib/EmailEditor/Integrations/MailPoet/EmailEditor.php)
