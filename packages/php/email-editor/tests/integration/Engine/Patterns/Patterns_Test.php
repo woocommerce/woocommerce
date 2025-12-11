@@ -32,12 +32,24 @@ class Patterns_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function testItRegistersPatternCategories(): void {
 		$this->patterns->initialize();
-		$categories = \WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
-		/** @var array{name: string, label: string, description: string} $category */ // phpcs:ignore
-		$category = array_pop( $categories );
-		$this->assertEquals( 'email-contents', $category['name'] );
-		$this->assertEquals( 'Email Contents', $category['label'] );
-		$this->assertEquals( 'A collection of email content layouts.', $category['description'] );
+		$categories         = \WP_Block_Pattern_Categories_Registry::get_instance()->get_all_registered();
+		$categories_by_name = array_column( $categories, null, 'name' );
+
+		$this->assertArrayHasKey( 'email-contents', $categories_by_name );
+		$this->assertEquals( 'Email Contents', $categories_by_name['email-contents']['label'] );
+		$this->assertEquals( 'A collection of email content layouts.', $categories_by_name['email-contents']['description'] );
+
+		$this->assertArrayHasKey( 'basic', $categories_by_name );
+		$this->assertEquals( 'Basic', $categories_by_name['basic']['label'] );
+		$this->assertEquals( 'A collection of basic email layouts.', $categories_by_name['basic']['description'] );
+
+		$this->assertArrayHasKey( 'welcome', $categories_by_name );
+		$this->assertEquals( 'Welcome', $categories_by_name['welcome']['label'] );
+		$this->assertEquals( 'A collection of welcome email layouts.', $categories_by_name['welcome']['description'] );
+
+		$this->assertArrayHasKey( 'abandoned-cart', $categories_by_name );
+		$this->assertEquals( 'Abandoned cart', $categories_by_name['abandoned-cart']['label'] );
+		$this->assertEquals( 'A collection of abandoned cart email layouts.', $categories_by_name['abandoned-cart']['description'] );
 	}
 
 	/**

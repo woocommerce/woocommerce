@@ -33,6 +33,21 @@ class Patterns {
 				'label'       => _x( 'Email Contents', 'Block pattern category', 'woocommerce' ),
 				'description' => __( 'A collection of email content layouts.', 'woocommerce' ),
 			),
+			array(
+				'name'        => 'basic',
+				'label'       => _x( 'Basic', 'Block pattern category', 'woocommerce' ),
+				'description' => __( 'A collection of basic email layouts.', 'woocommerce' ),
+			),
+			array(
+				'name'        => 'welcome',
+				'label'       => _x( 'Welcome', 'Block pattern category', 'woocommerce' ),
+				'description' => __( 'A collection of welcome email layouts.', 'woocommerce' ),
+			),
+			array(
+				'name'        => 'abandoned-cart',
+				'label'       => _x( 'Abandoned cart', 'Block pattern category', 'woocommerce' ),
+				'description' => __( 'A collection of abandoned cart email layouts.', 'woocommerce' ),
+			),
 		);
 		foreach ( $categories as $category ) {
 			register_block_pattern_category(
