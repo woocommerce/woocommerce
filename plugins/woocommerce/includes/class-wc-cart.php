@@ -1616,15 +1616,20 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		// Add package ID and package name to each package after the filter is applied.
-		$shipping_packages = array_map(
-			function ( $key, $package, $index ) {
-				$package['package_id']   = $package['package_id'] ?? $key;
-				$package['package_name'] = $this->get_shipping_package_name( $package, $index );
-				return $package;
-			},
-			array_keys( $shipping_packages ),
-			$shipping_packages,
-			range( 1, count( $shipping_packages ) )
+		$shipping_packages = array_filter(
+			array_map(
+				function ( $key, $package, $index ) {
+					if ( empty( $package ) || ! is_array( $package ) ) {
+						return null;
+					}
+					$package['package_id']   = $package['package_id'] ?? $key;
+					$package['package_name'] = $this->get_shipping_package_name( $package, $index );
+					return $package;
+				},
+				array_keys( $shipping_packages ),
+				$shipping_packages,
+				range( 1, count( $shipping_packages ) )
+			)
 		);
 
 		return $shipping_packages;
