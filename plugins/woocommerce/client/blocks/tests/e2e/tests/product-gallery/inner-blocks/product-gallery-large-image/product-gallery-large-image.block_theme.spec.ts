@@ -39,18 +39,18 @@ test.describe( `${ blockData.name }`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test( 'Renders Product Gallery Large Image block on the editor and frontend side', async ( {
+	test( 'Renders Product Gallery Viewer block on the editor and frontend side', async ( {
 		page,
 		editor,
 		pageObject,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 
-		const block = await pageObject.getMainImageBlock( {
+		const viewerBlock = await pageObject.getViewerBlock( {
 			page: 'editor',
 		} );
 
-		await expect( block ).toBeVisible();
+		await expect( viewerBlock ).toBeVisible();
 
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
@@ -58,11 +58,11 @@ test.describe( `${ blockData.name }`, () => {
 
 		await page.goto( blockData.productPage );
 
-		const blockFrontend = await pageObject.getMainImageBlock( {
+		const viewerBlockFrontend = await pageObject.getViewerBlock( {
 			page: 'frontend',
 		} );
 
-		await expect( blockFrontend ).toBeVisible();
+		await expect( viewerBlockFrontend ).toBeVisible();
 	} );
 
 	test.describe( 'Zoom while hovering setting', () => {
@@ -86,11 +86,11 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const blockFrontend = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
 
-			const selectedImage = blockFrontend.locator( 'img' ).first();
+			const selectedImage = viewerBlock.locator( 'img' ).first();
 
 			await test.step( 'for selected image', async () => {
 				// img[style] is the selector because the style attribute is Interactivity API.
@@ -112,7 +112,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await test.step( 'styles are not applied to other images', async () => {
 				// img[style] is the selector because the style attribute is Interactivity API.
-				const hiddenImage = blockFrontend.locator( 'img' ).nth( 1 );
+				const hiddenImage = viewerBlock.locator( 'img' ).nth( 1 );
 				const style = await hiddenImage.evaluate( ( el ) => el.style );
 
 				expect( style.transform ).toBe( '' );
@@ -143,11 +143,11 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const blockFrontend = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
 
-			const imgElement = blockFrontend.locator( 'img' ).first();
+			const imgElement = viewerBlock.locator( 'img' ).first();
 			const style = await imgElement.evaluate( ( el ) => el.style );
 
 			expect( style.transform ).toBe( '' );
@@ -171,11 +171,11 @@ test.describe( `${ blockData.name }`, () => {
 		await pageObject.addProductGalleryBlock( { cleanContent: false } );
 		await pageObject.addAddToCartWithOptionsBlock();
 
-		const block = await pageObject.getMainImageBlock( {
+		const viewerBlock = await pageObject.getViewerBlock( {
 			page: 'editor',
 		} );
 
-		await expect( block ).toBeVisible();
+		await expect( viewerBlock ).toBeVisible();
 
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
@@ -183,7 +183,7 @@ test.describe( `${ blockData.name }`, () => {
 
 		await page.goto( blockData.productPage );
 
-		const initialImageId = await pageObject.getVisibleLargeImageId();
+		const initialImageId = await pageObject.getViewerImageId();
 
 		const addToCartWithOptionsBlock =
 			await pageObject.getAddToCartWithOptionsBlock( {
@@ -198,7 +198,7 @@ test.describe( `${ blockData.name }`, () => {
 		await addToCartWithOptionsSizeSelector.selectOption( 'No' );
 
 		await expect( async () => {
-			const variationImageId = await pageObject.getVisibleLargeImageId();
+			const variationImageId = await pageObject.getViewerImageId();
 
 			expect( initialImageId ).not.toEqual( variationImageId );
 		} ).toPass( { timeout: 1_000 } );
@@ -224,15 +224,15 @@ test.describe( `${ blockData.name }`, () => {
 				width: 390, // iPhone 12 Pro
 			} );
 
-			const largeImageBlockLocator = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
-			const largeImage = largeImageBlockLocator.locator( 'img' ).first();
+			const viewerImage = viewerBlock.locator( 'img' ).first();
 
-			const initialImageId = await pageObject.getVisibleLargeImageId();
+			const initialImageId = await pageObject.getViewerImageId();
 
 			// Get the element's bounding box
-			const box = await largeImage.boundingBox();
+			const box = await viewerImage.boundingBox();
 			if ( ! box ) {
 				return;
 			}
@@ -244,7 +244,7 @@ test.describe( `${ blockData.name }`, () => {
 			const swipeEndY = swipeStartY;
 
 			// Dispatch touch events to simulate swipe
-			await largeImage.evaluate(
+			await viewerImage.evaluate(
 				( element, { startX, startY, endX, endY } ) => {
 					const touchStart = new TouchEvent( 'touchstart', {
 						bubbles: true,
@@ -296,7 +296,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( async () => {
 				// Verify the next image is shown
-				const nextImageId = await pageObject.getVisibleLargeImageId();
+				const nextImageId = await pageObject.getViewerImageId();
 
 				expect( nextImageId ).not.toEqual( initialImageId );
 			} ).toPass( { timeout: 1_000 } );

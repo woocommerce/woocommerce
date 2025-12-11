@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Migrate BlocksSharedState to a class with static methods to fix a bug where state was duplicated between block instances.

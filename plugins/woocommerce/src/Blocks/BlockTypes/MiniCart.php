@@ -24,7 +24,6 @@ use Automattic\Block_Delimiter;
  */
 class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
-	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -501,9 +500,10 @@ class MiniCart extends AbstractBlock {
 			wp_enqueue_script( $handle );
 		}
 
-		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
-		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
-		$this->placeholder_image( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+		BlocksSharedState::load_cart_state( $consent );
+		BlocksSharedState::load_store_config( $consent );
+		BlocksSharedState::load_placeholder_image( $consent );
 
 		$cart = $this->get_cart_instance();
 
