@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Exception;
 use InvalidArgumentException;
+use WP_Query;
 
 /**
  * Data store class for push tokens.
@@ -214,24 +215,27 @@ class PushTokensDataStore {
 			);
 		}
 
-		global $wpdb;
-
-		$posts = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT *
-				FROM {$wpdb->posts}
-				WHERE post_type = %s
-					AND post_status = 'private'
-					AND post_author = %d
-				ORDER BY ID DESC",
-				PushToken::POST_TYPE,
-				$push_token->get_user_id()
+		$query = new WP_Query(
+			array(
+				'post_type'      => PushToken::POST_TYPE,
+				'post_status'    => 'private',
+				'author'         => $push_token->get_user_id(),
+				'posts_per_page' => -1,
+				'orderby'        => 'ID',
+				'order'          => 'DESC',
+				'fields'         => 'ids',
 			)
 		);
 
-		foreach ( $posts as $post ) {
+		$posts = $query->posts;
+
+		if ( empty( $posts ) ) {
+			return null;
+		}
+
+		foreach ( $query->posts as $post_id ) {
 			$candidate = new PushToken();
-			$candidate->set_id( (int) $post->ID );
+			$candidate->set_id( $post_id );
 
 			try {
 				$meta = $this->build_meta_array_from_database( $candidate );
@@ -239,7 +243,7 @@ class PushTokensDataStore {
 				wc_get_logger()->warning(
 					'Failed to load meta for push token.',
 					array(
-						'token_id' => $post->ID,
+						'token_id' => $post_id,
 						'error'    => $e->getMessage(),
 					)
 				);
@@ -255,7 +259,7 @@ class PushTokensDataStore {
 					|| ( $push_token->get_device_uuid() && $push_token->get_device_uuid() === $meta['device_uuid'] )
 				)
 			) {
-				$push_token->set_id( (int) $post->ID );
+				$push_token->set_id( $post_id );
 				$push_token->set_token( $meta['token'] );
 				$push_token->set_device_uuid( $meta['device_uuid'] );
 				return $push_token;
