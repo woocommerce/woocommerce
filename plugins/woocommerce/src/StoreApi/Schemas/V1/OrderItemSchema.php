@@ -74,7 +74,7 @@ class OrderItemSchema extends ItemSchema {
 			$product_properties['images']             = $this->get_images( $product );
 			// Only include variation data for product variations, not simple products.
 			// This is consistent with the cart endpoint behavior.
-			if ( $product->is_type( 'variation' ) ) {
+			if ( $product instanceof \WC_Product_Variation ) {
 				$product_properties['variation'] = $this->format_variation_data( $product->get_variation_attributes(), $product );
 			}
 		}
