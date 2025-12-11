@@ -20,7 +20,6 @@ use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
-use Automattic\WooCommerce\Internal\Utilities\PostMetaUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1541,8 +1540,6 @@ WHERE
 	 * @throws \Exception If no CPT data store is found for an order.
 	 */
 	private function get_post_orders_for_ids( array $orders ): array {
-		$legacy_handler = wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler::class );
-
 		$order_ids = array_keys( $orders );
 		foreach ( $order_ids as $order_id ) {
 			// Exclude orders where the CPT version is a placeholder post.
@@ -1587,7 +1584,7 @@ WHERE
 
 				try {
 					$cpt_order->set_id( $order_id );
-					$legacy_handler->read_order_from_datastore( $cpt_order, $cpt_store );
+					$cpt_store->read( $cpt_order );
 					$cpt_orders[ $order_id ] = $cpt_order;
 				} catch ( Exception $e ) {
 					// If the post record has been deleted (for instance, by direct query) then an exception may be thrown.
@@ -1649,25 +1646,15 @@ WHERE
 	 *
 	 * Also provides an option to sync the metadata as well, since we are already computing the diff.
 	 *
-	 * @param \WC_Abstract_Order $order1 Order object read from COT.
-	 * @param \WC_Abstract_Order $order2 Order object read from posts.
+	 * @param \WC_Abstract_Order $order1 Order object read from posts.
+	 * @param \WC_Abstract_Order $order2 Order object read from COT.
 	 * @param bool               $sync   Whether to also sync the meta data.
 	 *
 	 * @return array Difference between post and COT meta data.
 	 */
 	private function get_diff_meta_data_between_orders( \WC_Abstract_Order &$order1, \WC_Abstract_Order $order2, $sync = false ): array {
-		$order1_meta = ArrayUtil::select( $order1->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
-		$order2_meta = ArrayUtil::select( $order2->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
-
-		// Canonicalize metadata by converting scalar to string for comparison purposes.
-		if ( ! $sync ) {
-			$maybe_convert_to_string = function ( &$m ) {
-				$m['value'] = is_scalar( $m['value'] ) ? (string) $m['value'] : $m['value'];
-			};
-			array_walk( $order1_meta, $maybe_convert_to_string );
-			array_walk( $order2_meta, $maybe_convert_to_string );
-		}
-
+		$order1_meta        = ArrayUtil::select( $order1->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
+		$order2_meta        = ArrayUtil::select( $order2->get_meta_data(), 'get_data', ArrayUtil::SELECT_BY_OBJECT_METHOD );
 		$order1_meta_by_key = ArrayUtil::select_as_assoc( $order1_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
 		$order2_meta_by_key = ArrayUtil::select_as_assoc( $order2_meta, 'key', ArrayUtil::SELECT_BY_ARRAY_KEY );
 
@@ -1687,7 +1674,7 @@ WHERE
 
 			$order2_values = ArrayUtil::select( $order2_meta_by_key[ $key ], 'value', ArrayUtil::SELECT_BY_ARRAY_KEY );
 			$new_diff      = ArrayUtil::deep_assoc_array_diff( $order1_values, $order2_values );
-			if ( ! empty( $new_diff ) ) {
+			if ( ! empty( $new_diff ) && $sync ) {
 				if ( count( $order2_values ) > 1 ) {
 					$sync && $order1->delete_meta_data( $key );
 					foreach ( $order2_values as $post_order_value ) {
@@ -3308,6 +3295,8 @@ CREATE TABLE $meta_table (
 	 * @return bool
 	 */
 	public function delete_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
+		global $wpdb;
+
 		if ( $this->should_backfill_post_record() && isset( $meta->id ) ) {
 			// Let's get the actual meta key before its deleted for backfilling. We cannot delete just by ID because meta IDs are different in HPOS and posts tables.
 			$db_meta = $this->data_store_meta->get_metadata_by_id( $meta->id );
@@ -3322,7 +3311,23 @@ CREATE TABLE $meta_table (
 
 		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			PostMetaUtil::delete_post_meta_safe( $object->get_id(), $meta->key, $meta->value );
+			if ( is_object( $meta->value ) && '__PHP_Incomplete_Class' === get_class( $meta->value ) ) {
+				$meta_value = maybe_serialize( $meta->value );
+				$wpdb->delete(
+					_get_meta_table( 'post' ),
+					array(
+						'post_id'    => $object->get_id(),
+						'meta_key'   => $meta->key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					),
+					array( '%d', '%s', '%s' )
+				);
+				wp_cache_delete( $object->get_id(), 'post_meta' );
+				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID %d: "%s"', $object->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+			} else {
+				delete_post_meta( $object->get_id(), $meta->key, $meta->value );
+			}
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
@@ -3365,7 +3370,7 @@ CREATE TABLE $meta_table (
 
 		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			PostMetaUtil::update_post_meta_safe( $object->get_id(), $meta->key, $meta->value );
+			update_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
