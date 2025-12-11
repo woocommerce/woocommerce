@@ -1,0 +1,174 @@
+/**
+ * External dependencies
+ */
+
+import { addFilter } from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Add a currency dropdown filter to reports.
+ *
+ * @param {Array} filters - Set of filters in a report.
+ * @return {Array} Amended set of filters.
+ */
+const addCurrencyFilters = ( filters ) => {
+	return [
+		{
+			label: __( 'Currency', '{{textdomain}}' ),
+			staticParams: [],
+			param: 'currency',
+			showFilters: () => true,
+			defaultValue: 'USD',
+			filters: [ ...( wcSettings.multiCurrency || [] ) ],
+		},
+		...filters,
+	];
+};
+
+// Add currency filter to all relevant reports.
+addFilter(
+	'woocommerce_admin_revenue_report_filters',
+	'{{textdomain}}',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_orders_report_filters',
+	'{{textdomain}}',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_products_report_filters',
+	'{{textdomain}}',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_categories_report_filters',
+	'{{textdomain}}',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_coupons_report_filters',
+	'{{textdomain}}',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_taxes_report_filters',
+	'{{textdomain}}',
+	addCurrencyFilters
+);
+addFilter(
+	'woocommerce_admin_dashboard_filters',
+	'{{textdomain}}',
+	addCurrencyFilters
+);
+
+/**
+ * Add a currency column to report tables.
+ *
+ * @param {Object} reportTableData - Table data.
+ * @return {Object} Modified table data.
+ */
+const addTableColumn = ( reportTableData ) => {
+	const includedReports = [
+		'revenue',
+		'products',
+		'orders',
+		'categories',
+		'coupons',
+		'taxes',
+	];
+
+	if ( ! includedReports.includes( reportTableData.endpoint ) ) {
+		return reportTableData;
+	}
+
+	const newHeaders = [
+		{
+			label: __( 'Currency', '{{textdomain}}' ),
+			key: 'currency',
+		},
+		...reportTableData.headers,
+	];
+
+	const newRows = reportTableData.rows.map( ( row, index ) => {
+		const item = reportTableData.items.data[ index ];
+		const currency =
+			reportTableData.endpoint === 'revenue'
+				? item.subtotals.currency
+				: item.currency;
+		const newRow = [
+			{
+				display: currency,
+				value: currency,
+			},
+			...row,
+		];
+		return newRow;
+	} );
+
+	reportTableData.headers = newHeaders;
+	reportTableData.rows = newRows;
+
+	return reportTableData;
+};
+
+addFilter( 'woocommerce_admin_report_table', '{{textdomain}}', addTableColumn );
+
+/**
+ * Persist 'currency' query parameter when navigating between reports.
+ *
+ * @param {Array} params - Array of persisted query parameters.
+ * @return {Array} Array including 'currency'.
+ */
+const persistQueries = ( params ) => {
+	params.push( 'currency' );
+	return params;
+};
+
+addFilter(
+	'woocommerce_admin_persisted_queries',
+	'{{textdomain}}',
+	persistQueries
+);
+
+/**
+ * Currency configuration for different currencies.
+ */
+const currencies = {
+	ZAR: {
+		code: 'ZAR',
+		symbol: 'R',
+		symbolPosition: 'left',
+		thousandSeparator: ' ',
+		decimalSeparator: ',',
+		precision: 2,
+	},
+	NZD: {
+		code: 'NZD',
+		symbol: '$NZ',
+		symbolPosition: 'left',
+		thousandSeparator: ',',
+		decimalSeparator: '.',
+		precision: 2,
+	},
+};
+
+/**
+ * Update report currency formatting based on selected currency.
+ *
+ * @param {Object} config - Default currency configuration.
+ * @param {Object} query - Query parameters including currency.
+ * @return {Object} Updated currency configuration.
+ */
+const updateReportCurrencies = ( config, { currency } ) => {
+	if ( currency && currencies[ currency ] ) {
+		return currencies[ currency ];
+	}
+	return config;
+};
+
+addFilter(
+	'woocommerce_admin_report_currency',
+	'{{textdomain}}',
+	updateReportCurrencies
+);
