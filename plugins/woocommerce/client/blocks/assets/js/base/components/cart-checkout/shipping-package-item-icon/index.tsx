@@ -16,8 +16,10 @@ interface ShippingPackageItemIconProps {
 /**
  * Formats and returns an image element.
  *
- * @param {Object} props       Incoming props for the component.
- * @param {Object} props.image Image properties.
+ * @param {Object} props             Incoming props for the component.
+ * @param {Object} props.packageItem The package item.
+ * @param {Object} props.cartItems   The cartItems to get the image from via the packageItem key.
+ * @returns {JSX.Element} React node.
  */
 
 const ShippingPackageItemIcon = ( {
