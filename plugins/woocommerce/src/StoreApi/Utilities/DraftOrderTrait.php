@@ -60,6 +60,12 @@ trait DraftOrderTrait {
 			return true;
 		}
 
+		// POS pending orders can be retried without cart hash validation.
+		// POS sessions are transaction-scoped, providing isolation between customers.
+		if ( wc_is_pos_session() && $order_object->needs_payment() && $order_object->has_status( 'pending' ) ) {
+			return true;
+		}
+
 		// Pending and failed orders can be retried if the cart hasn't changed.
 		if ( $order_object->needs_payment() && $order_object->has_cart_hash( wc()->cart->get_cart_hash() ) ) {
 			return true;
