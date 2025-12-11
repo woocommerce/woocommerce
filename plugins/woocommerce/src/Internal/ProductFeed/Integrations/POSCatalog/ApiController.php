@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 10.5.0
  */
 class ApiController {
-	const ROUTE_NAMESPACE = 'wc/pos/v1/product-catalog';
+	const ROUTE_NAMESPACE = 'wc/pos/v1/catalog';
 
 	/**
 	 * Container instance.
