@@ -21,7 +21,11 @@ const config: Config = {
 	projectName: 'woocommerce', // Usually your repo name.
 
 	onBrokenLinks: 'throw',
-	onBrokenMarkdownLinks: 'warn',
+	markdown: {
+		hooks: {
+			onBrokenMarkdownLinks: 'warn',
+		},
+	},
 
 	trailingSlash: true,
 

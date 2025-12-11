@@ -14,10 +14,11 @@ Follow WooCommerce project conventions when adding or modifying backend PHP code
 1. **Creating new code structures**: See [file-entities.md](file-entities.md) for conventions on creating classes and organizing files (but for new unit test files see [unit-tests.md](unit-tests.md)).
 2. **Naming conventions**: See [code-entities.md](code-entities.md) for naming methods, variables, and parameters
 3. **Coding style**: See [coding-conventions.md](coding-conventions.md) for general coding standards and best practices
-4. **Working with hooks**: See [hooks.md](hooks.md) for hook callback conventions and documentation
-5. **Dependency injection**: See [dependency-injection.md](dependency-injection.md) for DI container usage
-6. **Data integrity**: See [data-integrity.md](data-integrity.md) for ensuring data integrity when performing CRUD operations
-7. **Writing tests**: See [unit-tests.md](unit-tests.md) for unit testing conventions
+4. **Type annotations**: See [type-annotations.md](type-annotations.md) for PHPStan-aware PHPDoc annotations
+5. **Working with hooks**: See [hooks.md](hooks.md) for hook callback conventions and documentation
+6. **Dependency injection**: See [dependency-injection.md](dependency-injection.md) for DI container usage
+7. **Data integrity**: See [data-integrity.md](data-integrity.md) for ensuring data integrity when performing CRUD operations
+8. **Writing tests**: See [unit-tests.md](unit-tests.md) for unit testing conventions
 
 ## Key Principles
 

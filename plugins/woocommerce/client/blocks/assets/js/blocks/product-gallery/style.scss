@@ -259,7 +259,18 @@ $dialog-padding: 20px;
 :where(.wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {
 	pointer-events: none;
 	cursor: default;
+}
+
+// Overlay style: darkens the active thumbnail
+:where(.wc-block-product-gallery-thumbnails--active-overlay .wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {
 	filter: brightness(0.8);
+}
+
+// Outline style: adds a border around the active thumbnail
+:where(.wc-block-product-gallery-thumbnails--active-outline .wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {
+	border: 1px solid currentColor;
+	padding: 2px;
+	box-sizing: border-box;
 }
 
 :where(.is-vertical .wc-block-product-gallery-thumbnails) {
