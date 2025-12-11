@@ -1,0 +1,4 @@
+Significance: major
+Type: enhancement
+
+**Breaking Change:**  Adds variants for multiple extension scaffolds, templatesPath moved to variants/default subdirectory, new variants API structure introduced, postinstall script modified, and @wordpress/scripts version unpinned

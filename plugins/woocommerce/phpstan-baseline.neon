@@ -29701,6 +29701,12 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
+			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/data-stores/class-wc-product-grouped-data-store-cpt.php
+
+		-
 			message: '#^Method WC_Product\:\:get_children\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -71248,12 +71254,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Constant WOOCOMMERCE_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Blocks/AssetsController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\AssetsController\:\:enqueue_wc_entities\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -73654,31 +73654,25 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartItemsBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render_experimental_iapi_markup\(\) should return string but returns string\|false\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render_experimental_iapi_product_details_item_markup\(\) should return string but returns string\|false\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render_product_details_item_markup\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render_experimental_iapi_product_details_markup\(\) should return string but returns string\|false\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render_product_details_markup\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
 
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render_experimental_iapi_markup\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
