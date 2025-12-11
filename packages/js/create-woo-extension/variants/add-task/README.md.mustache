@@ -1,0 +1,42 @@
+# {{title}}
+
+{{#description}}
+{{description}}
+{{/description}}
+
+This is a WooCommerce extension that adds a custom task to the WooCommerce onboarding wizard.
+
+## Development
+
+### Getting started
+
+1. `npm install` to install dependencies
+2. `npm start` to start the development server
+3. `npm run build` to build the production version
+
+### File Structure
+
+- `src/index.js` - Main JavaScript file that registers the task content and list item customization
+- `includes/Admin/Setup.php` - PHP class that handles task registration and script enqueuing
+- `includes/Task.php` - Custom task class extending WooCommerce's base Task class
+- `{{slug}}.php` - Main plugin file
+
+## Features
+
+- Adds a custom task to the WooCommerce onboarding task list
+- Demonstrates how to extend the `Task` base class
+- Shows how to use `WooOnboardingTask` and `WooOnboardingTaskListItem` components
+- Includes example of task completion and action tracking
+
+## Customization
+
+To customize this task for your needs:
+
+1. Update the task properties in `includes/Task.php` (ID, title, content, time)
+2. Modify the task content UI in `src/index.js`
+3. Add custom logic for task completion and actions
+4. Customize the task list item styling and behavior
+
+## Learn More
+
+For more information about WooCommerce onboarding tasks, see the [WooCommerce documentation](https://woocommerce.com/document/woocommerce-onboarding-tasks/).
