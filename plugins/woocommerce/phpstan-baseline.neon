@@ -67156,36 +67156,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Appearance.php
 
 		-
-			message: '#^Cannot call method is_block_editor\(\) on WP_Screen\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:possibly_add_site_editor_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:possibly_hide_wp_admin_bar\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_starts_with expects string\|null, array\|string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
 			message: '#^Parameter \#1 \$input of function array_keys expects array, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -67198,20 +67168,8 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
 
 		-
-			message: '#^Parameter \#1 \$var of function wc_clean expects array\|string, mixed given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
 			message: '#^Parameter \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:__construct\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
 
