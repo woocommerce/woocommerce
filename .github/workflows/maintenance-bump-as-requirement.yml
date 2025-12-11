@@ -62,8 +62,6 @@ jobs:
     needs: check-version
     if: needs.check-version.outputs.should-update == 'true'
     runs-on: ubuntu-latest
-    outputs:
-      pr-number: ${{ steps.create-pr.outputs.pr-number }}
     steps:
     - name: Check out trunk
       uses: actions/checkout@v4
