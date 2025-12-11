@@ -29701,6 +29701,12 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
+			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/data-stores/class-wc-product-grouped-data-store-cpt.php
+
+		-
 			message: '#^Method WC_Product\:\:get_children\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -71245,12 +71251,6 @@ parameters:
 			message: '#^Cannot access offset ''version'' on mixed\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: src/Blocks/AssetsController.php
-
-		-
-			message: '#^Constant WOOCOMMERCE_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 2
 			path: src/Blocks/AssetsController.php
 
 		-
