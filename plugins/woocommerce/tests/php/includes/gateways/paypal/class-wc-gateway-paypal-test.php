@@ -298,4 +298,55 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * Tests for `is_available` method with invalid item amount in cart.
+	 *
+	 * @param float $price The item price to set in the cart.
+	 * @param bool  $expected_available The expected availability of the gateway.
+	 * @return void
+	 *
+	 * @dataProvider provide_test_is_available_with_invalid_item_amount
+	 */
+	public function test_is_available_with_invalid_item_amount( float $price, bool $expected_available ): void {
+		// Clear the cart before adding new item.
+		WC()->cart->empty_cart();
+
+		// Create a simple product with the specified amount.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $price );
+		$product->save();
+
+		// Add item with specified amount to the cart.
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$new_settings = array(
+			'enabled' => 'yes',
+			'email'   => 'merchant@example.com',
+		);
+
+		update_option( 'woocommerce_paypal_settings', $new_settings );
+
+		// Mock Orders v2 to be enabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2', 'needs_setup' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
+		$mock_gateway->method( 'needs_setup' )->willReturn( false );
+
+		$this->assertSame( $expected_available, $mock_gateway->is_available() );
+	}
+
+	/**
+	 * Data provider for test_is_available_with_invalid_item_amount.
+	 *
+	 * @return array[]
+	 */
+	public function provide_test_is_available_with_invalid_item_amount(): array {
+		return array(
+			'zero price item'     => [ 0.0, false ],
+			'negative price item' => [ -10.0, false ],
+			'valid price item'    => [ 25.0, true ],
+		);
+	}
 }
