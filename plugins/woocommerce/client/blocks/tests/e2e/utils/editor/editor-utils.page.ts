@@ -134,7 +134,7 @@ export class Editor extends CoreEditor {
 		// Using expect.poll() for a retrying assertion since toHaveCount
 		// requires an exact number.
 		await expect
-			.poll( () => templateCards.count(), { timeout: 10000 } )
+			.poll( () => templateCards.count(), { timeout: 3000 } )
 			.toBeLessThan( templatesBeforeSearch );
 	}
 
