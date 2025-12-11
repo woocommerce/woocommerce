@@ -58,7 +58,7 @@ jobs:
             DEDUPLICATION (CRITICAL - do this FIRST, before analyzing the diff)
             1. Fetch ALL existing review comments on this PR:
                gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments?per_page=100" --paginate
-            2. Filter to comments from "claude[bot]" that contain "Backwards Compatibility Review"
+            2. Filter to comments from "github-actions[bot]" or "claude[bot]" that contain "Backwards Compatibility Review"
             3. Build a list of already-covered concerns: for each existing comment, note the file path, line number, and the breaking change described
             4. When you find a potential BC issue, check your list - if an existing comment ALREADY covers the same concern on the same file (same or nearby lines within 5 lines), SKIP it
             5. Two comments cover the same concern if they warn about the SAME breaking change, even if worded differently:
