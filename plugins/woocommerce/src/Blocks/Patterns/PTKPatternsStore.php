@@ -193,6 +193,10 @@ class PTKPatternsStore {
 	public function flush_cached_patterns() {
 		delete_option( self::OPTION_NAME );
 
+		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
+			return;
+		}
+
 		// Unschedule any existing fetch_patterns actions.
 		// Defer unscheduling until Action Scheduler is ready to avoid errors during early initialization.
 		if ( did_action( 'action_scheduler_init' ) ) {
