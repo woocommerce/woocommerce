@@ -15,6 +15,7 @@ const { spawn } = require( 'child_process' );
 
 // Configuration
 const PROGRESS_BAR_WIDTH = 30;
+const IS_TTY = process.stdout.isTTY;
 
 // ANSI color codes
 const colors = {
@@ -43,6 +44,8 @@ let totalPackages = 0;
 let completedCount = 0;
 const startTime = Date.now();
 const currentlyBuilding = new Set();
+const lastProgressLine = '';
+let progressLineWritten = false;
 
 // Categorize package by path
 function getCategory( path ) {
@@ -140,8 +143,23 @@ function updateProgress() {
 		`${ colors.dim }${ elapsed }s${ colors.reset } ` +
 		currentDisplay;
 
-	// Clear line and write progress
-	process.stdout.write( '\r\x1b[K' + progressLine );
+	// Clear line and write progress (only in TTY mode)
+	if ( IS_TTY ) {
+		// Move cursor up if we've already written a progress line, then clear
+		if ( progressLineWritten ) {
+			process.stdout.write( '\x1b[1A\x1b[2K' ); // Move up 1 line, clear entire line
+		}
+		process.stdout.write( progressLine + '\n' );
+		progressLineWritten = true;
+	}
+}
+
+// Print completion message for non-TTY mode
+function printCompletion( packageName, cached ) {
+	if ( ! IS_TTY ) {
+		const status = cached ? '· (cached)' : '✓';
+		console.log( `${ status } ${ packageName }` );
+	}
 }
 
 // Process a line of output
@@ -193,7 +211,9 @@ function processLine( rawLine ) {
 		line.includes( 'DEPRECATION' )
 	) {
 		// Extract package name if present (format: "path/to/package task: message")
-		const packageMatch = line.match( /^([^\s]+)\s+build:project:[^:]+:\s*(.*)$/ );
+		const packageMatch = line.match(
+			/^([^\s]+)\s+build:project:[^:]+:\s*(.*)$/
+		);
 		let warningText;
 		if ( packageMatch ) {
 			const pkgName = getPackageName( packageMatch[ 1 ] );
@@ -203,10 +223,7 @@ function processLine( rawLine ) {
 		}
 
 		// Deduplicate by checking if we already have a similar warning
-		if (
-			warningText &&
-			! warnings.some( ( w ) => w === warningText )
-		) {
+		if ( warningText && ! warnings.some( ( w ) => w === warningText ) ) {
 			warnings.push( warningText );
 		}
 		return;
@@ -267,8 +284,14 @@ function processLine( rawLine ) {
 		// Check if cached (skipped > 0 means cached)
 		// Match "skipped N" where N > 0
 		const skippedMatch = line.match( /skipped (\d+)/ );
-		if ( skippedMatch && parseInt( skippedMatch[ 1 ], 10 ) > 0 ) {
+		const isCached = skippedMatch && parseInt( skippedMatch[ 1 ], 10 ) > 0;
+		if ( isCached ) {
 			pkg.cached = true;
+		}
+
+		// Print completion for non-TTY (only on first build type completion for this package)
+		if ( pkg.buildTypes.length === 1 ) {
+			printCompletion( packageName, isCached );
 		}
 
 		updateProgress();
@@ -279,8 +302,10 @@ function processLine( rawLine ) {
 function printSummary() {
 	const totalTime = ( Date.now() - startTime ) / 1000;
 
-	// Clear progress line
-	process.stdout.write( '\r\x1b[K' );
+	// Clear the last progress line if in TTY mode
+	if ( IS_TTY && progressLineWritten ) {
+		process.stdout.write( '\x1b[1A\x1b[2K' ); // Move up 1 line, clear entire line
+	}
 
 	console.log( '' );
 
