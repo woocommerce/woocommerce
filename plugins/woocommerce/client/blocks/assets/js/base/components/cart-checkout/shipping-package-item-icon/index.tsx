@@ -14,7 +14,7 @@ interface ShippingPackageItemIconProps {
 	cartItems: CartItem[];
 }
 /**
- * Formats and returns an image element.
+ * Renders a product image for a package item.
  *
  * @param {Object} props             Incoming props for the component.
  * @param {Object} props.packageItem The package item.
