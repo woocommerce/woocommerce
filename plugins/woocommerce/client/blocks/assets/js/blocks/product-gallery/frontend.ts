@@ -59,7 +59,7 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	// Find the scrollable container for the large image gallery
+	// Find the scrollable container for the viewer gallery
 	const scrollableContainer = galleryContainer.querySelector(
 		'.wc-block-product-gallery-large-image__container'
 	);
@@ -244,7 +244,7 @@ const productGallery = {
 
 			actions.selectImage( newImageIndex );
 		},
-		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
+		onViewerImageKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.key === 'Enter' || event.key === ' ' ) {
 				if ( event.key === ' ' ) {
 					event.preventDefault();
