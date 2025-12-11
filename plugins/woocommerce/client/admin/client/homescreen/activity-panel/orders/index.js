@@ -73,6 +73,16 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 		return renderEmptyCard();
 	}
 
+	const getCustomerString = ( customer ) => {
+		const { name } = customer || {};
+
+		if ( ! name ) {
+			return '';
+		}
+
+		return `<customerLink>${ name }</customerLink>`;
+	};
+
 	const orderCardTitle = ( order ) => {
 		const {
 			id: orderId,
@@ -91,15 +101,14 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 				: getAdminLink( 'user-edit.php?user_id=' + customer.id );
 		}
 
-		const customerName = customer?.name || '';
 		const formattedString = sprintf(
 			/* translators: 1: order number, 2: customer name */
 			__(
-				'<orderLink>Order #%1$s</orderLink> <customerLink>%2$s</customerLink>',
+				'<orderLink>Order #%1$s</orderLink> %2$s',
 				'woocommerce'
 			),
 			orderNumber,
-			customerName
+			getCustomerString( customer ),
 		);
 
 		return (
