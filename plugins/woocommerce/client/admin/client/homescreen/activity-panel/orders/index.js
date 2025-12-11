@@ -103,12 +103,9 @@ function renderOrders( orders, customers, getFormattedOrderTotal ) {
 
 		const formattedString = sprintf(
 			/* translators: 1: order number, 2: customer name */
-			__(
-				'<orderLink>Order #%1$s</orderLink> %2$s',
-				'woocommerce'
-			),
+			__( '<orderLink>Order #%1$s</orderLink> %2$s', 'woocommerce' ),
 			orderNumber,
-			getCustomerString( customer ),
+			getCustomerString( customer )
 		);
 
 		return (
