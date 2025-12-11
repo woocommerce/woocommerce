@@ -287,14 +287,14 @@ class PushTokensDataStore {
 		foreach ( static::SUPPORTED_META as $key ) {
 			if ( ! isset( $meta[ $key ] ) ) {
 				$meta_by_key[ $key ] = null;
-			} else if ( is_array( $meta[ $key ] ) ) {
+			} elseif ( is_array( $meta[ $key ] ) ) {
 				$meta_by_key[ $key ] = $meta[ $key ][0];
 			} else {
 				$meta_by_key[ $key ] = $meta[ $key ];
 			}
 		}
 
-		return $meta;
+		return $meta_by_key;
 	}
 
 	/**
