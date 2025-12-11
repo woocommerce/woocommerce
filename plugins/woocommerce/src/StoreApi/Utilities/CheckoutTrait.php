@@ -84,6 +84,9 @@ trait CheckoutTrait {
 			if ( ! $payment_result instanceof PaymentResult ) {
 				throw new RouteException( 'woocommerce_rest_checkout_invalid_payment_result', __( 'Invalid payment result received from payment method.', 'woocommerce' ), 500 );
 			}
+		} catch ( RouteException $e ) {
+			// Re-throw RouteExceptions as-is to preserve error code and data from payment gateways.
+			throw $e;
 		} catch ( \Exception $e ) {
 			$additional_data = [];
 
