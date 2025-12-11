@@ -43,6 +43,7 @@ jobs:
             OUTPUT RULES
             - At most ONE inline comment per file + line + concern. Merge related points into a single comment.
             - DO NOT post comments one at a time. Collect ALL comments, then submit as a SINGLE batched review (see POSTING COMMENTS below).
+            - If this flow was triggered by a commit, and the commit is a merge commit, ABORT. Merge commits are typically named `Merge branch *** into <current branch>`.
 
             INLINE COMMENT FORMAT (for each comment in the batch)
             ```
