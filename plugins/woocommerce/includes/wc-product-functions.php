@@ -294,12 +294,14 @@ function wc_product_post_type_link( $permalink, $post ) {
 		/**
 		 * Filter the product category used for the product permalink.
 		 *
-		 * By default, the deepest category (most ancestors) is selected. This filter allows
-		 * customization of which category is used in the product permalink.
+		 * By default, the deepest category (most ancestors) is selected. Prior to 9.9.0,
+		 * categories were sorted by parent term ID descending, then term ID ascending.
+		 * This filter allows customization of which category is used in the product permalink.
 		 *
 		 * @since 2.4.0
+		 * @since 9.9.0 Selection algorithm changed to use deepest category instead of sort order.
 		 *
-		 * @param WP_Term   $deepest_term The selected category term object.
+		 * @param WP_Term   $deepest_term The selected category term object (deepest category since 9.9.0).
 		 * @param WP_Term[] $terms        All category terms assigned to the product.
 		 * @param WP_Post   $post         The product post object.
 		 */
