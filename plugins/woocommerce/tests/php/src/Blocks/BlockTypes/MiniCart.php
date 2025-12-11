@@ -308,4 +308,98 @@ class MiniCart extends \WP_UnitTestCase {
 			)
 		);
 	}
+
+	/**
+	 * Test that mini-cart does not render for logged-out users when coming soon mode is enabled for store pages only.
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_does_not_render_for_logged_out_users_when_store_coming_soon() {
+		// Set up coming soon mode for store pages only.
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'yes' );
+
+		// Ensure user is logged out.
+		wp_set_current_user( 0 );
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		// Mini-cart should not render (empty output).
+		$this->assertEmpty( $output, 'Mini-cart should not render for logged-out users when store is in coming soon mode.' );
+
+		// Clean up.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+	}
+
+	/**
+	 * Test that mini-cart renders for logged-in users when coming soon mode is enabled for store pages only.
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_renders_for_logged_in_users_when_store_coming_soon() {
+		// Set up coming soon mode for store pages only.
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'yes' );
+
+		// Create and log in a user.
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		// Mini-cart should render (non-empty output).
+		$this->assertNotEmpty( $output, 'Mini-cart should render for logged-in users even when store is in coming soon mode.' );
+
+		// Clean up.
+		wp_set_current_user( 0 );
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+	}
+
+	/**
+	 * Test that mini-cart renders for logged-out users when coming soon mode is disabled.
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_renders_for_logged_out_users_when_coming_soon_disabled() {
+		// Ensure coming soon mode is disabled.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+
+		// Ensure user is logged out.
+		wp_set_current_user( 0 );
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		// Mini-cart should render (non-empty output).
+		$this->assertNotEmpty( $output, 'Mini-cart should render for logged-out users when coming soon mode is disabled.' );
+	}
+
+	/**
+	 * Test that mini-cart renders for logged-out users when site-wide coming soon mode is enabled (not store pages only).
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_renders_when_site_wide_coming_soon_not_store_only() {
+		// Set up site-wide coming soon mode (not store pages only).
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+
+		// Ensure user is logged out.
+		wp_set_current_user( 0 );
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		// Mini-cart should render (non-empty output) because the logic only checks for store pages coming soon.
+		$this->assertNotEmpty( $output, 'Mini-cart should render when site-wide coming soon is enabled but not store pages only.' );
+
+		// Clean up.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+	}
 }
