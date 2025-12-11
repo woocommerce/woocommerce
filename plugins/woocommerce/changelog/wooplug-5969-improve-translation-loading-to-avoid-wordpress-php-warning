@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent notice as_unschedule_all_actions() was called before the Action Scheduler data store was initialized
