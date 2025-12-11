@@ -13,10 +13,10 @@
 
 ## Test File Naming and Location
 
-| Source | Test | Pattern |
-|--------|------|---------|
-| `includes/` classes | `tests/php/includes/{path}/class-wc-{name}-test.php` | Add `-test` suffix |
-| `src/` classes | `tests/php/src/{path}/{name}Test.php` | Append `Test` (no hyphen) |
+| Source               | Test                                                 | Pattern                  |
+| -------------------- | ---------------------------------------------------- | ------------------------ |
+| `includes/` classes  | `tests/php/includes/{path}/class-wc-{name}-test.php` | Add `-test` suffix       |
+| `src/` classes       | `tests/php/src/{path}/{name}Test.php`                | Append `Test` (no hyphen)|
 
 Test class: Same name as source class + `_Test` or `Test` suffix, extends `WC_Unit_Test_Case`
 
@@ -265,12 +265,12 @@ public function test_logs_warning_for_invalid_input(): void {
 
 ### Key Points
 
-| Aspect | Detail |
-|--------|--------|
-| Filter name | `woocommerce_logging_class` |
-| Return value | Object instance (not class name string) |
-| Interface | Must implement `WC_Logger_Interface` |
-| Cleanup | Always call `remove_all_filters()` after test |
+| Aspect       | Detail                                          |
+| ------------ | ----------------------------------------------- |
+| Filter name  | `woocommerce_logging_class`                     |
+| Return value | Object instance (not class name string)         |
+| Interface    | Must implement `WC_Logger_Interface`            |
+| Cleanup      | Always call `remove_all_filters()` after test   |
 
 ### Reference
 

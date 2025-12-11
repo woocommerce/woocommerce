@@ -196,4 +196,4 @@ jobs:
             OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
           fi
 
-          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE
+          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE -ga ${{ github.actor }}
