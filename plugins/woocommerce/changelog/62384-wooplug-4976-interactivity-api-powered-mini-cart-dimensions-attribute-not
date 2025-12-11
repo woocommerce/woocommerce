@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a bug where the `Dimension` block attribute of Mini-Cart Contents was not respected.
