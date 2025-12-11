@@ -75,7 +75,7 @@ class OrderItemSchema extends ItemSchema {
 			// Only include variation data for product variations, not simple products.
 			// This is consistent with the cart endpoint behavior.
 			if ( $product instanceof \WC_Product_Variation ) {
-				$product_properties['variation'] = $this->format_variation_data( $product->get_variation_attributes(), $product );
+				$product_properties['variation'] = $this->format_variation_data( $product->get_attributes(), $product );
 			}
 		}
 
