@@ -358,6 +358,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return false;
 		}
 
+		// Bail if the cart contains a product with invalid amount (negative or zero).
+		if ( $this->cart_has_invalid_amount_item() ) {
+			return false;
+		}
+
 		return parent::is_available();
 	}
 
@@ -1056,6 +1061,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		WC_Gateway_Paypal_Notices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
+	}
+
+	/**
+	 * Check if the cart has any item with an invalid amount (negative or zero).
+	 *
+	 * @return bool True if the cart has at least one item with an invalid amount, false otherwise.
+	 */
+	protected function cart_has_invalid_amount_item(): bool {
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			if ( $cart_item['data']->get_price() * $cart_item['quantity'] <= 0 ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
 
