@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hides PayPal Standard when the cart contains an item with an invalid amount.
