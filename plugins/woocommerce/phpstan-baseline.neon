@@ -99277,18 +99277,6 @@ parameters:
 			path: src/Internal/Utilities/PluginInstaller.php
 
 		-
-			message: '#^Cannot call method warning\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: src/Internal/Utilities/PostMetaUtil.php
-
-		-
-			message: '#^Parameter \#1 \$data of function maybe_serialize expects array\|object\|string, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Internal/Utilities/PostMetaUtil.php
-
-		-
 			message: '#^Binary operation "\." between ''wc_child_has…''\|''wc_child_has_weight_''\|''wc_product_children_''\|''wc_related_''\|''wc_var_prices_'' and Automattic\\WooCommerce\\Internal\\Utilities\\WC_Product\|int results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
