@@ -605,7 +605,7 @@ class WC_Gateway_Paypal_Request {
 		$purchase_unit_amount = $this->get_paypal_order_purchase_unit_amount( $order );
 		if ( empty( $purchase_unit_amount ) ) {
 			// If we cannot build purchase unit amount (e.g. negative or zero order total),
-			//we should not proceed with the create-order request.
+			// we should not proceed with the create-order request.
 			throw new Exception( 'Cannot build PayPal order purchase unit amount. Order ID: ' . esc_html( $order->get_id() ) );
 		}
 
