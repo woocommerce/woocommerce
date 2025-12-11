@@ -10,6 +10,7 @@ use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use WC_Logger;
 use Exception;
 
 /**
@@ -118,7 +119,12 @@ class PushNotifications {
 			);
 		} catch ( Exception $e ) {
 			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
-			$logger->error( 'Error determining if PushNotifications feature should be enabled: ' . $e->getMessage() );
+
+			if ( $logger instanceof WC_Logger ) {
+				$logger->error(
+					'Error determining if PushNotifications feature should be enabled: ' . $e->getMessage()
+				);
+			}
 
 			$this->enabled = false;
 		}

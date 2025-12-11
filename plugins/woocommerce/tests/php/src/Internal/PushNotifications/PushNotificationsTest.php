@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use WC_Logger;
 use WC_Unit_Test_Case;
 
 /**
@@ -107,20 +108,15 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 * enablement check.
 	 */
 	public function test_it_logs_error_when_jetpack_connection_check_throws_exception() {
-		// phpcs:disable Squiz.Commenting
-		$fake_logger = new class() {
-			public $errors = array();
+		$logger_mock = $this->createMock( WC_Logger::class );
+		$logger_mock->expects( $this->once() )
+			->method( 'error' )
+			->with(
+				$this->stringContains( 'Error determining if PushNotifications feature should be enabled' ),
+				$this->anything()
+			);
 
-			public function error( $message, $data = array() ) {
-				$this->errors[] = array(
-					'message' => $message,
-					'data'    => $data,
-				);
-			}
-		};
-		// phpcs:enable Squiz.Commenting
-
-		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $fake_logger ) );
+		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
 		$this->set_up_features_controller_mock( true );
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
@@ -133,13 +129,6 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$result             = $push_notifications->should_be_enabled();
 
 		$this->assertFalse( $result, 'Should be disabled when exception is thrown' );
-		$this->assertCount( 1, $fake_logger->errors, 'Should have logged exactly one error' );
-		$this->assertStringContainsString( 'Connection check failed', $fake_logger->errors[0]['message'] );
-
-		$this->assertStringContainsString(
-			'Error determining if PushNotifications feature should be enabled',
-			$fake_logger->errors[0]['message']
-		);
 	}
 
 	/**
