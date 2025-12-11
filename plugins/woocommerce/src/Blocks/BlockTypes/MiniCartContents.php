@@ -153,7 +153,10 @@ class MiniCartContents extends AbstractBlock {
 
 		$parsed_style = '';
 		if ( array_key_exists( 'width', $attributes ) ) {
-			$parsed_style .= ':root{--drawer-width: ' . esc_html( $attributes['width'] ) . '}';
+			$parsed_style .= sprintf(
+				'.wc-block-components-drawer { --drawer-width: %s; --neg-drawer-width: calc(var(--drawer-width) * -1); }',
+				esc_html( $attributes['width'] )
+			);
 		}
 
 		foreach ( $styles as $style ) {
