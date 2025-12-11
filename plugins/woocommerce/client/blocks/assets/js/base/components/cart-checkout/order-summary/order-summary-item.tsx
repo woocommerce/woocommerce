@@ -12,6 +12,7 @@ import {
 } from '@woocommerce/price-format';
 import {
 	applyCheckoutFilter,
+	productPriceScreenReaderValidation,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
@@ -151,6 +152,7 @@ const OrderSummaryItem = ( {
 		defaultValue: productPriceScreenReaderDefault,
 		extensions,
 		arg: { ...arg, context: 'summaryScreenReader' },
+		validation: productPriceScreenReaderValidation,
 	} );
 
 	const cartItemClassNameFilter = applyCheckoutFilter( {
