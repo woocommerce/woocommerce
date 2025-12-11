@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent excessive debug logging from the Payments Settings page.
