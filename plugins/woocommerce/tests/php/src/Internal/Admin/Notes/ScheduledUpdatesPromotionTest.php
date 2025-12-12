@@ -45,7 +45,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'disable_feature' ) );
 
 		// Delete option to simulate existing installation.
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 
 		$this->assertFalse( ScheduledUpdatesPromotion::is_applicable() );
 
@@ -60,7 +60,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_feature' ) );
 
 		// Delete option to simulate existing installation (doesn't exist).
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 
 		$this->assertTrue( ScheduledUpdatesPromotion::is_applicable() );
 
@@ -74,8 +74,8 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		// Enable feature flag.
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_feature' ) );
 
-		// Set option to 'yes' to simulate new installation.
-		update_option( 'woocommerce_analytics_immediate_import', 'yes' );
+		// Set option to 'yes' to simulate new installation (scheduled enabled).
+		update_option( 'woocommerce_analytics_scheduled_import', 'yes' );
 
 		$this->assertFalse( ScheduledUpdatesPromotion::is_applicable() );
 
@@ -90,7 +90,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_feature' ) );
 
 		// Delete option to simulate existing installation (doesn't exist).
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 
 		$note = ScheduledUpdatesPromotion::get_note();
 
@@ -113,7 +113,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		// Disable the feature (it's enabled by default in feature-config.php).
 		add_filter( 'woocommerce_admin_features', array( $this, 'disable_feature' ) );
 
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 
 		$note = ScheduledUpdatesPromotion::get_note();
 
@@ -130,7 +130,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_feature' ) );
 
 		// Delete option to simulate existing installation.
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 
 		ScheduledUpdatesPromotion::possibly_add_note();
 
@@ -151,7 +151,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_feature' ) );
 
 		// Delete option to simulate existing installation.
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 
 		// Add note first time.
 		ScheduledUpdatesPromotion::possibly_add_note();
@@ -173,7 +173,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 	 */
 	public function test_enable_action_updates_option() {
 		// Delete option to simulate existing installation.
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 
 		// Get the note.
 		$note = ScheduledUpdatesPromotion::get_note();
@@ -183,8 +183,8 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		$promotion = new ScheduledUpdatesPromotion();
 		$promotion->enable_scheduled_updates( $note );
 
-		// Verify option was updated.
-		$this->assertEquals( 'no', get_option( 'woocommerce_analytics_immediate_import' ) );
+		// Verify option was updated to 'yes' (scheduled enabled).
+		$this->assertEquals( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
 	}
 
 	/**
@@ -192,7 +192,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 	 */
 	public function test_enable_action_ignores_wrong_note() {
 		// Delete option to simulate existing installation.
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 
 		// Create a different note.
 		$other_note = new Note();
@@ -203,7 +203,7 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		$promotion->enable_scheduled_updates( $other_note );
 
 		// Verify option was NOT updated (still null/doesn't exist).
-		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ), 'Option should not exist' );
+		$this->assertFalse( get_option( 'woocommerce_analytics_scheduled_import' ), 'Option should not exist' );
 	}
 
 	/**
@@ -224,6 +224,6 @@ class ScheduledUpdatesPromotionTest extends WC_Unit_Test_Case {
 		}
 
 		// Reset options.
-		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
 	}
 }

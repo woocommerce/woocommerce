@@ -14,7 +14,10 @@ import {
 /**
  * Internal dependencies
  */
-import type { ProductGalleryThumbnailsSettingsProps } from '../types';
+import {
+	type ProductGalleryThumbnailsSettingsProps,
+	ProductGalleryActiveThumbnailStyle,
+} from '../types';
 
 const minValue = 10;
 const maxValue = 50;
@@ -24,7 +27,7 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 	attributes,
 	setAttributes,
 }: ProductGalleryThumbnailsSettingsProps ) => {
-	const { thumbnailSize, aspectRatio } = attributes;
+	const { thumbnailSize, aspectRatio, activeThumbnailStyle } = attributes;
 
 	const aspectRatioOptions = [
 		{
@@ -63,6 +66,17 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 		{
 			value: '9/16',
 			label: __( 'Tall - 9:16', 'woocommerce' ),
+		},
+	];
+
+	const activeThumbnailStyleOptions = [
+		{
+			value: ProductGalleryActiveThumbnailStyle.OVERLAY,
+			label: __( 'Overlay', 'woocommerce' ),
+		},
+		{
+			value: ProductGalleryActiveThumbnailStyle.OUTLINE,
+			label: __( 'Outline', 'woocommerce' ),
 		},
 	];
 
@@ -107,6 +121,27 @@ export const ProductGalleryThumbnailsBlockSettings = ( {
 				} }
 				help={ __(
 					'Applies the selected aspect ratio to product thumbnails.',
+					'woocommerce'
+				) }
+			/>
+			<SelectControl
+				__next40pxDefaultSize
+				multiple={ false }
+				value={ activeThumbnailStyle }
+				options={ activeThumbnailStyleOptions }
+				label={ __( 'Active Thumbnail Style', 'woocommerce' ) }
+				onChange={ ( value ) => {
+					if (
+						value === ProductGalleryActiveThumbnailStyle.OVERLAY ||
+						value === ProductGalleryActiveThumbnailStyle.OUTLINE
+					) {
+						setAttributes( {
+							activeThumbnailStyle: value,
+						} );
+					}
+				} }
+				help={ __(
+					'Choose how the active thumbnail is highlighted.',
 					'woocommerce'
 				) }
 			/>

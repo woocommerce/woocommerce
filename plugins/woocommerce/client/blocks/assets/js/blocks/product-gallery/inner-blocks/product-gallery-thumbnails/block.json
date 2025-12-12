@@ -17,6 +17,10 @@
 		"aspectRatio": {
 			"type": "string",
 			"default": "1"
+		},
+		"activeThumbnailStyle": {
+			"type": "string",
+			"default": "overlay"
 		}
 	},
 	"supports": {
