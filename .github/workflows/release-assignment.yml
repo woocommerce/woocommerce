@@ -220,7 +220,7 @@ jobs:
           slack-text: |
             :woo: *The WooCommerce ${{ needs.check-upcoming-release-events.outputs.version }} release is coming up!* :woo:
 
-            The team responsible for this release is * Team ${{ needs.check-upcoming-release-events.outputs.team-name }}*.
+            The team responsible for this release is *Team ${{ needs.check-upcoming-release-events.outputs.team-name }}*.
             <@${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-slack-member-id }}>, make sure you choose a release DRI and update the release P2 accordingly.
 
             :p2: <${{ needs.trigger-upcoming-code-freeze-events.outputs.post }}|Release P2 post>
