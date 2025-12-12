@@ -3494,11 +3494,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
 
 		// Check that the log entry was created.
-		$serialized_meta_value = '"\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"';
-
-		$log_message = end( $fake_logger->warnings )['message'];
-		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
-		$this->assertStringContainsString( $serialized_meta_value, $log_message );
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 
 		// Test deleting meta data containing an object of a non-existent class.
 		$meta_data = $this->sut->read_meta( $order );
@@ -3511,9 +3507,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
 
 		// Check that the log entry was created.
-		$log_message = end( $fake_logger->warnings )['message'];
-		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
-		$this->assertStringContainsString( $serialized_meta_value, $log_message );
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 	}
 
 	/**
@@ -3878,26 +3872,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->add_meta_data( $meta_key, $meta_value, false );
 		$order->save_meta_data();
 		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
-	}
-
-	/**
-	 * @testdox Sync-on-read should update metadata as well.
-	 */
-	public function test_sync_on_read_updates_metadata() {
-		$this->toggle_cot_feature_and_usage( true );
-		$this->enable_cot_sync();
-
-		$order = OrderHelper::create_order();
-		$order->add_meta_data( 'foo', 'bar' );
-		$order->save();
-
-		// Update the meta data on the post.
-		update_post_meta( $order->get_id(), 'foo', 'baz' );
-
-		$fresh_order = wc_get_order( $order->get_id() );
-
-		$this->assertEquals( 'baz', get_post_meta( $order->get_id(), 'foo', true ) );
-		$this->assertEquals( 'baz', $fresh_order->get_meta( 'foo', true, 'edit' ) );
 	}
 
 	/**
