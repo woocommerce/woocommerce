@@ -414,12 +414,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// Allow a list of locations to be specified (includes).
 		if ( ! empty( $query_args['location_includes'] ) ) {
-			$where_clauses[] = $this->build_location_filter_clause( $query_args['location_includes'], true );
+			$location_clause = $this->build_location_filter_clause( $query_args['location_includes'], true );
+			if ( '' !== $location_clause ) {
+				$where_clauses[] = $location_clause;
+			}
 		}
 
 		// Allow a list of locations to be excluded.
 		if ( ! empty( $query_args['location_excludes'] ) ) {
-			$where_clauses[] = $this->build_location_filter_clause( $query_args['location_excludes'], false );
+			$location_clause = $this->build_location_filter_clause( $query_args['location_excludes'], false );
+			if ( '' !== $location_clause ) {
+				$where_clauses[] = $location_clause;
+			}
 		}
 
 		// Filter by user type.
