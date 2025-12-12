@@ -77440,12 +77440,6 @@ parameters:
 			path: src/Blocks/Patterns/PTKPatternsStore.php
 
 		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Blocks/Patterns/PTKPatternsStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Patterns\\PTKPatternsStore\:\:get_patterns\(\) should return array but returns mixed\.$#'
 			identifier: return.type
 			count: 1
