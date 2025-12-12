@@ -1615,22 +1615,21 @@ class WC_Cart extends WC_Legacy_Cart {
 			return array();
 		}
 
-		// Add package ID and package name to each package after the filter is applied.
+		// Remove any invalid packages before adding package IDs.
 		$shipping_packages = array_filter(
-			array_map(
-				function ( $key, $package, $index ) {
-					if ( empty( $package ) || ! is_array( $package ) ) {
-						return null;
-					}
-					$package['package_id']   = $package['package_id'] ?? $key;
-					$package['package_name'] = $this->get_shipping_package_name( $package, $index );
-					return $package;
-				},
-				array_keys( $shipping_packages ),
-				$shipping_packages,
-				range( 1, count( $shipping_packages ) )
-			)
+			$shipping_packages,
+			function ( $package ) {
+				return ! empty( $package ) && is_array( $package );
+			}
 		);
+
+		// Add package ID and package name to each package after the filter is applied.
+		$index = 1;
+		foreach ( $shipping_packages as $key => $package ) {
+			$shipping_packages[ $key ]['package_id']   = $package['package_id'] ?? $key;
+			$shipping_packages[ $key ]['package_name'] = $this->get_shipping_package_name( $shipping_packages[ $key ], $index );
+			++$index;
+		}
 
 		return $shipping_packages;
 	}
