@@ -5835,6 +5835,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		try {
 			$this->sut->mark_onboarding_step_completed( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
 		} catch ( ApiException $e ) {
 			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_requirements_not_met', $e->getErrorCode() );
 		}
@@ -5898,6 +5900,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		try {
 			$this->sut->mark_onboarding_step_completed( $step_id, $location );
+
+			$this->fail( 'Expected ApiException not thrown' );
 		} catch ( ApiException $e ) {
 			$this->assertEquals( 'woocommerce_woopayments_onboarding_step_blocked', $e->getErrorCode() );
 		}
@@ -7516,8 +7520,10 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Act.
 		try {
 			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected exception was not thrown' );
 		} catch ( \Exception $e ) {
-			unset( $e );
+			// Verify the exception is the expected one from the mocked WP_Error response.
+			$this->assertStringContainsString( 'test_error', $e->getMessage() );
 		}
 
 		// Assert.
