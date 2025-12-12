@@ -31,6 +31,41 @@ import {
 	wooPaymentsOnboardingSessionEntryLYS,
 } from '~/settings-payments/constants';
 
+/**
+ * Validates and sanitizes a plugin slug.
+ * Plugin slugs should only contain lowercase letters, numbers, dashes, and underscores.
+ * This prevents passing unexpected or malicious input to plugin installation.
+ *
+ * @param slug - The plugin slug to validate.
+ * @return The validated slug if valid, or undefined if invalid.
+ */
+const validatePluginSlug = ( slug: unknown ): string | undefined => {
+	// Must be a string.
+	if ( typeof slug !== 'string' ) {
+		return undefined;
+	}
+
+	const trimmed = slug.trim();
+
+	// Must be non-empty after trimming.
+	if ( trimmed.length === 0 ) {
+		return undefined;
+	}
+
+	// Plugin slugs should only contain lowercase letters, numbers, dashes, and underscores.
+	// This pattern rejects control characters, slashes, spaces, and other special characters.
+	const validSlugPattern = /^[a-z0-9_-]+$/;
+	if ( ! validSlugPattern.test( trimmed ) ) {
+		// eslint-disable-next-line no-console
+		console.warn(
+			`[WooCommerce Payments] Invalid plugin slug format: "${ trimmed }". Using default slug.`
+		);
+		return undefined;
+	}
+
+	return trimmed;
+};
+
 const InstallWooPaymentsStep = ( {
 	installWooPayments,
 	isPluginInstalling,
@@ -124,10 +159,13 @@ const InstallWooPaymentsStep = ( {
 						} );
 					}
 
-					// Provide the plugin slug reported by the provider, if available, since it is the most accurate.
-					// If we use the official slug and WooPayments is installed under a different slug (like when using test versions),
-					// the WPORG version will be installed and activated instead.
-					installWooPayments( wooPaymentsProvider?.plugin?.slug );
+					// Validate and sanitize the plugin slug before passing to installWooPayments.
+					// This prevents unexpected or malicious input from reaching the plugin installer.
+					// If validation fails, undefined is passed, which triggers the default slug fallback.
+					const validatedSlug = validatePluginSlug(
+						wooPaymentsProvider?.plugin?.slug
+					);
+					installWooPayments( validatedSlug );
 				} }
 				isBusy={ isPluginInstalling }
 				disabled={ isPluginInstalling }
