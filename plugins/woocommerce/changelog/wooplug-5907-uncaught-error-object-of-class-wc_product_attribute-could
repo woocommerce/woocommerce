@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix: Fixed fatal error in Store API when product has custom attribute matching a global attribute slug.
+Fix: Store API: Orders endpoint now returns an empty array for the `variation` field on simple products, matching cart endpoint behavior.
