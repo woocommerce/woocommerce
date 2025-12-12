@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add PHPStan analyze support and Github action to run on each PR.

@@ -13,7 +13,7 @@ import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
 import TaxesReportTable from './table';
-import ReportFilters from '../../components/report-filters';
+import { ReportHeader } from '../../components/report-header';
 
 class TaxesReport extends Component {
 	getChartMeta() {
@@ -42,7 +42,7 @@ class TaxesReport extends Component {
 		}
 		return (
 			<Fragment>
-				<ReportFilters
+				<ReportHeader
 					query={ query }
 					path={ path }
 					filters={ filters }

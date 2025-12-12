@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent Select2 styles from leaking into other plugins
