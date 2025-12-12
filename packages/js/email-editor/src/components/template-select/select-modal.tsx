@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { useState, useEffect, memo } from '@wordpress/element';
+import { useState, useEffect, useMemo, memo } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
-import { dispatch } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
+import { dispatch, useSelect } from '@wordpress/data';
 import { Modal, Button, Flex, FlexItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -21,32 +22,69 @@ import { TemplateList } from './template-list';
 import { TemplateCategoriesListSidebar } from './template-categories-list-sidebar';
 import { recordEvent, recordEventOnce } from '../../events';
 
-const TemplateCategories: Array< { name: TemplateCategory; label: string } > = [
-	{
-		name: 'recent',
-		label: __( 'Recent', 'woocommerce' ),
-	},
-	{
-		name: 'basic',
-		label: __( 'Basic', 'woocommerce' ),
-	},
-];
+type PatternCategory = {
+	name: string;
+	label: string;
+};
+
+function getCategoriesFromTemplates(
+	templates: TemplatePreview[],
+	patternCategories: PatternCategory[]
+): Array< { name: TemplateCategory; label: string } > {
+	const categoryLabels = new Map< string, string >(
+		patternCategories.map( ( cat ) => [ cat.name, cat.label ] )
+	);
+	// Add localized label for 'recent' category (used by email posts)
+	categoryLabels.set( 'recent', __( 'Recent', 'woocommerce' ) );
+
+	const uniqueCategories = new Set< string >();
+	for ( const template of templates ) {
+		if ( template.category ) {
+			uniqueCategories.add( template.category );
+		}
+	}
+
+	return [ ...uniqueCategories ].map( ( category ) => ( {
+		name: category as TemplateCategory,
+		label: categoryLabels.get( category ) ?? category,
+	} ) );
+}
 
 function SelectTemplateBody( {
-	hasEmailPosts,
 	templates,
 	handleTemplateSelection,
 	templateSelectMode,
 } ) {
-	const [ selectedCategory, setSelectedCategory ] = useState(
-		TemplateCategories[ 1 ].name // Show the “Basic” category by default
+	const patternCategories = useSelect(
+		( select ) =>
+			select(
+				coreStore
+			).getBlockPatternCategories() as PatternCategory[],
+		[]
 	);
 
 	const hideRecentCategory = templateSelectMode === 'swap';
 
-	const displayCategories = TemplateCategories.filter(
-		( { name } ) => name !== 'recent' || ! hideRecentCategory
-	);
+	const displayCategories = useMemo( () => {
+		const allCategories = getCategoriesFromTemplates(
+			templates,
+			patternCategories ?? []
+		);
+
+		if ( hideRecentCategory ) {
+			return allCategories.filter( ( cat ) => cat.name !== 'recent' );
+		}
+
+		// Put 'recent' category first
+		return allCategories.sort( ( a, b ) => {
+			if ( a.name === 'recent' ) return -1;
+			if ( b.name === 'recent' ) return 1;
+			return 0;
+		} );
+	}, [ templates, patternCategories, hideRecentCategory ] );
+
+	const [ selectedCategory, setSelectedCategory ] =
+		useState< TemplateCategory | null >( null );
 
 	const handleCategorySelection = ( category: TemplateCategory ) => {
 		recordEvent( 'template_select_modal_category_change', { category } );
@@ -54,12 +92,17 @@ function SelectTemplateBody( {
 	};
 
 	useEffect( () => {
+		if ( selectedCategory !== null || displayCategories.length === 0 ) {
+			return;
+		}
+
 		setTimeout( () => {
-			if ( hasEmailPosts && ! hideRecentCategory ) {
-				setSelectedCategory( TemplateCategories[ 0 ].name );
-			}
+			const defaultCategory =
+				displayCategories.find( ( cat ) => cat.name !== 'recent' )
+					?.name ?? displayCategories[ 0 ]?.name;
+			setSelectedCategory( defaultCategory );
 		}, 1000 ); // using setTimeout to ensure the template styles are available before block preview
-	}, [ hasEmailPosts, hideRecentCategory ] );
+	}, [ displayCategories, selectedCategory ] );
 
 	return (
 		<div className="block-editor-block-patterns-explorer">
@@ -89,8 +132,7 @@ export function SelectTemplateModal( {
 	const templateSelectMode = previewContent ? 'swap' : 'new';
 	recordEventOnce( 'template_select_modal_opened', { templateSelectMode } );
 
-	const [ templates, emailPosts, hasEmailPosts ] =
-		usePreviewTemplates( previewContent );
+	const [ templates, emailPosts ] = usePreviewTemplates( previewContent );
 
 	const hasTemplates = templates?.length > 0;
 
@@ -147,7 +189,6 @@ export function SelectTemplateModal( {
 			isFullScreen
 		>
 			<MemorizedSelectTemplateBody
-				hasEmailPosts={ hasEmailPosts }
 				templates={ [ ...templates, ...emailPosts ] }
 				handleTemplateSelection={ handleTemplateSelection }
 				templateSelectMode={ templateSelectMode }
