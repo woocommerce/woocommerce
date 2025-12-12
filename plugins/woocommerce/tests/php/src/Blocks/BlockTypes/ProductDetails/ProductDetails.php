@@ -129,14 +129,14 @@ class ProductDetails extends \WP_UnitTestCase {
 		);
 
 		$template_file = Utils::wp_version_compare( '6.9', '>=' ) ? 'template_wp69.html' : 'template.html';
-		$template = file_get_contents(__DIR__ . '/' . $template_file);
+		$template      = file_get_contents( __DIR__ . '/' . $template_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$serialized_blocks = do_blocks( $template );
 
-		$expected_file = Utils::wp_version_compare( '6.9', '>=' )
+		$expected_file              = Utils::wp_version_compare( '6.9', '>=' )
 			? __DIR__ . '/render_with_hook_expected_result_wp69.html'
 			: __DIR__ . '/render_with_hook_expected_result.html';
-		$expected_serialized_blocks = file_get_contents($expected_file);
+		$expected_serialized_blocks = file_get_contents( $expected_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$serialized_blocks_without_whitespace          = wp_strip_all_tags( $serialized_blocks, true );
 		$expected_serialized_blocks_without_whitespace = wp_strip_all_tags( $expected_serialized_blocks, true );
@@ -150,10 +150,10 @@ class ProductDetails extends \WP_UnitTestCase {
 	 * Accordion Item block and appended to the Product Details' Accordion Group block.
 	 */
 	public function test_hooked_blocks() {
-		$accordion_group_name = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion' : 'woocommerce/accordion-group';
-		$accordion_item_name = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion-item' : 'woocommerce/accordion-item';
+		$accordion_group_name  = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion' : 'woocommerce/accordion-group';
+		$accordion_item_name   = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion-item' : 'woocommerce/accordion-item';
 		$accordion_header_name = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion-heading' : 'woocommerce/accordion-header';
-		$accordion_panel_name = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion-panel' : 'woocommerce/accordion-panel';
+		$accordion_panel_name  = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion-panel' : 'woocommerce/accordion-panel';
 
 		$test_block = array(
 			'slug'    => 'custom-info',
