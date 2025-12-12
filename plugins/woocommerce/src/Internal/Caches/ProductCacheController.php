@@ -102,7 +102,7 @@ class ProductCacheController {
 	 * Set the `product_objects` cache group as non-persistent.
 	 *
 	 * With product instance caching enabled, products are cached in-memory during a request
-	 * rather than being persisted to external cache backends.  If WC_Data:__sleep()/::__wakeup() methods are eventually
+	 * rather than being persisted to external cache backends.  If WC_Data::__sleep()/::__wakeup() methods are eventually
 	 * removed or changed so that the entire object is stored instead of just the ID, this should be revisited and evaluated
 	 * performance impact.
 	 *
