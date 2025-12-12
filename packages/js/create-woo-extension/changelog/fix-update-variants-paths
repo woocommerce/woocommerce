@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-replaces the deprecated "templatesPath" with specific "blockTemplatesPath" and "pluginTemplatesPath" properties
+Replace deprecated "templatesPath" with "blockTemplatesPath" and "pluginTemplatesPath" properties.
