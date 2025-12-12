@@ -1,0 +1,174 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/wp-admin/index.php",
+	"login": true,
+	"plugins": [
+		"blaze-ads",
+		"gravatar-enhanced",
+		"gutenberg",
+		"woocommerce",
+		"woocommerce-payments",
+		"woocommerce-services"
+	],
+	"preferredVersions": {
+		"php": "8.3",
+		"wp": "latest"
+	},
+	"steps": [
+		{
+			"step": "setSiteOptions",
+			"options": {
+				"woocommerce_onboarding_profile": {
+					"skipped": true
+				},
+				"woocommerce_allow_tracking": "no",
+				"woocommerce_coming_soon": "no"
+			}
+		},
+		{
+			"step": "installPlugin",
+			"options": {
+				"activate": false,
+				"targetFolderName": "wc-smooth-generator"
+			},
+			"pluginData": {
+				"resource": "git:directory",
+				"url": "https://github.com/woocommerce/wc-smooth-generator.git",
+				"ref": "HEAD",
+				"path": "/"
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "akismet"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "classic-editor"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "crowdsignal-forms"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "polldaddy"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "facebook-for-woocommerce"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "google-listings-and-ads"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "jetpack"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "layout-grid"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "mailpoet"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "page-optimize"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "pinterest-for-woocommerce"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "taxjar-simplified-taxes-for-woocommerce"
+			},
+			"options": {
+				"activate": false
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "\u003C?php require_once '/wordpress/wp-load.php'; $wp_rewrite-\u003Eset_permalink_structure( '/%postname%/' ); include_once( ABSPATH . 'wp-admin/includes/plugin.php' ); deactivate_plugins( 'hello.php', 'hello-dolly' ); include_once( ABSPATH . 'wp-admin/includes/file.php' ); delete_plugins( [ 'hello.php', 'hello-dolly' ] );"
+		},
+		{
+			"step": "updateUserMeta",
+			"meta": {
+				"admin_color": "modern",
+				"show_welcome_panel": 0
+			},
+			"userId": 1
+		}
+	]
+}
