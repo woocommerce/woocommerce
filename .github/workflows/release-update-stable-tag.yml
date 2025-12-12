@@ -288,7 +288,7 @@ jobs:
               --label Release \
               --milestone "$milestone"
 
-            echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME with milestone $MILESTONE"
+            echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME with milestone $milestone"
           fi
 
   notify-release:

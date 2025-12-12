@@ -332,7 +332,7 @@ export const createPullRequest = async ( options: {
 				owner,
 				repo: name,
 				pull_number: pullRequest.data.number,
-				filteredReviewers,
+				reviewers: filteredReviewers,
 			}
 		);
 	}
