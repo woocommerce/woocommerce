@@ -44,9 +44,12 @@ export const SetUpPaymentsProvider: React.FC< {
 		const store = select( paymentSettingsStore );
 		const isFetching = store.isFetching();
 		const providers = store.getPaymentProviders();
-		const wooPaymentsProvider = providers.find( ( provider ) =>
-			isWooPayments( provider.id )
-		);
+
+		// Defensively check that providers is an array before calling .find().
+		// This prevents runtime errors if getPaymentProviders() returns null/undefined.
+		const wooPaymentsProvider = Array.isArray( providers )
+			? providers.find( ( provider ) => isWooPayments( provider.id ) )
+			: undefined;
 
 		// Use the real plugin slug from the provider once loaded,
 		// falling back to the official slug while loading or if not found.
@@ -55,22 +58,31 @@ export const SetUpPaymentsProvider: React.FC< {
 		return ! isFetching && wooPaymentsProvider?.plugin?.slug
 			? wooPaymentsProvider.plugin.slug
 			: wooPaymentsExtensionSlug;
-	}, [] );
+		// Note: Dependencies are intentionally managed by useSelect's internal subscription.
+		// The selector re-runs automatically when store state changes (isFetching, providers).
+	} );
 
 	// Check if WooPayments is active by looking for the plugin in the active plugins list.
 	const isWooPaymentsActive = useSelect(
-		( select ) =>
-			select( pluginsStore )
-				.getActivePlugins()
-				.includes( wooPaymentsPluginSlug ),
+		( select ) => {
+			const activePlugins = select( pluginsStore ).getActivePlugins();
+			// Defensively check that activePlugins is an array before calling .includes().
+			return Array.isArray( activePlugins )
+				? activePlugins.includes( wooPaymentsPluginSlug )
+				: false;
+		},
 		[ wooPaymentsPluginSlug ]
 	);
 
 	const isWooPaymentsInstalled = useSelect(
-		( select ) =>
-			select( pluginsStore )
-				.getInstalledPlugins()
-				.includes( wooPaymentsPluginSlug ),
+		( select ) => {
+			const installedPlugins =
+				select( pluginsStore ).getInstalledPlugins();
+			// Defensively check that installedPlugins is an array before calling .includes().
+			return Array.isArray( installedPlugins )
+				? installedPlugins.includes( wooPaymentsPluginSlug )
+				: false;
+		},
 		[ wooPaymentsPluginSlug ]
 	);
 

@@ -63,7 +63,7 @@ class PaymentsRemindMeLater {
 		if ( ! self::should_display_note() ) {
 			return;
 		}
-		/* translators: %s: Payment provider name. */
+		/* translators: 1: Payment provider name. */
 		$content = sprintf( __( 'Save up to $800 in fees by managing transactions with %1$s. With %1$s, you can securely accept major cards, Apple Pay, and payments in over 100 currencies.', 'woocommerce' ), 'WooPayments' );
 
 		$note = new Note();

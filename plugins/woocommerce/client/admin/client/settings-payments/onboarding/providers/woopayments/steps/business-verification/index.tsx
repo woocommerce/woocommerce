@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React from 'react';
+import { __ } from '@wordpress/i18n';
 import { Notice } from '@wordpress/components';
 
 /**
@@ -76,8 +77,18 @@ export const BusinessVerificationStep: React.FC = () => {
 						status="error"
 						isDismissible={ false }
 						className="settings-payments-onboarding-modal__step-business-verification-error"
+						// Adding role="alert" for explicit screen reader announcement.
+						// While @wordpress/components Notice uses speak() internally,
+						// role="alert" provides better backwards compatibility with older AT.
+						{ ...{ role: 'alert' } }
 					>
-						<p>{ currentStep.errors[ 0 ].message }</p>
+						<p>
+							{ currentStep.errors[ 0 ]?.message ||
+								__(
+									'Something went wrong. Please try again.',
+									'woocommerce'
+								) }
+						</p>
 					</Notice>
 				) }
 				<BusinessVerificationContextProvider
