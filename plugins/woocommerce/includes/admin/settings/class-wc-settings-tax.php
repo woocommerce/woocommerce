@@ -413,7 +413,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 			return;
 		}
 
-		$has_base_rate = $this->has_tax_rate_for_country( $base_location['country'] );
+		$has_base_rate = $this->has_standard_tax_rate_for_country( $base_location['country'] );
 
 		// If no base rates exist, show warning.
 		if ( ! $has_base_rate ) {
@@ -458,7 +458,7 @@ class WC_Settings_Tax extends WC_Settings_Page {
 	 * @param string $country Country code.
 	 * @return bool True if at least one standard tax rate exists for the country.
 	 */
-	private function has_tax_rate_for_country( $country ) {
+	private function has_standard_tax_rate_for_country( $country ) {
 		global $wpdb;
 
 		$count = $wpdb->get_var(
