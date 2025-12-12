@@ -223,7 +223,7 @@ const CustomButton = ( props ) => {
 	// In editor/preview mode, show a placeholder or preview version
 	if ( isEditor || isPreview ) {
 		return (
-			<button disabled>
+			<button type="button" disabled>
 				Pay with Custom Method (Preview)
 			</button>
 		);
@@ -231,6 +231,7 @@ const CustomButton = ( props ) => {
 
 	return (
 		<button
+		  type="button"
 			onClick={ handleClick }
 			disabled={ disabled || isShowingInternalPaymentSheet }
 		>
