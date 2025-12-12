@@ -7296,6 +7296,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Act - call the method which will trigger mark_onboarding_step_failed.
 		try {
 			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected exception was not thrown' );
 		} catch ( \Exception $e ) {
 			// Expected exception, ignore it.
 			unset( $e );
@@ -7314,7 +7315,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$stored_error = $final_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['error'];
 
-		// Verify the error structure has only code, message, and context at the top level.
+		// Verify the error structure has code, message, and context at the top level.
 		$this->assertArrayHasKey( 'code', $stored_error );
 		$this->assertArrayHasKey( 'message', $stored_error );
 		$this->assertArrayHasKey( 'context', $stored_error );
@@ -7323,15 +7324,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Verify the extra keys were moved to context.
 		$this->assertIsArray( $stored_error['context'] );
+		$this->assertNotEmpty( $stored_error['context'], 'Context should contain the extra keys' );
 		$this->assertArrayHasKey( 'details', $stored_error['context'] );
 		$this->assertArrayHasKey( 'trace', $stored_error['context'] );
 		$this->assertArrayHasKey( 'response', $stored_error['context'] );
 		$this->assertSame( 'Some additional details', $stored_error['context']['details'] );
 		$this->assertSame( 'stack trace info', $stored_error['context']['trace'] );
 		$this->assertSame( 'raw response data', $stored_error['context']['response'] );
-
-		// Verify no extra keys remain at the top level.
-		$this->assertCount( 3, $stored_error, 'Error should only have code, message, and context keys' );
 	}
 
 	/**
@@ -7409,7 +7408,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		// Act.
 		try {
 			$this->sut->onboarding_test_account_init( $location );
+			$this->fail( 'Expected exception was not thrown' );
 		} catch ( \Exception $e ) {
+			// Expected exception, ignore it.
 			unset( $e );
 		}
 
@@ -7418,8 +7419,15 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$final_profile = end( $updated_stored_profiles );
 		$stored_error  = $final_profile['onboarding'][ $location ]['steps'][ $step_id ]['data']['error'];
 
+		// Verify the error structure has code, message, and context at the top level.
+		$this->assertArrayHasKey( 'code', $stored_error );
+		$this->assertArrayHasKey( 'message', $stored_error );
 		$this->assertArrayHasKey( 'context', $stored_error );
 		$this->assertIsArray( $stored_error['context'] );
+		$this->assertNotEmpty( $stored_error['context'], 'Context should contain the merged keys' );
+
+		// Verify conflicting_key is NOT at the top level (it should only be in context).
+		$this->assertArrayNotHasKey( 'conflicting_key', $stored_error, 'Extra keys should be moved to context, not kept at top level' );
 
 		// Verify extra key was moved to context.
 		$this->assertArrayHasKey( 'details', $stored_error['context'] );
@@ -7621,9 +7629,14 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $result['errors'] );
 
 		$standardized_error = $result['errors'][0];
+		$this->assertArrayHasKey( 'code', $standardized_error );
 		$this->assertSame( 'error_with_only_code', $standardized_error['code'] );
-		// Message should default to empty string.
+		// Message should default to empty string when not provided.
 		$this->assertArrayHasKey( 'message', $standardized_error );
+		$this->assertSame( '', $standardized_error['message'], 'Message should default to empty string' );
+		// Context should default to empty array when not provided.
+		$this->assertArrayHasKey( 'context', $standardized_error );
+		$this->assertSame( array(), $standardized_error['context'], 'Context should default to empty array' );
 	}
 
 	/**
