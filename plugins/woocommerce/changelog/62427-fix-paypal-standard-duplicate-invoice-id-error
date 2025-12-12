@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Ensure the PayPal Standard invoice ID is unique across stores.
