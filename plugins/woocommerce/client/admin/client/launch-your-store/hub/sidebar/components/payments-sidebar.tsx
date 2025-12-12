@@ -53,21 +53,33 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		let isMounted = true;
 
 		const fetchPaymentsTask = async () => {
-			const task = await getPaymentsTaskFromLysTasklist();
+			try {
+				const task = await getPaymentsTaskFromLysTasklist();
 
-			// Only update state if component is still mounted
-			if ( isMounted ) {
-				setPaymentsTask( task );
+				// Only update state if component is still mounted.
+				if ( isMounted ) {
+					setPaymentsTask( task );
+				}
+			} catch ( error ) {
+				// Log the error for debugging purposes.
+				// eslint-disable-next-line no-console
+				console.error(
+					'PaymentsSidebar: Failed to fetch payments task:',
+					error
+				);
+
+				// Component remains in its default state (payments_task = undefined).
+				// This is a safe fallback as the UI handles undefined gracefully.
 			}
 		};
 
 		fetchPaymentsTask();
 
-		// Cleanup function to prevent state updates after unmount
+		// Cleanup function to prevent state updates after unmount.
 		return () => {
 			isMounted = false;
 		};
-	}, [ isWooPaymentsActive, wooPaymentsRecentlyActivated ] ); // Refresh when WooPayments state changes
+	}, [ isWooPaymentsActive, wooPaymentsRecentlyActivated ] ); // Refresh when WooPayments state changes.
 
 	const currentStepIndex = allSteps.findIndex(
 		( step ) => step.id === currentStep?.id

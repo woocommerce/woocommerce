@@ -66,8 +66,18 @@ const TestOrLiveAccountStep = () => {
 									status="error"
 									isDismissible={ false }
 									className="woocommerce-payments-test-or-live-account-step__error"
+									// Adding role="alert" for explicit screen reader announcement.
+									// While @wordpress/components Notice uses speak() internally,
+									// role="alert" provides better backwards compatibility with older AT.
+									{ ...{ role: 'alert' } }
 								>
-									<p>{ currentStep.errors[ 0 ].message }</p>
+									<p>
+										{ currentStep.errors[ 0 ]?.message ||
+											__(
+												'Something went wrong. Please try again.',
+												'woocommerce'
+											) }
+									</p>
 								</Notice>
 							) }
 						<div className="woocommerce-payments-test-or-live-account-step__success-whats-next">
