@@ -271,19 +271,49 @@ function wc_product_post_type_link( $permalink, $post ) {
 	// Get the custom taxonomy terms in use by this post.
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
-	if ( ! empty( $terms ) ) {
-		$terms           = wp_list_sort(
-			$terms,
-			array(
-				'parent'  => 'DESC',
-				'term_id' => 'ASC',
-			)
-		);
-		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $terms[0], $terms, $post );
+	if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+		// Find the deepest category (most ancestors) for the permalink.
+		$deepest_term      = $terms[0];
+		$deepest_ancestors = $deepest_term->parent ? get_ancestors( $deepest_term->term_id, 'product_cat' ) : array();
+
+		foreach ( $terms as $term ) {
+			if ( $term->term_id === $deepest_term->term_id ) {
+				continue;
+			}
+			// Skip root categories - they can't be deeper than current.
+			if ( ! $term->parent ) {
+				continue;
+			}
+			$ancestors = get_ancestors( $term->term_id, 'product_cat' );
+			if ( count( $ancestors ) > count( $deepest_ancestors ) ) {
+				$deepest_ancestors = $ancestors;
+				$deepest_term      = $term;
+			}
+		}
+
+		/**
+		 * Filter the product category used for the product permalink.
+		 *
+		 * By default, the deepest category (most ancestors) is selected. Prior to 9.9.0,
+		 * categories were sorted by parent term ID descending, then term ID ascending.
+		 * This filter allows customization of which category is used in the product permalink.
+		 *
+		 * @since 2.4.0
+		 * @since 9.9.0 Selection algorithm changed to use deepest category instead of sort order.
+		 *
+		 * @param WP_Term   $deepest_term The selected category term object (deepest category since 9.9.0).
+		 * @param WP_Term[] $terms        All category terms assigned to the product.
+		 * @param WP_Post   $post         The product post object.
+		 */
+		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $deepest_term, $terms, $post );
+		$category_object = ! $category_object instanceof WP_Term ? $deepest_term : $category_object;
 		$product_cat     = $category_object->slug;
 
 		if ( $category_object->parent ) {
-			$ancestors = get_ancestors( $category_object->term_id, 'product_cat' );
+			// Reuse cached ancestors if the filter didn't change the category, otherwise fetch them.
+			$ancestors = ( $category_object->term_id === $deepest_term->term_id )
+				? $deepest_ancestors
+				: get_ancestors( $category_object->term_id, 'product_cat' );
 			foreach ( $ancestors as $ancestor ) {
 				$ancestor_object = get_term( $ancestor, 'product_cat' );
 				if ( apply_filters( 'woocommerce_product_post_type_link_parent_category_only', false ) ) {
@@ -317,7 +347,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		date_i18n( 'H', strtotime( $post->post_date ) ),
 		date_i18n( 'i', strtotime( $post->post_date ) ),
 		date_i18n( 's', strtotime( $post->post_date ) ),
-		$post->ID,
+		(string) $post->ID,
 		$product_cat,
 		$product_cat,
 	);
