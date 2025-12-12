@@ -642,7 +642,7 @@ class WC_Gateway_Paypal_Request {
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => $this->get_paypal_order_purchase_unit_amount( $order ),
-					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+					'invoice_id' => $this->generate_paypal_invoice_id( $order ),
 					'items'      => $order_items,
 					'payee'      => array(
 						'email_address' => $payee_email,
@@ -756,6 +756,25 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		return $custom_id;
+	}
+
+	/**
+	 * Generate a unique invoice ID for the order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string
+	 */
+	private function generate_paypal_invoice_id( $order ) {
+		$prefix          = $this->gateway->get_option( 'invoice_prefix' );
+		$order_number    = $order->get_order_number();
+		$base_invoice_id = $prefix . $order_number;
+
+		// generate a unique ID for the site.
+		$site_id = class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : '';
+		$unique_id = substr( md5( $site_id ), 0, 8 );
+
+		$invoice_id = $this->limit_length( $base_invoice_id . '-' . $unique_id, WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH );
+		return $invoice_id;
 	}
 
 	/**
