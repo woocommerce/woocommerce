@@ -1,4 +1,5 @@
 Significance: patch
 Type: dev
+Comment: Only PHPStan fixes.
 
-Update pnpm to 9.1.0
+

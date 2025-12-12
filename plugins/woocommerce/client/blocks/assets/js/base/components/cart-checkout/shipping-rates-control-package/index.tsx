@@ -5,15 +5,18 @@ import clsx from 'clsx';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Panel } from '@woocommerce/blocks-components';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
-import { useShippingData } from '@woocommerce/base-context/hooks';
+import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 import { CartShippingPackageShippingRate } from '@woocommerce/types';
+import {
+	PackageItems,
+	ShippingPackageItemIcon,
+} from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
  */
 import PackageRates from './package-rates';
-import PackageItems from './package-items';
 import type { PackageProps } from './types';
 import './style.scss';
 
@@ -28,6 +31,7 @@ export const ShippingRatesControlPackage = ( {
 	highlightChecked = false,
 }: PackageProps ) => {
 	const { selectShippingRate, shippingRates } = useShippingData();
+	const { cartItems } = useStoreCart();
 
 	const internalPackageCount = shippingRates?.length || 1;
 
@@ -67,13 +71,17 @@ export const ShippingRatesControlPackage = ( {
 	);
 
 	// Collapsible and non-collapsible header handling.
-	const header =
-		shouldBeCollapsible || shouldShowItems ? (
+	let header = null;
+
+	if ( shouldBeCollapsible || shouldShowItems ) {
+		header = (
 			<div className="wc-block-components-shipping-rates-control__package-header">
 				<div
 					className="wc-block-components-shipping-rates-control__package-title"
 					dangerouslySetInnerHTML={ {
-						__html: sanitizeHTML( packageData.name ),
+						__html: sanitizeHTML(
+							String( packageData.name ?? '' )
+						),
 					} }
 				/>
 				{ shouldBeCollapsible && (
@@ -85,7 +93,27 @@ export const ShippingRatesControlPackage = ( {
 					<PackageItems packageData={ packageData } />
 				) }
 			</div>
-		) : null;
+		);
+
+		if ( multiplePackages ) {
+			const packageItems = packageData.items || [];
+
+			header = (
+				<div className="wc-block-components-shipping-rates-control__package-container">
+					{ header }
+					<div className="wc-block-components-shipping-rates-control__package-thumbnails">
+						{ packageItems.slice( 0, 3 ).map( ( item ) => (
+							<ShippingPackageItemIcon
+								key={ item.key }
+								packageItem={ item }
+								cartItems={ cartItems }
+							/>
+						) ) }
+					</div>
+				</div>
+			);
+		}
+	}
 
 	const onSelectRate = useCallback(
 		( newShippingRateId: string ) => {
@@ -111,6 +139,8 @@ export const ShippingRatesControlPackage = ( {
 			<Panel
 				className={ clsx(
 					'wc-block-components-shipping-rates-control__package',
+					multiplePackages &&
+						'wc-block-components-shipping-rates-control__package--multiple',
 					className
 				) }
 				// initialOpen remembers only the first value provided to it, so by the
@@ -129,6 +159,8 @@ export const ShippingRatesControlPackage = ( {
 		<div
 			className={ clsx(
 				'wc-block-components-shipping-rates-control__package',
+				multiplePackages &&
+					'wc-block-components-shipping-rates-control__package--multiple',
 				className
 			) }
 		>
