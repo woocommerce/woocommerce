@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Revert to previous sync-on-read logic to prevent unnecessary writes when HPOS and compat mode are enabled.
