@@ -187,12 +187,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return void
 	 */
 	protected function add_order_by_sql_params( $query_args ) {
-		if ( isset( $query_args['orderby'] ) || isset( $query_args['order'] ) ) {
-			$order_by_clause = $this->normalize_order_by_clause( $query_args['orderby'] ?? 'date_registered', $query_args['order'] ?? 'desc' );
-		} else {
-			$order_by_clause = '';
-		}
-
+		$order_by_clause = $this->normalize_order_by_clause(
+			$query_args['orderby'] ?? 'date_registered',
+			$query_args['order'] ?? 'desc'
+		);
 		$this->clear_sql_clause( 'order_by' );
 		$this->add_sql_clause( 'order_by', $order_by_clause );
 	}
