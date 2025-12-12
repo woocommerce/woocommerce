@@ -581,7 +581,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		if ( $has_aggregated_field ) {
-			$this->subquery->add_sql_clause( 'order_by', $order_by . ', customer_id' );
+			$customer_lookup_table = self::get_db_table_name();
+			$this->subquery->add_sql_clause( 'order_by', $order_by . ", {$customer_lookup_table}.customer_id" );
 		} else {
 			$this->subquery->add_sql_clause( 'order_by', $order_by );
 		}
