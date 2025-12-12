@@ -20,7 +20,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Bump node version. [#45148]
 -   Minor - Monorepo: bump pnpm version to 9.15.0 [#54189]
 -   Minor - Fix typos in README.md files [#48569]
--    - **Breaking Change:**  Adds variants for multiple extension scaffolds, templatesPath moved to variants/default subdirectory, new variants API structure introduced, postinstall script modified, and @wordpress/scripts version unpinned [#62297]
+-   **Breaking Change:**  Adds variants for multiple extension scaffolds, templatesPath moved to variants/default subdirectory, new variants API structure introduced, postinstall script modified, and @wordpress/scripts version unpinned [#62297]
 
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/create-woo-extension/v/1.1.0) - 2024-01-31 
 
