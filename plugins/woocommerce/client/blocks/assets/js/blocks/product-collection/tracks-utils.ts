@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+
+/**
+ * Internal dependencies
+ */
+import { CORE_EDITOR_STORE } from '../../utils/wordpress-stores';
 
 enum Locations {
 	SINGLE_PRODUCT = 'single-product',
@@ -31,9 +35,10 @@ const templateSlugToTemplateMap: {
 
 export const useTracksLocation = ( templateSlug: string | undefined ) => {
 	const postType = useSelect( ( select ) => {
+		const editor = select( CORE_EDITOR_STORE );
 		// @ts-expect-error Type definitions are missing
 		// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
-		return select( editorStore ).getCurrentPostType();
+		return editor?.getCurrentPostType?.();
 	}, [] );
 
 	if ( postType === Locations.PAGE || postType === Locations.POST ) {

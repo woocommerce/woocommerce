@@ -9,12 +9,11 @@ import { useBlockProps } from '@wordpress/block-editor';
 import {
 	__experimentalText as Text, // eslint-disable-line
 } from '@wordpress/components';
-// eslint-disable-next-line @woocommerce/dependency-group
-import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
+import { CORE_EDITOR_STORE } from '../../utils/wordpress-stores';
 import metadata from './block.json';
 
 function HoverContent() {
@@ -41,7 +40,7 @@ export default function Edit() {
 	const blockProps = useBlockProps();
 	const { postId } = useSelect(
 		( select ) => ( {
-			postId: select( editorStore ).getCurrentPostId?.() ?? 0,
+			postId: select( CORE_EDITOR_STORE )?.getCurrentPostId?.() ?? 0,
 		} ),
 		[]
 	);
