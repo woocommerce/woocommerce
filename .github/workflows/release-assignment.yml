@@ -20,7 +20,6 @@ jobs:
       rc-1-release-date: ${{ steps.get-all-events-for-version.outputs.event-rc-1-date }}
       final-release-date: ${{ steps.get-all-events-for-version.outputs.event-final-date }}
       team-name: ${{ steps.get-all-events-for-version.outputs.team-name }}
-      team-name-slug: ${{ steps.get-all-events-for-version.outputs.team-name-slug }}
     steps:
       - name: Install node-ical
         run: npm install node-ical
@@ -103,7 +102,6 @@ jobs:
               .filter(event => event.summary && event.start);
 
             let teamName = null;
-            let teamNameSlug = null;
 
             for (const [eventKey, eventTitle] of Object.entries(releaseEvents)) {
               const matchingEvent = calendarEvents.find(event => 
@@ -118,15 +116,13 @@ jobs:
               if (eventKey === 'final' && matchingEvent && matchingEvent.description) {
                 const teamMatch = matchingEvent.description.match(/Team:\s*(.+)/i);
                 if (teamMatch && teamMatch[1]) {
-                  teamName = teamMatch[1].trim();
-                  teamNameSlug = teamName.toLowerCase().replace(/\s+/g, '-');
+                  teamName = teamMatch[1].trim().toLowerCase().replace(/\s+/g, '-');
                   console.log(`Team name from the event description: ${teamName}`);
                 }
               }
             }
 
             core.setOutput('team-name', teamName);
-            core.setOutput('team-name-slug', teamNameSlug);
 
   trigger-upcoming-code-freeze-events:
     name: Assign a release lead
@@ -148,7 +144,7 @@ jobs:
 
             const payload = {
               action: 'release-assignment',
-              team: '${{ needs.check-upcoming-release-events.outputs.team-name-slug }}',
+              team: '${{ needs.check-upcoming-release-events.outputs.team-name }}',
               version: '${{ needs.check-upcoming-release-events.outputs.version }}',
               feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
               status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
