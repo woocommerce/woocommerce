@@ -31,8 +31,18 @@ final class DependencyDetection {
 	 * @var array<string>
 	 */
 	private const WC_SCRIPT_HANDLES = array(
-		'wc-blocks-checkout',
+		'wc-blocks-registry',
+		'wc-settings',
 		'wc-blocks-data-store',
+		'wc-store-data',
+		'wc-blocks-shared-context',
+		'wc-blocks-shared-hocs',
+		'wc-price-format',
+		'wc-blocks-checkout',
+		'wc-blocks-checkout-events',
+		'wc-blocks-components',
+		'wc-types',
+		'wc-sanitize',
 	);
 
 	/**
