@@ -76,7 +76,7 @@ If your WordPress installation does not use the Gutenberg plugin or does not inc
 
 #### Global Styles Engine
 
-The email editor depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
+A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
 
 **Impact**: If your build configuration marks all `@wordpress/*` packages as externals (common in webpack configs), you will encounter runtime errors: `"Cannot find module '@wordpress/global-styles-engine'"`.
 
