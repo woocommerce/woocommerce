@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add optional createCoupon URL to EmailEditorUrls type for coupon creation integration

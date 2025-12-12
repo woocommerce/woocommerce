@@ -29,8 +29,7 @@
 
 	.wc-blocks-components-select__select {
 		@include reset-typography();
-		font-size: 16px;
-		line-height: 22px;
+		@include font-for-inputs-locked;
 		border-radius: $universal-border-radius;
 		width: 100%;
 		appearance: none;
@@ -39,22 +38,14 @@
 		border: 1px solid $universal-border-strong;
 		box-sizing: border-box;
 
-		padding: $gap-large - 3px $gap-smaller + 1px $gap-smaller;
-
-		// We are hardcoding the height to reserve space for a wider border that
-		// we apply for focused state. Without it, when focusing the input its
-		// height will increase by 1px, causing the rest of the form to shift.
-		// height = font line-height + vertical padding + focused top/bottom border
-		// Don't worry, this calculation won't be performed at runtime, SCSS
-		// is transforming it into a singular value during build time.
-		height: calc(15px + 16px * 2 + 1.5px * 2);
+		padding: $gap $gap-smaller + 1px 0;
+		height: 50px;
 
 		&:focus {
 			border-color: currentColor;
 			border-width: 1.5px;
-			// original padding - border size
-			padding-left: $gap-smaller + 0.5px;
-			padding-top: $gap-large - 3.5px;
+
+			padding: $gap $gap-smaller + .5px 0;
 		}
 
 		.has-dark-controls & {

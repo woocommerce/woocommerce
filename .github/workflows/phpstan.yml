@@ -1,0 +1,150 @@
+name: 'PHPStan Analysis'
+
+on:
+    pull_request:
+        paths:
+            - 'plugins/woocommerce/**/*.php'
+            - 'plugins/woocommerce/composer.json'
+            - 'plugins/woocommerce/composer.lock'
+            - 'plugins/woocommerce/phpstan.neon'
+            - 'plugins/woocommerce/phpstan-baseline.neon'
+    push:
+        paths:
+            - 'plugins/woocommerce/**/*.php'
+            - 'plugins/woocommerce/composer.json'
+            - 'plugins/woocommerce/composer.lock'
+            - 'plugins/woocommerce/phpstan.neon'
+            - 'plugins/woocommerce/phpstan-baseline.neon'
+        branches:
+            - 'trunk'
+            - 'release/*'
+
+concurrency:
+    group: phpstan-${{ github.event_name == 'push' && github.run_id || github.event_name }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    FORCE_COLOR: 1
+
+jobs:
+    phpstan:
+        name: 'PHPStan Analysis'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              id: 'setup-monorepo'
+              with:
+                  install: '@woocommerce/plugin-woocommerce...'
+                  pull-package-deps: '@woocommerce/plugin-woocommerce'
+                  php-version: '8.4'
+
+            - name: 'Create tmp directory'
+              working-directory: plugins/woocommerce
+              run: mkdir -p tmp
+
+            - name: 'Restore PHPStan result cache'
+              uses: actions/cache/restore@v4
+              with:
+                  path: plugins/woocommerce/tmp
+                  key: phpstan-result-cache-${{ github.run_id }}
+                  restore-keys: |
+                      phpstan-result-cache-
+
+            - name: 'Run PHPStan'
+              working-directory: plugins/woocommerce
+              run: |
+                  set +e  # Don't exit immediately on error
+                  set -o pipefail  # But do capture pipeline exit codes
+                  pnpm --filter='@woocommerce/plugin-woocommerce' phpstan 2>&1 | tee /tmp/phpstan-output.txt
+                  PHPSTAN_EXIT=${PIPESTATUS[0]}
+                  if [[ $PHPSTAN_EXIT -ne 0 ]]; then
+                      if grep -q "was not matched in reported errors" /tmp/phpstan-output.txt; then
+                          echo ""
+                          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                          echo "::error::PHPStan baseline is out of date. Some errors in the baseline no longer exist in the code."
+                          echo ""
+                          echo "This typically happens when:"
+                          echo "  • You fixed an error that was previously baselined"
+                          echo "  • Code was refactored and the error location changed"
+                          echo ""
+                          echo "To fix this, regenerate the baseline by running:"
+                          echo "  cd plugins/woocommerce && composer phpstan:baseline"
+                          echo ""
+                          echo "Then commit the updated phpstan-baseline.neon file."
+                          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                      fi
+                      exit $PHPSTAN_EXIT
+                  fi
+
+            - name: 'Check baseline changes'
+              if: ${{ github.event_name == 'pull_request' }}
+              working-directory: plugins/woocommerce
+              run: |
+                  BASELINE_FILE="phpstan-baseline.neon"
+                  # Full path from repo root for git commands
+                  BASELINE_PATH="plugins/woocommerce/$BASELINE_FILE"
+
+                  # Fetch the base branch for comparison
+                  BASE_SHA="${{ github.event.pull_request.base.sha }}"
+                  git fetch origin "$BASE_SHA" --depth=1
+
+                  # Check if baseline file has changed (use relative path since we're in working-directory)
+                  if ! git diff --exit-code --ignore-all-space "$BASE_SHA" -- "$BASELINE_FILE" > /dev/null 2>&1; then
+                      # Function to count total errors in baseline (sum of all count fields)
+                      count_errors() {
+                          local file="$1"
+                          if [[ ! -f "$file" ]] || [[ "$file" == "/dev/null" ]]; then
+                              echo 0
+                              return
+                          fi
+                          # Extract all count values and sum them
+                          grep -E '^[[:space:]]+count:[[:space:]]*[0-9]+' "$file" 2>/dev/null | sed -E 's/^[[:space:]]+count:[[:space:]]*//' | awk '{sum+=$1} END {print sum+0}'
+                      }
+
+                      # Get base version of baseline
+                      BASE_BASELINE=$(mktemp)
+                      if git show "$BASE_SHA:$BASELINE_PATH" > "$BASE_BASELINE" 2>/dev/null; then
+                          BASE_COUNT=$(count_errors "$BASE_BASELINE")
+                      else
+                          BASE_COUNT=0
+                      fi
+                      rm -f "$BASE_BASELINE"
+
+                      # Count errors in current baseline (local file, use relative path)
+                      CURRENT_COUNT=$(count_errors "$BASELINE_FILE")
+
+                      # Calculate difference
+                      DIFF=$((CURRENT_COUNT - BASE_COUNT))
+
+                      echo "Base branch baseline errors: $BASE_COUNT"
+                      echo "Current baseline errors: $CURRENT_COUNT"
+
+                      if [[ $DIFF -gt 0 ]]; then
+                          # Baseline increased - block the PR
+                          echo ""
+                          echo "::error file=$BASELINE_PATH::Adding errors to PHPStan baseline is not allowed. This PR adds $DIFF new error(s) (from $BASE_COUNT to $CURRENT_COUNT). Please fix the PHPStan errors instead of adding them to the baseline. Run 'pnpm phpstan' locally to see the errors."
+                          echo ""
+                          echo "New errors added to baseline:"
+                          git diff "$BASE_SHA" -- "$BASELINE_FILE" | grep -A 5 -E '^\+[[:space:]]*message:' | head -150
+                          exit 1
+                      elif [[ $DIFF -lt 0 ]]; then
+                          # Baseline decreased - good news!
+                          DECREASE=$((DIFF * -1))
+                          echo "::notice file=$BASELINE_PATH::PHPStan baseline reduced by $DECREASE error(s) (from $BASE_COUNT to $CURRENT_COUNT). Great work! 🎉"
+                      else
+                          # Count is same but file changed (errors reorganized or replaced)
+                          echo "::notice file=$BASELINE_PATH::PHPStan baseline changed but error count remained the same ($CURRENT_COUNT errors)."
+                      fi
+                  else
+                      echo "Baseline file unchanged."
+                  fi
+
+            - name: 'Save PHPStan result cache'
+              uses: actions/cache/save@v4
+              if: ${{ !cancelled() }}
+              with:
+                  path: plugins/woocommerce/tmp
+                  key: phpstan-result-cache-${{ github.run_id }}

@@ -167,6 +167,66 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * Test that creating a variation with attributes containing special characters in their slug
+	 * properly saves the attributes.
+	 *
+	 * This test verifies the fix for issue #61791 where attributes with non-ASCII characters
+	 * (like Persian) were not saved when creating variations via the REST API.
+	 * @see https://github.com/woocommerce/woocommerce/issues/61791
+	 */
+	public function test_create_variation_with_persian_attribute_by_id() {
+		// Create a variable product with Persian attribute names.
+		$product         = WC_Helper_Product::create_variation_product();
+		$color_attribute = WC_Helper_Product::create_product_attribute_object( 'رنگ', array( 'blue', 'green' ) );
+		$product->set_attributes( array( $color_attribute ) );
+		$product->save();
+
+		// Create a variation via REST API.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_body_params(
+			array(
+				'regular_price'  => '0',
+				'sale_price'     => '0',
+				'manage_stock'   => true,
+				'stock_quantity' => 0,
+				'attributes'     => array(
+					array(
+						'id'     => $color_attribute->get_id(),
+						'option' => 'green',
+					),
+				),
+			)
+		);
+
+		$response  = $this->server->dispatch( $request );
+		$variation = $response->get_data();
+
+		// Verify the variation was created successfully.
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertNotEmpty( $variation['id'] );
+		$this->assertEquals( 'variation', $variation['type'] );
+		$this->assertEquals( $product->get_id(), $variation['parent_id'] );
+
+		// Verify the attribute is properly set.
+		$this->assertNotEmpty( $variation['attributes'], 'Attributes array should not be empty' );
+		$this->assertCount( 1, $variation['attributes'], 'Variation should have 1 attribute' );
+		$this->assertEquals( 'رنگ', $variation['attributes'][0]['name'], 'Variation should contain color attribute' );
+		$this->assertEquals( 'green', $variation['attributes'][0]['option'], 'Variation should contain color option green' );
+
+		// Verify the variation can be retrieved and has the attribute data.
+		$get_request         = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations/' . $variation['id'] );
+		$get_response        = $this->server->dispatch( $get_request );
+		$retrieved_variation = $get_response->get_data();
+
+		$this->assertEquals( 200, $get_response->get_status() );
+		$this->assertNotEmpty( $retrieved_variation['attributes'], 'Retrieved variation should have attributes' );
+		$this->assertCount( 1, $retrieved_variation['attributes'], 'Retrieved variation should have 1 attribute' );
+		$this->assertEquals( 'رنگ', $retrieved_variation['attributes'][0]['name'], 'Variation should contain color attribute' );
+		$this->assertEquals( 'pa_رنگ', $retrieved_variation['attributes'][0]['slug'], 'Variation should contain color attribute slug' );
+		$this->assertEquals( 'green', $retrieved_variation['attributes'][0]['option'], 'Variation should contain color option green' );
+	}
+
+	/**
 	 * Test that the products endpoint can filter by global_unique_id and also return matched variations.
 	 *
 	 * @return void
