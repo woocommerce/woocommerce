@@ -34,9 +34,9 @@ class Patterns {
 				'description' => __( 'A collection of email content layouts.', 'woocommerce' ),
 			),
 			array(
-				'name'        => 'basic',
-				'label'       => _x( 'Basic', 'Block pattern category', 'woocommerce' ),
-				'description' => __( 'A collection of basic email layouts.', 'woocommerce' ),
+				'name'        => 'newsletter',
+				'label'       => _x( 'Newsletter', 'Block pattern category', 'woocommerce' ),
+				'description' => __( 'A collection of newsletter email layouts.', 'woocommerce' ),
 			),
 			array(
 				'name'        => 'welcome',
