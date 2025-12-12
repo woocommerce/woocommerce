@@ -27781,12 +27781,6 @@ parameters:
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Cannot call method warning\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Cannot cast mixed to float\.$#'
 			identifier: cast.double
 			count: 2
@@ -27837,12 +27831,6 @@ parameters:
 		-
 			message: '#^Method Abstract_WC_Order_Data_Store_CPT\:\:set_order_props\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
-
-		-
-			message: '#^Method Abstract_WC_Order_Data_Store_CPT\:\:set_order_props\(\) has parameter \$order with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
@@ -52612,12 +52600,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Parameter \#1 \$input_list of function wp_list_sort expects array, array\<WP_Term\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Parameter \#1 \$maybeint of function absint expects array\|bool\|float\|int\|resource\|string\|null, mixed given\.$#'
 			identifier: argument.type
 			count: 1
@@ -52705,12 +52687,6 @@ parameters:
 			message: '#^Parameter \#2 \$product of function wc_attribute_label expects WC_Product, WC_Product_Variation\|false given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Parameter \#2 \$replace of function str_replace expects array\<string\>\|string, array\<int, mixed\> given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/wc-product-functions.php
 
 		-
@@ -77464,12 +77440,6 @@ parameters:
 			path: src/Blocks/Patterns/PTKPatternsStore.php
 
 		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Blocks/Patterns/PTKPatternsStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Patterns\\PTKPatternsStore\:\:get_patterns\(\) should return array but returns mixed\.$#'
 			identifier: return.type
 			count: 1
@@ -88366,6 +88336,12 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataCleanup.php
 
 		-
+			message: '#^Access to protected property WC_Order\:\:\$data_store\.$#'
+			identifier: property.protected
+			count: 1
+			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
+
+		-
 			message: '#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -88379,18 +88355,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method object\:\:get_current_class_name\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
-			message: '#^Call to an undefined method object\:\:read\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
-			message: '#^Call to an undefined method object\:\:set_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
@@ -88414,19 +88378,7 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:get_order_from_datastore\(\) should return WC_Order but returns WC_Abstract_Order\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:read_order_from_datastore\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
@@ -88438,13 +88390,13 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:is_order_newer_than_post\(\) expects WC_Abstract_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
-			identifier: argument.type
+			message: '#^PHPDoc tag @var with type WC_Order is not subtype of native type \$this\(Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\)\.$#'
+			identifier: varTag.nativeType
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:read_order_from_datastore\(\) expects WC_Abstract_Order, object given\.$#'
+			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:is_order_newer_than_post\(\) expects WC_Abstract_Order, WC_Order\|WC_Order_Refund\|true given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
@@ -88452,12 +88404,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$props of method WC_Data\:\:set_props\(\) expects array, array\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
-
-		-
-			message: '#^Property WC_Data_Store\:\:\$instance \(WC_Data_Store\) does not accept object\.$#'
-			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
@@ -88940,12 +88886,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$order of method Abstract_WC_Order_Data_Store_CPT\:\:read\(\) expects WC_Order, WC_Abstract_Order given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\LegacyDataHandler\:\:read_order_from_datastore\(\) expects WC_Abstract_Order, object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -99277,18 +99217,6 @@ parameters:
 			path: src/Internal/Utilities/PluginInstaller.php
 
 		-
-			message: '#^Cannot call method warning\(\) on mixed\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: src/Internal/Utilities/PostMetaUtil.php
-
-		-
-			message: '#^Parameter \#1 \$data of function maybe_serialize expects array\|object\|string, mixed given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Internal/Utilities/PostMetaUtil.php
-
-		-
 			message: '#^Binary operation "\." between ''wc_child_has…''\|''wc_child_has_weight_''\|''wc_product_children_''\|''wc_related_''\|''wc_var_prices_'' and Automattic\\WooCommerce\\Internal\\Utilities\\WC_Product\|int results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -103721,4 +103649,3 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: woocommerce.php
-
