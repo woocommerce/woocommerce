@@ -17,23 +17,26 @@ namespace Automattic\WooCommerce\Blocks;
 final class DependencyDetection {
 
 	/**
-	 * WooCommerce script handles that we track for dependency detection.
+	 * Maps window.wc.* property names to their required script handles.
 	 *
-	 * @var array<string>
+	 * This is the source of truth for both PHP and JS dependency detection.
+	 * Based on wcDepMap and wcHandleMap in client/blocks/bin/webpack-helpers.js.
+	 *
+	 * @var array<string, string>
 	 */
-	private const WC_SCRIPT_HANDLES = array(
-		'wc-blocks-registry',
-		'wc-settings',
-		'wc-blocks-data-store',
-		'wc-store-data',
-		'wc-blocks-shared-context',
-		'wc-blocks-shared-hocs',
-		'wc-price-format',
-		'wc-blocks-checkout',
-		'wc-blocks-checkout-events',
-		'wc-blocks-components',
-		'wc-types',
-		'wc-sanitize',
+	private const WC_GLOBAL_TO_HANDLE = array(
+		'wcBlocksRegistry'      => 'wc-blocks-registry',
+		'wcSettings'            => 'wc-settings',
+		'wcBlocksData'          => 'wc-blocks-data-store',
+		'data'                  => 'wc-store-data',
+		'wcBlocksSharedContext' => 'wc-blocks-shared-context',
+		'wcBlocksSharedHocs'    => 'wc-blocks-shared-hocs',
+		'priceFormat'           => 'wc-price-format',
+		'blocksCheckout'        => 'wc-blocks-checkout',
+		'blocksCheckoutEvents'  => 'wc-blocks-checkout-events',
+		'blocksComponents'      => 'wc-blocks-components',
+		'wcTypes'               => 'wc-types',
+		'sanitize'              => 'wc-sanitize',
 	);
 
 	/**
@@ -64,7 +67,7 @@ final class DependencyDetection {
 	 * but output inline to ensure correct timing (before any enqueued scripts).
 	 */
 	public function output_early_proxy_setup(): void {
-		$script_path = __DIR__ . '/assets/js/dependency-detection.js';
+		$script_path = __DIR__ . '/Assets/js/dependency-detection.js';
 
 		if ( ! file_exists( $script_path ) ) {
 			return;
@@ -77,7 +80,15 @@ final class DependencyDetection {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Script content is from a trusted local file.
+		// Inject the global-to-handle mapping from PHP (source of truth).
+		$mapping_json   = \wp_json_encode( self::WC_GLOBAL_TO_HANDLE );
+		$script_content = str_replace(
+			'__WC_GLOBAL_TO_HANDLE_PLACEHOLDER__',
+			$mapping_json,
+			$script_content
+		);
+
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Script content is from a trusted local file, JSON is safely encoded.
 		echo '<script id="wc-dependency-detection">' . $script_content . '</script>' . "\n";
 	}
 
@@ -185,11 +196,12 @@ final class DependencyDetection {
 		}
 
 		// Filter to only include WooCommerce handles we care about.
+		$wc_handles = array_values( self::WC_GLOBAL_TO_HANDLE );
 		return array_values(
 			array_filter(
 				$all_deps,
-				function ( $dep ) {
-					return in_array( $dep, self::WC_SCRIPT_HANDLES, true );
+				function ( $dep ) use ( $wc_handles ) {
+					return in_array( $dep, $wc_handles, true );
 				}
 			)
 		);

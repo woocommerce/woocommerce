@@ -17,10 +17,10 @@
 	const warnedScripts = {};
 	let pendingChecks = []; // Queue checks until registry is loaded
 
-	const WC_GLOBAL_TO_HANDLE = {
-		blocksCheckout: 'wc-blocks-checkout',
-		wcBlocksData: 'wc-blocks-data-store',
-	};
+	// Maps window.wc.* property names to their required script handles.
+	// Injected by PHP from DependencyDetection::WC_GLOBAL_TO_HANDLE (source of truth).
+	// eslint-disable-next-line no-undef
+	const WC_GLOBAL_TO_HANDLE = __WC_GLOBAL_TO_HANDLE_PLACEHOLDER__;
 
 	// Pattern to identify WooCommerce core scripts (which we should skip).
 	// Matches /plugins/woocommerce/(client|assets|build)/ but NOT /plugins/woocommerce-subscriptions/ etc.
