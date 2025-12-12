@@ -572,6 +572,18 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'fraud_protection'              => array(
+				'name'                         => __( 'Fraud protection', 'woocommerce' ),
+				'description'                  => __(
+					'Enable fraud protection features for your store.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {
