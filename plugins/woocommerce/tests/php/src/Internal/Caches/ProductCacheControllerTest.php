@@ -56,8 +56,24 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->product_cache->flush();
+		$this->unhook_controller( $this->sut );
 		$this->restore_feature_option();
 		parent::tearDown();
+	}
+
+	/**
+	 * Remove all hooks registered by a controller instance.
+	 *
+	 * @param ProductCacheController $controller The controller to unhook.
+	 */
+	private function unhook_controller( ProductCacheController $controller ): void {
+		remove_action( 'init', array( $controller, 'on_init' ), 0 );
+		remove_action( 'clean_post_cache', array( $controller, 'invalidate_product_cache_on_clean' ), 10 );
+		remove_action( 'updated_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ), 10 );
+		remove_action( 'added_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ), 10 );
+		remove_action( 'deleted_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ), 10 );
+		remove_action( 'woocommerce_updated_product_stock', array( $controller, 'invalidate_product_cache' ), 10 );
+		remove_action( 'woocommerce_updated_product_sales', array( $controller, 'invalidate_product_cache' ), 10 );
 	}
 
 	/**
@@ -102,16 +118,20 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 		$controller->init( $this->product_cache );
 		$controller->on_init();
 
-		// Verify hooks are NOT registered when feature is disabled.
-		$this->assertFalse(
-			has_action( 'clean_post_cache', array( $controller, 'invalidate_product_cache_on_clean' ) ),
-			'clean_post_cache hook should NOT be registered when feature is disabled'
-		);
+		try {
+			// Verify hooks are NOT registered when feature is disabled.
+			$this->assertFalse(
+				has_action( 'clean_post_cache', array( $controller, 'invalidate_product_cache_on_clean' ) ),
+				'clean_post_cache hook should NOT be registered when feature is disabled'
+			);
 
-		$this->assertFalse(
-			has_action( 'updated_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ) ),
-			'updated_post_meta hook should NOT be registered when feature is disabled'
-		);
+			$this->assertFalse(
+				has_action( 'updated_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ) ),
+				'updated_post_meta hook should NOT be registered when feature is disabled'
+			);
+		} finally {
+			$this->unhook_controller( $controller );
+		}
 	}
 
 	/**
@@ -125,38 +145,42 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 		$controller->init( $this->product_cache );
 		$controller->on_init();
 
-		// Verify clean_post_cache hook is registered.
-		$this->assertNotFalse(
-			has_action( 'clean_post_cache', array( $controller, 'invalidate_product_cache_on_clean' ) ),
-			'clean_post_cache hook should be registered'
-		);
+		try {
+			// Verify clean_post_cache hook is registered.
+			$this->assertNotFalse(
+				has_action( 'clean_post_cache', array( $controller, 'invalidate_product_cache_on_clean' ) ),
+				'clean_post_cache hook should be registered'
+			);
 
-		// Verify meta update hooks are registered.
-		$this->assertNotFalse(
-			has_action( 'updated_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ) ),
-			'updated_post_meta hook should be registered'
-		);
+			// Verify meta update hooks are registered.
+			$this->assertNotFalse(
+				has_action( 'updated_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ) ),
+				'updated_post_meta hook should be registered'
+			);
 
-		$this->assertNotFalse(
-			has_action( 'added_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ) ),
-			'added_post_meta hook should be registered'
-		);
+			$this->assertNotFalse(
+				has_action( 'added_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ) ),
+				'added_post_meta hook should be registered'
+			);
 
-		$this->assertNotFalse(
-			has_action( 'deleted_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ) ),
-			'deleted_post_meta hook should be registered'
-		);
+			$this->assertNotFalse(
+				has_action( 'deleted_post_meta', array( $controller, 'invalidate_product_cache_by_meta' ) ),
+				'deleted_post_meta hook should be registered'
+			);
 
-		// Verify stock/sales hooks are registered.
-		$this->assertNotFalse(
-			has_action( 'woocommerce_updated_product_stock', array( $controller, 'invalidate_product_cache' ) ),
-			'woocommerce_updated_product_stock hook should be registered'
-		);
+			// Verify stock/sales hooks are registered.
+			$this->assertNotFalse(
+				has_action( 'woocommerce_updated_product_stock', array( $controller, 'invalidate_product_cache' ) ),
+				'woocommerce_updated_product_stock hook should be registered'
+			);
 
-		$this->assertNotFalse(
-			has_action( 'woocommerce_updated_product_sales', array( $controller, 'invalidate_product_cache' ) ),
-			'woocommerce_updated_product_sales hook should be registered'
-		);
+			$this->assertNotFalse(
+				has_action( 'woocommerce_updated_product_sales', array( $controller, 'invalidate_product_cache' ) ),
+				'woocommerce_updated_product_sales hook should be registered'
+			);
+		} finally {
+			$this->unhook_controller( $controller );
+		}
 	}
 
 	/**

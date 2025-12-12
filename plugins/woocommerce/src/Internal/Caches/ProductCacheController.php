@@ -48,6 +48,10 @@ class ProductCacheController {
 	final public function init( ProductCache $product_cache ): void {
 		$this->product_cache = $product_cache;
 
+		// Mark cache group as non-persistent immediately to ensure it's set
+		// regardless of when this controller is instantiated relative to other hooks.
+		$this->set_product_cache_group_as_non_persistent();
+
 		// Defer feature check to 'init' to avoid triggering translations too early.
 		add_action( 'init', array( $this, 'on_init' ), 0 );
 	}
@@ -78,9 +82,6 @@ class ProductCacheController {
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		// Set cache group as non-persistent immediately since 'before_woocommerce_init' has already fired.
-		$this->set_product_cache_group_as_non_persistent();
-
 		// Handle direct WordPress post updates (bypassing CRUD).
 		add_action( 'clean_post_cache', array( $this, 'invalidate_product_cache_on_clean' ), 10, 2 );
 
