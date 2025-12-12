@@ -7522,8 +7522,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			$this->sut->onboarding_test_account_init( $location );
 			$this->fail( 'Expected exception was not thrown' );
 		} catch ( \Exception $e ) {
-			// Verify the exception is the expected one from the mocked WP_Error response.
-			$this->assertStringContainsString( 'test_error', $e->getMessage() );
+			// Exception expected from the mocked WP_Error response.
+			// The actual error sanitization is verified in the assertions below.
+			unset( $e );
 		}
 
 		// Assert.
