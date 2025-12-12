@@ -261,8 +261,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// Bail early if the addresses update already have been attempted.
-		$addresses_updated = $order->get_meta( '_paypal_address_update_attempted', true );
-		if ( 'yes' === $addresses_updated ) {
+		$addresses_update_status = $order->get_meta( '_paypal_address_update_status', true );
+		if ( ! empty( $addresses_update_status ) ) {
 			return;
 		}
 
@@ -309,12 +309,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
 			}
 
+			$order->update_meta_data( '_paypal_address_update_status', 'success' );
 			$order->save();
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
-		} finally {
-			// Set the '_paypal_address_update_attempted' flag to 'yes' to prevent repeated API calls on thankyou page reload.
-			$order->update_meta_data( '_paypal_address_update_attempted', 'yes' );
+			$order->update_meta_data( '_paypal_address_update_status', 'failed' );
 			$order->save();
 		}
 	}
