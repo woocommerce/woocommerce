@@ -172,4 +172,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 = 10.4.2 2025-12-12 =
 
+**WooCommerce**
+
+
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
