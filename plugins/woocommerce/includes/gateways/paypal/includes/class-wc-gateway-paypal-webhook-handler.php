@@ -92,6 +92,9 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			);
 			$order->save();
 
+			// Update the addresses in the order with the addresses from the PayPal order details.
+			WC_Gateway_Paypal_Helper::update_addresses_in_order( $order, $event['resource'] );
+
 			// Authorize or capture the payment after approval.
 			$paypal_intent = $event['resource']['intent'] ?? null;
 			$links         = $event['resource']['links'] ?? null;
