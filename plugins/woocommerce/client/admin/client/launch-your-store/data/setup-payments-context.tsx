@@ -40,27 +40,30 @@ export const SetUpPaymentsProvider: React.FC< {
 	// Get the WooPayments provider to access the real plugin slug.
 	// This is important for test/beta versions that may be installed under a different slug.
 	// We also track isFetching to avoid slug instability during initial load.
-	const wooPaymentsPluginSlug = useSelect( ( select ) => {
-		const store = select( paymentSettingsStore );
-		const isFetching = store.isFetching();
-		const providers = store.getPaymentProviders();
+	const wooPaymentsPluginSlug = useSelect(
+		( select ) => {
+			const store = select( paymentSettingsStore );
+			const isFetching = store.isFetching();
+			const providers = store.getPaymentProviders();
 
-		// Defensively check that providers is an array before calling .find().
-		// This prevents runtime errors if getPaymentProviders() returns null/undefined.
-		const wooPaymentsProvider = Array.isArray( providers )
-			? providers.find( ( provider ) => isWooPayments( provider.id ) )
-			: undefined;
+			// Defensively check that providers is an array before calling .find().
+			// This prevents runtime errors if getPaymentProviders() returns null/undefined.
+			const wooPaymentsProvider = Array.isArray( providers )
+				? providers.find( ( provider ) => isWooPayments( provider.id ) )
+				: undefined;
 
-		// Use the real plugin slug from the provider once loaded,
-		// falling back to the official slug while loading or if not found.
-		// This prevents the slug from flipping during initial load,
-		// which would cause dependent selectors to re-run unnecessarily.
-		return ! isFetching && wooPaymentsProvider?.plugin?.slug
-			? wooPaymentsProvider.plugin.slug
-			: wooPaymentsExtensionSlug;
-		// Note: Dependencies are intentionally managed by useSelect's internal subscription.
-		// The selector re-runs automatically when store state changes (isFetching, providers).
-	} );
+			// Use the real plugin slug from the provider once loaded,
+			// falling back to the official slug while loading or if not found.
+			// This prevents the slug from flipping during initial load,
+			// which would cause dependent selectors to re-run unnecessarily.
+			return ! isFetching && wooPaymentsProvider?.plugin?.slug
+				? wooPaymentsProvider.plugin.slug
+				: wooPaymentsExtensionSlug;
+		},
+		// Empty deps array - the selector subscribes to store state internally.
+		// It re-runs automatically when store state changes (isFetching, providers).
+		[]
+	);
 
 	// Check if WooPayments is active by looking for the plugin in the active plugins list.
 	const isWooPaymentsActive = useSelect(
