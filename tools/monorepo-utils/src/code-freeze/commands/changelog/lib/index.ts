@@ -298,7 +298,11 @@ export const updateReleaseBranchChangelogs = async (
 		}
 
 		try {
-			await addMilestoneToIssue( options, pullRequest.number, `${ mainVersion }.0` );
+			await addMilestoneToIssue(
+				options,
+				pullRequest.number,
+				`${ mainVersion }.0`
+			);
 		} catch {
 			Logger.warn(
 				`Could not add milestone "${ mainVersion }.0" to PR ${ pullRequest.number }`

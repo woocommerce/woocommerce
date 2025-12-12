@@ -321,7 +321,9 @@ export const createPullRequest = async ( options: {
 		}
 	);
 
-	const filteredReviewers = reviewers?.filter( ( reviewer ) => reviewer !== pullRequest.data.user.login );
+	const filteredReviewers = reviewers?.filter(
+		( reviewer ) => reviewer !== pullRequest.data.user.login
+	);
 
 	if ( filteredReviewers && filteredReviewers.length > 0 ) {
 		await octokitWithAuth().request(
