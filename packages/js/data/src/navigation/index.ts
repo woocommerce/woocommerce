@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { controls } from '@wordpress/data-controls';
-import { SelectFromMap, DispatchFromMap } from '@automattic/data-stores';
 import { createReduxStore, register } from '@wordpress/data';
 import deprecated from '@wordpress/deprecated';
 
@@ -14,8 +13,13 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer, { State } from './reducer';
 import * as resolvers from './resolvers';
-import initDispatchers from './dispatchers';
-import { WPDataActions, WPDataSelectors } from '../types';
+import initDispatchers, { INTERNAL_CALL } from './dispatchers';
+import {
+	DispatchFromMap,
+	SelectFromMap,
+	WPDataActions,
+	WPDataSelectors,
+} from '../types';
 import { PromiseifySelectors } from '../types/promiseify-selectors';
 
 export { type State };
@@ -27,8 +31,14 @@ function wrapWithDeprecate< T extends Record< string, unknown > >( obj: T ): T {
 		const value = obj[ key ];
 		if ( typeof value === 'function' ) {
 			wrapped[ key ] = function ( this: unknown, ...args: unknown[] ) {
-				// onLoad action is automatically called when initDispatchers is called, skip deprecation message.
-				if ( key !== 'onLoad' ) {
+				// Skip deprecation message for:
+				// - onLoad (automatically called by initDispatchers)
+				// - onHistoryChange when called internally with true flag
+				const shouldSkipDeprecation =
+					( key === 'onLoad' || key === 'onHistoryChange' ) &&
+					args[ 0 ] === INTERNAL_CALL;
+
+				if ( ! shouldSkipDeprecation ) {
 					deprecated( 'Navigation store', {} );
 				}
 				return ( value as ( ...args: unknown[] ) => unknown ).apply(

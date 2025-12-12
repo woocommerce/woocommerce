@@ -55,10 +55,11 @@ final class Container {
 	 * Returns an instance of the specified class.
 	 * See the comment about ContainerException in RuntimeContainer::get.
 	 *
-	 * @template T
-	 * @param string|class-string<T> $id Class name.
+	 * @template T of object
+	 * @param string $id Class name.
+	 * @phpstan-param class-string<T> $id
 	 *
-	 * @return T|object Object instance.
+	 * @return T Object instance.
 	 *
 	 * @throws ContainerException Error when resolving the class to an object instance, or class not found.
 	 * @throws \Exception Exception thrown in the constructor or in the 'init' method of one of the resolved classes.

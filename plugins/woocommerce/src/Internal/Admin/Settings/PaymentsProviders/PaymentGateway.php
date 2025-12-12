@@ -275,11 +275,10 @@ class PaymentGateway {
 	 */
 	public function get_provider_links( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): array {
 		$country_code = strtoupper( sanitize_text_field( $country_code ) );
-		// Validate the country code format, if provided - expect ISO 3166-1 alpha-2.
-		if ( empty( $country_code ) ) {
-			$country_code = '';
-		} elseif ( strlen( $country_code ) !== 2 || ! ctype_upper( $country_code ) ) {
-			// Log so we can investigate.
+		// Validate the country code format - expect ISO 3166-1 alpha-2.
+		// Empty country code is valid (parameter is optional), so only validate non-empty values.
+		if ( '' !== $country_code && ( strlen( $country_code ) !== 2 || ! ctype_upper( $country_code ) ) ) {
+			// Log so we can investigate non-empty invalid country codes.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Received invalid country code when getting provider links. Ignoring it.',
 				array(

@@ -307,6 +307,94 @@ add_filter( 'woocommerce_email_editor_register_personalization_tags', 'your_plug
 
 To learn more about personalization tags, please see the [personalization tags documentation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/php/email-editor/docs/personalization-tags.md) in the `woocommerce/email-editor` package.
 
+### Providing custom context for personalization tags
+
+Use the `woocommerce_email_editor_integration_personalizer_context_data` filter to provide custom context data to your personalization tags. This is useful when your extension needs to pass additional data (such as subscription details, loyalty points, or custom order metadata) that your personalization tag callbacks can access.
+
+**Filter details:**
+
+| Property | Value |
+| -------- | ----- |
+| Hook name | `woocommerce_email_editor_integration_personalizer_context_data` |
+| Since | 10.5.0 |
+| Parameters | `$context` (array), `$email` (\WC_Email) |
+| Returns | array |
+
+**Parameters:**
+
+- `$context` *(array)* – The existing context data array. This may already contain data from WooCommerce core or other extensions.
+- `$email` *(\WC_Email)* – The WooCommerce email object being processed. You can use this to access the email ID, recipient, and the object associated with the email (such as an order or customer).
+
+**Return value:**
+
+Return an array of custom context data along with Woo core context data. This array will be accessible to all personalization tag callbacks through the `$context` parameter.
+
+#### Example: Adding subscription data to context
+
+```php
+/**
+ * Add subscription-related context data for personalization tags.
+ *
+ * @param array     $context The existing context data.
+ * @param \WC_Email $email   The WooCommerce email object.
+ * @return array Modified context data.
+ */
+function your_plugin_add_subscription_context( $context, $email ) {
+    // Only add context for subscription-related emails.
+    if ( strpos( $email->id, 'subscription' ) === false ) {
+        return $context;
+    }
+
+    // Get the order from the email object.
+    $order = $email->object instanceof WC_Order ? $email->object : null;
+
+    if ( ! $order ) {
+        return $context;
+    }
+
+    // Add your custom subscription data to context.
+    $context['subscription_id']       = $order->get_meta( '_subscription_id' );
+    $context['subscription_end_date'] = $order->get_meta( '_subscription_end_date' );
+    $context['renewal_count']         = (int) $order->get_meta( '_renewal_count' );
+
+    return $context;
+}
+add_filter( 'woocommerce_email_editor_integration_personalizer_context_data', 'your_plugin_add_subscription_context', 10, 2 );
+```
+
+#### Example: Using custom context in a personalization tag callback
+
+Once you've added custom data to the context, your personalization tag callbacks can access it:
+
+```php
+/**
+ * Personalization tag callback that uses custom context data.
+ *
+ * @param array $context The context data (includes your custom data).
+ * @param array $args    Optional attributes passed to the tag.
+ * @return string The personalized value.
+ */
+function your_plugin_get_subscription_end_date( $context, $args = array() ) {
+    // Access the custom context data you added via the filter.
+    $end_date = $context['subscription_end_date'] ?? '';
+
+    if ( empty( $end_date ) ) {
+        return __( 'N/A', 'your-plugin' );
+    }
+
+    // Format the date according to site settings.
+    return date_i18n( get_option( 'date_format' ), strtotime( $end_date ) );
+}
+```
+
+**Important notes:**
+
+- The filter is called during email personalization, so your context data is available when personalization tags are processed.
+- Always check if the email type is relevant before adding context data to avoid unnecessary processing.
+- Use unique keys for your context data to prevent conflicts with WooCommerce core or other extensions.
+- The `$email->object` property typically contains the main object associated with the email (e.g., `WC_Order` for order emails, `WP_User` for user-related emails).
+- When using context data in personalization tags, ensure proper escaping based on the output context (e.g., `esc_html()`, `esc_attr()`, `esc_url()`).
+
 ## Complete example
 
 Below is an example of a loyalty program welcome email implementation:

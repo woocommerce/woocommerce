@@ -97,15 +97,24 @@ endif;
  * @param bool     $plain_text Whether the email is being sent as plain text.
  * @param WC_Email $email The email object.
  */
-do_action( 'woocommerce_email_general_block_email', $sent_to_admin, $plain_text, $email );
+do_action( 'woocommerce_email_general_block_content', $sent_to_admin, $plain_text, $email );
 
+/**
+ * Filter the list of email IDs that should not display order details.
+ *
+ * @since 10.5.0
+ * @param array $emails_without_order_details Array of email IDs that should not display order details.
+ */
+$emails_without_order_details = apply_filters( 'woocommerce_emails_general_block_content_emails_without_order_details', array() );
 
 $accounts_related_emails = array(
 	'customer_reset_password',
 	'customer_new_account',
 );
 
-if ( isset( $order ) && ! in_array( $email->id, $accounts_related_emails, true ) ) {
+$emails_without_order_details = array_merge( $emails_without_order_details ?? array(), $accounts_related_emails );
+
+if ( isset( $order ) && ! in_array( $email->id, $emails_without_order_details, true ) ) {
 
 	/**
 	 * Woocommerce_email_order_details
