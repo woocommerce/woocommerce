@@ -48,6 +48,18 @@ class ProductCacheController {
 	final public function init( ProductCache $product_cache ): void {
 		$this->product_cache = $product_cache;
 
+		// Defer feature check to 'init' to avoid triggering translations too early.
+		add_action( 'init', array( $this, 'on_init' ), 0 );
+	}
+
+	/**
+	 * Check feature flag and register hooks on WordPress init.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return void
+	 */
+	public function on_init(): void {
 		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
 			return;
 		}
@@ -58,7 +70,7 @@ class ProductCacheController {
 	/**
 	 * Register the cache invalidation hooks.
 	 *
-	 * This method is separated from init() to allow tests to call it directly
+	 * This method is separated from on_init() to allow tests to call it directly
 	 * after enabling the feature flag.
 	 *
 	 * @since 10.5.0
@@ -66,7 +78,8 @@ class ProductCacheController {
 	 * @return void
 	 */
 	public function register_hooks(): void {
-		add_action( 'before_woocommerce_init', array( $this, 'set_product_cache_group_as_non_persistent' ) );
+		// Set cache group as non-persistent immediately since 'before_woocommerce_init' has already fired.
+		$this->set_product_cache_group_as_non_persistent();
 
 		// Handle direct WordPress post updates (bypassing CRUD).
 		add_action( 'clean_post_cache', array( $this, 'invalidate_product_cache_on_clean' ), 10, 2 );

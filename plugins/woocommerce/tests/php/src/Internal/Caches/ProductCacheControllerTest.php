@@ -100,6 +100,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 		// Create a fresh controller instance to test hook registration.
 		$controller = new ProductCacheController();
 		$controller->init( $this->product_cache );
+		$controller->on_init();
 
 		// Verify hooks are NOT registered when feature is disabled.
 		$this->assertFalse(
@@ -122,6 +123,7 @@ class ProductCacheControllerTest extends \WC_Unit_Test_Case {
 		// Create a fresh controller instance to test hook registration.
 		$controller = new ProductCacheController();
 		$controller->init( $this->product_cache );
+		$controller->on_init();
 
 		// Verify clean_post_cache hook is registered.
 		$this->assertNotFalse(
