@@ -159,4 +159,85 @@ class OrderItemSchemaTest extends TestCase {
 		$this->assertEquals( $item->get_name(), $result['name'] );
 		$this->assertEquals( $item->get_quantity(), $result['quantity'] );
 	}
+
+	/**
+	 * Test that simple products return empty variation array.
+	 *
+	 * Simple products don't have variations, so the variation field should be empty.
+	 * This is consistent with the cart endpoint behavior.
+	 */
+	public function test_get_item_response_simple_product_has_empty_variation(): void {
+		// Arrange - Create a simple product with attributes.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_attributes(
+			array(
+				'size' => new \WC_Product_Attribute(
+					array(
+						'name'    => 'size',
+						'options' => array( 'Small', 'Medium' ),
+					)
+				),
+			)
+		);
+		$product->save();
+
+		// Create an order with this product.
+		$order = new \WC_Order();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		// Act - Get item response.
+		$result = $this->sut->get_item_response( $item );
+
+		// Assert - variation should be empty for simple products.
+		$this->assertArrayHasKey( 'variation', $result );
+		$this->assertIsArray( $result['variation'] );
+		$this->assertEmpty( $result['variation'] );
+
+		// Cleanup.
+		$order->delete( true );
+		$product->delete( true );
+	}
+
+	/**
+	 * Test that product variations return variation attributes.
+	 *
+	 * Product variations should have their selected variation attributes
+	 * included in the response.
+	 */
+	public function test_get_item_response_variation_product_has_variation_data(): void {
+		// Arrange - Create a variable product with variations.
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variations       = $variable_product->get_children();
+		$variation        = wc_get_product( $variations[0] );
+
+		// Create an order with the variation.
+		$order = new \WC_Order();
+		$order->add_product( $variation, 1 );
+		$order->save();
+
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		// Act - Get item response.
+		$result = $this->sut->get_item_response( $item );
+
+		// Assert - variation should contain the variation attributes.
+		$this->assertArrayHasKey( 'variation', $result );
+		$this->assertIsArray( $result['variation'] );
+		$this->assertNotEmpty( $result['variation'] );
+
+		// Verify structure of variation data.
+		$first_variation = $result['variation'][0];
+		$this->assertArrayHasKey( 'raw_attribute', $first_variation );
+		$this->assertArrayHasKey( 'attribute', $first_variation );
+		$this->assertArrayHasKey( 'value', $first_variation );
+
+		// Cleanup.
+		$order->delete( true );
+		$variable_product->delete( true );
+	}
 }
