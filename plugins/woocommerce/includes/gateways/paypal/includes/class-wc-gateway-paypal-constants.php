@@ -30,6 +30,7 @@ class WC_Gateway_Paypal_Constants {
 	const STATUS_APPROVED   = 'APPROVED';
 	const STATUS_CAPTURED   = 'CAPTURED';
 	const STATUS_AUTHORIZED = 'AUTHORIZED';
+	const STATUS_PAYER_ACTION_REQUIRED = 'PAYER_ACTION_REQUIRED';
 
 	/**
 	 * PayPal payment intents.
