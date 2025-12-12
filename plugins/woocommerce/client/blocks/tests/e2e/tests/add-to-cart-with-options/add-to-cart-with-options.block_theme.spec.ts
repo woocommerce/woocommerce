@@ -59,14 +59,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -98,14 +91,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		productGalleryPageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		const variationDescription =
 			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
@@ -288,14 +274,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		// Make Hoodie with Logo to be sold individually.
 		const cliOutput = await wpCLI(
 			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
@@ -825,14 +804,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
 
 		await pageObject.updateSingleProductTemplate();
@@ -944,14 +916,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding simple products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 't-shirt' );
 
 		const addToCartButton = page.getByRole( 'button', {
@@ -966,14 +931,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variable products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 'hoodie' );
 
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
@@ -997,14 +955,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variations to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock(
 			'hoodie',
 			'hoodie-blue-yes'
@@ -1024,14 +975,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 'logo-collection' );
 
 		const increaseQuantityButton = page.getByLabel(

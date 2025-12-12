@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix cached API request in iAPI cart store
