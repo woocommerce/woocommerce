@@ -39,8 +39,8 @@ export const SetUpPaymentsProvider: React.FC< {
 } > = ( { children, closeModal } ) => {
 	// Get the WooPayments provider to access the real plugin slug.
 	// This is important for test/beta versions that may be installed under a different slug.
-	// We also track isFetching to avoid slug instability during initial load.
-	const wooPaymentsPluginSlug = useSelect(
+	// We wait for the fetch to complete before exposing state to prevent slug instability.
+	const { wooPaymentsPluginSlug, isSlugResolved } = useSelect(
 		( select ) => {
 			const store = select( paymentSettingsStore );
 			const isFetching = store.isFetching();
@@ -52,13 +52,18 @@ export const SetUpPaymentsProvider: React.FC< {
 				? providers.find( ( provider ) => isWooPayments( provider.id ) )
 				: undefined;
 
-			// Use the real plugin slug from the provider once loaded,
-			// falling back to the official slug while loading or if not found.
-			// This prevents the slug from flipping during initial load,
-			// which would cause dependent selectors to re-run unnecessarily.
-			return ! isFetching && wooPaymentsProvider?.plugin?.slug
-				? wooPaymentsProvider.plugin.slug
-				: wooPaymentsExtensionSlug;
+			// Return both the slug and resolution state.
+			// We consider the slug "resolved" when:
+			// 1. We're not fetching anymore, AND
+			// 2. Either we found a provider with a slug, or providers loaded but WooPayments isn't present
+			const hasLoadedProviders =
+				! isFetching && Array.isArray( providers );
+			const resolvedSlug = wooPaymentsProvider?.plugin?.slug;
+
+			return {
+				wooPaymentsPluginSlug: resolvedSlug ?? wooPaymentsExtensionSlug,
+				isSlugResolved: hasLoadedProviders,
+			};
 		},
 		// Empty deps array - the selector subscribes to store state internally.
 		// It re-runs automatically when store state changes (isFetching, providers).
@@ -115,6 +120,26 @@ export const SetUpPaymentsProvider: React.FC< {
 		},
 		preserveParams: [ 'sidebar', 'content' ],
 	};
+
+	// Wait for slug resolution to prevent state flipping.
+	// During initial load, we don't know if a test/beta version is installed under a different slug.
+	// Rendering children without waiting could show incorrect UI that then flips after load.
+	if ( ! isSlugResolved ) {
+		// Render children without context-dependent decisions during loading.
+		// This prevents the UI from making incorrect assumptions about WooPayments state.
+		return (
+			<SetUpPaymentsContext.Provider
+				value={ {
+					isWooPaymentsActive: false,
+					isWooPaymentsInstalled: false,
+					wooPaymentsRecentlyActivated: false,
+					setWooPaymentsRecentlyActivated: () => undefined,
+				} }
+			>
+				{ children }
+			</SetUpPaymentsContext.Provider>
+		);
+	}
 
 	return (
 		<SetUpPaymentsContext.Provider
