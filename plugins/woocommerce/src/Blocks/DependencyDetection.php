@@ -8,13 +8,12 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 /**
  * DependencyDetection class.
  *
- * Provides runtime detection of extensions that use WooCommerce globals
+ * Provides runtime detection of extensions that use Blocks related WooCommerce globals
  * (window.wc.*) without properly declaring their PHP script dependencies.
  *
- * This runs by default to warn developers about missing dependencies
- * during the transition period to iAPI-based checkout blocks.
+ * This runs by default to warn developers about missing dependencies.
  *
- * @since 9.8.0
+ * @since 10.5.0
  * @internal
  */
 final class DependencyDetection {
@@ -66,186 +65,25 @@ final class DependencyDetection {
 	 * Output early inline script to set up the Proxy on window.wc.
 	 *
 	 * This must run before any WooCommerce scripts to intercept access.
+	 * The script is loaded from a separate file for better IDE support and testing,
+	 * but output inline to ensure correct timing (before any enqueued scripts).
 	 */
 	public function output_early_proxy_setup(): void {
-		?>
-		<script id="wc-dependency-detection-early">
-		(function() {
-			// Set up a placeholder that will be replaced with the real proxy later.
-			// This ensures we capture window.wc before any WC scripts set it.
-			var originalWc = window.wc || {};
-			var proxyEnabled = false;
-			var scriptRegistry = {};
-			var registryLoaded = false;
-			var warnedScripts = {};
-			var pendingChecks = []; // Queue checks until registry is loaded
+		$script_path = __DIR__ . '/assets/js/dependency-detection-early.js';
 
-			var WC_GLOBAL_TO_HANDLE = {
-				blocksCheckout: 'wc-blocks-checkout',
-				wcBlocksData: 'wc-blocks-data-store'
-			};
+		if ( ! file_exists( $script_path ) ) {
+			return;
+		}
 
-			// Patterns to identify WooCommerce's own scripts (which we should skip).
-			var WC_SCRIPT_PATTERNS = [
-				/\/woocommerce\//i,
-				/\/wc-blocks/i,
-				/wc-blocks-/,
-				/blocks-checkout/,
-				/blocks-components/,
-				/blocks-registry/,
-				/blocks-data/,
-				/price-format/,
-				/checkout-frontend/,
-				/cart-frontend/,
-				/wc-settings/,
-				/wc-payment-method-/
-			];
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file read for inline script output.
+		$script_content = file_get_contents( $script_path );
 
-			function isWooCommerceScript(url) {
-				if (!url) return false;
-				for (var i = 0; i < WC_SCRIPT_PATTERNS.length; i++) {
-					if (WC_SCRIPT_PATTERNS[i].test(url)) {
-						return true;
-					}
-				}
-				return false;
-			}
+		if ( ! $script_content ) {
+			return;
+		}
 
-			function getFilename(url) {
-				if (!url) return 'unknown';
-				var filename = url.split('/').pop().split('?')[0].split('#')[0];
-				return filename || 'unknown';
-			}
-
-			function parseStackForCallerUrl(stack) {
-				if (!stack) return null;
-				var lines = stack.split('\n');
-				for (var i = 1; i < lines.length; i++) {
-					var line = lines[i];
-					// Skip our own detection script lines.
-					if (line.indexOf('wc-dependency-detection') !== -1) continue;
-					if (line.indexOf('Proxy.') !== -1) continue;
-					if (line.indexOf('Reflect.') !== -1) continue;
-					if (line.indexOf('Object.get') !== -1) continue;
-					if (line.indexOf('checkDependency') !== -1) continue;
-					if (line.indexOf('performCheck') !== -1) continue;
-					if (line.indexOf('getCallerScriptUrl') !== -1) continue;
-					if (line.indexOf('parseStackForCallerUrl') !== -1) continue;
-					// Skip native functions (setTimeout, etc.)
-					if (line.indexOf('[native code]') !== -1) continue;
-					if (/^\s*(at\s+)?setTimeout\s*$/.test(line.trim())) continue;
-					// Match URLs pointing to .js files
-					var match = line.match(/(https?:\/\/[^\s\)\?]+\.js)/);
-					if (match) {
-						return match[1];
-					}
-				}
-				return null;
-			}
-
-			function getCallerScriptUrl() {
-				if (document.currentScript && document.currentScript.src) {
-					return document.currentScript.src.replace(/\?.*$/, '');
-				}
-				var stack = new Error().stack;
-				return parseStackForCallerUrl(stack);
-			}
-
-			function checkDependency(callerUrl, prop, requiredHandle) {
-				// Skip WooCommerce's own scripts - they manage their own dependencies.
-				if (isWooCommerceScript(callerUrl)) {
-					return;
-				}
-
-				// If registry not loaded yet, queue the check for later.
-				if (!registryLoaded) {
-					console.warn('[WooCommerce] Dependency registry not loaded yet. Queueing check for later: ' + callerUrl + ' -> ' + prop + ' -> ' + requiredHandle);
-					pendingChecks.push({callerUrl: callerUrl, prop: prop, requiredHandle: requiredHandle});
-					return;
-				}
-
-				performCheck(callerUrl, prop, requiredHandle);
-			}
-
-			function performCheck(callerUrl, prop, requiredHandle) {
-				var warningKey = (callerUrl || 'inline') + ':' + prop;
-				if (warnedScripts[warningKey]) return;
-
-				if (!callerUrl) {
-					console.warn('[WooCommerce] An inline or unknown script accessed wc.' + prop + ' without proper dependency declaration. This script should declare "' + requiredHandle + '" as a dependency.');
-					warnedScripts[warningKey] = true;
-					return;
-				}
-
-				var scriptInfo = scriptRegistry[callerUrl];
-				if (!scriptInfo) {
-					console.warn('[WooCommerce] Unregistered script "' + getFilename(callerUrl) + '" accessed wc.' + prop + '. This script should be registered with wp_enqueue_script() and declare "' + requiredHandle + '" as a dependency.');
-					warnedScripts[warningKey] = true;
-					return;
-				}
-
-				if (scriptInfo.deps.indexOf(requiredHandle) === -1) {
-					console.warn('[WooCommerce] Script "' + scriptInfo.handle + '" accessed wc.' + prop + ' without declaring "' + requiredHandle + '" as a dependency. Add "' + requiredHandle + '" to the script\'s dependencies array.');
-					warnedScripts[warningKey] = true;
-				}
-			}
-
-			/**
-			 * Create the proxy immediately.
-			 *
-			 * wc.blocksCheckout doesn't exist initially but will be set by the blocks-checkout script.
-			 * This catches the access before the script gets the actual object, regardless of when blocksCheckout is created.
-			 */
-
-			function createWcProxy(target) {
-				return new Proxy(target, {
-					get: function(obj, prop) {
-						if (proxyEnabled && WC_GLOBAL_TO_HANDLE[prop]) {
-							var callerUrl = getCallerScriptUrl();
-							checkDependency(callerUrl, prop, WC_GLOBAL_TO_HANDLE[prop]);
-						}
-						return Reflect.get(obj, prop);
-					},
-					set: function(obj, prop, value) {
-						return Reflect.set(obj, prop, value);
-					}
-				});
-			}
-
-			// Create the proxy immediately.
-			var wcProxy = createWcProxy(originalWc);
-
-			// Define window.wc as a getter/setter to maintain the proxy.
-			Object.defineProperty(window, 'wc', {
-				get: function() { return wcProxy; },
-				set: function(newValue) {
-					// When WC scripts set window.wc, wrap the new value.
-					originalWc = newValue;
-					wcProxy = createWcProxy(newValue);
-				},
-				configurable: true,
-				enumerable: true
-			});
-
-			// Expose function to update registry (called later after all scripts registered).
-			window.__wcUpdateDependencyRegistry = function(registry) {
-				scriptRegistry = registry || {};
-				registryLoaded = true;
-
-				// Process any pending checks now that we have the registry.
-				for (var i = 0; i < pendingChecks.length; i++) {
-					var check = pendingChecks[i];
-					performCheck(check.callerUrl, check.prop, check.requiredHandle);
-				}
-				pendingChecks = [];
-			};
-
-			// Enable detection immediately.
-			proxyEnabled = true;
-			console.info('[WooCommerce] Dependency detection enabled. Warnings will be shown for scripts that access wc.* globals without proper dependencies.');
-		})();
-		</script>
-		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Script content is from a trusted local file.
+		echo '<script id="wc-dependency-detection-early">' . $script_content . '</script>' . "\n";
 	}
 
 	/**
