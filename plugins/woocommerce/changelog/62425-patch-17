@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+New action hook to let third parties know about privacy-related order deletion
