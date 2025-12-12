@@ -22,21 +22,10 @@
 		wcBlocksData: 'wc-blocks-data-store',
 	};
 
-	// Patterns to identify WooCommerce's own scripts (which we should skip).
-	const WC_SCRIPT_PATTERNS = [
-		/\/woocommerce\//i,
-		/\/wc-blocks/i,
-		/wc-blocks-/,
-		/blocks-checkout/,
-		/blocks-components/,
-		/blocks-registry/,
-		/blocks-data/,
-		/price-format/,
-		/checkout-frontend/,
-		/cart-frontend/,
-		/wc-settings/,
-		/wc-payment-method-/,
-	];
+	// Pattern to identify WooCommerce core scripts (which we should skip).
+	// Matches /plugins/woocommerce/(client|assets|build)/ but NOT /plugins/woocommerce-subscriptions/ etc.
+	const WC_CORE_SCRIPT_PATTERN =
+		/\/plugins\/woocommerce\/(client|assets|build)\//;
 
 	/**
 	 * Check if a URL belongs to WooCommerce core scripts.
@@ -46,12 +35,7 @@
 	 */
 	function isWooCommerceScript( url ) {
 		if ( ! url ) return false;
-		for ( let i = 0; i < WC_SCRIPT_PATTERNS.length; i++ ) {
-			if ( WC_SCRIPT_PATTERNS[ i ].test( url ) ) {
-				return true;
-			}
-		}
-		return false;
+		return WC_CORE_SCRIPT_PATTERN.test( url );
 	}
 
 	/**
