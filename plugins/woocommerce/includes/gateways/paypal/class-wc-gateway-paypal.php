@@ -246,7 +246,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		// Bail early if the order is not a PayPal order.
-		if ( ! $order || $order->get_payment_method() !== $this->id ) {
+		if ( ! $order instanceof WC_Order || $order->get_payment_method() !== $this->id ) {
 			return;
 		}
 

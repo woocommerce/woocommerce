@@ -156,12 +156,12 @@ class WC_Gateway_Paypal_Helper {
 	/**
 	 * Update the addresses in the order.
 	 *
-	 * @param WC_Order $order The order object.
-	 * @param array    $paypal_order_details The PayPal order details.
+	 * @param WC_Order|null $order The order object.
+	 * @param array         $paypal_order_details The PayPal order details.
 	 * @return void
 	 */
-	public static function update_addresses_in_order( WC_Order $order, array $paypal_order_details ): void {
-		if ( ! $order || empty( $paypal_order_details ) ) {
+	public static function update_addresses_in_order( ?WC_Order $order, array $paypal_order_details ): void {
+		if ( empty( $order ) || empty( $paypal_order_details ) ) {
 			return;
 		}
 
