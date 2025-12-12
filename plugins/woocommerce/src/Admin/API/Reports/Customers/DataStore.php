@@ -200,22 +200,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
-	 * @override ReportsDataStore::normalize_order_by()
-	 *
-	 * @param string $order_by Sorting criterion.
-	 * @return string
-	 */
-	protected function normalize_order_by( $order_by ) {
-		if ( 'name' === $order_by ) {
-			return "CONCAT_WS( ' ', first_name, last_name )";
-		}
-
-		return $order_by;
-	}
-
-	/**
-	 * Maps ordering specified by the user to columns in the database/fields in the data.
-	 *
 	 * Handles both order_by and direction.
 	 *
 	 * @since 10.5.0
@@ -228,9 +212,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order           = strtolower( $order ) === 'asc' ? 'ASC' : 'DESC';
 		$order_by_clause = '';
 
-		if ( 'name' === $order_by ) {
-			$order_by_clause = "CONCAT_WS( ' ', first_name, last_name ) {$order}";
-		} elseif ( 'location' === $order_by ) {
+		if ( 'location' === $order_by ) {
 			$order_by_clause = "state {$order}, country {$order}";
 		} else {
 			$order_by_clause = "{$order_by} {$order}";
@@ -589,8 +571,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->subquery->clear_sql_clause( 'select' );
 		$this->subquery->add_sql_clause( 'select', $selections );
 		// For aggregated fields, ensure deterministic ordering by including GROUP BY field.
-		$order_by = $this->get_sql_clause( 'order_by' );
-		if ( in_array( $order_by, array( 'orders_count', 'total_spend', 'avg_order_value' ), true ) ) {
+		$order_by             = $this->get_sql_clause( 'order_by' );
+		$aggregated_fields    = array( 'orders_count', 'total_spend', 'avg_order_value' );
+		$has_aggregated_field = false;
+
+		foreach ( $aggregated_fields as $field ) {
+			if ( false !== strpos( $order_by, $field ) ) {
+				$has_aggregated_field = true;
+				break;
+			}
+		}
+
+		if ( $has_aggregated_field ) {
 			$this->subquery->add_sql_clause( 'order_by', $order_by . ', customer_id' );
 		} else {
 			$this->subquery->add_sql_clause( 'order_by', $order_by );
@@ -1085,7 +1077,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function build_location_filter_clause( $locations_string, $is_include = true ) {
 		$customer_lookup_table = self::get_db_table_name();
 		$locations_array       = explode( ',', $locations_string );
-		$country_states        = array();
+		$country_state_pairs   = array();
 		$countries             = array();
 
 		foreach ( $locations_array as $location ) {
@@ -1095,7 +1087,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			}
 
 			if ( false !== strpos( $location, ':' ) ) {
-				$country_states[] = esc_sql( $location );
+				$parts = explode( ':', $location );
+				if ( 2 === count( $parts ) ) {
+					$country_state_pairs[] = array(
+						'country' => esc_sql( $parts[0] ),
+						'state'   => esc_sql( $parts[1] ),
+					);
+				}
 			} else {
 				$countries[] = esc_sql( $location );
 			}
@@ -1103,11 +1101,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$conditions = array();
 
-		if ( ! empty( $country_states ) ) {
-			$operator     = $is_include ? 'IN' : 'NOT IN';
-			$conditions[] = "CONCAT_WS( ':', {$customer_lookup_table}.country, {$customer_lookup_table}.state ) {$operator} ('" . implode( "','", $country_states ) . "')";
+		// Build country:state pair conditions.
+		if ( ! empty( $country_state_pairs ) ) {
+			$pair_conditions = array();
+			foreach ( $country_state_pairs as $pair ) {
+				if ( $is_include ) {
+					$pair_conditions[] = "({$customer_lookup_table}.country = '{$pair['country']}' AND {$customer_lookup_table}.state = '{$pair['state']}')";
+				} else {
+					$pair_conditions[] = "({$customer_lookup_table}.country != '{$pair['country']}' OR {$customer_lookup_table}.state != '{$pair['state']}')";
+				}
+			}
+			$pair_connector = $is_include ? ' OR ' : ' AND ';
+			$conditions[]   = '(' . implode( $pair_connector, $pair_conditions ) . ')';
 		}
 
+		// Build country-only conditions.
 		if ( ! empty( $countries ) ) {
 			$operator     = $is_include ? 'IN' : 'NOT IN';
 			$conditions[] = "{$customer_lookup_table}.country {$operator} ('" . implode( "','", $countries ) . "')";
