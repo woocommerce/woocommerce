@@ -8,14 +8,15 @@
 - [Comments in Tests](#comments-in-tests)
 - [Test Configuration](#test-configuration)
 - [Example: Payment Extension Suggestions Tests](#example-payment-extension-suggestions-tests)
+- [Mocking the WooCommerce Logger](#mocking-the-woocommerce-logger)
 - [General Testing Best Practices](#general-testing-best-practices)
 
 ## Test File Naming and Location
 
-| Source | Test | Pattern |
-|--------|------|---------|
-| `includes/` classes | `tests/php/includes/{path}/class-wc-{name}-test.php` | Add `-test` suffix |
-| `src/` classes | `tests/php/src/{path}/{name}Test.php` | Append `Test` (no hyphen) |
+| Source               | Test                                                 | Pattern                  |
+| -------------------- | ---------------------------------------------------- | ------------------------ |
+| `includes/` classes  | `tests/php/includes/{path}/class-wc-{name}-test.php` | Add `-test` suffix       |
+| `src/` classes       | `tests/php/src/{path}/{name}Test.php`                | Append `Test` (no hyphen)|
 
 Test class: Same name as source class + `_Test` or `Test` suffix, extends `WC_Unit_Test_Case`
 
@@ -226,6 +227,54 @@ When working with payment extension suggestions:
 2. **When adding new countries** to the implementation, update both data providers in the test file
 3. **Tests are separated by merchant type** (online vs offline) as they have different extension counts
 4. **Data providers use descriptive keys** (country names) for better test output
+
+## Mocking the WooCommerce Logger
+
+When testing code that uses `wc_get_logger()` (directly or via `SafeGlobalFunctionProxy::wc_get_logger()`), use the `woocommerce_logging_class` filter to inject a fake logger.
+
+### Why the Filter Approach?
+
+- `register_legacy_proxy_function_mocks` doesn't intercept `SafeGlobalFunctionProxy` calls
+- Passing an object (not a class name string) bypasses `wc_get_logger()`'s internal cache
+
+### Creating a Fake Logger
+
+The fake logger must implement `WC_Logger_Interface`. Create an anonymous class with public arrays to track calls (`$debug_calls`, `$warning_calls`, etc.) and implement all interface methods (`add`, `log`, `debug`, `info`, `warning`, `error`, `emergency`, `alert`, `critical`, `notice`).
+
+### Using the Fake Logger
+
+```php
+public function test_logs_warning_for_invalid_input(): void {
+    $fake_logger = $this->create_fake_logger();
+
+    // Inject via filter - passing object bypasses cache.
+    add_filter(
+        'woocommerce_logging_class',
+        function () use ( $fake_logger ) {
+            return $fake_logger;
+        }
+    );
+
+    $this->sut->process_input( 'invalid-value' );
+
+    $this->assertCount( 1, $fake_logger->warning_calls );
+
+    remove_all_filters( 'woocommerce_logging_class' ); // Always clean up.
+}
+```
+
+### Key Points
+
+| Aspect       | Detail                                          |
+| ------------ | ----------------------------------------------- |
+| Filter name  | `woocommerce_logging_class`                     |
+| Return value | Object instance (not class name string)         |
+| Interface    | Must implement `WC_Logger_Interface`            |
+| Cleanup      | Always call `remove_all_filters()` after test   |
+
+### Reference
+
+See `PaymentGatewayTest.php:create_fake_logger()` for a complete implementation.
 
 ## General Testing Best Practices
 

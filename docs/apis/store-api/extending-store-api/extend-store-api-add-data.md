@@ -12,7 +12,7 @@ ExtendSchema offers the possibility to add contextual custom data to Store API e
 
 You can use ExtendSchema by registering a couple of functions, `schema_callback` and `data_callback` on a specific endpoint namespace. ExtendSchema will call them at execution time and will pass them relevant data as well.
 
-This example below uses the Cart endpoint, [see passed parameters.](./available-endpoints-to-extend.md#wcstorecart)
+This example below uses the Cart endpoint, [see passed parameters.](./available-endpoints-to-extend.md)
 
 **Note: Make sure to read the "Things to consider" section below.**
 
