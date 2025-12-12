@@ -30,7 +30,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		expect( isScriptEnqueued ).toBe( false );
 	} );
 
-	test( 'should add product to the cart', async ( { frontendUtils, page } ) => {
+	test( 'should add product to the cart', async ( {
+		frontendUtils,
+		page,
+	} ) => {
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		const block = blocks.first();
 
