@@ -72,7 +72,11 @@ class OrderItemSchema extends ItemSchema {
 			$product_properties['prices']             = $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) );
 			$product_properties['sold_individually']  = $product->is_sold_individually();
 			$product_properties['images']             = $this->get_images( $product );
-			$product_properties['variation']          = $this->format_variation_data( $product->get_attributes(), $product );
+			// Only include variation data for product variations, not simple products.
+			// This is consistent with the cart endpoint behavior.
+			if ( $product instanceof \WC_Product_Variation ) {
+				$product_properties['variation'] = $this->format_variation_data( $product->get_attributes(), $product );
+			}
 		}
 
 		return [
