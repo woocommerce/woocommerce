@@ -301,6 +301,7 @@ class WC_Privacy extends WC_Abstract_Privacy {
 
 		if ( $orders ) {
 			foreach ( $orders as $order ) {
+				do_action( 'wc_privacy_before_trash_order', $order );
 				$order->delete( false );
 				++$count;
 			}
