@@ -48,26 +48,44 @@ class ProductCacheController {
 	final public function init( ProductCache $product_cache ): void {
 		$this->product_cache = $product_cache;
 
-		add_action( 'before_woocommerce_init', array( $this, 'maybe_set_product_cache_group_as_non_persistent' ) );
+		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+			return;
+		}
+
+		$this->register_hooks();
+	}
+
+	/**
+	 * Register the cache invalidation hooks.
+	 *
+	 * This method is separated from init() to allow tests to call it directly
+	 * after enabling the feature flag.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return void
+	 */
+	public function register_hooks(): void {
+		add_action( 'before_woocommerce_init', array( $this, 'set_product_cache_group_as_non_persistent' ) );
 
 		// Handle direct WordPress post updates (bypassing CRUD).
-		add_action( 'clean_post_cache', array( $this, 'maybe_invalidate_product_cache_on_clean' ), 10, 2 );
+		add_action( 'clean_post_cache', array( $this, 'invalidate_product_cache_on_clean' ), 10, 2 );
 
 		// Handle post meta updates (third-party plugins updating via postmeta API).
-		add_action( 'updated_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 2 );
-		add_action( 'added_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 2 );
-		add_action( 'deleted_post_meta', array( $this, 'maybe_invalidate_product_cache_by_meta' ), 10, 2 );
+		add_action( 'updated_post_meta', array( $this, 'invalidate_product_cache_by_meta' ), 10, 2 );
+		add_action( 'added_post_meta', array( $this, 'invalidate_product_cache_by_meta' ), 10, 2 );
+		add_action( 'deleted_post_meta', array( $this, 'invalidate_product_cache_by_meta' ), 10, 2 );
 
 		// Handle direct stock/sales updates (which uses direct SQL and cache manipulation, bypassing standard meta hooks)
 		// In the future, update WC_Product_Data_Store_CPT::update_product_stock() and
 		// update_product_sales() to trigger standard WordPress updated_post_meta hooks instead
 		// of requiring specific hooks here.
-		add_action( 'woocommerce_updated_product_stock', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
-		add_action( 'woocommerce_updated_product_sales', array( $this, 'maybe_invalidate_product_cache' ), 10, 1 );
+		add_action( 'woocommerce_updated_product_stock', array( $this, 'invalidate_product_cache' ), 10, 1 );
+		add_action( 'woocommerce_updated_product_sales', array( $this, 'invalidate_product_cache' ), 10, 1 );
 	}
 
 	/**
-	 * Set the `product_objects` cache group as non-persistent if product instance caching is enabled.
+	 * Set the `product_objects` cache group as non-persistent.
 	 *
 	 * With product instance caching enabled, products are cached in-memory during a request
 	 * rather than being persisted to external cache backends.  If WC_Data:__sleep()/::__wakeup() methods are eventually
@@ -78,10 +96,8 @@ class ProductCacheController {
 	 *
 	 * @return void
 	 */
-	public function maybe_set_product_cache_group_as_non_persistent() {
-		if ( FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
-			wp_cache_add_non_persistent_groups( array( $this->product_cache->get_object_type() ) );
-		}
+	public function set_product_cache_group_as_non_persistent(): void {
+		wp_cache_add_non_persistent_groups( array( $this->product_cache->get_object_type() ) );
 	}
 
 	/**
@@ -94,7 +110,7 @@ class ProductCacheController {
 	 *
 	 * @return void
 	 */
-	public function maybe_invalidate_product_cache_on_clean( $post_id, $post ) {
+	public function invalidate_product_cache_on_clean( $post_id, $post ): void {
 		$post_id = (int) $post_id;
 		/**
 		 * It's important not to trigger get_post() during this callback as some extensions may attempt to clean cache
@@ -116,7 +132,7 @@ class ProductCacheController {
 	 *
 	 * @return void
 	 */
-	public function maybe_invalidate_product_cache( $post_id ) {
+	public function invalidate_product_cache( $post_id ): void {
 		$post_id   = (int) $post_id;
 		$post_type = get_post_type( $post_id );
 		if ( ! $post_type || ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
@@ -136,10 +152,10 @@ class ProductCacheController {
 	 *
 	 * @return void
 	 */
-	public function maybe_invalidate_product_cache_by_meta( $meta_id, $object_id ) {
+	public function invalidate_product_cache_by_meta( $meta_id, $object_id ): void {
 		$object_id = (int) $object_id;
 		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
-			$this->maybe_invalidate_product_cache( $object_id );
+			$this->invalidate_product_cache( $object_id );
 		}
 	}
 }
