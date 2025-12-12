@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Swap core/post-content render callback only during email rendering to prevent conflicts with other plugins like MailPoet.
