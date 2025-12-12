@@ -3,8 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
-
 /**
  * DependencyDetection class.
  *
@@ -17,13 +15,6 @@ use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
  * @internal
  */
 final class DependencyDetection {
-
-	/**
-	 * Asset API interface for script registration.
-	 *
-	 * @var AssetApi
-	 */
-	private $api;
 
 	/**
 	 * WooCommerce script handles that we track for dependency detection.
@@ -47,11 +38,8 @@ final class DependencyDetection {
 
 	/**
 	 * Constructor.
-	 *
-	 * @param AssetApi $asset_api Asset API interface.
 	 */
-	public function __construct( AssetApi $asset_api ) {
-		$this->api = $asset_api;
+	public function __construct() {
 		$this->init();
 	}
 
@@ -59,9 +47,6 @@ final class DependencyDetection {
 	 * Initialize hooks.
 	 */
 	public function init(): void {
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_detection_script' ), 1 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'register_detection_script' ), 1 );
-
 		// Build registry late (after all scripts registered) but output the inline script early.
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_detection_script' ), 999 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_detection_script' ), 999 );
@@ -79,7 +64,7 @@ final class DependencyDetection {
 	 * but output inline to ensure correct timing (before any enqueued scripts).
 	 */
 	public function output_early_proxy_setup(): void {
-		$script_path = __DIR__ . '/assets/js/dependency-detection-early.js';
+		$script_path = __DIR__ . '/assets/js/dependency-detection.js';
 
 		if ( ! file_exists( $script_path ) ) {
 			return;
@@ -93,19 +78,7 @@ final class DependencyDetection {
 		}
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Script content is from a trusted local file.
-		echo '<script id="wc-dependency-detection-early">' . $script_content . '</script>' . "\n";
-	}
-
-	/**
-	 * Register the dependency detection script.
-	 */
-	public function register_detection_script(): void {
-		$this->api->register_script(
-			'wc-dependency-detection',
-			'assets/client/blocks/dependency-detection.js',
-			array(),
-			false
-		);
+		echo '<script id="wc-dependency-detection">' . $script_content . '</script>' . "\n";
 	}
 
 	/**
