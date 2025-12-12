@@ -1,5 +1,10 @@
 == Changelog ==
 
+= 10.4.2 2025-12-12 =
+
+**WooCommerce**
+
+
 = 10.4.0 2025-12-10 =
 
 **WooCommerce**
