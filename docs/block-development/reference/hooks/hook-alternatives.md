@@ -264,7 +264,6 @@ These hooks run on every Woo page load, some affect the blocks, some don't, some
 | `woocommerce_quantity_input_type` | Not supported ❌ | This is possible by modifying the quantity_limits property of the cart item in the `woocommerce_store_api_product_quantity_{$value_type}` filter. |
 | `woocommerce_cart_item_quantity` | Not supported ❌ | This is possible by modifying the quantity_limits property of the cart item in the `woocommerce_store_api_product_quantity_{$value_type}` filter. |
 | `woocommerce_cart_product_subtotal` | Not supported ❌ | |
-| `woocommerce_cart_item_subtotal` | Not supported ❌ | |
 | `woocommerce_cross_sells_columns` | Not supported ❌ | The cross sells are rendered as an inner block. |
 | `woocommerce_cross_sells_orderby` | Not supported ❌ | The cross sells are rendered as an inner block. |
 | `woocommerce_cross_sells_order` | Not supported ❌ | The cross sells are rendered as an inner block. |

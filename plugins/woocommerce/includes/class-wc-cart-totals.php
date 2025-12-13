@@ -730,7 +730,7 @@ final class WC_Cart_Totals {
 				}
 			}
 
-			$item->subtotal = $item->price;
+			$item->subtotal = apply_filters( 'woocommerce_cart_item_subtotal', $item->price, $item, $item_key );
 
 			if ( $this->calculate_tax && $item->product->is_taxable() ) {
 				$item->subtotal_taxes = WC_Tax::calc_tax( $item->subtotal, $item->tax_rates, $item->price_includes_tax );
