@@ -5027,7 +5027,7 @@
   </wp:postmeta>
 </item>
 <item>
-  <title>Auto-select T-shirt - Green, S </title>
+  <title>Auto-select T-shirt - Green, S</title>
   <link>https://woocommercecore.mystagingwebsite.com/product/autoselect-t-shirt/?attribute_type=T-shirt&amp;attribute_color=Green&amp;attribute_size=S</link>
   <pubDate>Wed, 16 Jan 2019 13:01:54 +0000</pubDate>
   <dc:creator>shopmanager</dc:creator>
@@ -5040,7 +5040,7 @@
   <wp:post_date_gmt>2019-01-16 13:01:54</wp:post_date_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>autoselect-t-shirt</wp:post_name>
+  <wp:post_name>autoselect-t-shirt-green-s</wp:post_name>
   <wp:status>publish</wp:status>
   <wp:post_parent>53</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -5218,7 +5218,7 @@
   <wp:post_date_gmt>2019-01-16 13:01:54</wp:post_date_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>autoselect-t-shirt</wp:post_name>
+  <wp:post_name>autoselect-t-shirt-red-l</wp:post_name>
   <wp:status>publish</wp:status>
   <wp:post_parent>53</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -5396,7 +5396,7 @@
   <wp:post_date_gmt>2019-01-16 13:01:54</wp:post_date_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>autoselect-t-shirt</wp:post_name>
+  <wp:post_name>autoselect-t-shirt-red-xl</wp:post_name>
   <wp:status>publish</wp:status>
   <wp:post_parent>53</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
@@ -5574,7 +5574,7 @@
   <wp:post_date_gmt>2019-01-16 13:01:54</wp:post_date_gmt>
   <wp:comment_status>closed</wp:comment_status>
   <wp:ping_status>closed</wp:ping_status>
-  <wp:post_name>autoselect-t-shirt</wp:post_name>
+  <wp:post_name>autoselect-t-shirt-blue-xl</wp:post_name>
   <wp:status>publish</wp:status>
   <wp:post_parent>53</wp:post_parent>
   <wp:menu_order>0</wp:menu_order>
