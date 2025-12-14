@@ -96,12 +96,14 @@ function SelectTemplateBody( {
 			return;
 		}
 
-		setTimeout( () => {
+		const timeoutId = setTimeout( () => {
 			const defaultCategory =
 				displayCategories.find( ( cat ) => cat.name !== 'recent' )
 					?.name ?? displayCategories[ 0 ]?.name;
 			setSelectedCategory( defaultCategory );
 		}, 1000 ); // using setTimeout to ensure the template styles are available before block preview
+
+		return () => clearTimeout( timeoutId );
 	}, [ displayCategories, selectedCategory ] );
 
 	return (
