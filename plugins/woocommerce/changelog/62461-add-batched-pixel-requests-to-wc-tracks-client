@@ -1,4 +1,4 @@
 Significance: minor
-Type: add
+Type: performance
 
 Implement batched pixel requests for improved performance when sending tracking events.
