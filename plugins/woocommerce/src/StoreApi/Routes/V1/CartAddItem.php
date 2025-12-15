@@ -98,6 +98,17 @@ class CartAddItem extends AbstractCartRoute {
 			throw new RouteException( 'woocommerce_rest_cart_item_exists', esc_html__( 'Cannot create an existing cart item.', 'woocommerce' ), 400 );
 		}
 
+		// Collect extra fields from the request that aren't part of the schema.
+		// These are passed to cart_item_data for plugins like Gift Cards that expect
+		// additional product-specific data (e.g., wc_gc_giftcard_to, wc_gc_giftcard_from).
+		$known_keys     = array( 'id', 'quantity', 'variation', 'key' );
+		$cart_item_data = array();
+		foreach ( $request->get_params() as $key => $value ) {
+			if ( ! in_array( $key, $known_keys, true ) ) {
+				$cart_item_data[ $key ] = $value;
+			}
+		}
+
 		/**
 		 * Filters cart item data sent via the API before it is passed to the cart controller.
 		 *
@@ -119,7 +130,7 @@ class CartAddItem extends AbstractCartRoute {
 				'id'             => $request['id'],
 				'quantity'       => $request['quantity'],
 				'variation'      => $request['variation'],
-				'cart_item_data' => [],
+				'cart_item_data' => $cart_item_data,
 			),
 			$request
 		);
