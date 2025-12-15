@@ -556,8 +556,9 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
  *
  * @since 10.5.0
  * @param WC_Product $product Product object.
+ * @return void
  */
-function wc_schedule_product_sale_events( WC_Product $product ) {
+function wc_schedule_product_sale_events( WC_Product $product ): void {
 	$product_id = $product->get_id();
 	$date_from  = $product->get_date_on_sale_from( 'edit' );
 	$date_to    = $product->get_date_on_sale_to( 'edit' );
@@ -565,7 +566,7 @@ function wc_schedule_product_sale_events( WC_Product $product ) {
 	if ( $date_from ) {
 		$start_ts = $date_from->getTimestamp();
 		if ( $start_ts > time() ) {
-			as_schedule_single_action(
+			as_schedule_single_action( // @phpstan-ignore function.notFound -- Action Scheduler.
 				$start_ts,
 				'wc_product_start_scheduled_sale',
 				array( 'product_id' => $product_id ),
@@ -577,7 +578,7 @@ function wc_schedule_product_sale_events( WC_Product $product ) {
 	if ( $date_to ) {
 		$end_ts = $date_to->getTimestamp();
 		if ( $end_ts > time() ) {
-			as_schedule_single_action(
+			as_schedule_single_action( // @phpstan-ignore function.notFound -- Action Scheduler.
 				$end_ts,
 				'wc_product_end_scheduled_sale',
 				array( 'product_id' => $product_id ),
@@ -596,8 +597,9 @@ function wc_schedule_product_sale_events( WC_Product $product ) {
  * @since 10.5.0
  * @param WC_Product $product Product object.
  * @param string     $mode    'start' or 'end'.
+ * @return void
  */
-function wc_apply_sale_state_for_product( WC_Product $product, string $mode ) {
+function wc_apply_sale_state_for_product( WC_Product $product, string $mode ): void {
 	$product_id = $product->get_id();
 
 	if ( 'start' === $mode ) {
@@ -640,8 +642,9 @@ function wc_apply_sale_state_for_product( WC_Product $product, string $mode ) {
  *
  * @since 10.5.0
  * @param int $product_id Product ID.
+ * @return void
  */
-function wc_handle_product_start_scheduled_sale( $product_id ) {
+function wc_handle_product_start_scheduled_sale( $product_id ): void {
 	$product = wc_get_product( $product_id );
 	if ( ! $product ) {
 		return;
@@ -684,8 +687,9 @@ add_action( 'wc_product_start_scheduled_sale', 'wc_handle_product_start_schedule
  *
  * @since 10.5.0
  * @param int $product_id Product ID.
+ * @return void
  */
-function wc_handle_product_end_scheduled_sale( $product_id ) {
+function wc_handle_product_end_scheduled_sale( $product_id ): void {
 	$product = wc_get_product( $product_id );
 	if ( ! $product ) {
 		return;
@@ -717,8 +721,9 @@ add_action( 'wc_product_end_scheduled_sale', 'wc_handle_product_end_scheduled_sa
  * @since 10.5.0
  * @param int             $product_id Product ID.
  * @param WC_Product|null $product    Product object (optional).
+ * @return void
  */
-function wc_maybe_schedule_product_sale_events( $product_id, $product = null ) {
+function wc_maybe_schedule_product_sale_events( $product_id, $product = null ): void {
 	if ( ! $product ) {
 		$product = wc_get_product( $product_id );
 		if ( ! $product ) {
@@ -729,8 +734,8 @@ function wc_maybe_schedule_product_sale_events( $product_id, $product = null ) {
 	$product_id = $product->get_id();
 
 	// Always clear existing events first.
-	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
-	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
+	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ); // @phpstan-ignore function.notFound -- Action Scheduler.
+	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ); // @phpstan-ignore function.notFound -- Action Scheduler.
 
 	$date_from = $product->get_date_on_sale_from( 'edit' );
 	$date_to   = $product->get_date_on_sale_to( 'edit' );

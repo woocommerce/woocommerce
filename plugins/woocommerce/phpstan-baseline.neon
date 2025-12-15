@@ -42100,12 +42100,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Function wc_apply_sale_state_for_product\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Function wc_deferred_product_sync\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -42166,31 +42160,7 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Function wc_handle_product_end_scheduled_sale\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Function wc_handle_product_start_scheduled_sale\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Function wc_maybe_schedule_product_sale_events\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Function wc_product_force_unique_sku\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Function wc_schedule_product_sale_events\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/wc-product-functions.php
