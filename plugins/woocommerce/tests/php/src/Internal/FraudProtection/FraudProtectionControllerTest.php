@@ -11,19 +11,16 @@ use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
  * Tests for the FraudProtectionController class.
  */
 class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
-	/**
-	 * @var FraudProtectionController
-	 */
-	private $controller;
 
 	/**
-	 * Setup test case.
+	 * Get a fresh controller instance with reset container.
+	 *
+	 * @return FraudProtectionController
 	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		// Get controller instance from container.
-		$this->controller = wc_get_container()->get( FraudProtectionController::class );
+	private function get_fresh_controller(): FraudProtectionController {
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		return $container->get( FraudProtectionController::class );
 	}
 
 	/**
@@ -97,9 +94,7 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_fraud_protection_enabled', 'no' );
 
 		// Get a fresh controller instance.
-		$container = wc_get_container();
-		$container->reset_all_resolved();
-		$controller = $container->get( FraudProtectionController::class );
+		$controller = $this->get_fresh_controller();
 
 		// Count hooks before calling on_init.
 		global $wp_filter;
@@ -121,9 +116,7 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_register_registers_init_action(): void {
 		// Get a fresh controller instance.
-		$container = wc_get_container();
-		$container->reset_all_resolved();
-		$controller = $container->get( FraudProtectionController::class );
+		$controller = $this->get_fresh_controller();
 
 		// Call register.
 		$controller->register();
@@ -143,9 +136,7 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
 
 		// Get a fresh controller instance to pick up the option change.
-		$container = wc_get_container();
-		$container->reset_all_resolved();
-		$controller = $container->get( FraudProtectionController::class );
+		$controller = $this->get_fresh_controller();
 
 		// Check if the method returns true.
 		$this->assertTrue( $controller->feature_is_enabled() );
@@ -159,9 +150,7 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_feature_fraud_protection_enabled', 'no' );
 
 		// Get a fresh controller instance to pick up the option change.
-		$container = wc_get_container();
-		$container->reset_all_resolved();
-		$controller = $container->get( FraudProtectionController::class );
+		$controller = $this->get_fresh_controller();
 
 		// Check if the method returns false.
 		$this->assertFalse( $controller->feature_is_enabled() );
