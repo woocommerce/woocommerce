@@ -175,7 +175,7 @@ Here's a simple example:
 
 ```js
 const CustomButton = ( props ) => {
-	const { validate, onSubmit, disabled, isEditor, isPreview, eventRegistration: { onPaymentSetup }, } = props;
+	const { validate, onSubmit, disabled, isEditor, isPreview, eventRegistration: { onPaymentSetup }, emitResponse } = props;
 
 	const [
 		isShowingInternalPaymentSheet,
@@ -209,7 +209,7 @@ const CustomButton = ( props ) => {
     () =>
       onPaymentSetup( () => {
         return ({
-          type: paymentResultRef.current ? 'success' : 'error',
+          type: paymentResultRef.current ? emitResponse.responseTypes.SUCCESS : emitResponse.responseTypes.ERROR,
           meta: {
             paymentMethodData: {
               payment_method: 'your-payment-method',
@@ -217,7 +217,7 @@ const CustomButton = ( props ) => {
           },
         });
       } ),
-    [ onPaymentSetup ]
+    [ onPaymentSetup, emitResponse.responseTypes.SUCCESS, emitResponse.responseTypes.ERROR ]
   );
 
 	// In editor/preview mode, show a placeholder or preview version
