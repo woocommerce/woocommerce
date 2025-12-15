@@ -51,7 +51,6 @@ const PlaceOrderButton = ( {
 	const { isEditor, isPreview = false } = useEditorContext();
 
 	const { cartTotals, cartIsLoading } = useStoreCart();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	// when provided, the `CustomButtonComponent` should take precedence over the default button.
 	if ( CustomButtonComponent ) {
@@ -123,7 +122,9 @@ const PlaceOrderButton = ( {
 						<div className="wc-block-components-checkout-place-order-button__price">
 							<FormattedMonetaryAmount
 								value={ cartTotals.total_price }
-								currency={ totalsCurrency }
+								currency={ getCurrencyFromPriceResponse(
+									cartTotals
+								) }
 							/>
 						</div>
 					</>
