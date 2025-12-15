@@ -127,7 +127,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Test that pixels are queued when batching is enabled.
 	 */
-	public function test_record_pixel_queues_pixel_when_batching_enabled() {
+	public function test_record_pixel_batched_queues_pixel_when_batching_enabled() {
 		// Ensure batching is supported.
 		if ( ! class_exists( 'WpOrg\Requests\Requests' ) && ! class_exists( 'Requests' ) ) {
 			$this->markTestSkipped( 'Requests library not available for batching.' );
@@ -135,8 +135,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		$pixel = 'https://pixel.wp.com/t.gif?_en=test_event&test=value';
 
-		// Record the pixel.
-		WC_Tracks_Client::record_pixel( $pixel );
+		// Record the pixel using batched method.
+		WC_Tracks_Client::record_pixel_batched( $pixel );
 
 		// Get the batch queue.
 		$queue = $this->get_batch_queue();
@@ -147,9 +147,30 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that record_pixel sends immediately without batching.
+	 */
+	public function test_record_pixel_sends_immediately() {
+		$pixel = 'https://pixel.wp.com/t.gif?_en=test_event&test=value';
+
+		// Clear intercepted requests.
+		$this->intercepted_requests = array();
+
+		// Record the pixel using immediate method.
+		WC_Tracks_Client::record_pixel( $pixel );
+
+		// Should be sent immediately, not queued.
+		$queue = $this->get_batch_queue();
+		$this->assertEmpty( $queue, 'Pixel should not be queued when using record_pixel().' );
+
+		// Should have been sent immediately via HTTP.
+		$this->assertCount( 1, $this->intercepted_requests, 'Pixel should be sent immediately.' );
+		$this->assertStringContainsString( '_en=test_event', $this->intercepted_requests[0]['url'] );
+	}
+
+	/**
 	 * Test that multiple pixels are queued correctly.
 	 */
-	public function test_record_multiple_pixels_queues_all() {
+	public function test_record_multiple_pixels_batched_queues_all() {
 		// Ensure batching is supported.
 		if ( ! class_exists( 'WpOrg\Requests\Requests' ) && ! class_exists( 'Requests' ) ) {
 			$this->markTestSkipped( 'Requests library not available for batching.' );
@@ -159,9 +180,9 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		$pixel2 = 'https://pixel.wp.com/t.gif?_en=event2';
 		$pixel3 = 'https://pixel.wp.com/t.gif?_en=event3';
 
-		WC_Tracks_Client::record_pixel( $pixel1 );
-		WC_Tracks_Client::record_pixel( $pixel2 );
-		WC_Tracks_Client::record_pixel( $pixel3 );
+		WC_Tracks_Client::record_pixel_batched( $pixel1 );
+		WC_Tracks_Client::record_pixel_batched( $pixel2 );
+		WC_Tracks_Client::record_pixel_batched( $pixel3 );
 
 		$queue = $this->get_batch_queue();
 
@@ -174,7 +195,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Test that shutdown hook is registered when pixels are queued.
 	 */
-	public function test_shutdown_hook_registered_when_pixel_queued() {
+	public function test_shutdown_hook_registered_when_pixel_batched() {
 		// Ensure batching is supported.
 		if ( ! class_exists( 'WpOrg\Requests\Requests' ) && ! class_exists( 'Requests' ) ) {
 			$this->markTestSkipped( 'Requests library not available for batching.' );
@@ -182,8 +203,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		$pixel = 'https://pixel.wp.com/t.gif?_en=test_event';
 
-		// Record the pixel.
-		WC_Tracks_Client::record_pixel( $pixel );
+		// Record the pixel using batched method.
+		WC_Tracks_Client::record_pixel_batched( $pixel );
 
 		// Check if the shutdown hook is registered.
 		$this->assertNotFalse(
@@ -201,8 +222,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 			$this->markTestSkipped( 'Requests library not available for batching.' );
 		}
 
-		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event1' );
-		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event2' );
+		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event1' );
+		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event2' );
 
 		// Get the priority value (should be 20).
 		$priority = has_action( 'shutdown', array( 'WC_Tracks_Client', 'send_batched_pixels' ) );
@@ -235,7 +256,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		$pixel = 'https://pixel.wp.com/t.gif?_en=test_event';
 
 		// Queue a pixel.
-		WC_Tracks_Client::record_pixel( $pixel );
+		WC_Tracks_Client::record_pixel_batched( $pixel );
 
 		// Clear intercepted requests before sending.
 		$this->intercepted_requests = array();
@@ -284,8 +305,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		$pixel = 'https://pixel.wp.com/t.gif?_en=test_event';
 
-		// Record the pixel.
-		WC_Tracks_Client::record_pixel( $pixel );
+		// Record the pixel using batched method (but filter will disable batching).
+		WC_Tracks_Client::record_pixel_batched( $pixel );
 
 		// Queue should be empty since batching is disabled.
 		$queue = $this->get_batch_queue();
@@ -309,8 +330,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		$pixel = 'https://pixel.wp.com/t.gif?_en=test_event';
 
-		// Record the pixel.
-		WC_Tracks_Client::record_pixel( $pixel );
+		// Record the pixel using batched method.
+		WC_Tracks_Client::record_pixel_batched( $pixel );
 
 		// Queue should have the pixel.
 		$queue = $this->get_batch_queue();
@@ -444,9 +465,9 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		}
 
 		// Queue multiple pixels.
-		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event1' );
-		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event2' );
-		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event3' );
+		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event1' );
+		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event2' );
+		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event3' );
 
 		$queue = $this->get_batch_queue();
 		$this->assertCount( 3, $queue );
@@ -472,8 +493,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		$this->intercepted_requests = array();
 
 		// Record multiple pixels.
-		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event1&prop=value1' );
-		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event2&prop=value2' );
+		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event1&prop=value1' );
+		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event2&prop=value2' );
 
 		// Send batched pixels.
 		WC_Tracks_Client::send_batched_pixels();
@@ -501,7 +522,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		$this->intercepted_requests = array();
 
 		// Record a pixel (should use fallback method).
-		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=fallback_event' );
+		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=fallback_event' );
 
 		// Verify that HTTP request was intercepted.
 		$this->assertCount( 1, $this->intercepted_requests, 'Should have intercepted 1 HTTP request.' );

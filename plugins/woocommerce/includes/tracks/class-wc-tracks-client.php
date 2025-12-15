@@ -118,12 +118,65 @@ class WC_Tracks_Client {
 	}
 
 	/**
+	 * Record a Tracks event using batched requests for improved performance.
+	 * Events are queued and sent together on the shutdown hook.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param  array $event Array of event properties.
+	 * @return bool|WP_Error         True on success, WP_Error on failure.
+	 */
+	public static function record_event_batched( $event ) {
+		if ( ! $event instanceof WC_Tracks_Event ) {
+			$event = new WC_Tracks_Event( $event );
+		}
+
+		if ( is_wp_error( $event ) ) {
+			return $event;
+		}
+
+		$pixel = $event->build_pixel_url( $event );
+
+		if ( ! $pixel ) {
+			return new WP_Error( 'invalid_pixel', 'cannot generate tracks pixel for given input', 400 );
+		}
+
+		return self::record_pixel_batched( $pixel );
+	}
+
+	/**
 	 * Synchronously request the pixel.
 	 *
 	 * @param string $pixel pixel url and query string.
 	 * @return bool Always returns true.
 	 */
 	public static function record_pixel( $pixel ) {
+		// Add the Request Timestamp and no cache parameter just before the HTTP request.
+		$pixel = self::add_request_timestamp_and_nocache( $pixel );
+
+		wp_safe_remote_get(
+			$pixel,
+			array(
+				'blocking'    => false,
+				'redirection' => 2,
+				'httpversion' => '1.1',
+				'timeout'     => 1,
+			)
+		);
+
+		return true;
+	}
+
+	/**
+	 * Record a pixel using batched requests for improved performance.
+	 * Pixels are queued and sent together on the shutdown hook.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param string $pixel pixel url and query string.
+	 * @return bool Always returns true.
+	 */
+	public static function record_pixel_batched( $pixel ) {
 		// Check if batching is enabled and supported.
 		$use_batching = self::can_use_batch_requests();
 
@@ -143,20 +196,7 @@ class WC_Tracks_Client {
 		}
 
 		// Fallback to immediate sending if batching is not supported or disabled.
-		// Add the Request Timestamp and no cache parameter just before the HTTP request.
-		$pixel = self::add_request_timestamp_and_nocache( $pixel );
-
-		wp_safe_remote_get(
-			$pixel,
-			array(
-				'blocking'    => false,
-				'redirection' => 2,
-				'httpversion' => '1.1',
-				'timeout'     => 1,
-			)
-		);
-
-		return true;
+		return self::record_pixel( $pixel );
 	}
 
 	/**
