@@ -37920,7 +37920,7 @@ parameters:
 		-
 			message: '#^Call to function is_wp_error\(\) with WC_Tracks_Event will always evaluate to false\.$#'
 			identifier: function.impossibleType
-			count: 2
+			count: 1
 			path: includes/tracks/class-wc-tracks-client.php
 
 		-

@@ -129,8 +129,8 @@ class WC_Tracks_Client {
 			$event = new WC_Tracks_Event( $event );
 		}
 
-		if ( is_wp_error( $event ) ) {
-			return $event;
+		if ( isset( $event->error ) && is_wp_error( $event->error ) ) {
+			return $event->error;
 		}
 
 		$pixel = $event->build_pixel_url();
