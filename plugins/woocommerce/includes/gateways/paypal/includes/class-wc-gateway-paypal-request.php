@@ -379,6 +379,12 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
+		// Skip if the payment is voided.
+		if ( WC_Gateway_Paypal_Constants::VOIDED === $paypal_status ) {
+			WC_Gateway_Paypal::log( 'PayPal payment voided. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
 		$authorization_id = $this->get_authorization_id_for_capture( $order );
 		if ( ! $authorization_id ) {
 			WC_Gateway_Paypal::log( 'Authorization ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
