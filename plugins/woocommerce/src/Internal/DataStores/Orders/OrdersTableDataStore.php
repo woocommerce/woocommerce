@@ -1676,12 +1676,12 @@ WHERE
 			$new_diff      = ArrayUtil::deep_assoc_array_diff( $order1_values, $order2_values );
 			if ( ! empty( $new_diff ) && $sync ) {
 				if ( count( $order2_values ) > 1 ) {
-					$sync && $order1->delete_meta_data( $key );
+					$order1->delete_meta_data( $key );
 					foreach ( $order2_values as $post_order_value ) {
-						$sync && $order1->add_meta_data( $key, $post_order_value, false );
+						$order1->add_meta_data( $key, $post_order_value, false );
 					}
 				} else {
-					$sync && $order1->update_meta_data( $key, $order2_values[0] );
+					$order1->update_meta_data( $key, $order2_values[0] );
 				}
 				$diff[ $key ] = $new_diff;
 				unset( $order2_meta_by_key[ $key ] );
@@ -3135,6 +3135,15 @@ FROM $order_meta_table
 			$query_vars['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
 		}
 
+		/**
+		 * Filter the query args before executing the query.
+		 *
+		 * @param array $query_vars The query vars.
+		 * @return array
+		 * @since 10.4.0
+		 */
+		$query_vars = apply_filters( 'woocommerce_orders_table_datastore_get_orders_query', $query_vars, $this );
+
 		try {
 			$query = new OrdersTableQuery( $query_vars );
 		} catch ( \Exception $e ) {
@@ -3314,6 +3323,7 @@ CREATE TABLE $meta_table (
 					array( '%d', '%s', '%s' )
 				);
 				wp_cache_delete( $object->get_id(), 'post_meta' );
+				/** @var \WC_Logger_Interface $logger */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID %d: "%s"', $object->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 			} else {

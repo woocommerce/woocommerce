@@ -8,6 +8,7 @@ import {
 	useEffect,
 	useLayoutEffect,
 	useState,
+	useMemo,
 } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import { store as editorStore } from '@wordpress/editor';
@@ -21,7 +22,6 @@ import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
 import { createStore, storeName } from './store';
-import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 import {
 	initEventCollector,
@@ -36,11 +36,7 @@ import {
 } from './hooks';
 import { cleanupConfigurationChanges } from './config-tools';
 import { getEditorConfigFromWindow } from './store/settings';
-import {
-	EmailEditorSettings,
-	EmailTheme,
-	EmailEditorUrls,
-} from './store/types';
+import { EmailEditorConfig } from './store/types';
 
 function Editor( {
 	postId,
@@ -73,16 +69,19 @@ function Editor( {
 	const stylesContentRef = useFilterEditorContentStylesheets();
 	const mergedContentRef = useMergeRefs( [ stylesContentRef, contentRef ] );
 
+	// Set allowed blockTypes and isPreviewMode to the editor settings.
+	const editorSettings = useMemo(
+		() => ( {
+			...settings,
+			allowedBlockTypes: getAllowedBlockNames(),
+			isPreviewMode: isPreview,
+		} ),
+		[ settings, isPreview ]
+	);
+
 	if ( ! isInitialized ) {
 		return null;
 	}
-
-	// Set allowed blockTypes and isPreviewMode to the editor settings.
-	const editorSettings = {
-		...settings,
-		allowedBlockTypes: getAllowedBlockNames(),
-		isPreviewMode: isPreview,
-	};
 
 	return (
 		<StrictMode>
@@ -104,7 +103,6 @@ function onInit() {
 	initContentValidationMiddleware();
 	initializeLayout();
 	initBlocks();
-	initHooks();
 	initTextHooks();
 }
 
@@ -128,6 +126,7 @@ export function initialize( elementId: string ) {
 		'woocommerce_email_editor_wrap_editor_component',
 		Editor
 	) as typeof Editor;
+
 	onInit();
 
 	// Set configuration to store from window object for backward compatibility
@@ -154,22 +153,16 @@ export function ExperimentalEmailEditor( {
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
-	config?: {
-		editorSettings: EmailEditorSettings;
-		theme: EmailTheme;
-		urls: EmailEditorUrls;
-		userEmail: string;
-		globalStylesPostId?: number | null;
-	};
+	config?: EmailEditorConfig;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
 	useLayoutEffect( () => {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
-		onInit();
-
 		// Set configuration to store from window object for backward compatibility
 		const editorConfig = config || getEditorConfigFromWindow();
+		onInit();
+
 		dispatch( storeName ).setEditorConfig( editorConfig );
 		setIsInitialized( true );
 		// Cleanup global editor settings

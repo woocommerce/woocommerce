@@ -115,7 +115,10 @@ export async function createMessage( options: Options ) {
 			: `Run: ${ runId }/${ runAttempt }, triggered by ${ triggeringActor }`
 	);
 	const actorBlock = getTextContextElement( `Actor: ${ actor }` );
-	const lastRunButtonBlock = getButton( 'Run', getRunUrl( options, false ) );
+	const lastRunButtonBlock = getButton(
+		'View Run',
+		getRunUrl( options, false )
+	);
 	buttons.push( lastRunButtonBlock );
 
 	if ( eventName === 'pull_request' ) {

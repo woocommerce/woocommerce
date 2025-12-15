@@ -271,19 +271,49 @@ function wc_product_post_type_link( $permalink, $post ) {
 	// Get the custom taxonomy terms in use by this post.
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
-	if ( ! empty( $terms ) ) {
-		$terms           = wp_list_sort(
-			$terms,
-			array(
-				'parent'  => 'DESC',
-				'term_id' => 'ASC',
-			)
-		);
-		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $terms[0], $terms, $post );
+	if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+		// Find the deepest category (most ancestors) for the permalink.
+		$deepest_term      = $terms[0];
+		$deepest_ancestors = $deepest_term->parent ? get_ancestors( $deepest_term->term_id, 'product_cat' ) : array();
+
+		foreach ( $terms as $term ) {
+			if ( $term->term_id === $deepest_term->term_id ) {
+				continue;
+			}
+			// Skip root categories - they can't be deeper than current.
+			if ( ! $term->parent ) {
+				continue;
+			}
+			$ancestors = get_ancestors( $term->term_id, 'product_cat' );
+			if ( count( $ancestors ) > count( $deepest_ancestors ) ) {
+				$deepest_ancestors = $ancestors;
+				$deepest_term      = $term;
+			}
+		}
+
+		/**
+		 * Filter the product category used for the product permalink.
+		 *
+		 * By default, the deepest category (most ancestors) is selected. Prior to 9.9.0,
+		 * categories were sorted by parent term ID descending, then term ID ascending.
+		 * This filter allows customization of which category is used in the product permalink.
+		 *
+		 * @since 2.4.0
+		 * @since 9.9.0 Selection algorithm changed to use deepest category instead of sort order.
+		 *
+		 * @param WP_Term   $deepest_term The selected category term object (deepest category since 9.9.0).
+		 * @param WP_Term[] $terms        All category terms assigned to the product.
+		 * @param WP_Post   $post         The product post object.
+		 */
+		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $deepest_term, $terms, $post );
+		$category_object = ! $category_object instanceof WP_Term ? $deepest_term : $category_object;
 		$product_cat     = $category_object->slug;
 
 		if ( $category_object->parent ) {
-			$ancestors = get_ancestors( $category_object->term_id, 'product_cat' );
+			// Reuse cached ancestors if the filter didn't change the category, otherwise fetch them.
+			$ancestors = ( $category_object->term_id === $deepest_term->term_id )
+				? $deepest_ancestors
+				: get_ancestors( $category_object->term_id, 'product_cat' );
 			foreach ( $ancestors as $ancestor ) {
 				$ancestor_object = get_term( $ancestor, 'product_cat' );
 				if ( apply_filters( 'woocommerce_product_post_type_link_parent_category_only', false ) ) {
@@ -317,7 +347,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		date_i18n( 'H', strtotime( $post->post_date ) ),
 		date_i18n( 'i', strtotime( $post->post_date ) ),
 		date_i18n( 's', strtotime( $post->post_date ) ),
-		$post->ID,
+		(string) $post->ID,
 		$product_cat,
 		$product_cat,
 	);
@@ -1291,12 +1321,33 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$order       = ArrayUtil::get_value_or_default( $args, 'order' );
 		$customer_id = $order ? $order->get_customer_id() : 0;
+		$tax_rates   = false;
+
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-		} else {
-			$customer  = $customer_id ? wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id ) : null;
+		} elseif ( $customer_id ) {
+			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
+		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
+			$tax_location = $order->get_taxable_location();
+			if ( is_array( $tax_location ) && isset( $tax_location['country'] ) ) {
+				$tax_rates = WC_Tax::find_rates(
+					array(
+						'country'   => $tax_location['country'],
+						'state'     => $tax_location['state'] ?? '',
+						'postcode'  => $tax_location['postcode'] ?? '',
+						'city'      => $tax_location['city'] ?? '',
+						'tax_class' => $product->get_tax_class(),
+					)
+				);
+			}
 		}
+
+		// Fallback if no tax rates were determined.
+		if ( false === $tax_rates ) {
+			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), null );
+		}
+
 		$remove_taxes = WC_Tax::calc_tax( $line_price, $tax_rates, true );
 		$return_price = $line_price - array_sum( $remove_taxes ); // Unrounded since we're dealing with tax inclusive prices. Matches logic in cart-totals class. @see adjust_non_base_location_price.
 	} else {

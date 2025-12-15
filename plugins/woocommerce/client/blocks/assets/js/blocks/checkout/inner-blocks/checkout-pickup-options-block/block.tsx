@@ -127,6 +127,8 @@ const renderPickupLocation = (
 				<Icon
 					icon={ mapMarker }
 					className="wc-block-editor-components-block-icon"
+					width={ 16 }
+					height={ 16 }
 				/>
 				{ decodeEntities( address ) }
 			</>
@@ -207,12 +209,15 @@ const Block = () => {
 		renderPickupLocation,
 	};
 
+	const packageData = shippingRates[ 0 ] || null;
+
 	return (
 		<>
 			<ExperimentalOrderLocalPickupPackages.Slot { ...slotFillProps } />
 			<ExperimentalOrderLocalPickupPackages>
 				<LocalPickupSelect
-					title={ shippingRates[ 0 ].name }
+					title={ packageData?.name }
+					packageData={ packageData }
 					selectedOption={ selectedOption ?? '' }
 					renderPickupLocation={ renderPickupLocation }
 					pickupLocations={ pickupLocations }

@@ -12,7 +12,6 @@ import { storeName } from './constants';
 import {
 	SendingPreviewStatus,
 	State,
-	PersonalizationTag,
 	ContentValidation,
 	EmailEditorSettings,
 	EmailTheme,
@@ -44,6 +43,19 @@ export function setEmailPost( postId: number | string, postType: string ) {
 	return {
 		type: 'SET_EMAIL_POST',
 		state: { postId, postType } as Partial< State >,
+	} as const;
+}
+
+export function setEmailPostType( postType: string ) {
+	if ( ! postType ) {
+		throw new Error(
+			'setEmailPostType requires a valid postType parameter'
+		);
+	}
+
+	return {
+		type: 'SET_EMAIL_POST',
+		state: { postType } as Partial< State >,
 	} as const;
 }
 
@@ -106,24 +118,6 @@ export function* requestSendingNewsletterPreview( email: string ) {
 			},
 		};
 	}
-}
-
-export function setIsFetchingPersonalizationTags( isFetching: boolean ) {
-	return {
-		type: 'SET_IS_FETCHING_PERSONALIZATION_TAGS',
-		state: {
-			isFetching,
-		} as Partial< State[ 'personalizationTags' ] >,
-	} as const;
-}
-
-export function setPersonalizationTagsList( list: PersonalizationTag[] ) {
-	return {
-		type: 'SET_PERSONALIZATION_TAGS_LIST',
-		state: {
-			list,
-		} as Partial< State[ 'personalizationTags' ] >,
-	} as const;
 }
 
 export function setContentValidation(

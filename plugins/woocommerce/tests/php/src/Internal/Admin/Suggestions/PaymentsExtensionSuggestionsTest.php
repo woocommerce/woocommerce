@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Suggestions;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestionIncentives;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use WC_Unit_Test_Case;
@@ -723,24 +724,24 @@ class PaymentsExtensionSuggestionsTest extends WC_Unit_Test_Case {
 			array(
 				// These are coming from the per-country details.
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_PRICING,
+					'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 					'url'   => 'https://www.klarna.com/mx/negocios/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_TERMS,
+					'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 					'url'   => 'https://www.klarna.com/mx/terminos-y-condiciones/',
 				),
 				// These are base details for the suggestion.
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'https://woocommerce.com/products/klarna-payments/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_DOCS,
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 					'url'   => 'https://woocommerce.com/document/klarna-payments/',
 				),
 				array(
-					'_type' => PaymentsExtensionSuggestions::LINK_TYPE_SUPPORT,
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-payments',
 				),
 			),

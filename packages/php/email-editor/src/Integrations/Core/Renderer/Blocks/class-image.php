@@ -98,19 +98,61 @@ class Image extends Abstract_Block_Renderer {
 		// Can't determine any width let's go with 100%.
 		if ( ! isset( $parsed_block['email_attrs']['width'] ) ) {
 			$parsed_block['attrs']['width'] = '100%';
+			return $parsed_block;
 		}
 		$max_width = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] );
 
-		if ( $image_url ) {
-			$upload_dir = wp_upload_dir();
-			$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
-			$image_size = wp_getimagesize( $image_path );
+		$image_size = null;
 
-			$image_size = $image_size ? $image_size[0] : $max_width;
-			$width      = min( $image_size, $max_width );
-		} else {
-			$width = $max_width;
+		if ( $image_url ) {
+			// Try to extract width from URL query parameter if it exists.
+			$parsed_url = wp_parse_url( $image_url );
+			if ( isset( $parsed_url['query'] ) ) {
+				parse_str( $parsed_url['query'], $query_params );
+				if ( isset( $query_params['w'] ) && is_numeric( $query_params['w'] ) && $query_params['w'] > 0 ) {
+					$image_size = (int) $query_params['w'];
+				}
+			}
+
+			// Next we check the attachment data if it has an ID.
+			if ( ! isset( $image_size ) ) {
+				$attachment_id = $parsed_block['attrs']['id'] ?? null;
+				if ( $attachment_id ) {
+					$size_slug = $parsed_block['attrs']['sizeSlug'] ?? 'large';
+
+					// Check the metadata first.
+					$metadata = wp_get_attachment_metadata( $attachment_id );
+					if ( $metadata ) {
+						if ( isset( $metadata['sizes'][ $size_slug ]['width'] ) ) {
+							$image_size = (int) $metadata['sizes'][ $size_slug ]['width'];
+						} elseif ( 'full' === $size_slug && isset( $metadata['width'] ) ) {
+							$image_size = (int) $metadata['width'];
+						}
+					}
+
+					// Try to get dimensions from wp_get_attachment_image_src if metadata didn't have it.
+					if ( ! isset( $image_size ) ) {
+						$image_src = wp_get_attachment_image_src( $attachment_id, $size_slug );
+						if ( $image_src && isset( $image_src[1] ) ) {
+							$image_size = (int) $image_src[1];
+						}
+					}
+				}
+			}
+
+			// Fallback to wp_getimagesize if we still don't have a size.
+			if ( ! isset( $image_size ) ) {
+				$upload_dir = wp_upload_dir();
+				$image_path = str_replace( $upload_dir['baseurl'], $upload_dir['basedir'], $image_url );
+				$result     = wp_getimagesize( $image_path );
+				if ( $result ) {
+					$image_size = (int) $result[0];
+				}
+			}
 		}
+
+		// Use the found image size or fall back to max_width.
+		$width = isset( $image_size ) ? min( $image_size, $max_width ) : $max_width;
 
 		$parsed_block['attrs']['width'] = "{$width}px";
 		return $parsed_block;

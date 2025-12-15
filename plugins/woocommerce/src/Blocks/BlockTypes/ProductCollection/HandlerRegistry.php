@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use InvalidArgumentException;
 
 /**
@@ -330,6 +331,25 @@ class HandlerRegistry {
 				return $collection_args;
 			}
 		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/cart-contents',
+			function ( $collection_args ) {
+				$cart_product_ids = $collection_args['cartProductIds'] ?? null;
+				if ( empty( $cart_product_ids ) ) {
+					return array( 'post__in' => array( -1 ) );
+				}
+				return array( 'post__in' => $cart_product_ids );
+			},
+			function ( $collection_args, $query ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, null );
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, $request );
+				return $collection_args;
+			}
+		);
 		return $this->collection_handler_store;
 	}
 
@@ -377,5 +397,50 @@ class HandlerRegistry {
 			);
 		}
 		return $product_references;
+	}
+
+	/**
+	 * Get cart product IDs from various sources.
+	 * Handles loading cart products from location context or request params.
+	 *
+	 * @param array                 $collection_args Collection arguments with location context.
+	 * @param \WP_REST_Request|null $request         Optional REST request for editor context.
+	 * @return array<int> The product IDs from the cart. Returns recent products for preview in editor context only.
+	 */
+	private function get_cart_product_ids( $collection_args, $request = null ) {
+		$location = $collection_args['productCollectionLocation'] ?? array();
+
+		if ( $request ) {
+			$user_id    = $request->get_param( 'userId' ) ? absint( $request->get_param( 'userId' ) ) : null;
+			$user_email = $request->get_param( 'userEmail' ) ? sanitize_email( $request->get_param( 'userEmail' ) ) : null;
+			if ( $user_id || $user_email ) {
+				$cart_ids = CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
+				if ( ! empty( $cart_ids ) ) {
+					return $cart_ids;
+				}
+			}
+			// In editor context (REST request), show sample products for preview when cart is empty.
+			$recent_product_ids = wc_get_products(
+				array(
+					'status'  => 'publish',
+					'orderby' => 'date',
+					'order'   => 'DESC',
+					'limit'   => 3,
+					'return'  => 'ids',
+				)
+			);
+			return ! empty( $recent_product_ids ) ? $recent_product_ids : array();
+		}
+
+		if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
+			$user_id    = isset( $location['sourceData']['userId'] ) ? absint( $location['sourceData']['userId'] ) : null;
+			$user_email = isset( $location['sourceData']['userEmail'] ) ? sanitize_email( $location['sourceData']['userEmail'] ) : null;
+			if ( $user_id || $user_email ) {
+				return CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
+			}
+		}
+
+		// In frontend/email context, return empty array when no cart is found.
+		return array();
 	}
 }
