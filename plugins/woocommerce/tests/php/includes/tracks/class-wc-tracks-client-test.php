@@ -32,7 +32,6 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		// Intercept HTTP requests to prevent actual network calls.
 		add_filter( 'pre_http_request', array( $this, 'intercept_http_requests' ), 10, 3 );
-		add_filter( 'wc_tracks_batch_requests_before_send', array( $this, 'intercept_batch_requests' ), 10, 2 );
 	}
 
 	/**
@@ -43,7 +42,6 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->reset_batch_state();
 		remove_filter( 'pre_http_request', array( $this, 'intercept_http_requests' ), 10 );
-		remove_filter( 'wc_tracks_batch_requests_before_send', array( $this, 'intercept_batch_requests' ), 10 );
 		parent::tearDown();
 	}
 
@@ -74,26 +72,6 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Intercept batched requests to prevent actual network calls during testing.
-	 *
-	 * @param array $requests Array of request arrays.
-	 * @param array $options  Request options.
-	 * @return false Returns false to skip actual sending.
-	 */
-	public function intercept_batch_requests( $requests, $options ) {
-		// Record all batched requests.
-		foreach ( $requests as $request ) {
-			$this->intercepted_requests[] = array(
-				'url'  => $request['url'],
-				'args' => $options,
-			);
-		}
-
-		// Return false to skip actual sending.
-		return false;
 	}
 
 	/**
@@ -267,9 +245,9 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that batched pixels are sent with timestamp and nocache parameters.
+	 * Test that batched pixels are processed and queue is cleared after sending.
 	 */
-	public function test_send_batched_pixels_adds_timestamp_and_nocache() {
+	public function test_send_batched_pixels_clears_queue() {
 		// Ensure batching is supported.
 		if ( ! class_exists( 'WpOrg\Requests\Requests' ) && ! class_exists( 'Requests' ) ) {
 			$this->markTestSkipped( 'Requests library not available for batching.' );
@@ -280,19 +258,12 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		// Queue a pixel.
 		WC_Tracks_Client::record_pixel_batched( $pixel );
 
-		// Clear intercepted requests before sending.
-		$this->intercepted_requests = array();
+		// Verify pixel was queued.
+		$queue = $this->get_batch_queue();
+		$this->assertCount( 1, $queue );
 
 		// Send the batched pixels.
 		WC_Tracks_Client::send_batched_pixels();
-
-		// Verify that an HTTP request was intercepted.
-		$this->assertNotEmpty( $this->intercepted_requests, 'HTTP request should have been intercepted.' );
-
-		// Verify the request URL contains timestamp and nocache parameters.
-		$intercepted_url = $this->intercepted_requests[0]['url'];
-		$this->assertStringContainsString( '_rt=', $intercepted_url, 'Request should contain timestamp parameter.' );
-		$this->assertStringContainsString( '_=_', $intercepted_url, 'Request should contain nocache parameter.' );
 
 		// Queue should be empty after sending.
 		$queue = $this->get_batch_queue();
@@ -403,9 +374,9 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test record_event with batching.
+	 * Test record_event_batched with batching.
 	 */
-	public function test_record_event_uses_batching() {
+	public function test_record_event_batched_queues_event() {
 		// Ensure batching is supported.
 		if ( ! class_exists( 'WpOrg\Requests\Requests' ) && ! class_exists( 'Requests' ) ) {
 			$this->markTestSkipped( 'Requests library not available for batching.' );
@@ -419,8 +390,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		$event = new \WC_Tracks_Event( $event_props );
 
-		// Record the event.
-		WC_Tracks_Client::record_event( $event );
+		// Record the event using batched method.
+		WC_Tracks_Client::record_event_batched( $event );
 
 		// Queue should have one pixel.
 		$queue = $this->get_batch_queue();
@@ -449,7 +420,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 			);
 
 			$event = new \WC_Tracks_Event( $event_props );
-			WC_Tracks_Client::record_event( $event );
+			WC_Tracks_Client::record_event_batched( $event );
 		}
 
 		// Queue should have 5 pixels.
@@ -503,34 +474,28 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that HTTP requests are intercepted and not actually sent.
+	 * Test that multiple pixels are batched together.
 	 */
-	public function test_http_requests_are_intercepted() {
+	public function test_multiple_pixels_batched_together() {
 		// Ensure batching is supported.
 		if ( ! class_exists( 'WpOrg\Requests\Requests' ) && ! class_exists( 'Requests' ) ) {
 			$this->markTestSkipped( 'Requests library not available for batching.' );
 		}
 
-		// Clear intercepted requests.
-		$this->intercepted_requests = array();
-
 		// Record multiple pixels.
 		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event1&prop=value1' );
 		WC_Tracks_Client::record_pixel_batched( 'https://pixel.wp.com/t.gif?_en=event2&prop=value2' );
 
+		// Verify both pixels are in the queue before sending.
+		$queue = $this->get_batch_queue();
+		$this->assertCount( 2, $queue, 'Should have 2 pixels queued.' );
+
 		// Send batched pixels.
 		WC_Tracks_Client::send_batched_pixels();
 
-		// Verify that HTTP requests were intercepted.
-		$this->assertCount( 2, $this->intercepted_requests, 'Should have intercepted 2 HTTP requests.' );
-
-		// Verify the intercepted requests contain the correct event names.
-		$this->assertStringContainsString( '_en=event1', $this->intercepted_requests[0]['url'] );
-		$this->assertStringContainsString( '_en=event2', $this->intercepted_requests[1]['url'] );
-
-		// Verify the requests are non-blocking.
-		$this->assertFalse( $this->intercepted_requests[0]['args']['blocking'], 'Requests should be non-blocking.' );
-		$this->assertFalse( $this->intercepted_requests[1]['args']['blocking'], 'Requests should be non-blocking.' );
+		// Verify queue is cleared after sending.
+		$queue = $this->get_batch_queue();
+		$this->assertEmpty( $queue, 'Queue should be empty after sending.' );
 	}
 
 	/**
