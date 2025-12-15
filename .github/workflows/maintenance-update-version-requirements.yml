@@ -97,6 +97,7 @@ jobs:
           fi
 
           # Add changelog entry.
+          rm -f changelog/update-version-requirements-wp-and-php-via-automation
           composer exec -- changelogger add \
             --significance minor \
             --type update \

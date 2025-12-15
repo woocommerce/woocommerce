@@ -107,6 +107,7 @@ jobs:
 
         composer update woocommerce/action-scheduler --no-scripts
 
+        rm -f changelog/update-action-scheduler-via-automation
         composer exec -- changelogger add \
           --significance minor \
           --type update \
