@@ -37942,18 +37942,6 @@ parameters:
 			path: includes/tracks/class-wc-tracks-client.php
 
 		-
-			message: '#^Call to function method_exists\(\) with ''WpOrg\\\\Requests\\\\Requests'' and ''request_multiple'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/tracks/class-wc-tracks-client.php
-
-		-
-			message: '#^Call to function method_exists\(\) with ''Requests'' and ''request_multiple'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/tracks/class-wc-tracks-client.php
-
-		-
 			message: '#^Method WC_Tracks_Client\:\:queue_pixel_for_batch\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
