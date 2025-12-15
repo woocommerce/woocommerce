@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: Store API: Orders endpoint now returns an empty array for the `variation` field on simple products, matching cart endpoint behavior.

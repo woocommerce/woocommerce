@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add category tabs navigation to email template selection modal. The TemplateCategory type is now a string to support dynamic categories loaded from block patterns.
