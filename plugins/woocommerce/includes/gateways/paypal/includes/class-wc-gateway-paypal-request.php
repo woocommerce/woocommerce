@@ -606,7 +606,7 @@ class WC_Gateway_Paypal_Request {
 		if ( $purchase_unit_amount['value'] <= 0 ) {
 			// If we cannot build purchase unit amount (e.g. negative or zero order total),
 			// we should not proceed with the create-order request.
-			throw new Exception( 'Cannot build PayPal order purchase unit amount. Order total is not valid. Order ID: ' . esc_html( $order->get_id() ) . ', Total: ' . esc_html( $purchase_unit_amount['value'] ) );
+			throw new Exception( 'Cannot build PayPal order purchase unit amount. Order total is not valid. Order ID: ' . esc_html( (string) $order->get_id() ) . ', Total: ' . esc_html( (string) $purchase_unit_amount['value'] ) );
 		}
 
 		$order_items = $this->get_paypal_order_items( $order );
