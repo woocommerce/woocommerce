@@ -37942,6 +37942,18 @@ parameters:
 			path: includes/tracks/class-wc-tracks-client.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''WpOrg\\\\Requests\\\\Requests'' and ''request_multiple'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/tracks/class-wc-tracks-client.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Requests'' and ''request_multiple'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/tracks/class-wc-tracks-client.php
+
+		-
 			message: '#^Access to an undefined property object\:\:\$_en\.$#'
 			identifier: property.notFound
 			count: 1
