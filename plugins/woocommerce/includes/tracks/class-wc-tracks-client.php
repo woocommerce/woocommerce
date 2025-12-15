@@ -4,6 +4,7 @@
  *
  * @package WooCommerce\Tracks
  */
+
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
