@@ -151,7 +151,7 @@ The options you feed the configuration instance should be an object in this shap
 | Property                  | Type              | Description                                                                                                                                      |
 |---------------------------|-------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
 | `savedTokenComponent`     | ReactNode         | A React node that contains logic for handling saved payment methods. Rendered when a customer's saved token for this payment method is selected. |
-| `label`                   | ReactNode         | A React node used to output the label for the payment method option. Can be text or images.                                                      |
+| `label`                   | ReactNode         | A React node used to output the label for the payment method option. This can be text or images.                                                 |
 | `ariaLabel`               | string            | The label read by screen-readers when the payment method is selected.                                                                            |
 | `placeOrderButtonLabel`   | string            | Optional label to change the default "Place Order" button text when this payment method is selected. Mutually exclusive with `placeOrderButton`. |
 | `placeOrderButton`        | React Component   | Optional React component to replace the default "Place Order" button when this payment method is selected. Mutually exclusive with `placeOrderButtonLabel`. The component receives `PaymentMethodInterface` props. |
