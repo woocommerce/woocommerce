@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add method to retrieve email pattern categories from block patterns. Renamed 'basic' email pattern category to 'newsletter'.
+Add category tabs navigation to email template selection modal.

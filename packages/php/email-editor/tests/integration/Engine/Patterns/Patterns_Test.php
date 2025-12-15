@@ -38,18 +38,6 @@ class Patterns_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertArrayHasKey( 'email-contents', $categories_by_name );
 		$this->assertEquals( 'Email Contents', $categories_by_name['email-contents']['label'] );
 		$this->assertEquals( 'A collection of email content layouts.', $categories_by_name['email-contents']['description'] );
-
-		$this->assertArrayHasKey( 'newsletter', $categories_by_name );
-		$this->assertEquals( 'Newsletter', $categories_by_name['newsletter']['label'] );
-		$this->assertEquals( 'A collection of newsletter email layouts.', $categories_by_name['newsletter']['description'] );
-
-		$this->assertArrayHasKey( 'welcome', $categories_by_name );
-		$this->assertEquals( 'Welcome', $categories_by_name['welcome']['label'] );
-		$this->assertEquals( 'A collection of welcome email layouts.', $categories_by_name['welcome']['description'] );
-
-		$this->assertArrayHasKey( 'abandoned-cart', $categories_by_name );
-		$this->assertEquals( 'Abandoned cart', $categories_by_name['abandoned-cart']['label'] );
-		$this->assertEquals( 'A collection of abandoned cart email layouts.', $categories_by_name['abandoned-cart']['description'] );
 	}
 
 	/**
