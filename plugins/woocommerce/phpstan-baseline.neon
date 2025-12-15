@@ -37936,12 +37936,6 @@ parameters:
 			path: includes/tracks/class-wc-tracks-client.php
 
 		-
-			message: '#^Method WC_Tracks_Event\:\:build_pixel_url\(\) invoked with 1 parameter, 0 required\.$#'
-			identifier: arguments.count
-			count: 2
-			path: includes/tracks/class-wc-tracks-client.php
-
-		-
 			message: "#^Call to function method_exists\\(\\) with 'WpOrg\\\\\\\\Requests.+' and 'request_multiple' will always evaluate to true\\.$#"
 			identifier: function.alreadyNarrowedType
 			count: 1
