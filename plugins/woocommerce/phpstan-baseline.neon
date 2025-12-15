@@ -37920,7 +37920,7 @@ parameters:
 		-
 			message: '#^Call to function is_wp_error\(\) with WC_Tracks_Event will always evaluate to false\.$#'
 			identifier: function.impossibleType
-			count: 1
+			count: 2
 			path: includes/tracks/class-wc-tracks-client.php
 
 		-
@@ -37938,6 +37938,36 @@ parameters:
 		-
 			message: '#^Method WC_Tracks_Event\:\:build_pixel_url\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
+			count: 2
+			path: includes/tracks/class-wc-tracks-client.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''WpOrg\\\\Requests\\\\Requests'' and ''request_multiple'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/tracks/class-wc-tracks-client.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Requests'' and ''request_multiple'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/tracks/class-wc-tracks-client.php
+
+		-
+			message: '#^Method WC_Tracks_Client\:\:queue_pixel_for_batch\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/tracks/class-wc-tracks-client.php
+
+		-
+			message: '#^Method WC_Tracks_Client\:\:send_batched_pixels\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/tracks/class-wc-tracks-client.php
+
+		-
+			message: '#^Method WC_Tracks_Client\:\:send_with_requests_multiple\(\) has no return type specified\.$#'
+			identifier: missingType.return
 			count: 1
 			path: includes/tracks/class-wc-tracks-client.php
 
