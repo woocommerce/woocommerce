@@ -120,9 +120,6 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 	 * Test that register method registers init action.
 	 */
 	public function test_register_registers_init_action(): void {
-		// Remove all init hooks first.
-		remove_all_actions( 'init' );
-
 		// Get a fresh controller instance.
 		$container = wc_get_container();
 		$container->reset_all_resolved();
