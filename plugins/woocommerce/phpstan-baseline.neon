@@ -37942,24 +37942,6 @@ parameters:
 			path: includes/tracks/class-wc-tracks-client.php
 
 		-
-			message: '#^Method WC_Tracks_Client\:\:queue_pixel_for_batch\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/tracks/class-wc-tracks-client.php
-
-		-
-			message: '#^Method WC_Tracks_Client\:\:send_batched_pixels\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/tracks/class-wc-tracks-client.php
-
-		-
-			message: '#^Method WC_Tracks_Client\:\:send_with_requests_multiple\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/tracks/class-wc-tracks-client.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$_en\.$#'
 			identifier: property.notFound
 			count: 1
