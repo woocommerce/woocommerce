@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Handle missing layout settings in the editor settings
