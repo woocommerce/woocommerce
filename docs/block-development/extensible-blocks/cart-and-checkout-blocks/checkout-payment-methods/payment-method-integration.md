@@ -201,7 +201,7 @@ const CustomButton = ( props ) => {
 		//     return;
 		// }
 
-		// 3. Submit the checkout
+		// 3. Submit the checkout to the server once all payment information has been collected.
 		onSubmit();
 	};
 
