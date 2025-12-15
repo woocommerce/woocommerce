@@ -22,8 +22,8 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Create controller instance.
-		$this->controller = new FraudProtectionController();
+		// Get controller instance from container.
+		$this->controller = wc_get_container()->get( FraudProtectionController::class );
 	}
 
 	/**
@@ -90,21 +90,23 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that hooks are not registered when feature is disabled.
+	 * Test that on_init does nothing when feature is disabled.
 	 */
 	public function test_no_hooks_when_feature_disabled(): void {
 		// Ensure feature is disabled.
 		update_option( 'woocommerce_feature_fraud_protection_enabled', 'no' );
 
-		// Create a new controller instance.
-		$controller = new FraudProtectionController();
+		// Get a fresh controller instance.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$controller = $container->get( FraudProtectionController::class );
 
-		// Count hooks before calling maybe_init_hooks.
+		// Count hooks before calling on_init.
 		global $wp_filter;
 		$hook_count_before = count( $wp_filter );
 
-		// Call maybe_init_hooks.
-		$controller->maybe_init_hooks();
+		// Call on_init.
+		$controller->on_init();
 
 		// Count hooks after - should be the same (no new hooks registered).
 		$hook_count_after = count( $wp_filter );
@@ -115,46 +117,57 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that init action is registered on construction.
+	 * Test that register method registers init action.
 	 */
-	public function test_init_action_registered(): void {
-		// Create a fresh controller instance.
+	public function test_register_registers_init_action(): void {
+		// Remove all init hooks first.
 		remove_all_actions( 'init' );
-		$new_controller = new FraudProtectionController();
+
+		// Get a fresh controller instance.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$controller = $container->get( FraudProtectionController::class );
+
+		// Call register.
+		$controller->register();
 
 		// Check if the init action is registered for our callback.
-		$priority = has_action( 'init', array( $new_controller, 'maybe_init_hooks' ) );
+		$priority = has_action( 'init', array( $controller, 'on_init' ) );
 
-		// The priority should be 0 as specified in the constructor.
-		$this->assertSame( 0, $priority, 'Init action should be registered with priority 0' );
+		// The priority should be 10 (default).
+		$this->assertSame( 10, $priority, 'Init action should be registered with default priority 10' );
 	}
 
 	/**
-	 * Test that is_fraud_protection_enabled returns true when feature is enabled.
+	 * Test that feature_is_enabled returns true when feature is enabled.
 	 */
-	public function test_is_fraud_protection_enabled_returns_true_when_enabled(): void {
+	public function test_feature_is_enabled_returns_true_when_enabled(): void {
 		// Enable the feature.
 		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
 
-		// Create a new controller instance to pick up the option change.
-		$controller = new FraudProtectionController();
+		// Get a fresh controller instance to pick up the option change.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$controller = $container->get( FraudProtectionController::class );
 
 		// Check if the method returns true.
-		$this->assertTrue( $controller->is_fraud_protection_enabled() );
+		$this->assertTrue( $controller->feature_is_enabled() );
 	}
 
 	/**
-	 * Test that is_fraud_protection_enabled returns false when feature is disabled.
+	 * Test that feature_is_enabled returns false when feature is disabled.
 	 */
-	public function test_is_fraud_protection_enabled_returns_false_when_disabled(): void {
+	public function test_feature_is_enabled_returns_false_when_disabled(): void {
 		// Disable the feature.
 		update_option( 'woocommerce_feature_fraud_protection_enabled', 'no' );
 
-		// Create a new controller instance to pick up the option change.
-		$controller = new FraudProtectionController();
+		// Get a fresh controller instance to pick up the option change.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$controller = $container->get( FraudProtectionController::class );
 
 		// Check if the method returns false.
-		$this->assertFalse( $controller->is_fraud_protection_enabled() );
+		$this->assertFalse( $controller->feature_is_enabled() );
 	}
 
 	/**
@@ -168,6 +181,9 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
 
 		// Remove any init hooks registered by the controller.
-		remove_all_actions( 'init', 0 );
+		remove_all_actions( 'init' );
+
+		// Reset container.
+		wc_get_container()->reset_all_resolved();
 	}
 }

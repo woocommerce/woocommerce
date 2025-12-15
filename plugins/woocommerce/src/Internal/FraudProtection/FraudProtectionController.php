@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,54 +21,43 @@ defined( 'ABSPATH' ) || exit;
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class FraudProtectionController {
+class FraudProtectionController implements RegisterHooksInterface {
 
 	/**
 	 * Features controller instance.
 	 *
 	 * @var FeaturesController
 	 */
-	private $features_controller;
+	private FeaturesController $features_controller;
 
 	/**
-	 * Constructor. Sets up the controller.
+	 * Register hooks.
 	 */
-	public function __construct() {
-		$container = wc_get_container();
-		$this->features_controller = $container->get( FeaturesController::class );
-
-		// Defer feature check until init action to avoid triggering translation loading
-		// before WooCommerce's textdomain is loaded.
-		// See https://github.com/woocommerce/woocommerce/pull/61424.
-		add_action( 'init', array( $this, 'maybe_init_hooks' ), 0 );
+	public function register() {
+		add_action( 'init', array( $this, 'on_init' ) );
 	}
 
 	/**
-	 * Initialize fraud protection hooks if the feature is enabled.
-	 *
-	 * This is called on the init action to defer the feature check until after
-	 * WooCommerce's textdomain is loaded, avoiding the "translation loaded too early" notice.
+	 * Initialize the instance, runs when the instance is created by the dependency injection container.
 	 *
 	 * @internal
-	 *
-	 * @return void
+	 * @param FeaturesController $features_controller The instance of FeaturesController to use.
 	 */
-	public function maybe_init_hooks(): void {
-		if ( $this->is_fraud_protection_enabled() ) {
-			$this->init();
-		}
+	final public function init( FeaturesController $features_controller ) {
+		$this->features_controller = $features_controller;
 	}
 
 	/**
-	 * Initialize the controller.
-	 * Called when feature flag is enabled.
+	 * Hook into WordPress on init.
 	 *
-	 * This method will be used to register hooks and initialize components
-	 * in future implementations.
-	 *
-	 * @return void
+	 * @internal
 	 */
-	private function init(): void {
+	public function on_init() {
+		// Bail if the feature is not enabled.
+		if ( ! $this->feature_is_enabled() ) {
+			return;
+		}
+
 		// Future implementation: Register hooks and initialize components here.
 		// For now, this is a placeholder for the infrastructure.
 	}
@@ -80,7 +70,7 @@ class FraudProtectionController {
 	 *
 	 * @return bool True if enabled.
 	 */
-	public function is_fraud_protection_enabled(): bool {
+	public function feature_is_enabled(): bool {
 		return $this->features_controller->feature_is_enabled( 'fraud_protection' );
 	}
 
