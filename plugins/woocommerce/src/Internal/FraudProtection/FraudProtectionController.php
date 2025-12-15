@@ -43,7 +43,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 * @internal
 	 * @param FeaturesController $features_controller The instance of FeaturesController to use.
 	 */
-	final public function init( FeaturesController $features_controller ) {
+	final public function init( FeaturesController $features_controller ): void {
 		$this->features_controller = $features_controller;
 	}
 
@@ -52,7 +52,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 */
-	public function on_init() {
+	public function on_init(): void {
 		// Bail if the feature is not enabled.
 		if ( ! $this->feature_is_enabled() ) {
 			return;
