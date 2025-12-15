@@ -119,6 +119,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		// Should return true if either WpOrg\Requests\Requests or Requests class exists with request_multiple method.
 		if ( class_exists( 'WpOrg\Requests\Requests' ) || class_exists( 'Requests' ) ) {
 			$this->assertTrue( $can_batch );
+		} else {
+			$this->assertFalse( $can_batch );
 		}
 	}
 
@@ -418,13 +420,9 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test error handling in send_with_requests_multiple.
+	 * Test that send_with_requests_multiple can be called with an empty array.
 	 */
-	public function test_send_with_requests_multiple_handles_exceptions_gracefully() {
-		// This test ensures that if an exception occurs, it doesn't break the site.
-		// We can't easily simulate an exception without mocking, but we can at least
-		// verify the method exists and can be called.
-
+	public function test_send_with_requests_multiple_handles_empty_array() {
 		$reflection = new ReflectionClass( 'WC_Tracks_Client' );
 		$method     = $reflection->getMethod( 'send_with_requests_multiple' );
 		$method->setAccessible( true );
@@ -432,8 +430,8 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		// Call with empty array - should not cause any issues.
 		$method->invoke( null, array() );
 
-		// If we got here without errors, the test passes.
-		$this->assertTrue( true );
+		// Explicit assertion that no exception was thrown.
+		$this->addToAssertionCount( 1 );
 	}
 
 	/**
