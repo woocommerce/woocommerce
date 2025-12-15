@@ -65,7 +65,9 @@ class Checkout extends AbstractCartRoute {
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
 		// POS sessions are authenticated via Application Passwords, so they don't need CSRF protection.
-		if ( wc_is_pos_session() ) {
+		// Check both wc_is_pos_session() (if session is already initialized) and the request header
+		// (in case session was initialized before our filter was added).
+		if ( wc_is_pos_session() || $this->is_pos_request( $request ) ) {
 			return false;
 		}
 

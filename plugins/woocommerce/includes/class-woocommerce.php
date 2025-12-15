@@ -555,8 +555,15 @@ final class WooCommerce {
 			return false;
 		}
 
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$rest_prefix         = trailingslashit( rest_get_url_prefix() );
-		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) ); // phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$is_rest_api_request = ( false !== strpos( $_SERVER['REQUEST_URI'], $rest_prefix ) );
+
+		// Also check for ?rest_route= query parameter format.
+		if ( ! $is_rest_api_request && isset( $_GET['rest_route'] ) ) {
+			$is_rest_api_request = true;
+		}
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		/**
 		 * Whether this is a REST API request.
@@ -576,7 +583,16 @@ final class WooCommerce {
 			return false;
 		}
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		return false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' );
+		// Check for /wp-json/wc/store/ format.
+		if ( false !== strpos( $_SERVER['REQUEST_URI'], trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) ) {
+			return true;
+		}
+		// Also check for ?rest_route=/wc/store/ query parameter format.
+		if ( isset( $_GET['rest_route'] ) && 0 === strpos( $_GET['rest_route'], '/wc/store/' ) ) {
+			return true;
+		}
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return false;
 	}
 
 	/**

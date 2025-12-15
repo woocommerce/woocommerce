@@ -178,8 +178,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
-		$this->maybe_use_pos_session( $request );
-
+		// Check for cart token first (for non-POS requests).
 		if ( $this->has_cart_token( $request ) ) {
 			// Overrides the core session class.
 			add_filter(
@@ -189,6 +188,10 @@ abstract class AbstractCartRoute extends AbstractRoute {
 				}
 			);
 		}
+
+		// POS session setup runs after and takes precedence over cart token.
+		$this->maybe_use_pos_session( $request );
+
 		$this->cart_controller->load_cart();
 		$this->cart_controller->normalize_cart();
 
@@ -302,11 +305,27 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
 		// POS sessions are authenticated via Application Passwords, so they don't need CSRF protection.
-		if ( wc_is_pos_session() ) {
+		// Check both wc_is_pos_session() (if session is already initialized) and the request header
+		// (in case session was initialized before our filter was added).
+		if ( wc_is_pos_session() || $this->is_pos_request( $request ) ) {
 			return false;
 		}
 
 		return $this->is_update_request( $request ) && ! $this->has_cart_token( $request );
+	}
+
+	/**
+	 * Check if this is an authenticated POS request.
+	 *
+	 * This checks the X-WC-POS header and verifies the user has POS permissions.
+	 * Used as a fallback when wc_is_pos_session() might return false due to
+	 * session initialization timing.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return bool
+	 */
+	protected function is_pos_request( \WP_REST_Request $request ): bool {
+		return $request->get_header( 'X-WC-POS' ) && POSUtils::current_user_can_pos();
 	}
 
 	/**
