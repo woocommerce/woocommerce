@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add method to retrieve email pattern categories from block patterns
+Add method to retrieve email pattern categories from block patterns. Renamed 'basic' email pattern category to 'newsletter'.

@@ -4,6 +4,7 @@
 import { useState, useEffect, useMemo, memo } from '@wordpress/element';
 import { store as editorStore } from '@wordpress/editor';
 import { store as coreStore } from '@wordpress/core-data';
+import type { UserPatternCategory } from '@wordpress/core-data/build-types/selectors';
 import { dispatch, useSelect } from '@wordpress/data';
 import { Modal, Button, Flex, FlexItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -22,14 +23,9 @@ import { TemplateList } from './template-list';
 import { TemplateCategoriesListSidebar } from './template-categories-list-sidebar';
 import { recordEvent, recordEventOnce } from '../../events';
 
-type PatternCategory = {
-	name: string;
-	label: string;
-};
-
 function getCategoriesFromTemplates(
 	templates: TemplatePreview[],
-	patternCategories: PatternCategory[]
+	patternCategories: UserPatternCategory[]
 ): Array< { name: TemplateCategory; label: string } > {
 	const categoryLabels = new Map< string, string >(
 		patternCategories.map( ( cat ) => [ cat.name, cat.label ] )
@@ -59,7 +55,7 @@ function SelectTemplateBody( {
 		( select ) =>
 			select(
 				coreStore
-			).getBlockPatternCategories() as PatternCategory[],
+			).getBlockPatternCategories() as UserPatternCategory[],
 		[]
 	);
 
@@ -93,7 +89,7 @@ function SelectTemplateBody( {
 
 	useEffect( () => {
 		if ( selectedCategory !== null || displayCategories.length === 0 ) {
-			return;
+			return undefined;
 		}
 
 		const timeoutId = setTimeout( () => {
