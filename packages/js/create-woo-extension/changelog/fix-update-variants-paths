@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Replace deprecated "templatesPath" with "blockTemplatesPath" and "pluginTemplatesPath" properties.
