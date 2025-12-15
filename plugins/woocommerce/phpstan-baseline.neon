@@ -23947,12 +23947,6 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 5
-			path: includes/emails/class-wc-email.php
-
-		-
 			message: '#^Access to property \$AltBody on an unknown class PHPMailer\.$#'
 			identifier: class.notFound
 			count: 4
@@ -24074,24 +24068,6 @@ parameters:
 
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_Settings_API\)\: Unexpected token "\\n ", expected ''\<'' at offset 255 on line 9$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Email \$this The WC_Email object\.\)\: Unexpected token "\$this", expected variable at offset 161 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Email \$this The WC_Email object\.\)\: Unexpected token "\$this", expected variable at offset 162 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Email \$this The WC_Email object\.\)\: Unexpected token "\$this", expected variable at offset 300 on line 8$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/emails/class-wc-email.php
