@@ -161,7 +161,7 @@ The options you feed the configuration instance should be an object in this shap
 
 ### Using Custom Place Order Button
 
-The `placeOrderButton` property allows you to replace the default "Place Order" button with a custom component. This is useful for payment methods that require custom button styling (e.g., Google Pay, Apple Pay) or need to show a payment UI before submitting the order.
+The `placeOrderButton` property allows you to replace the default "Place Order" button with a custom component. This is useful for payment methods that require custom button styling (e.g., Google Pay, Apple Pay) or need to show a payment UI before submitting the order. If this doesn't apply to your payment method, omitting this property and using the default button is recommended.
 
 Your custom button component receives all the same props as the payment method `content` component via the `PaymentMethodInterface`, plus additional button-specific props:
 
