@@ -33,7 +33,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 	/**
 	 * Register hooks.
 	 */
-	public function register() {
+	public function register(): void {
 		add_action( 'init', array( $this, 'on_init' ) );
 	}
 
