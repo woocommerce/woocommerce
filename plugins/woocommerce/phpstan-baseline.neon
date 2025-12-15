@@ -42088,18 +42088,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
-			count: 2
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 2
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Function wc_deferred_product_sync\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
