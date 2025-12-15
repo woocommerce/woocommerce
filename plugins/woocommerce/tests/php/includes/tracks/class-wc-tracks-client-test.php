@@ -7,6 +7,13 @@ declare(strict_types=1);
 class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * Array to track intercepted HTTP requests.
+	 *
+	 * @var array
+	 */
+	private $intercepted_requests = array();
+
+	/**
 	 * Set up test.
 	 *
 	 * @return void
@@ -19,6 +26,12 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		// Clear any existing batch queue and hooks.
 		$this->reset_batch_state();
+
+		// Clear intercepted requests.
+		$this->intercepted_requests = array();
+
+		// Intercept HTTP requests to prevent actual network calls.
+		add_filter( 'pre_http_request', array( $this, 'intercept_http_requests' ), 10, 3 );
 	}
 
 	/**
@@ -28,7 +41,37 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->reset_batch_state();
+		remove_filter( 'pre_http_request', array( $this, 'intercept_http_requests' ), 10 );
 		parent::tearDown();
+	}
+
+	/**
+	 * Intercept HTTP requests to prevent actual network calls during testing.
+	 *
+	 * @param false|array|WP_Error $response    A preemptive return value of an HTTP request.
+	 * @param array                $parsed_args HTTP request arguments.
+	 * @param string               $url         The request URL.
+	 * @return array Mocked HTTP response.
+	 */
+	public function intercept_http_requests( $response, $parsed_args, $url ) {
+		// Track the intercepted request.
+		if ( strpos( $url, 'pixel.wp.com/t.gif' ) !== false ) {
+			$this->intercepted_requests[] = array(
+				'url'  => $url,
+				'args' => $parsed_args,
+			);
+
+			// Return a successful mock response.
+			return array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => '',
+			);
+		}
+
+		return $response;
 	}
 
 	/**
@@ -192,19 +235,19 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		// Queue a pixel.
 		WC_Tracks_Client::record_pixel( $pixel );
 
-		// Mock the send_with_requests_multiple method to capture the pixels.
-		$sent_pixels = array();
-		$mock_send   = function ( $pixels ) use ( &$sent_pixels ) {
-			$sent_pixels = $pixels;
-		};
+		// Clear intercepted requests before sending.
+		$this->intercepted_requests = array();
 
-		$reflection = new ReflectionClass( 'WC_Tracks_Client' );
-		$method     = $reflection->getMethod( 'send_with_requests_multiple' );
-		$method->setAccessible( true );
-
-		// Since we can't easily mock static methods, we'll just verify the timestamp is added.
 		// Send the batched pixels.
 		WC_Tracks_Client::send_batched_pixels();
+
+		// Verify that an HTTP request was intercepted.
+		$this->assertNotEmpty( $this->intercepted_requests, 'HTTP request should have been intercepted.' );
+
+		// Verify the request URL contains timestamp and nocache parameters.
+		$intercepted_url = $this->intercepted_requests[0]['url'];
+		$this->assertStringContainsString( '_rt=', $intercepted_url, 'Request should contain timestamp parameter.' );
+		$this->assertStringContainsString( '_=_', $intercepted_url, 'Request should contain nocache parameter.' );
 
 		// Queue should be empty after sending.
 		$queue = $this->get_batch_queue();
@@ -416,5 +459,57 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		// Queue should be empty.
 		$queue = $this->get_batch_queue();
 		$this->assertEmpty( $queue );
+	}
+
+	/**
+	 * Test that HTTP requests are intercepted and not actually sent.
+	 */
+	public function test_http_requests_are_intercepted() {
+		// Ensure batching is supported.
+		if ( ! class_exists( 'WpOrg\Requests\Requests' ) && ! class_exists( 'Requests' ) ) {
+			$this->markTestSkipped( 'Requests library not available for batching.' );
+		}
+
+		// Clear intercepted requests.
+		$this->intercepted_requests = array();
+
+		// Record multiple pixels.
+		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event1&prop=value1' );
+		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=event2&prop=value2' );
+
+		// Send batched pixels.
+		WC_Tracks_Client::send_batched_pixels();
+
+		// Verify that HTTP requests were intercepted.
+		$this->assertCount( 2, $this->intercepted_requests, 'Should have intercepted 2 HTTP requests.' );
+
+		// Verify the intercepted requests contain the correct event names.
+		$this->assertStringContainsString( '_en=event1', $this->intercepted_requests[0]['url'] );
+		$this->assertStringContainsString( '_en=event2', $this->intercepted_requests[1]['url'] );
+
+		// Verify the requests are non-blocking.
+		$this->assertFalse( $this->intercepted_requests[0]['args']['blocking'], 'Requests should be non-blocking.' );
+		$this->assertFalse( $this->intercepted_requests[1]['args']['blocking'], 'Requests should be non-blocking.' );
+	}
+
+	/**
+	 * Test that non-batched requests are also intercepted.
+	 */
+	public function test_fallback_requests_are_intercepted() {
+		// Disable batching via filter.
+		add_filter( 'wc_tracks_use_batch_requests', '__return_false' );
+
+		// Clear intercepted requests.
+		$this->intercepted_requests = array();
+
+		// Record a pixel (should use fallback method).
+		WC_Tracks_Client::record_pixel( 'https://pixel.wp.com/t.gif?_en=fallback_event' );
+
+		// Verify that HTTP request was intercepted.
+		$this->assertCount( 1, $this->intercepted_requests, 'Should have intercepted 1 HTTP request.' );
+		$this->assertStringContainsString( '_en=fallback_event', $this->intercepted_requests[0]['url'] );
+
+		// Clean up filter.
+		remove_filter( 'wc_tracks_use_batch_requests', '__return_false' );
 	}
 }
