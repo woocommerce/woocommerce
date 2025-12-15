@@ -183,7 +183,7 @@ describe( 'LocalPickupSelect', () => {
 			'store_2' // gets the currently selected option.
 		);
 	} );
-	it( 'Updates isSelectedInClient parameter when selection changes', () => {
+	it( 'Updates clientSelectedOption parameter when selection changes', () => {
 		renderPickupLocationMock.mockClear();
 		const pickupLocations = [
 			generateShippingRate( {
