@@ -155,8 +155,9 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			),
 			'body'     => wp_json_encode(
 				array(
-					'id'    => '123',
-					'links' => array(
+					'id'     => '123',
+					'status' => 'CREATED',
+					'links'  => array(
 						array(
 							'rel'    => 'approve',
 							'href'   => 'https://www.paypal.com/checkoutnow?token=123',

@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.1](https://github.com/woocommerce/email-editor/releases/tag/2.1.1) - 2025-12-11 
+
+-   Patch - Update email editor core default styles. [#62051]
+
 ## [2.1.0](https://github.com/woocommerce/email-editor/releases/tag/2.1.0) - 2025-11-30 
 
 -   Minor - Email Editor: retrieve image width in a more efficient manner. [#62118]
@@ -16,7 +20,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 -   Patch - Fix core/post-content block rendering empty on second email in batch processing by overriding WordPress render callback with stateless version [#61546]
 -   Minor - Extend Rendering_Context with email-specific context support (user_id, order_id, recipient_email), add woocommerce_email_editor_rendering_email_context filter [#61546]
--   Major [ **BREAKING CHANGE** ] - Updated all PHP dependencies. [#61753]
+-   Major - ** BREAKING CHANGE ** Updated all PHP dependencies. [#61753]
 
 ## [1.9.0](https://github.com/woocommerce/email-editor/releases/tag/1.9.0) - 2025-10-31 
 
