@@ -6,8 +6,6 @@
  * @version 2.1.0
  */
 
-declare(strict_types=1);
-
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\Email\EmailColors;
 use Automattic\WooCommerce\Internal\Email\EmailFont;
