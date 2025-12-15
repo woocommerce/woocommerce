@@ -5,6 +5,8 @@
  * @package WooCommerce\Tracks
  */
 
+declare(strict_types=1);
+
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -374,6 +376,23 @@ class WC_Tracks_Client {
 				'data'    => array(),
 				'type'    => 'GET',
 			);
+		}
+
+		/**
+		 * Filters the batched pixel requests before sending.
+		 * Can be used for testing or to intercept/modify requests.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param array $requests Array of request arrays with url, headers, data, type.
+		 * @param array $options  Request options including blocking and timeout.
+		 * @return array|false Modified requests array, or false to skip sending.
+		 */
+		$requests = apply_filters( 'wc_tracks_batch_requests_before_send', $requests, $options );
+
+		// Allow tests to skip actual sending by returning false.
+		if ( false === $requests ) {
+			return;
 		}
 
 		try {

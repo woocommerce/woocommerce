@@ -32,6 +32,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		// Intercept HTTP requests to prevent actual network calls.
 		add_filter( 'pre_http_request', array( $this, 'intercept_http_requests' ), 10, 3 );
+		add_filter( 'wc_tracks_batch_requests_before_send', array( $this, 'intercept_batch_requests' ), 10, 2 );
 	}
 
 	/**
@@ -42,6 +43,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->reset_batch_state();
 		remove_filter( 'pre_http_request', array( $this, 'intercept_http_requests' ), 10 );
+		remove_filter( 'wc_tracks_batch_requests_before_send', array( $this, 'intercept_batch_requests' ), 10 );
 		parent::tearDown();
 	}
 
@@ -72,6 +74,26 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Intercept batched requests to prevent actual network calls during testing.
+	 *
+	 * @param array $requests Array of request arrays.
+	 * @param array $options  Request options.
+	 * @return false Returns false to skip actual sending.
+	 */
+	public function intercept_batch_requests( $requests, $options ) {
+		// Record all batched requests.
+		foreach ( $requests as $request ) {
+			$this->intercepted_requests[] = array(
+				'url'  => $request['url'],
+				'args' => $options,
+			);
+		}
+
+		// Return false to skip actual sending.
+		return false;
 	}
 
 	/**
