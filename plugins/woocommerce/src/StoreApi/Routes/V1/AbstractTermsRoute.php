@@ -97,7 +97,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		);
 
 		$params['parent'] = array(
-			'description'       => __( 'Limit result set to resources assigned to a specific parent. Applies to hierarchical taxonomies only.', 'woocommerce' ),
+			'description'       => __( 'Limit results to terms with a specific parent (hierarchical taxonomies only).', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
