@@ -2125,7 +2125,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_get_total_fees_should_sum_mixed_positive_and_negative_fees() {
 		$order      = WC_Helper_Order::create_order();
-		$fee_totals = array( 25, -10, 5.50 ); // Net: 20.50
+		$fee_totals = array( 25, -10, 5.50 ); // Net: 20.50.
 
 		foreach ( $fee_totals as $total ) {
 			$fee = new WC_Order_Item_Fee();
