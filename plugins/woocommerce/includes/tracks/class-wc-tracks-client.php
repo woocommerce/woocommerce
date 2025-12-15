@@ -318,7 +318,7 @@ class WC_Tracks_Client {
 	 *
 	 * @param string $pixel The pixel URL to queue.
 	 */
-	private static function queue_pixel_for_batch( $pixel ): void {
+	private static function queue_pixel_for_batch( string $pixel ): void {
 		self::$pixel_batch_queue[] = $pixel;
 
 		// Register shutdown hook once.
@@ -362,7 +362,7 @@ class WC_Tracks_Client {
 	 *
 	 * @param array $pixels Array of pixel URLs to send.
 	 */
-	private static function send_with_requests_multiple( $pixels ): void {
+	private static function send_with_requests_multiple( array $pixels ): void {
 		$requests = array();
 		$options  = array(
 			'blocking' => false, // Non-blocking mode - returns immediately.
