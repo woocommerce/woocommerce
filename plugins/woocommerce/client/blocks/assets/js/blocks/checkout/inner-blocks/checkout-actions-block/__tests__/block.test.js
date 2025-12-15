@@ -16,8 +16,7 @@ const mockPlaceOrderButton = jest.fn( ( { label, CustomButtonComponent } ) => {
 } );
 
 jest.mock( '@woocommerce/base-components/cart-checkout', () => ( {
-	PlaceOrderButton: (props) => mockPlaceOrderButton(props),
-	ReturnToCartButton: ( { children } ) => <a>{ children }</a>,
+	PlaceOrderButton: ( props ) => mockPlaceOrderButton( props ),
 } ) );
 
 const mockUseCheckoutSubmit = jest.fn();
