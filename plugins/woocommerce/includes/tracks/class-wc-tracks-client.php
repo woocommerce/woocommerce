@@ -106,7 +106,7 @@ class WC_Tracks_Client {
 			return $event;
 		}
 
-		$pixel = $event->build_pixel_url();
+		$pixel = $event->build_pixel_url( $event );
 
 		if ( ! $pixel ) {
 			return new WP_Error( 'invalid_pixel', 'cannot generate tracks pixel for given input', 400 );
