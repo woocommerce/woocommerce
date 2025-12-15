@@ -129,8 +129,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 			'search'     => $request['search'],
 		);
 
-		$taxonomy_obj = get_taxonomy( $taxonomy );
-		if ( $taxonomy_obj->hierarchical && isset( $request['parent'] ) ) {
+		if ( isset( $request['parent'] ) && is_taxonomy_hierarchical( $taxonomy ) ) {
 			$prepared_args['parent'] = (int) $request['parent'];
 		}
 
