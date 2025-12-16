@@ -602,6 +602,12 @@ class FeaturesController {
 						'title' => __( 'Reset Session Clearances', 'woocommerce' ),
 						'desc'  => __( 'Reset all data about session fraud protection clearance. This will require all users to validate their sessions again.', 'woocommerce' ),
 					),
+					array(
+						'type'  => 'jetpack_connection',
+						'id'    => 'jetpack_connection_button',
+						'title' => __( 'Connect to Jetpack', 'woocommerce' ),
+						'desc'  => __( 'A Jetpack connection is required to use fraud protection.', 'woocommerce' ),
+					),
 				),
 			),
 		);
