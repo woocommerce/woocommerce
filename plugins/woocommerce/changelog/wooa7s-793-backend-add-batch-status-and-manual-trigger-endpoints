@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add analytics import status and manual trigger endpoints

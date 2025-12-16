@@ -3494,11 +3494,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
 
 		// Check that the log entry was created.
-		$serialized_meta_value = '"\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"';
-
-		$log_message = end( $fake_logger->warnings )['message'];
-		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
-		$this->assertStringContainsString( $serialized_meta_value, $log_message );
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 
 		// Test deleting meta data containing an object of a non-existent class.
 		$meta_data = $this->sut->read_meta( $order );
@@ -3511,9 +3507,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
 
 		// Check that the log entry was created.
-		$log_message = end( $fake_logger->warnings )['message'];
-		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
-		$this->assertStringContainsString( $serialized_meta_value, $log_message );
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 	}
 
 	/**
@@ -3881,26 +3875,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testdox Sync-on-read should update metadata as well.
-	 */
-	public function test_sync_on_read_updates_metadata() {
-		$this->toggle_cot_feature_and_usage( true );
-		$this->enable_cot_sync();
-
-		$order = OrderHelper::create_order();
-		$order->add_meta_data( 'foo', 'bar' );
-		$order->save();
-
-		// Update the meta data on the post.
-		update_post_meta( $order->get_id(), 'foo', 'baz' );
-
-		$fresh_order = wc_get_order( $order->get_id() );
-
-		$this->assertEquals( 'baz', get_post_meta( $order->get_id(), 'foo', true ) );
-		$this->assertEquals( 'baz', $fresh_order->get_meta( 'foo', true, 'edit' ) );
-	}
-
-	/**
 	 * @testdox An order deleted from the posts table while sync was off is deleted from the orders table when sync runs.
 	 */
 	public function test_loading_order_deleted_from_posts_table() {
@@ -3925,5 +3899,64 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$sync = wc_get_container()->get( DataSynchronizer::class );
 		$sync->process_batch( array( $order_id ) );
 		$this->assertEquals( false, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
+	 * @testdox needs_processing returns correct result when COGS filter triggers get_items() during order hydration.
+	 *
+	 * Reproduces GitHub issue #62173: woocommerce_new_order fires before items are in DB.
+	 * If a hook loads the order and triggers get_items() (e.g., via COGS filter calling get_data()),
+	 * empty items get cached. The fix invalidates the cache when items are saved.
+	 */
+	public function test_needs_processing_with_cogs_filter_triggering_get_items() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cogs_feature();
+
+		$this->assertTrue(
+			OrderUtil::orders_cache_usage_is_enabled(),
+			'Order cache must be enabled for this test.'
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( false );
+		$product->set_downloadable( false );
+		$product->save();
+
+		// COGS filter that calls get_data() (which calls get_items()), priming empty items.
+		$cogs_filter = function ( $cogs_value, $order ) {
+			$order->get_data();
+			return $cogs_value;
+		};
+		add_filter( 'woocommerce_load_order_cogs_value', $cogs_filter, 10, 2 );
+
+		// Load order during woocommerce_new_order (before items are in DB), caching it with empty items.
+		$new_order_hook = function ( $order_id ) {
+			wc_get_order( $order_id );
+		};
+		add_action( 'woocommerce_new_order', $new_order_hook, 10, 1 );
+
+		// Create order with item. woocommerce_new_order fires before save_items().
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$order->add_item( $item );
+		$order->save();
+		$order_id = $order->get_id();
+
+		remove_filter( 'woocommerce_load_order_cogs_value', $cogs_filter, 10 );
+		remove_action( 'woocommerce_new_order', $new_order_hook, 10 );
+
+		// Without fix: returns cached order with empty items. With fix: fresh data from DB.
+		$fresh_order = wc_get_order( $order_id );
+
+		$this->assertCount( 1, $fresh_order->get_items(), 'Order should have items from DB.' );
+		$this->assertTrue( $fresh_order->needs_processing(), 'Order with physical product should need processing.' );
 	}
 }

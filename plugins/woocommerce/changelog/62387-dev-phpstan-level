@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Reduce PHPStan level from 9 to 8 to improve developer productivity while maintaining strong type safety

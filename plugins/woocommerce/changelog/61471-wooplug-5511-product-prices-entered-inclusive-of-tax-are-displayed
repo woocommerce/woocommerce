@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Improve UX for tax-inclusive pricing configuration by adding validation notice and clearer setting description when base tax rate is not configured.
