@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Compatibility update for Gutenberg 22.0. useEmailCss now returns styles correctly with Gutenberg 22.0+.

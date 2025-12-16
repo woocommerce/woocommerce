@@ -23,14 +23,7 @@ test.describe( 'Product Page: error notices', () => {
 	test( 'displays error notice when attempting to add product beyond stock limit', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		const productName = 'A Managed Stock';
 
 		await wpCLI(
