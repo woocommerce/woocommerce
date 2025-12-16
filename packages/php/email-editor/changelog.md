@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0](https://github.com/woocommerce/email-editor/releases/tag/2.2.0) - 2025-12-15 
+
+-   Minor - Add category tabs navigation to email template selection modal. [#62441]
+-   Minor - Renderer for the coupon code block
+
 ## [2.1.1](https://github.com/woocommerce/email-editor/releases/tag/2.1.1) - 2025-12-11 
 
 -   Patch - Update email editor core default styles. [#62051]
