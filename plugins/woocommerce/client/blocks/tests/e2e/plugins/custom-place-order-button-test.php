@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 /**
  * Plugin Name: WooCommerce Blocks Test Custom Place Order Button
  * Description: Registers a test payment method with a custom place order button for e2e testing.
@@ -8,6 +7,8 @@ declare(strict_types=1);
  *
  * @package woocommerce-blocks-test-custom-place-order-button
  */
+
+declare(strict_types=1);
 
 add_action(
 	'plugins_loaded',
