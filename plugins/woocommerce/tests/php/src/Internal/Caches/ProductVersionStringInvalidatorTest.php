@@ -1,23 +1,23 @@
 <?php
 /**
- * ProductCacheInvalidatorTest class file.
+ * ProductVersionStringInvalidatorTest class file.
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Caches\Invalidators;
+namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
-use Automattic\WooCommerce\Caches\Invalidators\ProductCacheInvalidator;
+use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 
 /**
- * Tests for the ProductCacheInvalidator class.
+ * Tests for the ProductVersionStringInvalidator class.
  */
-class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
+class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * System under test.
+	 * The System Under Test.
 	 *
-	 * @var ProductCacheInvalidator
+	 * @var ProductVersionStringInvalidator
 	 */
 	private $sut;
 
@@ -34,7 +34,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut              = wc_get_container()->get( ProductCacheInvalidator::class );
+		$this->sut              = wc_get_container()->get( ProductVersionStringInvalidator::class );
 		$this->captured_actions = array();
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
@@ -69,7 +69,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $this->captured_actions );
 		$this->assertEquals( $product->get_id(), $this->captured_actions[0]['product_id'] );
-		$this->assertEquals( ProductCacheInvalidator::OPERATION_CREATE, $this->captured_actions[0]['operation'] );
+		$this->assertEquals( ProductVersionStringInvalidator::OPERATION_CREATE, $this->captured_actions[0]['operation'] );
 	}
 
 	/**
@@ -85,7 +85,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $this->captured_actions );
 		$this->assertEquals( $product->get_id(), $this->captured_actions[0]['product_id'] );
-		$this->assertEquals( ProductCacheInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
+		$this->assertEquals( ProductVersionStringInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
 	}
 
 	/**
@@ -101,7 +101,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $this->captured_actions );
 		$this->assertEquals( $product_id, $this->captured_actions[0]['product_id'] );
-		$this->assertEquals( ProductCacheInvalidator::OPERATION_DELETE, $this->captured_actions[0]['operation'] );
+		$this->assertEquals( ProductVersionStringInvalidator::OPERATION_DELETE, $this->captured_actions[0]['operation'] );
 	}
 
 	/**
@@ -116,7 +116,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $this->captured_actions );
 		$this->assertEquals( $product->get_id(), $this->captured_actions[0]['product_id'] );
-		$this->assertEquals( ProductCacheInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
+		$this->assertEquals( ProductVersionStringInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
 	}
 
 	/**
@@ -135,19 +135,19 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $parent_product ) {
 				return $parent_product->get_id() === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_CREATE === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_CREATE === $action['operation'];
 			}
 		);
 		$this->assertNotEmpty( $parent_create_events, 'Parent product should have a CREATE event' );
 		$this->assertEquals( $parent_product->get_id(), $this->captured_actions[0]['product_id'] );
-		$this->assertEquals( ProductCacheInvalidator::OPERATION_CREATE, $this->captured_actions[0]['operation'] );
+		$this->assertEquals( ProductVersionStringInvalidator::OPERATION_CREATE, $this->captured_actions[0]['operation'] );
 
 		foreach ( $variations as $variation_id ) {
 			$variation_create_events = array_filter(
 				$this->captured_actions,
 				function ( $action ) use ( $variation_id ) {
 					return $variation_id === $action['product_id']
-						&& ProductCacheInvalidator::OPERATION_CREATE === $action['operation'];
+						&& ProductVersionStringInvalidator::OPERATION_CREATE === $action['operation'];
 				}
 			);
 			$this->assertNotEmpty( $variation_create_events, "Variation {$variation_id} should have a CREATE event" );
@@ -173,7 +173,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $variation ) {
 				return $variation->get_id() === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_UPDATE === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_UPDATE === $action['operation'];
 			}
 		);
 		$this->assertNotEmpty( $variation_updates, 'Variation should have UPDATE event' );
@@ -182,7 +182,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $parent_product, $variation ) {
 				return $parent_product->get_id() === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_UPDATE === $action['operation']
+					&& ProductVersionStringInvalidator::OPERATION_UPDATE === $action['operation']
 					&& isset( $action['context']['variation_id'] )
 					&& $variation->get_id() === $action['context']['variation_id'];
 			}
@@ -195,7 +195,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_invalidate_method() {
 		$product_id = 123;
-		$operation  = ProductCacheInvalidator::OPERATION_UPDATE;
+		$operation  = ProductVersionStringInvalidator::OPERATION_UPDATE;
 		$context    = array( 'test' => 'value' );
 
 		$this->sut->invalidate( $product_id, $operation, $context );
@@ -220,7 +220,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->sut->invalidate(
 			$product_id,
-			ProductCacheInvalidator::OPERATION_UPDATE,
+			ProductVersionStringInvalidator::OPERATION_UPDATE,
 			array( 'test' => 'value' )
 		);
 
@@ -313,7 +313,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_no_deduplication() {
 		$product_id = 123;
-		$operation  = ProductCacheInvalidator::OPERATION_UPDATE;
+		$operation  = ProductVersionStringInvalidator::OPERATION_UPDATE;
 
 		$this->sut->invalidate( $product_id, $operation, array( 'source' => 'first' ) );
 		$this->sut->invalidate( $product_id, $operation, array( 'source' => 'second' ) );
@@ -340,7 +340,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $product_id ) {
 				return $product_id === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_TRASH === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_TRASH === $action['operation'];
 			}
 		);
 
@@ -364,7 +364,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $product_id ) {
 				return $product_id === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_UNTRASH === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_UNTRASH === $action['operation'];
 			}
 		);
 
@@ -388,7 +388,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $variation_id ) {
 				return $variation_id === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_DELETE === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_DELETE === $action['operation'];
 			}
 		);
 		$this->assertNotEmpty( $variation_delete, 'Variation should have DELETE event' );
@@ -397,7 +397,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $parent_product ) {
 				return $parent_product->get_id() === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_UPDATE === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_UPDATE === $action['operation'];
 			}
 		);
 		$this->assertNotEmpty( $parent_update, 'Parent should have UPDATE event when variation is deleted' );
@@ -450,7 +450,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $variation_id ) {
 				return $variation_id === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_TRASH === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_TRASH === $action['operation'];
 			}
 		);
 		$this->assertNotEmpty( $variation_trash, 'Variation should have TRASH event' );
@@ -459,7 +459,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $parent_product ) {
 				return $parent_product->get_id() === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_UPDATE === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_UPDATE === $action['operation'];
 			}
 		);
 		$this->assertNotEmpty( $parent_update, 'Parent should have UPDATE event when variation is trashed' );
@@ -484,7 +484,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $variation_id ) {
 				return $variation_id === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_UNTRASH === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_UNTRASH === $action['operation'];
 			}
 		);
 		$this->assertNotEmpty( $variation_untrash, 'Variation should have UNTRASH event' );
@@ -493,7 +493,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $parent_product ) {
 				return $parent_product->get_id() === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_UPDATE === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_UPDATE === $action['operation'];
 			}
 		);
 		$this->assertNotEmpty( $parent_update, 'Parent should have UPDATE event when variation is untrashed' );
@@ -510,7 +510,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $this->captured_actions );
 		$this->assertEquals( $product_id, $this->captured_actions[0]['product_id'] );
-		$this->assertEquals( ProductCacheInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
+		$this->assertEquals( ProductVersionStringInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
 		$this->assertEquals( 'woocommerce_updated_product_stock', $this->captured_actions[0]['context']['hook'] );
 	}
 
@@ -525,7 +525,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $this->captured_actions );
 		$this->assertEquals( $product_id, $this->captured_actions[0]['product_id'] );
-		$this->assertEquals( ProductCacheInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
+		$this->assertEquals( ProductVersionStringInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
 		$this->assertEquals( 'woocommerce_updated_product_price', $this->captured_actions[0]['context']['hook'] );
 	}
 
@@ -540,7 +540,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $this->captured_actions );
 		$this->assertEquals( $product_id, $this->captured_actions[0]['product_id'] );
-		$this->assertEquals( ProductCacheInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
+		$this->assertEquals( ProductVersionStringInvalidator::OPERATION_UPDATE, $this->captured_actions[0]['operation'] );
 		$this->assertEquals( 'woocommerce_updated_product_sales', $this->captured_actions[0]['context']['hook'] );
 	}
 
@@ -584,7 +584,7 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 			$this->captured_actions,
 			function ( $action ) use ( $product ) {
 				return $product->get_id() === $action['product_id']
-					&& ProductCacheInvalidator::OPERATION_UPDATE === $action['operation'];
+					&& ProductVersionStringInvalidator::OPERATION_UPDATE === $action['operation'];
 			}
 		);
 
@@ -645,8 +645,8 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 		do_action( 'edited_term', $term['term_id'], $term['term_taxonomy_id'], 'pa_filter_test' );
 
 		$this->assertNotEmpty( $filter_calls, 'Filter should have been called' );
-		$this->assertSame( ProductCacheInvalidator::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, $filter_calls[0]['ttl'] );
-		$this->assertSame( ProductCacheInvalidator::class, $filter_calls[0]['class'] );
+		$this->assertSame( ProductVersionStringInvalidator::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, $filter_calls[0]['ttl'] );
+		$this->assertSame( ProductVersionStringInvalidator::class, $filter_calls[0]['class'] );
 
 		remove_all_filters( 'woocommerce_cache_invalidator_taxonomy_lookup_ttl' );
 	}

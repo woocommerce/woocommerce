@@ -2,9 +2,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Caches\Invalidators;
-
-use Automattic\WooCommerce\Internal\Caches\VersionStringGenerator;
+namespace Automattic\WooCommerce\Internal\Caches;
 
 /**
  * Product cache invalidation handler.
@@ -25,7 +23,7 @@ use Automattic\WooCommerce\Internal\Caches\VersionStringGenerator;
  * }, 10, 3 );
  * ```
  */
-class ProductCacheInvalidator {
+class ProductVersionStringInvalidator {
 
 	/**
 	 * Operation constants.

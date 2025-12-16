@@ -5,7 +5,7 @@
  * @package WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Caches\Invalidators\ProductCacheInvalidator;
+use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Utilities\CallbackUtil;
@@ -749,12 +749,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				)
 			);
 
-			$invalidator = wc_get_container()->get( ProductCacheInvalidator::class );
+			$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
 			$children    = $product->get_children();
 			foreach ( $children as $child_id ) {
 				$invalidator->invalidate(
 					$child_id,
-					ProductCacheInvalidator::OPERATION_UPDATE,
+					ProductVersionStringInvalidator::OPERATION_UPDATE,
 					array(
 						'function'  => __METHOD__,
 						'parent_id' => $product->get_id(),
@@ -763,7 +763,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 			$invalidator->invalidate(
 				$product->get_id(),
-				ProductCacheInvalidator::OPERATION_UPDATE,
+				ProductVersionStringInvalidator::OPERATION_UPDATE,
 				array(
 					'function' => __METHOD__,
 					'product'  => $product,
@@ -786,7 +786,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( $product->get_manage_stock() ) {
 			$children    = $product->get_children();
 			$changed     = false;
-			$invalidator = wc_get_container()->get( ProductCacheInvalidator::class );
+			$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
 
 			if ( $children ) {
 				$status   = $product->get_stock_status();
@@ -801,7 +801,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 						$invalidator->invalidate(
 							$managed_child,
-							ProductCacheInvalidator::OPERATION_UPDATE,
+							ProductVersionStringInvalidator::OPERATION_UPDATE,
 							array(
 								'function'  => __METHOD__,
 								'parent_id' => $product->get_id(),
@@ -818,7 +818,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				$invalidator->invalidate(
 					$product->get_id(),
-					ProductCacheInvalidator::OPERATION_UPDATE,
+					ProductVersionStringInvalidator::OPERATION_UPDATE,
 					array(
 						'function' => __METHOD__,
 						'product'  => $product,
