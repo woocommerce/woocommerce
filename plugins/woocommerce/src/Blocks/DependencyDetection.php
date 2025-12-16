@@ -55,6 +55,15 @@ final class DependencyDetection {
 	);
 
 	/**
+	 * Whether the proxy script was output.
+	 *
+	 * Used to ensure we only output the registry if the proxy was set up.
+	 *
+	 * @var bool
+	 */
+	private bool $proxy_output = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -65,13 +74,13 @@ final class DependencyDetection {
 	 * Initialize hooks.
 	 */
 	public function init(): void {
-		// Build registry late (after all scripts registered) but output the inline script early.
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_detection_script' ), 999 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_detection_script' ), 999 );
-
 		// Output an early inline script to set up the Proxy before any other scripts run.
 		add_action( 'wp_head', array( $this, 'output_early_proxy_setup' ), 1 );
 		add_action( 'admin_head', array( $this, 'output_early_proxy_setup' ), 1 );
+
+		// Output registry late when all scripts (including IntegrationInterface) are registered.
+		add_action( 'wp_print_footer_scripts', array( $this, 'output_script_registry' ), 1 );
+		add_action( 'admin_print_footer_scripts', array( $this, 'output_script_registry' ), 1 );
 	}
 
 	/**
@@ -110,30 +119,30 @@ final class DependencyDetection {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Script content is from a trusted local file, JSON is safely encoded.
 		echo '<script id="wc-dependency-detection">' . $script_content . '</script>' . "\n";
+
+		$this->proxy_output = true;
 	}
 
 	/**
-	 * Enqueue the dependency detection script with the script registry data.
+	 * Output the script registry JSON for dependency checking.
+	 *
+	 * This runs late (wp_print_footer_scripts) to ensure all scripts,
+	 * including those registered via IntegrationInterface, are captured.
 	 */
-	public function enqueue_detection_script(): void {
-		// Only run on pages that have the tracked blocks.
-		if ( ! $this->page_has_tracked_blocks() ) {
+	public function output_script_registry(): void {
+		// Only output registry if the proxy was set up earlier.
+		// This avoids the duplicate page_has_tracked_blocks() check and ensures
+		// we don't output a registry without a proxy to consume it.
+		if ( ! $this->proxy_output ) {
 			return;
 		}
 
-		// Build the registry at wp_print_footer_scripts when all scripts (including integration scripts) are registered.
-		\add_action(
-			'wp_print_footer_scripts',
-			function () {
-				// Build the script registry mapping URLs to handles and dependencies.
-				$script_registry = $this->build_script_registry();
-				$registry_json   = wp_json_encode( $script_registry );
+		// Build the script registry mapping URLs to handles and dependencies.
+		$script_registry = $this->build_script_registry();
+		$registry_json   = \wp_json_encode( $script_registry );
 
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON is safely encoded by wp_json_encode.
-				echo '<script id="wc-dependency-detection-registry">if(typeof window.__wcUpdateDependencyRegistry==="function"){window.__wcUpdateDependencyRegistry(' . $registry_json . ');}</script>' . "\n";
-			},
-			1
-		);
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON is safely encoded by wp_json_encode.
+		echo '<script id="wc-dependency-detection-registry">if(typeof window.__wcUpdateDependencyRegistry==="function"){window.__wcUpdateDependencyRegistry(' . $registry_json . ');}</script>' . "\n";
 	}
 
 	/**
