@@ -61,6 +61,11 @@ test.describe( 'Custom Place Order Button', () => {
 		// Clear any pre-filled fields to ensure validation fails.
 		await page.getByLabel( 'Email address' ).clear();
 
+		// Wait for the custom button to be enabled - in some cases the tests are so fast that shipping options haven't loaded yet.
+		await expect(
+			page.getByTestId( 'custom-place-order-button' )
+		).toBeEnabled();
+
 		// Click the custom button without filling required fields.
 		await page.getByTestId( 'custom-place-order-button' ).click();
 
@@ -96,6 +101,11 @@ test.describe( 'Custom Place Order Button', () => {
 		await expect(
 			page.locator( '.wc-block-components-checkout-place-order-button' )
 		).toBeHidden();
+
+		// Wait for the custom button to be enabled - in some cases the tests are so fast that shipping options haven't loaded yet.
+		await expect(
+			page.getByTestId( 'custom-place-order-button' )
+		).toBeEnabled();
 
 		// Click the custom button.
 		await page.getByTestId( 'custom-place-order-button' ).click();

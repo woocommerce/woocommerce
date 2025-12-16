@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 /**
  * Plugin Name: WooCommerce Blocks Test Custom Place Order Button
  * Description: Registers a test payment method with a custom place order button for e2e testing.
@@ -92,7 +93,7 @@ add_action(
 				 * @return array
 				 */
 				public function get_payment_method_script_handles() {
-					wp_register_script( 'test-custom-button', '', array('wc-blocks-registry'), '1.0.0', true );
+					wp_register_script( 'test-custom-button', '', array( 'wc-blocks-registry' ), '1.0.0', true );
 					wp_add_inline_script( 'test-custom-button', $this->get_inline_script() );
 					return array( 'test-custom-button' );
 				}
