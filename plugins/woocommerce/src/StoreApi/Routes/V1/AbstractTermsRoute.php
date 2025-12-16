@@ -37,9 +37,7 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		$params['per_page'] = array(
 			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woocommerce' ),
 			'type'              => 'integer',
-			'default'           => 100,
-			'minimum'           => 1,
-			'maximum'           => 100,
+			'minimum'           => 0,
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
