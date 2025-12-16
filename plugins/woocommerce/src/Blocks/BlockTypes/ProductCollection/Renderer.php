@@ -350,13 +350,24 @@ class Renderer {
 			return $context;
 		}
 
-		$is_in_single_product                 = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
-		$context['productCollectionLocation'] = $is_in_single_product ? array(
-			'type'       => 'product',
-			'sourceData' => array(
-				'productId' => absint( $context['postId'] ),
-			),
-		) : $this->get_location_context();
+		do_action( 'qm/debug', $context['woocommerce/isDescendantOfMiniCart'] ?? null );
+
+		$is_in_single_product = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
+		$is_in_mini_cart      = isset( $context['woocommerce/isDescendantOfMiniCart'] )
+			&& $context['woocommerce/isDescendantOfMiniCart'];
+
+		if ( $is_in_single_product ) {
+			$context['productCollectionLocation'] = array(
+				'type'       => 'product',
+				'sourceData' => array(
+					'productId' => absint( $context['postId'] ),
+				),
+			);
+		} elseif ( $is_in_mini_cart ) {
+			$context['productCollectionLocation'] = $this->get_cart_location_context();
+		} else {
+			$context['productCollectionLocation'] = $this->get_location_context();
+		}
 
 		return $context;
 	}
@@ -375,5 +386,30 @@ class Renderer {
 			$location_context = ProductCollectionUtils::parse_frontend_location_context();
 		}
 		return $location_context;
+	}
+
+	/**
+	 * Get the cart location context with product IDs from the current cart.
+	 *
+	 * @return array The cart location context.
+	 */
+	private function get_cart_location_context() {
+		$items = array();
+
+		if ( isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' ) ) {
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				if ( ! isset( $cart_item['product_id'] ) ) {
+					continue;
+				}
+				$items[] = absint( $cart_item['product_id'] );
+			}
+		}
+
+		$items = array_unique( array_filter( $items ) );
+
+		return array(
+			'type'       => 'cart',
+			'sourceData' => array( 'productIds' => $items ),
+		);
 	}
 }

@@ -36,7 +36,14 @@
 		"width": {
 			"type": "string",
 			"default": "480px"
+		},
+		"isDescendantOfMiniCart": {
+			"type": "boolean",
+			"default": true
 		}
+	},
+	"providesContext": {
+		"woocommerce/isDescendantOfMiniCart": "isDescendantOfMiniCart"
 	},
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

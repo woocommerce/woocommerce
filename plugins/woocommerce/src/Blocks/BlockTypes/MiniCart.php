@@ -140,6 +140,23 @@ class MiniCart extends AbstractBlock {
 	}
 
 	/**
+	 * Set the isDescendantOfMiniCart context for blocks rendered inside mini-cart.
+	 *
+	 * Because we are printing the template part using do_blocks, context from
+	 * the outside is lost. This filter adds the isDescendantOfMiniCart context
+	 * to all blocks so inner blocks of product-collection can detect they're
+	 * inside the mini-cart.
+	 *
+	 * @param array $context The block context.
+	 * @param array $block   The block being rendered.
+	 * @return array The modified block context.
+	 */
+	public function set_is_descendant_of_mini_cart_context( $context, $block ) {
+		$context['woocommerce/isDescendantOfMiniCart'] = true;
+		return $context;
+	}
+
+	/**
 	 * Callback for the Block Hooks API to modify the attributes of the hooked block.
 	 *
 	 * @param array|null                      $parsed_hooked_block The parsed block array for the given hooked block type, or null to suppress the block.
@@ -526,7 +543,9 @@ class MiniCart extends AbstractBlock {
 			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
 			$wrapper_styles                   = $classes_styles['styles'];
 			$template_part_contents           = $this->get_template_part_contents( false );
+			add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_mini_cart_context' ), 10, 2 );
 			$template_part_contents           = do_blocks( $this->process_template_contents( $template_part_contents ) );
+			remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_mini_cart_context' ) );
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
 			$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
 			$cart_item_count                  = $cart ? $cart->get_cart_contents_count() : 0;
@@ -655,7 +674,9 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function render_experimental_iapi_mini_cart_overlay() {
 		$template_part_contents = $this->get_template_part_contents( false );
+		add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_mini_cart_context' ), 10, 2 );
 		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
+		remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_mini_cart_context' ) );
 		ob_start();
 		?>
 		<div
@@ -770,7 +791,9 @@ class MiniCart extends AbstractBlock {
 
 		if ( $template_part && ! empty( $template_part->content ) ) {
 			if ( $do_blocks ) {
+				add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_mini_cart_context' ), 10, 2 );
 				$template_part_contents = do_blocks( $template_part->content );
+				remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_mini_cart_context' ) );
 			} else {
 				$template_part_contents = $template_part->content;
 			}
@@ -780,9 +803,11 @@ class MiniCart extends AbstractBlock {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			$file_contents = file_get_contents( Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $template_name . '.html' );
 			if ( $do_blocks ) {
+				add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_mini_cart_context' ), 10, 2 );
 				$template_part_contents = do_blocks(
 					$file_contents
 				);
+				remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_mini_cart_context' ) );
 			} else {
 				$template_part_contents = $file_contents;
 			}
