@@ -103,12 +103,12 @@ test.describe( 'Custom Place Order Button', () => {
 		).toBeHidden();
 
 		// Wait for the custom button to be enabled - in some cases the tests are so fast that shipping options haven't loaded yet.
-		await expect(
-			page.getByTestId( 'custom-place-order-button' )
-		).toBeEnabled();
+		const customButton = page.getByTestId( 'custom-place-order-button' );
+		await expect( customButton ).toBeEnabled();
 
-		// Click the custom button.
-		await page.getByTestId( 'custom-place-order-button' ).click();
+		// Focus then click the custom button to avoid misses due to page content shifting.
+		await customButton.focus();
+		await customButton.click();
 
 		// Verify order was placed successfully by checking for order confirmation.
 		await expect( page ).toHaveURL( /order-received/ );
