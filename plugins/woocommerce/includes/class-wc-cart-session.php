@@ -722,7 +722,7 @@ final class WC_Cart_Session {
 	/**
 	 * Removes items from the removed cart contents on next user initiated request.
 	 *
-	 * @return bool True if expired items should be removed, false otherwise.
+	 * @return void
 	 */
 	public function clean_up_removed_cart_contents() {
 		// Limit to page requests initiated by the user.
