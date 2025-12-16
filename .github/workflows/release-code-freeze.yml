@@ -320,70 +320,10 @@ jobs:
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false
 
-
-  trigger-webhook:
-    name: Trigger Release Webhook
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: [publish-dev-release, prepare-for-feature-freeze]
-    steps:
-      - name: Trigger Feature Freeze Webhook
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-        with:
-          script: |
-            const crypto = require('crypto');
-
-            const payload = {
-              action: 'feature-freeze',
-              version: '${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}',
-              build_zip: '${{ needs.publish-dev-release.outputs.release-zip }}',
-              status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
-            };
-
-            console.log('Webhook payload:');
-            console.log(`  Version: ${payload.version}`);
-            console.log(`  Build ZIP: ${payload.build_zip}`);
-            console.log(`  Post Status: ${payload.status}`);
-
-            const requestBody = JSON.stringify({
-              payload
-            });
-
-            const hmac = crypto.createHmac('sha256', process.env.WPCOM_WEBHOOK_SECRET);
-            hmac.update(requestBody);
-            const signature = hmac.digest('hex');
-
-            try {
-              const response = await fetch(process.env.WPCOM_RELEASE_WEBHOOK_URL, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-Hub-Signature-256': `sha256=${signature}`
-                },
-                body: requestBody
-              });
-
-              if (!response.ok) {
-                if (response.status === 409) {
-                  console.log('Webhook request failed: Duplicate post detected (409)');
-                } else if (response.status === 403) {
-                  console.log('Webhook request failed: Invalid secret (403)');
-                }
-                core.setFailed(`Webhook request failed with status ${response.status}`);
-              } else {
-                console.log('Webhook triggered successfully');
-              }
-            } catch (error) {
-              core.setFailed(`Webhook request failed: ${error.message}`);
-            }
-        env:
-          WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
-          WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}
-          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-
   notify-slack-on-failure:
     name: Notify Slack on Failure
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
-    needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, cleanup-milestones, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
+    needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, cleanup-milestones, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack ]
     if: always() && ((contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')))
     steps:
       - name: Notify Slack on failure
