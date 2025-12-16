@@ -32,7 +32,10 @@ export const createFieldProps = (
 	errorId: `${ fieldAddressType }_${ field?.key }`,
 	label: ( field?.required ? field?.label : field?.optionalLabel ) || '',
 	autoCapitalize: field?.autocapitalize,
-	autoComplete: field?.autocomplete,
+	// Prefix autocomplete value with address type (e.g., 'address-level1' becomes 'billing address-level1').
+	autoComplete: field?.autocomplete
+		? `${ fieldAddressType } ${ field.autocomplete }`
+		: undefined,
 	errorMessage: field?.errorMessage || '',
 	required: field?.required,
 	placeholder: field?.placeholder,
