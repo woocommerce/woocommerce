@@ -196,6 +196,9 @@ class WC_Gateway_Paypal_Request {
 			// Save the PayPal order ID to the order.
 			$order->update_meta_data( '_paypal_order_id', $response_data['id'] );
 
+			// Save the PayPal order status to the order.
+			$order->update_meta_data( '_paypal_status', $response_data['status'] );
+
 			// Remember the payment source: payment_source is not patchable.
 			// If the payment source is changed, we need to create a new PayPal order.
 			$order->update_meta_data( '_paypal_payment_source', $payment_source );
@@ -363,9 +366,22 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		$paypal_status = $order->get_meta( '_paypal_status', true );
+
 		// Skip if the payment is already captured.
 		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		// Skip if the payment requires payer action.
+		if ( WC_Gateway_Paypal_Constants::STATUS_PAYER_ACTION_REQUIRED === $paypal_status ) {
+			WC_Gateway_Paypal::log( 'PayPal payment requires payer action. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		// Skip if the payment is voided.
+		if ( WC_Gateway_Paypal_Constants::VOIDED === $paypal_status ) {
+			WC_Gateway_Paypal::log( 'PayPal payment voided. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
 
@@ -557,7 +573,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_approve_link( $http_code, $response_data ) {
 		// See https://developer.paypal.com/docs/api/orders/v2/#orders_create.
-		if ( isset( $response_data['status'] ) && 'PAYER_ACTION_REQUIRED' === $response_data['status'] ) {
+		if ( isset( $response_data['status'] ) && WC_Gateway_Paypal_Constants::STATUS_PAYER_ACTION_REQUIRED === $response_data['status'] ) {
 			$rel = 'payer-action';
 		} else {
 			$rel = 'approve';
