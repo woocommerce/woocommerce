@@ -24,7 +24,7 @@ final class DependencyDetection {
 	 *
 	 * @var array<string, string>
 	 */
-	private const WC_GLOBAL_TO_HANDLE = array(
+	private const WC_GLOBAL_EXPORTS = array(
 		'wcBlocksRegistry'      => 'wc-blocks-registry',
 		'wcSettings'            => 'wc-settings',
 		'wcBlocksData'          => 'wc-blocks-data-store',
@@ -81,9 +81,9 @@ final class DependencyDetection {
 		}
 
 		// Inject the global-to-handle mapping from PHP (source of truth).
-		$mapping_json   = \wp_json_encode( self::WC_GLOBAL_TO_HANDLE );
+		$mapping_json   = \wp_json_encode( self::WC_GLOBAL_EXPORTS );
 		$script_content = str_replace(
-			'__WC_GLOBAL_TO_HANDLE_PLACEHOLDER__',
+			'__WC_GLOBAL_EXPORTS_PLACEHOLDER__',
 			$mapping_json,
 			$script_content
 		);
@@ -196,7 +196,7 @@ final class DependencyDetection {
 		}
 
 		// Filter to only include WooCommerce handles we care about.
-		$wc_handles = array_values( self::WC_GLOBAL_TO_HANDLE );
+		$wc_handles = array_values( self::WC_GLOBAL_EXPORTS );
 		return array_values(
 			array_filter(
 				$all_deps,

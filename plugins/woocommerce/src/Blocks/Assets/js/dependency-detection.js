@@ -2,7 +2,7 @@
  * WooCommerce Dependency Detection - Early Proxy Setup
  *
  * This script sets up a Proxy on window.wc to detect when extensions
- * access globals without properly declaring dependencies.
+ * access blocks exposed globals without properly declaring dependencies.
  *
  * IMPORTANT: This script must be loaded inline in wp_head before any other scripts.
  * It is read by PHP and output as an inline script to ensure correct timing.
@@ -18,9 +18,9 @@
 	let pendingChecks = []; // Queue checks until registry is loaded
 
 	// Maps window.wc.* property names to their required script handles.
-	// Injected by PHP from DependencyDetection::WC_GLOBAL_TO_HANDLE (source of truth).
+	// Injected by PHP from DependencyDetection::WC_GLOBAL_EXPORTS (source of truth).
 	// eslint-disable-next-line no-undef
-	const WC_GLOBAL_TO_HANDLE = __WC_GLOBAL_TO_HANDLE_PLACEHOLDER__;
+	const WC_GLOBAL_EXPORTS = __WC_GLOBAL_EXPORTS_PLACEHOLDER__;
 
 	// Pattern to identify WooCommerce core scripts (which we should skip).
 	// Matches /plugins/woocommerce/(client|assets|build)/ but NOT /plugins/woocommerce-subscriptions/ etc.
@@ -35,6 +35,7 @@
 	 */
 	function isWooCommerceScript( url ) {
 		if ( ! url ) return false;
+
 		return WC_CORE_SCRIPT_PATTERN.test( url );
 	}
 
@@ -46,11 +47,13 @@
 	 */
 	function getFilename( url ) {
 		if ( ! url ) return 'unknown';
+
 		const filename = url
 			.split( '/' )
 			.pop()
 			.split( '?' )[ 0 ]
 			.split( '#' )[ 0 ];
+
 		return filename || 'unknown';
 	}
 
@@ -62,9 +65,12 @@
 	 */
 	function parseStackForCallerUrl( stack ) {
 		if ( ! stack ) return null;
+
 		const lines = stack.split( '\n' );
+
 		for ( let i = 1; i < lines.length; i++ ) {
 			const line = lines[ i ];
+
 			// Skip our own detection script lines.
 			if ( line.indexOf( 'wc-dependency-detection' ) !== -1 ) continue;
 			if ( line.indexOf( 'Proxy.' ) !== -1 ) continue;
@@ -74,15 +80,19 @@
 			if ( line.indexOf( 'performCheck' ) !== -1 ) continue;
 			if ( line.indexOf( 'getCallerScriptUrl' ) !== -1 ) continue;
 			if ( line.indexOf( 'parseStackForCallerUrl' ) !== -1 ) continue;
+
 			// Skip native functions (setTimeout, etc.)
 			if ( line.indexOf( '[native code]' ) !== -1 ) continue;
 			if ( /^\s*(at\s+)?setTimeout\s*$/.test( line.trim() ) ) continue;
+
 			// Match URLs pointing to .js files
 			const match = line.match( /(https?:\/\/[^\s)?\u0022]+\.js)/ );
+
 			if ( match ) {
 				return match[ 1 ];
 			}
 		}
+
 		return null;
 	}
 
@@ -95,6 +105,8 @@
 		if ( document.currentScript && document.currentScript.src ) {
 			return document.currentScript.src.replace( /\?.*$/, '' );
 		}
+
+		// Fallback for scenarios when currentScript isn't available
 		const stack = new Error().stack;
 		return parseStackForCallerUrl( stack );
 	}
@@ -134,6 +146,7 @@
 	 */
 	function performCheck( callerUrl, prop, requiredHandle ) {
 		const warningKey = ( callerUrl || 'inline' ) + ':' + prop;
+
 		if ( warnedScripts[ warningKey ] ) return;
 
 		if ( ! callerUrl ) {
@@ -149,6 +162,7 @@
 		}
 
 		const scriptInfo = scriptRegistry[ callerUrl ];
+
 		if ( ! scriptInfo ) {
 			console.warn(
 				'[WooCommerce] Unregistered script "' +
@@ -188,12 +202,12 @@
 	function createWcProxy( target ) {
 		return new Proxy( target, {
 			get( obj, prop ) {
-				if ( proxyEnabled && WC_GLOBAL_TO_HANDLE[ prop ] ) {
+				if ( proxyEnabled && WC_GLOBAL_EXPORTS[ prop ] ) {
 					const callerUrl = getCallerScriptUrl();
 					checkDependency(
 						callerUrl,
 						prop,
-						WC_GLOBAL_TO_HANDLE[ prop ]
+						WC_GLOBAL_EXPORTS[ prop ]
 					);
 				}
 				return obj[ prop ];
