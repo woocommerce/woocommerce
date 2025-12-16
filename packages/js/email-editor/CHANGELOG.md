@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.0) - 2025-12-15 
+
+-   Patch - Handle missing layout settings in the editor settings [#61471]
+-   Minor - Add category tabs navigation to email template selection modal. The TemplateCategory type is now a string to support dynamic categories loaded from block patterns. [#62441]
+-   Patch - Add optional createCoupon URL to EmailEditorUrls type for coupon creation integration
+-   Patch - Improve UX for tax-inclusive pricing configuration by adding validation notice and clearer setting description when base tax rate is not configured. [#61471]
+
 ## [1.4.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.4.3) - 2025-12-11 
 
 -   Patch - Compatibility update for Gutenberg 22.0. useEmailCss now returns styles correctly with Gutenberg 22.0+. [#61964]
