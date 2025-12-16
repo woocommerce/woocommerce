@@ -57,6 +57,16 @@ class Cart extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		return rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
+		$cart_response = $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() );
+		/**
+		 * Filter the cart response.
+		 *
+		 * This hook allows the cart response to be changed.
+		 *
+		 * @param array  $cart_response  The cart response.
+		 * @since 10.5.0
+		 */
+		$cart_response = apply_filters( 'woocommerce_store_api_cart_response', $cart_response );
+		return rest_ensure_response( $cart_response );
 	}
 }
