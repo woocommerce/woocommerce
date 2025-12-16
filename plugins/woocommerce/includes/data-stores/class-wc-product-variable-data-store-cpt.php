@@ -752,23 +752,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
 			$children    = $product->get_children();
 			foreach ( $children as $child_id ) {
-				$invalidator->invalidate(
-					$child_id,
-					ProductVersionStringInvalidator::OPERATION_UPDATE,
-					array(
-						'function'  => __METHOD__,
-						'parent_id' => $product->get_id(),
-					)
-				);
+				$invalidator->invalidate( $child_id );
 			}
-			$invalidator->invalidate(
-				$product->get_id(),
-				ProductVersionStringInvalidator::OPERATION_UPDATE,
-				array(
-					'function' => __METHOD__,
-					'product'  => $product,
-				)
-			);
+			$invalidator->invalidate( $product->get_id() );
 		}
 	}
 
@@ -799,14 +785,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						$this->update_lookup_table( $managed_child, 'wc_product_meta_lookup' );
 						$changed = true;
 
-						$invalidator->invalidate(
-							$managed_child,
-							ProductVersionStringInvalidator::OPERATION_UPDATE,
-							array(
-								'function'  => __METHOD__,
-								'parent_id' => $product->get_id(),
-							)
-						);
+						$invalidator->invalidate( $managed_child );
 					}
 				}
 			}
@@ -816,14 +795,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$product->set_children( $children['all'] );
 				$product->set_visible_children( $children['visible'] );
 
-				$invalidator->invalidate(
-					$product->get_id(),
-					ProductVersionStringInvalidator::OPERATION_UPDATE,
-					array(
-						'function' => __METHOD__,
-						'product'  => $product,
-					)
-				);
+				$invalidator->invalidate( $product->get_id() );
 			}
 		}
 	}
