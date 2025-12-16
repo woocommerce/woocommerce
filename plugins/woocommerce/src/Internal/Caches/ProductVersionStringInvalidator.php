@@ -56,10 +56,10 @@ class ProductVersionStringInvalidator {
 	 */
 	private function register_hooks(): void {
 		// WordPress post hooks for products.
-		add_action( 'save_post_product', array( $this, 'handle_save_post_product' ), 10, 3 );
+		add_action( 'save_post_product', array( $this, 'handle_save_post_product' ), 10, 1 );
 		add_action( 'delete_post', array( $this, 'handle_delete_post' ), 10, 2 );
-		add_action( 'trashed_post', array( $this, 'handle_trashed_post' ), 10, 2 );
-		add_action( 'untrashed_post', array( $this, 'handle_untrashed_post' ), 10, 2 );
+		add_action( 'trashed_post', array( $this, 'handle_trashed_post' ), 10, 1 );
+		add_action( 'untrashed_post', array( $this, 'handle_untrashed_post' ), 10, 1 );
 
 		// WooCommerce CRUD hooks for products.
 		add_action( 'woocommerce_new_product', array( $this, 'handle_woocommerce_new_product' ), 10, 1 );
@@ -81,7 +81,7 @@ class ProductVersionStringInvalidator {
 		// Attribute-related hooks (only for CPT data store).
 		// These hooks use direct SQL queries that assume CPT storage.
 		if ( $this->is_using_cpt_data_store() ) {
-			add_action( 'woocommerce_attribute_updated', array( $this, 'handle_woocommerce_attribute_updated' ), 10, 3 );
+			add_action( 'woocommerce_attribute_updated', array( $this, 'handle_woocommerce_attribute_updated' ), 10, 2 );
 			add_action( 'woocommerce_attribute_deleted', array( $this, 'handle_woocommerce_attribute_deleted' ), 10, 3 );
 			add_action( 'woocommerce_updated_product_attribute_summary', array( $this, 'handle_woocommerce_updated_product_attribute_summary' ), 10, 1 );
 			add_action( 'edited_term', array( $this, 'handle_edited_term' ), 10, 3 );
@@ -101,9 +101,7 @@ class ProductVersionStringInvalidator {
 	/**
 	 * Handle the save_post_product hook.
 	 *
-	 * @param int      $post_id The post ID.
-	 * @param \WP_Post $post The post object.
-	 * @param bool     $update Whether this is an update or new post.
+	 * @param int $post_id The post ID.
 	 *
 	 * @return void
 	 *
@@ -111,7 +109,7 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_save_post_product( int $post_id, $post, bool $update ): void {
+	public function handle_save_post_product( int $post_id ): void {
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 			return;
 		}
@@ -150,8 +148,7 @@ class ProductVersionStringInvalidator {
 	/**
 	 * Handle the trashed_post hook.
 	 *
-	 * @param int    $post_id The post ID.
-	 * @param string $previous_status The previous post status.
+	 * @param int $post_id The post ID.
 	 *
 	 * @return void
 	 *
@@ -159,15 +156,14 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_trashed_post( int $post_id, string $previous_status ): void {
+	public function handle_trashed_post( int $post_id ): void {
 		$this->handle_trashed_or_untrashed_post( $post_id );
 	}
 
 	/**
 	 * Handle the untrashed_post hook.
 	 *
-	 * @param int    $post_id The post ID.
-	 * @param string $previous_status The previous post status.
+	 * @param int $post_id The post ID.
 	 *
 	 * @return void
 	 *
@@ -175,7 +171,7 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_untrashed_post( int $post_id, string $previous_status ): void {
+	public function handle_untrashed_post( int $post_id ): void {
 		$this->handle_trashed_or_untrashed_post( $post_id );
 	}
 
@@ -370,9 +366,8 @@ class ProductVersionStringInvalidator {
 	/**
 	 * Handle the woocommerce_attribute_updated hook.
 	 *
-	 * @param int    $id The attribute ID.
-	 * @param array  $data The attribute data.
-	 * @param string $old_slug The old attribute slug.
+	 * @param int   $id The attribute ID.
+	 * @param array $data The attribute data.
 	 *
 	 * @return void
 	 *
@@ -380,7 +375,7 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_attribute_updated( int $id, array $data, string $old_slug ): void {
+	public function handle_woocommerce_attribute_updated( int $id, array $data ): void {
 		$taxonomy = wc_attribute_taxonomy_name( $data['attribute_name'] );
 		$this->invalidate_products_with_attribute( $taxonomy );
 	}
