@@ -75,7 +75,7 @@ class OrderItemSchema extends ItemSchema {
 			// Only include variation data for product variations, not simple products.
 			// This is consistent with the cart endpoint behavior.
 			if ( $product instanceof \WC_Product_Variation ) {
-				$product_properties['variation'] = $this->format_variation_data( $product->get_attributes(), $product );
+				$product_properties['variation'] = $this->get_variation_data_from_order_item( $order_item, $product );
 			}
 		}
 
@@ -120,5 +120,49 @@ class OrderItemSchema extends ItemSchema {
 			'line_total'        => $this->prepare_money_response( $order_item->get_total(), wc_get_price_decimals() ),
 			'line_total_tax'    => $this->prepare_money_response( $order_item->get_total_tax(), wc_get_price_decimals() ),
 		];
+	}
+
+	/**
+	 * Get variation data from order item metadata.
+	 *
+	 * Gets the customer's actual attribute choices from the order metadata.
+	 * This fixes variations set to "Any" returning empty values.
+	 *
+	 * @param \WC_Order_Item_Product $order_item Order item instance.
+	 * @param \WC_Product            $product Product instance.
+	 * @return array Formatted variation data.
+	 */
+	protected function get_variation_data_from_order_item( $order_item, $product ) {
+		$variation_data = array();
+		$meta_data      = $order_item->get_meta_data();
+
+		foreach ( $meta_data as $meta ) {
+			$meta_key   = $meta->key;
+			$meta_value = $meta->value;
+
+			if ( empty( $meta_key ) || '' === $meta_value || ! is_scalar( $meta_value ) || strpos( $meta_key, '_' ) === 0 ) {
+				continue;
+			}
+
+			$is_variation_attribute = false;
+
+			if ( strpos( $meta_key, 'pa_' ) === 0 ) {
+				$is_variation_attribute = true;
+			} else {
+				$product_attributes = $product->get_parent_id() ? wc_get_product( $product->get_parent_id() )->get_attributes() : array();
+				foreach ( $product_attributes as $attribute ) {
+					if ( strtolower( $attribute->get_name() ) === strtolower( $meta_key ) ) {
+						$is_variation_attribute = true;
+						break;
+					}
+				}
+			}
+
+			if ( $is_variation_attribute ) {
+				$variation_data[ 'attribute_' . $meta_key ] = $meta_value;
+			}
+		}
+
+		return $this->format_variation_data( $variation_data, $product );
 	}
 }
