@@ -54862,12 +54862,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Appearance.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_keys expects array, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
 			message: '#^Parameter \#1 \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\:\:__construct\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\|null, Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList given\.$#'
 			identifier: argument.type
 			count: 1
