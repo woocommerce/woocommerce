@@ -309,7 +309,9 @@ class WC_Breadcrumb {
 		$this_term = $GLOBALS['wp_query']->get_queried_object();
 		$taxonomy  = get_taxonomy( $this_term->taxonomy );
 
-		$this->add_crumb( $taxonomy->labels->name );
+		if ( 'product_brand' !== $this_term->taxonomy ) {
+			$this->add_crumb( $taxonomy->labels->name );
+		}
 
 		if ( 0 !== intval( $this_term->parent ) ) {
 			$this->term_ancestors( $this_term->term_id, $this_term->taxonomy );

@@ -4,7 +4,7 @@ includes:
 
 parameters:
 	tmpDir: tmp
-	level: 9
+	level: 8
 	phpVersion: 70400
 	paths:
 		- woocommerce.php
