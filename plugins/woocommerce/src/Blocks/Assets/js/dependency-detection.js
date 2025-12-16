@@ -147,8 +147,15 @@
 	function performCheck( callerUrl, prop, requiredHandle ) {
 		const warningKey = ( callerUrl || 'inline' ) + ':' + prop;
 
+		// Don't warn twice for the same script + property combination.
 		if ( warnedScripts[ warningKey ] ) return;
 
+		// Case 1: Inline or unknown script.
+		// We couldn't identify the calling script from the stack trace.
+		// This happens with:
+		// - Inline <script> tags in the HTML
+		// - Scripts loaded via eval() or dynamic injection
+		// - Code running in contexts where stack traces don't include URLs (e.g., some React renders)
 		if ( ! callerUrl ) {
 			console.warn(
 				'[WooCommerce] An inline or unknown script accessed wc.' +
@@ -163,6 +170,13 @@
 
 		const scriptInfo = scriptRegistry[ callerUrl ];
 
+		// Case 2: Unregistered script.
+		// The script URL was found in the stack trace, but it's not in our registry.
+		// This means the script was loaded without using wp_enqueue_script().
+		// Common causes:
+		// - Script loaded via a direct <script src="..."> tag
+		// - Script loaded by a third-party library
+		// - Script URL doesn't match registry due to query string differences
 		if ( ! scriptInfo ) {
 			console.warn(
 				'[WooCommerce] Unregistered script "' +
@@ -177,6 +191,11 @@
 			return;
 		}
 
+		// Case 3: Missing dependency.
+		// The script is properly registered via wp_enqueue_script(), but it doesn't
+		// declare the required WooCommerce handle as a dependency.
+		// Fix: Add the handle to the script's dependencies array in wp_register_script()
+		// or use @woocommerce/dependency-extraction-webpack-plugin for automatic extraction.
 		if ( scriptInfo.deps.indexOf( requiredHandle ) === -1 ) {
 			console.warn(
 				'[WooCommerce] Script "' +
