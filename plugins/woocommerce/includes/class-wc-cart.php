@@ -1579,7 +1579,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array of cart items
 	 */
 	public function get_shipping_packages() {
-		return apply_filters(
+		/**
+		 * Filters the shipping packages for the cart.
+		 *
+		 * @since 1.5.4
+		 * @param array $packages The shipping packages.
+		 * @return array The shipping packages.
+		 */
+		$shipping_packages = apply_filters(
 			'woocommerce_cart_shipping_packages',
 			array(
 				array(
@@ -1594,13 +1601,65 @@ class WC_Cart extends WC_Legacy_Cart {
 						'state'     => $this->get_customer()->get_shipping_state(),
 						'postcode'  => $this->get_customer()->get_shipping_postcode(),
 						'city'      => $this->get_customer()->get_shipping_city(),
-						'address'   => $this->get_customer()->get_shipping_address(),
-						'address_1' => $this->get_customer()->get_shipping_address(), // Provide both address and address_1 for backwards compatibility.
+						'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
+						'address_1' => $this->get_customer()->get_shipping_address_1(),
 						'address_2' => $this->get_customer()->get_shipping_address_2(),
 					),
 					'cart_subtotal'   => $this->get_displayed_subtotal(),
 				),
 			)
+		);
+
+		// Return empty array if invalid object supplied by the filter or no packages.
+		if ( ! is_array( $shipping_packages ) || empty( $shipping_packages ) ) {
+			return array();
+		}
+
+		// Remove any invalid packages before adding package IDs.
+		$shipping_packages = array_filter(
+			$shipping_packages,
+			function ( $package ) {
+				return ! empty( $package ) && is_array( $package );
+			}
+		);
+
+		// Add package ID and package name to each package after the filter is applied.
+		$index = 1;
+		foreach ( $shipping_packages as $key => $package ) {
+			$shipping_packages[ $key ]['package_id']   = $package['package_id'] ?? $key;
+			$shipping_packages[ $key ]['package_name'] = $this->get_shipping_package_name( $shipping_packages[ $key ], $index );
+			++$index;
+		}
+
+		return $shipping_packages;
+	}
+
+	/**
+	 * Get the package name.
+	 *
+	 * @param array $package Shipping package data.
+	 * @param int   $index Package number.
+	 * @return string
+	 */
+	private function get_shipping_package_name( $package, $index ) {
+		/**
+		 * Filters the shipping package name.
+		 *
+		 * @since 4.3.0
+		 * @param string $shipping_package_name Shipping package name.
+		 * @param string $package_id Shipping package ID.
+		 * @param array $package Shipping package from WooCommerce.
+		 * @return string Shipping package name.
+		 */
+		return apply_filters(
+			'woocommerce_shipping_package_name',
+			sprintf(
+				/* translators: %d: shipping package number */
+				_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
+				$index
+			),
+			$package['package_id'],
+			$package
 		);
 	}
 

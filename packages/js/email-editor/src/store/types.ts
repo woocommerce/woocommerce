@@ -167,7 +167,7 @@ export type TemplatePreview = {
 	type: string;
 };
 
-export type TemplateCategory = 'recent' | 'basic';
+export type TemplateCategory = string;
 
 export type Feature =
 	| 'fullscreenMode'
