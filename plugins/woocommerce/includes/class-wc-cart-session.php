@@ -727,7 +727,14 @@ final class WC_Cart_Session {
 	public function clean_up_removed_cart_contents() {
 		// Limit to page requests initiated by the user.
 		$is_page = is_singular() || is_archive() || is_search();
+
 		if ( is_404() || ! $is_page ) {
+			return;
+		}
+
+		// Don't cleanup if user just removed an item (undo link is being displayed).
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['removed_item'] ) ) {
 			return;
 		}
 
