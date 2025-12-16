@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks;
 
+use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
+
 /**
  * DependencyDetection class.
  *
@@ -15,6 +17,19 @@ namespace Automattic\WooCommerce\Blocks;
  * @internal
  */
 final class DependencyDetection {
+
+	/**
+	 * WooCommerce blocks that use the tracked globals.
+	 *
+	 * Detection script only runs on pages containing these blocks.
+	 *
+	 * @var array<string>
+	 */
+	private const TRACKED_BLOCKS = array(
+		'woocommerce/checkout',
+		'woocommerce/cart',
+		'woocommerce/mini-cart',
+	);
 
 	/**
 	 * Maps window.wc.* property names to their required script handles.
@@ -67,6 +82,11 @@ final class DependencyDetection {
 	 * but output inline to ensure correct timing (before any enqueued scripts).
 	 */
 	public function output_early_proxy_setup(): void {
+		// Only run on pages that have the tracked blocks.
+		if ( ! $this->page_has_tracked_blocks() ) {
+			return;
+		}
+
 		$script_path = __DIR__ . '/Assets/js/dependency-detection.js';
 
 		if ( ! file_exists( $script_path ) ) {
@@ -96,6 +116,11 @@ final class DependencyDetection {
 	 * Enqueue the dependency detection script with the script registry data.
 	 */
 	public function enqueue_detection_script(): void {
+		// Only run on pages that have the tracked blocks.
+		if ( ! $this->page_has_tracked_blocks() ) {
+			return;
+		}
+
 		// Build the registry at wp_print_footer_scripts when all scripts (including integration scripts) are registered.
 		\add_action(
 			'wp_print_footer_scripts',
@@ -205,6 +230,39 @@ final class DependencyDetection {
 				}
 			)
 		);
+	}
+
+	/**
+	 * Check if the current page contains any of the tracked blocks.
+	 * Checks post content, widget areas, and template parts (header) for blocks.
+	 *
+	 * @return bool True if page has tracked blocks.
+	 */
+	private function page_has_tracked_blocks(): bool {
+		// Check post content for blocks.
+		foreach ( self::TRACKED_BLOCKS as $block_name ) {
+			if ( \has_block( $block_name ) ) {
+				return true;
+			}
+		}
+
+		// Check widget areas for mini-cart (classic themes).
+		$mini_cart_in_widgets = BlocksUtil::get_blocks_from_widget_area( 'woocommerce/mini-cart' );
+		if ( ! empty( $mini_cart_in_widgets ) ) {
+			return true;
+		}
+
+		// Check header template part for mini-cart (block themes).
+		try {
+			$mini_cart_in_header = BlocksUtil::get_block_from_template_part( 'woocommerce/mini-cart', 'header' );
+			if ( ! empty( $mini_cart_in_header ) ) {
+				return true;
+			}
+		} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Template part may not exist in all themes, silently continue.
+		}
+
+		return false;
 	}
 
 	/**
