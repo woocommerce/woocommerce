@@ -1733,10 +1733,17 @@ class WC_Countries {
 		// Prepend field keys.
 		$address_fields = array();
 
+		// Convert type prefix (e.g., 'billing_' or 'shipping_') to address type for autocomplete (e.g., 'billing' or 'shipping').
+		$address_type = rtrim( $type, '_' );
+
 		foreach ( $fields as $key => $value ) {
 			if ( 'state' === $key ) {
 				$value['country_field'] = $type . 'country';
 				$value['country']       = $country;
+			}
+			// Prefix autocomplete value with address type (e.g., 'address-level1' becomes 'billing address-level1').
+			if ( ! empty( $value['autocomplete'] ) ) {
+				$value['autocomplete'] = $address_type . ' ' . $value['autocomplete'];
 			}
 			$address_fields[ $type . $key ] = $value;
 		}
@@ -1750,7 +1757,7 @@ class WC_Countries {
 					'type'         => 'tel',
 					'class'        => array( 'form-row-wide' ),
 					'validate'     => array( 'phone' ),
-					'autocomplete' => 'tel',
+					'autocomplete' => $address_type . ' tel',
 					'priority'     => 100,
 				);
 			}
@@ -1760,7 +1767,7 @@ class WC_Countries {
 				'type'         => 'email',
 				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'email' ),
-				'autocomplete' => 'email',
+				'autocomplete' => $address_type . ' email',
 				'priority'     => 110,
 			);
 		}
