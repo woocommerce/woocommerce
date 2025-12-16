@@ -54862,36 +54862,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Appearance.php
 
 		-
-			message: '#^Cannot call method is_block_editor\(\) on WP_Screen\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:possibly_add_site_editor_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:possibly_hide_wp_admin_bar\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_starts_with expects string\|null, array\|string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
 			message: '#^Parameter \#1 \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\:\:__construct\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\|null, Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList given\.$#'
 			identifier: argument.type
 			count: 1
@@ -54900,12 +54870,6 @@ parameters:
 		-
 			message: '#^Parameter \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:__construct\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
 
@@ -67588,54 +67552,6 @@ parameters:
 			path: src/Internal/Admin/Onboarding/Onboarding.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:install_font_faces\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:start_install_fonts_async_job\(\) should return string but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:start_install_fonts_async_job\(\) should return string but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Offset ''fontFamily'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Offset ''name'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Offset ''preview'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Offset ''slug'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingHelper\:\:add_help_tab\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -73703,72 +73619,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:download_file\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:get_installed_font_faces_by_slug\(\) should return WP_Post\|null but returns int\|WP_Post\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:handle_font_file_upload_error\(\) has invalid return type Automattic\\WooCommerce\\Internal\\Font\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:handle_font_file_upload_error\(\) should return Automattic\\WooCommerce\\Internal\\Font\\WP_Error but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:insert_font_face\(\) should return WP_Error\|WP_Post but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:validate_font_face\(\) should return WP_Error\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Parameter \#1 \$postarr of function wp_insert_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{post_type\: ''wp_font_face'', post_parent\: int, post_title\: string, post_name\: string, post_content\: non\-empty\-string\|false, post_status\: ''publish''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFamily\:\:get_font_family_by_name\(\) should return WP_Post\|null but returns int\|WP_Post\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Font/FontFamily.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFamily\:\:insert_font_family\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Font/FontFamily.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFamily\:\:validate_font_family\(\) should return WP_Error\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Font/FontFamily.php
-
-		-
-			message: '#^Parameter \#1 \$postarr of function wp_insert_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{post_type\: ''wp_font_family'', post_title\: mixed, name\: mixed, post_content\: non\-empty\-string\|false, post_status\: ''publish''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Font/FontFamily.php
 
 		-
 			message: '#^Call to function is_object\(\) with ''''\|''0''\|array will always evaluate to false\.$#'

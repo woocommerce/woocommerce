@@ -618,6 +618,13 @@ class WC_Gateway_Paypal_Request {
 			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( $order->get_id() ) );
 		}
 
+		$purchase_unit_amount = $this->get_paypal_order_purchase_unit_amount( $order );
+		if ( $purchase_unit_amount['value'] <= 0 ) {
+			// If we cannot build purchase unit amount (e.g. negative or zero order total),
+			// we should not proceed with the create-order request.
+			throw new Exception( 'Cannot build PayPal order purchase unit amount. Order total is not valid. Order ID: ' . esc_html( (string) $order->get_id() ) . ', Total: ' . esc_html( (string) $purchase_unit_amount['value'] ) );
+		}
+
 		$order_items = $this->get_paypal_order_items( $order );
 		if ( empty( $order_items ) ) {
 			// If we cannot build order items (e.g. negative item amounts),
@@ -657,7 +664,7 @@ class WC_Gateway_Paypal_Request {
 			'purchase_units' => array(
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
-					'amount'     => $this->get_paypal_order_purchase_unit_amount( $order ),
+					'amount'     => $purchase_unit_amount,
 					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $order_items,
 					'payee'      => array(
