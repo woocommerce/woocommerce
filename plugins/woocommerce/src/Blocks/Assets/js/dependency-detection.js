@@ -196,10 +196,7 @@
 						WC_GLOBAL_TO_HANDLE[ prop ]
 					);
 				}
-				return Reflect.get( obj, prop );
-			},
-			set( obj, prop, value ) {
-				return Reflect.set( obj, prop, value );
+				return obj[ prop ];
 			},
 		} );
 	}
