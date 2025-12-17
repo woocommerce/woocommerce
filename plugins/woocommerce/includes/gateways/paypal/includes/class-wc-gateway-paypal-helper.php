@@ -174,8 +174,9 @@ class WC_Gateway_Paypal_Helper {
 		// Update the shipping information.
 		$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
 		if ( ! empty( $full_name ) ) {
-			$approximate_first_name = explode( ' ', $full_name )[0] ?? '';
-			$approximate_last_name  = explode( ' ', $full_name )[1] ?? '';
+			$name_parts = explode( ' ', $full_name, 2 );
+			$approximate_first_name = $name_parts[0] ?? '';
+			$approximate_last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
 			$order->set_shipping_first_name( $approximate_first_name );
 			$order->set_shipping_last_name( $approximate_last_name );
 		}
