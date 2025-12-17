@@ -1374,7 +1374,7 @@ WHERE
 			 */
 			$data_sync_enabled = apply_filters(
 				'woocommerce_hpos_enable_sync_on_read',
-				$data_sync_enabled && ! doing_action( 'woocommerce_deliver_webhook_async' ) && ! doing_action( 'wc-admin_import_orders' )
+				! doing_action( 'woocommerce_deliver_webhook_async' ) && ! doing_action( 'wc-admin_import_orders' )
 			);
 		}
 
