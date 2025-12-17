@@ -11,7 +11,6 @@
 	// Set up a placeholder that will be replaced with the real proxy later.
 	// This ensures we capture window.wc before any WC scripts set it.
 	let originalWc = window.wc || {};
-	let proxyEnabled = false;
 	let scriptRegistry = {};
 	let registryLoaded = false;
 	const warnedScripts = {};
@@ -77,7 +76,7 @@
 			if ( line.indexOf( 'Reflect.' ) !== -1 ) continue;
 			if ( line.indexOf( 'Object.get' ) !== -1 ) continue;
 			if ( line.indexOf( 'checkDependency' ) !== -1 ) continue;
-			if ( line.indexOf( 'performCheck' ) !== -1 ) continue;
+			if ( line.indexOf( 'warnIfMissingDependency' ) !== -1 ) continue;
 			if ( line.indexOf( 'getCallerScriptUrl' ) !== -1 ) continue;
 			if ( line.indexOf( 'parseStackForCallerUrl' ) !== -1 ) continue;
 
@@ -112,40 +111,18 @@
 	}
 
 	/**
-	 * Check if a script has declared the required dependency.
-	 *
-	 * @param {string|null} callerUrl      - The URL of the calling script.
-	 * @param {string}      prop           - The property being accessed (e.g., 'blocksCheckout').
-	 * @param {string}      requiredHandle - The required dependency handle.
-	 */
-	function checkDependency( callerUrl, prop, requiredHandle ) {
-		// Skip WooCommerce's own scripts - they manage their own dependencies.
-		if ( isWooCommerceScript( callerUrl ) ) {
-			return;
-		}
-
-		// If registry not loaded yet, queue the check for later.
-		if ( ! registryLoaded ) {
-			pendingChecks.push( {
-				callerUrl,
-				prop,
-				requiredHandle,
-			} );
-			return;
-		}
-
-		performCheck( callerUrl, prop, requiredHandle );
-	}
-
-	/**
 	 * Perform the actual dependency check and warn if missing.
 	 *
-	 * @param {string|null} callerUrl      - The URL of the calling script.
-	 * @param {string}      prop           - The property being accessed.
-	 * @param {string}      requiredHandle - The required dependency handle.
+	 * @param {string|null} callerUrl                - The URL of the calling script.
+	 * @param {string}      wcGlobalKey              - The property being accessed.
+	 * @param {string}      requiredDependencyHandle - The required dependency handle.
 	 */
-	function performCheck( callerUrl, prop, requiredHandle ) {
-		const warningKey = ( callerUrl || 'inline' ) + ':' + prop;
+	function warnIfMissingDependency(
+		callerUrl,
+		wcGlobalKey,
+		requiredDependencyHandle
+	) {
+		const warningKey = ( callerUrl || 'inline' ) + ':' + wcGlobalKey;
 
 		// Don't warn twice for the same script + property combination.
 		if ( warnedScripts[ warningKey ] ) return;
@@ -159,9 +136,9 @@
 		if ( ! callerUrl ) {
 			console.warn(
 				'[WooCommerce] An inline or unknown script accessed wc.' +
-					prop +
+					wcGlobalKey +
 					' without proper dependency declaration. This script should declare "' +
-					requiredHandle +
+					requiredDependencyHandle +
 					'" as a dependency.'
 			);
 			warnedScripts[ warningKey ] = true;
@@ -182,9 +159,9 @@
 				'[WooCommerce] Unregistered script "' +
 					getFilename( callerUrl ) +
 					'" accessed wc.' +
-					prop +
+					wcGlobalKey +
 					'. This script should be registered with wp_enqueue_script() and declare "' +
-					requiredHandle +
+					requiredDependencyHandle +
 					'" as a dependency.'
 			);
 			warnedScripts[ warningKey ] = true;
@@ -196,20 +173,54 @@
 		// declare the required WooCommerce handle as a dependency.
 		// Fix: Add the handle to the script's dependencies array in wp_register_script()
 		// or use @woocommerce/dependency-extraction-webpack-plugin for automatic extraction.
-		if ( scriptInfo.deps.indexOf( requiredHandle ) === -1 ) {
+		if ( scriptInfo.deps.indexOf( requiredDependencyHandle ) === -1 ) {
 			console.warn(
 				'[WooCommerce] Script "' +
 					scriptInfo.handle +
 					'" accessed wc.' +
-					prop +
+					wcGlobalKey +
 					' without declaring "' +
-					requiredHandle +
+					requiredDependencyHandle +
 					'" as a dependency. Add "' +
-					requiredHandle +
+					requiredDependencyHandle +
 					'" to the script\'s dependencies array.'
 			);
 			warnedScripts[ warningKey ] = true;
 		}
+	}
+
+	/**
+	 * Check if a script has declared the required dependency.
+	 *
+	 * @param {string|null} callerUrl                - The URL of the calling script.
+	 * @param {string}      wcGlobalKey              - The property being accessed (e.g., 'blocksCheckout').
+	 * @param {string}      requiredDependencyHandle - The required dependency handle.
+	 */
+	function checkDependency(
+		callerUrl,
+		wcGlobalKey,
+		requiredDependencyHandle
+	) {
+		// Skip WooCommerce's own scripts - they manage their own dependencies.
+		if ( isWooCommerceScript( callerUrl ) ) {
+			return;
+		}
+
+		// If registry not loaded yet, queue the check for later.
+		if ( ! registryLoaded ) {
+			pendingChecks.push( {
+				callerUrl,
+				wcGlobalKey,
+				requiredDependencyHandle,
+			} );
+			return;
+		}
+
+		warnIfMissingDependency(
+			callerUrl,
+			wcGlobalKey,
+			requiredDependencyHandle
+		);
 	}
 
 	/**
@@ -221,7 +232,7 @@
 	function createWcProxy( target ) {
 		return new Proxy( target, {
 			get( obj, prop ) {
-				if ( proxyEnabled && WC_GLOBAL_EXPORTS[ prop ] ) {
+				if ( WC_GLOBAL_EXPORTS[ prop ] ) {
 					const callerUrl = getCallerScriptUrl();
 					checkDependency(
 						callerUrl,
@@ -259,13 +270,15 @@
 		// Process any pending checks now that we have the registry.
 		for ( let i = 0; i < pendingChecks.length; i++ ) {
 			const check = pendingChecks[ i ];
-			performCheck( check.callerUrl, check.prop, check.requiredHandle );
+			warnIfMissingDependency(
+				check.callerUrl,
+				check.wcGlobalKey,
+				check.requiredDependencyHandle
+			);
 		}
 		pendingChecks = [];
 	};
 
-	// Enable detection immediately.
-	proxyEnabled = true;
 	console.info(
 		'[WooCommerce] Dependency detection enabled. Warnings will be shown for scripts that access wc.* globals without proper dependencies.'
 	);
