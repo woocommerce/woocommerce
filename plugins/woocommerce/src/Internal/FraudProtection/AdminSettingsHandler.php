@@ -60,6 +60,13 @@ class AdminSettingsHandler {
 			return $settings;
 		}
 
+		// Check if field already exists to prevent duplicates.
+		foreach ( $settings as $setting ) {
+			if ( isset( $setting['id'] ) && 'woocommerce_fraud_protection_jetpack_connection' === $setting['id'] ) {
+				return $settings;
+			}
+		}
+
 		// Find the fraud_protection field and add Jetpack connection field after it.
 		$new_settings = array();
 		foreach ( $settings as $setting ) {
