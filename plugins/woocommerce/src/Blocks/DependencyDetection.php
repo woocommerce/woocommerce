@@ -172,6 +172,11 @@ final class DependencyDetection {
 				continue;
 			}
 
+			// Skip WordPress core scripts - they won't use wc.* globals.
+			if ( $this->is_wordpress_core_script( $src ) ) {
+				continue;
+			}
+
 			// Normalize the URL for consistent matching.
 			$src = $this->normalize_url( $src );
 
@@ -196,7 +201,20 @@ final class DependencyDetection {
 	private function is_woocommerce_script( string $url ): bool {
 		// Check if the URL is from the WooCommerce core plugin directory.
 		// This matches /plugins/woocommerce/ but not /plugins/woocommerce-subscriptions/ etc.
-		return (bool) preg_match( '#/plugins/woocommerce/(client|assets|build)/#', $url );
+		return (bool) preg_match( '#/plugins/woocommerce/(client|assets|build|vendor)/#', $url );
+	}
+
+	/**
+	 * Check if a script URL belongs to WordPress core.
+	 *
+	 * WordPress core scripts (wp-includes, wp-admin) won't use wc.* globals,
+	 * so we can skip them to reduce registry size.
+	 *
+	 * @param string $url Script URL.
+	 * @return bool
+	 */
+	private function is_wordpress_core_script( string $url ): bool {
+		return (bool) preg_match( '#/(wp-includes|wp-admin)/#', $url );
 	}
 
 	/**
