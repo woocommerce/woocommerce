@@ -60,18 +60,18 @@ class AdminSettingsHandler {
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
-				<label for="<?php echo $field_id; ?>"><?php echo $field_title; ?></label>
+				<label for="<?php echo esc_attr( $field_id ); ?>"><?php echo esc_html( $field_title ); ?></label>
 			</th>
 			<td class="forminp forminp-button">
 				<button
 					type="button"
-					id="<?php echo $field_id; ?>"
+					id="<?php echo esc_attr( $field_id ); ?>"
 					class="button button-secondary wc-fraud-protection-reset-button"
 					data-reset-url="<?php echo esc_url( $reset_url ); ?>"
 				>
 					<?php esc_html_e( 'Reset All Sessions', 'woocommerce' ); ?>
 				</button>
-				<p class="description"><?php echo $field_description; ?></p>
+				<p class="description"><?php echo esc_html( $field_description ); ?></p>
 			</td>
 		</tr>
 		<?php
@@ -103,7 +103,7 @@ class AdminSettingsHandler {
 				?>
 				<tr valign="top">
 					<th scope="row" class="titledesc">
-						<label for="<?php echo $field_id; ?>"><?php echo $field_title; ?></label>
+						<label for="<?php echo esc_attr( $field_id ); ?>"><?php echo esc_html( $field_title ); ?></label>
 					</th>
 					<td class="forminp forminp-button">
 						<p class="description" style="color: #dc3232;">
@@ -118,18 +118,18 @@ class AdminSettingsHandler {
 			?>
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo $field_id; ?>"><?php echo $field_title; ?></label>
+					<label for="<?php echo esc_attr( $field_id ); ?>"><?php echo esc_html( $field_title ); ?></label>
 				</th>
 				<td class="forminp forminp-button">
 					<button
 						type="button"
-						id="<?php echo $field_id; ?>"
+						id="<?php echo esc_attr( $field_id ); ?>"
 						class="button button-secondary jetpack_connection_button"
 						data-connection-url="<?php echo esc_url( $connection_url ); ?>"
 					>
 						<?php esc_html_e( 'Connect to Jetpack', 'woocommerce' ); ?>
 					</button>
-					<p class="description"><?php echo $field_description; ?></p>
+					<p class="description"><?php echo esc_html( $field_description ); ?></p>
 				</td>
 			</tr>
 			<?php
@@ -137,7 +137,7 @@ class AdminSettingsHandler {
 			?>
 			<tr valign="top">
 				<th scope="row" class="titledesc">
-					<label for="<?php echo $field_id; ?>"><?php echo $field_title; ?></label>
+					<label for="<?php echo esc_attr( $field_id ); ?>"><?php echo esc_html( $field_title ); ?></label>
 				</th>
 				<td class="forminp forminp-button">
 					<span class="dashicons dashicons-yes-alt" style="color: #46b450;"></span>
