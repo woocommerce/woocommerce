@@ -66,26 +66,19 @@
 		if ( ! stack ) return null;
 
 		const lines = stack.split( '\n' );
+		const currentPage = window.location.pathname;
 
 		for ( let i = 1; i < lines.length; i++ ) {
 			const line = lines[ i ];
 
-			// Skip our own detection script lines.
-			if ( line.indexOf( 'wc-dependency-detection' ) !== -1 ) continue;
-			if ( line.indexOf( 'Proxy.' ) !== -1 ) continue;
-			if ( line.indexOf( 'Reflect.' ) !== -1 ) continue;
-			if ( line.indexOf( 'Object.get' ) !== -1 ) continue;
-			if ( line.indexOf( 'checkDependency' ) !== -1 ) continue;
-			if ( line.indexOf( 'warnIfMissingDependency' ) !== -1 ) continue;
-			if ( line.indexOf( 'getCallerScriptUrl' ) !== -1 ) continue;
-			if ( line.indexOf( 'parseStackForCallerUrl' ) !== -1 ) continue;
+			// Skip lines from the current page (our inline detection script).
+			if ( line.indexOf( currentPage + ':' ) !== -1 ) continue;
 
-			// Skip native functions (setTimeout, etc.)
-			if ( line.indexOf( '[native code]' ) !== -1 ) continue;
-			if ( /^\s*(at\s+)?setTimeout\s*$/.test( line.trim() ) ) continue;
+			// Skip webpack source-mapped files (internal build artifacts).
+			if ( line.indexOf( 'webpack://' ) !== -1 ) continue;
 
-			// Match URLs pointing to .js files
-			const match = line.match( /(https?:\/\/[^\s)?\u0022]+\.js)/ );
+			// Captures everything up to and including .js, stopping before any ? (query string), : (line number), or # (hash)
+			const match = line.match( /(https?:\/\/[^\s)]+\.js)(?:[?:#]|$)/ );
 
 			if ( match ) {
 				return match[ 1 ];
