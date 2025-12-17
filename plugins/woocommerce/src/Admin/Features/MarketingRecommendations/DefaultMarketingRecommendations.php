@@ -141,7 +141,7 @@ class DefaultMarketingRecommendations {
 			),
 			array(
 				'title'          => 'Blaze Ads',
-				'description'    => __( 'Promote your products and services to over 100 million users across Tumblr and WordPress.', 'woocommerce' ),
+				'description'    => __( 'The quickest way to grow your business by advertising to over 100 million users across Tumblr and WordPress, starting at just $5/day.', 'woocommerce' ),
 				'url'            => "https://woocommerce.com/products/blaze-ads/{$utm_string}",
 				'direct_install' => true,
 				'icon'           => "{$icon_dir_url}/blaze.svg",
@@ -153,7 +153,9 @@ class DefaultMarketingRecommendations {
 				'subcategories'  => array(
 					$sales_channels,
 				),
-				'tags'           => array(),
+				'tags'           => array(
+					$built_by_woocommerce,
+				),
 			),
 			array(
 				'title'          => 'MailPoet',
