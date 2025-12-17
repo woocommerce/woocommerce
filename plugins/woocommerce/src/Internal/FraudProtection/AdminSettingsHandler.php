@@ -24,11 +24,14 @@ class AdminSettingsHandler {
 	private $connection_manager;
 
 	/**
-	 * Constructor. Sets up hooks on instantiation.
+	 * Initialize the class with dependencies.
+	 *
+	 * @internal
 	 *
 	 * @param JetpackConnectionManager $connection_manager Jetpack connection manager instance.
+	 * @return void
 	 */
-	public function __construct( JetpackConnectionManager $connection_manager ) {
+	final public function init( JetpackConnectionManager $connection_manager ): void {
 		$this->connection_manager = $connection_manager;
 
 		add_action( 'woocommerce_admin_field_fraud_protection_reset_sessions', array( $this, 'handle_output_reset_button' ), 10, 1 );

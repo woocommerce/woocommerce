@@ -65,11 +65,14 @@ class FraudProtectionServiceApiClient {
 	private $connection_manager;
 
 	/**
-	 * Constructor.
+	 * Initialize the class with dependencies.
+	 *
+	 * @internal
 	 *
 	 * @param JetpackConnectionManager $connection_manager Jetpack connection manager instance.
+	 * @return void
 	 */
-	public function __construct( JetpackConnectionManager $connection_manager ) {
+	final public function init( JetpackConnectionManager $connection_manager ): void {
 		$this->connection_manager = $connection_manager;
 	}
 
