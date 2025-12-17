@@ -444,6 +444,7 @@ final class BlockTypesController {
 			'ClassicTemplate',
 			'ClassicShortcode',
 			'ComingSoon',
+			'CouponCode',
 			'CustomerAccount',
 			'EmailContent',
 			'FeaturedCategory',
