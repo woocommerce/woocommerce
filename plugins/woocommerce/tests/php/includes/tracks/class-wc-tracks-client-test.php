@@ -107,7 +107,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that batch requests are supported when Requests library is available.
+	 * @testdox Should detect batch request support when Requests library is available.
 	 */
 	public function test_can_use_batch_requests_when_supported() {
 		$reflection = new ReflectionClass( 'WC_Tracks_Client' );
@@ -125,7 +125,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that pixels are queued when batching is enabled.
+	 * @testdox Should queue pixels when batching is enabled.
 	 */
 	public function test_record_pixel_batched_queues_pixel_when_batching_enabled() {
 		// Ensure batching is supported.
@@ -147,7 +147,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that record_pixel sends immediately without batching.
+	 * @testdox Should send pixels immediately when using record_pixel without batching.
 	 */
 	public function test_record_pixel_sends_immediately() {
 		$pixel = 'https://pixel.wp.com/t.gif?_en=test_event&test=value';
@@ -168,7 +168,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that multiple pixels are queued correctly.
+	 * @testdox Should queue all pixels when recording multiple batched pixels.
 	 */
 	public function test_record_multiple_pixels_batched_queues_all() {
 		// Ensure batching is supported.
@@ -193,7 +193,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that shutdown hook is registered when pixels are queued.
+	 * @testdox Should register shutdown hook when pixels are batched.
 	 */
 	public function test_shutdown_hook_registered_when_pixel_batched() {
 		// Ensure batching is supported.
@@ -214,7 +214,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that shutdown hook is only registered once.
+	 * @testdox Should register shutdown hook only once when multiple pixels are batched.
 	 */
 	public function test_shutdown_hook_registered_only_once() {
 		// Ensure batching is supported.
@@ -245,7 +245,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that batched pixels are processed and queue is cleared after sending.
+	 * @testdox Should clear queue after sending batched pixels.
 	 */
 	public function test_send_batched_pixels_clears_queue() {
 		// Ensure batching is supported.
@@ -271,7 +271,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that send_batched_pixels does nothing when queue is empty.
+	 * @testdox Should do nothing when sending batched pixels with empty queue.
 	 */
 	public function test_send_batched_pixels_does_nothing_when_queue_empty() {
 		$this->reset_batch_state();
@@ -285,7 +285,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the wc_tracks_use_batch_requests filter to disable batching.
+	 * @testdox Should disable batching when wc_tracks_use_batch_requests filter returns false.
 	 */
 	public function test_filter_can_disable_batching() {
 		// Ensure batching is supported.
@@ -310,7 +310,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the wc_tracks_use_batch_requests filter to enable batching.
+	 * @testdox Should enable batching when wc_tracks_use_batch_requests filter returns true.
 	 */
 	public function test_filter_can_enable_batching() {
 		// Ensure batching is supported.
@@ -335,7 +335,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that timestamp is generated correctly.
+	 * @testdox Should generate timestamp in milliseconds.
 	 */
 	public function test_build_timestamp() {
 		$timestamp = WC_Tracks_Client::build_timestamp();
@@ -349,7 +349,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that request timestamp and nocache are added to pixel.
+	 * @testdox Should add request timestamp and nocache parameters to pixel URL.
 	 */
 	public function test_add_request_timestamp_and_nocache() {
 		$pixel = 'https://pixel.wp.com/t.gif?_en=test_event';
@@ -374,7 +374,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test record_event_batched with batching.
+	 * @testdox Should queue event when using record_event_batched.
 	 */
 	public function test_record_event_batched_queues_event() {
 		// Ensure batching is supported.
@@ -403,7 +403,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that batching works with multiple events.
+	 * @testdox Should queue multiple events when batching.
 	 */
 	public function test_batch_multiple_events() {
 		// Ensure batching is supported.
@@ -434,7 +434,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that send_with_requests_multiple can be called with an empty array.
+	 * @testdox Should handle empty array when calling send_with_requests_multiple.
 	 */
 	public function test_send_with_requests_multiple_handles_empty_array() {
 		$reflection = new ReflectionClass( 'WC_Tracks_Client' );
@@ -449,7 +449,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that queue is cleared after sending.
+	 * @testdox Should clear queue after sending pixels.
 	 */
 	public function test_queue_cleared_after_sending() {
 		// Ensure batching is supported.
@@ -474,7 +474,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that multiple pixels are batched together.
+	 * @testdox Should batch multiple pixels together and clear queue after sending.
 	 */
 	public function test_multiple_pixels_batched_together() {
 		// Ensure batching is supported.
@@ -499,7 +499,7 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that non-batched requests are also intercepted.
+	 * @testdox Should intercept fallback requests when batching is disabled.
 	 */
 	public function test_fallback_requests_are_intercepted() {
 		// Disable batching via filter.
