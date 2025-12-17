@@ -309,17 +309,14 @@ $dialog-padding: 20px;
 }
 
 :where(.wc-block-product-gallery-dialog__header) {
-	width: 100%;
-	max-width: 1600px;
 	margin: 0 auto;
-	padding: 14px 0;
+	padding: 14px;
 	display: flex;
 	justify-content: flex-end;
 }
 
 :where(.wc-block-product-gallery-dialog__close-button) {
 	padding: 4px;
-	margin-right: 8px;
 	background: none;
 	border: none;
 	cursor: pointer;
