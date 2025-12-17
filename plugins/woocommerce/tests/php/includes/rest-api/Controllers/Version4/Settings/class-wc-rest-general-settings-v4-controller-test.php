@@ -223,6 +223,58 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * Test updating country with state code that includes country prefix (e.g., DE:DE-BY).
+	 * This ensures compatibility with V3 API format where state codes include the country prefix.
+	 */
+	public function test_update_country_with_state_including_country_prefix() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_default_country' => 'DE:DE-BY', // Bavaria, Germany with country prefix in state code.
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'DE:DE-BY', get_option( 'woocommerce_default_country' ) );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertEquals( 'DE:DE-BY', $data['values']['woocommerce_default_country'] );
+	}
+
+	/**
+	 * Test updating country with state code without country prefix (legacy format).
+	 * This ensures backward compatibility with formats like DE:BY.
+	 */
+	public function test_update_country_with_state_without_country_prefix() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_default_country' => 'DE:BY', // Bavaria, Germany without country prefix in state code.
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'DE:BY', get_option( 'woocommerce_default_country' ) );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertEquals( 'DE:BY', $data['values']['woocommerce_default_country'] );
+	}
+
+	/**
 	 * Test update_item method does not update \'title\' and \'sectionend\' settings and other non-updatable fields.
 	 */
 	public function test_update_item_ignores_non_updatable_settings() {
