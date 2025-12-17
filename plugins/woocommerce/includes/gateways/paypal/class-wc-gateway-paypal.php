@@ -260,9 +260,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		// Bail early if the addresses update already have been attempted.
-		$addresses_update_status = $order->get_meta( '_paypal_address_update_status', true );
-		if ( ! empty( $addresses_update_status ) ) {
+		// Bail early if the addresses update already have been attempted (whether successful or not).
+		$addresses_update_attempted = $order->meta_exists( '_paypal_addresses_updated' );
+		if ( $addresses_update_attempted ) {
 			return;
 		}
 
@@ -275,7 +275,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			WC_Gateway_Paypal_Helper::update_addresses_in_order( $order, $paypal_order_details );
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
-			$order->update_meta_data( '_paypal_address_update_status', 'failed' );
+			$order->update_meta_data( '_paypal_addresses_updated', false );
 			$order->save();
 		}
 	}

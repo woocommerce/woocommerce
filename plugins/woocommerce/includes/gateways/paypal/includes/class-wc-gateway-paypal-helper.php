@@ -165,9 +165,9 @@ class WC_Gateway_Paypal_Helper {
 			return;
 		}
 
-		// Bail early if the addresses update already have been successful.
-		$addresses_update_status = $order->get_meta( '_paypal_address_update_status', true );
-		if ( 'success' === $addresses_update_status ) {
+		// Bail early if '_paypal_addresses_updated' is true, meaning the addresses update already have been successful.
+		$addresses_update_completed = $order->get_meta( '_paypal_addresses_updated', true );
+		if ( $addresses_update_completed ) {
 			return;
 		}
 
@@ -209,7 +209,7 @@ class WC_Gateway_Paypal_Helper {
 			$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
 		}
 
-		$order->update_meta_data( '_paypal_address_update_status', 'success' );
+		$order->update_meta_data( '_paypal_addresses_updated', true );
 		$order->save();
 	}
 }
