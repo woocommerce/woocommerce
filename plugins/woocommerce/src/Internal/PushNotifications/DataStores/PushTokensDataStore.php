@@ -227,13 +227,15 @@ class PushTokensDataStore {
 			)
 		);
 
-		$posts = $query->posts;
+		$post_ids = $query->posts;
 
-		if ( empty( $posts ) ) {
+		if ( empty( $post_ids ) ) {
 			return null;
 		}
 
-		foreach ( $posts as $post_id ) {
+		update_meta_cache( 'post', $post_ids );
+
+		foreach ( $post_ids as $post_id ) {
 			$candidate = new PushToken();
 			$candidate->set_id( $post_id );
 
