@@ -98,7 +98,6 @@ type MiniCart = {
 		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
-		saveMiniCartButtonRef: () => void;
 	};
 };
 
