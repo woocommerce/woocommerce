@@ -7,9 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
-use Automattic\Jetpack\Connection\Manager;
-use Automattic\WooCommerce\Admin\API\OnboardingPlugins;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,9 +17,20 @@ defined( 'ABSPATH' ) || exit;
 class AdminSettingsHandler {
 
 	/**
-	 * Constructor. Sets up hooks on instantiation.
+	 * Jetpack connection manager instance.
+	 *
+	 * @var JetpackConnectionManager
 	 */
-	public function __construct() {
+	private $connection_manager;
+
+	/**
+	 * Constructor. Sets up hooks on instantiation.
+	 *
+	 * @param JetpackConnectionManager $connection_manager Jetpack connection manager instance.
+	 */
+	public function __construct( JetpackConnectionManager $connection_manager ) {
+		$this->connection_manager = $connection_manager;
+
 		add_action( 'woocommerce_admin_field_fraud_protection_reset_sessions', array( $this, 'handle_output_reset_button' ), 10, 1 );
 		add_action( 'woocommerce_admin_field_jetpack_connection', array( $this, 'handle_output_jetpack_connection_button' ), 10, 1 );
 		add_action( 'admin_init', array( $this, 'handle_reset_sessions_action' ), 10, 0 );
@@ -79,29 +87,29 @@ class AdminSettingsHandler {
 		$field_title       = esc_html( $value['title'] );
 		$field_description = esc_html( $value['desc'] );
 
+		// Get connection status from connection manager.
+		$connection_status = $this->connection_manager->get_connection_status();
 
-		$manager = new Manager( 'woocommerce' );
-		if ( ! $manager->is_connected() ) {
-			$request = new \WP_REST_Request();
-			$request->set_param( 'redirect_url', admin_url() );
-			$plugin_onboarding = new OnboardingPlugins();
-			$result = $plugin_onboarding->get_jetpack_authorization_url( $request );
+		if ( ! $connection_status['connected'] ) {
+			// Get authorization URL for connecting.
+			$redirect_url   = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
+			$connection_url = $this->connection_manager->get_authorization_url( $redirect_url );
 
-			// Todo: change parameters
-			if ( ! empty( $result['url'] ) ) {
-				$result['url'] = add_query_arg(
-					array(
-						'redirect_uri' => urlencode( admin_url() . 'admin.php/?page=wc-settings&tab=advanced&section=features' ),
-						// We use the new WooDNA value.
-						'from'         => 'woocommerce-setup-wizard',
-						// We inform Calypso that this is a WooPayments onboarding flow.
-						'plugin_name'  => 'woocommerce',
-						// Use the current user's WP admin color scheme.
-						'color_scheme' => $result['color_scheme'],
-					),
-					$result['url']
-				);
-				$connection_url = $result['url'];
+			// If we couldn't get authorization URL, show error message.
+			if ( ! $connection_url ) {
+				?>
+				<tr valign="top">
+					<th scope="row" class="titledesc">
+						<label for="<?php echo $field_id; ?>"><?php echo $field_title; ?></label>
+					</th>
+					<td class="forminp forminp-button">
+						<p class="description" style="color: #dc3232;">
+							<?php echo esc_html( $connection_status['error'] ); ?>
+						</p>
+					</td>
+				</tr>
+				<?php
+				return;
 			}
 
 			?>
@@ -114,7 +122,7 @@ class AdminSettingsHandler {
 						type="button"
 						id="<?php echo $field_id; ?>"
 						class="button button-secondary jetpack_connection_button"
-						data-reset-url="<?php echo esc_url( $connection_url ); ?>"
+						data-connection-url="<?php echo esc_url( $connection_url ); ?>"
 					>
 						<?php esc_html_e( 'Connect to Jetpack', 'woocommerce' ); ?>
 					</button>
@@ -129,7 +137,17 @@ class AdminSettingsHandler {
 					<label for="<?php echo $field_id; ?>"><?php echo $field_title; ?></label>
 				</th>
 				<td class="forminp forminp-button">
-					<p class="description"><?php _e( 'Already connected to Jetpack', 'woocommerce' )  ?></p>
+					<span class="dashicons dashicons-yes-alt" style="color: #46b450;"></span>
+					<span><?php esc_html_e( 'Connected to Jetpack', 'woocommerce' ); ?></span>
+					<p class="description">
+						<?php
+						printf(
+							/* translators: %d: Blog ID */
+							esc_html__( 'Site ID: %d', 'woocommerce' ),
+							(int) $connection_status['blog_id']
+						);
+						?>
+					</p>
 				</td>
 			</tr>
 			<?php
@@ -217,8 +235,8 @@ class AdminSettingsHandler {
 			$('.jetpack_connection_button').on('click', function(e) {
 				e.preventDefault();
 
-				var resetUrl = $(this).data('reset-url');
-				window.location.href = resetUrl;
+				var connectionUrl = $(this).data('connection-url');
+				window.location.href = connectionUrl;
 			});
 		});
 		";

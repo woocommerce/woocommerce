@@ -58,6 +58,22 @@ class FraudProtectionServiceApiClient {
 	public const DECISION_CHALLENGE = 'challenge';
 
 	/**
+	 * Jetpack connection manager instance.
+	 *
+	 * @var JetpackConnectionManager
+	 */
+	private $connection_manager;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param JetpackConnectionManager $connection_manager Jetpack connection manager instance.
+	 */
+	public function __construct( JetpackConnectionManager $connection_manager ) {
+		$this->connection_manager = $connection_manager;
+	}
+
+	/**
 	 * Track a session event and get fraud decision from WPCOM endpoint.
 	 *
 	 * Implements fail-open pattern: if the endpoint is unreachable or times out,
@@ -106,20 +122,23 @@ class FraudProtectionServiceApiClient {
 	private function make_request( array $payload ) {
 		$this->log_request( $payload );
 
-		// Check if Jetpack Connection is available.
-		if ( ! class_exists( Jetpack_Connection_Client::class ) ) {
+		// Check connection status using connection manager.
+		$connection_status = $this->connection_manager->get_connection_status();
+		if ( ! $connection_status['connected'] ) {
 			return new \WP_Error(
-				'jetpack_not_available',
-				'Jetpack Connection is not available'
+				$connection_status['error_code'],
+				$connection_status['error']
 			);
 		}
 
-		// Get the Jetpack blog ID for site-specific endpoint.
-		$blog_id = \Jetpack_Options::get_option( 'id' );
-		if ( ! $blog_id ) {
+		// Get blog ID from connection manager.
+		$blog_id = $connection_status['blog_id'];
+
+		// Check if Jetpack Connection Client is available.
+		if ( ! class_exists( Jetpack_Connection_Client::class ) ) {
 			return new \WP_Error(
-				'no_blog_id',
-				'Jetpack blog ID not found. Is the site connected to WordPress.com?'
+				'jetpack_not_available',
+				'Jetpack Connection Client class is not available'
 			);
 		}
 

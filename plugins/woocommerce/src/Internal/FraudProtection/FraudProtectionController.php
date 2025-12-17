@@ -43,6 +43,13 @@ class FraudProtectionController {
 	private $data_collector;
 
 	/**
+	 * Jetpack connection manager instance.
+	 *
+	 * @var JetpackConnectionManager
+	 */
+	private $connection_manager;
+
+	/**
 	 * Constructor. Sets up hooks on instantiation.
 	 */
 	public function __construct() {
@@ -50,7 +57,8 @@ class FraudProtectionController {
 		$container = wc_get_container();
 		$this->session_manager     = $container->get( SessionClearanceManager::class );
 		$this->features_controller = $container->get( FeaturesController::class );
-		$this->data_collector    = $container->get( SessionDataCollector::class );
+		$this->data_collector      = $container->get( SessionDataCollector::class );
+		$this->connection_manager  = $container->get( JetpackConnectionManager::class );
 
 		// Register Store API routes.
 		add_action( 'rest_api_init', array( $this, 'handle_register_store_api_routes' ), 10, 0 );
@@ -77,8 +85,77 @@ class FraudProtectionController {
 	 */
 	public function maybe_init_hooks(): void {
 		if ( $this->is_fraud_protection_enabled() ) {
+			// Check Jetpack connection and log warning if not connected.
+			$this->check_jetpack_connection();
+
 			$this->init_hooks();
 		}
+	}
+
+	/**
+	 * Check Jetpack connection status and log warning if not connected.
+	 *
+	 * This implements the fail-open pattern: the feature will continue to work
+	 * even if Jetpack is not connected, but fraud protection API calls will fail
+	 * gracefully and allow all sessions through.
+	 *
+	 * @return void
+	 */
+	private function check_jetpack_connection(): void {
+		$connection_status = $this->connection_manager->get_connection_status();
+
+		if ( ! $connection_status['connected'] ) {
+			$logger = wc_get_logger();
+			$logger->warning(
+				sprintf(
+					'Fraud Protection is enabled but Jetpack connection is not available: %s (Error: %s). Fraud protection will fail open and allow all sessions.',
+					$connection_status['error'],
+					$connection_status['error_code']
+				),
+				array( 'source' => 'woo-fraud-protection' )
+			);
+
+			// Add admin notice if in admin area.
+			if ( is_admin() ) {
+				add_action( 'admin_notices', array( $this, 'handle_connection_warning_notice' ) );
+			}
+		}
+	}
+
+	/**
+	 * Display admin notice when Jetpack connection is not available.
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public function handle_connection_warning_notice(): void {
+		// Only show on WooCommerce settings page.
+		$screen = get_current_screen();
+		if ( ! $screen || 'woocommerce_page_wc-settings' !== $screen->id ) {
+			return;
+		}
+
+		$connection_status = $this->connection_manager->get_connection_status();
+		$settings_url      = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
+
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p>
+				<strong><?php esc_html_e( 'Fraud Protection Warning:', 'woocommerce' ); ?></strong>
+				<?php echo esc_html( $connection_status['error'] ); ?>
+			</p>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: Settings page URL */
+					wp_kses_post( __( 'Fraud protection will fail open and allow all sessions until connected. <a href="%s">Connect to Jetpack</a>', 'woocommerce' ) ),
+					esc_url( $settings_url )
+				);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**
