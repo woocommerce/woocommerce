@@ -1741,9 +1741,11 @@ class WC_Countries {
 				$value['country_field'] = $type . 'country';
 				$value['country']       = $country;
 			}
-			// Prefix autocomplete value with address type (e.g., 'address-level1' becomes 'billing address-level1').
+			// Prefix autocomplete value with section and address type per HTML spec.
+			// Format: section-<name> [shipping|billing] <autofill-field>
+			// e.g., 'address-level1' becomes 'section-billing billing address-level1'.
 			if ( ! empty( $value['autocomplete'] ) ) {
-				$value['autocomplete'] = $address_type . ' ' . $value['autocomplete'];
+				$value['autocomplete'] = 'section-' . $address_type . ' ' . $address_type . ' ' . $value['autocomplete'];
 			}
 			$address_fields[ $type . $key ] = $value;
 		}
@@ -1757,7 +1759,7 @@ class WC_Countries {
 					'type'         => 'tel',
 					'class'        => array( 'form-row-wide' ),
 					'validate'     => array( 'phone' ),
-					'autocomplete' => $address_type . ' tel',
+					'autocomplete' => 'section-' . $address_type . ' ' . $address_type . ' tel',
 					'priority'     => 100,
 				);
 			}
@@ -1767,7 +1769,7 @@ class WC_Countries {
 				'type'         => 'email',
 				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'email' ),
-				'autocomplete' => $address_type . ' email',
+				'autocomplete' => 'section-' . $address_type . ' ' . $address_type . ' email',
 				'priority'     => 110,
 			);
 		}
