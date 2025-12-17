@@ -84,7 +84,7 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 						data-wp-class--is-success="state.isSuccess"
 						data-wp-class--is-info="state.isInfo"
 						data-wp-class--is-dismissible="context.notice.dismissible"
-						data-wp-bind--role="state.role"						
+						data-wp-bind--role="state.role"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
 							<path data-wp-bind--d="state.iconPath"></path>
@@ -103,32 +103,7 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 							</svg>
 						</button>
 					</div>
-			</template>
-			<?php foreach ( $notices as $notice ) : ?>
-				<div
-					class="wc-block-components-notice-banner is-error is-dismissible"
-					role="alert"
-					data-wp-each-child
-				>
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-						<path d="<?php echo esc_attr( $error_icon_path ); ?>"></path>
-					</svg>
-					<div class="wc-block-components-notice-banner__content">
-						<span>
-							<?php echo wp_kses_post( $notice['notice'] ); ?>
-						</span>
-					</div>
-					<button
-						class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
-						aria-label="<?php echo esc_attr( $dismiss_aria_label ); ?>"
-						data-wp-on--click="actions.removeNotice"
-					>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
-						</svg>
-					</button>
-				</div>
-			<?php endforeach; ?>
+				</template>
 			</div>
 			<?php
 				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
