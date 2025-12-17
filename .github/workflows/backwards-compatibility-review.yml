@@ -10,61 +10,107 @@ concurrency:
 
 jobs:
   review-with-tracking:
+    if: |
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo != null &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: write
-      issues: write
       id-token: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: PR Review with Progress Tracking
+      - name: PR Review with Progress Tracking (inline-only)
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-
-          # Enable progress tracking
-          track_progress: true
-
-          # update a single comment, instead of posting a new one on each push
-          use_sticky_comment: true
-
-          # Your custom review instructions
           prompt: |
+            WooCommerce/WordPress Backwards Compatibility
+
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR: #${{ github.event.pull_request.number }}
 
-            PRIMARY OBJECTIVE: Backwards Compatibility (BC) Review for WooCommerce/WordPress
+            OBJECTIVE
+            Identify ONLY backwards compatibility risks and missing deprecations across PHP, JS/Blocks, REST, templates, and data contracts.
 
-            Only report on BC risks and required deprecations. Ignore styling, formatting, comments, and pure test/doc changes unless they mask a BC concern.
+            OUTPUT RULES
+            - At most ONE inline comment per file + line + concern. Merge related points into a single comment.
+            - DO NOT post comments one at a time. Collect ALL comments, then submit as a SINGLE batched review (see POSTING COMMENTS below).
+            - If this flow was triggered by a commit, and the commit is a merge commit, ABORT. Merge commits are typically named `Merge branch *** into <current branch>`.
 
-            Output format (strict):
-            - Summary: Overall risk [None|Low|Medium|High] and a 2 to 4 sentence rationale.
-            - Testing Focus: targeted regression areas (e.g., checkout, gateways, subscriptions) with concrete steps.
-            - Confidence: a percentage and one-sentence justification.
+            INLINE COMMENT FORMAT (for each comment in the batch)
+            ```
+            Backwards Compatibility Review
 
-            Scope to analyze (but not limited to):
-            - PHP: public/protected API signature/visibility changes; default param or type-hint changes; thrown exceptions; removed/renamed hooks (`do_action`, `apply_filters`); template changes under `templates/**`; REST params/response shapes; DB/schema/options changes; global constants/vars; composer constraints.
-            - JS/Blocks: block names/attributes; script/style handle names, dependencies, and load order; REST schemas; data-store selectors/actions; settings/options keys.
-            - Ecosystem impact: payment gateways, popular Woo extensions (Subscriptions/Bookings/Memberships), themes customizing templates, custom checkout flows.
+            **Why breaking:** <1-3 sentences>
 
-            Method:
-            - Prefer exact citations with file:line for every item (from the diff and repo).
-            - Provide mitigation or migration guidance for each breaking/deprecation.
-            - If uncertain, state what evidence is missing and rate likelihood.
-            - Use inline comments for line-specific concerns and one top-level summary comment.
+            **Migration:** <specific code or steps>
 
-            Ignore/limit noise and cost:
-            - Exclude generated/binary/third-party content (e.g., `vendor/**`, `node_modules/**`, `build/**`, `dist/**`, `*.min.*`, translations `*.mo`/`*.po`).
-            - Focus on files changed in this PR and related API touch points.
+            **Deprecation:** <version plan, shim, notices>
+            ```
 
-            If no BC issues are found, explicitly state: "No breaking changes detected" and explain why, including deprecation sufficiency and ecosystem considerations.
+            DEDUPLICATION (CRITICAL - do this FIRST, before analyzing the diff)
+            1. Fetch ALL existing review comments on this PR:
+               gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/comments?per_page=100" --paginate
+            2. Filter to comments from "github-actions[bot]" or "claude[bot]" that contain "Backwards Compatibility Review"
+            3. Build a list of already-covered concerns: for each existing comment, note the file path, line number, and the breaking change described
+            4. When you find a potential BC issue, check your list - if an existing comment ALREADY covers the same concern on the same file (same or nearby lines within 5 lines), SKIP it
+            5. Two comments cover the same concern if they warn about the SAME breaking change, even if worded differently:
+               - "REST API namespace contract" and "endpoint URL becomes permanent" on the same route = SAME concern
+               - "hook name is public API" and "hook signature is a contract" on the same hook = SAME concern
+               - Comments on different hooks/methods/lines = DIFFERENT concerns, both should be posted
 
-          # Tools for comprehensive PR review
-          claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*),Bash(rg *)"
+            DO NOT use HTML markers for deduplication.
+            DO NOT try to PATCH/update existing comments.
+            Simply SKIP adding to batch if the concern is already covered by an existing comment.
+
+            POSTING COMMENTS (CRITICAL - use batched review API via file)
+            Post ALL comments as a SINGLE review to avoid spamming notifications.
+
+            Step 1: Get the latest commit SHA:
+               gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}" --jq '.head.sha'
+
+            Step 2: Use the Write tool to create a JSON file at ./bc_review_payload.json with this structure:
+               {
+                 "commit_id": "<SHA from step 1>",
+                 "event": "COMMENT",
+                 "body": "🤖 **Backwards Compatibility Review** - Found <N> potential issues\n\n_Generated by [Claude](https://claude.ai) via [this workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})_",
+                 "comments": [
+                   {"path": "relative/file/path.php", "line": <line_number>, "body": "<comment text>"},
+                   ...
+                 ]
+               }
+
+            Step 3: Submit the review using the file as input:
+               gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" -X POST --input bc_review_payload.json
+
+            If there are NO new issues to report, do not create the file or submit a review.
+
+            ANALYSIS BOUNDARIES
+            Include:
+              - PHP: public/protected signature or visibility changes; default param changes; return/param type-hints; adding `declare(strict_types=1)` to existing files; thrown exception class changes; removed/renamed hooks (`do_action`, `apply_filters`); `templates/**` contract changes; REST route/param/response changes; DB/schema/options; globals/constants; composer constraints.
+              - JS/Blocks: block names/attributes; script/style handle names, dependencies, and load order; `wp.data` selectors/actions; REST schemas; settings/option keys.
+            Exclude:
+              - `vendor/**`, `node_modules/**`, `build/**`, `dist/**`, `**/*.min.*`, `**/*.map`, translations `**/*.po` `**/*.mo`, images/binaries, generated artifacts, `tests/**`.
+
+            METHOD
+            1. FIRST: Fetch and catalog all existing BC review comments (see DEDUPLICATION above)
+            2. Get the PR diff using: gh pr diff ${{ github.event.pull_request.number }}
+               DO NOT use shell redirects (>, >>, |) - they are blocked. Just run the command directly.
+            3. Analyze the diff for backwards compatibility issues
+            4. For each potential issue:
+               - Cite exact `file:line` from the PR diff
+               - Check if already covered by an existing comment (skip if so)
+               - If new, add to the comments batch
+            5. After analysis, use the Write tool to create ./bc_review_payload.json (NOT /tmp/, must be in working directory)
+            6. Submit the review using: gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" -X POST --input bc_review_payload.json
+
+          claude_args: >
+            --allowedTools "Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
