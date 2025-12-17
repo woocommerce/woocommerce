@@ -2328,3 +2328,11 @@ body:not(.search-results) .twentysixteen .entry-summary {
 	background: inherit;
 	color: inherit;
 }
+
+/**
+ * Custom place order button
+ * Hides default button when a gateway with custom place order button is selected
+ */
+.woocommerce-checkout.has-custom-place-order-button #place_order {
+	display: none !important;
+}

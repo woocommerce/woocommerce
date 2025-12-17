@@ -667,6 +667,7 @@ class WC_Frontend_Scripts {
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
+					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
 				);
 				break;
 			case 'wc-address-autocomplete-common':
@@ -775,6 +776,30 @@ class WC_Frontend_Scripts {
 		$params = apply_filters_deprecated( $handle . '_params', array( $params ), '3.0.0', 'woocommerce_get_script_data' );
 
 		return apply_filters( 'woocommerce_get_script_data', $params, $handle );
+	}
+
+	/**
+	 * Get list of payment gateway IDs that have custom place order buttons.
+	 *
+	 * @since 9.8.0
+	 * @return array List of gateway IDs with custom place order buttons.
+	 */
+	private static function get_gateways_with_custom_place_order_button() {
+		$gateways_with_custom_button = array();
+
+		if ( ! WC()->payment_gateways() ) {
+			return $gateways_with_custom_button;
+		}
+
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		foreach ( $available_gateways as $gateway ) {
+			if ( ! empty( $gateway->has_custom_place_order_button ) ) {
+				$gateways_with_custom_button[] = $gateway->id;
+			}
+		}
+
+		return $gateways_with_custom_button;
 	}
 
 	/**
