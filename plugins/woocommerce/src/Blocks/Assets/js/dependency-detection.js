@@ -201,6 +201,17 @@
 		wcGlobalKey,
 		requiredDependencyHandle
 	) {
+		// For null/unknown callerUrl, warn immediately - no registry needed.
+		// We already know it's an inline or unknown script.
+		if ( ! callerUrl ) {
+			warnIfMissingDependency(
+				callerUrl,
+				wcGlobalKey,
+				requiredDependencyHandle
+			);
+			return;
+		}
+
 		// Skip WooCommerce's own scripts - they manage their own dependencies.
 		if ( isWooCommerceScript( callerUrl ) ) {
 			return;
