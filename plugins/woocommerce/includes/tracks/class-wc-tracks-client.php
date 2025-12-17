@@ -305,10 +305,8 @@ class WC_Tracks_Client {
 	 */
 	private static function can_use_batch_requests() {
 		// Check if the Requests library supports request_multiple().
-		// @phpstan-ignore function.alreadyNarrowedType.
-		return ( class_exists( 'WpOrg\Requests\Requests' ) && method_exists( 'WpOrg\Requests\Requests', 'request_multiple' ) )
-			// @phpstan-ignore function.alreadyNarrowedType.
-			|| ( class_exists( 'Requests' ) && method_exists( 'Requests', 'request_multiple' ) );
+		return ( class_exists( 'WpOrg\Requests\Requests' ) && method_exists( 'WpOrg\Requests\Requests', 'request_multiple' ) ) // @phpstan-ignore function.alreadyNarrowedType
+			|| ( class_exists( 'Requests' ) && method_exists( 'Requests', 'request_multiple' ) ); // @phpstan-ignore function.alreadyNarrowedType
 	}
 
 	/**
