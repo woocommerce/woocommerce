@@ -284,7 +284,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			WC_Gateway_Paypal_Helper::update_addresses_in_order( $order, $paypal_order_details );
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
-			$order->update_meta_data( '_paypal_addresses_updated', false );
+			$order->update_meta_data( '_paypal_addresses_updated', 'no' );
 			$order->save();
 		}
 	}

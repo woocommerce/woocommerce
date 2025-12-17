@@ -165,16 +165,15 @@ class WC_Gateway_Paypal_Helper {
 			return;
 		}
 
-		// Bail early if '_paypal_addresses_updated' is true, meaning the addresses update already have been successful.
-		$addresses_update_completed = $order->get_meta( '_paypal_addresses_updated', true );
-		if ( $addresses_update_completed ) {
+		// Bail early if '_paypal_addresses_updated' is 'yes', meaning the addresses update already have been successful.
+		if ( 'yes' === $order->get_meta( '_paypal_addresses_updated', true ) ) {
 			return;
 		}
 
 		// Update the shipping information.
 		$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
 		if ( ! empty( $full_name ) ) {
-			$name_parts = explode( ' ', $full_name, 2 );
+			$name_parts             = explode( ' ', $full_name, 2 );
 			$approximate_first_name = $name_parts[0] ?? '';
 			$approximate_last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
 			$order->set_shipping_first_name( $approximate_first_name );
@@ -210,7 +209,7 @@ class WC_Gateway_Paypal_Helper {
 			$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
 		}
 
-		$order->update_meta_data( '_paypal_addresses_updated', true );
+		$order->update_meta_data( '_paypal_addresses_updated', 'yes' );
 		$order->save();
 	}
 }
