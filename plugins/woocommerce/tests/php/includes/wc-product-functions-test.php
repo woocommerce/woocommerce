@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Functions\Stock
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
@@ -242,6 +244,163 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Action Scheduler events are scheduled when product with sale dates is saved.
+	 */
+	public function test_wc_schedule_product_sale_events_on_save() {
+		$future_start = time() + 3600;  // 1 hour from now.
+		$future_end   = time() + 86400; // 24 hours from now.
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		// Check that AS actions were scheduled.
+		$start_action = as_next_scheduled_action(
+			'wc_product_start_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+		$end_action   = as_next_scheduled_action(
+			'wc_product_end_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+
+		$this->assertNotFalse( $start_action, 'Start sale action should be scheduled' );
+		$this->assertNotFalse( $end_action, 'End sale action should be scheduled' );
+	}
+
+	/**
+	 * @testDox Existing AS events are cleared when product sale dates change.
+	 */
+	public function test_wc_schedule_product_sale_events_clears_existing() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		$original_start = as_next_scheduled_action(
+			'wc_product_start_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+
+		// Update the sale dates.
+		$new_start = time() + 7200; // 2 hours from now.
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $new_start ) );
+		$product->save();
+
+		$new_start_action = as_next_scheduled_action(
+			'wc_product_start_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+
+		// The timestamp should have changed.
+		$this->assertNotEquals( $original_start, $new_start_action, 'Start action should be rescheduled with new time' );
+	}
+
+	/**
+	 * @testdox Guest order uses billing address tax rate when woocommerce_adjust_non_base_location_prices is false.
+	 */
+	public function test_wc_get_price_excluding_tax_guest_order_uses_billing_address() {
+		// Enable taxes.
+		$wc_tax_enabled = wc_tax_enabled();
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+		}
+
+		// Set prices to include tax.
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		// Set base country to Germany.
+		$original_base_country = get_option( 'woocommerce_default_country' );
+		update_option( 'woocommerce_default_country', 'DE' );
+
+		// Create German tax rate (19%) - this is the base/shop rate.
+		$german_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '19.0000',
+				'tax_rate_name'     => 'German VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create French tax rate (20%) - this is where the customer is.
+		$french_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'FR',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'French VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create a product priced at 100 (including tax).
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		// Create a guest order with French billing address.
+		$order = wc_create_order();
+		$order->set_customer_id( 0 ); // Guest order.
+		$order->set_billing_country( 'FR' );
+		$order->set_billing_city( 'Paris' );
+		$order->set_billing_postcode( '75001' );
+		$order->save();
+
+		// Enable "same price everywhere" mode.
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		// Calculate the price excluding tax.
+		$price_excluding_tax = wc_get_price_excluding_tax( $product, array( 'order' => $order ) );
+
+		// With filter=false and French customer (20% VAT):
+		// €100 / 1.20 = €83.33 (net price)
+		// Later: €83.33 * 1.20 = €100 (customer pays €100).
+		//
+		// If the bug were present (using base rate instead):
+		// €100 / 1.19 = €84.03 (wrong net price)
+		// Later: €84.03 * 1.20 = €100.84 (customer pays more than €100).
+		$this->assertEquals( 83.33, round( $price_excluding_tax, 2 ), 'Price should use French tax rate (20%) to calculate net, not German base rate (19%)' );
+
+		// Clean up.
+		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		WC_Tax::_delete_tax_rate( $german_tax_rate_id );
+		WC_Tax::_delete_tax_rate( $french_tax_rate_id );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		$order->delete( true );
+		update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		update_option( 'woocommerce_default_country', $original_base_country );
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'no' );
+		}
+	}
+
+	/**
 	 * @testDox Test 'wc_get_related_products' with actual related products.
 	 */
 	public function test_wc_get_related_products_with_actual_related_products() {
@@ -286,5 +445,115 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $related_product1->get_id() );
 		WC_Helper_Product::delete_product( $related_product2->get_id() );
 		WC_Helper_Product::delete_product( $related_product3->get_id() );
+	}
+
+	/**
+	 * @testdox Product permalink should use deepest category, not the one with highest parent term ID.
+	 */
+	public function test_wc_product_post_type_link_uses_deepest_category() {
+		/*
+		 * Reproduce the bug from WOOPLUG-5957:
+		 * Create categories "out of sequence" so term_ids don't match hierarchy depth.
+		 * Per the issue: "Level 2 ID should be higher than all other levels."
+		 *
+		 * We create Level 2 LAST so it has the highest term_id. Then we update parent
+		 * relationships. This means Level 3's parent (Level 2) has a higher term_id
+		 * than Level 4's parent (Level 3).
+		 *
+		 * Old buggy code sorted by parent DESC, so it would select Level 3 (parent=Level 2
+		 * with high term_id) instead of Level 4 (the actual deepest category).
+		 */
+
+		// Create Level 1 first (gets lowest term_id).
+		$level1_term = wp_insert_term( 'Level 1', 'product_cat' );
+
+		// Create Level 3 and Level 4 without parents initially.
+		$level3_term = wp_insert_term( 'Level 3', 'product_cat' );
+		$level4_term = wp_insert_term( 'Level 4 Deepest', 'product_cat' );
+
+		// Create Level 2 LAST (gets highest term_id).
+		$level2_term = wp_insert_term( 'Level 2', 'product_cat' );
+
+		// Set up hierarchy: Level 1 > Level 2 > Level 3 > Level 4.
+		wp_update_term( $level2_term['term_id'], 'product_cat', array( 'parent' => $level1_term['term_id'] ) );
+		wp_update_term( $level3_term['term_id'], 'product_cat', array( 'parent' => $level2_term['term_id'] ) );
+		wp_update_term( $level4_term['term_id'], 'product_cat', array( 'parent' => $level3_term['term_id'] ) );
+
+		// Assign product to all categories.
+		$product = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms(
+			$product->get_id(),
+			array(
+				$level1_term['term_id'],
+				$level2_term['term_id'],
+				$level3_term['term_id'],
+				$level4_term['term_id'],
+			),
+			'product_cat'
+		);
+
+		// Set up permalink structure to include product_cat.
+		update_option( 'woocommerce_permalinks', array( 'product_base' => '/shop/%product_cat%' ) );
+		$product_post = get_post( $product->get_id() );
+
+		// Call wc_product_post_type_link directly to test the category selection.
+		$permalink = wc_product_post_type_link( '/shop/%product_cat%/' . $product_post->post_name . '/', $product_post );
+
+		// Get slugs for assertions.
+		$level1_slug = get_term( $level1_term['term_id'], 'product_cat' )->slug;
+		$level2_slug = get_term( $level2_term['term_id'], 'product_cat' )->slug;
+		$level3_slug = get_term( $level3_term['term_id'], 'product_cat' )->slug;
+		$level4_slug = get_term( $level4_term['term_id'], 'product_cat' )->slug;
+
+		// The permalink should contain the full hierarchical path of the deepest category (level 4).
+		// The old buggy code would select Level 3 (parent=Level 2 with high term_id) instead of Level 4.
+		$expected_path = $level1_slug . '/' . $level2_slug . '/' . $level3_slug . '/' . $level4_slug;
+		$this->assertStringContainsString(
+			$expected_path,
+			$permalink,
+			'Permalink should contain the full path of the deepest category (level 4)'
+		);
+
+		// Clean up (delete children before parents).
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_term( $level4_term['term_id'], 'product_cat' );
+		wp_delete_term( $level3_term['term_id'], 'product_cat' );
+		wp_delete_term( $level2_term['term_id'], 'product_cat' );
+		wp_delete_term( $level1_term['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Product permalink uses first root category when product has only root-level categories.
+	 */
+	public function test_wc_product_post_type_link_with_only_root_categories() {
+		// Create multiple root categories - first one (lowest term_id) should be selected.
+		$root1_term = wp_insert_term( 'Root Category One', 'product_cat' );
+		$root2_term = wp_insert_term( 'Root Category Two', 'product_cat' );
+		$root3_term = wp_insert_term( 'Root Category Three', 'product_cat' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms(
+			$product->get_id(),
+			array( $root1_term['term_id'], $root2_term['term_id'], $root3_term['term_id'] ),
+			'product_cat'
+		);
+
+		update_option( 'woocommerce_permalinks', array( 'product_base' => '/shop/%product_cat%' ) );
+		$product_post = get_post( $product->get_id() );
+
+		$permalink = wc_product_post_type_link( '/shop/%product_cat%/' . $product_post->post_name . '/', $product_post );
+
+		// First root category (lowest term_id) should be used.
+		$root1_slug = get_term( $root1_term['term_id'], 'product_cat' )->slug;
+		$this->assertStringContainsString(
+			'/' . $root1_slug . '/',
+			$permalink,
+			'Permalink should contain the first root category slug'
+		);
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_term( $root3_term['term_id'], 'product_cat' );
+		wp_delete_term( $root2_term['term_id'], 'product_cat' );
+		wp_delete_term( $root1_term['term_id'], 'product_cat' );
 	}
 }

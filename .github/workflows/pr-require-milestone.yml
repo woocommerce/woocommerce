@@ -1,7 +1,7 @@
 name: 'Require milestone on pull requests'
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
@@ -14,28 +14,24 @@ on:
         - trunk
 
 permissions:
+  contents: read
   pull-requests: read
 
 jobs:
   ensure-milestone:
-    name: 'Ensure milestone is assigned'
+    name: 'Ensure milestone is or will be assigned'
     if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     steps:
-      - name: 'Validate milestone'
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflows/scripts
+
+      - name: 'Validate milestone or checkbox selection'
         uses: actions/github-script@v7
         with:
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const { data: issue } = await github.rest.issues.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: prNumber,
-            });
-
-            if (!issue.milestone) {
-                core.setFailed('Assign a milestone before merging this pull request.');
-                return;
-            }
-
-            core.info(`Milestone "${issue.milestone.title}" is set.`);
+            const script = require('./.github/workflows/scripts/validate-milestone-selection.js');
+            await script({ github, context, core });

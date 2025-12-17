@@ -305,7 +305,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			// If the prices are not stored for this hash, generate them and add to the transient.
 			// Check also the opposite price hash as it may have changed (see get_price_hash).
 			if ( empty( $transient_cached_prices_array[ $price_hash ] ) ||
-				( ( $opposite_price_hash !== $price_hash ) && empty( $transient_cached_prices_array[ $opposite_price_hash ] ) ) ) {
+				( ! is_null( $opposite_price_hash ) && ( $opposite_price_hash !== $price_hash ) && empty( $transient_cached_prices_array[ $opposite_price_hash ] ) ) ) {
 				$prices_array = array(
 					'price'         => array(),
 					'regular_price' => array(),
@@ -317,6 +317,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				if ( is_callable( '_prime_post_caches' ) ) {
 					_prime_post_caches( $variation_ids );
 				}
+
+				$tax_display_mode = $for_display ? get_option( 'woocommerce_tax_display_shop' ) : null;
 
 				foreach ( $variation_ids as $variation_id ) {
 					$variation = wc_get_product( $variation_id );
@@ -394,7 +396,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 						// If we are getting prices for display, we need to account for taxes.
 						if ( $for_display ) {
-							if ( 'incl' === get_option( 'woocommerce_tax_display_shop' ) ) {
+							if ( 'incl' === $tax_display_mode ) {
 								$price         = '' === $price ? '' : wc_get_price_including_tax(
 									$variation,
 									array(

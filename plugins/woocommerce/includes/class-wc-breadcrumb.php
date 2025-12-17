@@ -266,6 +266,10 @@ class WC_Breadcrumb {
 	protected function add_crumbs_category() {
 		$this_category = get_category( $GLOBALS['wp_query']->get_queried_object() );
 
+		if ( is_wp_error( $this_category ) || ! $this_category ) {
+			return;
+		}
+
 		if ( 0 !== intval( $this_category->parent ) ) {
 			$this->term_ancestors( $this_category->term_id, 'category' );
 		}
@@ -305,7 +309,9 @@ class WC_Breadcrumb {
 		$this_term = $GLOBALS['wp_query']->get_queried_object();
 		$taxonomy  = get_taxonomy( $this_term->taxonomy );
 
-		$this->add_crumb( $taxonomy->labels->name );
+		if ( 'product_brand' !== $this_term->taxonomy ) {
+			$this->add_crumb( $taxonomy->labels->name );
+		}
 
 		if ( 0 !== intval( $this_term->parent ) ) {
 			$this->term_ancestors( $this_term->term_id, $this_term->taxonomy );

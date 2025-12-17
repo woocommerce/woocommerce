@@ -50,7 +50,6 @@ class TaskLists {
 		'Tax',
 		'Shipping',
 		'Marketing',
-		'Appearance',
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
@@ -111,8 +110,8 @@ class TaskLists {
 		$tasks = array(
 			'StoreDetails',
 			'Products',
-			'Appearance',
 			'Payments',
+			'CustomizeStore',
 			'Tax',
 			'Shipping',
 			'LaunchYourStore',

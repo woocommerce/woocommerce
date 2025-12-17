@@ -33,6 +33,11 @@ $fontSizes: (
 	line-height: 16px;
 }
 
+@mixin font-for-inputs-locked {
+	font-size: 16px;
+	line-height: 25px;
+}
+
 // We're treating mobile inputs as a special case, increasing the font-size to
 // 16px to avoid mobile Safari auto-zooming when focusing on the input. The
 // minimum font-size to prevent this behavior is 16px. Please don't change it!
@@ -385,6 +390,17 @@ $fontSizes: (
 			transition: background-color 0.2s ease;
 		}
 	}
+}
+
+@mixin card-styles() {
+	@include font-regular-locked;
+	border: 1px solid $universal-border-light;
+	padding: $gap;
+	margin: 0;
+	border-radius: $universal-border-radius;
+	display: flex;
+	justify-content: flex-start;
+	align-items: flex-start;
 }
 
 @keyframes wc-skeleton-shimmer {
