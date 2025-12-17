@@ -74623,6 +74623,12 @@ parameters:
 			path: src/Internal/ProductImage/MatchImageBySKU.php
 
 		-
+			message: '#^Cannot cast int\|WP_Post to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
+
+		-
 			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_id\(\) expects int, int\|WP_Post given\.$#'
 			identifier: argument.type
 			count: 2
