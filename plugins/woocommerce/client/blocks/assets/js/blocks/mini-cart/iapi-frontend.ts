@@ -255,6 +255,8 @@ store< MiniCart >(
 					window.location.href = checkoutUrl;
 					return;
 				}
+				const { ref } = getElement();
+				state.miniCartButtonRef = ref;
 				state.isOpen = true;
 			},
 
@@ -382,11 +384,6 @@ store< MiniCart >(
 					// Focus first element when the minicart is opened.
 					getFocusableElements( ref )[ 0 ]?.focus();
 				}
-			},
-
-			saveMiniCartButtonRef() {
-				const { ref } = getElement();
-				state.miniCartButtonRef = ref;
 			},
 		},
 	},

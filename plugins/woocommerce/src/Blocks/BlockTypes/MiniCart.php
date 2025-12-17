@@ -610,7 +610,6 @@ class MiniCart extends AbstractBlock {
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
 				<button 
-					data-wp-init="callbacks.saveMiniCartButtonRef"
 					data-wp-on--click="actions.openDrawer"
 					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
