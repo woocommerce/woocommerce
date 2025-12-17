@@ -74,6 +74,11 @@ final class DependencyDetection {
 	 * Initialize hooks.
 	 */
 	public function init(): void {
+		// Only run when debugging is enabled.
+		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+			return;
+		}
+
 		// Output an early inline script to set up the Proxy before any other scripts run.
 		add_action( 'wp_head', array( $this, 'output_early_proxy_setup' ), 1 );
 		add_action( 'admin_head', array( $this, 'output_early_proxy_setup' ), 1 );
