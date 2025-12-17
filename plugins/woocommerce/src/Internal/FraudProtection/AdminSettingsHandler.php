@@ -42,7 +42,7 @@ class AdminSettingsHandler {
 	 * @return void
 	 */
 	final public function init( JetpackConnectionManager $connection_manager ): void {
-		$this->connection_manager = $connection_manager;	
+		$this->connection_manager = $connection_manager;
 	}
 
 	/**
@@ -88,6 +88,7 @@ class AdminSettingsHandler {
 	 * @return void
 	 */
 	public function handle_output_jetpack_connection_field( $value ): void {
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		$this->output_jetpack_connection_status();
 	}
 
