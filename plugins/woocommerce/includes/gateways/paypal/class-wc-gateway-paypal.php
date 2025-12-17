@@ -260,7 +260,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		// Bail early if the addresses update already have been attempted (whether successful or not).
+		/**
+		 * Bail early if the addresses update already have been attempted (whether successful or not).
+		 * Prevent duplicate address update attempts from the thankyou page.
+		 *
+		 * Address updates are primarily handled by the PayPal webhook when the order is approved.
+		 * This method serves as a fallback if the webhook hasn't fired yet,
+		 * but we want to show the correct addresses to the customer on the thankyou page.
+		 * Once an attempt is made (meta exists), we skip to prevent repeated API calls on page reloads.
+		 * The webhook handler will always update the addresses.
+		 */
 		$addresses_update_attempted = $order->meta_exists( '_paypal_addresses_updated' );
 		if ( $addresses_update_attempted ) {
 			return;
