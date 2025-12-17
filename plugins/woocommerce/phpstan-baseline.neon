@@ -24759,13 +24759,13 @@ parameters:
 		-
 			message: '#^Cannot call method get_meta\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
 			message: '#^Cannot call method get_payment_method\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
@@ -24776,108 +24776,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_address_1\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_address_2\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_city\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_country\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_email\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_first_name\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_last_name\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_postcode\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_state\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_address_1\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_address_2\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_city\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_country\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_first_name\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_last_name\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_postcode\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_state\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
