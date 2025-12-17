@@ -57,31 +57,87 @@
 	}
 
 	/**
+	 * Check if a stack line is from our proxy's get handler.
+	 *
+	 * @param {string} line        - A single line from the stack trace.
+	 * @param {string} currentPage - The current page pathname.
+	 * @return {boolean} True if this line is from our proxy get handler.
+	 */
+	function isProxyGetLine( line, currentPage ) {
+		return (
+			line.indexOf( currentPage + ':' ) !== -1 &&
+			line.indexOf( 'Object.get' ) !== -1
+		);
+	}
+
+	/**
+	 * Check if a stack line should be skipped (internal code).
+	 *
+	 * @param {string} line        - A single line from the stack trace.
+	 * @param {string} currentPage - The current page pathname.
+	 * @return {boolean} True if this line should be skipped.
+	 */
+	function shouldSkipLine( line, currentPage ) {
+		// Skip lines from the current page (our inline detection script).
+		if ( line.indexOf( currentPage + ':' ) !== -1 ) return true;
+
+		// Skip webpack source-mapped files (internal build artifacts).
+		if ( line.indexOf( 'webpack://' ) !== -1 ) return true;
+
+		return false;
+	}
+
+	/**
+	 * Extract a .js URL from a stack trace line.
+	 *
+	 * @param {string} line - A single line from the stack trace.
+	 * @return {string|null} The extracted URL or null.
+	 */
+	function extractJsUrl( line ) {
+		const match = line.match( /(https?:\/\/[^\s)]+\.js)(?:[?:#]|$)/ );
+		return match ? match[ 1 ] : null;
+	}
+
+	/**
 	 * Parse an error stack trace to find the calling script URL.
 	 *
+	 * WooCommerce's webpack externals map @woocommerce/* imports to window.wc.*
+	 * at runtime (e.g., @woocommerce/settings becomes window.wc.wcSettings).
+	 * This causes recursive proxy calls when one wc module uses another.
+	 *
+	 * We detect recursion by counting Object.get calls from our inline script:
+	 * - First call (count=1): External code accessing window.wc.X → not recursive
+	 * - Subsequent calls (count>1): Internal wc module dependencies → recursive
+	 *
 	 * @param {string} stack - The error stack trace.
-	 * @return {string|null} The caller URL or null if not found.
+	 * @return {string|null} The caller URL, null if not found, or 'internal' if recursive.
 	 */
 	function parseStackForCallerUrl( stack ) {
 		if ( ! stack ) return null;
 
 		const lines = stack.split( '\n' );
 		const currentPage = window.location.pathname;
+		let seenProxyGet = false;
 
 		for ( let i = 1; i < lines.length; i++ ) {
 			const line = lines[ i ];
 
-			// Skip lines from the current page (our inline detection script).
-			if ( line.indexOf( currentPage + ':' ) !== -1 ) continue;
+			// Detect recursion: multiple proxy get calls means internal wc module access.
+			if ( isProxyGetLine( line, currentPage ) ) {
+				if ( seenProxyGet ) {
+					return 'internal';
+				}
+				seenProxyGet = true;
+				continue;
+			}
 
-			// Skip webpack source-mapped files (internal build artifacts).
-			if ( line.indexOf( 'webpack://' ) !== -1 ) continue;
+			// Skip other internal lines.
+			if ( shouldSkipLine( line, currentPage ) ) continue;
 
-			// Captures everything up to and including .js, stopping before any ? (query string), : (line number), or # (hash)
-			const match = line.match( /(https?:\/\/[^\s)]+\.js)(?:[?:#]|$)/ );
-
-			if ( match ) {
-				return match[ 1 ];
+			// Found an external URL - return it.
+			const url = extractJsUrl( line );
+			if ( url ) {
+				return url;
 			}
 		}
 
@@ -194,6 +250,11 @@
 		wcGlobalKey,
 		requiredDependencyHandle
 	) {
+		// Skip internal/recursive calls (wc modules calling other wc modules).
+		if ( callerUrl === 'internal' ) {
+			return;
+		}
+
 		// For null/unknown callerUrl, warn immediately - no registry needed.
 		// We already know it's an inline or unknown script.
 		if ( ! callerUrl ) {
