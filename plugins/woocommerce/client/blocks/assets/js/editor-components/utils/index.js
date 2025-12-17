@@ -192,7 +192,40 @@ export const getCategory = ( categoryId ) => {
 };
 
 /**
+ * Get a promise that resolves to a list of variation objects from the Store API
+ * and the total number of variations.
+ *
+ * @param {number} product Product ID.
+ * @param {Object} args    Query args to pass in.
+ */
+export const getProductVariationsWithTotal = ( product, args = {} ) => {
+	return apiFetch( {
+		path: addQueryArgs( `wc/store/v1/products`, {
+			type: 'variation',
+			parent: product,
+			orderby: 'title',
+			per_page: 25,
+			...args,
+		} ),
+		parse: false,
+	} ).then( ( response ) => {
+		return response.json().then( ( data ) => {
+			const totalHeader = response.headers.get( 'x-wp-total' );
+			return {
+				variations: data,
+				total: totalHeader ? Number( totalHeader ) : null,
+			};
+		} );
+	} );
+};
+
+/**
  * Get a promise that resolves to a list of variation objects from the Store API.
+ *
+ * NOTE: If implementing new features, prefer using the
+ * `getProductVariationsWithTotal()` function above, as it doesn't default to
+ * `per_page: 0`.
+ * See: https://github.com/woocommerce/woocommerce/pull/61755#issuecomment-3499859585
  *
  * @param {number} product Product ID.
  */

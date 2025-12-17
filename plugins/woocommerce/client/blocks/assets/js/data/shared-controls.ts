@@ -127,7 +127,6 @@ export const apiFetchWithHeadersControl = ( options: APIFetchOptions ) =>
 
 // List of paths which should not be batched.
 const preventBatching = [
-	'/wc/store/v1/cart/select-shipping-rate',
 	'/wc/store/v1/checkout',
 	'/wc/store/v1/checkout?__experimental_calc_totals=true',
 ];
