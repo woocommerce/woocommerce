@@ -89,6 +89,11 @@ class AdminSettingsHandler {
 	 */
 	public function handle_output_jetpack_connection_field( $value ): void {
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		// Only show Jetpack connection when fraud protection is enabled.
+		if ( 'yes' !== get_option( 'woocommerce_feature_fraud_protection_enabled', 'no' ) ) {
+			return;
+		}
+
 		$this->output_jetpack_connection_status();
 	}
 
