@@ -37938,6 +37938,8 @@ parameters:
 		-
 			message: '#^Method WC_Tracks_Event\:\:build_pixel_url\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
+			count: 1
+			path: includes/tracks/class-wc-tracks-client.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$_en\.$#'
