@@ -142,9 +142,8 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		$attribute_id    = $block->context['woocommerce/attributeId'];
 		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 		$attribute_terms = $block->context['woocommerce/attributeTerms'];
-		$attrs = $block->__get( 'attributes' );
-		$autoselect = $attrs[ 'autoselect' ] ?? false;
-		$disabled_attributes_action = $attrs[ 'disabledAttributesAction' ] ?? 'disable';
+		$autoselect = $attributes[ 'autoselect' ] ?? false;
+		$disabled_attributes_action = $attributes[ 'disabledAttributesAction' ] ?? 'disable';
 
 		wp_interactivity_state(
 			'woocommerce/add-to-cart-with-options',
@@ -230,9 +229,8 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		);
 
 		$selected_attribute = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
-		$attrs = $block->__get( 'attributes' );
-		$autoselect = $attrs[ 'autoselect' ] ?? false;
-		$disabled_attributes_action = $attrs[ 'disabledAttributesAction' ] ?? 'disable';
+		$autoselect = $attributes[ 'autoselect' ] ?? false;
+		$disabled_attributes_action = $attributes[ 'disabledAttributesAction' ] ?? 'disable';
 
 		$options = '';
 		foreach ( $attribute_terms as $attribute_term ) {
