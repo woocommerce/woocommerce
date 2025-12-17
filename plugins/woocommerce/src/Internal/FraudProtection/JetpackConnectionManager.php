@@ -224,15 +224,4 @@ class JetpackConnectionManager {
 		$logger = wc_get_logger();
 		$logger->error( $message, array( 'source' => self::LOGGER_SOURCE ) );
 	}
-
-	/**
-	 * Log an info message.
-	 *
-	 * @param string $message Info message.
-	 * @return void
-	 */
-	private function log_info( string $message ): void {
-		$logger = wc_get_logger();
-		$logger->info( $message, array( 'source' => self::LOGGER_SOURCE ) );
-	}
 }
