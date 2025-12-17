@@ -40,9 +40,6 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_filled_mini_cart_contents( $attributes, $content, $block ) {
-		// Manually enqueue the store-notices store.
-		wp_enqueue_script_module( '@woocommerce/stores/store-notices' );
-
 		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 		$notices = BlocksSharedState::get_cart_error_notices( $consent );
 
