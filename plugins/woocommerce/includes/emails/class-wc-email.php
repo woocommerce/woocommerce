@@ -414,7 +414,7 @@ class WC_Email extends WC_Settings_API {
 		 * @since 6.8.0
 		 *
 		 * @param bool $default_value The default returned value.
-		 * @param WC_Email $this The WC_Email object.
+		 * @param WC_Email $email The WC_Email object.
 		 */
 		$switch_email_locale = apply_filters( 'woocommerce_allow_switching_email_locale', true, $this );
 
@@ -434,7 +434,7 @@ class WC_Email extends WC_Settings_API {
 		 * @since 6.8.0
 		 *
 		 * @param bool $default_value The default returned value.
-		 * @param WC_Email $this The WC_Email object.
+		 * @param WC_Email $email The WC_Email object.
 		 */
 		$restore_email_locale = apply_filters( 'woocommerce_allow_restoring_email_locale', true, $this );
 
@@ -888,7 +888,7 @@ class WC_Email extends WC_Settings_API {
 			 *
 			 * @param callable $style_inline_callback The default email inline styling callback.
 			 * @param string|null $content Content that will receive inline styles.
-			 * @param WC_Email $this The WC_Email object.
+			 * @param WC_Email $email The WC_Email object.
 			 */
 			$style_inline_callback = apply_filters( 'woocommerce_mail_style_inline_callback', array( $this, 'apply_inline_style' ), $content, $this );
 
@@ -941,7 +941,7 @@ class WC_Email extends WC_Settings_API {
 				 * @since 4.1.0
 				 *
 				 * @param CssInliner $css_inliner CssInliner instance.
-				 * @param WC_Email $this WC_Email instance.
+				 * @param WC_Email $email WC_Email instance.
 				 */
 				do_action( 'woocommerce_emogrifier', $css_inliner, $this );
 
@@ -1025,7 +1025,17 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_from_name( $from_name = '' ) {
-		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name' ), $this, $from_name );
+		$default = get_bloginfo( 'name', 'display' );
+		/**
+		 * Filters the "from" name for outgoing emails.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param string|mixed $from_name        The from name.
+		 * @param WC_Email     $email            Email object.
+		 * @param string       $default_from_name Default from name.
+		 */
+		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name', $default ), $this, $from_name );
 		return wp_specialchars_decode( esc_html( $from_name ), ENT_QUOTES );
 	}
 
@@ -1138,7 +1148,7 @@ class WC_Email extends WC_Settings_API {
 		 * @since 5.6.0
 		 * @param bool     $return Whether the email was sent successfully.
 		 * @param string   $id     Email ID.
-		 * @param WC_Email $this   WC_Email instance.
+		 * @param WC_Email $email  WC_Email instance.
 		 */
 		do_action( 'woocommerce_email_sent', $return, (string) $this->id, $this );
 
