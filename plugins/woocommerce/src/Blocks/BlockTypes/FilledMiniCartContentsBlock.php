@@ -81,7 +81,7 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 					<div
 						class="wc-block-components-notice-banner"
 						data-wp-class--is-error="state.isError"
-						data-wp-class--is-success ="state.isSuccess"
+						data-wp-class--is-success="state.isSuccess"
 						data-wp-class--is-info="state.isInfo"
 						data-wp-class--is-dismissible="context.notice.dismissible"
 						data-wp-bind--role="state.role"						
