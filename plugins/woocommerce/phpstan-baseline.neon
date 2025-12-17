@@ -12157,12 +12157,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
 			count: 1
