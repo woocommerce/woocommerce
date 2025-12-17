@@ -3437,6 +3437,7 @@ CREATE TABLE $meta_table (
 
 		$should_save =
 			$order->get_id() > 0
+			&& ! in_array( $order->get_id(), self::$sync_on_read_order_ids, true )
 			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 
