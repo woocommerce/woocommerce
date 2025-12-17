@@ -57,20 +57,6 @@
 	}
 
 	/**
-	 * Check if a stack line is from our proxy's get handler.
-	 *
-	 * @param {string} line        - A single line from the stack trace.
-	 * @param {string} currentPage - The current page pathname.
-	 * @return {boolean} True if this line is from our proxy get handler.
-	 */
-	function isProxyGetLine( line, currentPage ) {
-		return (
-			line.indexOf( currentPage + ':' ) !== -1 &&
-			line.indexOf( 'Object.get' ) !== -1
-		);
-	}
-
-	/**
 	 * Check if a stack line should be skipped (internal code).
 	 *
 	 * @param {string} line        - A single line from the stack trace.
@@ -79,7 +65,9 @@
 	 */
 	function shouldSkipLine( line, currentPage ) {
 		// Skip lines from the current page (our inline detection script).
-		if ( line.indexOf( currentPage + ':' ) !== -1 ) return true;
+		if ( line.indexOf( currentPage + ':' ) !== -1 ) {
+			return true;
+		}
 
 		// Skip webpack source-mapped files (internal build artifacts).
 		if ( line.indexOf( 'webpack://' ) !== -1 ) return true;
@@ -101,37 +89,19 @@
 	/**
 	 * Parse an error stack trace to find the calling script URL.
 	 *
-	 * WooCommerce's webpack externals map @woocommerce/* imports to window.wc.*
-	 * at runtime (e.g., @woocommerce/settings becomes window.wc.wcSettings).
-	 * This causes recursive proxy calls when one wc module uses another.
-	 *
-	 * We detect recursion by counting Object.get calls from our inline script:
-	 * - First call (count=1): External code accessing window.wc.X → not recursive
-	 * - Subsequent calls (count>1): Internal wc module dependencies → recursive
-	 *
 	 * @param {string} stack - The error stack trace.
-	 * @return {string|null} The caller URL, null if not found, or 'internal' if recursive.
+	 * @return {string|null} The caller URL or null if not found.
 	 */
 	function parseStackForCallerUrl( stack ) {
 		if ( ! stack ) return null;
 
 		const lines = stack.split( '\n' );
 		const currentPage = window.location.pathname;
-		let seenProxyGet = false;
 
 		for ( let i = 1; i < lines.length; i++ ) {
 			const line = lines[ i ];
 
-			// Detect recursion: multiple proxy get calls means internal wc module access.
-			if ( isProxyGetLine( line, currentPage ) ) {
-				if ( seenProxyGet ) {
-					return 'internal';
-				}
-				seenProxyGet = true;
-				continue;
-			}
-
-			// Skip other internal lines.
+			// Skip internal lines (our script, webpack).
 			if ( shouldSkipLine( line, currentPage ) ) continue;
 
 			// Found an external URL - return it.
@@ -250,11 +220,6 @@
 		wcGlobalKey,
 		requiredDependencyHandle
 	) {
-		// Skip internal/recursive calls (wc modules calling other wc modules).
-		if ( callerUrl === 'internal' ) {
-			return;
-		}
-
 		// For null/unknown callerUrl, warn immediately - no registry needed.
 		// We already know it's an inline or unknown script.
 		if ( ! callerUrl ) {
@@ -288,26 +253,43 @@
 		);
 	}
 
+	let isChecking = false;
+
 	/**
 	 * Create a Proxy wrapper for the wc object.
+	 *
+	 * Intercepts property access on window.wc to check if the calling script
+	 * has declared the required dependency. Uses a guard flag (isChecking) to
+	 * prevent infinite recursion when accessing a property triggers nested
+	 * proxy calls (e.g., wc.blocksCheckout internally uses wc.wcSettings).
 	 *
 	 * @param {Object} target - The object to wrap.
 	 * @return {Proxy} The proxied object.
 	 */
 	function createWcProxy( target ) {
-		return new Proxy( target, {
-			get( obj, prop ) {
-				if ( WC_GLOBAL_EXPORTS[ prop ] ) {
-					const callerUrl = getCallerScriptUrl();
-					checkDependency(
-						callerUrl,
-						prop,
-						WC_GLOBAL_EXPORTS[ prop ]
-					);
-				}
+		function __wcProxyGet( obj, prop ) {
+			// Recursive call - skip checking and just return the value.
+			if ( isChecking ) {
 				return obj[ prop ];
-			},
-		} );
+			}
+
+			if ( WC_GLOBAL_EXPORTS[ prop ] ) {
+				// Set guard before any operations that might trigger nested proxy calls.
+				// The guard flag isChecking stays true from when we start checking until after we get the value. Any nested proxy calls during that time hit the guard
+				// and return immediately without checking.
+				isChecking = true;
+				const callerUrl = getCallerScriptUrl();
+				checkDependency( callerUrl, prop, WC_GLOBAL_EXPORTS[ prop ] );
+			}
+
+			// Get the value (This may trigger nested proxy calls, e.g., blocksCheckout uses wcSettings, but isChecking blocks them).
+			const value = obj[ prop ];
+			// Reset guard only after we have the value.
+			isChecking = false;
+			return value;
+		}
+
+		return new Proxy( target, { get: __wcProxyGet } );
 	}
 
 	// Create the proxy immediately.
