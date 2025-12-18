@@ -42,7 +42,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 *
 	 * When true, the default "Place order" button will be hidden on page load
 	 * if this gateway is pre-selected. The gateway must register its custom
-	 * button via JavaScript using wc.classicCheckout.registerCustomPlaceOrderButton().
+	 * button via JavaScript using wc.customPlaceOrderButton.register().
 	 *
 	 * Note: This property is purely for UX (preventing flash of default button).
 	 * It does NOT affect security or functionality - the JS registration is what
