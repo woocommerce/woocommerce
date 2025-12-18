@@ -532,7 +532,7 @@ const productGallery = {
 						selectedImage.offsetTop +
 						selectedImage.offsetHeight / 2 -
 						dialogRef.offsetHeight / 2 -
-						32; // Arbitraty value for the header height.
+						32; // Arbitrary value for the header height.
 				}
 			}
 		},
