@@ -109,7 +109,9 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_save_post_product( int $post_id ): void {
+	public function handle_save_post_product( $post_id ): void {
+		$post_id = (int) $post_id;
+
 		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
 			return;
 		}
@@ -129,8 +131,10 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_delete_post( int $post_id, $post = null ): void {
-		if ( is_null( $post ) ) {
+	public function handle_delete_post( $post_id, $post = null ): void {
+		$post_id = (int) $post_id;
+
+		if ( ! $post instanceof \WP_Post ) {
 			$post = get_post( $post_id );
 		}
 
@@ -139,7 +143,7 @@ class ProductVersionStringInvalidator {
 		}
 
 		if ( 'product_variation' === $post->post_type ) {
-			$this->invalidate_variation_and_parent( $post_id, $post->post_parent );
+			$this->invalidate_variation_and_parent( $post_id, (int) $post->post_parent );
 		} elseif ( 'product' === $post->post_type ) {
 			$this->invalidate( $post_id );
 		}
@@ -156,8 +160,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_trashed_post( int $post_id ): void {
-		$this->handle_trashed_or_untrashed_post( $post_id );
+	public function handle_trashed_post( $post_id ): void {
+		$this->handle_trashed_or_untrashed_post( (int) $post_id );
 	}
 
 	/**
@@ -171,8 +175,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_untrashed_post( int $post_id ): void {
-		$this->handle_trashed_or_untrashed_post( $post_id );
+	public function handle_untrashed_post( $post_id ): void {
+		$this->handle_trashed_or_untrashed_post( (int) $post_id );
 	}
 
 	/**
@@ -208,8 +212,10 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_new_product_variation( int $variation_id, $variation ): void {
-		$this->invalidate_variation_and_parent( $variation_id, $variation->get_parent_id() );
+	public function handle_woocommerce_new_product_variation( $variation_id, $variation ): void {
+		$variation_id = (int) $variation_id;
+		$parent_id    = $variation instanceof \WC_Product ? $variation->get_parent_id() : null;
+		$this->invalidate_variation_and_parent( $variation_id, $parent_id );
 	}
 
 	/**
@@ -224,8 +230,10 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_update_product_variation( int $variation_id, $variation ): void {
-		$this->invalidate_variation_and_parent( $variation_id, $variation->get_parent_id() );
+	public function handle_woocommerce_update_product_variation( $variation_id, $variation ): void {
+		$variation_id = (int) $variation_id;
+		$parent_id    = $variation instanceof \WC_Product ? $variation->get_parent_id() : null;
+		$this->invalidate_variation_and_parent( $variation_id, $parent_id );
 	}
 
 	/**
@@ -239,8 +247,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_new_product( int $product_id ): void {
-		$this->invalidate( $product_id );
+	public function handle_woocommerce_new_product( $product_id ): void {
+		$this->invalidate( (int) $product_id );
 	}
 
 	/**
@@ -254,8 +262,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_update_product( int $product_id ): void {
-		$this->invalidate( $product_id );
+	public function handle_woocommerce_update_product( $product_id ): void {
+		$this->invalidate( (int) $product_id );
 	}
 
 	/**
@@ -269,8 +277,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_before_delete_product( int $product_id ): void {
-		$this->invalidate( $product_id );
+	public function handle_woocommerce_before_delete_product( $product_id ): void {
+		$this->invalidate( (int) $product_id );
 	}
 
 	/**
@@ -284,8 +292,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_trash_product( int $product_id ): void {
-		$this->invalidate( $product_id );
+	public function handle_woocommerce_trash_product( $product_id ): void {
+		$this->invalidate( (int) $product_id );
 	}
 
 	/**
@@ -299,8 +307,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_before_delete_product_variation( int $variation_id ): void {
-		$this->invalidate_variation_and_parent( $variation_id );
+	public function handle_woocommerce_before_delete_product_variation( $variation_id ): void {
+		$this->invalidate_variation_and_parent( (int) $variation_id );
 	}
 
 	/**
@@ -314,8 +322,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_trash_product_variation( int $variation_id ): void {
-		$this->invalidate_variation_and_parent( $variation_id );
+	public function handle_woocommerce_trash_product_variation( $variation_id ): void {
+		$this->invalidate_variation_and_parent( (int) $variation_id );
 	}
 
 	/**
@@ -329,8 +337,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_updated_product_stock( int $product_id ): void {
-		$this->invalidate( $product_id );
+	public function handle_woocommerce_updated_product_stock( $product_id ): void {
+		$this->invalidate( (int) $product_id );
 	}
 
 	/**
@@ -344,8 +352,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_updated_product_price( int $product_id ): void {
-		$this->invalidate( $product_id );
+	public function handle_woocommerce_updated_product_price( $product_id ): void {
+		$this->invalidate( (int) $product_id );
 	}
 
 	/**
@@ -359,8 +367,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_updated_product_sales( int $product_id ): void {
-		$this->invalidate( $product_id );
+	public function handle_woocommerce_updated_product_sales( $product_id ): void {
+		$this->invalidate( (int) $product_id );
 	}
 
 	/**
@@ -375,7 +383,11 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_attribute_updated( int $id, array $data ): void {
+	public function handle_woocommerce_attribute_updated( $id, $data ): void {
+		if ( ! is_array( $data ) || ! isset( $data['attribute_name'] ) ) {
+			return;
+		}
+
 		$taxonomy = wc_attribute_taxonomy_name( $data['attribute_name'] );
 		$this->invalidate_products_with_attribute( $taxonomy );
 	}
@@ -393,7 +405,11 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_attribute_deleted( int $id, string $name, string $taxonomy ): void {
+	public function handle_woocommerce_attribute_deleted( $id, $name, $taxonomy ): void {
+		if ( ! is_string( $taxonomy ) || '' === $taxonomy ) {
+			return;
+		}
+
 		$this->invalidate_products_with_attribute( $taxonomy );
 	}
 
@@ -408,8 +424,8 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_updated_product_attribute_summary( int $variation_id ): void {
-		$this->invalidate_variation_and_parent( $variation_id );
+	public function handle_woocommerce_updated_product_attribute_summary( $variation_id ): void {
+		$this->invalidate_variation_and_parent( (int) $variation_id );
 	}
 
 	/**
@@ -425,13 +441,17 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_edited_term( int $term_id, int $tt_id, string $taxonomy ): void {
+	public function handle_edited_term( $term_id, $tt_id, $taxonomy ): void {
+		if ( ! is_string( $taxonomy ) ) {
+			return;
+		}
+
 		// Only handle product attribute taxonomies.
 		if ( 0 !== strpos( $taxonomy, 'pa_' ) ) {
 			return;
 		}
 
-		$this->invalidate_products_with_term( $tt_id );
+		$this->invalidate_products_with_term( (int) $tt_id );
 	}
 
 	/**

@@ -598,4 +598,142 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$data_store = \WC_Data_Store::load( 'product' );
 		return 'WC_Product_Data_Store_CPT' === $data_store->get_current_class_name();
 	}
+
+	/**
+	 * @testdox Hook handlers accept string IDs and cast them to integers.
+	 */
+	public function test_handlers_accept_string_ids() {
+		$product_id = '123';
+
+		$this->version_generator->generate_version( 'product_123' );
+		$version_before = $this->version_generator->get_version( 'product_123', false );
+		$this->assertNotNull( $version_before, 'Version string should exist before invalidation' );
+
+		$this->sut->handle_woocommerce_new_product( $product_id );
+
+		$version_after = $this->version_generator->get_version( 'product_123', false );
+		$this->assertNull( $version_after, 'Version string should be deleted after invalidation with string ID' );
+	}
+
+	/**
+	 * @testdox Hook handlers gracefully handle non-WC_Product variation objects.
+	 */
+	public function test_variation_handlers_handle_invalid_variation_object() {
+		$variation_id = 456;
+
+		$this->version_generator->generate_version( "product_{$variation_id}" );
+		$version_before = $this->version_generator->get_version( "product_{$variation_id}", false );
+		$this->assertNotNull( $version_before, 'Version string should exist before invalidation' );
+
+		// Call with invalid variation object - should not throw and should still invalidate the variation.
+		$this->sut->handle_woocommerce_new_product_variation( $variation_id, 'not_a_product' );
+
+		$version_after = $this->version_generator->get_version( "product_{$variation_id}", false );
+		$this->assertNull( $version_after, 'Variation version string should be deleted even with invalid variation object' );
+	}
+
+	/**
+	 * @testdox handle_woocommerce_attribute_updated gracefully handles invalid data array.
+	 */
+	public function test_attribute_updated_handler_handles_invalid_data() {
+		$this->sut->handle_woocommerce_attribute_updated( 1, 'not_an_array' );
+		$this->assertTrue( true, 'Handler should not throw with non-array data' );
+
+		$this->sut->handle_woocommerce_attribute_updated( 1, array( 'other_key' => 'value' ) );
+		$this->assertTrue( true, 'Handler should not throw with array missing attribute_name' );
+	}
+
+	/**
+	 * @testdox handle_woocommerce_attribute_deleted gracefully handles invalid taxonomy.
+	 */
+	public function test_attribute_deleted_handler_handles_invalid_taxonomy() {
+		$this->sut->handle_woocommerce_attribute_deleted( 1, 'name', null );
+		$this->assertTrue( true, 'Handler should not throw with null taxonomy' );
+
+		$this->sut->handle_woocommerce_attribute_deleted( 1, 'name', '' );
+		$this->assertTrue( true, 'Handler should not throw with empty taxonomy' );
+
+		$this->sut->handle_woocommerce_attribute_deleted( 1, 'name', array( 'taxonomy' ) );
+		$this->assertTrue( true, 'Handler should not throw with array taxonomy' );
+	}
+
+	/**
+	 * @testdox handle_edited_term gracefully handles invalid taxonomy.
+	 */
+	public function test_edited_term_handler_handles_invalid_taxonomy() {
+		$this->sut->handle_edited_term( 1, 1, null );
+		$this->assertTrue( true, 'Handler should not throw with null taxonomy' );
+
+		$this->sut->handle_edited_term( 1, 1, array( 'pa_color' ) );
+		$this->assertTrue( true, 'Handler should not throw with array taxonomy' );
+
+		$this->sut->handle_edited_term( 1, 1, 123 );
+		$this->assertTrue( true, 'Handler should not throw with integer taxonomy' );
+	}
+
+	/**
+	 * @testdox handle_delete_post gracefully handles invalid post object.
+	 */
+	public function test_delete_post_handler_handles_invalid_post_object() {
+		$product    = \WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		$this->version_generator->generate_version( "product_{$product_id}" );
+		$version_before = $this->version_generator->get_version( "product_{$product_id}", false );
+		$this->assertNotNull( $version_before, 'Version string should exist before deletion' );
+
+		// Call with invalid post object - should fetch post by ID and still work.
+		$this->sut->handle_delete_post( $product_id, 'not_a_post' );
+
+		$version_after = $this->version_generator->get_version( "product_{$product_id}", false );
+		$this->assertNull( $version_after, 'Version string should be deleted even with invalid post object' );
+	}
+
+	/**
+	 * @testdox handle_save_post_product accepts string post ID.
+	 */
+	public function test_save_post_product_handler_accepts_string_id() {
+		$product    = \WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		$this->version_generator->generate_version( "product_{$product_id}" );
+		$version_before = $this->version_generator->get_version( "product_{$product_id}", false );
+		$this->assertNotNull( $version_before, 'Version string should exist before save' );
+
+		$this->sut->handle_save_post_product( (string) $product_id );
+
+		$version_after = $this->version_generator->get_version( "product_{$product_id}", false );
+		$this->assertNull( $version_after, 'Version string should be deleted with string ID' );
+	}
+
+	/**
+	 * @testdox SQL-level hook handlers accept string IDs.
+	 */
+	public function test_sql_hook_handlers_accept_string_ids() {
+		$product_id = '789';
+
+		// Test stock handler.
+		$this->version_generator->generate_version( 'product_789' );
+		$this->sut->handle_woocommerce_updated_product_stock( $product_id );
+		$this->assertNull(
+			$this->version_generator->get_version( 'product_789', false ),
+			'Stock handler should work with string ID'
+		);
+
+		// Test price handler.
+		$this->version_generator->generate_version( 'product_789' );
+		$this->sut->handle_woocommerce_updated_product_price( $product_id );
+		$this->assertNull(
+			$this->version_generator->get_version( 'product_789', false ),
+			'Price handler should work with string ID'
+		);
+
+		// Test sales handler.
+		$this->version_generator->generate_version( 'product_789' );
+		$this->sut->handle_woocommerce_updated_product_sales( $product_id );
+		$this->assertNull(
+			$this->version_generator->get_version( 'product_789', false ),
+			'Sales handler should work with string ID'
+		);
+	}
 }
