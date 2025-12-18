@@ -121,9 +121,9 @@ jobs:
                 }
               }
             }
-
+            
             core.setOutput('team-name', teamName);
-
+            
   trigger-upcoming-code-freeze-events:
     name: Assign a release lead
     needs: check-upcoming-release-events

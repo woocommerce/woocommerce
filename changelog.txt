@@ -1,5 +1,22 @@
 == Changelog ==
 
+= 10.4.2 2025-12-12 =
+
+**WooCommerce**
+
+* Fix - Product Editor: Remove editor mode and unused rich text components [#62428](https://github.com/woocommerce/woocommerce/pull/62428)
+
+
+= 10.4.1 2025-12-12 =
+
+**WooCommerce**
+
+* Fix - Fix cached API request in iAPI cart store [#62416](https://github.com/woocommerce/woocommerce/pull/62416)
+* Fix - Prevent excessive debug logging from the Payments Settings page. [#62404](https://github.com/woocommerce/woocommerce/pull/62404)
+* Fix - Prevent notice as_unschedule_all_actions() was called before the Action Scheduler data store was initialized [#62419](https://github.com/woocommerce/woocommerce/pull/62419)
+* Fix - Revert to previous sync-on-read logic to prevent unnecessary writes when HPOS and compat mode are enabled. [#62408](https://github.com/woocommerce/woocommerce/pull/62408)
+
+
 = 10.4.0 2025-12-10 =
 
 **WooCommerce**
