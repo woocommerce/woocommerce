@@ -151,7 +151,8 @@ import {
 	} );
 
 	// Expose function to update registry (called later after all scripts registered).
-	window.__wcUpdateDependencyRegistry = function ( registry ) {
+	// Not in WC_GLOBAL_EXPORTS, so accessing via window.wc won't trigger proxy checks.
+	window.wc.wcUpdateDependencyRegistry = function ( registry ) {
 		scriptRegistry = registry || {};
 		registryLoaded = true;
 
