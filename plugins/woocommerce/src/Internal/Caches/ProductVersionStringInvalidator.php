@@ -486,7 +486,7 @@ class ProductVersionStringInvalidator {
 	 *
 	 * Uses the indexed wp_term_relationships table for efficient lookups.
 	 * The list of entities associated with the term is cached for performance;
-	 * the TTL can be customized via the 'woocommerce_cache_invalidator_taxonomy_lookup_ttl' filter.
+	 * the TTL can be customized via the 'woocommerce_version_string_invalidator_taxonomy_lookup_ttl' filter.
 	 *
 	 * @param int $tt_id The term taxonomy ID.
 	 *
@@ -518,10 +518,10 @@ class ProductVersionStringInvalidator {
 			 *
 			 * @since 10.5.0
 			 *
-			 * @param int    $ttl   Cache TTL in seconds. Default 300 (5 minutes).
-			 * @param string $class The invalidator class name.
+			 * @param int    $ttl         Cache TTL in seconds. Default 300 (5 minutes).
+			 * @param string $entity_type The type of entity being invalidated ('product').
 			 */
-			$ttl = apply_filters( 'woocommerce_cache_invalidator_taxonomy_lookup_ttl', self::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, static::class );
+			$ttl = apply_filters( 'woocommerce_version_string_invalidator_taxonomy_lookup_ttl', self::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, 'product' );
 			wp_cache_set( $cache_key, $entity_ids, 'woocommerce', $ttl );
 		}
 
@@ -539,7 +539,7 @@ class ProductVersionStringInvalidator {
 	 * Invalidate all products using a specific attribute taxonomy.
 	 *
 	 * The list of entities associated with the taxonomy is cached for performance;
-	 * the TTL can be customized via the 'woocommerce_cache_invalidator_taxonomy_lookup_ttl' filter.
+	 * the TTL can be customized via the 'woocommerce_version_string_invalidator_taxonomy_lookup_ttl' filter.
 	 *
 	 * @param string $taxonomy The attribute taxonomy slug.
 	 *
@@ -574,8 +574,8 @@ class ProductVersionStringInvalidator {
 				'variation_ids' => $variation_ids,
 			);
 
-			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-			$ttl = apply_filters( 'woocommerce_cache_invalidator_taxonomy_lookup_ttl', self::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, static::class );
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Documented above.
+			$ttl = apply_filters( 'woocommerce_version_string_invalidator_taxonomy_lookup_ttl', self::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, 'product' );
 			wp_cache_set( $cache_key, $cached, 'woocommerce', $ttl );
 		}
 

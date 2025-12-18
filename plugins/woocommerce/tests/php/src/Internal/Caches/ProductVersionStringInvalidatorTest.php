@@ -527,7 +527,7 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The taxonomy lookup cache TTL is filterable via woocommerce_cache_invalidator_taxonomy_lookup_ttl.
+	 * @testdox The taxonomy lookup cache TTL is filterable via woocommerce_version_string_invalidator_taxonomy_lookup_ttl.
 	 */
 	public function test_taxonomy_lookup_cache_ttl_is_filterable() {
 		if ( ! $this->is_cpt_data_store() ) {
@@ -537,11 +537,11 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$filter_calls = array();
 
 		add_filter(
-			'woocommerce_cache_invalidator_taxonomy_lookup_ttl',
-			function ( $ttl, $invalidator_class ) use ( &$filter_calls ) {
+			'woocommerce_version_string_invalidator_taxonomy_lookup_ttl',
+			function ( $ttl, $entity_type ) use ( &$filter_calls ) {
 				$filter_calls[] = array(
-					'ttl'   => $ttl,
-					'class' => $invalidator_class,
+					'ttl'         => $ttl,
+					'entity_type' => $entity_type,
 				);
 				return 600;
 			},
@@ -577,9 +577,9 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $filter_calls, 'Filter should have been called' );
 		$this->assertSame( ProductVersionStringInvalidator::DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL, $filter_calls[0]['ttl'] );
-		$this->assertSame( ProductVersionStringInvalidator::class, $filter_calls[0]['class'] );
+		$this->assertSame( 'product', $filter_calls[0]['entity_type'] );
 
-		remove_all_filters( 'woocommerce_cache_invalidator_taxonomy_lookup_ttl' );
+		remove_all_filters( 'woocommerce_version_string_invalidator_taxonomy_lookup_ttl' );
 	}
 
 	/**
