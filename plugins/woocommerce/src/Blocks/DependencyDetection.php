@@ -302,41 +302,23 @@ final class DependencyDetection {
 	}
 
 	/**
-	 * Normalize a URL by removing version query strings.
+	 * Normalize a URL by removing query strings and hash fragments.
 	 *
-	 * This helps match URLs in stack traces which may have different version strings.
+	 * This helps match URLs in stack traces which don't include query strings.
 	 *
 	 * @param string $url URL to normalize.
-	 * @return string Normalized URL.
+	 * @return string Normalized URL without query string or hash.
 	 */
 	private function normalize_url( string $url ): string {
-		// Parse the URL.
-		$parsed = wp_parse_url( $url );
+		$scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+		$host   = wp_parse_url( $url, PHP_URL_HOST );
+		$path   = wp_parse_url( $url, PHP_URL_PATH );
 
-		if ( ! $parsed ) {
-			return $url;
+		if ( $scheme && $host && $path ) {
+			$port = wp_parse_url( $url, PHP_URL_PORT );
+			return $scheme . '://' . $host . ( $port ? ':' . $port : '' ) . $path;
 		}
 
-		// Rebuild without query string for cleaner matching.
-		// Stack traces often don't include query strings.
-		$normalized = '';
-
-		if ( ! empty( $parsed['scheme'] ) ) {
-			$normalized .= $parsed['scheme'] . '://';
-		}
-
-		if ( ! empty( $parsed['host'] ) ) {
-			$normalized .= $parsed['host'];
-		}
-
-		if ( ! empty( $parsed['port'] ) ) {
-			$normalized .= ':' . $parsed['port'];
-		}
-
-		if ( ! empty( $parsed['path'] ) ) {
-			$normalized .= $parsed['path'];
-		}
-
-		return $normalized;
+		return $url;
 	}
 }
