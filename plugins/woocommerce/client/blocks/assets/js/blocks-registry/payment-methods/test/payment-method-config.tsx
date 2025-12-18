@@ -42,6 +42,7 @@ describe( 'PaymentMethodConfig', () => {
 		expect( () => {
 			new PaymentMethodConfig( {
 				...baseConfig,
+				// @ts-expect-error Testing runtime validation of invalid type
 				placeOrderButtonLabel: 123,
 			} );
 		} ).toThrow(
@@ -74,6 +75,7 @@ describe( 'PaymentMethodConfig', () => {
 		expect( () => {
 			new PaymentMethodConfig( {
 				...baseConfig,
+				// @ts-expect-error Testing runtime validation of invalid type
 				placeOrderButton: 'not-a-function',
 			} );
 		} ).toThrow(
@@ -82,12 +84,14 @@ describe( 'PaymentMethodConfig', () => {
 		expect( () => {
 			new PaymentMethodConfig( {
 				...baseConfig,
+				// @ts-expect-error Testing runtime validation of invalid type
 				placeOrderButton: 123,
 			} );
 		} ).toThrow( TypeError );
 		expect( () => {
 			new PaymentMethodConfig( {
 				...baseConfig,
+				// @ts-expect-error Testing runtime validation of invalid type
 				placeOrderButton: { render: () => null },
 			} );
 		} ).toThrow( TypeError );
