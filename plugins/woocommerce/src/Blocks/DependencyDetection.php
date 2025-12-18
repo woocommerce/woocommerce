@@ -101,7 +101,8 @@ final class DependencyDetection {
 			return;
 		}
 
-		$script_path = __DIR__ . '/Assets/js/dependency-detection.js';
+		// Load from the blocks build directory (built by webpack from client/blocks/assets/js/dependency-detection/).
+		$script_path = __DIR__ . '/../../client/blocks/build/dependency-detection.js';
 
 		if ( ! file_exists( $script_path ) ) {
 			return;
