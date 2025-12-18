@@ -126,6 +126,54 @@ jQuery( function ( $ ) {
 			return false;
 		} );
 
+	// POS Visibility.
+	$( '#pos-visibility' )
+		.find( '.edit-pos-visibility' )
+		.on( 'click', function () {
+			if ( $( '#pos-visibility-select' ).is( ':hidden' ) ) {
+				$( '#pos-visibility-select' ).slideDown( 'fast' );
+				$( this ).hide();
+			}
+			return false;
+		} );
+	$( '#pos-visibility' )
+		.find( '.save-pos-visibility' )
+		.on( 'click', function () {
+			$( '#pos-visibility-select' ).slideUp( 'fast' );
+			$( '#pos-visibility' )
+				.find( '.edit-pos-visibility' )
+				.show();
+
+			var label = $( 'input[name=_pos_visibility]:checked' ).attr(
+				'data-label'
+			);
+
+			$( '#pos-visibility-display' ).text( label );
+			return false;
+		} );
+	$( '#pos-visibility' )
+		.find( '.cancel-pos-visibility' )
+		.on( 'click', function () {
+			$( '#pos-visibility-select' ).slideUp( 'fast' );
+			$( '#pos-visibility' )
+				.find( '.edit-pos-visibility' )
+				.show();
+
+			var current_pos_visibility = $( '#current_pos_visibility' ).val();
+
+			$( 'input[name=_pos_visibility]' ).prop( 'checked', false );
+			$(
+				'input[name=_pos_visibility][value=' + current_pos_visibility + ']'
+			).attr( 'checked', 'checked' );
+
+			var label = $( 'input[name=_pos_visibility]:checked' ).attr(
+				'data-label'
+			);
+
+			$( '#pos-visibility-display' ).text( label );
+			return false;
+		} );
+
 	// Product type specific options.
 	$( 'select#product-type' )
 		.on( 'change', function () {
