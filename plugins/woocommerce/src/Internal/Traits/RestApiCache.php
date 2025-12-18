@@ -210,7 +210,6 @@ trait RestApiCache {
 	 * @param array           $config   Caching configuration specified for the endpoint.
 	 * @return WP_REST_Response|\WP_Error The response.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function handle_cacheable_request( WP_REST_Request $request, callable $callback, array $config ) {
 		$backend_caching_enabled = ! is_null( $this->version_string_generator );
@@ -260,7 +259,6 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request The request object.
 	 * @return bool True if caching should be used, false otherwise.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function should_use_cache_for_request( WP_REST_Request $request ): bool {
 		$skip_cache   = $request->get_param( '_skip_cache' );
@@ -292,7 +290,6 @@ trait RestApiCache {
 	 * @return array|null Normalized cache config with keys: endpoint_id, entity_type, vary_by_user, cache_ttl, relevant_hooks, include_headers, exclude_headers, cache_key. Returns null if entity type is not available.
 	 * @throws \InvalidArgumentException If include_headers is not false or an array.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function build_cache_config( WP_REST_Request $request, array $config ): ?array {
 		$endpoint_id  = $config['endpoint_id'] ?? null;
@@ -345,7 +342,6 @@ trait RestApiCache {
 	 * @param bool                                    $add_cache_headers  Whether to add cache control headers.
 	 * @return WP_REST_Response|\WP_Error The response with appropriate cache headers.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function maybe_cache_response( WP_REST_Request $request, $response, array $cached_config, bool $add_cache_headers ) {
 		if ( is_wp_error( $response ) ) {
@@ -408,7 +404,6 @@ trait RestApiCache {
 	 * @param array                                   $cached_config Caching configuration from build_cache_config().
 	 * @return WP_REST_Response|\WP_Error The response with cache headers.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function maybe_add_cache_headers( WP_REST_Request $request, $response, array $cached_config ) {
 		if ( is_wp_error( $response ) ) {
@@ -460,7 +455,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id         The endpoint identifier.
 	 * @return WP_REST_Response|null 304 response if allowed, null otherwise.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function create_not_modified_response( string $etag, string $cache_control_value, WP_REST_Request $request, ?string $endpoint_id ): ?WP_REST_Response {
 		$response = new WP_REST_Response( null, 304 );
@@ -505,7 +499,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array Cleaned data for ETag generation.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return $data;
@@ -524,7 +517,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return bool True to make cache user-specific, false otherwise.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return true;
@@ -540,7 +532,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return int Cache TTL in seconds.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_ttl_for_cached_response( WP_REST_Request $request, ?string $endpoint_id = null ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return HOUR_IN_SECONDS;
@@ -561,7 +552,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array Array of hook names to track.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return array();
@@ -582,7 +572,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array|false Array of header names to include (case-insensitive), or false to use exclusion logic.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_response_headers_to_include_in_caching( WP_REST_Request $request, ?string $endpoint_id = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return false;
@@ -604,7 +593,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array Array of header names to exclude (case-insensitive).
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_response_headers_to_exclude_from_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return array();
@@ -624,7 +612,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id   Optional friendly identifier for the endpoint.
 	 * @return array Array of entity IDs.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$ids = array();
@@ -639,7 +626,8 @@ trait RestApiCache {
 			$ids[] = $response_data['id'];
 		}
 
-		// Filter out null/false values but keep 0 and empty strings as they could be valid IDs.
+		// Filter out false values but keep 0 and empty strings as they could be valid IDs.
+		// Note: null values can't exist here because isset() checks above exclude them.
 		return array_unique(
 			array_filter( $ids, fn ( $id ) => false !== $id )
 		);
@@ -667,7 +655,6 @@ trait RestApiCache {
 	 * @param string|null      $endpoint_id     Optional friendly identifier for the endpoint.
 	 * @return array Filtered headers array.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function get_headers_to_cache( array $nominal_headers, $include_headers, array $exclude_headers, WP_REST_Request $request, WP_REST_Response $response, ?string $endpoint_id ): array {
 		// Step 1: Determine which headers to consider based on include/exclude.
@@ -765,7 +752,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id  Optional friendly identifier for the endpoint.
 	 * @return array Array of cache key information parts.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_key_info_for_cached_response( WP_REST_Request $request, bool $vary_by_user = false, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$request_query_params = $request->get_query_params();
@@ -799,7 +785,6 @@ trait RestApiCache {
 	 * @param string|null     $endpoint_id  Optional friendly identifier for the endpoint.
 	 * @return string Cache key.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function get_key_for_cached_response( WP_REST_Request $request, string $entity_type, bool $vary_by_user = false, ?string $endpoint_id = null ): string {
 		$cache_key_parts = $this->get_key_info_for_cached_response( $request, $vary_by_user, $endpoint_id );
@@ -879,7 +864,6 @@ trait RestApiCache {
 	 * @param bool            $cache_headers_enabled Whether to add cache control headers.
 	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	private function get_cached_response( WP_REST_Request $request, array $cached_config, bool $cache_headers_enabled ): ?WP_REST_Response {
 		$cache_key      = $cached_config['cache_key'];

@@ -81,7 +81,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param string|null     $endpoint_id Optional endpoint identifier.
 	 * @return array Cleaned data for ETag generation.
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array {
 		return $this->remove_related_ids_from_response_data( $data );
@@ -751,7 +750,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @internal
 	 *
-	 * @phpstan-ignore-next-line missingType.generics -- WP_REST_Request generic type not specified, not practical for WP REST API.
 	 */
 	public function get_related_products( $request ) {
 		$product = $this->get_object( (int) $request['id'] );

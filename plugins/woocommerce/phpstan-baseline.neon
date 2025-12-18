@@ -32527,8 +32527,20 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:build_cache_config\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
 			message: '#^Method WC_REST_Products_V2_Controller\:\:clear_transients\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:create_not_modified_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
@@ -32539,8 +32551,92 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:extract_entity_ids_from_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_cached_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_data_for_etag\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_headers_to_cache\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_hooks_relevant_to_caching\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_key_for_cached_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_key_info_for_cached_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
 			message: '#^Method WC_REST_Products_V2_Controller\:\:get_object\(\) should return WC_Data but returns WC_Product\|false\|null\.$#'
 			identifier: return.type
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_related_products\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_response_headers_to_exclude_from_caching\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_response_headers_to_include_in_caching\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:get_ttl_for_cached_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:handle_cacheable_request\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:maybe_add_cache_headers\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:maybe_cache_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
@@ -32581,7 +32677,19 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:response_cache_vary_by_user\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
 			message: '#^Method WC_REST_Products_V2_Controller\:\:save_default_attributes\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Method WC_REST_Products_V2_Controller\:\:should_use_cache_for_request\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
@@ -77125,12 +77233,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Call to static method load\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Data_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Cannot access property \$public on WP_Post_Type\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -80003,12 +80105,6 @@ parameters:
 			identifier: trait.unused
 			count: 1
 			path: src/Internal/Traits/AccessiblePrivateMethods.php
-
-		-
-			message: '#^Trait Automattic\\WooCommerce\\Internal\\Traits\\RestApiCache is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Internal/Traits/RestApiCache.php
 
 		-
 			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
