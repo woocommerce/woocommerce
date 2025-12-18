@@ -10,7 +10,7 @@
  * Matches /plugins/woocommerce/(client|assets|build)/ but NOT /plugins/woocommerce-subscriptions/ etc.
  */
 const WC_CORE_SCRIPT_PATTERN =
-	/\/plugins\/woocommerce\/(client|assets|build)\//;
+	/\/plugins\/woocommerce\/(client|assets|build|vendor)\//;
 
 /**
  * Check if a URL belongs to WooCommerce core scripts.
