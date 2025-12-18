@@ -184,6 +184,8 @@ class AdminSettingsHandler {
 			return;
 		}
 
+		wp_enqueue_script( 'jquery' );
+		
 		$script = "
 		jQuery(document).ready(function($) {
 			$('.jetpack_connection_button').on('click', function(e) {
