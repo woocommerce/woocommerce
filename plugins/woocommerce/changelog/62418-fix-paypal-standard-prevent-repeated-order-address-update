@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Refactored the address update functionality of PayPal Standard with improved status tracking to prevent duplicate requests.

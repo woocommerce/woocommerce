@@ -96,6 +96,13 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 			'default'     => true,
 		);
 
+		$params['parent'] = array(
+			'description'       => __( 'Limit results to terms with a specific parent (hierarchical taxonomies only).', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		return $params;
 	}
 
@@ -121,6 +128,10 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 			'offset'     => $per_page > 0 ? ( $page - 1 ) * $per_page : 0,
 			'search'     => $request['search'],
 		);
+
+		if ( isset( $request['parent'] ) && is_taxonomy_hierarchical( $taxonomy ) ) {
+			$prepared_args['parent'] = (int) $request['parent'];
+		}
 
 		$term_query = new WP_Term_Query();
 		$objects    = $term_query->query( $prepared_args );

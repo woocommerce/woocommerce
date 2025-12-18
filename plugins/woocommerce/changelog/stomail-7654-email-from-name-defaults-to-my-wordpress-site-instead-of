@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Allow “Email FROM” to automatically use the “Store Title” as the value unless the merchant manually changes it.

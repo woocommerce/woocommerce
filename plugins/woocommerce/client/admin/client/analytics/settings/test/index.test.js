@@ -8,7 +8,7 @@ import { useSettings } from '@woocommerce/data';
  * Internal dependencies
  */
 import Settings from '../index';
-import { IMMEDIATE_IMPORT_SETTING_NAME } from '../config';
+import { SCHEDULED_IMPORT_SETTING_NAME } from '../config';
 
 // Mock dependencies.
 jest.mock( '@woocommerce/data', () => ( {
@@ -26,26 +26,26 @@ window.wcAdminFeatures = {
 
 jest.mock( '../config', () => ( {
 	config: {
-		woocommerce_analytics_immediate_import: {
-			name: 'woocommerce_analytics_immediate_import',
+		woocommerce_analytics_scheduled_import: {
+			name: 'woocommerce_analytics_scheduled_import',
 			label: 'Updates:',
 			inputType: 'radio',
 			options: [
 				{
 					label: 'Scheduled (recommended)',
-					value: 'no',
+					value: 'yes',
 					description: 'Updates automatically every 12 hours.',
 				},
 				{
 					label: 'Immediately',
-					value: 'yes',
+					value: 'no',
 					description: 'Updates as soon as new data is available.',
 				},
 			],
-			defaultValue: 'no',
+			defaultValue: 'yes',
 		},
 	},
-	IMMEDIATE_IMPORT_SETTING_NAME: 'woocommerce_analytics_immediate_import',
+	SCHEDULED_IMPORT_SETTING_NAME: 'woocommerce_analytics_scheduled_import',
 } ) );
 
 jest.mock( '../historical-data', () => ( {
@@ -68,7 +68,7 @@ describe( 'Settings - Import Mode Modal', () => {
 			updateAndPersistSettings: jest.fn(),
 			updateSettings: mockUpdateSettings,
 			wcAdminSettings: {
-				[ IMMEDIATE_IMPORT_SETTING_NAME ]: 'no',
+				[ SCHEDULED_IMPORT_SETTING_NAME ]: 'yes',
 			},
 		} );
 
@@ -168,7 +168,7 @@ describe( 'Settings - Import Mode Modal', () => {
 
 		// Setting should be updated.
 		expect( mockUpdateSettings ).toHaveBeenCalledWith( 'wcAdminSettings', {
-			woocommerce_analytics_immediate_import: 'yes',
+			woocommerce_analytics_scheduled_import: 'no',
 		} );
 	} );
 
@@ -182,7 +182,7 @@ describe( 'Settings - Import Mode Modal', () => {
 			updateAndPersistSettings: jest.fn(),
 			updateSettings: mockUpdateSettings,
 			wcAdminSettings: {
-				woocommerce_analytics_immediate_import: 'yes',
+				woocommerce_analytics_scheduled_import: 'no',
 			},
 		} );
 
@@ -199,7 +199,7 @@ describe( 'Settings - Import Mode Modal', () => {
 
 		// Setting should be updated immediately.
 		expect( mockUpdateSettings ).toHaveBeenCalledWith( 'wcAdminSettings', {
-			woocommerce_analytics_immediate_import: 'no',
+			woocommerce_analytics_scheduled_import: 'yes',
 		} );
 	} );
 } );
