@@ -94,8 +94,7 @@ class AdminSettingsHandler {
 	 * @param array $value Field configuration.
 	 * @return void
 	 */
-	public function handle_output_jetpack_connection_field( $value ): void {
-		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+	public function handle_output_jetpack_connection_field( $value ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 		// Only show Jetpack connection when fraud protection is enabled.
 		if ( 'yes' !== get_option( 'woocommerce_feature_fraud_protection_enabled', 'no' ) ) {
 			return;
@@ -185,7 +184,7 @@ class AdminSettingsHandler {
 		}
 
 		wp_enqueue_script( 'jquery' );
-		
+
 		$script = "
 		jQuery(document).ready(function($) {
 			$('.jetpack_connection_button').on('click', function(e) {
