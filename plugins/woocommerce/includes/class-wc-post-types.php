@@ -212,6 +212,22 @@ class WC_Post_Types {
 			)
 		);
 
+		register_taxonomy( 'pos_product_visibility',
+			apply_filters( 'woocommerce_taxonomy_objects_pos_product_visibility', array( 'product', 'product_variation' ) ),
+			apply_filters(
+				'woocommerce_taxonomy_args_pos_product_visibility',
+				array(
+					'hierarchical'      => false,
+					'show_ui'           => false,
+					'show_in_nav_menus' => false,
+					'query_var'         => is_admin(),
+					'rewrite'           => false,
+					'public'            => false,
+					'label'             => _x( 'POS Product visibility', 'Taxonomy name', 'woocommerce' ),
+				)
+			)
+		);
+
 		global $wc_product_attributes;
 
 		$wc_product_attributes = array();
