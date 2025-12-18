@@ -94,10 +94,6 @@ describe( 'PaymentMethodConfig', () => {
 	} );
 
 	it( 'logs a warning when both placeOrderButton and placeOrderButtonLabel are provided', () => {
-		const consoleWarnSpy = jest
-			.spyOn( console, 'warn' )
-			.mockImplementation( () => {} );
-
 		const CustomButton = () => null;
 		new PaymentMethodConfig( {
 			...baseConfig,
@@ -105,10 +101,8 @@ describe( 'PaymentMethodConfig', () => {
 			placeOrderButtonLabel: 'Custom Label',
 		} );
 
-		expect( consoleWarnSpy ).toHaveBeenCalledWith(
+		expect( console ).toHaveWarnedWith(
 			'Payment method "test-payment-method" provided both placeOrderButton and placeOrderButtonLabel. Using placeOrderButton.'
 		);
-
-		consoleWarnSpy.mockRestore();
 	} );
 } );
