@@ -172,7 +172,6 @@
 		// Common causes:
 		// - Script loaded via a direct <script src="..."> tag
 		// - Script loaded by a third-party library
-		// - Script URL doesn't match registry due to query string differences
 		if ( ! scriptInfo ) {
 			console.warn(
 				'[WooCommerce] Unregistered script "' +
@@ -190,8 +189,6 @@
 		// Case 3: Missing dependency.
 		// The script is properly registered via wp_enqueue_script(), but it doesn't
 		// declare the required WooCommerce handle as a dependency.
-		// Fix: Add the handle to the script's dependencies array in wp_register_script()
-		// or use @woocommerce/dependency-extraction-webpack-plugin for automatic extraction.
 		if ( scriptInfo.deps.indexOf( requiredDependencyHandle ) === -1 ) {
 			console.warn(
 				'[WooCommerce] Script "' +
