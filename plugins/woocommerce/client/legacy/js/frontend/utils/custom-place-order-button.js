@@ -15,6 +15,18 @@
 	window.wc = window.wc || {};
 	window.wc.customPlaceOrderButton = window.wc.customPlaceOrderButton || {};
 
+	// Inject critical CSS inline to ensure it works even when themes dequeue woocommerce.css
+	( function injectStyles() {
+		var styleId = 'wc-custom-place-order-button-styles';
+		if ( document.getElementById( styleId ) ) {
+			return;
+		}
+		var style = document.createElement( 'style' );
+		style.id = styleId;
+		style.textContent = '.has-custom-place-order-button #place_order { display: none !important; }';
+		document.head.appendChild( style );
+	} )();
+
 	/**
 	 * Registry for custom place order buttons.
 	 * Key: gateway_id, Value: { render: function, cleanup: function }
@@ -112,6 +124,8 @@
 			try {
 				customPlaceOrderButtons[ activeCustomButtonGateway ].cleanup();
 			} catch ( e ) {
+				// Log errors to help gateway developers debug their cleanup implementation.
+				// eslint-disable-next-line no-console
 				console.error( 'Error in custom place order button cleanup:', e );
 			}
 		}
@@ -135,6 +149,8 @@
 			try {
 				customPlaceOrderButtons[ activeCustomButtonGateway ].cleanup();
 			} catch ( e ) {
+				// Log errors to help gateway developers debug their cleanup implementation.
+				// eslint-disable-next-line no-console
 				console.error( 'Error in custom place order button cleanup:', e );
 			}
 		}
@@ -151,6 +167,8 @@
 			try {
 				customPlaceOrderButtons[ gatewayId ].render( $container.get( 0 ), api );
 			} catch ( e ) {
+				// Log errors to help gateway developers debug their render implementation.
+				// eslint-disable-next-line no-console
 				console.error( 'Error rendering custom place order button:', e );
 			}
 		} else {
@@ -188,10 +206,14 @@
 	 */
 	function registerCustomPlaceOrderButton( gatewayId, config ) {
 		if ( typeof config.render !== 'function' ) {
+			// Log validation errors to help gateway developers fix incorrect API usage.
+			// eslint-disable-next-line no-console
 			console.error( 'wc.customPlaceOrderButton.register: render must be a function' );
 			return;
 		}
 		if ( typeof config.cleanup !== 'function' ) {
+			// Log validation errors to help gateway developers fix incorrect API usage.
+			// eslint-disable-next-line no-console
 			console.error( 'wc.customPlaceOrderButton.register: cleanup must be a function' );
 			return;
 		}
