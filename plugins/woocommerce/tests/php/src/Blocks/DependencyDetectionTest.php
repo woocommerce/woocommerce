@@ -4,11 +4,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\DependencyDetection;
+use WC_Unit_Test_Case;
 
 /**
  * Unit tests for the DependencyDetection class.
  */
-class DependencyDetectionTest extends \WP_UnitTestCase {
+class DependencyDetectionTest extends WC_Unit_Test_Case {
 
 	/**
 	 * System under test.
