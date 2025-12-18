@@ -107,7 +107,7 @@ jobs:
           script: |
             const targetBranch = '${{ inputs.target_branch }}';
             const prNumber = '${{ inputs.pr_number }}';
-            const cherryPickBranch = `cherry-pick-PR${prNumber}-to-${targetBranch}`;
+            const cherryPickBranch = `cherry-pick-PR${prNumber}-to-${targetBranch}-${Date.now()}`;
             
             try {
               // Check target branch exists
