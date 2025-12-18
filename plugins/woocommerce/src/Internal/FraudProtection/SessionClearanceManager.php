@@ -156,7 +156,7 @@ class SessionClearanceManager {
 	 *
 	 * @return void
 	 */
-	private function ensure_cart_loaded(): void {
+	public function ensure_cart_loaded(): void {
 		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && function_exists( 'wc_load_cart' ) ) {
 			WC()->call_function( 'wc_load_cart' );
 		}
@@ -177,7 +177,7 @@ class SessionClearanceManager {
 	 *
 	 * @return string Session identifier.
 	 */
-	private function get_session_id(): string {
+	public function get_session_id(): string {
 		if ( ! $this->is_session_available() ) {
 			return 'no-session';
 		}
