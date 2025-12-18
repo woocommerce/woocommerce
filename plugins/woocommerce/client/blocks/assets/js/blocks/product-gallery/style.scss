@@ -332,10 +332,19 @@ $dialog-padding: 20px;
 	gap: 8px;
 	padding: 0 8px;
 
+	:where(.admin-bar) & {
+		// Subtract the admin bar height.
+		height: calc(100vh - 64px - $admin-bar-height);
+	}
+
 	img {
 		max-width: 1600px;
 		width: 100%;
 		height: auto;
+
+		&:last-child {
+			margin-bottom: 50px;
+		}
 	}
 }
 
