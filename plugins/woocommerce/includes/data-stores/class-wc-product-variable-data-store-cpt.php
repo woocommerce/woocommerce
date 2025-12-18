@@ -5,6 +5,7 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Utilities\CallbackUtil;
@@ -749,6 +750,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$product->get_id()
 				)
 			);
+
+			$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
+			$children    = $product->get_children();
+			foreach ( $children as $child_id ) {
+				$invalidator->invalidate( $child_id );
+			}
+			$invalidator->invalidate( $product->get_id() );
 		}
 	}
 
@@ -764,8 +772,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		global $wpdb;
 
 		if ( $product->get_manage_stock() ) {
-			$children = $product->get_children();
-			$changed  = false;
+			$children    = $product->get_children();
+			$changed     = false;
+			$invalidator = wc_get_container()->get( ProductVersionStringInvalidator::class );
 
 			if ( $children ) {
 				$status   = $product->get_stock_status();
@@ -777,6 +786,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					if ( update_post_meta( $managed_child, '_stock_status', $status ) ) {
 						$this->update_lookup_table( $managed_child, 'wc_product_meta_lookup' );
 						$changed = true;
+
+						$invalidator->invalidate( $managed_child );
 					}
 				}
 			}
@@ -785,6 +796,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$children = $this->read_children( $product, true );
 				$product->set_children( $children['all'] );
 				$product->set_visible_children( $children['visible'] );
+
+				$invalidator->invalidate( $product->get_id() );
 			}
 		}
 	}
