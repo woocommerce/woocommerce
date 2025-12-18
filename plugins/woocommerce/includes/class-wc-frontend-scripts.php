@@ -800,10 +800,10 @@ class WC_Frontend_Scripts {
 			return $gateways_with_custom_button;
 		}
 
-		/** @var WC_Payment_Gateway[] $available_gateways The list of available gateways. */
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		foreach ( $available_gateways as $gateway ) {
+			/* @var WC_Payment_Gateway $gateway */
 			if ( ! empty( $gateway->has_custom_place_order_button ) ) {
 				$gateways_with_custom_button[] = $gateway->id;
 			}
