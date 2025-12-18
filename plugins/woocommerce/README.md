@@ -89,7 +89,7 @@ composer phpstan
 composer phpstan:baseline
 ```
 
-PHPStan configuration is stored in `phpstan.neon` at the root of the plugin directory. The analysis runs at level 9 (the strictest level) and includes WordPress-specific stubs via the `szepeviktor/phpstan-wordpress` extension.
+PHPStan configuration is stored in `phpstan.neon` at the root of the plugin directory. The analysis runs at level 8 (the second-strictest level) and includes WordPress-specific stubs via the `szepeviktor/phpstan-wordpress` extension.
 
 ## Documentation
 
