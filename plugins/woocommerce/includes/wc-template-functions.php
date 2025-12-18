@@ -57,7 +57,7 @@ function wc_template_redirect() {
 	}
 
 	// Trigger 404 if trying to access an endpoint on wrong page.
-	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() && apply_filters( 'woocommerce_account_endpoint_page_not_found', true ) ) {
+	if ( is_wc_endpoint_url() && ! is_account_page() && ! is_checkout() && ! is_order_received_page() && ! is_checkout_pay_page() && apply_filters( 'woocommerce_account_endpoint_page_not_found', true ) ) {
 		$wp_query->set_404();
 		status_header( 404 );
 
