@@ -1,7 +1,7 @@
 /**
  * Webpack config for WooCommerce Dependency Detection script.
  *
- * This builds a standalone IIFE JS File that PHP inlines into the page.
+ * This builds a standalone JS File that PHP inlines into the page.
  */
 
 const path = require( 'path' );
@@ -64,9 +64,6 @@ module.exports = {
 		new ProgressBarPlugin(
 			getProgressBarPluginConfig( 'Dependency Detection' )
 		),
-		// Note: We intentionally do NOT define __WC_GLOBAL_EXPORTS_PLACEHOLDER__ here.
-		// It must remain as an undefined reference that PHP will replace with the actual
-		// JSON mapping at runtime. Defining it would cause Terser to inline it.
 	],
 	optimization: {
 		// Always minimize - this is an inline script embedded in page HTML.
