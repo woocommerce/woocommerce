@@ -226,8 +226,8 @@ class Bootstrap {
 		);
 		$this->container->register(
 			DependencyDetection::class,
-			function ( Container $container ) {
-				return new DependencyDetection( $container->get( AssetApi::class ) );
+			function () {
+				return new DependencyDetection();
 			}
 		);
 		$this->container->register(

@@ -115,7 +115,10 @@ final class DependencyDetection {
 		}
 
 		// Inject the global-to-handle mapping from PHP (source of truth).
-		$mapping_json   = \wp_json_encode( self::WC_GLOBAL_EXPORTS );
+		$mapping_json = \wp_json_encode( self::WC_GLOBAL_EXPORTS );
+		if ( false === $mapping_json ) {
+			return;
+		}
 		$script_content = str_replace(
 			'__WC_GLOBAL_EXPORTS_PLACEHOLDER__',
 			$mapping_json,
