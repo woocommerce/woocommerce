@@ -12157,12 +12157,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -12201,18 +12195,6 @@ parameters:
 		-
 			message: '#^Cannot call method has_status\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
-			message: '#^Method WC_Cart_Session\:\:clean_up_removed_cart_contents\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 2
-			path: includes/class-wc-cart-session.php
-
-		-
-			message: '#^Method WC_Cart_Session\:\:clean_up_removed_cart_contents\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: includes/class-wc-cart-session.php
 
