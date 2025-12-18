@@ -176,6 +176,25 @@ test(
 
 			// Verify the product was removed again
 			await checkCartContent( true, page, [], tax );
+
+			// Verify undo link is visible
+			await expect(
+				page.getByRole( 'link', { name: 'Undo?' } )
+			).toBeVisible();
+		} );
+
+		await test.step( 'verify undo link disappears after navigation', async () => {
+			// Navigate to shop page and return to cart
+			await page.goto( 'shop' );
+			await page.goto( slug );
+
+			// Verify cart is still empty
+			await checkCartContent( true, page, [], tax );
+
+			// Verify undo link is no longer visible (cleanup occurred)
+			await expect(
+				page.getByRole( 'link', { name: 'Undo?' } )
+			).not.toBeVisible();
 		} );
 	}
 );
