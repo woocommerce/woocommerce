@@ -135,7 +135,7 @@ jQuery( function ( $ ) {
 				this.$order_review.on( 'submit', this.submitOrder );
 				this.$order_review.attr( 'novalidate', 'novalidate' );
 
-				// Initialize custom place order button for order-pay page
+				// Initialize the custom place order button for the "order-pay" page
 				var $orderPayMethod = this.$order_review.find( 'input[name="payment_method"]:checked' );
 				if ( $orderPayMethod.length ) {
 					wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $orderPayMethod.val() );
