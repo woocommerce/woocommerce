@@ -15637,6 +15637,7 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
+<<<<<<< HEAD
 			message: '#^@param string \$key does not accept actual type of parameter\: mixed\.$#'
 			identifier: parameter.phpDocType
 			count: 5
@@ -15655,6 +15656,8 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
+=======
+>>>>>>> 31360e0002 ([Cart shortcode] Fix undo cart item removal action (#62472))
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -15717,18 +15720,6 @@ parameters:
 		-
 			message: '#^Cannot call method has_status\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
-			message: '#^Method WC_Cart_Session\:\:clean_up_removed_cart_contents\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 2
-			path: includes/class-wc-cart-session.php
-
-		-
-			message: '#^Method WC_Cart_Session\:\:clean_up_removed_cart_contents\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: includes/class-wc-cart-session.php
 
