@@ -15,6 +15,7 @@ import {
 	FormattedMonetaryAmount,
 	Spinner,
 } from '@woocommerce/blocks-components';
+import { useValidateCheckout } from '@woocommerce/blocks-checkout';
 import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
 import { useEditorContext } from '@woocommerce/base-context';
 
@@ -48,6 +49,7 @@ const PlaceOrderButton = ( {
 	} = useCheckoutSubmit();
 
 	const paymentMethodInterface = usePaymentMethodInterface();
+	const validateCheckout = useValidateCheckout();
 	const { isEditor, isPreview = false } = useEditorContext();
 
 	const { cartTotals, cartIsLoading } = useStoreCart();
@@ -67,6 +69,7 @@ const PlaceOrderButton = ( {
 				}
 				isEditor={ isEditor }
 				isPreview={ isPreview }
+				validate={ validateCheckout }
 				{ ...paymentMethodInterface }
 			/>
 		);

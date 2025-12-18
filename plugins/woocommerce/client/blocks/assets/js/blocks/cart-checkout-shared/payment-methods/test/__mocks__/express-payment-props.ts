@@ -186,5 +186,4 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 		},
 	},
 	shouldSavePayment: false,
-	validate: expect.any( Function ),
 } );

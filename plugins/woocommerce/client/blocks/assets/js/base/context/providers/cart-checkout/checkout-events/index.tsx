@@ -21,16 +21,10 @@ import {
 } from '@woocommerce/block-data';
 import { store as noticesStore } from '@wordpress/notices';
 import type { WPNotice } from '@wordpress/notices/build-types/store/selectors';
-import {
-	checkoutEvents,
-	checkoutEventsEmitter,
-	CHECKOUT_EVENTS,
-} from '@woocommerce/blocks-checkout-events';
+import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 import {
 	ExpressPaymentMethods,
 	PlainExpressPaymentMethods,
-	isErrorResponse,
-	isFailResponse,
 } from '@woocommerce/types';
 import {
 	getExpressPaymentMethods,
@@ -50,8 +44,6 @@ import { EventListenerRegistrationFunction } from '../../../../../events/event-e
 type CheckoutEventsContextType = {
 	// Submits the checkout and begins processing.
 	onSubmit: () => void;
-	// Validates the checkout without starting processing. Returns a promise that resolves to validation results.
-	validate: () => Promise< { hasError: boolean } >;
 	// Deprecated in favour of onCheckoutSuccess.
 	onCheckoutAfterProcessingWithSuccess: ReturnType< typeof emitterCallback >;
 	// Deprecated in favour of onCheckoutFail.
@@ -70,7 +62,6 @@ type CheckoutEventsContextType = {
 
 const CheckoutEventsContext = createContext< CheckoutEventsContextType >( {
 	onSubmit: () => void null,
-	validate: () => Promise.resolve( { hasError: false } ),
 	onCheckoutAfterProcessingWithSuccess: () => () => void null, // deprecated for onCheckoutSuccess
 	onCheckoutAfterProcessingWithError: () => () => void null, // deprecated for onCheckoutFail
 	onCheckoutBeforeProcessing: () => () => void null, // deprecated for onCheckoutValidationBeforeProcessing
@@ -354,35 +345,6 @@ export const CheckoutEventsProvider = ( {
 		__internalEmitAfterProcessingEvents,
 	] );
 
-	const validate = useCallback( async () => {
-		// Emit validation event and check responses
-		const responses = await checkoutEventsEmitter.emit(
-			CHECKOUT_EVENTS.CHECKOUT_VALIDATION
-		);
-
-		// Check if any response indicates an error or failure
-		const hasError = responses.some(
-			( response ) =>
-				isErrorResponse( response ) || isFailResponse( response )
-		);
-
-		// If there are validation errors, set them in the store
-		if ( hasError ) {
-			responses.forEach( ( response ) => {
-				if (
-					isErrorResponse( response ) ||
-					isFailResponse( response )
-				) {
-					if ( response.validationErrors ) {
-						setValidationErrors( response.validationErrors );
-					}
-				}
-			} );
-		}
-
-		return { hasError };
-	}, [ setValidationErrors ] );
-
 	const onSubmit = useCallback( () => {
 		dispatchCheckoutEvent( 'submit' );
 		__internalSetBeforeProcessing();
@@ -390,7 +352,6 @@ export const CheckoutEventsProvider = ( {
 
 	const checkoutEventHandlers = {
 		onSubmit,
-		validate,
 		onCheckoutBeforeProcessing,
 		onCheckoutValidationBeforeProcessing,
 		onCheckoutAfterProcessingWithSuccess,
