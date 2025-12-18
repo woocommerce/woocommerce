@@ -158,7 +158,7 @@ class SessionClearanceManager {
 	 */
 	private function ensure_cart_loaded(): void {
 		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && function_exists( 'wc_load_cart' ) ) {
-			WC()->call_function('wc_load_cart');
+			WC()->call_function( 'wc_load_cart' );
 		}
 	}
 
