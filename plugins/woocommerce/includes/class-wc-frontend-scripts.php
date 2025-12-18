@@ -791,7 +791,6 @@ class WC_Frontend_Scripts {
 	/**
 	 * Get a list of payment gateway IDs that have custom place order buttons.
 	 *
-	 * @since 10.5.0
 	 * @return array List of gateway IDs with custom place order buttons.
 	 */
 	private static function get_gateways_with_custom_place_order_button() {
