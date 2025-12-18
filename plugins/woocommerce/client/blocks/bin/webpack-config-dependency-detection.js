@@ -1,9 +1,7 @@
 /**
  * Webpack config for WooCommerce Dependency Detection script.
  *
- * This builds a standalone IIFE that PHP inlines into the page.
- * Unlike other blocks scripts, this has no external dependencies
- * and outputs a plain script without module exports.
+ * This builds a standalone IIFE JS File that PHP inlines into the page.
  */
 
 const path = require( 'path' );
@@ -13,7 +11,7 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 /**
  * Internal dependencies
  */
-const { getProgressBarPluginConfig, NODE_ENV } = require( './webpack-helpers' );
+const { getProgressBarPluginConfig } = require( './webpack-helpers' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
 // Output to the standard blocks build directory (gitignored).
@@ -22,12 +20,10 @@ const BABEL_CACHE_DIR = path.join(
 	ROOT_DIR,
 	'node_modules/.cache/babel-loader'
 );
-const isProduction = NODE_ENV === 'production';
 
 module.exports = {
 	entry: {
-		'dependency-detection':
-			'./assets/js/dependency-detection/index.js',
+		'dependency-detection': './assets/js/dependency-detection/index.js',
 	},
 	output: {
 		path: BUILD_DIR,
