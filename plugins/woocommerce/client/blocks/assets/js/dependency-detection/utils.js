@@ -194,15 +194,18 @@ export function createWcProxy(
 		if ( wcGlobalExports[ prop ] ) {
 			// Set guard before any operations that might trigger nested proxy calls.
 			isChecking = true;
-			const callerUrl = getCallerScriptUrl();
-			checkDependency( callerUrl, prop, wcGlobalExports[ prop ] );
+			try {
+				const callerUrl = getCallerScriptUrl();
+				checkDependency( callerUrl, prop, wcGlobalExports[ prop ] );
+				// Get the value (may trigger nested proxy calls, but isChecking blocks them).
+				return obj[ prop ];
+			} finally {
+				// Reset guard only after we have the value, even if an error occurs.
+				isChecking = false;
+			}
 		}
 
-		// Get the value (may trigger nested proxy calls, but isChecking blocks them).
-		const value = obj[ prop ];
-		// Reset guard only after we have the value.
-		isChecking = false;
-		return value;
+		return obj[ prop ];
 	}
 
 	return new Proxy( target, { get: __wcProxyGet } );
