@@ -116,12 +116,7 @@ export function getWarningInfo(
 	if ( ! callerUrl ) {
 		return {
 			type: 'inline',
-			message:
-				'[WooCommerce] An inline or unknown script accessed wc.' +
-				wcGlobalKey +
-				' without proper dependency declaration. This script should declare "' +
-				requiredDependencyHandle +
-				'" as a dependency.',
+			message: `[WooCommerce] An inline or unknown script accessed wc.${ wcGlobalKey } without proper dependency declaration. This script should declare "${ requiredDependencyHandle }" as a dependency.`,
 		};
 	}
 
@@ -131,14 +126,9 @@ export function getWarningInfo(
 	if ( ! scriptInfo ) {
 		return {
 			type: 'unregistered',
-			message:
-				'[WooCommerce] Unregistered script "' +
-				getFilenameFn( callerUrl ) +
-				'" accessed wc.' +
-				wcGlobalKey +
-				'. This script should be registered with wp_enqueue_script() and declare "' +
-				requiredDependencyHandle +
-				'" as a dependency.',
+			message: `[WooCommerce] Unregistered script "${ getFilenameFn(
+				callerUrl
+			) }" accessed wc.${ wcGlobalKey }. This script should be registered with wp_enqueue_script() and declare "${ requiredDependencyHandle }" as a dependency.`,
 		};
 	}
 
@@ -146,16 +136,7 @@ export function getWarningInfo(
 	if ( scriptInfo.deps.indexOf( requiredDependencyHandle ) === -1 ) {
 		return {
 			type: 'missing-dependency',
-			message:
-				'[WooCommerce] Script "' +
-				scriptInfo.handle +
-				'" accessed wc.' +
-				wcGlobalKey +
-				' without declaring "' +
-				requiredDependencyHandle +
-				'" as a dependency. Add "' +
-				requiredDependencyHandle +
-				'" to the script\'s dependencies array.',
+			message: `[WooCommerce] Script "${ scriptInfo.handle }" accessed wc.${ wcGlobalKey } without declaring "${ requiredDependencyHandle }" as a dependency. Add "${ requiredDependencyHandle }" to the script's dependencies array.`,
 		};
 	}
 
