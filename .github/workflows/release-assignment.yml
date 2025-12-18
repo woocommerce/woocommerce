@@ -19,6 +19,7 @@ jobs:
       beta-2-release-date: ${{ steps.get-all-events-for-version.outputs.event-beta-2-date }}
       rc-1-release-date: ${{ steps.get-all-events-for-version.outputs.event-rc-1-date }}
       final-release-date: ${{ steps.get-all-events-for-version.outputs.event-final-date }}
+      team-name: ${{ steps.get-all-events-for-version.outputs.team-name }}
     steps:
       - name: Install node-ical
         run: npm install node-ical
@@ -100,6 +101,8 @@ jobs:
               .filter(event => event.type === 'VEVENT')
               .filter(event => event.summary && event.start);
 
+            let teamName = null;
+
             for (const [eventKey, eventTitle] of Object.entries(releaseEvents)) {
               const matchingEvent = calendarEvents.find(event => 
                 event.summary.trim() === eventTitle
@@ -108,8 +111,19 @@ jobs:
               const date = matchingEvent ? new Date(matchingEvent.start).toISOString().split('T')[0] : null;
               core.setOutput(`event-${eventKey}-date`, date);
               console.log(`Event: ${eventTitle}, Date: ${date}`);
-            }
 
+              // Extract team name from final release event description
+              if (eventKey === 'final' && matchingEvent && matchingEvent.description) {
+                const teamMatch = matchingEvent.description.match(/Team:\s*(.+)/i);
+                if (teamMatch && teamMatch[1]) {
+                  teamName = teamMatch[1].trim().toLowerCase().replace(/\s+/g, '-');
+                  console.log(`Team name from description: ${teamName}`);
+                }
+              }
+            }
+            
+            core.setOutput('team-name', teamName);
+            
   trigger-upcoming-code-freeze-events:
     name: Assign a release lead
     needs: check-upcoming-release-events
@@ -129,6 +143,7 @@ jobs:
 
             const payload = {
               action: 'release-assignment',
+              team: '${{ needs.check-upcoming-release-events.outputs.team-name }}',
               version: '${{ needs.check-upcoming-release-events.outputs.version }}',
               feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
               status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
