@@ -169,7 +169,7 @@ class SessionClearanceManager {
 	 */
 	private function is_session_available(): bool {
 		$this->ensure_cart_loaded();
-		return isset( WC()->session ) && WC()->session instanceof \WC_Session;
+		return WC()->session instanceof \WC_Session;
 	}
 
 	/**
