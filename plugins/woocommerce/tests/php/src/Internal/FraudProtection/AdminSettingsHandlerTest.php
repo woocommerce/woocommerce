@@ -67,14 +67,14 @@ class AdminSettingsHandlerTest extends \WC_Unit_Test_Case {
 	public function test_add_jetpack_connection_field_returns_unchanged_on_non_features_section(): void {
 		$this->sut->register();
 
-		$settings         = array(
+		$settings        = array(
 			array(
 				'id'   => 'some_setting',
 				'type' => 'text',
 			),
 		);
-		$current_section  = 'general';
-		$result           = $this->sut->add_jetpack_connection_field( $settings, $current_section );
+		$current_section = 'general';
+		$result          = $this->sut->add_jetpack_connection_field( $settings, $current_section );
 
 		$this->assertSame( $settings, $result, 'Settings should be unchanged on non-features section' );
 	}
@@ -276,10 +276,8 @@ class AdminSettingsHandlerTest extends \WC_Unit_Test_Case {
 		// Mock wp_add_inline_script.
 		global $wp_scripts;
 		$wp_scripts_backup = $wp_scripts;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_scripts        = new \WP_Scripts();
-
-		// Register jquery (required dependency).
-		wp_register_script( 'jquery', '', array(), '1.0.0' );
 
 		// Call the method with the correct hook.
 		$this->sut->handle_enqueue_admin_scripts( 'woocommerce_page_wc-settings' );
@@ -293,6 +291,7 @@ class AdminSettingsHandlerTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'window.location.href', $script_content );
 
 		// Restore.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_scripts = $wp_scripts_backup;
 		unset( $_GET['section'] );
 	}
@@ -307,9 +306,8 @@ class AdminSettingsHandlerTest extends \WC_Unit_Test_Case {
 
 		global $wp_scripts;
 		$wp_scripts_backup = $wp_scripts;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_scripts        = new \WP_Scripts();
-
-		wp_register_script( 'jquery', '', array(), '1.0.0' );
 
 		// Call with wrong hook.
 		$this->sut->handle_enqueue_admin_scripts( 'edit.php' );
@@ -319,6 +317,7 @@ class AdminSettingsHandlerTest extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $inline_scripts );
 
 		// Restore.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_scripts = $wp_scripts_backup;
 		unset( $_GET['section'] );
 	}
@@ -333,9 +332,8 @@ class AdminSettingsHandlerTest extends \WC_Unit_Test_Case {
 
 		global $wp_scripts;
 		$wp_scripts_backup = $wp_scripts;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_scripts        = new \WP_Scripts();
-
-		wp_register_script( 'jquery', '', array(), '1.0.0' );
 
 		// Call with correct hook but wrong section.
 		$this->sut->handle_enqueue_admin_scripts( 'woocommerce_page_wc-settings' );
@@ -345,6 +343,7 @@ class AdminSettingsHandlerTest extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $inline_scripts );
 
 		// Restore.
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_scripts = $wp_scripts_backup;
 		unset( $_GET['section'] );
 	}
