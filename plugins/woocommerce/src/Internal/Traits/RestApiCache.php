@@ -157,7 +157,6 @@ trait RestApiCache {
 	 * This MUST be called from the controller's constructor.
 	 */
 	protected function initialize_rest_api_cache(): void {
-		/** @var FeaturesController $features_controller Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 
 		$this->rest_api_caching_feature_enabled = $features_controller->feature_is_enabled( 'rest_api_caching' );
@@ -165,7 +164,6 @@ trait RestApiCache {
 			return;
 		}
 
-		/** @var VersionStringGenerator $generator Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$generator = wc_get_container()->get( VersionStringGenerator::class );
 
 		$backend_caching_enabled        = 'yes' === get_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
@@ -208,8 +206,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request  The request object.
 	 * @param callable        $callback The original endpoint callback.
 	 * @param array           $config   Caching configuration specified for the endpoint.
-	 * @return WP_REST_Response|\WP_Error The response.
 	 *
+	 * @return WP_REST_Response|\WP_Error The response.
 	 */
 	private function handle_cacheable_request( WP_REST_Request $request, callable $callback, array $config ) {
 		$backend_caching_enabled = ! is_null( $this->version_string_generator );
@@ -257,8 +255,8 @@ trait RestApiCache {
 	 * Check if caching should be used for a particular incoming request.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return bool True if caching should be used, false otherwise.
 	 *
+	 * @return bool True if caching should be used, false otherwise.
 	 */
 	private function should_use_cache_for_request( WP_REST_Request $request ): bool {
 		$skip_cache   = $request->get_param( '_skip_cache' );
@@ -287,9 +285,10 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @param array           $config  Raw configuration array passed to with_cache.
-	 * @return array|null Normalized cache config with keys: endpoint_id, entity_type, vary_by_user, cache_ttl, relevant_hooks, include_headers, exclude_headers, cache_key. Returns null if entity type is not available.
-	 * @throws \InvalidArgumentException If include_headers is not false or an array.
 	 *
+	 * @return array|null Normalized cache config with keys: endpoint_id, entity_type, vary_by_user, cache_ttl, relevant_hooks, include_headers, exclude_headers, cache_key. Returns null if entity type is not available.
+	 *
+	 * @throws \InvalidArgumentException If include_headers is not false or an array.
 	 */
 	private function build_cache_config( WP_REST_Request $request, array $config ): ?array {
 		$endpoint_id  = $config['endpoint_id'] ?? null;
@@ -297,7 +296,6 @@ trait RestApiCache {
 		$vary_by_user = $config['vary_by_user'] ?? $this->response_cache_vary_by_user( $request, $endpoint_id );
 
 		if ( ! $entity_type ) {
-			/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
 			$legacy_proxy->call_function(
 				'wc_doing_it_wrong',
@@ -340,8 +338,8 @@ trait RestApiCache {
 	 * @param WP_REST_Response|\WP_Error|array|object $response           The response to potentially cache.
 	 * @param array                                   $cached_config      Caching configuration from build_cache_config().
 	 * @param bool                                    $add_cache_headers  Whether to add cache control headers.
-	 * @return WP_REST_Response|\WP_Error The response with appropriate cache headers.
 	 *
+	 * @return WP_REST_Response|\WP_Error The response with appropriate cache headers.
 	 */
 	private function maybe_cache_response( WP_REST_Request $request, $response, array $cached_config, bool $add_cache_headers ) {
 		if ( is_wp_error( $response ) ) {
@@ -402,8 +400,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request                         $request       The request object.
 	 * @param WP_REST_Response|\WP_Error|array|object $response      The response to add headers to.
 	 * @param array                                   $cached_config Caching configuration from build_cache_config().
-	 * @return WP_REST_Response|\WP_Error The response with cache headers.
 	 *
+	 * @return WP_REST_Response|\WP_Error The response with cache headers.
 	 */
 	private function maybe_add_cache_headers( WP_REST_Request $request, $response, array $cached_config ) {
 		if ( is_wp_error( $response ) ) {
@@ -423,7 +421,6 @@ trait RestApiCache {
 
 		$request_etag = $request->get_header( 'if-none-match' );
 
-		/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$legacy_proxy        = wc_get_container()->get( LegacyProxy::class );
 		$is_user_logged_in   = $legacy_proxy->call_function( 'is_user_logged_in' );
 		$cache_visibility    = $cached_config['vary_by_user'] && $is_user_logged_in ? 'private' : 'public';
@@ -453,8 +450,8 @@ trait RestApiCache {
 	 * @param string          $cache_control_value The Cache-Control header value.
 	 * @param WP_REST_Request $request             The request object.
 	 * @param string|null     $endpoint_id         The endpoint identifier.
-	 * @return WP_REST_Response|null 304 response if allowed, null otherwise.
 	 *
+	 * @return WP_REST_Response|null 304 response if allowed, null otherwise.
 	 */
 	private function create_not_modified_response( string $etag, string $cache_control_value, WP_REST_Request $request, ?string $endpoint_id ): ?WP_REST_Response {
 		$response = new WP_REST_Response( null, 304 );
@@ -497,8 +494,8 @@ trait RestApiCache {
 	 * @param array           $data        Response data.
 	 * @param WP_REST_Request $request     The request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
-	 * @return array Cleaned data for ETag generation.
 	 *
+	 * @return array Cleaned data for ETag generation.
 	 */
 	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return $data;
@@ -515,8 +512,8 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request     The request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
-	 * @return bool True to make cache user-specific, false otherwise.
 	 *
+	 * @return bool True to make cache user-specific, false otherwise.
 	 */
 	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return true;
@@ -530,8 +527,8 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request     The request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
-	 * @return int Cache TTL in seconds.
 	 *
+	 * @return int Cache TTL in seconds.
 	 */
 	protected function get_ttl_for_cached_response( WP_REST_Request $request, ?string $endpoint_id = null ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return HOUR_IN_SECONDS;
@@ -550,8 +547,8 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request     Request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
-	 * @return array Array of hook names to track.
 	 *
+	 * @return array Array of hook names to track.
 	 */
 	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return array();
@@ -570,8 +567,8 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request     Request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
-	 * @return array|false Array of header names to include (case-insensitive), or false to use exclusion logic.
 	 *
+	 * @return array|false Array of header names to include (case-insensitive), or false to use exclusion logic.
 	 */
 	protected function get_response_headers_to_include_in_caching( WP_REST_Request $request, ?string $endpoint_id = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return false;
@@ -591,8 +588,8 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request     Request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
-	 * @return array Array of header names to exclude (case-insensitive).
 	 *
+	 * @return array Array of header names to exclude (case-insensitive).
 	 */
 	protected function get_response_headers_to_exclude_from_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return array();
@@ -610,8 +607,8 @@ trait RestApiCache {
 	 * @param array           $response_data Response data.
 	 * @param WP_REST_Request $request       The request object.
 	 * @param string|null     $endpoint_id   Optional friendly identifier for the endpoint.
-	 * @return array Array of entity IDs.
 	 *
+	 * @return array Array of entity IDs.
 	 */
 	protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$ids = array();
@@ -653,8 +650,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request  $request         The request object.
 	 * @param WP_REST_Response $response        The response object.
 	 * @param string|null      $endpoint_id     Optional friendly identifier for the endpoint.
-	 * @return array Filtered headers array.
 	 *
+	 * @return array Filtered headers array.
 	 */
 	private function get_headers_to_cache( array $nominal_headers, $include_headers, array $exclude_headers, WP_REST_Request $request, WP_REST_Response $response, ?string $endpoint_id ): array {
 		// Step 1: Determine which headers to consider based on include/exclude.
@@ -697,6 +694,7 @@ trait RestApiCache {
 		 * @param WP_REST_Response $response            The response object.
 		 * @param string|null      $endpoint_id         Optional friendly identifier for the endpoint.
 		 * @param object           $controller          The controller instance.
+		 *
 		 * @return array Filtered list of header names to cache.
 		 */
 		$filtered_header_names = apply_filters(
@@ -717,7 +715,6 @@ trait RestApiCache {
 		);
 
 		if ( ! empty( $reintroduced_headers ) ) {
-			/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
 			$legacy_proxy->call_function(
 				'wc_doing_it_wrong',
@@ -750,8 +747,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request      The request object.
 	 * @param bool            $vary_by_user Whether to include user ID in cache key.
 	 * @param string|null     $endpoint_id  Optional friendly identifier for the endpoint.
-	 * @return array Array of cache key information parts.
 	 *
+	 * @return array Array of cache key information parts.
 	 */
 	protected function get_key_info_for_cached_response( WP_REST_Request $request, bool $vary_by_user = false, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$request_query_params = $request->get_query_params();
@@ -766,7 +763,6 @@ trait RestApiCache {
 		);
 
 		if ( $vary_by_user ) {
-			/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
 			// @phpstan-ignore-next-line argument.type -- get_current_user_id returns int at runtime.
 			$user_id           = intval( $legacy_proxy->call_function( 'get_current_user_id' ) );
@@ -783,8 +779,8 @@ trait RestApiCache {
 	 * @param string          $entity_type  The entity type.
 	 * @param bool            $vary_by_user Whether to include user ID in cache key.
 	 * @param string|null     $endpoint_id  Optional friendly identifier for the endpoint.
-	 * @return string Cache key.
 	 *
+	 * @return string Cache key.
 	 */
 	private function get_key_for_cached_response( WP_REST_Request $request, string $entity_type, bool $vary_by_user = false, ?string $endpoint_id = null ): string {
 		$cache_key_parts = $this->get_key_info_for_cached_response( $request, $vary_by_user, $endpoint_id );
@@ -801,6 +797,7 @@ trait RestApiCache {
 		 * @param bool            $vary_by_user    Whether user ID is included in cache key.
 		 * @param string|null     $endpoint_id     Optional friendly identifier for the endpoint (passed to with_cache).
 		 * @param object          $controller      The controller instance.
+		 *
 		 * @return array Filtered cache key information parts.
 		 */
 		$cache_key_parts = apply_filters(
@@ -820,6 +817,7 @@ trait RestApiCache {
 	 * Generate a hash based on the actual usages of the hooks that affect the response.
 	 *
 	 * @param array $hook_names Array of hook names to track.
+	 *
 	 * @return string Hooks hash.
 	 */
 	private function generate_hooks_hash( array $hook_names ): string {
@@ -862,8 +860,8 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request              The request object.
 	 * @param array           $cached_config        Built caching configuration from build_cache_config().
 	 * @param bool            $cache_headers_enabled Whether to add cache control headers.
-	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
 	 *
+	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
 	 */
 	private function get_cached_response( WP_REST_Request $request, array $cached_config, bool $cache_headers_enabled ): ?WP_REST_Response {
 		$cache_key      = $cached_config['cache_key'];
@@ -878,7 +876,6 @@ trait RestApiCache {
 			return null;
 		}
 
-		/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$legacy_proxy    = wc_get_container()->get( LegacyProxy::class );
 		$current_time    = $legacy_proxy->call_function( 'time' );
 		$expiration_time = $cached['created_at'] + $cache_ttl;
@@ -917,7 +914,6 @@ trait RestApiCache {
 		$response_headers = array();
 
 		if ( $cache_headers_enabled ) {
-			/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			$legacy_proxy      = wc_get_container()->get( LegacyProxy::class );
 			$is_user_logged_in = $legacy_proxy->call_function( 'is_user_logged_in' );
 			$cache_visibility  = $cached_config['vary_by_user'] && $is_user_logged_in ? 'private' : 'public';
@@ -985,7 +981,6 @@ trait RestApiCache {
 			}
 		}
 
-		/** @var LegacyProxy $legacy_proxy Container returns mixed, cast for type safety. */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
 		$cache_data   = array(
 			'data'            => $data,
@@ -1018,6 +1013,7 @@ trait RestApiCache {
 	 * @internal
 	 *
 	 * @param bool $send_no_cache_headers Whether to send no-cache headers.
+	 *
 	 * @return bool False if we're handling caching for this request, original value otherwise.
 	 */
 	public function handle_rest_send_nocache_headers( bool $send_no_cache_headers ): bool {
