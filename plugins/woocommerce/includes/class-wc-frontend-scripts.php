@@ -804,7 +804,7 @@ class WC_Frontend_Scripts {
 
 		foreach ( $available_gateways as $gateway ) {
 			/* @var WC_Payment_Gateway $gateway */
-			if ( ! empty( $gateway->has_custom_place_order_button ) ) {
+			if ( true === $gateway->has_custom_place_order_button ) {
 				$gateways_with_custom_button[] = $gateway->id;
 			}
 		}

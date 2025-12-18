@@ -100,8 +100,13 @@
 			return $customButtonContainer;
 		}
 
+		var $placeOrderButton = getForm().find( '#place_order' );
+		if ( ! $placeOrderButton.length ) {
+			return $( [] );
+		}
+
 		$customButtonContainer = $( '<div class="wc-custom-place-order-button"></div>' );
-		getForm().find( '#place_order' ).after( $customButtonContainer );
+		$placeOrderButton.after( $customButtonContainer );
 
 		return $customButtonContainer;
 	}
@@ -205,6 +210,11 @@
 	 * @param {Function} config.cleanup - Function called when switching away from this gateway
 	 */
 	function registerCustomPlaceOrderButton( gatewayId, config ) {
+		// Silently ignore if already registered (prevents double-registration issues)
+		if ( customPlaceOrderButtons[ gatewayId ] ) {
+			return;
+		}
+
 		if ( typeof config.render !== 'function' ) {
 			// Log validation errors to help gateway developers fix incorrect API usage.
 			// eslint-disable-next-line no-console
