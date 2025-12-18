@@ -2331,8 +2331,9 @@ body:not(.search-results) .twentysixteen .entry-summary {
 
 /**
  * Custom place order button
- * Hides default button when a gateway with custom place order button is selected
+ * Hides default button when a gateway with custom place order button is selected.
+ * This applies to checkout, order-pay, and add-payment-method pages.
  */
-.woocommerce-checkout.has-custom-place-order-button #place_order {
+.has-custom-place-order-button #place_order {
 	display: none !important;
 }

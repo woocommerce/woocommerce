@@ -226,7 +226,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-add-payment-method'      => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-payment-method' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-custom-place-order-button' ),
 				'version' => $version,
 			),
 			'wc-add-to-cart'             => array(
@@ -261,7 +261,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-checkout'                => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/checkout' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n', 'wc-custom-place-order-button' ),
 				'version' => $version,
 			),
 			'wc-country-select'          => array(
@@ -272,6 +272,11 @@ class WC_Frontend_Scripts {
 			'wc-credit-card-form'        => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/credit-card-form' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-jquery-payment' ),
+				'version' => $version,
+			),
+			'wc-custom-place-order-button' => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/utils/custom-place-order-button' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
 			'wc-dompurify'               => array(
@@ -733,6 +738,11 @@ class WC_Frontend_Scripts {
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' ),
 				);
 				break;
+			case 'wc-add-payment-method':
+				$params = array(
+					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
+				);
+				break;
 			case 'wc-add-to-cart-variation':
 				// We also need the wp.template for this script :).
 				wc_get_template( 'single-product/add-to-cart/variation.php' );
@@ -779,7 +789,7 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Get list of payment gateway IDs that have custom place order buttons.
+	 * Get a list of payment gateway IDs that have custom place order buttons.
 	 *
 	 * @since 9.8.0
 	 * @return array List of gateway IDs with custom place order buttons.

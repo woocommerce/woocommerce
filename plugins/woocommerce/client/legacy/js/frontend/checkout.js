@@ -7,89 +7,41 @@ jQuery( function ( $ ) {
 
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
-	// Initialize wc.classicCheckout namespace for custom place order button API
-	window.wc = window.wc || {};
-	window.wc.classicCheckout = window.wc.classicCheckout || {};
-
 	/**
-	 * Registry for custom place order buttons.
-	 * Key: gateway_id, Value: { render: function, cleanup: function }
-	 */
-	var customPlaceOrderButtons = {};
-
-	/**
-	 * Currently active custom button gateway ID, or null if using default button.
-	 */
-	var activeCustomButtonGateway = null;
-
-	/**
-	 * Container element for custom place order button.
-	 */
-	var $customButtonContainer = null;
-
-	/**
-	 * Register a custom place order button for a payment gateway.
-	 *
-	 * @param {string} gatewayId - The payment gateway ID (e.g., 'google_pay')
-	 * @param {Object} config - Configuration object
-	 * @param {Function} config.render - Function called to render the button. Receives (container, api)
-	 * @param {Function} config.cleanup - Function called when switching away from this gateway
-	 */
-	window.wc.classicCheckout.registerCustomPlaceOrderButton = function ( gatewayId, config ) {
-		if ( typeof config.render !== 'function' ) {
-			console.error( 'wc.classicCheckout.registerCustomPlaceOrderButton: render must be a function' );
-			return;
-		}
-		if ( typeof config.cleanup !== 'function' ) {
-			console.error( 'wc.classicCheckout.registerCustomPlaceOrderButton: cleanup must be a function' );
-			return;
-		}
-
-		customPlaceOrderButtons[ gatewayId ] = config;
-
-		// If this gateway is already selected, render its button now
-		var $selectedPaymentMethod = $( 'input[name="payment_method"]:checked' );
-		if ( $selectedPaymentMethod.val() === gatewayId ) {
-			maybeShowCustomPlaceOrderButton( gatewayId );
-		}
-	};
-
-	/**
-	 * Create the API object passed to render callbacks.
+	 * Create the API object passed to custom place order button render callbacks.
+	 * This is checkout-specific and includes form validation.
 	 *
 	 * @return {Object} API object with validate and submit methods
 	 */
-	function createPlaceOrderApi() {
+	function createCheckoutPlaceOrderApi() {
+		var $form = wc.customPlaceOrderButton.__getForm();
+
 		return {
 			/**
 			 * Validate the checkout form.
+			 * This gets a little tricky.
+			 * The existing checkout.js does NOT have a "validate everything before submit" function - it's not needed.
+			 * Validation is done:
+			 *  - Field-by-field via `validate_field` on blur/change
+			 *  - Server-side on form submission (errors are returned in AJAX response).
+			 * This function tries to mimic client-side validation, but WooCommerce's real validation happens server-side.
 			 *
 			 * @return {Promise<{hasError: boolean}>} Promise resolving to validation result
 			 */
 			validate: function () {
 				return new Promise( function ( resolve ) {
-					var $form = $( 'form.checkout' );
 					var hasError = false;
 
-					// Trigger validation on all fields
+					// Trigger field-level validation (which adds `.woocommerce-invalid` to invalid fields)
 					$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' );
 
-					// Check for validation errors
-					var $invalidFields = $form.find( '.woocommerce-invalid' );
-					if ( $invalidFields.length > 0 ) {
+					// Check for validation errors (from validate_field handler)
+					if ( $form.find( '.woocommerce-invalid' ).length > 0 ) {
 						hasError = true;
-						// Scroll to first error
-						$( 'html, body' ).animate(
-							{
-								scrollTop: $invalidFields.first().offset().top - 100,
-							},
-							500
-						);
 					}
 
-					// Check required fields
-					var $requiredFields = $form.find( '.validate-required' );
-					$requiredFields.each( function () {
+					// Check required fields (adds .woocommerce-invalid if not already set)
+					$form.find( '.validate-required:visible' ).each( function () {
 						var $field = $( this );
 						var $input = $field.find( 'input.input-text, select, input:checkbox' );
 
@@ -97,23 +49,37 @@ jQuery( function ( $ ) {
 							return;
 						}
 
-						var isEmpty = false;
+						var isEmpty;
 						if ( $input.is( ':checkbox' ) ) {
 							isEmpty = ! $input.is( ':checked' );
 						} else {
 							isEmpty = $input.val() === '' || $input.val() === null;
 						}
 
-						if ( isEmpty && $input.is( ':visible' ) ) {
+						if ( isEmpty ) {
 							hasError = true;
 							$field.addClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
 						}
 					} );
 
-					// Check terms checkbox if visible
-					var $terms = $form.find( 'input[name="terms"]' );
-					if ( $terms.length > 0 && $terms.is( ':visible' ) && ! $terms.is( ':checked' ) ) {
+					// Check terms checkbox if visible and not checked
+					var $uncheckedTerms = $form.find( 'input[name="terms"]:visible:not(:checked)' );
+					if ( $uncheckedTerms.length ) {
 						hasError = true;
+						$uncheckedTerms.closest( '.form-row' ).addClass( 'woocommerce-invalid' );
+					}
+
+					// Scroll to the first invalid field in DOM order
+					if ( hasError ) {
+						var $firstInvalidField = $form.find( '.woocommerce-invalid' ).first();
+						if ( $firstInvalidField.length ) {
+							$( 'html, body' ).animate(
+								{
+									scrollTop: $firstInvalidField.offset().top - 100,
+								},
+								500
+							);
+						}
 					}
 
 					resolve( { hasError: hasError } );
@@ -125,100 +91,21 @@ jQuery( function ( $ ) {
 			 * Triggers the same logic as clicking the default place order button.
 			 */
 			submit: function () {
-				$( 'form.checkout' ).trigger( 'submit' );
+				$form.trigger( 'submit' );
 			},
 		};
-	}
-
-	/**
-	 * Create or get the container for custom place order buttons.
-	 *
-	 * @return {jQuery} The container element
-	 */
-	function getOrCreateCustomButtonContainer() {
-		if ( $customButtonContainer && $customButtonContainer.length ) {
-			return $customButtonContainer;
-		}
-
-		$customButtonContainer = $( '<div class="wc-custom-place-order-button"></div>' );
-		$( '#place_order' ).after( $customButtonContainer );
-
-		return $customButtonContainer;
-	}
-
-	/**
-	 * Remove the custom button container.
-	 */
-	function removeCustomButtonContainer() {
-		if ( $customButtonContainer && $customButtonContainer.length ) {
-			$customButtonContainer.remove();
-			$customButtonContainer = null;
-		}
-	}
-
-	/**
-	 * Show custom place order button for a gateway, or show default button.
-	 *
-	 * @param {string} gatewayId - The payment gateway ID
-	 */
-	function maybeShowCustomPlaceOrderButton( gatewayId ) {
-		var $form = $( 'form.checkout' );
-		var hasCustomButton = customPlaceOrderButtons.hasOwnProperty( gatewayId );
-
-		// Cleanup previous custom button if any
-		if ( activeCustomButtonGateway && customPlaceOrderButtons[ activeCustomButtonGateway ] ) {
-			try {
-				customPlaceOrderButtons[ activeCustomButtonGateway ].cleanup();
-			} catch ( e ) {
-				console.error( 'Error in custom place order button cleanup:', e );
-			}
-		}
-
-		if ( hasCustomButton ) {
-			// Hide default button and show custom
-			$form.addClass( 'has-custom-place-order-button' );
-			activeCustomButtonGateway = gatewayId;
-
-			var $container = getOrCreateCustomButtonContainer();
-			$container.empty();
-
-			try {
-				customPlaceOrderButtons[ gatewayId ].render( $container.get( 0 ), createPlaceOrderApi() );
-			} catch ( e ) {
-				console.error( 'Error rendering custom place order button:', e );
-			}
-		} else {
-			// Show default button
-			$form.removeClass( 'has-custom-place-order-button' );
-			activeCustomButtonGateway = null;
-			removeCustomButtonContainer();
-		}
-	}
-
-	/**
-	 * Check if a gateway has a custom place order button registered via server-side flag.
-	 *
-	 * @param {string} gatewayId - The payment gateway ID
-	 * @return {boolean} True if gateway has custom button
-	 */
-	function gatewayHasCustomPlaceOrderButton( gatewayId ) {
-		var gatewaysWithCustomButton = wc_checkout_params.gateways_with_custom_place_order_button || [];
-		return gatewaysWithCustomButton.indexOf( gatewayId ) !== -1;
 	}
 
 	// Clean up custom place order button before checkout update destroys the DOM.
 	// After the update, init_payment_methods() will trigger payment method selection,
 	// which will call render() again for the active gateway.
 	$( document.body ).on( 'update_checkout', function () {
-		if ( activeCustomButtonGateway && customPlaceOrderButtons[ activeCustomButtonGateway ] ) {
-			try {
-				customPlaceOrderButtons[ activeCustomButtonGateway ].cleanup();
-			} catch ( e ) {
-				console.error( 'Error in custom place order button cleanup:', e );
-			}
-		}
-		$customButtonContainer = null;
-		activeCustomButtonGateway = null;
+		wc.customPlaceOrderButton.__cleanup();
+	} );
+
+	// When a gateway registers after a page load, render its button if it's selected.
+	$( document.body ).on( 'wc_custom_place_order_button_registered', function ( e, gatewayId ) {
+		wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
 	} );
 
 	var wc_checkout_form = {
@@ -247,6 +134,13 @@ jQuery( function ( $ ) {
 				);
 				this.$order_review.on( 'submit', this.submitOrder );
 				this.$order_review.attr( 'novalidate', 'novalidate' );
+
+				// Initialize custom place order button for order-pay page
+				var $orderPayMethod = this.$order_review.find( 'input[name="payment_method"]:checked' );
+				if ( $orderPayMethod.length ) {
+					wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $orderPayMethod.val() );
+					$orderPayMethod.trigger( 'click' );
+				}
 			}
 
 			// Prevent HTML5 validation which can conflict.
@@ -354,16 +248,15 @@ jQuery( function ( $ ) {
 					.slideUp( 0 );
 			}
 
+			// Check if initially selected gateway has custom place order button (via server-side flag)
+			// This hides the default button immediately to prevent flash while the gateway JS loads
+			var $selectedMethod = $payment_methods.filter( ':checked' ).eq( 0 );
+			if ( $selectedMethod.length ) {
+				wc.customPlaceOrderButton.__maybeHideDefaultButtonOnInit( $selectedMethod.val() );
+			}
+
 			// Trigger click event for selected method
 			$payment_methods.filter( ':checked' ).eq( 0 ).trigger( 'click' );
-
-			// Check if initially selected gateway has custom place order button (via server-side flag)
-			var $selectedMethod = $payment_methods.filter( ':checked' ).eq( 0 );
-			if ( $selectedMethod.length && gatewayHasCustomPlaceOrderButton( $selectedMethod.val() ) ) {
-				// Add class immediately to prevent flash of default button
-				// The actual button will render once the gateway registers via JS
-				$( 'form.checkout' ).addClass( 'has-custom-place-order-button' );
-			}
 		},
 		get_payment_method: function () {
 			return wc_checkout_form.$checkout_form
@@ -410,7 +303,7 @@ jQuery( function ( $ ) {
 
 			// Handle custom place order button
 			var gatewayId = $( this ).val();
-			maybeShowCustomPlaceOrderButton( gatewayId );
+			wc.customPlaceOrderButton.__maybeShow( gatewayId, createCheckoutPlaceOrderApi() );
 
 			wc_checkout_form.selectedPaymentMethod = selectedPaymentMethod;
 		},
