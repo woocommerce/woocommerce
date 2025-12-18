@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Support embeds in V4 order endpoint when using plain permalinks.
