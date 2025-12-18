@@ -76,13 +76,12 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Get data for ETag generation, excluding fields that change on each request.
 	 *
-	 * @param array           $data        Response data.
-	 * @param WP_REST_Request $request     The request object.
-	 * @param string|null     $endpoint_id Optional endpoint identifier.
+	 * @param array                                 $data        Response data.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
 	 * @return array Cleaned data for ETag generation.
-	 *
 	 */
-	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array {
+	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		return $this->remove_related_ids_from_response_data( $data );
 	}
 
@@ -745,11 +744,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Get related products for a specific product.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 *
 	 * @internal
-	 *
 	 */
 	public function get_related_products( $request ) {
 		$product = $this->get_object( (int) $request['id'] );
