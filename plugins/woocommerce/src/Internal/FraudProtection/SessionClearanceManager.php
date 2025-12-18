@@ -184,7 +184,7 @@ class SessionClearanceManager {
 
 		// Use WooCommerce session customer ID.
 		$customer_id = WC()->session->get_customer_id();
-		return $customer_id ? $customer_id : 'guest-' . wp_get_session_token();
+		return $customer_id ? $customer_id : WC()->call_function( 'wc_rand_hash', 'guest_', 30 );
 	}
 
 	/**

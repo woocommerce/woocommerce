@@ -3,6 +3,8 @@
  * SessionClearanceManagerTest class file.
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
