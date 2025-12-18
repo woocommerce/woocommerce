@@ -45,7 +45,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private static $backfilling_order_ids = array();
 
 	/**
-	 * Keep track of order IDs that are being synced on read. This is used to prevent backfilling to posts of an order being updated
+	 * Keep track of order IDs (as keys) that are being synced on read. This is used to prevent backfilling to posts of an order being updated
 	 * from posts.
 	 *
 	 * @var array
@@ -1721,7 +1721,7 @@ WHERE
 	 * @return void
 	 */
 	private function migrate_post_record( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ): void {
-		self::$sync_on_read_order_ids[] = $order->get_id();
+		self::$sync_on_read_order_ids[ $order->get_id() ] = true;
 
 		$diff                 = $this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
@@ -1738,7 +1738,7 @@ WHERE
 		}
 		$this->persist_updates( $order, false );
 
-		self::$sync_on_read_order_ids = array_diff( self::$sync_on_read_order_ids, array( $order->get_id() ) );
+		unset( self::$sync_on_read_order_ids[ $order->get_id() ] );
 
 		/**
 		 * Fired when an HPOS order is updated from its corresponding post record on read due to a difference in the data.
@@ -2894,7 +2894,7 @@ FROM $order_meta_table
 		$changes = $order->get_changes();
 
 		// Does not make much sense to backfill to posts an order being sync-on-read from posts.
-		$should_backfill = ! in_array( $order->get_id(), self::$sync_on_read_order_ids, true );
+		$should_backfill = ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] );
 
 		$this->persist_updates( $order, $should_backfill );
 
@@ -3440,7 +3440,7 @@ CREATE TABLE $meta_table (
 
 		$should_save =
 			$order->get_id() > 0
-			&& ! in_array( $order->get_id(), self::$sync_on_read_order_ids, true )
+			&& ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] )
 			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 
