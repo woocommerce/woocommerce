@@ -803,6 +803,7 @@ class WC_Frontend_Scripts {
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		foreach ( $available_gateways as $gateway ) {
+			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found -- Type hint for PHPStan.
 			/* @var WC_Payment_Gateway $gateway */
 			if ( true === $gateway->has_custom_place_order_button ) {
 				$gateways_with_custom_button[] = $gateway->id;
