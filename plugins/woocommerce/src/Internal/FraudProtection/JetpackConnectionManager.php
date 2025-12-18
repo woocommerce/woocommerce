@@ -192,7 +192,7 @@ class JetpackConnectionManager {
 					// Customize the URL parameters for fraud protection.
 					$url = add_query_arg(
 						array(
-							'redirect_uri' => rawurlencode( $redirect_url ),
+							'redirect_uri' => $redirect_url,
 							'from'         => 'woocommerce-fraud-protection',
 							'plugin_name'  => 'woocommerce',
 						),
