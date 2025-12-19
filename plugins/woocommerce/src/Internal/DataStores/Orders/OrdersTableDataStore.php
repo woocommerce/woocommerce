@@ -45,6 +45,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private static $backfilling_order_ids = array();
 
 	/**
+	 * Keep track of order IDs (as keys) that are being synced on read. This is used to prevent backfilling to posts of an order being updated
+	 * from posts.
+	 *
+	 * @var array
+	 */
+	private static $sync_on_read_order_ids = array();
+
+	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
 	 * @since 7.0.0
@@ -1356,6 +1364,10 @@ WHERE
 
 		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
 		if ( $data_sync_enabled ) {
+			// We prefer not syncing-on-read if we are inside a webhook delivery or importing orders, as those events are likely triggered after the order is written
+			// and we don't want to possibly create loops of sync-on-read.
+			$should_sync_on_read = ! doing_action( 'woocommerce_deliver_webhook_async' ) && ! doing_action( 'wc-admin_import_orders' );
+
 			/**
 			 * Allow opportunity to disable sync on read, while keeping sync on write enabled. This adds another step as a large shop progresses from full sync to no sync with HPOS authoritative.
 			 * This filter is only executed if data sync is enabled from settings in the first place as it's meant to be a step between full sync -> no sync, rather than be a control for enabling just the sync on read. Sync on read without sync on write is problematic as any update will reset on the next read, but sync on write without sync on read is fine.
@@ -1364,7 +1376,7 @@ WHERE
 			 *
 			 * @since 8.1.0
 			 */
-			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', $data_sync_enabled );
+			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', $should_sync_on_read );
 		}
 
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
@@ -1710,6 +1722,8 @@ WHERE
 	 * @return void
 	 */
 	private function migrate_post_record( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ): void {
+		self::$sync_on_read_order_ids[ $order->get_id() ] = true;
+
 		$diff                 = $this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {
@@ -1724,6 +1738,8 @@ WHERE
 			$this->set_order_prop( $order, $key, $value );
 		}
 		$this->persist_updates( $order, false );
+
+		unset( self::$sync_on_read_order_ids[ $order->get_id() ] );
 
 		/**
 		 * Fired when an HPOS order is updated from its corresponding post record on read due to a difference in the data.
@@ -2877,7 +2893,11 @@ FROM $order_meta_table
 
 		// Fetch changes.
 		$changes = $order->get_changes();
-		$this->persist_updates( $order );
+
+		// Does not make much sense to backfill to posts an order being sync-on-read from posts.
+		$should_backfill = ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] );
+
+		$this->persist_updates( $order, $should_backfill );
 
 		// Update download permissions if necessary.
 		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
@@ -3420,6 +3440,7 @@ CREATE TABLE $meta_table (
 
 		$should_save =
 			$order->get_id() > 0
+			&& ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] )
 			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 
