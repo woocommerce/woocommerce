@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Caches;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
  * Product version string invalidation handler.
@@ -13,12 +14,19 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  * the version string for a given product, which in turn invalidates
  * any cached REST API responses containing that product.
  */
-class ProductVersionStringInvalidator {
+class ProductVersionStringInvalidator implements RegisterHooksInterface {
 
 	/**
 	 * Default cache TTL in seconds for term/taxonomy entity lookups.
 	 */
 	const DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL = 300;
+
+	/**
+	 * Features controller.
+	 *
+	 * @var FeaturesController
+	 */
+	private FeaturesController $features_controller;
 
 	/**
 	 * Initialize the invalidator and register hooks.
@@ -36,13 +44,16 @@ class ProductVersionStringInvalidator {
 	 * @internal
 	 */
 	final public function init( FeaturesController $features_controller ): void {
-		if ( ! $features_controller->feature_is_enabled( 'rest_api_caching' ) ) {
-			return;
-		}
+		$this->features_controller = $features_controller;
+	}
 
-		if ( 'yes' === get_option( 'woocommerce_rest_api_enable_backend_caching', 'no' ) ) {
-			$this->register_hooks();
-		}
+	/**
+	 * Register the hooks, related to the class..
+	 *
+	 * @return void
+	 */
+	public function register(): void {
+		add_action( 'init', array( $this, 'on_init' ) );
 	}
 
 	/**
@@ -54,7 +65,17 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @return void
 	 */
-	private function register_hooks(): void {
+	public function on_init(): void {
+		if (
+			// The feature should be enabled first.
+			! $this->features_controller->feature_is_enabled( 'rest_api_caching' )
+
+			// And then the setting within the "REST API caching" section.
+			|| ( 'yes' !== get_option( 'woocommerce_rest_api_enable_backend_caching', 'no' ) )
+		) {
+			return;
+		}
+
 		// WordPress post hooks for products.
 		add_action( 'save_post_product', array( $this, 'handle_save_post_product' ), 10, 1 );
 		add_action( 'delete_post', array( $this, 'handle_delete_post' ), 10, 2 );
