@@ -213,7 +213,7 @@ class WC_Post_Types {
 		);
 
 		register_taxonomy( 'pos_product_visibility',
-			apply_filters( 'woocommerce_taxonomy_objects_pos_product_visibility', array( 'product', 'product_variation' ) ),
+			apply_filters( 'woocommerce_taxonomy_objects_pos_product_visibility', array( 'product') ),
 			apply_filters(
 				'woocommerce_taxonomy_args_pos_product_visibility',
 				array(
