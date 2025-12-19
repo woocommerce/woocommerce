@@ -27,7 +27,7 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 
 The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
-- **`woocommerce-backend-dev`** - Backend PHP conventions (classes, methods, hooks, DI, testing)
+- **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
