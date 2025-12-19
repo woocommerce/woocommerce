@@ -61,9 +61,9 @@ class SessionDataCollector {
 			'timestamp'        => gmdate( 'Y-m-d H:i:s' ),
 			'session'          => $this->get_session_data(),
 			'customer'         => $this->get_customer_data(),
-			'order'            => array(),
-			'shipping_address' => array(),
-			'billing_address'  => array(),
+			'order'            => $this->get_order_data(),
+			'shipping_address' => $this->get_shipping_address(),
+			'billing_address'  => $this->get_billing_address(),
 			'payment'          => array(),
 			'event_data'       => $event_data,
 		);
@@ -179,6 +179,282 @@ class SessionDataCollector {
 	}
 
 	/**
+	 * Get order data including totals, currency, cart hash, and cart items.
+	 *
+	 * Collects comprehensive order information from the cart with graceful degradation.
+	 * Calculates shipping_tax_rate from shipping tax and shipping total. Sets customer_id
+	 * to 'guest' for non-logged-in users.
+	 *
+	 * @return array Order data array with 11 keys including items array.
+	 */
+	private function get_order_data(): array {
+		try {
+			// Initialize default values.
+			$order_id          = null;
+			$customer_id       = 'guest';
+			$total             = 0;
+			$items_total       = 0;
+			$shipping_total    = 0;
+			$tax_total         = 0;
+			$shipping_tax_rate = null;
+			$discount_total    = 0;
+			$currency          = WC()->call_function( 'get_woocommerce_currency' );
+			$cart_hash         = null;
+			$items             = array();
+
+			// Get customer ID from WooCommerce customer object if available.
+			// We don't need to fallback to session data here, because customer id won't be stored there.
+			if ( WC()->customer instanceof \WC_Customer ) {
+				$id = WC()->customer->get_id();
+				if ( $id ) {
+					$customer_id = $id;
+				}
+			}
+			// Get cart data if available.
+			if ( WC()->cart instanceof \WC_Cart ) {
+				$items_total    = (float) WC()->cart->get_subtotal();
+				$shipping_total = (float) WC()->cart->get_shipping_total();
+				$tax_total      = (float) WC()->cart->get_cart_contents_tax();
+				$discount_total = (float) WC()->cart->get_discount_total();
+				$cart_hash      = WC()->cart->get_cart_hash();
+				$items          = $this->get_cart_items();
+				$total          = (float) WC()->cart->get_total( 'edit' );
+
+				// Calculate shipping_tax_rate.
+				$shipping_tax = (float) WC()->cart->get_shipping_tax();
+				if ( $shipping_total > 0 && $shipping_tax > 0 ) {
+					$shipping_tax_rate = $shipping_tax / $shipping_total;
+				}
+			}
+
+			return array(
+				'order_id'          => $order_id,
+				'customer_id'       => $customer_id,
+				'total'             => $total,
+				'items_total'       => $items_total,
+				'shipping_total'    => $shipping_total,
+				'tax_total'         => $tax_total,
+				'shipping_tax_rate' => $shipping_tax_rate,
+				'discount_total'    => $discount_total,
+				'currency'          => $currency,
+				'cart_hash'         => $cart_hash,
+				'items'             => $items,
+			);
+		} catch ( \Exception $e ) {
+			// Graceful degradation - return structure with default values.
+			return array(
+				'order_id'          => null,
+				'customer_id'       => 'guest',
+				'total'             => 0,
+				'items_total'       => 0,
+				'shipping_total'    => 0,
+				'tax_total'         => 0,
+				'shipping_tax_rate' => null,
+				'discount_total'    => 0,
+				'currency'          => WC()->call_function( 'get_woocommerce_currency' ),
+				'cart_hash'         => null,
+				'items'             => array(),
+			);
+		}
+	}
+
+	/**
+	 * Get cart items with detailed product information.
+	 *
+	 * Iterates through cart items and extracts comprehensive product data including
+	 * name, description, category, SKU, pricing, quantities, and WooCommerce-specific
+	 * attributes. Returns array of item objects with 12 fields each.
+	 *
+	 * @return array Array of cart item objects with detailed product information.
+	 */
+	private function get_cart_items(): array {
+		$items = array();
+
+		try {
+			if ( ! WC()->cart instanceof \WC_Cart ) {
+				return $items;
+			}
+
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				try {
+					$product = $cart_item['data'] ?? null;
+
+					if ( ! $product instanceof \WC_Product ) {
+						continue;
+					}
+
+					$quantity = $cart_item['quantity'] ?? 1;
+
+					// Calculate per-unit amounts.
+					$unit_price           = (float) $product->get_price();
+					$line_tax             = $cart_item['line_tax'] ?? 0;
+					$unit_tax_amount      = $quantity > 0 ? ( (float) $line_tax / $quantity ) : 0;
+					$line_discount        = $cart_item['line_subtotal'] - $cart_item['line_total'];
+					$unit_discount_amount = $quantity > 0 ? ( (float) $line_discount / $quantity ) : 0;
+					$category             = $this->get_product_category_names( $product );
+
+					$items[] = array(
+						'name'                 => $product->get_name() ? $product->get_name() : null,
+						'description'          => $product->get_description() ? $product->get_description() : null,
+						'category'             => $category,
+						'sku'                  => $product->get_sku() ? $product->get_sku() : null,
+						'quantity'             => $quantity,
+						'unit_price'           => $unit_price,
+						'unit_tax_amount'      => $unit_tax_amount,
+						'unit_discount_amount' => $unit_discount_amount,
+						'product_type'         => $product->get_type() ? $product->get_type() : null,
+						'is_virtual'           => $product->is_virtual(),
+						'is_downloadable'      => $product->is_downloadable(),
+						'attributes'           => $product->get_attributes() ? $product->get_attributes() : array(),
+					);
+				} catch ( \Exception $e ) {
+					// Skip this item if there's an error, continue with next item.
+					continue;
+				}
+			}
+		} catch ( \Exception $e ) {
+			// Return empty array on error.
+			return array();
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Get billing address from customer data.
+	 *
+	 * Collects billing address fields from WC_Customer object with graceful degradation.
+	 * Returns array with 6 address fields, sanitized with sanitize_text_field().
+	 *
+	 * @return array Billing address array with 6 keys.
+	 */
+	private function get_billing_address(): array {
+		try {
+			$street         = null;
+			$street2        = null;
+			$city           = null;
+			$state_province = null;
+			$country        = null;
+			$zip_code       = null;
+
+			if ( WC()->customer instanceof \WC_Customer ) {
+				$street         = WC()->customer->get_billing_address_1();
+				$street2        = WC()->customer->get_billing_address_2();
+				$city           = WC()->customer->get_billing_city();
+				$state_province = WC()->customer->get_billing_state();
+				$country        = WC()->customer->get_billing_country();
+				$zip_code       = WC()->customer->get_billing_postcode();
+
+				// Sanitize all fields.
+				if ( $street ) {
+					$street = \sanitize_text_field( $street );
+				}
+				if ( $street2 ) {
+					$street2 = \sanitize_text_field( $street2 );
+				}
+				if ( $city ) {
+					$city = \sanitize_text_field( $city );
+				}
+				if ( $state_province ) {
+					$state_province = \sanitize_text_field( $state_province );
+				}
+				if ( $country ) {
+					$country = \sanitize_text_field( $country );
+				}
+				if ( $zip_code ) {
+					$zip_code = \sanitize_text_field( $zip_code );
+				}
+			}
+
+			return array(
+				'street'         => $street ? $street : null,
+				'street2'        => $street2 ? $street2 : null,
+				'city'           => $city ? $city : null,
+				'state_province' => $state_province ? $state_province : null,
+				'country'        => $country ? $country : null,
+				'zip_code'       => $zip_code ? $zip_code : null,
+			);
+		} catch ( \Exception $e ) {
+			// Graceful degradation - return structure with null values.
+			return array(
+				'street'         => null,
+				'street2'        => null,
+				'city'           => null,
+				'state_province' => null,
+				'country'        => null,
+				'zip_code'       => null,
+			);
+		}
+	}
+
+	/**
+	 * Get shipping address from customer data.
+	 *
+	 * Collects shipping address fields from WC_Customer object with graceful degradation.
+	 * Returns array with 6 address fields, sanitized with sanitize_text_field().
+	 *
+	 * @return array Shipping address array with 6 keys.
+	 */
+	private function get_shipping_address(): array {
+		try {
+			$street         = null;
+			$street2        = null;
+			$city           = null;
+			$state_province = null;
+			$country        = null;
+			$zip_code       = null;
+
+			if ( WC()->customer instanceof \WC_Customer ) {
+				$street         = WC()->customer->get_shipping_address_1();
+				$street2        = WC()->customer->get_shipping_address_2();
+				$city           = WC()->customer->get_shipping_city();
+				$state_province = WC()->customer->get_shipping_state();
+				$country        = WC()->customer->get_shipping_country();
+				$zip_code       = WC()->customer->get_shipping_postcode();
+
+				// Sanitize all fields.
+				if ( $street ) {
+					$street = \sanitize_text_field( $street );
+				}
+				if ( $street2 ) {
+					$street2 = \sanitize_text_field( $street2 );
+				}
+				if ( $city ) {
+					$city = \sanitize_text_field( $city );
+				}
+				if ( $state_province ) {
+					$state_province = \sanitize_text_field( $state_province );
+				}
+				if ( $country ) {
+					$country = \sanitize_text_field( $country );
+				}
+				if ( $zip_code ) {
+					$zip_code = \sanitize_text_field( $zip_code );
+				}
+			}
+
+			return array(
+				'street'         => $street ? $street : null,
+				'street2'        => $street2 ? $street2 : null,
+				'city'           => $city ? $city : null,
+				'state_province' => $state_province ? $state_province : null,
+				'country'        => $country ? $country : null,
+				'zip_code'       => $zip_code ? $zip_code : null,
+			);
+		} catch ( \Exception $e ) {
+			// Graceful degradation - return structure with null values.
+			return array(
+				'street'         => null,
+				'street2'        => null,
+				'city'           => null,
+				'state_province' => null,
+				'country'        => null,
+				'zip_code'       => null,
+			);
+		}
+	}
+
+	/**
 	 * Get client IP address using WooCommerce geolocation utility.
 	 *
 	 * @return string|null IP address or null if not available.
@@ -237,6 +513,29 @@ class SessionDataCollector {
 			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) );
 		}
 		return null;
+	}
+
+	/**
+	 * Get product category names as comma-separated list.
+	 *
+	 * Uses WooCommerce helper with caching for better performance.
+	 * Returns all categories for the product, not just the primary one.
+	 *
+	 * @param \WC_Product $product The product object.
+	 * @return string|null Comma-separated category names or null if none.
+	 */
+	private function get_product_category_names( \WC_Product $product ): ?string {
+		$terms = WC()->call_function( 'wc_get_product_terms', $product->get_id(), 'product_cat' );
+		if ( empty( $terms ) || ! is_array( $terms ) ) {
+			return null;
+		}
+		$category_names = array_map(
+			function ( $term ) {
+				return $term->name;
+			},
+			$terms
+		);
+		return implode( ', ', $category_names );
 	}
 
 	/**
