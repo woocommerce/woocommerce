@@ -15721,18 +15721,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Method WC_Cart_Session\:\:clean_up_removed_cart_contents\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 2
-			path: includes/class-wc-cart-session.php
-
-		-
-			message: '#^Method WC_Cart_Session\:\:clean_up_removed_cart_contents\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Method WC_Cart_Session\:\:dedupe_cookies\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
