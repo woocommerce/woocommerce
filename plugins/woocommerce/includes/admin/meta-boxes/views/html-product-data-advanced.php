@@ -1,4 +1,6 @@
 <?php
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -52,9 +54,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 		</div>
 	<?php endif; ?>
+	<?php if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) : ?>
 	<div class="options_group">
 		<?php
-		// TODO: I think we should not render this if POS is completely disabled
 		$pos_visible = ! has_term( 'pos-hidden', 'pos_product_visibility', $post_id );
 		woocommerce_wp_checkbox(
 			array(
@@ -66,6 +68,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		);
 		?>
 	</div>
+	<?php endif; ?>
 
 	<?php do_action( 'woocommerce_product_options_advanced' ); ?>
 </div>
