@@ -128,13 +128,13 @@ add_filter( 'woocommerce_transactional_emails_for_block_editor', 'your_plugin_re
 
 ### Customizing email template post generation
 
-You can modify the email template post data before it's created using the `woocommerce_email_template_post_data` filter. This allows you to customize the post title, content, meta, or any other post data during template generation.
+You can modify the email template post data before it's created using the `woocommerce_email_content_post_data` filter. This allows you to customize the post title, content, meta, or any other post data during template generation.
 
 **Filter details:**
 
 | Property   | Value                                                                   |
 | ---------- | ----------------------------------------------------------------------- |
-| Hook name  | `woocommerce_email_template_post_data`                                  |
+| Hook name  | `woocommerce_email_content_post_data`                                   |
 | Since      | 10.5.0                                                                  |
 | Parameters | `$post_data` (array), `$email_type` (string), `$email_data` (\WC_Email) |
 | Returns    | array                                                                   |
@@ -178,7 +178,7 @@ function your_plugin_customize_email_template_post( $post_data, $email_type, $em
 
     return $post_data;
 }
-add_filter( 'woocommerce_email_template_post_data', 'your_plugin_customize_email_template_post', 10, 3 );
+add_filter( 'woocommerce_email_content_post_data', 'your_plugin_customize_email_template_post', 10, 3 );
 ```
 
 **Important notes:**
