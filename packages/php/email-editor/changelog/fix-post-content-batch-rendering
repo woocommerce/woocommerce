@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix core/post-content block rendering empty on second email in batch processing by overriding WordPress render callback with stateless version

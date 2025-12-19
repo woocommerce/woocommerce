@@ -238,14 +238,14 @@ jobs:
 
       - name: Configure Git
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config --global user.name "woocommercebot"
+          git config --global user.email "woocommercebot@users.noreply.github.com"
 
       - name: Update stable tag on ${{ matrix.branch }}
         env:
           TARGET_VERSION: ${{ needs.validate-release.outputs.version }}
           BRANCH_NAME: ${{ matrix.branch }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           echo "🔄 Processing branch: $BRANCH_NAME..."
 
@@ -275,14 +275,20 @@ jobs:
             git commit -m "Update stable tag to $TARGET_VERSION on $BRANCH_NAME"
             git push origin "$UPDATE_BRANCH"
 
+            # Determine milestone from woocommerce.php version.
+            milestone=$( cat ./plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+\(-dev\)\?$/.0/' )
+            echo "Using milestone: '$milestone'."
+
             gh pr create \
               --title "Update stable tag to $TARGET_VERSION ($BRANCH_NAME)" \
               --body "This PR updates the stable tag to $TARGET_VERSION." \
               --base "$BRANCH_NAME" \
               --head "$UPDATE_BRANCH" \
-              --reviewer ${{ github.actor }}
+              --reviewer ${{ github.actor }} \
+              --label Release \
+              --milestone "$milestone"
 
-            echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME"
+            echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME with milestone $milestone"
           fi
 
   notify-release:

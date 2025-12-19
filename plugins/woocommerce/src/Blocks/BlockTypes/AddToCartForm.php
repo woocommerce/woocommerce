@@ -223,10 +223,17 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
-		$product_name = $product->get_name();
-		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
+		// If the quantity input is hidden, don't render the stepper buttons and styles.
+		if ( $is_stepper_style && ! Utils::has_visible_quantity_input( $product_html ) ) {
+			$is_stepper_style = false;
+		}
 
-		$product_html       = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product_html ) : $product_html;
+		if ( $is_stepper_style ) {
+			$product_name = $product->get_name();
+			$product_html = $this->add_steppers( $product_html, $product_name );
+			$product_html = $this->add_stepper_classes_to_add_to_cart_form_input( $product_html );
+		}
+
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
 		$product_classname = $is_descendent_of_single_product_block ? 'product' : '';

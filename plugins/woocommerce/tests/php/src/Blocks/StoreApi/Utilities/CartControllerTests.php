@@ -18,6 +18,7 @@ class CartControllerTests extends TestCase {
 	public function tearDown(): void {
 		parent::tearDown();
 		WC()->cart->empty_cart();
+		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -157,5 +158,129 @@ class CartControllerTests extends TestCase {
 		foreach ( $expected_errors as $expected_error ) {
 			$this->assertContains( $expected_error, $error_codes );
 		}
+	}
+
+	/**
+	 * Test that get_shipping_packages returns packages with package_id and package_name.
+	 */
+	public function test_get_shipping_packages_includes_package_id_and_package_name() {
+		$class    = new CartController();
+		$fixtures = new FixtureData();
+		$fixtures->shipping_add_flat_rate();
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+				'weight'        => 10,
+			)
+		);
+
+		wc()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Set shipping address so packages are generated.
+		wc()->customer->set_shipping_country( 'US' );
+		wc()->customer->set_shipping_state( 'CA' );
+		wc()->customer->set_shipping_postcode( '90210' );
+
+		$packages = $class->get_shipping_packages( false );
+
+		$this->assertNotEmpty( $packages, 'Should have at least one shipping package.' );
+		$this->assertArrayHasKey( 'package_id', $packages[0], 'Package should have package_id.' );
+		$this->assertArrayHasKey( 'package_name', $packages[0], 'Package should have package_name.' );
+		$this->assertEquals( 0, $packages[0]['package_id'], 'First package should have package_id of 0 (array key).' );
+		$this->assertStringContainsString( 'Shipment 1', $packages[0]['package_name'], 'First package should have package_name containing "Shipment 1".' );
+	}
+
+	/**
+	 * Test that get_shipping_packages handles multiple packages correctly.
+	 */
+	public function test_get_shipping_packages_handles_multiple_packages() {
+		$class    = new CartController();
+		$fixtures = new FixtureData();
+		$fixtures->shipping_add_flat_rate();
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+				'weight'        => 10,
+			)
+		);
+
+		wc()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Set shipping address.
+		wc()->customer->set_shipping_country( 'US' );
+		wc()->customer->set_shipping_state( 'CA' );
+		wc()->customer->set_shipping_postcode( '90210' );
+
+		// Filter to create multiple packages.
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			function ( $packages ) {
+				$packages[] = $packages[0];
+				return $packages;
+			}
+		);
+
+		$packages = $class->get_shipping_packages( false );
+
+		$this->assertCount( 2, $packages, 'Should have two shipping packages.' );
+
+		// First package.
+		$this->assertArrayHasKey( 'package_id', $packages[0], 'First package should have package_id.' );
+		$this->assertArrayHasKey( 'package_name', $packages[0], 'First package should have package_name.' );
+		$this->assertEquals( 0, $packages[0]['package_id'], 'First package should have package_id of 0.' );
+		$this->assertStringContainsString( 'Shipment 1', $packages[0]['package_name'], 'First package should have package_name containing "Shipment 1".' );
+
+		// Second package.
+		$this->assertArrayHasKey( 'package_id', $packages[1], 'Second package should have package_id.' );
+		$this->assertArrayHasKey( 'package_name', $packages[1], 'Second package should have package_name.' );
+		$this->assertEquals( 1, $packages[1]['package_id'], 'Second package should have package_id of 1.' );
+		$this->assertStringContainsString( 'Shipment 2', $packages[1]['package_name'], 'Second package should have package_name containing "Shipment 2".' );
+
+		remove_all_filters( 'woocommerce_cart_shipping_packages' );
+	}
+
+	/**
+	 * Test that get_shipping_packages respects custom package_id from filter.
+	 */
+	public function test_get_shipping_packages_respects_custom_package_id() {
+		$class    = new CartController();
+		$fixtures = new FixtureData();
+		$fixtures->shipping_add_flat_rate();
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+				'weight'        => 10,
+			)
+		);
+
+		wc()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Set shipping address.
+		wc()->customer->set_shipping_country( 'US' );
+		wc()->customer->set_shipping_state( 'CA' );
+		wc()->customer->set_shipping_postcode( '90210' );
+
+		// Filter to add custom package_id.
+		add_filter(
+			'woocommerce_cart_shipping_packages',
+			function ( $packages ) {
+				$packages[0]['package_id'] = 'custom-package-123';
+				return $packages;
+			}
+		);
+
+		$packages = $class->get_shipping_packages( false );
+
+		$this->assertNotEmpty( $packages, 'Should have at least one shipping package.' );
+		$this->assertEquals( 'custom-package-123', $packages[0]['package_id'], 'Package should use custom package_id from filter.' );
+		$this->assertArrayHasKey( 'package_name', $packages[0], 'Package should still have package_name.' );
+
+		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 }

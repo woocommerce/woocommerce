@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve handling of order modified date during HPOS sync on read to prevent infinite loops.

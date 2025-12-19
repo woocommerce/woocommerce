@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add @template annotations to DI container for better PHPStan type inference.

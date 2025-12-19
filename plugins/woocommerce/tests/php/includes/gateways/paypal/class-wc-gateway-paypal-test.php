@@ -223,4 +223,79 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 			}
 		}
 	}
+
+	/**
+	 * Test that gateway is available when Orders v2 is disabled (legacy mode).
+	 */
+	public function test_is_available_with_legacy_mode() {
+		// Enable the gateway.
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'yes' ) );
+
+		// Mock Orders v2 to be disabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( false );
+
+		$this->assertTrue( $mock_gateway->is_available() );
+	}
+
+	/**
+	 * Test that gateway availability depends on email field value when Orders v2 is enabled.
+	 *
+	 * @dataProvider gateway_availability_data_provider_for_orders_v2
+	 *
+	 * @param string|null $email The email to set for the gateway.
+	 * @param bool        $expected_available Whether the gateway should be available.
+	 */
+	public function test_is_available_with_orders_v2( ?string $email, bool $expected_available ) {
+		$new_settings = array(
+			'enabled' => 'yes',
+		);
+
+		if ( null !== $email ) {
+			$new_settings['email'] = $email;
+		} else {
+			// Remove the email field from the settings to test the case where the email field is not set.
+			$current_settings = get_option( 'woocommerce_paypal_settings', array() );
+			unset( $current_settings['email'] );
+			$new_settings = array_merge( $new_settings, $current_settings );
+		}
+
+		update_option( 'woocommerce_paypal_settings', $new_settings );
+
+		// Mock Orders v2 to be enabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
+
+		$this->assertSame( $expected_available, $mock_gateway->is_available() );
+	}
+
+	/**
+	 * Data provider for payment gateway availability tests when Orders v2 is enabled.
+	 *
+	 * @return array Test cases with email values and expected paypal gateway availability.
+	 */
+	public function gateway_availability_data_provider_for_orders_v2() {
+		return array(
+			'email field is not set' => array(
+				'email'              => null,
+				'expected_available' => false,
+			),
+			'email is empty string'  => array(
+				'email'              => '',
+				'expected_available' => false,
+			),
+			'email is invalid'       => array(
+				'email'              => 'example@',
+				'expected_available' => false,
+			),
+			'email is valid'         => array(
+				'email'              => 'merchant@example.com',
+				'expected_available' => true,
+			),
+		);
+	}
 }

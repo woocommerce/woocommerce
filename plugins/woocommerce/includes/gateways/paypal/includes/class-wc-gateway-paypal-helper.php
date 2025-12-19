@@ -152,4 +152,64 @@ class WC_Gateway_Paypal_Helper {
 
 		return $masked_local . '@' . $domain;
 	}
+
+	/**
+	 * Update the addresses in the order.
+	 *
+	 * @param WC_Order|null $order The order object.
+	 * @param array         $paypal_order_details The PayPal order details.
+	 * @return void
+	 */
+	public static function update_addresses_in_order( ?WC_Order $order, array $paypal_order_details ): void {
+		if ( empty( $order ) || empty( $paypal_order_details ) ) {
+			return;
+		}
+
+		// Bail early if '_paypal_addresses_updated' is 'yes', meaning the addresses update already have been successful.
+		if ( 'yes' === $order->get_meta( '_paypal_addresses_updated', true ) ) {
+			return;
+		}
+
+		// Update the shipping information.
+		$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
+		if ( ! empty( $full_name ) ) {
+			$name_parts             = explode( ' ', $full_name, 2 );
+			$approximate_first_name = $name_parts[0] ?? '';
+			$approximate_last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
+			$order->set_shipping_first_name( $approximate_first_name );
+			$order->set_shipping_last_name( $approximate_last_name );
+		}
+
+		$shipping_address = $paypal_order_details['purchase_units'][0]['shipping']['address'] ?? array();
+		if ( ! empty( $shipping_address ) ) {
+			$order->set_shipping_country( $shipping_address['country_code'] ?? '' );
+			$order->set_shipping_postcode( $shipping_address['postal_code'] ?? '' );
+			$order->set_shipping_state( $shipping_address['admin_area_1'] ?? '' );
+			$order->set_shipping_city( $shipping_address['admin_area_2'] ?? '' );
+			$order->set_shipping_address_1( $shipping_address['address_line_1'] ?? '' );
+			$order->set_shipping_address_2( $shipping_address['address_line_2'] ?? '' );
+		}
+
+		// Update the billing information.
+		$full_name = $paypal_order_details['payer']['name'] ?? array();
+		$email     = $paypal_order_details['payer']['email_address'] ?? '';
+		if ( ! empty( $full_name ) ) {
+			$order->set_billing_first_name( $full_name['given_name'] ?? '' );
+			$order->set_billing_last_name( $full_name['surname'] ?? '' );
+			$order->set_billing_email( $email );
+		}
+
+		$billing_address = $paypal_order_details['payer']['address'] ?? array();
+		if ( ! empty( $billing_address ) ) {
+			$order->set_billing_country( $billing_address['country_code'] ?? '' );
+			$order->set_billing_postcode( $billing_address['postal_code'] ?? '' );
+			$order->set_billing_state( $billing_address['admin_area_1'] ?? '' );
+			$order->set_billing_city( $billing_address['admin_area_2'] ?? '' );
+			$order->set_billing_address_1( $billing_address['address_line_1'] ?? '' );
+			$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
+		}
+
+		$order->update_meta_data( '_paypal_addresses_updated', 'yes' );
+		$order->save();
+	}
 }

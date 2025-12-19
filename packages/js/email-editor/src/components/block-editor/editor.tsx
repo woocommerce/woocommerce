@@ -109,12 +109,14 @@ export function InnerEditor( {
 					? 'post-only'
 					: 'template-locked',
 			supportsTemplateMode: true,
+			styles,
 		} ),
 		[
 			settings,
 			onNavigateToEntityRecord,
 			onNavigateToPreviousEntityRecord,
 			currentPost.postType,
+			styles,
 		]
 	);
 	const canRenderEditor =
@@ -145,8 +147,8 @@ export function InnerEditor( {
 					postType={ currentPost.postType }
 					settings={ editorSettings }
 					templateId={ template && template.id }
-					styles={ styles }
 					contentRef={ contentRef }
+					styles={ styles } // This is needed for BC for Gutenberg below v22
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />

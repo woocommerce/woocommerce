@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -46,7 +45,8 @@ export function addProduct( includeTests = {} ) {
 	let post_id;
 	let api_x_wp_nonce;
 	let apiNonceHeader;
-	let includedTests = Object.assign( {
+	const includedTests = Object.assign(
+		{
 			heartbeat: true,
 			other: true,
 			permalink: true,
@@ -74,8 +74,8 @@ export function addProduct( includeTests = {} ) {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Add new product' header": ( response ) =>
-				response.body.includes( 'Add new product</h1>' ),
+			"body contains: 'Add new product' header": ( r ) =>
+				r.body.includes( 'Add new product</h1>' ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -126,8 +126,8 @@ export function addProduct( includeTests = {} ) {
 		);
 		api_x_wp_nonce = findBetween(
 			response.body,
-			'wp-json\\/","nonce":"',
-			'",'
+			'wp.apiFetch.createNonceMiddleware( "',
+			'" )'
 		);
 
 		// Create request header with nonce value for use in subsequent requests.
@@ -186,7 +186,9 @@ export function addProduct( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.heartbeat ) {
@@ -255,12 +257,14 @@ export function addProduct( includeTests = {} ) {
 			);
 			check( response, {
 				'is status 200': ( r ) => r.status === 200,
-				"body contains: 'Permalink:'": ( response ) =>
-					response.body.includes( '<strong>Permalink:</strong>' ),
+				"body contains: 'Permalink:'": ( r ) =>
+					r.body.includes( '<strong>Permalink:</strong>' ),
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.update ) {
@@ -375,10 +379,10 @@ export function addProduct( includeTests = {} ) {
 			);
 			check( response, {
 				'is status 200': ( r ) => r.status === 200,
-				"body contains: 'Edit product' header": ( response ) =>
-					response.body.includes( 'Edit product</h1>' ),
-				"body contains: 'Product published' confirmation": ( response ) =>
-					response.body.includes( 'Product published.' ),
+				"body contains: 'Edit product' header": ( r ) =>
+					r.body.includes( 'Edit product</h1>' ),
+				"body contains: 'Product published' confirmation": ( r ) =>
+					r.body.includes( 'Product published.' ),
 			} );
 		} );
 	}

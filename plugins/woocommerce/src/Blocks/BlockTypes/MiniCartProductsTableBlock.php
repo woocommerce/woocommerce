@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * MiniCartProductsTableBlock class.
  */
@@ -24,27 +22,30 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_markup( $attributes, $content, $block );
-		}
-
-		return $content;
-	}
-
-	/**
-	 * Render experimental iAPI block markup.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		$screen_reader_text = __( 'Products in cart', 'woocommerce' );
 		$remove_item_label  = __( 'Remove item', 'woocommerce' );
 		$head_product_label = __( 'Product', 'woocommerce' );
 		$head_details_label = __( 'Details', 'woocommerce' );
 		$head_total_label   = __( 'Total', 'woocommerce' );
+
+		wp_interactivity_state(
+			$this->get_full_block_name(),
+			array(
+				'cartItem' => function () {
+					$context = wp_interactivity_get_context( 'woocommerce' );
+					$cart_state = wp_interactivity_state( 'woocommerce' );
+					$item_key = $context['cartItem']['key'];
+
+					foreach ( $cart_state['cart']['items'] as $item ) {
+						if ( $item['key'] === $item_key ) {
+							return $item;
+						}
+					}
+
+					return null;
+				},
+			)
+		);
 
 		// translators: %s is the name of the product in cart.
 		$reduce_quantity_label = __( 'Reduce quantity of %s', 'woocommerce' );
@@ -111,7 +112,12 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 						data-wp-each--cart-item="woocommerce::state.cart.items"
 						data-wp-each-key="state.cartItem.key"
 					>
-						<tr class="wc-block-cart-items__row" data-wp-run="callbacks.filterCartItemClass" tabindex="-1">
+						<tr
+							class="wc-block-cart-items__row"
+							data-wp-bind--hidden="!state.cartItem.key"
+							data-wp-run="callbacks.filterCartItemClass"
+							tabindex="-1"
+						>
 							<td data-wp-context='{ "isImageHidden": false }' class="wc-block-cart-item__image" aria-hidden="true">
 								<img
 									data-wp-bind--hidden="!state.isProductHiddenFromCatalog"
@@ -176,8 +182,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
-										<?php echo $this->render_experimental_iapi_product_details_markup( 'item_data' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										<?php echo $this->render_experimental_iapi_product_details_markup( 'variation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										<?php echo $this->render_product_details_markup( 'item_data' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>										
+										<?php echo $this->render_product_details_markup( 'variation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>																				
 									</div>
 									<div class="wc-block-cart-item__quantity">
 										<div class="wc-block-components-quantity-selector" data-wp-bind--hidden="state.cartItem.sold_individually">
@@ -258,7 +264,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	 * @param string $property The property to render in the product details markup.
 	 * @return string Rendered product details output.
 	 */
-	protected function render_experimental_iapi_product_details_markup( $property ) {
+	protected function render_product_details_markup( $property ) {
 		$context = array( 'dataProperty' => $property );
 
 		// If the property is item_data, so not a variation, we need to skip the text directive.
@@ -271,7 +277,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			class="wc-block-components-product-details"
 			data-wp-bind--hidden="state.shouldHideSingleProductDetails"
 		>
-			<?php echo $this->render_experimental_iapi_product_details_item_markup( 'div', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo $this->render_product_details_item_markup( 'div', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<ul
 			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -282,7 +288,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				data-wp-each--item-data="state.cartItem.<?php echo esc_attr( $property ); ?>"
 				data-wp-each-key="state.cartItemDataKey"
 			>
-				<?php echo $this->render_experimental_iapi_product_details_item_markup( 'li', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo $this->render_product_details_item_markup( 'li', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</template>
 		</ul>
 		<?php
@@ -296,18 +302,18 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	 * @param bool   $is_item_data Whether the item is of item_data type.
 	 * @return string Rendered product detail item output based on item type.
 	 */
-	private function render_experimental_iapi_product_details_item_markup( $tag_name, $is_item_data = false ) {
+	private function render_product_details_item_markup( $tag_name, $is_item_data = false ) {
 		ob_start();
 		?>
-		<<?php echo tag_escape( $tag_name ); ?>
-			data-wp-bind--hidden="state.cartItemDataAttr.hidden"
-			data-wp-bind--class="state.cartItemDataAttr.className"
-		>
+	<<?php echo tag_escape( $tag_name ); ?>
+		data-wp-bind--hidden="state.cartItemDataAttrHidden"
+		data-wp-bind--class="state.cartItemDataAttr.className"
+	>
 		<?php if ( $is_item_data ) : ?>
-			<span class="wc-block-components-product-details__name" data-wp-watch="callbacks.itemDataNameInnerHTML"></span><?php echo ': '; ?>
+			<span class="wc-block-components-product-details__name" data-wp-watch="callbacks.itemDataNameInnerHTML"></span>
 			<span class="wc-block-components-product-details__value" data-wp-watch="callbacks.itemDataValueInnerHTML"></span>
 		<?php else : ?>
-			<span class="wc-block-components-product-details__name"  data-wp-text="state.cartItemDataAttr.name"></span><?php echo ': '; ?>
+			<span class="wc-block-components-product-details__name"  data-wp-text="state.cartItemDataAttr.name"></span>
 			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
 		<?php endif; ?>
 		</<?php echo tag_escape( $tag_name ); ?>>
