@@ -432,10 +432,6 @@ class WC_Meta_Box_Product_Data {
 		if ( $pos_visible ) {
 			wp_remove_object_terms( $post_id, 'pos-hidden', 'pos_product_visibility' );
 		} else {
-			// TODO: I believe this is not necessary, is it fine to remove it?
-//			if ( ! term_exists( 'pos-hidden', 'pos_product_visibility' ) ) {
-//				wp_insert_term( 'pos-hidden', 'pos_product_visibility' );
-//			}
 			wp_set_object_terms( $post_id, 'pos-hidden', 'pos_product_visibility' );
 		}
 
