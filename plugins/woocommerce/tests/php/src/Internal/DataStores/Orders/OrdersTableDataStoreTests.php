@@ -1484,6 +1484,76 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Test sync-on-read with date and metadata differences.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_metadata Whether to add a new metadata to the post version of the order.
+	 */
+	public function test_sync_on_read_with_date_differences( $with_metadata = false ) {
+		global $wpdb;
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$now    = time() - ( 10 * MINUTE_IN_SECONDS );
+		$before = $now - ( 10 * MINUTE_IN_SECONDS );
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_billing_first_name( 'Duke' );
+		$order->save();
+
+		$order->set_date_modified( $before );
+		$order->save();
+
+		// Refresh order from HPOS datastore.
+		$order = wc_get_order( $order->get_id() );
+
+		// Confirm post version exists and that both have the same modified date.
+		$this->assertSame( 'shop_order', get_post_type( $order->get_id() ) );
+		$this->assertEquals( $order->get_date_modified( 'edit' )->getTimestamp(), $before );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $before );
+
+		// Update the posts modified date and confirm the change was made.
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $now ),
+			),
+			array(
+				'ID' => $order->get_id(),
+			)
+		);
+		clean_post_cache( $order->get_id() );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $now );
+
+		// Add a new metadata so sync-on-read does something.
+		if ( $with_metadata ) {
+			add_post_meta( $order->get_id(), 'foo', 'bar' );
+		}
+
+		// Trigger sync-on-read by re-reading the order and compare dates again.
+		$sync_on_read_triggered = false;
+		add_action(
+			'woocommerce_hpos_post_record_migrated_on_read',
+			function ( $o ) use ( &$sync_on_read_triggered, $order ) {
+				$sync_on_read_triggered = $o->get_id() === $order->get_id();
+			}
+		);
+
+		$this->reset_order_data_store_state( $this->sut );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $sync_on_read_triggered );
+		remove_all_actions( 'woocommerce_hpos_post_record_migrated_on_read' );
+
+		// Compare dates again.
+		$this->assertEquals( $order->get_date_modified( 'edit' )->getTimestamp(), $now );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $now );
+	}
+
+	/**
 	 * @testDox Meta data should be migrated from post order to cot order.
 	 *
 	 * @return void
@@ -3018,8 +3088,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	private function reset_order_data_store_state( $sut ) {
 		$reset_state = function () use ( $sut ) {
-			self::$backfilling_order_ids = array();
-			self::$reading_order_ids     = array();
+			self::$backfilling_order_ids  = array();
+			self::$reading_order_ids      = array();
+			self::$sync_on_read_order_ids = array();
 		};
 		$reset_state->call( $sut );
 		wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->flush();
