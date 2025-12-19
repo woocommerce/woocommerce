@@ -63,6 +63,7 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 
 		$invalidator = new ProductVersionStringInvalidator();
 		$invalidator->init( $features_controller );
+		$invalidator->on_init();
 
 		return $invalidator;
 	}
