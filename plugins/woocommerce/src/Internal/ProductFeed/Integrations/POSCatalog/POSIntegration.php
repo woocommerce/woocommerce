@@ -54,7 +54,15 @@ class POSIntegration implements IntegrationInterface {
 	 */
 	public function get_product_feed_query_args(): array {
 		return array(
-			'type' => array( 'simple', 'variable', 'variation' ),
+			'type'      => array( 'simple', 'variable', 'variation' ),
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'pos_product_visibility',
+					'field'    => 'slug',
+					'terms'    => 'pos-hidden',
+					'operator' => 'NOT IN',
+				),
+			),
 		);
 	}
 
