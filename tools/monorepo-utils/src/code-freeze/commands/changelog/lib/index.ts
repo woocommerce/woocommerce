@@ -14,6 +14,7 @@ import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
 import {
 	addLabelsToIssue,
+	addMilestoneToIssue,
 	createPullRequest,
 } from '../../../../core/github/repo';
 import { Options } from '../types';
@@ -296,6 +297,18 @@ export const updateReleaseBranchChangelogs = async (
 			);
 		}
 
+		try {
+			await addMilestoneToIssue(
+				options,
+				pullRequest.number,
+				`${ mainVersion }.0`
+			);
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ mainVersion }.0" to PR ${ pullRequest.number }`
+			);
+		}
+
 		return {
 			deletionCommitHash,
 			prNumber: pullRequest.number,
@@ -350,6 +363,18 @@ export const updateBranchChangelog = async (
 			[ branch ]: null,
 		} );
 
+		// Read plugin file version in branch to determine milestone.
+		let milestone = '';
+		const pluginFile = readFileSync(
+			path.join( tmpRepoPath, 'plugins/woocommerce/woocommerce.php' ),
+			'utf8'
+		);
+		const m = pluginFile.match( /\*\s+Version:\s+(\d+\.\d+)\.\d+/ );
+
+		if ( m ) {
+			milestone = `${ m[ 1 ] }.0`;
+		}
+
 		try {
 			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
 		} catch ( e ) {
@@ -387,6 +412,14 @@ export const updateBranchChangelog = async (
 		} catch {
 			Logger.warn(
 				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
+		}
+
+		try {
+			await addMilestoneToIssue( options, pullRequest.number, milestone );
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ milestone }" to PR ${ pullRequest.number }`
 			);
 		}
 
