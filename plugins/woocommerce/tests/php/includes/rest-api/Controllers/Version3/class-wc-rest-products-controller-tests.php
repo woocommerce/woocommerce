@@ -2045,4 +2045,73 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
 		$this->assertEquals( $count_before - 1, $count_after, 'Batch delete should decrement term count immediately.' );
 	}
+
+	/**
+	 * Test `pos_visible` filter returns only POS-visible products when true.
+	 */
+	public function test_pos_visible_filter_returns_only_visible_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'pos_visible', true );
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertNotContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test `pos_visible` filter returns only POS-hidden products when false.
+	 */
+	public function test_pos_visible_filter_returns_only_hidden_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'pos_visible', false );
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $hidden_product->get_id(), $product_ids );
+		$this->assertNotContains( $visible_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test that omitting `pos_visible` filter returns all products regardless of POS visibility.
+	 */
+	public function test_pos_visible_filter_omitted_returns_all_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		// Do not set pos_visible parameter.
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertContains( $hidden_product->get_id(), $product_ids );
+	}
 }
