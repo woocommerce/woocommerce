@@ -12,7 +12,7 @@ use WC_Unit_Test_Case;
 class DependencyDetectionTest extends WC_Unit_Test_Case {
 
 	/**
-	 * System under test.
+	 * The System Under Test.
 	 *
 	 * @var DependencyDetection
 	 */
@@ -60,7 +60,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_woocommerce_script returns true for WooCommerce core client path
+	 * @testdox is_woocommerce_script returns true for WooCommerce core client path.
 	 */
 	public function test_is_woocommerce_script_returns_true_for_client_path(): void {
 		$url    = 'https://example.com/wp-content/plugins/woocommerce/client/blocks/index.js';
@@ -69,7 +69,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_woocommerce_script returns true for WooCommerce core assets path
+	 * @testdox is_woocommerce_script returns true for WooCommerce core assets path.
 	 */
 	public function test_is_woocommerce_script_returns_true_for_assets_path(): void {
 		$url    = 'https://example.com/wp-content/plugins/woocommerce/assets/js/frontend.js';
@@ -78,7 +78,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_woocommerce_script returns true for WooCommerce core build path
+	 * @testdox is_woocommerce_script returns true for WooCommerce core build path.
 	 */
 	public function test_is_woocommerce_script_returns_true_for_build_path(): void {
 		$url    = 'https://example.com/wp-content/plugins/woocommerce/build/bundle.js';
@@ -87,7 +87,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_woocommerce_script returns true for WooCommerce core vendor path
+	 * @testdox is_woocommerce_script returns true for WooCommerce core vendor path.
 	 */
 	public function test_is_woocommerce_script_returns_true_for_vendor_path(): void {
 		$url    = 'https://example.com/wp-content/plugins/woocommerce/vendor/some-lib.js';
@@ -96,7 +96,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_woocommerce_script returns false for WooCommerce extensions
+	 * @testdox is_woocommerce_script returns false for WooCommerce extensions.
 	 */
 	public function test_is_woocommerce_script_returns_false_for_subscriptions(): void {
 		$url    = 'https://example.com/wp-content/plugins/woocommerce-subscriptions/assets/js/index.js';
@@ -105,7 +105,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_woocommerce_script returns false for WooCommerce Payments
+	 * @testdox is_woocommerce_script returns false for WooCommerce Payments.
 	 */
 	public function test_is_woocommerce_script_returns_false_for_payments(): void {
 		$url    = 'https://example.com/wp-content/plugins/woocommerce-payments/build/index.js';
@@ -114,7 +114,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox is_woocommerce_script returns false for third-party plugins
+	 * @testdox is_woocommerce_script returns false for third-party plugins.
 	 */
 	public function test_is_woocommerce_script_returns_false_for_third_party(): void {
 		$url    = 'https://example.com/wp-content/plugins/my-plugin/assets/js/index.js';
@@ -123,7 +123,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_all_dependencies returns empty array for empty input
+	 * @testdox get_all_dependencies returns empty array for empty input.
 	 */
 	public function test_get_all_dependencies_returns_empty_for_empty_input(): void {
 		$result = $this->invoke_private_method( 'get_all_dependencies', array( array() ) );
@@ -131,7 +131,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_all_dependencies filters to WC handles only
+	 * @testdox get_all_dependencies filters to WC handles only.
 	 */
 	public function test_get_all_dependencies_filters_to_wc_handles(): void {
 		// Register a script with mixed dependencies.
@@ -146,7 +146,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_all_dependencies handles circular dependencies
+	 * @testdox get_all_dependencies handles circular dependencies.
 	 */
 	public function test_get_all_dependencies_handles_circular_deps(): void {
 		// This test verifies the method doesn't infinite loop.
@@ -158,7 +158,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox build_script_registry includes third-party plugin scripts
+	 * @testdox build_script_registry includes third-party plugin scripts.
 	 */
 	public function test_build_script_registry_includes_plugin_scripts(): void {
 		// Register a third-party plugin script.
@@ -186,7 +186,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox build_script_registry excludes WooCommerce core scripts
+	 * @testdox build_script_registry excludes WooCommerce core scripts.
 	 */
 	public function test_build_script_registry_excludes_woocommerce_scripts(): void {
 		$result = $this->invoke_private_method( 'build_script_registry', array() );
@@ -212,7 +212,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox build_script_registry excludes WordPress core scripts
+	 * @testdox build_script_registry excludes WordPress core scripts.
 	 */
 	public function test_build_script_registry_excludes_wordpress_scripts(): void {
 		$result = $this->invoke_private_method( 'build_script_registry', array() );
@@ -233,7 +233,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox build_script_registry normalizes URLs by removing query strings
+	 * @testdox build_script_registry normalizes URLs by removing query strings.
 	 */
 	public function test_build_script_registry_normalizes_urls(): void {
 		// Register a script (WordPress adds version query string automatically).
@@ -258,7 +258,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox output_early_proxy_setup outputs nothing when no tracked blocks are present
+	 * @testdox output_early_proxy_setup outputs nothing when no tracked blocks are present.
 	 */
 	public function test_output_early_proxy_setup_outputs_nothing_without_tracked_blocks(): void {
 		// Create a post without any WooCommerce blocks.
@@ -277,7 +277,7 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox output_script_registry outputs nothing when proxy was not output
+	 * @testdox output_script_registry outputs nothing when proxy was not output.
 	 */
 	public function test_output_script_registry_outputs_nothing_without_proxy(): void {
 		// Don't call output_early_proxy_setup first.
