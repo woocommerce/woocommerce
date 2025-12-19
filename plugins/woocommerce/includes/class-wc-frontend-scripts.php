@@ -266,7 +266,7 @@ class WC_Frontend_Scripts {
 					'woocommerce',
 					'wc-country-select',
 					'wc-address-i18n',
-					'wc-custom-place-order-button'
+					'wc-custom-place-order-button',
 				),
 				'version' => $version,
 			),
