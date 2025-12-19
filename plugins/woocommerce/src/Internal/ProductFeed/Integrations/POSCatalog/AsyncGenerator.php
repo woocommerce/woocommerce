@@ -347,7 +347,7 @@ class AsyncGenerator {
 				return false;
 			}
 
-			if ( ! isset( $status['completed_at' ] ) ) {
+			if ( ! isset( $status['completed_at'] ) ) {
 				return false;
 			}
 
