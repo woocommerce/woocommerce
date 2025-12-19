@@ -808,8 +808,7 @@ class FeaturesController {
 
 		wc_deprecated_function(
 			"FeaturesUtil::feature_is_enabled('{$feature_id}')",
-			$deprecated_since,
-			'This feature check is deprecated and can be removed.'
+			$deprecated_since
 		);
 
 		if ( class_exists( 'WC_Tracks' ) ) {
