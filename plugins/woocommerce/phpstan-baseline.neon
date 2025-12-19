@@ -15637,7 +15637,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-<<<<<<< HEAD
 			message: '#^@param string \$key does not accept actual type of parameter\: mixed\.$#'
 			identifier: parameter.phpDocType
 			count: 5
@@ -15656,8 +15655,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-=======
->>>>>>> 31360e0002 ([Cart shortcode] Fix undo cart item removal action (#62472))
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
 			count: 1
