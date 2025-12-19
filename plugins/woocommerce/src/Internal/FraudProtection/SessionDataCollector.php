@@ -48,23 +48,29 @@ class SessionDataCollector {
 	 * to gather all relevant data for fraud analysis. It returns data in the nested
 	 * format expected by the WPCOM fraud protection service.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param string|null $event_type Optional event type identifier (e.g., 'checkout_started', 'payment_attempt').
-	 * @param array       $event_data Optional event-specific additional context data.
+	 * @param array       $event_data Optional event-specific additional context data (may include 'order_id').
 	 * @return array Nested array containing all collected fraud protection data.
 	 */
 	public function collect( ?string $event_type = null, array $event_data = array() ): array {
 		// Ensure cart and session are loaded.
 		$this->session_clearance_manager->ensure_cart_loaded();
 
+		// Extract order ID from event_data if provided.
+		// There seem to be no universal way to get order id from session data, so we may start with passing it as a parameter when calling this method.
+		$order_id_from_event = $event_data['order_id'] ?? null;
+
 		return array(
 			'event_type'       => $event_type,
 			'timestamp'        => gmdate( 'Y-m-d H:i:s' ),
 			'session'          => $this->get_session_data(),
 			'customer'         => $this->get_customer_data(),
-			'order'            => $this->get_order_data(),
+			'order'            => $this->get_order_data( $order_id_from_event ),
 			'shipping_address' => $this->get_shipping_address(),
 			'billing_address'  => $this->get_billing_address(),
-			'payment'          => array(),
+			'payment'          => $this->get_payment_data(),
 			'event_data'       => $event_data,
 		);
 	}
@@ -75,6 +81,8 @@ class SessionDataCollector {
 	 * Collects session identification and tracking data with graceful degradation
 	 * for unavailable fields. Email collection follows the fallback chain:
 	 * logged-in user email → session customer data → WC_Customer billing email.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return array Session data array with 6 keys.
 	 */
@@ -119,6 +127,8 @@ class SessionDataCollector {
 	 * Collects customer identification and history data with graceful degradation.
 	 * Tries WC_Customer object first, then falls back to session data if values are empty.
 	 * Only includes lifetime_order_count for order history (minimal approach).
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return array Customer data array with 4 keys.
 	 */
@@ -185,12 +195,15 @@ class SessionDataCollector {
 	 * Calculates shipping_tax_rate from shipping tax and shipping total. Sets customer_id
 	 * to 'guest' for non-logged-in users.
 	 *
+	 * @since 10.5.0
+	 *
+	 * @param int|null $order_id_from_event Optional order ID from event data.
 	 * @return array Order data array with 11 keys including items array.
 	 */
-	private function get_order_data(): array {
+	private function get_order_data( ?int $order_id_from_event = null ): array {
 		try {
 			// Initialize default values.
-			$order_id          = null;
+			$order_id          = $order_id_from_event;
 			$customer_id       = 'guest';
 			$total             = 0;
 			$items_total       = 0;
@@ -265,6 +278,8 @@ class SessionDataCollector {
 	 * name, description, category, SKU, pricing, quantities, and WooCommerce-specific
 	 * attributes. Returns array of item objects with 12 fields each.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return array Array of cart item objects with detailed product information.
 	 */
 	private function get_cart_items(): array {
@@ -325,6 +340,8 @@ class SessionDataCollector {
 	 *
 	 * Collects billing address fields from WC_Customer object with graceful degradation.
 	 * Returns array with 6 address fields, sanitized with sanitize_text_field().
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return array Billing address array with 6 keys.
 	 */
@@ -393,6 +410,8 @@ class SessionDataCollector {
 	 * Collects shipping address fields from WC_Customer object with graceful degradation.
 	 * Returns array with 6 address fields, sanitized with sanitize_text_field().
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return array Shipping address array with 6 keys.
 	 */
 	private function get_shipping_address(): array {
@@ -455,7 +474,66 @@ class SessionDataCollector {
 	}
 
 	/**
+	 * Get payment data structure for fraud protection analysis.
+	 *
+	 * Returns payment data structure with all 11 supported fields. Currently populates
+	 * payment_gateway_name and payment_method_type when available from the chosen payment
+	 * method. All other fields are set to null and supposed to be populated by payment gateway
+	 * extensions when available.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return array Payment data array with 11 keys.
+	 */
+	private function get_payment_data(): array {
+		try {
+			$payment_gateway_name = null;
+			$payment_method_type  = null;
+
+			// Try to get chosen payment method from session.
+			if ( WC()->session instanceof \WC_Session ) {
+				$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
+				if ( $chosen_payment_method ) {
+					$payment_gateway_name = \sanitize_text_field( $chosen_payment_method );
+					$payment_method_type  = \sanitize_text_field( $chosen_payment_method );
+				}
+			}
+
+			return array(
+				'payment_gateway_name'      => $payment_gateway_name,
+				'payment_method_type'       => $payment_method_type,
+				'card_bin'                  => null,
+				'card_last4'                => null,
+				'card_brand'                => null,
+				'payer_id'                  => null,
+				'outcome'                   => null,
+				'decline_reason'            => null,
+				'avs_result'                => null,
+				'cvc_result'                => null,
+				'tokenized_card_identifier' => null,
+			);
+		} catch ( \Exception $e ) {
+			// Graceful degradation - return structure with null values.
+			return array(
+				'payment_gateway_name'      => null,
+				'payment_method_type'       => null,
+				'card_bin'                  => null,
+				'card_last4'                => null,
+				'card_brand'                => null,
+				'payer_id'                  => null,
+				'outcome'                   => null,
+				'decline_reason'            => null,
+				'avs_result'                => null,
+				'cvc_result'                => null,
+				'tokenized_card_identifier' => null,
+			);
+		}
+	}
+
+	/**
 	 * Get client IP address using WooCommerce geolocation utility.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return string|null IP address or null if not available.
 	 */
@@ -472,6 +550,8 @@ class SessionDataCollector {
 	 *
 	 * Tries logged-in user email first, then WC_Customer billing email,
 	 * then session customer data as fallback.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return string|null Email address or null if not available.
 	 */
@@ -506,6 +586,8 @@ class SessionDataCollector {
 	/**
 	 * Get user agent string from HTTP headers.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return string|null User agent or null if not available.
 	 */
 	private function get_user_agent(): ?string {
@@ -520,6 +602,8 @@ class SessionDataCollector {
 	 *
 	 * Uses WooCommerce helper with caching for better performance.
 	 * Returns all categories for the product, not just the primary one.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param \WC_Product $product The product object.
 	 * @return string|null Comma-separated category names or null if none.
@@ -542,6 +626,8 @@ class SessionDataCollector {
 	 * Calculate lifetime order count for a customer.
 	 *
 	 * Counts orders with 'completed' status only.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param int $user_id The user ID.
 	 * @return int Number of completed orders.
