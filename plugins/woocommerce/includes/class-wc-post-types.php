@@ -222,7 +222,7 @@ class WC_Post_Types {
 					'show_in_nav_menus' => false,
 					'query_var'         => is_admin(),
 					'rewrite'           => false,
-					'public'            => false,
+					'public'            => true,
 					'label'             => _x( 'POS Product visibility', 'Taxonomy name', 'woocommerce' ),
 				)
 			)

@@ -789,38 +789,6 @@ class WC_Admin_Post_Types {
 				</p>
 			</div>
 		</div>
-
-		<?php
-		$pos_visible         = ! has_term( 'pos-hidden', 'pos_product_visibility', $thepostid );
-		$current_pos_visible = $pos_visible ? 'visible' : 'hidden';
-		?>
-		<div class="misc-pub-section" id="pos-visibility">
-			<span class="dashicons dashicons-cart"></span>
-			<?php esc_html_e( 'Point of sale:', 'woocommerce' ); ?>
-			<strong id="pos-visibility-display">
-				<?php echo $pos_visible ? esc_html__( 'Visible', 'woocommerce' ) : esc_html__( 'Hidden', 'woocommerce' ); ?>
-			</strong>
-
-			<a href="#pos-visibility" class="edit-pos-visibility hide-if-no-js"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
-
-			<div id="pos-visibility-select" class="hide-if-js">
-
-				<input type="hidden" name="current_pos_visibility" id="current_pos_visibility" value="<?php echo esc_attr( $current_pos_visible ); ?>" />
-
-				<p><?php esc_html_e( 'This setting determines if the product will be visible in Point of Sale.', 'woocommerce' ); ?></p>
-
-				<input type="radio" name="_pos_visibility" id="_pos_visibility_visible" value="visible" <?php checked( $current_pos_visible, 'visible' ); ?> data-label="<?php esc_attr_e( 'Visible', 'woocommerce' ); ?>" />
-				<label for="_pos_visibility_visible" class="selectit"><?php esc_html_e( 'Visible', 'woocommerce' ); ?></label><br />
-
-				<input type="radio" name="_pos_visibility" id="_pos_visibility_hidden" value="hidden" <?php checked( $current_pos_visible, 'hidden' ); ?> data-label="<?php esc_attr_e( 'Hidden', 'woocommerce' ); ?>" />
-				<label for="_pos_visibility_hidden" class="selectit"><?php esc_html_e( 'Hidden', 'woocommerce' ); ?></label><br />
-
-				<p>
-					<a href="#pos-visibility" class="save-pos-visibility hide-if-no-js button"><?php esc_html_e( 'OK', 'woocommerce' ); ?></a>
-					<a href="#pos-visibility" class="cancel-pos-visibility hide-if-no-js"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></a>
-				</p>
-			</div>
-		</div>
 		<?php
 	}
 

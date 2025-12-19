@@ -52,6 +52,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 			?>
 		</div>
 	<?php endif; ?>
+	<div class="options_group">
+		<?php
+		// TODO: I think we should not render this if POS is completely disabled
+		$pos_visible = ! has_term( 'pos-hidden', 'pos_product_visibility', $post_id );
+		woocommerce_wp_checkbox(
+			array(
+				'id'          => '_pos_visible',
+				'value'       => $pos_visible ? 'yes' : 'no',
+				'label'       => __( 'Show in Point of Sale', 'woocommerce' ),
+				'description' => __( 'Enable this to show the product in Point of Sale.', 'woocommerce' ),
+			)
+		);
+		?>
+	</div>
 
 	<?php do_action( 'woocommerce_product_options_advanced' ); ?>
 </div>

@@ -428,13 +428,14 @@ class WC_Meta_Box_Product_Data {
 		$product->delete_meta_data( '_product_template_id' );
 
 		// Handle POS visibility.
-		$pos_visibility = isset( $_POST['_pos_visibility'] ) ? wc_clean( wp_unslash( $_POST['_pos_visibility'] ) ) : 'visible';
-		if ( 'visible' === $pos_visibility ) {
+		$pos_visible = isset( $_POST['_pos_visible'] ) && 'yes' === $_POST['_pos_visible'];
+		if ( $pos_visible ) {
 			wp_remove_object_terms( $post_id, 'pos-hidden', 'pos_product_visibility' );
 		} else {
-			if ( ! term_exists( 'pos-hidden', 'pos_product_visibility' ) ) {
-				wp_insert_term( 'pos-hidden', 'pos_product_visibility' );
-			}
+			// TODO: I believe this is not necessary, is it fine to remove it?
+//			if ( ! term_exists( 'pos-hidden', 'pos_product_visibility' ) ) {
+//				wp_insert_term( 'pos-hidden', 'pos_product_visibility' );
+//			}
 			wp_set_object_terms( $post_id, 'pos-hidden', 'pos_product_visibility' );
 		}
 
