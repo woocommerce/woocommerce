@@ -2047,9 +2047,9 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test `pos_visible` filter returns only POS-visible products when true.
+	 * Test `visible_in_pos` filter returns only POS-visible products when true.
 	 */
-	public function test_pos_visible_filter_returns_only_visible_products() {
+	public function test_visible_in_pos_filter_returns_only_visible_products() {
 		$visible_product = WC_Helper_Product::create_simple_product();
 		$hidden_product  = WC_Helper_Product::create_simple_product();
 
@@ -2057,7 +2057,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_param( 'pos_visible', true );
+		$request->set_param( 'visible_in_pos', true );
 
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
@@ -2070,9 +2070,9 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test `pos_visible` filter returns only POS-hidden products when false.
+	 * Test `visible_in_pos` filter returns only POS-hidden products when false.
 	 */
-	public function test_pos_visible_filter_returns_only_hidden_products() {
+	public function test_visible_in_pos_filter_returns_only_hidden_products() {
 		$visible_product = WC_Helper_Product::create_simple_product();
 		$hidden_product  = WC_Helper_Product::create_simple_product();
 
@@ -2080,7 +2080,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		$request->set_param( 'pos_visible', false );
+		$request->set_param( 'visible_in_pos', false );
 
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
@@ -2093,9 +2093,9 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that omitting `pos_visible` filter returns all products regardless of POS visibility.
+	 * Test that omitting `visible_in_pos` filter returns all products regardless of visibility in POS.
 	 */
-	public function test_pos_visible_filter_omitted_returns_all_products() {
+	public function test_visible_in_pos_filter_omitted_returns_all_products() {
 		$visible_product = WC_Helper_Product::create_simple_product();
 		$hidden_product  = WC_Helper_Product::create_simple_product();
 
@@ -2103,7 +2103,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
-		// Do not set pos_visible parameter.
+		// Do not set visible_in_pos parameter.
 
 		$response = $this->server->dispatch( $request );
 		$products = $response->get_data();
