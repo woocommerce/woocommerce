@@ -212,8 +212,21 @@ class WC_Post_Types {
 			)
 		);
 
-		register_taxonomy( 'pos_product_visibility',
-			apply_filters( 'woocommerce_taxonomy_objects_pos_product_visibility', array( 'product') ),
+		register_taxonomy(
+			'pos_product_visibility',
+			/**
+			 * Filter the post types that the POS product visibility taxonomy is attached to.
+			 *
+			 * @since 9.8.0
+			 * @param array $post_types Array of post types.
+			 */
+			apply_filters( 'woocommerce_taxonomy_objects_pos_product_visibility', array( 'product' ) ),
+			/**
+			 * Filter the arguments for the POS product visibility taxonomy.
+			 *
+			 * @since 9.8.0
+			 * @param array $args Array of taxonomy arguments.
+			 */
 			apply_filters(
 				'woocommerce_taxonomy_args_pos_product_visibility',
 				array(
