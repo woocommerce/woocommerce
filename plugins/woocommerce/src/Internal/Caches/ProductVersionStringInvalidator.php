@@ -48,7 +48,7 @@ class ProductVersionStringInvalidator implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Register the hooks, related to the class..
+	 * Register the hooks, related to the class.
 	 *
 	 * @return void
 	 */
