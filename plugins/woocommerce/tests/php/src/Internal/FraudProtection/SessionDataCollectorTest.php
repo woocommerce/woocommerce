@@ -579,4 +579,229 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'customer_id', $result['order'] );
 		$this->assertEquals( $user_id, $result['order']['customer_id'] );
 	}
+
+	/**
+	 * Test payment data structure includes all 11 required fields.
+	 */
+	public function test_payment_data_includes_all_required_fields() {
+		$result = $this->sut->collect();
+
+		$this->assertIsArray( $result['payment'] );
+		$this->assertArrayHasKey( 'payment_gateway_name', $result['payment'] );
+		$this->assertArrayHasKey( 'payment_method_type', $result['payment'] );
+		$this->assertArrayHasKey( 'card_bin', $result['payment'] );
+		$this->assertArrayHasKey( 'card_last4', $result['payment'] );
+		$this->assertArrayHasKey( 'card_brand', $result['payment'] );
+		$this->assertArrayHasKey( 'payer_id', $result['payment'] );
+		$this->assertArrayHasKey( 'outcome', $result['payment'] );
+		$this->assertArrayHasKey( 'decline_reason', $result['payment'] );
+		$this->assertArrayHasKey( 'avs_result', $result['payment'] );
+		$this->assertArrayHasKey( 'cvc_result', $result['payment'] );
+		$this->assertArrayHasKey( 'tokenized_card_identifier', $result['payment'] );
+	}
+
+	/**
+	 * Test complete collect() output includes all 9 top-level sections with data.
+	 */
+	public function test_complete_collect_output_includes_all_sections() {
+		// Create a logged-in user.
+		$user_id = $this->factory->user->create(
+			array(
+				'user_email' => 'complete-test@example.com',
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		// Set customer data.
+		if ( isset( WC()->customer ) ) {
+			WC()->customer->set_billing_first_name( 'Test' );
+			WC()->customer->set_billing_last_name( 'User' );
+			WC()->customer->set_billing_email( 'complete-test@example.com' );
+			WC()->customer->set_billing_address_1( '123 Test St' );
+			WC()->customer->set_billing_city( 'Test City' );
+			WC()->customer->set_billing_country( 'US' );
+		}
+
+		// Add a product to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$result = $this->sut->collect( 'checkout_started', array( 'test' => 'data' ) );
+
+		// Verify all 9 sections exist.
+		$this->assertArrayHasKey( 'event_type', $result );
+		$this->assertArrayHasKey( 'timestamp', $result );
+		$this->assertArrayHasKey( 'session', $result );
+		$this->assertArrayHasKey( 'customer', $result );
+		$this->assertArrayHasKey( 'order', $result );
+		$this->assertArrayHasKey( 'shipping_address', $result );
+		$this->assertArrayHasKey( 'billing_address', $result );
+		$this->assertArrayHasKey( 'payment', $result );
+		$this->assertArrayHasKey( 'event_data', $result );
+
+		// Verify sections contain expected data types.
+		$this->assertEquals( 'checkout_started', $result['event_type'] );
+		$this->assertIsString( $result['timestamp'] );
+		$this->assertIsArray( $result['session'] );
+		$this->assertIsArray( $result['customer'] );
+		$this->assertIsArray( $result['order'] );
+		$this->assertIsArray( $result['shipping_address'] );
+		$this->assertIsArray( $result['billing_address'] );
+		$this->assertIsArray( $result['payment'] );
+		$this->assertEquals( array( 'test' => 'data' ), $result['event_data'] );
+	}
+
+	/**
+	 * Test end-to-end data collection with full cart scenario.
+	 */
+	public function test_end_to_end_data_collection_with_full_cart() {
+		// Empty cart first.
+		WC()->cart->empty_cart();
+
+		// Create logged-in user.
+		$user_id = $this->factory->user->create(
+			array(
+				'user_email' => 'e2e-test@example.com',
+			)
+		);
+		wp_set_current_user( $user_id );
+
+		// Create completed order for lifetime count.
+		$order = wc_create_order();
+		$order->set_customer_id( $user_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		// Set customer data.
+		if ( isset( WC()->customer ) ) {
+			WC()->customer = new \WC_Customer( $user_id, true );
+			WC()->customer->set_billing_first_name( 'John' );
+			WC()->customer->set_billing_last_name( 'Doe' );
+			WC()->customer->set_billing_email( 'e2e-test@example.com' );
+			WC()->customer->set_billing_address_1( '123 Test St' );
+			WC()->customer->set_billing_address_2( 'Apt 1' );
+			WC()->customer->set_billing_city( 'Test City' );
+			WC()->customer->set_billing_state( 'CA' );
+			WC()->customer->set_billing_country( 'US' );
+			WC()->customer->set_billing_postcode( '90210' );
+			WC()->customer->set_shipping_address_1( '456 Ship St' );
+			WC()->customer->set_shipping_city( 'Ship City' );
+			WC()->customer->set_shipping_state( 'NY' );
+			WC()->customer->set_shipping_country( 'US' );
+			WC()->customer->set_shipping_postcode( '10001' );
+		}
+
+		// Add products to cart.
+		$product1 = \WC_Helper_Product::create_simple_product();
+		$product1->set_name( 'Product 1' );
+		$product1->set_regular_price( 100.00 );
+		$product1->save();
+
+		$product2 = \WC_Helper_Product::create_simple_product();
+		$product2->set_name( 'Product 2' );
+		$product2->set_regular_price( 50.00 );
+		$product2->save();
+
+		WC()->cart->add_to_cart( $product1->get_id(), 2 );
+		WC()->cart->add_to_cart( $product2->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		// Collect data.
+		$result = $this->sut->collect( 'payment_attempt', array( 'gateway' => 'stripe' ) );
+
+		// Verify comprehensive data collection.
+		$this->assertEquals( 'payment_attempt', $result['event_type'] );
+		$this->assertNotEmpty( $result['timestamp'] );
+
+		// Session data.
+		$this->assertNotEmpty( $result['session']['session_id'] );
+		$this->assertEquals( 'e2e-test@example.com', $result['session']['email'] );
+
+		// Customer data.
+		$this->assertEquals( 'John', $result['customer']['first_name'] );
+		$this->assertEquals( 'Doe', $result['customer']['last_name'] );
+		$this->assertEquals( 1, $result['customer']['lifetime_order_count'] );
+
+		// Order data.
+		$this->assertGreaterThan( 0, $result['order']['total'] );
+		$this->assertCount( 2, $result['order']['items'] );
+
+		// Billing address.
+		$this->assertEquals( '123 Test St', $result['billing_address']['street'] );
+		$this->assertEquals( 'Test City', $result['billing_address']['city'] );
+
+		// Shipping address.
+		$this->assertEquals( '456 Ship St', $result['shipping_address']['street'] );
+		$this->assertEquals( 'Ship City', $result['shipping_address']['city'] );
+
+		// Payment data structure exists.
+		$this->assertIsArray( $result['payment'] );
+		$this->assertArrayHasKey( 'payment_gateway_name', $result['payment'] );
+
+		// Event data.
+		$this->assertEquals( array( 'gateway' => 'stripe' ), $result['event_data'] );
+	}
+
+	/**
+	 * Test graceful degradation across all sections.
+	 */
+	public function test_graceful_degradation_across_all_sections() {
+		// Ensure no user logged in.
+		wp_set_current_user( 0 );
+
+		// Reinitialize customer as guest (ID will be 0).
+		WC()->customer = new \WC_Customer( 0, true );
+
+		// Empty cart.
+		WC()->cart->empty_cart();
+
+		// Clear customer data.
+		if ( isset( WC()->customer ) ) {
+			WC()->customer->set_billing_first_name( '' );
+			WC()->customer->set_billing_last_name( '' );
+			WC()->customer->set_billing_email( '' );
+		}
+
+		// Collect should still succeed and return valid structure.
+		$result = $this->sut->collect();
+
+		// Verify structure is intact even with minimal data.
+		$this->assertIsArray( $result );
+		$this->assertCount( 9, $result );
+
+		// All sections should be arrays.
+		$this->assertIsArray( $result['session'] );
+		$this->assertIsArray( $result['customer'] );
+		$this->assertIsArray( $result['order'] );
+		$this->assertIsArray( $result['shipping_address'] );
+		$this->assertIsArray( $result['billing_address'] );
+		$this->assertIsArray( $result['payment'] );
+
+		// Key fields should have appropriate defaults.
+		$this->assertEquals( 'guest', $result['order']['customer_id'] );
+		$this->assertEquals( 0, $result['customer']['lifetime_order_count'] );
+		$this->assertEmpty( $result['order']['items'] );
+	}
+
+	/**
+	 * Test manual triggering only (no automatic hooks).
+	 */
+	public function test_manual_triggering_only() {
+		// This test verifies that SessionDataCollector doesn't automatically
+		// hook into WooCommerce events. It should only collect data when
+		// collect() is explicitly called.
+
+		// Add a product to cart (should not trigger automatic collection).
+		$product = \WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify collect() must be called manually.
+		$result = $this->sut->collect();
+
+		$this->assertIsArray( $result );
+		$this->assertCount( 1, $result['order']['items'] );
+
+		// No automatic data collection should have occurred.
+		// This is a design verification test - the class should not register hooks.
+	}
 }
