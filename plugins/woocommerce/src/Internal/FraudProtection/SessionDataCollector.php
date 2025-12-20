@@ -96,7 +96,6 @@ class SessionDataCollector {
 			/**
 			 * $is_user_session is flag that we have a real browser session vs API-based interaction.
 			 * We start with a very basic check, but we might need a more sophisticated way to detect it in the future.
-			 * TODO: Implement more sophisticated way to detect it.
 			 */
 			$is_user_session = 'no-session' !== $session_id;
 
