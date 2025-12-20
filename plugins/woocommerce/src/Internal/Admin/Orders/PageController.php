@@ -273,7 +273,7 @@ class PageController {
 		if ( $has_shop_order ) {
 			// Process shop_order first to create top-level menu.
 			$post_type = get_post_type_object( 'shop_order' );
-			$menu_name = $post_type->labels->menu_name;
+			$menu_name = $post_type->labels->menu_name . \WC_Admin_Menus::get_orders_menu_badge();
 
 			// Create top-level Orders menu and capture the hook suffix.
 			$main_hook_suffix = add_menu_page(

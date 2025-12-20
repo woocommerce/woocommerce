@@ -266,26 +266,15 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Generate order count badge HTML.
+	 * Get the order count badge for the Orders menu.
 	 *
-	 * @param int $order_count The number of processing orders.
-	 * @return string The badge HTML.
+	 * Applies filters and returns the badge HTML, or empty string if not applicable.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return string The badge HTML or empty string.
 	 */
-	private function get_order_count_badge( $order_count ) {
-		return ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
-	}
-
-	/**
-	 * Adds the order processing count to the menu.
-	 */
-	public function menu_order_count() {
-		global $submenu, $menu;
-
-		// Always remove 'WooCommerce' sub menu item.
-		if ( isset( $submenu['woocommerce'] ) ) {
-			unset( $submenu['woocommerce'][0] );
-		}
-
+	public static function get_orders_menu_badge() {
 		/**
 		 * Filters whether to include the processing order count in the menu.
 		 *
@@ -294,7 +283,7 @@ class WC_Admin_Menus {
 		 * @param bool $include_count Whether to include the count. Default true.
 		 */
 		if ( ! apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) || ! current_user_can( 'edit_others_shop_orders' ) ) {
-			return;
+			return '';
 		}
 
 		/**
@@ -306,16 +295,43 @@ class WC_Admin_Menus {
 		 */
 		$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 
-		if ( $order_count ) {
-			// Determine the menu slug to search for based on HPOS status.
-			$orders_menu_slug = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ? 'wc-orders' : 'edit.php?post_type=shop_order';
+		if ( ! $order_count ) {
+			return '';
+		}
 
-			// Add count badge to the orders menu.
-			foreach ( $menu as $key => $menu_item ) {
-				if ( $orders_menu_slug === $menu_item[2] ) {
-					$menu[ $key ][0] .= $this->get_order_count_badge( $order_count ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-					break;
-				}
+		return ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
+	}
+
+	/**
+	 * Adds the order processing count to the menu.
+	 *
+	 * When HPOS is enabled, the badge is added directly during menu registration
+	 * in PageController::register_menu(). This method only handles the legacy
+	 * post type menu case.
+	 */
+	public function menu_order_count() {
+		global $submenu, $menu;
+
+		// Always remove 'WooCommerce' sub menu item.
+		if ( isset( $submenu['woocommerce'] ) ) {
+			unset( $submenu['woocommerce'][0] );
+		}
+
+		// When HPOS is enabled, the badge is added during menu registration in PageController.
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		$badge = self::get_orders_menu_badge();
+		if ( ! $badge ) {
+			return;
+		}
+
+		// Add count badge to the legacy orders menu.
+		foreach ( $menu as $key => $menu_item ) {
+			if ( 'edit.php?post_type=shop_order' === $menu_item[2] ) {
+				$menu[ $key ][0] .= $badge; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				break;
 			}
 		}
 	}
