@@ -152,8 +152,7 @@ class PageController {
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
 
-		// Hook to all possible orders screen IDs (the compatibility layer will handle firing the right hooks).
-		add_action( 'load-toplevel_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
+		// Hook to the expected screen ID. The compatibility layer ensures this fires for top-level menus too.
 		add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 
 		add_action( 'admin_title', array( $this, 'set_page_title' ) );
