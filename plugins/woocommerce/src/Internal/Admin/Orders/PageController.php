@@ -309,7 +309,7 @@ class PageController {
 		}
 
 		// Process remaining order types (custom order types like shop_subscription).
-		// These are placed in a hierarchy: WooCommerce menu > Orders menu > Top-level.
+		// These are placed under WooCommerce if accessible, otherwise as top-level.
 		foreach ( $order_types as $order_type ) {
 			// Skip shop_order if we already processed it.
 			if ( 'shop_order' === $order_type && $has_shop_order ) {
@@ -325,9 +325,8 @@ class PageController {
 
 			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
 
-			// Determine menu parent: prefer WooCommerce menu if user can access it, then Orders, then top-level.
-			$menu_parent = $has_shop_order ? 'wc-orders' : null;
-			$menu_parent = \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : $menu_parent;
+			// Determine menu parent: WooCommerce menu if user can access it, otherwise top-level.
+			$menu_parent = \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : null;
 
 			if ( null === $menu_parent ) {
 				// Create as top-level menu if no parent available.
