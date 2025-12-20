@@ -302,7 +302,7 @@ class PageController {
 				'wc-orders',
 				$post_type->labels->add_new_item,
 				__( 'Add new order', 'woocommerce' ),
-				$post_type->cap->create_posts,
+				$post_type->cap->edit_others_posts,
 				$this->get_new_page_url(),
 				''
 			);
