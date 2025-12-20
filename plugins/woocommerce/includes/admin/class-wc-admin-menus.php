@@ -40,6 +40,7 @@ class WC_Admin_Menus {
 		// Add menus.
 		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
 		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
+		add_filter( 'submenu_file', array( $this, 'highlight_order_submenus' ) );
 		add_action( 'admin_menu', array( $this, 'maybe_add_new_product_management_experience' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
@@ -245,14 +246,23 @@ class WC_Admin_Menus {
 				}
 				break;
 		}
+	}
 
-		// Highlight "Add new order" submenu when on the new order page.
-		$page   = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-		if ( 'wc-orders' === $page && 'new' === $action ) {
-			$submenu_file = \Automattic\WooCommerce\Utilities\OrderUtil::get_order_admin_new_url(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	/**
+	 * Highlights the correct submenu item for HPOS order screens.
+	 *
+	 * WordPress auto-highlights post type screens but not custom admin pages,
+	 * so this is only needed when HPOS is enabled.
+	 *
+	 * @param string $submenu_file The current submenu file.
+	 * @return string The modified submenu file.
+	 */
+	public function highlight_order_submenus( $submenu_file ) {
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() && \Automattic\WooCommerce\Utilities\OrderUtil::is_new_order_screen() ) {
+			return \Automattic\WooCommerce\Utilities\OrderUtil::get_order_admin_new_url();
 		}
+
+		return $submenu_file;
 	}
 
 	/**
