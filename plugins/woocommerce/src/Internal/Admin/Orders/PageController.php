@@ -139,7 +139,7 @@ class PageController {
 			add_action( 'admin_menu', array( $this, 'register_menu' ), 9 );
 		}
 
-		// Remove legacy post type menus after WordPress registers them.
+		// Remove WordPress-generated post type menus (see docblock on remove_legacy_order_type_menus).
 		add_action( 'admin_menu', array( $this, 'remove_legacy_order_type_menus' ), 50 );
 
 		// Not on an Orders page.
@@ -362,12 +362,14 @@ class PageController {
 	}
 
 	/**
-	 * Removes legacy post type menu pages for order types.
+	 * Remove WordPress-generated post type menus for order types.
 	 *
-	 * In some cases (such as if the authoritative order store was changed earlier in the current request) we
-	 * need an extra step to remove the menu entry for the post type.
+	 * Order types remain registered as post types (for backwards compatibility) with show_in_menu
+	 * enabled, which causes WordPress to auto-generate menus. We remove these to prevent duplicates
+	 * with our custom HPOS menus.
 	 *
-	 * @return void
+	 * We can't set show_in_menu => false at registration because wc_get_order_types('admin-menu')
+	 * uses this flag to determine which types get HPOS menus.
 	 */
 	public function remove_legacy_order_type_menus(): void {
 		$order_types = wc_get_order_types( 'admin-menu' );
