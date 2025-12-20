@@ -358,7 +358,7 @@ class PageController {
 		}
 
 		// Create backwards compatibility layer.
-		$this->create_hook_compatibility( $hook_mappings );
+		wc_get_container()->get( MenuCompatibilityController::class )->register_hook_compatibility( $hook_mappings );
 	}
 
 	/**
@@ -390,95 +390,6 @@ class PageController {
 				remove_submenu_page( $post_type->show_in_menu, $menu_slug );
 			}
 		}
-	}
-
-	/**
-	 * Create backwards compatibility hooks to ensure plugins expecting the old hook names still work.
-	 *
-	 * @param array $hook_mappings Array of actual_hook => expected_hook mappings.
-	 */
-	private function create_hook_compatibility( array $hook_mappings ): void {
-		// Hook prefixes to map for backwards compatibility.
-		$hook_prefixes = array(
-			'load-',
-			'admin_print_styles-',
-			'admin_print_scripts-',
-			'admin_head-',
-			'admin_footer-',
-			'admin_print_footer_scripts-',
-		);
-
-		foreach ( $hook_mappings as $actual_hook => $expected_hook ) {
-			// Register compatibility hooks for each prefix.
-			foreach ( $hook_prefixes as $prefix ) {
-				add_action(
-					"{$prefix}{$actual_hook}",
-					function () use ( $expected_hook, $prefix ) {
-						$expected_full_hook = "{$prefix}{$expected_hook}";
-						// Only fire if we're not already in the expected hook (prevent infinite loops).
-						if ( ! doing_action( $expected_full_hook ) ) {
-							/**
-							 * Fires compatibility hooks for the orders page.
-							 *
-							 * @since 10.3.0
-							 */
-							do_action( $expected_full_hook ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for some hook patterns.
-						}
-					},
-					1
-				);
-			}
-
-			// Also fire the base hook (without prefix).
-			add_action(
-				$actual_hook,
-				function () use ( $expected_hook ) {
-					if ( ! doing_action( $expected_hook ) ) {
-						/**
-						 * Fires for the orders page hook.
-						 *
-						 * @since 10.3.0
-						 */
-						do_action( $expected_hook );
-					}
-				},
-				1
-			);
-		}
-
-		// Modify the screen ID for backwards compatibility.
-		add_action(
-			'current_screen',
-			function ( $screen ) use ( $hook_mappings ) {
-				if ( ! is_object( $screen ) || ! property_exists( $screen, 'id' ) ) {
-					return;
-				}
-
-				if ( isset( $hook_mappings[ $screen->id ] ) ) {
-					// Store the original ID and base in case something needs them.
-					$screen->original_id = $screen->id;
-					$screen->original_base = $screen->base;
-					// Change the screen ID and base to what plugins expect.
-					$screen->id = $hook_mappings[ $screen->original_id ];
-					$screen->base = $hook_mappings[ $screen->original_id ];
-
-					// Update JavaScript adminpage variable to match the expected screen ID.
-					// WordPress sets this in admin-header.php from the sanitized hook suffix.
-					$adminpage = preg_replace( '/[^a-z0-9_-]+/i', '-', $screen->id );
-					add_action(
-						'admin_head',
-						function () use ( $adminpage ) {
-							printf(
-								'<script>window.adminpage = %s;</script>' . "\n",
-								wp_json_encode( $adminpage )
-							);
-						},
-						1
-					);
-				}
-			},
-			1
-		);
 	}
 
 	/**
