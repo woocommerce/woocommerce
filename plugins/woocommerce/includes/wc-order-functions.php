@@ -285,9 +285,7 @@ function wc_get_order_types( $for = '' ) {
 			}
 			break;
 		case 'admin-menu':
-			// Get order types with show_ui => true that should appear in admin menus.
-			// This includes types with show_in_menu => 'woocommerce' (legacy behavior)
-			// and show_in_menu => true (for order types with their own top-level menu).
+			// Get order types with show_ui enabled that should appear in admin menus.
 			foreach ( $wc_order_types as $type => $args ) {
 				$post_type_obj = get_post_type_object( $type );
 				if ( $post_type_obj && $post_type_obj->show_ui && false !== $post_type_obj->show_in_menu ) {
