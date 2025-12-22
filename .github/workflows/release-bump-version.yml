@@ -184,7 +184,7 @@ jobs:
           # Create PR
           gh pr create \
             --title 'Bump WooCommerce version to `${{ steps.compute-new-version.outputs.nextVersion }}` on `${{ inputs.branch }}`' \
-            --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.'$'\n\n''<!-- [x] This Pull Request does not require a changelog -->' \
+            --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.'$'\n\n''<!-- [x] This Pull Request does not require a changelog --><!-- is-release-pr -->' \
             --base ${{ inputs.branch }} \
             --head ${branch_name} \
             --label Release \

@@ -262,7 +262,7 @@ jobs:
               });
             
               // Create PR body
-              let prBody = `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n`;
+              let prBody = `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n<!-- is-release-pr -->`;
             
               if (hasConflicts) {
                 prBody += `⚠️ **WARNING**: This cherry-pick contained conflicts that have not been resolved. Please review the changes carefully before merging!\n\n`;

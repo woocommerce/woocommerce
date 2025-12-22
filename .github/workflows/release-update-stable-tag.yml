@@ -281,7 +281,7 @@ jobs:
 
             gh pr create \
               --title "Update stable tag to $TARGET_VERSION ($BRANCH_NAME)" \
-              --body "This PR updates the stable tag to $TARGET_VERSION." \
+              --body "This PR updates the stable tag to $TARGET_VERSION.<!-- is-release-pr -->" \
               --base "$BRANCH_NAME" \
               --head "$UPDATE_BRANCH" \
               --reviewer ${{ github.actor }} \

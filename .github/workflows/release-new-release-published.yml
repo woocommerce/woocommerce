@@ -136,7 +136,7 @@ jobs:
           # Open a PR.
           gh pr create \
             --title 'Update changelog.txt after ${{ inputs.release_tag_name }}' \
-            --body 'This PR updates the global changelog.txt file following the release of version ${{ inputs.release_tag_name }}.' \
+            --body 'This PR updates the global changelog.txt file following the release of version ${{ inputs.release_tag_name }}.<!-- is-release-pr -->' \
             --base trunk \
             --head "$branch_name" \
             --reviewer "${{ github.actor }}" \
