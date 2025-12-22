@@ -26,7 +26,7 @@ trait OrderAuthorizationTrait {
 			$order = wc_get_order( $order_id );
 
 			if ( ! $order ) {
-				throw new RouteException( 'woocommerce_rest_invalid_order', __( 'Invalid order ID.', 'woocommerce' ), 404 );
+				throw new RouteException( 'woocommerce_rest_invalid_order', esc_html__( 'Invalid order ID.', 'woocommerce' ), 404 );
 			}
 
 			$order_customer_id = $order->get_customer_id();
@@ -37,7 +37,7 @@ trait OrderAuthorizationTrait {
 				if ( get_current_user_id() === $order_customer_id ) {
 					return true;
 				} else {
-					throw new RouteException( 'woocommerce_rest_invalid_user', __( 'This order belongs to a different customer.', 'woocommerce' ), 403 );
+					throw new RouteException( 'woocommerce_rest_invalid_user', esc_html__( 'This order belongs to a different customer.', 'woocommerce' ), 403 );
 				}
 			}
 
@@ -66,21 +66,21 @@ trait OrderAuthorizationTrait {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $order ) {
-			throw new RouteException( 'woocommerce_rest_invalid_order', __( 'Invalid order ID.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_invalid_order', esc_html__( 'Invalid order ID.', 'woocommerce' ), 404 );
 		}
 
 		$order_billing_email = $order->get_billing_email();
 
 		// If the order doesn't have an email, then allowing an empty billing_email param is acceptable. It will still be compared to order email below.
 		if ( ! $billing_email && ! empty( $order_billing_email ) ) {
-			throw new RouteException( 'woocommerce_rest_invalid_billing_email', __( 'No billing email provided.', 'woocommerce' ), 401 );
+			throw new RouteException( 'woocommerce_rest_invalid_billing_email', esc_html__( 'No billing email provided.', 'woocommerce' ), 401 );
 		}
 
 		// For Store API authorization, the provided billing email must exactly match the order's billing email. We use
 		// direct comparison rather than Users::should_user_verify_order_email() because that function has a grace
 		// period for newly created orders which is inappropriate for use when querying orders on the API.
 		if ( 0 !== strcasecmp( $order_billing_email, $billing_email ) ) {
-			throw new RouteException( 'woocommerce_rest_invalid_billing_email', __( 'Invalid billing email provided.', 'woocommerce' ), 401 );
+			throw new RouteException( 'woocommerce_rest_invalid_billing_email', esc_html__( 'Invalid billing email provided.', 'woocommerce' ), 401 );
 		}
 	}
 }
