@@ -1,8 +1,9 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Order Route Tests.
  */
+
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
@@ -137,7 +138,7 @@ class Order extends ControllerTestCase {
 	 * Test that billing email matching is case-insensitive.
 	 */
 	public function test_guest_can_access_guest_order_with_different_case_email() {
-		$order = $this->create_guest_order(); // Has email: guest@example.com
+		$order = $this->create_guest_order(); // Has email: guest@example.com.
 
 		wp_set_current_user( 0 );
 
