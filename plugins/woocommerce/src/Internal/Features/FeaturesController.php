@@ -584,7 +584,7 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 			),
-			'fraud_protection'              => array(
+			'fraud_protection'                   => array(
 				'name'                         => __( 'Fraud protection', 'woocommerce' ),
 				'description'                  => __(
 					'Enable fraud protection features for your store.',
