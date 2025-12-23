@@ -50,8 +50,8 @@ class WC_Gateway_Paypal_Notices {
 	 * @var array
 	 */
 	protected const PAYPAL_ACCOUNT_RESTRICTION_ISSUES = array(
-		'PAYEE_ACCOUNT_LOCKED_OR_CLOSED',
-		'PAYEE_ACCOUNT_RESTRICTED',
+		WC_Gateway_Paypal_Constants::PAYPAL_ISSUE_PAYEE_ACCOUNT_LOCKED_OR_CLOSED,
+		WC_Gateway_Paypal_Constants::PAYPAL_ISSUE_PAYEE_ACCOUNT_RESTRICTED,
 	);
 
 	/**

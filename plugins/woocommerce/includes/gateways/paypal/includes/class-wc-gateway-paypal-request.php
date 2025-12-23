@@ -406,16 +406,18 @@ class WC_Gateway_Paypal_Request {
 				throw new Exception( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
 			}
 
-			$http_code     = wp_remote_retrieve_response_code( $response );
-			$body          = wp_remote_retrieve_body( $response );
-			$response_data = json_decode( $body, true );
+			$http_code             = wp_remote_retrieve_response_code( $response );
+			$body                  = wp_remote_retrieve_body( $response );
+			$response_data         = json_decode( $body, true );
+			$issue                 = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
+			$auth_already_captured = 422 === $http_code && WC_Gateway_Paypal_Constants::PAYPAL_ISSUE_AUTHORIZATION_ALREADY_CAPTURED === $issue;
 
-			if ( 200 !== $http_code && 201 !== $http_code ) {
+			if ( 200 !== $http_code && 201 !== $http_code && ! $auth_already_captured ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
 				throw new Exception( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
-			// Set custom status for successful capture response.
+			// Set custom status for successful capture response, or if the authorization was already captured.
 			$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
 			$order->save();
 		} catch ( Exception $e ) {
