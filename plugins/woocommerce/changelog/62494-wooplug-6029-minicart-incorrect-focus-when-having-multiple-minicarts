@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix minicart focus when multiple minicarts are in the page

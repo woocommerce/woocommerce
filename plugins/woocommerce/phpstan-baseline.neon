@@ -12157,12 +12157,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -12201,18 +12195,6 @@ parameters:
 		-
 			message: '#^Cannot call method has_status\(\) on bool\|WC_Order\|WC_Order_Refund\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
-			message: '#^Method WC_Cart_Session\:\:clean_up_removed_cart_contents\(\) should return bool but empty return statement found\.$#'
-			identifier: return.empty
-			count: 2
-			path: includes/class-wc-cart-session.php
-
-		-
-			message: '#^Method WC_Cart_Session\:\:clean_up_removed_cart_contents\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: includes/class-wc-cart-session.php
 
@@ -23947,12 +23929,6 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 5
-			path: includes/emails/class-wc-email.php
-
-		-
 			message: '#^Access to property \$AltBody on an unknown class PHPMailer\.$#'
 			identifier: class.notFound
 			count: 4
@@ -24074,24 +24050,6 @@ parameters:
 
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_Settings_API\)\: Unexpected token "\\n ", expected ''\<'' at offset 255 on line 9$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Email \$this The WC_Email object\.\)\: Unexpected token "\$this", expected variable at offset 161 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Email \$this The WC_Email object\.\)\: Unexpected token "\$this", expected variable at offset 162 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Email \$this The WC_Email object\.\)\: Unexpected token "\$this", expected variable at offset 300 on line 8$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/emails/class-wc-email.php
@@ -24783,13 +24741,13 @@ parameters:
 		-
 			message: '#^Cannot call method get_meta\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
 			message: '#^Cannot call method get_payment_method\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
@@ -24800,108 +24758,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_address_1\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_address_2\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_city\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_country\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_email\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_first_name\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_last_name\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_postcode\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_billing_state\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_address_1\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_address_2\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_city\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_country\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_first_name\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_last_name\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_postcode\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Cannot call method set_shipping_state\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -54862,36 +54718,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/Appearance.php
 
 		-
-			message: '#^Cannot call method is_block_editor\(\) on WP_Screen\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:possibly_add_site_editor_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:possibly_hide_wp_admin_bar\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Parameter \#1 \$haystack of function str_starts_with expects string\|null, array\|string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
 			message: '#^Parameter \#1 \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\:\:__construct\(\) expects Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\|null, Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList given\.$#'
 			identifier: argument.type
 			count: 1
@@ -54900,12 +54726,6 @@ parameters:
 		-
 			message: '#^Parameter \$task_list of method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\CustomizeStore\:\:__construct\(\) has invalid type Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Tasks\\TaskList\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
 			count: 1
 			path: src/Admin/Features/OnboardingTasks/Tasks/CustomizeStore.php
 
@@ -67588,54 +67408,6 @@ parameters:
 			path: src/Internal/Admin/Onboarding/Onboarding.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:install_font_faces\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:start_install_fonts_async_job\(\) should return string but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:start_install_fonts_async_job\(\) should return string but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Offset ''fontFamily'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 2
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Offset ''name'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Offset ''preview'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
-			message: '#^Offset ''slug'' might not exist on array\|null\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingHelper\:\:add_help_tab\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -73705,72 +73477,6 @@ parameters:
 			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:download_file\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:get_installed_font_faces_by_slug\(\) should return WP_Post\|null but returns int\|WP_Post\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:handle_font_file_upload_error\(\) has invalid return type Automattic\\WooCommerce\\Internal\\Font\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:handle_font_file_upload_error\(\) should return Automattic\\WooCommerce\\Internal\\Font\\WP_Error but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:insert_font_face\(\) should return WP_Error\|WP_Post but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:validate_font_face\(\) should return WP_Error\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Parameter \#1 \$postarr of function wp_insert_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{post_type\: ''wp_font_face'', post_parent\: int, post_title\: string, post_name\: string, post_content\: non\-empty\-string\|false, post_status\: ''publish''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Font/FontFace.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFamily\:\:get_font_family_by_name\(\) should return WP_Post\|null but returns int\|WP_Post\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/Font/FontFamily.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFamily\:\:insert_font_family\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Font/FontFamily.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFamily\:\:validate_font_family\(\) should return WP_Error\|null but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Font/FontFamily.php
-
-		-
-			message: '#^Parameter \#1 \$postarr of function wp_insert_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{post_type\: ''wp_font_family'', post_title\: mixed, name\: mixed, post_content\: non\-empty\-string\|false, post_status\: ''publish''\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Font/FontFamily.php
-
-		-
 			message: '#^Call to function is_object\(\) with ''''\|''0''\|array will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1
@@ -77401,12 +77107,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Call to static method load\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Data_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Cannot access property \$public on WP_Post_Type\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -80273,18 +79973,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/StockNotifications/StockSyncController.php
-
-		-
-			message: '#^Trait Automattic\\WooCommerce\\Internal\\Traits\\AccessiblePrivateMethods is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Internal/Traits/AccessiblePrivateMethods.php
-
-		-
-			message: '#^Trait Automattic\\WooCommerce\\Internal\\Traits\\RestApiCache is used zero times and is not analysed\.$#'
-			identifier: trait.unused
-			count: 1
-			path: src/Internal/Traits/RestApiCache.php
 
 		-
 			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
