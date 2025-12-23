@@ -790,14 +790,12 @@ class WC_Gateway_Paypal_Request {
 			$item_amount = $this->get_paypal_order_item_amount( $order, $item );
 			if ( $item_amount < 0 ) {
 				// PayPal does not accept negative item amounts items breakdown.
-				WC_Gateway_Paypal::log( sprintf( 'Order item with negative amount for PayPal order items. Order ID: %d, Item ID: %d, Amount: %f', $order->get_id(), $item->get_id(), $item_amount ) );
 				return array();
 			}
 
 			$quantity = $item->get_quantity();
 			// PayPal does not accept zero or fractional quantities.
 			if ( 0 === $quantity || floor( $quantity ) !== $quantity ) {
-				WC_Gateway_Paypal::log( sprintf( 'Order item with zero or fractional quantity for PayPal order items. Order ID: %d, Item ID: %d, Quantity: %f', $order->get_id(), $item->get_id(), $item->get_quantity() ) );
 				return array();
 			}
 
