@@ -143,7 +143,11 @@ class SessionDataCollector {
 				$first_name           = WC()->customer->get_billing_first_name();
 				$last_name            = WC()->customer->get_billing_last_name();
 				$billing_email        = WC()->customer->get_billing_email();
-				$lifetime_order_count = WC()->customer->get_order_count();
+				
+				if ( WC()->customer->get_id() > 0 ) {
+					$customer = new \WC_Customer( WC()->customer->get_id() );
+					$lifetime_order_count = $customer->get_order_count();
+				}
 
 				// Sanitize email.
 				if ( $billing_email ) {
