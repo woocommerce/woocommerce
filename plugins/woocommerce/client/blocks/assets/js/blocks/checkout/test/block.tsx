@@ -45,6 +45,16 @@ import Checkout from '../block';
 
 jest.mock( '@wordpress/data', () => {
 	const wpData = jest.requireActual( 'wordpress-data-wp-6-7' );
+	// Create a mock editor store with basic selectors
+	const mockEditorStore = wpData.createReduxStore( 'core/editor', {
+		reducer: () => ( {} ),
+		selectors: {
+			getCurrentPostId: () => 0,
+			getCurrentPostType: () => 'post',
+			isCurrentPostPublished: () => false,
+		},
+	} );
+	wpData.register( mockEditorStore );
 	return {
 		__esModule: true,
 		...wpData,
