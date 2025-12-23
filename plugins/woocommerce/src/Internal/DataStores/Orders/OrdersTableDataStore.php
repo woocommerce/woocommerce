@@ -2422,9 +2422,31 @@ FROM $order_meta_table
 		$row        = array();
 		$row_format = array();
 
+		$order_id = $order->get_id();
+		$order_data = $order->get_data();
+		$has_existing_date_created = $order_id > 0 && isset( $order_data['date_created'] ) && null !== $order_data['date_created'];
+
 		foreach ( $column_mapping as $column => $details ) {
 			if ( ! isset( $details['name'] ) || ! array_key_exists( $details['name'], $changes ) ) {
 				continue;
+			}
+
+			if ( 'date_created_gmt' === $column && 'date_created' === $details['name'] && $has_existing_date_created ) {
+				/**
+				 * Filter to allow updating date_created_gmt for existing orders.
+				 *
+				 * @param bool             $allow_update Whether to allow updating date_created_gmt. Default false.
+				 * @param \WC_Abstract_Order $order        The order object.
+				 * @param string           $column       The database column name.
+				 * @return bool True to allow the update, false to skip it.
+				 *
+				 * @since 10.5.0
+				 */
+				$allow_update = apply_filters( 'woocommerce_allow_update_order_date_created_gmt', false, $order, $column );
+				
+				if ( ! $allow_update ) {
+					continue;
+				}
 			}
 
 			$row[ $column ]        = $this->database_util->format_object_value_for_db( $changes[ $details['name'] ], $details['type'] );

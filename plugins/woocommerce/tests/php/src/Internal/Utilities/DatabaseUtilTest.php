@@ -155,4 +155,86 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 			$this->assertEquals( $expected, $this->sut->sanitise_boolean_fts_search_term( $term ) );
 		}
 	}
+
+	/**
+	 * @testDox Test that format_object_value_for_db properly handles WC_DateTime objects for date type.
+	 */
+	public function test_format_object_value_for_db_date_with_wc_datetime() {
+		$datetime = new \WC_DateTime( '2025-01-15 10:30:00', new \DateTimeZone( 'UTC' ) );
+		$result  = $this->sut->format_object_value_for_db( $datetime, 'date' );
+		$this->assertEquals( '2025-01-15 10:30:00', $result );
+	}
+
+	/**
+	 * @testDox Test that format_object_value_for_db properly handles numeric timestamps for date type.
+	 */
+	public function test_format_object_value_for_db_date_with_timestamp() {
+		$timestamp = strtotime( '2025-01-15 10:30:00 UTC' );
+		$result    = $this->sut->format_object_value_for_db( $timestamp, 'date' );
+		$this->assertEquals( '2025-01-15 10:30:00', $result );
+	}
+
+	/**
+	 * @testDox Test that format_object_value_for_db detects and converts millisecond timestamps for date type.
+	 */
+	public function test_format_object_value_for_db_date_with_millisecond_timestamp() {
+		$timestamp_seconds = strtotime( '2025-01-15 10:30:00 UTC' );
+		$millisecond_timestamp = $timestamp_seconds * 1000;
+		$result                = $this->sut->format_object_value_for_db( $millisecond_timestamp, 'date' );
+		$this->assertEquals( '2025-01-15 10:30:00', $result );
+	}
+
+	/**
+	 * @testDox Test that format_object_value_for_db rejects timestamps that result in dates beyond year 2100.
+	 */
+	public function test_format_object_value_for_db_date_rejects_future_dates() {
+		$invalid_timestamp = 17369442000000;
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid timestamp value' );
+		$this->sut->format_object_value_for_db( $invalid_timestamp, 'date' );
+	}
+
+	/**
+	 * @testDox Test that format_object_value_for_db rejects timestamps beyond year 2100 even after conversion.
+	 */
+	public function test_format_object_value_for_db_date_rejects_dates_after_2100() {
+		$future_date_string = '2101-01-01 00:00:00';
+		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'Invalid date value results in year' );
+		$this->sut->format_object_value_for_db( $future_date_string, 'date' );
+	}
+
+	/**
+	 * @testDox Test that format_object_value_for_db properly handles string dates for date type.
+	 */
+	public function test_format_object_value_for_db_date_with_string() {
+		$date_string = '2025-01-15 10:30:00';
+		$result      = $this->sut->format_object_value_for_db( $date_string, 'date' );
+		$this->assertEquals( '2025-01-15 10:30:00', $result );
+	}
+
+	/**
+	 * @testDox Test that format_object_value_for_db returns null for null/empty date values.
+	 */
+	public function test_format_object_value_for_db_date_with_null() {
+		$this->assertNull( $this->sut->format_object_value_for_db( null, 'date' ) );
+		$this->assertNull( $this->sut->format_object_value_for_db( false, 'date' ) );
+		$this->assertNull( $this->sut->format_object_value_for_db( 0, 'date' ) );
+	}
+
+	/**
+	 * @testDox Test that format_object_value_for_db can allow invalid dates with filter (backwards compatibility).
+	 */
+	public function test_format_object_value_for_db_date_allows_invalid_with_filter() {
+		add_filter( 'woocommerce_allow_invalid_date_in_db_format', '__return_true' );
+
+		$future_date_string = '2200-01-01 00:00:00';
+		$result = $this->sut->format_object_value_for_db( $future_date_string, 'date' );
+
+		$this->assertIsString( $result );
+		$this->assertStringContainsString( '2200', $result );
+
+		// Clean up.
+		remove_filter( 'woocommerce_allow_invalid_date_in_db_format', '__return_true' );
+	}
 }

@@ -163,9 +163,11 @@ class DatabaseUtil {
 				$value = strval( $value );
 				break;
 			case 'date':
-				// Date properties are converted to the WP timezone (see WC_Data::set_date_prop() method), however
-				// for our own tables we persist dates in GMT.
-				$value = $value ? ( new DateTime( $value ) )->setTimezone( new DateTimeZone( '+00:00' ) )->format( 'Y-m-d H:i:s' ) : null;
+				if ( ! $value ) {
+					$value = null;
+				} else {
+					$value = $this->format_date_value_for_db( $value, true );
+				}
 				break;
 			case 'date_epoch':
 				$value = $value ? ( new DateTime( "@{$value}" ) )->format( 'Y-m-d H:i:s' ) : null;
@@ -175,6 +177,82 @@ class DatabaseUtil {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Formats a date value for database storage.
+	 *
+	 * @param mixed $value        The date value (WC_DateTime, timestamp, or string).
+	 * @param bool  $validate     Whether to validate the date (reject invalid dates).
+	 * @return string|null 		  Formatted date string or null.
+	 * @throws \Exception 	      When validation fails and filter doesn't allow invalid dates.
+	 */
+	private function format_date_value_for_db( $value, bool $validate = true ) {
+		$formatted_date = null;
+
+		try {
+			if ( is_a( $value, 'WC_DateTime' ) ) {
+				$datetime = clone $value;
+				$datetime->setTimezone( new DateTimeZone( 'UTC' ) );
+				$formatted_date = $datetime->format( 'Y-m-d H:i:s' );
+			} elseif ( is_numeric( $value ) ) {
+				$timestamp = (int) $value;
+				if ( $timestamp > 4102444800 ) {
+					$timestamp = (int) ( $timestamp / 1000 );
+				}
+
+				if ( $validate ) {
+					$min_timestamp = 0;
+					$max_timestamp = 4102444800;
+					if ( $timestamp < $min_timestamp || $timestamp > $max_timestamp ) {
+						throw new \Exception( sprintf( 'Invalid timestamp value: %d (expected range: %d - %d)', $value, $min_timestamp, $max_timestamp ) );
+					}
+				}
+
+				$datetime      = new DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
+				$formatted_date = $datetime->format( 'Y-m-d H:i:s' );
+			} else {
+				$datetime      = new DateTime( $value, new DateTimeZone( 'UTC' ) );
+				$formatted_date = $datetime->format( 'Y-m-d H:i:s' );
+			}
+
+			if ( $validate ) {
+				$formatted_year = (int) substr( $formatted_date, 0, 4 );
+				if ( $formatted_year > 2100 ) {
+					throw new \Exception( sprintf( 'Invalid date value results in year %d (dates beyond 2100 are not allowed)', $formatted_year ) );
+				}
+			}
+
+			return $formatted_date;
+		} catch ( \Exception $e ) {
+			if ( ! $validate ) {
+				return $formatted_date;
+			}
+
+			/**
+			 * Filter to allow invalid dates to be processed (for backwards compatibility).
+			 *
+			 * @param bool       $allow_invalid Whether to allow invalid dates. Default false.
+			 * @param mixed      $value         The date value that failed validation.
+			 * @param string     $type         The data type ('date' or 'date_epoch').
+			 * @param \Exception $exception    The exception that was caught.
+			 * @return bool True to allow the invalid date, false to throw the exception.
+			 *
+			 * @since 10.5.0
+			 */
+			$allow_invalid = apply_filters( 'woocommerce_allow_invalid_date_in_db_format', false, $value, 'date', $e );
+			if ( $allow_invalid ) {
+				return $this->format_date_value_for_db( $value, false );
+			}
+
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error(
+					sprintf( 'Invalid date value in DatabaseUtil::format_object_value_for_db: %s', $e->getMessage() ),
+					array( 'source' => 'woocommerce', 'value' => $value )
+				);
+			}
+			throw new \Exception( sprintf( 'Invalid date value: %s', $e->getMessage() ) );
+		}
 	}
 
 	/**

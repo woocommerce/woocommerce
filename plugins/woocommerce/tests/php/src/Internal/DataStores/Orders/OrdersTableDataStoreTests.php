@@ -2278,6 +2278,234 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Test that date_created_gmt is not overwritten after initial order creation, even when status changes to completed.
+	 */
+	public function test_date_created_gmt_not_overwritten_on_status_change() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+
+		// Create an order.
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_created_via( 'checkout' );
+		$order->save();
+
+		// Get the original creation date from the order object.
+		$original_date_created_obj = $order->get_date_created();
+		$this->assertNotNull( $original_date_created_obj, 'Order should have a creation date.' );
+		$original_date_created = $original_date_created_obj->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$order_id = $order->get_id();
+
+		$order->set_date_created( time() - 86400 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$date_after_status_change = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT date_created_gmt FROM {$orders_table} WHERE id = %d",
+				$order->get_id()
+			)
+		);
+
+		$this->assertNotEmpty( $date_after_status_change, 'Order should still have a creation date after status change.' );
+
+		$this->assertEquals(
+			$original_date_created,
+			$date_after_status_change,
+			'date_created_gmt should not be overwritten after initial creation, even when order status changes to completed.'
+		);
+	}
+
+	/**
+	 * @testDox Test that date_created_gmt can be updated when filter allows it (backwards compatibility).
+	 */
+	public function test_date_created_gmt_can_be_updated_with_filter() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+
+		// Create an order.
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_created_via( 'checkout' );
+		$order->save();
+
+		// Get the original creation date.
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$original_date_created = $order->get_date_created();
+		$original_date_created_str = $original_date_created->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+
+		// Use the filter to allow updating the date (for backwards compatibility).
+		add_filter( 'woocommerce_allow_update_order_date_created_gmt', '__return_true' );
+
+		// Try to set a new date.
+		$new_date = time() - 86400;
+		$order->set_date_created( $new_date );
+		$order->save();
+
+		$date_after_update = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT date_created_gmt FROM {$orders_table} WHERE id = %d",
+				$order->get_id()
+			)
+		);
+
+		$this->assertNotEmpty( $date_after_update, 'Order should have a creation date after update.' );
+		$this->assertNotEquals(
+			$original_date_created_str,
+			$date_after_update,
+			'date_created_gmt should be updated when filter allows it.'
+		);
+
+		// Clean up.
+		remove_filter( 'woocommerce_allow_update_order_date_created_gmt', '__return_true' );
+	}
+
+	/**
+	 * @testDox Test that date corruption from millisecond timestamps is prevented.
+	 */
+	public function test_date_corruption_from_millisecond_timestamp_prevented() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+
+		// Create an order using the helper to ensure it's properly set up.
+		$order = WC_Helper_Order::create_order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->save();
+
+		// Get the original creation date.
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$original_date_created = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT date_created_gmt FROM {$orders_table} WHERE id = %d",
+				$order->get_id()
+			)
+		);
+
+		$millisecond_timestamp = 1736944200000;
+
+		// Try to set the date using a millisecond timestamp.
+		try {
+			$order->set_date_modified( $millisecond_timestamp );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->save();
+
+			$date_after_update = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT date_created_gmt FROM {$orders_table} WHERE id = %d",
+					$order->get_id()
+				)
+			);
+
+			$this->assertNotEmpty( $date_after_update, 'Order should still have a creation date.' );
+
+			$this->assertEquals(
+				$original_date_created,
+				$date_after_update,
+				'date_created_gmt should remain unchanged even when invalid timestamps are attempted.'
+			);
+
+			$date_updated = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT date_updated_gmt FROM {$orders_table} WHERE id = %d",
+					$order->get_id()
+				)
+			);
+
+			$this->assertNotEmpty( $date_updated, 'Order should have an updated date.' );
+
+			$updated_year = (int) substr( $date_updated, 0, 4 );
+			$this->assertLessThanOrEqual(
+				2100,
+				$updated_year,
+				'date_updated_gmt should not be in an invalid future year (beyond 2100).'
+			);
+		} catch ( \Exception $e ) {
+			$this->assertStringContainsString( 'Invalid', $e->getMessage() );
+		}
+	}
+
+	/**
+	 * @testDox Test that date corruption is prevented when a plugin hooks into woocommerce_order_status_completed.
+	 */
+	public function test_date_corruption_prevented_via_status_completed_hook() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+
+		// Create an order.
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_created_via( 'checkout' );
+		$order->save();
+
+		// Get the original creation date from database.
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$order_id = $order->get_id();
+		$original_date_created = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT date_created_gmt FROM {$orders_table} WHERE id = %d",
+				$order_id
+			)
+		);
+
+		$this->assertNotEmpty( $original_date_created, 'Order should have a creation date initially.' );
+
+		// Simulate a third-party plugin hooking into woocommerce_order_status_completed
+		// and trying to set date_created with a millisecond timestamp.
+		$malicious_callback = function( $order_id_param, $order_obj = null ) use ( $order_id ) {
+			if ( $order_id_param === $order_id ) {
+				// Simulate a plugin that incorrectly passes milliseconds instead of seconds.
+				$millisecond_timestamp = time() * 1000;
+				if ( $order_obj ) {
+					$order_obj->set_date_created( $millisecond_timestamp );
+				} else {
+					$order = wc_get_order( $order_id_param );
+					if ( $order ) {
+						$order->set_date_created( $millisecond_timestamp );
+						$order->save();
+					}
+				}
+			}
+		};
+		add_action( 'woocommerce_order_status_completed', $malicious_callback, 10, 2 );
+
+		// Change status to completed.
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Remove the hook.
+		remove_action( 'woocommerce_order_status_completed', $malicious_callback, 10 );
+
+		$date_after_status_change = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT date_created_gmt FROM {$orders_table} WHERE id = %d",
+				$order_id
+			)
+		);
+
+		$this->assertNotEmpty( $date_after_status_change, 'Order should still have a creation date after status change.' );
+
+		$this->assertEquals(
+			$original_date_created,
+			$date_after_status_change,
+			'date_created_gmt should not be overwritten even when a plugin tries to set it with a millisecond timestamp via woocommerce_order_status_completed hook.'
+		);
+
+		$date_year = (int) substr( $date_after_status_change, 0, 4 );
+		$this->assertLessThanOrEqual(
+			2100,
+			$date_year,
+			'date_created_gmt should not be in an invalid future year (beyond 2100). Got year: ' . $date_year
+		);
+		$this->assertGreaterThanOrEqual(
+			2020,
+			$date_year,
+			'date_created_gmt should be in a reasonable year (not before 2020). Got year: ' . $date_year
+		);
+	}
+
+	/**
 	 * @testDox Test that inserting with strict SQL mode is also supported.
 	 */
 	public function test_order_create_with_strict_mode_and_null_values() {
