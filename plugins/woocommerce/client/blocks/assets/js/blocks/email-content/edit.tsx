@@ -9,11 +9,11 @@ import { useBlockProps } from '@wordpress/block-editor';
 import {
 	__experimentalText as Text, // eslint-disable-line
 } from '@wordpress/components';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
  */
-import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import metadata from './block.json';
 
 function HoverContent() {
