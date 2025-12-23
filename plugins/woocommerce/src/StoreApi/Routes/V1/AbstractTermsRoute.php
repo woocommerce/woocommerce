@@ -1,8 +1,8 @@
 <?php
+declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
-use WP_Term_Query;
 
 /**
  * AbstractTermsRoute class.
@@ -133,9 +133,8 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 			$prepared_args['parent'] = (int) $request['parent'];
 		}
 
-		$term_query = new WP_Term_Query();
-		$objects    = $term_query->query( $prepared_args );
-		$return     = [];
+		$objects = get_terms( $prepared_args );
+		$return  = [];
 
 		foreach ( $objects as $object ) {
 			$data     = $this->prepare_item_for_response( $object, $request );

@@ -138,8 +138,8 @@ class ProductCategories extends AbstractDynamicBlock {
 		if ( $children_only ) {
 			$term_id    = get_queried_object_id();
 			$categories = get_terms(
-				'product_cat',
 				[
+					'taxonomy'     => 'product_cat',
 					'hide_empty'   => ! $attributes['hasEmpty'],
 					'pad_counts'   => true,
 					'hierarchical' => true,
@@ -148,8 +148,8 @@ class ProductCategories extends AbstractDynamicBlock {
 			);
 		} else {
 			$categories = get_terms(
-				'product_cat',
 				[
+					'taxonomy'     => 'product_cat',
 					'hide_empty'   => ! $attributes['hasEmpty'],
 					'pad_counts'   => true,
 					'hierarchical' => true,
@@ -165,7 +165,7 @@ class ProductCategories extends AbstractDynamicBlock {
 		if ( ! $attributes['hasEmpty'] ) {
 			$categories = array_filter(
 				$categories,
-				function( $category ) {
+				function ( $category ) {
 					return 0 !== $category->count;
 				}
 			);
