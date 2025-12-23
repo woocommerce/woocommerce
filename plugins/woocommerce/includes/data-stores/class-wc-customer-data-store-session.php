@@ -205,7 +205,27 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
-		return 0;
+		if ( $customer->get_id() === 0 ) {
+			return 0;
+		}
+
+		$query_args = array (
+			'order_after' => null,
+			'page' => 1,
+			'per_page' => 1,
+			'order' => 'desc',
+			'users' => [ $customer->get_id() ],
+		);
+		
+		$data_store = \WC_Data_Store::load( 'report-customers' );
+		$customer_report_data = $data_store->get_data( $query_args );
+		$lifetime_order_count = 0;
+
+		if ( $customer_report_data && $customer_report_data->total > 0 ) {
+			$lifetime_order_count = $customer_report_data->data[0]['orders_count'];
+		}
+
+		return $lifetime_order_count;
 	}
 
 	/**
