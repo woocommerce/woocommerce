@@ -64,7 +64,8 @@ class JetpackConnectionManager {
 		try {
 			return new Manager( 'woocommerce' );
 		} catch ( \Exception $e ) {
-			$this->log_error(
+			FraudProtectionController::log(
+				'error',
 				sprintf(
 					'Failed to initialize Jetpack Connection Manager: %s',
 					$e->getMessage()
@@ -178,7 +179,8 @@ class JetpackConnectionManager {
 
 			return null;
 		} catch ( \Exception $e ) {
-			$this->log_error(
+			FraudProtectionController::log(
+				'error',
 				sprintf(
 					'Failed to get Jetpack authorization URL: %s',
 					$e->getMessage()
@@ -186,16 +188,5 @@ class JetpackConnectionManager {
 			);
 			return null;
 		}
-	}
-
-	/**
-	 * Log an error message.
-	 *
-	 * @param string $message Error message.
-	 * @return void
-	 */
-	private function log_error( string $message ): void {
-		$logger = wc_get_logger();
-		$logger->error( $message, array( 'source' => self::LOGGER_SOURCE ) );
 	}
 }
