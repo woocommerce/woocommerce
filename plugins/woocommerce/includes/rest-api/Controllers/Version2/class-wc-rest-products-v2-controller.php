@@ -689,7 +689,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
 						'slug'   => rawurldecode( $name ),
-						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
+						'option' => $option_term && ! is_wp_error( $option_term ) ? rawurldecode( $option_term->name ) : rawurldecode( $attribute ),
 					);
 				} else {
 					$attributes[] = array(
@@ -1631,7 +1631,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$_attribute = $attributes[ $attribute_name ];
 
 					if ( $_attribute['is_variation'] ) {
-						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+						$value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
 							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
