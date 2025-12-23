@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-
-/**
- * Internal dependencies
- */
-import { CORE_EDITOR_STORE } from '../../utils/wordpress-stores';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 enum Locations {
 	SINGLE_PRODUCT = 'single-product',

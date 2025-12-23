@@ -6,7 +6,7 @@ import { addFilter } from '@wordpress/hooks';
 import { select, useSelect, useDispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
-import { CORE_EDITOR_STORE } from '../../utils/wordpress-stores';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import {
 	useEffect,
 	useLayoutEffect,

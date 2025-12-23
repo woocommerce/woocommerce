@@ -10,7 +10,6 @@ import { CORE_EDITOR_STORE } from './wordpress-stores';
 
 export const isSiteEditorPage = (): boolean => {
 	const editor = select( CORE_EDITOR_STORE );
-	// @ts-expect-error getCurrentPostType is not typed.
 	const editedPostType = editor?.getCurrentPostType?.();
 
 	return (

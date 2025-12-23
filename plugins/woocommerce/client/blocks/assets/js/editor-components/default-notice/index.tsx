@@ -7,6 +7,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { Notice } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { CHECKOUT_PAGE_ID, CART_PAGE_ID } from '@woocommerce/block-settings';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 import {
 	useCallback,
@@ -17,7 +18,6 @@ import {
 /**
  * Internal dependencies
  */
-import { CORE_EDITOR_STORE } from '../../utils/wordpress-stores';
 import './editor.scss';
 
 export function DefaultNotice( { block }: { block: string } ) {

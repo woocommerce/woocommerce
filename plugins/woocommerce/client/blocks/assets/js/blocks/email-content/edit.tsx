@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { CORE_EDITOR_STORE } from '../../utils/wordpress-stores';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import metadata from './block.json';
 
 function HoverContent() {
