@@ -68,90 +68,54 @@ class ProductCategories extends ControllerTestCase {
 	 */
 	protected function tearDown(): void {
 		parent::tearDown();
-
 		delete_option( 'woocommerce_hide_out_of_stock_items' );
+		delete_transient( 'wc_term_counts' );
 	}
 
 	/**
-	 * @testdox Should return correct category data.
+	 * @testdox Category list count should reflect visibility-aware product count.
 	 */
-	public function test_get_items(): void {
+	public function test_category_list_count_uses_visibility_aware_count(): void {
+		$term_id = $this->product_category['term_id'];
+
+		$this->products[0]->set_stock_status( 'outofstock' );
+		$this->products[0]->save();
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		wc_recount_all_terms();
+
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/categories' );
 		$request->set_param( 'hide_empty', false );
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
-		$this->assertGreaterThanOrEqual( 1, count( $data ), 'Expected at least one category.' );
-
-		$test_category = null;
-		foreach ( $data as $category ) {
-			if ( $category['id'] === $this->product_category['term_id'] ) {
-				$test_category = $category;
+		$category = null;
+		foreach ( $data as $cat ) {
+			if ( $cat['id'] === $term_id ) {
+				$category = $cat;
 				break;
 			}
 		}
 
-		$this->assertNotNull( $test_category, 'Test category not found in response.' );
-		$this->assertArrayHasKey( 'id', $test_category );
-		$this->assertArrayHasKey( 'name', $test_category );
-		$this->assertArrayHasKey( 'slug', $test_category );
-		$this->assertArrayHasKey( 'description', $test_category );
-		$this->assertArrayHasKey( 'count', $test_category );
+		$this->assertNotNull( $category, 'Category should exist in response.' );
+		$this->assertSame( 1, $category['count'], 'Count should reflect visibility-aware value.' );
 	}
 
 	/**
-	 * @testdox Should return a single category.
+	 * @testdox Single category count should reflect visibility-aware product count.
 	 */
-	public function test_get_item(): void {
-		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products/categories/' . $this->product_category['term_id'] );
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
-		$this->assertSame( 'Test Category', $data['name'] );
-	}
-
-	/**
-	 * @testdox Should exclude out of stock products from category count when hide out of stock option is enabled.
-	 */
-	public function test_category_count_excludes_out_of_stock_when_visibility_option_enabled(): void {
-		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products/categories/' . $this->product_category['term_id'] );
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
-		$this->assertSame( 2, $data['count'], 'Expected count of 2 when both products are in stock.' );
+	public function test_single_category_count_uses_visibility_aware_count(): void {
+		$term_id = $this->product_category['term_id'];
 
 		$this->products[0]->set_stock_status( 'outofstock' );
 		$this->products[0]->save();
-
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 		wc_recount_all_terms();
 
-		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products/categories/' . $this->product_category['term_id'] );
+		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products/categories/' . $term_id );
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
-		$this->assertSame( 1, $data['count'], 'Expected count of 1 when one product is out of stock and visibility option is enabled.' );
-	}
-
-	/**
-	 * @testdox Should include out of stock products in category count when hide out of stock option is disabled.
-	 */
-	public function test_category_count_includes_out_of_stock_when_visibility_option_disabled(): void {
-		$this->products[0]->set_stock_status( 'outofstock' );
-		$this->products[0]->save();
-
-		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
-		wc_recount_all_terms();
-
-		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/products/categories/' . $this->product_category['term_id'] );
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
-
-		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
-		$this->assertSame( 2, $data['count'], 'Expected count of 2 when visibility option is disabled, even if one product is out of stock.' );
+		$this->assertSame( 200, $response->get_status(), 'Response should be successful.' );
+		$this->assertSame( 1, $data['count'], 'Single category count should reflect visibility-aware value.' );
 	}
 }

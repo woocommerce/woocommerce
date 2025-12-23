@@ -564,8 +564,8 @@ add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_chan
 
 
 /**
- * Overrides the original term count for product categories and tags with the product count.
- * that takes catalog visibility into account.
+ * Overrides the original term count for product categories, tags, and brands with the product count.
+ * that takes catalog visibility and out of stock status into account.
  *
  * @param array        $terms      List of terms.
  * @param string|array $taxonomies Single taxonomy or list of taxonomies.
@@ -614,6 +614,62 @@ function wc_change_term_counts( $terms, $taxonomies ) {
 	return $terms;
 }
 add_filter( 'get_terms', 'wc_change_term_counts', 10, 2 );
+
+/**
+ * Overrides the original term count for a single term with the product count.
+ * that takes catalog visibility and out of stock status into account.
+ *
+ * Similar to wc_change_term_counts, but for a single term.
+ *
+ * @param WP_Term $term Term object.
+ * @param string  $taxonomy Taxonomy.
+ * @return WP_Term
+ */
+function wc_change_term_count( $term, $taxonomy ) {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return $term;
+	}
+
+	/**
+	 * Filter which product taxonomies should have their term counts overridden to take catalog visibility into account.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param array $valid_taxonomies List of taxonomy slugs.
+	 */
+	$valid_taxonomies = apply_filters( 'woocommerce_change_term_counts', array( 'product_cat', 'product_tag', 'product_brand' ) );
+	if ( ! in_array( $taxonomy, $valid_taxonomies, true ) ) {
+		return $term;
+	}
+
+	if ( ! $term instanceof WP_Term ) {
+		return $term;
+	}
+
+	// Check the transient cache first (shared with wc_change_term_counts) to avoid redundant meta lookups.
+	$key         = $term->term_id . '_' . $taxonomy;
+	$term_counts = get_transient( 'wc_term_counts' );
+
+	if ( false !== $term_counts && isset( $term_counts[ $key ] ) ) {
+		$term->count = $term_counts[ $key ];
+		return $term;
+	}
+
+	$count       = get_term_meta( $term->term_id, 'product_count_' . $taxonomy, true );
+	$count       = '' !== $count ? absint( $count ) : 0;
+	$term->count = $count;
+
+	// Update the transient cache.
+	if ( false === $term_counts ) {
+		$term_counts = array();
+	}
+	$term_counts[ $key ] = $count;
+	set_transient( 'wc_term_counts', $term_counts, MONTH_IN_SECONDS );
+
+	return $term;
+}
+
+add_filter( 'get_term', 'wc_change_term_count', 10, 2 );
 
 /**
  * Return products in a given term, and cache value.
