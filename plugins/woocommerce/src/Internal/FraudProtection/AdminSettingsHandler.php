@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Handles admin settings for fraud protection.
  *
- * @since 10.4.0
+ * @since 10.5.0
  */
 class AdminSettingsHandler {
 

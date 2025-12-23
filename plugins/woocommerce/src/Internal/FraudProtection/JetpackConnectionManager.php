@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * Provides centralized methods to check connection status, validate requirements,
  * and handle connection-related errors gracefully.
  *
- * @since 10.4.0
+ * @since 10.5.0
  */
 class JetpackConnectionManager {
 
