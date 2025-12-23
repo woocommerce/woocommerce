@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add `woocommerce_store_api_cart_response` filter to allow modifying the Store API cart response
