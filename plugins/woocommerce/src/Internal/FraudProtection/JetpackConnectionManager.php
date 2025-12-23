@@ -27,32 +27,6 @@ class JetpackConnectionManager {
 	private const LOGGER_SOURCE = 'woo-fraud-protection';
 
 	/**
-	 * Check if Jetpack Connection is available and properly configured.
-	 *
-	 * This method checks:
-	 * 1. If Jetpack Connection class exists
-	 * 2. If the site is connected to WordPress.com
-	 * 3. If we can retrieve the blog ID
-	 *
-	 * @return bool True if connection is available and valid.
-	 */
-	public function is_connected(): bool {
-		// Check if Jetpack Connection is available.
-		if ( ! $this->is_jetpack_connection_available() ) {
-			return false;
-		}
-
-		// Get connection manager instance.
-		$manager = $this->get_connection_manager();
-		if ( ! $manager ) {
-			return false;
-		}
-
-		// Check if site is connected.
-		return $manager->is_connected();
-	}
-
-	/**
 	 * Check if Jetpack Connection class is available.
 	 *
 	 * @return bool True if Jetpack Connection class exists.
