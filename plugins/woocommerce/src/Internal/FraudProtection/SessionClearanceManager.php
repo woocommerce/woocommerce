@@ -184,7 +184,18 @@ class SessionClearanceManager {
 
 		// Use WooCommerce session customer ID.
 		$customer_id = WC()->session->get_customer_id();
-		return $customer_id ? $customer_id : WC()->call_function( 'wc_rand_hash', 'guest_', 30 );
+
+		if ( $customer_id ) {
+			return $customer_id;
+		}
+
+		// Fallback: use or generate a stable guest session ID for tracking consistency.
+		$guest_session_id = WC()->session->get( '_fraud_protection_guest_session_id' );
+		if ( ! $guest_session_id ) {
+			$guest_session_id = WC()->call_function( 'wc_rand_hash', 'guest_', 30 );
+			WC()->session->set( '_fraud_protection_guest_session_id', $guest_session_id );
+		}
+		return $guest_session_id;
 	}
 
 	/**

@@ -96,7 +96,6 @@ class SessionDataCollector {
 			/**
 			 * $is_user_session is flag that we have a real browser session vs API-based interaction.
 			 * We start with a very basic check, but we might need a more sophisticated way to detect it in the future.
-			 * TODO: Implement more sophisticated way to detect it.
 			 */
 			$is_user_session = 'no-session' !== $session_id;
 
@@ -126,7 +125,7 @@ class SessionDataCollector {
 	 *
 	 * Collects customer identification and history data with graceful degradation.
 	 * Tries WC_Customer object first, then falls back to session data if values are empty.
-	 * Only includes lifetime_order_count for order history (minimal approach).
+	 * Includes lifetime_order_count which counts all orders regardless of status.
 	 *
 	 * @since 10.5.0
 	 *
@@ -141,9 +140,10 @@ class SessionDataCollector {
 
 			// Try WC_Customer object first.
 			if ( WC()->customer instanceof \WC_Customer ) {
-				$first_name    = WC()->customer->get_billing_first_name();
-				$last_name     = WC()->customer->get_billing_last_name();
-				$billing_email = WC()->customer->get_billing_email();
+				$first_name           = WC()->customer->get_billing_first_name();
+				$last_name            = WC()->customer->get_billing_last_name();
+				$billing_email        = WC()->customer->get_billing_email();
+				$lifetime_order_count = WC()->customer->get_order_count();
 
 				// Sanitize email.
 				if ( $billing_email ) {
@@ -163,12 +163,6 @@ class SessionDataCollector {
 						$billing_email = \sanitize_email( $customer_data['email'] );
 					}
 				}
-			}
-
-			// Calculate lifetime order count for logged-in users.
-			if ( \is_user_logged_in() ) {
-				$user_id              = \get_current_user_id();
-				$lifetime_order_count = $this->get_lifetime_order_count( $user_id );
 			}
 
 			return array(
@@ -620,38 +614,5 @@ class SessionDataCollector {
 			$terms
 		);
 		return implode( ', ', $category_names );
-	}
-
-	/**
-	 * Calculate lifetime order count for a customer.
-	 *
-	 * Counts orders with 'completed' status only.
-	 *
-	 * @since 10.5.0
-	 *
-	 * @param int $user_id The user ID.
-	 * @return int Number of completed orders.
-	 */
-	private function get_lifetime_order_count( int $user_id ): int {
-		try {
-			if ( ! function_exists( 'wc_get_orders' ) ) {
-				return 0;
-			}
-
-			// ! That might be expensive operation to run on every event, so we might need to cache the result.
-			$orders = WC()->call_function(
-				'wc_get_orders',
-				array(
-					'customer_id' => $user_id,
-					'status'      => 'completed',
-					'limit'       => -1,
-					'return'      => 'ids',
-				)
-			);
-
-			return is_array( $orders ) ? count( $orders ) : 0;
-		} catch ( \Exception $e ) {
-			return 0;
-		}
 	}
 }
