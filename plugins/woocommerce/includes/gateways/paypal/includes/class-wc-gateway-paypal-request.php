@@ -626,11 +626,6 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		$order_items = $this->get_paypal_order_items( $order );
-		if ( empty( $order_items ) ) {
-			// If we cannot build order items (e.g. negative item amounts),
-			// we should not proceed with the create-order request.
-			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
-		}
 
 		$src_locale = get_locale();
 		// If the locale is longer than PayPal's string limit (10).
@@ -783,6 +778,7 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Get the order items for the PayPal create-order request.
+	 * Returns an empty array if any of the items (amount, quantity) are invalid.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return array
@@ -792,15 +788,22 @@ class WC_Gateway_Paypal_Request {
 
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			$item_amount = $this->get_paypal_order_item_amount( $order, $item );
-			if ( 'line_item' === $item->get_type() && $item_amount < 0 ) {
-				// PayPal does not accept negative item amounts (for line items).
-				WC_Gateway_Paypal::log( sprintf( 'Order item with negative amount for PayPal order items. Order ID: %d, Item ID: %d, Amount: %f', $order->get_id(), $item->get_id(), $item_amount ), 'error' );
+			if ( $item_amount < 0 ) {
+				// PayPal does not accept negative item amounts items breakdown.
+				WC_Gateway_Paypal::log( sprintf( 'Order item with negative amount for PayPal order items. Order ID: %d, Item ID: %d, Amount: %f', $order->get_id(), $item->get_id(), $item_amount ) );
+				return array();
+			}
+
+			$quantity = $item->get_quantity();
+			// PayPal does not accept zero or fractional quantities.
+			if ( 0 === $quantity || floor( $quantity ) !== $quantity ) {
+				WC_Gateway_Paypal::log( sprintf( 'Order item with zero or fractional quantity for PayPal order items. Order ID: %d, Item ID: %d, Quantity: %f', $order->get_id(), $item->get_id(), $item->get_quantity() ) );
 				return array();
 			}
 
 			$items[] = array(
 				'name'        => $this->limit_length( $item->get_name(), WC_Gateway_Paypal_Constants::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
-				'quantity'    => $item->get_quantity(),
+				'quantity'    => $quantity,
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
 					// Use the subtotal before discounts.
