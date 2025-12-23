@@ -2568,6 +2568,7 @@ FROM $order_meta_table
 					$order_id
 				)
 			);
+			clean_post_cache( $order_id );
 		} else {
 			// phpcs:disable WordPress.DB.SlowDBQuery
 			$wpdb->insert(

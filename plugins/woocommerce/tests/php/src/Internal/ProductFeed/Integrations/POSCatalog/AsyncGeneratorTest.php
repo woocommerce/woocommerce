@@ -7,6 +7,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\AsyncGenerator;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\POSIntegration;
 use Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog\ProductMapper;
+use ReflectionClass;
 use WC_Helper_Product;
 
 /**
@@ -102,5 +103,37 @@ class AsyncGeneratorTest extends \WC_Unit_Test_Case {
 		// Check the final status.
 		$updated_status = get_option( self::OPTION_KEY );
 		$this->assertEquals( AsyncGenerator::STATE_COMPLETED, $updated_status['state'] );
+	}
+
+	/**
+	 * Test that validate_status returns false for expired feeds.
+	 */
+	public function test_validate_status_returns_false_for_expired_feed() {
+		$status = array(
+			'state'        => AsyncGenerator::STATE_COMPLETED,
+			'path'         => __FILE__, // We just need a path that exists.
+			'completed_at' => time() - AsyncGenerator::FEED_EXPIRY - 1,
+		);
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'validate_status' );
+		$method->setAccessible( true );
+
+		$this->assertFalse( $method->invoke( $this->sut, $status ) );
+	}
+
+	/**
+	 * Test that validate_status returns true for non-expired feeds.
+	 */
+	public function test_validate_status_returns_true_for_non_expired_feed() {
+		$status = array(
+			'state'        => AsyncGenerator::STATE_COMPLETED,
+			'path'         => __FILE__, // We just need a path that exists.
+			'completed_at' => time() + AsyncGenerator::FEED_EXPIRY,
+		);
+
+		$method = ( new ReflectionClass( $this->sut ) )->getMethod( 'validate_status' );
+		$method->setAccessible( true );
+
+		$this->assertTrue( $method->invoke( $this->sut, $status ) );
 	}
 }
