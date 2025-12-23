@@ -74,7 +74,14 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
-		$this->assertLogged( 'error', 'Connection failed', array( 'source' => 'woo-fraud-protection', 'error' => 'error_data' ) );
+		$this->assertLogged(
+			'error',
+			'Connection failed',
+			array(
+				'source' => 'woo-fraud-protection',
+				'error'  => 'error_data',
+			)
+		);
 	}
 
 	/**
@@ -97,7 +104,10 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertLogged(
 			'error',
 			'Endpoint POST transact/fraud-protection/events returned status code 500',
-			array( 'source' => 'woo-fraud-protection', 'response' => 'Internal Server Error' )
+			array(
+				'source'   => 'woo-fraud-protection',
+				'response' => 'Internal Server Error',
+			)
 		);
 	}
 
@@ -126,7 +136,10 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertLogged(
 			'error',
 			'Endpoint POST transact/fraud-protection/events returned status code 400',
-			array( 'source' => 'woo-fraud-protection', 'response' => $response )
+			array(
+				'source'   => 'woo-fraud-protection',
+				'response' => $response,
+			)
 		);
 	}
 
@@ -150,7 +163,10 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertLogged(
 			'error',
 			'Failed to decode JSON response: Syntax error',
-			array( 'source' => 'woo-fraud-protection', 'response' => 'not valid json' )
+			array(
+				'source'   => 'woo-fraud-protection',
+				'response' => 'not valid json',
+			)
 		);
 	}
 
@@ -174,7 +190,10 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertLogged(
 			'error',
 			'missing "verdict" field',
-			array( 'source' => 'woo-fraud-protection', 'response' => array( 'fraud_event_id' => 123 ) )
+			array(
+				'source'   => 'woo-fraud-protection',
+				'response' => array( 'fraud_event_id' => 123 ),
+			)
 		);
 	}
 
@@ -198,7 +217,10 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertLogged(
 			'error',
 			'Invalid verdict value "invalid_verdict"',
-			array( 'source' => 'woo-fraud-protection', 'response' => array( 'verdict' => 'invalid_verdict' ) )
+			array(
+				'source'   => 'woo-fraud-protection',
+				'response' => array( 'verdict' => 'invalid_verdict' ),
+			)
 		);
 	}
 

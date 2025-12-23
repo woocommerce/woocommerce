@@ -64,8 +64,7 @@ class ApiClient {
 	private const VALID_DECISIONS = array(
 		self::DECISION_ALLOW,
 		self::DECISION_BLOCK,
-		// TODO: Uncomment this after the challenge flow is implemented (stretch goal for alpha)
-		// self::DECISION_CHALLENGE,
+		// Note: self::DECISION_CHALLENGE will be added here after the challenge flow is implemented (stretch goal for alpha).
 	);
 
 	/**
@@ -198,6 +197,11 @@ class ApiClient {
 			return $response;
 		}
 
+		/**
+		 * Type assertion for PHPStan - Jetpack returns array on success.
+		 *
+		 * @var array $response
+		 */
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_body = wp_remote_retrieve_body( $response );
 
