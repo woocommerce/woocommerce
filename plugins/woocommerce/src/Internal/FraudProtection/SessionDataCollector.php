@@ -145,6 +145,7 @@ class SessionDataCollector {
 				$billing_email        = WC()->customer->get_billing_email();
 				
 				if ( WC()->customer->get_id() > 0 ) {
+					// We need to reload the customer so it uses the correct data store to count the orders.
 					$customer = new \WC_Customer( WC()->customer->get_id() );
 					$lifetime_order_count = $customer->get_order_count();
 				}
