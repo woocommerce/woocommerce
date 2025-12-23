@@ -6,10 +6,10 @@ import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
 import { useBlockProps } from '@wordpress/block-editor';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import {
 	__experimentalText as Text, // eslint-disable-line
 } from '@wordpress/components';
-import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
