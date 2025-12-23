@@ -63,7 +63,8 @@ class Cart extends AbstractCartRoute {
 		 *
 		 * This hook allows the cart response to be changed.
 		 *
-		 * @param array  $cart_response  The cart response.
+		 * @param array $cart_response The cart response.
+		 * @return array Modified cart response.
 		 * @since 10.5.0
 		 */
 		$cart_response = apply_filters( 'woocommerce_store_api_cart_response', $cart_response );
