@@ -12,6 +12,7 @@ use WC_Tracks;
 use WC_Site_Tracking;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
@@ -284,7 +285,7 @@ class FeaturesController {
 		$tracking_enabled                 = WC_Site_Tracking::is_tracking_enabled();
 
 		$legacy_features = array(
-			'analytics'                     => array(
+			'analytics'                          => array(
 				'name'                         => __( 'Analytics', 'woocommerce' ),
 				'description'                  => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
@@ -294,7 +295,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'product_block_editor'          => array(
+			'product_block_editor'               => array(
 				'name'                         => __( 'New product editor', 'woocommerce' ),
 				'description'                  => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental'              => true,
@@ -302,14 +303,14 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'cart_checkout_blocks'          => array(
+			'cart_checkout_blocks'               => array(
 				'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental'              => false,
 				'disable_ui'                   => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'rate_limit_checkout'           => array(
+			'rate_limit_checkout'                => array(
 				'name'                         => __( 'Rate limit Checkout', 'woocommerce' ),
 				'description'                  => sprintf(
 					// translators: %s is the URL to the rate limiting documentation.
@@ -322,7 +323,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'marketplace'                   => array(
+			'marketplace'                        => array(
 				'name'                         => __( 'Marketplace', 'woocommerce' ),
 				'description'                  => __(
 					'New, faster way to find extensions and themes for your WooCommerce store',
@@ -336,7 +337,7 @@ class FeaturesController {
 			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
-			'order_attribution'             => array(
+			'order_attribution'                  => array(
 				'name'                         => __( 'Order Attribution', 'woocommerce' ),
 				'description'                  => __(
 					'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
@@ -348,7 +349,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'site_visibility_badge'         => array(
+			'site_visibility_badge'              => array(
 				'name'                         => __( 'Site visibility badge', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the site visibility badge in the WordPress admin bar',
@@ -361,7 +362,7 @@ class FeaturesController {
 				'is_experimental'              => false,
 				'disabled'                     => false,
 			),
-			'hpos_fts_indexes'              => array(
+			'hpos_fts_indexes'                   => array(
 				'name'                         => __( 'HPOS Full text search indexes', 'woocommerce' ),
 				'description'                  => __(
 					'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
@@ -373,7 +374,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'option_key'                   => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 			),
-			'hpos_datastore_caching'        => array(
+			'hpos_datastore_caching'             => array(
 				'name'                         => __( 'HPOS Data Caching', 'woocommerce' ),
 				'description'                  => __(
 					'Enable order data caching in the datastore. This feature only works with high-performance order storage and is recommended for stores using object caching.',
@@ -386,7 +387,7 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'option_key'                   => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
-			'remote_logging'                => array(
+			'remote_logging'                     => array(
 				'name'                         => __( 'Remote Logging', 'woocommerce' ),
 				'description'                  => sprintf(
 					/* translators: %1$s: opening link tag, %2$s: closing link tag */
@@ -421,7 +422,7 @@ class FeaturesController {
 					},
 				),
 			),
-			'email_improvements'            => array(
+			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(
 					'Enable modern email design for transactional emails',
@@ -441,7 +442,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'blueprint'                     => array(
+			'blueprint'                          => array(
 				'name'                         => __( 'Blueprint (beta)', 'woocommerce' ),
 				'description'                  => __(
 					'Enable blueprint to import and export settings in bulk',
@@ -462,7 +463,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'block_email_editor'            => array(
+			'block_email_editor'                 => array(
 				'name'                         => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the block-based email editor for transactional emails.',
@@ -482,7 +483,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 			),
-			'point_of_sale'                 => array(
+			'point_of_sale'                      => array(
 				'name'                         => __( 'Point of Sale', 'woocommerce' ),
 				'description'                  => __(
 					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
@@ -503,7 +504,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => true,
 			),
-			'fulfillments'                  => array(
+			'fulfillments'                       => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the Order Fulfillments feature to manage order fulfillment and shipping.',
@@ -514,7 +515,7 @@ class FeaturesController {
 				'is_experimental'              => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'mcp_integration'               => array(
+			'mcp_integration'                    => array(
 				'name'                         => __( 'WooCommerce MCP', 'woocommerce' ),
 				'description'                  => $this->get_mcp_integration_description(),
 				'enabled_by_default'           => false,
@@ -523,7 +524,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_legacy'                    => false,
 			),
-			'destroy-empty-sessions'        => array(
+			'destroy-empty-sessions'             => array(
 				'name'                         => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
 				'description'                  => __(
 					'[Performance] Removes session cookies for non-logged in customers when session data is empty, improving page caching performance. May cause compatibility issues with extensions that depend on the session cookie without using session data.',
@@ -534,7 +535,7 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'agentic_checkout'              => array(
+			'agentic_checkout'                   => array(
 				'name'                         => __( 'Agentic Checkout API', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the Agentic Checkout API for AI-powered checkout experiences (e.g., ChatGPT). This adds REST API endpoints that allow AI agents to create and manage checkout sessions.',
@@ -546,7 +547,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			PushNotifications::FEATURE_NAME => array(
+			PushNotifications::FEATURE_NAME      => array(
 				'name'                         => __( 'Push Notifications', 'woocommerce' ),
 				'description'                  => __(
 					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
@@ -558,7 +559,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'rest_api_caching'              => array(
+			'rest_api_caching'                   => array(
 				'name'                         => __( 'REST API Caching', 'woocommerce' ),
 				'description'                  => sprintf(
 					/* translators: %1$s and %2$s are opening and closing <a> tags */
@@ -572,7 +573,18 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'fraud_protection'              => array(
+			ProductCacheController::FEATURE_NAME => array(
+				'name'                         => __( 'Cache Product Objects', 'woocommerce' ),
+				'description'                  => __(
+					'[Performance] Speeds up your store by caching product objects during each request, preventing duplicate product loads. Can improve page load times on product-heavy pages.',
+					'woocommerce'
+				),
+				'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+			),
+			'fraud_protection'                   => array(
 				'name'                         => __( 'Fraud protection', 'woocommerce' ),
 				'description'                  => __(
 					'Enable fraud protection features for your store.',

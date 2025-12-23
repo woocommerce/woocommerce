@@ -176,14 +176,14 @@ if ( wc_tax_enabled() ) {
 			</tr>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
 			<tr>
-				<td class="label"><?php esc_html_e( 'Coupon(s):', 'woocommerce' ); ?></td>
+				<td class="label"><?php esc_html_e( 'Discount:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">-
 					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
 			</tr>
 		<?php endif; ?>
-		<?php if ( 0 < $order->get_total_fees() ) : ?>
+		<?php if ( abs( $order->get_total_fees() ) > 0 ) : ?>
 			<tr>
 				<td class="label"><?php esc_html_e( 'Fees:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>

@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
@@ -35,6 +36,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
+use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\Jetpack\Constants;
 
@@ -344,6 +346,7 @@ final class WooCommerce {
 		$container->get( MatchImageBySKU::class );
 		$container->get( RestockRefundedItemsAdjuster::class );
 		$container->get( CustomOrdersTableController::class );
+		$container->get( ProductCacheController::class );
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
@@ -358,6 +361,7 @@ final class WooCommerce {
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
 		$container->get( MCPAdapterProvider::class );
+		$container->get( ProductVersionStringInvalidator::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {

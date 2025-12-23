@@ -522,11 +522,17 @@ const productGallery = {
 					`[data-image-id="${ selectedImageId }"]`
 				);
 
-				if ( selectedImage instanceof HTMLElement ) {
-					selectedImage.scrollIntoView( {
-						behavior: 'auto',
-						block: 'center',
-					} );
+				if (
+					selectedImage instanceof HTMLElement &&
+					selectedImage.parentNode instanceof HTMLElement
+				) {
+					// We're doing this manually because scrollIntoView caused layout shifts resulting in buggy
+					// dialog layout.
+					selectedImage.parentNode.scrollTop =
+						selectedImage.offsetTop +
+						selectedImage.offsetHeight / 2 -
+						dialogRef.offsetHeight / 2 -
+						32; // Arbitrary value for the header height.
 				}
 			}
 		},

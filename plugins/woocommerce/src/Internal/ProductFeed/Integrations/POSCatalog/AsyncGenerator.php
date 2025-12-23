@@ -44,7 +44,7 @@ class AsyncGenerator {
 	 *
 	 * @var int
 	 */
-	const FEED_EXPIRY = 24 * HOUR_IN_SECONDS;
+	const FEED_EXPIRY = 20 * HOUR_IN_SECONDS;
 
 	/**
 	 * Possible states of generation.
@@ -334,15 +334,26 @@ class AsyncGenerator {
 	 * @return bool         True if the status is valid, false otherwise.
 	 */
 	private function validate_status( array $status ): bool {
-		// Validate the state.
 		/**
 		 * For completed jobs, make sure the file still exists. Regenerate otherwise.
 		 *
 		 * The file should typically get deleted at the same time as the status is cleared.
 		 * However, something else could cause the file to disappear in the meantime (ex. manual delete).
+		 *
+		 * Also, if the cleanup job failed, the feed might appear as complete, but be expired.
 		 */
-		if ( self::STATE_COMPLETED === $status['state'] && ! file_exists( $status['path'] ) ) {
-			return false;
+		if ( self::STATE_COMPLETED === $status['state'] ) {
+			if ( ! file_exists( $status['path'] ) ) {
+				return false;
+			}
+
+			if ( ! isset( $status['completed_at'] ) ) {
+				return false;
+			}
+
+			if ( $status['completed_at'] + self::FEED_EXPIRY < time() ) {
+				return false;
+			}
 		}
 
 		/**
