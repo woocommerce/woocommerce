@@ -118,7 +118,7 @@ class AdminSettingsHandler {
 				<label><?php esc_html_e( 'Jetpack Connection', 'woocommerce' ); ?></label>
 			</th>
 			<td class="forminp forminp-button">
-				<?php if ( $connection_status['connected'] ) : ?>
+				<?php if ( ! $connection_status['connected'] ) : ?>
 					<?php
 					// Get authorization URL for connecting.
 					$redirect_url   = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
