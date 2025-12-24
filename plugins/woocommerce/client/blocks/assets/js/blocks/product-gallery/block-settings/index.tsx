@@ -21,7 +21,7 @@ export const ProductGalleryBlockSettings = ( {
 				<ToggleControl
 					label={ __( 'Zoom while hovering', 'woocommerce' ) }
 					help={ __(
-						'While hovering the large image will zoom in by 30%.',
+						'While hovering the image in the viewer will zoom in by 30%.',
 						'woocommerce'
 					) }
 					checked={ hoverZoom }
@@ -34,7 +34,7 @@ export const ProductGalleryBlockSettings = ( {
 				<ToggleControl
 					label={ __( 'Open pop-up when clicked', 'woocommerce' ) }
 					help={ __(
-						'Clicking on the large image will open a full-screen gallery experience.',
+						'Clicking on the image in the viewer will open a full-screen gallery experience.',
 						'woocommerce'
 					) }
 					checked={ fullScreenOnClick }

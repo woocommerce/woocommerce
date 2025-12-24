@@ -4,8 +4,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
-use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
 /**
  * EmailContent class.
@@ -66,7 +66,11 @@ class EmailContent extends AbstractBlock {
 		$email_preview = wc_get_container()->get( EmailPreview::class );
 
 		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
-		if ( isset( $attributes['emailType'] ) ) {
+
+		if ( isset( $attributes['postId'] ) ) {
+			$email_type_class_name = WCTransactionalEmailPostsManager::get_instance()->get_email_type_class_name_from_post_id( $attributes['postId'] );
+			$type_param            = ! empty( $email_type_class_name ) ? $email_type_class_name : $type_param;
+		} elseif ( isset( $attributes['emailType'] ) ) {
 			$type_param = sanitize_text_field( wp_unslash( $attributes['emailType'] ) );
 		}
 

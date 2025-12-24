@@ -14,7 +14,8 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
 
 	/**
-	 * Block name.
+	 * Block name. Block has been initially created as Large Image but has been renamed
+	 * to more generic name.
 	 *
 	 * @var string
 	 */
@@ -81,36 +82,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		$images_html       = '';
 		$inner_blocks_html = '';
-
-		/**
-		 * ============================================================
-		 * START TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
-		 * ============================================================
-		 * In case Product Gallery Large Image is still used in a
-		 * "standalone" way, with no Product Image block inside,
-		 * we need to render the images manually the "old way".
-		 *
-		 * Includes legacy_get_main_images_html method.
-		 */
-
-		$has_product_image_block = ! empty(
-			array_filter(
-				iterator_to_array( $block->inner_blocks ),
-				function ( $inner_block ) {
-					return 'woocommerce/product-image' === $inner_block->name;
-				}
-			)
-		);
-
-		if ( ! $has_product_image_block ) {
-			$images_html = $this->legacy_get_main_images_html( $block->context, $product );
-		}
-
-		/**
-		 * ==========================================================
-		 * END TEMPORARY BACKWARDS COMPATIBILITY CODE - TO BE REMOVED
-		 * ==========================================================
-		 */
 
 		foreach ( $block->inner_blocks as $inner_block ) {
 			if ( 'woocommerce/product-image' === $inner_block->name ) {
@@ -187,7 +158,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		$p->set_attribute( 'tabindex', '-1' );
 		$p->set_attribute( 'draggable', 'false' );
-		$p->set_attribute( 'data-wp-on--click', 'actions.onSelectedLargeImageClick' );
+		$p->set_attribute( 'data-wp-on--click', 'actions.onViewerClick' );
 		$p->set_attribute( 'data-wp-on--touchstart', 'actions.onTouchStart' );
 		$p->set_attribute( 'data-wp-on--touchmove', 'actions.onTouchMove' );
 		$p->set_attribute( 'data-wp-on--touchend', 'actions.onTouchEnd' );
@@ -234,7 +205,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			<ul
 				class="wc-block-product-gallery-large-image__container"
 				data-wp-interactive="woocommerce/product-gallery"
-				data-wp-on--keydown="actions.onSelectedLargeImageKeyDown"
+				data-wp-on--keydown="actions.onViewerImageKeyDown"
 				aria-label="<?php esc_attr_e( 'Product gallery', 'woocommerce' ); ?>"
 				tabindex="0"
 				aria-roledescription="carousel"
@@ -263,67 +234,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	}
 
 	/**
-	 * Get the main images html code. The first element of the array contains the HTML of the first image that is visible, the second element contains the HTML of the other images that are hidden.
-	 *
-	 * @param array       $context The block context.
-	 * @param \WC_Product $product The product object.
-	 *
-	 * @return array
-	 */
-	private function legacy_get_main_images_html( $context, $product ) {
-		$image_data   = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_single' );
-		$base_classes = 'wc-block-woocommerce-product-gallery-large-image__image wc-block-woocommerce-product-gallery-large-image__image--legacy';
-
-		if ( ! empty( $context['fullScreenOnClick'] ) ) {
-			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click';
-		}
-		if ( ! empty( $context['hoverZoom'] ) ) {
-			$base_classes .= ' wc-block-woocommerce-product-gallery-large-image__image--hoverZoom';
-		}
-
-		ob_start();
-		?>
-			<ul
-				class="wc-block-product-gallery-large-image__container"
-				aria-roledescription="carousel"
-			>
-				<?php foreach ( $image_data as $index => $image ) : ?>
-					<li class="wc-block-product-gallery-large-image__wrapper">
-						<img
-							class="<?php echo esc_attr( $base_classes ); ?>"
-							src="<?php echo esc_attr( $image['src'] ); ?>"
-							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
-							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
-							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
-							alt="<?php echo esc_attr( $image['alt'] ); ?>"
-							data-wp-on--touchstart="actions.onTouchStart"
-							data-wp-on--touchmove="actions.onTouchMove"
-							data-wp-on--touchend="actions.onTouchEnd"
-							<?php if ( $context['hoverZoom'] ) : ?>
-								data-wp-on--mousemove="actions.startZoom"
-								data-wp-on--mouseleave="actions.resetZoom"
-							<?php endif; ?>
-							<?php if ( $context['fullScreenOnClick'] ) : ?>
-								data-wp-on--click="actions.openDialog"
-							<?php endif; ?>
-							<?php if ( 0 === $index ) : ?>
-								fetchpriority="high"
-							<?php else : ?>
-								fetchpriority="low"
-								loading="lazy"
-							<?php endif; ?>
-							tabindex="-1"
-							draggable="false"
-						/>
-					</li>
-				<?php endforeach; ?>
-			</ul>
-		<?php
-		$template = ob_get_clean();
-		return wp_interactivity_process_directives( $template );
-	}
-
-	/**
 	 * Disable the editor style handle for this block type.
 	 *
 	 * @return null
@@ -333,7 +243,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 	}
 
 	/**
-	 * Large Image renders inner blocks manually so we need to skip default
+	 * Viewer renders inner blocks manually so we need to skip default
 	 * rendering routine for its inner blocks
 	 *
 	 * @param array $settings Array of determined settings for registering a block type.

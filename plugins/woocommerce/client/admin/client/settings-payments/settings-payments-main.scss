@@ -43,18 +43,6 @@
 	}
 }
 
-// Align the nav tabs with the overall page spacings for page internal consistency,
-// although not cross settings pages consistency.
-body.woocommerce-settings-payments-tab {
-	.nav-tab-wrapper {
-		padding-left: $grid-unit-60;
-
-		@media screen and (max-width: $break-xlarge) {
-			padding-left: $grid-unit-30;
-		}
-	}
-}
-
 .settings-payments-main__container {
 	margin: 0 -30px;
 	padding-bottom: 32px;

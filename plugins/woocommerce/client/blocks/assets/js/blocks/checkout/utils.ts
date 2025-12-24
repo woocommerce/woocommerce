@@ -124,4 +124,4 @@ export const formatAddress = (
 	return { name: parsedName, address: addressParts };
 };
 
-export const reloadPage = (): void => void window.location.reload( true );
+export const reloadPage = (): void => void window.location.reload();

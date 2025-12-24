@@ -253,11 +253,6 @@ export function* resetCustomizeYourStore() {
 			method: 'DELETE',
 			path: `${ API_NAMESPACE }/options/${ optionsToDelete.join( ',' ) }`,
 		} );
-
-		yield apiFetch( {
-			path: API_NAMESPACE + '/tools/reset-cys',
-			method: 'POST',
-		} );
 	} );
 }
 

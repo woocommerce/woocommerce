@@ -37,12 +37,6 @@
 			"__experimentalSkipSerialization": true
 		}
 	},
-	"allowedBlocks": [
-		"woocommerce/category-title",
-		"woocommerce/category-description",
-		"core/heading",
-		"core/buttons"
-	],
 	"attributes": {
 		"alt": {
 			"type": "string",

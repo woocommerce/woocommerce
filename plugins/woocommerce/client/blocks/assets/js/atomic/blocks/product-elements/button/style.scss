@@ -45,7 +45,8 @@
 		width: auto;
 	}
 
-	a[hidden] {
+	a[hidden],
+	button[hidden] {
 		display: none;
 	}
 

@@ -108,7 +108,7 @@ export const useProductDataContext = (
 	const context = useContext( ProductDataContext );
 	const { isAdmin, product, isResolving } = props;
 
-	if ( ! isAdmin ) {
+	if ( ! isAdmin || ! product ) {
 		return context;
 	}
 

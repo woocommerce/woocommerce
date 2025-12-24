@@ -270,15 +270,6 @@ class Controller extends AbstractController {
 				break;
 
 			case 'woocommerce_default_country':
-				// Validate country code format (e.g., "US" or "US:CA").
-				if ( ! empty( $value ) && ! preg_match( '/^[A-Z]{2}(:[A-Z0-9]+)?$/', $value ) ) {
-					return new WP_Error(
-						'rest_invalid_param',
-						__( 'Invalid country/state format.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
-
 				if ( ! $this->validate_country_or_state_code( $value ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
