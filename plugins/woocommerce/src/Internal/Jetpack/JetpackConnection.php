@@ -26,6 +26,18 @@ class JetpackConnection {
         return self::$manager;
     }
 
+	/**
+	 * Get the authorization URL for the Jetpack connection.
+	 * @param mixed $redirect_url 
+	 * @param string $from 
+	 * @return array {
+	 *     Authorization data.
+	 *     @type bool   $success      Whether authorization URL generation succeeded.
+	 *     @type array  $errors       Array of error messages if any.
+	 *     @type string $color_scheme User's admin color scheme.
+	 *     @type string $url          The authorization URL.
+	 * }
+	 */
     public static function get_authorization_url( $redirect_url, $from = '' ){
 		$manager = self::get_manager();
 		$errors  = new WP_Error();
