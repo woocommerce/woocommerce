@@ -27,11 +27,12 @@ class JetpackConnection {
     }
 
     public static function get_authorization_url( $redirect_url, $from = '' ){
+		$manager = self::get_manager();
 		$errors  = new WP_Error();
 
 		// Register the site to wp.com.
-		if ( ! self::$manager->is_connected() ) {
-			$result = self::$manager->try_registration();
+		if ( ! $manager->is_connected() ) {
+			$result = $manager->try_registration();
 			if ( is_wp_error( $result ) ) {
 				$errors->add( $result->get_error_code(), $result->get_error_message() );
 			}
@@ -39,7 +40,7 @@ class JetpackConnection {
 
 		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
 
-		$authorization_url = self::$manager->get_authorization_url( null, $redirect_url );
+		$authorization_url = $manager->get_authorization_url( null, $redirect_url );
 		$authorization_url = add_query_arg( 'locale', self::get_wpcom_locale(), $authorization_url );
 
 		if ( Features::is_enabled( 'use-wp-horizon' ) ) {
