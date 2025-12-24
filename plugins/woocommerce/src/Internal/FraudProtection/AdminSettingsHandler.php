@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Handles admin settings for fraud protection.
  *
- * @since 10.5.0
+ * @since 10.4.0
  */
 class AdminSettingsHandler {
 
@@ -29,6 +29,7 @@ class AdminSettingsHandler {
 	public function register(): void {
 		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_jetpack_connection_field' ), 100, 2 );
 		add_action( 'woocommerce_admin_field_jetpack_connection', array( $this, 'handle_output_jetpack_connection_field' ), 10, 1 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'handle_enqueue_admin_scripts' ), 10, 1 );
 	}
 
 
@@ -112,13 +113,14 @@ class AdminSettingsHandler {
 	private function output_jetpack_connection_status(): void {
 		// Get connection status from connection manager.
 		$connection_status = $this->connection_manager->get_connection_status();
+
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
 				<label><?php esc_html_e( 'Jetpack Connection', 'woocommerce' ); ?></label>
 			</th>
 			<td class="forminp forminp-button">
-				<?php if ( $connection_status['connected'] ) : ?>
+				<?php if ( ! $connection_status['connected'] ) : ?>
 					<?php
 					// Get authorization URL for connecting.
 					$redirect_url   = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
@@ -131,9 +133,13 @@ class AdminSettingsHandler {
 							<?php echo esc_html( $connection_status['error'] ); ?>
 						</p>
 					<?php else : ?>
-						<a href="<?php echo esc_url( $connection_url ); ?>" class="button button-secondary jetpack_connection_button">
+						<button
+							type="button"
+							class="button button-secondary jetpack_connection_button"
+							data-connection-url="<?php echo esc_url( $connection_url ); ?>"
+						>
 							<?php esc_html_e( 'Connect to Jetpack', 'woocommerce' ); ?>
-						</a>
+						</button>
 						<p class="description">
 							<?php esc_html_e( 'Connect your site to Jetpack to enable fraud protection features.', 'woocommerce' ); ?>
 						</p>
@@ -154,5 +160,42 @@ class AdminSettingsHandler {
 			</td>
 		</tr>
 		<?php
+	}
+
+	/**
+	 * Enqueue admin scripts for the Jetpack connection button.
+	 *
+	 * @internal
+	 *
+	 * @param string $hook Page hook.
+	 * @return void
+	 */
+	public function handle_enqueue_admin_scripts( $hook ): void {
+		// Only on WooCommerce settings page.
+		if ( 'woocommerce_page_wc-settings' !== $hook ) {
+			return;
+		}
+
+		// Check if we're on the features section.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$section = isset( $_GET['section'] ) ? sanitize_text_field( wp_unslash( $_GET['section'] ) ) : '';
+		if ( 'features' !== $section ) {
+			return;
+		}
+
+		wp_enqueue_script( 'jquery' );
+
+		$script = "
+		jQuery(document).ready(function($) {
+			$('.jetpack_connection_button').on('click', function(e) {
+				e.preventDefault();
+
+				var connectionUrl = $(this).data('connection-url');
+				window.location.href = connectionUrl;
+			});
+		});
+		";
+
+		wp_add_inline_script( 'jquery', $script );
 	}
 }

@@ -28,7 +28,7 @@ class WC_Tracks_Event {
 	/**
 	 * Error message as WP_Error.
 	 *
-	 * @var WP_Error
+	 * @var WP_Error|null
 	 */
 	public $error;
 
