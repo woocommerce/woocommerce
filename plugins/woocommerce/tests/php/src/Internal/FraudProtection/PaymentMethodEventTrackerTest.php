@@ -1,0 +1,271 @@
+<?php
+/**
+ * PaymentMethodEventTrackerTest class file.
+ *
+ * @package WooCommerce\Tests
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
+
+use Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+
+/**
+ * Tests for the PaymentMethodEventTracker class.
+ */
+class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * Logged data storage for testing.
+	 *
+	 * @var array
+	 */
+	public static $logged_data = array();
+
+	/**
+	 * Setup test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Reset logged data.
+		self::$logged_data = array();
+
+		// Enable the fraud protection feature.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
+	}
+
+	/**
+	 * Get a testable tracker instance with mock controller.
+	 *
+	 * @return PaymentMethodEventTracker
+	 */
+	private function get_testable_tracker(): PaymentMethodEventTracker {
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+
+		$features_controller = $container->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
+
+		// Create mock controller that captures log calls.
+		$mock_controller = new class($features_controller) extends FraudProtectionController {
+			/**
+			 * Override log to capture calls for testing.
+			 *
+			 * @param string $level   Log level.
+			 * @param string $message Log message.
+			 * @param array  $context Context data.
+			 */
+			public function log( string $level, string $message, array $context = array() ): void {
+				PaymentMethodEventTrackerTest::$logged_data[] = array(
+					'level'   => $level,
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+		};
+
+		// Initialize the mock controller.
+		$mock_controller->init( $features_controller );
+
+		// Create tracker with mock controller.
+		$tracker = $container->get( PaymentMethodEventTracker::class );
+		$tracker->init(
+			$container->get( \Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector::class ),
+			$container->get( \Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager::class ),
+			$mock_controller
+		);
+
+		return $tracker;
+	}
+
+	/**
+	 * Test that hooks are registered when feature is enabled.
+	 */
+	public function test_hooks_registered_when_feature_enabled(): void {
+		$tracker = $this->get_testable_tracker();
+		$tracker->register();
+
+		$this->assertNotFalse( has_action( 'woocommerce_new_payment_token', array( $tracker, 'handle_payment_method_added' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_payment_token_updated', array( $tracker, 'handle_payment_method_updated' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_payment_token_set_default', array( $tracker, 'handle_payment_method_set_default' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_payment_token_deleted', array( $tracker, 'handle_payment_method_deleted' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_payment_token_add_failed', array( $tracker, 'handle_payment_method_add_failed' ) ) );
+	}
+
+	/**
+	 * Test that hooks are not registered when feature is disabled.
+	 */
+	public function test_hooks_not_registered_when_feature_disabled(): void {
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'no' );
+
+		$tracker = $this->get_testable_tracker();
+		$tracker->register();
+
+		$this->assertFalse( has_action( 'woocommerce_new_payment_token', array( $tracker, 'handle_payment_method_added' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_payment_token_updated', array( $tracker, 'handle_payment_method_updated' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_payment_token_set_default', array( $tracker, 'handle_payment_method_set_default' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_payment_token_deleted', array( $tracker, 'handle_payment_method_deleted' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_payment_token_add_failed', array( $tracker, 'handle_payment_method_add_failed' ) ) );
+	}
+
+	/**
+	 * Test payment method added event tracking.
+	 */
+	public function test_handle_payment_method_added(): void {
+		$user_id = $this->factory->user->create();
+
+		$token = new \WC_Payment_Token_CC();
+		$token->set_token( 'test_token_123' );
+		$token->set_gateway_id( 'stripe' );
+		$token->set_card_type( 'visa' );
+		$token->set_last4( '4242' );
+		$token->set_expiry_month( '12' );
+		$token->set_expiry_year( '2025' );
+		$token->set_user_id( $user_id );
+		$token->save();
+
+		$tracker = $this->get_testable_tracker();
+		$tracker->register();
+
+		do_action( 'woocommerce_new_payment_token', $token->get_id(), $token );
+
+		$this->assertCount( 1, self::$logged_data );
+		$this->assertEquals( 'info', self::$logged_data[0]['level'] );
+		$this->assertStringContainsString( 'payment_method_added', self::$logged_data[0]['message'] );
+		$this->assertEquals( 'payment_method_added', self::$logged_data[0]['context']['event_type'] );
+		$this->assertEquals( 'added', self::$logged_data[0]['context']['event_data']['action'] );
+		$this->assertEquals( $token->get_id(), self::$logged_data[0]['context']['event_data']['token_id'] );
+		$this->assertEquals( 'stripe', self::$logged_data[0]['context']['event_data']['gateway_id'] );
+	}
+
+	/**
+	 * Test payment method updated event tracking.
+	 */
+	public function test_handle_payment_method_updated(): void {
+		$user_id = $this->factory->user->create();
+
+		$token = new \WC_Payment_Token_CC();
+		$token->set_token( 'test_token_456' );
+		$token->set_gateway_id( 'stripe' );
+		$token->set_card_type( 'mastercard' );
+		$token->set_last4( '5555' );
+		$token->set_expiry_month( '06' );
+		$token->set_expiry_year( '2026' );
+		$token->set_user_id( $user_id );
+		$token->save();
+
+		$tracker = $this->get_testable_tracker();
+		$tracker->register();
+
+		do_action( 'woocommerce_payment_token_updated', $token->get_id() );
+
+		$this->assertCount( 1, self::$logged_data );
+		$this->assertEquals( 'payment_method_updated', self::$logged_data[0]['context']['event_type'] );
+		$this->assertEquals( 'updated', self::$logged_data[0]['context']['event_data']['action'] );
+	}
+
+	/**
+	 * Test payment method set as default event tracking.
+	 */
+	public function test_handle_payment_method_set_default(): void {
+		$user_id = $this->factory->user->create();
+
+		$token = new \WC_Payment_Token_CC();
+		$token->set_token( 'test_token_789' );
+		$token->set_gateway_id( 'stripe' );
+		$token->set_card_type( 'amex' );
+		$token->set_last4( '0005' );
+		$token->set_expiry_month( '03' );
+		$token->set_expiry_year( '2027' );
+		$token->set_user_id( $user_id );
+		$token->set_default( true );
+		$token->save();
+
+		$tracker = $this->get_testable_tracker();
+		$tracker->register();
+
+		do_action( 'woocommerce_payment_token_set_default', $token->get_id(), $token );
+
+		$this->assertCount( 1, self::$logged_data );
+		$this->assertEquals( 'payment_method_set_default', self::$logged_data[0]['context']['event_type'] );
+		$this->assertEquals( 'set_default', self::$logged_data[0]['context']['event_data']['action'] );
+		$this->assertTrue( self::$logged_data[0]['context']['event_data']['is_default'] );
+	}
+
+	/**
+	 * Test payment method deleted event tracking.
+	 */
+	public function test_handle_payment_method_deleted(): void {
+		$user_id = $this->factory->user->create();
+
+		$token = new \WC_Payment_Token_CC();
+		$token->set_token( 'test_token_delete' );
+		$token->set_gateway_id( 'stripe' );
+		$token->set_card_type( 'visa' );
+		$token->set_last4( '1111' );
+		$token->set_expiry_month( '09' );
+		$token->set_expiry_year( '2028' );
+		$token->set_user_id( $user_id );
+		$token->save();
+
+		$tracker = $this->get_testable_tracker();
+		$tracker->register();
+
+		do_action( 'woocommerce_payment_token_deleted', $token->get_id(), $token );
+
+		$this->assertCount( 1, self::$logged_data );
+		$this->assertEquals( 'payment_method_deleted', self::$logged_data[0]['context']['event_type'] );
+		$this->assertEquals( 'deleted', self::$logged_data[0]['context']['event_data']['action'] );
+	}
+
+	/**
+	 * Test payment method add failed event tracking.
+	 */
+	public function test_handle_payment_method_add_failed(): void {
+		$user_id = $this->factory->user->create();
+
+		$token = new \WC_Payment_Token_CC();
+		$token->set_token( 'test_token_failed' );
+		$token->set_gateway_id( 'stripe' );
+		$token->set_card_type( 'visa' );
+		$token->set_last4( '0002' );
+		$token->set_expiry_month( '01' );
+		$token->set_expiry_year( '2024' );
+		$token->set_user_id( $user_id );
+
+		$tracker = $this->get_testable_tracker();
+		$tracker->register();
+
+		do_action( 'woocommerce_payment_token_add_failed', $token, 'card_declined' );
+
+		$this->assertCount( 1, self::$logged_data );
+		$this->assertEquals( 'payment_method_add_failed', self::$logged_data[0]['context']['event_type'] );
+		$this->assertEquals( 'add_failed', self::$logged_data[0]['context']['event_data']['action'] );
+		$this->assertEquals( 'card_declined', self::$logged_data[0]['context']['event_data']['failure_reason'] );
+	}
+
+	/**
+	 * Cleanup after test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		// Remove all hooks.
+		remove_all_actions( 'woocommerce_new_payment_token' );
+		remove_all_actions( 'woocommerce_payment_token_updated' );
+		remove_all_actions( 'woocommerce_payment_token_set_default' );
+		remove_all_actions( 'woocommerce_payment_token_deleted' );
+		remove_all_actions( 'woocommerce_payment_token_add_failed' );
+
+		// Clean up options.
+		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
+
+		// Reset container.
+		wc_get_container()->reset_all_resolved();
+
+		// Reset logged data.
+		self::$logged_data = array();
+	}
+}
