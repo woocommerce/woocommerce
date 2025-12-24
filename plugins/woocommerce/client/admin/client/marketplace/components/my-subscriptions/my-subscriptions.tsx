@@ -3,7 +3,11 @@
  */
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { createInterpolateElement, useContext } from '@wordpress/element';
+import {
+	createInterpolateElement,
+	useContext,
+	useState,
+} from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -77,6 +81,38 @@ export default function MySubscriptions(): JSX.Element {
 		);
 	};
 
+	const [ isJetpackConnecting, setIsJetpackConnecting ] = useState( false );
+
+	const handleJetpackConnect = async () => {
+		setIsJetpackConnecting( true );
+		try {
+			const returnUrl = new URL( window.location.href );
+			returnUrl.searchParams.set( 'page', 'wc-admin' );
+			returnUrl.searchParams.set( 'tab', 'my-subscriptions' );
+			returnUrl.searchParams.set( 'path', '/extensions' );
+			returnUrl.searchParams.set( 'jp_wccom_connect', '1' );
+
+			const response: {
+				success: boolean;
+				errors: string[];
+				url: string;
+			} = await apiFetch( {
+				path: `/wc-admin/onboarding/plugins/jetpack-authorization-url?redirect_url=${ encodeURIComponent(
+					returnUrl.toString()
+				) }&from=woocommerce-onboarding`,
+				method: 'GET',
+			} );
+
+			if ( response?.url ) {
+				window.location.href = response.url;
+			} else {
+				setIsJetpackConnecting( false );
+			}
+		} catch ( error ) {
+			setIsJetpackConnecting( false );
+		}
+	};
+
 	if ( ! wccomSettings?.isConnected ) {
 		const connectMessage = __(
 			'Connect your WooCommerce.com account to get product updates, manage your subscriptions from your store admin, and get streamlined support.',
@@ -122,9 +158,21 @@ export default function MySubscriptions(): JSX.Element {
 					<p className="woocommerce-marketplace__my-subscriptions__description">
 						{ connectMessage }
 					</p>
-					<Button href={ connectUrl() } variant="primary">
-						{ __( 'Connect', 'woocommerce' ) }
-					</Button>
+					<div className="woocommerce-marketplace__my-subscriptions__buttons">
+						<Button href={ connectUrl() } variant="primary">
+							{ __( 'Connect', 'woocommerce' ) }
+						</Button>
+						{ ! wccomSettings?.isJetpackConnected && (
+							<Button
+								onClick={ handleJetpackConnect }
+								variant="secondary"
+								isBusy={ isJetpackConnecting }
+								disabled={ isJetpackConnecting }
+							>
+								{ __( 'Jetpack Connect', 'woocommerce' ) }
+							</Button>
+						) }
+					</div>
 				</div>
 			</>
 		);

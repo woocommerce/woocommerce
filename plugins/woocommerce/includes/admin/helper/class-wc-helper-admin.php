@@ -90,7 +90,9 @@ class WC_Helper_Admin {
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
 			'trackingAllowed'            => 'yes' === get_option( 'woocommerce_allow_tracking' ),
+			'isJetpackConnected'         => self::is_jetpack_connected(),
 		);
+
 
 		// This data is only used in the `Extensions` screen, so only populate it there.
 		// More specifically, it's used in `My Subscriptions`, however, switching tabs doesn't require
@@ -151,6 +153,21 @@ class WC_Helper_Admin {
 			$connect_url_args,
 			admin_url( 'admin.php' )
 		);
+	}
+
+	/**
+	 * Checks if the site is connected to WordPress.com via Jetpack.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return bool True if connected to Jetpack/WordPress.com.
+	 */
+	public static function is_jetpack_connected() {
+		if ( ! class_exists( 'WC_Jetpack' ) ) {
+			return false;
+		}
+
+		return WC_Jetpack::instance()->is_connected();
 	}
 
 	/**

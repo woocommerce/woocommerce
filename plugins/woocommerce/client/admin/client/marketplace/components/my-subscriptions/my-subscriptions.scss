@@ -295,6 +295,13 @@
 		margin-bottom: $grid-unit-30;
 		max-width: 520px;
 	}
+
+	.woocommerce-marketplace__my-subscriptions__buttons {
+		display: flex;
+		gap: $grid-unit-15;
+		flex-wrap: wrap;
+		justify-content: center;
+	}
 }
 
 .woocommerce-marketplace__my-subscriptions__table__header--actions {
