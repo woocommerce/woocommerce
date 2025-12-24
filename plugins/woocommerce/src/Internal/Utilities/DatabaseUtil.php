@@ -185,7 +185,7 @@ class DatabaseUtil {
 	 * @param mixed $value        The date value (WC_DateTime, timestamp, or string).
 	 * @param bool  $validate     Whether to validate the date (reject invalid dates).
 	 * @return string|null 		  Formatted date string or null.
-	 * @throws \Exception 	      When validation fails and filter doesn't allow invalid dates.
+	 * @throws \Exception 	      When validation fails.
 	 */
 	private function format_date_value_for_db( $value, bool $validate = true ) {
 		$formatted_date = null;
@@ -227,22 +227,6 @@ class DatabaseUtil {
 		} catch ( \Exception $e ) {
 			if ( ! $validate ) {
 				return $formatted_date;
-			}
-
-			/**
-			 * Filter to allow invalid dates to be processed (for backwards compatibility).
-			 *
-			 * @param bool       $allow_invalid Whether to allow invalid dates. Default false.
-			 * @param mixed      $value         The date value that failed validation.
-			 * @param string     $type         The data type ('date' or 'date_epoch').
-			 * @param \Exception $exception    The exception that was caught.
-			 * @return bool True to allow the invalid date, false to throw the exception.
-			 *
-			 * @since 10.5.0
-			 */
-			$allow_invalid = apply_filters( 'woocommerce_allow_invalid_date_in_db_format', false, $value, 'date', $e );
-			if ( $allow_invalid ) {
-				return $this->format_date_value_for_db( $value, false );
 			}
 
 			if ( function_exists( 'wc_get_logger' ) ) {

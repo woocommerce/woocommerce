@@ -2432,17 +2432,23 @@ FROM $order_meta_table
 			}
 
 			if ( 'date_created_gmt' === $column && 'date_created' === $details['name'] && $has_existing_date_created ) {
+				$is_admin_edit = is_admin() && isset( $_POST['order_date'] ) && ! empty( $_POST['order_date'] ); // phpcs:ignore WordPress.Security.NonceVerification
+				
 				/**
-				 * Filter to allow updating date_created_gmt for existing orders.
+				 * Filter to allow updating date_created_gmt for existing orders (e.g., admin manual edits).
 				 *
-				 * @param bool             $allow_update Whether to allow updating date_created_gmt. Default false.
+				 * By default, date_created_gmt is protected from being overwritten after initial creation
+				 * to prevent corruption during status transitions. Admin edits are automatically allowed.
+				 * Use this filter to allow updates in other scenarios.
+				 *
+				 * @param bool             $allow_update Whether to allow updating date_created_gmt. Default false, or true for admin edits.
 				 * @param \WC_Abstract_Order $order        The order object.
 				 * @param string           $column       The database column name.
 				 * @return bool True to allow the update, false to skip it.
 				 *
 				 * @since 10.5.0
 				 */
-				$allow_update = apply_filters( 'woocommerce_allow_update_order_date_created_gmt', false, $order, $column );
+				$allow_update = apply_filters( 'woocommerce_allow_update_order_date_created_gmt', $is_admin_edit, $order, $column );
 				
 				if ( ! $allow_update ) {
 					continue;

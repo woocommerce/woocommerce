@@ -222,19 +222,4 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 		$this->assertNull( $this->sut->format_object_value_for_db( 0, 'date' ) );
 	}
 
-	/**
-	 * @testDox Test that format_object_value_for_db can allow invalid dates with filter (backwards compatibility).
-	 */
-	public function test_format_object_value_for_db_date_allows_invalid_with_filter() {
-		add_filter( 'woocommerce_allow_invalid_date_in_db_format', '__return_true' );
-
-		$future_date_string = '2200-01-01 00:00:00';
-		$result = $this->sut->format_object_value_for_db( $future_date_string, 'date' );
-
-		$this->assertIsString( $result );
-		$this->assertStringContainsString( '2200', $result );
-
-		// Clean up.
-		remove_filter( 'woocommerce_allow_invalid_date_in_db_format', '__return_true' );
-	}
 }

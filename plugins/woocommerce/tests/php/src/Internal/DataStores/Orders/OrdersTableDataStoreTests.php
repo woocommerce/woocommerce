@@ -2319,7 +2319,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testDox Test that date_created_gmt can be updated when filter allows it (backwards compatibility).
+	 * @testDox Test that date_created_gmt can be updated when filter allows it.
 	 */
 	public function test_date_created_gmt_can_be_updated_with_filter() {
 		global $wpdb;
@@ -2336,7 +2336,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$original_date_created = $order->get_date_created();
 		$original_date_created_str = $original_date_created->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
 
-		// Use the filter to allow updating the date (for backwards compatibility).
+		// Use the filter to allow updating the date.
 		add_filter( 'woocommerce_allow_update_order_date_created_gmt', '__return_true' );
 
 		// Try to set a new date.
@@ -2360,6 +2360,53 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		// Clean up.
 		remove_filter( 'woocommerce_allow_update_order_date_created_gmt', '__return_true' );
+	}
+
+	/**
+	 * @testDox Test that date_created_gmt can be updated automatically for admin edits.
+	 */
+	public function test_date_created_gmt_can_be_updated_for_admin_edits() {
+		global $wpdb;
+		$this->toggle_cot_feature_and_usage( true );
+
+		// Create an order.
+		$order = new WC_Order();
+		$this->switch_data_store( $order, $this->sut );
+		$order->set_created_via( 'checkout' );
+		$order->save();
+
+		// Get the original creation date.
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$original_date_created = $order->get_date_created();
+		$original_date_created_str = $original_date_created->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+
+		// Simulate admin edit by setting $_POST['order_date'] (as admin edit form does).
+		set_current_screen( 'admin' );
+		$_POST['order_date'] = '2024-01-01'; // phpcs:ignore WordPress.Security.NonceVerification
+		$_POST['order_date_hour'] = '10'; // phpcs:ignore WordPress.Security.NonceVerification
+		$_POST['order_date_minute'] = '30'; // phpcs:ignore WordPress.Security.NonceVerification
+		$_POST['order_date_second'] = '00'; // phpcs:ignore WordPress.Security.NonceVerification
+		
+		$new_date = strtotime( '2024-01-01 10:30:00 UTC' );
+		$order->set_date_created( $new_date );
+		$order->save();
+
+		$date_after_update = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT date_created_gmt FROM {$orders_table} WHERE id = %d",
+				$order->get_id()
+			)
+		);
+
+		$this->assertNotEmpty( $date_after_update, 'Order should have a creation date after admin edit.' );
+		$this->assertNotEquals(
+			$original_date_created_str,
+			$date_after_update,
+			'date_created_gmt should be updated automatically for admin edits (non-breaking change).'
+		);
+
+		// Clean up.
+		unset( $_POST['order_date'], $_POST['order_date_hour'], $_POST['order_date_minute'], $_POST['order_date_second'] ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
 
 	/**
