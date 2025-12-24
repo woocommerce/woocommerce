@@ -39,6 +39,10 @@ class CacheController implements RegisterHooksInterface {
 	 * Hook into actions and filters.
 	 */
 	public function register() {
+		if ( ! $this->need_cleanup() ) {
+			return;
+		}
+
 		add_action( 'woocommerce_after_product_object_save', array( $this, 'clear_filter_data_cache' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'clear_filter_data_cache' ) );
 
@@ -74,6 +78,10 @@ class CacheController implements RegisterHooksInterface {
 	 * Delete all filter data transients.
 	 */
 	public function delete_filter_data_transients() {
+		if ( ! $this->need_cleanup() ) {
+			return;
+		}
+
 		global $wpdb;
 		$wpdb->query(
 			$wpdb->prepare(
@@ -82,5 +90,19 @@ class CacheController implements RegisterHooksInterface {
 				$wpdb->esc_like( '_transient_timeout_wc_filter_data_' ) . '%'
 			)
 		);
+	}
+
+	/**
+	 * Check if the filter data cache should be cleaned up.
+	 * If the cache group is not set, it means that the store is not using
+	 * the product filters and we don't need to register the hooks.
+	 *
+	 * @return bool
+	 */
+	public function need_cleanup() {
+		$transient_name  = self::CACHE_GROUP . '-transient-version';
+		$transient_value = get_transient( $transient_name );
+
+		return ! empty( $transient_value );
 	}
 }
