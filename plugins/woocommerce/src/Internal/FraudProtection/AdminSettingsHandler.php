@@ -112,14 +112,13 @@ class AdminSettingsHandler {
 	private function output_jetpack_connection_status(): void {
 		// Get connection status from connection manager.
 		$connection_status = $this->connection_manager->get_connection_status();
-
 		?>
 		<tr valign="top">
 			<th scope="row" class="titledesc">
 				<label><?php esc_html_e( 'Jetpack Connection', 'woocommerce' ); ?></label>
 			</th>
 			<td class="forminp forminp-button">
-				<?php if ( true ) : ?>
+				<?php if ( $connection_status['connected'] ) : ?>
 					<?php
 					// Get authorization URL for connecting.
 					$redirect_url   = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
