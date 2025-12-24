@@ -55,7 +55,7 @@ class CacheController implements RegisterHooksInterface {
 	/**
 	 * Invalidate all cache under filter data group.
 	 */
-	public function invalidate_filter_data_cache() {
+	public function invalidate_filter_data_cache(): void {
 		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
@@ -77,7 +77,7 @@ class CacheController implements RegisterHooksInterface {
 	/**
 	 * Delete all filter data transients.
 	 */
-	public function delete_filter_data_transients() {
+	public function delete_filter_data_transients(): void {
 		if ( ! $this->need_cleanup() ) {
 			return;
 		}
@@ -100,6 +100,6 @@ class CacheController implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	public function need_cleanup() {
-		return get_transient( self::CACHE_GROUP . '-transient-version' );
+		return ! empty( get_transient( self::CACHE_GROUP . '-transient-version' ) );
 	}
 }
