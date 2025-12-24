@@ -35,8 +35,9 @@
 	<coverage includeUncoveredFiles="true">
 		<include>
 			<directory suffix=".php">./includes</directory>
-		<file>woocommerce.php</file>
-		<file>uninstall.php</file>
+			<directory suffix=".php">./src</directory>
+			<file>woocommerce.php</file>
+			<file>uninstall.php</file>
 		</include>
 		<exclude>
 			<directory suffix=".php">./includes/admin/helper/views</directory>
@@ -57,7 +58,6 @@
 			<directory suffix=".php">./includes/vendor</directory>
 			<directory suffix=".php">./includes/widgets</directory>
 			<directory suffix=".php">./packages</directory>
-			<directory suffix=".php">./src</directory>
 			<directory suffix=".php">./vendor</directory>
 			<file>./includes/wc-deprecated-functions.php</file>
 			<file>./includes/wc-template-hooks.php</file>
