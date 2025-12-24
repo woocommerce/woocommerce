@@ -99,7 +99,6 @@ class JetpackConnectionManager {
 					$authorization_data['errors'][0]
 				)
 			);
-			
 			return null;
 		}
 

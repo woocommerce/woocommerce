@@ -443,7 +443,6 @@ class Utils {
 	 * }
 	 */
 	public static function get_wpcom_connection_authorization( string $return_url ): array {
-		
 		$result = JetpackConnection::get_authorization_url( $return_url );
 
 		if ( ! empty( $result['url'] ) ) {

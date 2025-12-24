@@ -1,4 +1,5 @@
 <?php
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Jetpack;
 
@@ -6,39 +7,46 @@ use Automattic\Jetpack\Connection\Manager;
 use Automattic\WooCommerce\Admin\Features\Features;
 use WP_Error;
 
+/**
+ * Jetpack Connection wrapper class.
+ */
 class JetpackConnection {
 	/**
 	 * Jetpack connection manager.
+	 *
 	 * @var Manager
 	 */
-    private static $manager;
+	private static $manager;
 
 	/**
 	 * Get the Jetpack connection manager.
 	 *
 	 * @return Manager
 	 */
-    public static function get_manager(){
-        if ( ! isset( self::$manager ) ) {
-            self::$manager = new Manager( 'woocommerce' );
-        }
+	public static function get_manager() {
+		if ( ! isset( self::$manager ) ) {
+			self::$manager = new Manager( 'woocommerce' );
+		}
 
-        return self::$manager;
-    }
+		return self::$manager;
+	}
 
 	/**
 	 * Get the authorization URL for the Jetpack connection.
-	 * @param mixed $redirect_url 
-	 * @param string $from 
+	 *
+	 * @param mixed  $redirect_url Redirect URL.
+	 * @param string $from         From parameter.
+	 *
 	 * @return array {
 	 *     Authorization data.
+	 *
 	 *     @type bool   $success      Whether authorization URL generation succeeded.
 	 *     @type array  $errors       Array of error messages if any.
 	 *     @type string $color_scheme User's admin color scheme.
 	 *     @type string $url          The authorization URL.
 	 * }
 	 */
-    public static function get_authorization_url( $redirect_url, $from = '' ){
+	public static function get_authorization_url( $redirect_url, $from = '' ) {
 		$manager = self::get_manager();
 		$errors  = new WP_Error();
 
@@ -50,7 +58,7 @@ class JetpackConnection {
 			}
 		}
 
-		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
+		$calypso_env = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
 
 		$authorization_url = $manager->get_authorization_url( null, $redirect_url );
 		$authorization_url = add_query_arg( 'locale', self::get_wpcom_locale(), $authorization_url );
@@ -60,7 +68,6 @@ class JetpackConnection {
 		}
 
 		$color_scheme = get_user_option( 'admin_color', get_current_user_id() );
-		
 		if ( ! $color_scheme ) {
 			// The default Core color schema is 'fresh'.
 			$color_scheme = 'fresh';
