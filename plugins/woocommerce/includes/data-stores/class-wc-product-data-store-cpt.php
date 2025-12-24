@@ -1438,17 +1438,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
-	 * Find a matching (enabled) variation within a variable product.
+	 * Returns an array of available product variations.
 	 *
-	 * @since  3.0.0
+	 * @since 10.4.0
 	 * @param  WC_Product $product Variable product.
-	 * @param  array      $match_attributes Array of attributes we want to try to match.
-	 * @return int Matching variation ID or 0.
+	 * @return array
 	 */
-	public function find_matching_product_variation( $product, $match_attributes = array() ) {
+	public function get_product_variations( $product ) {
+		if ( ! $product instanceof WC_Product ) {
+			return array();
+		}
+
 		if ( ProductType::VARIATION === $product->get_type() ) {
 			// Can't get a variation of a variation.
-			return 0;
+			return array();
 		}
 
 		global $wpdb;
@@ -1482,8 +1485,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$query .= ' ORDER BY posts.menu_order ASC, postmeta.post_id ASC;';
 
-		$attributes = $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return $wpdb->get_results( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
 
+	/**
+	 * Find a matching (enabled) variation within a variable product.
+	 *
+	 * @since  3.0.0
+	 * @param  WC_Product $product Variable product.
+	 * @param  array      $match_attributes Array of attributes we want to try to match.
+	 * @return int Matching variation ID or 0.
+	 */
+	public function find_matching_product_variation( $product, $match_attributes = array() ) {
+		$attributes = self::get_product_variations( $product );
 		if ( ! $attributes ) {
 			return 0;
 		}
@@ -1500,26 +1514,22 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		 * Note: Not all meta fields will be set which is why we check existence.
 		 */
 		foreach ( $sorted_meta as $variation_id => $variation ) {
-			$match = true;
-
 			// Loop over the variation meta keys and values i.e. what is saved to the products. Note: $attribute_value is empty when 'any' is in use.
 			foreach ( $variation as $attribute_key => $attribute_value ) {
-				$match_any_value = '' === $attribute_value;
-
-				if ( ! $match_any_value && ! array_key_exists( $attribute_key, $match_attributes ) ) {
-					$match = false; // Requires a selection but no value was provide.
+				if ( '' === $attribute_value ) {
+					continue;
 				}
 
-				if ( array_key_exists( $attribute_key, $match_attributes ) ) { // Value to match was provided.
-					if ( ! $match_any_value && $match_attributes[ $attribute_key ] !== $attribute_value ) {
-						$match = false; // Provided value does not match variation.
-					}
+				if ( ! array_key_exists( $attribute_key, $match_attributes ) ) {
+					continue 2; // Requires a selection but no value was provide.
+				}
+
+				if ( $match_attributes[ $attribute_key ] !== $attribute_value ) {
+					continue 2; // Provided value does not match variation.
 				}
 			}
 
-			if ( true === $match ) {
-				return $variation_id;
-			}
+			return $variation_id;
 		}
 
 		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
@@ -1531,6 +1541,66 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		return 0;
+	}
+
+	/**
+	 * Find matching (enabled) variations within a variable product.
+	 *
+	 * @since 10.4.0
+	 * @param  WC_Product $product Variable product.
+	 * @param  array      $match_attributes Array of attributes we want to try to match.
+	 * @return int[] Matching variation IDs or empty array if none found.
+	 */
+	public function find_matching_product_variations( $product, $match_attributes = array() ) {
+		$attributes = self::get_product_variations( $product );
+		if ( ! $attributes ) {
+			return [];
+		}
+
+		$sorted_meta = array();
+
+		foreach ( $attributes as $m ) {
+			$sorted_meta[ $m->post_id ][ $m->meta_key ] = $m->meta_value; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		}
+
+		/**
+		 * Check each variation to find the one that matches the $match_attributes.
+		 *
+		 * Note: Not all meta fields will be set which is why we check existence.
+		 */
+		$variation_ids = array();
+		foreach ( $sorted_meta as $variation_id => $variation ) {
+			// Loop over the variation meta keys and values i.e. what is saved to the products. Note: $attribute_value is empty when 'any' is in use.
+			foreach ( $variation as $attribute_key => $attribute_value ) {
+				if ( '' === $attribute_value ) {
+					continue;
+				}
+
+				if ( ! array_key_exists( $attribute_key, $match_attributes ) ) {
+					continue;
+				}
+
+				if ( '' === $match_attributes[$attribute_key] ) {
+					continue;
+				}
+
+				if ( $match_attributes[ $attribute_key ] !== $attribute_value ) {
+					continue 2;
+				}
+			}
+
+			$variation_ids[] = $variation_id;
+		}
+
+		if ( version_compare( get_post_meta( $product->get_id(), '_product_version', true ), '2.4.0', '<' ) ) {
+			/**
+			 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
+			 * Fallback is here because there are cases where data will be 'synced' but the product version will remain the same.
+			 */
+			return ( array_map( 'sanitize_title', $match_attributes ) === $match_attributes ) ? array() : $this->find_matching_product_variations( $product, array_map( 'sanitize_title', $match_attributes ) );
+		}
+
+		return $variation_ids;
 	}
 
 	/**

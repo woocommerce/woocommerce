@@ -147,6 +147,7 @@ class WC_AJAX {
 			'remove_from_cart',
 			'checkout',
 			'get_variation',
+			'get_variations',
 			'get_customer_location',
 		);
 
@@ -621,6 +622,30 @@ class WC_AJAX {
 		$variation_id = $data_store->find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 		$variation    = $variation_id ? $variable_product->get_available_variation( $variation_id ) : false;
 		wp_send_json( $variation );
+		// phpcs:enable
+	}
+
+	/**
+	 * Get matching variations based on posted attributes.
+	 */
+	public static function get_variations() {
+		ob_start();
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( empty( $_POST['product_id'] ) ) {
+			wp_die();
+		}
+
+		$variable_product = wc_get_product( absint( $_POST['product_id'] ) );
+
+		if ( ! $variable_product ) {
+			wp_die();
+		}
+
+		$data_store    = WC_Data_Store::load( 'product' );
+		$variation_ids = $data_store->find_matching_product_variations( $variable_product, wp_unslash( $_POST ) );
+		$variations    = array_values( array_filter( array_map( array( $variable_product, 'get_available_variation' ), $variation_ids ), 'is_array' ) );
+		wp_send_json( $variations );
 		// phpcs:enable
 	}
 

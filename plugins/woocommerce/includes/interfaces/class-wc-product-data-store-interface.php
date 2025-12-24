@@ -65,6 +65,15 @@ interface WC_Product_Data_Store_Interface {
 	public function get_ending_sales();
 
 	/**
+	 * Returns an array of available product variations.
+	 *
+	 * @since 10.4.0
+	 * @param WC_Product $product Variable product object.
+	 * @return array
+	 */
+	public function get_product_variations( $product );
+
+	/**
 	 * Find a matching (enabled) variation within a variable product.
 	 *
 	 * @param WC_Product $product Variable product object.
@@ -72,6 +81,16 @@ interface WC_Product_Data_Store_Interface {
 	 * @return int Matching variation ID or 0.
 	 */
 	public function find_matching_product_variation( $product, $match_attributes = array() );
+
+	/**
+	 * Find matching (enabled) variations within a variable product.
+	 *
+	 * @since 10.4.0
+	 * @param WC_Product $product Variable product object.
+	 * @param array      $match_attributes Array of attributes we want to try to match.
+	 * @return int[] Matching variation IDs or empty array if none found.
+	 */
+	public function find_matching_product_variations( $product, $match_attributes = array() );
 
 	/**
 	 * Make sure all variations have a sort order set so they can be reordered correctly.
