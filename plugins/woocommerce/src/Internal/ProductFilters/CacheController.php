@@ -100,9 +100,6 @@ class CacheController implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	public function need_cleanup() {
-		$transient_name  = self::CACHE_GROUP . '-transient-version';
-		$transient_value = get_transient( $transient_name );
-
-		return ! empty( $transient_value );
+		return get_transient( self::CACHE_GROUP . '-transient-version' );
 	}
 }
