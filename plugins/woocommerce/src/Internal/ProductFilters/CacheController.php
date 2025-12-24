@@ -43,8 +43,8 @@ class CacheController implements RegisterHooksInterface {
 			return;
 		}
 
-		add_action( 'woocommerce_after_product_object_save', array( $this, 'clear_filter_data_cache' ) );
-		add_action( 'woocommerce_delete_product_transients', array( $this, 'clear_filter_data_cache' ) );
+		add_action( 'woocommerce_after_product_object_save', array( $this, 'invalidate_filter_data_cache' ) );
+		add_action( 'woocommerce_delete_product_transients', array( $this, 'invalidate_filter_data_cache' ) );
 
 		// Clear taxonomy hierarchy cache when terms change.
 		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
@@ -55,7 +55,7 @@ class CacheController implements RegisterHooksInterface {
 	/**
 	 * Invalidate all cache under filter data group.
 	 */
-	public function clear_filter_data_cache() {
+	public function invalidate_filter_data_cache() {
 		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
