@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
-use Automattic\Jetpack\Connection\Manager;
+use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,57 +22,15 @@ defined( 'ABSPATH' ) || exit;
 class JetpackConnectionManager {
 
 	/**
-	 * Logger source identifier.
-	 */
-	private const LOGGER_SOURCE = 'woo-fraud-protection';
-
-	/**
-	 * Check if Jetpack Connection class is available.
-	 *
-	 * @return bool True if Jetpack Connection class exists.
-	 */
-	public function is_jetpack_connection_available(): bool {
-		return class_exists( Manager::class );
-	}
-
-	/**
 	 * Get the Jetpack blog ID.
 	 *
 	 * @return int|null Blog ID if available, null otherwise.
 	 */
 	public function get_blog_id(): ?int {
-		if ( ! $this->is_jetpack_connection_available() ) {
-			return null;
-		}
-
 		// Get blog ID from Jetpack options.
 		$blog_id = \Jetpack_Options::get_option( 'id' );
 
 		return $blog_id ? (int) $blog_id : null;
-	}
-
-	/**
-	 * Get connection manager instance.
-	 *
-	 * @return Manager|null Connection manager instance or null if not available.
-	 */
-	private function get_connection_manager(): ?Manager {
-		if ( ! $this->is_jetpack_connection_available() ) {
-			return null;
-		}
-
-		try {
-			return new Manager( 'woocommerce' );
-		} catch ( \Exception $e ) {
-			FraudProtectionController::log(
-				'error',
-				sprintf(
-					'Failed to initialize Jetpack Connection Manager: %s',
-					$e->getMessage()
-				)
-			);
-			return null;
-		}
 	}
 
 	/**
@@ -97,23 +55,8 @@ class JetpackConnectionManager {
 			'blog_id'    => null,
 		);
 
-		// Check if Jetpack Connection class exists.
-		if ( ! $this->is_jetpack_connection_available() ) {
-			$status['error']      = __( 'Jetpack Connection is not available. Please install and activate Jetpack.', 'woocommerce' );
-			$status['error_code'] = 'jetpack_not_available';
-			return $status;
-		}
-
-		// Get connection manager.
-		$manager = $this->get_connection_manager();
-		if ( ! $manager ) {
-			$status['error']      = __( 'Failed to initialize Jetpack Connection Manager.', 'woocommerce' );
-			$status['error_code'] = 'manager_init_failed';
-			return $status;
-		}
-
 		// Check if connected.
-		if ( ! $manager->is_connected() ) {
+		if ( ! JetpackConnection::get_manager()->is_connected() ) {
 			$status['error']      = __( 'Site is not connected to WordPress.com. Please connect your site to enable fraud protection.', 'woocommerce' );
 			$status['error_code'] = 'not_connected';
 			return $status;
@@ -141,52 +84,27 @@ class JetpackConnectionManager {
 	 * @return string|null Authorization URL or null on error.
 	 */
 	public function get_authorization_url( string $redirect_url = '' ): ?string {
-		if ( ! $this->is_jetpack_connection_available() ) {
-			return null;
-		}
-
-		$manager = $this->get_connection_manager();
-		if ( ! $manager ) {
-			return null;
-		}
-
 		// If no redirect URL provided, use current admin URL.
 		if ( empty( $redirect_url ) ) {
 			$redirect_url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
 		}
 
-		try {
-			// Use the OnboardingPlugins class to get authorization URL.
-			if ( class_exists( '\Automattic\WooCommerce\Admin\API\OnboardingPlugins' ) ) {
-				$request = new \WP_REST_Request();
-				$request->set_param( 'redirect_url', $redirect_url );
-				$plugin_onboarding = new \Automattic\WooCommerce\Admin\API\OnboardingPlugins();
-				$result            = $plugin_onboarding->get_jetpack_authorization_url( $request );
+		$authorization_data = JetpackConnection::get_authorization_url( $redirect_url, 'new-account-button' );
 
-				if ( ! empty( $result['url'] ) ) {
-					// Customize the URL parameters for fraud protection.
-					$url = add_query_arg(
-						array(
-							'redirect_uri' => $redirect_url,
-							'from'         => 'woocommerce-fraud-protection',
-							'plugin_name'  => 'woocommerce',
-						),
-						$result['url']
-					);
-					return $url;
-				}
-			}
-
-			return null;
-		} catch ( \Exception $e ) {
+		$authorization_data['url'] = add_query_arg('redirect_uri', $redirect_url, $authorization_data['url']);
+		
+		if ( ! $authorization_data['success'] ) {
 			FraudProtectionController::log(
 				'error',
 				sprintf(
 					'Failed to get Jetpack authorization URL: %s',
-					$e->getMessage()
+					$authorization_data['errors'][0]
 				)
 			);
+			
 			return null;
 		}
+
+		return $authorization_data['url'];
 	}
 }
