@@ -8,8 +8,9 @@ jQuery( function ( $ ) {
 		var has_empty_fields = false;
 		attributes_and_variations_data.each( function () {
 			var $this = $( this );
-			// Check if the field is checkbox or a search field.
+			// Check if the field is textarea, checkbox or a search field.
 			if (
+				$this.is( 'textarea' ) ||
 				$this.hasClass( 'checkbox' ) ||
 				$this.filter( '[class*=search__field]' ).length
 			) {
