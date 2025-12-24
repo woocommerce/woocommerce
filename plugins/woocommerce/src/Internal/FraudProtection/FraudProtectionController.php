@@ -68,35 +68,8 @@ class FraudProtectionController implements RegisterHooksInterface {
 			return;
 		}
 
-		// Check Jetpack connection status and log if not connected.
-		$this->check_jetpack_connection();
-
 		// Future implementation: Register hooks and initialize components here.
 		// For now, this is a placeholder for the infrastructure.
-	}
-
-	/**
-	 * Check Jetpack connection status and log warning if not connected.
-	 *
-	 * This implements the fail-open pattern: the feature will continue to work
-	 * even if Jetpack is not connected, but API calls will fail gracefully and
-	 * allow all sessions through.
-	 *
-	 * @return void
-	 */
-	private function check_jetpack_connection(): void {
-		$connection_status = $this->connection_manager->get_connection_status();
-
-		if ( ! $connection_status['connected'] ) {
-			self::log(
-				'warning',
-				sprintf(
-					'Fraud Protection is enabled but Jetpack connection is not available: %s (Error: %s). Fraud protection will fail open and allow all sessions.',
-					$connection_status['error'],
-					$connection_status['error_code']
-				)
-			);
-		}
 	}
 
 	/**
