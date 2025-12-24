@@ -225,7 +225,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 			// $event_tracker->track( $event_type, $session_data );
 			//
 			// For now, log the event for debugging and verification.
-			FraudProtectionController::log(
+			$this->fraud_protection_controller->log(
 				'info',
 				sprintf(
 					'Fraud protection event tracked: %s | Token ID: %s | Gateway: %s | User ID: %s | Session ID: %s',
@@ -243,7 +243,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 			);
 		} catch ( \Exception $e ) {
 			// Gracefully handle errors - fraud protection should never break payment method management.
-			FraudProtectionController::log(
+			$this->fraud_protection_controller->log(
 				'error',
 				sprintf(
 					'Failed to track fraud protection event: %s | Error: %s',
