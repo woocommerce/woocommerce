@@ -69,4 +69,18 @@ class CacheController implements RegisterHooksInterface {
 			$this->taxonomy_hierarchy_data->clear_cache( $taxonomy );
 		}
 	}
+
+	/**
+	 * Delete all filter data transients.
+	 */
+	public function delete_filter_data_transients() {
+		global $wpdb;
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				$wpdb->esc_like( '_transient_wc_filter_data_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_wc_filter_data_' ) . '%'
+			)
+		);
+	}
 }
