@@ -91,8 +91,6 @@ class JetpackConnectionManager {
 
 		$authorization_data = JetpackConnection::get_authorization_url( $redirect_url, 'new-account-button' );
 
-		$authorization_data['url'] = add_query_arg('redirect_uri', $redirect_url, $authorization_data['url']);
-		
 		if ( ! $authorization_data['success'] ) {
 			FraudProtectionController::log(
 				'error',
