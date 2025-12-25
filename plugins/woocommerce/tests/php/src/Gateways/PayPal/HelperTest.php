@@ -419,5 +419,199 @@ class HelperTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertEmpty( $result );
 	}
+
+	/**
+	 * Test update_addresses_in_order updates both shipping and billing addresses.
+	 */
+	public function test_update_addresses_in_order_updates_addresses() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$paypal_order_details = array(
+			'purchase_units' => array(
+				array(
+					'shipping' => array(
+						'name'    => array(
+							'full_name' => 'John Doe',
+						),
+						'address' => array(
+							'country_code'   => 'US',
+							'postal_code'    => '12345',
+							'admin_area_1'   => 'CA',
+							'admin_area_2'   => 'San Francisco',
+							'address_line_1' => '123 Main St',
+							'address_line_2' => 'Apt 4B',
+						),
+					),
+				),
+			),
+			'payer'          => array(
+				'name'          => array(
+					'given_name' => 'Jane',
+					'surname'    => 'Smith',
+				),
+				'email_address' => 'jane.smith@example.com',
+				'address'       => array(
+					'country_code'   => 'US',
+					'postal_code'    => '54321',
+					'admin_area_1'   => 'NY',
+					'admin_area_2'   => 'New York',
+					'address_line_1' => '456 Broadway',
+					'address_line_2' => 'Suite 100',
+				),
+			),
+		);
+
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
+
+		// Verify shipping address was updated.
+		$this->assertEquals( 'John', $order->get_shipping_first_name() );
+		$this->assertEquals( 'Doe', $order->get_shipping_last_name() );
+		$this->assertEquals( 'US', $order->get_shipping_country() );
+		$this->assertEquals( '12345', $order->get_shipping_postcode() );
+		$this->assertEquals( 'CA', $order->get_shipping_state() );
+		$this->assertEquals( 'San Francisco', $order->get_shipping_city() );
+		$this->assertEquals( '123 Main St', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Apt 4B', $order->get_shipping_address_2() );
+
+		// Verify billing address was updated.
+		$this->assertEquals( 'Jane', $order->get_billing_first_name() );
+		$this->assertEquals( 'Smith', $order->get_billing_last_name() );
+		$this->assertEquals( 'jane.smith@example.com', $order->get_billing_email() );
+		$this->assertEquals( 'US', $order->get_billing_country() );
+		$this->assertEquals( '54321', $order->get_billing_postcode() );
+		$this->assertEquals( 'NY', $order->get_billing_state() );
+		$this->assertEquals( 'New York', $order->get_billing_city() );
+		$this->assertEquals( '456 Broadway', $order->get_billing_address_1() );
+		$this->assertEquals( 'Suite 100', $order->get_billing_address_2() );
+
+		// Verify meta flag was set.
+		$this->assertEquals( 'yes', $order->get_meta( '_paypal_addresses_updated', true ) );
+
+		// Clean up.
+		$order->delete( true );
+	}
+
+	/**
+	 * Test update_addresses_in_order does not update when order is null.
+	 */
+	public function test_update_addresses_in_order_skips_null_order() {
+		$paypal_order_details = array(
+			'purchase_units' => array(
+				array(
+					'shipping' => array(
+						'name' => array( 'full_name' => 'John Doe' ),
+					),
+				),
+			),
+		);
+
+		// Should not throw an error.
+		Helper::update_addresses_in_order( null, $paypal_order_details );
+
+		// No assertions, just ensuring no exception is thrown.
+		$this->assertTrue( true );
+	}
+
+	/**
+	 * Test update_addresses_in_order does not update when paypal_order_details is empty.
+	 */
+	public function test_update_addresses_in_order_skips_empty_details() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$original_shipping_first_name = $order->get_shipping_first_name();
+        $original_billing_first_name = $order->get_billing_first_name();
+
+		Helper::update_addresses_in_order( $order, array() );
+
+		// Order should not be modified.
+		$this->assertEquals( $original_shipping_first_name, $order->get_shipping_first_name() );
+		$this->assertEquals( $original_billing_first_name, $order->get_billing_first_name() );
+		$this->assertEmpty( $order->get_meta( '_paypal_addresses_updated', true ) );
+
+		// Clean up.
+		$order->delete( true );
+	}
+
+	/**
+	 * Test update_addresses_in_order does not update when already updated.
+	 */
+	public function test_update_addresses_in_order_skips_already_updated() {
+		$order = WC_Helper_Order::create_order();
+		$order->update_meta_data( '_paypal_addresses_updated', 'yes' );
+		$order->save();
+
+		$original_shipping_first_name = $order->get_shipping_first_name();
+
+		$paypal_order_details = array(
+			'purchase_units' => array(
+				array(
+					'shipping' => array(
+						'name' => array(
+							'full_name' => 'Different Name',
+						),
+					),
+				),
+			),
+		);
+
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
+
+		// Order should not be modified.
+		$this->assertEquals( $original_shipping_first_name, $order->get_shipping_first_name() );
+
+		// Clean up.
+		$order->delete( true );
+	}
+
+	/**
+	 * Test update_addresses_in_order handles partial address data.
+	 */
+	public function test_update_addresses_in_order_handles_partial_address_data() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$paypal_order_details = array(
+			'purchase_units' => array(
+				array(
+					'shipping' => array(
+						'name'    => array(
+							'full_name' => 'John Doe',
+						),
+						'address' => array(
+							'country_code' => 'US',
+							// Only country code, missing other fields.
+						),
+					),
+				),
+			),
+			'payer'          => array(
+				'name'    => array(
+					'given_name' => 'Jane',
+					// Missing surname.
+				),
+				'address' => array(
+					'postal_code' => '12345',
+					// Only postal code.
+				),
+			),
+		);
+
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
+
+		// Shipping country should be set, other fields should be empty strings.
+		$this->assertEquals( 'US', $order->get_shipping_country() );
+		$this->assertEquals( '', $order->get_shipping_postcode() );
+		$this->assertEquals( '', $order->get_shipping_state() );
+
+		// Billing should have given name and postal code.
+		$this->assertEquals( 'Jane', $order->get_billing_first_name() );
+		$this->assertEquals( '', $order->get_billing_last_name() );
+		$this->assertEquals( '12345', $order->get_billing_postcode() );
+
+		// Clean up.
+		$order->delete( true );
+	}
 }
 
