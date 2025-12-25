@@ -20,7 +20,7 @@ use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 /**
  * WC_Gateway_Paypal_Constants Class.
  *
- * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Constants instead. This class will be removed in 10.7.0.
+ * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Constants instead. This class will be removed in 11.0.0.
  */
 class WC_Gateway_Paypal_Constants {
 	/**
