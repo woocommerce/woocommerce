@@ -4,7 +4,7 @@
  *
  * Provides constants for PayPal payment statuses, intents, and other PayPal-related values.
  *
- * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Constants instead. This class will be removed in 10.7.0.
+ * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Constants instead. This class will be removed in 11.0.0.
  * @version    10.3.0
  * @package    WooCommerce\Gateways
  */
