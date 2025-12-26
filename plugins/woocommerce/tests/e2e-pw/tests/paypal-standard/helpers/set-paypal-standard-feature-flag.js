@@ -19,10 +19,5 @@ export const setPaypalStandardFeatureFlag = async ( baseURL, shouldLoad ) => {
 	const value = {
 		_should_load: shouldLoad,
 	};
-	await setOption(
-		request,
-		baseURL,
-		'woocommerce_paypal_settings',
-		value
-	);
+	await setOption( request, baseURL, 'woocommerce_paypal_settings', value );
 };
