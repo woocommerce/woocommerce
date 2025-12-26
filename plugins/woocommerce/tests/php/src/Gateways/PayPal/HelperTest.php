@@ -351,6 +351,10 @@ class HelperTest extends \WC_Unit_Test_Case {
 				'email'    => 'user@domain@com',
 				'expected' => 'us*r@domain@com',
 			),
+			'empty_email'                => array(
+				'email'    => '',
+				'expected' => '',
+			),
 		);
 	}
 

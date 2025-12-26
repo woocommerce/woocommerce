@@ -106,7 +106,7 @@ class Helper {
 			}
 			// Mask the email address.
 			if ( 'email_address' === $key || 'email' === $key ) {
-				$redacted_data[ $key ] = self::mask_email( $value );
+				$redacted_data[ $key ] = self::mask_email( (string) $value );
 				continue;
 			}
 
@@ -129,7 +129,7 @@ class Helper {
 	 * @param string $email The email address to mask.
 	 * @return string The masked email address or original input if invalid.
 	 */
-	public static function mask_email( $email ): string {
+	public static function mask_email( string $email ): string {
 		if ( empty( $email ) ) {
 			return $email;
 		}
