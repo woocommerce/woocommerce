@@ -11,18 +11,14 @@ namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 /**
  * Tests for the PaymentMethodEventTracker class.
  */
 class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
-	/**
-	 * Logged data storage for testing.
-	 *
-	 * @var array
-	 */
-	public static $logged_data = array();
+	use LoggerSpyTrait;
 
 	/**
 	 * Setup test.
@@ -30,15 +26,12 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Reset logged data.
-		self::$logged_data = array();
-
 		// Enable the fraud protection feature.
 		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
 	}
 
 	/**
-	 * Get a testable tracker instance with mock controller.
+	 * Get a testable tracker instance.
 	 *
 	 * @return PaymentMethodEventTracker
 	 */
@@ -46,36 +39,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 
-		$features_controller = $container->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class );
-
-		// Create mock controller that captures log calls.
-		$mock_controller = new class($features_controller) extends FraudProtectionController {
-			/**
-			 * Override log to capture calls for testing.
-			 *
-			 * @param string $level   Log level.
-			 * @param string $message Log message.
-			 * @param array  $context Context data.
-			 */
-			public function log( string $level, string $message, array $context = array() ): void {
-				PaymentMethodEventTrackerTest::$logged_data[] = array(
-					'level'   => $level,
-					'message' => $message,
-					'context' => $context,
-				);
-			}
-		};
-
-		// Initialize the mock controller.
-		$mock_controller->init( $features_controller );
-
-		// Create tracker with mock controller.
+		// Get tracker with real controller - logs will be captured by LoggerSpyTrait.
 		$tracker = $container->get( PaymentMethodEventTracker::class );
-		$tracker->init(
-			$container->get( \Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector::class ),
-			$container->get( \Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager::class ),
-			$mock_controller
-		);
 
 		return $tracker;
 	}
@@ -131,13 +96,13 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		do_action( 'woocommerce_new_payment_token', $token->get_id(), $token );
 
-		$this->assertCount( 1, self::$logged_data );
-		$this->assertEquals( 'info', self::$logged_data[0]['level'] );
-		$this->assertStringContainsString( 'payment_method_added', self::$logged_data[0]['message'] );
-		$this->assertEquals( 'payment_method_added', self::$logged_data[0]['context']['event_type'] );
-		$this->assertEquals( 'added', self::$logged_data[0]['context']['event_data']['action'] );
-		$this->assertEquals( $token->get_id(), self::$logged_data[0]['context']['event_data']['token_id'] );
-		$this->assertEquals( 'stripe', self::$logged_data[0]['context']['event_data']['gateway_id'] );
+		$this->assertCount( 1, $this->captured_logs );
+		$this->assertEquals( 'info', $this->captured_logs[0]['level'] );
+		$this->assertStringContainsString( 'payment_method_added', $this->captured_logs[0]['message'] );
+		$this->assertEquals( 'payment_method_added', $this->captured_logs[0]['context']['event_type'] );
+		$this->assertEquals( 'added', $this->captured_logs[0]['context']['event_data']['action'] );
+		$this->assertEquals( $token->get_id(), $this->captured_logs[0]['context']['event_data']['token_id'] );
+		$this->assertEquals( 'stripe', $this->captured_logs[0]['context']['event_data']['gateway_id'] );
 	}
 
 	/**
@@ -161,9 +126,9 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		do_action( 'woocommerce_payment_token_updated', $token->get_id() );
 
-		$this->assertCount( 1, self::$logged_data );
-		$this->assertEquals( 'payment_method_updated', self::$logged_data[0]['context']['event_type'] );
-		$this->assertEquals( 'updated', self::$logged_data[0]['context']['event_data']['action'] );
+		$this->assertCount( 1, $this->captured_logs );
+		$this->assertEquals( 'payment_method_updated', $this->captured_logs[0]['context']['event_type'] );
+		$this->assertEquals( 'updated', $this->captured_logs[0]['context']['event_data']['action'] );
 	}
 
 	/**
@@ -188,10 +153,10 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		do_action( 'woocommerce_payment_token_set_default', $token->get_id(), $token );
 
-		$this->assertCount( 1, self::$logged_data );
-		$this->assertEquals( 'payment_method_set_default', self::$logged_data[0]['context']['event_type'] );
-		$this->assertEquals( 'set_default', self::$logged_data[0]['context']['event_data']['action'] );
-		$this->assertTrue( self::$logged_data[0]['context']['event_data']['is_default'] );
+		$this->assertCount( 1, $this->captured_logs );
+		$this->assertEquals( 'payment_method_set_default', $this->captured_logs[0]['context']['event_type'] );
+		$this->assertEquals( 'set_default', $this->captured_logs[0]['context']['event_data']['action'] );
+		$this->assertTrue( $this->captured_logs[0]['context']['event_data']['is_default'] );
 	}
 
 	/**
@@ -215,9 +180,9 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		do_action( 'woocommerce_payment_token_deleted', $token->get_id(), $token );
 
-		$this->assertCount( 1, self::$logged_data );
-		$this->assertEquals( 'payment_method_deleted', self::$logged_data[0]['context']['event_type'] );
-		$this->assertEquals( 'deleted', self::$logged_data[0]['context']['event_data']['action'] );
+		$this->assertCount( 1, $this->captured_logs );
+		$this->assertEquals( 'payment_method_deleted', $this->captured_logs[0]['context']['event_type'] );
+		$this->assertEquals( 'deleted', $this->captured_logs[0]['context']['event_data']['action'] );
 	}
 
 	/**
@@ -240,10 +205,10 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		do_action( 'woocommerce_payment_token_add_failed', $token, 'card_declined' );
 
-		$this->assertCount( 1, self::$logged_data );
-		$this->assertEquals( 'payment_method_add_failed', self::$logged_data[0]['context']['event_type'] );
-		$this->assertEquals( 'add_failed', self::$logged_data[0]['context']['event_data']['action'] );
-		$this->assertEquals( 'card_declined', self::$logged_data[0]['context']['event_data']['failure_reason'] );
+		$this->assertCount( 1, $this->captured_logs );
+		$this->assertEquals( 'payment_method_add_failed', $this->captured_logs[0]['context']['event_type'] );
+		$this->assertEquals( 'add_failed', $this->captured_logs[0]['context']['event_data']['action'] );
+		$this->assertEquals( 'card_declined', $this->captured_logs[0]['context']['event_data']['failure_reason'] );
 	}
 
 	/**
@@ -264,8 +229,5 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Reset container.
 		wc_get_container()->reset_all_resolved();
-
-		// Reset logged data.
-		self::$logged_data = array();
 	}
 }
