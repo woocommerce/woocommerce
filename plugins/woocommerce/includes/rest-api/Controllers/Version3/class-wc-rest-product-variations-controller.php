@@ -364,7 +364,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				}
 
 				$attribute_key   = sanitize_title( $parent_attributes[ $attribute_name ]->get_name() );
-				$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+				$attribute_value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
 					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
