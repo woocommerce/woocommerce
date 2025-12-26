@@ -56,7 +56,7 @@ class WC_Gateway_Paypal_Helper {
 			return null;
 		}
 
-		return PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
+		return PayPalHelper::get_wc_order_from_paypal_custom_id( (string) $custom_id );
 	}
 
 	/**
@@ -81,7 +81,7 @@ class WC_Gateway_Paypal_Helper {
 	 * @return string The masked email address or original input if invalid.
 	 */
 	public static function mask_email( $email ) {
-		return PayPalHelper::mask_email( $email );
+		return PayPalHelper::mask_email( (string) $email );
 	}
 
 	/**

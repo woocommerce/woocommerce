@@ -130,7 +130,7 @@ class Helper {
 	 * @return string The masked email address or original input if invalid.
 	 */
 	public static function mask_email( $email ): string {
-		if ( ! is_string( $email ) || empty( $email ) ) {
+		if ( empty( $email ) ) {
 			return $email;
 		}
 
@@ -211,4 +211,3 @@ class Helper {
 		$order->save();
 	}
 }
-
