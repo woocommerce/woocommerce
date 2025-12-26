@@ -58,8 +58,8 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_data_collector  = $this->createMock( SessionDataCollector::class );
-		$this->mock_controller      = $this->createMock( FraudProtectionController::class );
+		$this->mock_data_collector = $this->createMock( SessionDataCollector::class );
+		$this->mock_controller     = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
 		$this->sut = new CartEventTracker();
