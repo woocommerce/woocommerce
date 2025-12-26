@@ -9,7 +9,7 @@ use WP_Error;
 
 /**
  * Jetpack Connection wrapper class.
- * 
+ *
  * @since 8.3.0
  */
 class JetpackConnection {
