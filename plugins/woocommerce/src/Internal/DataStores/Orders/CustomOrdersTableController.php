@@ -557,7 +557,8 @@ class CustomOrdersTableController {
 				'query_var'                        => false,
 				'can_export'                       => false,
 				'supports'                         => array(),
-				'capabilities'                     => array(),
+				'capability_type'                  => 'shop_order',
+				'map_meta_cap'                     => true,
 				'exclude_from_order_count'         => true,
 				'exclude_from_order_views'         => true,
 				'exclude_from_order_reports'       => true,
@@ -676,7 +677,7 @@ class CustomOrdersTableController {
 
 			if ( $is_dangerous ) {
 				$sync_message[] = wp_kses_data(
-					__( "There are orders pending sync.", 'woocommerce' )
+					__( 'There are orders pending sync.', 'woocommerce' )
 					. '<strong>'
 					. __( 'Switching data storage while sync is incomplete is dangerous and can lead to order data corruption or loss!', 'woocommerce' )
 					. '</strong>'
@@ -726,7 +727,7 @@ class CustomOrdersTableController {
 
 				if ( ! $is_dangerous ) {
 					$sync_message[] = wp_kses_data(
-						__( "You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There are currently orders out of sync.", 'woocommerce' ),
+						__( 'You can switch order data storage <strong>only when the posts and orders tables are in sync</strong>. There are currently orders out of sync.', 'woocommerce' ),
 					);
 				}
 
