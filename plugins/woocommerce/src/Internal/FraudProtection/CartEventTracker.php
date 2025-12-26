@@ -116,7 +116,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	public function handle_track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $cart ): void {
 		$cart_item = $cart->cart_contents[ $cart_item_key ] ?? null;
 
-		if ( ! $cart_item ) {
+		if ( (int) $quantity === (int) $old_quantity || ! $cart_item ) {
 			return;
 		}
 
