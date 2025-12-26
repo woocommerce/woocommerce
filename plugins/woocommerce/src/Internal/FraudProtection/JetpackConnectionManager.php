@@ -94,10 +94,8 @@ class JetpackConnectionManager {
 		if ( ! $authorization_data['success'] ) {
 			FraudProtectionController::log(
 				'error',
-				sprintf(
-					'Failed to get Jetpack authorization URL: %s',
-					$authorization_data['errors'][0]
-				)
+				'Failed to get Jetpack authorization URL.',
+				$authorization_data['errors']
 			);
 			return null;
 		}
