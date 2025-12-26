@@ -883,12 +883,13 @@
 					"changes": [],
 					"events": [
 						"pull_request",
-						"nightly-checks",
-						"release-checks",
-						"core-e2e-paypal-standard"
+						"push"
 					],
+					"testEnv": {
+						"start": "env:test"
+					},
 					"report": {
-						"resultsBlobName": "default-paypal-standard-core-e2e",
+						"resultsBlobName": "core-e2e-report",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
