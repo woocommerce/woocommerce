@@ -7,7 +7,9 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Helper;
 
 /**
  * Class HelperTest.
@@ -84,7 +86,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	public function test_is_paypal_gateway_available_scenarios( $settings, $expected ) {
 		update_option( 'woocommerce_paypal_settings', $settings );
 
-		$result = PayPalHelper::is_paypal_gateway_available();
+		$result = Helper::is_paypal_gateway_available();
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -168,7 +170,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	public function test_is_orders_v2_migration_eligible_scenarios( $settings, $expected ) {
 		update_option( 'woocommerce_paypal_settings', $settings );
 
-		$result = PayPalHelper::is_orders_v2_migration_eligible();
+		$result = Helper::is_orders_v2_migration_eligible();
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -178,7 +180,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_returns_order_when_valid() {
 		// Create a test order.
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$custom_id = wp_json_encode(
@@ -190,9 +192,9 @@ class HelperTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
-		$this->assertInstanceOf( WC_Order::class, $result );
+		$this->assertInstanceOf( \WC_Order::class, $result );
 		$this->assertEquals( $order->get_id(), $result->get_id() );
 
 		// Clean up.
@@ -210,7 +212,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 	}
@@ -227,7 +229,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 	}
@@ -237,7 +239,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_returns_null_when_order_key_mismatch() {
 		// Create a test order.
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$custom_id = wp_json_encode(
@@ -248,7 +250,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 
@@ -287,7 +289,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * @param mixed  $expected  The expected result.
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_invalid_inputs( $custom_id, $expected ) {
-		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -301,7 +303,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * @param string $expected The expected masked result.
 	 */
 	public function test_mask_email( $email, $expected ) {
-		$result = PayPalHelper::mask_email( $email );
+		$result = Helper::mask_email( $email );
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -376,7 +378,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$result = PayPalHelper::redact_data( $data );
+		$result = Helper::redact_data( $data );
 
 		// PII fields should be redacted.
 		$this->assertEquals( '[redacted]', $result['given_name'] );
@@ -404,17 +406,17 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test redact_data handles non-array inputs.
 	 */
 	public function test_redact_data_handles_non_array_inputs() {
-		$this->assertEquals( 'string', PayPalHelper::redact_data( 'string' ) );
-		$this->assertEquals( 123, PayPalHelper::redact_data( 123 ) );
-		$this->assertEquals( null, PayPalHelper::redact_data( null ) );
-		$this->assertEquals( true, PayPalHelper::redact_data( true ) );
+		$this->assertEquals( 'string', Helper::redact_data( 'string' ) );
+		$this->assertEquals( 123, Helper::redact_data( 123 ) );
+		$this->assertEquals( null, Helper::redact_data( null ) );
+		$this->assertEquals( true, Helper::redact_data( true ) );
 	}
 
 	/**
 	 * Test redact_data handles empty arrays.
 	 */
 	public function test_redact_data_handles_empty_array() {
-		$result = PayPalHelper::redact_data( array() );
+		$result = Helper::redact_data( array() );
 
 		$this->assertIsArray( $result );
 		$this->assertEmpty( $result );
@@ -424,7 +426,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test update_addresses_in_order updates both shipping and billing addresses.
 	 */
 	public function test_update_addresses_in_order_updates_addresses() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$paypal_order_details = array(
@@ -462,7 +464,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 			),
 		);
 
-		PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
 
 		// Verify shipping address was updated.
 		$this->assertEquals( 'John', $order->get_shipping_first_name() );
@@ -507,7 +509,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 		);
 
 		// Should not throw an error.
-		PayPalHelper::update_addresses_in_order( null, $paypal_order_details );
+		Helper::update_addresses_in_order( null, $paypal_order_details );
 
 		// No assertions, just ensuring no exception is thrown.
 		$this->assertTrue( true );
@@ -517,13 +519,13 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test update_addresses_in_order does not update when paypal_order_details is empty.
 	 */
 	public function test_update_addresses_in_order_skips_empty_details() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$original_shipping_first_name = $order->get_shipping_first_name();
 		$original_billing_first_name  = $order->get_billing_first_name();
 
-		PayPalHelper::update_addresses_in_order( $order, array() );
+		Helper::update_addresses_in_order( $order, array() );
 
 		// Order should not be modified.
 		$this->assertEquals( $original_shipping_first_name, $order->get_shipping_first_name() );
@@ -538,7 +540,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test update_addresses_in_order does not update when already updated.
 	 */
 	public function test_update_addresses_in_order_skips_already_updated() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_addresses_updated', 'yes' );
 		$order->save();
 
@@ -556,7 +558,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 			),
 		);
 
-		PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
 
 		// Order should not be modified.
 		$this->assertEquals( $original_shipping_first_name, $order->get_shipping_first_name() );
@@ -569,7 +571,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test update_addresses_in_order handles partial address data.
 	 */
 	public function test_update_addresses_in_order_handles_partial_address_data() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$paypal_order_details = array(
@@ -598,7 +600,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 			),
 		);
 
-		PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
 
 		// Shipping country should be set, other fields should be empty strings.
 		$this->assertEquals( 'US', $order->get_shipping_country() );
