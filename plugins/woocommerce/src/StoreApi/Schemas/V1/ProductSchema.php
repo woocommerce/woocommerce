@@ -407,6 +407,33 @@ class ProductSchema extends AbstractSchema {
 					'readonly'    => true,
 				],
 			],
+			'related_ids'         => [
+				'description' => __( 'List of related products IDs.', 'woocommerce' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type' => 'integer',
+				],
+			],
+			'upsell_ids'          => [
+				'description' => __( 'List of up-sell products IDs.', 'woocommerce' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type' => 'integer',
+				],
+			],
+			'cross_sell_ids'      => [
+				'description' => __( 'List of cross-sell products IDs.', 'woocommerce' ),
+				'type'        => 'array',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type' => 'integer',
+				],
+			],
 			'has_options'         => [
 				'description' => __( 'Does the product have additional options before it can be added to the cart?', 'woocommerce' ),
 				'type'        => 'boolean',
@@ -549,6 +576,9 @@ class ProductSchema extends AbstractSchema {
 			'attributes'          => $this->get_attributes( $product ),
 			'variations'          => $this->get_variations( $product ),
 			'grouped_products'    => $this->get_grouped_products( $product ),
+			'related_ids'         => $this->get_related_ids( $product ),
+			'upsell_ids'          => $this->get_upsell_ids( $product ),
+			'cross_sell_ids'      => $this->get_cross_sell_ids( $product ),
 			'has_options'         => $product->has_options(),
 			'is_purchasable'      => $product->is_purchasable(),
 			'is_in_stock'         => $product->is_in_stock(),
@@ -758,6 +788,42 @@ class ProductSchema extends AbstractSchema {
 			);
 		}
 		return [];
+	}
+
+	/**
+	 * Get related product IDs.
+	 *
+	 * @since 10.x.x
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return array<int>
+	 */
+	protected function get_related_ids( \WC_Product $product ): array {
+		return array_values( array_map( 'absint', wc_get_related_products( $product->get_id() ) ) );
+	}
+
+	/**
+	 * Get upsell product IDs.
+	 *
+	 * @since 10.x.x
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return array<int>
+	 */
+	protected function get_upsell_ids( \WC_Product $product ): array {
+		return array_values( array_map( 'absint', $product->get_upsell_ids() ) );
+	}
+
+	/**
+	 * Get cross-sell product IDs.
+	 *
+	 * @since 10.x.x
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return array<int>
+	 */
+	protected function get_cross_sell_ids( \WC_Product $product ): array {
+		return array_values( array_map( 'absint', $product->get_cross_sell_ids() ) );
 	}
 
 	/**
