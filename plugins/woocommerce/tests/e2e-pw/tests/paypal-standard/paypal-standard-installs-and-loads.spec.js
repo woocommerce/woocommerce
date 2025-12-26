@@ -9,7 +9,7 @@ import { request } from '@playwright/test';
 import { expect, tags, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { setOption } from '../../utils/options';
-import {setFilterValue} from "../../utils/filters";
+import { setFilterValue } from '../../utils/filters';
 
 test.describe(
 	'PayPal Standard Installation',
