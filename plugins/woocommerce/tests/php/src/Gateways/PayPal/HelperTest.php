@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
 use Automattic\WooCommerce\Gateways\PayPal\Helper;
 
 /**
@@ -178,7 +180,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_returns_order_when_valid() {
 		// Create a test order.
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$custom_id = wp_json_encode(
@@ -192,7 +194,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 
 		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
-		$this->assertInstanceOf( WC_Order::class, $result );
+		$this->assertInstanceOf( \WC_Order::class, $result );
 		$this->assertEquals( $order->get_id(), $result->get_id() );
 
 		// Clean up.
@@ -237,7 +239,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_returns_null_when_order_key_mismatch() {
 		// Create a test order.
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$custom_id = wp_json_encode(
@@ -424,7 +426,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test update_addresses_in_order updates both shipping and billing addresses.
 	 */
 	public function test_update_addresses_in_order_updates_addresses() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$paypal_order_details = array(
@@ -517,11 +519,11 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test update_addresses_in_order does not update when paypal_order_details is empty.
 	 */
 	public function test_update_addresses_in_order_skips_empty_details() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$original_shipping_first_name = $order->get_shipping_first_name();
-        $original_billing_first_name = $order->get_billing_first_name();
+		$original_billing_first_name  = $order->get_billing_first_name();
 
 		Helper::update_addresses_in_order( $order, array() );
 
@@ -538,7 +540,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test update_addresses_in_order does not update when already updated.
 	 */
 	public function test_update_addresses_in_order_skips_already_updated() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_addresses_updated', 'yes' );
 		$order->save();
 
@@ -569,7 +571,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 * Test update_addresses_in_order handles partial address data.
 	 */
 	public function test_update_addresses_in_order_handles_partial_address_data() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$paypal_order_details = array(
@@ -614,4 +616,3 @@ class HelperTest extends \WC_Unit_Test_Case {
 		$order->delete( true );
 	}
 }
-
