@@ -69,7 +69,7 @@ class Helper {
 		}
 
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			return null;
 		}
 
@@ -211,3 +211,4 @@ class Helper {
 		$order->save();
 	}
 }
+
