@@ -24901,18 +24901,6 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-api-handler.php
 
 		-
-			message: '#^Cannot call method get_order_key\(\) on WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-helper.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Helper\:\:get_wc_order_from_paypal_custom_id\(\) should return WC_Order\|null but returns WC_Order\|WC_Order_Refund\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-helper.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|true\.$#'
 			identifier: method.nonObject
 			count: 1
