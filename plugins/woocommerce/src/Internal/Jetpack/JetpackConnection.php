@@ -26,7 +26,7 @@ class JetpackConnection {
 	 * @return Manager
 	 */
 	public static function get_manager() {
-		if ( ! isset( self::$manager ) ) {
+		if ( empty( self::$manager ) || ! self::$manager instanceof Manager ) {
 			self::$manager = new Manager( 'woocommerce' );
 		}
 
