@@ -873,6 +873,21 @@
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "Core e2e tests - PayPal Standard",
+					"testType": "e2e",
+					"command": "test:e2e:paypal-standard",
+					"shardingArguments": [],
+					"changes": [],
+					"events": [
+						"core-e2e-paypal-standard"
+					],
+					"report": {
+						"resultsBlobName": "default-paypal-standard-core-e2e",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				}
 			]
 		}
