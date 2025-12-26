@@ -131,7 +131,7 @@ class CartEventTracker implements RegisterHooksInterface {
 		);
 
 		// Add old quantity for context.
-		$event_data['old_quantity'] = $old_quantity;
+		$event_data['old_quantity'] = (int) $old_quantity;
 
 		$this->track_event( 'cart_item_updated', $event_data );
 	}
