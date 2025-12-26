@@ -11,7 +11,7 @@ test.describe(
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test( 'PayPal can be installed', async ( { page } ) => {
-			await test.step( 'Go to the payment gateways page', async ( page ) => {
+			await test.step( 'Go to the payment gateways page', async () => {
 				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
 
 				await page
