@@ -19,7 +19,7 @@ class NoticesTest extends \WC_Unit_Test_Case {
 	/**
 	 * The PayPal gateway instance.
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var \WC_Gateway_Paypal
 	 */
 	private $gateway;
 
@@ -99,7 +99,7 @@ class NoticesTest extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_paypal_account_restricted_status' );
 
 		// Reset the gateway singleton to null.
-		WC_Gateway_Paypal::set_instance( null );
+		\WC_Gateway_Paypal::set_instance( null );
 
 		parent::tearDown();
 	}
@@ -430,11 +430,11 @@ class NoticesTest extends \WC_Unit_Test_Case {
 	 * Test that notices are not displayed when Orders v2 is not enabled.
 	 */
 	public function test_notices_not_displayed_when_orders_v2_not_enabled() {
-		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+		$mock_gateway = $this->getMockBuilder( \WC_Gateway_Paypal::class )
 			->onlyMethods( array( 'should_use_orders_v2' ) )
 			->getMock();
 		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( false );
-		WC_Gateway_Paypal::set_instance( $mock_gateway );
+		\WC_Gateway_Paypal::set_instance( $mock_gateway );
 
 		$notices = new Notices();
 
@@ -544,17 +544,17 @@ class NoticesTest extends \WC_Unit_Test_Case {
 	/**
 	 * Create a mock gateway instance.
 	 *
-	 * @return WC_Gateway_Paypal|\PHPUnit\Framework\MockObject\MockObject
+	 * @return \WC_Gateway_Paypal|\PHPUnit\Framework\MockObject\MockObject
 	 */
 	private function create_mock_gateway() {
-		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+		$mock_gateway = $this->getMockBuilder( \WC_Gateway_Paypal::class )
 			->onlyMethods( array( 'should_use_orders_v2' ) )
 			->getMock();
 
 		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
 
 		// Inject the mock gateway as the singleton instance.
-		WC_Gateway_Paypal::set_instance( $mock_gateway );
+		\WC_Gateway_Paypal::set_instance( $mock_gateway );
 
 		return $mock_gateway;
 	}
