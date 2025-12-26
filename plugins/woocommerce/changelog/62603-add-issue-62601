@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add related_ids, upsell_ids, and cross_sell_ids fields to Store API product endpoint.
