@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
 use Automattic\WooCommerce\Gateways\PayPal\Notices;
 
 /**
@@ -557,4 +559,3 @@ class NoticesTest extends \WC_Unit_Test_Case {
 		return $mock_gateway;
 	}
 }
-
