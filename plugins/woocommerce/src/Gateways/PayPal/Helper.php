@@ -211,4 +211,3 @@ class Helper {
 		$order->save();
 	}
 }
-
