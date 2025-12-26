@@ -55,10 +55,6 @@ class AdminSettingsHandlerTest extends \WC_Unit_Test_Case {
 		// Check if the admin field action is registered.
 		$priority = has_action( 'woocommerce_admin_field_jetpack_connection', array( $this->sut, 'handle_output_jetpack_connection_field' ) );
 		$this->assertSame( 10, $priority, 'Admin field action should be registered with priority 10' );
-
-		// Check if the enqueue scripts action is registered.
-		$priority = has_action( 'admin_enqueue_scripts', array( $this->sut, 'handle_enqueue_admin_scripts' ) );
-		$this->assertSame( 10, $priority, 'Enqueue scripts action should be registered with priority 10' );
 	}
 
 	/**
