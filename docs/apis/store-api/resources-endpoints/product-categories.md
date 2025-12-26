@@ -10,7 +10,7 @@ GET /products/categories
 | :----------- | :------ | :------: | :------------------------------------------------------------------------------- |
 | `context`    | string  |    No    | Scope under which the request is made; determines fields present in response.   |
 | `page`       | integer |    No    | Current page of the collection. Defaults to `1`.                                 |
-| `per_page`   | integer |    No    | Maximum number of items to be returned in result set. Defaults to no limit.      |
+| `per_page`   | integer |    No    | Maximum number of items to be returned in result set. Defaults to no limit. Values between `0` and `100` are allowed.     |
 | `search`     | string  |    No    | Limit results to those matching a string.                                        |
 | `exclude`    | array   |    No    | Ensure result set excludes specific IDs.                                         |
 | `include`    | array   |    No    | Limit result set to specific IDs.                                                |
