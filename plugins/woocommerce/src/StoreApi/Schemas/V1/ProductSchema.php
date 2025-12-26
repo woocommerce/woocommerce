@@ -793,7 +793,7 @@ class ProductSchema extends AbstractSchema {
 	/**
 	 * Get related product IDs.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return array<int>
@@ -805,7 +805,7 @@ class ProductSchema extends AbstractSchema {
 	/**
 	 * Get upsell product IDs.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return array<int>
@@ -817,7 +817,7 @@ class ProductSchema extends AbstractSchema {
 	/**
 	 * Get cross-sell product IDs.
 	 *
-	 * @since 10.x.x
+	 * @since 10.5.0
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return array<int>
