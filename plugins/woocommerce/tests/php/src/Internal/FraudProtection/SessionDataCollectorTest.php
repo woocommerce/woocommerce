@@ -45,6 +45,9 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->session_clearance_manager = new SessionClearanceManager();
 		$this->sut                       = new SessionDataCollector();
 		$this->sut->init( $this->session_clearance_manager );
+
+		// Disable taxes before adding products to cart.
+		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
