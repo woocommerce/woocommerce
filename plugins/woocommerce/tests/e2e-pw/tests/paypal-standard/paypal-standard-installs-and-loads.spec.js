@@ -9,6 +9,7 @@ import { request } from '@playwright/test';
 import { expect, tags, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { setOption } from '../../utils/options';
+import {setFilterValue} from "../../utils/filters";
 
 test.describe(
 	'PayPal Standard Installation',
@@ -17,6 +18,13 @@ test.describe(
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test( 'PayPal Standard can be installed', async ( { page } ) => {
+			// Temporarily set the filter to enable Orders V2 integration.
+			await setFilterValue(
+				page,
+				'woocommerce_paypal_use_orders_v2',
+				'__return_true'
+			);
+
 			await test.step( 'Go to the payment gateways page', async () => {
 				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
 
