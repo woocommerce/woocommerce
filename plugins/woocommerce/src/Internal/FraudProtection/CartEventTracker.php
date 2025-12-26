@@ -114,14 +114,14 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function handle_track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $cart ): void {
-		$cart_item = isset( $cart->cart_contents[ $cart_item_key ] ) ? $cart->cart_contents[ $cart_item_key ] : null;
+		$cart_item = $cart->cart_contents[ $cart_item_key ] ?? null;
 
 		if ( ! $cart_item ) {
 			return;
 		}
 
-		$product_id   = isset( $cart_item['product_id'] ) ? $cart_item['product_id'] : 0;
-		$variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
+		$product_id   = $cart_item['product_id'] ?? 0;
+		$variation_id = $cart_item['variation_id'] ?? 0;
 
 		$event_data = $this->build_cart_event_data(
 			'item_updated',
@@ -148,15 +148,15 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function handle_track_cart_item_removed( $cart_item_key, $cart ): void {
-		$cart_item = isset( $cart->removed_cart_contents[ $cart_item_key ] ) ? $cart->removed_cart_contents[ $cart_item_key ] : null;
+		$cart_item = $cart->removed_cart_contents[ $cart_item_key ] ?? null;
 
 		if ( ! $cart_item ) {
 			return;
 		}
 
-		$product_id   = isset( $cart_item['product_id'] ) ? $cart_item['product_id'] : 0;
-		$variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
-		$quantity     = isset( $cart_item['quantity'] ) ? $cart_item['quantity'] : 0;
+		$product_id   = $cart_item['product_id'] ?? 0;
+		$variation_id = $cart_item['variation_id'] ?? 0;
+		$quantity     = $cart_item['quantity'] ?? 0;
 
 		$event_data = $this->build_cart_event_data(
 			'item_removed',
@@ -180,15 +180,15 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function handle_track_cart_item_restored( $cart_item_key, $cart ): void {
-		$cart_item = isset( $cart->cart_contents[ $cart_item_key ] ) ? $cart->cart_contents[ $cart_item_key ] : null;
+		$cart_item = $cart->cart_contents[ $cart_item_key ] ?? null;
 
 		if ( ! $cart_item ) {
 			return;
 		}
 
-		$product_id   = isset( $cart_item['product_id'] ) ? $cart_item['product_id'] : 0;
-		$variation_id = isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 0;
-		$quantity     = isset( $cart_item['quantity'] ) ? $cart_item['quantity'] : 0;
+		$product_id   = $cart_item['product_id'] ?? 0;
+		$variation_id = $cart_item['variation_id'] ?? 0;
+		$quantity     = $cart_item['quantity'] ?? 0;
 
 		$event_data = $this->build_cart_event_data(
 			'item_restored',
