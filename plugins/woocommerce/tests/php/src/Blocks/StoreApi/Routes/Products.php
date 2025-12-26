@@ -266,6 +266,105 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Products should return related product IDs based on shared categories/tags.
+	 */
+	public function test_get_item_returns_related_ids() {
+		$fixtures = new FixtureData();
+		$category = wp_insert_term( 'Related Test Category', 'product_cat' );
+
+		$related_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Related Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 15,
+			)
+		);
+		$related_product->set_category_ids( array( $category['term_id'] ) );
+		$related_product->save();
+
+		$main_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Main Product for Related',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			)
+		);
+		$main_product->set_category_ids( array( $category['term_id'] ) );
+		$main_product->save();
+
+		delete_transient( 'wc_related_' . $main_product->get_id() );
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $main_product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertIsArray( $data['related_ids'] );
+		$this->assertContains( $related_product->get_id(), $data['related_ids'] );
+	}
+
+	/**
+	 * @testdox Products should return upsell IDs when configured.
+	 */
+	public function test_get_item_returns_upsell_ids() {
+		$fixtures       = new FixtureData();
+		$upsell_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Upsell Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 20,
+			)
+		);
+
+		$main_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Main Product for Upsell',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			)
+		);
+		$main_product->set_upsell_ids( array( $upsell_product->get_id() ) );
+		$main_product->save();
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $main_product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertIsArray( $data['upsell_ids'] );
+		$this->assertContains( $upsell_product->get_id(), $data['upsell_ids'] );
+	}
+
+	/**
+	 * @testdox Products should return cross-sell IDs when configured.
+	 */
+	public function test_get_item_returns_cross_sell_ids() {
+		$fixtures           = new FixtureData();
+		$cross_sell_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Cross-sell Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 15,
+			)
+		);
+
+		$main_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Main Product for Cross-sell',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			)
+		);
+		$main_product->set_cross_sell_ids( array( $cross_sell_product->get_id() ) );
+		$main_product->save();
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $main_product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertIsArray( $data['cross_sell_ids'] );
+		$this->assertContains( $cross_sell_product->get_id(), $data['cross_sell_ids'] );
+	}
+
+	/**
 	 * Test product category image return types.
 	 */
 	public function test_product_category_image_return_types() {
