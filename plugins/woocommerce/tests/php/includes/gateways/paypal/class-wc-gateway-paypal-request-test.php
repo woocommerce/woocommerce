@@ -1254,7 +1254,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 						'body'     => wp_json_encode(
 							array(
 								'name'     => 'UNPROCESSABLE_ENTITY',
-        						'message'  => 'The requested action could not be performed, semantically incorrect, or failed business validation.',
+								'message'  => 'The requested action could not be performed, semantically incorrect, or failed business validation.',
 								'debug_id' => '1234567890',
 								'details'  => array(
 									array(
