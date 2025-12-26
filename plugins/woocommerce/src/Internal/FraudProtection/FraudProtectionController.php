@@ -77,16 +77,16 @@ class FraudProtectionController implements RegisterHooksInterface {
 	/**
 	 * Log helper method for consistent logging across all fraud protection components.
 	 *
-	 * This public method ensures all fraud protection logs are written with
+	 * This static method ensures all fraud protection logs are written with
 	 * the same 'woo-fraud-protection' source for easy filtering in WooCommerce logs.
-	 *
-	 * Public visibility allows tests to override this method to verify logging behavior.
 	 *
 	 * @param string $level   Log level (emergency, alert, critical, error, warning, notice, info, debug).
 	 * @param string $message Log message.
 	 * @param array  $context Optional context data.
+	 *
+	 * @return void
 	 */
-	public function log( string $level, string $message, array $context = array() ): void {
+	public static function log( string $level, string $message, array $context = array() ): void {
 		wc_get_logger()->log(
 			$level,
 			$message,

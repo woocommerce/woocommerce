@@ -48,24 +48,6 @@ class SessionClearanceManager {
 	public const DEFAULT_STATUS = self::STATUS_ALLOWED;
 
 	/**
-	 * Fraud protection controller instance.
-	 *
-	 * @var FraudProtectionController
-	 */
-	private FraudProtectionController $fraud_protection_controller;
-
-	/**
-	 * Initialize with dependencies.
-	 *
-	 * @internal
-	 *
-	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
-	 */
-	final public function init( FraudProtectionController $fraud_protection_controller ): void {
-		$this->fraud_protection_controller = $fraud_protection_controller;
-	}
-
-	/**
 	 * Check if the current session is allowed.
 	 *
 	 * @return bool True if session is allowed, false otherwise.
@@ -240,8 +222,6 @@ class SessionClearanceManager {
 			$timestamp
 		);
 
-		if ( isset( $this->fraud_protection_controller ) ) {
-			$this->fraud_protection_controller->log( 'info', $message );
-		}
+		FraudProtectionController::log( 'info', $message );
 	}
 }
