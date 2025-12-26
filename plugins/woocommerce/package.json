@@ -882,6 +882,9 @@
 					"shardingArguments": [],
 					"changes": [],
 					"events": [
+						"pull_request",
+						"nightly-checks",
+						"release-checks",
 						"core-e2e-paypal-standard"
 					],
 					"report": {
