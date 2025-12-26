@@ -32,13 +32,6 @@ class CartEventTracker implements RegisterHooksInterface {
 	private SessionDataCollector $data_collector;
 
 	/**
-	 * Session clearance manager instance.
-	 *
-	 * @var SessionClearanceManager
-	 */
-	private SessionClearanceManager $session_clearance_manager;
-
-	/**
 	 * Fraud protection controller instance.
 	 *
 	 * @var FraudProtectionController
@@ -51,16 +44,13 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @internal
 	 *
 	 * @param SessionDataCollector      $data_collector              The session data collector instance.
-	 * @param SessionClearanceManager   $session_clearance_manager   The session clearance manager instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
 		SessionDataCollector $data_collector,
-		SessionClearanceManager $session_clearance_manager,
 		FraudProtectionController $fraud_protection_controller
 	): void {
 		$this->data_collector              = $data_collector;
-		$this->session_clearance_manager   = $session_clearance_manager;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 

@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
-use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
@@ -32,13 +31,6 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	 * @var SessionDataCollector|\PHPUnit\Framework\MockObject\MockObject
 	 */
 	private $mock_data_collector;
-
-	/**
-	 * Mock session clearance manager.
-	 *
-	 * @var SessionClearanceManager|\PHPUnit\Framework\MockObject\MockObject
-	 */
-	private $mock_session_manager;
 
 	/**
 	 * Mock fraud protection controller.
@@ -67,14 +59,12 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Create mocks.
 		$this->mock_data_collector  = $this->createMock( SessionDataCollector::class );
-		$this->mock_session_manager = $this->createMock( SessionClearanceManager::class );
 		$this->mock_controller      = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
 		$this->sut = new CartEventTracker();
 		$this->sut->init(
 			$this->mock_data_collector,
-			$this->mock_session_manager,
 			$this->mock_controller
 		);
 
