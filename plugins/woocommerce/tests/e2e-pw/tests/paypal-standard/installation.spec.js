@@ -10,23 +10,40 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test( 'PayPal should be listed for install', async ( { page } ) => {
-			await page.goto( '/wp-admin/admin.php?page=wc-settings' );
+		test( 'PayPal can be installed', async ( { page } ) => {
+			await test.step( 'Go to the payment gateways page', async ( page ) => {
+				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
 
-			await page
-				.getByRole( 'link', { name: 'Payments', exact: true } )
-				.click();
+				await page
+					.getByRole( 'link', { name: 'Payments', exact: true } )
+					.click();
 
-			await page.waitForSelector(
-				'.settings-payment-gateways__header-title'
-			);
+				await page.waitForSelector(
+					'.settings-payment-gateways__header-title'
+				);
+			} );
 
-			// Confirm PayPal is listed.
 			const paypalDiv = page.locator( '#_wc_pes_paypal_full_stack' );
-			await expect( paypalDiv ).toBeVisible();
-			await expect(
-				paypalDiv.getByRole( 'button', { name: 'Install' } )
-			).toBeVisible();
+
+			await test.step( 'Install PayPal', async () => {
+				// Confirm PayPal is listed.
+				await expect( paypalDiv ).toBeVisible();
+
+				// Confirm Install button is present.
+				const installButton = paypalDiv.getByRole( 'button', {
+					name: 'Install',
+				} );
+				await expect( installButton ).toBeVisible();
+
+				// Click Install button.
+				await installButton.click();
+			} );
+
+			// Confirm Manage button is present after installation.
+			const completeSetup = paypalDiv.getByRole( 'button', {
+				name: 'Complete setup',
+			} );
+			await expect( completeSetup ).toBeVisible();
 		} );
 	}
 );
