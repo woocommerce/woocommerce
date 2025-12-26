@@ -13,13 +13,10 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
 }
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
@@ -520,7 +517,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function is_valid_for_use() {
 		if ( $this->should_use_orders_v2() ) {
-			$valid_currencies = WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES;
+			$valid_currencies = PayPalConstants::SUPPORTED_CURRENCIES;
 		} else {
 			$valid_currencies = array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' );
 		}
