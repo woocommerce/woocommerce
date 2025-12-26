@@ -13,7 +13,9 @@ test.describe(
 		test( 'PayPal should be listed for install', async ( { page } ) => {
 			await page.goto( '/wp-admin/admin.php?page=wc-settings' );
 
-			await page.getByRole( 'link', { name: 'Payments' } ).click();
+			await page
+				.getByRole( 'link', { name: 'Payments', exact: true } )
+				.click();
 
 			await page.waitForSelector(
 				'.settings-payment-gateways__header-title'
