@@ -1,8 +1,8 @@
-const { test } = require( '@playwright/test' );
-const {
-	setPaypalStandardFeatureFlag,
-} = require( './helpers/set-paypal-standard-feature-flag' );
-
+// const { test } = require( '@playwright/test' );
+// const {
+// 	setPaypalStandardFeatureFlag,
+// } = require( './helpers/set-paypal-standard-feature-flag' );
+//
 // test.describe( 'PayPal Standard with Orders V2 availability', () => {
 // 	test( 'PayPal Standard with Orders V2 should be available when the feature flag is enabled', async ( {
 // 		page,
