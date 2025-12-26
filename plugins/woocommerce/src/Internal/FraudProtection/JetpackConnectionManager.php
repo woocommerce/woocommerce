@@ -89,7 +89,7 @@ class JetpackConnectionManager {
 			$redirect_url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
 		}
 
-		$authorization_data = JetpackConnection::get_authorization_url( $redirect_url, 'new-account-button' );
+		$authorization_data = JetpackConnection::get_authorization_url( $redirect_url, 'woocommerce-fraud-protection' );
 
 		if ( ! $authorization_data['success'] ) {
 			FraudProtectionController::log(
