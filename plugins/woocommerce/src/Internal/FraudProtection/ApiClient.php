@@ -215,7 +215,7 @@ class ApiClient {
 			);
 		}
 
-		if ( JSON_ERROR_NONE !== json_last_error() ) {
+		if ( JSON_ERROR_NONE !== json_last_error() || ! is_array( $data ) ) {
 			return new \WP_Error(
 				'json_decode_error',
 				sprintf( 'Failed to decode JSON response: %s', json_last_error_msg() ),
