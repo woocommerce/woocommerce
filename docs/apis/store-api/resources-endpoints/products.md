@@ -67,7 +67,7 @@ GET /products?return_rating_counts=true
 | `attributes`                                | array   |    no    | Limit result set to specific attribute terms. Expects an array of objects containing `attribute` (taxonomy), `term_id` or `slug`, and optional `operator` for comparison.                                                             |
 | `attribute_relation`                        | string  |    no    | The logical relationship between attributes when filtering across multiple at once.                                                                                                                                                   |
 | `catalog_visibility`                        | string  |    no    | Determines if hidden or visible catalog products are shown. Allowed values: `any`, `visible`, `catalog`, `search`, `hidden`                                                                                                           |
-| `rating`                                    | array   |    no    | Limit result set to products with a certain average rating.                                                                                                                                                                           |
+| `rating`                                    | array   |    no    | Limit result set to products with a certain average rating. Allowed values: `1`, `2`, `3`, `4`, `5`.                                                                                                                                                                          |
 
 ```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products"
