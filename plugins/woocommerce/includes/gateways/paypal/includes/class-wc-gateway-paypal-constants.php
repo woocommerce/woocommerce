@@ -113,25 +113,4 @@ class WC_Gateway_Paypal_Constants {
 	 * @var array<string>
 	 */
 	const SUPPORTED_CURRENCIES = PayPalConstants::SUPPORTED_CURRENCIES;
-
-	/**
-	 * PayPal authorization already captured issue code.
-	 *
-	 * @var string
-	 */
-	const PAYPAL_ISSUE_AUTHORIZATION_ALREADY_CAPTURED = 'AUTHORIZATION_ALREADY_CAPTURED';
-
-	/**
-	 * PayPal account locked or closed issue code.
-	 *
-	 * @var string
-	 */
-	const PAYPAL_ISSUE_PAYEE_ACCOUNT_LOCKED_OR_CLOSED = 'PAYEE_ACCOUNT_LOCKED_OR_CLOSED';
-
-	/**
-	 * PayPal account restricted issue code.
-	 *
-	 * @var string
-	 */
-	const PAYPAL_ISSUE_PAYEE_ACCOUNT_RESTRICTED = 'PAYEE_ACCOUNT_RESTRICTED';
 }

@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
@@ -410,7 +411,7 @@ class WC_Gateway_Paypal_Request {
 			$body                  = wp_remote_retrieve_body( $response );
 			$response_data         = json_decode( $body, true );
 			$issue                 = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
-			$auth_already_captured = 422 === $http_code && WC_Gateway_Paypal_Constants::PAYPAL_ISSUE_AUTHORIZATION_ALREADY_CAPTURED === $issue;
+			$auth_already_captured = 422 === $http_code && PayPalConstants::PAYPAL_ISSUE_AUTHORIZATION_ALREADY_CAPTURED === $issue;
 
 			if ( 200 !== $http_code && 201 !== $http_code && ! $auth_already_captured ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
@@ -418,7 +419,7 @@ class WC_Gateway_Paypal_Request {
 			}
 
 			// Set custom status for successful capture response, or if the authorization was already captured.
-			$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
+			$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_CAPTURED );
 			$order->save();
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
