@@ -210,6 +210,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 			// Collect comprehensive session data.
 			$session_data = $this->data_collector->collect( $event_type, $event_specific_data );
 
+			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			// TODO: Once EventTracker/API client is implemented (WOOSUBS-1249), call it here:
 			// $event_tracker = wc_get_container()->get( EventTracker::class );
 			// $event_tracker->track( $event_type, $session_data );
