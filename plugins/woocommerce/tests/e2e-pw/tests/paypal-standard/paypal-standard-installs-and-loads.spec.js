@@ -1,15 +1,8 @@
 /**
- * External dependencies
- */
-import { request } from '@playwright/test';
-
-/**
  * Internal dependencies
  */
 import { expect, tags, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { setOption } from '../../utils/options';
-import { setFilterValue } from '../../utils/filters';
 
 test.describe(
 	'PayPal Standard Installation',
@@ -17,14 +10,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test( 'PayPal Standard can be installed', async ( { page } ) => {
-			// Temporarily set the filter to enable Orders V2 integration.
-			await setFilterValue(
-				page,
-				'woocommerce_paypal_use_orders_v2',
-				'__return_true'
-			);
-
+		test( 'PayPal Standard can be installed', async ( { page} ) => {
 			await test.step( 'Go to the payment gateways page', async () => {
 				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
 
@@ -59,18 +45,7 @@ test.describe(
 
 		test( 'PayPal Standard Orders V2 integration is available when the feature flag is enabled', async ( {
 			page,
-			baseURL,
 		} ) => {
-			const value = {
-				_should_load: 'yes',
-			};
-			await setOption(
-				request,
-				baseURL,
-				'woocommerce_paypal_settings',
-				value
-			);
-
 			// Click the Manage button
 			await page
 				.getByRole( 'link', { name: 'Manage', exact: true } )

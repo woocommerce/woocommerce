@@ -374,6 +374,14 @@ function wc_cleanup_reset_site() {
 	update_option( 'woocommerce_dimension_unit', 'in' );
 
 	wc_cleanup_reset_customer_email();
+
+	// Ensure PayPal is set to load.
+	$woocommerce_paypal_settings = get_option( 'woocommerce_paypal_settings' );
+	if ( ! is_array( $woocommerce_paypal_settings ) ) {
+		$woocommerce_paypal_settings = array();
+	}
+	$woocommerce_paypal_settings['_should_load'] = 'yes';
+	update_option( 'woocommerce_paypal_settings', $woocommerce_paypal_settings );
 }
 
 add_action(
