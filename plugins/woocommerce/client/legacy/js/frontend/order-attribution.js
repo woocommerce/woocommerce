@@ -45,6 +45,8 @@
 	 * @param {Object} values Object containing field values.
 	 */
 	function updateFormValues( values ) {
+		// Remove duplicates before updating to ensure only one set of elements exists.
+		removeDuplicateInputGroups();
 		// Update `<wc-order-attribution-inputs>` elements if any exist.
 		for( const element of document.querySelectorAll( 'wc-order-attribution-inputs' ) ) {
 			element.values = values;
@@ -107,7 +109,6 @@
 			} );
 		}
 		const values = wc_order_attribution.getAttributionData();
-		removeDuplicateInputGroups();
 		updateFormValues( values );
 		updateCheckoutBlockData( values );
 	}
