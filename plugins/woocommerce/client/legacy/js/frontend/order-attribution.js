@@ -28,6 +28,18 @@
 	}
 
 	/**
+	 * Remove duplicate `<wc-order-attribution-inputs>` elements, leaving only the first one,
+	 * to prevent sending the same data multiple times.
+	 */
+	function removeDuplicateInputGroups() {
+		document.querySelectorAll( 'wc-order-attribution-inputs' ).forEach( ( group, index ) => {
+			if ( index > 0 ) {
+				group.remove();
+			}
+		} );
+	}
+
+	/**
 	 * Update `wc_order_attribution` input elements' values.
 	 *
 	 * @param {Object} values Object containing field values.
@@ -95,6 +107,7 @@
 			} );
 		}
 		const values = wc_order_attribution.getAttributionData();
+		removeDuplicateInputGroups();
 		updateFormValues( values );
 		updateCheckoutBlockData( values );
 	}
