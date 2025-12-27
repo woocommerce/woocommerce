@@ -154,7 +154,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 * @param string            $failure_reason The reason for failure (e.g., 'validation_failed', 'gateway_error', 'declined').
 	 */
 	public function handle_payment_method_add_failed( \WC_Payment_Token $token, string $failure_reason ): void {
-		$event_data = $this->build_payment_method_event_data( 'add_failed', $token );
+		$event_data                   = $this->build_payment_method_event_data( 'add_failed', $token );
 		$event_data['failure_reason'] = $failure_reason;
 		$this->track_event( 'payment_method_add_failed', $event_data );
 	}

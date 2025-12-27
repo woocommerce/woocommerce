@@ -94,6 +94,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$tracker = $this->get_testable_tracker();
 		$tracker->register();
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		do_action( 'woocommerce_new_payment_token', $token->get_id(), $token );
 
 		$this->assertCount( 1, $this->captured_logs );
@@ -124,6 +125,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$tracker = $this->get_testable_tracker();
 		$tracker->register();
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		do_action( 'woocommerce_payment_token_updated', $token->get_id() );
 
 		$this->assertCount( 1, $this->captured_logs );
@@ -151,6 +153,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$tracker = $this->get_testable_tracker();
 		$tracker->register();
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		do_action( 'woocommerce_payment_token_set_default', $token->get_id(), $token );
 
 		$this->assertCount( 1, $this->captured_logs );
@@ -178,6 +181,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$tracker = $this->get_testable_tracker();
 		$tracker->register();
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		do_action( 'woocommerce_payment_token_deleted', $token->get_id(), $token );
 
 		$this->assertCount( 1, $this->captured_logs );
@@ -203,6 +207,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$tracker = $this->get_testable_tracker();
 		$tracker->register();
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		do_action( 'woocommerce_payment_token_add_failed', $token, 'card_declined' );
 
 		$this->assertCount( 1, $this->captured_logs );
