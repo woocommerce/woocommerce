@@ -58,6 +58,14 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private $proxy;
 
 	/**
+	 * Whether the `stamp_checkout_html_element` method has been called.
+	 * Used when single-output mode is enabled via filter.
+	 *
+	 * @var bool
+	 */
+	private static $is_stamp_checkout_html_called = false;
+
+	/**
 	 * Initialization method.
 	 *
 	 * Takes the place of the constructor within WooCommerce Dependency injection.
@@ -134,7 +142,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 			)
 		);
 		foreach ( $stamp_checkout_html_actions as $action ) {
-			add_action( $action, array( $this, 'stamp_html_element' ) );
+			add_action( $action, array( $this, 'stamp_checkout_html_element_once' ) );
 		}
 
 		add_action( 'woocommerce_register_form', array( $this, 'stamp_html_element' ) );
@@ -380,13 +388,46 @@ class OrderAttributionController implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Handles the `<wc-order-attribution-inputs>` element for checkout forms.
+	 *
+	 * @since 9.0.0
+	 * @deprecated 9.5.0 Use stamp_html_element() instead. This method is maintained for backwards compatibility.
+	 *
+	 * @return void
+	 */
+	public function stamp_checkout_html_element_once() {
+		wc_deprecated_function( __METHOD__, '9.5.0', 'stamp_html_element' );
+
+		/**
+		 * Filter to allow sites to opt back into single-output behavior during the transition period.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param bool $allow_multiple_elements True to allow multiple elements (new behavior), false for single element (old behavior).
+		 */
+		$allow_multiple = apply_filters( 'wc_order_attribution_allow_multiple_elements', true );
+
+		// If single-output mode is enabled, use the static flag to prevent multiple outputs.
+		if ( ! $allow_multiple && self::$is_stamp_checkout_html_called ) {
+			return;
+		}
+
+		$this->stamp_html_element();
+
+		if ( ! $allow_multiple ) {
+			self::$is_stamp_checkout_html_called = true;
+		}
+	}
+
+	/**
 	 * Output `<wc-order-attribution-inputs>` element that contributes the order attribution values to the enclosing form.
 	 *
 	 * Used for customer register forms and checkout forms.
 	 *
-	 * Note: This method may output multiple instances of the element when called multiple times
-	 * (e.g., during checkout form pre-generation and actual rendering). The JavaScript layer
-	 * will update all instances and the form submission will determine which data is used.
+	 * Note: By default, this method may output multiple instances of the element when called
+	 * multiple times (e.g., during checkout form pre-generation and actual rendering).
+	 * The JavaScript layer will remove duplicate elements and ensure only one set of data is submitted.
+	 * Use the 'wc_order_attribution_allow_multiple_elements' filter to opt back into single-output behavior.
 	 *
 	 * @return void
 	 */
