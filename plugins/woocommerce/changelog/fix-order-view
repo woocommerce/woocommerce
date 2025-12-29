@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure guest orders cannot be read by customers without providing the key and billing address.
