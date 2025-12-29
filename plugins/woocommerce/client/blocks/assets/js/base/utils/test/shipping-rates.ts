@@ -37,6 +37,7 @@ jest.mock( '@woocommerce/block-settings', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@woocommerce/block-settings' ),
 	LOCAL_PICKUP_ENABLED: true,
+	HAS_COLLECTABLE_METHODS: true,
 } ) );
 const blockSettingsMock = jest.requireMock( '@woocommerce/block-settings' );
 
@@ -150,6 +151,13 @@ describe( 'isPackageRateCollectable', () => {
 		} );
 		it( 'returns false for all rates if local pickup is disabled', () => {
 			blockSettingsMock.LOCAL_PICKUP_ENABLED = false;
+			blockSettingsMock.HAS_COLLECTABLE_METHODS = true;
+			const ratesToTest = [ 'flat_rate', 'local_pickup' ];
+			expect( hasCollectableRate( ratesToTest ) ).toBe( false );
+		} );
+		it( 'returns false for all rates if no collectable methods exist', () => {
+			blockSettingsMock.LOCAL_PICKUP_ENABLED = true;
+			blockSettingsMock.HAS_COLLECTABLE_METHODS = false;
 			const ratesToTest = [ 'flat_rate', 'local_pickup' ];
 			expect( hasCollectableRate( ratesToTest ) ).toBe( false );
 		} );

@@ -7,7 +7,10 @@ import { __ } from '@wordpress/i18n';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { Icon, store, shipping } from '@wordpress/icons';
 import { ADMIN_URL, getSetting } from '@woocommerce/settings';
-import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
+import {
+	LOCAL_PICKUP_ENABLED,
+	HAS_COLLECTABLE_METHODS,
+} from '@woocommerce/block-settings';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -191,7 +194,8 @@ export const Edit = ( {
 		! hasCalculatedShipping ||
 		! shippingRates ||
 		! isCollectable ||
-		! LOCAL_PICKUP_ENABLED
+		! LOCAL_PICKUP_ENABLED ||
+		! HAS_COLLECTABLE_METHODS
 	) {
 		return null;
 	}

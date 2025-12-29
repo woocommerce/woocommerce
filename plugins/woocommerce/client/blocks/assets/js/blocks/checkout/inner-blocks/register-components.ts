@@ -4,6 +4,7 @@
 import {
 	WC_BLOCKS_BUILD_URL,
 	LOCAL_PICKUP_ENABLED,
+	HAS_COLLECTABLE_METHODS,
 } from '@woocommerce/block-settings';
 import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
 
@@ -54,7 +55,7 @@ registerCheckoutBlock( {
 	component: CheckoutContactInformationBlock,
 } );
 
-if ( LOCAL_PICKUP_ENABLED ) {
+if ( LOCAL_PICKUP_ENABLED && HAS_COLLECTABLE_METHODS ) {
 	registerCheckoutBlock( {
 		metadata: metadata.CHECKOUT_SHIPPING_METHOD,
 		component: CheckoutShippingMethodBlock,
