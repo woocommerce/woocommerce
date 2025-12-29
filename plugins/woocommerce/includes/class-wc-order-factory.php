@@ -22,7 +22,7 @@ class WC_Order_Factory {
 	 * Get order.
 	 *
 	 * @param  mixed $order_id (default: false) Order ID to get.
-	 * @return \WC_Order|bool
+	 * @return \WC_Order|false
 	 */
 	public static function get_order( $order_id = false ) {
 		$order_id = self::get_order_id( $order_id );
@@ -303,5 +303,4 @@ class WC_Order_Factory {
 		$classname = self::get_class_names_for_order_ids( array( $order_id ) );
 		return $classname[ $order_id ] ?? false;
 	}
-
 }
