@@ -28,10 +28,18 @@
 			.wc-block-components-address-form__company,
 			.wc-block-components-address-form__address_1,
 			.wc-block-components-address-form__address_2,
-			.wc-block-components-address-form__email,
 			.wc-block-components-country-input,
 			.wc-block-components-checkbox {
 				flex: 0 0 100%;
+			}
+		}
+	}
+
+	.wc-block-checkout__contact-fields {
+		.wc-block-components-address-form {
+			.wc-block-components-select-input,
+			.wc-block-components-text-input {
+				flex: 0 0 100%; // Forcing all inputs in the contact step to be full width.
 			}
 		}
 	}
