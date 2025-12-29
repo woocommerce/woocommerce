@@ -789,7 +789,7 @@ class WC_Gateway_Paypal_Request {
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			$item_amount = $this->get_paypal_order_item_amount( $order, $item );
 			if ( $item_amount < 0 ) {
-				// PayPal does not accept negative item amounts items breakdown.
+				// PayPal does not accept negative item amounts in the items breakdown, so we return an empty list.
 				return array();
 			}
 
