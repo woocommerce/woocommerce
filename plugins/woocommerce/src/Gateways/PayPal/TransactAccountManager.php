@@ -23,6 +23,8 @@ final class TransactAccountManager {
 	 * The API version for the proxy endpoint.
 	 *
 	 * @var int
+	 *
+	 * @since 10.5.0
 	 */
 	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
 
@@ -30,23 +32,53 @@ final class TransactAccountManager {
 	 * Transact provider type, for provider onboarding.
 	 *
 	 * @var string
+	 *
+	 * @since 10.5.0
 	 */
 	private const TRANSACT_PROVIDER_TYPE = 'paypal_standard';
 
 	/**
-	 * Cache keys for the merchant and provider accounts.
+	 * Cache key for the merchant account in live mode.
 	 *
 	 * @var string
+	 *
+	 * @since 10.5.0
 	 */
 	private const TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE = 'woocommerce_paypal_transact_merchant_account_live';
+
+	/**
+	 * Cache key for the merchant account in test mode.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
 	private const TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST = 'woocommerce_paypal_transact_merchant_account_test';
+
+	/**
+	 * Cache key for the provider account in live mode.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
 	private const TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE = 'woocommerce_paypal_transact_provider_account_live';
+
+	/**
+	 * Cache key for the provider account in test mode.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
 	private const TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST = 'woocommerce_paypal_transact_provider_account_test';
 
 	/**
 	 * The expiry time for the Transact account cache.
 	 *
 	 * @var int
+	 *
+	 * @since 10.5.0
 	 */
 	private const TRANSACT_ACCOUNT_CACHE_EXPIRY = 60 * 60 * 24; // 24 hours.
 
@@ -70,6 +102,8 @@ final class TransactAccountManager {
 	 * Onboard the merchant with the Transact platform.
 	 *
 	 * @return void
+	 *
+	 * @since 10.5.0
 	 */
 	public function do_onboarding() {
 		// Check that we have a PayPal email. This is required for processing payments --
@@ -134,6 +168,8 @@ final class TransactAccountManager {
 	 * Get the Transact account (merchant or provider) data. Performs a fetch if the account
 	 * is not in cache or expired.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param string $account_type The type of account to get (merchant or provider).
 	 * @return array|null Returns null if the transact account cannot be retrieved.
 	 */
@@ -160,6 +196,8 @@ final class TransactAccountManager {
 	/**
 	 * Get the cache key for the transact account.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param string $account_type The type of account to get (merchant or provider).
 	 * @return string|null The cache key, or null if the account type is invalid.
 	 */
@@ -177,6 +215,8 @@ final class TransactAccountManager {
 
 	/**
 	 * Fetch the merchant account from the Transact platform.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return array|null The API response body, or null if the request fails.
 	 */
@@ -211,6 +251,8 @@ final class TransactAccountManager {
 	/**
 	 * Fetch the provider account from the Transact platform.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return bool True if the provider account exists, false otherwise.
 	 */
 	private function fetch_provider_account() {
@@ -241,6 +283,8 @@ final class TransactAccountManager {
 
 	/**
 	 * Create the merchant account with the Transact platform.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return array|null The API response body, or null if the request fails.
 	 */
@@ -274,6 +318,8 @@ final class TransactAccountManager {
 	/**
 	 * Create the provider account with the Transact platform.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return bool True if the provider account creation was successful, false otherwise.
 	 */
 	private function create_provider_account() {
@@ -304,8 +350,12 @@ final class TransactAccountManager {
 	/**
 	 * Update the transact account (merchant or provider) cache.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param string $cache_key The cache key to update.
 	 * @param array  $account_data The transact account data.
+	 *
+	 * @return void
 	 */
 	private function update_transact_account_cache( $cache_key, $account_data ) {
 		$expires = time() + self::TRANSACT_ACCOUNT_CACHE_EXPIRY;
@@ -320,6 +370,8 @@ final class TransactAccountManager {
 
 	/**
 	 * Get the transact account (merchant or provider) from the database cache.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param string $cache_key The cache key to get the account.
 	 * @return bool|null The transact account data, or null if the cache is
@@ -337,6 +389,8 @@ final class TransactAccountManager {
 
 	/**
 	 * Send a request to the Transact platform.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param string $method The HTTP method to use.
 	 * @param string $endpoint The endpoint to request.

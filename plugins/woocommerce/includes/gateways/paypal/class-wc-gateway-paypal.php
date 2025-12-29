@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
-use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
 use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
