@@ -7,7 +7,6 @@ import { useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 import { addQueryArgs } from '@wordpress/url';
 import { useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -35,8 +34,9 @@ const registerWooCommerceAnalyticsCommand = ( { label, path, origin } ) => {
 
 const WooCommerceAnalyticsCommands = () => {
 	const { editedPostType } = useSelect( ( select ) => {
+		const editor = select( 'core/editor' );
 		return {
-			editedPostType: select( editorStore ).getCurrentPostType(),
+			editedPostType: editor?.getCurrentPostType?.() ?? null,
 		};
 	} );
 	const origin = editedPostType ? editedPostType + '-editor' : null;
