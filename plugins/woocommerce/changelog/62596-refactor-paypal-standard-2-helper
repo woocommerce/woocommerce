@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Deprecate WC_Gateway_Paypal_Helper class in favor of Automattic\WooCommerce\Gateways\PayPal\Helper.

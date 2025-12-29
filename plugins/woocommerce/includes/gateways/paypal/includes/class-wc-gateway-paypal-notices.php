@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -50,8 +52,8 @@ class WC_Gateway_Paypal_Notices {
 	 * @var array
 	 */
 	protected const PAYPAL_ACCOUNT_RESTRICTION_ISSUES = array(
-		'PAYEE_ACCOUNT_LOCKED_OR_CLOSED',
-		'PAYEE_ACCOUNT_RESTRICTED',
+		PayPalConstants::PAYPAL_ISSUE_PAYEE_ACCOUNT_LOCKED_OR_CLOSED,
+		PayPalConstants::PAYPAL_ISSUE_PAYEE_ACCOUNT_RESTRICTED,
 	);
 
 	/**
