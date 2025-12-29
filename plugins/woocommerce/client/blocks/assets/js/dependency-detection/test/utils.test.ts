@@ -75,6 +75,11 @@ describe( 'Dependency Detection Utils', () => {
 			expect( getFilename( '' ) ).toBe( 'unknown' );
 			expect( getFilename( null ) ).toBe( 'unknown' );
 		} );
+
+		it( 'returns unknown for URL with trailing slash and no filename', () => {
+			expect( getFilename( 'https://example.com/' ) ).toBe( 'unknown' );
+			expect( getFilename( '/' ) ).toBe( 'unknown' );
+		} );
 	} );
 
 	describe( 'shouldSkipLine', () => {

@@ -80,13 +80,16 @@ export function isWooCommerceScript( url: string | null ): boolean {
  * @return The filename or 'unknown'.
  */
 export function getFilename( url: string | null ): string {
-	if ( ! url ) return 'unknown';
+	if ( ! url ) {
+		return 'unknown';
+	}
 
-	const filename = url
-		.split( '/' )
-		.pop()
-		?.split( '?' )[ 0 ]
-		.split( '#' )[ 0 ];
+	const lastSegment = url.split( '/' ).pop();
+	if ( ! lastSegment ) {
+		return 'unknown';
+	}
+
+	const filename = lastSegment.split( '?' )[ 0 ].split( '#' )[ 0 ];
 
 	return filename || 'unknown';
 }
@@ -132,7 +135,9 @@ export function parseStackForCallerUrl(
 	stack: string | null,
 	currentPage: string
 ): string | null {
-	if ( ! stack ) return null;
+	if ( ! stack ) {
+		return null;
+	}
 
 	const lines = stack.split( '\n' );
 
