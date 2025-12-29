@@ -7,16 +7,6 @@
 .wc-block-cart {
 	padding-top: $gap;
 
-	.wc-block-components-address-form {
-		.wc-block-components-text-input,
-		.wc-block-components-country-input,
-		.wc-block-components-state-input {
-			&:first-of-type {
-				margin-top: 0;
-			}
-		}
-	}
-
 	.wc-block-components-totals-taxes,
 	.wc-block-components-totals-footer-item {
 		margin: 0;

@@ -34,12 +34,11 @@
 		line-height: $gap * 1.25;
 		@include font-small-locked;
 	}
-	.wc-block-checkout__create-account {
-		margin-top: $gap !important;
-	}
+
 	.wc-block-checkout__guest-checkout-notice {
 		@include font-small-locked;
-		margin: $gap-smallest 0 0;
+		// $gap-small is the gap between form elements, we want to shift this notice up by that gap minus the smallest gap (similar to having no parent gap and margin top of $gap-smallest).
+		margin: ($gap-smallest - $gap-small) 0 0;
 	}
 }
 

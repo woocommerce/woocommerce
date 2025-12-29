@@ -1,23 +1,8 @@
 .wc-block-checkout__form {
 	margin: 0;
 	max-width: 100%;
-
-	// This margin is aligned with text-input margin-top, making it positioned
-	// correctly when two are placed next to each other.
-	// Please don't change unless you plan to apply the same change
-	// in text-input/style.scss
-	.wc-blocks-components-select {
-		margin-top: $gap-small;
-	}
-
-	// No need for this margin in default country select, which sits at the top
-	// of the form
-	.wc-block-components-address-form__country {
-		.wc-blocks-components-select {
-			margin-top: 0;
-		}
-	}
 }
+
 @include cart-checkout-below-large-container {
 	.wc-block-checkout__main {
 		order: 1;
@@ -25,49 +10,28 @@
 }
 @mixin address-form-layout {
 	.wc-block-checkout__shipping-fields,
-	.wc-block-checkout__billing-fields {
+	.wc-block-checkout__billing-fields,
+	.wc-block-checkout__contact-fields {
 		.wc-block-components-address-form {
 			display: flex;
 			flex-wrap: wrap;
 			justify-content: space-between;
-			gap: 0 $gap-small; // Required for spacing especially when using flex-grow
+			gap: $gap-small; // Required for spacing especially when using flex-grow
 
 			.wc-block-components-text-input,
 			.wc-block-components-state-input,
 			.wc-block-components-select-input {
 				flex: 1 0 calc(50% - #{$gap-small}); // "flex-grow = 1" allows the input to grow to fill the space
 				box-sizing: border-box;
-
-				&:first-child {
-					margin-top: 0;
-				}
-
-				&:first-child + .wc-block-components-text-input {
-					margin-top: 0;
-				}
 			}
 
 			.wc-block-components-address-form__company,
 			.wc-block-components-address-form__address_1,
 			.wc-block-components-address-form__address_2,
+			.wc-block-components-address-form__email,
 			.wc-block-components-country-input,
 			.wc-block-components-checkbox {
 				flex: 0 0 100%;
-
-				&:first-child {
-					margin-top: 0;
-				}
-			}
-		}
-	}
-	.wc-block-components-address-form {
-		.wc-block-components-checkbox {
-			margin-top: $gap;
-		}
-
-		.wc-block-components-text-input.wc-block-components-address-form__email {
-			&:only-child {
-				margin-top: 0;
 			}
 		}
 	}
@@ -90,7 +54,6 @@
 	border: none;
 	color: inherit;
 	cursor: pointer;
-	margin-top: $gap-small;
 	text-align: left;
 	width: 100%;
 

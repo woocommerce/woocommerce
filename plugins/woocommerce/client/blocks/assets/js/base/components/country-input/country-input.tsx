@@ -8,7 +8,6 @@ import clsx from 'clsx';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import type { CountryInputWithCountriesProps } from './CountryInputProps';
 import { Select, SelectOption } from '../select';
 
