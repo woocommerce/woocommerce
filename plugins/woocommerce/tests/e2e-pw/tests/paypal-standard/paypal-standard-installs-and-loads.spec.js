@@ -30,7 +30,7 @@ test.describe(
 				await expect( paypalDiv ).toBeVisible();
 
 				// Confirm the Enable button is present.
-				const enableButton = paypalDiv.getByRole( 'button', {
+				const enableButton = paypalDiv.getByRole( 'link', {
 					name: 'Enable',
 				} );
 				await expect( enableButton ).toBeVisible();
@@ -48,7 +48,7 @@ test.describe(
 		} ) => {
 			// Click the Manage button
 			await page
-				.getByRole( 'link', { name: 'Manage', exact: true } )
+				.getByRole( 'button', { name: 'Manage', exact: true } )
 				.click();
 
 			// Confirm the PayPal Buttons setting is present. It is only available for the Orders V2 integration.
