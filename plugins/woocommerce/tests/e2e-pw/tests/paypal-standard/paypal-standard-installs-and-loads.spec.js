@@ -10,7 +10,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test( 'PayPal Standard can be installed', async ( { page} ) => {
+		test( 'PayPal Standard can be installed', async ( { page } ) => {
 			await test.step( 'Go to the payment gateways page', async () => {
 				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
 
@@ -43,13 +43,13 @@ test.describe(
 			await expect( paypalDiv.getByText( 'Active' ) ).toBeVisible();
 		} );
 
-		test( 'PayPal Standard Orders V2 integration is available when the feature flag is enabled', async ( {
+		test( 'PayPal Standard Orders V2 integration is available', async ( {
 			page,
 		} ) => {
+			const paypalDiv = page.locator( '#paypal' );
+
 			// Click the Manage button
-			await page
-				.getByRole( 'button', { name: 'Manage', exact: true } )
-				.click();
+			await paypalDiv.getByRole( 'button', { name: 'Manage' } ).click();
 
 			// Confirm the PayPal Buttons setting is present. It is only available for the Orders V2 integration.
 			await expect(
