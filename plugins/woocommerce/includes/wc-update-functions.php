@@ -3223,6 +3223,8 @@ function wc_update_1050_enable_autoload_options() {
  * This cleans up the orphaned option from the database.
  *
  * @since 10.5.0
+ *
+ * @return void
  */
 function wc_update_1050_remove_deprecated_marketplace_option() {
 	delete_option( 'woocommerce_feature_marketplace_enabled' );
