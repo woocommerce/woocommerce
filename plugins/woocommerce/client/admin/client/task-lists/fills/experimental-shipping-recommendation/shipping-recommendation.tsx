@@ -150,17 +150,17 @@ export const ShippingRecommendation = ( {
 					className:
 						'woocommerce-task-dashboard__container woocommerce-task-marketplace-link',
 				} }
-			message={ __(
-				// translators: {{Link}} is a placeholder for a html element.
-				'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
-				'woocommerce'
-			) }
-			eventName="tasklist_shipping_recommendation_visit_marketplace_click"
-			targetUrl={ getAdminLink(
-				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-			) }
-			linkType="wc-admin"
-		/>
+				message={ __(
+					// translators: {{Link}} is a placeholder for a html element.
+					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+					'woocommerce'
+				) }
+				eventName="tasklist_shipping_recommendation_visit_marketplace_click"
+				targetUrl={ getAdminLink(
+					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+				) }
+				linkType="wc-admin"
+			/>
 		</div>
 	);
 };
