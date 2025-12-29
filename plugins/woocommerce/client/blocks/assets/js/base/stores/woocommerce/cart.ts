@@ -601,6 +601,7 @@ const { state, actions } = store< Store >(
 						`${ state.restUrl }wc/store/v1/cart`,
 						{
 							method: 'GET',
+							cache: 'no-store',
 							headers: { 'Content-Type': 'application/json' },
 						}
 					);
