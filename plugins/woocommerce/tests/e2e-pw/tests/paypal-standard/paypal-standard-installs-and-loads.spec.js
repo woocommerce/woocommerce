@@ -48,8 +48,13 @@ test.describe(
 		} ) => {
 			const paypalDiv = page.locator( '#paypal' );
 
+			const manageButton = paypalDiv.getByRole( 'button', {
+				name: 'Manage',
+			} );
+			await expect( manageButton ).toBeVisible();
+
 			// Click the Manage button
-			await paypalDiv.getByRole( 'button', { name: 'Manage' } ).click();
+			await manageButton.click();
 
 			// Confirm the PayPal Buttons setting is present. It is only available for the Orders V2 integration.
 			await expect(
