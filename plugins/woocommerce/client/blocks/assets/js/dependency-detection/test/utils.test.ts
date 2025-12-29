@@ -9,6 +9,8 @@ import {
 	parseStackForCallerUrl,
 	getWarningInfo,
 	createWcProxy,
+	type ScriptRegistry,
+	type WcGlobalExportsMap,
 } from '../utils';
 
 describe( 'Dependency Detection Utils', () => {
@@ -196,14 +198,14 @@ describe( 'Dependency Detection Utils', () => {
 	} );
 
 	describe( 'getWarningInfo', () => {
-		const mockRegistry = {
+		const mockRegistry: ScriptRegistry = {
 			'https://example.com/registered-with-dep.js': {
 				handle: 'my-script-with-dep',
 				deps: [ 'wc-blocks-checkout' ],
 			},
 			'https://example.com/registered-without-dep.js': {
 				handle: 'my-script-without-dep',
-				deps: [ 'jquery' ],
+				deps: [],
 			},
 		};
 
@@ -215,8 +217,8 @@ describe( 'Dependency Detection Utils', () => {
 				mockRegistry
 			);
 
-			expect( result.type ).toBe( 'inline' );
-			expect( result.message ).toBe(
+			expect( result?.type ).toBe( 'inline' );
+			expect( result?.message ).toBe(
 				'[WooCommerce] An inline or unknown script accessed wc.blocksCheckout without proper dependency declaration. This script should declare "wc-blocks-checkout" as a dependency.'
 			);
 		} );
@@ -229,8 +231,8 @@ describe( 'Dependency Detection Utils', () => {
 				mockRegistry
 			);
 
-			expect( result.type ).toBe( 'unregistered' );
-			expect( result.message ).toBe(
+			expect( result?.type ).toBe( 'unregistered' );
+			expect( result?.message ).toBe(
 				'[WooCommerce] Unregistered script "unregistered.js" accessed wc.blocksCheckout. This script should be registered with wp_enqueue_script() and declare "wc-blocks-checkout" as a dependency.'
 			);
 		} );
@@ -243,8 +245,8 @@ describe( 'Dependency Detection Utils', () => {
 				mockRegistry
 			);
 
-			expect( result.type ).toBe( 'missing-dependency' );
-			expect( result.message ).toBe(
+			expect( result?.type ).toBe( 'missing-dependency' );
+			expect( result?.message ).toBe(
 				'[WooCommerce] Script "my-script-without-dep" accessed wc.blocksCheckout without declaring "wc-blocks-checkout" as a dependency. Add "wc-blocks-checkout" to the script\'s dependencies array.'
 			);
 		} );
@@ -263,10 +265,10 @@ describe( 'Dependency Detection Utils', () => {
 
 	describe( 'createWcProxy', () => {
 		it( 'returns value for non-tracked properties', () => {
-			const target = { someProperty: 'value' };
+			const target: Record< string, unknown > = { someProperty: 'value' };
 			const proxy = createWcProxy(
 				target,
-				{}, // No tracked exports
+				{} as WcGlobalExportsMap, // No tracked exports
 				jest.fn(),
 				jest.fn()
 			);
@@ -275,8 +277,12 @@ describe( 'Dependency Detection Utils', () => {
 		} );
 
 		it( 'calls checkDependency for tracked properties', () => {
-			const target = { blocksCheckout: { Component: () => {} } };
-			const wcGlobalExports = { blocksCheckout: 'wc-blocks-checkout' };
+			const target: Record< string, unknown > = {
+				blocksCheckout: { Component: () => {} },
+			};
+			const wcGlobalExports = {
+				blocksCheckout: 'wc-blocks-checkout',
+			} as WcGlobalExportsMap;
 			const getCallerScriptUrl = jest
 				.fn()
 				.mockReturnValue( 'https://example.com/script.js' );
@@ -302,8 +308,8 @@ describe( 'Dependency Detection Utils', () => {
 
 		it( 'prevents infinite recursion with guard flag', () => {
 			let accessCount = 0;
-			const target = {
-				get blocksCheckout() {
+			const target: Record< string, unknown > = {
+				get blocksCheckout(): unknown {
 					accessCount++;
 					// Simulate nested access (like blocksCheckout using wcSettings)
 					if ( accessCount === 1 ) {
@@ -318,7 +324,7 @@ describe( 'Dependency Detection Utils', () => {
 			const wcGlobalExports = {
 				blocksCheckout: 'wc-blocks-checkout',
 				wcSettings: 'wc-settings',
-			};
+			} as WcGlobalExportsMap;
 			const getCallerScriptUrl = jest
 				.fn()
 				.mockReturnValue( 'https://example.com/script.js' );
@@ -346,11 +352,14 @@ describe( 'Dependency Detection Utils', () => {
 		} );
 
 		it( 'resets guard flag after access completes', () => {
-			const target = { blocksCheckout: {}, wcSettings: {} };
+			const target: Record< string, unknown > = {
+				blocksCheckout: {},
+				wcSettings: {},
+			};
 			const wcGlobalExports = {
 				blocksCheckout: 'wc-blocks-checkout',
 				wcSettings: 'wc-settings',
-			};
+			} as WcGlobalExportsMap;
 			const checkDependency = jest.fn();
 
 			const proxy = createWcProxy(

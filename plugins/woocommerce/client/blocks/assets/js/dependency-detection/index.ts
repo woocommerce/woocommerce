@@ -15,49 +15,77 @@ import {
 	parseStackForCallerUrl,
 	getWarningInfo,
 	createWcProxy,
+	type ScriptRegistry,
+	type WcGlobalExportsMap,
+	type WcGlobalKey,
+	type WcDependencyHandle,
 } from './utils';
+
+declare global {
+	// eslint-disable-next-line no-var, @typescript-eslint/naming-convention
+	var __WC_GLOBAL_EXPORTS_PLACEHOLDER__: WcGlobalExportsMap;
+}
+
+/**
+ * Pending check stored when registry isn't loaded yet.
+ */
+interface PendingCheck {
+	callerUrl: string;
+	wcGlobalKey: WcGlobalKey;
+	requiredDependencyHandle: WcDependencyHandle;
+}
 
 ( function () {
 	// Set up a placeholder that will be replaced with the real proxy later.
 	// This ensures we capture window.wc before any WC scripts set it.
-	let originalWc = window.wc || {};
-	let scriptRegistry = {};
+	let originalWc: Record< string, unknown > = window.wc || {};
+	let scriptRegistry: ScriptRegistry = {};
 	let registryLoaded = false;
-	const warnedScripts = {};
-	let pendingChecks = []; // Queue checks until registry is loaded
+	const warnedScripts: Record< string, boolean > = {};
+	let pendingChecks: PendingCheck[] = []; // Queue checks until registry is loaded
 
 	// Maps window.wc.* property names to their required script handles.
 	// Injected by PHP from DependencyDetection::WC_GLOBAL_EXPORTS (source of truth).
 	// eslint-disable-next-line no-undef
-	const WC_GLOBAL_EXPORTS = __WC_GLOBAL_EXPORTS_PLACEHOLDER__;
+	const WC_GLOBAL_EXPORTS: WcGlobalExportsMap =
+		__WC_GLOBAL_EXPORTS_PLACEHOLDER__;
 
 	/**
 	 * Get the URL of the script that called this function.
 	 *
-	 * @return {string|null} The caller script URL or null.
+	 * @return The caller script URL or null.
 	 */
-	function getCallerScriptUrl() {
-		if ( document.currentScript && document.currentScript.src ) {
-			return document.currentScript.src.replace( /\?.*$/, '' );
+	function getCallerScriptUrl(): string | null {
+		if (
+			document.currentScript &&
+			( document.currentScript as HTMLScriptElement ).src
+		) {
+			return ( document.currentScript as HTMLScriptElement ).src.replace(
+				/\?.*$/,
+				''
+			);
 		}
 
 		// Fallback for scenarios when currentScript isn't available
 		const stack = new Error().stack;
-		return parseStackForCallerUrl( stack, window.location.pathname );
+		return parseStackForCallerUrl(
+			stack ?? null,
+			window.location.pathname
+		);
 	}
 
 	/**
 	 * Perform the actual dependency check and warn if missing.
 	 *
-	 * @param {string|null} callerUrl                - The URL of the calling script.
-	 * @param {string}      wcGlobalKey              - The property being accessed.
-	 * @param {string}      requiredDependencyHandle - The required dependency handle.
+	 * @param callerUrl                - The URL of the calling script.
+	 * @param wcGlobalKey              - The property being accessed.
+	 * @param requiredDependencyHandle - The required dependency handle.
 	 */
 	function warnIfMissingDependency(
-		callerUrl,
-		wcGlobalKey,
-		requiredDependencyHandle
-	) {
+		callerUrl: string | null,
+		wcGlobalKey: WcGlobalKey,
+		requiredDependencyHandle: WcDependencyHandle
+	): void {
 		const warningKey = ( callerUrl || 'inline' ) + ':' + wcGlobalKey;
 
 		// Don't warn twice for the same script + property combination.
@@ -81,15 +109,15 @@ import {
 	/**
 	 * Check if a script has declared the required dependency.
 	 *
-	 * @param {string|null} callerUrl                - The URL of the calling script.
-	 * @param {string}      wcGlobalKey              - The property being accessed (e.g., 'blocksCheckout').
-	 * @param {string}      requiredDependencyHandle - The required dependency handle.
+	 * @param callerUrl                - The URL of the calling script.
+	 * @param wcGlobalKey              - The property being accessed (e.g., 'blocksCheckout').
+	 * @param requiredDependencyHandle - The required dependency handle.
 	 */
 	function checkDependency(
-		callerUrl,
-		wcGlobalKey,
-		requiredDependencyHandle
-	) {
+		callerUrl: string | null,
+		wcGlobalKey: WcGlobalKey,
+		requiredDependencyHandle: WcDependencyHandle
+	): void {
 		// For null/unknown callerUrl, warn immediately - no registry needed.
 		// We already know it's an inline or unknown script.
 		if ( ! callerUrl ) {
@@ -136,7 +164,7 @@ import {
 		get() {
 			return wcProxy;
 		},
-		set( newValue ) {
+		set( newValue: Record< string, unknown > ) {
 			// When WC scripts set window.wc, wrap the new value.
 			originalWc = newValue;
 			wcProxy = createWcProxy(
@@ -152,21 +180,22 @@ import {
 
 	// Expose function to update registry (called later after all scripts registered).
 	// Not in WC_GLOBAL_EXPORTS, so accessing via window.wc won't trigger proxy checks.
-	window.wc.wcUpdateDependencyRegistry = function ( registry ) {
-		scriptRegistry = registry || {};
-		registryLoaded = true;
+	( window.wc as Record< string, unknown > ).wcUpdateDependencyRegistry =
+		function ( registry: ScriptRegistry ): void {
+			scriptRegistry = registry || {};
+			registryLoaded = true;
 
-		// Process any pending checks now that we have the registry.
-		for ( let i = 0; i < pendingChecks.length; i++ ) {
-			const check = pendingChecks[ i ];
-			warnIfMissingDependency(
-				check.callerUrl,
-				check.wcGlobalKey,
-				check.requiredDependencyHandle
-			);
-		}
-		pendingChecks = [];
-	};
+			// Process any pending checks now that we have the registry.
+			for ( let i = 0; i < pendingChecks.length; i++ ) {
+				const check = pendingChecks[ i ];
+				warnIfMissingDependency(
+					check.callerUrl,
+					check.wcGlobalKey,
+					check.requiredDependencyHandle
+				);
+			}
+			pendingChecks = [];
+		};
 
 	// eslint-disable-next-line no-console
 	console.info(
