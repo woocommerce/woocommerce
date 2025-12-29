@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
