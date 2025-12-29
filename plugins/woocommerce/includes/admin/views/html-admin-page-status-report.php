@@ -222,6 +222,11 @@ if ( file_exists( $plugin_path ) ) {
 			</td>
 		</tr>
 		<tr>
+			<td data-export-label="WP Environment Type"><?php esc_html_e( 'Environment type', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The current environment type set for this site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td><?php echo esc_html( $environment['wp_environment_type'] ); ?></td>
+		</tr>
+		<tr>
 			<td data-export-label="Language"><?php esc_html_e( 'Language', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The current language used by WordPress. Default = English', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $environment['language'] ); ?></td>
