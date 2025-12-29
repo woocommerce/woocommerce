@@ -47,6 +47,8 @@ import {
 } from './utils';
 import validateCountry from './validate-country';
 import { validateState } from './validate-state';
+import { EmailField } from './email-field';
+
 /**
  * Checkout form.
  */
@@ -251,6 +253,22 @@ const Form = <
 				if ( field.key === 'email' ) {
 					fieldProps.id = 'email';
 					fieldProps.errorId = 'billing_email';
+
+					return (
+						<EmailField
+							{ ...fieldProps }
+							key={ field.key }
+							onChange={ ( value: string ) =>
+								onChange( {
+									...values,
+									email: value,
+								} as T )
+							}
+							value={
+								( values as ContactFormValues )?.email || ''
+							}
+						/>
+					);
 				}
 
 				if ( field.type === 'checkbox' ) {

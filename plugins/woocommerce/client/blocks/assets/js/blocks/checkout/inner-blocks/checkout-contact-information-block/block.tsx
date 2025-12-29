@@ -54,17 +54,6 @@ const CreateAccountUI = (): React.ReactElement | null => {
 
 	return (
 		<>
-			{ allowGuestCheckout && (
-				<p
-					id={ guestCheckoutNoticeId }
-					className="wc-block-checkout__guest-checkout-notice"
-				>
-					{ __(
-						'You are currently checking out as a guest.',
-						'woocommerce'
-					) }
-				</p>
-			) }
 			{ showCreateAccountCheckbox && (
 				<CheckboxControl
 					className="wc-block-checkout__create-account"
