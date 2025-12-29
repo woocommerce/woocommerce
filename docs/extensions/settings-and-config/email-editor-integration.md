@@ -126,6 +126,68 @@ add_filter( 'woocommerce_transactional_emails_for_block_editor', 'your_plugin_re
 
 **Development tip:** WooCommerce caches email post-generation with a transient. When testing or developing, delete the transient `wc_email_editor_initial_templates_generated` to force post-generation.
 
+### Customizing email template post generation
+
+You can modify the email template post data before it's created using the `woocommerce_email_content_post_data` filter. This allows you to customize the post title, content, meta, or any other post data during template generation.
+
+**Filter details:**
+
+| Property   | Value                                                                   |
+| ---------- | ----------------------------------------------------------------------- |
+| Hook name  | `woocommerce_email_content_post_data`                                   |
+| Since      | 10.5.0                                                                  |
+| Parameters | `$post_data` (array), `$email_type` (string), `$email_data` (\WC_Email) |
+| Returns    | array                                                                   |
+
+**Parameters:**
+
+-   `$post_data` _(array)_ – The post data array that will be passed to `wp_insert_post()`. Contains keys like `post_type`, `post_status`, `post_title`, `post_content`, `post_excerpt`, `post_name`, and `meta_input`.
+-   `$email_type` _(string)_ – The email type identifier (e.g., 'customer_processing_order').
+-   `$email_data` _(\WC_Email)_ – The WooCommerce email object.
+
+**Return value:**
+
+Return the modified post data array. This array will be used to create the email template post.
+
+#### Example: Modifying email template post data
+
+```php
+/**
+ * Customize email template post data during generation.
+ *
+ * @param array     $post_data  The post data array.
+ * @param string    $email_type The email type identifier.
+ * @param \WC_Email $email_data The WooCommerce email object.
+ * @return array Modified post data.
+ */
+function your_plugin_customize_email_template_post( $post_data, $email_type, $email_data ) {
+    // Modify the post title for specific email types.
+    if ( 'customer_processing_order' === $email_type ) {
+        $post_data['post_title'] = __( 'Custom Processing Order Email', 'your-plugin' );
+    }
+
+    // Modify the post content (block template HTML).
+    $post_data['post_content'] = str_replace(
+        'default content',
+        'custom content',
+        $post_data['post_content']
+    );
+
+    // Add custom meta data.
+    $post_data['meta_input']['custom_meta_key'] = 'custom_value';
+
+    return $post_data;
+}
+add_filter( 'woocommerce_email_content_post_data', 'your_plugin_customize_email_template_post', 10, 3 );
+```
+
+**Important notes:**
+
+-   You can modify any valid `wp_insert_post()` parameter (`post_title`, `post_content`, `post_excerpt`, `post_status`, `post_name`, `meta_input`, etc.).
+-   Always return the modified `$post_data` array.
+-   When modifying `post_content`, ensure valid block markup is maintained.
+-   The filter runs for all email types; check `$email_type` to target specific emails.
+
 ## 4. Create the initial block template
 
 Create `templates/emails/block/your-custom-email.php`:
@@ -180,7 +242,7 @@ If your email needs to use different content, you have two options:
     ```
 
 **Using action hook:**
-You can use the action hook `woocommerce_email_general_block_email` to execute additional actions within the content template. 
+You can use the action hook `woocommerce_email_general_block_email` to execute additional actions within the content template.
 
 ## 5. Set Up Triggers
 
@@ -313,17 +375,17 @@ Use the `woocommerce_email_editor_integration_personalizer_context_data` filter 
 
 **Filter details:**
 
-| Property | Value |
-| -------- | ----- |
-| Hook name | `woocommerce_email_editor_integration_personalizer_context_data` |
-| Since | 10.5.0 |
-| Parameters | `$context` (array), `$email` (\WC_Email) |
-| Returns | array |
+| Property   | Value                                                            |
+| ---------- | ---------------------------------------------------------------- |
+| Hook name  | `woocommerce_email_editor_integration_personalizer_context_data` |
+| Since      | 10.5.0                                                           |
+| Parameters | `$context` (array), `$email` (\WC_Email)                         |
+| Returns    | array                                                            |
 
 **Parameters:**
 
-- `$context` *(array)* – The existing context data array. This may already contain data from WooCommerce core or other extensions.
-- `$email` *(\WC_Email)* – The WooCommerce email object being processed. You can use this to access the email ID, recipient, and the object associated with the email (such as an order or customer).
+-   `$context` _(array)_ – The existing context data array. This may already contain data from WooCommerce core or other extensions.
+-   `$email` _(\WC_Email)_ – The WooCommerce email object being processed. You can use this to access the email ID, recipient, and the object associated with the email (such as an order or customer).
 
 **Return value:**
 
@@ -389,11 +451,11 @@ function your_plugin_get_subscription_end_date( $context, $args = array() ) {
 
 **Important notes:**
 
-- The filter is called during email personalization, so your context data is available when personalization tags are processed.
-- Always check if the email type is relevant before adding context data to avoid unnecessary processing.
-- Use unique keys for your context data to prevent conflicts with WooCommerce core or other extensions.
-- The `$email->object` property typically contains the main object associated with the email (e.g., `WC_Order` for order emails, `WP_User` for user-related emails).
-- When using context data in personalization tags, ensure proper escaping based on the output context (e.g., `esc_html()`, `esc_attr()`, `esc_url()`).
+-   The filter is called during email personalization, so your context data is available when personalization tags are processed.
+-   Always check if the email type is relevant before adding context data to avoid unnecessary processing.
+-   Use unique keys for your context data to prevent conflicts with WooCommerce core or other extensions.
+-   The `$email->object` property typically contains the main object associated with the email (e.g., `WC_Order` for order emails, `WP_User` for user-related emails).
+-   When using context data in personalization tags, ensure proper escaping based on the output context (e.g., `esc_html()`, `esc_attr()`, `esc_url()`).
 
 ## Complete example
 

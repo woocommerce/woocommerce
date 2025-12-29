@@ -1,11 +1,20 @@
 ---
 name: woocommerce-backend-dev
-description: Add or modify WooCommerce backend PHP code following project conventions. Use when creating new classes, methods, hooks, or modifying existing backend code.
+description: Add or modify WooCommerce backend PHP code following project conventions. Use when creating new classes, methods, hooks, or modifying existing backend code. **MUST be invoked before writing any PHP unit tests.**
 ---
 
 # WooCommerce Backend Development
 
 This skill provides guidance for developing WooCommerce backend PHP code according to project standards and conventions.
+
+## When to Use This Skill
+
+**ALWAYS invoke this skill before:**
+
+- Writing new PHP unit tests (`*Test.php` files)
+- Creating new PHP classes
+- Modifying existing backend PHP code
+- Adding hooks or filters
 
 ## Instructions
 
