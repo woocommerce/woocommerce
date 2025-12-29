@@ -12,7 +12,7 @@ test.describe(
 
 		test( 'PayPal Standard can be installed', async ( { page } ) => {
 			await test.step( 'Go to the payment gateways page', async () => {
-				await page.goto( '/wp-admin/admin.php?page=wc-settings', { timeout: 600000 } );
+				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
 
 				await page
 					.getByRole( 'link', { name: 'Payments', exact: true } )
@@ -46,6 +46,18 @@ test.describe(
 		test( 'PayPal Standard Orders V2 integration is available', async ( {
 			page,
 		} ) => {
+			await test.step( 'Go to the payment gateways page', async () => {
+				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
+
+				await page
+					.getByRole( 'link', { name: 'Payments', exact: true } )
+					.click();
+
+				await page.waitForSelector(
+					'.settings-payment-gateways__header-title'
+				);
+			} );
+
 			const paypalDiv = page.locator( '#paypal' );
 
 			await expect( paypalDiv ).toBeVisible();
