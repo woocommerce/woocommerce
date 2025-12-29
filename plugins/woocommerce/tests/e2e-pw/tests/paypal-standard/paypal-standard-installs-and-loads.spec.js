@@ -1,8 +1,14 @@
 /**
+ * External dependencies
+ */
+import { request } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { expect, tags, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+const { setOption } = require( '../../utils/options' );
 
 test.describe(
 	'PayPal Standard Installation',
@@ -10,24 +16,29 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test( 'PayPal Standard can be installed', async ( { page } ) => {
-			await test.step( 'Go to the payment gateways page', async () => {
-				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
+		async function openPayments( page ) {
+			await page.goto( '/wp-admin/admin.php?page=wc-settings' );
+			await page
+				.getByRole( 'link', { name: 'Payments', exact: true } )
+				.click();
+			await page.waitForSelector(
+				'.settings-payment-gateways__header-title'
+			);
+		}
 
-				await page
-					.getByRole( 'link', { name: 'Payments', exact: true } )
-					.click();
-
-				await page.waitForSelector(
-					'.settings-payment-gateways__header-title'
-				);
-			} );
-
+		async function waitForPayPalToLoad( page ) {
 			const paypalDiv = page.locator( '#paypal' );
+			await expect( paypalDiv ).toBeVisible();
+
+			return paypalDiv;
+		}
+
+		test( 'PayPal Standard can be installed', async ( { page } ) => {
+			await openPayments( page );
+
+			const paypalDiv = await waitForPayPalToLoad( page );
 
 			await test.step( 'Install PayPal Standard', async () => {
-				// Confirm PayPal is listed.
-				await expect( paypalDiv ).toBeVisible();
 
 				// Confirm the Enable button is present.
 				const enableButton = paypalDiv.getByRole( 'link', {
@@ -43,24 +54,20 @@ test.describe(
 			await expect( paypalDiv.getByText( 'Active' ) ).toBeVisible();
 		} );
 
-		test( 'PayPal Standard Orders V2 integration is available', async ( {
+		test( 'PayPal Standard Orders V2 integration is available after onboarding to Jetpack', async ( {
 			page,
+			baseURL,
 		} ) => {
-			await test.step( 'Go to the payment gateways page', async () => {
-				await page.goto( '/wp-admin/admin.php?page=wc-settings' );
+			await setOption(
+				request,
+				baseURL,
+				'transact_onboarding_complete',
+				'yes'
+			);
 
-				await page
-					.getByRole( 'link', { name: 'Payments', exact: true } )
-					.click();
+			await openPayments( page );
 
-				await page.waitForSelector(
-					'.settings-payment-gateways__header-title'
-				);
-			} );
-
-			const paypalDiv = page.locator( '#paypal' );
-
-			await expect( paypalDiv ).toBeVisible();
+			const paypalDiv = await waitForPayPalToLoad( page );
 
 			const manageButton = paypalDiv.getByRole( 'button', {
 				name: 'Manage',
