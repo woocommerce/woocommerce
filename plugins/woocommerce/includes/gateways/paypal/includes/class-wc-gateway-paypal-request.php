@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
@@ -196,6 +197,9 @@ class WC_Gateway_Paypal_Request {
 			// Save the PayPal order ID to the order.
 			$order->update_meta_data( '_paypal_order_id', $response_data['id'] );
 
+			// Save the PayPal order status to the order.
+			$order->update_meta_data( '_paypal_status', $response_data['status'] );
+
 			// Remember the payment source: payment_source is not patchable.
 			// If the payment source is changed, we need to create a new PayPal order.
 			$order->update_meta_data( '_paypal_payment_source', $payment_source );
@@ -363,9 +367,22 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		$paypal_status = $order->get_meta( '_paypal_status', true );
+
 		// Skip if the payment is already captured.
 		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		// Skip if the payment requires payer action.
+		if ( WC_Gateway_Paypal_Constants::STATUS_PAYER_ACTION_REQUIRED === $paypal_status ) {
+			WC_Gateway_Paypal::log( 'PayPal payment requires payer action. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		// Skip if the payment is voided.
+		if ( WC_Gateway_Paypal_Constants::VOIDED === $paypal_status ) {
+			WC_Gateway_Paypal::log( 'PayPal payment voided. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
 
@@ -376,6 +393,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		$paypal_debug_id = null;
+		$http_code       = null;
 
 		try {
 			$request_body = array(
@@ -389,23 +407,46 @@ class WC_Gateway_Paypal_Request {
 				throw new Exception( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
 			}
 
-			$http_code     = wp_remote_retrieve_response_code( $response );
-			$body          = wp_remote_retrieve_body( $response );
-			$response_data = json_decode( $body, true );
+			$http_code             = wp_remote_retrieve_response_code( $response );
+			$body                  = wp_remote_retrieve_body( $response );
+			$response_data         = json_decode( $body, true );
+			$issue                 = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
+			$auth_already_captured = 422 === $http_code && PayPalConstants::PAYPAL_ISSUE_AUTHORIZATION_ALREADY_CAPTURED === $issue;
 
-			if ( 200 !== $http_code && 201 !== $http_code ) {
+			if ( 200 !== $http_code && 201 !== $http_code && ! $auth_already_captured ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
 				throw new Exception( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
-			// Set custom status for successful capture response.
-			$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
+			// Set custom status for successful capture response, or if the authorization was already captured.
+			$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_CAPTURED );
 			$order->save();
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
+
 			$note_message = sprintf(
 				__( 'PayPal capture authorized payment failed', 'woocommerce' ),
 			);
+
+			// Scenario 1: Capture auth API call returned 404 (authorization object does not exist).
+			// If the authorization ID is not found (404 response), set the '_paypal_authorization_checked' flag.
+			// This flag indicates that we've made an API call to capture PayPal payment and no authorization object was found with this authorization ID.
+			// This prevents repeated API calls for orders that have no authorization data.
+			if ( 404 === $http_code ) {
+				$paypal_dashboard_url = $this->gateway->testmode
+					? 'https://www.sandbox.paypal.com/unifiedtransactions'
+					: 'https://www.paypal.com/unifiedtransactions';
+
+				$note_message .= sprintf(
+					/* translators: %1$s: Authorization ID, %2$s: open link tag, %3$s: close link tag */
+					__( '. Authorization ID: %1$s not found. Please log into your %2$sPayPal account%3$s to capture the payment', 'woocommerce' ),
+					esc_html( $authorization_id ),
+					'<a href="' . esc_url( $paypal_dashboard_url ) . '" target="_blank">',
+					'</a>'
+				);
+				$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
+			}
+
 			if ( $paypal_debug_id ) {
 				$note_message .= sprintf(
 					/* translators: %s: PayPal debug ID */
@@ -413,7 +454,9 @@ class WC_Gateway_Paypal_Request {
 					$paypal_debug_id
 				);
 			}
+
 			$order->add_order_note( $note_message );
+			$order->save();
 		}
 	}
 
@@ -433,9 +476,12 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
-		// If '_paypal_authorization_checked' is set to 'yes' and the authorization ID is empty, it means we already checked and found no authorization data.
-		// Return null to avoid repeated API calls.
-		if ( empty( $authorization_id ) && 'yes' === $order->get_meta( '_paypal_authorization_checked', true ) ) {
+		// If '_paypal_authorization_checked' is set to 'yes', it means we've already made an API call to PayPal
+		// and confirmed that no authorization object exists. This flag is set in two scenarios:
+		// 1. Capture auth API call returned 404 (authorization object does not exist with the authorization ID).
+		// 2. Order details API call returned empty authorization array (authorization object does not exist for this PayPal order).
+		// Return null to avoid repeated API calls for orders that have no authorization data.
+		if ( 'yes' === $order->get_meta( '_paypal_authorization_checked', true ) ) {
 			return null;
 		}
 
@@ -476,7 +522,9 @@ class WC_Gateway_Paypal_Request {
 					WC_Gateway_Paypal::log( 'Storing authorization ID from Paypal. Order ID: ' . $order->get_id() . '; authorization ID: ' . $authorization_id );
 					$order->save();
 				} else {
-					// Store '_paypal_authorization_checked' flag to prevent repeated API calls for orders with no authorization data.
+					// Scenario 2: Order details API call returned empty authorization array (authorization object does not exist).
+					// Store '_paypal_authorization_checked' flag to prevent repeated API calls.
+					// This flag indicates that we've made an API call to get PayPal order details and confirmed no authorization object exists.
 					WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
 					$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
 					$order->save();
@@ -528,7 +576,7 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_approve_link( $http_code, $response_data ) {
 		// See https://developer.paypal.com/docs/api/orders/v2/#orders_create.
-		if ( isset( $response_data['status'] ) && 'PAYER_ACTION_REQUIRED' === $response_data['status'] ) {
+		if ( isset( $response_data['status'] ) && WC_Gateway_Paypal_Constants::STATUS_PAYER_ACTION_REQUIRED === $response_data['status'] ) {
 			$rel = 'payer-action';
 		} else {
 			$rel = 'approve';
@@ -573,6 +621,13 @@ class WC_Gateway_Paypal_Request {
 			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( $order->get_id() ) );
 		}
 
+		$purchase_unit_amount = $this->get_paypal_order_purchase_unit_amount( $order );
+		if ( $purchase_unit_amount['value'] <= 0 ) {
+			// If we cannot build purchase unit amount (e.g. negative or zero order total),
+			// we should not proceed with the create-order request.
+			throw new Exception( 'Cannot build PayPal order purchase unit amount. Order total is not valid. Order ID: ' . esc_html( (string) $order->get_id() ) . ', Total: ' . esc_html( (string) $purchase_unit_amount['value'] ) );
+		}
+
 		$order_items = $this->get_paypal_order_items( $order );
 		if ( empty( $order_items ) ) {
 			// If we cannot build order items (e.g. negative item amounts),
@@ -612,7 +667,7 @@ class WC_Gateway_Paypal_Request {
 			'purchase_units' => array(
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
-					'amount'     => $this->get_paypal_order_purchase_unit_amount( $order ),
+					'amount'     => $purchase_unit_amount,
 					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $order_items,
 					'payee'      => array(

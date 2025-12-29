@@ -6,7 +6,6 @@ import { __, sprintf } from '@wordpress/i18n';
 import { box, plus, settings } from '@wordpress/icons';
 import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { dispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 import { store as coreStore } from '@wordpress/core-data';
 import { addQueryArgs } from '@wordpress/url';
 import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
@@ -41,8 +40,9 @@ const registerWooCommerceSettingsCommand = ( { label, tab, origin } ) => {
 // https://github.com/WordPress/gutenberg/blob/8863b49b7e686f555e8b8adf70cc588c4feebfbf/packages/core-commands/src/site-editor-navigation-commands.js#L36C7-L36C44
 function useProductCommandLoader( { search } ) {
 	const { editedPostType } = useSelect( ( select ) => {
+		const editor = select( 'core/editor' );
 		return {
-			editedPostType: select( editorStore ).getCurrentPostType(),
+			editedPostType: editor?.getCurrentPostType?.() ?? null,
 		};
 	} );
 	const origin = editedPostType ? editedPostType + '-editor' : null;
@@ -122,8 +122,9 @@ function useProductCommandLoader( { search } ) {
 
 const WooCommerceCommands = () => {
 	const { editedPostType } = useSelect( ( select ) => {
+		const editor = select( 'core/editor' );
 		return {
-			editedPostType: select( editorStore ).getCurrentPostType(),
+			editedPostType: editor?.getCurrentPostType?.() ?? null,
 		};
 	} );
 	const origin = editedPostType ? editedPostType + '-editor' : null;

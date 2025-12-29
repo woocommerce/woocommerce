@@ -24,9 +24,9 @@ Note: A POSIX compliant operating system (e.g., Linux, macOS) is assumed. If you
 
 In addition to the software shared above, you'll also want to have some way of setting up a local development server stack. There are a number of different tools available for this, each with a certain set of functionality and limitations. We recommend choosing from the options below that fit your preferred workflow best.
 
-### Studio - Recommended Approach
+### WordPress Studio - Recommended Approach
 
-For easy local development environments, we recommend [Studio](https://developer.wordpress.com/studio/), the local development environment provided by [WordPress.com](https://developer.wordpress.com). Studio includes the ability to manage multiple local website environments, as well as integrations with your code editor and terminal. Studio also features a WordPress-specific AI Assistant, easy imports from WordPress backups, free public preview sites, and two-way sync with sites hosted on WordPress.com.
+For easy local development environments, we recommend [WordPress Studio](https://developer.wordpress.com/studio/), the local development environment supported by the [WordPress.com](https://developer.wordpress.com) team. Studio includes the ability to manage multiple local website environments, as well as integrations with your code editor and terminal. Studio also features a WordPress-specific AI Assistant, easy imports from WordPress backups, Blueprint support, free public preview sites, and two-way sync with sites hosted on WordPress.com or Pressable.
 
 ### wp-env
 

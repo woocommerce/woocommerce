@@ -33,14 +33,7 @@ test.describe( `${ blockData.name } Block`, () => {
 	test( 'should add product to the cart', async ( {
 		frontendUtils,
 		page,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		const block = blocks.first();
 
