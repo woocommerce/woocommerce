@@ -266,6 +266,52 @@ describe( 'Dependency Detection Utils', () => {
 
 			expect( result ).toBe( null );
 		} );
+
+		it( 'returns unregistered warning for malformed registry entry with missing deps', () => {
+			const malformedRegistry = {
+				'https://example.com/malformed.js': {
+					handle: 'malformed-script',
+				},
+			} as unknown as ScriptRegistry;
+
+			const result = getWarningInfo(
+				'https://example.com/malformed.js',
+				'blocksCheckout',
+				'wc-blocks-checkout',
+				malformedRegistry
+			);
+
+			expect( result?.type ).toBe( 'unregistered' );
+		} );
+
+		it( 'returns unregistered warning for malformed registry entry with non-array deps', () => {
+			const malformedRegistry = {
+				'https://example.com/malformed.js': {
+					handle: 'malformed-script',
+					deps: 'not-an-array',
+				},
+			} as unknown as ScriptRegistry;
+
+			const result = getWarningInfo(
+				'https://example.com/malformed.js',
+				'blocksCheckout',
+				'wc-blocks-checkout',
+				malformedRegistry
+			);
+
+			expect( result?.type ).toBe( 'unregistered' );
+		} );
+
+		it( 'returns unregistered warning when registry is not an object', () => {
+			const result = getWarningInfo(
+				'https://example.com/script.js',
+				'blocksCheckout',
+				'wc-blocks-checkout',
+				null as unknown as ScriptRegistry
+			);
+
+			expect( result?.type ).toBe( 'unregistered' );
+		} );
 	} );
 
 	describe( 'createWcProxy', () => {

@@ -182,10 +182,13 @@ export function getWarningInfo(
 		};
 	}
 
-	const scriptInfo = scriptRegistry[ callerUrl ];
+	const scriptInfo =
+		scriptRegistry && typeof scriptRegistry === 'object'
+			? scriptRegistry[ callerUrl ]
+			: undefined;
 
-	// Case 2: Unregistered script.
-	if ( ! scriptInfo ) {
+	// Case 2: Unregistered script or malformed registry entry.
+	if ( ! scriptInfo || ! Array.isArray( scriptInfo.deps ) ) {
 		return {
 			type: 'unregistered',
 			message: `[WooCommerce] Unregistered script "${ getFilenameFn(
