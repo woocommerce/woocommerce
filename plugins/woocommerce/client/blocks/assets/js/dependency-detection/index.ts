@@ -56,14 +56,9 @@ interface PendingCheck {
 	 * @return The caller script URL or null.
 	 */
 	function getCallerScriptUrl(): string | null {
-		if (
-			document.currentScript &&
-			( document.currentScript as HTMLScriptElement ).src
-		) {
-			return ( document.currentScript as HTMLScriptElement ).src.replace(
-				/\?.*$/,
-				''
-			);
+		const src = ( document.currentScript as HTMLScriptElement | null )?.src;
+		if ( src && typeof src === 'string' ) {
+			return src.replace( /\?.*$/, '' );
 		}
 
 		// Fallback for scenarios when currentScript isn't available
