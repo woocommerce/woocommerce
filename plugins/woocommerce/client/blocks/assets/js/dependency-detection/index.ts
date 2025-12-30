@@ -173,8 +173,15 @@ interface PendingCheck {
 		enumerable: true,
 	} );
 
-	// Expose function to update registry (called later after all scripts registered).
-	// Not in WC_GLOBAL_EXPORTS, so accessing via window.wc won't trigger proxy checks.
+	/**
+	 * Update the script registry. Called by WooCommerce PHP to provide
+	 * registered script data for dependency checking.
+	 *
+	 * Not for external use. Calling this will overwrite the registry
+	 * provided by WooCommerce.
+	 *
+	 * @internal
+	 */
 	( window.wc as Record< string, unknown > ).wcUpdateDependencyRegistry =
 		function ( registry: ScriptRegistry ): void {
 			scriptRegistry = registry || {};
