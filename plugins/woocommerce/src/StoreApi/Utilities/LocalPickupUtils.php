@@ -1,4 +1,4 @@
-<?php declare( strict_types=1 );
+<?php
 
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
@@ -113,10 +113,11 @@ class LocalPickupUtils {
 	 * - There are custom shipping methods that support 'local-pickup'
 	 *
 	 * @return bool True if collectable methods are available.
+	 * @since 10.5.0
 	 */
 	public static function has_collectable_methods() {
 		// Check if there are any enabled pickup locations configured in the UI.
-		$pickup_locations = get_option( 'pickup_location_pickup_locations', array() );
+		$pickup_locations      = get_option( 'pickup_location_pickup_locations', array() );
 		$has_enabled_locations = false;
 
 		foreach ( $pickup_locations as $location ) {
