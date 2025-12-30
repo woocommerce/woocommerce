@@ -808,7 +808,7 @@ class FeaturesController {
 	}
 
 	/**
-	 * Log usage of a deprecated feature and track the event.
+	 * Log usage of a deprecated feature.
 	 *
 	 * This method ensures logging only happens once per request to avoid spam.
 	 *
@@ -829,16 +829,6 @@ class FeaturesController {
 			"FeaturesUtil::feature_is_enabled('{$feature_id}')",
 			$deprecated_since
 		);
-
-		if ( class_exists( 'WC_Tracks' ) ) {
-			\WC_Tracks::record_event(
-				'deprecated_feature_checked',
-				array(
-					'feature_id'       => $feature_id,
-					'deprecated_since' => $deprecated_since,
-				)
-			);
-		}
 	}
 
 	/**
