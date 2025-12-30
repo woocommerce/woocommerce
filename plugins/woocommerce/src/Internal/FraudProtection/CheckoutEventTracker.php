@@ -94,11 +94,11 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		// Traditional checkout: Track when checkout fields are updated.
 		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
 
-		// Track when payment method is changed in session.
-		add_action( 'woocommerce_payment_method_selected', array( $this, 'handle_payment_method_selected' ), 10, 1 );
-
 		// Store API (block checkout): Track checkout field updates.
 		add_action( 'woocommerce_store_api_checkout_update_customer_from_request', array( $this, 'handle_store_api_checkout_update' ), 10, 2 );
+
+		// WooCommerce AJAX: Handle payment method selection tracking.
+		add_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this, 'ajax_handle_payment_method_selected' ) );
 
 		// Flush any pending batched events at shutdown.
 		add_action( 'shutdown', array( $this, 'flush_pending_events' ), 10, 0 );
@@ -124,27 +124,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 
 		$event_data = $this->build_checkout_event_data( 'field_update', $data );
 		$this->track_event_with_batching( 'checkout_field_update', $event_data );
-	}
-
-	/**
-	 * Handle payment method selection event.
-	 *
-	 * Triggered when the payment method is selected or changed during checkout.
-	 * This hook may not exist in core WooCommerce, so payment gateways or custom
-	 * implementations should fire it when payment method changes are detected.
-	 *
-	 * @internal
-	 *
-	 * @param string $payment_method The selected payment method ID.
-	 * @return void
-	 */
-	public function handle_payment_method_selected( $payment_method ): void {
-		$event_data = $this->build_checkout_event_data(
-			'payment_method_selected',
-			array( 'payment_method' => $payment_method )
-		);
-
-		$this->track_event_with_batching( 'checkout_payment_method_selected', $event_data );
 	}
 
 	/**
@@ -176,6 +155,38 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Handle AJAX payment method selection event.
+	 *
+	 * Triggered via WooCommerce AJAX when payment method is changed in checkout.
+	 * This is called from JavaScript when the payment_method_selected event fires.
+	 *
+	 * @internal
+	 *
+	 * @return void
+	 */
+	public function ajax_handle_payment_method_selected(): void {
+		// Get payment method from POST data.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce AJAX endpoints don't require nonce for logged-out users.
+		$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method'] ) ) : '';
+
+		if ( empty( $payment_method ) ) {
+			wp_send_json_error( array( 'message' => 'Payment method is required.' ) );
+			return;
+		}
+
+		// Track the payment method selection.
+		$event_data = $this->build_checkout_event_data(
+			'payment_method_selected',
+			array( 'payment' => array( 'payment_method_type' => $payment_method ) )
+		);
+
+		$this->track_event_with_batching( 'checkout_payment_method_selected', $event_data );
+
+		// Send success response.
+		wp_send_json_success( array( 'message' => 'Payment method tracked.' ) );
+	}
+
+	/**
 	 * Build checkout event-specific data.
 	 *
 	 * Prepares the checkout event data including action type and any changed fields.
@@ -194,11 +205,34 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			$this->extract_billing_fields( $posted_data ),
 			$this->extract_shipping_fields( $posted_data ),
 			$this->extract_payment_method( $posted_data ),
+			$this->extract_shipping_method( $posted_data )
 		);
 
-		$event_data['shipping_methods'] = $this->extract_shipping_method( $posted_data );
-
 		return $event_data;
+	}
+
+	/**
+	 * Extract payment method data from posted data.
+	 *
+	 * Extracts payment method ID and retrieves the readable gateway name.
+	 *
+	 * @param array $posted_data Posted form data.
+	 * @return array Payment method data with ID and name, or empty array if not found.
+	 */
+	private static function extract_payment_method( array $posted_data ): array {
+		$payment_data = array();
+
+		if ( ! empty( $posted_data['payment']['payment_method_type'] ) ) {
+			$payment_method_id   = sanitize_text_field( wp_unslash( $posted_data['payment']['payment_method_type'] ) );
+			$payment_method_name = PaymentMethodHelper::get_payment_method_name( $payment_method_id );
+
+			$payment_data['payment'] = array(
+				'payment_method_type' => $payment_method_id,
+				'payment_method_name' => $payment_method_name,
+			);
+		}
+
+		return $payment_data;
 	}
 
 	/**
@@ -270,22 +304,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		return $extracted_fields;
-	}
-
-	/**
-	 * Extract payment method from posted data.
-	 *
-	 * @param array $posted_data Posted form data.
-	 * @return array Payment method data.
-	 */
-	private function extract_payment_method( array $posted_data ): array {
-		$payment_data = array();
-
-		if ( ! empty( $posted_data['payment_method'] ) ) {
-			$payment_data['payment_method'] = sanitize_text_field( wp_unslash( $posted_data['payment_method'] ) );
-		}
-
-		return $payment_data;
 	}
 
 	/**
@@ -584,4 +602,5 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 
 		return $shipping_method_map;
 	}
+
 }

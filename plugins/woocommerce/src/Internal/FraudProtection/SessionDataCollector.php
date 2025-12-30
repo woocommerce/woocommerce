@@ -70,7 +70,7 @@ class SessionDataCollector {
 			'order'            => $this->get_order_data( $order_id_from_event ),
 			'shipping_address' => $this->get_shipping_address(),
 			'billing_address'  => $this->get_billing_address(),
-			'payment'          => $this->get_payment_data(),
+			'payment'          => $event_data['payment'] ?? $this->get_payment_data(),
 			'event_data'       => $event_data,
 		);
 	}
@@ -496,8 +496,8 @@ class SessionDataCollector {
 			// Try to get chosen payment method from session.
 			$chosen_payment_method = $this->get_chosen_payment_method();
 			if ( $chosen_payment_method ) {
-				$payment_gateway_name = \sanitize_text_field( $chosen_payment_method );
 				$payment_method_type  = \sanitize_text_field( $chosen_payment_method );
+				$payment_gateway_name = PaymentMethodHelper::get_payment_method_name( $payment_method_type );
 			}
 
 			// Initialize payment data with default null values.
