@@ -742,7 +742,14 @@ class FeaturesController {
 
 		if ( $include_enabled_info ) {
 			foreach ( array_keys( $features ) as $feature_id ) {
-				$is_enabled                            = $this->feature_is_enabled( $feature_id );
+				$is_enabled = false;
+				// For deprecated features, use the deprecated_value directly without triggering the deprecation notice.
+				// The deprecation notice should only fire for external code checking feature status, not for internal listing.
+				if ( ! empty( $features[ $feature_id ]['deprecated_since'] ) ) {
+					$is_enabled = (bool) ( $features[ $feature_id ]['deprecated_value'] ?? false );
+				} else {
+					$is_enabled = $this->feature_is_enabled( $feature_id );
+				}
 				$features[ $feature_id ]['is_enabled'] = $is_enabled;
 			}
 		}
