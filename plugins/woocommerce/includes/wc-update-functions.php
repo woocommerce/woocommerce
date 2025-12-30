@@ -3217,15 +3217,16 @@ function wc_update_1050_enable_autoload_options() {
 }
 
 /**
- * Remove deprecated marketplace feature option.
+ * Set deprecated marketplace feature option to 'yes' for backwards compatibility.
  *
  * The marketplace feature flag was deprecated in 10.5.0 and is now always enabled.
- * This cleans up the orphaned option from the database.
+ * We set it to 'yes' instead of deleting to maintain backwards compatibility with
+ * code that reads the option directly instead of using FeaturesUtil::feature_is_enabled().
  *
  * @since 10.5.0
  *
  * @return void
  */
-function wc_update_1050_remove_deprecated_marketplace_option() {
-	delete_option( 'woocommerce_feature_marketplace_enabled' );
+function wc_update_1050_set_deprecated_marketplace_option(): void {
+	update_option( 'woocommerce_feature_marketplace_enabled', 'yes' );
 }
