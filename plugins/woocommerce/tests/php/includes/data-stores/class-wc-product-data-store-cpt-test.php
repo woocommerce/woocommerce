@@ -172,28 +172,28 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// When the product is published, is_existing_sku should return true in all cases.
 		$this->assertTrue(
-			$data_store->is_existing_sku( $other_product->get_id(), $test_sku, false ),
-			'is_existing_sku should return true when product is published and check_trashed is false.'
+			$data_store->is_existing_sku( $other_product->get_id(), $test_sku ),
+			'is_existing_sku should return true when product is published and check does not trashed products.'
 		);
 		$this->assertTrue(
-			$data_store->is_existing_sku( $other_product->get_id(), $test_sku, true ),
-			'is_existing_sku should return true when product is published and check_trashed is true.'
+			$data_store->is_existing_sku( $other_product->get_id(), $test_sku, array() ),
+			'is_existing_sku should return true when product is published and check includes trashed products.'
 		);
 
 		// Move the product to trash.
 		$product_with_sku->set_status( 'trash' );
 		$product_with_sku->save();
 
-		// When the product is trashed, is_existing_sku should return false when check_trashed is false.
+		// When the product is trashed, is_existing_sku should return true when check_trashed is true.
 		$this->assertFalse(
-			$data_store->is_existing_sku( $other_product->get_id(), $test_sku, false ),
-			'is_existing_sku should return false when product is trashed and check_trashed is false.'
+			$data_store->is_existing_sku( $other_product->get_id(), $test_sku ),
+			'is_existing_sku should return true when product is trashed and check does not trashed products.'
 		);
 
-		// When the product is trashed, is_existing_sku should return true when check_trashed is true.
+		// When the product is trashed, is_existing_sku should return false when check_trashed is false.
 		$this->assertTrue(
-			$data_store->is_existing_sku( $other_product->get_id(), $test_sku, true ),
-			'is_existing_sku should return true when product is trashed and check_trashed is true.'
+			$data_store->is_existing_sku( $other_product->get_id(), $test_sku, array() ),
+			'is_existing_sku should return true when product is trashed and check includes trashed products.'
 		);
 	}
 

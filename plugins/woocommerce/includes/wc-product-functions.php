@@ -944,10 +944,12 @@ function wc_get_product_types() {
  * @since 2.2
  * @param int    $product_id Product ID.
  * @param string $sku Product SKU.
- * @param bool   $check_trashed Whether to check for trashed products. Defaults to false.
+ * @param array  $excluded_statuses Statuses to exclude from the check. Defaults to array( 'trash' ).
  * @return bool
+ *
+ * @since 10.5.0 Added $excluded_statuses parameter.
  */
-function wc_product_has_unique_sku( $product_id, $sku, $check_trashed = false ) {
+function wc_product_has_unique_sku( $product_id, $sku, $excluded_statuses = array( 'trash' ) ) {
 	/**
 	 * Gives plugins an opportunity to verify SKU uniqueness themselves.
 	 *
@@ -963,7 +965,7 @@ function wc_product_has_unique_sku( $product_id, $sku, $check_trashed = false ) 
 	}
 
 	$data_store = WC_Data_Store::load( 'product' );
-	$sku_found  = $data_store->is_existing_sku( $product_id, $sku, $check_trashed );
+	$sku_found  = $data_store->is_existing_sku( $product_id, $sku, $excluded_statuses );
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;

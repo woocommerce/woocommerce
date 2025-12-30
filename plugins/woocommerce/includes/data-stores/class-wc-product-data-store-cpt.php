@@ -1220,12 +1220,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function is_existing_sku( $product_id, $sku, $excluded_statuses = array( 'trash' ) ) {
 		global $wpdb;
 
-		// Note: this is directly injected into the SQL query. Be mindful if
-		// using it with untrusted data.
-		$excluded_statuses_sql =
-			is_array( $excluded_statuses ) && count( $excluded_statuses ) > 0 ?
-				"AND posts.post_status NOT IN ( '" . implode( "','", sanitize_key( $excluded_statuses ) ) . "' )" :
-				'';
+		$excluded_statuses_sql = '';
+
+		if ( is_array( $excluded_statuses ) && count( $excluded_statuses ) > 0 ) {
+			$valid_statuses    = array_keys( get_post_stati() );
+			$excluded_statuses = array_values( array_map( 'sanitize_key', array_intersect( $excluded_statuses, $valid_statuses ) ) );
+
+			if ( count( $excluded_statuses ) > 0 ) {
+				// Note: this is directly injected into the SQL query. Be mindful
+				// if using it with untrusted data.
+				$excluded_statuses_sql = "AND posts.post_status NOT IN ( '" . implode( "','", $excluded_statuses ) . "' )";
+			}
+		}
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return (bool) $wpdb->get_var(
@@ -1237,7 +1243,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				WHERE
 				posts.post_type IN ( 'product', 'product_variation' )
 				" .
-				// Variables used inside $excluded_statuses_sql are sanitized,
+				// Variables used inside $excluded_statuses_sql are whitelisted,
 				// so it's safe to not pass it as a $wpdb->prepare() variable.
 				$excluded_statuses_sql // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				. '
