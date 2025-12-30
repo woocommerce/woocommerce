@@ -68,7 +68,8 @@ class FilledMiniCartContentsBlockTest extends \WP_UnitTestCase {
 	 * @testdox Should render error notices in data-wp-context when cart has errors.
 	 */
 	public function test_renders_error_notices_in_context_when_cart_has_errors(): void {
-		// WordPress warns about interactivity directives in SVG tags during server-side render.
+		// TODO: Should we hardcode the path? Because server side rendering does not support SVG, we will get a _doing_it_wrong warning,
+		// which WooCommerce should probably not do because it will confuse devs.
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API_Directives_Processor::skip_to_tag_closer' );
 
 		WC()->cart->add_to_cart( $this->products[0]->get_id(), 2 );
