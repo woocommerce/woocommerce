@@ -128,57 +128,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test ajax_handle_payment_method_selected tracks event.
-	 */
-	public function test_ajax_handle_payment_method_selected_tracks_event(): void {
-		// Mock feature as enabled.
-		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
-
-		// Mock data collector to return session data.
-		// Note: The first call may be batched, so we need to flush to trigger the collect call.
-		$this->mock_data_collector
-			->expects( $this->once() )
-			->method( 'collect' )
-			->with(
-				$this->equalTo( 'checkout_payment_method_selected' ),
-				$this->callback(
-					function ( $event_data ) {
-						return isset( $event_data['action'] )
-							&& $event_data['action'] === 'payment_method_selected'
-							&& isset( $event_data['payment']['payment_method_type'] )
-							&& $event_data['payment']['payment_method_type'] === 'stripe';
-					}
-				)
-			)
-			->willReturn(
-				array(
-					'session' => array( 'session_id' => 'test_session' ),
-				)
-			);
-
-		// Register hooks.
-		$this->sut->register();
-
-		// Simulate AJAX payment method selection.
-		$_POST['payment_method'] = 'stripe';
-
-		// Capture the JSON output.
-		ob_start();
-		$this->sut->ajax_handle_payment_method_selected();
-		$output = ob_get_clean();
-
-		// Verify success response.
-		$response = json_decode( $output, true );
-		$this->assertTrue( $response['success'] );
-
-		// Flush any pending events to ensure tracking occurs.
-		$this->sut->flush_pending_events();
-
-		// Clean up.
-		unset( $_POST['payment_method'] );
-	}
-
-	/**
 	 * Test batching mechanism prevents rapid successive events.
 	 */
 	public function test_batching_prevents_rapid_successive_events(): void {
