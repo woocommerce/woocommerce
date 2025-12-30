@@ -944,9 +944,10 @@ function wc_get_product_types() {
  * @since 2.2
  * @param int    $product_id Product ID.
  * @param string $sku Product SKU.
+ * @param bool   $check_trashed Whether to check for trashed products. Defaults to false.
  * @return bool
  */
-function wc_product_has_unique_sku( $product_id, $sku ) {
+function wc_product_has_unique_sku( $product_id, $sku, $check_trashed = false ) {
 	/**
 	 * Gives plugins an opportunity to verify SKU uniqueness themselves.
 	 *
@@ -962,7 +963,7 @@ function wc_product_has_unique_sku( $product_id, $sku ) {
 	}
 
 	$data_store = WC_Data_Store::load( 'product' );
-	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
+	$sku_found  = $data_store->is_existing_sku( $product_id, $sku, $check_trashed );
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
@@ -1046,13 +1047,16 @@ function wc_product_force_unique_sku( $product_id ) {
  * @param  integer $product_id Product ID.
  * @param  string  $sku Product SKU.
  * @param  integer $index An optional index that can be added to the product SKU.
+ * @param  boolean $check_trashed Whether to check for trashed products. Defaults to false.
  * @return string
+ *
+ * @since 10.5.0 Added $check_trashed parameter.
  */
-function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
+function wc_product_generate_unique_sku( $product_id, $sku, $index = 0, $check_trashed = false ) {
 	$generated_sku = 0 < $index ? $sku . '-' . $index : $sku;
 
-	if ( ! wc_product_has_unique_sku( $product_id, $generated_sku ) ) {
-		$generated_sku = wc_product_generate_unique_sku( $product_id, $sku, ( $index + 1 ) );
+	if ( ! wc_product_has_unique_sku( $product_id, $generated_sku, $check_trashed ) ) {
+		$generated_sku = wc_product_generate_unique_sku( $product_id, $sku, ( $index + 1 ), $check_trashed );
 	}
 
 	return $generated_sku;

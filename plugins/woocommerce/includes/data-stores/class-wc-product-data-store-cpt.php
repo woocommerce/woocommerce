@@ -1212,10 +1212,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 * @param int    $product_id Product ID.
 	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
+	 * @param bool   $check_trashed Whether to check for trashed products. Defaults to false.
 	 * @return bool
+	 *
+	 * @since 10.5.0 Added $check_trashed parameter.
 	 */
-	public function is_existing_sku( $product_id, $sku ) {
+	public function is_existing_sku( $product_id, $sku, $check_trashed = false ) {
 		global $wpdb;
+
+		// Note: this is directly injected into the SQL query. Be mindful if
+		// using it with untrusted data.
+		$exclude_trashed_sql = $check_trashed ? '' : "AND posts.post_status != 'trash'";
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return (bool) $wpdb->get_var(
@@ -1226,11 +1233,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 				WHERE
 				posts.post_type IN ( 'product', 'product_variation' )
-				AND posts.post_status != 'trash'
+				" .
+				// This is a hard-coded line without any variables, so it's safe
+				// to not pass it as a $wpdb->prepare() variable.
+				$exclude_trashed_sql // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				. '
 				AND lookup.sku = %s
 				AND lookup.product_id <> %d
 				LIMIT 1
-				",
+				',
 				wp_slash( $sku ),
 				$product_id
 			)
