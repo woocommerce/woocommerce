@@ -35,6 +35,8 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Set up the test environment.
+	 *
+	 * @return void
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -48,6 +50,8 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Tear down the test environment.
+	 *
+	 * @return void
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ) );
@@ -58,15 +62,19 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Mock HTTP calls to PayPal endpoints in tests.
+	 *
+	 * @return array
 	 */
-	public function mock_paypal_http_response() {
+	public function mock_paypal_http_response(): array {
 		return array( 'response' => array( 'code' => 200 ) );
 	}
 
 	/**
 	 * Test process_checkout_order_approved with valid data.
+	 *
+	 * @return void
 	 */
-	public function test_process_checkout_order_approved_with_valid_data() {
+	public function test_process_checkout_order_approved_with_valid_data(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->save();
@@ -113,8 +121,10 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_checkout_order_approved skips already processed orders.
+	 *
+	 * @return void
 	 */
-	public function test_process_checkout_order_approved_skips_already_processed() {
+	public function test_process_checkout_order_approved_skips_already_processed(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
@@ -154,8 +164,10 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_payment_capture_completed with valid data.
+	 *
+	 * @return void
 	 */
-	public function test_process_payment_capture_completed_with_valid_data() {
+	public function test_process_payment_capture_completed_with_valid_data(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->save();
@@ -190,8 +202,10 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_payment_capture_completed skips already processed orders.
+	 *
+	 * @return void
 	 */
-	public function test_process_payment_capture_completed_skips_already_processed() {
+	public function test_process_payment_capture_completed_skips_already_processed(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
@@ -227,8 +241,10 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_payment_authorization_created with valid data.
+	 *
+	 * @return void
 	 */
-	public function test_process_payment_authorization_created_with_valid_data() {
+	public function test_process_payment_authorization_created_with_valid_data(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->save();
@@ -264,8 +280,10 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_payment_authorization_created skips already processed orders.
+	 *
+	 * @return void
 	 */
-	public function test_process_payment_authorization_created_skips_already_processed() {
+	public function test_process_payment_authorization_created_skips_already_processed(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
@@ -307,7 +325,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_get_action_url_scenarios() {
+	public function provider_get_action_url_scenarios(): array {
 		return array(
 			'valid_capture_link'   => array(
 				'links'    => array(
@@ -380,8 +398,9 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 	 * @param array  $links    The links array.
 	 * @param string $action   The action to find.
 	 * @param mixed  $expected The expected result.
+	 * @return void
 	 */
-	public function test_get_action_url_scenarios( $links, $action, $expected ) {
+	public function test_get_action_url_scenarios( array $links, string $action, $expected ): void {
 		// Use reflection to test private method.
 		$reflection = new \ReflectionClass( $this->webhook_handler );
 		$method     = $reflection->getMethod( 'get_action_url' );
