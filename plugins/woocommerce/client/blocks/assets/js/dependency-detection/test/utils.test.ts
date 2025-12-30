@@ -5,7 +5,10 @@ import {
 	isWooCommerceScript,
 	getFilename,
 	shouldSkipLine,
+	detectStackFormat,
 	extractJsUrl,
+	extractJsUrlV8,
+	extractJsUrlSpiderMonkey,
 	parseStackForCallerUrl,
 	getWarningInfo,
 	createWcProxy,
@@ -115,8 +118,124 @@ describe( 'Dependency Detection Utils', () => {
 		} );
 	} );
 
+	describe( 'detectStackFormat', () => {
+		it( 'detects V8 format (Chrome/Edge/Node)', () => {
+			const v8Stack = `Error
+    at getCallerScriptUrl (checkout/:7:3437)
+    at Object.c [as get] (checkout/:7:2171)
+    at bad-extension.js?ver=1.0.0:31:30`;
+
+			expect( detectStackFormat( v8Stack ) ).toBe( 'v8' );
+		} );
+
+		it( 'detects SpiderMonkey format (Firefox/Safari)', () => {
+			const spiderMonkeyStack = `s@https://store.local/checkout/:7:3437
+c@https://store.local/checkout/:7:2171
+@https://store.local/wp-content/plugins/wc-dependency-test/bad-extension.js?ver=1.0.0:31:7`;
+
+			expect( detectStackFormat( spiderMonkeyStack ) ).toBe(
+				'spidermonkey'
+			);
+		} );
+
+		it( 'returns v8 as default for empty or invalid input', () => {
+			expect( detectStackFormat( '' ) ).toBe( 'v8' );
+			expect( detectStackFormat( null as unknown as string ) ).toBe(
+				'v8'
+			);
+		} );
+	} );
+
+	describe( 'extractJsUrlV8', () => {
+		it( 'extracts full URL with protocol', () => {
+			expect(
+				extractJsUrlV8(
+					'    at someFunc (https://example.com/script.js:10:5)'
+				)
+			).toBe( 'https://example.com/script.js' );
+		} );
+
+		it( 'extracts bare filename without protocol', () => {
+			expect( extractJsUrlV8( '    at bad-extension.js:31:30' ) ).toBe(
+				null
+			);
+			// Bare filename needs to be in parentheses for V8 format
+			expect(
+				extractJsUrlV8( '    at someFunc (bad-extension.js:31:30)' )
+			).toBe( 'bad-extension.js' );
+		} );
+
+		it( 'extracts URL with query string', () => {
+			expect(
+				extractJsUrlV8(
+					'    at (https://example.com/script.js?ver=1.0.0:10:5)'
+				)
+			).toBe( 'https://example.com/script.js' );
+		} );
+
+		it( 'returns null for non-.js files', () => {
+			expect( extractJsUrlV8( '    at someFunc (cart/:123:45)' ) ).toBe(
+				null
+			);
+		} );
+	} );
+
+	describe( 'extractJsUrlSpiderMonkey', () => {
+		it( 'extracts URL after @ symbol', () => {
+			expect(
+				extractJsUrlSpiderMonkey(
+					'@https://store.local/wp-content/plugins/test/bad-extension.js?ver=1.0.0:31:7'
+				)
+			).toBe(
+				'https://store.local/wp-content/plugins/test/bad-extension.js'
+			);
+		} );
+
+		it( 'extracts URL with function name prefix', () => {
+			expect(
+				extractJsUrlSpiderMonkey(
+					'someFunc@https://example.com/script.js:10:5'
+				)
+			).toBe( 'https://example.com/script.js' );
+		} );
+
+		it( 'returns null for V8 format lines', () => {
+			expect(
+				extractJsUrlSpiderMonkey(
+					'    at someFunc (https://example.com/script.js:10:5)'
+				)
+			).toBe( null );
+		} );
+
+		it( 'returns null for non-.js files', () => {
+			expect(
+				extractJsUrlSpiderMonkey(
+					's@https://store.local/checkout/:7:3437'
+				)
+			).toBe( null );
+		} );
+	} );
+
 	describe( 'extractJsUrl', () => {
-		it( 'extracts URL from stack line with line numbers', () => {
+		it( 'extracts V8 format URL with explicit format', () => {
+			expect(
+				extractJsUrl(
+					'    at someFunc (https://example.com/script.js:10:5)',
+					'v8'
+				)
+			).toBe( 'https://example.com/script.js' );
+		} );
+
+		it( 'extracts SpiderMonkey format URL with explicit format', () => {
+			expect(
+				extractJsUrl(
+					'someFunc@https://example.com/script.js:10:5',
+					'spidermonkey'
+				)
+			).toBe( 'https://example.com/script.js' );
+		} );
+
+		it( 'defaults to V8 format when no format specified', () => {
 			expect(
 				extractJsUrl(
 					'    at someFunc (https://example.com/script.js:10:5)'
@@ -127,30 +246,56 @@ describe( 'Dependency Detection Utils', () => {
 		it( 'extracts URL with query string', () => {
 			expect(
 				extractJsUrl(
-					'    at someFunc (https://example.com/script.js?ver=1.0:10:5)'
+					'    at someFunc (https://example.com/script.js?ver=1.0:10:5)',
+					'v8'
+				)
+			).toBe( 'https://example.com/script.js' );
+			expect(
+				extractJsUrl(
+					'@https://example.com/script.js?ver=1.0:10:5',
+					'spidermonkey'
 				)
 			).toBe( 'https://example.com/script.js' );
 		} );
 
 		it( 'returns null for lines without .js URLs', () => {
-			expect( extractJsUrl( '    at someFunc (cart/:123:45)' ) ).toBe(
-				null
-			);
-			expect( extractJsUrl( 'Error: test error' ) ).toBe( null );
+			expect(
+				extractJsUrl( '    at someFunc (cart/:123:45)', 'v8' )
+			).toBe( null );
+			expect( extractJsUrl( 'Error: test error', 'v8' ) ).toBe( null );
+			expect(
+				extractJsUrl(
+					's@https://store.local/checkout/:7:3437',
+					'spidermonkey'
+				)
+			).toBe( null );
 		} );
 
 		it( 'handles http URLs', () => {
 			expect(
 				extractJsUrl(
-					'    at someFunc (http://localhost/script.js:10:5)'
+					'    at someFunc (http://localhost/script.js:10:5)',
+					'v8'
+				)
+			).toBe( 'http://localhost/script.js' );
+			expect(
+				extractJsUrl(
+					'someFunc@http://localhost/script.js:10:5',
+					'spidermonkey'
 				)
 			).toBe( 'http://localhost/script.js' );
 		} );
 
 		it( 'returns null for non-string input', () => {
-			expect( extractJsUrl( 123 as unknown as string ) ).toBe( null );
-			expect( extractJsUrl( null as unknown as string ) ).toBe( null );
-			expect( extractJsUrl( {} as unknown as string ) ).toBe( null );
+			expect( extractJsUrl( 123 as unknown as string, 'v8' ) ).toBe(
+				null
+			);
+			expect( extractJsUrl( null as unknown as string, 'v8' ) ).toBe(
+				null
+			);
+			expect( extractJsUrl( {} as unknown as string, 'v8' ) ).toBe(
+				null
+			);
 		} );
 	} );
 
@@ -189,7 +334,7 @@ describe( 'Dependency Detection Utils', () => {
 			expect( parseStackForCallerUrl( stack, '/cart/' ) ).toBe( null );
 		} );
 
-		it( 'handles real-world stack trace', () => {
+		it( 'handles real-world V8 stack trace with bare filenames', () => {
 			const stack = `Error
     at getCallerScriptUrl (cart/:141:17)
     at Object.__wcProxyGet [as get] (cart/:286:23)
@@ -201,8 +346,11 @@ describe( 'Dependency Detection Utils', () => {
     at async updatePaymentMethods (update-payment-methods.ts:24:2)
     at async index.ts:126:28`;
 
-			// No https:// URLs in this stack, so should return null
-			expect( parseStackForCallerUrl( stack, '/cart/' ) ).toBe( null );
+			// V8 format can include bare filenames without protocol.
+			// First .js file after skipping cart/ lines should be found.
+			expect( parseStackForCallerUrl( stack, '/cart/' ) ).toBe(
+				'utils.js'
+			);
 		} );
 
 		it( 'handles stack with versioned script URLs', () => {
@@ -213,6 +361,17 @@ describe( 'Dependency Detection Utils', () => {
 
 			expect( parseStackForCallerUrl( stack, '/cart/' ) ).toBe(
 				'https://example.com/wp-content/plugins/extension/index.js'
+			);
+		} );
+
+		it( 'handles SpiderMonkey format stack trace (Firefox/Safari)', () => {
+			const stack = `s@https://store.local/checkout/:7:3437
+c@https://store.local/checkout/:7:2171
+@https://store.local/wp-content/plugins/wc-dependency-test/bad-extension.js?ver=1.0.0:31:7
+setTimeout handler*@https://store.local/wp-content/plugins/wc-dependency-test/bad-extension.js?ver=1.0.0:29:11`;
+
+			expect( parseStackForCallerUrl( stack, '/checkout/' ) ).toBe(
+				'https://store.local/wp-content/plugins/wc-dependency-test/bad-extension.js'
 			);
 		} );
 	} );

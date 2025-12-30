@@ -131,21 +131,120 @@ export function shouldSkipLine( line: string, currentPage: string ): boolean {
 }
 
 /**
- * Extract a .js URL from a stack trace line.
+ * Stack trace format types.
+ * - 'v8': Chrome, Edge, Node.js - format: "at funcName (url:line:col)" with "Error" header
+ * - 'spidermonkey': Firefox (SpiderMonkey), Safari (JavaScriptCore) - format: "funcName@url:line:col" without header
+ */
+export type StackFormatType = 'v8' | 'spidermonkey';
+
+/**
+ * Detect the stack trace format type from a stack string.
+ *
+ * V8 (Chrome/Edge/Node): Lines contain "at " followed by function name and URL in parentheses.
+ * SpiderMonkey (Firefox/Safari): Lines contain "@" between function name and URL.
+ *
+ * @param stack - The stack trace string.
+ * @return The detected format type, defaults to 'v8' if unknown.
+ */
+export function detectStackFormat( stack: string ): StackFormatType {
+	if ( ! stack || typeof stack !== 'string' ) {
+		return 'v8';
+	}
+
+	// SpiderMonkey format: lines have "@" before the URL (e.g., "funcName@https://...")
+	// V8 format: lines have "at " prefix (e.g., "at funcName (https://...)")
+	const lines = stack.split( '\n' );
+
+	// Start from line 0 because SpiderMonkey stacks may not have an "Error" header.
+	for ( let i = 0; i < lines.length; i++ ) {
+		const line = lines[ i ];
+
+		// SpiderMonkey: "@https://" or "@http://" pattern
+		if ( /@https?:\/\//.test( line ) ) {
+			return 'spidermonkey';
+		}
+
+		// V8: "at " prefix pattern
+		if ( /^\s*at\s/.test( line ) ) {
+			return 'v8';
+		}
+	}
+
+	return 'v8';
+}
+
+/**
+ * Extract a .js URL from a V8-format stack trace line (Chrome/Edge/Node).
+ *
+ * V8 format examples:
+ * - "at funcName (https://example.com/script.js:10:5)" - full URL
+ * - "at funcName (script.js:10:5)" - relative/bare filename
  *
  * @param line - A single line from the stack trace.
  * @return The extracted URL or null.
  */
-export function extractJsUrl( line = '' ): string | null {
+export function extractJsUrlV8( line = '' ): string | null {
 	if ( typeof line !== 'string' ) {
 		return null;
 	}
-	const match = line.match( /(https?:\/\/[^\s)]+\.js)(?:[?:#]|$)/ );
+	// First try to match full URL with protocol
+	const fullUrlMatch = line.match( /(https?:\/\/[^\s)]+?\.js)(?:[?:#]|$)/ );
+	if ( fullUrlMatch ) {
+		return fullUrlMatch[ 1 ];
+	}
+
+	// Fall back to bare filename (e.g., "script.js" without protocol).
+	// Match inside parentheses: ( followed by path ending in .js
+	const bareMatch = line.match( /\(([^()\s]+\.js)(?:[?:#]|$)/ );
+	return bareMatch ? bareMatch[ 1 ] : null;
+}
+
+/**
+ * Extract a .js URL from a SpiderMonkey-format stack trace line (Firefox/Safari).
+ *
+ * SpiderMonkey format: "funcName@https://example.com/script.js:10:7"
+ * The URL comes after "@", followed by line:col.
+ *
+ * @param line - A single line from the stack trace.
+ * @return The extracted URL or null.
+ */
+export function extractJsUrlSpiderMonkey( line = '' ): string | null {
+	if ( typeof line !== 'string' ) {
+		return null;
+	}
+	// Match URL after "@", ending with .js before query/hash/line number.
+	// Use non-greedy match [^\s]+? to stop at first .js occurrence.
+	const match = line.match( /@(https?:\/\/[^\s]+?\.js)(?:[?:#]|$)/ );
 	return match ? match[ 1 ] : null;
 }
 
 /**
+ * Extract a .js URL from a stack trace line using the specified format.
+ *
+ * @param line   - A single line from the stack trace.
+ * @param format - The stack format type to use for extraction.
+ * @return The extracted URL or null.
+ */
+export function extractJsUrl(
+	line = '',
+	format: StackFormatType = 'v8'
+): string | null {
+	if ( typeof line !== 'string' ) {
+		return null;
+	}
+
+	if ( format === 'spidermonkey' ) {
+		return extractJsUrlSpiderMonkey( line );
+	}
+
+	return extractJsUrlV8( line );
+}
+
+/**
  * Parse an error stack trace to find the calling script URL.
+ *
+ * Detects the stack format (V8 vs SpiderMonkey) once and uses
+ * the appropriate extractor for all lines.
  *
  * @param stack       - The error stack trace.
  * @param currentPage - The current page pathname.
@@ -159,16 +258,22 @@ export function parseStackForCallerUrl(
 		return null;
 	}
 
+	// Detect format once for the entire stack.
+	const format = detectStackFormat( stack );
 	const lines = stack.split( '\n' );
 
-	for ( let i = 1; i < lines.length; i++ ) {
+	// V8 stacks have "Error" as line 0, so start at 1.
+	// SpiderMonkey stacks start directly with frames, so start at 0.
+	const startLine = format === 'v8' ? 1 : 0;
+
+	for ( let i = startLine; i < lines.length; i++ ) {
 		const line = lines[ i ];
 
 		// Skip internal lines (our script, webpack).
 		if ( shouldSkipLine( line, currentPage ) ) continue;
 
 		// Found an external URL - return it.
-		const url = extractJsUrl( line );
+		const url = extractJsUrl( line, format );
 		if ( url ) {
 			return url;
 		}
