@@ -230,8 +230,8 @@ class WebhookHandler {
 	 * @since 10.5.0
 	 *
 	 * @param \WC_Order $order The order object.
-	 * @param array    $links The links from the webhook event.
-	 * @param string   $action The action to perform (capture or authorize).
+	 * @param array     $links The links from the webhook event.
+	 * @param string    $action The action to perform (capture or authorize).
 	 * @return void
 	 */
 	private function authorize_or_capture_payment( $order, $links, $action ): void {
