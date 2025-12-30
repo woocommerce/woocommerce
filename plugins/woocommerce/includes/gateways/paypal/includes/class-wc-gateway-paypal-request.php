@@ -798,7 +798,7 @@ class WC_Gateway_Paypal_Request {
 
 			$quantity = $item->get_quantity();
 			// PayPal does not accept zero or fractional quantities.
-			if ( 0 === $quantity || floor( $quantity ) != $quantity ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
+			if ( ! is_numeric( $quantity ) || $quantity <= 0 || floor( $quantity ) != $quantity ) { // phpcs:ignore Universal.Operators.StrictComparisons.LooseNotEqual
 				return array();
 			}
 
