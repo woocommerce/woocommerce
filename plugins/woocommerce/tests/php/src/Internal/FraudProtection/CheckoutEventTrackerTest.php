@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
@@ -26,11 +26,11 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Mock session data collector.
+	 * Mock fraud protection tracker.
 	 *
-	 * @var SessionDataCollector|\PHPUnit\Framework\MockObject\MockObject
+	 * @var FraudProtectionTracker|\PHPUnit\Framework\MockObject\MockObject
 	 */
-	private $mock_data_collector;
+	private $mock_tracker;
 
 	/**
 	 * Mock fraud protection controller.
@@ -51,13 +51,13 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_data_collector = $this->createMock( SessionDataCollector::class );
-		$this->mock_controller     = $this->createMock( FraudProtectionController::class );
+		$this->mock_tracker    = $this->createMock( FraudProtectionTracker::class );
+		$this->mock_controller = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
 		$this->sut = new CheckoutEventTracker();
 		$this->sut->init(
-			$this->mock_data_collector,
+			$this->mock_tracker,
 			$this->mock_controller
 		);
 	}
@@ -103,10 +103,10 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
-		// Mock data collector to return session data.
-		$this->mock_data_collector
+		// Mock tracker to verify track_event is called.
+		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'collect' )
+			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'checkout_field_update' ),
 				$this->callback(
@@ -116,11 +116,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 							&& isset( $event_data['billing_email'] )
 							&& $event_data['billing_email'] === 'test@example.com';
 					}
-				)
-			)
-			->willReturn(
-				array(
-					'session' => array( 'session_id' => 'test_session' ),
 				)
 			);
 
@@ -192,14 +187,9 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// When session is not available, batching may not work as expected.
 		// This test verifies that at least one event is tracked.
-		$this->mock_data_collector
+		$this->mock_tracker
 			->expects( $this->atLeastOnce() )
-			->method( 'collect' )
-			->willReturn(
-				array(
-					'session' => array( 'session_id' => 'test_session' ),
-				)
-			);
+			->method( 'track_event' );
 
 		// Register hooks.
 		$this->sut->register();
@@ -241,10 +231,10 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 						)
 					);
 
-		// Mock data collector to return session data.
-		$this->mock_data_collector
+		// Mock tracker to verify track_event is called.
+		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'collect' )
+			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'checkout_store_api_update' ),
 				$this->callback(
@@ -254,11 +244,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 							&& isset( $event_data['email'] )
 							&& $event_data['email'] === 'store-api@example.com';
 					}
-				)
-			)
-			->willReturn(
-				array(
-					'session' => array( 'session_id' => 'test_session' ),
 				)
 			);
 
@@ -279,10 +264,10 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
-		// Mock data collector to return session data.
-		$this->mock_data_collector
+		// Mock tracker to verify track_event is called.
+		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'collect' )
+			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'checkout_field_update' ),
 				$this->callback(
@@ -293,11 +278,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 							&& is_array( $event_data['shipping_methods'] )
 							&& count( $event_data['shipping_methods'] ) > 0;
 					}
-				)
-			)
-			->willReturn(
-				array(
-					'session' => array( 'session_id' => 'test_session' ),
 				)
 			);
 

@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
@@ -26,11 +26,11 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Mock session data collector.
+	 * Mock fraud protection tracker.
 	 *
-	 * @var SessionDataCollector|\PHPUnit\Framework\MockObject\MockObject
+	 * @var FraudProtectionTracker|\PHPUnit\Framework\MockObject\MockObject
 	 */
-	private $mock_data_collector;
+	private $mock_tracker;
 
 	/**
 	 * Mock fraud protection controller.
@@ -58,13 +58,13 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_data_collector = $this->createMock( SessionDataCollector::class );
-		$this->mock_controller     = $this->createMock( FraudProtectionController::class );
+		$this->mock_tracker    = $this->createMock( FraudProtectionTracker::class );
+		$this->mock_controller = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
 		$this->sut = new CartEventTracker();
 		$this->sut->init(
-			$this->mock_data_collector,
+			$this->mock_tracker,
 			$this->mock_controller
 		);
 
@@ -110,13 +110,13 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handle_track_cart_item_added collects and logs event data.
+	 * Test handle_track_cart_item_added tracks event.
 	 */
 	public function test_handle_track_cart_item_added_tracks_event(): void {
-		// Mock the data collector to return test data.
-		$this->mock_data_collector
+		// Mock the tracker to verify track_event is called.
+		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'collect' )
+			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'cart_item_added' ),
 				$this->callback(
@@ -128,12 +128,6 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 							&& isset( $event_data['cart_item_count'] )
 							&& is_numeric( $event_data['cart_item_count'] );
 					}
-				)
-			)
-			->willReturn(
-				array(
-					'event_type' => 'cart_item_added',
-					'session'    => array( 'session_id' => 'test-session' ),
 				)
 			);
 
@@ -149,16 +143,16 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handle_track_cart_item_updated collects event data.
+	 * Test handle_track_cart_item_updated tracks event.
 	 */
 	public function test_handle_track_cart_item_updated_tracks_event(): void {
 		// Add item to cart first.
 		$cart_item_key = WC()->cart->add_to_cart( $this->test_product->get_id(), 1 );
 
-		// Mock the data collector.
-		$this->mock_data_collector
+		// Mock the tracker.
+		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'collect' )
+			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'cart_item_updated' ),
 				$this->callback(
@@ -167,12 +161,6 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 							&& 'item_updated' === $event_data['action']
 							&& isset( $event_data['old_quantity'] );
 					}
-				)
-			)
-			->willReturn(
-				array(
-					'event_type' => 'cart_item_updated',
-					'session'    => array( 'session_id' => 'test-session' ),
 				)
 			);
 
@@ -186,16 +174,16 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handle_track_cart_item_removed collects event data.
+	 * Test handle_track_cart_item_removed tracks event.
 	 */
 	public function test_handle_track_cart_item_removed_tracks_event(): void {
 		// Add item to cart.
 		$cart_item_key = WC()->cart->add_to_cart( $this->test_product->get_id(), 1 );
 
-		// Mock the data collector.
-		$this->mock_data_collector
+		// Mock the tracker.
+		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'collect' )
+			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'cart_item_removed' ),
 				$this->callback(
@@ -203,12 +191,6 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 						return isset( $event_data['action'] )
 							&& 'item_removed' === $event_data['action'];
 					}
-				)
-			)
-			->willReturn(
-				array(
-					'event_type' => 'cart_item_removed',
-					'session'    => array( 'session_id' => 'test-session' ),
 				)
 			);
 
@@ -220,16 +202,16 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handle_track_cart_item_restored collects event data.
+	 * Test handle_track_cart_item_restored tracks event.
 	 */
 	public function test_handle_track_cart_item_restored_tracks_event(): void {
 		// Add item to cart.
 		$cart_item_key = WC()->cart->add_to_cart( $this->test_product->get_id(), 1 );
 
-		// Mock the data collector.
-		$this->mock_data_collector
+		// Mock the tracker.
+		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'collect' )
+			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'cart_item_restored' ),
 				$this->callback(
@@ -237,12 +219,6 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 						return isset( $event_data['action'] )
 							&& 'item_restored' === $event_data['action'];
 					}
-				)
-			)
-			->willReturn(
-				array(
-					'event_type' => 'cart_item_restored',
-					'session'    => array( 'session_id' => 'test-session' ),
 				)
 			);
 
@@ -262,10 +238,10 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 		$variations       = $variable_product->get_available_variations();
 		$variation_id     = $variations[0]['variation_id'];
 
-		// Mock the data collector to capture event data.
-		$this->mock_data_collector
+		// Mock the tracker to capture event data.
+		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'collect' )
+			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'cart_item_added' ),
 				$this->callback(
@@ -274,8 +250,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 							&& $variation_id === $event_data['variation_id'];
 					}
 				)
-			)
-			->willReturn( array() );
+			);
 
 		// Call the handler with variation ID.
 		$this->sut->handle_track_cart_item_added(
