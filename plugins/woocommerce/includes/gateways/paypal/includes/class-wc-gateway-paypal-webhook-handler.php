@@ -48,6 +48,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * Process the webhook event.
 	 *
 	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return void
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
 		$this->webhook_handler->process_webhook( $request );

@@ -31,8 +31,9 @@ class WebhookHandler {
 	 * @since 10.5.0
 	 *
 	 * @param \WP_REST_Request $request The request object.
+	 * @return void
 	 */
-	public function process_webhook( \WP_REST_Request $request ) {
+	public function process_webhook( \WP_REST_Request $request ): void {
 		$data = $request->get_json_params();
 		if ( ! is_array( $data ) || empty( $data['event_type'] ) || empty( $data['resource'] ) ) {
 			\WC_Gateway_Paypal::log( 'Invalid PayPal webhook payload: ' . wc_print_r( $data, true ) );
@@ -66,8 +67,9 @@ class WebhookHandler {
 	 * @since 10.5.0
 	 *
 	 * @param array $event The webhook event data.
+	 * @return void
 	 */
-	private function process_checkout_order_approved( $event ) {
+	private function process_checkout_order_approved( $event ): void {
 		$custom_id = $event['resource']['purchase_units'][0]['custom_id'] ?? '';
 		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
@@ -123,8 +125,9 @@ class WebhookHandler {
 	 * @since 10.5.0
 	 *
 	 * @param array $event The webhook event data.
+	 * @return void
 	 */
-	private function process_payment_capture_completed( $event ) {
+	private function process_payment_capture_completed( $event ): void {
 		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
@@ -159,8 +162,9 @@ class WebhookHandler {
 	 * @since 10.5.0
 	 *
 	 * @param array $event The webhook event data.
+	 * @return void
 	 */
-	private function process_payment_capture_pending( $event ) {
+	private function process_payment_capture_pending( $event ): void {
 		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
@@ -190,8 +194,9 @@ class WebhookHandler {
 	 * @since 10.5.0
 	 *
 	 * @param array $event The webhook event data.
+	 * @return void
 	 */
-	private function process_payment_authorization_created( $event ) {
+	private function process_payment_authorization_created( $event ): void {
 		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
@@ -224,12 +229,12 @@ class WebhookHandler {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param WC_Order $order The order object.
+	 * @param \WC_Order $order The order object.
 	 * @param array    $links The links from the webhook event.
 	 * @param string   $action The action to perform (capture or authorize).
 	 * @return void
 	 */
-	private function authorize_or_capture_payment( $order, $links, $action ) {
+	private function authorize_or_capture_payment( $order, $links, $action ): void {
 		$action_url = $this->get_action_url( $links, $action );
 
 		$payment_gateways = WC()->payment_gateways()->payment_gateways();
@@ -251,7 +256,7 @@ class WebhookHandler {
 	 * @param string $action The action to perform (capture or authorize).
 	 * @return string|null
 	 */
-	private function get_action_url( $links, $action ) {
+	private function get_action_url( $links, $action ): ?string {
 		$action_url = null;
 		foreach ( $links as $link ) {
 			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
