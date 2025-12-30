@@ -109,15 +109,20 @@ class SessionDataCollectorPaymentExtensionTest extends WC_Unit_Test_Case {
 		WC()->session->set( 'chosen_payment_method', 'test_gateway' );
 
 		// Add a filter to modify payment data.
-		add_filter( 'woocommerce_fraud_protection_payment_data', function( $payment_data, $chosen_payment_method, $data_collector ) {
-			$this->assertEquals( 'test_gateway', $chosen_payment_method );
-			$this->assertInstanceOf( SessionDataCollector::class, $data_collector );
+		add_filter(
+			'woocommerce_fraud_protection_payment_data',
+			function ( $payment_data, $chosen_payment_method, $data_collector ) {
+				$this->assertEquals( 'test_gateway', $chosen_payment_method );
+				$this->assertInstanceOf( SessionDataCollector::class, $data_collector );
 
-			$payment_data['payment_gateway_name'] = 'Test Gateway';
-			$payment_data['card_brand']           = 'visa';
+				$payment_data['payment_gateway_name'] = 'Test Gateway';
+				$payment_data['card_brand']           = 'visa';
 
-			return $payment_data;
-		}, 10, 3 );
+				return $payment_data;
+			},
+			10,
+			3
+		);
 
 		$data         = $this->collector->collect();
 		$payment_data = $data['payment'];
@@ -134,21 +139,26 @@ class SessionDataCollectorPaymentExtensionTest extends WC_Unit_Test_Case {
 		WC()->session->set( 'chosen_payment_method', 'stripe' );
 
 		// Add a gateway-specific filter.
-		add_filter( 'woocommerce_fraud_protection_payment_data_stripe', function( $payment_data, $data_collector ) {
-			$this->assertInstanceOf( SessionDataCollector::class, $data_collector );
+		add_filter(
+			'woocommerce_fraud_protection_payment_data_stripe',
+			function ( $payment_data, $data_collector ) {
+				$this->assertInstanceOf( SessionDataCollector::class, $data_collector );
 
-			$payment_data['payment_gateway_name']      = 'Stripe';
-			$payment_data['payment_method_type']       = 'card';
-			$payment_data['card_bin']                  = '424242';
-			$payment_data['card_last4']                = '4242';
-			$payment_data['card_brand']                = 'visa';
-			$payment_data['outcome']                   = 'authorized';
-			$payment_data['avs_result']                = 'Y';
-			$payment_data['cvc_result']                = 'pass';
-			$payment_data['tokenized_card_identifier'] = 'pm_abc123';
+				$payment_data['payment_gateway_name']      = 'Stripe';
+				$payment_data['payment_method_type']       = 'card';
+				$payment_data['card_bin']                  = '424242';
+				$payment_data['card_last4']                = '4242';
+				$payment_data['card_brand']                = 'visa';
+				$payment_data['outcome']                   = 'authorized';
+				$payment_data['avs_result']                = 'Y';
+				$payment_data['cvc_result']                = 'pass';
+				$payment_data['tokenized_card_identifier'] = 'pm_abc123';
 
-			return $payment_data;
-		}, 10, 2 );
+				return $payment_data;
+			},
+			10,
+			2
+		);
 
 		$data         = $this->collector->collect();
 		$payment_data = $data['payment'];
@@ -175,10 +185,15 @@ class SessionDataCollectorPaymentExtensionTest extends WC_Unit_Test_Case {
 		// Simulate POST data from checkout.
 		$_POST['payment_method'] = 'stripe';
 
-		add_filter( 'woocommerce_fraud_protection_payment_data_stripe', function( $payment_data ) {
-			$payment_data['payment_gateway_name'] = 'Stripe';
-			return $payment_data;
-		}, 10, 2 );
+		add_filter(
+			'woocommerce_fraud_protection_payment_data_stripe',
+			function ( $payment_data ) {
+				$payment_data['payment_gateway_name'] = 'Stripe';
+				return $payment_data;
+			},
+			10,
+			2
+		);
 
 		$data         = $this->collector->collect();
 		$payment_data = $data['payment'];
