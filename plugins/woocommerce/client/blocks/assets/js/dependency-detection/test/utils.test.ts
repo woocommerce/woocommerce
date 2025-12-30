@@ -146,6 +146,12 @@ describe( 'Dependency Detection Utils', () => {
 				)
 			).toBe( 'http://localhost/script.js' );
 		} );
+
+		it( 'returns null for non-string input', () => {
+			expect( extractJsUrl( 123 as unknown as string ) ).toBe( null );
+			expect( extractJsUrl( null as unknown as string ) ).toBe( null );
+			expect( extractJsUrl( {} as unknown as string ) ).toBe( null );
+		} );
 	} );
 
 	describe( 'parseStackForCallerUrl', () => {

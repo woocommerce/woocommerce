@@ -119,7 +119,10 @@ export function shouldSkipLine( line: string, currentPage: string ): boolean {
  * @param line - A single line from the stack trace.
  * @return The extracted URL or null.
  */
-export function extractJsUrl( line: string ): string | null {
+export function extractJsUrl( line = '' ): string | null {
+	if ( typeof line !== 'string' ) {
+		return null;
+	}
 	const match = line.match( /(https?:\/\/[^\s)]+\.js)(?:[?:#]|$)/ );
 	return match ? match[ 1 ] : null;
 }
