@@ -25,11 +25,11 @@ defined( 'ABSPATH' ) || exit;
 class CartEventTracker implements RegisterHooksInterface {
 
 	/**
-	 * Session data collector instance.
+	 * Fraud protection tracker instance.
 	 *
-	 * @var SessionDataCollector
+	 * @var FraudProtectionTracker
 	 */
-	private SessionDataCollector $data_collector;
+	private FraudProtectionTracker $tracker;
 
 	/**
 	 * Fraud protection controller instance.
@@ -43,14 +43,14 @@ class CartEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param SessionDataCollector      $data_collector              The session data collector instance.
+	 * @param FraudProtectionTracker    $tracker                     The fraud protection tracker instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		SessionDataCollector $data_collector,
+		FraudProtectionTracker $tracker,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->data_collector              = $data_collector;
+		$this->tracker                     = $tracker;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
@@ -97,7 +97,7 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->track_event( 'cart_item_added', $event_data );
+		$this->tracker->track_event( 'cart_item_added', $event_data );
 	}
 
 	/**
@@ -133,7 +133,7 @@ class CartEventTracker implements RegisterHooksInterface {
 		// Add old quantity for context.
 		$event_data['old_quantity'] = (int) $old_quantity;
 
-		$this->track_event( 'cart_item_updated', $event_data );
+		$this->tracker->track_event( 'cart_item_updated', $event_data );
 	}
 
 	/**
@@ -165,7 +165,7 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->track_event( 'cart_item_removed', $event_data );
+		$this->tracker->track_event( 'cart_item_removed', $event_data );
 	}
 
 	/**
@@ -197,7 +197,7 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->track_event( 'cart_item_restored', $event_data );
+		$this->tracker->track_event( 'cart_item_restored', $event_data );
 	}
 
 	/**
@@ -230,60 +230,4 @@ class CartEventTracker implements RegisterHooksInterface {
 		);
 	}
 
-	/**
-	 * Track fraud protection event with comprehensive session context.
-	 *
-	 * This method orchestrates the event tracking by:
-	 * 1. Collecting comprehensive session data via SessionDataCollector
-	 * 2. Merging with event-specific data
-	 * 3. Logging the event (will call EventTracker/API client once available)
-	 *
-	 * The method implements graceful degradation - any errors during tracking
-	 * will be logged but will not break the cart functionality.
-	 *
-	 * @param string $event_type          Event type identifier (e.g., 'cart_item_added').
-	 * @param array  $event_specific_data Event-specific data to merge with session context.
-	 * @return void
-	 */
-	private function track_event( string $event_type, array $event_specific_data ): void {
-		try {
-			// Collect comprehensive session data.
-			$session_data = $this->data_collector->collect( $event_type, $event_specific_data );
-
-			// Once EventTracker/API client is implemented (WOOSUBS-1249), call it here:
-			// $event_tracker = wc_get_container()->get( EventTracker::class );
-			// $event_tracker->track( $event_type, $session_data );
-			//
-			// For now, log the event for debugging and verification.
-			FraudProtectionController::log(
-				'info',
-				sprintf(
-					'Fraud protection event tracked: %s | Product ID: %s | Quantity: %s | Session ID: %s',
-					$event_type,
-					$event_specific_data['product_id'] ?? 'N/A',
-					$event_specific_data['quantity'] ?? 'N/A',
-					$session_data['session']['session_id'] ?? 'N/A'
-				),
-				array(
-					'event_type'   => $event_type,
-					'event_data'   => $event_specific_data,
-					'session_data' => $session_data,
-				)
-			);
-		} catch ( \Exception $e ) {
-			// Gracefully handle errors - fraud protection should never break the cart.
-			FraudProtectionController::log(
-				'error',
-				sprintf(
-					'Failed to track fraud protection event: %s | Error: %s',
-					$event_type,
-					$e->getMessage()
-				),
-				array(
-					'event_type' => $event_type,
-					'exception'  => $e,
-				)
-			);
-		}
-	}
 }
