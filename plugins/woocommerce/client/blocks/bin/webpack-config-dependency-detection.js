@@ -23,7 +23,7 @@ const BABEL_CACHE_DIR = path.join(
 
 module.exports = {
 	entry: {
-		'dependency-detection': './assets/js/dependency-detection/index.js',
+		'dependency-detection': './assets/js/dependency-detection/index.ts',
 	},
 	output: {
 		path: BUILD_DIR,
@@ -35,7 +35,7 @@ module.exports = {
 	module: {
 		rules: [
 			{
-				test: /\.js$/,
+				test: /\.[jt]s$/,
 				exclude: /node_modules/,
 				use: {
 					loader: 'babel-loader',
@@ -52,6 +52,7 @@ module.exports = {
 									},
 								},
 							],
+							'@babel/preset-typescript',
 						],
 						cacheDirectory: BABEL_CACHE_DIR,
 						cacheCompression: false,
@@ -98,6 +99,6 @@ module.exports = {
 	// No externals - this is a standalone script.
 	externals: {},
 	resolve: {
-		extensions: [ '.js' ],
+		extensions: [ '.ts', '.js' ],
 	},
 };
