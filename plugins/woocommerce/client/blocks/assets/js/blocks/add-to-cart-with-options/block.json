@@ -7,11 +7,15 @@
 		"isDescendantOfAddToCartWithOptions": {
 			"type": "boolean",
 			"default": true
+		},
+		"lazyLoadVariations": {
+			"type": "boolean"
 		}
 	},
-	"usesContext": [ "postId" ],
+	"usesContext": [ "postId", "woocommerce/lazyLoadVariations" ],
 	"providesContext": {
-		"woocommerce/isDescendantOfAddToCartWithOptions": "isDescendantOfAddToCartWithOptions"
+		"woocommerce/isDescendantOfAddToCartWithOptions": "isDescendantOfAddToCartWithOptions",
+		"woocommerce/lazyLoadVariations": "lazyLoadVariations"
 	},
 	"textdomain": "woocommerce",
 	"supports": {

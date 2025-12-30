@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
+use WP_Block;
 
 /**
  * VariationDescription class.
@@ -20,13 +22,22 @@ class VariationDescription extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-description';
 
 	/**
+	 * Register the context.
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'postId', 'woocommerce/lazyLoadVariations' ];
+	}
+
+	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
+	 * Checks block context first, then falls back to site-level option.
+	 *
+	 * @param WP_Block $block The block instance.
 	 * @return bool
 	 */
-	protected function is_lazy_load_enabled(): bool {
-		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
-		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	protected function is_lazy_load_enabled( WP_Block $block ): bool {
+		return VariationDataUtils::is_enabled( $block );
 	}
 
 
@@ -46,7 +57,7 @@ class VariationDescription extends AbstractBlock {
 			return '';
 		}
 
-		if ( $this->is_lazy_load_enabled() ) {
+		if ( $this->is_lazy_load_enabled( $block ) ) {
 			wp_interactivity_config(
 				'woocommerce',
 				array(

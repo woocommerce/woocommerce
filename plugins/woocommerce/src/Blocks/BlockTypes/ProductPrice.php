@@ -2,7 +2,9 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * ProductPrice class.
@@ -49,27 +51,19 @@ class ProductPrice extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId' ];
+		return [ 'query', 'queryId', 'postId', 'woocommerce/lazyLoadVariations' ];
 	}
 
 	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
+	 * Checks block context first, then falls back to site-level option.
+	 *
+	 * @param WP_Block $block The block instance.
 	 * @return bool
 	 */
-	protected function is_lazy_load_enabled(): bool {
-		/**
-		 * Filter to enable/disable lazy loading of variation data.
-		 *
-		 * When enabled, variation data (prices, stock, SKU, etc.) is fetched via
-		 * the Store API on demand instead of being pre-rendered for all variations
-		 * on page load. This can significantly improve performance for products
-		 * with many variations.
-		 *
-		 * @since 9.8.0
-		 * @param bool $enabled Whether lazy loading is enabled. Default true.
-		 */
-		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	protected function is_lazy_load_enabled( WP_Block $block ): bool {
+		return VariationDataUtils::is_enabled( $block );
 	}
 
 	/**
@@ -117,7 +111,7 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
-				$use_lazy_load = $this->is_lazy_load_enabled();
+				$use_lazy_load = $this->is_lazy_load_enabled( $block );
 
 				if ( $use_lazy_load ) {
 					// Lazy load mode: Only check if prices vary, don't pre-load variation data.

@@ -1,9 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * ProductStockIndicator class.
@@ -39,7 +41,7 @@ class ProductStockIndicator extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId' ];
+		return [ 'query', 'queryId', 'postId', 'woocommerce/lazyLoadVariations' ];
 	}
 
 	/**
@@ -54,11 +56,13 @@ class ProductStockIndicator extends AbstractBlock {
 	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
+	 * Checks block context first, then falls back to site-level option.
+	 *
+	 * @param WP_Block $block The block instance.
 	 * @return bool
 	 */
-	protected function is_lazy_load_enabled(): bool {
-		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
-		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	protected function is_lazy_load_enabled( WP_Block $block ): bool {
+		return VariationDataUtils::is_enabled( $block );
 	}
 
 	/**
@@ -139,7 +143,7 @@ class ProductStockIndicator extends AbstractBlock {
 				'availability' => $availability['availability'],
 			);
 
-			if ( $this->is_lazy_load_enabled() ) {
+			if ( $this->is_lazy_load_enabled( $block ) ) {
 				$config_data['lazy_load'] = true;
 			} else {
 				$variations                = $product_to_render->get_available_variations( 'objects' );

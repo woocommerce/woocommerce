@@ -62,6 +62,9 @@
 		},
 		"__privatePreviewState": {
 			"type": "object"
+		},
+		"lazyLoadVariations": {
+			"type": "boolean"
 		}
 	},
 	"providesContext": {
@@ -71,7 +74,8 @@
 		"dimensions": "dimensions",
 		"queryContextIncludes": "queryContextIncludes",
 		"collection": "collection",
-		"__privateProductCollectionPreviewState": "__privatePreviewState"
+		"__privateProductCollectionPreviewState": "__privatePreviewState",
+		"woocommerce/lazyLoadVariations": "lazyLoadVariations"
 	},
 	"usesContext": [ "templateSlug", "postId" ],
 	"supports": {

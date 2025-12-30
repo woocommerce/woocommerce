@@ -6,10 +6,11 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
+use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * AddToCartWithOptions class.
@@ -26,13 +27,22 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options';
 
 	/**
+	 * Register the context.
+	 */
+	protected function get_block_type_uses_context() {
+		return [ 'postId', 'woocommerce/lazyLoadVariations' ];
+	}
+
+	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
+	 * Checks block context first, then falls back to site-level option.
+	 *
+	 * @param WP_Block $block The block instance.
 	 * @return bool
 	 */
-	protected function is_lazy_load_enabled(): bool {
-		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
-		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	protected function is_lazy_load_enabled( WP_Block $block ): bool {
+		return VariationDataUtils::is_enabled( $block );
 	}
 
 	/**
@@ -343,7 +353,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$variations_data               = array();
 				$context['selectedAttributes'] = array();
 
-				if ( $this->is_lazy_load_enabled() ) {
+				if ( $this->is_lazy_load_enabled( $block ) ) {
 					// Lazy load mode: Get only attribute data efficiently without loading variation objects.
 					// Stock status and other data will be fetched via AJAX when a variation is selected.
 					$variations_data = $this->get_variation_attributes_efficiently( $product );
