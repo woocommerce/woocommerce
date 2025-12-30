@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Automattic\WooCommerce\Gateways\PayPal;
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
 
