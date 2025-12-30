@@ -154,6 +154,15 @@ describe( 'Dependency Detection Utils', () => {
 			expect( parseStackForCallerUrl( '', '/cart/' ) ).toBe( null );
 		} );
 
+		it( 'returns null for non-string stack', () => {
+			expect(
+				parseStackForCallerUrl( 123 as unknown as string, '/cart/' )
+			).toBe( null );
+			expect(
+				parseStackForCallerUrl( {} as unknown as string, '/cart/' )
+			).toBe( null );
+		} );
+
 		it( 'finds external script URL in stack trace', () => {
 			const stack = `Error
     at getCallerScriptUrl (cart/:141:17)

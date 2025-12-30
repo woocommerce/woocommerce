@@ -135,7 +135,7 @@ export function parseStackForCallerUrl(
 	stack: string | null,
 	currentPage: string
 ): string | null {
-	if ( ! stack ) {
+	if ( ! stack || typeof stack !== 'string' ) {
 		return null;
 	}
 
