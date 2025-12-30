@@ -205,7 +205,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			$this->extract_billing_fields( $posted_data ),
 			$this->extract_shipping_fields( $posted_data ),
 			$this->extract_payment_method( $posted_data ),
-			$this->extract_shipping_method( $posted_data )
+			$this->extract_shipping_methods( $posted_data )
 		);
 
 		return $event_data;
@@ -255,7 +255,14 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			'billing_phone'      => 'sanitize_text_field',
 		);
 
-		return $this->extract_fields_by_map( $field_map, $posted_data );
+		$extracted_fields = $this->extract_fields_by_map( $field_map, $posted_data );
+
+		// Store API uses 'email' instead of 'billing_email'.
+		if ( empty( $extracted_fields['billing_email'] ) && ! empty( $posted_data['email'] ) ) {
+			$extracted_fields['email'] = sanitize_email( $posted_data['email'] );
+		}
+
+		return $extracted_fields;
 	}
 
 	/**
@@ -310,15 +317,18 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * Extract and convert shipping method IDs to readable names.
 	 *
 	 * @param array $posted_data Posted form data.
-	 * @return array Shipping method data as ID => name map.
+	 * @return array Shipping method data wrapped in 'shipping_methods' key.
 	 */
-	private function extract_shipping_method( array $posted_data ): array {
+	private function extract_shipping_methods( array $posted_data ): array {
 		$shipping_method_data = array();
 
 		if ( ! empty( $posted_data['shipping_method'] ) ) {
 			$shipping_method_ids = $posted_data['shipping_method'];
 
-			$shipping_method_data = $this->get_shipping_method_names( $shipping_method_ids );
+			$shipping_methods = $this->get_shipping_method_names( $shipping_method_ids );
+			if ( ! empty( $shipping_methods ) ) {
+				$shipping_method_data['shipping_methods'] = $shipping_methods;
+			}
 		}
 
 		return $shipping_method_data;
