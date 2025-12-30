@@ -24,6 +24,16 @@ class QuantitySelector extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-quantity-selector';
 
 	/**
+	 * Check if lazy loading of variation data is enabled.
+	 *
+	 * @return bool
+	 */
+	protected function is_lazy_load_enabled(): bool {
+		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
+		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * The selector is hidden for:
@@ -131,38 +141,51 @@ class QuantitySelector extends AbstractBlock {
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 
-			$variations_data           = $product->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations_data as $variation ) {
-				$variation_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $variation );
-				$variation_data                 = array();
-
-				// Only add variation data if it's different than the defaults.
-				if ( 1 !== $variation_quantity_constraints['min'] ) {
-					$variation_data['min'] = $variation_quantity_constraints['min'];
-				}
-				if ( null !== $variation_quantity_constraints['max'] ) {
-					$variation_data['max'] = $variation_quantity_constraints['max'];
-				}
-				if ( 1 !== $variation_quantity_constraints['step'] ) {
-					$variation_data['step'] = $variation_quantity_constraints['step'];
-				}
-				if ( $variation->is_sold_individually() ) {
-					$variation_data['sold_individually'] = true;
-				}
-				$formatted_variations_data[ $variation->get_id() ] = $variation_data;
-			}
-
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product->get_id() => array(
-							'variations' => $formatted_variations_data,
+			if ( $this->is_lazy_load_enabled() ) {
+				wp_interactivity_config(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'lazy_load' => true,
+							),
 						),
-					),
-				)
-			);
+					)
+				);
+			} else {
+				$variations_data           = $product->get_available_variations( 'objects' );
+				$formatted_variations_data = array();
+				foreach ( $variations_data as $variation ) {
+					$variation_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $variation );
+					$variation_data                 = array();
+
+					// Only add variation data if it's different than the defaults.
+					if ( 1 !== $variation_quantity_constraints['min'] ) {
+						$variation_data['min'] = $variation_quantity_constraints['min'];
+					}
+					if ( null !== $variation_quantity_constraints['max'] ) {
+						$variation_data['max'] = $variation_quantity_constraints['max'];
+					}
+					if ( 1 !== $variation_quantity_constraints['step'] ) {
+						$variation_data['step'] = $variation_quantity_constraints['step'];
+					}
+					if ( $variation->is_sold_individually() ) {
+						$variation_data['sold_individually'] = true;
+					}
+					$formatted_variations_data[ $variation->get_id() ] = $variation_data;
+				}
+
+				wp_interactivity_config(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'variations' => $formatted_variations_data,
+							),
+						),
+					)
+				);
+			}
 
 			$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsQuantityChange';
 			$input_attributes['data-wp-bind--min']      = 'woocommerce/product-elements::state.productData.min';

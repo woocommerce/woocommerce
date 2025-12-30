@@ -26,6 +26,85 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options';
 
 	/**
+	 * Check if lazy loading of variation data is enabled.
+	 *
+	 * @return bool
+	 */
+	protected function is_lazy_load_enabled(): bool {
+		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
+		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	}
+
+	/**
+	 * Get variation attributes efficiently without loading full variation objects.
+	 *
+	 * This queries the postmeta table directly to get attribute values for each
+	 * variation, which is much faster than loading WC_Product_Variation objects.
+	 *
+	 * @param \WC_Product_Variable $product The variable product.
+	 * @return array Array of variation data keyed by variation ID.
+	 */
+	protected function get_variation_attributes_efficiently( $product ): array {
+		global $wpdb;
+
+		$variation_ids = $product->get_children();
+		if ( empty( $variation_ids ) ) {
+			return array();
+		}
+
+		// Get the attribute names we need to look for.
+		$attributes      = $product->get_attributes();
+		$attribute_names = array();
+		foreach ( $attributes as $attribute ) {
+			if ( ! empty( $attribute['is_variation'] ) ) {
+				$attribute_names[] = wc_variation_attribute_name( $attribute['name'] );
+			}
+		}
+
+		if ( empty( $attribute_names ) ) {
+			return array();
+		}
+
+		// Build placeholders for the query.
+		$id_placeholders   = implode( ',', array_fill( 0, count( $variation_ids ), '%d' ) );
+		$name_placeholders = implode( ',', array_fill( 0, count( $attribute_names ), '%s' ) );
+
+		// Query all attribute meta for all variations in one go.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT post_id, meta_key, meta_value
+				FROM {$wpdb->postmeta}
+				WHERE post_id IN ({$id_placeholders})
+				AND meta_key IN ({$name_placeholders})",
+				array_merge( $variation_ids, $attribute_names )
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Build the variations data array.
+		$variations_data = array();
+		foreach ( $variation_ids as $variation_id ) {
+			$variations_data[ $variation_id ] = array(
+				'attributes' => array(),
+			);
+		}
+
+		foreach ( $results as $row ) {
+			$variation_id = (int) $row['post_id'];
+			$meta_key     = $row['meta_key'];
+			$meta_value   = $row['meta_value'];
+
+			if ( isset( $variations_data[ $variation_id ] ) ) {
+				$variations_data[ $variation_id ]['attributes'][ $meta_key ] = $meta_value;
+			}
+		}
+
+		return $variations_data;
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
@@ -263,32 +342,57 @@ class AddToCartWithOptions extends AbstractBlock {
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
 				$variations_data               = array();
 				$context['selectedAttributes'] = array();
-				$available_variations          = $product->get_available_variations( 'objects' );
-				foreach ( $available_variations as $variation ) {
-					// We intentionally set the default quantity to the product's min purchase quantity
-					// instead of the variation's min purchase quantity. That's because we use the same
-					// input for all variations, so we want quantities to be in sync.
-					$context['quantity'][ $variation->get_id() ] = $default_quantity;
 
-					$variation_data = array(
-						'attributes'        => $variation->get_variation_attributes(),
-						'is_in_stock'       => $variation->is_in_stock(),
-						'sold_individually' => $variation->is_sold_individually(),
-					);
+				if ( $this->is_lazy_load_enabled() ) {
+					// Lazy load mode: Get only attribute data efficiently without loading variation objects.
+					// Stock status and other data will be fetched via AJAX when a variation is selected.
+					$variations_data = $this->get_variation_attributes_efficiently( $product );
 
-					$variations_data[ $variation->get_id() ] = $variation_data;
-				}
+					// Set default quantity for all variations.
+					foreach ( array_keys( $variations_data ) as $variation_id ) {
+						$context['quantity'][ $variation_id ] = $default_quantity;
+					}
 
-				wp_interactivity_config(
-					'woocommerce',
-					array(
-						'products' => array(
-							$product->get_id() => array(
-								'variations' => $variations_data,
+					wp_interactivity_config(
+						'woocommerce',
+						array(
+							'products' => array(
+								$product->get_id() => array(
+									'variations' => $variations_data,
+									'lazy_load'  => true, // Flag to indicate lazy loading mode.
+								),
 							),
-						),
-					)
-				);
+						)
+					);
+				} else {
+					// Original behavior: Load full variation objects.
+					$available_variations = $product->get_available_variations( 'objects' );
+					foreach ( $available_variations as $variation ) {
+						// We intentionally set the default quantity to the product's min purchase quantity
+						// instead of the variation's min purchase quantity. That's because we use the same
+						// input for all variations, so we want quantities to be in sync.
+						$context['quantity'][ $variation->get_id() ] = $default_quantity;
+
+						$variation_data = array(
+							'attributes'        => $variation->get_variation_attributes(),
+							'is_in_stock'       => $variation->is_in_stock(),
+							'sold_individually' => $variation->is_sold_individually(),
+						);
+
+						$variations_data[ $variation->get_id() ] = $variation_data;
+					}
+
+					wp_interactivity_config(
+						'woocommerce',
+						array(
+							'products' => array(
+								$product->get_id() => array(
+									'variations' => $variations_data,
+								),
+							),
+						)
+					);
+				}
 			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
 				$variation_attributes = $product->get_variation_attributes();
 				$formatted_attributes = array_map(

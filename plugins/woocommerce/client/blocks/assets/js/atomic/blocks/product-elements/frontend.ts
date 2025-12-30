@@ -15,6 +15,14 @@ import type {
 } from '@woocommerce/stores/woocommerce/cart';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
+/**
+ * Internal dependencies
+ */
+import {
+	fetchVariationData,
+	getCachedVariationData,
+} from '../../../base/utils/variations/variation-data-store';
+
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -57,6 +65,45 @@ export type Context = {
 		| 'dimensions';
 };
 
+/**
+ * Check if lazy loading is enabled for a product.
+ *
+ * @param productId The product ID.
+ * @return True if lazy loading is enabled.
+ */
+function isLazyLoadEnabled( productId: number ): boolean {
+	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
+	return products?.[ productId ]?.lazy_load === true;
+}
+
+/**
+ * Get variation data from pre-loaded config or shared cache.
+ *
+ * @param productId   The parent product ID.
+ * @param variationId The variation ID.
+ * @return The variation data or undefined.
+ */
+function getVariationData(
+	productId: number,
+	variationId: number
+): ProductData | undefined {
+	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
+
+	// First check if data exists in config (pre-loaded).
+	const preloadedData = products?.[ productId ]?.variations?.[ variationId ];
+	if ( preloadedData && 'price_html' in preloadedData ) {
+		return preloadedData;
+	}
+
+	// Check shared cache for lazy-loaded data.
+	const cachedData = getCachedVariationData( variationId );
+	if ( cachedData ) {
+		return cachedData as ProductData;
+	}
+
+	return undefined;
+}
+
 const productElementStore = store(
 	'woocommerce/product-elements',
 	{
@@ -74,15 +121,25 @@ const productElementStore = store(
 					return undefined;
 				}
 
-				return (
-					products?.[ productDataState.productId ]?.variations?.[
-						productDataState?.variationId || 0
-					] || products?.[ productDataState.productId ]
-				);
+				const variationId = productDataState?.variationId || 0;
+
+				// If a variation is selected, try to get its data.
+				if ( variationId ) {
+					const variationData = getVariationData(
+						productDataState.productId,
+						variationId
+					);
+					if ( variationData ) {
+						return variationData;
+					}
+				}
+
+				// Fall back to parent product data.
+				return products?.[ productDataState.productId ];
 			},
 		},
 		callbacks: {
-			updateValue: () => {
+			updateValue: async () => {
 				const element = getElement();
 
 				if ( ! element.ref || ! productDataState?.productId ) {
@@ -90,7 +147,38 @@ const productElementStore = store(
 				}
 
 				const { productElementKey } = getContext< Context >();
+				const variationId = productDataState?.variationId || 0;
+				const productId = productDataState.productId;
 
+				// Check if we need to fetch data lazily.
+				if (
+					variationId &&
+					isLazyLoadEnabled( productId ) &&
+					! getVariationData( productId, variationId )
+				) {
+					// Show loading state.
+					element.ref.style.opacity = '0.5';
+
+					// Fetch the variation data (uses shared cache).
+					const fetchedData = await fetchVariationData( variationId );
+
+					// Remove loading state.
+					element.ref.style.opacity = '1';
+
+					if ( fetchedData ) {
+						const html =
+							fetchedData[ productElementKey as keyof typeof fetchedData ];
+						if ( typeof html === 'string' ) {
+							element.ref.innerHTML = sanitizeHTML( html, {
+								tags: ALLOWED_TAGS,
+								attr: ALLOWED_ATTR,
+							} );
+						}
+					}
+					return;
+				}
+
+				// Use pre-loaded or cached data.
 				const productElementHtml =
 					productElementStore?.state?.productData?.[
 						productElementKey

@@ -30,6 +30,16 @@ class ProductGallery extends AbstractBlock {
 	}
 
 	/**
+	 * Check if lazy loading of variation data is enabled.
+	 *
+	 * @return bool
+	 */
+	protected function is_lazy_load_enabled(): bool {
+		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
+		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	}
+
+	/**
 	 * Return the dialog content.
 	 *
 	 * @param array $images An array of all images of the product.
@@ -155,24 +165,55 @@ class ProductGallery extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$variations_data           = $product->get_available_variations();
 				$formatted_variations_data = array();
 				$has_variation_images      = false;
-				foreach ( $variations_data as $variation ) {
-					if (
-						empty( $variation['variation_id'] )
-						|| ! array_key_exists( 'image_id', $variation )
-					) {
-						continue;
-					}
+				$parent_image_id           = (int) $product->get_image_id();
 
-					$variation_image_id = (int) $variation['image_id'];
-					if ( $variation_image_id && $variation_image_id !== (int) $product->get_image_id() ) {
-						$has_variation_images = true;
-
-						$formatted_variations_data[ $variation['variation_id'] ] = array(
-							'image_id' => $variation_image_id,
+				if ( $this->is_lazy_load_enabled() ) {
+					// Efficient query for variation image IDs without loading full objects.
+					global $wpdb;
+					$variation_ids = $product->get_children();
+					if ( ! empty( $variation_ids ) ) {
+						$id_placeholders = implode( ',', array_fill( 0, count( $variation_ids ), '%d' ) );
+						// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+						$results = $wpdb->get_results(
+							$wpdb->prepare(
+								"SELECT post_id, meta_value FROM {$wpdb->postmeta}
+								WHERE post_id IN ({$id_placeholders})
+								AND meta_key = '_thumbnail_id'
+								AND meta_value != ''
+								AND meta_value != %d",
+								array_merge( $variation_ids, array( $parent_image_id ) )
+							),
+							ARRAY_A
 						);
+						// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+						foreach ( $results as $row ) {
+							$has_variation_images                                  = true;
+							$formatted_variations_data[ (int) $row['post_id'] ] = array(
+								'image_id' => (int) $row['meta_value'],
+							);
+						}
+					}
+				} else {
+					$variations_data = $product->get_available_variations();
+					foreach ( $variations_data as $variation ) {
+						if (
+							empty( $variation['variation_id'] )
+							|| ! array_key_exists( 'image_id', $variation )
+						) {
+							continue;
+						}
+
+						$variation_image_id = (int) $variation['image_id'];
+						if ( $variation_image_id && $variation_image_id !== $parent_image_id ) {
+							$has_variation_images = true;
+
+							$formatted_variations_data[ $variation['variation_id'] ] = array(
+								'image_id' => $variation_image_id,
+							);
+						}
 					}
 				}
 
@@ -182,7 +223,7 @@ class ProductGallery extends AbstractBlock {
 						array(
 							'products' => array(
 								$product->get_id() => array(
-									'image_id'   => (int) $product->get_image_id(),
+									'image_id'   => $parent_image_id,
 									'variations' => $formatted_variations_data,
 								),
 							),

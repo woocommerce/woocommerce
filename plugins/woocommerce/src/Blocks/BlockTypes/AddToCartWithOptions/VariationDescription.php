@@ -19,6 +19,16 @@ class VariationDescription extends AbstractBlock {
 	 */
 	protected $block_name = 'add-to-cart-with-options-variation-description';
 
+	/**
+	 * Check if lazy loading of variation data is enabled.
+	 *
+	 * @return bool
+	 */
+	protected function is_lazy_load_enabled(): bool {
+		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
+		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	}
+
 
 	/**
 	 * Render the block.
@@ -36,27 +46,40 @@ class VariationDescription extends AbstractBlock {
 			return '';
 		}
 
-		$variations                = $product->get_available_variations( 'objects' );
-		$formatted_variations_data = array();
-		foreach ( $variations as $variation ) {
-			$variation_description = $variation->get_description();
-			if ( is_string( $variation_description ) && ! empty( $variation_description ) ) {
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'variation_description' => wp_kses_post( wc_format_content( $variation_description ) ),
-				);
-			}
-		}
-
-		wp_interactivity_config(
-			'woocommerce',
-			array(
-				'products' => array(
-					$product->get_id() => array(
-						'variations' => $formatted_variations_data,
+		if ( $this->is_lazy_load_enabled() ) {
+			wp_interactivity_config(
+				'woocommerce',
+				array(
+					'products' => array(
+						$product->get_id() => array(
+							'lazy_load' => true,
+						),
 					),
-				),
-			)
-		);
+				)
+			);
+		} else {
+			$variations                = $product->get_available_variations( 'objects' );
+			$formatted_variations_data = array();
+			foreach ( $variations as $variation ) {
+				$variation_description = $variation->get_description();
+				if ( is_string( $variation_description ) && ! empty( $variation_description ) ) {
+					$formatted_variations_data[ $variation->get_id() ] = array(
+						'variation_description' => wp_kses_post( wc_format_content( $variation_description ) ),
+					);
+				}
+			}
+
+			wp_interactivity_config(
+				'woocommerce',
+				array(
+					'products' => array(
+						$product->get_id() => array(
+							'variations' => $formatted_variations_data,
+						),
+					),
+				)
+			);
+		}
 
 		$context_directive = wp_interactivity_data_wp_context(
 			array(

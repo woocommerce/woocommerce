@@ -41,6 +41,16 @@ class ProductSKU extends AbstractBlock {
 	}
 
 	/**
+	 * Check if lazy loading of variation data is enabled.
+	 *
+	 * @return bool
+	 */
+	protected function is_lazy_load_enabled(): bool {
+		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
+		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	}
+
+	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -71,22 +81,30 @@ class ProductSKU extends AbstractBlock {
 		$is_interactive = $product->is_type( ProductType::VARIABLE );
 
 		if ( $is_interactive ) {
-			$variations                = $product->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'sku' => $variation->get_sku(),
-				);
+			$config_data = array(
+				'sku' => $product_sku,
+			);
+
+			if ( $this->is_lazy_load_enabled() ) {
+				// Lazy mode: SKU data will be fetched on-demand when variation is selected.
+				$config_data['lazy_load'] = true;
+			} else {
+				// Pre-load all variation SKUs.
+				$variations                = $product->get_available_variations( 'objects' );
+				$formatted_variations_data = array();
+				foreach ( $variations as $variation ) {
+					$formatted_variations_data[ $variation->get_id() ] = array(
+						'sku' => $variation->get_sku(),
+					);
+				}
+				$config_data['variations'] = $formatted_variations_data;
 			}
 
 			wp_interactivity_config(
 				'woocommerce',
 				array(
 					'products' => array(
-						$product->get_id() => array(
-							'sku'        => $product_sku,
-							'variations' => $formatted_variations_data,
-						),
+						$product->get_id() => $config_data,
 					),
 				)
 			);

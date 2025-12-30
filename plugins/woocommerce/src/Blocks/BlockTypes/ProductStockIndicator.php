@@ -52,6 +52,16 @@ class ProductStockIndicator extends AbstractBlock {
 	}
 
 	/**
+	 * Check if lazy loading of variation data is enabled.
+	 *
+	 * @return bool
+	 */
+	protected function is_lazy_load_enabled(): bool {
+		/** This filter is documented in src/Blocks/BlockTypes/ProductPrice.php */
+		return (bool) apply_filters( 'woocommerce_blocks_lazy_load_variation_data', true );
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
@@ -125,25 +135,31 @@ class ProductStockIndicator extends AbstractBlock {
 		$watch_attribute    = '';
 
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
-			$variations                = $product_to_render->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$variation_availability = $variation->get_availability();
-				if ( is_string( $variation_availability['availability'] ) && ! empty( $variation_availability['availability'] ) ) {
-					$formatted_variations_data[ $variation->get_id() ] = array(
-						'availability' => $variation_availability['availability'],
-					);
+			$config_data = array(
+				'availability' => $availability['availability'],
+			);
+
+			if ( $this->is_lazy_load_enabled() ) {
+				$config_data['lazy_load'] = true;
+			} else {
+				$variations                = $product_to_render->get_available_variations( 'objects' );
+				$formatted_variations_data = array();
+				foreach ( $variations as $variation ) {
+					$variation_availability = $variation->get_availability();
+					if ( is_string( $variation_availability['availability'] ) && ! empty( $variation_availability['availability'] ) ) {
+						$formatted_variations_data[ $variation->get_id() ] = array(
+							'availability' => $variation_availability['availability'],
+						);
+					}
 				}
+				$config_data['variations'] = $formatted_variations_data;
 			}
 
 			wp_interactivity_config(
 				'woocommerce',
 				array(
 					'products' => array(
-						$product_to_render->get_id() => array(
-							'availability' => $availability['availability'],
-							'variations'   => $formatted_variations_data,
-						),
+						$product_to_render->get_id() => $config_data,
 					),
 				)
 			);

@@ -20,6 +20,10 @@ import type {
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
 import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
+import {
+	fetchVariationData,
+	getCachedVariationData,
+} from '../../../base/utils/variations/variation-data-store';
 import setStyles from './set-styles';
 
 type Option = {
@@ -279,17 +283,18 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					matchedVariation?.variation_id || null;
 				productDataActions.setVariationId( matchedVariationId );
 			},
-			validateVariation() {
+			validateVariation: async () => {
 				actions.clearErrors( 'variable-product' );
 
 				const { products } = getConfig( 'woocommerce' );
+				const productId = productDataState.productId;
 
-				if ( ! products || ! products[ productDataState.productId ] ) {
+				if ( ! products || ! products[ productId ] ) {
 					return;
 				}
 
-				const variations =
-					products[ productDataState.productId ].variations;
+				const variations = products[ productId ].variations;
+				const isLazyMode = products[ productId ]?.lazy_load === true;
 
 				const { selectedAttributes } = getContext< Context >();
 
@@ -311,7 +316,31 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				if ( ! matchedVariation?.is_in_stock ) {
+				const variationId = matchedVariation.variation_id;
+
+				// Determine stock status - check pre-loaded data, shared cache, or fetch.
+				let isInStock: boolean;
+
+				if ( 'is_in_stock' in matchedVariation ) {
+					// Stock data was pre-loaded.
+					isInStock = matchedVariation.is_in_stock;
+				} else if ( isLazyMode ) {
+					// Check shared cache first.
+					let cachedData = getCachedVariationData( variationId );
+
+					if ( ! cachedData ) {
+						// Fetch from API and cache.
+						cachedData = await fetchVariationData( variationId );
+					}
+
+					// Default to in-stock if fetch failed.
+					isInStock = cachedData?.is_in_stock ?? true;
+				} else {
+					// No data available, assume in stock.
+					isInStock = true;
+				}
+
+				if ( ! isInStock ) {
 					actions.addError( {
 						code: 'variableProductOutOfStock',
 						message: errorMessages?.variableProductOutOfStock || '',
