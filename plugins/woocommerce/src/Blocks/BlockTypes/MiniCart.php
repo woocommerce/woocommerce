@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use Automattic\Block_Delimiter;
 
 /**
@@ -472,6 +473,14 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		/**
+		 * Do not render for logged-out users if the Coming Soon mode is enabled for store pages only.
+		 */
+		$coming_soon_helper = wc_get_container()->get( ComingSoonHelper::class );
+		if ( ! is_user_logged_in() && ! WC()->is_rest_api_request() && $coming_soon_helper->is_store_coming_soon() ) {
+			return '';
+		}
+
+		/**
 		 * In the cart and checkout pages, the block is either rendered hidden or removed.
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
@@ -601,7 +610,6 @@ class MiniCart extends AbstractBlock {
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
 				<button 
-					data-wp-init="callbacks.saveMiniCartButtonRef"
 					data-wp-on--click="actions.openDrawer"
 					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"

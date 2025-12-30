@@ -62,7 +62,11 @@ const scalePrice = ( {
 	price,
 	inputDecimals,
 	outputDecimals = 0,
-}: ScalePriceArgs ) => price * Math.pow( 10, outputDecimals - inputDecimals );
+}: ScalePriceArgs ) => {
+	const scaledPrice = price * Math.pow( 10, outputDecimals - inputDecimals );
+	// Remove extra decimals.
+	return Math.round( scaledPrice );
+};
 
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
@@ -95,7 +99,6 @@ type MiniCart = {
 		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
-		saveMiniCartButtonRef: () => void;
 	};
 };
 
@@ -252,6 +255,8 @@ store< MiniCart >(
 					window.location.href = checkoutUrl;
 					return;
 				}
+				const { ref } = getElement();
+				state.miniCartButtonRef = ref;
 				state.isOpen = true;
 			},
 
@@ -379,11 +384,6 @@ store< MiniCart >(
 					// Focus first element when the minicart is opened.
 					getFocusableElements( ref )[ 0 ]?.focus();
 				}
-			},
-
-			saveMiniCartButtonRef() {
-				const { ref } = getElement();
-				state.miniCartButtonRef = ref;
 			},
 		},
 	},

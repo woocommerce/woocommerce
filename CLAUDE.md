@@ -27,7 +27,7 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 
 The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
-- **`woocommerce-backend-dev`** - Backend PHP conventions (classes, methods, hooks, DI, testing)
+- **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
@@ -84,6 +84,22 @@ plugins/woocommerce/
 2. Run relevant tests (see `woocommerce-dev-cycle` skill)
 3. Run linting (see `woocommerce-dev-cycle` skill)
 4. Commit only after tests pass and linting is clean
+5. Create changelog entries for each affected package
+6. Create PR only after changelog entries exist
+
+**NEVER create a PR without changelog entries.** Each package modified in the monorepo requires its own changelog entry. Run for each affected package:
+
+```sh
+pnpm --filter=<project> changelog add
+```
+
+Example for WooCommerce Core:
+
+```sh
+pnpm --filter=@woocommerce/plugin-woocommerce changelog add
+```
+
+This command prompts for the change type and description. Run it once per affected package before creating any PR.
 
 ## Testing Environment
 

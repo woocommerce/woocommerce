@@ -80,7 +80,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 
 		$status          = $event['resource']['status'] ?? null;
 		$paypal_order_id = $event['resource']['id'] ?? null;
-		if ( 'APPROVED' === $status ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_APPROVED === $status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
 			$order->update_meta_data( '_paypal_status', $status );
 			$order->add_order_note(
@@ -91,6 +91,9 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				)
 			);
 			$order->save();
+
+			// Update the addresses in the order with the addresses from the PayPal order details.
+			WC_Gateway_Paypal_Helper::update_addresses_in_order( $order, $event['resource'] );
 
 			// Authorize or capture the payment after approval.
 			$paypal_intent = $event['resource']['intent'] ?? null;

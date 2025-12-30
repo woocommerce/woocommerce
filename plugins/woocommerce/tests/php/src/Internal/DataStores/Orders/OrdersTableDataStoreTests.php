@@ -1484,6 +1484,76 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Test sync-on-read with date and metadata differences.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_metadata Whether to add a new metadata to the post version of the order.
+	 */
+	public function test_sync_on_read_with_date_differences( $with_metadata = false ) {
+		global $wpdb;
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$now    = time() - ( 10 * MINUTE_IN_SECONDS );
+		$before = $now - ( 10 * MINUTE_IN_SECONDS );
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_billing_first_name( 'Duke' );
+		$order->save();
+
+		$order->set_date_modified( $before );
+		$order->save();
+
+		// Refresh order from HPOS datastore.
+		$order = wc_get_order( $order->get_id() );
+
+		// Confirm post version exists and that both have the same modified date.
+		$this->assertSame( 'shop_order', get_post_type( $order->get_id() ) );
+		$this->assertEquals( $order->get_date_modified( 'edit' )->getTimestamp(), $before );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $before );
+
+		// Update the posts modified date and confirm the change was made.
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $now ),
+			),
+			array(
+				'ID' => $order->get_id(),
+			)
+		);
+		clean_post_cache( $order->get_id() );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $now );
+
+		// Add a new metadata so sync-on-read does something.
+		if ( $with_metadata ) {
+			add_post_meta( $order->get_id(), 'foo', 'bar' );
+		}
+
+		// Trigger sync-on-read by re-reading the order and compare dates again.
+		$sync_on_read_triggered = false;
+		add_action(
+			'woocommerce_hpos_post_record_migrated_on_read',
+			function ( $o ) use ( &$sync_on_read_triggered, $order ) {
+				$sync_on_read_triggered = $o->get_id() === $order->get_id();
+			}
+		);
+
+		$this->reset_order_data_store_state( $this->sut );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $sync_on_read_triggered );
+		remove_all_actions( 'woocommerce_hpos_post_record_migrated_on_read' );
+
+		// Compare dates again.
+		$this->assertEquals( $order->get_date_modified( 'edit' )->getTimestamp(), $now );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $now );
+	}
+
+	/**
 	 * @testDox Meta data should be migrated from post order to cot order.
 	 *
 	 * @return void
@@ -3018,8 +3088,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	private function reset_order_data_store_state( $sut ) {
 		$reset_state = function () use ( $sut ) {
-			self::$backfilling_order_ids = array();
-			self::$reading_order_ids     = array();
+			self::$backfilling_order_ids  = array();
+			self::$reading_order_ids      = array();
+			self::$sync_on_read_order_ids = array();
 		};
 		$reset_state->call( $sut );
 		wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->flush();
@@ -3494,11 +3565,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
 
 		// Check that the log entry was created.
-		$serialized_meta_value = '"\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"';
-
-		$log_message = end( $fake_logger->warnings )['message'];
-		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
-		$this->assertStringContainsString( $serialized_meta_value, $log_message );
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 
 		// Test deleting meta data containing an object of a non-existent class.
 		$meta_data = $this->sut->read_meta( $order );
@@ -3511,9 +3578,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
 
 		// Check that the log entry was created.
-		$log_message = end( $fake_logger->warnings )['message'];
-		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
-		$this->assertStringContainsString( $serialized_meta_value, $log_message );
+		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
 	}
 
 	/**
@@ -3878,26 +3943,6 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->add_meta_data( $meta_key, $meta_value, false );
 		$order->save_meta_data();
 		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
-	}
-
-	/**
-	 * @testdox Sync-on-read should update metadata as well.
-	 */
-	public function test_sync_on_read_updates_metadata() {
-		$this->toggle_cot_feature_and_usage( true );
-		$this->enable_cot_sync();
-
-		$order = OrderHelper::create_order();
-		$order->add_meta_data( 'foo', 'bar' );
-		$order->save();
-
-		// Update the meta data on the post.
-		update_post_meta( $order->get_id(), 'foo', 'baz' );
-
-		$fresh_order = wc_get_order( $order->get_id() );
-
-		$this->assertEquals( 'baz', get_post_meta( $order->get_id(), 'foo', true ) );
-		$this->assertEquals( 'baz', $fresh_order->get_meta( 'foo', true, 'edit' ) );
 	}
 
 	/**
