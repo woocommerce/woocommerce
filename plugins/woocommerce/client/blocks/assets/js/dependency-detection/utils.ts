@@ -66,21 +66,58 @@ export interface WarningInfo {
 }
 
 /**
- * Pattern to identify WooCommerce core scripts (which we should skip).
- * Matches /plugins/woocommerce/(client|assets|build)/ but NOT /plugins/woocommerce-subscriptions/ etc.
+ * WooCommerce asset subdirectories that contain core scripts.
  */
-const WC_CORE_SCRIPT_PATTERN =
+const WC_ASSET_DIRS = [ 'client/', 'assets/', 'build/', 'vendor/' ];
+
+/**
+ * Fallback pattern for WooCommerce core scripts when plugin URL is not available.
+ * Matches /plugins/woocommerce/(client|assets|build|vendor)/ but NOT /plugins/woocommerce-subscriptions/ etc.
+ */
+const WC_CORE_SCRIPT_FALLBACK_PATTERN =
 	/\/plugins\/woocommerce\/(client|assets|build|vendor)\//;
 
 /**
  * Check if a URL belongs to WooCommerce core scripts.
  *
- * @param url - The script URL to check.
+ * Uses the plugin URL from the server to account for custom plugin directories
+ * (WP_PLUGIN_DIR, WP_CONTENT_DIR configurations). Falls back to a hardcoded
+ * pattern if the plugin URL is not available.
+ *
+ * @param url         - The script URL to check.
+ * @param wcPluginUrl - The WooCommerce plugin URL from the server.
  * @return True if this is a WooCommerce core script.
  */
-export function isWooCommerceScript( url: string | null ): boolean {
-	if ( ! url ) return false;
-	return WC_CORE_SCRIPT_PATTERN.test( url );
+export function isWooCommerceScript(
+	url: string | null,
+	wcPluginUrl = ''
+): boolean {
+	if ( ! url ) {
+		return false;
+	}
+
+	// If WC_PLUGIN_URL is not available, fall back to hardcoded pattern.
+	// This handles cases where PHP injection failed.
+	if ( ! wcPluginUrl ) {
+		return WC_CORE_SCRIPT_FALLBACK_PATTERN.test( url );
+	}
+
+	// Check if the URL starts with the WooCommerce plugin URL.
+	if ( url.indexOf( wcPluginUrl ) !== 0 ) {
+		return false;
+	}
+
+	// Get the path after the plugin URL.
+	const relativePath = url.substring( wcPluginUrl.length );
+
+	// Check if it's in one of the known WooCommerce asset directories.
+	for ( let i = 0; i < WC_ASSET_DIRS.length; i++ ) {
+		if ( relativePath.indexOf( WC_ASSET_DIRS[ i ] ) === 0 ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -125,7 +162,9 @@ export function shouldSkipLine( line: string, currentPage: string ): boolean {
 	}
 
 	// Skip webpack source-mapped files (internal build artifacts).
-	if ( line.indexOf( 'webpack://' ) !== -1 ) return true;
+	if ( line.indexOf( 'webpack://' ) !== -1 ) {
+		return true;
+	}
 
 	return false;
 }

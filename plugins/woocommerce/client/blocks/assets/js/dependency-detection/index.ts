@@ -24,6 +24,8 @@ import {
 declare global {
 	// eslint-disable-next-line no-var, @typescript-eslint/naming-convention
 	var __WC_GLOBAL_EXPORTS_PLACEHOLDER__: WcGlobalExportsMap;
+	// eslint-disable-next-line no-var, @typescript-eslint/naming-convention
+	var __WC_PLUGIN_URL_PLACEHOLDER__: string;
 }
 
 /**
@@ -50,6 +52,9 @@ interface PendingCheck {
 	const WC_GLOBAL_EXPORTS: WcGlobalExportsMap =
 		__WC_GLOBAL_EXPORTS_PLACEHOLDER__;
 
+	// WooCommerce plugin URL, injected by PHP to account for custom plugin directories.
+	// eslint-disable-next-line no-undef
+	const WC_PLUGIN_URL: string = __WC_PLUGIN_URL_PLACEHOLDER__;
 	/**
 	 * Get the URL of the script that called this function.
 	 *
@@ -84,7 +89,9 @@ interface PendingCheck {
 		const warningKey = ( callerUrl || 'inline' ) + ':' + wcGlobalKey;
 
 		// Don't warn twice for the same script + property combination.
-		if ( warnedScripts[ warningKey ] ) return;
+		if ( warnedScripts[ warningKey ] ) {
+			return;
+		}
 
 		const warning = getWarningInfo(
 			callerUrl,
@@ -125,7 +132,7 @@ interface PendingCheck {
 		}
 
 		// Skip WooCommerce's own scripts - they manage their own dependencies.
-		if ( isWooCommerceScript( callerUrl ) ) {
+		if ( isWooCommerceScript( callerUrl, WC_PLUGIN_URL ) ) {
 			return;
 		}
 

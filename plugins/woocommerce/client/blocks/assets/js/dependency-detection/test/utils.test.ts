@@ -18,20 +18,32 @@ import {
 
 describe( 'Dependency Detection Utils', () => {
 	describe( 'isWooCommerceScript', () => {
+		const wcPluginUrl =
+			'https://example.com/wp-content/plugins/woocommerce/';
+
 		it( 'returns true for WooCommerce core scripts', () => {
 			expect(
 				isWooCommerceScript(
-					'https://example.com/wp-content/plugins/woocommerce/client/blocks/index.js'
+					'https://example.com/wp-content/plugins/woocommerce/client/blocks/index.js',
+					wcPluginUrl
 				)
 			).toBe( true );
 			expect(
 				isWooCommerceScript(
-					'https://example.com/wp-content/plugins/woocommerce/assets/js/frontend.js'
+					'https://example.com/wp-content/plugins/woocommerce/assets/js/frontend.js',
+					wcPluginUrl
 				)
 			).toBe( true );
 			expect(
 				isWooCommerceScript(
-					'https://example.com/wp-content/plugins/woocommerce/build/bundle.js'
+					'https://example.com/wp-content/plugins/woocommerce/build/bundle.js',
+					wcPluginUrl
+				)
+			).toBe( true );
+			expect(
+				isWooCommerceScript(
+					'https://example.com/wp-content/plugins/woocommerce/vendor/some-lib.js',
+					wcPluginUrl
 				)
 			).toBe( true );
 		} );
@@ -39,19 +51,91 @@ describe( 'Dependency Detection Utils', () => {
 		it( 'returns false for WooCommerce extensions', () => {
 			expect(
 				isWooCommerceScript(
-					'https://example.com/wp-content/plugins/woocommerce-subscriptions/assets/js/index.js'
+					'https://example.com/wp-content/plugins/woocommerce-subscriptions/assets/js/index.js',
+					wcPluginUrl
 				)
 			).toBe( false );
 			expect(
 				isWooCommerceScript(
-					'https://example.com/wp-content/plugins/woocommerce-payments/build/index.js'
+					'https://example.com/wp-content/plugins/woocommerce-payments/build/index.js',
+					wcPluginUrl
 				)
 			).toBe( false );
 		} );
 
 		it( 'returns false for empty or null URLs', () => {
-			expect( isWooCommerceScript( '' ) ).toBe( false );
-			expect( isWooCommerceScript( null ) ).toBe( false );
+			expect( isWooCommerceScript( '', wcPluginUrl ) ).toBe( false );
+			expect( isWooCommerceScript( null, wcPluginUrl ) ).toBe( false );
+		} );
+
+		it( 'falls back to hardcoded pattern when wcPluginUrl is empty', () => {
+			// Standard path should match fallback pattern
+			expect(
+				isWooCommerceScript(
+					'https://example.com/wp-content/plugins/woocommerce/client/blocks/index.js',
+					''
+				)
+			).toBe( true );
+			expect(
+				isWooCommerceScript(
+					'https://example.com/wp-content/plugins/woocommerce/assets/js/frontend.js',
+					''
+				)
+			).toBe( true );
+			// Extensions should not match
+			expect(
+				isWooCommerceScript(
+					'https://example.com/wp-content/plugins/woocommerce-subscriptions/assets/js/index.js',
+					''
+				)
+			).toBe( false );
+			// Custom paths won't work with fallback (expected limitation)
+			expect(
+				isWooCommerceScript(
+					'https://example.com/app/extensions/woocommerce/client/blocks/index.js',
+					''
+				)
+			).toBe( false );
+		} );
+
+		it( 'works with custom plugin directories', () => {
+			const customPluginUrl =
+				'https://example.com/app/extensions/woocommerce/';
+
+			expect(
+				isWooCommerceScript(
+					'https://example.com/app/extensions/woocommerce/client/blocks/index.js',
+					customPluginUrl
+				)
+			).toBe( true );
+			expect(
+				isWooCommerceScript(
+					'https://example.com/app/extensions/woocommerce/assets/js/frontend.js',
+					customPluginUrl
+				)
+			).toBe( true );
+			// Other plugins in custom directory should not match
+			expect(
+				isWooCommerceScript(
+					'https://example.com/app/extensions/woocommerce-subscriptions/assets/js/index.js',
+					customPluginUrl
+				)
+			).toBe( false );
+		} );
+
+		it( 'returns false for scripts in non-asset directories', () => {
+			expect(
+				isWooCommerceScript(
+					'https://example.com/wp-content/plugins/woocommerce/includes/some-file.js',
+					wcPluginUrl
+				)
+			).toBe( false );
+			expect(
+				isWooCommerceScript(
+					'https://example.com/wp-content/plugins/woocommerce/readme.js',
+					wcPluginUrl
+				)
+			).toBe( false );
 		} );
 	} );
 

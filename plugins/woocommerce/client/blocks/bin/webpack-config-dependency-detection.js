@@ -87,8 +87,8 @@ module.exports = {
 					mangle: {
 						// Don't mangle top-level names.
 						toplevel: false,
-						// Preserve WC_GLOBAL_EXPORTS name for readability in page source.
-						reserved: [ 'WC_GLOBAL_EXPORTS' ],
+						// Preserve variable names for readability and PHP placeholder replacement.
+						reserved: [ 'WC_GLOBAL_EXPORTS', 'WC_PLUGIN_URL' ],
 					},
 				},
 			} ),

@@ -126,6 +126,15 @@ final class DependencyDetection {
 			$script_content
 		);
 
+		// Inject the WooCommerce plugin URL for script origin detection.
+		// This accounts for custom plugin directories (WP_PLUGIN_DIR, WP_CONTENT_DIR).
+		$wc_plugin_url  = \plugins_url( '/', WC_PLUGIN_FILE );
+		$script_content = str_replace(
+			'__WC_PLUGIN_URL_PLACEHOLDER__',
+			'"' . esc_js( $wc_plugin_url ) . '"',
+			$script_content
+		);
+
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Script content is from a trusted local file, JSON is safely encoded.
 		echo '<script id="wc-dependency-detection">' . $script_content . '</script>' . "\n";
 
@@ -208,9 +217,19 @@ final class DependencyDetection {
 	 * @return bool
 	 */
 	private function is_woocommerce_script( string $url ): bool {
-		// Check if the URL is from the WooCommerce core plugin directory.
-		// This matches /plugins/woocommerce/ but not /plugins/woocommerce-subscriptions/ etc.
-		return (bool) preg_match( '#/plugins/woocommerce/(client|assets|build|vendor)/#', $url );
+		// Get the WooCommerce plugin URL (accounts for custom plugin directories).
+		$wc_plugin_url = \plugins_url( '/', WC_PLUGIN_FILE );
+
+		// Check if the URL starts with the WooCommerce plugin URL and is in a known subdirectory.
+		if ( strpos( $url, $wc_plugin_url ) !== 0 ) {
+			return false;
+		}
+
+		// Get the path after the WooCommerce plugin URL.
+		$relative_path = substr( $url, strlen( $wc_plugin_url ) );
+
+		// Check if it's in one of the known WooCommerce asset directories.
+		return (bool) preg_match( '#^(client|assets|build|vendor)/#', $relative_path );
 	}
 
 	/**

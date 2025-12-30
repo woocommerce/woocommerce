@@ -63,8 +63,9 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	 * @testdox is_woocommerce_script returns true for WooCommerce core client path.
 	 */
 	public function test_is_woocommerce_script_returns_true_for_client_path(): void {
-		$url    = 'https://example.com/wp-content/plugins/woocommerce/client/blocks/index.js';
-		$result = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
+		$wc_plugin_url = plugins_url( '/', WC_PLUGIN_FILE );
+		$url           = $wc_plugin_url . 'client/blocks/index.js';
+		$result        = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
 		$this->assertTrue( $result );
 	}
 
@@ -72,8 +73,9 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	 * @testdox is_woocommerce_script returns true for WooCommerce core assets path.
 	 */
 	public function test_is_woocommerce_script_returns_true_for_assets_path(): void {
-		$url    = 'https://example.com/wp-content/plugins/woocommerce/assets/js/frontend.js';
-		$result = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
+		$wc_plugin_url = plugins_url( '/', WC_PLUGIN_FILE );
+		$url           = $wc_plugin_url . 'assets/js/frontend.js';
+		$result        = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
 		$this->assertTrue( $result );
 	}
 
@@ -81,8 +83,9 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	 * @testdox is_woocommerce_script returns true for WooCommerce core build path.
 	 */
 	public function test_is_woocommerce_script_returns_true_for_build_path(): void {
-		$url    = 'https://example.com/wp-content/plugins/woocommerce/build/bundle.js';
-		$result = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
+		$wc_plugin_url = plugins_url( '/', WC_PLUGIN_FILE );
+		$url           = $wc_plugin_url . 'build/bundle.js';
+		$result        = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
 		$this->assertTrue( $result );
 	}
 
@@ -90,16 +93,29 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	 * @testdox is_woocommerce_script returns true for WooCommerce core vendor path.
 	 */
 	public function test_is_woocommerce_script_returns_true_for_vendor_path(): void {
-		$url    = 'https://example.com/wp-content/plugins/woocommerce/vendor/some-lib.js';
-		$result = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
+		$wc_plugin_url = plugins_url( '/', WC_PLUGIN_FILE );
+		$url           = $wc_plugin_url . 'vendor/some-lib.js';
+		$result        = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
 		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @testdox is_woocommerce_script returns false for scripts in root directory (not in asset dirs).
+	 */
+	public function test_is_woocommerce_script_returns_false_for_root_scripts(): void {
+		$wc_plugin_url = plugins_url( '/', WC_PLUGIN_FILE );
+		$url           = $wc_plugin_url . 'readme.js';
+		$result        = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
+		$this->assertFalse( $result );
 	}
 
 	/**
 	 * @testdox is_woocommerce_script returns false for WooCommerce extensions.
 	 */
 	public function test_is_woocommerce_script_returns_false_for_subscriptions(): void {
-		$url    = 'https://example.com/wp-content/plugins/woocommerce-subscriptions/assets/js/index.js';
+		$wc_plugin_url = plugins_url( '/', WC_PLUGIN_FILE );
+		// Replace /woocommerce/ with /woocommerce-subscriptions/ in the URL.
+		$url    = str_replace( '/woocommerce/', '/woocommerce-subscriptions/', $wc_plugin_url ) . 'assets/js/index.js';
 		$result = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
 		$this->assertFalse( $result );
 	}
@@ -108,7 +124,9 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	 * @testdox is_woocommerce_script returns false for WooCommerce Payments.
 	 */
 	public function test_is_woocommerce_script_returns_false_for_payments(): void {
-		$url    = 'https://example.com/wp-content/plugins/woocommerce-payments/build/index.js';
+		$wc_plugin_url = plugins_url( '/', WC_PLUGIN_FILE );
+		// Replace /woocommerce/ with /woocommerce-payments/ in the URL.
+		$url    = str_replace( '/woocommerce/', '/woocommerce-payments/', $wc_plugin_url ) . 'build/index.js';
 		$result = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
 		$this->assertFalse( $result );
 	}
@@ -117,7 +135,9 @@ class DependencyDetectionTest extends WC_Unit_Test_Case {
 	 * @testdox is_woocommerce_script returns false for third-party plugins.
 	 */
 	public function test_is_woocommerce_script_returns_false_for_third_party(): void {
-		$url    = 'https://example.com/wp-content/plugins/my-plugin/assets/js/index.js';
+		$wc_plugin_url = plugins_url( '/', WC_PLUGIN_FILE );
+		// Replace /woocommerce/ with /my-plugin/ in the URL.
+		$url    = str_replace( '/woocommerce/', '/my-plugin/', $wc_plugin_url ) . 'assets/js/index.js';
 		$result = $this->invoke_private_method( 'is_woocommerce_script', array( $url ) );
 		$this->assertFalse( $result );
 	}
