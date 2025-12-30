@@ -4,23 +4,12 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.2.0
+ * @version 10.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 global $product;
-
-// For variable products, we disable the button by default if we
-// know at least one attribute needs to be selected to avoid shoppers
-// submitting the form with invalid data.
-// @see https://github.com/woocommerce/woocommerce/issues/62448
-$is_button_disabled_by_default = false;
-if ( $product->is_type( 'variable' ) ) {
-	$product_attributes            = array_keys( $product->get_attributes() );
-	$default_attributes            = array_keys( $product->get_default_attributes() );
-	$is_button_disabled_by_default = count( array_diff( $product_attributes, $default_attributes ) ) > 0;
-}
 ?>
 <div class="woocommerce-variation-add-to-cart variations_button">
 	<?php do_action( 'woocommerce_before_add_to_cart_button' ); ?>
@@ -39,7 +28,7 @@ if ( $product->is_type( 'variable' ) ) {
 	do_action( 'woocommerce_after_add_to_cart_quantity' );
 	?>
 
-	<button type="submit" class="single_add_to_cart_button button alt<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" <?php echo disabled( $is_button_disabled_by_default, true ); ?>><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
+	<button type="submit" class="single_add_to_cart_button button alt<?php echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); ?>" disabled><?php echo esc_html( $product->single_add_to_cart_text() ); ?></button>
 
 	<?php do_action( 'woocommerce_after_add_to_cart_button' ); ?>
 
