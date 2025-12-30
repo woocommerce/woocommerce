@@ -1047,16 +1047,16 @@ function wc_product_force_unique_sku( $product_id ) {
  * @param  integer $product_id Product ID.
  * @param  string  $sku Product SKU.
  * @param  integer $index An optional index that can be added to the product SKU.
- * @param  boolean $check_trashed Whether to check for trashed products. Defaults to false.
+ * @param  array   $excluded_statuses Statuses to exclude from the check. Defaults to array( 'trash' ).
  * @return string
  *
- * @since 10.5.0 Added $check_trashed parameter.
+ * @since 10.5.0 Added $excluded_statuses parameter.
  */
-function wc_product_generate_unique_sku( $product_id, $sku, $index = 0, $check_trashed = false ) {
+function wc_product_generate_unique_sku( $product_id, $sku, $index = 0, $excluded_statuses = array( 'trash' ) ) {
 	$generated_sku = 0 < $index ? $sku . '-' . $index : $sku;
 
-	if ( ! wc_product_has_unique_sku( $product_id, $generated_sku, $check_trashed ) ) {
-		$generated_sku = wc_product_generate_unique_sku( $product_id, $sku, ( $index + 1 ), $check_trashed );
+	if ( ! wc_product_has_unique_sku( $product_id, $generated_sku, $excluded_statuses ) ) {
+		$generated_sku = wc_product_generate_unique_sku( $product_id, $sku, ( $index + 1 ), $excluded_statuses );
 	}
 
 	return $generated_sku;

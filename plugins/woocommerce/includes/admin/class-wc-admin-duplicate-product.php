@@ -157,7 +157,7 @@ class WC_Admin_Duplicate_Product {
 		$duplicate->set_name( sprintf( esc_html__( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
 		$duplicate->set_total_sales( 0 );
 		if ( '' !== $product->get_sku( 'edit' ) ) {
-			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ), 0, true ) );
+			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ), 0, array() ) );
 		}
 		if ( '' !== $product->get_global_unique_id( 'edit' ) ) {
 			$duplicate->set_global_unique_id( '' );
@@ -204,7 +204,7 @@ class WC_Admin_Duplicate_Product {
 				$this->generate_unique_slug( $child_duplicate );
 
 				if ( '' !== $child->get_sku( 'edit' ) ) {
-					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ), 0, true ) );
+					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ), 0, array() ) );
 				}
 				if ( '' !== $child->get_global_unique_id( 'edit' ) ) {
 					$child_duplicate->set_global_unique_id( '' );

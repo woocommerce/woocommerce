@@ -1212,17 +1212,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @since 3.0.0
 	 * @param int    $product_id Product ID.
 	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
-	 * @param bool   $check_trashed Whether to check for trashed products. Defaults to false.
+	 * @param array  $excluded_statuses Statuses to exclude from the check. Defaults to array( 'trash' ).
 	 * @return bool
 	 *
-	 * @since 10.5.0 Added $check_trashed parameter.
+	 * @since 10.5.0 Added $excluded_statuses parameter.
 	 */
-	public function is_existing_sku( $product_id, $sku, $check_trashed = false ) {
+	public function is_existing_sku( $product_id, $sku, $excluded_statuses = array( 'trash' ) ) {
 		global $wpdb;
 
 		// Note: this is directly injected into the SQL query. Be mindful if
 		// using it with untrusted data.
-		$exclude_trashed_sql = $check_trashed ? '' : "AND posts.post_status != 'trash'";
+		$exclude_trashed_sql =
+			is_array( $excluded_statuses ) && count( $excluded_statuses ) > 0 ?
+				"AND posts.post_status NOT IN ( '" . implode( "','", esc_sql( $excluded_statuses ) ) . "' )" :
+				'';
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return (bool) $wpdb->get_var(
