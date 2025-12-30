@@ -180,6 +180,10 @@ final class DependencyDetection {
 
 			// Get the full URL.
 			$src = $script->src;
+			if ( ! is_string( $src ) ) {
+				// Skip malformed src.
+				continue;
+			}
 			if ( ! preg_match( '|^(https?:)?//|', $src ) ) {
 				// Relative URL - make it absolute.
 				$src = $wp_scripts->base_url . $src;

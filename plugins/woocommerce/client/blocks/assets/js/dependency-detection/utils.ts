@@ -103,7 +103,7 @@ export function isWooCommerceScript(
 	}
 
 	// Check if the URL starts with the WooCommerce plugin URL.
-	if ( url.indexOf( wcPluginUrl ) !== 0 ) {
+	if ( ! url.startsWith( wcPluginUrl ) ) {
 		return false;
 	}
 
@@ -112,7 +112,7 @@ export function isWooCommerceScript(
 
 	// Check if it's in one of the known WooCommerce asset directories.
 	for ( let i = 0; i < WC_ASSET_DIRS.length; i++ ) {
-		if ( relativePath.indexOf( WC_ASSET_DIRS[ i ] ) === 0 ) {
+		if ( relativePath.startsWith( WC_ASSET_DIRS[ i ] ) ) {
 			return true;
 		}
 	}
@@ -157,12 +157,12 @@ export function getFilename( url: string | null ): string {
  */
 export function shouldSkipLine( line: string, currentPage: string ): boolean {
 	// Skip lines from the current page (our inline detection script).
-	if ( line.indexOf( currentPage + ':' ) !== -1 ) {
+	if ( line.includes( currentPage + ':' ) ) {
 		return true;
 	}
 
 	// Skip webpack source-mapped files (internal build artifacts).
-	if ( line.indexOf( 'webpack://' ) !== -1 ) {
+	if ( line.includes( 'webpack://' ) ) {
 		return true;
 	}
 
