@@ -8,6 +8,12 @@
 /**
  * Exact mapping of wc.* property names to their required handles.
  * Must match PHP DependencyDetection::WC_GLOBAL_EXPORTS exactly.
+ *
+ * This interface is used for development-time dependency warnings only.
+ * It is not a public API and may change without notice. Extensions should
+ * not rely on which properties are tracked or the detection behavior.
+ *
+ * @internal
  */
 export interface WcGlobalExportsMap {
 	wcBlocksRegistry: 'wc-blocks-registry';
@@ -26,11 +32,15 @@ export interface WcGlobalExportsMap {
 
 /**
  * Allowed window.wc.* property names that are tracked.
+ *
+ * @internal
  */
 export type WcGlobalKey = keyof WcGlobalExportsMap;
 
 /**
  * WooCommerce script dependency handles.
+ *
+ * @internal
  */
 export type WcDependencyHandle = WcGlobalExportsMap[ WcGlobalKey ];
 
@@ -95,10 +105,17 @@ export function getFilename( url: string | null ): string {
 }
 
 /**
- * Check if a stack line should be skipped (internal code).
+ * Check if a stack trace line should be skipped when searching for the caller.
+ *
+ * We skip internal lines because we want to find the actual third-party script
+ * that accessed wc.*, not the detection code itself. Lines to skip include:
+ * - Current page lines: These are from our inline detection script (the IIFE
+ *   output by PHP). They appear as "cart/:123" or "checkout/:456" in the stack.
+ * - Webpack source maps: Internal WooCommerce build artifacts that aren't the
+ *   actual caller script.
  *
  * @param line        - A single line from the stack trace.
- * @param currentPage - The current page pathname.
+ * @param currentPage - The current page pathname (e.g., '/cart/', '/checkout/').
  * @return True if this line should be skipped.
  */
 export function shouldSkipLine( line: string, currentPage: string ): boolean {
