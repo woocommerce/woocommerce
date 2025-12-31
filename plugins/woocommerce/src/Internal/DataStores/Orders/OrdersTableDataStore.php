@@ -2425,21 +2425,23 @@ FROM $order_meta_table
 		$order_id = $order->get_id();
 		$order_data = $order->get_data();
 		$has_existing_date_created = $order_id > 0 && isset( $order_data['date_created'] ) && null !== $order_data['date_created'];
+		$is_status_transition = $only_changes && isset( $changes['status'] ) && isset( $order_data['status'] ) && $changes['status'] !== $order_data['status'];
 
 		foreach ( $column_mapping as $column => $details ) {
 			if ( ! isset( $details['name'] ) || ! array_key_exists( $details['name'], $changes ) ) {
 				continue;
 			}
 
-			if ( 'date_created_gmt' === $column && 'date_created' === $details['name'] && $has_existing_date_created ) {
+			// Only protect date_created_gmt during status transitions to prevent corruption from hooks.
+			if ( 'date_created_gmt' === $column && 'date_created' === $details['name'] && $has_existing_date_created && $is_status_transition ) {
 				$is_admin_edit = is_admin() && isset( $_POST['order_date'] ) && ! empty( $_POST['order_date'] ); // phpcs:ignore WordPress.Security.NonceVerification
 				
 				/**
-				 * Filter to allow updating date_created_gmt for existing orders (e.g., admin manual edits).
+				 * Filter to allow updating date_created_gmt during status transitions.
 				 *
-				 * By default, date_created_gmt is protected from being overwritten after initial creation
-				 * to prevent corruption during status transitions. Admin edits are automatically allowed.
-				 * Use this filter to allow updates in other scenarios.
+				 * By default, date_created_gmt is protected during status transitions to prevent
+				 * corruption from plugins that incorrectly modify dates in status change hooks.
+				 * Admin edits are automatically allowed. Use this filter to allow updates in other scenarios.
 				 *
 				 * @param bool             $allow_update Whether to allow updating date_created_gmt. Default false, or true for admin edits.
 				 * @param \WC_Abstract_Order $order        The order object.

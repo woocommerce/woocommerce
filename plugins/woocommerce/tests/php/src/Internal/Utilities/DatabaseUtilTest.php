@@ -166,6 +166,16 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Test that format_object_value_for_db properly converts non-UTC timezones to UTC.
+	 */
+	public function test_format_object_value_for_db_date_with_wc_datetime_non_utc() {
+		$datetime = new \WC_DateTime( '2025-01-15 10:30:00', new \DateTimeZone( 'America/New_York' ) );
+		$result  = $this->sut->format_object_value_for_db( $datetime, 'date' );
+		// America/New_York is UTC-5 in January (EST), so 10:30 EST = 15:30 UTC
+		$this->assertEquals( '2025-01-15 15:30:00', $result );
+	}
+
+	/**
 	 * @testDox Test that format_object_value_for_db properly handles numeric timestamps for date type.
 	 */
 	public function test_format_object_value_for_db_date_with_timestamp() {
@@ -175,30 +185,20 @@ class DatabaseUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test that format_object_value_for_db detects and converts millisecond timestamps for date type.
+	 * @testDox Test that format_object_value_for_db rejects millisecond timestamps with clear error.
 	 */
-	public function test_format_object_value_for_db_date_with_millisecond_timestamp() {
-		$timestamp_seconds = strtotime( '2025-01-15 10:30:00 UTC' );
-		$millisecond_timestamp = $timestamp_seconds * 1000;
-		$result                = $this->sut->format_object_value_for_db( $millisecond_timestamp, 'date' );
-		$this->assertEquals( '2025-01-15 10:30:00', $result );
-	}
-
-	/**
-	 * @testDox Test that format_object_value_for_db rejects timestamps that result in dates beyond year 2100.
-	 */
-	public function test_format_object_value_for_db_date_rejects_future_dates() {
-		$invalid_timestamp = 17369442000000;
+	public function test_format_object_value_for_db_date_rejects_millisecond_timestamps() {
+		$millisecond_timestamp = 1736944200000;
 		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( 'Invalid timestamp value' );
-		$this->sut->format_object_value_for_db( $invalid_timestamp, 'date' );
+		$this->expectExceptionMessage( 'appears to be in milliseconds' );
+		$this->sut->format_object_value_for_db( $millisecond_timestamp, 'date' );
 	}
 
 	/**
-	 * @testDox Test that format_object_value_for_db rejects timestamps beyond year 2100 even after conversion.
+	 * @testDox Test that format_object_value_for_db rejects dates beyond year 2200.
 	 */
-	public function test_format_object_value_for_db_date_rejects_dates_after_2100() {
-		$future_date_string = '2101-01-01 00:00:00';
+	public function test_format_object_value_for_db_date_rejects_dates_after_2200() {
+		$future_date_string = '2201-01-01 00:00:00';
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Invalid date value results in year' );
 		$this->sut->format_object_value_for_db( $future_date_string, 'date' );

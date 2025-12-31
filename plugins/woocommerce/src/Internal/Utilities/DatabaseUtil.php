@@ -15,6 +15,11 @@ use Vtiful\Kernel\Format;
 class DatabaseUtil {
 
 	/**
+	 * Threshold for detecting millisecond timestamps (timestamp for year 2200).
+	 */
+	private const MILLISECOND_THRESHOLD = 7258118400; // 2200-01-01 00:00:00 UTC
+
+	/**
 	 * Wrapper for the WordPress dbDelta function, allows to execute a series of SQL queries.
 	 *
 	 * @param string $queries The SQL queries to execute.
@@ -197,15 +202,18 @@ class DatabaseUtil {
 				$formatted_date = $datetime->format( 'Y-m-d H:i:s' );
 			} elseif ( is_numeric( $value ) ) {
 				$timestamp = (int) $value;
-				if ( $timestamp > 4102444800 ) {
-					$timestamp = (int) ( $timestamp / 1000 );
+				
+				// Reject timestamps that appear to be in milliseconds.
+				if ( $timestamp > self::MILLISECOND_THRESHOLD ) {
+					throw new \Exception( sprintf( 'Invalid timestamp value: %d appears to be in milliseconds (expected Unix timestamp in seconds). If you need to convert milliseconds, divide by 1000 first.', $timestamp ) );
 				}
 
 				if ( $validate ) {
 					$min_timestamp = 0;
-					$max_timestamp = 4102444800;
+					$max_timestamp = self::MILLISECOND_THRESHOLD;
+
 					if ( $timestamp < $min_timestamp || $timestamp > $max_timestamp ) {
-						throw new \Exception( sprintf( 'Invalid timestamp value: %d (expected range: %d - %d)', $value, $min_timestamp, $max_timestamp ) );
+						throw new \Exception( sprintf( 'Invalid timestamp value: %d (expected range: %d - %d)', $timestamp, $min_timestamp, $max_timestamp ) );
 					}
 				}
 
@@ -218,8 +226,9 @@ class DatabaseUtil {
 
 			if ( $validate ) {
 				$formatted_year = (int) substr( $formatted_date, 0, 4 );
-				if ( $formatted_year > 2100 ) {
-					throw new \Exception( sprintf( 'Invalid date value results in year %d (dates beyond 2100 are not allowed)', $formatted_year ) );
+
+				if ( $formatted_year > 2200 ) {
+					throw new \Exception( sprintf( 'Invalid date value results in year %d (dates beyond 2200 are not allowed)', $formatted_year ) );
 				}
 			}
 
@@ -232,7 +241,11 @@ class DatabaseUtil {
 			if ( function_exists( 'wc_get_logger' ) ) {
 				wc_get_logger()->error(
 					sprintf( 'Invalid date value in DatabaseUtil::format_object_value_for_db: %s', $e->getMessage() ),
-					array( 'source' => 'woocommerce', 'value' => $value )
+					array(
+						'source'     => 'woocommerce',
+						'value_type' => gettype( $value ),
+						'is_numeric' => is_numeric( $value ),
+					)
 				);
 			}
 			throw new \Exception( sprintf( 'Invalid date value: %s', $e->getMessage() ) );

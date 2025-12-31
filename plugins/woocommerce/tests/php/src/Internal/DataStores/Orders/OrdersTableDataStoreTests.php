@@ -2541,9 +2541,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$date_year = (int) substr( $date_after_status_change, 0, 4 );
 		$this->assertLessThanOrEqual(
-			2100,
+			2200,
 			$date_year,
-			'date_created_gmt should not be in an invalid future year (beyond 2100). Got year: ' . $date_year
+			'date_created_gmt should not be in an invalid future year (beyond 2200). Got year: ' . $date_year
 		);
 		$this->assertGreaterThanOrEqual(
 			2020,
