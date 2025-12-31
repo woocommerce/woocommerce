@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Flat rate: allow empty main cost so class-only rates work again
