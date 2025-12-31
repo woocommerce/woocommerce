@@ -72,6 +72,8 @@ final class DependencyDetection {
 
 	/**
 	 * Initialize hooks.
+	 *
+	 * @since 10.5.0
 	 */
 	public function init(): void {
 		// Only run when debugging is enabled.
@@ -94,6 +96,8 @@ final class DependencyDetection {
 	 * This must run before any WooCommerce scripts to intercept access.
 	 * The script is loaded from a separate file for better IDE support and testing,
 	 * but output inline to ensure correct timing (before any enqueued scripts).
+	 *
+	 * @since 10.5.0
 	 */
 	public function output_early_proxy_setup(): void {
 		// Only run on pages that have the tracked blocks.
@@ -146,6 +150,8 @@ final class DependencyDetection {
 	 *
 	 * This runs late (wp_print_footer_scripts) to ensure all scripts,
 	 * including those registered via IntegrationInterface, are captured.
+	 *
+	 * @since 10.5.0
 	 */
 	public function output_script_registry(): void {
 		// Only output registry if the proxy was set up earlier.
