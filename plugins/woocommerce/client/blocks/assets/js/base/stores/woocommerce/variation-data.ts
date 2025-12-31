@@ -1,10 +1,7 @@
 /**
- * Shared variation data store for lazy-loading variation information.
- *
- * This module provides a centralized cache and fetch mechanism for variation
- * data that can be used by multiple blocks (ProductPrice, AddToCartWithOptions, etc.)
- * to avoid duplicate API requests and share cached data.
+ * External dependencies
  */
+import { store } from '@wordpress/interactivity';
 
 /**
  * Shape of variation data stored in the cache.
@@ -17,17 +14,30 @@ export type VariationData = {
 	availability?: string;
 };
 
-// Shared cache for fetched variation data.
-const variationDataCache: Record< number, VariationData > = {};
+export type Store = {
+	state: {
+		variations: Record< number, VariationData >;
+	};
+};
 
 // Track in-flight requests to avoid duplicate fetches.
 const pendingRequests: Record< number, Promise< VariationData | null > > = {};
 
+const { state } = store< Store >(
+	'woocommerce/variation-data',
+	{
+		state: {
+			variations: {},
+		},
+	},
+	{ lock: true }
+);
+
 /**
  * Fetch variation data from the Store API.
  *
- * This fetches the full variation data and caches it for use by any block
- * that needs variation information (price, stock status, etc.).
+ * This fetches the full variation data and caches it in the store for use by
+ * any block that needs variation information (price, stock status, etc.).
  *
  * @param variationId The variation ID to fetch.
  * @return Promise resolving to the variation data or null on error.
@@ -36,8 +46,8 @@ export async function fetchVariationData(
 	variationId: number
 ): Promise< VariationData | null > {
 	// Return cached data if available.
-	if ( variationDataCache[ variationId ] ) {
-		return variationDataCache[ variationId ];
+	if ( state.variations[ variationId ] ) {
+		return state.variations[ variationId ];
 	}
 
 	// Return existing promise if request is in flight.
@@ -75,7 +85,7 @@ export async function fetchVariationData(
 					: data.availability?.availability || '',
 			};
 
-			variationDataCache[ variationId ] = variationData;
+			state.variations[ variationId ] = variationData;
 			return variationData;
 		} catch ( error ) {
 			// eslint-disable-next-line no-console
@@ -104,31 +114,7 @@ export async function fetchVariationData(
 export function getCachedVariationData(
 	variationId: number
 ): VariationData | undefined {
-	return variationDataCache[ variationId ];
+	return state.variations[ variationId ];
 }
 
-/**
- * Check if variation data is cached.
- *
- * @param variationId The variation ID.
- * @return True if the variation data is cached.
- */
-export function isVariationDataCached( variationId: number ): boolean {
-	return variationId in variationDataCache;
-}
-
-/**
- * Manually set variation data in the cache.
- *
- * This can be used to populate the cache from pre-loaded data
- * without making an API request.
- *
- * @param variationId   The variation ID.
- * @param variationData The variation data to cache.
- */
-export function setCachedVariationData(
-	variationId: number,
-	variationData: VariationData
-): void {
-	variationDataCache[ variationId ] = variationData;
-}
+export { state };

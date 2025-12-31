@@ -23,7 +23,7 @@ import { getMatchedVariation } from '../../../base/utils/variations/get-matched-
 import {
 	fetchVariationData,
 	getCachedVariationData,
-} from '../../../base/utils/variations/variation-data-store';
+} from '../../../base/stores/woocommerce/variation-data';
 import setStyles from './set-styles';
 
 type Option = {

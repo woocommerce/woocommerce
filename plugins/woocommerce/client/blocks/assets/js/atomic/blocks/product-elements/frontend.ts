@@ -19,9 +19,9 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
  * Internal dependencies
  */
 import {
+	state as variationDataState,
 	fetchVariationData,
-	getCachedVariationData,
-} from '../../../base/utils/variations/variation-data-store';
+} from '../../../base/stores/woocommerce/variation-data';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -66,7 +66,7 @@ export type Context = {
 };
 
 /**
- * Get variation data from pre-loaded config or shared cache.
+ * Get variation data from pre-loaded config or store state.
  *
  * @param productId   The parent product ID.
  * @param variationId The variation ID.
@@ -84,8 +84,8 @@ function getVariationData(
 		return preloadedData;
 	}
 
-	// Check shared cache for lazy-loaded data.
-	const cachedData = getCachedVariationData( variationId );
+	// Check store state for lazy-loaded data.
+	const cachedData = variationDataState.variations[ variationId ];
 	if ( cachedData ) {
 		return cachedData as ProductData;
 	}
@@ -144,7 +144,7 @@ const productElementStore = store(
 					// Show loading state.
 					element.ref.style.opacity = '0.5';
 
-					// Fetch the variation data (uses shared cache).
+					// Fetch the variation data (caches in store).
 					const fetchedData = await fetchVariationData( variationId );
 
 					// Remove loading state.
