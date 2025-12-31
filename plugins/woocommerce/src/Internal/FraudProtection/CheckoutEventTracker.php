@@ -379,8 +379,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	public function get_scheduled_action_ids( string $session_id, string $event_type ): array {
 		global $wpdb;
 
-		// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
-		// phpstan:ignore class.notFound
+		// @phpstan-ignore-next-line class.notFound
 		$sql = $wpdb->prepare(
 			"SELECT a.action_id
 			FROM {$wpdb->actionscheduler_actions} a
