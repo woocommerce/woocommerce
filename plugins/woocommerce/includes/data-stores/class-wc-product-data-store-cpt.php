@@ -1243,8 +1243,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				WHERE
 				posts.post_type IN ( 'product', 'product_variation' )
 				" .
-				// Variables used inside $excluded_statuses_sql are whitelisted,
-				// so it's safe to not pass it as a $wpdb->prepare() variable.
+				// Variables used inside $excluded_statuses_sql are whitelisted
+				// and sanitized, so it's safe to not pass $excluded_statuses_sql
+				// as a $wpdb->prepare() variable.
 				$excluded_statuses_sql // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				. '
 				AND lookup.sku = %s

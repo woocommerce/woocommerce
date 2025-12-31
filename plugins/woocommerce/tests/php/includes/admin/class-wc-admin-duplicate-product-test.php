@@ -47,7 +47,7 @@ class WC_Admin_Duplicate_Product_Test extends WC_Unit_Test_Case {
 		// Create a duplicate and trash it.
 		$first_duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
 		$first_duplicate->save();
-		$first_duplicate->delete(); // Move to trash.
+		$first_duplicate->delete();
 
 		// Verify the trashed product is in trash.
 		$this->assertEquals( 'trash', $first_duplicate->get_status() );
@@ -55,7 +55,8 @@ class WC_Admin_Duplicate_Product_Test extends WC_Unit_Test_Case {
 		// Duplicate the original product.
 		$second_duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
 
-		// Verify the duplicate has SKU 'woo-cap-2' (skipping 'woo-cap-1' which is trashed).
+		// Verify the duplicate was created successfully and has SKU 'woo-cap-2'
+		// (skipping 'woo-cap-1' which is trashed).
 		$this->assertEquals( 'woo-cap-2', $second_duplicate->get_sku() );
 		$this->assertNotEquals( $product->get_id(), $second_duplicate->get_id() );
 	}
