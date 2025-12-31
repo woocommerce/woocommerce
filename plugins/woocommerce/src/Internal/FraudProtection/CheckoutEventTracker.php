@@ -370,6 +370,11 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	/**
 	 * Cancel scheduled tracking actions for a specific session and event type.
 	 *
+	 * Uses custom SQL query with JSON_EXTRACT on extended_args to find actions
+	 * matching session_id and event_type. This is necessary because our collected_data
+	 * is too large and gets stored in extended_args, and Action Scheduler's query
+	 * builder doesn't support partial matching on extended_args.
+	 *
 	 * @param string|null $session_id Optional session ID. If not provided, uses current session.
 	 * @param string $event_type Event type to cancel.
 	 * @return void
@@ -383,16 +388,44 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			return;
 		}
 
-		if ( function_exists( 'as_unschedule_all_actions' ) ) {
-			// Only cancel actions for this specific session by including session_id in args.
-			as_unschedule_all_actions(
+		global $wpdb;
+
+		// Use custom SQL with JSON_EXTRACT on extended_args column.
+		// Action Scheduler's query builder doesn't support partial matching on extended_args.
+		if ( class_exists( 'ActionScheduler' ) && \ActionScheduler::is_initialized( __FUNCTION__ ) ) {
+			// Query for ALL pending actions matching session_id and event_type.
+			$sql = $wpdb->prepare(
+				"SELECT a.action_id
+				FROM {$wpdb->actionscheduler_actions} a
+				LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id = a.group_id
+				WHERE a.hook = %s
+				AND g.slug = %s
+				AND a.status = %s
+				AND a.extended_args IS NOT NULL
+				AND JSON_EXTRACT(a.extended_args, '$.session_id') = %s
+				AND JSON_EXTRACT(a.extended_args, '$.event_type') = %s
+				ORDER BY a.scheduled_date_gmt ASC",
 				self::SCHEDULED_ACTION_HOOK,
-				array( 
-					'session_id' => $session_id,
-					'event_type' => $event_type,
-				 ),
-				'woocommerce-fraud-protection'
+				'woocommerce-fraud-protection',
+				\ActionScheduler_Store::STATUS_PENDING,
+				$session_id,
+				$event_type
 			);
+
+			$action_ids = $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+			// Cancel all found actions.
+			foreach ( $action_ids as $action_id ) {
+				try {
+					\ActionScheduler::store()->cancel_action( (int) $action_id );
+				} catch ( \Exception $e ) {
+					// Log but continue - action might have been cancelled by another process.
+					FraudProtectionController::log(
+						'warning',
+						sprintf( 'Failed to cancel scheduled action %d: %s', $action_id, $e->getMessage() )
+					);
+				}
+			}
 		}
 	}
 
