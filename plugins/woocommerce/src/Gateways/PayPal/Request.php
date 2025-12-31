@@ -27,7 +27,7 @@ class Request {
 	/**
 	 * The PayPal gateway instance.
 	 *
-	 * @var \WC_Gateway_Paypal
+	 * @var \\WC_Gateway_Paypal
 	 */
 	private $gateway;
 
@@ -59,7 +59,7 @@ class Request {
 	/**
 	 * Constructor.
 	 *
-	 * @param \WC_Gateway_Paypal $gateway Paypal gateway object.
+	 * @param \\WC_Gateway_Paypal $gateway Paypal gateway object.
 	 */
 	public function __construct( $gateway ) {
 		$this->gateway = $gateway;
@@ -158,7 +158,7 @@ class Request {
 				'redirect_url' => $redirect_url,
 			);
 		} catch ( Exception $e ) {
-			WC_Gateway_Paypal::log( $e->getMessage() );
+			\WC_Gateway_Paypal::log( $e->getMessage() );
 			if ( $paypal_debug_id ) {
 				$order->add_order_note(
 					sprintf(
@@ -217,18 +217,18 @@ class Request {
 		$paypal_debug_id = null;
 		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
 		if ( ! $paypal_order_id ) {
-			WC_Gateway_Paypal::log( 'PayPal order ID not found. Cannot ' . $action . ' payment.' );
+			\WC_Gateway_Paypal::log( 'PayPal order ID not found. Cannot ' . $action . ' payment.' );
 			return;
 		}
 
 		if ( ! $action_url || ! filter_var( $action_url, FILTER_VALIDATE_URL ) ) {
-			WC_Gateway_Paypal::log( 'Invalid or missing action URL. Cannot ' . $action . ' payment.' );
+			\WC_Gateway_Paypal::log( 'Invalid or missing action URL. Cannot ' . $action . ' payment.' );
 			return;
 		}
 
 		// Skip if the payment is already captured.
 		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
 
@@ -264,7 +264,7 @@ class Request {
 				throw new Exception( 'PayPal ' . $action . ' payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 		} catch ( Exception $e ) {
-			WC_Gateway_Paypal::log( $e->getMessage() );
+			\WC_Gateway_Paypal::log( $e->getMessage() );
 			$note_message = sprintf(
 				/* translators: %1$s: Action, %2$s: PayPal order ID */
 				__( 'PayPal %1$s payment failed. PayPal Order ID: %2$s', 'woocommerce' ),
@@ -296,21 +296,21 @@ class Request {
 	 */
 	public function capture_authorized_payment( $order ) {
 		if ( ! $order ) {
-			WC_Gateway_Paypal::log( 'Order not found to capture authorized payment.' );
+			\WC_Gateway_Paypal::log( 'Order not found to capture authorized payment.' );
 			return;
 		}
 
 		$paypal_order_id = $order->get_meta( '_paypal_order_id', true );
 		// Skip if the PayPal Order ID is not found. This means the order was not created via the Orders v2 API.
 		if ( ! $paypal_order_id ) {
-			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
 			return;
 		}
 
 		$capture_id = $order->get_meta( '_paypal_capture_id', true );
 		// Skip if the payment is already captured.
 		if ( $capture_id ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is already captured. PayPal capture ID: ' . $capture_id . '. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'PayPal payment is already captured. PayPal capture ID: ' . $capture_id . '. Order ID: ' . $order->get_id() );
 			return;
 		}
 
@@ -318,25 +318,25 @@ class Request {
 
 		// Skip if the payment is already captured.
 		if ( PayPalConstants::STATUS_CAPTURED === $paypal_status || PayPalConstants::STATUS_COMPLETED === $paypal_status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
 
 		// Skip if the payment requires payer action.
 		if ( PayPalConstants::STATUS_PAYER_ACTION_REQUIRED === $paypal_status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment requires payer action. Skipping capture. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'PayPal payment requires payer action. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
 
 		// Skip if the payment is voided.
 		if ( PayPalConstants::VOIDED === $paypal_status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment voided. Skipping capture. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'PayPal payment voided. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
 
 		$authorization_id = $this->get_authorization_id_for_capture( $order );
 		if ( ! $authorization_id ) {
-			WC_Gateway_Paypal::log( 'Authorization ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'Authorization ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
 			return;
 		}
 
@@ -370,7 +370,7 @@ class Request {
 			$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_CAPTURED );
 			$order->save();
 		} catch ( Exception $e ) {
-			WC_Gateway_Paypal::log( $e->getMessage() );
+			\WC_Gateway_Paypal::log( $e->getMessage() );
 
 			$note_message = sprintf(
 				__( 'PayPal capture authorized payment failed', 'woocommerce' ),
@@ -435,7 +435,7 @@ class Request {
 
 		// If the authorization ID is not found, try to retrieve it from the PayPal order details.
 		if ( empty( $authorization_id ) ) {
-			WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
 
 			try {
 				$order_data         = $this->get_paypal_order_details( $paypal_order_id );
@@ -453,7 +453,7 @@ class Request {
 					$order->update_meta_data( '_paypal_capture_id', $capture_id );
 					$order->update_meta_data( '_paypal_status', $capture_data['status'] ?? PayPalConstants::STATUS_CAPTURED );
 					$order->save();
-					WC_Gateway_Paypal::log( 'Storing capture ID from Paypal. Order ID: ' . $order->get_id() . '; capture ID: ' . $capture_id );
+					\WC_Gateway_Paypal::log( 'Storing capture ID from Paypal. Order ID: ' . $order->get_id() . '; capture ID: ' . $capture_id );
 					return null;
 				}
 
@@ -467,19 +467,19 @@ class Request {
 					$authorization_id = $authorization_data['id'];
 					$order->update_meta_data( '_paypal_authorization_id', $authorization_id );
 					$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_AUTHORIZED );
-					WC_Gateway_Paypal::log( 'Storing authorization ID from Paypal. Order ID: ' . $order->get_id() . '; authorization ID: ' . $authorization_id );
+					\WC_Gateway_Paypal::log( 'Storing authorization ID from Paypal. Order ID: ' . $order->get_id() . '; authorization ID: ' . $authorization_id );
 					$order->save();
 				} else {
 					// Scenario 2: Order details API call returned empty authorization array (authorization object does not exist).
 					// Store '_paypal_authorization_checked' flag to prevent repeated API calls.
 					// This flag indicates that we've made an API call to get PayPal order details and confirmed no authorization object exists.
-					WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
+					\WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
 					$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
 					$order->save();
 					return null;
 				}
 			} catch ( Exception $e ) {
-				WC_Gateway_Paypal::log( 'Error retrieving authorization ID from PayPal order details. Order ID: ' . $order->get_id() . '. Error: ' . $e->getMessage() );
+				\WC_Gateway_Paypal::log( 'Error retrieving authorization ID from PayPal order details. Order ID: ' . $order->get_id() . '. Error: ' . $e->getMessage() );
 				return null;
 			}
 		}
@@ -715,7 +715,7 @@ class Request {
 				'order_key' => $order->get_order_key(),
 				// Endpoint for the proxy to forward webhooks to.
 				'site_url'  => home_url(),
-				'site_id'   => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
+				'site_id'   => class_exists( '\Jetpack_Options' ) ? \Jetpack_Options::get_option( 'id' ) : null,
 				'v'         => WC_VERSION,
 			)
 		);
@@ -859,7 +859,7 @@ class Request {
 		$raw_country = $country;
 		$country     = $this->normalize_paypal_order_shipping_country_code( $raw_country );
 		if ( ! $country ) {
-			WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code. Raw value: %s', $raw_country ), 'error' );
+			\WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code. Raw value: %s', $raw_country ), 'error' );
 			return null;
 		}
 
@@ -868,12 +868,12 @@ class Request {
 		// TODO: The container call can be removed once we migrate this class to the `src` folder.
 		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance();
 		if ( empty( $city ) && $address_requirements->country_requires_city( $country ) ) {
-			WC_Gateway_Paypal::log( sprintf( 'City is required for country: %s', $country ), 'error' );
+			\WC_Gateway_Paypal::log( sprintf( 'City is required for country: %s', $country ), 'error' );
 			return null;
 		}
 
 		if ( empty( $postcode ) && $address_requirements->country_requires_postal_code( $country ) ) {
-			WC_Gateway_Paypal::log( sprintf( 'Postal code is required for country: %s', $country ), 'error' );
+			\WC_Gateway_Paypal::log( sprintf( 'Postal code is required for country: %s', $country ), 'error' );
 			return null;
 		}
 
@@ -908,12 +908,12 @@ class Request {
 				return $code;
 			}
 
-			WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
+			\WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
 			return null;
 		}
 
 		// Log when we get an unexpected country code length.
-		WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $code ), $code ) );
+		\WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $code ), $code ) );
 
 		// Truncate to the expected maximum length (3).
 		$max_country_code_length = PayPalConstants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
@@ -924,7 +924,7 @@ class Request {
 		// Check if it's a valid alpha-3 code.
 		$alpha2 = wc()->countries->get_country_from_alpha_3_code( $code );
 		if ( null === $alpha2 ) {
-			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
+			\WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
 		}
 
 		return $alpha2;
@@ -991,7 +991,7 @@ class Request {
 
 			return $response_data['client_id'] ?? null;
 		} catch ( Exception $e ) {
-			WC_Gateway_Paypal::log( $e->getMessage() );
+			\WC_Gateway_Paypal::log( $e->getMessage() );
 			return null;
 		}
 	}
@@ -1009,7 +1009,7 @@ class Request {
 	private function send_wpcom_proxy_request( $method, $endpoint, $request_body ) {
 		$site_id = \Jetpack_Options::get_option( 'id' );
 		if ( ! $site_id ) {
-			WC_Gateway_Paypal::log( sprintf( 'Site ID not found. Cannot send request to %s.', $endpoint ) );
+			\WC_Gateway_Paypal::log( sprintf( 'Site ID not found. Cannot send request to %s.', $endpoint ) );
 			throw new Exception( 'Site ID not found. Cannot send proxy request.' );
 		}
 
