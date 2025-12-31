@@ -554,7 +554,11 @@ class SessionDataCollector {
 			 * @return array Modified payment data array.
 			 */
 			if ( $chosen_payment_method ) {
-				// Hook: woocommerce_fraud_protection_payment_data_{payment_method}.
+				/**
+			 * Hook: woocommerce_fraud_protection_payment_data_{payment_method}.
+			 *
+			 * @since 10.5.0
+			 */
 				$payment_data = apply_filters(
 					"woocommerce_fraud_protection_payment_data_{$chosen_payment_method}",
 					$payment_data,
