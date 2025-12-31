@@ -176,7 +176,7 @@ class ProductSpecifications extends AbstractBlock {
 								<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 							</th>
 							<?php if ( $is_interactive && in_array( $product_attribute_key, array( 'weight', 'dimensions' ), true ) ) : ?>
-								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.<?php echo esc_attr( $product_attribute_key ); ?>" data-lazy-load-variations="<?php echo esc_attr( $use_lazy_load ? 'true' : 'false' ); ?>">
+								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.<?php echo esc_attr( $product_attribute_key ); ?>">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>
 							<?php else : ?>	

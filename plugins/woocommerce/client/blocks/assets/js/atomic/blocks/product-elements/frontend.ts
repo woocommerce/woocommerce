@@ -66,21 +66,6 @@ export type Context = {
 };
 
 /**
- * Check if lazy loading of variation data is enabled for an element.
- *
- * Reads from the data-lazy-load-variations attribute set by the PHP block render.
- * This allows different block instances to have different lazy load settings,
- * even when displaying the same product.
- *
- * @param element The element to check.
- * @return True if lazy loading of variations is enabled.
- */
-function isLazyLoadVariationsEnabled( element: HTMLElement ): boolean {
-	const wrapper = element.closest( '[data-lazy-load-variations]' );
-	return wrapper?.getAttribute( 'data-lazy-load-variations' ) === 'true';
-}
-
-/**
  * Get variation data from pre-loaded config or shared cache.
  *
  * @param productId   The parent product ID.
@@ -154,12 +139,8 @@ const productElementStore = store(
 				const variationId = productDataState?.variationId || 0;
 				const productId = productDataState.productId;
 
-				// Check if we need to fetch data lazily.
-				if (
-					variationId &&
-					isLazyLoadVariationsEnabled( element.ref ) &&
-					! getVariationData( productId, variationId )
-				) {
+				// If variation is selected but data doesn't exist, fetch it.
+				if ( variationId && ! getVariationData( productId, variationId ) ) {
 					// Show loading state.
 					element.ref.style.opacity = '0.5';
 

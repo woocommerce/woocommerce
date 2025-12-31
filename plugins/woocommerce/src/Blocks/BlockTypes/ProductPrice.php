@@ -130,8 +130,7 @@ class ProductPrice extends AbstractBlock {
 						);
 
 						wp_enqueue_script_module( 'woocommerce/product-elements' );
-						$wrapper_attributes['data-wp-interactive']       = 'woocommerce/product-elements';
-						$wrapper_attributes['data-lazy-load-variations'] = 'true';
+						$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
 						$context_directive                         = wp_interactivity_data_wp_context(
 							array(
 								'productElementKey' => 'price_html',
@@ -178,9 +177,8 @@ class ProductPrice extends AbstractBlock {
 						);
 
 						wp_enqueue_script_module( 'woocommerce/product-elements' );
-						$wrapper_attributes['data-wp-interactive']       = 'woocommerce/product-elements';
-						$wrapper_attributes['data-lazy-load-variations'] = 'false';
-						$context_directive                               = wp_interactivity_data_wp_context(
+						$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
+						$context_directive                         = wp_interactivity_data_wp_context(
 							array(
 								'productElementKey' => 'price_html',
 							)

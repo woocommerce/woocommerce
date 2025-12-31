@@ -127,10 +127,7 @@ class ProductSKU extends AbstractBlock {
 		}
 
 		$interactive_attributes = $is_interactive
-			? sprintf(
-				'data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.sku" data-lazy-load-variations="%s"',
-				$use_lazy_load ? 'true' : 'false'
-			)
+			? 'data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.sku"'
 			: '';
 
 		return sprintf(
