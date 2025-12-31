@@ -186,7 +186,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		// When the product is trashed, is_existing_sku should return false when excluded_statuses is true.
 		$this->assertFalse(
 			$data_store->is_existing_sku( $other_product->get_id(), $test_sku ),
-			'is_existing_sku should return true when product is trashed and check does not include trashed products.'
+			'is_existing_sku should return false when product is trashed and check does not include trashed products.'
 		);
 
 		// When the product is trashed, is_existing_sku should return true when excluded_statuses is false.
