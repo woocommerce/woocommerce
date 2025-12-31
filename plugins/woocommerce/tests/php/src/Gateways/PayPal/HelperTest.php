@@ -1,18 +1,20 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Helper class.
+ * Unit tests for Automattic\WooCommerce\Gateways\PayPal\Helper class.
  *
- * @package WooCommerce\Tests\Paypal.
+ * @package WooCommerce\Tests\Gateways\PayPal
  */
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-helper.php';
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Helper;
 
 /**
- * Class WC_Gateway_Paypal_Helper_Test.
+ * Class HelperTest.
  */
-class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
+class HelperTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Tear down the test environment.
@@ -84,7 +86,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	public function test_is_paypal_gateway_available_scenarios( $settings, $expected ) {
 		update_option( 'woocommerce_paypal_settings', $settings );
 
-		$result = WC_Gateway_Paypal_Helper::is_paypal_gateway_available();
+		$result = Helper::is_paypal_gateway_available();
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -168,7 +170,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	public function test_is_orders_v2_migration_eligible_scenarios( $settings, $expected ) {
 		update_option( 'woocommerce_paypal_settings', $settings );
 
-		$result = WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible();
+		$result = Helper::is_orders_v2_migration_eligible();
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -178,7 +180,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_returns_order_when_valid() {
 		// Create a test order.
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$custom_id = wp_json_encode(
@@ -190,9 +192,9 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
-		$this->assertInstanceOf( WC_Order::class, $result );
+		$this->assertInstanceOf( \WC_Order::class, $result );
 		$this->assertEquals( $order->get_id(), $result->get_id() );
 
 		// Clean up.
@@ -210,7 +212,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 	}
@@ -227,7 +229,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 	}
@@ -237,7 +239,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_returns_null_when_order_key_mismatch() {
 		// Create a test order.
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$custom_id = wp_json_encode(
@@ -248,7 +250,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 
@@ -263,20 +265,8 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	public function provider_custom_id_scenarios() {
 		return array(
-			'null_input'            => array(
-				'custom_id' => null,
-				'expected'  => null,
-			),
 			'empty_string'          => array(
 				'custom_id' => '',
-				'expected'  => null,
-			),
-			'integer_input'         => array(
-				'custom_id' => 123,
-				'expected'  => null,
-			),
-			'array_input'           => array(
-				'custom_id' => array( 'test' ),
 				'expected'  => null,
 			),
 			'invalid_json'          => array(
@@ -295,11 +285,11 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider provider_custom_id_scenarios
 	 *
-	 * @param mixed $custom_id The custom ID to test.
-	 * @param mixed $expected  The expected result.
+	 * @param string $custom_id The custom ID to test.
+	 * @param mixed  $expected  The expected result.
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_invalid_inputs( $custom_id, $expected ) {
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -313,7 +303,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 * @param string $expected The expected masked result.
 	 */
 	public function test_mask_email( $email, $expected ) {
-		$result = WC_Gateway_Paypal_Helper::mask_email( $email );
+		$result = Helper::mask_email( $email );
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -344,10 +334,6 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			'empty_string'               => array(
 				'email'    => '',
 				'expected' => '',
-			),
-			'not_string'                 => array(
-				'email'    => 123,
-				'expected' => 123,
 			),
 			'invalid_email_string'       => array(
 				'email'    => 'notanemail',
@@ -392,7 +378,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$result = WC_Gateway_Paypal_Helper::redact_data( $data );
+		$result = Helper::redact_data( $data );
 
 		// PII fields should be redacted.
 		$this->assertEquals( '[redacted]', $result['given_name'] );
@@ -420,19 +406,213 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 * Test redact_data handles non-array inputs.
 	 */
 	public function test_redact_data_handles_non_array_inputs() {
-		$this->assertEquals( 'string', WC_Gateway_Paypal_Helper::redact_data( 'string' ) );
-		$this->assertEquals( 123, WC_Gateway_Paypal_Helper::redact_data( 123 ) );
-		$this->assertEquals( null, WC_Gateway_Paypal_Helper::redact_data( null ) );
-		$this->assertEquals( true, WC_Gateway_Paypal_Helper::redact_data( true ) );
+		$this->assertEquals( 'string', Helper::redact_data( 'string' ) );
+		$this->assertEquals( 123, Helper::redact_data( 123 ) );
+		$this->assertEquals( null, Helper::redact_data( null ) );
+		$this->assertEquals( true, Helper::redact_data( true ) );
 	}
 
 	/**
 	 * Test redact_data handles empty arrays.
 	 */
 	public function test_redact_data_handles_empty_array() {
-		$result = WC_Gateway_Paypal_Helper::redact_data( array() );
+		$result = Helper::redact_data( array() );
 
 		$this->assertIsArray( $result );
 		$this->assertEmpty( $result );
+	}
+
+	/**
+	 * Test update_addresses_in_order updates both shipping and billing addresses.
+	 */
+	public function test_update_addresses_in_order_updates_addresses() {
+		$order = \WC_Helper_Order::create_order();
+		$order->save();
+
+		$paypal_order_details = array(
+			'purchase_units' => array(
+				array(
+					'shipping' => array(
+						'name'    => array(
+							'full_name' => 'John Doe',
+						),
+						'address' => array(
+							'country_code'   => 'US',
+							'postal_code'    => '12345',
+							'admin_area_1'   => 'CA',
+							'admin_area_2'   => 'San Francisco',
+							'address_line_1' => '123 Main St',
+							'address_line_2' => 'Apt 4B',
+						),
+					),
+				),
+			),
+			'payer'          => array(
+				'name'          => array(
+					'given_name' => 'Jane',
+					'surname'    => 'Smith',
+				),
+				'email_address' => 'jane.smith@example.com',
+				'address'       => array(
+					'country_code'   => 'US',
+					'postal_code'    => '54321',
+					'admin_area_1'   => 'NY',
+					'admin_area_2'   => 'New York',
+					'address_line_1' => '456 Broadway',
+					'address_line_2' => 'Suite 100',
+				),
+			),
+		);
+
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
+
+		// Verify shipping address was updated.
+		$this->assertEquals( 'John', $order->get_shipping_first_name() );
+		$this->assertEquals( 'Doe', $order->get_shipping_last_name() );
+		$this->assertEquals( 'US', $order->get_shipping_country() );
+		$this->assertEquals( '12345', $order->get_shipping_postcode() );
+		$this->assertEquals( 'CA', $order->get_shipping_state() );
+		$this->assertEquals( 'San Francisco', $order->get_shipping_city() );
+		$this->assertEquals( '123 Main St', $order->get_shipping_address_1() );
+		$this->assertEquals( 'Apt 4B', $order->get_shipping_address_2() );
+
+		// Verify billing address was updated.
+		$this->assertEquals( 'Jane', $order->get_billing_first_name() );
+		$this->assertEquals( 'Smith', $order->get_billing_last_name() );
+		$this->assertEquals( 'jane.smith@example.com', $order->get_billing_email() );
+		$this->assertEquals( 'US', $order->get_billing_country() );
+		$this->assertEquals( '54321', $order->get_billing_postcode() );
+		$this->assertEquals( 'NY', $order->get_billing_state() );
+		$this->assertEquals( 'New York', $order->get_billing_city() );
+		$this->assertEquals( '456 Broadway', $order->get_billing_address_1() );
+		$this->assertEquals( 'Suite 100', $order->get_billing_address_2() );
+
+		// Verify meta flag was set.
+		$this->assertEquals( 'yes', $order->get_meta( '_paypal_addresses_updated', true ) );
+
+		// Clean up.
+		$order->delete( true );
+	}
+
+	/**
+	 * Test update_addresses_in_order does not update when order is null.
+	 */
+	public function test_update_addresses_in_order_skips_null_order() {
+		$paypal_order_details = array(
+			'purchase_units' => array(
+				array(
+					'shipping' => array(
+						'name' => array( 'full_name' => 'John Doe' ),
+					),
+				),
+			),
+		);
+
+		// Should not throw an error.
+		Helper::update_addresses_in_order( null, $paypal_order_details );
+
+		// No assertions, just ensuring no exception is thrown.
+		$this->assertTrue( true );
+	}
+
+	/**
+	 * Test update_addresses_in_order does not update when paypal_order_details is empty.
+	 */
+	public function test_update_addresses_in_order_skips_empty_details() {
+		$order = \WC_Helper_Order::create_order();
+		$order->save();
+
+		$original_shipping_first_name = $order->get_shipping_first_name();
+		$original_billing_first_name  = $order->get_billing_first_name();
+
+		Helper::update_addresses_in_order( $order, array() );
+
+		// Order should not be modified.
+		$this->assertEquals( $original_shipping_first_name, $order->get_shipping_first_name() );
+		$this->assertEquals( $original_billing_first_name, $order->get_billing_first_name() );
+		$this->assertEmpty( $order->get_meta( '_paypal_addresses_updated', true ) );
+
+		// Clean up.
+		$order->delete( true );
+	}
+
+	/**
+	 * Test update_addresses_in_order does not update when already updated.
+	 */
+	public function test_update_addresses_in_order_skips_already_updated() {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_paypal_addresses_updated', 'yes' );
+		$order->save();
+
+		$original_shipping_first_name = $order->get_shipping_first_name();
+
+		$paypal_order_details = array(
+			'purchase_units' => array(
+				array(
+					'shipping' => array(
+						'name' => array(
+							'full_name' => 'Different Name',
+						),
+					),
+				),
+			),
+		);
+
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
+
+		// Order should not be modified.
+		$this->assertEquals( $original_shipping_first_name, $order->get_shipping_first_name() );
+
+		// Clean up.
+		$order->delete( true );
+	}
+
+	/**
+	 * Test update_addresses_in_order handles partial address data.
+	 */
+	public function test_update_addresses_in_order_handles_partial_address_data() {
+		$order = \WC_Helper_Order::create_order();
+		$order->save();
+
+		$paypal_order_details = array(
+			'purchase_units' => array(
+				array(
+					'shipping' => array(
+						'name'    => array(
+							'full_name' => 'John Doe',
+						),
+						'address' => array(
+							'country_code' => 'US',
+							// Only country code, missing other fields.
+						),
+					),
+				),
+			),
+			'payer'          => array(
+				'name'    => array(
+					'given_name' => 'Jane',
+					// Missing surname.
+				),
+				'address' => array(
+					'postal_code' => '12345',
+					// Only postal code.
+				),
+			),
+		);
+
+		Helper::update_addresses_in_order( $order, $paypal_order_details );
+
+		// Shipping country should be set, other fields should be empty strings.
+		$this->assertEquals( 'US', $order->get_shipping_country() );
+		$this->assertEquals( '', $order->get_shipping_postcode() );
+		$this->assertEquals( '', $order->get_shipping_state() );
+
+		// Billing should have given name and postal code.
+		$this->assertEquals( 'Jane', $order->get_billing_first_name() );
+		$this->assertEquals( '', $order->get_billing_last_name() );
+		$this->assertEquals( '12345', $order->get_billing_postcode() );
+
+		// Clean up.
+		$order->delete( true );
 	}
 }
