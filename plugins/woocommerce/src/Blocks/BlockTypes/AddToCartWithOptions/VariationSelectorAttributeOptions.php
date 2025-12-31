@@ -191,7 +191,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'id'              => $attribute_id,
 					'aria-labelledby' => $attribute_id . '_label',
 					'data-wp-context' => array(
-						'id'            => $attribute_id,
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
@@ -236,6 +235,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		foreach ( $attribute_terms as $attribute_term ) {
 			$option_attributes = array(
 				'value'                  => $attribute_term['value'],
+				'data-wp-bind--selected' => 'state.isOptionSelected',
 				'data-wp-bind--disabled' => 'state.isOptionDisabled',
 				'data-wp-bind--hidden'   => $disabled_attributes_action === 'hide' ? 'state.isOptionDisabled' : null,
 				'data-wp-context'        => array(
@@ -265,7 +265,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'class'              => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 					'id'                 => $attribute_id,
 					'data-wp-context'    => array(
-						'id'            => $attribute_id,
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
 						'selectedValue' => $selected_attribute,

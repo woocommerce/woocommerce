@@ -137,6 +137,33 @@ const isAttributeValueValid = ( {
 	} );
 };
 
+/**
+ * Return the product attributes and options.
+ */
+const getProductAttributesAndOptions = ( productObject ) => {
+	if ( ! productObject || ! productObject?.variations ) {
+		return {};
+	}
+
+	const variations = Object.values( productObject.variations );
+	const productAttributesAndOptions = {} as Record< string, string[] >;
+	variations.forEach( ( variation ) => {
+		Object.entries( variation.attributes ).forEach( ( [ key, value ] ) => {
+			if ( typeof key !== 'string' || typeof value !== 'string' ) {
+				return;
+			}
+			if ( ! Array.isArray( productAttributesAndOptions[ key ] ) ) {
+				productAttributesAndOptions[ key ] = [];
+			}
+			if ( ! productAttributesAndOptions[ key ].includes( value ) ) {
+				productAttributesAndOptions[ key ].push( value );
+			}
+		} );
+	} );
+
+	return productAttributesAndOptions;
+};
+
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
@@ -145,14 +172,13 @@ export type VariableProductAddToCartWithOptionsStore =
 			isOptionDisabled: boolean;
 		};
 		actions: {
-			setAttribute: ( attribute: string, value: string, context: Context | null ) => void;
+			setAttribute: ( attribute: string, value: string ) => void;
 			removeAttribute: ( attribute: string ) => void;
 			handlePillClick: () => void;
 			handleDropdownChange: (
 				event: ChangeEvent< HTMLSelectElement >
 			) => void;
-			autoselectAttributes: ( variation_selectors: Element[] ) => void;
-			autoselectOtherAttributes: () => void;
+			autoselectAttributes: ( excludedAttribute: string ) => void;
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
@@ -180,8 +206,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				return context.selectedAttributes;
 			},
 			get isOptionSelected() {
-				const { selectedValue, option } = getContext< Context >();
-				return selectedValue === option.value;
+				const { selectedAttributes, option, name } =
+					getContext< Context >();
+
+				return selectedAttributes.some( ( attrObject ) => {
+					return (
+						attrObject.attribute === name &&
+						attrObject.value === option.value
+					);
+				} );
 			},
 			get isOptionDisabled() {
 				const { name, option, selectedAttributes } =
@@ -199,8 +232,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 		},
 		actions: {
-			setAttribute( attribute: string, value: string, context: Context | null ) {
-				context = context || getContext< Context >();
+			setAttribute( attribute: string, value: string ) {
+				const context = getContext< Context >();
 				const { selectedAttributes } = context;
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
@@ -239,95 +272,65 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			handlePillClick() {
 				const context = getContext< Context >();
 
-				if ( context.selectedValue === context.option.value ) {
+				if ( state.isOptionSelected ) {
 					context.selectedValue = '';
 				} else {
 					context.selectedValue = context.option.value;
 				}
 				actions.setAttribute( context.name, context.selectedValue );
-				actions.autoselectOtherAttributes();
+				actions.autoselectAttributes( context.name );
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
-				actions.autoselectOtherAttributes();
+				actions.autoselectAttributes( context.name );
 			},
-			autoselectAttributes( variation_selectors: Element[] ) {
-				const { selectedAttributes } = getContext< Context >();
+			autoselectAttributes( excludedAttribute: string ) {
+				const { autoselect, selectedAttributes } =
+					getContext< Context >();
 
-				for ( const current_variation_selector of variation_selectors ) {
-					const optionStyle = current_variation_selector.dataset?.optionStyle || 'pills';
-					// Dropdown options or Pill inputs,
-					// that HAVE a value (Choose an Option has an empty value of ""),
-					// and are compatible with the possible variations
-					let valid_choices: Element[] = [];
-					current_variation_selector.querySelectorAll( 'option:not([value=""]), input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:not([value=""])' ).forEach( ( el ) => {
-						const name = optionStyle === 'dropdown' ? JSON.parse( el.dataset?.wpContext )[ 'name' ] : el.getAttribute( 'name' );
-						if ( isAttributeValueValid( {
-							attributeName: name,
-							attributeValue: el.value,
-							selectedAttributes,
-						} ) ) {
-							valid_choices.push( el );
+				if ( ! autoselect ) {
+					return;
+				}
+
+				const productObject = getProductData(
+					productDataState.productId,
+					[]
+				);
+				const productAttributesAndOptions =
+					getProductAttributesAndOptions( productObject );
+				Object.entries( productAttributesAndOptions ).forEach(
+					( [ attribute, options ] ) => {
+						if ( attribute === excludedAttribute ) {
+							return;
 						}
-					} );
-					if ( valid_choices.length === 1 ) {
-						// Only 1 option (+ the "Choose an option" choice in case of dropdowns)
-						const valid_choice: Element = valid_choices[0];
-						const selected: Element[] = current_variation_selector.querySelectorAll( ':checked' );
-						if ( selected.length === 0 || selected[0].value !== valid_choice.value ) {
-							// No option selected, OR the selected value is not the same as the only valid one (for example if the selected value is "" (Choose an Option))
-							const name = optionStyle === 'dropdown' ? JSON.parse( valid_choice.dataset?.wpContext )[ 'name' ] : valid_choice.getAttribute( 'name' );
-							if ( optionStyle === 'dropdown' ) {
-								valid_choice.parentElement.value = valid_choice.value
-							} else {
-								if ( selected.length !== 0 ) {
-									selected[0].checked = false;
-								}
-								// Manually enable the input, because we know it is valid and will be enabled by Wordpress's interactivity API anyways.
-								valid_choice.removeAttribute( 'disabled' );
-								valid_choice.checked = true;
-							}
-							current_variation_selector.dispatchEvent( new CustomEvent( 'wc-set-selected-value', { detail: { name: name, value: valid_choice.value } } ) );
+						const validOptions = options.filter( ( option ) =>
+							isAttributeValueValid( {
+								attributeName: attribute,
+								attributeValue: option,
+								selectedAttributes: selectedAttributes,
+							} )
+						);
+						if ( validOptions.length === 1 ) {
+							const validOption = validOptions[ 0 ];
+							actions.setAttribute( attribute, validOption );
+							return;
 						}
 					}
-				}
-			},
-			autoselectOtherAttributes() {
-				const context = getContext< Context >();
-				const { id, autoselect } = context;
-				const target_variation_selector: Element = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` );
-				const variation_selectors: Element[] = target_variation_selector
-					.closest( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector' )
-					.querySelectorAll( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' );
-
-				if ( autoselect && context.selectedValue ) {
-					let other_variation_selectors: Element[] = [];
-					variation_selectors.forEach( ( el ) => {
-						if ( el !== target_variation_selector ) {
-							other_variation_selectors.push( el );
-						}
-					} );
-					actions.autoselectAttributes( other_variation_selectors );
-				}
+				);
 			},
 		},
 		callbacks: {
 			setDefaultSelectedAttribute() {
 				const context = getContext< Context >();
-				const { id, autoselect } = context;
-				const target_variation_selector: Element = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` );
+				const { autoselect } = context;
 
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
 				if ( autoselect ) {
-					target_variation_selector.addEventListener( 'wc-set-selected-value', ( e: CustomEvent ) => {
-						context.selectedValue = e.detail.value;
-						actions.setAttribute( e.detail.name, e.detail.value, context );
-					} );
-					actions.autoselectAttributes( [ target_variation_selector ] );
+					actions.autoselectAttributes( context.name );
 				}
 			},
 			setSelectedVariationId: () => {
