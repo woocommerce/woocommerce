@@ -3,6 +3,7 @@
  */
 import { SVG, Path } from '@wordpress/components';
 import { registerBlockType } from '@wordpress/blocks';
+import { isWpVersion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -51,6 +52,11 @@ export const settings = {
 	example: {},
 	edit,
 	save,
+	supports: {
+		// We only want to show the block in the inserter in WP 6.8 or lower,
+		// because WP 6.9 comes with its own accordion block.
+		inserter: isWpVersion( '6.9', '<' ),
+	},
 };
 
 registerBlockType( metadata, settings );

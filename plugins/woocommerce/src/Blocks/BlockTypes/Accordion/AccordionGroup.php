@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 class AccordionGroup extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
-	use AccordionVersionControlTrait;
 
 	/**
 	 * Block name.
@@ -20,19 +19,6 @@ class AccordionGroup extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'accordion-group';
-
-	/**
-	 * Initialize this block type.
-	 *
-	 * - Hook into WP lifecycle.
-	 * - Register the block with WordPress.
-	 *
-	 * @since 10.4.3
-	 */
-	protected function initialize() {
-		$this->initialize_accordion_version_control();
-		parent::initialize();
-	}
 
 	/**
 	 * Include and render the block.
