@@ -40,26 +40,19 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	/**
 	 * Batch interval in seconds for checkout events.
 	 *
-	 * This defines the minimum time between tracking events to reduce API calls
-	 * when customers rapidly update checkout fields.
+	 * This defines how long to wait after the last event before tracking.
+	 * Each new event resets this timer (debouncing).
 	 *
 	 * @var int
 	 */
 	private const BATCH_INTERVAL_SECONDS = 15;
 
 	/**
-	 * Session key for storing last tracking timestamp.
+	 * Action hook name for scheduled event tracking.
 	 *
 	 * @var string
 	 */
-	private const SESSION_KEY_LAST_TRACK = 'fraud_protection_checkout_last_track';
-
-	/**
-	 * Session key for storing pending event data.
-	 *
-	 * @var string
-	 */
-	private const SESSION_KEY_PENDING_DATA = 'fraud_protection_checkout_pending_data';
+	private const SCHEDULED_ACTION_HOOK = 'woocommerce_fraud_protection_track_checkout_event';
 
 	/**
 	 * Initialize with dependencies.
@@ -94,14 +87,11 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		// Traditional checkout: Track when checkout fields are updated.
 		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
 
-		// Store API (block checkout): Track checkout field updates.
-		add_action( 'woocommerce_store_api_checkout_update_customer_from_request', array( $this, 'handle_store_api_checkout_update' ), 10, 2 );
-
 		// WooCommerce AJAX: Handle payment method selection tracking.
 		add_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this, 'ajax_handle_payment_method_selected' ) );
 
-		// Flush any pending batched events at shutdown.
-		add_action( 'shutdown', array( $this, 'flush_pending_events' ), 10, 0 );
+		// Scheduled action to track pending events after debounce interval.
+		add_action( self::SCHEDULED_ACTION_HOOK, array( $this, 'process_scheduled_tracking' ), 10, 1 );
 	}
 
 	/**
@@ -123,35 +113,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		$event_data = $this->build_checkout_event_data( 'field_update', $data );
-		$this->track_event_with_batching( 'checkout_field_update', $event_data );
-	}
-
-	/**
-	 * Handle Store API checkout update event.
-	 *
-	 * Triggered when checkout data is updated via the Store API (block checkout).
-	 * Implements batching to reduce API calls for rapid successive updates.
-	 *
-	 * @internal
-	 *
-	 * @param \WC_Customer      $customer The customer object being updated.
-	 * @param \WP_REST_Request  $request  The REST API request object.
-	 * @return void
-	 */
-	public function handle_store_api_checkout_update( $customer, $request ): void {
-		// Extract billing data from the request.
-		$billing_address = $request->get_param( 'billing_address' );
-		$email           = $billing_address['email'] ?? null;
-
-		$event_data = $this->build_checkout_event_data(
-			'store_api_update',
-			array(
-				'email'           => $email,
-				'billing_address' => $billing_address,
-			)
-		);
-
-		$this->track_event_with_batching( 'checkout_store_api_update', $event_data );
+		$this->schedule_tracking( 'checkout_field_update', $event_data );
 	}
 
 	/**
@@ -180,8 +142,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			array( 'payment' => array( 'payment_method_type' => $payment_method ) )
 		);
 
-		$this->track_event_with_batching( 'checkout_payment_method_selected', $event_data );
-
+		$this->schedule_tracking( 'checkout_payment_method_selected', $event_data );
 		// Send success response.
 		wp_send_json_success( array( 'message' => 'Payment method tracked.' ) );
 	}
@@ -337,133 +298,113 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	/**
 	 * Track event with batching to reduce API calls.
 	 *
-	 * Implements a batching mechanism that prevents tracking events more frequently
-	 * than BATCH_INTERVAL_SECONDS. When rapid updates occur, only the most recent
-	 * event data is retained and will be flushed at shutdown.
+	 * Implements a debouncing mechanism: stores events and only tracks after
+	 * BATCH_INTERVAL_SECONDS pass with no new events. Each new event resets the timer
+	 * and replaces the stored data, so only the most recent event is tracked.
+	 *
+	 * Uses Action Scheduler to ensure events are tracked even if the user leaves.
 	 *
 	 * @param string $event_type          Event type identifier (e.g., 'checkout_field_update').
 	 * @param array  $event_specific_data Event-specific data to merge with session context.
 	 * @return void
 	 */
 	private function track_event_with_batching( string $event_type, array $event_specific_data ): void {
-		// Get last tracking timestamp from session.
-		$last_track_time = $this->get_last_track_time();
-		$current_time    = time();
+		$current_time = time();
 
-		// Check if enough time has passed since last tracking.
-		if ( $last_track_time && ( $current_time - $last_track_time ) < self::BATCH_INTERVAL_SECONDS ) {
-			// Store the pending event data to be flushed later.
-			$this->store_pending_event( $event_type, $event_specific_data );
-			return;
-		}
-
-		// Track the event immediately.
-		$this->tracker->track_event( $event_type, $event_specific_data );
-
-		// Update last tracking timestamp.
-		$this->update_last_track_time( $current_time );
-
-		// Clear any pending event data since we just tracked.
-		$this->clear_pending_event();
+		$this->schedule_tracking( $$event_type, $event_specific_data );
 	}
 
 	/**
-	 * Flush any pending batched events.
+	 * Schedule a tracking action to run after the debounce interval.
 	 *
-	 * This method is called at shutdown to ensure that any batched events that
-	 * haven't been sent yet are flushed before the request ends.
+	 * Cancels any existing scheduled action for this session before scheduling a new one.
+	 *
+	 * @param int $timestamp The timestamp when the event was stored.
+	 * @return void
+	 */
+	private function schedule_tracking( string $event_type, array $event_specific_data ): void {
+		$timestamp = time();
+		// Get session ID to use as a unique identifier for this customer's actions.
+		$session_id = WC()->session instanceof \WC_Session ? WC()->session->get_customer_id() : null;
+
+		if ( ! $session_id ) {
+			// Can't schedule without a session ID.
+			return;
+		}
+
+		// Cancel any existing scheduled action for this session first.
+		$this->cancel_scheduled_tracking( $session_id, $event_type );
+
+		// Schedule action to run after the debounce interval.
+		// Pass the event data and timestamp with the action so it's available when it runs.
+		$run_time = $timestamp + self::BATCH_INTERVAL_SECONDS;
+
+		if ( function_exists( 'as_schedule_single_action' ) ) {
+			as_schedule_single_action(
+				$run_time,
+				self::SCHEDULED_ACTION_HOOK,
+				array(
+					'session_id'  => $session_id,
+					'event_type'  => $event_type,
+					'event_data'  => $event_specific_data,
+					'timestamp'   => $timestamp,
+				),
+				'woocommerce-fraud-protection'
+			);
+		}
+	}
+
+	/**
+	 * Cancel scheduled tracking actions for a specific session and event type.
+	 *
+	 * @param string|null $session_id Optional session ID. If not provided, uses current session.
+	 * @param string $event_type Event type to cancel.
+	 * @return void
+	 */
+	private function cancel_scheduled_tracking( ?string $session_id = null, string $event_type = '' ): void {
+		if ( null === $session_id ) {
+			$session_id = WC()->session instanceof \WC_Session ? WC()->session->get_customer_id() : null;
+		}
+
+		if ( ! $session_id ) {
+			return;
+		}
+
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			// Only cancel actions for this specific session by including session_id in args.
+			as_unschedule_all_actions(
+				self::SCHEDULED_ACTION_HOOK,
+				array( 
+					'session_id' => $session_id,
+					'event_type' => $event_type,
+				 ),
+				'woocommerce-fraud-protection'
+			);
+		}
+	}
+
+	/**
+	 * Process scheduled tracking action.
+	 *
+	 * Called by Action Scheduler after the debounce interval has passed.
+	 * Receives all necessary event data as arguments, so it doesn't depend on session availability.
 	 *
 	 * @internal
 	 *
+	 * @param array $args Action arguments containing session_id, event_type, event_data, and timestamp.
 	 * @return void
 	 */
-	public function flush_pending_events(): void {
-		$pending = $this->get_pending_event();
+	public function process_scheduled_tracking( array $args ): void {
+		$event_type  = $args['event_type'] ?? null;
+		$event_data  = $args['event_data'] ?? array();
+		$timestamp   = $args['timestamp'] ?? null;
 
-		if ( ! $pending ) {
+		// Validate required parameters.
+		if ( ! $event_type || ! $timestamp ) {
 			return;
 		}
 
-		$event_type          = $pending['event_type'] ?? null;
-		$event_specific_data = $pending['event_data'] ?? array();
-
-		if ( $event_type ) {
-			$this->tracker->track_event( $event_type, $event_specific_data );
-			$this->update_last_track_time( time() );
-			$this->clear_pending_event();
-		}
-	}
-
-	/**
-	 * Get last tracking timestamp from session.
-	 *
-	 * @return int|null Timestamp of last tracking, or null if not set.
-	 */
-	private function get_last_track_time(): ?int {
-		if ( ! WC()->session instanceof \WC_Session ) {
-			return null;
-		}
-
-		$time = WC()->session->get( self::SESSION_KEY_LAST_TRACK );
-		return $time ? (int) $time : null;
-	}
-
-	/**
-	 * Update last tracking timestamp in session.
-	 *
-	 * @param int $timestamp The timestamp to store.
-	 * @return void
-	 */
-	private function update_last_track_time( int $timestamp ): void {
-		if ( WC()->session instanceof \WC_Session ) {
-			WC()->session->set( self::SESSION_KEY_LAST_TRACK, $timestamp );
-		}
-	}
-
-	/**
-	 * Store pending event data in session.
-	 *
-	 * @param string $event_type          Event type identifier.
-	 * @param array  $event_specific_data Event-specific data.
-	 * @return void
-	 */
-	private function store_pending_event( string $event_type, array $event_specific_data ): void {
-		if ( ! WC()->session instanceof \WC_Session ) {
-			return;
-		}
-
-		WC()->session->set(
-			self::SESSION_KEY_PENDING_DATA,
-			array(
-				'event_type' => $event_type,
-				'event_data' => $event_specific_data,
-			)
-		);
-	}
-
-	/**
-	 * Get pending event data from session.
-	 *
-	 * @return array|null Pending event data, or null if none.
-	 */
-	private function get_pending_event(): ?array {
-		if ( ! WC()->session instanceof \WC_Session ) {
-			return null;
-		}
-
-		$pending = WC()->session->get( self::SESSION_KEY_PENDING_DATA );
-		return is_array( $pending ) ? $pending : null;
-	}
-
-	/**
-	 * Clear pending event data from session.
-	 *
-	 * @return void
-	 */
-	private function clear_pending_event(): void {
-		if ( WC()->session instanceof \WC_Session ) {
-			WC()->session->set( self::SESSION_KEY_PENDING_DATA, null );
-		}
+		$this->tracker->track_event( $event_type, $event_data );
 	}
 
 	/**
