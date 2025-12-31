@@ -315,7 +315,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @param array  $event_specific_data Event-specific data to merge with session context.
 	 * @return void
 	 */
-	private function schedule_tracking( string $event_type, array $event_specific_data ): void {
+	public function schedule_tracking( string $event_type, array $event_specific_data ): void {
 		$timestamp = time();
 		// Get session ID to use as a unique identifier for this customer's actions.
 		$session_id = WC()->session instanceof \WC_Session ? WC()->session->get_customer_id() : null;
@@ -368,6 +368,40 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Get scheduled action IDs for a specific session and event type.
+	 *
+	 * Queries Action Scheduler for pending actions matching the session_id and event_type
+	 * in the extended_args column using JSON_EXTRACT.
+	 *
+	 * @param string $session_id Session ID to search for.
+	 * @param string $event_type Event type to search for.
+	 * @return array Array of action IDs.
+	 */
+	public function get_scheduled_action_ids( string $session_id, string $event_type ): array {
+		global $wpdb;
+
+		$sql = $wpdb->prepare(
+			"SELECT a.action_id
+			FROM {$wpdb->actionscheduler_actions} a
+			LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id = a.group_id
+			WHERE a.hook = %s
+			AND g.slug = %s
+			AND a.status = %s
+			AND a.extended_args IS NOT NULL
+			AND JSON_EXTRACT(a.extended_args, '$.session_id') = %s
+			AND JSON_EXTRACT(a.extended_args, '$.event_type') = %s
+			ORDER BY a.scheduled_date_gmt ASC",
+			self::SCHEDULED_ACTION_HOOK,
+			'woocommerce-fraud-protection',
+			\ActionScheduler_Store::STATUS_PENDING,
+			$session_id,
+			$event_type
+		);
+
+		return $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
 	 * Cancel scheduled tracking actions for a specific session and event type.
 	 *
 	 * Uses custom SQL query with JSON_EXTRACT on extended_args to find actions
@@ -379,7 +413,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @param string $event_type Event type to cancel.
 	 * @return void
 	 */
-	private function cancel_scheduled_tracking( ?string $session_id = null, string $event_type = '' ): void {
+	public function cancel_scheduled_tracking( ?string $session_id = null, string $event_type = '' ): void {
 		if ( null === $session_id ) {
 			$session_id = WC()->session instanceof \WC_Session ? WC()->session->get_customer_id() : null;
 		}
@@ -388,31 +422,10 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			return;
 		}
 
-		global $wpdb;
-
 		// Use custom SQL with JSON_EXTRACT on extended_args column.
-		// Action Scheduler's query builder doesn't support partial matching on extended_args.
 		if ( class_exists( 'ActionScheduler' ) && \ActionScheduler::is_initialized( __FUNCTION__ ) ) {
-			// Query for ALL pending actions matching session_id and event_type.
-			$sql = $wpdb->prepare(
-				"SELECT a.action_id
-				FROM {$wpdb->actionscheduler_actions} a
-				LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id = a.group_id
-				WHERE a.hook = %s
-				AND g.slug = %s
-				AND a.status = %s
-				AND a.extended_args IS NOT NULL
-				AND JSON_EXTRACT(a.extended_args, '$.session_id') = %s
-				AND JSON_EXTRACT(a.extended_args, '$.event_type') = %s
-				ORDER BY a.scheduled_date_gmt ASC",
-				self::SCHEDULED_ACTION_HOOK,
-				'woocommerce-fraud-protection',
-				\ActionScheduler_Store::STATUS_PENDING,
-				$session_id,
-				$event_type
-			);
-
-			$action_ids = $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// Get all pending actions matching session_id and event_type.
+			$action_ids = $this->get_scheduled_action_ids( $session_id, $event_type );
 
 			// Cancel all found actions.
 			foreach ( $action_ids as $action_id ) {
