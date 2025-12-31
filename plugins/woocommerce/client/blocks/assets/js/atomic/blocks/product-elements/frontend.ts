@@ -11,6 +11,7 @@ import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type {
 	ProductData,
+	VariationData,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import { sanitizeHTML } from '@woocommerce/sanitize';
@@ -75,7 +76,7 @@ export type Context = {
 function getVariationData(
 	productId: number,
 	variationId: number
-): ProductData | undefined {
+): VariationData | undefined {
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
 	// First check if data exists in config (pre-loaded).
@@ -86,19 +87,14 @@ function getVariationData(
 	}
 
 	// Check store state for lazy-loaded data.
-	const cachedData = variationDataState.variations[ variationId ];
-	if ( cachedData ) {
-		return cachedData as ProductData;
-	}
-
-	return undefined;
+	return variationDataState.variations[ variationId ];
 }
 
 const productElementStore = store(
 	'woocommerce/product-elements',
 	{
 		state: {
-			get productData(): ProductData | undefined {
+			get productData(): ProductData | VariationData | undefined {
 				if ( ! productDataState?.productId ) {
 					return undefined;
 				}
@@ -147,6 +143,12 @@ const productElementStore = store(
 
 					// Fetch the variation data (caches in store).
 					const fetchedData = await fetchVariationData( variationId );
+
+					// Check if variation changed during fetch (user switched quickly) and bail if not.
+					const currentVariationId = productDataState?.variationId || 0;
+					if ( currentVariationId !== variationId ) {
+						return;
+					}
 
 					// Remove loading state.
 					element.ref.style.opacity = '1';
