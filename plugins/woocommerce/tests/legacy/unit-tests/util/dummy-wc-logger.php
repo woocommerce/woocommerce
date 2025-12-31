@@ -100,4 +100,15 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	public function debug( $message, $context = array() ) {
 	}
 
+	/**
+	 * Do nothing.
+	 *
+	 * @param string $source
+	 * @param bool   $quiet
+	 *
+	 * @return bool
+	 */
+	public function clear( $source = '', $quiet = false ) {
+		return true;
+	}
 }

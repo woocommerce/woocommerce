@@ -132,4 +132,14 @@ interface WC_Logger_Interface {
 	 * @param array  $context Optional. Additional information for log handlers.
 	 */
 	public function debug( $message, $context = array() );
+
+	/**
+	 * Clear entries for a chosen file/source.
+	 *
+	 * @param string $source Source/handle to clear.
+	 * @param bool   $quiet  Whether to suppress the deletion message.
+	 *
+	 * @return bool True if entries were cleared, false otherwise.
+	 */
+	public function clear( $source = '', $quiet = false );
 }

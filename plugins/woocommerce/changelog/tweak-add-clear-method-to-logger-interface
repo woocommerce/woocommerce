@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add `clear` method to the `WC_Logger_Interface` since it's required
