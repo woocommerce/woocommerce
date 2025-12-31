@@ -283,7 +283,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					matchedVariation?.variation_id || null;
 				productDataActions.setVariationId( matchedVariationId );
 			},
-			validateVariation: async () => {
+			*validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
 				const { products } = getConfig( 'woocommerce' );
@@ -330,7 +330,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 					if ( ! cachedData ) {
 						// Fetch from API and cache.
-						cachedData = await fetchVariationData( variationId );
+						cachedData = yield fetchVariationData( variationId );
 
 						// Check if variation changed during fetch (user switched quickly).
 						if ( productDataState.variationId !== variationId ) {

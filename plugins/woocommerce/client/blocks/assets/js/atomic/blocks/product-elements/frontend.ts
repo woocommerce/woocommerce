@@ -125,7 +125,7 @@ const productElementStore = store(
 			},
 		},
 		callbacks: {
-			updateValue: async () => {
+			*updateValue() {
 				const element = getElement();
 
 				if ( ! element.ref || ! productDataState?.productId ) {
@@ -142,7 +142,9 @@ const productElementStore = store(
 					element.ref.style.opacity = '0.5';
 
 					// Fetch the variation data (caches in store).
-					const fetchedData = await fetchVariationData( variationId );
+					const fetchedData: Awaited<
+						ReturnType< typeof fetchVariationData >
+					> = yield fetchVariationData( variationId );
 
 					// Check if variation changed during fetch (user switched quickly) and bail if not.
 					const currentVariationId = productDataState?.variationId || 0;
