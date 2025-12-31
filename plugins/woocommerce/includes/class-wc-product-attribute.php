@@ -33,6 +33,14 @@ class WC_Product_Attribute implements ArrayAccess {
 	);
 
 	/**
+	 * Extra data array.
+	 *
+	 * @since 10.6.0
+	 * @var array
+	 */
+	protected $extra_data = array();
+
+	/**
 	 * Return if this attribute is a taxonomy.
 	 *
 	 * @return boolean
@@ -124,6 +132,7 @@ class WC_Product_Attribute implements ArrayAccess {
 	 */
 	public function get_data() {
 		return array_merge(
+			$this->extra_data,
 			$this->data,
 			array(
 				'is_visible'   => $this->get_visible() ? 1 : 0,
@@ -139,6 +148,17 @@ class WC_Product_Attribute implements ArrayAccess {
 	| Setters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Set extra data by key.
+	 *
+	 * @since 10.6.0
+	 * @param string $key Extra data key.
+	 * @param mixed $value Extra data value.
+	 */
+	public function set_extra_data( string $key, $value ) {
+		$this->extra_data[$key] = $value;
+	}
 
 	/**
 	 * Set ID (this is the attribute ID).
@@ -199,6 +219,17 @@ class WC_Product_Attribute implements ArrayAccess {
 	| Getters
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Get extra data by key.
+	 *
+	 * @since 10.6.0
+	 * @param string $key Extra data key.
+	 * @return mixed
+	 */
+	public function get_extra_data( string $key ) {
+		return $this->extra_data[$key] ?? null;
+	}
 
 	/**
 	 * Get the ID.
@@ -281,6 +312,9 @@ class WC_Product_Attribute implements ArrayAccess {
 				if ( is_callable( array( $this, "get_$offset" ) ) ) {
 					return $this->{"get_$offset"}();
 				}
+				if ( isset( $this->extra_data[$offset] ) ) {
+					return $this->extra_data[$offset];
+				}
 				break;
 		}
 		return '';
@@ -307,7 +341,9 @@ class WC_Product_Attribute implements ArrayAccess {
 			default:
 				if ( is_callable( array( $this, "set_$offset" ) ) ) {
 					$this->{"set_$offset"}( $value );
+					break;
 				}
+				$this->extra_data[$offset] = $value;
 				break;
 		}
 	}
@@ -328,6 +364,6 @@ class WC_Product_Attribute implements ArrayAccess {
 	 */
 	#[\ReturnTypeWillChange]
 	public function offsetExists( $offset ) {
-		return in_array( $offset, array_merge( array( 'is_variation', 'is_visible', 'is_taxonomy', 'value' ), array_keys( $this->data ) ), true );
+		return in_array( $offset, array_merge( array( 'is_variation', 'is_visible', 'is_taxonomy', 'value' ), array_keys( $this->data ), array_keys( $this->extra_data ) ), true );
 	}
 }

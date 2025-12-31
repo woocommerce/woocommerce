@@ -88,7 +88,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$attribute->set_position( $meta_value['position'] );
 				$attribute->set_visible( $meta_value['is_visible'] );
 				$attribute->set_variation( $meta_value['is_variation'] );
-				$attributes[] = $attribute;
+
+				/**
+				 * Filter product attribute after initialization.
+				 *
+				 * @since 10.6.0
+				 *
+				 * @param WC_Product_Attribute $attribute  The attribute object.
+				 * @param array                $meta_value The meta value.
+				 * @param WC_Product           $product    The product object.
+				 */
+				$attributes[] = apply_filters( 'woocommerce_product_read_attribute', $attribute, $meta_value, $product );
 			}
 			$product->set_attributes( $attributes );
 
@@ -587,7 +597,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 *
 		 * IMPORTANT: see also the documentation for the 'woocommerce_variation_prices_price' filter.
 		 *
-		 * @since 10.5.0
+		 * @since 10.6.0
 		 *
 		 * @param bool       $use_legacy  True to use the legacy algorithm (default), false to use CallbackUtil
 		 * @param WC_Product $product     The product object.
