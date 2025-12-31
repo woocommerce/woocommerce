@@ -20,7 +20,10 @@ class VariationDataUtils {
 	 *
 	 * Checks in order:
 	 * 1. Block context (from parent block attribute)
-	 * 2. Site-level option (defaults to 'no' for existing sites)
+	 * 2. Site-level option (defaults to 'yes' for new installs)
+	 *
+	 * Existing sites have the option set to 'no' during update via
+	 * wc_update_1000_disable_lazy_load_variations() in wc-update-functions.php.
 	 *
 	 * @param WP_Block|null $block The block instance to check context from.
 	 * @return bool Whether lazy loading is enabled.
@@ -32,20 +35,8 @@ class VariationDataUtils {
 		}
 
 		// Fall back to site-level option.
-		// Default is 'no' for backward compatibility with existing sites.
-		// New installs get 'yes' set via woocommerce_newly_installed hook.
-		return get_option( self::OPTION_NAME, 'no' ) === 'yes';
-	}
-
-	/**
-	 * Enable lazy loading for newly installed sites.
-	 *
-	 * This is called via the woocommerce_newly_installed hook to enable
-	 * lazy loading by default for new WooCommerce installations.
-	 *
-	 * @return void
-	 */
-	public static function enable_for_new_install(): void {
-		update_option( self::OPTION_NAME, 'yes' );
+		// Default is 'yes' (enabled) for new installs.
+		// Existing sites get 'no' set during update for backward compatibility.
+		return get_option( self::OPTION_NAME, 'yes' ) === 'yes';
 	}
 }

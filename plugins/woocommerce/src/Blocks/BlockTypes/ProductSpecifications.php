@@ -87,16 +87,16 @@ class ProductSpecifications extends AbstractBlock {
 		}
 
 		$is_interactive = $product->is_type( ProductType::VARIABLE );
+		$use_lazy_load  = false;
 
 		if ( $is_interactive ) {
-			$config_data = array(
+			$use_lazy_load = $this->is_lazy_load_enabled( $block );
+			$config_data   = array(
 				'weight'     => $product_data['weight']['value'] ?? '',
 				'dimensions' => html_entity_decode( $product_data['dimensions']['value'] ?? '', ENT_QUOTES, get_bloginfo( 'charset' ) ),
 			);
 
-			if ( $this->is_lazy_load_enabled( $block ) ) {
-				$config_data['lazy_load'] = true;
-			} else {
+			if ( ! $use_lazy_load ) {
 				$variations                = $product->get_available_variations( 'objects' );
 				$formatted_variations_data = array();
 				foreach ( $variations as $variation ) {
@@ -176,7 +176,7 @@ class ProductSpecifications extends AbstractBlock {
 								<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 							</th>
 							<?php if ( $is_interactive && in_array( $product_attribute_key, array( 'weight', 'dimensions' ), true ) ) : ?>
-								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.<?php echo esc_attr( $product_attribute_key ); ?>">
+								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.<?php echo esc_attr( $product_attribute_key ); ?>" data-lazy-load-variations="<?php echo esc_attr( $use_lazy_load ? 'true' : 'false' ); ?>">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>
 							<?php else : ?>	

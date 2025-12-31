@@ -66,14 +66,18 @@ export type Context = {
 };
 
 /**
- * Check if lazy loading is enabled for a product.
+ * Check if lazy loading of variation data is enabled for an element.
  *
- * @param productId The product ID.
- * @return True if lazy loading is enabled.
+ * Reads from the data-lazy-load-variations attribute set by the PHP block render.
+ * This allows different block instances to have different lazy load settings,
+ * even when displaying the same product.
+ *
+ * @param element The element to check.
+ * @return True if lazy loading of variations is enabled.
  */
-function isLazyLoadEnabled( productId: number ): boolean {
-	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
-	return products?.[ productId ]?.lazy_load === true;
+function isLazyLoadVariationsEnabled( element: HTMLElement ): boolean {
+	const wrapper = element.closest( '[data-lazy-load-variations]' );
+	return wrapper?.getAttribute( 'data-lazy-load-variations' ) === 'true';
 }
 
 /**
@@ -153,7 +157,7 @@ const productElementStore = store(
 				// Check if we need to fetch data lazily.
 				if (
 					variationId &&
-					isLazyLoadEnabled( productId ) &&
+					isLazyLoadVariationsEnabled( element.ref ) &&
 					! getVariationData( productId, variationId )
 				) {
 					// Show loading state.

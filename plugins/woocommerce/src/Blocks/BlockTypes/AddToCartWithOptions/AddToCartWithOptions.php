@@ -369,7 +369,6 @@ class AddToCartWithOptions extends AbstractBlock {
 							'products' => array(
 								$product->get_id() => array(
 									'variations' => $variations_data,
-									'lazy_load'  => true, // Flag to indicate lazy loading mode.
 								),
 							),
 						)

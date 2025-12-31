@@ -57,18 +57,9 @@ class VariationDescription extends AbstractBlock {
 			return '';
 		}
 
-		if ( $this->is_lazy_load_enabled( $block ) ) {
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product->get_id() => array(
-							'lazy_load' => true,
-						),
-					),
-				)
-			);
-		} else {
+		$use_lazy_load = $this->is_lazy_load_enabled( $block );
+
+		if ( ! $use_lazy_load ) {
 			$variations                = $product->get_available_variations( 'objects' );
 			$formatted_variations_data = array();
 			foreach ( $variations as $variation ) {
@@ -99,10 +90,11 @@ class VariationDescription extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-interactive'  => 'woocommerce/product-elements',
-			'data-wp-bind--hidden' => '!state.productData.variation_description',
-			'aria-live'            => 'polite',
-			'aria-atomic'          => 'true',
+			'data-wp-interactive'        => 'woocommerce/product-elements',
+			'data-wp-bind--hidden'       => '!state.productData.variation_description',
+			'data-lazy-load-variations'  => $use_lazy_load ? 'true' : 'false',
+			'aria-live'                  => 'polite',
+			'aria-atomic'                => 'true',
 		);
 
 		return '<div ' . $context_directive . ' ' . get_block_wrapper_attributes( $wrapper_attributes ) . ' data-wp-watch="callbacks.updateValue"></div>';

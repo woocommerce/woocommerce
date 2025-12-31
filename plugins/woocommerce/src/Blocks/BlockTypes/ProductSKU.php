@@ -84,15 +84,14 @@ class ProductSKU extends AbstractBlock {
 
 		$is_interactive = $product->is_type( ProductType::VARIABLE );
 
+		$use_lazy_load = false;
 		if ( $is_interactive ) {
-			$config_data = array(
+			$use_lazy_load = $this->is_lazy_load_enabled( $block );
+			$config_data   = array(
 				'sku' => $product_sku,
 			);
 
-			if ( $this->is_lazy_load_enabled( $block ) ) {
-				// Lazy mode: SKU data will be fetched on-demand when variation is selected.
-				$config_data['lazy_load'] = true;
-			} else {
+			if ( ! $use_lazy_load ) {
 				// Pre-load all variation SKUs.
 				$variations                = $product->get_available_variations( 'objects' );
 				$formatted_variations_data = array();
@@ -127,7 +126,12 @@ class ProductSKU extends AbstractBlock {
 			$suffix = sprintf( '<span class="wp-block-post-terms__suffix">%s</span>', $suffix );
 		}
 
-		$interactive_attributes = $is_interactive ? 'data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.sku"' : '';
+		$interactive_attributes = $is_interactive
+			? sprintf(
+				'data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.sku" data-lazy-load-variations="%s"',
+				$use_lazy_load ? 'true' : 'false'
+			)
+			: '';
 
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">

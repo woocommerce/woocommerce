@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
-
 /**
  * Installer class.
  * Handles installation of Blocks plugin dependencies.
@@ -16,7 +14,6 @@ class Installer {
 	public function init() {
 		add_action( 'admin_init', array( $this, 'install' ) );
 		add_filter( 'woocommerce_create_pages', array( $this, 'create_pages' ) );
-		add_action( 'woocommerce_newly_installed', array( VariationDataUtils::class, 'enable_for_new_install' ), 20 );
 	}
 
 	/**

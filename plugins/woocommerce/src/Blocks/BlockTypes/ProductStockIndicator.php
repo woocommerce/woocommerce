@@ -138,14 +138,14 @@ class ProductStockIndicator extends AbstractBlock {
 		$wrapper_attributes = array();
 		$watch_attribute    = '';
 
+		$use_lazy_load = false;
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
-			$config_data = array(
+			$use_lazy_load = $this->is_lazy_load_enabled( $block );
+			$config_data   = array(
 				'availability' => $availability['availability'],
 			);
 
-			if ( $this->is_lazy_load_enabled( $block ) ) {
-				$config_data['lazy_load'] = true;
-			} else {
+			if ( ! $use_lazy_load ) {
 				$variations                = $product_to_render->get_available_variations( 'objects' );
 				$formatted_variations_data = array();
 				foreach ( $variations as $variation ) {
@@ -169,10 +169,11 @@ class ProductStockIndicator extends AbstractBlock {
 			);
 
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
-			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
-			$wrapper_attributes['data-wp-text']        = 'state.productData.availability';
-			$wrapper_attributes['aria-live']           = 'polite';
-			$wrapper_attributes['aria-atomic']         = 'true';
+			$wrapper_attributes['data-wp-interactive']       = 'woocommerce/product-elements';
+			$wrapper_attributes['data-wp-text']              = 'state.productData.availability';
+			$wrapper_attributes['data-lazy-load-variations'] = $use_lazy_load ? 'true' : 'false';
+			$wrapper_attributes['aria-live']                 = 'polite';
+			$wrapper_attributes['aria-atomic']               = 'true';
 		}
 
 		$output_text = $low_stock_text ?? $availability['availability'];
