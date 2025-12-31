@@ -10,7 +10,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 /**
@@ -101,9 +100,9 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'info', $this->captured_logs[0]['level'] );
 		$this->assertStringContainsString( 'payment_method_added', $this->captured_logs[0]['message'] );
 		$this->assertEquals( 'payment_method_added', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'added', $this->captured_logs[0]['context']['event_data']['action'] );
-		$this->assertEquals( $token->get_id(), $this->captured_logs[0]['context']['event_data']['token_id'] );
-		$this->assertEquals( 'stripe', $this->captured_logs[0]['context']['event_data']['gateway_id'] );
+		$this->assertEquals( 'added', $this->captured_logs[0]['context']['collected_data']['event_data']['action'] );
+		$this->assertEquals( $token->get_id(), $this->captured_logs[0]['context']['collected_data']['event_data']['token_id'] );
+		$this->assertEquals( 'stripe', $this->captured_logs[0]['context']['collected_data']['event_data']['gateway_id'] );
 	}
 
 	/**
@@ -130,7 +129,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $this->captured_logs );
 		$this->assertEquals( 'payment_method_updated', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'updated', $this->captured_logs[0]['context']['event_data']['action'] );
+		$this->assertEquals( 'updated', $this->captured_logs[0]['context']['collected_data']['event_data']['action'] );
 	}
 
 	/**
@@ -158,8 +157,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $this->captured_logs );
 		$this->assertEquals( 'payment_method_set_default', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'set_default', $this->captured_logs[0]['context']['event_data']['action'] );
-		$this->assertTrue( $this->captured_logs[0]['context']['event_data']['is_default'] );
+		$this->assertEquals( 'set_default', $this->captured_logs[0]['context']['collected_data']['event_data']['action'] );
+		$this->assertTrue( $this->captured_logs[0]['context']['collected_data']['event_data']['is_default'] );
 	}
 
 	/**
@@ -186,7 +185,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $this->captured_logs );
 		$this->assertEquals( 'payment_method_deleted', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'deleted', $this->captured_logs[0]['context']['event_data']['action'] );
+		$this->assertEquals( 'deleted', $this->captured_logs[0]['context']['collected_data']['event_data']['action'] );
 	}
 
 	/**
@@ -212,8 +211,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		$this->assertCount( 1, $this->captured_logs );
 		$this->assertEquals( 'payment_method_add_failed', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'add_failed', $this->captured_logs[0]['context']['event_data']['action'] );
-		$this->assertEquals( 'card_declined', $this->captured_logs[0]['context']['event_data']['failure_reason'] );
+		$this->assertEquals( 'add_failed', $this->captured_logs[0]['context']['collected_data']['event_data']['action'] );
+		$this->assertEquals( 'card_declined', $this->captured_logs[0]['context']['collected_data']['event_data']['failure_reason'] );
 	}
 
 	/**

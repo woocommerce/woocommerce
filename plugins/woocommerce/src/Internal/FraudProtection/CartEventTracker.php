@@ -32,6 +32,13 @@ class CartEventTracker implements RegisterHooksInterface {
 	private FraudProtectionTracker $tracker;
 
 	/**
+	 * Session data collector instance.
+	 *
+	 * @var SessionDataCollector
+	 */
+	private SessionDataCollector $data_collector;
+
+	/**
 	 * Fraud protection controller instance.
 	 *
 	 * @var FraudProtectionController
@@ -44,13 +51,16 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @internal
 	 *
 	 * @param FraudProtectionTracker    $tracker                     The fraud protection tracker instance.
+	 * @param SessionDataCollector      $data_collector              The session data collector instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
 		FraudProtectionTracker $tracker,
+		SessionDataCollector $data_collector,
 		FraudProtectionController $fraud_protection_controller
 	): void {
 		$this->tracker                     = $tracker;
+		$this->data_collector              = $data_collector;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
@@ -97,7 +107,25 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->tracker->track_event( 'cart_item_added', $event_data );
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( 'cart_item_added', $event_data );
+			$this->tracker->track_event( 'cart_item_added', $collected_data );
+		} catch ( \Exception $e ) {
+			// Log error but don't break functionality.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for cart event: %s | Error: %s',
+					'cart_item_added',
+					$e->getMessage()
+				),
+				array(
+					'event_type' => 'cart_item_added',
+					'exception'  => $e,
+				)
+			);
+		}
 	}
 
 	/**
@@ -133,7 +161,25 @@ class CartEventTracker implements RegisterHooksInterface {
 		// Add old quantity for context.
 		$event_data['old_quantity'] = (int) $old_quantity;
 
-		$this->tracker->track_event( 'cart_item_updated', $event_data );
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( 'cart_item_updated', $event_data );
+			$this->tracker->track_event( 'cart_item_updated', $collected_data );
+		} catch ( \Exception $e ) {
+			// Log error but don't break functionality.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for cart event: %s | Error: %s',
+					'cart_item_updated',
+					$e->getMessage()
+				),
+				array(
+					'event_type' => 'cart_item_updated',
+					'exception'  => $e,
+				)
+			);
+		}
 	}
 
 	/**
@@ -165,7 +211,25 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->tracker->track_event( 'cart_item_removed', $event_data );
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( 'cart_item_removed', $event_data );
+			$this->tracker->track_event( 'cart_item_removed', $collected_data );
+		} catch ( \Exception $e ) {
+			// Log error but don't break functionality.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for cart event: %s | Error: %s',
+					'cart_item_removed',
+					$e->getMessage()
+				),
+				array(
+					'event_type' => 'cart_item_removed',
+					'exception'  => $e,
+				)
+			);
+		}
 	}
 
 	/**
@@ -197,7 +261,25 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->tracker->track_event( 'cart_item_restored', $event_data );
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( 'cart_item_restored', $event_data );
+			$this->tracker->track_event( 'cart_item_restored', $collected_data );
+		} catch ( \Exception $e ) {
+			// Log error but don't break functionality.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for cart event: %s | Error: %s',
+					'cart_item_restored',
+					$e->getMessage()
+				),
+				array(
+					'event_type' => 'cart_item_restored',
+					'exception'  => $e,
+				)
+			);
+		}
 	}
 
 	/**

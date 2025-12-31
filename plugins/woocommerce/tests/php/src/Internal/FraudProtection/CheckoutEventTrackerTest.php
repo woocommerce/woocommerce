@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
@@ -33,6 +34,13 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	private $mock_tracker;
 
 	/**
+	 * Mock session data collector.
+	 *
+	 * @var SessionDataCollector|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $mock_data_collector;
+
+	/**
 	 * Mock fraud protection controller.
 	 *
 	 * @var FraudProtectionController|\PHPUnit\Framework\MockObject\MockObject
@@ -51,14 +59,38 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_tracker    = $this->createMock( FraudProtectionTracker::class );
-		$this->mock_controller = $this->createMock( FraudProtectionController::class );
+		$this->mock_tracker        = $this->createMock( FraudProtectionTracker::class );
+		$this->mock_data_collector = $this->createMock( SessionDataCollector::class );
+		$this->mock_controller     = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
 		$this->sut = new CheckoutEventTracker();
 		$this->sut->init(
 			$this->mock_tracker,
+			$this->mock_data_collector,
 			$this->mock_controller
+		);
+	}
+
+	/**
+	 * Helper method to trigger scheduled tracking for testing.
+	 *
+	 * Simulates the scheduled action running by manually calling process_scheduled_tracking
+	 * with test data. In real scenarios, Action Scheduler would call this automatically.
+	 *
+	 * @param string $event_type     Event type for the scheduled tracking.
+	 * @param array  $collected_data Collected session data.
+	 */
+	private function trigger_scheduled_tracking( string $event_type = 'checkout_field_update', array $collected_data = array() ): void {
+		$session_id = WC()->session->get_customer_id();
+
+		$this->sut->process_scheduled_tracking(
+			array(
+				'session_id'     => $session_id,
+				'event_type'     => $event_type,
+				'collected_data' => $collected_data,
+				'timestamp'      => time(),
+			)
 		);
 	}
 
@@ -75,8 +107,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Verify hooks were not registered.
 		$this->assertFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_checkout_field_update' ) ) );
 		$this->assertFalse( has_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this->sut, 'ajax_handle_payment_method_selected' ) ) );
-		$this->assertFalse( has_action( 'woocommerce_store_api_checkout_update_customer_from_request', array( $this->sut, 'handle_store_api_checkout_update' ) ) );
-		$this->assertFalse( has_action( 'shutdown', array( $this->sut, 'flush_pending_events' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_fraud_protection_track_checkout_event', array( $this->sut, 'process_scheduled_tracking' ) ) );
 	}
 
 	/**
@@ -92,8 +123,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Verify hooks were registered.
 		$this->assertNotFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_checkout_field_update' ) ) );
 		$this->assertNotFalse( has_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this->sut, 'ajax_handle_payment_method_selected' ) ) );
-		$this->assertNotFalse( has_action( 'woocommerce_store_api_checkout_update_customer_from_request', array( $this->sut, 'handle_store_api_checkout_update' ) ) );
-		$this->assertNotFalse( has_action( 'shutdown', array( $this->sut, 'flush_pending_events' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_fraud_protection_track_checkout_event', array( $this->sut, 'process_scheduled_tracking' ) ) );
 	}
 
 	/**
@@ -103,20 +133,25 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
-		// Mock tracker to verify track_event is called.
+		$collected_data = array(
+			'action'        => 'field_update',
+			'billing_email' => 'test@example.com',
+			'session'       => array( 'session_id' => 'test-session' ),
+		);
+
+		// Mock data collector to return collected data.
+		$this->mock_data_collector
+			->expects( $this->once() )
+			->method( 'collect' )
+			->willReturn( $collected_data );
+
+		// Mock tracker to verify track_event is called with collected data.
 		$this->mock_tracker
 			->expects( $this->once() )
 			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'checkout_field_update' ),
-				$this->callback(
-					function ( $event_data ) {
-						return isset( $event_data['action'] )
-							&& $event_data['action'] === 'field_update'
-							&& isset( $event_data['billing_email'] )
-							&& $event_data['billing_email'] === 'test@example.com';
-					}
-				)
+				$this->equalTo( $collected_data )
 			);
 
 		// Register hooks.
@@ -125,6 +160,9 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Simulate checkout field update with billing email.
 		$posted_data = 'billing_email=test@example.com&billing_first_name=John&billing_last_name=Doe';
 		$this->sut->handle_checkout_field_update( $posted_data );
+
+		// Trigger the scheduled action to track the event.
+		$this->trigger_scheduled_tracking( 'checkout_field_update', $collected_data );
 	}
 
 	/**
@@ -134,11 +172,32 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
-		// When session is not available, batching may not work as expected.
-		// This test verifies that at least one event is tracked.
+		$collected_data1 = array(
+			'action'        => 'field_update',
+			'billing_email' => 'test1@example.com',
+			'session'       => array( 'session_id' => 'test-session' ),
+		);
+
+		$collected_data2 = array(
+			'action'        => 'field_update',
+			'billing_email' => 'test2@example.com',
+			'session'       => array( 'session_id' => 'test-session' ),
+		);
+
+		// Mock data collector to return collected data for each call.
+		$this->mock_data_collector
+			->expects( $this->exactly( 2 ) )
+			->method( 'collect' )
+			->willReturnOnConsecutiveCalls( $collected_data1, $collected_data2 );
+
+		// Mock tracker - should only be called once (for the last event).
 		$this->mock_tracker
-			->expects( $this->atLeastOnce() )
-			->method( 'track_event' );
+			->expects( $this->once() )
+			->method( 'track_event' )
+			->with(
+				$this->equalTo( 'checkout_field_update' ),
+				$this->equalTo( $collected_data2 )
+			);
 
 		// Register hooks.
 		$this->sut->register();
@@ -147,63 +206,12 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$posted_data1 = 'billing_email=test1@example.com';
 		$this->sut->handle_checkout_field_update( $posted_data1 );
 
-		// Second event immediately after - may be batched depending on session availability.
+		// Second event immediately after - replaces the first one due to debouncing.
 		$posted_data2 = 'billing_email=test2@example.com';
 		$this->sut->handle_checkout_field_update( $posted_data2 );
 
-		// Flush to ensure pending events are processed.
-		$this->sut->flush_pending_events();
-	}
-
-	/**
-	 * Test handle_store_api_checkout_update tracks event.
-	 */
-	public function test_handle_store_api_checkout_update_tracks_event(): void {
-		// Mock feature as enabled.
-		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
-
-		// Create mock customer.
-		$mock_customer = $this->createMock( \WC_Customer::class );
-
-		// Create mock REST request.
-		$mock_request = $this->getMockBuilder( \WP_REST_Request::class )
-							->disableOriginalConstructor()
-							->getMock();
-
-		$mock_request->method( 'get_param' )
-					->with( 'billing_address' )
-					->willReturn(
-						array(
-							'email'      => 'store-api@example.com',
-							'first_name' => 'Jane',
-							'last_name'  => 'Smith',
-						)
-					);
-
-		// Mock tracker to verify track_event is called.
-		$this->mock_tracker
-			->expects( $this->once() )
-			->method( 'track_event' )
-			->with(
-				$this->equalTo( 'checkout_store_api_update' ),
-				$this->callback(
-					function ( $event_data ) {
-						return isset( $event_data['action'] )
-							&& $event_data['action'] === 'store_api_update'
-							&& isset( $event_data['email'] )
-							&& $event_data['email'] === 'store-api@example.com';
-					}
-				)
-			);
-
-		// Register hooks.
-		$this->sut->register();
-
-		// Simulate Store API checkout update.
-		$this->sut->handle_store_api_checkout_update( $mock_customer, $mock_request );
-
-		// Flush any pending events to ensure tracking occurs.
-		$this->sut->flush_pending_events();
+		// Trigger the scheduled action to track only the last event.
+		$this->trigger_scheduled_tracking( 'checkout_field_update', $collected_data2 );
 	}
 
 	/**
@@ -213,21 +221,26 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
-		// Mock tracker to verify track_event is called.
+		$collected_data = array(
+			'action'           => 'field_update',
+			'billing_email'    => 'test@example.com',
+			'shipping_methods' => array( 'flat_rate:1' => 'Flat rate' ),
+			'session'          => array( 'session_id' => 'test-session' ),
+		);
+
+		// Mock data collector to return collected data.
+		$this->mock_data_collector
+			->expects( $this->once() )
+			->method( 'collect' )
+			->willReturn( $collected_data );
+
+		// Mock tracker to verify track_event is called with collected data.
 		$this->mock_tracker
 			->expects( $this->once() )
 			->method( 'track_event' )
 			->with(
 				$this->equalTo( 'checkout_field_update' ),
-				$this->callback(
-					function ( $event_data ) {
-						return isset( $event_data['action'] )
-							&& $event_data['action'] === 'field_update'
-							&& isset( $event_data['shipping_methods'] )
-							&& is_array( $event_data['shipping_methods'] )
-							&& count( $event_data['shipping_methods'] ) > 0;
-					}
-				)
+				$this->equalTo( $collected_data )
 			);
 
 		// Register hooks.
@@ -238,7 +251,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$posted_data = 'billing_email=test@example.com&shipping_method[0]=flat_rate:1';
 		$this->sut->handle_checkout_field_update( $posted_data );
 
-		// Flush any pending events to ensure tracking occurs.
-		$this->sut->flush_pending_events();
+		// Trigger the scheduled action to track the event.
+		$this->trigger_scheduled_tracking( 'checkout_field_update', $collected_data );
 	}
 }

@@ -31,6 +31,13 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	private FraudProtectionTracker $tracker;
 
 	/**
+	 * Session data collector instance.
+	 *
+	 * @var SessionDataCollector
+	 */
+	private SessionDataCollector $data_collector;
+
+	/**
 	 * Fraud protection controller instance.
 	 *
 	 * @var FraudProtectionController
@@ -60,13 +67,16 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @internal
 	 *
 	 * @param FraudProtectionTracker    $tracker                     The fraud protection tracker instance.
+	 * @param SessionDataCollector      $data_collector              The session data collector instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
 		FraudProtectionTracker $tracker,
+		SessionDataCollector $data_collector,
 		FraudProtectionController $fraud_protection_controller
 	): void {
 		$this->tracker                     = $tracker;
+		$this->data_collector              = $data_collector;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
@@ -296,30 +306,13 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Track event with batching to reduce API calls.
-	 *
-	 * Implements a debouncing mechanism: stores events and only tracks after
-	 * BATCH_INTERVAL_SECONDS pass with no new events. Each new event resets the timer
-	 * and replaces the stored data, so only the most recent event is tracked.
-	 *
-	 * Uses Action Scheduler to ensure events are tracked even if the user leaves.
-	 *
-	 * @param string $event_type          Event type identifier (e.g., 'checkout_field_update').
-	 * @param array  $event_specific_data Event-specific data to merge with session context.
-	 * @return void
-	 */
-	private function track_event_with_batching( string $event_type, array $event_specific_data ): void {
-		$current_time = time();
-
-		$this->schedule_tracking( $$event_type, $event_specific_data );
-	}
-
-	/**
 	 * Schedule a tracking action to run after the debounce interval.
 	 *
+	 * Collects comprehensive session data and schedules it for tracking.
 	 * Cancels any existing scheduled action for this session before scheduling a new one.
 	 *
-	 * @param int $timestamp The timestamp when the event was stored.
+	 * @param string $event_type          Event type identifier.
+	 * @param array  $event_specific_data Event-specific data to merge with session context.
 	 * @return void
 	 */
 	private function schedule_tracking( string $event_type, array $event_specific_data ): void {
@@ -332,11 +325,31 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			return;
 		}
 
+		// Collect comprehensive session data NOW (while session is available).
+		try {
+			$collected_data = $this->data_collector->collect( $event_type, $event_specific_data );
+		} catch ( \Exception $e ) {
+			// If collection fails, log and abort scheduling.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for checkout event: %s | Error: %s',
+					$event_type,
+					$e->getMessage()
+				),
+				array(
+					'event_type' => $event_type,
+					'exception'  => $e,
+				)
+			);
+			return;
+		}
+
 		// Cancel any existing scheduled action for this session first.
 		$this->cancel_scheduled_tracking( $session_id, $event_type );
 
 		// Schedule action to run after the debounce interval.
-		// Pass the event data and timestamp with the action so it's available when it runs.
+		// Pass the COLLECTED data with the action so it's available when it runs.
 		$run_time = $timestamp + self::BATCH_INTERVAL_SECONDS;
 
 		if ( function_exists( 'as_schedule_single_action' ) ) {
@@ -344,10 +357,10 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 				$run_time,
 				self::SCHEDULED_ACTION_HOOK,
 				array(
-					'session_id'  => $session_id,
-					'event_type'  => $event_type,
-					'event_data'  => $event_specific_data,
-					'timestamp'   => $timestamp,
+					'session_id'     => $session_id,
+					'event_type'     => $event_type,
+					'collected_data' => $collected_data,
+					'timestamp'      => $timestamp,
 				),
 				'woocommerce-fraud-protection'
 			);
@@ -387,24 +400,24 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * Process scheduled tracking action.
 	 *
 	 * Called by Action Scheduler after the debounce interval has passed.
-	 * Receives all necessary event data as arguments, so it doesn't depend on session availability.
+	 * Receives fully-collected event data as arguments, so it doesn't depend on session availability.
 	 *
 	 * @internal
 	 *
-	 * @param array $args Action arguments containing session_id, event_type, event_data, and timestamp.
+	 * @param array $args Action arguments containing session_id, event_type, collected_data, and timestamp.
 	 * @return void
 	 */
 	public function process_scheduled_tracking( array $args ): void {
-		$event_type  = $args['event_type'] ?? null;
-		$event_data  = $args['event_data'] ?? array();
-		$timestamp   = $args['timestamp'] ?? null;
+		$event_type     = $args['event_type'] ?? null;
+		$collected_data = $args['collected_data'] ?? array();
+		$timestamp      = $args['timestamp'] ?? null;
 
 		// Validate required parameters.
-		if ( ! $event_type || ! $timestamp ) {
+		if ( ! $event_type || ! $timestamp || empty( $collected_data ) ) {
 			return;
 		}
 
-		$this->tracker->track_event( $event_type, $event_data );
+		$this->tracker->track_event( $event_type, $collected_data );
 	}
 
 	/**
