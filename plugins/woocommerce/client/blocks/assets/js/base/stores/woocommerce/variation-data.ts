@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-import { store } from '@wordpress/interactivity';
+import { getConfig, store } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
  */
-import type { VariationData } from './cart';
+import type { VariationData, WooCommerceConfig } from './cart';
 
 export type { VariationData };
 
@@ -58,12 +58,16 @@ export async function fetchVariationData(
 	// Create new request.
 	pendingRequests[ variationId ] = ( async () => {
 		try {
+			const config = getConfig( 'woocommerce' ) as WooCommerceConfig;
+			const { restUrl = '/wp-json/', nonce = '' } = config;
+
 			const response = await fetch(
-				`/wp-json/wc/store/v1/products/${ variationId }`,
+				`${ restUrl }wc/store/v1/products/${ variationId }`,
 				{
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/json',
+						...( nonce && { Nonce: nonce } ),
 					},
 				}
 			);

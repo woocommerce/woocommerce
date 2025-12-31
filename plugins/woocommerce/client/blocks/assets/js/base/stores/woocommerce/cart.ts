@@ -30,6 +30,8 @@ export type WooCommerceConfig = {
 	};
 	placeholderImgSrc?: string;
 	currency?: Currency;
+	nonce?: string;
+	restUrl?: string;
 };
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;

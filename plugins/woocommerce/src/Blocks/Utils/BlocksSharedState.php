@@ -70,7 +70,7 @@ class BlocksSharedState {
 	}
 
 	/**
-	 * Load store config (currency, locale, core data) into interactivity config.
+	 * Load store config (currency, locale, core data, API config) into interactivity config.
 	 *
 	 * @param string $consent_statement The consent statement string.
 	 * @return void
@@ -88,6 +88,19 @@ class BlocksSharedState {
 		wp_interactivity_config( self::$settings_namespace, self::get_currency_data() );
 		wp_interactivity_config( self::$settings_namespace, self::get_locale_data() );
 		wp_interactivity_config( self::$settings_namespace, self::get_core_data() );
+		wp_interactivity_config( self::$settings_namespace, self::get_api_config() );
+	}
+
+	/**
+	 * Get API config data (nonce, REST URL) for Store API requests.
+	 *
+	 * @return array
+	 */
+	private static function get_api_config(): array {
+		return array(
+			'nonce'   => wp_create_nonce( 'wc_store_api' ),
+			'restUrl' => get_rest_url(),
+		);
 	}
 
 	/**
