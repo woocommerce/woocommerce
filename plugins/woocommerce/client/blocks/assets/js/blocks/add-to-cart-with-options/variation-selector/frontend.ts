@@ -331,6 +331,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					if ( ! cachedData ) {
 						// Fetch from API and cache.
 						cachedData = await fetchVariationData( variationId );
+
+						// Check if variation changed during fetch (user switched quickly).
+						if ( productDataState.variationId !== variationId ) {
+							return;
+						}
 					}
 
 					// Default to in-stock if fetch failed.
@@ -371,8 +376,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				if ( productObject ) {
 					const { quantity } = getContext< Context >();
-					const currentValue = quantity[ productObject.id ];
 					const { min, max } = productObject;
+					const currentValue = quantity[ productObject.id ] ?? min;
 
 					let newValue = currentValue;
 					if ( currentValue < min ) {

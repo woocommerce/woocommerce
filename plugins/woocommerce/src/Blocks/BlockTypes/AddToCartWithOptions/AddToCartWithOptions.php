@@ -46,6 +46,53 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
+	 * Get available variation IDs after applying standard WooCommerce filtering.
+	 *
+	 * This replicates the filtering from WC_Product_Variable::get_available_variations()
+	 * but only loads variation objects when necessary for visibility checks.
+	 *
+	 * @param \WC_Product_Variable $product The variable product.
+	 * @return array Array of available variation IDs.
+	 */
+	protected function get_available_variation_ids( $product ): array {
+		$variation_ids           = $product->get_children();
+		$hide_out_of_stock       = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
+		$available_variation_ids = array();
+
+		foreach ( $variation_ids as $variation_id ) {
+			// Check stock status first (cheap meta lookup) if hiding out of stock items.
+			if ( $hide_out_of_stock ) {
+				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
+				if ( 'outofstock' === $stock_status ) {
+					continue;
+				}
+			}
+
+			// Load variation for visibility check only if the filter is enabled.
+			// This is similar to how get_available_variations() works.
+			$variation = wc_get_product( $variation_id );
+			if ( ! $variation ) {
+				continue;
+			}
+
+			/**
+			 * Filter whether to hide invisible variations.
+			 *
+			 * @param bool                      $hide      Whether to hide invisible variations. Default true.
+			 * @param int                       $product_id The parent product ID.
+			 * @param \WC_Product_Variation     $variation The variation product object.
+			 */
+			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $product->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
+				continue;
+			}
+
+			$available_variation_ids[] = $variation_id;
+		}
+
+		return $available_variation_ids;
+	}
+
+	/**
 	 * Get variation attributes efficiently without loading full variation objects.
 	 *
 	 * This queries the postmeta table directly to get attribute values for each
@@ -57,7 +104,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected function get_variation_attributes_efficiently( $product ): array {
 		global $wpdb;
 
-		$variation_ids = $product->get_children();
+		$variation_ids = $this->get_available_variation_ids( $product );
 		if ( empty( $variation_ids ) ) {
 			return array();
 		}
@@ -356,18 +403,16 @@ class AddToCartWithOptions extends AbstractBlock {
 				if ( $this->is_lazy_load_enabled( $block ) ) {
 					// Lazy load mode: Get only attribute data efficiently without loading variation objects.
 					// Stock status and other data will be fetched via AJAX when a variation is selected.
+					// Note: Unlike non-lazy mode, we don't pre-set quantities for each variation.
+					// The frontend handles missing quantities by using the parent's min quantity as default.
 					$variations_data = $this->get_variation_attributes_efficiently( $product );
-
-					// Set default quantity for all variations.
-					foreach ( array_keys( $variations_data ) as $variation_id ) {
-						$context['quantity'][ $variation_id ] = $default_quantity;
-					}
 
 					wp_interactivity_config(
 						'woocommerce',
 						array(
 							'products' => array(
 								$product->get_id() => array(
+									'lazy_load'  => true,
 									'variations' => $variations_data,
 								),
 							),
