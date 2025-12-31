@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 use Automattic\WooCommerce\Utilities\NumberUtil;
-use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -50,29 +50,11 @@ class WC_Gateway_Paypal_Request {
 	protected $endpoint;
 
 	/**
-	 * The API version for the proxy endpoint.
+	 * The delegated request instance.
 	 *
-	 * @var int
+	 * @var PayPalRequest
 	 */
-	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
-
-	/**
-	 * The base for the proxy REST endpoint.
-	 *
-	 * @var string
-	 */
-	private const WPCOM_PROXY_REST_BASE = 'transact/paypal_standard/proxy';
-
-	/**
-	 * Proxy REST endpoints.
-	 *
-	 * @var string
-	 */
-	private const WPCOM_PROXY_ORDER_ENDPOINT                = 'order';
-	private const WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT      = 'payment/capture';
-	private const WPCOM_PROXY_PAYMENT_AUTHORIZE_ENDPOINT    = 'payment/authorize';
-	private const WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT = 'payment/capture_auth';
-	private const WPCOM_PROXY_CLIENT_ID_ENDPOINT            = 'client_id';
+	private $request;
 
 	/**
 	 * Constructor.
@@ -82,6 +64,7 @@ class WC_Gateway_Paypal_Request {
 	public function __construct( $gateway ) {
 		$this->gateway    = $gateway;
 		$this->notify_url = WC()->api_request_url( 'WC_Gateway_Paypal' );
+		$this->request    = new PayPalRequest( $gateway );
 	}
 
 	/**
@@ -120,9 +103,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Create a PayPal order using the Orders v2 API.
 	 *
-	 * This method creates a PayPal order and returns the order details including
-	 * the approval URL where customers will be redirected to complete payment.
-	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::create_paypal_order() instead. This method will be removed in 11.0.0.
 	 * @param WC_Order $order Order object.
 	 * @param string   $payment_source The payment source.
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
@@ -134,131 +115,28 @@ class WC_Gateway_Paypal_Request {
 		$payment_source = PayPalConstants::PAYMENT_SOURCE_PAYPAL,
 		$js_sdk_params = array()
 	) {
-		$paypal_debug_id = null;
-
-		// While PayPal JS SDK can return 'paylater' as the payment source in the createOrder callback,
-		// Orders v2 API does not accept it. We will use 'paypal' instead.
-		// Accepted payment_source values for Orders v2:
-		// https://developer.paypal.com/docs/api/orders/v2/#orders_create!ct=application/json&path=payment_source&t=request.
-		if ( PayPalConstants::PAYMENT_SOURCE_PAYLATER === $payment_source ) {
-			$payment_source = PayPalConstants::PAYMENT_SOURCE_PAYPAL;
-		}
-
-		try {
-			$request_body = array(
-				'test_mode' => $this->gateway->testmode,
-				'order'     => $this->get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ),
-			);
-			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_ORDER_ENDPOINT, $request_body );
-
-			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
-			}
-
-			$http_code     = wp_remote_retrieve_response_code( $response );
-			$body          = wp_remote_retrieve_body( $response );
-			$response_data = json_decode( $body, true );
-
-			$response_array = is_array( $response_data ) ? $response_data : array();
-
-			/**
-			 * Fires after receiving a response from PayPal order creation.
-			 *
-			 * This hook allows extensions to react to PayPal API responses, such as
-			 * displaying admin notices or logging response data.
-			 *
-			 * Note: This hook fires on EVERY order creation attempt (success or failure),
-			 * and can be called multiple times for the same order if retried. Extensions
-			 * hooking this should be idempotent and check order state/meta before taking
-			 * action to avoid duplicate processing.
-			 *
-			 * @since 10.4.0
-			 *
-			 * @param int|string $http_code     The HTTP status code from the PayPal API response.
-			 * @param array      $response_data The decoded response data from the PayPal API
-			 * @param WC_Order   $order         The WooCommerce order object.
-			 */
-			do_action( 'woocommerce_paypal_standard_order_created_response', $http_code, $response_array, $order );
-
-			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
-				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
-				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
-			}
-
-			$redirect_url = null;
-			if ( empty( $js_sdk_params['is_js_sdk_flow'] ) ) {
-				// We only need an approve link for the classic, redirect flow.
-				$redirect_url = $this->get_approve_link( $http_code, $response_data );
-				if ( empty( $redirect_url ) ) {
-					throw new Exception( 'PayPal order creation failed. Missing approval link.' );
-				}
-			}
-
-			// Save the PayPal order ID to the order.
-			$order->update_meta_data( '_paypal_order_id', $response_data['id'] );
-
-			// Save the PayPal order status to the order.
-			$order->update_meta_data( '_paypal_status', $response_data['status'] );
-
-			// Remember the payment source: payment_source is not patchable.
-			// If the payment source is changed, we need to create a new PayPal order.
-			$order->update_meta_data( '_paypal_payment_source', $payment_source );
-			$order->save();
-
-			return array(
-				'id'           => $response_data['id'],
-				'redirect_url' => $redirect_url,
-			);
-		} catch ( Exception $e ) {
-			WC_Gateway_Paypal::log( $e->getMessage() );
-			if ( $paypal_debug_id ) {
-				$order->add_order_note(
-					sprintf(
-						/* translators: %1$s: PayPal debug ID */
-						__( 'PayPal order creation failed. PayPal debug ID: %1$s', 'woocommerce' ),
-						$paypal_debug_id
-					)
-				);
-			}
-			return null;
-		}
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::create_paypal_order()' );
+		return $this->request->create_paypal_order( $order, $payment_source, $js_sdk_params );
 	}
 
 	/**
 	 * Get PayPal order details.
 	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_details() instead. This method will be removed in 11.0.0.
 	 * @param string $paypal_order_id The ID of the PayPal order.
 	 * @return array
 	 * @throws Exception If the PayPal order details request fails.
 	 * @throws Exception If the PayPal order details are not found.
 	 */
 	public function get_paypal_order_details( $paypal_order_id ) {
-		$request_body = array(
-			'test_mode' => $this->gateway->testmode,
-		);
-		$response     = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
-		if ( is_wp_error( $response ) ) {
-			throw new Exception( 'PayPal order details request failed: ' . esc_html( $response->get_error_message() ) );
-		}
-
-		$http_code     = wp_remote_retrieve_response_code( $response );
-		$body          = wp_remote_retrieve_body( $response );
-		$response_data = json_decode( $body, true );
-
-		if ( 200 !== $http_code ) {
-			$debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
-			$message  = 'PayPal order details request failed. HTTP ' . (int) $http_code . ( $debug_id ? '. Debug ID: ' . $debug_id : '' );
-			throw new Exception( esc_html( $message ) );
-		}
-
-		return $response_data;
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_details()' );
+		return $this->request->get_paypal_order_details( $paypal_order_id );
 	}
 
 	/**
 	 * Authorize or capture a PayPal payment using the Orders v2 API.
 	 *
-	 * This method authorizes or captures a PayPal payment and updates the order status.
-	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::authorize_or_capture_payment() instead.
 	 * @param WC_Order $order Order object.
 	 * @param string   $action_url The URL to authorize or capture the payment.
 	 * @param string   $action The action to perform. Either 'authorize' or 'capture'.
@@ -266,202 +144,28 @@ class WC_Gateway_Paypal_Request {
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
 	public function authorize_or_capture_payment( $order, $action_url, $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ) {
-		$paypal_debug_id = null;
-		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
-		if ( ! $paypal_order_id ) {
-			WC_Gateway_Paypal::log( 'PayPal order ID not found. Cannot ' . $action . ' payment.' );
-			return;
-		}
-
-		if ( ! $action_url || ! filter_var( $action_url, FILTER_VALIDATE_URL ) ) {
-			WC_Gateway_Paypal::log( 'Invalid or missing action URL. Cannot ' . $action . ' payment.' );
-			return;
-		}
-
-		// Skip if the payment is already captured.
-		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
-			return;
-		}
-
-		try {
-			if ( PayPalConstants::PAYMENT_ACTION_CAPTURE === $action ) {
-				$endpoint     = self::WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT;
-				$request_body = array(
-					'capture_url'     => $action_url,
-					'paypal_order_id' => $paypal_order_id,
-					'test_mode'       => $this->gateway->testmode,
-				);
-			} else {
-				$endpoint     = self::WPCOM_PROXY_PAYMENT_AUTHORIZE_ENDPOINT;
-				$request_body = array(
-					'authorize_url'   => $action_url,
-					'paypal_order_id' => $paypal_order_id,
-					'test_mode'       => $this->gateway->testmode,
-				);
-			}
-
-			$response = $this->send_wpcom_proxy_request( 'POST', $endpoint, $request_body );
-
-			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
-			}
-
-			$http_code     = wp_remote_retrieve_response_code( $response );
-			$body          = wp_remote_retrieve_body( $response );
-			$response_data = json_decode( $body, true );
-
-			if ( 200 !== $http_code && 201 !== $http_code ) {
-				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
-				throw new Exception( 'PayPal ' . $action . ' payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
-			}
-		} catch ( Exception $e ) {
-			WC_Gateway_Paypal::log( $e->getMessage() );
-			$note_message = sprintf(
-				/* translators: %1$s: Action, %2$s: PayPal order ID */
-				__( 'PayPal %1$s payment failed. PayPal Order ID: %2$s', 'woocommerce' ),
-				$action,
-				$paypal_order_id
-			);
-
-			// Add debug ID to the note if available.
-			if ( $paypal_debug_id ) {
-				$note_message .= sprintf(
-					/* translators: %s: PayPal debug ID */
-					__( '. PayPal debug ID: %s', 'woocommerce' ),
-					$paypal_debug_id
-				);
-			}
-
-			$order->add_order_note( $note_message );
-			$order->update_status( OrderStatus::FAILED );
-			$order->save();
-		}
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::authorize_or_capture_payment()' );
+		$this->request->authorize_or_capture_payment( $order, $action_url, $action );
 	}
 
 	/**
 	 * Capture a PayPal payment that has been authorized.
 	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::capture_authorized_payment() instead. This method will be removed in 11.0.0.
 	 * @param WC_Order $order Order object.
 	 * @return void
 	 * @throws Exception If the PayPal payment capture fails.
 	 */
 	public function capture_authorized_payment( $order ) {
-		if ( ! $order ) {
-			WC_Gateway_Paypal::log( 'Order not found to capture authorized payment.' );
-			return;
-		}
-
-		$paypal_order_id = $order->get_meta( '_paypal_order_id', true );
-		// Skip if the PayPal Order ID is not found. This means the order was not created via the Orders v2 API.
-		if ( ! $paypal_order_id ) {
-			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
-			return;
-		}
-
-		$capture_id = $order->get_meta( '_paypal_capture_id', true );
-		// Skip if the payment is already captured.
-		if ( $capture_id ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is already captured. PayPal capture ID: ' . $capture_id . '. Order ID: ' . $order->get_id() );
-			return;
-		}
-
-		$paypal_status = $order->get_meta( '_paypal_status', true );
-
-		// Skip if the payment is already captured.
-		if ( PayPalConstants::STATUS_CAPTURED === $paypal_status || PayPalConstants::STATUS_COMPLETED === $paypal_status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
-			return;
-		}
-
-		// Skip if the payment requires payer action.
-		if ( PayPalConstants::STATUS_PAYER_ACTION_REQUIRED === $paypal_status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment requires payer action. Skipping capture. Order ID: ' . $order->get_id() );
-			return;
-		}
-
-		// Skip if the payment is voided.
-		if ( PayPalConstants::VOIDED === $paypal_status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment voided. Skipping capture. Order ID: ' . $order->get_id() );
-			return;
-		}
-
-		$authorization_id = $this->get_authorization_id_for_capture( $order );
-		if ( ! $authorization_id ) {
-			WC_Gateway_Paypal::log( 'Authorization ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
-			return;
-		}
-
-		$paypal_debug_id = null;
-		$http_code       = null;
-
-		try {
-			$request_body = array(
-				'test_mode'        => $this->gateway->testmode,
-				'authorization_id' => $authorization_id,
-				'paypal_order_id'  => $paypal_order_id,
-			);
-			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT, $request_body );
-
-			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
-			}
-
-			$http_code             = wp_remote_retrieve_response_code( $response );
-			$body                  = wp_remote_retrieve_body( $response );
-			$response_data         = json_decode( $body, true );
-			$issue                 = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
-			$auth_already_captured = 422 === $http_code && PayPalConstants::PAYPAL_ISSUE_AUTHORIZATION_ALREADY_CAPTURED === $issue;
-
-			if ( 200 !== $http_code && 201 !== $http_code && ! $auth_already_captured ) {
-				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
-				throw new Exception( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
-			}
-
-			// Set custom status for successful capture response, or if the authorization was already captured.
-			$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_CAPTURED );
-			$order->save();
-		} catch ( Exception $e ) {
-			WC_Gateway_Paypal::log( $e->getMessage() );
-
-			$note_message = sprintf(
-				__( 'PayPal capture authorized payment failed', 'woocommerce' ),
-			);
-
-			// Scenario 1: Capture auth API call returned 404 (authorization object does not exist).
-			// If the authorization ID is not found (404 response), set the '_paypal_authorization_checked' flag.
-			// This flag indicates that we've made an API call to capture PayPal payment and no authorization object was found with this authorization ID.
-			// This prevents repeated API calls for orders that have no authorization data.
-			if ( 404 === $http_code ) {
-				$paypal_dashboard_url = $this->gateway->testmode
-					? 'https://www.sandbox.paypal.com/unifiedtransactions'
-					: 'https://www.paypal.com/unifiedtransactions';
-
-				$note_message .= sprintf(
-					/* translators: %1$s: Authorization ID, %2$s: open link tag, %3$s: close link tag */
-					__( '. Authorization ID: %1$s not found. Please log into your %2$sPayPal account%3$s to capture the payment', 'woocommerce' ),
-					esc_html( $authorization_id ),
-					'<a href="' . esc_url( $paypal_dashboard_url ) . '" target="_blank">',
-					'</a>'
-				);
-				$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
-			}
-
-			if ( $paypal_debug_id ) {
-				$note_message .= sprintf(
-					/* translators: %s: PayPal debug ID */
-					__( '. PayPal debug ID: %s', 'woocommerce' ),
-					$paypal_debug_id
-				);
-			}
-
-			$order->add_order_note( $note_message );
-			$order->save();
-		}
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::capture_authorized_payment()' );
+		$this->request->capture_authorized_payment( $order );
 	}
 
 	/**
 	 * Get the authorization ID for the PayPal payment.
+	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return string|null
@@ -542,6 +246,9 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the latest item from the authorizations or captures array based on update_time.
 	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
+	 *
 	 * @param array $items Array of authorizations or captures.
 	 * @return array|null The latest authorization or capture or null if array is empty or no valid update_time found.
 	 */
@@ -570,6 +277,9 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the approve link from the response data.
 	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
+	 *
 	 * @param int   $http_code The HTTP code of the response.
 	 * @param array $response_data The response data.
 	 * @return string|null
@@ -593,6 +303,9 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Build the request parameters for the PayPal create-order request.
+	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $payment_source The payment source.
@@ -722,39 +435,21 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the amount data  for the PayPal order purchase unit field.
 	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_purchase_unit_amount() instead. This method will be removed in 11.0.0.
 	 * @param WC_Order $order Order object.
 	 * @return array
 	 */
 	public function get_paypal_order_purchase_unit_amount( $order ) {
-		$currency = $order->get_currency();
-
-		return array(
-			'currency_code' => $currency,
-			'value'         => wc_format_decimal( $order->get_total(), wc_get_price_decimals() ),
-			'breakdown'     => array(
-				'item_total' => array(
-					'currency_code' => $currency,
-					'value'         => wc_format_decimal( $this->get_paypal_order_items_subtotal( $order ), wc_get_price_decimals() ),
-				),
-				'shipping'   => array(
-					'currency_code' => $currency,
-					'value'         => wc_format_decimal( $order->get_shipping_total(), wc_get_price_decimals() ),
-				),
-				'tax_total'  => array(
-					'currency_code' => $currency,
-					'value'         => wc_format_decimal( $order->get_total_tax(), wc_get_price_decimals() ),
-				),
-				'discount'   => array(
-					'currency_code' => $currency,
-					'value'         => wc_format_decimal( $order->get_discount_total(), wc_get_price_decimals() ),
-				),
-			),
-		);
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_purchase_unit_amount()' );
+		return $this->request->get_paypal_order_purchase_unit_amount( $order );
 	}
 
 	/**
 	 * Build the custom ID for the PayPal order. The custom ID will be used by the proxy for webhook forwarding,
 	 * and by later steps to identify the order.
+	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return string
@@ -782,6 +477,9 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the order items for the PayPal create-order request.
 	 * Returns an empty array if any of the items (amount, quantity) are invalid.
+	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return array
@@ -819,6 +517,9 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the subtotal for all items, before discounts.
 	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
+	 *
 	 * @param WC_Order $order Order object.
 	 * @return float
 	 */
@@ -833,6 +534,9 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Get the amount for a specific order item.
+	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
 	 *
 	 * @param WC_Order      $order Order object.
 	 * @param WC_Order_Item $item Order item.
@@ -849,6 +553,9 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the value for the intent field in the create-order request.
 	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
+	 *
 	 * @return string
 	 */
 	private function get_paypal_order_intent() {
@@ -862,6 +569,9 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Get the shipping preference for the PayPal create-order request.
+	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return string
@@ -877,6 +587,9 @@ class WC_Gateway_Paypal_Request {
 
 	/**
 	 * Get the shipping information for the PayPal create-order request.
+	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return array|null Returns null if the shipping is not required,
@@ -947,6 +660,9 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Normalize PayPal order shipping country code.
 	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
+	 *
 	 * @param string $country_code Country code to normalize.
 	 * @return string|null
 	 */
@@ -985,6 +701,9 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Normalize a URL for PayPal. PayPal requires absolute URLs with protocol.
 	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
+	 *
 	 * @param string $url The URL to check.
 	 * @return string Normalized URL.
 	 */
@@ -1018,38 +737,20 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Fetch the PayPal client-id from the Transact platform.
 	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::fetch_paypal_client_id() instead. This method will be removed in 11.0.0.
 	 * @return string|null The PayPal client-id, or null if the request fails.
 	 * @throws Exception If the request fails.
 	 */
 	public function fetch_paypal_client_id() {
-		try {
-			$request_body = array(
-				'test_mode' => $this->gateway->testmode,
-			);
-
-			$response = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_CLIENT_ID_ENDPOINT, $request_body );
-
-			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'Failed to fetch the client ID. Response error: ' . $response->get_error_message() );
-			}
-
-			$http_code     = wp_remote_retrieve_response_code( $response );
-			$body          = wp_remote_retrieve_body( $response );
-			$response_data = json_decode( $body, true );
-
-			if ( 200 !== $http_code ) {
-				throw new Exception( 'Failed to fetch the client ID. Response status: ' . $http_code . '. Response body: ' . $body );
-			}
-
-			return $response_data['client_id'] ?? null;
-		} catch ( Exception $e ) {
-			WC_Gateway_Paypal::log( $e->getMessage() );
-			return null;
-		}
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::fetch_paypal_client_id()' );
+		return $this->request->fetch_paypal_client_id();
 	}
 
 	/**
 	 * Send a request to the API proxy.
+	 *
+	 * @internal This method is no longer used since public methods delegate to the new Request class.
+	 *           It will be removed when the orders v2 methods are fully deprecated in 11.0.0.
 	 *
 	 * @param string $method The HTTP method to use.
 	 * @param string $endpoint The endpoint to request.
