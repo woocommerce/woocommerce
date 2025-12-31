@@ -82,7 +82,7 @@ function getVariationData(
 	// First check if data exists in config (pre-loaded).
 	const preloadedData = products?.[ productId ]?.variations?.[ variationId ];
 	if ( preloadedData && 'price_html' in preloadedData ) {
-		// Duck typing with `price_html` to validate the expected data full data is present.
+		// Duck typing with `price_html` to validate the expected full data is present.
 		return preloadedData;
 	}
 

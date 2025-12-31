@@ -67,7 +67,7 @@ export async function fetchVariationData(
 					credentials: 'same-origin',
 					headers: {
 						'Content-Type': 'application/json',
-						...( nonce && { Nonce: nonce } ),
+						...( nonce && { 'X-WC-Store-API-Nonce': nonce } ),
 					},
 				}
 			);
