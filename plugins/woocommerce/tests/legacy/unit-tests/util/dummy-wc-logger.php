@@ -103,8 +103,8 @@ class Dummy_WC_Logger implements WC_Logger_Interface {
 	/**
 	 * Do nothing.
 	 *
-	 * @param string $source
-	 * @param bool   $quiet
+	 * @param string $source Source.
+	 * @param bool   $quiet Quiet.
 	 *
 	 * @return bool
 	 */
