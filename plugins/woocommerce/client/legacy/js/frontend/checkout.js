@@ -18,24 +18,26 @@ jQuery( function ( $ ) {
 			$( document.body ).on( 'update_checkout', this.update_checkout );
 			$( document.body ).on( 'init_checkout', this.init_checkout );
 			// Fraud protection: Track payment method selection
-			$( document.body ).on( 'payment_method_selected', function () {
-				var payment_method = wc_checkout_form.get_payment_method();
-				if ( payment_method && wc_checkout_params.wc_ajax_url ) {
-					$.ajax( {
-						type: 'POST',
-						url: wc_checkout_params.wc_ajax_url
-							.toString()
-							.replace(
-								'%%endpoint%%',
-								'fraud_protection_payment_method_selected'
-							),
-						data: {
-							payment_method: payment_method,
-						},
-						dataType: 'json',
-					} );
-				}
-			} );
+			if ( wc_checkout_params.fraud_protection_enabled ) {
+				$( document.body ).on( 'payment_method_selected', function () {
+					var payment_method = wc_checkout_form.get_payment_method();
+					if ( payment_method && wc_checkout_params.wc_ajax_url ) {
+						$.ajax( {
+							type: 'POST',
+							url: wc_checkout_params.wc_ajax_url
+								.toString()
+								.replace(
+									'%%endpoint%%',
+									'fraud_protection_payment_method_selected'
+								),
+							data: {
+								payment_method: payment_method,
+							},
+							dataType: 'json',
+						} );
+					}
+				} );
+			}
 
 			// Payment methods
 			this.$checkout_form.on(
