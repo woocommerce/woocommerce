@@ -143,7 +143,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 
 		if ( empty( $payment_method ) ) {
 			wp_send_json_error( array( 'message' => 'Payment method is required.' ) );
-			return;
 		}
 
 		// Track the payment method selection.
@@ -380,6 +379,8 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	public function get_scheduled_action_ids( string $session_id, string $event_type ): array {
 		global $wpdb;
 
+		// phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar
+		// phpstan:ignore class.notFound
 		$sql = $wpdb->prepare(
 			"SELECT a.action_id
 			FROM {$wpdb->actionscheduler_actions} a
@@ -409,8 +410,8 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * is too large and gets stored in extended_args, and Action Scheduler's query
 	 * builder doesn't support partial matching on extended_args.
 	 *
-	 * @param string|null $session_id Optional session ID. If not provided, uses current session.
-	 * @param string $event_type Event type to cancel.
+	 * @param string|null $session_id  Optional session ID. If not provided, uses current session.
+	 * @param string      $event_type Event type to cancel.
 	 * @return void
 	 */
 	public function cancel_scheduled_tracking( ?string $session_id = null, string $event_type = '' ): void {
@@ -498,9 +499,9 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 
 				// Shipping method IDs can be in format "method_id:instance_id".
 				// Extract the base method ID.
-				$method_parts     = explode( ':', $method_id );
-				$base_method_id   = $method_parts[0];
-				$instance_id      = isset( $method_parts[1] ) ? $method_parts[1] : null;
+				$method_parts   = explode( ':', $method_id );
+				$base_method_id = $method_parts[0];
+				$instance_id    = isset( $method_parts[1] ) ? $method_parts[1] : null;
 
 				// Try to get the method label.
 				$method_label = null;
@@ -524,7 +525,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 					$method = $shipping_methods[ $base_method_id ];
 					if ( method_exists( $method, 'get_method_title' ) ) {
 						$method_label = $method->get_method_title();
-					} elseif ( isset( $method->method_title ) ) {
+					} elseif ( property_exists( $method, 'method_title' ) ) {
 						$method_label = $method->method_title;
 					}
 				}
@@ -553,5 +554,4 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 
 		return $shipping_method_map;
 	}
-
 }

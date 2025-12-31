@@ -295,5 +295,4 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 
 		return $event_data;
 	}
-
 }

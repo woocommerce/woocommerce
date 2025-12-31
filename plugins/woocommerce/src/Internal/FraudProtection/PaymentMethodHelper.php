@@ -36,9 +36,9 @@ class PaymentMethodHelper {
 			// Check if the payment method exists and has a title.
 			if ( isset( $payment_gateways[ $payment_method_id ] ) ) {
 				$gateway = $payment_gateways[ $payment_method_id ];
-				if ( method_exists( $gateway, 'get_title' ) ) {
+				if ( is_object( $gateway ) && method_exists( $gateway, 'get_title' ) ) {
 					return $gateway->get_title();
-				} elseif ( isset( $gateway->title ) ) {
+				} elseif ( is_object( $gateway ) && isset( $gateway->title ) ) {
 					return $gateway->title;
 				}
 			}

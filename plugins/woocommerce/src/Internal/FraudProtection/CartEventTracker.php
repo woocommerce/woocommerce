@@ -311,5 +311,4 @@ class CartEventTracker implements RegisterHooksInterface {
 			'cart_item_count' => $cart_item_count,
 		);
 	}
-
 }
