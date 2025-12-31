@@ -14,6 +14,10 @@ type ServerState = {
 	templateState: ProductRef;
 };
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
 const productDataStore = store< {
 	state: ProductRef & ServerState;
 	actions: {
@@ -62,7 +66,7 @@ const productDataStore = store< {
 			},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
 
 export type ProductDataStore = typeof productDataStore;

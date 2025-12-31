@@ -4,15 +4,11 @@
 import { store } from '@wordpress/interactivity';
 
 /**
- * Shape of variation data stored in the cache.
+ * Internal dependencies
  */
-export type VariationData = {
-	price_html: string;
-	is_in_stock: boolean;
-	sold_individually: boolean;
-	sku: string;
-	availability?: string;
-};
+import type { VariationData } from './cart';
+
+export type { VariationData };
 
 export type Store = {
 	state: {
@@ -23,6 +19,10 @@ export type Store = {
 // Track in-flight requests to avoid duplicate fetches.
 const pendingRequests: Record< number, Promise< VariationData | null > > = {};
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
 const { state } = store< Store >(
 	'woocommerce/variation-data',
 	{
@@ -30,7 +30,7 @@ const { state } = store< Store >(
 			variations: {},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
 
 /**
@@ -74,15 +74,35 @@ export async function fetchVariationData(
 
 			const data = await response.json();
 
+			// Extract variation attributes as a Record<string, string>.
+			const attributes: Record< string, string > = {};
+			if ( Array.isArray( data.variation ) ) {
+				for ( const attr of data.variation ) {
+					if ( attr.attribute && attr.value ) {
+						attributes[ attr.attribute ] = attr.value;
+					}
+				}
+			}
+
 			// Extract the fields we need and cache them.
 			const variationData: VariationData = {
-				price_html: data.price_html || '',
+				attributes,
 				is_in_stock: data.is_in_stock ?? true,
 				sold_individually: data.sold_individually ?? false,
-				sku: data.sku || '',
+				price_html: data.price_html || '',
+				image_id: data.images?.[ 0 ]?.id,
 				availability: data.is_in_stock
 					? ''
 					: data.availability?.availability || '',
+				variation_description: data.description || '',
+				sku: data.sku || '',
+				weight: data.weight,
+				dimensions: data.dimensions
+					? `${ data.dimensions.length } × ${ data.dimensions.width } × ${ data.dimensions.height }`
+					: undefined,
+				min: data.add_to_cart?.minimum,
+				max: data.add_to_cart?.maximum,
+				step: data.add_to_cart?.multiple_of,
 			};
 
 			state.variations[ variationId ] = variationData;
