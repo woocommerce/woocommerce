@@ -379,7 +379,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	public function get_scheduled_action_ids( string $session_id, string $event_type ): array {
 		global $wpdb;
 
-		// @phpstan-ignore-next-line class.notFound
 		$sql = $wpdb->prepare(
 			"SELECT a.action_id
 			FROM {$wpdb->actionscheduler_actions} a
@@ -393,7 +392,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			ORDER BY a.scheduled_date_gmt ASC",
 			self::SCHEDULED_ACTION_HOOK,
 			'woocommerce-fraud-protection',
-			\ActionScheduler_Store::STATUS_PENDING,
+			\ActionScheduler_Store::STATUS_PENDING, // phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar -- @phpstan-ignore-line class.notFound
 			$session_id,
 			$event_type
 		);
