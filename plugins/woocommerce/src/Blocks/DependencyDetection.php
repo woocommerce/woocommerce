@@ -159,6 +159,10 @@ final class DependencyDetection {
 		$script_registry = $this->build_script_registry();
 		$registry_json   = \wp_json_encode( $script_registry );
 
+		if ( false === $registry_json ) {
+			return;
+		}
+
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON is safely encoded by wp_json_encode.
 		echo '<script id="wc-dependency-detection-registry">if(typeof window.wc.wcUpdateDependencyRegistry==="function"){window.wc.wcUpdateDependencyRegistry(' . $registry_json . ');}</script>' . "\n";
 	}
