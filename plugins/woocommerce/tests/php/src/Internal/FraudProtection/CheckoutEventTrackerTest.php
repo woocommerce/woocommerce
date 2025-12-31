@@ -254,4 +254,47 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Trigger the scheduled action to track the event.
 		$this->trigger_scheduled_tracking( 'checkout_field_update', $collected_data );
 	}
+
+	public function test_schedule_tracking_cancels_existing_actions(){
+
+		WC()->session = $this->createMock( \WC_Session::class );
+		WC()->session
+			->method( 'get_customer_id' )
+			->willReturn( 'test-session' );
+
+			$collected_data = array(
+			'action'           => 'field_update',
+			'billing_email'    => 'test@example.com',
+			'shipping_methods' => array( 'flat_rate:1' => 'Flat rate' ),
+			'session'          => array( 'session_id' => 'test-session' ),
+		);
+
+		// Mock data collector to return collected data.
+		$this->mock_data_collector
+			->expects( $this->once() )
+			->method( 'collect' )
+			->willReturn( $collected_data );
+		
+		$this->sut->schedule_tracking( 'checkout_field_update', array( 'billing_email' => 'test@example.com' ) );
+
+		// Verify action was scheduled.
+		$action_ids = $this->sut->get_scheduled_action_ids( 'test-session', 'checkout_field_update' );
+
+		$this->assertCount(
+			1,
+			$action_ids,
+			'Expected one scheduled Action Scheduler action for fraud protection event, but found none.'
+		);
+
+		$this->sut->cancel_scheduled_tracking( 'test-session', 'checkout_field_update' );
+
+		// Verify the action was cancelled.
+		$action_ids = $this->sut->get_scheduled_action_ids( 'test-session', 'checkout_field_update' );
+		$this->assertCount( 0, $action_ids, 'Expected no pending actions after cancellation' );
+
+		// Cleanup: Remove all actions for this hook.
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( 'woocommerce_fraud_protection_track_checkout_event', array(), 'woocommerce-fraud-protection' );
+		}
+	}
 }
