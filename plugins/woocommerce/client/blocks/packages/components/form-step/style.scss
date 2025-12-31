@@ -9,9 +9,15 @@
 	background: none;
 	margin: 0 0 $gap-large 0;
 
-	.wc-block-components-text-input:first-of-type,
+	.wc-block-components-text-input,
 	.wc-block-components-country-input {
-		margin-top: 0;
+		&:first-of-type {
+			margin-top: 0;
+		}
+	}
+
+	.wc-block-components-country-input {
+		margin-top: $gap-small;
 	}
 }
 

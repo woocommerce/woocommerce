@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed the margin for country dropdown when position changes via filters.
