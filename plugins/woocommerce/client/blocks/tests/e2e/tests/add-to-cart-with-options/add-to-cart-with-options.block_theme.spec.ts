@@ -183,6 +183,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.first();
 		const quantitySelector = page.getByLabel( 'Product quantity' );
 
+		const additionalInfoPanel = page
+			.getByRole( 'button', { name: 'Additional Information' } )
+			.locator( '../..' )
+			.locator( '.wp-block-accordion-panel' );
+
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
 
@@ -204,9 +209,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( quantitySelector ).toBeVisible();
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			const visibleImage =
@@ -224,9 +227,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				page.getByText( 'SKU: woo-hoodie-blue' )
 			).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '2 lbs' )
+				additionalInfoPanel.getByText( '2 lbs' )
 			).toBeVisible();
 			await expect(
 				page.getByText( variationDescription )
@@ -247,9 +248,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			await expect( async () => {

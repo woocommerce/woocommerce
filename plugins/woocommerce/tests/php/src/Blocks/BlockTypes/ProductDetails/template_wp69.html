@@ -3,11 +3,20 @@
 	<!-- wp:core/accordion {"autoclose":false} -->
 	<div class="wp-block-accordion">
 		<!-- wp:core/accordion-item {"openByDefault": false} -->
-		<details class="wp-block-accordion-item">
+		<div class="wp-block-accordion-item">
 			<!-- wp:core/accordion-heading -->
-			<summary class="wp-block-accordion-heading">
-				Description Header
-			</summary>
+			<h3 class="wp-block-accordion-heading">
+				<button class="wp-block-accordion-heading__toggle">
+					<span class="wp-block-accordion-heading__toggle-title"
+						>Description Header</span
+					>
+					<span
+						class="wp-block-accordion-heading__toggle-icon"
+						aria-hidden="true"
+						>+</span
+					>
+				</button>
+			</h3>
 			<!-- /wp:core/accordion-heading -->
 			<!-- wp:core/accordion-panel -->
 			<div class="wp-block-accordion-panel">
@@ -16,14 +25,23 @@
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:core/accordion-panel -->
-		</details>
+		</div>
 		<!-- /wp:core/accordion-item -->
 		<!-- wp:core/accordion-item {"openByDefault": false} -->
-		<details class="wp-block-accordion-item">
+		<div class="wp-block-accordion-item">
 			<!-- wp:core/accordion-heading -->
-			<summary class="wp-block-accordion-heading">
-				Additional Information Header
-			</summary>
+			<h3 class="wp-block-accordion-heading">
+				<button class="wp-block-accordion-heading__toggle">
+					<span class="wp-block-accordion-heading__toggle-title"
+						>Additional Information Header</span
+					>
+					<span
+						class="wp-block-accordion-heading__toggle-icon"
+						aria-hidden="true"
+						>+</span
+					>
+				</button>
+			</h3>
 			<!-- /wp:core/accordion-heading -->
 			<!-- wp:core/accordion-panel -->
 			<div class="wp-block-accordion-panel">
@@ -32,12 +50,23 @@
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:core/accordion-panel -->
-		</details>
+		</div>
 		<!-- /wp:core/accordion-item -->
 		<!-- wp:core/accordion-item {"openByDefault": false} -->
-		<details class="wp-block-accordion-item">
+		<div class="wp-block-accordion-item">
 			<!-- wp:core/accordion-heading -->
-			<summary class="wp-block-accordion-heading">Reviews Header</summary>
+			<h3 class="wp-block-accordion-heading">
+				<button class="wp-block-accordion-heading__toggle">
+					<span class="wp-block-accordion-heading__toggle-title"
+						>Reviews Header</span
+					>
+					<span
+						class="wp-block-accordion-heading__toggle-icon"
+						aria-hidden="true"
+						>+</span
+					>
+				</button>
+			</h3>
 			<!-- /wp:core/accordion-heading -->
 			<!-- wp:core/accordion-panel {"isSelected":true} -->
 			<div class="wp-block-accordion-panel">
@@ -46,7 +75,7 @@
 				<!-- /wp:paragraph -->
 			</div>
 			<!-- /wp:core/accordion-panel -->
-		</details>
+		</div>
 		<!-- /wp:core/accordion-item -->
 	</div>
 	<!-- /wp:core/accordion -->
