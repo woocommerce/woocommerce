@@ -16,6 +16,7 @@ use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -267,8 +268,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		try {
-			include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-			$paypal_request       = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request       = new PayPalRequest( $this );
 			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
 
 			// Update the addresses in the order with the addresses from the PayPal order details.
@@ -597,10 +597,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
 		$order          = wc_get_order( $order_id );
-		$paypal_request = new WC_Gateway_Paypal_Request( $this );
+		$paypal_request = new PayPalRequest( $this );
 
 		if ( $this->should_use_orders_v2() ) {
 			$paypal_order = $paypal_request->create_paypal_order( $order );
@@ -710,9 +708,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
 
 		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
-			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request = new PayPalRequest( $this );
 			$paypal_request->capture_authorized_payment( $order );
 			return;
 		}
