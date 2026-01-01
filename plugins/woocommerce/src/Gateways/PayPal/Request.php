@@ -27,7 +27,7 @@ class Request {
 	/**
 	 * The PayPal gateway instance.
 	 *
-	 * @var \\WC_Gateway_Paypal
+	 * @var \WC_Gateway_Paypal
 	 */
 	private $gateway;
 
@@ -59,7 +59,7 @@ class Request {
 	/**
 	 * Constructor.
 	 *
-	 * @param \\WC_Gateway_Paypal $gateway Paypal gateway object.
+	 * @param \WC_Gateway_Paypal $gateway Paypal gateway object.
 	 */
 	public function __construct( $gateway ) {
 		$this->gateway = $gateway;
