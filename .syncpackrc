@@ -455,6 +455,15 @@
 			"pinVersion": "next"
 		},
 		{
+			"dependencies": [
+				"@wordpress/global-styles-engine"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
+		},
+		{
 			"label": "@wordpress/* runtime-dependencies",
 			"dependencies": [
 				"@wordpress/**"

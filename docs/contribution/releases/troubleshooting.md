@@ -19,6 +19,13 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 ⚠️ _Do not re-run any workflows until you understand the cause of the failure._ Re-running without fixing the root issue can make things more complicated.
 
+### CI is failing on a release-related PR
+
+During the release process, you may encounter CI test failures on release-related PRs. These failures sometimes occur because test fixes were merged to trunk but not backported to the release branch before it was cut.
+
+1. **Identify the cause**: Check if the failing tests pass on trunk. If they do, the fix likely needs to be backported.
+2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
+3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel. The "Heart of Gold - Flux" team can assist with resolving CI issues that block release work.
 
 ### Something looks wrong in the final release ZIP. Can I start over? {#can-i-start-over-id}
 

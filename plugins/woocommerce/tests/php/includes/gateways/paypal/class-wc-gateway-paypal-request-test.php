@@ -7,8 +7,9 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+
 require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-constants.php';
 
 /**
  * Class WC_Gateway_Paypal_Test.
@@ -155,8 +156,9 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			),
 			'body'     => wp_json_encode(
 				array(
-					'id'    => '123',
-					'links' => array(
+					'id'     => '123',
+					'status' => 'CREATED',
+					'links'  => array(
 						array(
 							'rel'    => 'approve',
 							'href'   => 'https://www.paypal.com/checkoutnow?token=123',
@@ -397,8 +399,8 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 */
 	public function provider_already_captured_statuses() {
 		return array(
-			'status_captured'  => array( WC_Gateway_Paypal_Constants::STATUS_CAPTURED ),
-			'status_completed' => array( WC_Gateway_Paypal_Constants::STATUS_COMPLETED ),
+			'status_captured'  => array( PayPalConstants::STATUS_CAPTURED ),
+			'status_completed' => array( PayPalConstants::STATUS_COMPLETED ),
 		);
 	}
 
@@ -477,7 +479,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		// Verify status was updated.
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals(
-			WC_Gateway_Paypal_Constants::STATUS_CAPTURED,
+			PayPalConstants::STATUS_CAPTURED,
 			$order->get_meta( '_paypal_status', true )
 		);
 	}
@@ -489,7 +491,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
-		$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
+		$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_AUTHORIZED );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -531,7 +533,58 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		// Verify capture ID was not set.
 		$this->assertEmpty( $order->get_meta( '_paypal_capture_id', true ) );
 		// Verify status was not updated.
-		$this->assertEquals( WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED, $order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( PayPalConstants::STATUS_AUTHORIZED, $order->get_meta( '_paypal_status', true ) );
+	}
+
+	/**
+	 * Test capture handles 404 error and sets authorization_checked flag.
+	 */
+	public function test_capture_authorized_payment_handles_404_error_and_sets_authorization_checked_flag() {
+		$order = WC_Helper_Order::create_order();
+		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
+		$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_AUTHORIZED );
+		$order->save();
+
+		$capture_api_call_count = 0;
+		$authorization_id       = 'AUTH_123';
+
+		$filter_callback = function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
+			// Track if capture_auth endpoint is called.
+			if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				++$capture_api_call_count;
+				return $this->return_capture_error( 404, array() );
+			}
+
+			return $value;
+		};
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request->capture_authorized_payment( $order );
+
+		remove_filter( 'pre_http_request', $filter_callback, 10 );
+
+		// Verify capture_auth API was called (but returned 404).
+		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
+		// Verify order note was added with authorization ID message.
+		$order = wc_get_order( $order->get_id() );
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $order->get_id(),
+				'limit'    => 1,
+			)
+		);
+
+		$this->assertNotEmpty( $notes );
+		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $notes[0]->content );
+		$this->assertStringContainsString( 'Authorization ID: ' . $authorization_id . ' not found', $notes[0]->content );
+		// Verify authorization_checked flag was set.
+		$this->assertEquals( 'yes', $order->get_meta( '_paypal_authorization_checked', true ), 'Expected _paypal_authorization_checked flag to be set to yes' );
+		// Verify capture ID was not set.
+		$this->assertEmpty( $order->get_meta( '_paypal_capture_id', true ) );
+		// Verify status was not updated.
+		$this->assertEquals( PayPalConstants::STATUS_AUTHORIZED, $order->get_meta( '_paypal_status', true ) );
 	}
 
 	/**
@@ -650,17 +703,17 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 											'authorizations' => array(
 												array(
 													'id' => 'AUTH_1',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 												array(
 													'id' => 'AUTH_3',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													'update_time' => '2024-02-02T00:00:00Z',
 												),
 												array(
 													'id' => 'AUTH_2',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-03T00:00:00Z',
 												),
 											),
@@ -719,19 +772,19 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 											'authorizations' => array(
 												array(
 													'id' => 'AUTH_1',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 											),
 											'captures' => array(
 												array(
 													'id' => 'CAPTURE_1',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_CAPTURED,
+													'status' => PayPalConstants::STATUS_CAPTURED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 												array(
 													'id' => 'CAPTURE_2',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_COMPLETED,
+													'status' => PayPalConstants::STATUS_COMPLETED,
 													'update_time' => '2024-02-02T00:00:00Z',
 												),
 											),
@@ -765,7 +818,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		// Verify capture ID was stored and no capture request was made.
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'CAPTURE_2', $order->get_meta( '_paypal_capture_id', true ) );
-		$this->assertEquals( WC_Gateway_Paypal_Constants::STATUS_COMPLETED, $order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( PayPalConstants::STATUS_COMPLETED, $order->get_meta( '_paypal_status', true ) );
 	}
 
 	/**
@@ -794,7 +847,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 											'authorizations' => array(
 												array(
 													'id' => 'AUTH_123',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_CAPTURED,
+													'status' => PayPalConstants::STATUS_CAPTURED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 											),
@@ -827,7 +880,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, $capture_api_call_count, 'Expected no capture_auth API call when authorization already captured' );
 		// Verify status was updated but no capture request was made.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( WC_Gateway_Paypal_Constants::STATUS_CAPTURED, $order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( PayPalConstants::STATUS_CAPTURED, $order->get_meta( '_paypal_status', true ) );
 	}
 
 	/**
@@ -935,17 +988,17 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 											'authorizations' => array(
 												array(
 													'id' => 'AUTH_OLD',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 												array(
 													'id' => 'AUTH_NEWEST',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-03T00:00:00Z',
 												),
 												array(
 													'id' => 'AUTH_MIDDLE',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-02T00:00:00Z',
 												),
 											),
@@ -1097,12 +1150,12 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 											'authorizations' => array(
 												array(
 													'id' => 'AUTH_NO_TIME',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													// Missing update_time.
 												),
 												array(
 													'id' => 'AUTH_VALID',
-													'status' => WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED,
+													'status' => PayPalConstants::STATUS_AUTHORIZED,
 													'update_time' => '2024-01-01T00:00:00Z',
 												),
 											),
@@ -1180,6 +1233,62 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'yes', $order->get_meta( '_paypal_authorization_checked', true ) );
 	}
 
+	/**
+	 * Test capture handles already captured authorization errors (from the PayPal side).
+	 */
+	public function test_capture_authorized_payment_handles_auth_already_captured_errors() {
+		$order = WC_Helper_Order::create_order();
+		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
+		$order->save();
+
+		$capture_api_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
+				// Track if capture_auth endpoint is called.
+				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+					++$capture_api_call_count;
+					return array(
+						'response' => array( 'code' => 422 ),
+						'body'     => wp_json_encode(
+							array(
+								'name'     => 'UNPROCESSABLE_ENTITY',
+								'message'  => 'The requested action could not be performed, semantically incorrect, or failed business validation.',
+								'debug_id' => '1234567890',
+								'details'  => array(
+									array(
+										'issue'       => PayPalConstants::PAYPAL_ISSUE_AUTHORIZATION_ALREADY_CAPTURED,
+										'description' => 'The authorization has already been captured.',
+									),
+								),
+							)
+						),
+					);
+				}
+
+				return $value;
+			},
+			10,
+			3
+		);
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request->capture_authorized_payment( $order );
+
+		remove_all_filters( 'pre_http_request' );
+
+		// Verify capture_auth API was called once.
+		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
+
+		// Verify status was updated.
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals(
+			PayPalConstants::STATUS_CAPTURED,
+			$order->get_meta( '_paypal_status', true )
+		);
+	}
+
 	// ========================================================================
 	// Helper methods for capture_authorized_payment tests
 	// ========================================================================
@@ -1198,7 +1307,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'body'     => wp_json_encode(
 				array(
 					'id'     => 'CAPTURE_123',
-					'status' => WC_Gateway_Paypal_Constants::STATUS_COMPLETED,
+					'status' => PayPalConstants::STATUS_COMPLETED,
 				)
 			),
 		);

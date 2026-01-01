@@ -21,7 +21,7 @@ import '@wordpress/format-library'; // Enables text formatting capabilities
 import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
-import { createStore, storeName, initStoreOverrides } from './store';
+import { createStore, storeName } from './store';
 import { initTextHooks } from './text-hooks';
 import {
 	initEventCollector,
@@ -95,7 +95,7 @@ function Editor( {
 	);
 }
 
-function onInit( config: EmailEditorConfig ) {
+function onInit() {
 	initEventCollector();
 	initStoreTracking();
 	initDomTracking();
@@ -104,7 +104,6 @@ function onInit( config: EmailEditorConfig ) {
 	initializeLayout();
 	initBlocks();
 	initTextHooks();
-	initStoreOverrides( config );
 }
 
 export function initialize( elementId: string ) {
@@ -128,7 +127,7 @@ export function initialize( elementId: string ) {
 		Editor
 	) as typeof Editor;
 
-	onInit( getEditorConfigFromWindow() );
+	onInit();
 
 	// Set configuration to store from window object for backward compatibility
 	const editorConfig = getEditorConfigFromWindow();
@@ -162,7 +161,7 @@ export function ExperimentalEmailEditor( {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
 		// Set configuration to store from window object for backward compatibility
 		const editorConfig = config || getEditorConfigFromWindow();
-		onInit( editorConfig );
+		onInit();
 
 		dispatch( storeName ).setEditorConfig( editorConfig );
 		setIsInitialized( true );

@@ -1538,7 +1538,7 @@ Enable customers to filter the product collection by selecting one or more taxon
 -	**Supports:** color (text, ~~background~~), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight)
 -	**Attributes:** displayStyle, hideEmpty, isPreview, showCounts, sortOrder, taxonomy
 
-## Product Gallery (Beta) - woocommerce/product-gallery
+## Product Gallery - woocommerce/product-gallery
 
 Showcase your products relevant images and media.
 
