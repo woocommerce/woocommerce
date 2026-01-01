@@ -871,7 +871,7 @@ class WC_Form_Handler {
 		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
-		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity ) ) {
+		if ( $passed_validation && WC()->cart && false !== WC()->cart->add_to_cart( $product_id, $quantity ) ) {
 			wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			return true;
 		}
