@@ -31,7 +31,7 @@ class Request {
 	 */
 	private $gateway;
 
-    /**
+	/**
 	 * The API version for the proxy endpoint.
 	 *
 	 * @var int
@@ -1038,19 +1038,19 @@ class Request {
 	/**
 	 * Limit length of an arg.
 	 *
-	 * @param  string  $string Argument to limit.
+	 * @param  string  $text Text to limit.
 	 * @param  integer $limit Limit size in characters.
 	 * @return string
 	 */
-	private function limit_length( $string, $limit = 127 ) {
+	private function limit_length( $text, $limit = 127 ) {
 		$str_limit = $limit - 3;
 		if ( function_exists( 'mb_strimwidth' ) ) {
-			if ( mb_strlen( $string ) > $limit ) {
-				$string = mb_strimwidth( $string, 0, $str_limit ) . '...';
+			if ( mb_strlen( $text ) > $limit ) {
+				$text = mb_strimwidth( $text, 0, $str_limit ) . '...';
 			}
-		} elseif ( strlen( $string ) > $limit ) {
-			$string = substr( $string, 0, $str_limit ) . '...';
+		} elseif ( strlen( $text ) > $limit ) {
+			$text = substr( $text, 0, $str_limit ) . '...';
 		}
-		return $string;
+		return $text;
 	}
 }
