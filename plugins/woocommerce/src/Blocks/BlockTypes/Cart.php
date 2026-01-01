@@ -266,7 +266,7 @@ class Cart extends AbstractBlock {
 							$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
 							return $location;
 						},
-						LocalPickupUtils::get_local_pickup_method_locations()
+						get_option( 'pickup_location_pickup_locations', array() )
 					)
 				)
 			);
