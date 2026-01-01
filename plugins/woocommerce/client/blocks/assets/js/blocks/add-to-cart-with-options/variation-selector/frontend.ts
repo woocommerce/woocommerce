@@ -30,7 +30,6 @@ type Option = {
 };
 
 type Context = AddToCartWithOptionsStoreContext & {
-	id: string;
 	name: string;
 	selectedValue: string | null;
 	option: Option;
@@ -178,7 +177,10 @@ export type VariableProductAddToCartWithOptionsStore =
 			handleDropdownChange: (
 				event: ChangeEvent< HTMLSelectElement >
 			) => void;
-			autoselectAttributes: ( excludedAttribute: string ) => void;
+			autoselectAttributes: ( args: {
+				includedAttributes?: string[],
+				excludedAttributes?: string[],
+			} ) => void;
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
@@ -278,15 +280,25 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					context.selectedValue = context.option.value;
 				}
 				actions.setAttribute( context.name, context.selectedValue );
-				actions.autoselectAttributes( context.name );
+				if ( context.selectedValue !== '' ) {
+					actions.autoselectAttributes( { excludedAttributes: [ context.name ] } );
+				}
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
-				actions.autoselectAttributes( context.name );
+				if ( context.selectedValue !== '' ) {
+					actions.autoselectAttributes( { excludedAttributes: [ context.name ] } );
+				}
 			},
-			autoselectAttributes( excludedAttribute: string ) {
+			autoselectAttributes( {
+				includedAttributes = [],
+				excludedAttributes = [],
+			}: {
+				includedAttributes: string[],
+				excludedAttributes: string[],
+			} ) {
 				const { autoselect, selectedAttributes } =
 					getContext< Context >();
 
@@ -302,7 +314,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					getProductAttributesAndOptions( productObject );
 				Object.entries( productAttributesAndOptions ).forEach(
 					( [ attribute, options ] ) => {
-						if ( attribute === excludedAttribute ) {
+						if ( includedAttributes.length !== 0 && ! includedAttributes.includes( attribute ) ) {
+							return;
+						}
+						if ( excludedAttributes.length !== 0 && excludedAttributes.includes( attribute ) ) {
 							return;
 						}
 						const validOptions = options.filter( ( option ) =>
@@ -324,14 +339,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		callbacks: {
 			setDefaultSelectedAttribute() {
 				const context = getContext< Context >();
-				const { autoselect } = context;
 
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
-				if ( autoselect ) {
-					actions.autoselectAttributes( context.name );
-				}
+				actions.autoselectAttributes( { includedAttributes: [ context.name ] } );
 			},
 			setSelectedVariationId: () => {
 				const { products } = getConfig( 'woocommerce' );
