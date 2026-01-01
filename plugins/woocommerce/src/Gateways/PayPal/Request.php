@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Exception;
 use WC_Order;
-use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -34,9 +33,9 @@ class Request {
 	/**
 	 * The API version for the proxy endpoint.
 	 *
-	 * @var int
+	 * @var string
 	 */
-	private const WPCOM_PROXY_ENDPOINT_API_VERSION = 2;
+	private const WPCOM_PROXY_ENDPOINT_API_VERSION = '2';
 
 	/**
 	 * The base for the proxy REST endpoint.
@@ -101,6 +100,10 @@ class Request {
 
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
+			}
+
+			if ( ! is_array( $response ) ) {
+				throw new Exception( 'PayPal order creation failed. Invalid response type.' );
 			}
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
@@ -189,6 +192,10 @@ class Request {
 			throw new Exception( 'PayPal order details request failed: ' . esc_html( $response->get_error_message() ) );
 		}
 
+		if ( ! is_array( $response ) ) {
+			throw new Exception( 'PayPal order details request failed. Invalid response type.' );
+		}
+
 		$http_code     = wp_remote_retrieve_response_code( $response );
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
@@ -253,6 +260,10 @@ class Request {
 
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
+			}
+
+			if ( ! is_array( $response ) ) {
+				throw new Exception( 'PayPal ' . $action . ' payment request failed. Invalid response type.' );
 			}
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
@@ -353,6 +364,10 @@ class Request {
 
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
+			}
+
+			if ( ! is_array( $response ) ) {
+				throw new Exception( 'PayPal capture payment request failed. Invalid response type.' );
 			}
 
 			$http_code             = wp_remote_retrieve_response_code( $response );
@@ -566,7 +581,7 @@ class Request {
 			PayPalConstants::SUPPORTED_CURRENCIES
 		);
 		if ( ! in_array( strtoupper( $order->get_currency() ), $supported_currencies, true ) ) {
-			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( $order->get_id() ) );
+			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( (string) $order->get_id() ) );
 		}
 
 		$purchase_unit_amount = $this->get_paypal_order_purchase_unit_amount( $order );
@@ -716,15 +731,19 @@ class Request {
 				// Endpoint for the proxy to forward webhooks to.
 				'site_url'  => home_url(),
 				'site_id'   => class_exists( '\Jetpack_Options' ) ? \Jetpack_Options::get_option( 'id' ) : null,
-				'v'         => WC_VERSION,
+				'v'         => defined( 'WC_VERSION' ) ? WC_VERSION : \WC()->version,
 			)
 		);
+
+		if ( false === $custom_id ) {
+			throw new Exception( 'Failed to encode custom ID.' );
+		}
 
 		if ( strlen( $custom_id ) > 255 ) {
 			throw new Exception( 'PayPal order custom ID is too long. Max length is 255 chars.' );
 		}
 
-		return $custom_id;
+		return $custom_id ? $custom_id : '';
 	}
 
 	/**
@@ -783,15 +802,14 @@ class Request {
 	 * Get the amount for a specific order item.
 	 *
 	 * @param WC_Order      $order Order object.
-	 * @param WC_Order_Item $item Order item.
+	 * @param \WC_Order_Item $item Order item.
 	 * @return float
 	 */
 	private function get_paypal_order_item_amount( $order, $item ) {
-		return (float) (
-			'fee' === $item->get_type()
-				? $item->get_amount()
-				: $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false )
-		);
+		if ( 'fee' === $item->get_type() && $item instanceof \WC_Order_Item_Fee ) {
+			return (float) $item->get_amount();
+		}
+		return (float) $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false );
 	}
 
 	/**
@@ -981,6 +999,10 @@ class Request {
 				throw new Exception( 'Failed to fetch the client ID. Response error: ' . $response->get_error_message() );
 			}
 
+			if ( ! is_array( $response ) ) {
+				throw new Exception( 'Failed to fetch the client ID. Invalid response type.' );
+			}
+
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
@@ -1003,7 +1025,7 @@ class Request {
 	 * @param string $endpoint The endpoint to request.
 	 * @param array  $request_body The request body.
 	 *
-	 * @return array|null The API response body, or null if the request fails.
+	 * @return array|\WP_Error The API response body, or WP_Error if the request fails.
 	 * @throws Exception If the site ID is not found.
 	 */
 	private function send_wpcom_proxy_request( $method, $endpoint, $request_body ) {
