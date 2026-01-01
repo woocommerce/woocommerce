@@ -23,7 +23,7 @@ class VariationDataUtils {
 	 * 2. Site-level option (defaults to 'yes' for new installs)
 	 *
 	 * Existing sites have the option set to 'no' during update via
-	 * wc_update_1000_disable_lazy_load_variations() in wc-update-functions.php.
+	 * wc_update_1060_disable_lazy_load_variations_for_existing_sites() in wc-update-functions.php.
 	 *
 	 * @param WP_Block|null $block The block instance to check context from.
 	 * @return bool Whether lazy loading is enabled.
