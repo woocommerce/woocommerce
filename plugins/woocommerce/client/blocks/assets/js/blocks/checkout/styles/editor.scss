@@ -41,6 +41,32 @@
 			top: 0;
 		}
 	}
+
+	.wc-block-components-form {
+		.wc-block-checkout__order-fields:has(
+				+ .wp-block-woocommerce-checkout-order-note-block
+			) {
+			margin-bottom: $gap-small;
+		}
+
+		// Would have been a lot easier to do if those blocks aren't nested from what we have in the frontend.
+		// @TODO: Refactor the block to remove the extra parent in the editor.
+		.wp-block-woocommerce-checkout-order-note-block:has(
+				+ .wp-block-woocommerce-checkout-terms-block
+			)
+			.wc-block-checkout__order-notes {
+			margin-bottom: $gap-small;
+		}
+
+		// Reset when the terms block has a separator
+		.wp-block-woocommerce-checkout-order-note-block:has(
+				+ .wp-block-woocommerce-checkout-terms-block
+					.wc-block-checkout__terms--with-separator
+			)
+			.wc-block-checkout__order-notes {
+			margin-bottom: $gap-large;
+		}
+	}
 }
 
 body.wc-lock-selected-block--move {

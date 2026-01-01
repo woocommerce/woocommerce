@@ -39,7 +39,7 @@ export const Edit = ( {
 			setAttributes={ setAttributes }
 			attributes={ attributes }
 			className={ clsx(
-				'wc-block-checkout__additional-information-fields',
+				'wc-block-checkout__order-fields',
 				attributes?.className
 			) }
 		>
