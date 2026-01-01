@@ -13,25 +13,16 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
-}
-
 if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
 	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
 }
 
 /**
@@ -281,7 +272,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
 
 			// Update the addresses in the order with the addresses from the PayPal order details.
-			WC_Gateway_Paypal_Helper::update_addresses_in_order( $order, $paypal_order_details );
+			PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
 			$order->update_meta_data( '_paypal_addresses_updated', 'no' );
@@ -313,7 +304,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible()
+			PayPalHelper::is_orders_v2_migration_eligible()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -520,7 +511,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function is_valid_for_use() {
 		if ( $this->should_use_orders_v2() ) {
-			$valid_currencies = WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES;
+			$valid_currencies = PayPalConstants::SUPPORTED_CURRENCIES;
 		} else {
 			$valid_currencies = array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' );
 		}
@@ -936,7 +927,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible()
+			PayPalHelper::is_orders_v2_migration_eligible()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -1035,7 +1026,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		WC_Gateway_Paypal_Notices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
+		PayPalNotices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
 	}
 }
 
@@ -1048,6 +1039,6 @@ add_action(
 		}
 
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
-		new WC_Gateway_Paypal_Notices();
+		new PayPalNotices();
 	}
 );
