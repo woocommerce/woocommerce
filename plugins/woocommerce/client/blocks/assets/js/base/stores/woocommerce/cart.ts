@@ -252,6 +252,8 @@ function emitSyncEvent( {
 	);
 }
 
+const pendingDeletes = new Set< string >();
+
 // Todo: export this store once the store is public.
 const { state, actions } = store< Store >(
 	'woocommerce',
@@ -259,6 +261,7 @@ const { state, actions } = store< Store >(
 		actions: {
 			*removeCartItem( key: string ) {
 				const previousCart = JSON.stringify( state.cart );
+				pendingDeletes.add( key );
 
 				// optimistically update the cart
 				state.cart.items = state.cart.items.filter(
@@ -280,6 +283,7 @@ const { state, actions } = store< Store >(
 					);
 
 					const json: Cart | ApiErrorResponse = yield res.json();
+					pendingDeletes.delete( key );
 
 					if ( isApiErrorResponse( res, json ) ) {
 						throw generateError( json );
@@ -296,9 +300,15 @@ const { state, actions } = store< Store >(
 						true
 					);
 
-					state.cart = json;
+					state.cart = {
+						...json,
+						items: json.items.filter(
+							( item ) => ! pendingDeletes.has( item.key )
+						),
+					};
 					emitSyncEvent( { quantityChanges } );
 				} catch ( error ) {
+					pendingDeletes.delete( key );
 					state.cart = JSON.parse( previousCart );
 
 					// Shows the error notice.
