@@ -22,6 +22,10 @@ export const getMatchedVariation = (
 	const matchingVariation = Object.entries( availableVariations ).find(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		( [ _, availableVariation ] ) => {
+			// Skip variations without attributes data.
+			if ( ! availableVariation?.attributes ) {
+				return false;
+			}
 			return Object.entries( availableVariation.attributes ).every(
 				( [ attributeName, attributeValue ] ) => {
 					const attributeMatched = selectedAttributes.some(

@@ -17,7 +17,25 @@ export type Store = {
 };
 
 // Track in-flight requests to avoid duplicate fetches.
-const pendingRequests: Record< number, Promise< VariationData | null > > = {};
+// Use window to ensure true singleton across separate bundles.
+declare global {
+	interface Window {
+		__wcVariationPendingRequests?: Record<
+			number,
+			Promise< VariationData | null >
+		>;
+	}
+}
+
+const getPendingRequests = (): Record<
+	number,
+	Promise< VariationData | null >
+> => {
+	if ( ! window.__wcVariationPendingRequests ) {
+		window.__wcVariationPendingRequests = {};
+	}
+	return window.__wcVariationPendingRequests;
+};
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -49,6 +67,8 @@ export async function fetchVariationData(
 	if ( state.variations[ variationId ] ) {
 		return state.variations[ variationId ];
 	}
+
+	const pendingRequests = getPendingRequests();
 
 	// Return existing promise if request is in flight.
 	if ( pendingRequests[ variationId ] ) {
@@ -119,7 +139,7 @@ export async function fetchVariationData(
 			);
 			return null;
 		} finally {
-			delete pendingRequests[ variationId ];
+			delete getPendingRequests()[ variationId ];
 		}
 	} )();
 

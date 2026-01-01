@@ -3217,14 +3217,3 @@ function wc_update_1050_enable_autoload_options() {
 	);
 }
 
-/**
- * Disable lazy load variations for existing sites.
- *
- * New installs get lazy loading enabled by default. This update ensures
- * existing sites maintain backward compatibility by explicitly disabling it.
- *
- * @since 10.6.0
- */
-function wc_update_1060_disable_lazy_load_variations_for_existing_sites() {
-	update_option( 'woocommerce_blocks_lazy_load_variations', 'no' );
-}

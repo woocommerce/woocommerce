@@ -34,13 +34,15 @@ class ProductGallery extends AbstractBlock {
 	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
-	 * Checks block context first, then falls back to site-level option.
+	 * Checks block context first, then falls back to variation count threshold.
 	 *
 	 * @param WP_Block $block The block instance.
 	 * @return bool
 	 */
 	protected function is_lazy_load_enabled( WP_Block $block ): bool {
-		return VariationDataUtils::is_enabled( $block );
+		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$product = wc_get_product( $post_id );
+		return VariationDataUtils::is_enabled( $block, $product );
 	}
 
 	/**
@@ -172,34 +174,12 @@ class ProductGallery extends AbstractBlock {
 				$formatted_variations_data = array();
 				$has_variation_images      = false;
 				$parent_image_id           = (int) $product->get_image_id();
+				$use_lazy_load             = $this->is_lazy_load_enabled( $block );
 
-				if ( $this->is_lazy_load_enabled( $block ) ) {
-					// Efficient query for variation image IDs without loading full objects.
-					global $wpdb;
-					$variation_ids = $product->get_children();
-					if ( ! empty( $variation_ids ) ) {
-						$id_placeholders = implode( ',', array_fill( 0, count( $variation_ids ), '%d' ) );
-						// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						$results = $wpdb->get_results(
-							$wpdb->prepare(
-								"SELECT post_id, meta_value FROM {$wpdb->postmeta}
-								WHERE post_id IN ({$id_placeholders})
-								AND meta_key = '_thumbnail_id'
-								AND meta_value != ''
-								AND meta_value != %d",
-								array_merge( $variation_ids, array( $parent_image_id ) )
-							),
-							ARRAY_A
-						);
-						// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-						foreach ( $results as $row ) {
-							$has_variation_images                                  = true;
-							$formatted_variations_data[ (int) $row['post_id'] ] = array(
-								'image_id' => (int) $row['meta_value'],
-							);
-						}
-					}
+				if ( $use_lazy_load ) {
+					// In lazy load mode, variation image_id will be fetched via AJAX.
+					// We just need to set the parent image_id and enable interactivity.
+					$has_variation_images = true;
 				} else {
 					$variations_data = $product->get_available_variations();
 					foreach ( $variations_data as $variation ) {
@@ -222,14 +202,21 @@ class ProductGallery extends AbstractBlock {
 				}
 
 				if ( $has_variation_images ) {
+					$config_data = array(
+						'image_id' => $parent_image_id,
+					);
+
+					// Only set variations in non-lazy mode to avoid overwriting
+					// AddToCartWithOptions's variation data that includes attributes.
+					if ( ! $use_lazy_load && ! empty( $formatted_variations_data ) ) {
+						$config_data['variations'] = $formatted_variations_data;
+					}
+
 					wp_interactivity_config(
 						'woocommerce',
 						array(
 							'products' => array(
-								$product->get_id() => array(
-									'image_id'   => $parent_image_id,
-									'variations' => $formatted_variations_data,
-								),
+								$product->get_id() => $config_data,
 							),
 						)
 					);

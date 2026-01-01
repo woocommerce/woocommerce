@@ -96,6 +96,11 @@ const isAttributeValueValid = ( {
 	// Check if there is at least one available variation matching the current
 	// selected attributes and the attribute value being checked.
 	return availableVariations.some( ( availableVariation ) => {
+		// Skip variations without attributes data (can happen with config merge issues).
+		if ( ! availableVariation.attributes ) {
+			return false;
+		}
+
 		// Skip variations that don't match the current attribute value.
 		if (
 			availableVariation.attributes[ attributeName ] !== attributeValue &&

@@ -31,13 +31,15 @@ class VariationDescription extends AbstractBlock {
 	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
-	 * Checks block context first, then falls back to site-level option.
+	 * Checks block context first, then falls back to variation count threshold.
 	 *
 	 * @param WP_Block $block The block instance.
 	 * @return bool
 	 */
 	protected function is_lazy_load_enabled( WP_Block $block ): bool {
-		return VariationDataUtils::is_enabled( $block );
+		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
+		$product = wc_get_product( $post_id );
+		return VariationDataUtils::is_enabled( $block, $product );
 	}
 
 
