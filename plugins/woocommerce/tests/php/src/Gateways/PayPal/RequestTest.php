@@ -1,23 +1,31 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Request class.
+ * Unit tests for PayPal Request class.
  *
- * @package WooCommerce\Tests\Paypal.
+ * @package WooCommerce\Tests\Gateways\PayPal
  */
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 
 /**
- * Class WC_Gateway_Paypal_Test.
+ * Class RequestTest.
  */
-class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
+class RequestTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Set up the test environment.
+	 *
+	 * @return void
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -31,6 +39,8 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Tear down the test environment.
+	 *
+	 * @return void
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
@@ -42,14 +52,16 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test create_paypal_order when API returns error.
+	 *
+	 * @return void
 	 */
-	public function test_create_paypal_order_error() {
-		$order = WC_Helper_Order::create_order();
+	public function test_create_paypal_order_error(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ) );
@@ -59,14 +71,16 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test create_paypal_order when API returns success.
+	 *
+	 * @return void
 	 */
-	public function test_create_paypal_order_success() {
-		$order = WC_Helper_Order::create_order();
+	public function test_create_paypal_order_success(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
@@ -77,9 +91,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test that the create_paypal_order params are correct.
+	 *
+	 * @return void
 	 */
-	public function test_create_paypal_order_params_are_correct() {
-		$order = WC_Helper_Order::create_order();
+	public function test_create_paypal_order_params_are_correct(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->set_cart_tax( 10 );
 		$order->set_shipping_tax( 0 );
 		$order->set_total( 60 );
@@ -87,7 +103,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$this->assertNotNull( $request->create_paypal_order( $order ) );
 
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
@@ -101,7 +117,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array Return a 200 response.
 	 */
-	public function check_create_paypal_order_params( $value, $parsed_args ) {
+	public function check_create_paypal_order_params( $value, $parsed_args ): array {
 		$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
 		$this->assertEquals( 'POST', $parsed_args['method'] );
 		$body = json_decode( $parsed_args['body'], true );
@@ -119,11 +135,15 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( '10.00', $purchase_unit['amount']['breakdown']['shipping']['value'] );
 		$this->assertEquals( '10.00', $purchase_unit['amount']['breakdown']['tax_total']['value'] );
 
-		$items = $purchase_unit['items'];
-		$this->assertEquals( 'Dummy Product', $items[0]['name'] );
-		$this->assertEquals( '4', $items[0]['quantity'] );
-		$this->assertEquals( '10.00', $items[0]['unit_amount']['value'] );
-		$this->assertEquals( 'USD', $items[0]['unit_amount']['currency_code'] );
+		if ( ! empty( $purchase_unit['items'] ) ) {
+			$items = $purchase_unit['items'];
+			$this->assertEquals( 'Dummy Product', $items[0]['name'] );
+			$this->assertEquals( '4', $items[0]['quantity'] );
+			$this->assertEquals( '10.00', $items[0]['unit_amount']['value'] );
+			$this->assertEquals( 'USD', $items[0]['unit_amount']['currency_code'] );
+		} else {
+			$this->assertArrayNotHasKey( 'items', $purchase_unit );
+		}
 
 		$this->assertArrayHasKey( 'payment_source', $order_payload );
 		$this->assertArrayHasKey( 'paypal', $order_payload['payment_source'] );
@@ -149,7 +169,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array Return a 200 response.
 	 */
-	public function create_paypal_order_success( $value, $parsed_url ) {
+	public function create_paypal_order_success( $value, $parsed_url ): array {
 		return array(
 			'response' => array(
 				'code' => 200,
@@ -178,7 +198,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array Return a 500 error response.
 	 */
-	public function create_paypal_order_error( $value, $parsed_url ) {
+	public function create_paypal_order_error( $value, $parsed_url ): array {
 		// Return a 500 error.
 		return array( 'response' => array( 'code' => 500 ) );
 	}
@@ -188,9 +208,9 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @param mixed $value The option value.
 	 *
-	 * @return int
+	 * @return array
 	 */
-	public function return_valid_site_id( $value ) {
+	public function return_valid_site_id( $value ): array {
 		return array( 'id' => 12345 );
 	}
 
@@ -201,7 +221,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function return_blog_token( $value ) {
+	public function return_blog_token( $value ): array {
 		return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
 	}
 
@@ -210,7 +230,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_normalize_url_scenarios() {
+	public function provider_normalize_url_scenarios(): array {
 		return array(
 			'absolute_url_https'                   => array(
 				'input'    => 'https://example.com/checkout',
@@ -278,13 +298,15 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @param string $input    The input URL to normalize.
 	 * @param string $expected The expected normalized URL.
+	 *
+	 * @return void
 	 */
-	public function test_normalize_url_for_paypal( $input, $expected ) {
-		$gateway = new WC_Gateway_Paypal();
-		$request = new WC_Gateway_Paypal_Request( $gateway );
+	public function test_normalize_url_for_paypal( string $input, string $expected ): void {
+		$gateway = new \WC_Gateway_Paypal();
+		$request = new PayPalRequest( $gateway );
 
 		// Use reflection to access the private method.
-		$reflection = new ReflectionClass( $request );
+		$reflection = new \ReflectionClass( $request );
 		$method     = $reflection->getMethod( 'normalize_url_for_paypal' );
 		$method->setAccessible( true );
 
@@ -299,13 +321,15 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture is not attempted when order is null.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_not_attempted_when_order_is_null() {
+	public function test_capture_authorized_payment_not_attempted_when_order_is_null(): void {
 		$capture_api_call_count = 0;
 		add_filter(
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -315,7 +339,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( null );
 
 		remove_all_filters( 'pre_http_request' );
@@ -326,9 +350,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture is not attempted when PayPal Order ID is missing.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_not_attempted_when_paypal_order_id_missing() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_not_attempted_when_paypal_order_id_missing(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -336,7 +362,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -347,7 +373,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -358,9 +384,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture is skipped when payment is already captured (via capture_id).
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_skipped_when_already_captured_via_capture_id() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_skipped_when_already_captured_via_capture_id(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_capture_id', 'CAPTURE_123' );
 		$order->save();
@@ -370,7 +398,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -381,7 +409,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -397,7 +425,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_already_captured_statuses() {
+	public function provider_already_captured_statuses(): array {
 		return array(
 			'status_captured'  => array( PayPalConstants::STATUS_CAPTURED ),
 			'status_completed' => array( PayPalConstants::STATUS_COMPLETED ),
@@ -410,9 +438,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 * @dataProvider provider_already_captured_statuses
 	 *
 	 * @param string $status The payment status.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_skipped_when_status_already_captured( $status ) {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_skipped_when_status_already_captured( string $status ): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_status', $status );
 		$order->save();
@@ -422,7 +452,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -433,7 +463,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -446,9 +476,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture succeeds with HTTP 200 response.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_succeeds_with_http_200() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_succeeds_with_http_200(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
 		$order->save();
@@ -458,7 +490,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -469,7 +501,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -486,9 +518,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture fails with various HTTP error codes.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_fails() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_fails(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
 		$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_AUTHORIZED );
@@ -500,7 +534,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count, $debug_id ) {
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_error( 400, array( 'debug_id' => $debug_id ) );
 				}
@@ -511,7 +545,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -538,9 +572,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture handles 404 error and sets authorization_checked flag.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_handles_404_error_and_sets_authorization_checked_flag() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_handles_404_error_and_sets_authorization_checked_flag(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
 		$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_AUTHORIZED );
@@ -551,7 +587,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		$filter_callback = function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 			// Track if capture_auth endpoint is called.
-			if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+			if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 				++$capture_api_call_count;
 				return $this->return_capture_error( 404, array() );
 			}
@@ -560,7 +596,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_filter( 'pre_http_request', $filter_callback, 10 );
@@ -589,9 +625,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture handles WP_Error response.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_handles_wp_error_response() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_handles_wp_error_response(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
 		$order->save();
@@ -601,9 +639,9 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
-					return new WP_Error( 'http_request_failed', 'Connection timeout' );
+					return new \WP_Error( 'http_request_failed', 'Connection timeout' );
 				}
 
 				return $value;
@@ -612,7 +650,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -634,9 +672,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture request includes correct parameters.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_request_includes_correct_parameters() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_request_includes_correct_parameters(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
 		$order->save();
@@ -647,7 +687,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$captured_request, &$capture_api_call_count ) {
 				// Capture the capture_auth request.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					$captured_request = $parsed_args;
 					return $this->return_capture_success_200( $value, $parsed_args );
@@ -659,7 +699,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -679,9 +719,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test authorization ID is retrieved from API when not in meta.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_retrieves_authorization_id_from_api() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_retrieves_authorization_id_from_api(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		// Don't set _paypal_authorization_id.
 		$order->save();
@@ -690,7 +732,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) {
 				// Mock get PayPal order details API call.
-				if ( strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
 					return array(
 						'response' => array( 'code' => 200 ),
 						'body'     => wp_json_encode(
@@ -726,7 +768,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				}
 
 				// Mock capture API call.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
 
@@ -736,7 +778,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -748,9 +790,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture is skipped when API returns capture data in order details.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_skipped_when_api_returns_capture_data() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_skipped_when_api_returns_capture_data(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->save();
 
@@ -759,7 +803,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Mock get PayPal order details API call.
-				if ( strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
 					return array(
 						'response' => array( 'code' => 200 ),
 						'body'     => wp_json_encode(
@@ -797,7 +841,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				}
 
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -808,7 +852,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -823,9 +867,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture is skipped when authorization status is already CAPTURED.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_skipped_when_authorization_status_is_captured() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_skipped_when_authorization_status_is_captured(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->save();
 
@@ -834,7 +880,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Mock get PayPal order details API call.
-				if ( strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
 					return array(
 						'response' => array( 'code' => 200 ),
 						'body'     => wp_json_encode(
@@ -860,7 +906,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				}
 
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -871,7 +917,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -885,9 +931,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test authorization checked flag prevents repeated API calls.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_authorization_checked_flag_prevents_repeated_calls() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_authorization_checked_flag_prevents_repeated_calls(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
 		$order->save();
@@ -897,7 +945,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -908,7 +956,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -921,9 +969,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture handles API exception during authorization ID retrieval.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_handles_api_exception_during_retrieval() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_handles_api_exception_during_retrieval(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->save();
 
@@ -932,7 +982,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Mock get PayPal order details API call with error.
-				if ( strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
 					return array(
 						'response' => array( 'code' => 500 ),
 						'body'     => wp_json_encode( array( 'error' => 'Internal Server Error' ) ),
@@ -940,7 +990,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				}
 
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
@@ -951,7 +1001,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -965,9 +1015,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_latest_transaction_data selects most recent authorization.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_selects_most_recent_authorization() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_selects_most_recent_authorization(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->save();
 
@@ -975,7 +1027,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) {
 				// Mock get PayPal order details API call with multiple authorizations.
-				if ( strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
 					return array(
 						'response' => array( 'code' => 200 ),
 						'body'     => wp_json_encode(
@@ -1011,7 +1063,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				}
 
 				// Mock capture API call.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
 
@@ -1021,7 +1073,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -1033,15 +1085,17 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture in test mode vs production mode.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_respects_test_mode_setting() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_respects_test_mode_setting(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
 		$order->save();
 
 		// Test with test mode enabled.
-		$gateway           = new WC_Gateway_Paypal();
+		$gateway           = new \WC_Gateway_Paypal();
 		$gateway->testmode = true;
 
 		$captured_request       = null;
@@ -1050,7 +1104,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$captured_request, &$capture_api_call_count ) {
 				// Capture the capture_auth request.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					$captured_request = $parsed_args;
 					return $this->return_capture_success_200( $value, $parsed_args );
@@ -1062,7 +1116,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( $gateway );
+		$request = new PayPalRequest( $gateway );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -1075,9 +1129,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture handles empty authorization array from API.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_handles_empty_authorization_array() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_handles_empty_authorization_array(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->save();
 
@@ -1085,7 +1141,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) {
 				// Mock get PayPal order details API call with empty authorizations.
-				if ( strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
 					return array(
 						'response' => array( 'code' => 200 ),
 						'body'     => wp_json_encode(
@@ -1105,7 +1161,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				}
 
 				// Mock capture API call.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
 
@@ -1115,7 +1171,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -1127,9 +1183,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture handles authorization with invalid update_time.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_handles_invalid_update_time() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_handles_invalid_update_time(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->save();
 
@@ -1137,7 +1195,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) {
 				// Mock get PayPal order details API call with invalid update_time.
-				if ( strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
 					return array(
 						'response' => array( 'code' => 200 ),
 						'body'     => wp_json_encode(
@@ -1168,7 +1226,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				}
 
 				// Mock capture API call.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
 
@@ -1178,7 +1236,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -1190,9 +1248,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture handles missing purchase_units in API response.
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_handles_missing_purchase_units() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_handles_missing_purchase_units(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->save();
 
@@ -1200,7 +1260,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) {
 				// Mock get PayPal order details API call without purchase_units.
-				if ( strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
 					return array(
 						'response' => array( 'code' => 200 ),
 						'body'     => wp_json_encode(
@@ -1213,7 +1273,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				}
 
 				// Mock capture API call.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					return $this->return_capture_success_200( $value, $parsed_args );
 				}
 
@@ -1223,7 +1283,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -1235,9 +1295,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test capture handles already captured authorization errors (from the PayPal side).
+	 *
+	 * @return void
 	 */
-	public function test_capture_authorized_payment_handles_auth_already_captured_errors() {
-		$order = WC_Helper_Order::create_order();
+	public function test_capture_authorized_payment_handles_auth_already_captured_errors(): void {
+		$order = \WC_Helper_Order::create_order();
 		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
 		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
 		$order->save();
@@ -1247,7 +1309,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_api_call_count ) {
 				// Track if capture_auth endpoint is called.
-				if ( strpos( $url, 'payment/capture_auth' ) !== false ) {
+				if ( \strpos( $url, 'payment/capture_auth' ) !== false ) {
 					++$capture_api_call_count;
 					return array(
 						'response' => array( 'code' => 422 ),
@@ -1273,7 +1335,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			3
 		);
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$request->capture_authorized_payment( $order );
 
 		remove_all_filters( 'pre_http_request' );
@@ -1301,7 +1363,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function return_capture_success_200( $value, $parsed_args ) {
+	public function return_capture_success_200( $value, $parsed_args ): array {
 		return array(
 			'response' => array( 'code' => 200 ),
 			'body'     => wp_json_encode(
@@ -1321,7 +1383,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function return_capture_error( $http_code, $body_data = array() ) {
+	public function return_capture_error( int $http_code, array $body_data = array() ): array {
 		$default_body = array(
 			'name'    => 'ERROR',
 			'message' => 'An error occurred',
@@ -1333,3 +1395,4 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		);
 	}
 }
+
