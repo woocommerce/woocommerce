@@ -183,10 +183,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.first();
 		const quantitySelector = page.getByLabel( 'Product quantity' );
 
-		const additionalInfoPanel = page
-			.getByRole( 'button', { name: 'Additional Information' } )
-			.locator( '../..' )
-			.locator( '.wp-block-accordion-panel' );
+		const additionalInfoPanel =
+			wpCoreVersion >= 6.9
+				? page
+						.getByRole( 'button', {
+							name: 'Additional Information',
+						} )
+						.locator( '../..' )
+						.locator( '.wp-block-accordion-panel' )
+				: page.getByLabel( 'Additional Information', { exact: true } );
 
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
