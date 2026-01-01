@@ -9,7 +9,6 @@ import { checkoutStore as checkoutStoreDescriptor } from '@woocommerce/block-dat
 import { useShippingData } from '@woocommerce/base-context/hooks';
 import {
 	LOCAL_PICKUP_ENABLED,
-	HAS_COLLECTABLE_METHODS,
 	SHIPPING_METHODS_EXIST,
 	SHIPPING_ENABLED,
 } from '@woocommerce/block-settings';
@@ -61,7 +60,6 @@ const FrontendBlock = ( {
 		! needsShipping ||
 		! isCollectable ||
 		! LOCAL_PICKUP_ENABLED ||
-		! HAS_COLLECTABLE_METHODS ||
 		! SHIPPING_METHODS_EXIST
 	) {
 		return null;
