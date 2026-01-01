@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Mini Cart: Avoid stale cart items returning when removing cart items rapidly.
