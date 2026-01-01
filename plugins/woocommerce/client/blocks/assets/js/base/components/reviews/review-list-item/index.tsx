@@ -33,7 +33,7 @@ function getReviewImage(
 					alt={ review.product_image?.alt || '' }
 					srcSet={ review.product_image?.srcset || '' }
 					src={ review.product_image?.thumbnail || '' }
-					sizes='3em'
+					sizes="3em"
 				/>
 			) : (
 				// The alt text is left empty on purpose, as it's considered a decorative image.
