@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { getSetting } from '@woocommerce/settings';
-import {
-	LOCAL_PICKUP_ENABLED,
-	HAS_COLLECTABLE_METHODS,
-} from '@woocommerce/block-settings';
+import { LOCAL_PICKUP_ENABLED } from '@woocommerce/block-settings';
 import type {
 	CartShippingPackageShippingRate,
 	CartShippingRate,
@@ -40,7 +37,7 @@ export const isPackageRateCollectable = (
 export const hasCollectableRate = (
 	chosenRates: string[] | string
 ): boolean => {
-	if ( ! LOCAL_PICKUP_ENABLED || ! HAS_COLLECTABLE_METHODS ) {
+	if ( ! LOCAL_PICKUP_ENABLED ) {
 		return false;
 	}
 	if ( Array.isArray( chosenRates ) ) {

@@ -52,11 +52,6 @@ export const LOCAL_PICKUP_ENABLED = getSetting< boolean >(
 	false
 );
 
-export const HAS_COLLECTABLE_METHODS = getSetting< boolean >(
-	'hasCollectableMethods',
-	false
-);
-
 export const SHIPPING_METHODS_EXIST = getSetting< boolean >(
 	'shippingMethodsExist',
 	false
