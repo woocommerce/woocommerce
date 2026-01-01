@@ -1,4 +1,4 @@
 Significance: patch
 Type: performance
 
-Add `gallery_thumbnail` image size to review product images schema to improve performance.
+Fix review by products blocks to use responsive product thumbnails by adding srcset and sizes.
