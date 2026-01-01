@@ -597,10 +597,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		$order          = wc_get_order( $order_id );
-		$paypal_request = new PayPalRequest( $this );
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order || ! $order instanceof WC_Order ) {
+			return array();
+		}
 
 		if ( $this->should_use_orders_v2() ) {
+			$paypal_request = new PayPalRequest( $this );
+
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception(
@@ -610,7 +615,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$redirect_url = $paypal_order['redirect_url'];
 		} else {
-			$redirect_url = $paypal_request->get_request_url( $order, $this->testmode );
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+
+			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$redirect_url   = $paypal_request->get_request_url( $order, $this->testmode );
 		}
 
 		return array(
@@ -695,7 +703,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		if ( ! $order || ! $order instanceof WC_Order ) {
 			return;
 		}
 
