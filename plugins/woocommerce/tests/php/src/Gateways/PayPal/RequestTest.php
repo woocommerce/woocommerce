@@ -1395,4 +1395,3 @@ class RequestTest extends \WC_Unit_Test_Case {
 		);
 	}
 }
-
