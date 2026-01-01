@@ -258,6 +258,10 @@ const Form = <
 						<EmailField
 							{ ...fieldProps }
 							key={ field.key }
+							ref={ ( el ) =>
+								( inputsRef.current[ field.key ] = el )
+							}
+							ariaDescribedBy={ ariaDescribedBy }
 							onChange={ ( value: string ) =>
 								onChange( {
 									...values,
