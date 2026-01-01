@@ -16,6 +16,10 @@ jQuery( function( $ ) {
 
 		$( document.body )
 			.on( 'click', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this }, this.onAddToCart )
+			// Handle when pressing the Space key on the add to cart anchor with role="button" attribute.
+			.on( 'keydown', '.add_to_cart_button:not(.wc-interactive)', { addToCartHandler: this },
+				( e ) => { if ( e.key === ' ' ) { e.preventDefault(); e.target.click(); } }
+			)
 			.on( 'click', '.remove_from_cart_button', { addToCartHandler: this }, this.onRemoveFromCart )
 			.on( 'keydown', '.remove_from_cart_button', this.onKeydownRemoveFromCart )
 			.on( 'added_to_cart', { addToCartHandler: this }, this.onAddedToCart )

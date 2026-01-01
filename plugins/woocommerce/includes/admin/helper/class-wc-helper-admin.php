@@ -89,6 +89,7 @@ class WC_Helper_Admin {
 			'wooUpdateManagerInstallUrl' => WC_Woo_Update_Manager_Plugin::generate_install_url(),
 			'wooUpdateManagerPluginSlug' => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
+			'trackingAllowed'            => 'yes' === get_option( 'woocommerce_allow_tracking' ),
 		);
 
 		// This data is only used in the `Extensions` screen, so only populate it there.

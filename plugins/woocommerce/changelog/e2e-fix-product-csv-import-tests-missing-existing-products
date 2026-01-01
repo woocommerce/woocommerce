@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-E2E tests: fix image URLs for product import tests to cover testing against a release artifact

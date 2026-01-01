@@ -9,7 +9,14 @@ import { apiFetch } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import { storeName } from './constants';
-import { SendingPreviewStatus, State, PersonalizationTag } from './types';
+import {
+	SendingPreviewStatus,
+	State,
+	ContentValidation,
+	EmailEditorSettings,
+	EmailTheme,
+	EmailEditorUrls,
+} from './types';
 import { recordEvent } from '../events';
 
 export function togglePreviewModal( isOpen: boolean ) {
@@ -23,6 +30,32 @@ export function updateSendPreviewEmail( toEmail: string ) {
 	return {
 		type: 'CHANGE_PREVIEW_STATE',
 		state: { toEmail } as Partial< State[ 'preview' ] >,
+	} as const;
+}
+
+export function setEmailPost( postId: number | string, postType: string ) {
+	if ( ! postId || ! postType ) {
+		throw new Error(
+			'setEmailPost requires valid postId and postType parameters'
+		);
+	}
+
+	return {
+		type: 'SET_EMAIL_POST',
+		state: { postId, postType } as Partial< State >,
+	} as const;
+}
+
+export function setEmailPostType( postType: string ) {
+	if ( ! postType ) {
+		throw new Error(
+			'setEmailPostType requires a valid postType parameter'
+		);
+	}
+
+	return {
+		type: 'SET_EMAIL_POST',
+		state: { postType } as Partial< State >,
 	} as const;
 }
 
@@ -87,20 +120,45 @@ export function* requestSendingNewsletterPreview( email: string ) {
 	}
 }
 
-export function setIsFetchingPersonalizationTags( isFetching: boolean ) {
+export function setContentValidation(
+	validation: ContentValidation | undefined
+) {
 	return {
-		type: 'SET_IS_FETCHING_PERSONALIZATION_TAGS',
-		state: {
-			isFetching,
-		} as Partial< State[ 'personalizationTags' ] >,
+		type: 'SET_CONTENT_VALIDATION',
+		validation,
 	} as const;
 }
 
-export function setPersonalizationTagsList( list: PersonalizationTag[] ) {
+export function setEditorSettings( editorSettings: EmailEditorSettings ) {
 	return {
-		type: 'SET_PERSONALIZATION_TAGS_LIST',
-		state: {
-			list,
-		} as Partial< State[ 'personalizationTags' ] >,
+		type: 'SET_EDITOR_SETTINGS',
+		editorSettings,
+	} as const;
+}
+
+export function setEditorTheme( theme: EmailTheme ) {
+	return {
+		type: 'SET_EDITOR_THEME',
+		theme,
+	} as const;
+}
+
+export function setEditorUrls( urls: EmailEditorUrls ) {
+	return {
+		type: 'SET_EDITOR_URLS',
+		urls,
+	} as const;
+}
+
+export function setEditorConfig( config: {
+	editorSettings: EmailEditorSettings;
+	theme: EmailTheme;
+	urls: EmailEditorUrls;
+	userEmail: string;
+	globalStylesPostId?: number | null;
+} ) {
+	return {
+		type: 'SET_EDITOR_CONFIG',
+		config,
 	} as const;
 }

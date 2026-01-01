@@ -339,7 +339,8 @@ global.__webpack_public_path__ = '';
 Object.defineProperty( window, 'matchMedia', {
 	writable: true,
 	value: jest.fn().mockImplementation( ( query ) => ( {
-		matches: false,
+		// Return true for prefers-reduced-motion queries to skip animations in tests
+		matches: /prefers-reduced-motion/.test( query ),
 		media: query,
 		onchange: null,
 		addListener: jest.fn(), // Deprecated
@@ -367,8 +368,3 @@ if ( ! window.DOMRect ) {
 jest.mock( 'client-zip', () => ( {
 	downloadZip: jest.fn(),
 } ) );
-
-/*
- * Enables `window.fetch()` in Jest tests.
- */
-require( 'jest-fetch-mock' ).enableMocks();

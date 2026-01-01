@@ -24,16 +24,13 @@ Note: A POSIX compliant operating system (e.g., Linux, macOS) is assumed. If you
 
 In addition to the software shared above, you'll also want to have some way of setting up a local development server stack. There are a number of different tools available for this, each with a certain set of functionality and limitations. We recommend choosing from the options below that fit your preferred workflow best.
 
-### Studio - Recommended Approach
+### WordPress Studio - Recommended Approach
 
-For easy local development environments, we recommend [Studio](https://developer.wordpress.com/studio/), the local development environment provided by [WordPress.com](https://developer.wordpress.com). Studio includes the ability to manage multiple local website environments, as well as integrations with your code editor and terminal. Studio also features a WordPress-specific AI Assistant, easy imports from WordPress backups, free public preview sites, and two-way sync with sites hosted on WordPress.com.
+For easy local development environments, we recommend [WordPress Studio](https://developer.wordpress.com/studio/), the local development environment supported by the [WordPress.com](https://developer.wordpress.com) team. Studio includes the ability to manage multiple local website environments, as well as integrations with your code editor and terminal. Studio also features a WordPress-specific AI Assistant, easy imports from WordPress backups, Blueprint support, free public preview sites, and two-way sync with sites hosted on WordPress.com or Pressable.
 
-### WordPress-specific tools
+### wp-env
 
-Below are a couple of tools designed specifically for a WordPress environment:
-
-* [vvv](https://varyingvagrantvagrants.org/) is a highly configurable, cross-platform, and robust environment management tool powered by VirtualBox and Vagrant. This is one tool that the WooCommerce Core team recommends to contributors.  
-* [wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) is a command-line utility maintained by the WordPress community that allows you to set up and run custom WordPress environments with [Docker](https://www.docker.com/) and JSON manifests. The repository includes a `.wp-env` file specifically for contributing to WooCommerce core.
+[wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) is a command-line utility maintained by the WordPress community that allows you to set up and run custom WordPress environments with [Docker](https://www.docker.com/) and JSON manifests. The repository includes a `.wp-env.json` file specifically for contributing to WooCommerce core.
 
 ### General PHP-based web stack tools
 
@@ -45,6 +42,7 @@ Below is a collection of tools to help you manage your environment that are not 
 * [Laravel Herd / Valet](https://herd.laravel.com/) - A minimalist and fast development environment for macOS (Valet) and Windows (Herd), optimized for Laravel and other PHP applications.
 * [Lando](https://lando.dev/) - A powerful, Docker-based tool for defining and managing local development services across various languages and frameworks.
 * [DDEV](https://ddev.com/) - An open-source, Docker-based tool for streamlined local web development, supporting many CMS and frameworks like Drupal and WordPress.
+* [vvv](https://varyingvagrantvagrants.org/) is a highly configurable, cross-platform, and robust environment management tool powered by VirtualBox and Vagrant. 
 
 ### Minimum server requirements
 
@@ -56,7 +54,7 @@ When developing for WooCommerce, it's helpful to install a development version o
 
 ### Option 1: WooCommerce Beta Tester
 
-If installing WooCommerce through the traditional WordPress dashboard, you can also install the [WooCommerce Beta Tester](/docs/contribution/testing/beta-testing) extension to change the version, including access to upcoming betas and release candidates. The WooCommerce Beta tester is available through the[ Woo Marketplace](https://woocommerce.com/marketplace). 
+If installing WooCommerce through the traditional WordPress dashboard, you can also install the [WooCommerce Beta Tester](/docs/contribution/testing/beta-testing) extension to change the version, including access to upcoming betas and release candidates. The WooCommerce Beta tester is available through the [Woo Marketplace](https://woocommerce.com/marketplace). 
 
 ### Option 2: Clone the WooCommerce Core repository
 
@@ -93,7 +91,7 @@ You can learn more about how to install and utilize nvm in [the nvm GitHub repos
 To install WooCommerce dependencies, use the following CLI command:
 
 ```shell
-pnpm install -frozen-lockfile
+pnpm install --frozen-lockfile
 ```
 
 #### Build WooCommerce
@@ -108,7 +106,7 @@ Note: If you try to run WooCommerce on your server without generating the compil
 
 #### Symlink the WooCommerce plugin 
 
-To load the WooCommerce plugin into your local develop environment, you can create a symbolic link from the WooCommerce plugin in your cloned repository to your local WordPress develoment environment.
+To load the WooCommerce plugin into your local development environment, you can create a symbolic link from the WooCommerce plugin in your cloned repository to your local WordPress development environment.
 
 ```shell
 ln -s woocommerce/plugins/woocommerce /path-to-local/wp-content/plugins

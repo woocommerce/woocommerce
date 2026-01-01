@@ -13,7 +13,7 @@ import { resolveSelect, useDispatch, useSelect } from '@wordpress/data';
 import React, { useState, useEffect } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { getAdminLink } from '@woocommerce/settings';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -41,8 +41,8 @@ import {
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
-import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
+import { getAdminSetting } from '~/utils/admin-settings';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 /**
  * A component that renders the main settings page for managing payment gateways in WooCommerce.
@@ -73,6 +73,8 @@ export const SettingsPaymentsMain = () => {
 
 	const [ isOnboardingModalOpen, setIsOnboardingModalOpen ] =
 		useState( false );
+
+	const assetUrl = getAdminSetting( 'wcAdminAssetUrl' );
 
 	useEffect( () => {
 		// Record the page view event.
@@ -391,7 +393,11 @@ export const SettingsPaymentsMain = () => {
 						'native_in_context'
 					) {
 						recordPaymentsOnboardingEvent(
-							'woopayments_onboarding_modal_opened'
+							'woopayments_onboarding_modal_opened',
+							{
+								from: context,
+								source: wooPaymentsOnboardingSessionEntrySettings,
+							}
 						);
 						setIsOnboardingModalOpen( true );
 					} else {
@@ -427,7 +433,7 @@ export const SettingsPaymentsMain = () => {
 							paymentsEntity?._suggestion_id ?? 'unknown',
 						provider_extension_slug: paymentsEntity.plugin.slug,
 						from: context,
-						source: context,
+						source: wooPaymentsOnboardingSessionEntrySettings,
 						reason: 'error',
 					} );
 					createNoticesFromResponse( response );
@@ -477,24 +483,17 @@ export const SettingsPaymentsMain = () => {
 	};
 
 	const morePaymentOptionsLink = (
-		<TrackedLink
-			message={ __(
-				// translators: {{Link}} is a placeholder for a html element.
-				'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment options.',
-				'woocommerce'
-			) }
-			onClickCallback={ trackMorePaymentsOptionsClicked }
-			targetUrl={
-				isFeatureEnabled( 'marketplace' )
-					? getAdminLink(
-							'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
-					  )
-					: 'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/'
-			}
-			linkType={
-				isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
-			}
-		/>
+		<Button
+			variant={ 'link' }
+			target="_blank"
+			rel="noopener noreferrer"
+			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
+			className="more-payment-options-link"
+			onClick={ trackMorePaymentsOptionsClicked }
+		>
+			<img src={ assetUrl + '/icons/external-link.svg' } alt="" />
+			{ __( 'More payment options', 'woocommerce' ) }
+		</Button>
 	);
 
 	return (

@@ -102,7 +102,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_variation_id( $value ) {
 		if ( $value > 0 && 'product_variation' !== get_post_type( $value ) ) {
-			$this->error( 'order_item_product_invalid_variation_id', __( 'Invalid variation ID', 'woocommerce' ) );
+			$this->error(
+				'order_item_product_invalid_variation_id',
+				__( 'Invalid variation ID', 'woocommerce' ),
+				400,
+				array( 'variation_id' => $value )
+			);
 		}
 		$this->set_prop( 'variation_id', absint( $value ) );
 	}
@@ -421,9 +426,18 @@ class WC_Order_Item_Product extends WC_Order_Item {
 					);
 				}
 			}
-		}
 
-		return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+			/**
+			 * Filters the list of downloadable files for an order item.
+			 *
+			 * @since 2.7.0
+			 *
+			 * @param array                 $files Array of downloadable file data.
+			 * @param WC_Order_Item_Product $this  The order item product object.
+			 * @param WC_Order              $order The order object.
+			 */
+			return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+		}
 	}
 
 	/**

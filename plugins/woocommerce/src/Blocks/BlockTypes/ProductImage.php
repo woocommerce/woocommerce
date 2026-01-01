@@ -135,7 +135,8 @@ class ProductImage extends AbstractBlock {
 	private function render_image( $product, $attributes, $image_id = null ) {
 		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 
-		$image_style = 'max-width:none;';
+		$image_style = '';
+
 		if ( ! empty( $attributes['height'] ) ) {
 			$image_style .= sprintf( 'height:%s;', $attributes['height'] );
 		}
@@ -160,9 +161,13 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$featured_image_id          = (int) $product->get_image_id();
-		$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
-		$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
-		$provided_image_id_is_valid = $image_id && in_array( $image_id, $available_image_ids, true );
+		$provided_image_id_is_valid = false;
+
+		if ( $image_id ) {
+			$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
+			$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
+			$provided_image_id_is_valid = in_array( $image_id, $available_image_ids, true );
+		}
 
 		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
 
@@ -171,14 +176,12 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$alt_text = get_post_meta( $target_image_id, '_wp_attachment_image_alt', true );
-		$title    = get_the_title( $target_image_id );
 
 		$attr = array(
 			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
 			'data-testid'   => 'product-image',
-			'data-image-id' => $provided_image_id_is_valid ? $image_id : $featured_image_id,
+			'data-image-id' => $target_image_id,
 			'style'         => $image_style,
-			'title'         => $title,
 		);
 
 		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
@@ -193,6 +196,7 @@ class ProductImage extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
+		$this->asset_data_registry->add( 'placeholderImgSrcFullSize', wc_placeholder_img_src( 'woocommerce_single' ) );
 	}
 
 	/**
@@ -209,12 +213,15 @@ class ProductImage extends AbstractBlock {
 		$post_id            = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$image_id           = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
 		$product            = wc_get_product( $post_id );
+		$aspect_ratio       = $parsed_attributes['aspectRatio'] ?? $parsed_attributes['style']['dimensions']['aspectRatio'] ?? 'auto';
+		$aspect_ratio_class = 'wc-block-components-product-image--aspect-ratio-' . str_replace( '/', '-', $aspect_ratio );
 
 		$classes = implode(
 			' ',
 			array_filter(
 				array(
 					'wc-block-components-product-image wc-block-grid__product-image',
+					$aspect_ratio_class,
 					esc_attr( $classes_and_styles['classes'] ),
 				)
 			)
@@ -222,7 +229,7 @@ class ProductImage extends AbstractBlock {
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class' => $classes,
+				'class' => esc_attr( $classes ),
 				'style' => esc_attr( $classes_and_styles['styles'] ),
 			)
 		);

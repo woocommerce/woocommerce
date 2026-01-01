@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Do not show double snackbar notices when installing and/or activating plugins.

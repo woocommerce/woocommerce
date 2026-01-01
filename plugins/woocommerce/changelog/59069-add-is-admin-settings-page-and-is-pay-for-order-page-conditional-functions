@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Adds two new functions to identify the current page: `is_admin_settings_page`, and `is_pay_for_order_page`.

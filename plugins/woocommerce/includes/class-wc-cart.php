@@ -288,7 +288,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Gets cart total. This is the total of items in the cart, but after discounts. Subtotal is before discounts.
 	 *
 	 * @since 3.2.0
-	 * @return float
+	 * @return float|string|int
 	 */
 	public function get_cart_contents_total() {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'cart_contents_total' ) );
@@ -652,17 +652,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Empties the cart and optionally the persistent cart too.
 	 *
 	 * @since 9.7.0 Also clears shipping methods and packages since the items they are linked to are cleared.
-	 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+	 *
+	 * @param bool $clear_persistent_cart Should the persistent cart be cleared too. Defaults to true.
 	 */
-	public function empty_cart( $deprecated = true ) {
+	public function empty_cart( $clear_persistent_cart = true ) {
 		/**
 		 * Fires before the cart is emptied.
 		 *
 		 * @since 9.7.0
 		 *
-		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+		 * @param bool $clear_persistent_cart Whether the persistent cart will be cleared too.
 		 */
-		do_action( 'woocommerce_before_cart_emptied', $deprecated );
+		do_action( 'woocommerce_before_cart_emptied', $clear_persistent_cart );
 
 		$this->cart_contents              = array();
 		$this->removed_cart_contents      = array();
@@ -671,6 +672,11 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->coupon_discount_tax_totals = array();
 		$this->applied_coupons            = array();
 		$this->totals                     = $this->default_totals;
+
+		if ( $clear_persistent_cart ) {
+			$this->session->persistent_cart_destroy();
+		}
+
 		$this->fees_api->remove_all_fees();
 		WC()->shipping()->reset_shipping();
 
@@ -678,9 +684,10 @@ class WC_Cart extends WC_Legacy_Cart {
 		 * Fires after the cart is emptied.
 		 *
 		 * @since 9.7.0
-		 * @param bool $deprecated Previously used to clear the persistent cart, but this is now handled by the session handler.
+		 *
+		 * @param bool $clear_persistent_cart Whether the persistent cart was cleared too.
 		 */
-		do_action( 'woocommerce_cart_emptied', $deprecated );
+		do_action( 'woocommerce_cart_emptied', $clear_persistent_cart );
 	}
 
 	/**
@@ -1572,7 +1579,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array of cart items
 	 */
 	public function get_shipping_packages() {
-		return apply_filters(
+		/**
+		 * Filters the shipping packages for the cart.
+		 *
+		 * @since 1.5.4
+		 * @param array $packages The shipping packages.
+		 * @return array The shipping packages.
+		 */
+		$shipping_packages = apply_filters(
 			'woocommerce_cart_shipping_packages',
 			array(
 				array(
@@ -1587,13 +1601,65 @@ class WC_Cart extends WC_Legacy_Cart {
 						'state'     => $this->get_customer()->get_shipping_state(),
 						'postcode'  => $this->get_customer()->get_shipping_postcode(),
 						'city'      => $this->get_customer()->get_shipping_city(),
-						'address'   => $this->get_customer()->get_shipping_address(),
-						'address_1' => $this->get_customer()->get_shipping_address(), // Provide both address and address_1 for backwards compatibility.
+						'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
+						'address_1' => $this->get_customer()->get_shipping_address_1(),
 						'address_2' => $this->get_customer()->get_shipping_address_2(),
 					),
 					'cart_subtotal'   => $this->get_displayed_subtotal(),
 				),
 			)
+		);
+
+		// Return empty array if invalid object supplied by the filter or no packages.
+		if ( ! is_array( $shipping_packages ) || empty( $shipping_packages ) ) {
+			return array();
+		}
+
+		// Remove any invalid packages before adding package IDs.
+		$shipping_packages = array_filter(
+			$shipping_packages,
+			function ( $package ) {
+				return ! empty( $package ) && is_array( $package );
+			}
+		);
+
+		// Add package ID and package name to each package after the filter is applied.
+		$index = 1;
+		foreach ( $shipping_packages as $key => $package ) {
+			$shipping_packages[ $key ]['package_id']   = $package['package_id'] ?? $key;
+			$shipping_packages[ $key ]['package_name'] = $this->get_shipping_package_name( $shipping_packages[ $key ], $index );
+			++$index;
+		}
+
+		return $shipping_packages;
+	}
+
+	/**
+	 * Get the package name.
+	 *
+	 * @param array $package Shipping package data.
+	 * @param int   $index Package number.
+	 * @return string
+	 */
+	private function get_shipping_package_name( $package, $index ) {
+		/**
+		 * Filters the shipping package name.
+		 *
+		 * @since 4.3.0
+		 * @param string $shipping_package_name Shipping package name.
+		 * @param string $package_id Shipping package ID.
+		 * @param array $package Shipping package from WooCommerce.
+		 * @return string Shipping package name.
+		 */
+		return apply_filters(
+			'woocommerce_shipping_package_name',
+			sprintf(
+				/* translators: %d: shipping package number */
+				_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
+				$index
+			),
+			$package['package_id'],
+			$package
 		);
 	}
 

@@ -7,6 +7,7 @@ import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
 	useStoreCartCoupons,
 	useStoreCart,
+	useOrderSummaryLoadingState,
 } from '@woocommerce/base-context/hooks';
 import { ExperimentalDiscountsMeta } from '@woocommerce/blocks-checkout';
 
@@ -24,9 +25,10 @@ const DiscountSlotFill = (): JSX.Element => {
 };
 
 const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
-	const { cartTotals, cartCoupons, cartIsLoading } = useStoreCart();
+	const { cartTotals, cartCoupons } = useStoreCart();
 	const { removeCoupon, isRemovingCoupon } =
 		useStoreCartCoupons( 'wc/checkout' );
+	const { isLoading } = useOrderSummaryLoadingState();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (
@@ -38,7 +40,7 @@ const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
 					isRemovingCoupon={ isRemovingCoupon }
 					removeCoupon={ removeCoupon }
 					values={ cartTotals }
-					isLoading={ cartIsLoading }
+					isLoading={ isLoading }
 				/>
 			</TotalsWrapper>
 			<DiscountSlotFill />

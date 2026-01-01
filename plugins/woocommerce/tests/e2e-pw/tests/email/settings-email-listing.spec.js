@@ -41,7 +41,7 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		await expect( listViewLocator ).toBeVisible();
 
 		// Check that "New order" email type exists within the list view
-		await expect( listViewLocator.getByText( 'New order' ) ).toBeVisible();
+		await expect( listViewLocator.getByText( /New order/ ) ).toBeVisible();
 
 		// Check table columns
 		// Check that Title column exists
@@ -99,9 +99,9 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		);
 
 		// I want to check that search works
-		await page.getByPlaceholder( 'Search' ).fill( 'Completed order' );
+		await page.getByPlaceholder( 'Search' ).fill( 'Failed order' );
 		await expect(
-			listViewLocator.getByText( 'Completed order' )
+			listViewLocator.getByText( 'Failed order' )
 		).toBeVisible();
 
 		// Check that only one row is visible after search

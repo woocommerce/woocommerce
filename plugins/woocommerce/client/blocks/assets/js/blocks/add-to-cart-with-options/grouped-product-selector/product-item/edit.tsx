@@ -19,28 +19,38 @@ import {
 import { resolveSelect, useSelect } from '@wordpress/data';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { productsStore } from '@woocommerce/data';
+import { isProductResponseItem } from '@woocommerce/entities';
+import { Spinner } from '@wordpress/components';
+import { previewProductResponseItems } from '@woocommerce/resource-previews';
 
 interface Attributes {
 	className?: string;
 }
 
-type ProductItemProps = {
+type ProductItemWithContextProps = {
 	attributes: { productId: number };
 	isLoading?: boolean;
-	product?: ProductResponseItem;
+	product?: ProductResponseItem | null;
 	blocks: BlockInstance[];
 	isSelected: boolean;
 	onSelect(): void;
 };
 
-const ProductItem = withProduct( function ProductItem( {
-	attributes,
-	isLoading,
+type ProductItemProps = {
+	product: ProductResponseItem | null;
+	blocks: BlockInstance[];
+	isLoading: boolean;
+	isSelected: boolean;
+	onSelect(): void;
+};
+
+const ProductItem = ( {
 	product,
 	blocks,
+	isLoading,
 	isSelected,
 	onSelect,
-}: ProductItemProps ) {
+}: ProductItemProps ) => {
 	const blockPreviewProps = useBlockPreview( {
 		blocks,
 	} );
@@ -50,31 +60,53 @@ const ProductItem = withProduct( function ProductItem( {
 	);
 
 	return (
-		<BlockContextProvider
-			value={ { postId: attributes.productId, postType: 'product' } }
-		>
-			<ProductDataContextProvider
-				product={ product as ProductResponseItem }
-				isLoading={ isLoading as boolean }
-			>
-				{ isSelected ? <div { ...innerBlocksProps } /> : <></> }
-
-				<div
-					role="listitem"
-					style={ { display: isSelected ? 'none' : undefined } }
-				>
+		<ProductDataContextProvider product={ product } isLoading={ isLoading }>
+			{ isSelected ? (
+				<div { ...innerBlocksProps } />
+			) : (
+				<div role="listitem">
 					<div
 						{ ...blockPreviewProps }
 						role="button"
 						tabIndex={ 0 }
 						onClick={ onSelect }
-						onKeyDown={ onSelect }
+						onKeyDown={ ( e ) => {
+							if ( e.key === 'Enter' || e.key === ' ' ) {
+								e.preventDefault();
+								onSelect();
+							}
+						} }
 					/>
 				</div>
-			</ProductDataContextProvider>
-		</BlockContextProvider>
+			) }
+		</ProductDataContextProvider>
 	);
-} );
+};
+
+const ProductItemWithContext = withProduct(
+	( {
+		attributes,
+		isLoading = true,
+		product = null,
+		blocks,
+		isSelected,
+		onSelect,
+	}: ProductItemWithContextProps ) => {
+		return (
+			<BlockContextProvider
+				value={ { postId: attributes.productId, postType: 'product' } }
+			>
+				<ProductItem
+					product={ product }
+					blocks={ blocks }
+					isLoading={ isLoading }
+					isSelected={ isSelected }
+					onSelect={ onSelect }
+				/>
+			</BlockContextProvider>
+		);
+	}
+);
 
 export default function ProductItemTemplateEdit(
 	props: BlockEditProps< Attributes >
@@ -86,14 +118,17 @@ export default function ProductItemTemplateEdit(
 		className,
 	} );
 
-	const { product } = useProductDataContext();
+	const { product, isLoading } = useProductDataContext();
+	const [ isLoadingProducts, setIsLoadingProducts ] = useState( true );
 	const [ products, setProducts ] = useState< ProductResponseItem[] | null >(
 		null
 	);
+	const productsLength = products?.length || 0;
 
 	useEffect( () => {
 		const fetchChildProducts = async ( groupedProductIds: number[] ) => {
 			if ( ! groupedProductIds || groupedProductIds.length === 0 ) {
+				setIsLoadingProducts( false );
 				return;
 			}
 
@@ -105,19 +140,23 @@ export default function ProductItemTemplateEdit(
 				} )
 				.then( ( fetchedProducts ) => {
 					setProducts( fetchedProducts );
+					setIsLoadingProducts( false );
 				} );
 		};
 
-		if ( ! products ) {
-			if ( product.id !== 0 && product.type === 'grouped' ) {
+		if ( ! isLoading && product && productsLength === 0 ) {
+			if ( isProductResponseItem( product ) ) {
 				fetchChildProducts( product.grouped_products );
-			} else if ( product.id === 0 ) {
-				// If product ID is 0, then we must be editing a template.
+			} else {
+				// If not editing a specific product, we are editing a template.
 				// Fetch an existing grouped product so template can be edited.
 				resolveSelect( productsStore )
 					.getProducts( { type: 'grouped', per_page: 1 } )
 					.then( ( groupedProduct ) => {
-						if ( groupedProduct.length > 0 ) {
+						if (
+							groupedProduct.length > 0 &&
+							groupedProduct[ 0 ]?.grouped_products?.length > 0
+						) {
 							fetchChildProducts(
 								groupedProduct[ 0 ].grouped_products
 							);
@@ -132,12 +171,13 @@ export default function ProductItemTemplateEdit(
 									if ( fetchedProducts.length > 0 ) {
 										setProducts( fetchedProducts );
 									}
+									setIsLoadingProducts( false );
 								} );
 						}
 					} );
 			}
 		}
-	}, [ products, product ] );
+	}, [ isLoading, product, productsLength ] );
 
 	const { blocks } = useSelect(
 		( select ) => {
@@ -150,27 +190,44 @@ export default function ProductItemTemplateEdit(
 	const [ selectedProductItem, setSelectedProductItem ] =
 		useState< number >();
 
+	if ( isLoading || isLoadingProducts ) {
+		return <Spinner />;
+	}
+
+	const productList = products
+		? products?.map( ( productItem ) => (
+				<ProductItemWithContext
+					key={ productItem.id }
+					attributes={ {
+						productId: productItem.id,
+					} }
+					blocks={ blocks }
+					isSelected={
+						( selectedProductItem ?? products[ 0 ]?.id ) ===
+						productItem.id
+					}
+					onSelect={ () => setSelectedProductItem( productItem.id ) }
+				/>
+		  ) )
+		: previewProductResponseItems?.map( ( productItem ) => (
+				<ProductItem
+					key={ productItem.id }
+					product={ productItem }
+					blocks={ blocks }
+					isLoading={ false }
+					isSelected={
+						( selectedProductItem ??
+							previewProductResponseItems[ 0 ]?.id ) ===
+						productItem.id
+					}
+					onSelect={ () => setSelectedProductItem( productItem.id ) }
+				/>
+		  ) );
+
 	return (
 		<div { ...blockProps }>
 			<InnerBlockLayoutContextProvider parentName="woocommerce/add-to-cart-with-options-grouped-product-item">
-				<div role="list">
-					{ products?.map( ( productItem ) => (
-						<ProductItem
-							key={ productItem.id }
-							attributes={ {
-								productId: productItem.id,
-							} }
-							blocks={ blocks }
-							isSelected={
-								( selectedProductItem || products[ 0 ]?.id ) ===
-								productItem.id
-							}
-							onSelect={ () =>
-								setSelectedProductItem( productItem.id )
-							}
-						/>
-					) ) }
-				</div>
+				<div role="list">{ productList }</div>
 			</InnerBlockLayoutContextProvider>
 		</div>
 	);

@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-removed excessive arguments from set_total

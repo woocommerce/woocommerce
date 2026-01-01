@@ -414,8 +414,10 @@ class WC_Admin_Menus {
 			unset( $endpoints['dashboard'] );
 		}
 
-		// Include missing lost password.
-		$endpoints['lost-password'] = __( 'Lost password', 'woocommerce' );
+		// Include missing lost password endpoint, if set in WooCommerce > Settings > Advanced > Account endpoints.
+		if ( ! empty( get_option( 'woocommerce_myaccount_lost_password_endpoint' ) ) ) {
+			$endpoints['lost-password'] = __( 'Lost password', 'woocommerce' );
+		}
 
 		$endpoints = apply_filters( 'woocommerce_custom_nav_menu_items', $endpoints );
 

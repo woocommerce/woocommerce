@@ -159,6 +159,40 @@ class WC_Product_Grouped extends WC_Product {
 		return array_filter( $grouped_products, 'wc_products_array_filter_visible_grouped' );
 	}
 
+	/**
+	 * Get the minimum price from visible child products.
+	 *
+	 * @since 10.1.0
+	 * @return string Minimum price or empty string if no children
+	 */
+	public function get_min_price() {
+		$children = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$prices   = array_map( 'wc_get_price_to_display', $children );
+
+		if ( empty( $prices ) ) {
+			return '';
+		}
+
+		return wc_format_decimal( min( $prices ) );
+	}
+
+	/**
+	 * Get the maximum price from visible child products.
+	 *
+	 * @since 10.1.0
+	 * @return string Maximum price or empty string if no children
+	 */
+	public function get_max_price() {
+		$children = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$prices   = array_map( 'wc_get_price_to_display', $children );
+
+		if ( empty( $prices ) ) {
+			return '';
+		}
+
+		return wc_format_decimal( max( $prices ) );
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters

@@ -169,11 +169,13 @@
 	}
 }
 
-.editor-styles-wrapper .wc-block-components-checkbox {
+.editor-styles-wrapper
+	.wc-block-attribute-filter
+	.wc-block-components-checkbox {
 	margin-top: em($gap);
 }
 
-.wc-block-components-checkbox {
+.wc-block-attribute-filter .wc-block-components-checkbox {
 	margin-top: em($gap);
 }
 

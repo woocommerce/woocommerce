@@ -5,15 +5,20 @@ import { createRegistrySelector, createSelector } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
-import { serialize, parse } from '@wordpress/blocks';
-import { BlockInstance } from '@wordpress/blocks/index';
-import { Post } from '@wordpress/core-data/build-types/entity-types/post';
+import { serialize, parse, BlockInstance } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import { storeName } from './constants';
-import { State, EmailTemplate, EmailEditorPostType, Feature } from './types';
+import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import {
+	State,
+	EmailTemplate,
+	EmailEditorPostType,
+	Feature,
+	PersonalizationTag,
+	GlobalEmailStylesPost,
+} from './types';
 
 function getContentFromEntity( entity ): string {
 	if ( entity?.content && typeof entity.content === 'function' ) {
@@ -152,19 +157,31 @@ export const getSentEmailEditorPosts = createRegistrySelector(
 );
 
 export const getBlockPatternsForEmailTemplate = createRegistrySelector(
-	( select ) =>
-		createSelector(
+	( select ) => {
+		const emailPostType = select( storeName ).getEmailPostType();
+		return createSelector(
 			() =>
-				select( coreDataStore )
-					.getBlockPatterns()
-					.filter(
-						( { templateTypes } ) =>
-							Array.isArray( templateTypes ) &&
-							templateTypes.includes( 'email-template' )
-					)
-					.map( enhancePatternWithParsedBlocks ),
-			() => [ select( coreDataStore ).getBlockPatterns() ]
-		)
+				emailPostType
+					? select( coreDataStore )
+							.getBlockPatterns()
+							.filter( ( { templateTypes, postTypes } ) => {
+								return (
+									// Make sure the template type matches the required one.
+									Array.isArray( templateTypes ) &&
+									templateTypes.includes(
+										'email-template'
+									) &&
+									// The current post type must be matched when post types are set.
+									( postTypes === undefined ||
+										postTypes.length === 0 ||
+										postTypes.includes( emailPostType ) )
+								);
+							} )
+							.map( enhancePatternWithParsedBlocks )
+					: [],
+			() => [ select( coreDataStore ).getBlockPatterns(), emailPostType ]
+		);
+	}
 );
 
 export const canUserEditTemplates = createRegistrySelector(
@@ -202,37 +219,40 @@ function getTemplate( select, templateId: string ): EmailTemplate {
  * @return {Object?} Post Template.
  */
 export const getEditedPostTemplate = createRegistrySelector(
-	( select ) => (): EmailTemplate | null => {
-		const currentTemplate =
-			select( editorStore ).getEditedPostAttribute( 'template' );
+	( select ) =>
+		( _state, templateSlug?: string ): EmailTemplate | null => {
+			const currentTemplate =
+				templateSlug ||
+				select( editorStore ).getEditedPostAttribute( 'template' );
 
-		if ( currentTemplate ) {
-			const templateWithSameSlug = select( coreDataStore )
-				.getEntityRecords( 'postType', 'wp_template', {
-					per_page: -1,
+			if ( currentTemplate ) {
+				const query: Record< string, string | number > = {
 					context: 'view',
-				} )
-				// @ts-expect-error Missing property in type
-				?.find( ( template ) => template.slug === currentTemplate );
+					per_page: -1,
+					_woocommerce_email_editor: 'fetch-all-templates', // Unused parameter to avoid using cached response.
+				};
 
-			if ( ! templateWithSameSlug ) {
-				return regularizedGetEntityRecord(
-					templateWithSameSlug
-				) as EmailTemplate;
+				const templateWithSameSlug = select( coreDataStore )
+					.getEntityRecords( 'postType', 'wp_template', query )
+					// @ts-expect-error Missing property in type
+					?.find( ( template ) => template.slug === currentTemplate );
+
+				if ( ! templateWithSameSlug ) {
+					return null;
+				}
+
+				// @ts-expect-error getEditedPostAttribute
+				return getTemplate( select, templateWithSameSlug.id );
 			}
 
-			// @ts-expect-error getEditedPostAttribute
-			return getTemplate( select, templateWithSameSlug.id );
-		}
-
-		const defaultTemplateId = select( coreDataStore ).getDefaultTemplateId(
-			{
+			const defaultTemplateId = select(
+				coreDataStore
+			).getDefaultTemplateId( {
 				slug: 'email-general',
-			}
-		);
+			} );
 
-		return getTemplate( select, defaultTemplateId );
-	}
+			return getTemplate( select, defaultTemplateId );
+		}
 );
 
 export const getCurrentTemplate = createRegistrySelector( ( select ) => () => {
@@ -249,7 +269,7 @@ export const getCurrentTemplate = createRegistrySelector( ( select ) => () => {
 			templateId
 		) as unknown as EmailTemplate;
 	}
-	return getEditedPostTemplate();
+	return select( storeName ).getEditedPostTemplate();
 } );
 
 export const getCurrentTemplateContent = () => {
@@ -281,19 +301,19 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 		if ( postId ) {
 			if ( canEdit ) {
 				return select( coreDataStore ).getEditedEntityRecord(
-					'postType',
-					'wp_global_styles',
+					'root',
+					'globalStyles',
 					postId
-				) as unknown as Post;
+				) as GlobalEmailStylesPost;
 			}
 			return regularizedGetEntityRecord(
 				select( coreDataStore ).getEntityRecord(
-					'postType',
-					'wp_global_styles',
+					'root',
+					'globalStyles',
 					postId,
 					{ context: 'view' }
 				)
-			) as unknown as Post;
+			) as GlobalEmailStylesPost;
 		}
 		return null;
 	}
@@ -338,27 +358,57 @@ export function getPaletteColors(
 	state: State
 ): State[ 'editorSettings' ][ '__experimentalFeatures' ][ 'color' ][ 'palette' ] {
 	// eslint-disable-next-line no-underscore-dangle
-	return state.editorSettings.__experimentalFeatures.color.palette;
+	return state.editorSettings?.__experimentalFeatures?.color?.palette;
 }
 
 export function getPreviewState( state: State ): State[ 'preview' ] {
 	return state.preview;
 }
 
-export function getPersonalizationTagsState(
-	state: State
-): State[ 'personalizationTags' ] {
-	return state.personalizationTags;
-}
+export const getPersonalizationTagsList = createRegistrySelector(
+	( select ) => () => {
+		const tags = ( select( coreDataStore ).getEntityRecords(
+			PERSONALIZATION_TAG_ENTITY.kind,
+			PERSONALIZATION_TAG_ENTITY.name,
+			{
+				context: 'view',
+				per_page: -1,
+			}
+		) || [] ) as PersonalizationTag[];
 
-export function getPersonalizationTagsList(
-	state: State
-): State[ 'personalizationTags' ][ 'list' ] {
-	return state.personalizationTags.list;
-}
+		const postType = select( storeName ).getEmailPostType();
+
+		if ( ! postType ) {
+			return tags;
+		}
+
+		// When postType is template, we filter tags by registered template postTypes.
+		if ( postType === 'wp_template' ) {
+			const postTemplate = select( storeName ).getCurrentTemplate();
+			return tags.filter( ( tag ) => {
+				return (
+					tag.postTypes === undefined ||
+					tag.postTypes.length === 0 ||
+					( Array.isArray( postTemplate.post_types ) &&
+						postTemplate.post_types.some( ( pt ) =>
+							tag.postTypes.includes( pt )
+						) )
+				);
+			} );
+		}
+
+		return tags.filter( ( tag ) => {
+			return (
+				tag.postTypes === undefined ||
+				tag.postTypes.length === 0 ||
+				tag.postTypes.includes( postType )
+			);
+		} );
+	}
+);
 
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
-	return state.theme.styles;
+	return state.theme?.styles;
 }
 
 export function getTheme( state: State ): State[ 'theme' ] {
@@ -371,4 +421,10 @@ export function getGlobalStylesPostId( state: State ): number | null {
 
 export function getUrls( state: State ): State[ 'urls' ] {
 	return state.urls;
+}
+
+export function getContentValidation(
+	state: State
+): State[ 'contentValidation' ] {
+	return state.contentValidation;
 }

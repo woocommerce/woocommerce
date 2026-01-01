@@ -393,6 +393,15 @@ class ProductDetails extends AbstractBlock {
 	}
 
 	/**
+	 * Enqueue legacy assets when this block is used as we don't enqueue them for block themes anymore.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/60223
+	 */
+	public function enqueue_legacy_assets() {
+		wp_enqueue_script( 'wc-single-product' );
+	}
+
+	/**
 	 * Previously, the Product Details block was a standalone block. It doesn't
 	 * have any inner blocks and it rendered the tabs directly like the classic
 	 * template. When upgrading, we want the existing stores using the block to
@@ -411,6 +420,8 @@ class ProductDetails extends AbstractBlock {
 		if ( ! is_singular( 'product' ) ) {
 			return $content;
 		}
+
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_assets' ], 20 );
 
 		$hide_tab_title = isset( $attributes['hideTabTitle'] ) ? $attributes['hideTabTitle'] : false;
 

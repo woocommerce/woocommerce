@@ -65,11 +65,19 @@ if ( ! class_exists( 'WC_Email_Customer_Reset_Password', false ) ) :
 			$this->template_html  = 'emails/customer-reset-password.php';
 			$this->template_plain = 'emails/plain/customer-reset-password.php';
 
+			$this->email_group = 'accounts';
+
 			// Trigger.
 			add_action( 'woocommerce_reset_password_notification', array( $this, 'trigger' ), 10, 2 );
 
 			// Call parent constructor.
 			parent::__construct();
+
+			// Must be after parent's constructor which sets `block_email_editor_enabled` property.
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Account password reset', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their password has been reset.', 'woocommerce' );
+			}
 		}
 
 		/**

@@ -7,7 +7,6 @@ import {
 	RecommendedPaymentMethod,
 } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
-import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
 import { parseAdminUrl } from '@woocommerce/navigation';
 
@@ -125,31 +124,6 @@ export const getWooPaymentsTestDriveAccountLink = () => {
 			getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
 			'&test_drive=true&auto_start_test_drive_onboarding=true&redirect_to_settings_page=true'
 	);
-};
-
-export const resetWooPaymentsAccount = async () => {
-	try {
-		return await apiFetch( {
-			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/reset',
-			method: 'POST',
-		} );
-	} catch ( error ) {
-		throw error;
-	}
-};
-
-/**
- * Disables the WooPayments test account.
- */
-export const disableWooPaymentsTestAccount = async () => {
-	try {
-		return await apiFetch( {
-			url: '/wp-json/wc-admin/settings/payments/woopayments/onboarding/test_account/disable',
-			method: 'POST',
-		} );
-	} catch ( error ) {
-		throw error;
-	}
 };
 
 export const getWooPaymentsSetupLiveAccountLink = () => {
@@ -371,17 +345,11 @@ export const recordPaymentsProviderEvent = (
 	const enrichedData: Record< string, string | boolean | number > = {
 		...data,
 		provider_id: provider.id,
+		provider_type: provider._type ?? 'unknown',
+		suggestion_id: provider._suggestion_id ?? 'unknown',
 	};
 
-	// Add provider-specific data to the event.
-	// If the provider is a suggestion, use its ID as the suggestion ID.
-	if ( provider._type === 'suggestion' ) {
-		enrichedData.suggestion_id = provider.id;
-	} else {
-		enrichedData.suggestion_id = provider._suggestion_id ?? 'unknown';
-	}
-
-	// The provider state.
+	// Capture the provider state.
 	enrichedData.provider_enabled = provider.state?.enabled ?? false;
 	enrichedData.provider_account_connected =
 		provider.state?.account_connected ?? false;
@@ -437,16 +405,14 @@ export const recordPaymentsOnboardingEvent = (
 				?.business_country_code ?? 'unknown';
 	}
 
-	// Capture the onboarding flow `source` and `from` from the URL parameters, if not provided.
+	// Capture the onboarding flow `source` from the URL parameters, if not provided.
 	const urlParams = new URLSearchParams( window.location.search );
 	if ( ! data.source ) {
 		data.source =
 			urlParams.get( 'source' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
 	}
-	if ( ! data.from ) {
-		data.from =
-			urlParams.get( 'from' )?.replace( /[^\w-]+/g, '' ) || 'unknown';
-	}
+	// We should not carry over the `from` parameter from the URL,
+	// as it meant to indicate the immediate source of the action that triggered the event.
 
 	recordEvent( eventName, data );
 };

@@ -11,13 +11,14 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import { CART_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
-import './style.scss';
 import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
+import './style.scss';
 
 export type BlockAttributes = {
 	cartPageId: number;
@@ -35,12 +36,7 @@ const Block = ( {
 	placeOrderButtonLabel,
 	returnToCartButtonLabel,
 	priceSeparator,
-}: {
-	cartPageId: number;
-	showReturnToCart: boolean;
-	className?: string;
-	placeOrderButtonLabel: string;
-} ): JSX.Element => {
+}: BlockAttributes ) => {
 	const { paymentMethodButtonLabel } = useCheckoutSubmit();
 
 	const label = applyCheckoutFilter( {
@@ -51,6 +47,10 @@ const Block = ( {
 			defaultPlaceOrderButtonLabel,
 	} );
 
+	const cartHref = getSetting( 'page-' + cartPageId, false );
+	const cartLink = cartHref || CART_URL;
+	const shouldShowReturnToCart = cartLink && showReturnToCart;
+
 	const showPrice = className?.includes( 'is-style-with-price' ) || false;
 
 	return (
@@ -59,28 +59,20 @@ const Block = ( {
 			<StoreNoticesContainer
 				context={ noticeContexts.CHECKOUT_ACTIONS }
 			/>
-			<div className="wc-block-checkout__actions_row">
-				{ showReturnToCart && (
-					<ReturnToCartButton
-						href={ getSetting( 'page-' + cartPageId, false ) }
-					>
+			<div
+				className={ clsx( 'wc-block-checkout__actions_row', {
+					'wc-block-checkout__actions_row--justify-flex-end':
+						! shouldShowReturnToCart,
+				} ) }
+			>
+				{ shouldShowReturnToCart && (
+					<ReturnToCartButton href={ cartLink }>
 						{ returnToCartButtonLabel }
 					</ReturnToCartButton>
 				) }
-				{ showPrice && (
-					<style>
-						{ `.wp-block-woocommerce-checkout-actions-block {
-						.wc-block-components-checkout-place-order-button__separator {
-							&::after {
-								content: "${ priceSeparator }";
-							}
-						}
-					}` }
-					</style>
-				) }
 				<PlaceOrderButton
 					label={ label }
-					fullWidth={ ! showReturnToCart }
+					fullWidth={ ! shouldShowReturnToCart }
 					showPrice={ showPrice }
 					priceSeparator={ priceSeparator }
 				/>

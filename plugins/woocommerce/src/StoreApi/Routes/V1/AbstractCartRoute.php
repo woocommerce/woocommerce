@@ -197,7 +197,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			return null;
 		}
 
-		return CartTokenUtils::get_cart_token( wc()->session->get_customer_id() );
+		return CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
 	}
 
 	/**

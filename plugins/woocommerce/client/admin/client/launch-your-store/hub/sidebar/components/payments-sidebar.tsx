@@ -23,11 +23,13 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
-import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
+import { SiteHub } from '~/customize-store/site-hub';
 import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
@@ -74,6 +76,15 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		<Button
 			onClick={ () => {
 				recordEvent( 'launch_your_store_payments_back_to_hub_click' );
+
+				// Record the "modal" being closed to keep consistency with the Payments Settings flow.
+				recordPaymentsOnboardingEvent(
+					'woopayments_onboarding_modal_closed',
+					{
+						from: 'lys_sidebar_back_to_hub',
+						source: wooPaymentsOnboardingSessionEntryLYS,
+					}
+				);
 
 				// Clear session flag to prevent redirect back to payments setup
 				// after exiting the flow and returning to the WC Admin home.
@@ -135,7 +146,10 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 					className="woocommerce-edit-site-layout__hub"
 				/>
 			</motion.div>
-			<SidebarContainer title={ sidebarTitle }>
+			<SidebarContainer
+				title={ sidebarTitle }
+				onMobileClose={ props.onMobileClose }
+			>
 				{ /* We are using these classes to inherit the styles from the edit your store styling */ }
 				<ItemGroup className="woocommerce-edit-site-sidebar-navigation-screen-essential-tasks__group">
 					{ ! isWooPaymentsActive && (

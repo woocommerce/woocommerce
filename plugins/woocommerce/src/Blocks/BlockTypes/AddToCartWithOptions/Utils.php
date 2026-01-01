@@ -12,6 +12,26 @@ use WP_Block;
  */
 class Utils {
 	/**
+	 * Check if the HTML content has a visible quantity input.
+	 *
+	 * @param string $html_content The HTML content.
+	 * @return bool True if the HTML content has a visible input, false otherwise.
+	 */
+	public static function has_visible_quantity_input( $html_content ) {
+		$processor = new \WP_HTML_Tag_Processor( $html_content );
+
+		while ( $processor->next_tag() ) {
+			if (
+				$processor->get_tag() === 'INPUT' &&
+				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->get_attribute( 'type' ) !== 'hidden'
+			) {
+				return true;
+			}
+		}
+		return false;
+	}
+	/**
 	 * Add increment and decrement buttons to the quantity input field.
 	 *
 	 * @param string $quantity_html Quantity input HTML.
@@ -23,10 +43,10 @@ class Utils {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $plus_button, $quantity_html );
 		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
@@ -55,34 +75,70 @@ class Utils {
 	}
 
 	/**
-	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding an input event listener.
+	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding a blur event listener.
 	 *
 	 * @param string $quantity_html The quantity HTML.
-	 * @param string $wrapper_attributes Optional wrapper attributes.
+	 * @param array  $wrapper_attributes Optional wrapper attributes.
+	 * @param array  $input_attributes Optional input attributes.
+	 * @param array  $context {
+	 *     Optional context for quantity input.
+	 *     @type int  $productId  Product ID for context-specific behavior.
+	 *     @type bool $allowZero  Whether to allow zero quantity.
+	 * }
+	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '' ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array() ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+		global $product;
+
 		if (
 			$processor->next_tag( 'input' ) &&
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInput' );
-			$processor->set_attribute( 'data-wp-on--change', 'actions.handleQuantityChange' );
+			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
+			$input_quantity   = isset( $context['allowZero'] ) && true === $context['allowZero'] ? 0 : $default_quantity;
+
+			wp_interactivity_state(
+				'woocommerce/add-to-cart-with-options-quantity-selector',
+				array(
+					'inputQuantity' => $input_quantity,
+				)
+			);
+
+			$processor->set_attribute( 'data-wp-on--blur', 'actions.handleQuantityBlur' );
+			$processor->set_attribute( 'data-wp-bind--value', 'state.inputQuantity' );
+			foreach ( $input_attributes as $attribute => $value ) {
+				$processor->set_attribute( $attribute, $value );
+			}
 		}
 
 		$quantity_html = $processor->get_updated_html();
 
-		if ( ! empty( $wrapper_attributes ) ) {
-			return sprintf(
-				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options">%2$s</div>',
-				$wrapper_attributes,
-				$quantity_html
-			);
-		}
+		$wrapper_attributes = array_merge(
+			array(
+				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options-quantity-selector',
+				'data-wp-init'        => 'callbacks.storeInputElementRef',
+			),
+			$wrapper_attributes
+		);
 
-		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options">' . $quantity_html . '</div>';
+		$context_attribute = wp_interactivity_data_wp_context(
+			wp_parse_args(
+				$context,
+				array(
+					'productId' => $product instanceof \WC_Product ? $product->get_id() : 0,
+				)
+			)
+		);
+
+		return sprintf(
+			'<div %1$s %2$s>%3$s</div>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			$context_attribute,
+			$quantity_html
+		);
 	}
 
 	/**
@@ -114,9 +170,9 @@ class Utils {
 	 * @return bool True if the product is not purchasable or not in stock.
 	 */
 	public static function is_not_purchasable_product( $product ) {
-		if ( $product->is_type( 'simple' ) ) {
+		if ( $product->is_type( ProductType::SIMPLE ) ) {
 			return ! $product->is_in_stock() || ! $product->is_purchasable();
-		} elseif ( $product->is_type( 'variable' ) ) {
+		} elseif ( $product->is_type( ProductType::VARIABLE ) ) {
 			return ! $product->is_in_stock() || ! $product->has_purchasable_variations();
 		}
 
@@ -151,24 +207,27 @@ class Utils {
 	 * @return bool True if min and max purchase quantity are the same, false otherwise.
 	 */
 	public static function is_min_max_quantity_same( $product ) {
-		/**
-		 * Filter the minimum quantity value allowed for the product.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param int        $min_purchase_quantity The minimum purchase quantity.
-		 * @param WC_Product $product               The product object.
-		 */
-		$min_purchase_quantity = apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product );
-		/**
-		 * Filter the maximum quantity value allowed for the product.
-		 *
-		 * @since 2.0.0
-		 *
-		 * @param int        $max_purchase_quantity The maximum purchase quantity.
-		 * @param WC_Product $product               The product object.
-		 */
-		$max_purchase_quantity = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
+		$min_purchase_quantity = $product->get_min_purchase_quantity();
+		$max_purchase_quantity = $product->get_max_purchase_quantity();
 		return $min_purchase_quantity === $max_purchase_quantity;
+	}
+
+	/**
+	 * Get the quantity constraints for a product.
+	 *
+	 * @param \WC_Product $product The product to get the quantity constraints for.
+	 * @return array The quantity constraints.
+	 */
+	public static function get_product_quantity_constraints( $product ) {
+		$min          = is_numeric( $product->get_min_purchase_quantity() ) ? $product->get_min_purchase_quantity() : 1;
+		$max_quantity = $product->get_max_purchase_quantity();
+		$max          = is_numeric( $max_quantity ) && -1 !== $max_quantity ? $max_quantity : null;
+		$step         = is_numeric( $product->get_purchase_quantity_step() ) ? $product->get_purchase_quantity_step() : 1;
+
+		return array(
+			'min'  => $min,
+			'max'  => $max,
+			'step' => $step,
+		);
 	}
 }

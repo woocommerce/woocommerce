@@ -43,9 +43,25 @@ class WC_WCCOM_Site_Installation_Manager {
 	 * @param int    $product_id The product ID.
 	 * @param string $idempotency_key The idempotency key.
 	 */
-	public function __construct( int $product_id, string $idempotency_key ) {
+	public function __construct( int $product_id, string $idempotency_key = '' ) {
 		$this->product_id      = $product_id;
 		$this->idempotency_key = $idempotency_key;
+	}
+
+	/**
+	 * Get the installation status.
+	 *
+	 * @return WC_WCCOM_Site_Installation_State
+	 * @throws Installer_Error If installation status request failed.
+	 */
+	public function get_installation_status(): WC_WCCOM_Site_Installation_State {
+		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $this->product_id );
+
+		if ( ! $state ) {
+			throw new Installer_Error( esc_html( Installer_Error_Codes::NO_INITIATED_INSTALLATION_FOUND ) );
+		}
+
+		return $state;
 	}
 
 	/**
@@ -53,7 +69,7 @@ class WC_WCCOM_Site_Installation_Manager {
 	 *
 	 * @param string $run_until_step The step to run until.
 	 * @return bool
-	 * @throws WC_REST_WCCOM_Site_Installer_Error If installation failed to run.
+	 * @throws Installer_Error If installation failed to run.
 	 */
 	public function run_installation( string $run_until_step ): bool {
 		$state = WC_WCCOM_Site_Installation_State_Storage::get_state( $this->product_id );

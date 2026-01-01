@@ -40,12 +40,20 @@ class Theme_Controller {
 	private User_Theme $user_theme;
 
 	/**
+	 * Site style sync controller
+	 *
+	 * @var Site_Style_Sync_Controller
+	 */
+	private Site_Style_Sync_Controller $site_style_sync_controller;
+
+	/**
 	 * Theme_Controller constructor.
 	 */
 	public function __construct() {
-		$this->core_theme = WP_Theme_JSON_Resolver::get_core_data();
-		$this->base_theme = new WP_Theme_JSON( (array) json_decode( (string) file_get_contents( __DIR__ . '/theme.json' ), true ), 'default' );
-		$this->user_theme = new User_Theme();
+		$this->core_theme                 = WP_Theme_JSON_Resolver::get_core_data();
+		$this->base_theme                 = new WP_Theme_JSON( (array) json_decode( (string) file_get_contents( __DIR__ . '/theme.json' ), true ), 'default' );
+		$this->user_theme                 = new User_Theme();
+		$this->site_style_sync_controller = new Site_Style_Sync_Controller();
 	}
 
 	/**
@@ -70,18 +78,13 @@ class Theme_Controller {
 		$theme->merge( $this->core_theme );
 		$theme->merge( $this->base_theme );
 
-		// Extract stuff from the site theme.
-		$filtered_site_theme_data = array(
-			'version'  => 3,
-			'settings' => array(),
-			'styles'   => array(),
-		);
-		$site_theme_settings      = WP_Theme_JSON_Resolver::get_theme_data()->get_settings();
-		if ( $site_theme_settings && isset( $site_theme_settings['color']['palette']['theme'] ) ) {
-			$filtered_site_theme_data['settings']['color']['palette']['theme'] = $site_theme_settings['color']['palette']['theme'];
+		// Merge synced styles from current active theme.
+		if ( $this->site_style_sync_controller->is_sync_enabled() ) {
+			/** @var WP_Theme_JSON $site_theme */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$site_theme = $this->site_style_sync_controller->get_theme();
+			$theme->merge( $site_theme );
 		}
-		$site_theme = new WP_Theme_JSON( $filtered_site_theme_data, 'theme' );
-		$theme->merge( $site_theme );
+
 		return apply_filters( 'woocommerce_email_editor_theme_json', $theme );
 	}
 
@@ -115,7 +118,7 @@ class Theme_Controller {
 		foreach ( $styles as $key => $style_value ) {
 			if ( is_array( $style_value ) ) {
 				$styles[ $key ] = $this->recursive_extract_preset_variables( $style_value );
-			} elseif ( strpos( $style_value, 'var:preset|' ) === 0 ) {
+			} elseif ( is_string( $style_value ) && strpos( $style_value, 'var:preset|' ) === 0 ) {
 				/** @var string $style_value */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$styles[ $key ] = 'var(--wp--' . str_replace( '|', '--', str_replace( 'var:', '', $style_value ) ) . ')';
 			} else {
@@ -301,7 +304,7 @@ class Theme_Controller {
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
 		$settings          = $this->get_settings();
-		$color_definitions = array_merge( $settings['color']['palette']['theme'], $settings['color']['palette']['default'] );
+		$color_definitions = array_merge( $settings['color']['palette']['theme'] ?? array(), $settings['color']['palette']['default'] ?? array() );
 		foreach ( $color_definitions as $color_definition ) {
 			if ( $color_definition['slug'] === $color_slug ) {
 				return strtolower( $color_definition['color'] );

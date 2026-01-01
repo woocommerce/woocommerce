@@ -631,4 +631,37 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		 */
 		return apply_filters( 'woocommerce_order_item_cogs_per_item_tooltip', $tooltip_text, $cost_per_item, $formatted_cost_per_item, $this );
 	}
+
+	/**
+	 * Returns the refunded Cost of Goods Sold value in html format.
+	 *
+	 * @param float         $refunded_cost The refunded value.
+	 * @param array|null    $wc_price_arg Arguments to be passed to wc_price, defaults to an array containing only the currency symbol.
+	 * @param WC_Order|null $order Order that contains this line item, if null, get_order will be invoked.
+	 *
+	 * @return string
+	 */
+	public function get_cogs_refund_value_html( float $refunded_cost, ?array $wc_price_arg = null, ?WC_Order $order = null ): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
+			return '';
+		}
+
+		if ( $refunded_cost > 0 ) {
+			$refunded_cost = -$refunded_cost;
+		}
+		$order ??= $this->get_order();
+		$html    = $refunded_cost ? '<small class="refunded">' . wc_price( $refunded_cost, $wc_price_arg ?? array( 'currency' => $order->get_currency() ) ) . '</small>' : '';
+
+		/**
+		 * Filter to customize the refunded Cost of Goods Sold (COGS) value HTML for a given order item.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param string $refunded_html The formatted refunded COGS HTML.
+		 * @param float  $refunded_cost The refunded cost value (always zero or a negative number).
+		 * @param WC_Order_Item $item   The order item object.
+		 * @param WC_Order $order       The order object.
+		 */
+		return apply_filters( 'woocommerce_order_item_cogs_refunded_html', $html, $refunded_cost, $this, $order );
+	}
 }

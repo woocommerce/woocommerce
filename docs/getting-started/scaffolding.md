@@ -12,12 +12,12 @@ WooCommerce offers a number of starter kits and scaffolds depending on what you 
 
 If you’re designing a WooCommerce store, you have two options for theme development: Classic Themes and Block Themes.
 
-- Classic themes use PHP templates to override designs to key pages on your store, including your product pages, product archives, shopping cart, and checkout page. While sites running a classic theme can use the WordPress block editor, many of the templates are not editable within the editor itself.  
-- Block themes use the WordPress site editor to generate every aspect of the WordPress site, including the header and footer, product pages, archives, and the cart and checkout pages. Designs built in the site editor can be exported into flat HTML files, but the files themselves are typically edited in the WordPress editor.
+-   Classic themes use PHP templates to override designs to key pages on your store, including your product pages, product archives, shopping cart, and checkout page. While sites running a classic theme can use the WordPress block editor, many of the templates are not editable within the editor itself.
+-   Block themes use the WordPress site editor to generate every aspect of the WordPress site, including the header and footer, product pages, archives, and the cart and checkout pages. Designs built in the site editor can be exported into flat HTML files, but the files themselves are typically edited in the WordPress editor.
 
 ### Storefront Theme (Classic)
 
-Storefront is Woo’s flagship classic theme, available in the [WordPress Theme Directory](https://wordpress.org/themes/). You can either rename and modify the theme itself, or override specific aspects of it using a child theme. 
+Storefront is Woo’s flagship classic theme, available in the [WordPress Theme Directory](https://wordpress.org/themes/). You can either rename and modify the theme itself, or override specific aspects of it using a child theme.
 
 For more information on building a classic WooCommerce theme, read our classic theme development handbook. For a comprehensive guide on creating a child block theme and understanding the differences between a classic and block theme, please refer to [WooCommerce block theme development](/docs/theming/block-theme-development/theming-woo-blocks) and [WordPress block child theme development](https://learn.wordpress.org/lesson-plan/create-a-basic-child-theme-for-block-themes/).
 
@@ -29,11 +29,15 @@ For more information, check out our [Block Theme Development handbook](/docs/the
 
 ## Extension Scaffolds
 
-### woocommerce/create-woo-extension
+### @woocommerce/create-woo-extension
 
-Create Woo Extension is an NPX command that scaffolds an entire WooCommerce extension for your store. The generated extensions adds a React-based settings page integrating with WooCommerce Admin. Also included are PHP and Javascript unit testing, linting, and Prettier IDE configuration for WooCommerce and WordPress.
+[Create Woo Extension](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/create-woo-extension/) is an NPX command that scaffolds an entire WooCommerce extension for your store. The generated extensions adds a React-based settings page integrating with WooCommerce Admin. Also included are PHP and Javascript unit testing, linting, and Prettier IDE configuration for WooCommerce and WordPress.
 
 Read our full tutorial on using the [create-woo-extension package](/docs/extensions/getting-started-extensions/building-your-first-extension).
+
+### @woocommerce/extend-cart-checkout-block
+
+This is a template to be used with `@wordpress/create-block` to create a WooCommerce Blocks extension starting point. To install and use it, follow the instructions in [`@woocommerce/extend-cart-checkout-block`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/extend-cart-checkout-block/). Please note that this example contains multiple other examples of extensibility, not just inner blocks.
 
 ### WooCommerce admin extension examples
 
@@ -47,7 +51,7 @@ Read our full tutorial showcasing [how to extend WooCommerce analytics reports](
 
 The default WordPress theme (Twenty-Twenty Five as of the time of this writing) is a great place to see the best practices and standard conventions of a WordPress block theme. Using the Create Block Theme tool, you can modify the theme design from within the site edtitor and then export your new design to a custom child theme.
 
-### wordpress/create-block
+### @wordpress/create-block
 
 If you’re adding additional content or design elements to WordPress, it may make sense to create a custom block. The WordPress block editor package library includes a scaffolding tool called WordPress Create Block that helps you spin up custom blocks that can be inserted into any page or template.
 
@@ -57,7 +61,7 @@ Read more about the [`wordpress/create-block` package](https://developer.wordpre
 
 ### Core Plugin Sample Data
 
-It may be helpful to load your local store with sample. In the WooCommerce core plugin, you can find CSV and XML files that can be imported directly into WooCommerce using the WordPress admin or via WC-CLI. The sample data is located in  [`/plugins/woocommerce/sample-data/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/sample-data).
+It may be helpful to load your local store with sample data. In the WooCommerce core plugin, you can find CSV and XML files that can be imported directly into WooCommerce using the WordPress admin or via WC-CLI. The sample data is located in [`/plugins/woocommerce/sample-data/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/sample-data).
 
 ### Smooth Generator
 

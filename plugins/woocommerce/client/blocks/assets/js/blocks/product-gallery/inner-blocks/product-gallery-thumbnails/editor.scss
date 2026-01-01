@@ -9,3 +9,10 @@
 		pointer-events: none;
 	}
 }
+
+// We want to force opinionated mobile design no matter the wrap/no-wrap setting.
+@include breakpoint("<600px") {
+	.wp-block-woocommerce-product-gallery-is-layout-flex.is-nowrap {
+		flex-wrap: wrap;
+	}
+}

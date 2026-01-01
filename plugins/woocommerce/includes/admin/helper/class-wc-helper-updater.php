@@ -255,7 +255,7 @@ class WC_Helper_Updater {
 		}
 
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
-			echo esc_html_e( ' Activate WooCommerce.com Update Manager to update.', 'woocommerce' );
+			esc_html_e( ' Activate WooCommerce.com Update Manager to update.', 'woocommerce' );
 		}
 	}
 
@@ -602,6 +602,34 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Validates cached update data and checks if it matches the expected hash.
+	 *
+	 * Ensures the cached data is properly structured and corresponds to the current
+	 * payload to prevent fatal errors and avoid stale cache returns.
+	 *
+	 * @since 10.3.6
+	 *
+	 * @param mixed  $data The data retrieved from the transient.
+	 * @param string $hash The expected hash to compare against.
+	 * @return bool True if the data is valid and hash matches, false otherwise.
+	 */
+	private static function should_use_cached_update_data( $data, $hash ) {
+		if ( ! is_array( $data ) ) {
+			return false;
+		}
+
+		if ( ! isset( $data['hash'], $data['products'] ) ) {
+			return false;
+		}
+
+		if ( ! is_string( $data['hash'] ) || ! is_array( $data['products'] ) ) {
+			return false;
+		}
+
+		return hash_equals( $hash, $data['hash'] );
+	}
+
+	/**
 	 * Run an update check API call.
 	 *
 	 * The call is cached based on the payload (product ids, file ids). If
@@ -619,10 +647,9 @@ class WC_Helper_Updater {
 
 		$cache_key = '_woocommerce_helper_updates';
 		$data      = get_transient( $cache_key );
-		if ( false !== $data ) {
-			if ( hash_equals( $hash, $data['hash'] ) ) {
-				return $data['products'];
-			}
+
+		if ( self::should_use_cached_update_data( $data, $hash ) ) {
+			return $data['products'];
 		}
 
 		$data = array(
@@ -694,6 +721,10 @@ class WC_Helper_Updater {
 				continue;
 			}
 
+			if ( ! is_plugin_active( $plugin['_filename'] ) ) {
+				continue;
+			}
+
 			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
 				++$count;
 			}
@@ -702,6 +733,10 @@ class WC_Helper_Updater {
 		// Scan local themes.
 		foreach ( WC_Helper::get_local_woo_themes() as $theme ) {
 			if ( empty( $update_data[ $theme['_product_id'] ] ) ) {
+				continue;
+			}
+
+			if ( get_stylesheet() !== $theme['_stylesheet'] ) {
 				continue;
 			}
 

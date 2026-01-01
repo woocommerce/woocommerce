@@ -1688,4 +1688,45 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 		$coupon_discounts = array_sum( $discounts->get_discounts_by_coupon() );
 		$this->assertEquals( 5.0, $coupon_discounts ); // $5 discount for 1 product.
 	}
+
+	/**
+	 * Test that manual discounts are preserved when no coupons are used in order.
+	 * This tests the logic in wc_save_order_items that only recalculates coupons when coupons exist.
+	 */
+	public function test_manual_discount_preservation_no_coupons() {
+		$price = 20;
+
+		// Create a product with a price of $20.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $price );
+		$product->save();
+		$this->store_product( $product );
+
+		// Create an order.
+		$order = new WC_Order();
+		$order->set_status( 'processing' );
+		$order->save();
+		$order_item_id = $order->add_product( $product, 1 );
+		$this->store_order( $order );
+
+		// Simulate $5 manual discount.
+		$items = array(
+			'order_item_id' => array( $order_item_id ),
+			'line_total'    => array( $order_item_id => $price - 5 ),
+			'line_subtotal' => array( $order_item_id => $price ),
+		);
+
+		// Save the order items - this should preserve manual discounts since no coupons are applied.
+		wc_save_order_items( $order->get_id(), $items );
+
+		// Reload the order to get updated data.
+		$order       = wc_get_order( $order->get_id() );
+		$order_items = $order->get_items();
+		$order_item  = reset( $order_items );
+
+		// Verify the manual discount is preserved.
+		$this->assertEquals( 20.0, $order_item->get_subtotal(), 'Subtotal should be $20' );
+		$this->assertEquals( 15.0, $order_item->get_total(), 'Total should be $15 preserving manual discount' );
+		$this->assertEquals( 15.0, $order->get_total(), 'Order total should be $15 preserving manual discount' );
+	}
 }

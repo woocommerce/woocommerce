@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect, BlockData } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	BlockData,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -47,7 +52,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -100,12 +105,6 @@ test.describe( 'Merchant → Checkout', () => {
 	} );
 
 	test.describe( 'Can adjust T&S and Privacy Policy options', () => {
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.activatePlugin(
-				'woocommerce-blocks-test-helper'
-			);
-		} );
-
 		test( 'Merchant can see T&S and Privacy Policy links without checkbox', async ( {
 			page,
 			frontendUtils,
@@ -164,7 +163,7 @@ test.describe( 'Merchant → Checkout', () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -207,7 +206,7 @@ test.describe( 'Merchant → Checkout', () => {
 		).toBeVisible();
 
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

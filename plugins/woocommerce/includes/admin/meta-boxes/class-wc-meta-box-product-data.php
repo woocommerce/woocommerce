@@ -574,7 +574,7 @@ class WC_Meta_Box_Product_Data {
 					if ( '' === $cogs_value ) {
 						$cogs_value = null;
 					}
-					$variation->set_cogs_value( is_null( $cogs_value ) ? null : (float) wc_format_Decimal( $cogs_value ) );
+					$variation->set_cogs_value( is_null( $cogs_value ) ? null : (float) wc_format_decimal( $cogs_value ) );
 				}
 
 				/**

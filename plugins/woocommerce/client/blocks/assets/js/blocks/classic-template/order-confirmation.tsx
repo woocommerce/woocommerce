@@ -9,10 +9,6 @@ import { __ } from '@wordpress/i18n';
  */
 import type { OnClickCallbackParameter, InheritedAttributes } from './types';
 
-const isConversionPossible = () => {
-	return true;
-};
-
 const getButtonLabel = () => __( 'Transform into blocks', 'woocommerce' );
 
 const getBlockifiedTemplate = ( inheritedAttributes: InheritedAttributes ) =>
@@ -212,4 +208,4 @@ const blockifyConfig = {
 	getBlockifiedTemplate,
 };
 
-export { blockifyConfig, isConversionPossible, getDescription, getSkeleton };
+export { blockifyConfig, getDescription, getSkeleton };

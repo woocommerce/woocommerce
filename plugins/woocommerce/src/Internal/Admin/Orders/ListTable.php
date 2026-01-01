@@ -24,6 +24,13 @@ class ListTable extends WP_List_Table {
 	private $order_type;
 
 	/**
+	 * Underlying WordPress post type. Used for checking permissions.
+	 *
+	 * @var WP_Post_Type|null
+	 */
+	private $wp_post_type;
+
+	/**
 	 * Request vars.
 	 *
 	 * @var array
@@ -98,7 +105,8 @@ class ListTable extends WP_List_Table {
 	 * @return void
 	 */
 	public function setup( $args = array() ): void {
-		$this->order_type = $args['order_type'] ?? 'shop_order';
+		$this->order_type   = $args['order_type'] ?? 'shop_order';
+		$this->wp_post_type = get_post_type_object( $this->order_type );
 
 		add_action( 'admin_notices', array( $this, 'bulk_action_notices' ) );
 		add_filter( "manage_{$this->screen->id}_columns", array( $this, 'get_columns' ), 0 );
@@ -308,6 +316,10 @@ class ListTable extends WP_List_Table {
 	 */
 	protected function get_bulk_actions() {
 		$selected_status = $this->order_query_args['status'] ?? false;
+
+		if ( ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
+			return array();
+		}
 
 		if ( array( 'trash' ) === $selected_status ) {
 			$actions = array(
@@ -1067,6 +1079,10 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
+		if ( ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_post, $item->get_id() ) ) {
+			return;
+		}
+
 		ob_start();
 		?>
 		<input id="cb-select-<?php echo esc_attr( $item->get_id() ); ?>" type="checkbox" name="id[]" value="<?php echo esc_attr( $item->get_id() ); ?>" />
@@ -1393,7 +1409,7 @@ class ListTable extends WP_List_Table {
 	public function handle_bulk_actions() {
 		$action = $this->current_action();
 
-		if ( ! $action ) {
+		if ( ! $action || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
 			return;
 		}
 
@@ -1734,13 +1750,17 @@ class ListTable extends WP_List_Table {
 
 							<?php do_action( 'woocommerce_admin_order_preview_end' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 						</article>
+						<# if ( data.actions_html || data.is_editable ) { #>
 						<footer>
 							<div class="inner">
 								{{{ data.actions_html }}}
 
+								<# if ( data.is_editable ) { #>
 								<a class="button button-primary button-large" aria-label="<?php esc_attr_e( 'Edit this order', 'woocommerce' ); ?>" href="<?php echo $order_edit_url_placeholder; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+								<# } #>
 							</div>
 						</footer>
+						<# } #>
 					</section>
 				</div>
 			</div>

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 test.describe( 'Product Search Results template', () => {
 	// This is a test to verify there are no regressions on
@@ -12,7 +12,7 @@ test.describe( 'Product Search Results template', () => {
 	} ) => {
 		await admin.visitSiteEditor( {
 			canvas: 'edit',
-			postId: 'woocommerce/woocommerce//product-search-results',
+			postId: `${ BLOCK_THEME_SLUG }//product-search-results`,
 			postType: 'wp_template',
 		} );
 

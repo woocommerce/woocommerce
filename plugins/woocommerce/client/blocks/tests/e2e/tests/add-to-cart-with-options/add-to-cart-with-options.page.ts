@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor, Admin } from '@woocommerce/e2e-utils';
+import { Editor, Admin, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 class AddToCartWithOptionsPage {
 	private page: Page;
@@ -26,26 +26,23 @@ class AddToCartWithOptionsPage {
 	}
 
 	async switchProductType( productType: string ) {
+		await this.page.getByRole( 'tab', { name: 'Template' } ).click();
+		await this.page
+			.getByRole( 'button', { name: 'Product Type', exact: true } )
+			.click();
+		await this.page
+			.getByLabel( 'Type switcher' )
+			.selectOption( { label: productType } );
+
 		const addToCartWithOptionsBlock = await this.editor.getBlockByName(
 			this.BLOCK_SLUG
 		);
-		await this.editor.selectBlocks( addToCartWithOptionsBlock );
 
-		const productTypeSwitcher = this.page.getByRole( 'button', {
-			name: 'Switch product type',
-		} );
-		await productTypeSwitcher.click();
-
-		// Wait for the menu to open.
-		const menu = this.page.getByRole( 'menu', {
-			name: 'Switch product type',
-		} );
-		await menu.waitFor( { state: 'visible' } );
-
-		const customProductTypeButton = this.page.getByRole( 'menuitem', {
-			name: productType,
-		} );
-		await customProductTypeButton.click();
+		await addToCartWithOptionsBlock
+			.getByLabel( 'Loading the Add to Cart + Options template part' )
+			.waitFor( {
+				state: 'hidden',
+			} );
 
 		await addToCartWithOptionsBlock
 			.locator( '.components-spinner' )
@@ -75,13 +72,7 @@ class AddToCartWithOptionsPage {
 		);
 	}
 
-	async updateSingleProductTemplate() {
-		await this.admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
+	async updateAddToCartWithOptionsBlock() {
 		const addToCartFormBlock = await this.editor.getBlockByName(
 			'woocommerce/add-to-cart-form'
 		);
@@ -89,9 +80,45 @@ class AddToCartWithOptionsPage {
 
 		await this.page
 			.getByRole( 'button', {
-				name: 'Upgrade to the Add to Cart + Options block',
+				name: 'Use the Add to Cart + Options block',
 			} )
 			.click();
+	}
+
+	async updateSingleProductTemplate() {
+		await this.admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_SLUG }//single-product`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		await this.updateAddToCartWithOptionsBlock();
+	}
+
+	async createPostWithProductBlock( product: string, variation?: string ) {
+		await this.admin.createNewPost();
+		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
+		const singleProductBlock = await this.editor.getBlockByName(
+			'woocommerce/single-product'
+		);
+
+		await singleProductBlock
+			.locator( `input[type="radio"][value="${ product }"]` )
+			.nth( 0 )
+			.click();
+
+		if ( variation ) {
+			await singleProductBlock
+				.locator( `input[type="radio"][value="${ variation }"]` )
+				.nth( 0 )
+				.click();
+		}
+
+		await singleProductBlock.getByText( 'Done' ).click();
+
+		await this.updateAddToCartWithOptionsBlock();
+
+		await this.editor.publishAndVisitPost();
 	}
 }
 

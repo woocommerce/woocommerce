@@ -3,10 +3,14 @@
  */
 import { Subtotal, TotalsWrapper } from '@woocommerce/blocks-components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useOrderSummaryLoadingState,
+} from '@woocommerce/base-context/hooks';
 
 const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
-	const { cartTotals, cartIsLoading } = useStoreCart();
+	const { cartTotals } = useStoreCart();
+	const { isLoading } = useOrderSummaryLoadingState();
 	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
 
 	return (
@@ -14,7 +18,7 @@ const Block = ( { className = '' }: { className?: string } ): JSX.Element => {
 			<Subtotal
 				currency={ totalsCurrency }
 				values={ cartTotals }
-				showSkeleton={ cartIsLoading }
+				showSkeleton={ isLoading }
 			/>
 		</TotalsWrapper>
 	);

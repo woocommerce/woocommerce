@@ -13,6 +13,8 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -1442,6 +1444,22 @@ if ( ! function_exists( 'woocommerce_template_loop_add_to_cart' ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
 		}
 
+		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
+		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
+
+		// The template is using an anchor instead of a button. For AJAX
+		// add-to-cart, it needs to be a button for accessibility reasons.
+		// See https://github.com/woocommerce/woocommerce/issues/59382.
+		if (
+			! $cart_redirect_after_add &&
+			$ajax_add_to_cart_enabled &&
+			$product->supports( 'ajax_add_to_cart' ) &&
+			$product->is_purchasable() &&
+			$product->is_in_stock()
+		) {
+			$args['attributes']['role'] = 'button';
+		}
+
 		wc_get_template( 'loop/add-to-cart.php', $args );
 	}
 }
@@ -2822,10 +2840,18 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		$thumbnail_id         = get_term_meta( $category->term_id, 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
-			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
-			$image        = $image[0];
-			$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
-			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+			$image_data = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
+
+			// Category image guard - fallback to placeholder.
+			if ( is_array( $image_data ) && isset( $image_data[0] ) ) {
+				$image        = $image_data[0];
+				$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
+				$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+			} else {
+				$image        = wc_placeholder_img_src();
+				$image_srcset = false;
+				$image_sizes  = false;
+			}
 		} else {
 			$image        = wc_placeholder_img_src();
 			$image_srcset = false;
@@ -2865,8 +2891,18 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 			return;
 		}
 
+		$template = 'order/order-details.php';
+
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$fulfillment_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+			$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
+			if ( ! empty( $fulfillments ) ) {
+				$template = 'order/order-details-fulfillments.php';
+			}
+		}
+
 		wc_get_template(
-			'order/order-details.php',
+			$template,
 			array(
 				'order_id'       => $order_id,
 				/**
@@ -3324,6 +3360,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 				'selected'         => false,
 				'required'         => false,
 				'name'             => '',
+				'aria-label'       => false,
 				'id'               => '',
 				'class'            => '',
 				'show_option_none' => __( 'Choose an option', 'woocommerce' ),
@@ -3353,7 +3390,7 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 			$options    = $attributes[ $attribute ];
 		}
 
-		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
+		$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" name="' . esc_attr( $name ) . ( $args['aria-label'] ? '" aria-label="' . esc_attr( $args['aria-label'] ) : '' ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '"' . ( $required ? ' required' : '' ) . '>';
 		$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
 
 		if ( ! empty( $options ) ) {
@@ -3596,6 +3633,107 @@ if ( ! function_exists( 'wc_get_email_order_items' ) ) {
 		);
 
 		return apply_filters( 'woocommerce_email_order_items_table', ob_get_clean(), $order );
+	}
+}
+
+if ( ! function_exists( 'wc_get_email_fulfillment_items' ) ) {
+	/**
+	 * Get HTML for the order items to be shown in emails.
+	 *
+	 * @param WC_Order    $order Order object.
+	 * @param Fulfillment $fulfillment Fulfillment object.
+	 * @param array       $args Arguments.
+	 *
+	 * @since 3.0.0
+	 * @return string
+	 */
+	function wc_get_email_fulfillment_items( $order, $fulfillment, $args = array() ) {
+		ob_start();
+
+		$email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+		$image_size                 = $email_improvements_enabled ? 48 : 32;
+
+		$defaults = array(
+			'show_sku'      => false,
+			'show_image'    => $email_improvements_enabled,
+			'image_size'    => array( $image_size, $image_size ),
+			'plain_text'    => false,
+			'sent_to_admin' => false,
+		);
+
+		$args     = wp_parse_args( $args, $defaults );
+		$template = $args['plain_text'] ? 'emails/plain/email-fulfillment-items.php' : 'emails/email-fulfillment-items.php';
+
+		$fulfillment_items = $fulfillment->get_items();
+		if ( empty( $fulfillment_items ) ) {
+			// If there are no fulfillment items, we return an empty string.
+			return '';
+		}
+
+		$order_items = $order->get_items();
+		if ( empty( $order_items ) ) {
+			// If there are no order items, we return an empty string.
+			return '';
+		}
+
+		$order_items_filtered = array();
+		foreach ( $fulfillment_items as $fulfillment_item ) {
+			// Filter order items to only include those that are part of the fulfillment.
+			foreach ( $order_items as $order_item ) {
+				if ( $order_item->get_id() === $fulfillment_item['item_id'] ) {
+					if ( method_exists( $order_item, 'get_subtotal' )
+						&& method_exists( $order_item, 'set_subtotal' )
+						&& method_exists( $order_item, 'get_quantity' ) ) {
+						$order_item->set_subtotal(
+							$order_item->get_subtotal() * $fulfillment_item['qty'] / $order_item->get_quantity()
+						);
+					}
+					$order_items_filtered[] = (object) array(
+						'item_id' => $order_item->get_id(),
+						'qty'     => $fulfillment_item['qty'],
+						'item'    => $order_item,
+					);
+					break;
+				}
+			}
+		}
+
+		wc_get_template(
+			$template,
+			/**
+			 * Filter to modify the arguments for the email fulfillment items.
+			 *
+			 * @since 10.1.0
+			 *
+			 * @param array $args The arguments for the email fulfillment items.
+			 */
+			apply_filters(
+				'woocommerce_email_fulfillment_items_args',
+				array(
+					'order'               => $order,
+					'fulfillment'         => $fulfillment,
+					'items'               => $order_items_filtered,
+					'show_download_links' => $order->is_download_permitted() && ! $args['sent_to_admin'],
+					'show_sku'            => $args['show_sku'],
+					'show_purchase_note'  => $order->is_paid() && ! $args['sent_to_admin'],
+					'show_image'          => $args['show_image'],
+					'image_size'          => $args['image_size'],
+					'plain_text'          => $args['plain_text'],
+					'sent_to_admin'       => $args['sent_to_admin'],
+				)
+			)
+		);
+
+		/**
+		 * Filter to modify the email fulfillment items table HTML.
+		 *
+		 * @since 10.1.0
+		 *
+		 * @param string   $html The HTML output of the fulfillment items table.
+		 * @param WC_Order $order The order object.
+		 * @param Fulfillment $fulfillment The fulfillment object.
+		 */
+		return apply_filters( 'woocommerce_get_email_fulfillment_items_table', ob_get_clean(), $order, $fulfillment );
 	}
 }
 
@@ -4177,7 +4315,7 @@ function wc_set_hooked_blocks_version() {
 		return;
 	}
 
-	add_option( $option_name, WC()->version );
+	add_option( $option_name, WC()->stable_version() );
 }
 
 /**
@@ -4249,7 +4387,7 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 
 	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
 	if ( ! $old_theme->is_block_theme() && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
-		add_option( $option_name, WC()->version );
+		add_option( $option_name, WC()->stable_version() );
 	}
 }
 

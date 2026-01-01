@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * Renders a button block.
@@ -22,42 +23,35 @@ class Button extends Abstract_Block_Renderer {
 	/**
 	 * Get styles for the wrapper element.
 	 *
-	 * @param array $block_styles Block styles.
-	 * @return object{css: string, classname: string}
+	 * @param array             $block_attributes Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return array
 	 */
-	private function get_wrapper_styles( array $block_styles ) {
-		$properties = array( 'border', 'color', 'typography', 'spacing' );
-		$styles     = $this->get_styles_from_block( array_intersect_key( $block_styles, array_flip( $properties ) ) );
-		return (object) array(
-			'css'       => $this->compile_css(
-				$styles['declarations'],
-				array(
-					'word-break' => 'break-word',
-					'display'    => 'block',
-				)
-			),
-			'classname' => $styles['classnames'],
+	private function get_wrapper_styles( array $block_attributes, Rendering_Context $rendering_context ) {
+		$block_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background-color', 'color', 'typography', 'spacing' ) );
+
+		return Styles_Helper::extend_block_styles(
+			$block_styles,
+			array(
+				'word-break' => 'break-word',
+				'display'    => 'block',
+			)
 		);
 	}
 
 	/**
 	 * Get styles for the link element.
 	 *
-	 * @param array $block_styles Block styles.
-	 * @return object{css: string, classname: string}
+	 * @param array             $block_attributes Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return array
 	 */
-	private function get_link_styles( array $block_styles ) {
-		$styles = $this->get_styles_from_block(
-			array(
-				'color'      => array(
-					'text' => $block_styles['color']['text'] ?? '',
-				),
-				'typography' => $block_styles['typography'] ?? array(),
-			)
-		);
-		return (object) array(
-			'css'       => $this->compile_css( $styles['declarations'], array( 'display' => 'block' ) ),
-			'classname' => $styles['classnames'],
+	private function get_link_styles( array $block_attributes, Rendering_Context $rendering_context ) {
+		$block_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'color', 'typography' ) );
+
+		return Styles_Helper::extend_block_styles(
+			$block_styles,
+			array( 'display' => 'block' )
 		);
 	}
 
@@ -108,32 +102,16 @@ class Button extends Abstract_Block_Renderer {
 			)
 		);
 
-		$block_styles = array_replace_recursive(
-			array(
-				'color' => array_filter(
-					array(
-						'background' => $block_attributes['backgroundColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
-						'text'       => $block_attributes['textColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['textColor'] ) : null,
-					)
-				),
-			),
-			$block_attributes['style'] ?? array()
-		);
-
-		if ( ! empty( $block_styles['border'] ) && empty( $block_styles['border']['style'] ) ) {
-			$block_styles['border']['style'] = 'solid';
-		}
-
-		$wrapper_styles = $this->get_wrapper_styles( $block_styles );
-		$link_styles    = $this->get_link_styles( $block_styles );
+		$wrapper_styles = $this->get_wrapper_styles( $block_attributes, $rendering_context );
+		$link_styles    = $this->get_link_styles( $block_attributes, $rendering_context );
 
 		$table_attrs = array(
 			'style' => 'width:' . ( $block_attributes['width'] ? '100%' : 'auto' ) . ';',
 		);
 
 		$cell_attrs = array(
-			'class'  => $wrapper_styles->classname . ' ' . $block_classname,
-			'style'  => $wrapper_styles->css,
+			'class'  => $wrapper_styles['classnames'] . ' ' . $block_classname,
+			'style'  => $wrapper_styles['css'],
 			'align'  => $block_attributes['textAlign'],
 			'valign' => 'middle',
 			'role'   => 'presentation',
@@ -141,8 +119,8 @@ class Button extends Abstract_Block_Renderer {
 
 		$button_content = sprintf(
 			'<a class="button-link %1$s" style="%2$s" href="%3$s" target="_blank">%4$s</a>',
-			esc_attr( $link_styles->classname ),
-			esc_attr( $link_styles->css ),
+			esc_attr( $link_styles['classnames'] ),
+			esc_attr( $link_styles['css'] ),
 			esc_url( $button_url ),
 			$button_text
 		);

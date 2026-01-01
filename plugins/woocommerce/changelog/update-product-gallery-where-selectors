@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Wrap Product Gallery CSS selectors in :where() to decrease specificity

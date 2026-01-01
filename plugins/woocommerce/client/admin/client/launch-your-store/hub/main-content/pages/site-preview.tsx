@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { useState, useRef, useEffect } from '@wordpress/element';
 import { Spinner } from '@woocommerce/components';
 import { useResizeObserver } from '@wordpress/compose';
+import { __ } from '@wordpress/i18n';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -15,7 +16,7 @@ import {
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
-import ResizableFrame from '~/customize-store/assembler-hub/resizable-frame';
+import ResizableFrame from '../components/resizable-frame';
 import type { MainContentComponentProps } from '../xstate';
 import './site-preview.scss';
 
@@ -88,7 +89,7 @@ export const SitePreviewPage = ( props: MainContentComponentProps ) => {
 							ref={ iframeRef }
 							className="launch-store-site__preview-site-iframe"
 							src={ siteUrl }
-							title="Preview"
+							title={ __( 'Preview', 'woocommerce' ) }
 							onLoad={ () => setIsLoading( false ) }
 						/>
 					</ResizableFrame>

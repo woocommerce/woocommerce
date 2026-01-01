@@ -83,7 +83,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		editor,
 	} ) => {
 		await test.step( 'in editor', async () => {
-			const largeImageBlock = editor.canvas.locator(
+			const viewerBlock = editor.canvas.locator(
 				'[data-type="woocommerce/product-gallery-large-image"]'
 			);
 			const thumbnailsBlock = editor.canvas.locator(
@@ -97,30 +97,24 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 
 			await expect( thumbnailsSizeInput ).toHaveValue( '25' );
 			await expect( async () => {
-				const largeImageBox = await largeImageBlock.boundingBox();
+				const viewerBox = await viewerBlock.boundingBox();
 				const thumbnailsBox = await thumbnailsBlock.boundingBox();
-				const largeImageWidth = largeImageBox?.width ?? 0;
+				const viewerWidth = viewerBox?.width ?? 0;
 				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
 
-				expect( thumbnailsWidth ).toBeCloseTo(
-					largeImageWidth * 0.25,
-					0
-				);
+				expect( thumbnailsWidth ).toBeCloseTo( viewerWidth * 0.25, 0 );
 			} ).toPass( { timeout: 3_000 } );
 
 			await expect( async () => {
 				// Set size to 10%
 				await thumbnailsSizeInput.fill( '10' );
 
-				const largeImageBox = await largeImageBlock.boundingBox();
+				const viewerBox = await viewerBlock.boundingBox();
 				const thumbnailsBox = await thumbnailsBlock.boundingBox();
-				const largeImageWidth = largeImageBox?.width ?? 0;
+				const viewerWidth = viewerBox?.width ?? 0;
 				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
 
-				expect( thumbnailsWidth ).toBeCloseTo(
-					largeImageWidth * 0.1,
-					0
-				);
+				expect( thumbnailsWidth ).toBeCloseTo( viewerWidth * 0.1, 0 );
 			} ).toPass( { timeout: 3_000 } );
 
 			await editor.saveSiteEditorEntities( {
@@ -134,22 +128,19 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 			const thumbnailsBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
 			);
-			const largeImageBlock = page.locator(
+			const viewerBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery-large-image"]'
 			);
 
 			await expect( async () => {
 				await page.reload();
 
-				const largeImageBox = await largeImageBlock.boundingBox();
+				const viewerBox = await viewerBlock.boundingBox();
 				const thumbnailsBox = await thumbnailsBlock.boundingBox();
-				const largeImageWidth = largeImageBox?.width ?? 0;
+				const viewerWidth = viewerBox?.width ?? 0;
 				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
 
-				expect( thumbnailsWidth ).toBeCloseTo(
-					largeImageWidth * 0.1,
-					0
-				);
+				expect( thumbnailsWidth ).toBeCloseTo( viewerWidth * 0.1, 0 );
 			} ).toPass( { timeout: 3_000 } );
 		} );
 	} );
@@ -159,7 +150,7 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		editor,
 	} ) => {
 		await test.step( 'in editor', async () => {
-			const largeImageBlock = editor.canvas.locator(
+			const viewerBlock = editor.canvas.locator(
 				'[data-type="woocommerce/product-gallery-large-image"]'
 			);
 			const thumbnailsBlock = editor.canvas.locator(
@@ -176,15 +167,12 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 				// Set size to 10%
 				await thumbnailsSizeInput.fill( '50' );
 
-				const largeImageBox = await largeImageBlock.boundingBox();
+				const viewerBox = await viewerBlock.boundingBox();
 				const thumbnailsBox = await thumbnailsBlock.boundingBox();
-				const largeImageWidth = largeImageBox?.width ?? 0;
+				const viewerWidth = viewerBox?.width ?? 0;
 				const thumbnailsWidth = thumbnailsBox?.width ?? 0;
 
-				expect( thumbnailsWidth ).toBeCloseTo(
-					largeImageWidth * 0.5,
-					0
-				);
+				expect( thumbnailsWidth ).toBeCloseTo( viewerWidth * 0.5, 0 );
 			} ).toPass( { timeout: 3_000 } );
 
 			await editor.saveSiteEditorEntities( {
