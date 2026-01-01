@@ -11,7 +11,8 @@
 
 .wc-block-checkout__shipping-fields,
 .wc-block-checkout__billing-fields,
-.wc-block-checkout__contact-fields {
+.wc-block-checkout__contact-fields,
+.wc-block-checkout__order-fields {
 	.wc-block-components-address-form {
 		display: flex;
 		flex-wrap: wrap;
@@ -35,12 +36,24 @@
 	}
 }
 
-.wc-block-checkout__contact-fields {
+.wc-block-checkout__contact-fields,
+.wc-block-checkout__order-fields {
 	.wc-block-components-address-form {
 		.wc-block-components-select-input,
 		.wc-block-components-text-input {
-			flex: 0 0 100%; // Forcing all inputs in the contact step to be full width.
+			flex: 0 0 100%; // Forcing all inputs in the contact and order steps to be full width.
 		}
+	}
+}
+
+.wc-block-components-form {
+	.wc-block-checkout__order-fields:has(+ .wc-block-checkout__order-notes),
+	.wc-block-checkout__order-notes:has(
+			+ .wc-block-checkout__terms:not(
+					.wc-block-checkout__terms--with-separator
+				)
+		) {
+		margin-bottom: $gap-small;
 	}
 }
 
