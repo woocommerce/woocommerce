@@ -352,12 +352,12 @@ final class TransactAccountManager {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param string $cache_key The cache key to update.
-	 * @param array  $account_data The transact account data.
+	 * @param string     $cache_key The cache key to update.
+	 * @param array|bool $account_data The transact account data.
 	 *
 	 * @return void
 	 */
-	private function update_transact_account_cache( string $cache_key, array $account_data ): void {
+	private function update_transact_account_cache( string $cache_key, $account_data ): void {
 		$expires = time() + self::TRANSACT_ACCOUNT_CACHE_EXPIRY;
 		update_option(
 			$cache_key,
