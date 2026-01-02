@@ -239,8 +239,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		},
 		actions: {
 			setAttribute( attribute: string, value: string ) {
-				const context = getContext< Context >();
-				const { selectedAttributes } = context;
+				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						selectedAttribute.attribute === attribute
