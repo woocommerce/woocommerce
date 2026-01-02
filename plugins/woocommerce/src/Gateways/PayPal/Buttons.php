@@ -165,7 +165,7 @@ class Buttons {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @return string|false
+	 * @return string
 	 */
 	public function get_current_page_for_app_switch() {
 		// If checkout, cart or product page, return the current page URL.
