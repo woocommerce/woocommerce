@@ -1,6 +1,6 @@
 <?php
 /**
- * CheckoutEventTracker class file.
+ * ShortcodeCheckoutEventTracker class file.
  */
 
 declare( strict_types=1 );
@@ -12,30 +12,23 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Tracks checkout events for fraud protection analysis.
+ * Tracks traditional (shortcode) checkout events for fraud protection analysis.
  *
- * This class hooks into WooCommerce checkout events (billing/email changes,
+ * This class hooks into traditional WooCommerce checkout events (billing/email changes,
  * payment selection) and triggers comprehensive event tracking with full session
  * context. It implements batching to reduce API calls for rapid successive updates.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class CheckoutEventTracker implements RegisterHooksInterface {
+class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 
 	/**
-	 * Fraud protection tracker instance.
+	 * Checkout event scheduler instance.
 	 *
-	 * @var FraudProtectionTracker
+	 * @var CheckoutEventScheduler
 	 */
-	private FraudProtectionTracker $tracker;
-
-	/**
-	 * Session data collector instance.
-	 *
-	 * @var SessionDataCollector
-	 */
-	private SessionDataCollector $data_collector;
+	private CheckoutEventScheduler $scheduler;
 
 	/**
 	 * Fraud protection controller instance.
@@ -45,43 +38,23 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	private FraudProtectionController $fraud_protection_controller;
 
 	/**
-	 * Batch interval in seconds for checkout events.
-	 *
-	 * This defines how long to wait after the last event before tracking.
-	 * Each new event resets this timer (debouncing).
-	 *
-	 * @var int
-	 */
-	private const BATCH_INTERVAL_SECONDS = 15;
-
-	/**
-	 * Action hook name for scheduled event tracking.
-	 *
-	 * @var string
-	 */
-	private const SCHEDULED_ACTION_HOOK = 'woocommerce_fraud_protection_track_checkout_event';
-
-	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionTracker    $tracker                     The fraud protection tracker instance.
-	 * @param SessionDataCollector      $data_collector              The session data collector instance.
+	 * @param CheckoutEventScheduler    $scheduler                   The checkout event scheduler instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		FraudProtectionTracker $tracker,
-		SessionDataCollector $data_collector,
+		CheckoutEventScheduler $scheduler,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->tracker                     = $tracker;
-		$this->data_collector              = $data_collector;
+		$this->scheduler                   = $scheduler;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
 	/**
-	 * Register checkout event hooks.
+	 * Register traditional checkout event hooks.
 	 *
 	 * Hooks into WooCommerce checkout actions to track fraud protection events.
 	 * Only registers hooks if the fraud protection feature is enabled.
@@ -99,14 +72,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 
 		// WooCommerce AJAX: Handle payment method selection tracking.
 		add_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this, 'ajax_handle_payment_method_selected' ) );
-
-		// WooCommerce Blocks (Store API): Track when customer data is updated in Blocks checkout.
-		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'handle_store_api_customer_update' ), 10, 2 );
-
-		// Scheduled action to track pending events after debounce interval.
-		add_action( self::SCHEDULED_ACTION_HOOK, array( $this, 'process_scheduled_tracking' ), 10, 1 );
-
-
 	}
 
 	/**
@@ -128,7 +93,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		$event_data = $this->build_checkout_event_data( 'field_update', $data );
-		$this->schedule_tracking( 'checkout_field_update', $event_data );
+		$this->scheduler->schedule_tracking( 'checkout_field_update', $event_data );
 	}
 
 	/**
@@ -156,61 +121,9 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			array( 'payment' => array( 'payment_method_type' => $payment_method ) )
 		);
 
-		$this->schedule_tracking( 'checkout_payment_method_selected', $event_data );
+		$this->scheduler->schedule_tracking( 'checkout_payment_method_selected', $event_data );
 		// Send success response.
 		wp_send_json_success( array( 'message' => 'Payment method tracked.' ) );
-	}
-
-	/**
-	 * Handle Store API customer update event (WooCommerce Blocks checkout).
-	 *
-	 * Triggered when customer information is updated via the Store API endpoint
-	 * /wc/store/v1/cart/update-customer during Blocks checkout flow.
-	 *
-	 * @internal
-	 *
-	 * @param \WC_Customer           $customer Customer object being updated.
-	 * @param \WP_REST_Request       $request  REST request object containing customer data.
-	 * @return void
-	 */
-	public function handle_store_api_customer_update( $customer, $request ): void {
-		// Extract customer data from the REST request.
-		$billing_address  = $request->get_param( 'billing_address' ) ?? array();
-		$shipping_address = $request->get_param( 'shipping_address' ) ?? array();
-
-		// Build posted data array in the format expected by build_checkout_event_data.
-		$posted_data = array();
-
-		// Extract billing fields.
-		if ( ! empty( $billing_address ) ) {
-			$posted_data['billing_first_name'] = $billing_address['first_name'] ?? '';
-			$posted_data['billing_last_name']  = $billing_address['last_name'] ?? '';
-			$posted_data['billing_address_1']  = $billing_address['address_1'] ?? '';
-			$posted_data['billing_address_2']  = $billing_address['address_2'] ?? '';
-			$posted_data['billing_city']       = $billing_address['city'] ?? '';
-			$posted_data['billing_state']      = $billing_address['state'] ?? '';
-			$posted_data['billing_postcode']   = $billing_address['postcode'] ?? '';
-			$posted_data['billing_country']    = $billing_address['country'] ?? '';
-			$posted_data['billing_phone']      = $billing_address['phone'] ?? '';
-			$posted_data['billing_email']      = $billing_address['email'] ?? '';
-		}
-
-		// Extract shipping fields if present.
-		if ( ! empty( $shipping_address ) ) {
-			$posted_data['ship_to_different_address'] = true;
-			$posted_data['shipping_first_name']       = $shipping_address['first_name'] ?? '';
-			$posted_data['shipping_last_name']        = $shipping_address['last_name'] ?? '';
-			$posted_data['shipping_address_1']        = $shipping_address['address_1'] ?? '';
-			$posted_data['shipping_address_2']        = $shipping_address['address_2'] ?? '';
-			$posted_data['shipping_city']             = $shipping_address['city'] ?? '';
-			$posted_data['shipping_state']            = $shipping_address['state'] ?? '';
-			$posted_data['shipping_postcode']         = $shipping_address['postcode'] ?? '';
-			$posted_data['shipping_country']          = $shipping_address['country'] ?? '';
-		}
-
-		// Build and schedule the event.
-		$event_data = $this->build_checkout_event_data( 'store_api_update', $posted_data );
-		$this->schedule_tracking( 'checkout_blocks_customer_update', $event_data );
 	}
 
 	/**
@@ -219,7 +132,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * Prepares the checkout event data including action type and any changed fields.
 	 * This data will be merged with comprehensive session data during event tracking.
 	 *
-	 * @param string $action      Action type (field_update, payment_method_selected, store_api_update).
+	 * @param string $action      Action type (field_update, payment_method_selected).
 	 * @param array  $posted_data Posted form data or event context.
 	 * @return array Checkout event data.
 	 */
@@ -359,167 +272,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		return $shipping_method_data;
-	}
-
-	/**
-	 * Schedule a tracking action to run after the debounce interval.
-	 *
-	 * Collects comprehensive session data and schedules it for tracking.
-	 * Cancels any existing scheduled action for this session before scheduling a new one.
-	 *
-	 * @param string $event_type          Event type identifier.
-	 * @param array  $event_specific_data Event-specific data to merge with session context.
-	 * @return void
-	 */
-	public function schedule_tracking( string $event_type, array $event_specific_data ): void {
-		$timestamp = time();
-		// Get session ID to use as a unique identifier for this customer's actions.
-		$session_id = WC()->session instanceof \WC_Session ? WC()->session->get_customer_id() : null;
-
-		if ( ! $session_id ) {
-			// Can't schedule without a session ID.
-			return;
-		}
-
-		// Collect comprehensive session data NOW (while session is available).
-		try {
-			$collected_data = $this->data_collector->collect( $event_type, $event_specific_data );
-		} catch ( \Exception $e ) {
-			// If collection fails, log and abort scheduling.
-			FraudProtectionController::log(
-				'error',
-				sprintf(
-					'Failed to collect session data for checkout event: %s | Error: %s',
-					$event_type,
-					$e->getMessage()
-				),
-				array(
-					'event_type' => $event_type,
-					'exception'  => $e,
-				)
-			);
-			return;
-		}
-
-		// Cancel any existing scheduled action for this session first.
-		$this->cancel_scheduled_tracking( $session_id, $event_type );
-
-		// Schedule action to run after the debounce interval.
-		// Pass the COLLECTED data with the action so it's available when it runs.
-		$run_time = $timestamp + self::BATCH_INTERVAL_SECONDS;
-
-		if ( function_exists( 'as_schedule_single_action' ) ) {
-			as_schedule_single_action(
-				$run_time,
-				self::SCHEDULED_ACTION_HOOK,
-				array(
-					'session_id'     => $session_id,
-					'event_type'     => $event_type,
-					'collected_data' => $collected_data,
-					'timestamp'      => $timestamp,
-				),
-				'woocommerce-fraud-protection'
-			);
-		}
-	}
-
-	/**
-	 * Get scheduled action IDs for a specific session and event type.
-	 *
-	 * Queries Action Scheduler for pending actions matching the session_id and event_type
-	 * in the extended_args column using JSON_EXTRACT.
-	 *
-	 * @param string $session_id Session ID to search for.
-	 * @param string $event_type Event type to search for.
-	 * @return array Array of action IDs.
-	 */
-	public function get_scheduled_action_ids( string $session_id, string $event_type ): array {
-		global $wpdb;
-
-		$sql = $wpdb->prepare(
-			"SELECT a.action_id
-			FROM {$wpdb->actionscheduler_actions} a
-			LEFT JOIN {$wpdb->actionscheduler_groups} g ON g.group_id = a.group_id
-			WHERE a.hook = %s
-			AND g.slug = %s
-			AND a.status = %s
-			AND a.extended_args IS NOT NULL
-			AND JSON_EXTRACT(a.extended_args, '$.session_id') = %s
-			AND JSON_EXTRACT(a.extended_args, '$.event_type') = %s
-			ORDER BY a.scheduled_date_gmt ASC",
-			self::SCHEDULED_ACTION_HOOK,
-			'woocommerce-fraud-protection',
-			\ActionScheduler_Store::STATUS_PENDING, // phpcs:ignore Squiz.Commenting.InlineComment.InvalidEndChar -- @phpstan-ignore-line class.notFound
-			$session_id,
-			$event_type
-		);
-
-		return $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-	}
-
-	/**
-	 * Cancel scheduled tracking actions for a specific session and event type.
-	 *
-	 * Uses custom SQL query with JSON_EXTRACT on extended_args to find actions
-	 * matching session_id and event_type. This is necessary because our collected_data
-	 * is too large and gets stored in extended_args, and Action Scheduler's query
-	 * builder doesn't support partial matching on extended_args.
-	 *
-	 * @param string|null $session_id  Optional session ID. If not provided, uses current session.
-	 * @param string      $event_type Event type to cancel.
-	 * @return void
-	 */
-	public function cancel_scheduled_tracking( ?string $session_id = null, string $event_type = '' ): void {
-		if ( null === $session_id ) {
-			$session_id = WC()->session instanceof \WC_Session ? WC()->session->get_customer_id() : null;
-		}
-
-		if ( ! $session_id ) {
-			return;
-		}
-
-		// Use custom SQL with JSON_EXTRACT on extended_args column.
-		if ( class_exists( 'ActionScheduler' ) && \ActionScheduler::is_initialized( __FUNCTION__ ) ) {
-			// Get all pending actions matching session_id and event_type.
-			$action_ids = $this->get_scheduled_action_ids( $session_id, $event_type );
-
-			// Cancel all found actions.
-			foreach ( $action_ids as $action_id ) {
-				try {
-					\ActionScheduler::store()->cancel_action( (int) $action_id );
-				} catch ( \Exception $e ) {
-					// Log but continue - action might have been cancelled by another process.
-					FraudProtectionController::log(
-						'warning',
-						sprintf( 'Failed to cancel scheduled action %d: %s', $action_id, $e->getMessage() )
-					);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Process scheduled tracking action.
-	 *
-	 * Called by Action Scheduler after the debounce interval has passed.
-	 * Receives fully-collected event data as arguments, so it doesn't depend on session availability.
-	 *
-	 * @internal
-	 *
-	 * @param array $args Action arguments containing session_id, event_type, collected_data, and timestamp.
-	 * @return void
-	 */
-	public function process_scheduled_tracking( array $args ): void {
-		$event_type     = $args['event_type'] ?? null;
-		$collected_data = $args['collected_data'] ?? array();
-		$timestamp      = $args['timestamp'] ?? null;
-
-		// Validate required parameters.
-		if ( ! $event_type || ! $timestamp || empty( $collected_data ) ) {
-			return;
-		}
-
-		$this->tracker->track_event( $event_type, $collected_data );
 	}
 
 	/**
