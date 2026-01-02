@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getConfig, store } from '@wordpress/interactivity';
+import type { ApiErrorResponse } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -9,6 +10,25 @@ import { getConfig, store } from '@wordpress/interactivity';
 import type { VariationData, WooCommerceConfig } from './cart';
 
 export type { VariationData };
+
+/**
+ * Check if response is an API error.
+ */
+function isApiErrorResponse(
+	res: Response,
+	json: unknown
+): json is ApiErrorResponse {
+	return ! res.ok;
+}
+
+/**
+ * Generate an Error from an API error response.
+ */
+function generateError( error: ApiErrorResponse ): Error {
+	return Object.assign( new Error( error.message || 'Unknown error.' ), {
+		code: error.code || 'unknown_error',
+	} );
+}
 
 export type Store = {
 	state: {
@@ -91,11 +111,11 @@ export async function fetchVariationData(
 				}
 			);
 
-			if ( ! response.ok ) {
-				throw new Error( `HTTP error! status: ${ response.status }` );
-			}
-
 			const data = await response.json();
+
+			if ( isApiErrorResponse( response, data ) ) {
+				throw generateError( data );
+			}
 
 			// Extract variation attributes as a Record<string, string>.
 			const attributes: Record< string, string > = {};
