@@ -20,16 +20,14 @@ export type Store = {
 // Use window to ensure true singleton across separate bundles.
 declare global {
 	interface Window {
-		wcVariationPendingRequests?: Record<
-			number,
-			Promise< VariationData | null >
+		wcVariationPendingRequests?: Partial<
+			Record< number, Promise< VariationData | null > >
 		>;
 	}
 }
 
-const getPendingRequests = (): Record<
-	number,
-	Promise< VariationData | null >
+const getPendingRequests = (): Partial<
+	Record< number, Promise< VariationData | null > >
 > => {
 	if ( ! window.wcVariationPendingRequests ) {
 		window.wcVariationPendingRequests = {};
@@ -71,12 +69,13 @@ export async function fetchVariationData(
 	const pendingRequests = getPendingRequests();
 
 	// Return existing promise if request is in flight.
-	if ( pendingRequests[ variationId ] ) {
-		return pendingRequests[ variationId ];
+	const existingRequest = pendingRequests[ variationId ];
+	if ( existingRequest ) {
+		return existingRequest;
 	}
 
 	// Create new request.
-	pendingRequests[ variationId ] = ( async () => {
+	const request = ( async () => {
 		try {
 			const config = getConfig( 'woocommerce' ) as WooCommerceConfig;
 			const { restUrl = '/wp-json/', nonce = '' } = config;
@@ -114,19 +113,27 @@ export async function fetchVariationData(
 				is_in_stock: data.is_in_stock ?? true,
 				sold_individually: data.sold_individually ?? false,
 				price_html: data.price_html || '',
-				image_id: data.images?.[ 0 ]?.id,
 				availability: data.is_in_stock
 					? ''
 					: data.availability?.availability || '',
 				variation_description: data.description || '',
 				sku: data.sku || '',
-				weight: data.weight,
-				dimensions: data.dimensions
-					? `${ data.dimensions.length } × ${ data.dimensions.width } × ${ data.dimensions.height }`
-					: undefined,
-				min: data.add_to_cart?.minimum,
-				max: data.add_to_cart?.maximum,
-				step: data.add_to_cart?.multiple_of,
+				...( data.images?.[ 0 ]?.id && {
+					image_id: data.images[ 0 ].id,
+				} ),
+				...( data.weight && { weight: data.weight } ),
+				...( data.dimensions && {
+					dimensions: `${ data.dimensions.length } × ${ data.dimensions.width } × ${ data.dimensions.height }`,
+				} ),
+				...( data.add_to_cart?.minimum !== undefined && {
+					min: data.add_to_cart.minimum,
+				} ),
+				...( data.add_to_cart?.maximum !== undefined && {
+					max: data.add_to_cart.maximum,
+				} ),
+				...( data.add_to_cart?.multiple_of !== undefined && {
+					step: data.add_to_cart.multiple_of,
+				} ),
 			};
 
 			state.variations[ variationId ] = variationData;
@@ -143,7 +150,8 @@ export async function fetchVariationData(
 		}
 	} )();
 
-	return pendingRequests[ variationId ];
+	pendingRequests[ variationId ] = request;
+	return request;
 }
 
 /**
