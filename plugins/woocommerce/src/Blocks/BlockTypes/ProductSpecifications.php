@@ -18,13 +18,6 @@ class ProductSpecifications extends AbstractBlock {
 	protected $block_name = 'product-specifications';
 
 	/**
-	 * Register the context.
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'postId' ];
-	}
-
-	/**
 	 * Get the frontend script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
