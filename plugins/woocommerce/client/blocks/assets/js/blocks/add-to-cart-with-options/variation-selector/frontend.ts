@@ -295,10 +295,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			autoselectAttributes( {
 				includedAttributes = [],
 				excludedAttributes = [],
-			}: {
-				includedAttributes: string[],
-				excludedAttributes: string[],
-			} ) {
+			} = {} ) {
 				const { autoselect, selectedAttributes } =
 					getContext< Context >();
 
@@ -310,6 +307,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					productDataState.productId,
 					[]
 				);
+				if ( ! productObject ) {
+					return;
+				}
 				const productAttributesAndOptions =
 					getProductAttributesAndOptions( productObject );
 				Object.entries( productAttributesAndOptions ).forEach(
@@ -324,7 +324,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 							isAttributeValueValid( {
 								attributeName: attribute,
 								attributeValue: option,
-								selectedAttributes: selectedAttributes,
+								selectedAttributes,
 							} )
 						);
 						if ( validOptions.length === 1 ) {
