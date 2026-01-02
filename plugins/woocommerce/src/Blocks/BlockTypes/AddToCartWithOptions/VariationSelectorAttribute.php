@@ -32,73 +32,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Get variation attributes efficiently without loading full variation objects.
-	 *
-	 * @param \WC_Product_Variable $product The variable product.
-	 * @return array Array of variation data with attributes.
-	 */
-	protected function get_variation_attributes_efficiently( $product ): array {
-		global $wpdb;
-
-		$variation_ids = $product->get_children();
-		if ( empty( $variation_ids ) ) {
-			return array();
-		}
-
-		// Get the attribute names we need to look for.
-		$attributes      = $product->get_attributes();
-		$attribute_names = array();
-		foreach ( $attributes as $attribute ) {
-			if ( ! empty( $attribute['is_variation'] ) ) {
-				$attribute_names[] = wc_variation_attribute_name( $attribute['name'] );
-			}
-		}
-
-		if ( empty( $attribute_names ) ) {
-			return array();
-		}
-
-		// Build placeholders for the query.
-		$id_placeholders   = implode( ',', array_fill( 0, count( $variation_ids ), '%d' ) );
-		$name_placeholders = implode( ',', array_fill( 0, count( $attribute_names ), '%s' ) );
-
-		// Query all attribute meta for all variations in one go.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT post_id, meta_key, meta_value
-				FROM {$wpdb->postmeta}
-				WHERE post_id IN ({$id_placeholders})
-				AND meta_key IN ({$name_placeholders})",
-				array_merge( $variation_ids, $attribute_names )
-			),
-			ARRAY_A
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		// Build the variations data array in the format expected by the filtering code.
-		$variations_data = array();
-		foreach ( $variation_ids as $variation_id ) {
-			$variations_data[ $variation_id ] = array(
-				'variation_id' => $variation_id,
-				'attributes'   => array(),
-			);
-		}
-
-		foreach ( $results as $row ) {
-			$variation_id = (int) $row['post_id'];
-			$meta_key     = $row['meta_key'];
-			$meta_value   = $row['meta_value'];
-
-			if ( isset( $variations_data[ $variation_id ] ) ) {
-				$variations_data[ $variation_id ]['attributes'][ $meta_key ] = $meta_value;
-			}
-		}
-
-		return array_values( $variations_data );
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -134,7 +67,16 @@ class VariationSelectorAttribute extends AbstractBlock {
 		$attribute_terms = $this->get_terms( $attribute_name, $product_attribute_terms );
 
 		if ( VariationDataUtils::should_lazy_load_variations( $product ) ) {
-			$product_variations = $this->get_variation_attributes_efficiently( $product );
+			// In lazy mode, we only need attributes for filtering - avoid loading full variation data.
+			$available_variations = $product->get_available_variations( 'objects' );
+			$product_variations   = array_map(
+				function ( $variation ) {
+					return array(
+						'attributes' => $variation->get_variation_attributes(),
+					);
+				},
+				$available_variations
+			);
 		} else {
 			$product_variations = $product->get_available_variations();
 		}

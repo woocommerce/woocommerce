@@ -340,10 +340,10 @@ const { actions, state } = store<
 				}
 
 				const { quantity } = getContext< Context >();
-				const productData = getProductData( id, selectedAttributes );
 				// In lazy load mode, quantity may not be pre-set for variations.
-				// Use the product's min quantity as the default fallback.
-				const quantityValue = quantity[ id ] ?? productData?.min ?? 1;
+				// Fall back to the parent product's quantity (matches non-lazy behavior).
+				const quantityValue =
+					quantity[ id ] ?? quantity[ productDataState.productId ] ?? 1;
 
 				const newQuantity = getNewQuantity(
 					id,

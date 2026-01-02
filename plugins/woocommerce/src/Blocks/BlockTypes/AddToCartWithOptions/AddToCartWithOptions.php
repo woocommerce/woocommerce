@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
-use WP_Block;
 
 /**
  * AddToCartWithOptions class.
@@ -25,129 +24,6 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'add-to-cart-with-options';
-
-	/**
-	 * Register the context.
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'postId' ];
-	}
-
-	/**
-	 * Get available variation IDs after applying standard WooCommerce filtering.
-	 *
-	 * This replicates the filtering from WC_Product_Variable::get_available_variations()
-	 * but only loads variation objects when necessary for visibility checks.
-	 *
-	 * @param \WC_Product_Variable $product The variable product.
-	 * @return array Array of available variation IDs.
-	 */
-	protected function get_available_variation_ids( $product ): array {
-		$variation_ids           = $product->get_children();
-		$hide_out_of_stock       = 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' );
-		$available_variation_ids = array();
-
-		foreach ( $variation_ids as $variation_id ) {
-			// Check stock status first (cheap meta lookup) if hiding out of stock items.
-			if ( $hide_out_of_stock ) {
-				$stock_status = get_post_meta( $variation_id, '_stock_status', true );
-				if ( 'outofstock' === $stock_status ) {
-					continue;
-				}
-			}
-
-			// Load variation for visibility check only if the filter is enabled.
-			// This is similar to how get_available_variations() works.
-			$variation = wc_get_product( $variation_id );
-			if ( ! $variation ) {
-				continue;
-			}
-
-			/**
-			 * Filter whether to hide invisible variations.
-			 *
-			 * @param bool                      $hide      Whether to hide invisible variations. Default true.
-			 * @param int                       $product_id The parent product ID.
-			 * @param \WC_Product_Variation     $variation The variation product object.
-			 */
-			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $product->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
-				continue;
-			}
-
-			$available_variation_ids[] = $variation_id;
-		}
-
-		return $available_variation_ids;
-	}
-
-	/**
-	 * Get variation attributes efficiently without loading full variation objects.
-	 *
-	 * This queries the postmeta table directly to get attribute values for each
-	 * variation, which is much faster than loading WC_Product_Variation objects.
-	 *
-	 * @param \WC_Product_Variable $product The variable product.
-	 * @return array Array of variation data keyed by variation ID.
-	 */
-	protected function get_variation_attributes_efficiently( $product ): array {
-		global $wpdb;
-
-		$variation_ids = $this->get_available_variation_ids( $product );
-		if ( empty( $variation_ids ) ) {
-			return array();
-		}
-
-		// Get the attribute names we need to look for.
-		$attributes      = $product->get_attributes();
-		$attribute_names = array();
-		foreach ( $attributes as $attribute ) {
-			if ( ! empty( $attribute['is_variation'] ) ) {
-				$attribute_names[] = wc_variation_attribute_name( $attribute['name'] );
-			}
-		}
-
-		if ( empty( $attribute_names ) ) {
-			return array();
-		}
-
-		// Build placeholders for the query.
-		$id_placeholders   = implode( ',', array_fill( 0, count( $variation_ids ), '%d' ) );
-		$name_placeholders = implode( ',', array_fill( 0, count( $attribute_names ), '%s' ) );
-
-		// Query all attribute meta for all variations in one go.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT post_id, meta_key, meta_value
-				FROM {$wpdb->postmeta}
-				WHERE post_id IN ({$id_placeholders})
-				AND meta_key IN ({$name_placeholders})",
-				array_merge( $variation_ids, $attribute_names )
-			),
-			ARRAY_A
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		// Build the variations data array.
-		$variations_data = array();
-		foreach ( $variation_ids as $variation_id ) {
-			$variations_data[ $variation_id ] = array(
-				'attributes' => array(),
-			);
-		}
-
-		foreach ( $results as $row ) {
-			$variation_id = (int) $row['post_id'];
-			$meta_key     = $row['meta_key'];
-			$meta_value   = $row['meta_value'];
-
-			if ( isset( $variations_data[ $variation_id ] ) ) {
-				$variations_data[ $variation_id ]['attributes'][ $meta_key ] = $meta_value;
-			}
-		}
-
-		return $variations_data;
-	}
 
 	/**
 	 * Extra data passed through from server to client for block.
@@ -389,11 +265,16 @@ class AddToCartWithOptions extends AbstractBlock {
 				$context['selectedAttributes'] = array();
 
 				if ( VariationDataUtils::should_lazy_load_variations( $product ) ) {
-					// Lazy load mode: Get only attribute data efficiently without loading variation objects.
+					// Lazy load mode: Only embed attribute data for client-side matching.
 					// Stock status and other data will be fetched via AJAX when a variation is selected.
 					// Note: Unlike non-lazy mode, we don't pre-set quantities for each variation.
 					// The frontend handles missing quantities by using the parent's min quantity as default.
-					$variations_data = $this->get_variation_attributes_efficiently( $product );
+					$available_variations = $product->get_available_variations( 'objects' );
+					foreach ( $available_variations as $variation ) {
+						$variations_data[ $variation->get_id() ] = array(
+							'attributes' => $variation->get_variation_attributes(),
+						);
+					}
 
 					wp_interactivity_config(
 						'woocommerce',
