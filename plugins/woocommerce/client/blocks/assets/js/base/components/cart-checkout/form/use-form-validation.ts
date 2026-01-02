@@ -143,8 +143,8 @@ export const useFormValidation = (
 
 	// Only set email on values if formFields contains 'email' and values supports 'email'.
 	if ( formFields.some( ( field ) => field.key === 'email' ) ) {
-		// @ts-expect-error values is a BillingAddress, but TS can't seem to figure that out.
-		values.email = data.customer.billing_address.email || '';
+		( values as ContactFormValues & { email: string } ).email =
+			data.customer.billing_address.email || '';
 	}
 
 	const partialSchema = formFields.reduce<
