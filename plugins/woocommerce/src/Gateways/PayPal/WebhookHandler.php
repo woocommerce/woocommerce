@@ -17,7 +17,7 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 }
 
 /**
- * Class WC_Gateway_Paypal_Webhook_Handler file.
+ * Class WebhookHandler file.
  *
  * Handles webhook events.
  *
