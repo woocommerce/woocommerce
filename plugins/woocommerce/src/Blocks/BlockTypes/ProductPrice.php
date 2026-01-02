@@ -124,7 +124,7 @@ class ProductPrice extends AbstractBlock {
 								'productElementKey' => 'price_html',
 							)
 						);
-						$interactive_attributes = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
+						$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
 					} else {
 						$is_interactive = false;
 					}
@@ -171,7 +171,7 @@ class ProductPrice extends AbstractBlock {
 								'productElementKey' => 'price_html',
 							)
 						);
-						$interactive_attributes = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
+						$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
 					}
 				}
 			}
