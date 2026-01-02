@@ -171,9 +171,9 @@ final class TransactAccountManager {
 	 * @since 10.5.0
 	 *
 	 * @param string $account_type The type of account to get (merchant or provider).
-	 * @return array|null Returns null if the transact account cannot be retrieved.
+	 * @return mixed Returns null if the transact account cannot be retrieved.
 	 */
-	public function get_transact_account_data( string $account_type ): ?array {
+	public function get_transact_account_data( string $account_type ) {
 		$cache_key = $this->get_cache_key( $account_type );
 
 		// Get transact account from cache. If not found, fetch/create it.
