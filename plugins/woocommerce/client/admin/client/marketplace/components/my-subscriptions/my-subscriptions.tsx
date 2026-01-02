@@ -7,6 +7,7 @@ import {
 	createInterpolateElement,
 	useContext,
 	useState,
+	useEffect,
 } from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
@@ -81,37 +82,103 @@ export default function MySubscriptions(): JSX.Element {
 		);
 	};
 
-	const [ isJetpackConnecting, setIsJetpackConnecting ] = useState( false );
+	const [ isConnecting, setIsConnecting ] = useState( false );
 
-	const handleJetpackConnect = async () => {
-		setIsJetpackConnecting( true );
+	/**
+	 * Attempts to connect to WooCommerce.com via Jetpack.
+	 * Returns true if successful, false if it failed (and should fall back to direct connect).
+	 */
+	const tryWccomConnectViaJetpack = async (): Promise< boolean > => {
 		try {
-			const returnUrl = new URL( window.location.href );
-			returnUrl.searchParams.set( 'page', 'wc-admin' );
-			returnUrl.searchParams.set( 'tab', 'my-subscriptions' );
-			returnUrl.searchParams.set( 'path', '/extensions' );
-			returnUrl.searchParams.set( 'jp_wccom_connect', '1' );
-
-			const response: {
-				success: boolean;
-				errors: string[];
-				url: string;
-			} = await apiFetch( {
-				path: `/wc-admin/onboarding/plugins/jetpack-authorization-url?redirect_url=${ encodeURIComponent(
-					returnUrl.toString()
-				) }&from=woocommerce-onboarding`,
-				method: 'GET',
+			const response: { success: boolean } = await apiFetch( {
+				path: '/wc-admin/onboarding/plugins/wccom-connect-via-jetpack',
+				method: 'POST',
 			} );
 
-			if ( response?.url ) {
-				window.location.href = response.url;
-			} else {
-				setIsJetpackConnecting( false );
+			if ( response?.success ) {
+				// Connection successful, reload the page to show connected state.
+				window.location.reload();
+				return true;
 			}
 		} catch ( error ) {
-			setIsJetpackConnecting( false );
+			// Failed to connect via Jetpack, will fall back to direct connect.
+		}
+		return false;
+	};
+
+	/**
+	 * Redirects to Jetpack authorization flow.
+	 */
+	const redirectToJetpackAuth = async (): Promise< void > => {
+		const returnUrl = new URL( window.location.href );
+		returnUrl.searchParams.set( 'page', 'wc-admin' );
+		returnUrl.searchParams.set( 'tab', 'my-subscriptions' );
+		returnUrl.searchParams.set( 'path', '/extensions' );
+		returnUrl.searchParams.set( 'jp_wccom_connect', '1' );
+
+		const response: {
+			success: boolean;
+			errors: string[];
+			url: string;
+		} = await apiFetch( {
+			path: `/wc-admin/onboarding/plugins/jetpack-authorization-url?redirect_url=${ encodeURIComponent(
+				returnUrl.toString()
+			) }&from=woocommerce-onboarding`,
+			method: 'GET',
+		} );
+
+		if ( response?.url ) {
+			window.location.href = response.url;
 		}
 	};
+
+	/**
+	 * Handles the Connect button click.
+	 * Flow:
+	 * 1. If Jetpack is connected, try to connect via Jetpack first.
+	 * 2. If that fails or Jetpack is not connected, redirect to Jetpack auth.
+	 * 3. If Jetpack auth fails to get URL, fall back to direct WCCOM connect.
+	 */
+	const handleConnect = async () => {
+		setIsConnecting( true );
+		try {
+			if ( wccomSettings?.isJetpackConnected ) {
+				// Jetpack is connected, try to connect via Jetpack.
+				const success = await tryWccomConnectViaJetpack();
+				if ( success ) {
+					return;
+				}
+				// Fall back to direct WCCOM connect if Jetpack connect failed.
+				window.location.href = connectUrl();
+				return;
+			}
+
+			// Jetpack is not connected, redirect to Jetpack auth.
+			await redirectToJetpackAuth();
+		} catch ( error ) {
+			// Fall back to direct WCCOM connect on any error.
+			window.location.href = connectUrl();
+		}
+	};
+
+	// Handle return from Jetpack authorization.
+	useEffect( () => {
+		const params = new URLSearchParams( window.location.search );
+		if (
+			params.get( 'jp_wccom_connect' ) === '1' &&
+			wccomSettings?.isJetpackConnected &&
+			! wccomSettings?.isConnected
+		) {
+			// Returned from Jetpack auth, now try to connect via Jetpack.
+			setIsConnecting( true );
+			tryWccomConnectViaJetpack().then( ( success ) => {
+				if ( ! success ) {
+					// Fall back to direct WCCOM connect.
+					window.location.href = connectUrl();
+				}
+			} );
+		}
+	}, [ wccomSettings?.isJetpackConnected, wccomSettings?.isConnected ] );
 
 	if ( ! wccomSettings?.isConnected ) {
 		const connectMessage = __(
@@ -159,19 +226,14 @@ export default function MySubscriptions(): JSX.Element {
 						{ connectMessage }
 					</p>
 					<div className="woocommerce-marketplace__my-subscriptions__buttons">
-						<Button href={ connectUrl() } variant="primary">
+						<Button
+							onClick={ handleConnect }
+							variant="primary"
+							isBusy={ isConnecting }
+							disabled={ isConnecting }
+						>
 							{ __( 'Connect', 'woocommerce' ) }
 						</Button>
-						{ ! wccomSettings?.isJetpackConnected && (
-							<Button
-								onClick={ handleJetpackConnect }
-								variant="secondary"
-								isBusy={ isJetpackConnecting }
-								disabled={ isJetpackConnecting }
-							>
-								{ __( 'Jetpack Connect', 'woocommerce' ) }
-							</Button>
-						) }
 					</div>
 				</div>
 			</>

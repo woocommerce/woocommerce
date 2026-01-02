@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Admin\API;
 defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
+use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_REST_Request;
@@ -127,6 +128,19 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 				),
 			)
 		);
+
+		// Endpoint to connect to WooCommerce.com via Jetpack.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/wccom-connect-via-jetpack',
+			array(
+				array(
+					'methods'             => 'POST',
+					'callback'            => array( $this, 'wccom_connect_via_jetpack' ),
+					'permission_callback' => array( $this, 'can_install_plugins' ),
+				),
+			)
+		);
 		add_action( 'woocommerce_plugins_install_error', array( $this, 'log_plugins_install_error' ), 10, 4 );
 		add_action( 'woocommerce_plugins_install_api_error', array( $this, 'log_plugins_install_api_error' ), 10, 2 );
 	}
@@ -229,6 +243,97 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		return JetpackConnection::get_authorization_url(
 			$request->get_param( 'redirect_url' ),
 			$request->get_param( 'from' )
+		);
+	}
+
+	/**
+	 * Connect to WooCommerce.com via Jetpack.
+	 *
+	 * Makes a POST request to the WordPress.com WCCOM connect endpoint via Jetpack
+	 * and stores the returned credentials.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return array|WP_Error Connection result or error.
+	 */
+	public function wccom_connect_via_jetpack() {
+		if ( ! class_exists( 'WC_Jetpack' ) ) {
+			return new WP_Error(
+				'woocommerce_jetpack_not_available',
+				__( 'Jetpack connection is not available.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$jetpack = \WC_Jetpack::instance();
+
+		if ( ! $jetpack->is_connected() ) {
+			return new WP_Error(
+				'woocommerce_jetpack_not_connected',
+				__( 'Site is not connected to WordPress.com via Jetpack.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		if ( ! $jetpack->is_user_connected() ) {
+			return new WP_Error(
+				'woocommerce_jetpack_user_not_connected',
+				__( 'Current user is not connected to WordPress.com via Jetpack.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_user(
+			'wccom/connect',
+			'2',
+			array(
+				'method'  => 'POST',
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'timeout' => 30,
+			),
+			null,
+			'wpcom'
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error(
+				'woocommerce_wccom_connect_request_failed',
+				$response->get_error_message(),
+				array( 'status' => 500 )
+			);
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+		$data          = json_decode( $response_body, true );
+
+		if ( $response_code >= 400 ) {
+			$error_message = $data['message'] ?? __( 'Failed to connect to WooCommerce.com via Jetpack.', 'woocommerce' );
+			return new WP_Error(
+				$data['code'] ?? 'woocommerce_wccom_connect_failed',
+				$error_message,
+				array( 'status' => $response_code )
+			);
+		}
+
+		if ( empty( $data['access_token'] ) || empty( $data['access_token_secret'] ) || empty( $data['site_id'] ) ) {
+			return new WP_Error(
+				'woocommerce_wccom_connect_invalid_response',
+				__( 'Invalid response from WooCommerce.com connection endpoint.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		\WC_Helper::update_auth_option(
+			$data['access_token'],
+			$data['access_token_secret'],
+			(int) $data['site_id'],
+			home_url()
+		);
+
+		return array(
+			'success' => true,
+			'message' => __( 'Successfully connected to WooCommerce.com via Jetpack.', 'woocommerce' ),
 		);
 	}
 
