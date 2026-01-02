@@ -378,7 +378,8 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\FraudProtection\AdminSettingsHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\FraudProtection\ShortCodeCheckoutEventTracker::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\FraudProtection\BlocksCheckoutEventTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
