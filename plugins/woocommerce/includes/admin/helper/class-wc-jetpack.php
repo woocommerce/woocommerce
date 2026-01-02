@@ -12,7 +12,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Client;
 use Automattic\Jetpack\Connection\Manager;
-use Jetpack_Options;
 
 /**
  * WC_Jetpack class.
