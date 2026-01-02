@@ -54,6 +54,11 @@ jest.mock( '@wordpress/data', () => ( {
 	useSelect: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/settings', () => ( {
+	...jest.requireActual( '@woocommerce/settings' ),
+	isWpVersion: jest.fn().mockReturnValue( false ),
+} ) );
+
 describe( 'Product Details block', () => {
 	describe( 'Single Product block', () => {
 		const server = setupServer(

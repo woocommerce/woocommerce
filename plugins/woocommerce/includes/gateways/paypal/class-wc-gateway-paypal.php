@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
 use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -23,10 +24,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
 	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
 }
 
 /**
@@ -1028,7 +1025,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		WC_Gateway_Paypal_Notices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
+		PayPalNotices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
 	}
 }
 
@@ -1041,6 +1038,6 @@ add_action(
 		}
 
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
-		new WC_Gateway_Paypal_Notices();
+		new PayPalNotices();
 	}
 );
