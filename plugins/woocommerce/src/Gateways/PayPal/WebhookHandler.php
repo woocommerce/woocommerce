@@ -69,7 +69,7 @@ class WebhookHandler {
 	 * @param array $event The webhook event data.
 	 * @return void
 	 */
-	private function process_checkout_order_approved( $event ): void {
+	private function process_checkout_order_approved( array $event ): void {
 		$custom_id = $event['resource']['purchase_units'][0]['custom_id'] ?? '';
 		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
@@ -127,7 +127,7 @@ class WebhookHandler {
 	 * @param array $event The webhook event data.
 	 * @return void
 	 */
-	private function process_payment_capture_completed( $event ): void {
+	private function process_payment_capture_completed( array $event ): void {
 		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
@@ -164,7 +164,7 @@ class WebhookHandler {
 	 * @param array $event The webhook event data.
 	 * @return void
 	 */
-	private function process_payment_capture_pending( $event ): void {
+	private function process_payment_capture_pending( array $event ): void {
 		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
@@ -196,7 +196,7 @@ class WebhookHandler {
 	 * @param array $event The webhook event data.
 	 * @return void
 	 */
-	private function process_payment_authorization_created( $event ): void {
+	private function process_payment_authorization_created( array $event ): void {
 		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
@@ -234,7 +234,7 @@ class WebhookHandler {
 	 * @param string    $action The action to perform (capture or authorize).
 	 * @return void
 	 */
-	private function authorize_or_capture_payment( $order, $links, $action ): void {
+	private function authorize_or_capture_payment( \WC_Order $order, array $links, string $action ): void {
 		$action_url = $this->get_action_url( $links, $action );
 
 		$payment_gateways = WC()->payment_gateways()->payment_gateways();
@@ -256,7 +256,7 @@ class WebhookHandler {
 	 * @param string $action The action to perform (capture or authorize).
 	 * @return string|null
 	 */
-	private function get_action_url( $links, $action ): ?string {
+	private function get_action_url( array $links, string $action ): ?string {
 		$action_url = null;
 		foreach ( $links as $link ) {
 			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
