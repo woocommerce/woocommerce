@@ -164,24 +164,24 @@ class ProductDetails extends AbstractBlock {
 	 */
 	private function create_accordion_item_block( $title, $content ) {
 		if ( Utils::wp_version_compare( '6.9', '>=' ) ) {
-			$template = '<!-- wp:core/accordion-item -->
+			$template = '<!-- wp:accordion-item -->
 				<div class="wp-block-accordion-item">
-					<!-- wp:core/accordion-heading -->
+					<!-- wp:accordion-heading -->
 					<h3 class="wp-block-accordion-heading">
 						<button class="wp-block-accordion-heading__toggle">
 							<span class="wp-block-accordion-heading__toggle-title">%1$s</span>
 							<span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span>
 						</button>
 					</h3>
-					<!-- /wp:core/accordion-heading -->
+					<!-- /wp:accordion-heading -->
 					
-					<!-- wp:core/accordion-panel -->
+					<!-- wp:accordion-panel -->
 					<div class="wp-block-accordion-panel">
 						%2$s
 					</div>
-					<!-- /wp:core/accordion-panel -->
+					<!-- /wp:accordion-panel -->
 				</div>
-				<!-- /wp:core/accordion-item -->';
+				<!-- /wp:accordion-item -->';
 		} else {
 			$template = '<!-- wp:woocommerce/accordion-item -->
 				<div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header -->
