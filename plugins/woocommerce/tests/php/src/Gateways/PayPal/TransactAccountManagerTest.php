@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 /**
- * WC_Gateway_Paypal_Transact_Account_Manager_Test class.
+ * TransactAccountManagerTest class.
  *
  * @package WooCommerce\Tests\Gateways\PayPal
  */
