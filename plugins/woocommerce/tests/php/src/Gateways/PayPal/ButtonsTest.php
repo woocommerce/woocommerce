@@ -353,7 +353,7 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_get_current_page_for_app_switch_returns_empty_for_other_pages(): array {
+	public function test_get_current_page_for_app_switch_returns_empty_for_other_pages(): void {
 		// Create a test post.
 		$post_id = $this->factory->post->create(
 			array(
