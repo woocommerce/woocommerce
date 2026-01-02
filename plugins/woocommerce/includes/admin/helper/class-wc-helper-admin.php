@@ -59,6 +59,11 @@ class WC_Helper_Admin {
 			exit;
 		}
 
+		// Handle return from Jetpack authorization - try to create WCCOM connection via Jetpack.
+		if ( isset( $_GET['jp_wccom_connect'] ) && '1' === $_GET['jp_wccom_connect'] && ! WC_Helper::is_site_connected() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			self::handle_jetpack_wccom_connect();
+		}
+
 		$auth_user_data  = WC_Helper_Options::get( 'auth_user_data', array() );
 		$auth_user_email = isset( $auth_user_data['email'] ) ? $auth_user_data['email'] : '';
 
@@ -155,6 +160,106 @@ class WC_Helper_Admin {
 			$connect_url_args,
 			admin_url( 'admin.php' )
 		);
+	}
+
+	/**
+	 * Handles the return from Jetpack authorization and attempts to create WCCOM connection.
+	 *
+	 * This is called when the user returns from Jetpack auth with jp_wccom_connect=1.
+	 * It tries to connect to WooCommerce.com via the Jetpack connection, and falls back
+	 * to the direct WCCOM OAuth flow if that fails.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return void
+	 */
+	private static function handle_jetpack_wccom_connect() {
+		// Build the base redirect URL (current page without the jp_wccom_connect param).
+		$redirect_url = remove_query_arg( 'jp_wccom_connect' );
+
+		// Check if user is Jetpack connected.
+		if ( ! self::is_jetpack_user_connected() ) {
+			// User is not Jetpack connected, fall back to direct WCCOM connect.
+			wp_safe_redirect( self::get_connection_url() );
+			exit;
+		}
+
+		// Try to connect via Jetpack.
+		$result = self::try_wccom_connect_via_jetpack();
+
+		if ( is_wp_error( $result ) ) {
+			// Failed, fall back to direct WCCOM connect.
+			wp_safe_redirect( self::get_connection_url() );
+			exit;
+		}
+
+		// Success! Redirect back to the page without the param.
+		wp_safe_redirect( $redirect_url );
+		exit;
+	}
+
+	/**
+	 * Attempts to connect to WooCommerce.com via Jetpack.
+	 *
+	 * Makes a POST request to the WordPress.com WCCOM connect endpoint using the
+	 * Jetpack user token, and stores the returned credentials.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return true|WP_Error True on success, WP_Error on failure.
+	 */
+	private static function try_wccom_connect_via_jetpack() {
+		if ( ! class_exists( 'Automattic\Jetpack\Connection\Client' ) ) {
+			return new WP_Error(
+				'jetpack_client_not_available',
+				__( 'Jetpack connection client is not available.', 'woocommerce' )
+			);
+		}
+
+		$response = \Automattic\Jetpack\Connection\Client::wpcom_json_api_request_as_user(
+			'wccom/connect',
+			'2',
+			array(
+				'method'  => 'POST',
+				'headers' => array( 'Content-Type' => 'application/json' ),
+				'timeout' => 30,
+			),
+			null,
+			'wpcom'
+		);
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$response_code = wp_remote_retrieve_response_code( $response );
+		$response_body = wp_remote_retrieve_body( $response );
+		$data          = json_decode( $response_body, true );
+
+		if ( $response_code >= 400 ) {
+			$error_message = $data['message'] ?? __( 'Failed to connect to WooCommerce.com via Jetpack.', 'woocommerce' );
+			return new WP_Error(
+				$data['code'] ?? 'wccom_connect_failed',
+				$error_message
+			);
+		}
+
+		if ( empty( $data['access_token'] ) || empty( $data['access_token_secret'] ) || empty( $data['site_id'] ) ) {
+			return new WP_Error(
+				'wccom_connect_invalid_response',
+				__( 'Invalid response from WooCommerce.com connection endpoint.', 'woocommerce' )
+			);
+		}
+
+		// Store the connection credentials.
+		WC_Helper::update_auth_option(
+			$data['access_token'],
+			$data['access_token_secret'],
+			(int) $data['site_id'],
+			home_url()
+		);
+
+		return true;
 	}
 
 	/**

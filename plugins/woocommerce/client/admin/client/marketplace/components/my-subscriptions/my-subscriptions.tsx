@@ -7,7 +7,6 @@ import {
 	createInterpolateElement,
 	useContext,
 	useState,
-	useEffect,
 } from '@wordpress/element';
 import { Icon, external } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
@@ -90,10 +89,11 @@ export default function MySubscriptions(): JSX.Element {
 	 */
 	const tryWccomConnectViaJetpack = async (): Promise< boolean > => {
 		try {
-			const response: { success: boolean } = await apiFetch( {
-				path: '/wc-admin/onboarding/plugins/wccom-connect-via-jetpack',
-				method: 'POST',
-			} );
+			const response: { success: boolean; message?: string } =
+				await apiFetch( {
+					path: '/wc-admin/onboarding/plugins/wccom-connect-via-jetpack',
+					method: 'POST',
+				} );
 
 			if ( response?.success ) {
 				// Connection successful, reload the page to show connected state.
@@ -108,6 +108,8 @@ export default function MySubscriptions(): JSX.Element {
 
 	/**
 	 * Redirects to Jetpack authorization flow.
+	 * After Jetpack auth completes, the server-side PHP handler will automatically
+	 * attempt to create the WCCOM connection via Jetpack.
 	 */
 	const redirectToJetpackAuth = async (): Promise< void > => {
 		const returnUrl = new URL( window.location.href );
@@ -136,9 +138,9 @@ export default function MySubscriptions(): JSX.Element {
 	 * Handles the Connect button click.
 	 * Flow:
 	 * 1. If user is Jetpack connected, try to connect via Jetpack first.
-	 * 2. If site is Jetpack connected but user is not, redirect to Jetpack user auth.
-	 * 3. If site is not Jetpack connected, redirect to full Jetpack auth.
-	 * 4. On any failure, fall back to direct WCCOM connect.
+	 * 2. If user is not Jetpack connected, redirect to Jetpack auth.
+	 *    After Jetpack auth, the server-side PHP handler will attempt the WCCOM connection.
+	 * 3. On any failure, fall back to direct WCCOM connect.
 	 */
 	const handleConnect = async () => {
 		setIsConnecting( true );
@@ -155,32 +157,13 @@ export default function MySubscriptions(): JSX.Element {
 			}
 
 			// User is not Jetpack connected, redirect to Jetpack auth.
-			// This works for both cases: site connected (user auth only) or site not connected (full auth).
+			// After auth, the server-side PHP handler will attempt WCCOM connection.
 			await redirectToJetpackAuth();
 		} catch ( error ) {
 			// Fall back to direct WCCOM connect on any error.
 			window.location.href = connectUrl();
 		}
 	};
-
-	// Handle return from Jetpack authorization.
-	useEffect( () => {
-		const params = new URLSearchParams( window.location.search );
-		if (
-			params.get( 'jp_wccom_connect' ) === '1' &&
-			wccomSettings?.isJetpackUserConnected &&
-			! wccomSettings?.isConnected
-		) {
-			// Returned from Jetpack auth, now try to connect via Jetpack.
-			setIsConnecting( true );
-			tryWccomConnectViaJetpack().then( ( success ) => {
-				if ( ! success ) {
-					// Fall back to direct WCCOM connect.
-					window.location.href = connectUrl();
-				}
-			} );
-		}
-	}, [ wccomSettings?.isJetpackUserConnected, wccomSettings?.isConnected ] );
 
 	if ( ! wccomSettings?.isConnected ) {
 		const connectMessage = __(
