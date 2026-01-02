@@ -352,8 +352,8 @@ final class TransactAccountManager {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param string     $cache_key The cache key to update.
-	 * @param array|bool $account_data The transact account data.
+	 * @param string|null $cache_key The cache key to update.
+	 * @param array|bool  $account_data The transact account data.
 	 *
 	 * @return void
 	 */
@@ -405,7 +405,7 @@ final class TransactAccountManager {
 
 		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
 			$endpoint,
-			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
+			(string) self::WPCOM_PROXY_ENDPOINT_API_VERSION,
 			array(
 				'headers' => array( 'Content-Type' => 'application/json' ),
 				'method'  => $method,
