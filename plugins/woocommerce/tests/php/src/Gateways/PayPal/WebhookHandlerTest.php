@@ -2,7 +2,7 @@
 /**
  * Unit tests for Automattic\WooCommerce\Gateways\PayPal\WebhookHandler class.
  *
- * @package WooCommerce\Tests\GatewaysPaypal.
+ * @package WooCommerce\Tests\Gateways\Paypal.
  */
 
 // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Required for testing WordPress globals
