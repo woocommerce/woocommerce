@@ -25165,84 +25165,6 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-response.php
 
 		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:get_transact_account_data\(\) should return array\|null but returns array\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:send_transact_api_request\(\) never returns array so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:send_transact_api_request\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:send_transact_api_request\(\) should return array\|null but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:update_transact_account_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#1 \$cache_key of method WC_Gateway_Paypal_Transact_Account_Manager\:\:get_transact_account_from_cache\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#1 \$cache_key of method WC_Gateway_Paypal_Transact_Account_Manager\:\:update_transact_account_cache\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#1 \$response of function wp_remote_retrieve_body expects array\|WP_Error, array\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#1 \$response of function wp_remote_retrieve_response_code expects array\|WP_Error, array\|null given\.$#'
-			identifier: argument.type
-			count: 4
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#2 \$account_data of method WC_Gateway_Paypal_Transact_Account_Manager\:\:update_transact_account_cache\(\) expects array, array\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#2 \$account_data of method WC_Gateway_Paypal_Transact_Account_Manager\:\:update_transact_account_cache\(\) expects array, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#2 \$version of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#4 \$body of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects array\|string\|null, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
 			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_checkout_order_approved\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -64274,6 +64196,42 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: src/Gateways/PayPal/AddressRequirements.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:send_transact_api_request\(\) never returns array so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:send_transact_api_request\(\) should return array\|WP_Error but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$cache_key with type string\|null is not subtype of native type string\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Parameter \#1 \$cache_key of method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:get_transact_account_from_cache\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Parameter \#1 \$cache_key of method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:update_transact_account_cache\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Parameter \#4 \$body of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects array\|string\|null, string\|false\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$payload\.$#'
