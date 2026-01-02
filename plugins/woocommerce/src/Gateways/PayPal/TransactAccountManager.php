@@ -374,10 +374,10 @@ final class TransactAccountManager {
 	 * @since 10.5.0
 	 *
 	 * @param string $cache_key The cache key to get the account.
-	 * @return bool|null The transact account data, or null if the cache is
+	 * @return mixed The transact account data, or null if the cache is
 	 *                    empty or expired.
 	 */
-	private function get_transact_account_from_cache( string $cache_key ): ?bool {
+	private function get_transact_account_from_cache( string $cache_key ) {
 		$transact_account = get_option( $cache_key, null );
 
 		if ( empty( $transact_account ) || ( isset( $transact_account['expiry'] ) && $transact_account['expiry'] < time() ) ) {
