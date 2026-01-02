@@ -135,15 +135,16 @@ export default function MySubscriptions(): JSX.Element {
 	/**
 	 * Handles the Connect button click.
 	 * Flow:
-	 * 1. If Jetpack is connected, try to connect via Jetpack first.
-	 * 2. If that fails or Jetpack is not connected, redirect to Jetpack auth.
-	 * 3. If Jetpack auth fails to get URL, fall back to direct WCCOM connect.
+	 * 1. If user is Jetpack connected, try to connect via Jetpack first.
+	 * 2. If site is Jetpack connected but user is not, redirect to Jetpack user auth.
+	 * 3. If site is not Jetpack connected, redirect to full Jetpack auth.
+	 * 4. On any failure, fall back to direct WCCOM connect.
 	 */
 	const handleConnect = async () => {
 		setIsConnecting( true );
 		try {
-			if ( wccomSettings?.isJetpackConnected ) {
-				// Jetpack is connected, try to connect via Jetpack.
+			if ( wccomSettings?.isJetpackUserConnected ) {
+				// User is Jetpack connected, try to connect via Jetpack.
 				const success = await tryWccomConnectViaJetpack();
 				if ( success ) {
 					return;
@@ -153,7 +154,8 @@ export default function MySubscriptions(): JSX.Element {
 				return;
 			}
 
-			// Jetpack is not connected, redirect to Jetpack auth.
+			// User is not Jetpack connected, redirect to Jetpack auth.
+			// This works for both cases: site connected (user auth only) or site not connected (full auth).
 			await redirectToJetpackAuth();
 		} catch ( error ) {
 			// Fall back to direct WCCOM connect on any error.
@@ -166,7 +168,7 @@ export default function MySubscriptions(): JSX.Element {
 		const params = new URLSearchParams( window.location.search );
 		if (
 			params.get( 'jp_wccom_connect' ) === '1' &&
-			wccomSettings?.isJetpackConnected &&
+			wccomSettings?.isJetpackUserConnected &&
 			! wccomSettings?.isConnected
 		) {
 			// Returned from Jetpack auth, now try to connect via Jetpack.
@@ -178,7 +180,7 @@ export default function MySubscriptions(): JSX.Element {
 				}
 			} );
 		}
-	}, [ wccomSettings?.isJetpackConnected, wccomSettings?.isConnected ] );
+	}, [ wccomSettings?.isJetpackUserConnected, wccomSettings?.isConnected ] );
 
 	if ( ! wccomSettings?.isConnected ) {
 		const connectMessage = __(

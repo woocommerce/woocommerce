@@ -91,6 +91,8 @@ class WC_Helper_Admin {
 			'dismissNoticeNonce'         => wp_create_nonce( 'dismiss_notice' ),
 			'trackingAllowed'            => 'yes' === get_option( 'woocommerce_allow_tracking' ),
 			'isJetpackConnected'         => self::is_jetpack_connected(),
+			'isJetpackSiteConnected'     => self::is_jetpack_site_connected(),
+			'isJetpackUserConnected'     => self::is_jetpack_user_connected(),
 		);
 
 
@@ -156,11 +158,14 @@ class WC_Helper_Admin {
 	}
 
 	/**
-	 * Checks if the site is connected to WordPress.com via Jetpack.
+	 * Checks if the site is fully connected to WordPress.com via Jetpack.
+	 *
+	 * A site is fully connected when both the site has a blog token
+	 * and there is a connected owner user.
 	 *
 	 * @since 10.5.0
 	 *
-	 * @return bool True if connected to Jetpack/WordPress.com.
+	 * @return bool True if fully connected to Jetpack/WordPress.com.
 	 */
 	public static function is_jetpack_connected() {
 		if ( ! class_exists( 'WC_Jetpack' ) ) {
@@ -168,6 +173,36 @@ class WC_Helper_Admin {
 		}
 
 		return WC_Jetpack::instance()->is_connected();
+	}
+
+	/**
+	 * Checks if the site has a blog token registered with WordPress.com via Jetpack.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return bool True if site is registered with Jetpack/WordPress.com.
+	 */
+	public static function is_jetpack_site_connected() {
+		if ( ! class_exists( 'WC_Jetpack' ) ) {
+			return false;
+		}
+
+		return WC_Jetpack::instance()->is_site_connected();
+	}
+
+	/**
+	 * Checks if the current user is connected to WordPress.com via Jetpack.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return bool True if current user is connected to Jetpack/WordPress.com.
+	 */
+	public static function is_jetpack_user_connected() {
+		if ( ! class_exists( 'WC_Jetpack' ) ) {
+			return false;
+		}
+
+		return WC_Jetpack::instance()->is_user_connected();
 	}
 
 	/**
