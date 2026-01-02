@@ -166,7 +166,7 @@ class Buttons {
 	 *
 	 * @return string
 	 */
-	public function get_current_page_for_app_switch() {
+	public function get_current_page_for_app_switch(): string {
 		// If checkout, cart or product page, return the current page URL.
 		if ( is_checkout() || is_cart() || is_product() ) {
 			return get_permalink( get_the_ID() );
