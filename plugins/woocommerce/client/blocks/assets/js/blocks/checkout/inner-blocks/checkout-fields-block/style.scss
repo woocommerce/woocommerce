@@ -48,7 +48,7 @@
 
 .wc-block-components-form {
 	.wc-block-checkout__order-fields:has(+ .wc-block-checkout__order-notes),
-	.wc-block-checkout__order-notes:has(
+	:is(.wc-block-checkout__order-notes, .wc-block-checkout__order-fields):has(
 			+ .wc-block-checkout__terms:not(
 					.wc-block-checkout__terms--with-separator
 				)

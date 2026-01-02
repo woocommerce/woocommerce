@@ -43,14 +43,14 @@
 	}
 
 	.wc-block-components-form {
+		// Would have been a lot easier to do if those blocks aren't nested from what we have in the frontend.
+		// @TODO: Refactor the block to remove the extra parent in the editor.
 		.wc-block-checkout__order-fields:has(
-				+ .wp-block-woocommerce-checkout-order-note-block
+				+ .wp-block-woocommerce-checkout-order-note-block,
+				+ .wp-block-woocommerce-checkout-terms-block
 			) {
 			margin-bottom: $gap-small;
 		}
-
-		// Would have been a lot easier to do if those blocks aren't nested from what we have in the frontend.
-		// @TODO: Refactor the block to remove the extra parent in the editor.
 		.wp-block-woocommerce-checkout-order-note-block:has(
 				+ .wp-block-woocommerce-checkout-terms-block
 			)
@@ -64,6 +64,12 @@
 					.wc-block-checkout__terms--with-separator
 			)
 			.wc-block-checkout__order-notes {
+			margin-bottom: $gap-large;
+		}
+		.wc-block-checkout__order-fields:has(
+				+ .wp-block-woocommerce-checkout-terms-block
+					.wc-block-checkout__terms--with-separator
+			) {
 			margin-bottom: $gap-large;
 		}
 	}
