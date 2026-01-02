@@ -396,9 +396,9 @@ final class TransactAccountManager {
 	 * @param string $endpoint The endpoint to request.
 	 * @param array  $request_body The request body.
 	 *
-	 * @return array|null The API response body, or null if the request fails.
+	 * @return array|\WP_Error The API response body, or null if the request fails.
 	 */
-	private function send_transact_api_request( string $method, string $endpoint, array $request_body ): ?array {
+	private function send_transact_api_request( string $method, string $endpoint, array $request_body ) {
 		if ( 'GET' === $method ) {
 			$endpoint .= '?' . http_build_query( $request_body );
 		}
