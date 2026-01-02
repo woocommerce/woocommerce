@@ -6,9 +6,10 @@ import { useSelect } from '@wordpress/data';
 import { snakeCaseKeys } from '@woocommerce/base-utils';
 import type {
 	OrderFormValues,
-	AddressFormValues,
 	FormType,
 	ContactFormValues,
+	BillingAddress,
+	ShippingAddress,
 } from '@woocommerce/settings';
 import {
 	ORDER_FORM_KEYS,
@@ -229,13 +230,13 @@ export interface DocumentObject< T extends FormType | 'global' > {
 	customer:
 		| {
 				id: number;
-				billing_address: AddressFormValues;
-				shipping_address: AddressFormValues;
+				billing_address: BillingAddress;
+				shipping_address: ShippingAddress;
 				additional_fields: ContactFormValues;
 				address: T extends 'billing'
-					? AddressFormValues
+					? BillingAddress
 					: T extends 'shipping'
-					? AddressFormValues
+					? ShippingAddress
 					: null;
 		  }
 		| Record< string, never >;

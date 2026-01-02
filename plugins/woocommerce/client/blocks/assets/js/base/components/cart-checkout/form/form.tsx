@@ -93,28 +93,27 @@ const Form = <
 
 	const { errors, previousErrors } = useFormValidation(
 		formFields,
-		addressType,
-		// Temporary override for shipping calculator address form.
-		addressType === 'shipping' ? ( values as AddressFormValues ) : undefined
+		addressType
 	);
 
 	useEffect( () => {
 		Object.entries( errors ).forEach( ( [ key, error ] ) => {
+			const errorKey =
+				key === 'email' ? 'billing_email' : `${ addressType }_${ key }`;
 			const inputRef = inputsRef.current[ key ];
 			if ( ! error ) {
 				return;
 			}
 			inputRef?.setErrorMessage( error );
-			const hasValidationError = select(
-				validationStore
-			).getValidationError( `${ addressType }_${ key }` );
+			const hasValidationError =
+				select( validationStore ).getValidationError( errorKey );
 
 			// Check if this field already has a validation error, prevents up from surfacing already hidden errors.
 			if ( hasValidationError ) {
 				return;
 			}
 			dispatch( validationStore ).setValidationErrors( {
-				[ `${ addressType }_${ key }` ]: {
+				[ errorKey ]: {
 					message: error,
 					hidden: !! inputRef?.isFocused(),
 				},
@@ -125,11 +124,15 @@ const Form = <
 		if ( previousErrors ) {
 			const errorsToClear: string[] = [];
 			Object.entries( previousErrors ).forEach( ( [ key ] ) => {
+				const errorKey =
+					key === 'email'
+						? 'billing_email'
+						: `${ addressType }_${ key }`;
 				const inputRef = inputsRef.current[ key ];
 
 				// If error was previously set but no longer exists, clear it.
 				if ( ! ( key in errors ) ) {
-					errorsToClear.push( `${ addressType }_${ key }` );
+					errorsToClear.push( errorKey );
 					inputRef?.setErrorMessage( '' );
 				}
 			} );
@@ -258,18 +261,21 @@ const Form = <
 						<EmailField
 							{ ...fieldProps }
 							key={ field.key }
+							type="email"
 							ref={ ( el ) =>
 								( inputsRef.current[ field.key ] = el )
 							}
 							ariaDescribedBy={ ariaDescribedBy }
+							value={
+								decodeEntities(
+									values[ field.key as keyof T ] as string
+								) ?? ''
+							}
 							onChange={ ( value: string ) =>
 								onChange( {
 									...values,
 									email: value,
 								} as T )
-							}
-							value={
-								( values as ContactFormValues )?.email || ''
 							}
 						/>
 					);
