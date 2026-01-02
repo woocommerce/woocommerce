@@ -9,7 +9,7 @@ import { Fragment, forwardRef } from '@wordpress/element';
 import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { checkoutStore } from '@woocommerce/block-data';
+import { checkoutStore, validationStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -30,7 +30,12 @@ const EmailField = forwardRef(
 			} ),
 			[]
 		);
-
+		const hasVisibleError = useSelect(
+			( select ) =>
+				select( validationStore ).getValidationError( 'billing_email' )
+					?.hidden === false,
+			[]
+		);
 		return (
 			<Fragment>
 				<ValidatedTextInput
@@ -39,7 +44,7 @@ const EmailField = forwardRef(
 					onChange={ onChange }
 					value={ value }
 				/>
-				{ allowGuestCheckout && ! customerId ? (
+				{ allowGuestCheckout && ! customerId && ! hasVisibleError ? (
 					<p
 						id={ guestCheckoutNoticeId }
 						className="wc-block-checkout__guest-checkout-notice"
