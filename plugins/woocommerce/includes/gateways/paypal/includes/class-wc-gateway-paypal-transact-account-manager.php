@@ -45,6 +45,12 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager::do_onboarding() instead. This method will be removed in 11.0.0.
 	 */
 	public function do_onboarding() {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			PayPalTransactAccountManager::class . '::do_onboarding()'
+		);
+
 		$this->transact_account_manager->do_onboarding();
 	}
 
@@ -58,6 +64,12 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager::get_transact_account_data() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_transact_account_data( $account_type ) {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			PayPalTransactAccountManager::class . '::get_transact_account_data()'
+		);
+
 		return $this->transact_account_manager->get_transact_account_data( $account_type );
 	}
 }
