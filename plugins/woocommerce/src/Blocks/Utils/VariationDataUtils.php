@@ -11,15 +11,15 @@ use WC_Product;
  */
 class VariationDataUtils {
 	/**
-	 * Check if lazy loading of variation data is enabled.
+	 * Check if variation data should be lazy loaded for this product.
 	 *
 	 * Uses the woocommerce_ajax_variation_threshold filter (default 30) to determine
 	 * when to lazy load variation data, matching the behavior of classic templates.
 	 *
 	 * @param WC_Product|false|null $product The product to check variation count for.
-	 * @return bool Whether lazy loading is enabled.
+	 * @return bool Whether variations should be lazy loaded.
 	 */
-	public static function is_enabled( $product = null ): bool {
+	public static function should_lazy_load_variations( $product = null ): bool {
 		// Products with more variations than the threshold use lazy loading.
 		// This matches the behavior of classic templates.
 		if ( ! $product || ! $product->is_type( 'variable' ) ) {

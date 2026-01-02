@@ -54,16 +54,6 @@ class ProductStockIndicator extends AbstractBlock {
 	}
 
 	/**
-	 * Check if lazy loading of variation data is enabled.
-	 *
-	 * @param \WC_Product $product The product to check.
-	 * @return bool
-	 */
-	protected function is_lazy_load_enabled( $product ): bool {
-		return VariationDataUtils::is_enabled( $product );
-	}
-
-	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
@@ -138,7 +128,7 @@ class ProductStockIndicator extends AbstractBlock {
 
 		$use_lazy_load = false;
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
-			$use_lazy_load = $this->is_lazy_load_enabled( $product_to_render );
+			$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product_to_render );
 			$config_data   = array(
 				'availability' => $availability['availability'],
 			);

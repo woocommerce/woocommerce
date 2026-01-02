@@ -33,16 +33,6 @@ class QuantitySelector extends AbstractBlock {
 	}
 
 	/**
-	 * Check if lazy loading of variation data is enabled.
-	 *
-	 * @param \WC_Product $product The product to check.
-	 * @return bool
-	 */
-	protected function is_lazy_load_enabled( $product ): bool {
-		return VariationDataUtils::is_enabled( $product );
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * The selector is hidden for:
@@ -150,7 +140,7 @@ class QuantitySelector extends AbstractBlock {
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 
-			$use_lazy_load = $this->is_lazy_load_enabled( $product );
+			$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 
 			if ( ! $use_lazy_load ) {
 				$variations_data           = $product->get_available_variations( 'objects' );

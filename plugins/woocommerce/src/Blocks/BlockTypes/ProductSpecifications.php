@@ -25,16 +25,6 @@ class ProductSpecifications extends AbstractBlock {
 	}
 
 	/**
-	 * Check if lazy loading of variation data is enabled.
-	 *
-	 * @param \WC_Product $product The product to check.
-	 * @return bool
-	 */
-	protected function is_lazy_load_enabled( $product ): bool {
-		return VariationDataUtils::is_enabled( $product );
-	}
-
-	/**
 	 * Get the frontend script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
@@ -88,7 +78,7 @@ class ProductSpecifications extends AbstractBlock {
 		$use_lazy_load  = false;
 
 		if ( $is_interactive ) {
-			$use_lazy_load = $this->is_lazy_load_enabled( $product );
+			$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 			$config_data   = array(
 				'weight'     => $product_data['weight']['value'] ?? '',
 				'dimensions' => html_entity_decode( $product_data['dimensions']['value'] ?? '', ENT_QUOTES, get_bloginfo( 'charset' ) ),

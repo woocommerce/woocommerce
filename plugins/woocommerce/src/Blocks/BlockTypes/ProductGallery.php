@@ -32,16 +32,6 @@ class ProductGallery extends AbstractBlock {
 	}
 
 	/**
-	 * Check if lazy loading of variation data is enabled.
-	 *
-	 * @param \WC_Product $product The product to check.
-	 * @return bool
-	 */
-	protected function is_lazy_load_enabled( $product ): bool {
-		return VariationDataUtils::is_enabled( $product );
-	}
-
-	/**
 	 * Return the dialog content.
 	 *
 	 * @param array $images An array of all images of the product.
@@ -170,7 +160,7 @@ class ProductGallery extends AbstractBlock {
 				$formatted_variations_data = array();
 				$has_variation_images      = false;
 				$parent_image_id           = (int) $product->get_image_id();
-				$use_lazy_load             = $this->is_lazy_load_enabled( $product );
+				$use_lazy_load             = VariationDataUtils::should_lazy_load_variations( $product );
 
 				if ( $use_lazy_load ) {
 					// In lazy load mode, variation image_id will be fetched via AJAX.

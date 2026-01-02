@@ -43,16 +43,6 @@ class ProductSKU extends AbstractBlock {
 	}
 
 	/**
-	 * Check if lazy loading of variation data is enabled.
-	 *
-	 * @param \WC_Product $product The product to check.
-	 * @return bool
-	 */
-	protected function is_lazy_load_enabled( $product ): bool {
-		return VariationDataUtils::is_enabled( $product );
-	}
-
-	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -84,7 +74,7 @@ class ProductSKU extends AbstractBlock {
 
 		$use_lazy_load = false;
 		if ( $is_interactive ) {
-			$use_lazy_load = $this->is_lazy_load_enabled( $product );
+			$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 			$config_data   = array(
 				'sku' => $product_sku,
 			);

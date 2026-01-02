@@ -32,16 +32,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Check if lazy loading of variation data is enabled.
-	 *
-	 * @param \WC_Product $product The product to check.
-	 * @return bool
-	 */
-	protected function is_lazy_load_enabled( $product ): bool {
-		return VariationDataUtils::is_enabled( $product );
-	}
-
-	/**
 	 * Get variation attributes efficiently without loading full variation objects.
 	 *
 	 * @param \WC_Product_Variable $product The variable product.
@@ -143,7 +133,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 
 		$attribute_terms = $this->get_terms( $attribute_name, $product_attribute_terms );
 
-		if ( $this->is_lazy_load_enabled( $product ) ) {
+		if ( VariationDataUtils::should_lazy_load_variations( $product ) ) {
 			$product_variations = $this->get_variation_attributes_efficiently( $product );
 		} else {
 			$product_variations = $product->get_available_variations();

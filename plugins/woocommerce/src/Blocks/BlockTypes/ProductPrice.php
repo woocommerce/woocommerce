@@ -55,16 +55,6 @@ class ProductPrice extends AbstractBlock {
 	}
 
 	/**
-	 * Check if lazy loading of variation data is enabled.
-	 *
-	 * @param \WC_Product $product The product to check.
-	 * @return bool
-	 */
-	protected function is_lazy_load_enabled( $product ): bool {
-		return VariationDataUtils::is_enabled( $product );
-	}
-
-	/**
 	 * Check if any variations have different prices than the parent.
 	 *
 	 * This is a lightweight check that doesn't require loading all variation data.
@@ -109,7 +99,7 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
-				$use_lazy_load = $this->is_lazy_load_enabled( $product );
+				$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 
 				if ( $use_lazy_load ) {
 					// Lazy load mode: Only check if prices vary, don't pre-load variation data.
