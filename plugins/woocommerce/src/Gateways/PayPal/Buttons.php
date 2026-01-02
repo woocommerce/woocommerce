@@ -62,7 +62,6 @@ class Buttons {
 		$this->gateway = $gateway;
 		$this->request = new \WC_Gateway_Paypal_Request( $this->gateway );
 
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		$this->enabled = $this->gateway->should_use_orders_v2() && 'yes' === $this->gateway->get_option( 'paypal_buttons', 'yes' );
 	}
 
