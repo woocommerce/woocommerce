@@ -132,12 +132,14 @@ const productElementStore = store(
 					return;
 				}
 
-				const { productElementKey } = getContext< Context >();
 				const variationId = productDataState?.variationId || 0;
 				const productId = productDataState.productId;
 
 				// If variation is selected but data doesn't exist, fetch it.
-				if ( variationId && ! getVariationData( productId, variationId ) ) {
+				if (
+					variationId &&
+					! getVariationData( productId, variationId )
+				) {
 					// Show loading state.
 					element.ref.style.opacity = '0.5';
 
@@ -147,7 +149,8 @@ const productElementStore = store(
 					> = yield fetchVariationData( variationId );
 
 					// Check if variation changed during fetch (user switched quickly) and bail if not.
-					const currentVariationId = productDataState?.variationId || 0;
+					const currentVariationId =
+						productDataState?.variationId || 0;
 					if ( currentVariationId !== variationId ) {
 						return;
 					}
@@ -156,8 +159,11 @@ const productElementStore = store(
 					element.ref.style.opacity = '1';
 
 					if ( fetchedData ) {
+						const { productElementKey } = getContext< Context >();
 						const html =
-							fetchedData[ productElementKey as keyof typeof fetchedData ];
+							fetchedData[
+								productElementKey as keyof typeof fetchedData
+							];
 						if ( typeof html === 'string' ) {
 							element.ref.innerHTML = sanitizeHTML( html, {
 								tags: ALLOWED_TAGS,
@@ -169,6 +175,7 @@ const productElementStore = store(
 				}
 
 				// Use pre-loaded or cached data.
+				const { productElementKey } = getContext< Context >();
 				const productElementHtml =
 					productElementStore?.state?.productData?.[
 						productElementKey
