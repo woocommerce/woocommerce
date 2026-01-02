@@ -799,7 +799,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return array<int>
 	 */
 	protected function get_related_ids( \WC_Product $product ): array {
-		return array_values( array_map( 'absint', wc_get_related_products( $product->get_id() ) ) );
+		return array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) );
 	}
 
 	/**
@@ -811,7 +811,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return array<int>
 	 */
 	protected function get_upsell_ids( \WC_Product $product ): array {
-		return array_values( array_map( 'absint', $product->get_upsell_ids() ) );
+		return array_map( 'absint', $product->get_upsell_ids() );
 	}
 
 	/**
@@ -823,7 +823,7 @@ class ProductSchema extends AbstractSchema {
 	 * @return array<int>
 	 */
 	protected function get_cross_sell_ids( \WC_Product $product ): array {
-		return array_values( array_map( 'absint', $product->get_cross_sell_ids() ) );
+		return array_map( 'absint', $product->get_cross_sell_ids() );
 	}
 
 	/**
