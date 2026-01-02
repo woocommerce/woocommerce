@@ -50,6 +50,12 @@ class WC_Gateway_Paypal_Buttons {
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_options() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_options() {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_options() instead.'
+		);
+
 		return $this->buttons->get_options();
 	}
 
@@ -61,6 +67,12 @@ class WC_Gateway_Paypal_Buttons {
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_common_options() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_common_options() {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_common_options() instead.'
+		);
+
 		return $this->buttons->get_common_options();
 	}
 
@@ -72,6 +84,12 @@ class WC_Gateway_Paypal_Buttons {
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_client_id() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_client_id() {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_client_id() instead.'
+		);
+
 		return $this->buttons->get_client_id();
 	}
 
@@ -83,6 +101,12 @@ class WC_Gateway_Paypal_Buttons {
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_page_type() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_page_type() {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_page_type() instead.'
+		);
+
 		return $this->buttons->get_page_type();
 	}
 
@@ -94,6 +118,12 @@ class WC_Gateway_Paypal_Buttons {
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::is_enabled() instead. This method will be removed in 11.0.0.
 	 */
 	public function is_enabled() {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::is_enabled() instead.'
+		);
+
 		return $this->buttons->is_enabled();
 	}
 
@@ -106,6 +136,12 @@ class WC_Gateway_Paypal_Buttons {
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_current_page_for_app_switch() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_current_page_for_app_switch() {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_current_page_for_app_switch() instead.'
+		);
+
 		return $this->buttons->get_current_page_for_app_switch();
 	}
 }

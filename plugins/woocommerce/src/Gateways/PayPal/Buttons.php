@@ -37,21 +37,21 @@ class Buttons {
 	 *
 	 * @var \WC_Gateway_Paypal
 	 */
-	private $gateway;
+	private \WC_Gateway_Paypal $gateway;
 
 	/**
 	 * Whether the gateway should use Orders v2 API.
 	 *
 	 * @var bool
 	 */
-	private $enabled = false;
+	private bool $enabled;
 
 	/**
 	 * The request instance.
 	 *
 	 * @var \WC_Gateway_Paypal_Request
 	 */
-	private $request;
+	private \WC_Gateway_Paypal_Request $request;
 
 	/**
 	 * Constructor.
