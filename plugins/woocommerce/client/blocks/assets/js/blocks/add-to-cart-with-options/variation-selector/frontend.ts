@@ -140,7 +140,11 @@ const isAttributeValueValid = ( {
  * Return the product attributes and options.
  */
 const getProductAttributesAndOptions = ( productObject ) => {
-	if ( ! productObject || ! productObject?.variations ) {
+	if (
+		! productObject ||
+		! Array.isArray( productObject.variations ) ||
+		typeof( productObject.variations.attributes ) !== 'object'
+	) {
 		return {};
 	}
 
