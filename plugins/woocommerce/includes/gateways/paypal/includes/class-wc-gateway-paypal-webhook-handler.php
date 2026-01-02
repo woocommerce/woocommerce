@@ -47,7 +47,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	/**
 	 * Process the webhook event.
 	 *
-	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\PayPalWebhookHandler::process_webhook() instead. This method will be removed in 11.0.0.
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\WebhookHandler::process_webhook() instead. This method will be removed in 11.0.0.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
