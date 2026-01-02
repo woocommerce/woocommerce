@@ -472,6 +472,9 @@ class Checkout extends AbstractBlock {
 				'localPickupLocations',
 				array_map(
 					function ( $location ) {
+						if ( ! $location['enabled'] ) {
+							return null;
+						}
 						$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
 						return $location;
 					},
