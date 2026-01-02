@@ -292,8 +292,6 @@ class Products extends ControllerTestCase {
 		$main_product->set_category_ids( array( $category['term_id'] ) );
 		$main_product->save();
 
-		delete_transient( 'wc_related_' . $main_product->get_id() );
-
 		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $main_product->get_id() ) );
 		$data     = $response->get_data();
 
