@@ -59,8 +59,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		// translators: %s is the name of the product in cart.
 		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
 
-		// translators: Save as in "Save $x".
-		$save_label = __( 'Save', 'woocommerce' );
+		// translators: Discount savings label, as in "Save $5".
+		$save_label = _x( 'Save', 'Discount savings', 'woocommerce' );
 
 		$available_on_backorder_label = __( 'Available on backorder', 'woocommerce' );
 

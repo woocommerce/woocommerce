@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add translation context to "Save" label in mini cart to allow proper translation in languages where "save money" differs from "save file".
