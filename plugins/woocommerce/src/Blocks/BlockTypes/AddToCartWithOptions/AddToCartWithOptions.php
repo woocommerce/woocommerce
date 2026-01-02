@@ -30,21 +30,17 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'woocommerce/lazyLoadVariations' ];
+		return [ 'postId' ];
 	}
 
 	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
-	 * Checks block context first, then falls back to variation count threshold.
-	 *
-	 * @param WP_Block $block The block instance.
+	 * @param \WC_Product $product The product to check.
 	 * @return bool
 	 */
-	protected function is_lazy_load_enabled( WP_Block $block ): bool {
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$product = wc_get_product( $post_id );
-		return VariationDataUtils::is_enabled( $block, $product );
+	protected function is_lazy_load_enabled( $product ): bool {
+		return VariationDataUtils::is_enabled( $product );
 	}
 
 	/**
@@ -402,7 +398,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				$variations_data               = array();
 				$context['selectedAttributes'] = array();
 
-				if ( $this->is_lazy_load_enabled( $block ) ) {
+				if ( $this->is_lazy_load_enabled( $product ) ) {
 					// Lazy load mode: Get only attribute data efficiently without loading variation objects.
 					// Stock status and other data will be fetched via AJAX when a variation is selected.
 					// Note: Unlike non-lazy mode, we don't pre-set quantities for each variation.

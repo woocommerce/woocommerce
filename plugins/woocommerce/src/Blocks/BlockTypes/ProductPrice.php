@@ -51,21 +51,17 @@ class ProductPrice extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId', 'woocommerce/lazyLoadVariations' ];
+		return [ 'query', 'queryId', 'postId' ];
 	}
 
 	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
-	 * Checks block context first, then falls back to variation count threshold.
-	 *
-	 * @param WP_Block $block The block instance.
+	 * @param \WC_Product $product The product to check.
 	 * @return bool
 	 */
-	protected function is_lazy_load_enabled( WP_Block $block ): bool {
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$product = wc_get_product( $post_id );
-		return VariationDataUtils::is_enabled( $block, $product );
+	protected function is_lazy_load_enabled( $product ): bool {
+		return VariationDataUtils::is_enabled( $product );
 	}
 
 	/**
@@ -113,7 +109,7 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
-				$use_lazy_load = $this->is_lazy_load_enabled( $block );
+				$use_lazy_load = $this->is_lazy_load_enabled( $product );
 
 				if ( $use_lazy_load ) {
 					// Lazy load mode: Only check if prices vary, don't pre-load variation data.

@@ -21,21 +21,17 @@ class ProductSpecifications extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'woocommerce/lazyLoadVariations' ];
+		return [ 'postId' ];
 	}
 
 	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
-	 * Checks block context first, then falls back to variation count threshold.
-	 *
-	 * @param WP_Block $block The block instance.
+	 * @param \WC_Product $product The product to check.
 	 * @return bool
 	 */
-	protected function is_lazy_load_enabled( WP_Block $block ): bool {
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$product = wc_get_product( $post_id );
-		return VariationDataUtils::is_enabled( $block, $product );
+	protected function is_lazy_load_enabled( $product ): bool {
+		return VariationDataUtils::is_enabled( $product );
 	}
 
 	/**
@@ -92,7 +88,7 @@ class ProductSpecifications extends AbstractBlock {
 		$use_lazy_load  = false;
 
 		if ( $is_interactive ) {
-			$use_lazy_load = $this->is_lazy_load_enabled( $block );
+			$use_lazy_load = $this->is_lazy_load_enabled( $product );
 			$config_data   = array(
 				'weight'     => $product_data['weight']['value'] ?? '',
 				'dimensions' => html_entity_decode( $product_data['dimensions']['value'] ?? '', ENT_QUOTES, get_bloginfo( 'charset' ) ),

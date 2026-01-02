@@ -28,21 +28,17 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 * Register the context.
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'woocommerce/lazyLoadVariations' ];
+		return [ 'postId' ];
 	}
 
 	/**
 	 * Check if lazy loading of variation data is enabled.
 	 *
-	 * Checks block context first, then falls back to variation count threshold.
-	 *
-	 * @param WP_Block $block The block instance.
+	 * @param \WC_Product $product The product to check.
 	 * @return bool
 	 */
-	protected function is_lazy_load_enabled( WP_Block $block ): bool {
-		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
-		$product = wc_get_product( $post_id );
-		return VariationDataUtils::is_enabled( $block, $product );
+	protected function is_lazy_load_enabled( $product ): bool {
+		return VariationDataUtils::is_enabled( $product );
 	}
 
 	/**
@@ -147,7 +143,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 
 		$attribute_terms = $this->get_terms( $attribute_name, $product_attribute_terms );
 
-		if ( $this->is_lazy_load_enabled( $block ) ) {
+		if ( $this->is_lazy_load_enabled( $product ) ) {
 			$product_variations = $this->get_variation_attributes_efficiently( $product );
 		} else {
 			$product_variations = $product->get_available_variations();
