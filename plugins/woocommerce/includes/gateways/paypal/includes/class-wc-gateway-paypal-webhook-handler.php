@@ -50,8 +50,16 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return void
+	 *
+	 * @deprecated 10.5.0 Deprecated in favor of Automattic\WooCommerce\Gateways\PayPal\WebhookHandler::process_webhook
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			PayPalWebhookHandler::class . '::process_webhook()'
+		);
+
 		$this->webhook_handler->process_webhook( $request );
 	}
 }
