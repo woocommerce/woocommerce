@@ -49,11 +49,23 @@
 .wc-block-components-form {
 	.wc-block-checkout__order-fields:has(+ .wc-block-checkout__order-notes),
 	:is(.wc-block-checkout__order-notes, .wc-block-checkout__order-fields):has(
-			+ .wc-block-checkout__terms:not(
-					.wc-block-checkout__terms--with-separator
-				)
+			+ .wc-block-checkout__terms
 		) {
 		margin-bottom: $gap-small;
+	}
+}
+
+@include cart-checkout-large-container {
+	.wc-block-components-form {
+		// Apply a different style when the terms block has the --with-separator modifier
+		:is(
+				.wc-block-checkout__order-notes,
+				.wc-block-checkout__order-fields
+			):has(
+				+ .wc-block-checkout__terms.wc-block-checkout__terms--with-separator
+			) {
+			margin-bottom: $gap-large;
+		}
 	}
 }
 

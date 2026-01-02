@@ -1,4 +1,4 @@
-// Adjust padding and margins in the editor to improve selected block outlines.
+// Add a small padding to the order so that margin doesn't collapse, this allows the block selector outline to include the margin so it's not too tight around the block.
 .wp-block-woocommerce-checkout-order-note-block {
-	padding: 4px 0;
+	padding: 1px 0;
 }

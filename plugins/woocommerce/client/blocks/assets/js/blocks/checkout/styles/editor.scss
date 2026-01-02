@@ -57,20 +57,25 @@
 			.wc-block-checkout__order-notes {
 			margin-bottom: $gap-small;
 		}
+	}
 
-		// Reset when the terms block has a separator
-		.wp-block-woocommerce-checkout-order-note-block:has(
-				+ .wp-block-woocommerce-checkout-terms-block
-					.wc-block-checkout__terms--with-separator
-			)
-			.wc-block-checkout__order-notes {
-			margin-bottom: $gap-large;
-		}
-		.wc-block-checkout__order-fields:has(
-				+ .wp-block-woocommerce-checkout-terms-block
-					.wc-block-checkout__terms--with-separator
-			) {
-			margin-bottom: $gap-large;
+	// Terms and conditions seperator is only visible on large screens, we account for it only there.
+	@include cart-checkout-large-container {
+		.wc-block-components-form {
+			// Reset when the terms block has a separator, but only in the large container
+			.wp-block-woocommerce-checkout-order-note-block:has(
+					+ .wp-block-woocommerce-checkout-terms-block
+						.wc-block-checkout__terms--with-separator
+				)
+				.wc-block-checkout__order-notes {
+				margin-bottom: $gap-large;
+			}
+			.wc-block-checkout__order-fields:has(
+					+ .wp-block-woocommerce-checkout-terms-block
+						.wc-block-checkout__terms--with-separator
+				) {
+				margin-bottom: $gap-large;
+			}
 		}
 	}
 }
