@@ -20,7 +20,7 @@ export type Store = {
 // Use window to ensure true singleton across separate bundles.
 declare global {
 	interface Window {
-		__wcVariationPendingRequests?: Record<
+		wcVariationPendingRequests?: Record<
 			number,
 			Promise< VariationData | null >
 		>;
@@ -31,10 +31,10 @@ const getPendingRequests = (): Record<
 	number,
 	Promise< VariationData | null >
 > => {
-	if ( ! window.__wcVariationPendingRequests ) {
-		window.__wcVariationPendingRequests = {};
+	if ( ! window.wcVariationPendingRequests ) {
+		window.wcVariationPendingRequests = {};
 	}
-	return window.__wcVariationPendingRequests;
+	return window.wcVariationPendingRequests;
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.

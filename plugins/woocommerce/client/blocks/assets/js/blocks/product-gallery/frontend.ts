@@ -10,15 +10,15 @@ import {
 } from '@wordpress/interactivity';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
-import {
-	getCachedVariationData,
-	fetchVariationData,
-} from '../../base/stores/woocommerce/variation-data';
 
 /**
  * Internal dependencies
  */
 import type { ProductGalleryContext } from './types';
+import {
+	getCachedVariationData,
+	fetchVariationData,
+} from '../../base/stores/woocommerce/variation-data';
 import { checkOverflow } from './utils';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
