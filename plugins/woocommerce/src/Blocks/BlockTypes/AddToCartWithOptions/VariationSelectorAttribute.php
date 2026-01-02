@@ -25,13 +25,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute';
 
 	/**
-	 * Register the context.
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'postId' ];
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.

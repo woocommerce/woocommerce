@@ -3216,4 +3216,3 @@ function wc_update_1050_enable_autoload_options() {
 		)
 	);
 }
-

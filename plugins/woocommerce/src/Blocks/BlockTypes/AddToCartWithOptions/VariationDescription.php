@@ -22,13 +22,6 @@ class VariationDescription extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-description';
 
 	/**
-	 * Register the context.
-	 */
-	protected function get_block_type_uses_context() {
-		return [ 'postId' ];
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.

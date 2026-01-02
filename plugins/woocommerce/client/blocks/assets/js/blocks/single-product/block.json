@@ -16,13 +16,7 @@
 		},
 		"productId": {
 			"type": "number"
-		},
-		"lazyLoadVariations": {
-			"type": "boolean"
 		}
-	},
-	"providesContext": {
-		"woocommerce/lazyLoadVariations": "lazyLoadVariations"
 	},
 	"example": {
 		"attributes": {
