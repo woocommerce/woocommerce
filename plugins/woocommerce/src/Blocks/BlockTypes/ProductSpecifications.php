@@ -71,7 +71,7 @@ class ProductSpecifications extends AbstractBlock {
 		$use_lazy_load  = false;
 
 		if ( $is_interactive ) {
-			/* @var \WC_Product_Variable $product Type already checked above. */
+			/** @var \WC_Product_Variable $product Type already checked above. */
 			$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 			$config_data   = array(
 				'weight'     => $product_data['weight']['value'] ?? '',
@@ -82,9 +82,10 @@ class ProductSpecifications extends AbstractBlock {
 				$variations                = $product->get_available_variations( 'objects' );
 				$formatted_variations_data = array();
 				foreach ( $variations as $variation ) {
+					$dimensions = $variation->get_dimensions( false );
 					$formatted_variations_data[ $variation->get_id() ] = array(
-						'weight'     => wc_format_weight( $variation->get_weight() ),
-						'dimensions' => html_entity_decode( wc_format_dimensions( $variation->get_dimensions( false ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
+						'weight'     => wc_format_weight( (float) $variation->get_weight() ),
+						'dimensions' => html_entity_decode( wc_format_dimensions( is_array( $dimensions ) ? $dimensions : array() ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 					);
 				}
 				$config_data['variations'] = $formatted_variations_data;

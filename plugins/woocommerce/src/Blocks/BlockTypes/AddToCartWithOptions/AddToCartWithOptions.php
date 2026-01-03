@@ -261,7 +261,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				/* @var \WC_Product_Variable $product Type already checked above. */
+				/** @var \WC_Product_Variable $product Type already checked above. */
 				$variations_data               = array();
 				$context['selectedAttributes'] = array();
 
