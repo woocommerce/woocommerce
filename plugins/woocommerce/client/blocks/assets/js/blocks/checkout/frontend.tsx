@@ -18,6 +18,7 @@ import './inner-blocks/register-components';
 import Block from './block';
 import { blockName, blockAttributes } from './attributes';
 import metadata from './block.json';
+require( './fraud-protection/frontend.tsx' );
 
 const getProps = ( el: Element ) => {
 	return {

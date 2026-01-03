@@ -56,6 +56,7 @@ class RoutesController {
 				Routes\V1\CartUpdateCustomer::IDENTIFIER => Routes\V1\CartUpdateCustomer::class,
 				Routes\V1\Checkout::IDENTIFIER           => Routes\V1\Checkout::class,
 				Routes\V1\CheckoutOrder::IDENTIFIER      => Routes\V1\CheckoutOrder::class,
+				Routes\V1\FraudProtectionPaymentMethodSelected::IDENTIFIER => Routes\V1\FraudProtectionPaymentMethodSelected::class,
 				Routes\V1\Order::IDENTIFIER              => Routes\V1\Order::class,
 				Routes\V1\ProductAttributes::IDENTIFIER  => Routes\V1\ProductAttributes::class,
 				Routes\V1\ProductAttributesById::IDENTIFIER => Routes\V1\ProductAttributesById::class,
