@@ -1758,8 +1758,8 @@ test.describe( 'Data API tests', () => {
 						},
 						{
 							code: 'BG',
-							name: 'Bulgarian lev',
-							currency_code: 'BGN',
+							name: 'Euro',
+							currency_code: 'EUR',
 							currency_pos: 'right_space',
 							decimal_sep: ',',
 							dimension_unit: 'cm',
@@ -3416,8 +3416,8 @@ test.describe( 'Data API tests', () => {
 					},
 					{
 						code: 'BG',
-						name: 'Bulgarian lev',
-						currency_code: 'BGN',
+						name: 'Euro',
+						currency_code: 'EUR',
 						currency_pos: 'right_space',
 						decimal_sep: ',',
 						dimension_unit: 'cm',
