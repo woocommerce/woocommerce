@@ -108,8 +108,8 @@ class BlocksCheckoutEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param \WC_Customer     $customer Customer object being updated.
-	 * @param \WP_REST_Request $request  REST request object containing customer data.
+	 * @param \WC_Customer                           $customer Customer object being updated.
+	 * @param \WP_REST_Request<array<string, mixed>> $request  REST request object containing customer data.
 	 * @return void
 	 */
 	public function handle_store_api_customer_update( $customer, $request ): void {

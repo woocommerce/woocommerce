@@ -87,7 +87,7 @@ class FraudProtectionPaymentMethodSelected extends AbstractRoute {
 	/**
 	 * Handle the request and return a valid response for this endpoint.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
