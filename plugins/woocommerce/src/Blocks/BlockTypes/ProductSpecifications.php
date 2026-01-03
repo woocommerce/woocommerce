@@ -71,6 +71,7 @@ class ProductSpecifications extends AbstractBlock {
 		$use_lazy_load  = false;
 
 		if ( $is_interactive ) {
+			/* @var \WC_Product_Variable $product Type already checked above. */
 			$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 			$config_data   = array(
 				'weight'     => $product_data['weight']['value'] ?? '',

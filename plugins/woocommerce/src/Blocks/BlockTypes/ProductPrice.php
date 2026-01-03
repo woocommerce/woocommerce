@@ -99,11 +99,11 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
+				/* @var \WC_Product_Variable $product Type already checked above. */
 				$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 
 				if ( $use_lazy_load ) {
 					// Lazy load mode: Only check if prices vary, don't pre-load variation data.
-					/* @var \WC_Product_Variable $product */
 					$has_variation_price_html = $this->has_price_variations( $product );
 
 					if ( $has_variation_price_html ) {
