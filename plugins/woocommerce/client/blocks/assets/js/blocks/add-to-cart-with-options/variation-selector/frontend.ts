@@ -139,7 +139,7 @@ const isAttributeValueValid = ( {
 /**
  * Return the product attributes and options.
  */
-const getProductAttributesAndOptions = ( productObject ) => {
+const getProductAttributesAndOptions = ( productObject: Record< any, any> | null ) => {
 	if (
 		! productObject ||
 		! Array.isArray( productObject.variations ) ||
@@ -148,9 +148,9 @@ const getProductAttributesAndOptions = ( productObject ) => {
 		return {};
 	}
 
-	const variations = Object.values( productObject.variations );
+	const variations: Record< string, any >[] = Object.values( productObject.variations );
 	const productAttributesAndOptions = {} as Record< string, string[] >;
-	variations.forEach( ( variation ) => {
+	variations.forEach( ( variation: Record< string, any > ) => {
 		Object.entries( variation.attributes ).forEach( ( [ key, value ] ) => {
 			if ( typeof key !== 'string' || typeof value !== 'string' ) {
 				return;
@@ -298,7 +298,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			autoselectAttributes( {
 				includedAttributes = [],
 				excludedAttributes = [],
-			} = {} ) {
+			}: {
+				includedAttributes?: Array< string >,
+				excludedAttributes?: Array< string >,
+			} = {},
+			) {
 				const { autoselect, selectedAttributes } =
 					getContext< Context >();
 
@@ -306,7 +310,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const productObject = getProductData(
+				const productObject: Record< any, any > | null = getProductData(
 					productDataState.productId,
 					[]
 				);
