@@ -9,6 +9,10 @@
 	"moduleDirectories": [ "node_modules" ],
 	"moduleNameMapper": {
 		"\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2)$": "<rootDir>/tests/js/config/file-mock.js",
+		"^msw/node$": "<rootDir>/../../../../node_modules/.pnpm/msw@2.10.4_@types+node@20.17.8_typescript@5.7.2/node_modules/msw/lib/node/index.js",
+		"^@mswjs/interceptors/ClientRequest$": "<rootDir>/../../../../node_modules/.pnpm/@mswjs+interceptors@0.39.2/node_modules/@mswjs/interceptors/lib/node/interceptors/ClientRequest/index.js",
+		"^@mswjs/interceptors/XMLHttpRequest$": "<rootDir>/../../../../node_modules/.pnpm/@mswjs+interceptors@0.39.2/node_modules/@mswjs/interceptors/lib/node/interceptors/XMLHttpRequest/index.js",
+		"^@mswjs/interceptors/fetch$": "<rootDir>/../../../../node_modules/.pnpm/@mswjs+interceptors@0.39.2/node_modules/@mswjs/interceptors/lib/node/interceptors/fetch/index.js",
 		"@wordpress/private-apis": "<rootDir>/node_modules/@wordpress/private-apis",
 		"@wordpress/core-data/build/(.*)$": "<rootDir>/node_modules/@wordpress/core-data/build/$1",
 		"@wordpress/core-data": "<rootDir>/node_modules/@wordpress/core-data",

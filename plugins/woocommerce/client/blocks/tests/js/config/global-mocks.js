@@ -5,6 +5,20 @@ global.crypto = webcrypto;
 global.TextEncoder = require( 'util' ).TextEncoder;
 global.TextDecoder = require( 'util' ).TextDecoder;
 
+// Polyfill fetch API globals for MSW
+const { Response, Request, Headers, FormData, File } = require( 'undici' );
+const { TransformStream, ReadableStream, WritableStream } = require( 'node:stream/web' );
+const { BroadcastChannel } = require( 'node:worker_threads' );
+global.Response = Response;
+global.Request = Request;
+global.Headers = Headers;
+global.FormData = FormData;
+global.File = File;
+global.TransformStream = TransformStream;
+global.ReadableStream = ReadableStream;
+global.WritableStream = WritableStream;
+global.BroadcastChannel = BroadcastChannel;
+
 /**
  * Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
  * likely run into this.
