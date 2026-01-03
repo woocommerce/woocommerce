@@ -41,6 +41,12 @@ class AddToCartWithOptionsPage {
 		);
 
 		await addToCartWithOptionsBlock
+			.getByLabel( 'Loading the Add to Cart + Options template part' )
+			.waitFor( {
+				state: 'hidden',
+			} );
+
+		await addToCartWithOptionsBlock
 			.locator( '.components-spinner' )
 			.waitFor( {
 				state: 'hidden',
@@ -77,10 +83,9 @@ class AddToCartWithOptionsPage {
 
 			await this.page
 				.getByRole( 'button', {
-					name: 'Upgrade to the Add to Cart + Options block',
+					name: 'Use the Add to Cart + Options block',
 				} )
 				.click();
-		}
 	}
 
 	async updateSingleProductTemplate() {
@@ -93,7 +98,7 @@ class AddToCartWithOptionsPage {
 		await this.updateAddToCartWithOptionsBlock();
 	}
 
-	async createPostWithProductBlock( product: string ) {
+	async createPostWithProductBlock( product: string, variation?: string ) {
 		await this.admin.createNewPost();
 		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
 		const singleProductBlock = await this.editor.getBlockByName(
@@ -104,6 +109,13 @@ class AddToCartWithOptionsPage {
 			.locator( `input[type="radio"][value="${ product }"]` )
 			.nth( 0 )
 			.click();
+
+		if ( variation ) {
+			await singleProductBlock
+				.locator( `input[type="radio"][value="${ variation }"]` )
+				.nth( 0 )
+				.click();
+		}
 
 		await singleProductBlock.getByText( 'Done' ).click();
 

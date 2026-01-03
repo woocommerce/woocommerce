@@ -5,8 +5,8 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { select, useSelect, useDispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { store as editorStore } from '@wordpress/editor';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import {
 	useEffect,
 	useLayoutEffect,
@@ -78,13 +78,15 @@ const isInProductArchive = () => {
 		// That includes:
 		// - taxonomy-product_cat
 		// - taxonomy-product_tag
+		// - taxonomy-product_brand
 		'taxonomy-product_cat',
 		'taxonomy-product_tag',
 		'taxonomy-product_brand',
 	];
 
 	// @ts-expect-error getEditedPostSlug is not typed
-	const currentTemplateId = select( editorStore ).getEditedPostSlug();
+	const currentTemplateId =
+		select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.
@@ -390,9 +392,10 @@ export const useSetPreviewState = ( {
 	 * For all Product Collection blocks that inherit query from the template,
 	 * we want to show a preview message in the editor if the block is in
 	 * generic archive template i.e.
-	 * - Products by category
-	 * - Products by tag
-	 * - Products by attribute
+	 * - Products by Category
+	 * - Products by Tag
+	 * - Products by Attribute
+	 * - Products by Brand
 	 */
 	const termId =
 		location.type === LocationType.Archive

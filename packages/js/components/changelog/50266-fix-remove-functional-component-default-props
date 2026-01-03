@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Removed defaultProps from React functional components since they will be deprecated for React 19

@@ -173,4 +173,119 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		$expected = sprintf( 'cost: %s, item: %s, order: %s', $refunded_cost, $this->item->get_id(), $this->order->get_id() );
 		$this->assertEquals( $expected, $actual );
 	}
+
+	/**
+	 * @testdox calculate_cogs_value_core recalculates COGS from product even for saved line items.
+	 */
+	public function test_calculate_cogs_value_core_recalculates_from_product() {
+		$this->enable_cogs_feature();
+
+		// Create a line item with 3 units of a product with COGS = 10.
+
+		$this->product->set_cogs_value( 10.00 );
+		$this->product->save();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_quantity( 3 );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		$calculated_cogs = $item->calculate_cogs_value_core();
+		$this->assertEquals( 30.00, $calculated_cogs );
+
+		// Now change the product's COGS value and recalculate COGS for the line.
+
+		$this->product->set_cogs_value( 15.00 );
+		$this->product->save();
+
+		$reloaded_item = new WC_Order_Item_Product( $item->get_id() );
+
+		$recalculated_cogs = $reloaded_item->calculate_cogs_value_core();
+		$this->assertEquals( 45.00, $recalculated_cogs );
+	}
+
+	/**
+	 * @testdox calculate_cogs_value_core calculates correctly with quantity $quantity and COGS $cogs_value.
+	 *
+	 * @param float $cogs_value The COGS value per unit.
+	 * @param int   $quantity The quantity (positive for regular items, negative for refunds).
+	 * @param float $expected The expected calculated COGS value.
+	 *
+	 * @testWith [12.50, 5, 62.50]
+	 *           [20.00, -2, -40.00]
+	 */
+	public function test_calculate_cogs_value_core_with_various_quantities( float $cogs_value, int $quantity, float $expected ) {
+		$this->enable_cogs_feature();
+
+		$this->product->set_cogs_value( $cogs_value );
+		$this->product->save();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_quantity( $quantity );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		$calculated_cogs = $item->calculate_cogs_value_core();
+		$this->assertEquals( $expected, $calculated_cogs );
+	}
+
+	/**
+	 * @testdox calculate_cogs_value_core returns null when product no longer exists.
+	 */
+	public function test_calculate_cogs_value_core_returns_null_when_product_missing() {
+		$this->enable_cogs_feature();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_quantity( 2 );
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+
+		$product_id = $this->product->get_id();
+		wp_delete_post( $product_id, true );
+
+		$reloaded_item = new WC_Order_Item_Product( $item->get_id() );
+
+		$calculated_cogs = $reloaded_item->calculate_cogs_value_core();
+		$this->assertNull( $calculated_cogs );
+	}
+
+	/**
+	 * @testdox calculate_cogs_value_core returns zero when product has no COGS value.
+	 */
+	public function test_calculate_cogs_value_core_with_product_without_cogs() {
+		$this->enable_cogs_feature();
+
+		$product_without_cogs = WC_Helper_Product::create_simple_product();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product_without_cogs );
+		$item->set_quantity( 3 );
+
+		$calculated_cogs = $item->calculate_cogs_value_core();
+		$this->assertEquals( 0.0, $calculated_cogs );
+
+		WC_Helper_Product::delete_product( $product_without_cogs->get_id() );
+	}
+
+	/**
+	 * @testdox set_variation_id throws exception with variation_id in error data for invalid ID.
+	 */
+	public function test_set_variation_id_throws_exception_with_data_for_invalid_id() {
+		$invalid_id = 999999;
+		$item       = new WC_Order_Item_Product();
+
+		try {
+			$item->set_variation_id( $invalid_id );
+			$this->fail( 'Setting an invalid variation ID should have thrown an exception.' );
+		} catch ( WC_Data_Exception $e ) {
+			$this->assertEquals( 'order_item_product_invalid_variation_id', $e->getErrorCode() );
+			$error_data = $e->getErrorData();
+			$this->assertEquals( 400, $error_data['status'] );
+			$this->assertArrayHasKey( 'variation_id', $error_data );
+			$this->assertEquals( $invalid_id, $error_data['variation_id'] );
+		}
+	}
 }

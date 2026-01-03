@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
@@ -55,12 +56,11 @@ class UpdateUtils {
 	 * @throws WC_REST_Exception When fails to set any item, \WC_Data_Exception When fails to set any item.
 	 * @param WC_Order        $order Order object.
 	 * @param WP_REST_Request $request Request object.
-	 * @param bool            $creating True when creating object, false when updating.
 	 * @return void
 	 */
-	public function update_order_from_request( WC_Order $order, WP_REST_Request $request, bool $creating = false ) {
+	public function update_order_from_request( WC_Order $order, WP_REST_Request $request ) {
 		// Get data that can be edited from schema.
-		$ignore_keys = array( 'created_via', 'status', 'customer_id', 'set_paid' );
+		$ignore_keys = array( 'created_via', 'status', 'customer_id' );
 		$data_keys   = array_diff( array_keys( $this->order_schema->get_writable_item_schema_properties() ), $ignore_keys );
 
 		// Make sure gateways are loaded so hooks from gateways fire on save/create.
@@ -120,13 +120,6 @@ class UpdateUtils {
 		if ( ! empty( $request['status'] ) ) {
 			$order->set_status( $request['status'], '', true );
 			$order->save();
-		}
-
-		// Actions for after the order is saved.
-		if ( true === $request['set_paid'] ) {
-			if ( $creating || $order->needs_payment() ) {
-				$order->payment_complete( $request['transaction_id'] );
-			}
 		}
 	}
 
@@ -249,7 +242,7 @@ class UpdateUtils {
 				$order->add_order_note(
 					sprintf(
 						// translators: %s item name.
-						__( 'Adjusted stock: %s', 'woocommerce' ),
+						__( 'Adjusted stock: %s.', 'woocommerce' ),
 						sprintf(
 							'%1$s (%2$s&rarr;%3$s)',
 							$item->get_name(),
@@ -258,7 +251,10 @@ class UpdateUtils {
 						)
 					),
 					false,
-					true
+					true,
+					array(
+						'note_group' => OrderNoteGroup::PRODUCT_STOCK,
+					)
 				);
 			}
 		}

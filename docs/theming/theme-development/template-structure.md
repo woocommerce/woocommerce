@@ -69,7 +69,7 @@ The copied file will now override the WooCommerce default template file, so you 
 
 ---
 
-**Note** A (desirable) side-effect of your templates being upgrade-safe is that WooCommerce core templates will update, but your custom overrides will not. You may occassionally see notices in your System Status report that says, e.g. "version 3.5.0 is out of date. The core version is 3.7.0". Should that happen, follow the Fixing Outdated WooCommerce Templates guide to bring them in line.
+**Note** A (desirable) side-effect of your templates being upgrade-safe is that WooCommerce core templates will update, but your custom overrides will not. You may occasionally see notices in your System Status report that says, e.g. "version 3.5.0 is out of date. The core version is 3.7.0". Should that happen, follow the Fixing Outdated WooCommerce Templates guide to bring them in line.
 
 ---
 

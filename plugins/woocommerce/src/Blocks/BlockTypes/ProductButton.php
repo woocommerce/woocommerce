@@ -14,7 +14,6 @@ use Automattic\WooCommerce\Enums\ProductType;
  */
 class ProductButton extends AbstractBlock {
 	use EnableBlockJsonAssetsTrait;
-	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -47,7 +46,6 @@ class ProductButton extends AbstractBlock {
 	 */
 	protected function enqueue_assets( array $attributes, $content, $block ) {
 		parent::enqueue_assets( $attributes, $content, $block );
-		wp_enqueue_script( 'wp-a11y' );
 
 		if ( wp_is_block_theme() ) {
 			add_action(
@@ -74,9 +72,10 @@ class ProductButton extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// This workaround ensures that WordPress loads the core/button block styles.
-		// For more details, see https://github.com/woocommerce/woocommerce/pull/53052.
-		( new \WP_Block( array( 'blockName' => 'core/button' ) ) )->render();
+		// This is work-around so the Product Button block inherits the styles
+		// of the core Button block. We render it with the same classes and
+		// enqueue its stylesheet.
+		wp_enqueue_style( 'wp-block-button' );
 
 		global $product;
 		$previous_product = $product;
@@ -99,7 +98,7 @@ class ProductButton extends AbstractBlock {
 			return '';
 		}
 
-		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
@@ -231,7 +230,9 @@ class ProductButton extends AbstractBlock {
 		$context_directives = wp_interactivity_data_wp_context( $context );
 
 		$button_directives = $is_descendant_of_add_to_cart_form ?
-			'data-wp-class--disabled="woocommerce/add-to-cart-with-options::!state.isFormValid" data-wp-on--click="actions.handlePressedState"' :
+			'data-wp-class--disabled="woocommerce/add-to-cart-with-options::!state.isFormValid"
+			data-wp-bind--hidden="woocommerce/add-to-cart-with-options::!state.allowsAddingToCart"
+			data-wp-on--click="actions.handlePressedState"' :
 			'data-wp-on--click="actions.addCartItem"';
 		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
 

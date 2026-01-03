@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
+use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * BlockTemplatesController class.
@@ -25,13 +26,19 @@ class BlockTemplatesController {
 	public function init() {
 		add_filter( 'pre_get_block_file_template', array( $this, 'get_block_file_template' ), 10, 3 );
 		add_filter( 'get_block_template', array( $this, 'add_block_template_details' ), 10, 3 );
-		add_filter( 'get_block_templates', array( $this, 'run_hooks_on_block_templates' ), 10, 3 );
 		add_filter( 'get_block_templates', array( $this, 'add_db_templates_with_woo_slug' ), 10, 3 );
 		add_filter( 'rest_pre_insert_wp_template', array( $this, 'dont_load_templates_for_suggestions' ), 10, 1 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'add_plugin_templates_parts_support' ), 10, 2 );
 		add_filter( 'block_type_metadata_settings', array( $this, 'prevent_shortcodes_html_breakage' ), 10, 2 );
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'dequeue_legacy_scripts' ], 20 );
+
+		// Fix a bug in WordPress 6.8 and lower that caused block hooks not to
+		// run in templates registered via the Template Registration API.
+		// @see https://github.com/WordPress/gutenberg/issues/71139.
+		if ( Utils::wp_version_compare( '6.8', '<=' ) ) {
+			add_filter( 'get_block_templates', array( $this, 'run_hooks_on_block_templates' ), 10, 3 );
+		}
 	}
 
 	/**
@@ -219,9 +226,6 @@ class BlockTemplatesController {
 	 * @return array The block templates.
 	 */
 	public function run_hooks_on_block_templates( $templates ) {
-		// There is a bug in the WordPress implementation that causes block hooks not to run in templates registered
-		// via the Template Registration API. Because of this, we run them manually.
-		// https://github.com/WordPress/gutenberg/issues/71139.
 		foreach ( $templates as $template ) {
 			if ( 'plugin' === $template->source && 'woocommerce' === $template->plugin ) {
 				$template->content = apply_block_hooks_to_content( $template->content, $template, 'insert_hooked_blocks_and_set_ignored_hooked_blocks_metadata' );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Fix: Set expiration time for filter data cache to avoid autoloading all cache data

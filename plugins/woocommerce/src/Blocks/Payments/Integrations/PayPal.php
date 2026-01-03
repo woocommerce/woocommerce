@@ -70,13 +70,17 @@ final class PayPal extends AbstractPaymentMethodType {
 	public function get_payment_method_data() {
 		$gateway = WC_Gateway_Paypal::get_instance();
 
+		if ( ! $gateway->is_available() ) {
+			return [];
+		}
+
 		include_once WC_ABSPATH . 'includes/gateways/paypal/class-wc-gateway-paypal-buttons.php';
 		$buttons = new \WC_Gateway_Paypal_Buttons( $gateway );
 		$options = $buttons->get_options();
 
 		return [
 			'title'                  => $this->get_setting( 'title' ),
-			'description'            => $this->get_setting( 'description' ),
+			'description'            => $this->get_description(),
 			'supports'               => $this->get_supported_features(),
 			'isButtonsEnabled'       => $buttons->is_enabled(),
 			'isProductPage'          => is_product(),
@@ -86,6 +90,22 @@ final class PayPal extends AbstractPaymentMethodType {
 			'create_order_nonce'     => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
 			'cancel_payment_nonce'   => wp_create_nonce( 'wc_gateway_paypal_standard_cancel_payment' ),
 		];
+	}
+
+	/**
+	 * Get the description for the payment method. Add sandbox instructions if sandbox mode is enabled.
+	 *
+	 * @return string
+	 */
+	public function get_description() {
+		$gateway     = WC_Gateway_Paypal::get_instance();
+		$testmode    = $gateway->testmode;
+		$description = $this->get_setting( 'description' ) ?? '';
+		if ( $testmode ) {
+			/* translators: %s: Link to PayPal sandbox testing guide page */
+			$description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/' );
+		}
+		return trim( $description );
 	}
 
 	/**

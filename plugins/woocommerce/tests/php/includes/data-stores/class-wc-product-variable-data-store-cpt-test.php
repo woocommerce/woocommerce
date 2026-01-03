@@ -463,6 +463,172 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox read_prices caches both prices for display and not for display when prices are the same in both cases.
+	 *
+	 * @testWith [false, true, true, false]
+	 *           [false, false, true, false]
+	 *           [true, true, false, false]
+	 *           [true, true, true, true]
+	 *
+	 * @param bool $tax_enabled Taxes enabled shop-wide or not.
+	 * @param bool $taxable_product Product is taxable or not.
+	 * @param bool $tax_has_rates Product tax has defined rates or not.
+	 * @param bool $user_vat_exempt User is VAT exempt or not.
+	 */
+	public function test_read_prices_cache_when_taxes_dont_influence_price( bool $tax_enabled, bool $taxable_product, bool $tax_has_rates, bool $user_vat_exempt ) {
+		add_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
+		add_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+		WC()->customer->set_is_vat_exempt( $user_vat_exempt );
+
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_variation_product();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+		delete_transient( $transient_name );
+
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		$expected_hashes = array_unique( array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) ) );
+		sort( $expected_hashes );
+
+		delete_transient( $transient_name );
+		$data_store->read_price_data( $product, false );
+		$actual_hashes = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		sort( $actual_hashes );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		delete_transient( $transient_name );
+		$data_store->read_price_data( $product, false );
+		$actual_hashes = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		sort( $actual_hashes );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		remove_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
+		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+	}
+
+	/**
+	 * @testdox read_prices does separate caching for prices for display and not for display when they are different.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $for_display Test getting prices for display or not for display.
+	 */
+	public function test_read_prices_cache_when_taxes_influence_price( bool $for_display ) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+		WC()->customer->set_is_vat_exempt( false );
+
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_variation_product();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+		delete_transient( $transient_name );
+
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		delete_transient( $transient_name );
+		$data_store->read_price_data( $product, $for_display );
+		$expected_hashes = array( $extended_data_store->get_price_hash( $product, $for_display ) );
+		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+	}
+
+	/**
+	 * @testdox read_prices skips unified caching if code hooked to woocommerce_variation_prices_array modifies the prices array.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hook_modifies_prices The hooked code modifies the prices array or not.
+	 * @return void
+	 */
+	public function test_read_prices_cache_when_taxes_dont_influence_price_plus_hook( bool $hook_modifies_prices ) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_false' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+		WC()->customer->set_is_vat_exempt( false );
+
+		add_filter(
+			'woocommerce_variation_prices_array',
+			function ( $prices_array, $variation, $for_display ) use ( $hook_modifies_prices ) {
+				if ( $hook_modifies_prices ) {
+					$prices_array['foobar'] = $for_display;
+				}
+				return $prices_array;
+			},
+			10,
+			3
+		);
+
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_variation_product();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+		delete_transient( $transient_name );
+
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		$data_store->read_price_data( $product, true );
+		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		$expected_hashes =
+			$hook_modifies_prices ?
+			array( $extended_data_store->get_price_hash( $product, true ) ) :
+			array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		remove_all_filters( 'woocommerce_variation_prices_array' );
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_false' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+	}
+
+	/**
+	 * Get an instance of WC_Product_Variable_Data_Store_CPT whose get_price_hash method is public.
+	 *
+	 * @return WC_Product_Variable_Data_Store_CPT
+	 */
+	private function get_data_store_with_public_get_price_hash(): object {
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		return new class() extends WC_Product_Variable_Data_Store_CPT {
+			public function get_price_hash( &$product, $for_display = false ) {
+				return parent::get_price_hash( $product, $for_display );
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+	}
+
+	/**
+	 * Parse a variable product prices transient and return the hashes only.
+	 *
+	 * @param string $transient_name Name of the transient to parse.
+	 * @return array
+	 */
+	private function get_keys_for_json_encoded_transient( string $transient_name ): array {
+		return array_keys( array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) ) );
+	}
+
+	/**
+	 * Return dummy tax rates.
+	 *
+	 * @return array
+	 */
+	public function __return_rates() {
+		return array(
+			'rate'     => 10,
+			'label'    => 'rate',
+			'shipping' => 'no',
+			'compund'  => 'no',
+		);
+	}
+
+	/**
 	 * @testdox Test read_price_data method works even when price validation fails
 	 */
 	public function test_read_price_data_with_validation_failure() {

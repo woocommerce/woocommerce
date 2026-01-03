@@ -4,6 +4,8 @@
  *
  * @package WooCommerce\Tests\Cart.
  */
+
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
@@ -28,6 +30,86 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+	}
+
+	/**
+	 * @testdox Order Again should enforce sold individually for variable products (no duplicates, qty forced to 1)
+	 */
+	public function test_order_again_enforces_sold_individually_for_variations() {
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product->set_sold_individually( true );
+		$variable_product->save();
+
+		$variation_ids = $variable_product->get_children();
+		$this->assertNotEmpty( $variation_ids, 'Expected at least one variation.' );
+		$variation_id = (int) $variation_ids[0];
+		$variation    = wc_get_product( $variation_id );
+
+		$this->assertTrue( $variation->is_sold_individually(), 'Variation should be sold individually.' );
+
+		$order = WC_Helper_Order::create_order( $user_id, $variation, array( 'status' => OrderStatus::COMPLETED ) );
+		$this->assertGreaterThan( 0, $order->get_id(), 'Order should be created.' );
+
+		$order_items = $order->get_items();
+		$this->assertNotEmpty( $order_items, 'Order should have at least one item.' );
+		$order_item = array_values( $order_items )[0];
+		foreach ( $variation->get_attributes() as $att_key => $att_val ) {
+			$order_item->add_meta_data( $att_key, $att_val, true );
+		}
+		$order_item->save();
+		$order->save();
+
+		$cart_session = new WC_Cart_Session( WC()->cart );
+		$ref          = new ReflectionClass( WC_Cart_Session::class );
+		$method       = $ref->getMethod( 'populate_cart_from_order' );
+		$method->setAccessible( true );
+		$current_cart = WC()->session->get( 'cart', null );
+		$populated    = $method->invoke( $cart_session, $order->get_id(), $current_cart );
+		WC()->session->set( 'cart', $populated );
+		WC()->cart->set_cart_contents( $populated ? $populated : array() );
+
+		$cart_contents = WC()->cart->get_cart();
+		$this->assertCount( 1, $cart_contents, 'Cart should contain one item after Order Again for sold individually product.' );
+
+		$only_item = array_values( $cart_contents )[0];
+		$this->assertEquals( $variation_id, $only_item['variation_id'], 'Cart item should correspond to the ordered variation.' );
+		$this->assertEquals( 1, $only_item['quantity'], 'Quantity should be forced to 1 for sold individually products.' );
+
+		$available_variations     = $variable_product->get_available_variations();
+		$attributes_for_variation = array();
+		foreach ( $available_variations as $v ) {
+			if ( (int) $v['variation_id'] === $variation_id ) {
+				$attributes_for_variation = $v['attributes'];
+				break;
+			}
+		}
+		$this->assertNotEmpty( $attributes_for_variation, 'Expected to find attributes for variation.' );
+
+		$added = WC()->cart->add_to_cart( $variable_product->get_id(), 1, $variation_id, $attributes_for_variation );
+		$this->assertFalse( $added, 'Adding duplicate sold individually variation should be blocked.' );
+
+		$notices = wc_get_notices();
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertNotEmpty( $notices['error'], 'Expected an error notice when adding duplicate sold individually item.' );
+
+		$cart_contents_after = WC()->cart->get_cart();
+		$this->assertCount( 1, $cart_contents_after, 'Cart should still contain one item.' );
+		$only_item_after = array_values( $cart_contents_after )[0];
+		$this->assertEquals( 1, $only_item_after['quantity'], 'Quantity should remain 1.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+		WC_Helper_Product::delete_product( $variable_product->get_id() );
+		wp_delete_user( $user_id );
 	}
 
 	/**
@@ -588,18 +670,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$coupon->delete( true );
 	}
 
-	/**
-	 * @testdox should clear store_api_draft_order from session when cart is empty
-	 */
-	public function test_setting_session_should_clear_store_api_draft_order_when_cart_is_empty() {
-		$cart     = WC()->cart;
-		$order_id = WC_Helper_Order::create_order()->save();
-		WC()->session->set( 'store_api_draft_order', $order_id );
-
-		$cart->set_session();
-
-		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
-	}
 
 	/**
 	 * @testdox should not clear store_api_draft_order from session when cart is not empty
@@ -609,7 +679,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$cart->add_to_cart( $product->get_id() );
-		$order_id = WC_Helper_Order::create_order()->save();
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'checkout-draft' );
+		$order_id = $order->save();
 		WC()->session->set( 'store_api_draft_order', $order_id );
 
 		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
@@ -621,20 +693,33 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
 	}
 
+
 	/**
-	 * @testdox should clear store_api_draft_order from session and db when the cart is emptied
+	 * @testdox should NOT delete non-draft orders when clearing store_api_draft_order from session
 	 */
-	public function test_emptying_the_cart_should_clear_store_api_draft_order() {
+	public function test_emptying_cart_should_not_delete_non_draft_orders() {
 		$cart = WC()->cart;
 
-		$order_id = WC_Helper_Order::create_order()->save();
-		WC()->session->set( 'store_api_draft_order', $order_id );
+		// Create a processing order (simulating a completed checkout).
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order_id = $order->save();
 
-		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
+		// Simulate stale session data where order ID still exists in session.
+		WC()->session->set( 'store_api_draft_order', $order_id );
 
 		$cart->empty_cart();
 
+		// Session should be cleared.
 		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
+
+		// BUT the order should NOT be deleted.
+		$order = wc_get_order( $order_id );
+		$this->assertNotFalse( $order, 'Non-draft order should not be deleted' );
+		$this->assertEquals( 'processing', $order->get_status(), 'Order status should remain unchanged' );
+
+		// Clean up.
+		$order->delete( true );
 	}
 
 	/**

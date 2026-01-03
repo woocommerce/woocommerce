@@ -230,6 +230,183 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 
 
 	/**
+	 * Test getting reports with multiple tax line items on a single order.
+	 * Ensures that the report returns the correct number of unique tax rates
+	 * when an order has multiple different taxes applied.
+	 *
+	 * @since 10.4.0
+	 */
+	public function test_get_reports_with_multiple_tax_line_items() {
+		global $wpdb;
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create a test product.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		// Create multiple tax rates.
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_tax_rates',
+			array(
+				'tax_rate_id'       => 1,
+				'tax_rate'          => '5',
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate_name'     => 'State Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_order'    => 1,
+			)
+		);
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_tax_rates',
+			array(
+				'tax_rate_id'       => 2,
+				'tax_rate'          => '2.5',
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate_name'     => 'City Tax',
+				'tax_rate_priority' => 2,
+				'tax_rate_order'    => 2,
+			)
+		);
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_tax_rates',
+			array(
+				'tax_rate_id'       => 3,
+				'tax_rate'          => '1',
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate_name'     => 'County Tax',
+				'tax_rate_priority' => 3,
+				'tax_rate_order'    => 3,
+			)
+		);
+
+		// Create an order with multiple tax line items.
+		$order = WC_Helper_Order::create_order( 1, $product );
+
+		// Add first tax item (State Tax).
+		$tax_item_1 = new WC_Order_Item_Tax();
+		$tax_item_1->set_rate( 1 );
+		$tax_item_1->set_tax_total( 5 );
+		$tax_item_1->set_shipping_tax_total( 1 );
+		$order->add_item( $tax_item_1 );
+
+		// Add second tax item (City Tax).
+		$tax_item_2 = new WC_Order_Item_Tax();
+		$tax_item_2->set_rate( 2 );
+		$tax_item_2->set_tax_total( 2.5 );
+		$tax_item_2->set_shipping_tax_total( 0.5 );
+		$order->add_item( $tax_item_2 );
+
+		// Add third tax item (County Tax).
+		$tax_item_3 = new WC_Order_Item_Tax();
+		$tax_item_3->set_rate( 3 );
+		$tax_item_3->set_tax_total( 1 );
+		$tax_item_3->set_shipping_tax_total( 0.25 );
+		$order->add_item( $tax_item_3 );
+
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 109.75 ); // Product + all taxes.
+		$order->save();
+
+		// @todo Remove this once order data is synced to wc_order_tax_lookup
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_tax_lookup',
+			array(
+				'order_id'     => $order->get_id(),
+				'tax_rate_id'  => 1,
+				'date_created' => gmdate( 'Y-m-d H:i:s' ),
+				'shipping_tax' => 1,
+				'order_tax'    => 5,
+				'total_tax'    => 6,
+			)
+		);
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_tax_lookup',
+			array(
+				'order_id'     => $order->get_id(),
+				'tax_rate_id'  => 2,
+				'date_created' => gmdate( 'Y-m-d H:i:s' ),
+				'shipping_tax' => 0.5,
+				'order_tax'    => 2.5,
+				'total_tax'    => 3,
+			)
+		);
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_tax_lookup',
+			array(
+				'order_id'     => $order->get_id(),
+				'tax_rate_id'  => 3,
+				'date_created' => gmdate( 'Y-m-d H:i:s' ),
+				'shipping_tax' => 0.25,
+				'order_tax'    => 1,
+				'total_tax'    => 1.25,
+			)
+		);
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Make the API request.
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
+		$reports  = $response->get_data();
+
+		// Assert response is successful.
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Assert we get exactly 3 unique tax rates in the report.
+		$this->assertEquals( 3, count( $reports ), 'Should return 3 unique tax rates' );
+
+		// Organize reports by tax_rate_id for easier assertions.
+		$reports_by_id = array();
+		foreach ( $reports as $report ) {
+			$reports_by_id[ $report['tax_rate_id'] ] = $report;
+		}
+
+		// Assert each tax rate has correct data.
+		// Tax Rate 1 - State Tax.
+		$this->assertArrayHasKey( 1, $reports_by_id );
+		$this->assertEquals( 1, $reports_by_id[1]['tax_rate_id'] );
+		$this->assertEquals( 5.0, $reports_by_id[1]['tax_rate'] );
+		$this->assertEquals( 'US', $reports_by_id[1]['country'] );
+		$this->assertEquals( 'CA', $reports_by_id[1]['state'] );
+		$this->assertEquals( 'STATE TAX', $reports_by_id[1]['name'] );
+		$this->assertEquals( 6, $reports_by_id[1]['total_tax'] );
+		$this->assertEquals( 5, $reports_by_id[1]['order_tax'] );
+		$this->assertEquals( 1, $reports_by_id[1]['shipping_tax'] );
+		$this->assertEquals( 1, $reports_by_id[1]['orders_count'] );
+
+		// Tax Rate 2 - City Tax.
+		$this->assertArrayHasKey( 2, $reports_by_id );
+		$this->assertEquals( 2, $reports_by_id[2]['tax_rate_id'] );
+		$this->assertEquals( 2.5, $reports_by_id[2]['tax_rate'] );
+		$this->assertEquals( 'US', $reports_by_id[2]['country'] );
+		$this->assertEquals( 'CA', $reports_by_id[2]['state'] );
+		$this->assertEquals( 'CITY TAX', $reports_by_id[2]['name'] );
+		$this->assertEquals( 3, $reports_by_id[2]['total_tax'] );
+		$this->assertEquals( 2.5, $reports_by_id[2]['order_tax'] );
+		$this->assertEquals( 0.5, $reports_by_id[2]['shipping_tax'] );
+		$this->assertEquals( 1, $reports_by_id[2]['orders_count'] );
+
+		// Tax Rate 3 - County Tax.
+		$this->assertArrayHasKey( 3, $reports_by_id );
+		$this->assertEquals( 3, $reports_by_id[3]['tax_rate_id'] );
+		$this->assertEquals( 1.0, $reports_by_id[3]['tax_rate'] );
+		$this->assertEquals( 'US', $reports_by_id[3]['country'] );
+		$this->assertEquals( 'CA', $reports_by_id[3]['state'] );
+		$this->assertEquals( 'COUNTY TAX', $reports_by_id[3]['name'] );
+		$this->assertEquals( 1.25, $reports_by_id[3]['total_tax'] );
+		$this->assertEquals( 1, $reports_by_id[3]['order_tax'] );
+		$this->assertEquals( 0.25, $reports_by_id[3]['shipping_tax'] );
+		$this->assertEquals( 1, $reports_by_id[3]['orders_count'] );
+	}
+
+	/**
 	 * Test getting reports without valid permissions.
 	 *
 	 * @since 3.5.0

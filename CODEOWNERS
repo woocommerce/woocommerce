@@ -39,3 +39,11 @@
 /plugins/woocommerce/client/blocks/assets/js/blocks/mini-cart @woocommerce/rubik
 /plugins/woocommerce/client/blocks/assets/js/blocks/order-confirmation @woocommerce/rubik
 /plugins/woocommerce/client/blocks/packages/checkout @woocommerce/rubik
+
+# Email Editor packages
+/packages/js/email-editor/ @woocommerce/ballade
+/packages/php/email-editor/ @woocommerce/ballade
+
+# Email Editor integrations
+/plugins/woocommerce/src/Internal/EmailEditor/ @woocommerce/ballade
+/plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/ @woocommerce/ballade

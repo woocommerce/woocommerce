@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Check the get_session_data method exists on the session object
