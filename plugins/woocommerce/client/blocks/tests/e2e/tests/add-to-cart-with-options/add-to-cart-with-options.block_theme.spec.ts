@@ -6,8 +6,10 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 /**
  * Internal dependencies
  */
+import { Page } from '@playwright/test';
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
+import { Editor } from '@wordpress/e2e-test-utils-playwright';
 import config from '../../../../../admin/config/core.json';
 
 const test = base.extend< {
@@ -958,271 +960,281 @@ test.describe( 'Add to Cart + Options Block', () => {
 			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
 		).toBeVisible();
 	} );
-} );
 
-test.describe( 'Add to Cart + Options autoselect behavior', () => {
-	const productName = `Cart product test ${ Date.now() }`;
-	const productSlug = 'autoselect-t-shirt';
-	const productPermalink = '/product/' + productSlug;
-	const productPrice = '13.99';
-	let productId;
-	let productAttributes;
+	test.describe( 'Add to Cart + Options autoselect behavior', () => {
+		const productSlug = 'autoselect-t-shirt';
+		const productPermalink = '/product/' + productSlug;
+		let productId;
+		let productAttributes: [ { name: string, options: any[] } ];
 
-	async function goToProductTemplateEditor ( pageObject, editor ) {
-		await pageObject.updateSingleProductTemplate();
-		await editor.setPreferences( 'core/edit-site', {
-			welcomeGuide: false,
-		} );
-		await editor.openDocumentSettingsSidebar();
-	}
-
-	async function setCartBlockAttributes(
-		pageObject,
-		editor,
-		{ optionStyle, autoselect, disabledAttributesAction } = {
-			optionStyle: undefined,
-			autoselect: false,
-			disabledAttributesAction: 'disable',
-		},
-	) {
-		const page = editor.page;
-		let isOnlyCurrentEntityDirty = true;
-
-		await pageObject.switchProductType( 'Variable product' );
-		await page.getByRole( 'tab', { name: 'Block' } ).click();
-		const blockCart = await editor.canvas.getByLabel( 'Block: Add to Cart + Options' );
-		blockCart.click();
-		await blockCart.getByLabel( 'Block: Variation Selector: Attribute Options' ).first().click();
-
-		const optionStyleInput = await page.getByRole( 'radio', { name: optionStyle, exact: true } )
-		if ( ! await optionStyleInput.isChecked() ) {
-			isOnlyCurrentEntityDirty = false;
-			await optionStyleInput.click();
+		async function goToProductTemplateEditor ( pageObject: AddToCartWithOptionsPage, editor: Editor ) {
+			await pageObject.updateSingleProductTemplate();
+			await editor.setPreferences( 'core/edit-site', {
+				welcomeGuide: false,
+			} );
+			await editor.openDocumentSettingsSidebar();
 		}
 
-		const autoselectInput = await page.getByRole( 'checkbox', { name: 'Auto-select when only one attribute is compatible' } )
-		const disabledAttributesActionInput = await page.getByLabel( 'Values in conflict');
-		if (
-			await autoselectInput.isChecked() !== autoselect ||
-			await disabledAttributesActionInput.inputValue() !== disabledAttributesAction
-		) {
-			isOnlyCurrentEntityDirty = false;
-		}
-		await autoselectInput.setChecked( autoselect );
-		await disabledAttributesActionInput.selectOption( { value: disabledAttributesAction } );
-		if (
-			await page.getByRole('region', {
-				name: 'Editor top bar',
-			})
-			.getByRole('button', {
-				name: 'Save',
-				exact: true,
-			})
-			.isEnabled()
-		) {
-			await editor.saveSiteEditorEntities( { isOnlyCurrentEntityDirty: isOnlyCurrentEntityDirty } );
-		}
-	}
+		async function setCartBlockAttributes(
+			pageObject: AddToCartWithOptionsPage,
+			editor: Editor,
+			{
+				optionStyle = undefined,
+				autoselect = false,
+				disabledAttributesAction = 'disable',
+			}: {
+				optionStyle?: any,
+				autoselect?: boolean,
+				disabledAttributesAction?: string,
+			} = {},
+			) {
+			const page = editor.page;
+			let isOnlyCurrentEntityDirty = true;
 
-	async function selectBlockAttribute(
-		page,
-		attributeName,
-		attributeValue,
-		optionStyle=undefined,
-	) {
-		if ( optionStyle === 'Dropdown' ) {
-			await page.getByLabel( attributeName ).selectOption( attributeValue );
-		} else if ( optionStyle === 'Pills' ) {
-			if ( attributeValue === '' ) {
-				await page.getByLabel( attributeName ).locator( 'label:has(:checked)' ).click();
-			} else {
-				await page.getByLabel( attributeName ).getByText( attributeValue ).click();
+			await pageObject.switchProductType( 'Variable product' );
+			await page.getByRole( 'tab', { name: 'Block' } ).click();
+			const blockCart = editor.canvas.getByLabel( 'Block: Add to Cart + Options' );
+			blockCart.click();
+			await blockCart.getByLabel( 'Block: Variation Selector: Attribute Options' ).first().click();
+
+			const optionStyleInput = page.getByRole( 'radio', { name: optionStyle, exact: true } )
+			if ( ! await optionStyleInput.isChecked() ) {
+				isOnlyCurrentEntityDirty = false;
+				await optionStyleInput.click();
 			}
-		} else {
-			throw new Error( `Bad values for optionStyle (${ optionStyle })` );
-		}
-	}
 
-	async function expectSelectedAttributes( page, expectedValues={}, optionStyle=undefined ) {
-		for ( let { name: attributeName, options: attributeValues } of productAttributes ) {
+			const autoselectInput = page.getByRole( 'checkbox', { name: 'Auto-select when only one attribute is compatible' } )
+			const disabledAttributesActionInput = page.getByLabel( 'Values in conflict');
+			if (
+				await autoselectInput.isChecked() !== autoselect ||
+				await disabledAttributesActionInput.inputValue() !== disabledAttributesAction
+			) {
+				isOnlyCurrentEntityDirty = false;
+			}
+			await autoselectInput.setChecked( autoselect );
+			await disabledAttributesActionInput.selectOption( { value: disabledAttributesAction } );
+			if (
+				await page.getByRole('region', {
+					name: 'Editor top bar',
+				})
+				.getByRole('button', {
+					name: 'Save',
+					exact: true,
+				})
+				.isEnabled()
+			) {
+				await editor.saveSiteEditorEntities( { isOnlyCurrentEntityDirty: isOnlyCurrentEntityDirty } );
+			}
+		}
+
+		async function selectBlockAttribute(
+			page: Page,
+			attributeName: any,
+			attributeValue: any,
+			optionStyle: string | undefined = undefined,
+		) {
 			if ( optionStyle === 'Dropdown' ) {
-				if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
-					await expect(
-						page.getByLabel( attributeName, { exact: true } )
-					).toHaveValue( expectedValues[ attributeName ] );
-				} else {
-					await expect(
-						page.getByLabel( attributeName, { exact: true } )
-					).toHaveValue( '' );
-				}
+				await page.getByLabel( attributeName ).selectOption( attributeValue );
 			} else if ( optionStyle === 'Pills' ) {
-				if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
-					attributeValues = attributeValues.filter( item => item !== expectedValues[ attributeName ] ); // Omit attributeName
-					await expect (
-						page.getByLabel( attributeName, { exact: true } ).getByLabel( expectedValues[ attributeName ], { exact: true } )
-					).toBeChecked();
-				}
-				if ( attributeValues.length ) {
-					for ( const attributeValue of attributeValues ) {
-						await expect(
-							page
-								.getByLabel( attributeName, { exact: true } )
-								.getByLabel( attributeValue, { exact: true } )
-						).not.toBeChecked();
-					}
+				if ( attributeValue === '' ) {
+					await page.getByLabel( attributeName ).locator( 'label:has(:checked)' ).click();
+				} else {
+					await page.getByLabel( attributeName ).getByText( attributeValue ).click();
 				}
 			} else {
-				throw new Error( `Bad value for optionStyle (${ optionStyle })` );
+				throw new Error( `Bad values for optionStyle (${ optionStyle })` );
 			}
 		}
-	}
 
-	test.beforeAll( async () => {
-		const cliOutput = await wpCLI(
-			`wc product list --user=1 --slug="${ productSlug }" --format=json`
-		);
-		const cliOutputJSON = JSON.parse( cliOutput.stdout.match( /\[\{.*\}\]\n?$/ )?.pop() );
-		productId = cliOutputJSON[0].id;
-		productAttributes = cliOutputJSON[0].attributes;
-	} );
-
-	test.beforeEach( async ( {
-		pageObject,
-		editor,
-	} ) => {
-		// Tests expect to start in editor of product template
-		await goToProductTemplateEditor( pageObject, editor );
-	} );
-
-	for ( const optionStyle of [ 'Pills', 'Dropdown' ] ) {
-		test( `${ optionStyle }: Add to Cart + Options: Auto-select should work (on page load)`, async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
-			await test.step( `${ optionStyle }: Set the autoselect setting to false`, async () => {
-				await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: false } );
-			} );
-			await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
-				await page.goto( productPermalink );
-
-				await expectSelectedAttributes( page, { Type: '', Color: '', Size: '' }, optionStyle );
-			} );
-
-			await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
-				await goToProductTemplateEditor( pageObject, editor );
-				await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
-			} );
-			await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
-				await page.goto( productPermalink );
-
-				// Expect Size to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
-				await expectSelectedAttributes( page, { Type: 'T-shirt', Color: '', Size: '' }, optionStyle );
-			} );
-		} );
-		test( `${ optionStyle }: Add to Cart + Options: Auto-select on user selection should work`, async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
-			await test.step( `${ optionStyle }: Set the autoselect setting to false`, async () => {
-				await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: false } );
-			} );
-			await test.step( `${ optionStyle }: Expect attributes to NOT auto-select when user selects something`, async () => {
-				await page.goto( productPermalink );
-
-				// Expect nothing to be auto-selected
-				await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
-
-				await expectSelectedAttributes( page, { Type: '', Color: 'Blue', Size: '' }, optionStyle );
-			} );
-
-			await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
-				await goToProductTemplateEditor( pageObject, editor );
-				await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
-			} );
-			await test.step( `${ optionStyle }: Expect attributes to auto-select when user selects something`, async () => {
-				await page.goto( productPermalink );
-
-				// By setting the Color to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
-				await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
-
-				await expectSelectedAttributes( page, { Type: 'T-shirt', Color: 'Blue', Size: 'XL' }, optionStyle );
-			} );
-		} );
-		test( `${ optionStyle }: Add to Cart + Options: Test the multiple choices of the Values in conflict setting`, async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
-			async function setDisabledAttributesAction( value ) {
-				await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "${ value }"`, async () => {
-					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: value } );
-				} );
+		async function expectSelectedAttributes(
+			page: Page,
+			expectedValues: Record< string, string >={},
+			optionStyle: string | undefined = undefined,
+		) {
+			for ( let { name: attributeName, options: attributeValues } of productAttributes ) {
+				if ( optionStyle === 'Dropdown' ) {
+					if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
+						await expect(
+							page.getByLabel( attributeName, { exact: true } )
+						).toHaveValue( expectedValues[ attributeName ] );
+					} else {
+						await expect(
+							page.getByLabel( attributeName, { exact: true } )
+						).toHaveValue( '' );
+					}
+				} else if ( optionStyle === 'Pills' ) {
+					if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
+						attributeValues = attributeValues.filter( item => item !== expectedValues[ attributeName ] ); // Omit attributeName
+						await expect (
+							page.getByLabel( attributeName, { exact: true } ).getByLabel( expectedValues[ attributeName ], { exact: true } )
+						).toBeChecked();
+					}
+					if ( attributeValues.length ) {
+						for ( const attributeValue of attributeValues ) {
+							await expect(
+								page
+									.getByLabel( attributeName, { exact: true } )
+									.getByLabel( attributeValue, { exact: true } )
+							).not.toBeChecked();
+						}
+					}
+				} else {
+					throw new Error( `Bad value for optionStyle (${ optionStyle })` );
+				}
 			}
-			async function preselect() {
-				await page.goto( productPermalink );
+		}
 
-				// By setting the Color to "Blue", the only possible Size remaining is "XL".
-				await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+		test.beforeAll( async () => {
+			const cliOutput = await wpCLI(
+				`wc product list --user=1 --slug="${ productSlug }" --format=json`
+			);
+			const match = cliOutput.stdout.match( /\[\{.*\}\]\n?$/ );
+			if ( ! match ) {
+				throw new Error( `No match found, productSlug: ${ productSlug }` );
 			}
+			const cliOutputJSON = JSON.parse( match[0] );
+			productId = cliOutputJSON[0].id;
+			productAttributes = cliOutputJSON[0].attributes;
+		} );
 
-			await setDisabledAttributesAction( 'hide' );
-			await test.step( `${ optionStyle }: Expect unattached options to be hidden (by attribute)`, async () => {
-				await preselect();
-
-				await expect(
-					page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
-				).not.toBeVisible();
-			} );
-
+		test.beforeEach( async ( {
+			pageObject,
+			editor,
+		} ) => {
+			// Tests expect to start in editor of product template
 			await goToProductTemplateEditor( pageObject, editor );
-			await setDisabledAttributesAction( 'disable' );
-			await test.step( `${ optionStyle }: Expect unattached options to be disabled (by prop)`, async () => {
-				await preselect();
-
-				await expect(
-					page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
-				).toBeDisabled();
-			} );
 		} );
-		test( `${ optionStyle }: Add to Cart + Options: Combining Auto-select on user selection and Values in conflict settings should work`, async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
-			async function preselect() {
-				await page.goto( productPermalink );
 
-				// By setting the Color to "Blue", the only possible Size remaining is "XL".
-				await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
-				// Now, we deselect the Color.
-				await selectBlockAttribute( page, 'Color', '', optionStyle );
-				// Now, the options should look like this:
-				// Type: T-shirt
-				// Color: ''
-				// Size: XL
-				// Because the Size is XL, the only Colors possible are Red and Blue.
-				// Now if we select Size: S, the Color should auto-select to Green.
-				await selectBlockAttribute( page, 'Size', 'S', optionStyle );
-				// Now, the options should look like this:
-				// Type: T-shirt
-				// Color: Green
-				// Size: S
-			}
-
-			for ( const value of [ 'hide', 'disable' ] ) {
-				await goToProductTemplateEditor( pageObject, editor );
-
-				await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
-					await setCartBlockAttributes( pageObject, editor, { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
+		for ( const optionStyle of [ 'Pills', 'Dropdown' ] ) {
+			test( `${ optionStyle }: Add to Cart + Options: Auto-select should work (on page load)`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				await test.step( `${ optionStyle }: Set the autoselect setting to false`, async () => {
+					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: false } );
 				} );
-				await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
+				await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
+					await page.goto( productPermalink );
+
+					await expectSelectedAttributes( page, { Type: '', Color: '', Size: '' }, optionStyle );
+				} );
+
+				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
+					await goToProductTemplateEditor( pageObject, editor );
+					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
+				} );
+				await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
+					await page.goto( productPermalink );
+
+					// Expect Size to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
+					await expectSelectedAttributes( page, { Type: 'T-shirt', Color: '', Size: '' }, optionStyle );
+				} );
+			} );
+			test( `${ optionStyle }: Add to Cart + Options: Auto-select on user selection should work`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				await test.step( `${ optionStyle }: Set the autoselect setting to false`, async () => {
+					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: false } );
+				} );
+				await test.step( `${ optionStyle }: Expect attributes to NOT auto-select when user selects something`, async () => {
+					await page.goto( productPermalink );
+
+					// Expect nothing to be auto-selected
+					await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+
+					await expectSelectedAttributes( page, { Type: '', Color: 'Blue', Size: '' }, optionStyle );
+				} );
+
+				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
+					await goToProductTemplateEditor( pageObject, editor );
+					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
+				} );
+				await test.step( `${ optionStyle }: Expect attributes to auto-select when user selects something`, async () => {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
+					await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+
+					await expectSelectedAttributes( page, { Type: 'T-shirt', Color: 'Blue', Size: 'XL' }, optionStyle );
+				} );
+			} );
+			test( `${ optionStyle }: Add to Cart + Options: Test the multiple choices of the Values in conflict setting`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				async function setDisabledAttributesAction( value: string ) {
+					await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "${ value }"`, async () => {
+						await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: value } );
+					} );
+				}
+				async function preselect() {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+				}
+
+				await setDisabledAttributesAction( 'hide' );
+				await test.step( `${ optionStyle }: Expect unattached options to be hidden (by attribute)`, async () => {
 					await preselect();
 
-					await expectSelectedAttributes( page, { Type: 'T-shirt', Color: 'Green', Size: 'S' }, optionStyle );
+					await expect(
+						page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
+					).not.toBeVisible();
 				} );
-			}
-		} );
-	}
+
+				await goToProductTemplateEditor( pageObject, editor );
+				await setDisabledAttributesAction( 'disable' );
+				await test.step( `${ optionStyle }: Expect unattached options to be disabled (by prop)`, async () => {
+					await preselect();
+
+					await expect(
+						page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
+					).toBeDisabled();
+				} );
+			} );
+			test( `${ optionStyle }: Add to Cart + Options: Combining Auto-select on user selection and Values in conflict settings should work`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				async function preselect() {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+					// Now, we deselect the Color.
+					await selectBlockAttribute( page, 'Color', '', optionStyle );
+					// Now, the options should look like this:
+					// Type: T-shirt
+					// Color: ''
+					// Size: XL
+					// Because the Size is XL, the only Colors possible are Red and Blue.
+					// Now if we select Size: S, the Color should auto-select to Green.
+					await selectBlockAttribute( page, 'Size', 'S', optionStyle );
+					// Now, the options should look like this:
+					// Type: T-shirt
+					// Color: Green
+					// Size: S
+				}
+
+				for ( const value of [ 'hide', 'disable' ] ) {
+					await goToProductTemplateEditor( pageObject, editor );
+
+					await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
+						await setCartBlockAttributes( pageObject, editor, { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
+					} );
+					await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
+						await preselect();
+
+						await expectSelectedAttributes( page, { Type: 'T-shirt', Color: 'Green', Size: 'S' }, optionStyle );
+					} );
+				}
+			} );
+		}
+	} );
 } );
