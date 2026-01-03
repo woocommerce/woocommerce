@@ -58408,18 +58408,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
 
 		-
-			message: '#^Cannot call method get_description\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
-
-		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\VariationDescription\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
