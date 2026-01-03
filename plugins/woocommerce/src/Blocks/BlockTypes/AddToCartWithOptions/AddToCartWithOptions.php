@@ -261,7 +261,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				/** @var \WC_Product_Variable $product Type already checked above. */
+				// phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				/** @var \WC_Product_Variable $product */
 				$variations_data               = array();
 				$context['selectedAttributes'] = array();
 

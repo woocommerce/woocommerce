@@ -99,7 +99,8 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
-				/** @var \WC_Product_Variable $product Type already checked above. */
+				// phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				/** @var \WC_Product_Variable $product */
 				$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 
 				if ( $use_lazy_load ) {
