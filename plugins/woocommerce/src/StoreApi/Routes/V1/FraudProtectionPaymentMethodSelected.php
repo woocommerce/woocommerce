@@ -1,9 +1,9 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * FraudProtectionPaymentMethodSelected class file.
  */
+
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 

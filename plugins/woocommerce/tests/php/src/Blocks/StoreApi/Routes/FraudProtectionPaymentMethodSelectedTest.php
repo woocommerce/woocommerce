@@ -1,9 +1,9 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * FraudProtectionPaymentMethodSelected Route Tests.
  */
+
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 

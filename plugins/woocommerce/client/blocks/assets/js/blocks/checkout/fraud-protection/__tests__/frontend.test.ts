@@ -27,7 +27,7 @@ describe( 'Fraud Protection Frontend', () => {
 		// Clear window params
 		delete (
 			window as Window & { wc_fraud_protection_blocks_params?: unknown }
-		).wc_fraud_protection_blocks_params;
+		 ).wc_fraud_protection_blocks_params;
 	} );
 
 	describe( 'Initialization', () => {
@@ -47,7 +47,7 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: false,
 			};
 
@@ -66,7 +66,7 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
@@ -88,7 +88,7 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
@@ -108,15 +108,13 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler:
-				| ( ( data: unknown ) => void )
-				| undefined;
+			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
@@ -148,13 +146,11 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
-			let registeredHandler:
-				| ( ( data: unknown ) => void )
-				| undefined;
+			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
@@ -178,7 +174,7 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
@@ -188,9 +184,7 @@ describe( 'Fraud Protection Frontend', () => {
 
 			mockApiFetch.mockRejectedValue( new Error( 'API Error' ) );
 
-			let registeredHandler:
-				| ( ( data: unknown ) => void )
-				| undefined;
+			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
@@ -223,7 +217,7 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
@@ -240,9 +234,8 @@ describe( 'Fraud Protection Frontend', () => {
 
 				jest.isolateModules( () => {
 					require( '../frontend' );
-					registeredHandler = mockAddAction.mock.calls[ 0 ]?.[
-						2
-					] as ( data: unknown ) => void;
+					registeredHandler = mockAddAction.mock
+						.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
 				} );
 
 				// Assert handler is defined
@@ -269,15 +262,13 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler:
-				| ( ( data: unknown ) => void )
-				| undefined;
+			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
@@ -305,15 +296,13 @@ describe( 'Fraud Protection Frontend', () => {
 				window as Window & {
 					wc_fraud_protection_blocks_params?: unknown;
 				}
-			).wc_fraud_protection_blocks_params = {
+			 ).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler:
-				| ( ( data: unknown ) => void )
-				| undefined;
+			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );

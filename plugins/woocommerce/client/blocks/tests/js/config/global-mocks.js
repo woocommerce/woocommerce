@@ -7,7 +7,11 @@ global.TextDecoder = require( 'util' ).TextDecoder;
 
 // Polyfill fetch API globals for MSW
 const { Response, Request, Headers, FormData, File } = require( 'undici' );
-const { TransformStream, ReadableStream, WritableStream } = require( 'node:stream/web' );
+const {
+	TransformStream,
+	ReadableStream,
+	WritableStream,
+} = require( 'node:stream/web' );
 const { BroadcastChannel } = require( 'node:worker_threads' );
 global.Response = Response;
 global.Request = Request;
