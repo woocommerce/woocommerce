@@ -86,8 +86,114 @@ class BlocksCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Call register.
 		$this->sut->register();
 
-		// Verify hook was registered.
+		// Verify hooks were registered.
 		$this->assertNotFalse( has_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this->sut, 'handle_store_api_customer_update' ) ) );
+		$this->assertNotFalse( has_action( 'wp_enqueue_scripts', array( $this->sut, 'add_script_params' ) ) );
+	}
+
+	/**
+	 * Test that add_script_params localizes script on checkout page when feature is enabled.
+	 */
+	public function test_add_script_params_localizes_script_on_checkout_when_enabled(): void {
+		// Mock feature as enabled.
+		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
+
+		// Create and set up checkout page.
+		$checkout_page_id = wc_create_page(
+			'checkout',
+			'woocommerce_checkout_page_id',
+			'Checkout',
+			'[woocommerce_checkout]'
+		);
+		$this->go_to( get_permalink( $checkout_page_id ) );
+
+		// Register the script first (simulating what happens in real scenario).
+		wp_register_script( 'wc-checkout-block-frontend', 'test.js', array(), '1.0', true );
+
+		// Call add_script_params.
+		$this->sut->add_script_params();
+
+		// Verify script params were added.
+		$script_data = wp_scripts()->get_data( 'wc-checkout-block-frontend', 'data' );
+		$this->assertNotFalse( $script_data );
+		$this->assertStringContainsString( 'wc_fraud_protection_blocks_params', $script_data );
+		$this->assertStringContainsString( '"enabled":true', $script_data );
+	}
+
+	/**
+	 * Test that add_script_params does not localize script on non-checkout pages.
+	 */
+	public function test_add_script_params_skips_on_non_checkout_page(): void {
+		// Mock feature as enabled.
+		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
+
+		// Go to home page instead of checkout.
+		$this->go_to( home_url( '/' ) );
+
+		// Register the script.
+		wp_register_script( 'wc-checkout-block-frontend', 'test.js', array(), '1.0', true );
+
+		// Call add_script_params.
+		$this->sut->add_script_params();
+
+		// Verify script params were NOT added.
+		$script_data = wp_scripts()->get_data( 'wc-checkout-block-frontend', 'data' );
+		if ( $script_data ) {
+			$this->assertStringNotContainsString( 'wc_fraud_protection_blocks_params', $script_data );
+		}
+	}
+
+	/**
+	 * Test that add_script_params does not localize script when feature is disabled.
+	 */
+	public function test_add_script_params_skips_when_feature_disabled(): void {
+		// Mock feature as disabled.
+		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( false );
+
+		// Create and set up checkout page.
+		$checkout_page_id = wc_create_page(
+			'checkout',
+			'woocommerce_checkout_page_id',
+			'Checkout',
+			'[woocommerce_checkout]'
+		);
+		$this->go_to( get_permalink( $checkout_page_id ) );
+
+		// Register the script.
+		wp_register_script( 'wc-checkout-block-frontend', 'test.js', array(), '1.0', true );
+
+		// Call add_script_params.
+		$this->sut->add_script_params();
+
+		// Verify script params were NOT added.
+		$script_data = wp_scripts()->get_data( 'wc-checkout-block-frontend', 'data' );
+		if ( $script_data ) {
+			$this->assertStringNotContainsString( 'wc_fraud_protection_blocks_params', $script_data );
+		}
+	}
+
+	/**
+	 * Test that add_script_params does not localize script on order received page.
+	 */
+	public function test_add_script_params_skips_on_order_received_page(): void {
+		// Mock feature as enabled.
+		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
+
+		// Create order and go to order received page.
+		$order = wc_create_order();
+		$this->go_to( $order->get_checkout_order_received_url() );
+
+		// Register the script.
+		wp_register_script( 'wc-checkout-block-frontend', 'test.js', array(), '1.0', true );
+
+		// Call add_script_params.
+		$this->sut->add_script_params();
+
+		// Verify script params were NOT added (order received page is excluded).
+		$script_data = wp_scripts()->get_data( 'wc-checkout-block-frontend', 'data' );
+		if ( $script_data ) {
+			$this->assertStringNotContainsString( 'wc_fraud_protection_blocks_params', $script_data );
+		}
 	}
 
 	/**
