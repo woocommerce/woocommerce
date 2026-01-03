@@ -258,6 +258,7 @@ class ShortcodeCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			$this->sut->ajax_handle_payment_method_selected();
 		} catch ( \WPAjaxDieContinueException $e ) {
 			// Expected exception from wp_send_json_success.
+			unset( $e );
 		}
 
 		// Clean up.

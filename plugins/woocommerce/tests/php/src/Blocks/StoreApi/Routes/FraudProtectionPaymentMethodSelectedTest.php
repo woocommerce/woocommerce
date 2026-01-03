@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 /**
  * FraudProtectionPaymentMethodSelected Route Tests.
  */
@@ -25,10 +27,10 @@ class FraudProtectionPaymentMethodSelectedTest extends ControllerTestCase {
 	 */
 	public function test_post_request_with_valid_payment_method(): void {
 		// Create a mock scheduler to capture the tracking call.
-		$scheduler_called  = false;
-		$captured_event    = null;
-		$captured_data     = null;
-		$mock_scheduler    = $this->createMock( CheckoutEventScheduler::class );
+		$scheduler_called = false;
+		$captured_event   = null;
+		$captured_data    = null;
+		$mock_scheduler   = $this->createMock( CheckoutEventScheduler::class );
 		$mock_scheduler
 			->expects( $this->once() )
 			->method( 'schedule_tracking' )
