@@ -69,7 +69,5 @@ const initFraudProtectionTracking = () => {
 	);
 };
 
-console.log('asdf');
-
 // Initialize immediately
 initFraudProtectionTracking();

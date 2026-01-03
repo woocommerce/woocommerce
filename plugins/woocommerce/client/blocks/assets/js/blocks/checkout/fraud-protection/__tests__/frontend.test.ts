@@ -25,7 +25,9 @@ describe( 'Fraud Protection Frontend', () => {
 		jest.resetModules();
 
 		// Clear window params
-		delete ( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params;
+		delete (
+			window as Window & { wc_fraud_protection_blocks_params?: unknown }
+		).wc_fraud_protection_blocks_params;
 	} );
 
 	describe( 'Initialization', () => {
@@ -41,7 +43,11 @@ describe( 'Fraud Protection Frontend', () => {
 
 		it( 'should not register hook when feature is disabled', () => {
 			// Set disabled settings
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: false,
 			};
 
@@ -56,7 +62,11 @@ describe( 'Fraud Protection Frontend', () => {
 
 		it( 'should register hook when feature is enabled', () => {
 			// Set enabled settings
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
@@ -74,7 +84,11 @@ describe( 'Fraud Protection Frontend', () => {
 		} );
 
 		it( 'should register handler function when enabled', () => {
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
@@ -90,59 +104,81 @@ describe( 'Fraud Protection Frontend', () => {
 
 	describe( 'Payment Method Handler Integration', () => {
 		it( 'should call apiFetch when handler is invoked with valid payment method', async () => {
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
+			let registeredHandler:
+				| ( ( data: unknown ) => void )
+				| undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
+				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+					data: unknown
+				) => void;
 			} );
 
-			// Call the registered handler
-			if ( registeredHandler ) {
-				await registeredHandler( {
-					paymentMethodSlug: 'stripe',
-				} );
+			// Assert handler is defined
+			expect( registeredHandler ).toBeDefined();
 
-				// Verify API was called
-				expect( mockApiFetch ).toHaveBeenCalledWith( {
-					path: '/wc/store/v1/fraud-protection/payment-method-selected',
-					method: 'POST',
-					data: {
-						payment_method: 'stripe',
-					},
-				} );
-			}
+			// Call the registered handler
+			await registeredHandler!( {
+				paymentMethodSlug: 'stripe',
+			} );
+
+			// Verify API was called
+			expect( mockApiFetch ).toHaveBeenCalledWith( {
+				path: '/wc/store/v1/fraud-protection/payment-method-selected',
+				method: 'POST',
+				data: {
+					payment_method: 'stripe',
+				},
+			} );
 		} );
 
 		it( 'should not call apiFetch when payment method is empty', async () => {
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
+			let registeredHandler:
+				| ( ( data: unknown ) => void )
+				| undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
+				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+					data: unknown
+				) => void;
 			} );
 
-			if ( registeredHandler ) {
-				await registeredHandler( {
-					paymentMethodSlug: '',
-				} );
+			// Assert handler is defined
+			expect( registeredHandler ).toBeDefined();
 
-				expect( mockApiFetch ).not.toHaveBeenCalled();
-			}
+			await registeredHandler!( {
+				paymentMethodSlug: '',
+			} );
+
+			expect( mockApiFetch ).not.toHaveBeenCalled();
 		} );
 
 		it( 'should handle API errors gracefully without throwing', async () => {
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
@@ -152,33 +188,42 @@ describe( 'Fraud Protection Frontend', () => {
 
 			mockApiFetch.mockRejectedValue( new Error( 'API Error' ) );
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
+			let registeredHandler:
+				| ( ( data: unknown ) => void )
+				| undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
+				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+					data: unknown
+				) => void;
 			} );
 
-			if ( registeredHandler ) {
-				// Should not throw
-				await expect(
-					registeredHandler( {
-						paymentMethodSlug: 'stripe',
-					} )
-				).resolves.not.toThrow();
+			// Assert handler is defined
+			expect( registeredHandler ).toBeDefined();
 
-				// Error should be logged
-				expect( consoleErrorSpy ).toHaveBeenCalledWith(
-					'Fraud protection tracking error:',
-					expect.any( Error )
-				);
-			}
+			// Should not throw
+			await expect(
+				registeredHandler!( {
+					paymentMethodSlug: 'stripe',
+				} )
+			).resolves.not.toThrow();
+
+			// Error should be logged
+			expect( consoleErrorSpy ).toHaveBeenCalledWith(
+				'Fraud protection tracking error:',
+				expect.any( Error )
+			);
 
 			consoleErrorSpy.mockRestore();
 		} );
 
 		it( 'should send correct data for different payment methods', async () => {
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
@@ -189,83 +234,106 @@ describe( 'Fraud Protection Frontend', () => {
 			for ( const method of paymentMethods ) {
 				jest.clearAllMocks();
 
-				let registeredHandler: ( ( data: unknown ) => void ) | undefined;
+				let registeredHandler:
+					| ( ( data: unknown ) => void )
+					| undefined;
 
 				jest.isolateModules( () => {
 					require( '../frontend' );
-					registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
+					registeredHandler = mockAddAction.mock.calls[ 0 ]?.[
+						2
+					] as ( data: unknown ) => void;
 				} );
 
-				if ( registeredHandler ) {
-					await registeredHandler( {
-						paymentMethodSlug: method,
-					} );
+				// Assert handler is defined
+				expect( registeredHandler ).toBeDefined();
 
-					expect( mockApiFetch ).toHaveBeenCalledWith(
-						expect.objectContaining( {
-							data: {
-								payment_method: method,
-							},
-						} )
-					);
-				}
+				await registeredHandler!( {
+					paymentMethodSlug: method,
+				} );
+
+				expect( mockApiFetch ).toHaveBeenCalledWith(
+					expect.objectContaining( {
+						data: {
+							payment_method: method,
+						},
+					} )
+				);
 			}
 		} );
 	} );
 
 	describe( 'API Endpoint and Method', () => {
 		it( 'should use correct Store API endpoint', async () => {
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
+			let registeredHandler:
+				| ( ( data: unknown ) => void )
+				| undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
+				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+					data: unknown
+				) => void;
 			} );
 
-			if ( registeredHandler ) {
-				await registeredHandler( {
-					paymentMethodSlug: 'stripe',
-				} );
+			// Assert handler is defined
+			expect( registeredHandler ).toBeDefined();
 
-				expect( mockApiFetch ).toHaveBeenCalledWith(
-					expect.objectContaining( {
-						path: '/wc/store/v1/fraud-protection/payment-method-selected',
-					} )
-				);
-			}
+			await registeredHandler!( {
+				paymentMethodSlug: 'stripe',
+			} );
+
+			expect( mockApiFetch ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					path: '/wc/store/v1/fraud-protection/payment-method-selected',
+				} )
+			);
 		} );
 
 		it( 'should use POST method', async () => {
-			( window as Window & { wc_fraud_protection_blocks_params?: unknown } ).wc_fraud_protection_blocks_params = {
+			(
+				window as Window & {
+					wc_fraud_protection_blocks_params?: unknown;
+				}
+			).wc_fraud_protection_blocks_params = {
 				enabled: true,
 			};
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
+			let registeredHandler:
+				| ( ( data: unknown ) => void )
+				| undefined;
 
 			jest.isolateModules( () => {
 				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
+				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+					data: unknown
+				) => void;
 			} );
 
-			if ( registeredHandler ) {
-				await registeredHandler( {
-					paymentMethodSlug: 'stripe',
-				} );
+			// Assert handler is defined
+			expect( registeredHandler ).toBeDefined();
 
-				expect( mockApiFetch ).toHaveBeenCalledWith(
-					expect.objectContaining( {
-						method: 'POST',
-					} )
-				);
-			}
+			await registeredHandler!( {
+				paymentMethodSlug: 'stripe',
+			} );
+
+			expect( mockApiFetch ).toHaveBeenCalledWith(
+				expect.objectContaining( {
+					method: 'POST',
+				} )
+			);
 		} );
 	} );
 } );
