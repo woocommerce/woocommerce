@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Lazy load variation data for blocks-based product pages using the existing woocommerce_ajax_variation_threshold filter (default 30) to match classic template behavior and improve page load performance.
