@@ -58192,32 +58192,14 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_variation_attributes\(\)\.$#'
+			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
-			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^Cannot call method get_variation_attributes\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^Cannot call method is_in_stock\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^Cannot call method is_sold_individually\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
+			message: '#^Call to an undefined method WC_Product\:\:get_variation_attributes\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
@@ -58366,6 +58348,12 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
 
 		-
+			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:get_product_from_context\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
+
+		-
 			message: '#^Parameter \#1 \$html_content of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:has_visible_quantity_input\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -58380,6 +58368,12 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$quantity_html of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:make_quantity_input_interactive\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\QuantitySelector\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
+			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
 
@@ -58422,6 +58416,12 @@ parameters:
 		-
 			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
 			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\VariationDescription\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
+			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
 
@@ -61114,6 +61114,12 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
 		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/ProductGallery.php
+
+		-
 			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -61122,6 +61128,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGallery\:\:render_dialog\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
+			count: 1
+			path: src/Blocks/BlockTypes/ProductGallery.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGallery\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductGallery.php
 
@@ -61282,8 +61294,14 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductOnSale.php
 
 		-
-			message: '#^Cannot access offset ''variation_id'' on array\|WC_Product_Variation\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Blocks/BlockTypes/ProductPrice.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductPrice.php
 
@@ -61306,8 +61324,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductPrice.php
 
 		-
-			message: '#^Parameter \#2 \$search of function array_key_exists expects array, array\|\(ArrayAccess&WC_Product_Variation\) given\.$#'
-			identifier: argument.type
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductPrice.php
 
@@ -61534,6 +61552,12 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Blocks/BlockTypes/ProductSKU.php
+
+		-
 			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -61548,6 +61572,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSKU.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSKU.php
 
@@ -61600,20 +61630,14 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductSearch.php
 
 		-
-			message: '#^Cannot call method get_dimensions\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 2
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
-			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSpecifications.php
-
-		-
-			message: '#^Cannot call method get_weight\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
+			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
+			identifier: method.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
@@ -61642,6 +61666,18 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSpecifications\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
+
+		-
+			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Blocks/BlockTypes/ProductStockIndicator.php
+
+		-
 			message: '#^Class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product not found\.$#'
 			identifier: class.notFound
 			count: 1
@@ -61662,6 +61698,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductStockIndicator\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Blocks/BlockTypes/ProductStockIndicator.php
+
+		-
+			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductStockIndicator\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
+			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductStockIndicator.php
 
