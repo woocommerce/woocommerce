@@ -58198,6 +58198,30 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
+			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 3
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
+
+		-
+			message: '#^Cannot call method get_variation_attributes\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 2
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
+
+		-
+			message: '#^Cannot call method is_in_stock\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
+
+		-
+			message: '#^Cannot call method is_sold_individually\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\AddToCartWithOptions\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -58388,6 +58412,18 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
+
+		-
+			message: '#^Cannot call method get_description\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
+
+		-
+			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
 
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\VariationSelector\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
@@ -61246,6 +61282,12 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductOnSale.php
 
 		-
+			message: '#^Cannot access offset ''variation_id'' on array\|WC_Product_Variation\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Blocks/BlockTypes/ProductPrice.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -61260,6 +61302,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:render\(\) should return string but return statement is missing\.$#'
 			identifier: return.missing
+			count: 1
+			path: src/Blocks/BlockTypes/ProductPrice.php
+
+		-
+			message: '#^Parameter \#2 \$search of function array_key_exists expects array, array\|\(ArrayAccess&WC_Product_Variation\) given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductPrice.php
 
@@ -61550,6 +61598,24 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSearch.php
+
+		-
+			message: '#^Cannot call method get_dimensions\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
+
+		-
+			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
+
+		-
+			message: '#^Cannot call method get_weight\(\) on array\|WC_Product_Variation\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSpecifications\:\:render\(\) should return string but returns string\|false\.$#'
