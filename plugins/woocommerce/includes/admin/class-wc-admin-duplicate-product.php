@@ -336,9 +336,15 @@ class WC_Admin_Duplicate_Product {
 					INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 					WHERE posts.post_type IN ( 'product', 'product_variation' )
 					AND lookup.sku LIKE %s",
-				$wpdb->esc_like( $root_sku ) . '-%'
+				'%' . $wpdb->esc_like( $root_sku ) . '%'
 			)
 		);
+
+		// The sku is already unique!
+		if ( empty( $existing_skus ) ) {
+			$product->set_sku( $root_sku );
+			return;
+		}
 
 		// Find the maximum suffix so we can ensure uniqueness.
 		$max_suffix = 0;
