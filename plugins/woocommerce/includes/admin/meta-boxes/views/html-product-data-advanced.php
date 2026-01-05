@@ -56,7 +56,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php endif; ?>
 	<?php if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) : ?>
 		<?php $is_pos_supported = $product_object->is_type( array( 'simple', 'variable' ) ) && ! $product_object->is_downloadable(); ?>
-		<div class="options_group show_if_simple show_if_variable hide_if_downloadable" id="pos_visibility_supported" <?php echo $is_pos_supported ? '' : 'style="display: none;"'; ?>>
+		<div class="options_group" id="pos_visibility_supported" <?php echo $is_pos_supported ? '' : 'style="display: none;"'; ?>>
 			<?php
 			$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_object->get_id() );
 			woocommerce_wp_checkbox(
