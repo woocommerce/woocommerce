@@ -334,7 +334,7 @@ class WC_Admin_Duplicate_Product {
 					INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 					WHERE posts.post_type IN ( 'product', 'product_variation' )
 					AND lookup.sku LIKE %s",
-				wp_slash( '%' . $root_sku . '%' )
+				'%' . $wpdb->esc_like( $root_sku ) . '%'
 			)
 		);
 
