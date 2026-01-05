@@ -139,17 +139,16 @@ const isAttributeValueValid = ( {
  * Return the product attributes and options.
  */
 const getProductAttributesAndOptions = ( productObject: Record< any, any> | null ) => {
-	if (
-		! productObject ||
-		! Array.isArray( productObject.variations ) ||
-		typeof( productObject.variations.attributes ) !== 'object'
-	) {
+	if ( ! productObject?.variations ) {
 		return {};
 	}
 
 	const variations: Record< string, any >[] = Object.values( productObject.variations );
 	const productAttributesAndOptions = {} as Record< string, string[] >;
 	variations.forEach( ( variation: Record< string, any > ) => {
+		if ( ! variation?.attributes ) {
+			return;
+		}
 		Object.entries( variation.attributes ).forEach( ( [ key, value ] ) => {
 			if ( typeof key !== 'string' || typeof value !== 'string' ) {
 				return;
