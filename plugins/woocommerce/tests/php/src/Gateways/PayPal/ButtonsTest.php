@@ -315,7 +315,7 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 			);
 		}
 
-		if ( $is_checkout ) {
+		if ( $is_cart ) {
 			add_filter( 'woocommerce_is_cart', '__return_true' );
 		}
 
