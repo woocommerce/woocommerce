@@ -74509,82 +74509,16 @@ parameters:
 			path: src/Internal/ProductImage/MatchImageBySKU.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\DataStores\\PushTokensDataStore\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
+			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_id\(\) expects int, int\|WP_Post given\.$#'
+			identifier: argument.type
+			count: 2
 			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\DataStores\\PushTokensDataStore\:\:read\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\DataStores\\PushTokensDataStore\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function delete_post_meta expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$object_ids of function update_meta_cache expects array\<int\>\|string, array\<int\|WP_Post\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$postarr of function wp_insert_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{post_author\: int\|null, post_type\: ''push_token'', post_status\: ''private'', meta_input\: array\{platform\: string\|null, token\: string\|null, device_uuid\?\: string, origin\: string\|null\}\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$postarr of function wp_update_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{ID\: int\|null, post_author\: int\|null, post_type\: ''push_token'', post_status\: ''private'', meta_input\: array\{platform\: string\|null, token\: string\|null, device_uuid\?\: string, origin\: string\|null\}\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_device_uuid\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_id\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_origin\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_platform\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_token\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_user_id\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
 
 		-
 			message: '#^@param string \$css does not accept actual type of parameter\: string\|false\.$#'
