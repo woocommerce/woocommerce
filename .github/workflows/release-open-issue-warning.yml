@@ -255,30 +255,40 @@ jobs:
               .sort((a, b) => b.version - a.version);
 
             const milestoneReports = [];
-            for (const milestone of filteredMilestones) {
-              // Search for issues and PRs in the milestone
-              const milestoneResults = await github.rest.search.issuesAndPullRequests({
+            for ( const milestone of filteredMilestones ) {
+              // Search for issues and PRs in the milestone (fetch only 11 items).
+              const milestoneResults = await github.rest.search.issuesAndPullRequests( {
                 q: `milestone:"${milestone.title}" state:open repo:${context.repo.owner}/${context.repo.repo}`,
-                per_page: 100
-              });
+                per_page: 11
+              } );
 
+              const totalCount = milestoneResults.data.total_count;
               const milestoneItems = milestoneResults.data.items;
-              console.log(`Found ${milestoneItems.length} open items for milestone ${milestone.title}`);
+              console.log( `Found ${totalCount} open items for milestone ${milestone.title}` );
 
-              if ( milestoneItems.length === 0 ) {
+              if ( totalCount === 0 ) {
                 continue;
               }
 
               // Build the report for this milestone.
               const formattedItems = [];
+              const shouldPaginate = totalCount >= 12;
+              const itemsToShow = shouldPaginate ? milestoneItems.slice( 0, 10 ) : milestoneItems;
 
-              for (const item of milestoneItems) {
-                const formattedItem = await formatItem(item, github, context);
-                formattedItems.push(formattedItem);
+              for (const item of itemsToShow) {
+                const formattedItem = await formatItem( item, github, context );
+                formattedItems.push( formattedItem );
+              }
+
+              // Add "... and X more" link if there are more items.
+              if (shouldPaginate) {
+                const remainingCount = totalCount - 10;
+                const milestoneUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/milestone/${milestone.number}`;
+                formattedItems.push(`<${milestoneUrl}|... and ${remainingCount} more>`);
               }
 
               const reportLines = [];
-              reportLines.push( `*_${milestone.title}_* (${milestoneItems.length} items)` );
+              reportLines.push( `*_${milestone.title}_* (${totalCount} items)` );
 
               // Milestone matches upcoming release.
               if ( releaseEventFound && milestone.title === upcomingMilestone ) {
