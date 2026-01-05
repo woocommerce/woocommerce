@@ -24,7 +24,11 @@ class FraudProtectionTracker {
 	 * Track fraud protection event with already-collected data.
 	 *
 	 * This method accepts fully-collected event data (including session context)
-	 * and logs it for the fraud protection service.
+	 * and triggers the fraud protection event tracking via the WordPress action hook.
+	 *
+	 * The EventTracker listens to this action and handles the complete tracking flow
+	 * including feature flag checks, whitelist handling, data transmission, and
+	 * session status updates.
 	 *
 	 * The method implements graceful degradation - any errors during tracking
 	 * will be logged but will not break the functionality.
@@ -35,24 +39,19 @@ class FraudProtectionTracker {
 	 */
 	public function track_event( string $event_type, array $collected_data ): void {
 		try {
-			// phpcs:ignore Generic.Commenting.Todo.TaskFound
-			// TODO: Once EventTracker/API client is implemented (WOOSUBS-1249), call it here:
-			// $event_tracker = wc_get_container()->get( EventTracker::class );
-			// $event_tracker->track( $event_type, $collected_data );
-			//
-			// For now, log the event for debugging and verification.
-			FraudProtectionController::log(
-				'info',
-				sprintf(
-					'Fraud protection event tracked: %s | Session ID: %s',
-					$event_type,
-					$collected_data['session']['session_id'] ?? 'N/A'
-				),
-				array(
-					'event_type'     => $event_type,
-					'collected_data' => $collected_data,
-				)
-			);
+			/**
+			 * Hook: woocommerce_fraud_protection_track_event
+			 *
+			 * Triggers fraud protection event tracking. The EventTracker class listens
+			 * to this action and orchestrates the complete tracking flow.
+			 *
+			 * @since 10.5.0
+			 *
+			 * @param string $event_type     Event type identifier.
+			 * @param array  $collected_data Fully-collected event data including session context.
+			 */
+			do_action( 'woocommerce_fraud_protection_track_event', $event_type, $collected_data );
+
 		} catch ( \Exception $e ) {
 			// Gracefully handle errors - fraud protection should never break functionality.
 			FraudProtectionController::log(
