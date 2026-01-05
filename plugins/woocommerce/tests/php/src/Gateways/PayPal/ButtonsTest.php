@@ -284,7 +284,7 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_current_page_for_app_switch(
 		string $page_type,
-		string $filter_name = null,
+		?string $filter_name = null,
 		string $post_type,
 		bool $expected_contains
 	): void {
