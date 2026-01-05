@@ -66,7 +66,7 @@ class VariationDataUtilsTest extends \WC_Unit_Test_Case {
 	 * Test that the woocommerce_ajax_variation_threshold filter is respected.
 	 */
 	public function test_respects_threshold_filter() {
-		$product = WC_Helper_Product::create_variation_product();
+		$product         = WC_Helper_Product::create_variation_product();
 		$variation_count = count( $product->get_children() );
 
 		// Set threshold below variation count - should enable lazy loading.
@@ -90,7 +90,7 @@ class VariationDataUtilsTest extends \WC_Unit_Test_Case {
 	 * Test that the filter receives the product as second argument.
 	 */
 	public function test_filter_receives_product_argument() {
-		$product = WC_Helper_Product::create_variation_product();
+		$product          = WC_Helper_Product::create_variation_product();
 		$received_product = null;
 
 		add_filter(
@@ -149,3 +149,4 @@ class VariationDataUtilsTest extends \WC_Unit_Test_Case {
 		return $product;
 	}
 }
+

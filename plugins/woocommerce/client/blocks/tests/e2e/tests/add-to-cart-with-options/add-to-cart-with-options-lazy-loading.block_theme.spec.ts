@@ -22,26 +22,17 @@ const test = base.extend< {
 } );
 
 test.describe( 'Add to Cart + Options Block - Lazy Loading Variations', () => {
-	// Activate the plugin that lowers the threshold to 3, so Hoodie (~6 variations)
-	// will trigger lazy loading mode.
-	test.beforeAll( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-lazy-load-variations'
-		);
-	} );
-
-	test.afterAll( async ( { requestUtils } ) => {
-		await requestUtils.deactivatePlugin(
-			'woocommerce-blocks-test-lazy-load-variations'
-		);
-		await requestUtils.deleteAllTemplates( 'wp_template' );
-	} );
-
 	test( 'fetches variation data via AJAX and updates UI when threshold is exceeded', async ( {
 		page,
 		pageObject,
 		editor,
+		requestUtils,
 	} ) => {
+		// Activate the plugin that lowers the threshold to 3, so Hoodie (~6 variations)
+		// will trigger lazy loading mode.
+		await requestUtils.activatePlugin(
+			'woocommerce-blocks-test-lazy-load-variations'
+		);
 		// Track requests to the Store API products endpoint.
 		const variationRequests: string[] = [];
 		page.on( 'request', ( request ) => {
@@ -92,5 +83,11 @@ test.describe( 'Add to Cart + Options Block - Lazy Loading Variations', () => {
 
 		// Verify success.
 		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+
+		// Cleanup.
+		await requestUtils.deactivatePlugin(
+			'woocommerce-blocks-test-lazy-load-variations'
+		);
+		await requestUtils.deleteAllTemplates( 'wp_template' );
 	} );
 } );
