@@ -25,11 +25,11 @@ defined( 'ABSPATH' ) || exit;
 class CartEventTracker implements RegisterHooksInterface {
 
 	/**
-	 * Fraud protection tracker instance.
+	 * Event tracker instance.
 	 *
-	 * @var FraudProtectionTracker
+	 * @var EventTracker
 	 */
-	private FraudProtectionTracker $tracker;
+	private EventTracker $event_tracker;
 
 	/**
 	 * Session data collector instance.
@@ -50,16 +50,16 @@ class CartEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionTracker    $tracker                     The fraud protection tracker instance.
+	 * @param EventTracker              $event_tracker               The event tracker instance.
 	 * @param SessionDataCollector      $data_collector              The session data collector instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		FraudProtectionTracker $tracker,
+		EventTracker $event_tracker,
 		SessionDataCollector $data_collector,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->tracker                     = $tracker;
+		$this->event_tracker               = $event_tracker;
 		$this->data_collector              = $data_collector;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
@@ -107,10 +107,10 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		// Collect comprehensive session data.
+		// Collect comprehensive session data and trigger event tracking.
 		try {
 			$collected_data = $this->data_collector->collect( 'cart_item_added', $event_data );
-			$this->tracker->track_event( 'cart_item_added', $collected_data );
+			$this->event_tracker->track_event( 'cart_item_added', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -161,10 +161,10 @@ class CartEventTracker implements RegisterHooksInterface {
 		// Add old quantity for context.
 		$event_data['old_quantity'] = (int) $old_quantity;
 
-		// Collect comprehensive session data.
+		// Collect comprehensive session data and trigger event tracking.
 		try {
 			$collected_data = $this->data_collector->collect( 'cart_item_updated', $event_data );
-			$this->tracker->track_event( 'cart_item_updated', $collected_data );
+			$this->event_tracker->track_event( 'cart_item_updated', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -211,10 +211,10 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		// Collect comprehensive session data.
+		// Collect comprehensive session data and trigger event tracking.
 		try {
 			$collected_data = $this->data_collector->collect( 'cart_item_removed', $event_data );
-			$this->tracker->track_event( 'cart_item_removed', $collected_data );
+			$this->event_tracker->track_event( 'cart_item_removed', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -261,10 +261,10 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		// Collect comprehensive session data.
+		// Collect comprehensive session data and trigger event tracking.
 		try {
 			$collected_data = $this->data_collector->collect( 'cart_item_restored', $event_data );
-			$this->tracker->track_event( 'cart_item_restored', $collected_data );
+			$this->event_tracker->track_event( 'cart_item_restored', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(

@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventScheduler;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\EventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 
 /**
@@ -28,7 +28,7 @@ class CheckoutEventSchedulerTest extends \WC_Unit_Test_Case {
 	/**
 	 * Mock fraud protection tracker.
 	 *
-	 * @var FraudProtectionTracker|\PHPUnit\Framework\MockObject\MockObject
+	 * @var EventTracker|\PHPUnit\Framework\MockObject\MockObject
 	 */
 	private $mock_tracker;
 
@@ -51,13 +51,13 @@ class CheckoutEventSchedulerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_tracker        = $this->createMock( FraudProtectionTracker::class );
+		$this->mock_event_tracker        = $this->createMock( EventTracker::class );
 		$this->mock_data_collector = $this->createMock( SessionDataCollector::class );
 
 		// Create system under test.
 		$this->sut = new CheckoutEventScheduler();
 		$this->sut->init(
-			$this->mock_tracker,
+			$this->mock_event_tracker,
 			$this->mock_data_collector
 		);
 	}
@@ -166,7 +166,7 @@ class CheckoutEventSchedulerTest extends \WC_Unit_Test_Case {
 		);
 
 		// Mock tracker to verify track_event is called with collected data.
-		$this->mock_tracker
+		$this->mock_event_tracker
 			->expects( $this->once() )
 			->method( 'track_event' )
 			->with(
@@ -190,7 +190,7 @@ class CheckoutEventSchedulerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_process_scheduled_tracking_handles_missing_parameters(): void {
 		// Mock tracker should not be called.
-		$this->mock_tracker
+		$this->mock_event_tracker
 			->expects( $this->never() )
 			->method( 'track_event' );
 

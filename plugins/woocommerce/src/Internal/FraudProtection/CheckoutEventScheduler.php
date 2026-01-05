@@ -22,11 +22,11 @@ defined( 'ABSPATH' ) || exit;
 class CheckoutEventScheduler {
 
 	/**
-	 * Fraud protection tracker instance.
+	 * Event tracker instance.
 	 *
-	 * @var FraudProtectionTracker
+	 * @var EventTracker
 	 */
-	private FraudProtectionTracker $tracker;
+	private EventTracker $event_tracker;
 
 	/**
 	 * Session data collector instance.
@@ -57,14 +57,14 @@ class CheckoutEventScheduler {
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionTracker $tracker        The fraud protection tracker instance.
-	 * @param SessionDataCollector   $data_collector The session data collector instance.
+	 * @param EventTracker         $event_tracker  The event tracker instance.
+	 * @param SessionDataCollector $data_collector The session data collector instance.
 	 */
 	final public function init(
-		FraudProtectionTracker $tracker,
+		EventTracker $event_tracker,
 		SessionDataCollector $data_collector
 	): void {
-		$this->tracker        = $tracker;
+		$this->event_tracker  = $event_tracker;
 		$this->data_collector = $data_collector;
 	}
 
@@ -236,6 +236,6 @@ class CheckoutEventScheduler {
 			return;
 		}
 
-		$this->tracker->track_event( $event_type, $collected_data );
+		$this->event_tracker->track_event( $event_type, $collected_data );
 	}
 }

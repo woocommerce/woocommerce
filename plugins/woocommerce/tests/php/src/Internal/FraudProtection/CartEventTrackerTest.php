@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\EventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
@@ -27,11 +27,11 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Mock fraud protection tracker.
+	 * Mock event tracker.
 	 *
-	 * @var FraudProtectionTracker|\PHPUnit\Framework\MockObject\MockObject
+	 * @var EventTracker|\PHPUnit\Framework\MockObject\MockObject
 	 */
-	private $mock_tracker;
+	private $mock_event_tracker;
 
 	/**
 	 * Mock session data collector.
@@ -66,14 +66,14 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_tracker        = $this->createMock( FraudProtectionTracker::class );
+		$this->mock_event_tracker  = $this->createMock( EventTracker::class );
 		$this->mock_data_collector = $this->createMock( SessionDataCollector::class );
 		$this->mock_controller     = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
 		$this->sut = new CartEventTracker();
 		$this->sut->init(
-			$this->mock_tracker,
+			$this->mock_event_tracker,
 			$this->mock_data_collector,
 			$this->mock_controller
 		);
@@ -138,7 +138,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker to verify track_event is called with collected data.
-		$this->mock_tracker
+		$this->mock_event_tracker
 			->expects( $this->once() )
 			->method( 'track_event' )
 			->with(
@@ -178,7 +178,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker.
-		$this->mock_tracker
+		$this->mock_event_tracker
 			->expects( $this->once() )
 			->method( 'track_event' )
 			->with(
@@ -214,7 +214,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker.
-		$this->mock_tracker
+		$this->mock_event_tracker
 			->expects( $this->once() )
 			->method( 'track_event' )
 			->with(
@@ -248,7 +248,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker.
-		$this->mock_tracker
+		$this->mock_event_tracker
 			->expects( $this->once() )
 			->method( 'track_event' )
 			->with(
@@ -285,7 +285,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker to capture event data.
-		$this->mock_tracker
+		$this->mock_event_tracker
 			->expects( $this->once() )
 			->method( 'track_event' )
 			->with(
