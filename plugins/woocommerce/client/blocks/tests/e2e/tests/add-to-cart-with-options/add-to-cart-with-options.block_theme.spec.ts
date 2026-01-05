@@ -1091,7 +1091,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			productAttributes = cliOutputJSON[0].attributes;
 		} );
 
-		for ( const optionStyle of [ 'pills', 'dropdown' ] as ( 'pills' | 'dropdown' )[] ) {
+		for ( const optionStyle of [ 'Pills', 'Dropdown' ] as ( 'Pills' | 'Dropdown' )[] ) {
 			test( `${ optionStyle }: Add to Cart + Options: Auto-select should work`, async ( {
 				page,
 				pageObject,

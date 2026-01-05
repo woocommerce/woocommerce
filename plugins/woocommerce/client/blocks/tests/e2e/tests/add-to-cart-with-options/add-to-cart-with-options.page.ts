@@ -128,9 +128,9 @@ class AddToCartWithOptionsPage {
 	async selectBlockAttribute(
 		attributeName: any,
 		attributeValue: any,
-		optionStyle: 'pills' | 'dropdown',
+		optionStyle: 'Pills' | 'Dropdown',
 	) {
-		if ( optionStyle === 'dropdown' ) {
+		if ( optionStyle === 'Dropdown' ) {
 			await this.page.getByLabel( attributeName ).selectOption( attributeValue );
 			return;
 		}
@@ -144,11 +144,11 @@ class AddToCartWithOptionsPage {
 	async expectSelectedAttributes(
 		productAttributes: [ { name: string, options: any[] } ],
 		expectedValues: Record< string, string | RegExp > = {},
-		optionStyle: 'pills' | 'dropdown',
+		optionStyle: 'Pills' | 'Dropdown',
 	) {
 		for ( let { name: attributeName, options: attributeValues } of productAttributes ) {
 			const attributeNameLocator = this.page.getByLabel( attributeName, { exact: true } );
-			if ( optionStyle === 'dropdown' ) {
+			if ( optionStyle === 'Dropdown' ) {
 				let expectedValue: string | RegExp;
 				if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
 					expectedValue = expectedValues[ attributeName ];
