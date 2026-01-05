@@ -590,7 +590,7 @@ class CustomOrdersTableController {
 
 		$features_controller->add_feature_definition(
 			'custom_order_tables',
-			__( 'High-Performance order storage', 'woocommerce' ),
+			fn() => __( 'High-Performance order storage', 'woocommerce' ),
 			$definition
 		);
 	}
