@@ -243,34 +243,7 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
-
-		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
-		$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
-
-		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
-		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
-
-		$is_block_editor = $this->is_block_editor();
-
-		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'localPickupLocations' ) ) {
-			// Locations are passed to the client in admin to show a realistic preview in the editor.
-			$this->asset_data_registry->add(
-				'localPickupLocations',
-				array_filter(
-					array_map(
-						function ( $location ) {
-							if ( ! $location['enabled'] ) {
-								return null;
-							}
-							$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
-							return $location;
-						},
-						get_option( 'pickup_location_pickup_locations', array() )
-					)
-				)
-			);
-		}
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
