@@ -345,7 +345,7 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		// Find the maximum suffix so we can ensure uniqueness.
-		$max_suffix = 1;
+		$max_suffix = 0;
 		foreach ( $existing_skus as $existing_sku ) {
 			// Pull a numerical suffix off the sku after the last hyphen.
 			$suffix = intval( substr( $existing_sku, strrpos( $existing_sku, '-', -1 ) + 1 ) );
