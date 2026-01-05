@@ -43,9 +43,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 */
 		public function init() {
 			// Reviews Widget.
-			if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
+			//if ( current_user_can( 'publish_shop_orders' ) && post_type_supports( 'product', 'comments' ) ) {
 				wp_add_dashboard_widget( 'woocommerce_dashboard_recent_reviews', __( 'WooCommerce Recent Reviews', 'woocommerce' ), array( $this, 'recent_reviews' ) );
-			}
+			//}
 			wp_add_dashboard_widget( 'woocommerce_dashboard_status', __( 'WooCommerce Status', 'woocommerce' ), array( $this, 'status_widget' ) );
 
 			// Network Order Widget.
@@ -416,6 +416,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 */
 		public function recent_reviews() {
 			global $wpdb;
+
+			// The hook has been introduced via https://github.com/woocommerce/woocommerce/pull/13409 (back in 2017),
+			// and limits us in the optimizations options (ideally we should cache latest five approved review IDs so
+			// the SQL query uses those IDs and PKs when joining the table) to caching the query results and invalidating
+			// those on review creation/update/deletion.
+
+			// TODO: latest reviews caching
 
 			$query_from = apply_filters(
 				'woocommerce_report_recent_reviews_query_from',
