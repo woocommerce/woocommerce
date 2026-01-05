@@ -30,20 +30,32 @@ class Text extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		$block_content    = $this->adjustStyleAttribute( $block_content );
-		$block_attributes = wp_parse_args(
+		$block_content        = $this->adjustStyleAttribute( $block_content );
+		$block_attributes     = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
 				'textAlign' => 'left',
 				'style'     => array(),
 			)
 		);
-		$html             = new \WP_HTML_Tag_Processor( $block_content );
-		$classes          = 'email-text-block';
+		$html                 = new \WP_HTML_Tag_Processor( $block_content );
+		$classes              = 'email-text-block';
+		$alignment_from_class = null;
 		if ( $html->next_tag() ) {
 			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$block_classes = $html->get_attribute( 'class' ) ?? '';
 			$classes      .= ' ' . $block_classes;
+
+			// Extract text alignment from has-text-align-* classes before they're potentially modified.
+			$class_attr = (string) $block_classes;
+			if ( false !== strpos( $class_attr, 'has-text-align-center' ) ) {
+				$alignment_from_class = 'center';
+			} elseif ( false !== strpos( $class_attr, 'has-text-align-right' ) ) {
+				$alignment_from_class = 'right';
+			} elseif ( false !== strpos( $class_attr, 'has-text-align-left' ) ) {
+				$alignment_from_class = 'left';
+			}
+
 			// remove has-background to prevent double padding applied for wrapper and inner element.
 			$block_classes = str_replace( 'has-background', '', $block_classes );
 			// remove border related classes because we handle border on wrapping table cell.
@@ -69,6 +81,8 @@ class Text extends Abstract_Block_Renderer {
 			$additional_styles['text-align'] = $parsed_block['attrs']['textAlign'];
 		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
 			$additional_styles['text-align'] = $parsed_block['attrs']['align'];
+		} elseif ( null !== $alignment_from_class ) {
+			$additional_styles['text-align'] = $alignment_from_class;
 		}
 
 		$block_styles = Styles_Helper::extend_block_styles( $block_styles, $additional_styles );

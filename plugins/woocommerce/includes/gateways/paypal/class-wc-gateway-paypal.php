@@ -16,6 +16,7 @@ use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
+use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -313,8 +314,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
 		$transact_account_manager->do_onboarding();
 	}
 
@@ -948,8 +948,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// We need merchant and provider accounts with Transact to be able to use the proxy.
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
 		$merchant_account_data    = $transact_account_manager->get_transact_account_data( 'merchant' );
 		if ( empty( $merchant_account_data ) ) {
 			return false;
