@@ -1027,7 +1027,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test.describe( 'Add to Cart + Options autoselect behavior', () => {
 		const productSlug = 'autoselect-t-shirt';
 		const productPermalink = '/product/' + productSlug;
-		let productId;
 		let productAttributes: [ { name: string, options: any[] } ];
 
 		async function goToProductTemplateEditor ( pageObject: AddToCartWithOptionsPage, editor: Editor ) {
@@ -1156,7 +1155,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 				throw new Error( `No match found, productSlug: ${ productSlug }` );
 			}
 			const cliOutputJSON = JSON.parse( match[0] );
-			productId = cliOutputJSON[0].id;
 			productAttributes = cliOutputJSON[0].attributes;
 		} );
 
