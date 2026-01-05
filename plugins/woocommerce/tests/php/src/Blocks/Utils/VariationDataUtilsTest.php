@@ -149,4 +149,3 @@ class VariationDataUtilsTest extends \WC_Unit_Test_Case {
 		return $product;
 	}
 }
-
