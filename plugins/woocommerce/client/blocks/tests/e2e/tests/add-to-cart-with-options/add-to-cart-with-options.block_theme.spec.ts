@@ -1140,18 +1140,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 				editor,
 			} ) => {
 				await pageObject.updateSingleProductTemplate();
-				async function preselect() {
-					await page.goto( productPermalink );
-
-					// By setting the Color to "Blue", the only possible Size remaining is "XL".
-					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
-				}
 
 				await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "hide"`, async () => {
 					await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: 'hide' } );
 				} );
 				await test.step( `${ optionStyle }: Expect unattached options to be hidden (by attribute)`, async () => {
-					await preselect();
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
 
 					await expect(
 						page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
@@ -1159,7 +1156,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} );
 
 				await test.step( `${ optionStyle }: Expect unattached options to be disabled (by prop)`, async () => {
-					await preselect();
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
 
 					await expect(
 						page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
@@ -1172,34 +1172,30 @@ test.describe( 'Add to Cart + Options Block', () => {
 				editor,
 			} ) => {
 				await pageObject.updateSingleProductTemplate();
-				async function preselect() {
-					await page.goto( productPermalink );
-
-					// By setting the Color to "Blue", the only possible Size remaining is "XL".
-					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
-					// Now, we deselect the Color.
-					await pageObject.selectBlockAttribute( 'Color', '', optionStyle );
-					// Now, the options should look like this:
-					// Type: T-shirt
-					// Color: ''
-					// Size: XL
-					// Because the Size is XL, the only Colors possible are Red and Blue.
-					// Now if we select Size: S, the Color should auto-select to Green.
-					await pageObject.selectBlockAttribute( 'Size', 'S', optionStyle );
-					// Now, the options should look like this:
-					// Type: T-shirt
-					// Color: Green
-					// Size: S
-				}
-
-				for ( const value of [ 'hide', 'disable' ] ) {
+				for ( const value of [ 'disable', 'hide' ] ) {
 					await pageObject.updateSingleProductTemplate();
 
 					await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
 						await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
 					} );
 					await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
-						await preselect();
+						await page.goto( productPermalink );
+
+						// By setting the Color to "Blue", the only possible Size remaining is "XL".
+						await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
+						// Now, we deselect the Color.
+						await pageObject.selectBlockAttribute( 'Color', '', optionStyle );
+						// Now, the options should look like this:
+						// Type: T-shirt
+						// Color: ''
+						// Size: XL
+						// Because the Size is XL, the only Colors possible are Red and Blue.
+						// Now if we select Size: S, the Color should auto-select to Green.
+						await pageObject.selectBlockAttribute( 'Size', 'S', optionStyle );
+						// Now, the options should look like this:
+						// Type: T-shirt
+						// Color: Green
+						// Size: S
 
 						await pageObject.expectSelectedAttributes( productAttributes, { Type: 'T-shirt', Color: 'Green', Size: 'S' }, optionStyle );
 					} );
