@@ -97,6 +97,9 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_create_paypal_order_params_are_correct(): void {
+		// set tax options to no.
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
 		$order = \WC_Helper_Order::create_order();
 		$order->set_cart_tax( 10 );
 		$order->set_shipping_tax( 0 );
