@@ -944,12 +944,9 @@ function wc_get_product_types() {
  * @since 2.2
  * @param int    $product_id Product ID.
  * @param string $sku Product SKU.
- * @param array  $excluded_statuses Statuses to exclude from the check. Defaults to array( 'trash' ).
  * @return bool
- *
- * @since 10.5.0 Added $excluded_statuses parameter.
  */
-function wc_product_has_unique_sku( $product_id, $sku, $excluded_statuses = array( 'trash' ) ) {
+function wc_product_has_unique_sku( $product_id, $sku ) {
 	/**
 	 * Gives plugins an opportunity to verify SKU uniqueness themselves.
 	 *
@@ -965,7 +962,7 @@ function wc_product_has_unique_sku( $product_id, $sku, $excluded_statuses = arra
 	}
 
 	$data_store = WC_Data_Store::load( 'product' );
-	$sku_found  = $data_store->is_existing_sku( $product_id, $sku, $excluded_statuses );
+	$sku_found  = $data_store->is_existing_sku( $product_id, $sku );
 
 	if ( apply_filters( 'wc_product_has_unique_sku', $sku_found, $product_id, $sku ) ) {
 		return false;
@@ -1049,16 +1046,13 @@ function wc_product_force_unique_sku( $product_id ) {
  * @param  integer $product_id Product ID.
  * @param  string  $sku Product SKU.
  * @param  integer $index An optional index that can be added to the product SKU.
- * @param  array   $excluded_statuses Statuses to exclude from the check. Defaults to array( 'trash' ).
  * @return string
- *
- * @since 10.5.0 Added $excluded_statuses parameter.
  */
-function wc_product_generate_unique_sku( $product_id, $sku, $index = 0, $excluded_statuses = array( 'trash' ) ) {
+function wc_product_generate_unique_sku( $product_id, $sku, $index = 0 ) {
 	$generated_sku = 0 < $index ? $sku . '-' . $index : $sku;
 
-	if ( ! wc_product_has_unique_sku( $product_id, $generated_sku, $excluded_statuses ) ) {
-		$generated_sku = wc_product_generate_unique_sku( $product_id, $sku, ( $index + 1 ), $excluded_statuses );
+	if ( ! wc_product_has_unique_sku( $product_id, $generated_sku ) ) {
+		$generated_sku = wc_product_generate_unique_sku( $product_id, $sku, ( $index + 1 ) );
 	}
 
 	return $generated_sku;

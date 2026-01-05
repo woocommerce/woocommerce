@@ -1207,17 +1207,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
-	 * Check if product sku is found for any other product IDs.
+	 * Check if product sku is found for any other product IDs, optionally excluding certain statuses.
 	 *
-	 * @since 3.0.0
+	 * @since 10.5.0
 	 * @param int    $product_id Product ID.
 	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
 	 * @param array  $excluded_statuses Statuses to exclude from the check. Defaults to array( 'trash' ).
 	 * @return bool
 	 *
-	 * @since 10.5.0 Added $excluded_statuses parameter.
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed. Use is_existing_sku()
+	 *           instead, which calls this method with the default excluded statuses.
 	 */
-	public function is_existing_sku( $product_id, $sku, $excluded_statuses = array( 'trash' ) ) {
+	public function is_existing_sku_with_excluded_statuses( $product_id, $sku, $excluded_statuses ) {
 		global $wpdb;
 
 		$excluded_statuses_sql = '';
@@ -1256,6 +1257,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$product_id
 			)
 		);
+	}
+
+	/**
+	 * Check if product sku is found for any other product IDs.
+	 *
+	 * @since 3.0.0
+	 * @param int    $product_id Product ID.
+	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
+	 * @return bool
+	 */
+	public function is_existing_sku( $product_id, $sku ) {
+		return $this->is_existing_sku_with_excluded_statuses( $product_id, $sku, array( 'trash' ) );
 	}
 
 	/**
