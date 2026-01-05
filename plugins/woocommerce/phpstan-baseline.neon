@@ -64096,12 +64096,6 @@ parameters:
 			path: src/Gateways/PayPal/WebhookHandler.php
 
 		-
-			message: '#^Parameter \#2 \$action_url of method WC_Gateway_Paypal_Request\:\:authorize_or_capture_payment\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Gateways/PayPal/WebhookHandler.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$payload\.$#'
 			identifier: property.notFound
 			count: 2
