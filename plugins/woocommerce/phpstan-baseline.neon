@@ -64030,6 +64030,24 @@ parameters:
 			path: src/Gateways/PayPal/AddressRequirements.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Request\:\:send_wpcom_proxy_request\(\) never returns array so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Gateways/PayPal/Request.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Request\:\:send_wpcom_proxy_request\(\) should return array\|WP_Error but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Gateways/PayPal/Request.php
+
+		-
+			message: '#^Parameter \#4 \$body of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects array\|string\|null, string\|false\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/Request.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:send_transact_api_request\(\) never returns array so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
@@ -64074,6 +64092,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\WebhookHandler\:\:process_webhook\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
+			count: 1
+			path: src/Gateways/PayPal/WebhookHandler.php
+
+		-
+			message: '#^Parameter \#2 \$action_url of method WC_Gateway_Paypal_Request\:\:authorize_or_capture_payment\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
 			count: 1
 			path: src/Gateways/PayPal/WebhookHandler.php
 
