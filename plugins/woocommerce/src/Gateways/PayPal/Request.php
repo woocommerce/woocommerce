@@ -207,8 +207,8 @@ class Request {
 	 * This method authorizes or captures a PayPal payment and updates the order status.
 	 *
 	 * @param WC_Order|null $order Order object.
-	 * @param string   $action_url The URL to authorize or capture the payment.
-	 * @param string   $action The action to perform. Either 'authorize' or 'capture'.
+	 * @param string        $action_url The URL to authorize or capture the payment.
+	 * @param string        $action The action to perform. Either 'authorize' or 'capture'.
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
@@ -794,7 +794,7 @@ class Request {
 	/**
 	 * Get the amount for a specific order item.
 	 *
-	 * @param WC_Order      $order Order object.
+	 * @param WC_Order       $order Order object.
 	 * @param \WC_Order_Item $item Order item.
 	 * @return float
 	 */

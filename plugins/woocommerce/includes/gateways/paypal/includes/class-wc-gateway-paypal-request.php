@@ -115,7 +115,7 @@ class WC_Gateway_Paypal_Request {
 	) {
 		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::create_paypal_order()' );
 		if ( ! $this->request ) {
-			$this->request = new PayPalRequest($this->gateway);
+			$this->request = new PayPalRequest( $this->gateway );
 		}
 		return $this->request->create_paypal_order( $order, $payment_source, $js_sdk_params );
 	}
@@ -132,7 +132,7 @@ class WC_Gateway_Paypal_Request {
 	public function get_paypal_order_details( $paypal_order_id ) {
 		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_details()' );
 		if ( ! $this->request ) {
-			$this->request = new PayPalRequest($this->gateway);
+			$this->request = new PayPalRequest( $this->gateway );
 		}
 		return $this->request->get_paypal_order_details( $paypal_order_id );
 	}
@@ -150,7 +150,7 @@ class WC_Gateway_Paypal_Request {
 	public function authorize_or_capture_payment( $order, $action_url, $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ) {
 		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::authorize_or_capture_payment()' );
 		if ( ! $this->request ) {
-			$this->request = new PayPalRequest($this->gateway);
+			$this->request = new PayPalRequest( $this->gateway );
 		}
 		$this->request->authorize_or_capture_payment( $order, $action_url, $action );
 	}
@@ -166,7 +166,7 @@ class WC_Gateway_Paypal_Request {
 	public function capture_authorized_payment( $order ) {
 		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::capture_authorized_payment()' );
 		if ( ! $this->request ) {
-			$this->request = new PayPalRequest($this->gateway);
+			$this->request = new PayPalRequest( $this->gateway );
 		}
 		$this->request->capture_authorized_payment( $order );
 	}
@@ -181,7 +181,7 @@ class WC_Gateway_Paypal_Request {
 	public function get_paypal_order_purchase_unit_amount( $order ) {
 		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::get_paypal_order_purchase_unit_amount()' );
 		if ( ! $this->request ) {
-			$this->request = new PayPalRequest($this->gateway);
+			$this->request = new PayPalRequest( $this->gateway );
 		}
 		return $this->request->get_paypal_order_purchase_unit_amount( $order );
 	}
@@ -196,7 +196,7 @@ class WC_Gateway_Paypal_Request {
 	public function fetch_paypal_client_id() {
 		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Request::fetch_paypal_client_id()' );
 		if ( ! $this->request ) {
-			$this->request = new PayPalRequest($this->gateway);
+			$this->request = new PayPalRequest( $this->gateway );
 		}
 		return $this->request->fetch_paypal_client_id();
 	}
