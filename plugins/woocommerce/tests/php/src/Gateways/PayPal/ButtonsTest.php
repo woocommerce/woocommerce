@@ -392,7 +392,11 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 		$post = get_post( $post_id );
 
 		// Mock all page types to return false.
-		add_filter( 'woocommerce_is_checkout', '__return_false' );
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'is_checkout' => fn() => false,
+			)
+		);
 		add_filter( 'woocommerce_is_cart', '__return_false' );
 
 		$url = $this->buttons->get_current_page_for_app_switch();
