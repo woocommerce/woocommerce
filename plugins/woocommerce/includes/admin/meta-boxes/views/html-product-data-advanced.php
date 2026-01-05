@@ -55,19 +55,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	<?php endif; ?>
 	<?php if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) : ?>
-	<div class="options_group">
-		<?php
-		$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_object->get_id() );
-		woocommerce_wp_checkbox(
-			array(
-				'id'          => '_visible_in_pos',
-				'value'       => $visible_in_pos ? 'yes' : 'no',
-				'label'       => __( 'Show in Point of Sale', 'woocommerce' ),
-				'description' => __( 'Enable this to show the product in Point of Sale.', 'woocommerce' ),
-			)
-		);
-		?>
-	</div>
+		<?php $is_pos_supported = $product_object->is_type( array( 'simple', 'variable' ) ) && ! $product_object->is_downloadable(); ?>
+		<div class="options_group show_if_simple show_if_variable hide_if_downloadable" id="pos_visibility_supported" <?php echo $is_pos_supported ? '' : 'style="display: none;"'; ?>>
+			<?php
+			$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_object->get_id() );
+			woocommerce_wp_checkbox(
+				array(
+					'id'          => '_visible_in_pos',
+					'value'       => $visible_in_pos ? 'yes' : 'no',
+					'label'       => __( 'Show in Point of Sale', 'woocommerce' ),
+					'description' => __( 'Enable this to show the product in Point of Sale.', 'woocommerce' ),
+				)
+			);
+			?>
+		</div>
+		<div class="options_group" id="pos_visibility_unsupported" <?php echo $is_pos_supported ? 'style="display: none;"' : ''; ?>>
+			<?php
+			woocommerce_wp_note(
+				array(
+					'id'      => '_pos_visibility_note',
+					'label'   => __( 'Point of Sale', 'woocommerce' ),
+					'message' => __( 'This product type is not currently supported in Point of Sale.', 'woocommerce' ),
+				)
+			);
+			?>
+		</div>
 	<?php endif; ?>
 
 	<?php do_action( 'woocommerce_product_options_advanced' ); ?>
