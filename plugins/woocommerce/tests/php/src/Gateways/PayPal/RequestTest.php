@@ -114,7 +114,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 5 );
 
-		// temporary disabled this assertion.
+		// temporarily disabled this assertion. Will re-enable later when all the refactor is done.
 		// $this->assertNotNull( $result );
 	}
 
