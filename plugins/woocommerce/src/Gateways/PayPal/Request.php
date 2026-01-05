@@ -28,7 +28,7 @@ class Request {
 	 *
 	 * @var \WC_Gateway_Paypal
 	 */
-	private $gateway;
+	private \WC_Gateway_Paypal $gateway;
 
 	/**
 	 * The API version for the proxy endpoint.
@@ -60,7 +60,7 @@ class Request {
 	 *
 	 * @param \WC_Gateway_Paypal $gateway Paypal gateway object.
 	 */
-	public function __construct( $gateway ) {
+	public function __construct( \WC_Gateway_Paypal $gateway ) {
 		$this->gateway = $gateway;
 	}
 
@@ -77,10 +77,10 @@ class Request {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function create_paypal_order(
-		$order,
-		$payment_source = PayPalConstants::PAYMENT_SOURCE_PAYPAL,
-		$js_sdk_params = array()
-	) {
+		WC_Order $order,
+		string $payment_source = PayPalConstants::PAYMENT_SOURCE_PAYPAL,
+		array $js_sdk_params = array()
+	): ?array {
 		$paypal_debug_id = null;
 
 		// While PayPal JS SDK can return 'paylater' as the payment source in the createOrder callback,
@@ -183,7 +183,7 @@ class Request {
 	 * @throws Exception If the PayPal order details request fails.
 	 * @throws Exception If the PayPal order details are not found.
 	 */
-	public function get_paypal_order_details( $paypal_order_id ) {
+	public function get_paypal_order_details( string $paypal_order_id ): array {
 		$request_body = array(
 			'test_mode' => $this->gateway->testmode,
 		);
@@ -220,7 +220,7 @@ class Request {
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
-	public function authorize_or_capture_payment( $order, $action_url, $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ) {
+	public function authorize_or_capture_payment( WC_Order $order, string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
 		$paypal_debug_id = null;
 		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
 		if ( ! $paypal_order_id ) {
@@ -305,7 +305,7 @@ class Request {
 	 * @return void
 	 * @throws Exception If the PayPal payment capture fails.
 	 */
-	public function capture_authorized_payment( $order ) {
+	public function capture_authorized_payment( WC_Order $order ): void {
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Order not found to capture authorized payment.' );
 			return;
@@ -429,7 +429,7 @@ class Request {
 	 * @param WC_Order $order Order object.
 	 * @return string|null
 	 */
-	private function get_authorization_id_for_capture( $order ) {
+	private function get_authorization_id_for_capture( WC_Order $order ): ?string {
 		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
 		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
 		$capture_id       = $order->get_meta( '_paypal_capture_id', true );
@@ -508,7 +508,7 @@ class Request {
 	 * @param array $items Array of authorizations or captures.
 	 * @return array|null The latest authorization or capture or null if array is empty or no valid update_time found.
 	 */
-	private function get_latest_transaction_data( $items ) {
+	private function get_latest_transaction_data( array $items ): ?array {
 		if ( empty( $items ) || ! is_array( $items ) ) {
 			return null;
 		}
@@ -533,11 +533,11 @@ class Request {
 	/**
 	 * Get the approve link from the response data.
 	 *
-	 * @param int   $http_code The HTTP code of the response.
-	 * @param array $response_data The response data.
+	 * @param int|string $http_code The HTTP code of the response.
+	 * @param array      $response_data The response data.
 	 * @return string|null
 	 */
-	private function get_approve_link( $http_code, $response_data ) {
+	private function get_approve_link( $http_code, array $response_data ): ?string {
 		// See https://developer.paypal.com/docs/api/orders/v2/#orders_create.
 		if ( isset( $response_data['status'] ) && PayPalConstants::STATUS_PAYER_ACTION_REQUIRED === $response_data['status'] ) {
 			$rel = 'payer-action';
@@ -564,7 +564,7 @@ class Request {
 	 *
 	 * @throws Exception If the order items cannot be built.
 	 */
-	private function get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ) {
+	private function get_paypal_create_order_request_params( WC_Order $order, string $payment_source, array $js_sdk_params ): array {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
 
@@ -688,7 +688,7 @@ class Request {
 	 * @param WC_Order $order Order object.
 	 * @return array
 	 */
-	public function get_paypal_order_purchase_unit_amount( $order ) {
+	public function get_paypal_order_purchase_unit_amount( WC_Order $order ): array {
 		$currency = $order->get_currency();
 
 		return array(
@@ -723,7 +723,7 @@ class Request {
 	 * @return string
 	 * @throws Exception If the custom ID is too long.
 	 */
-	private function get_paypal_order_custom_id( $order ) {
+	private function get_paypal_order_custom_id( WC_Order $order ): string {
 		$custom_id = wp_json_encode(
 			array(
 				'order_id'  => $order->get_id(),
@@ -753,7 +753,7 @@ class Request {
 	 * @param WC_Order $order Order object.
 	 * @return array
 	 */
-	private function get_paypal_order_items( $order ) {
+	private function get_paypal_order_items( WC_Order $order ): array {
 		$items = array();
 
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
@@ -789,7 +789,7 @@ class Request {
 	 * @param WC_Order $order Order object.
 	 * @return float
 	 */
-	private function get_paypal_order_items_subtotal( $order ) {
+	private function get_paypal_order_items_subtotal( WC_Order $order ): float {
 		$total = 0;
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			$total += wc_add_number_precision( $this->get_paypal_order_item_amount( $order, $item ) * $item->get_quantity(), false );
@@ -805,7 +805,7 @@ class Request {
 	 * @param \WC_Order_Item $item Order item.
 	 * @return float
 	 */
-	private function get_paypal_order_item_amount( $order, $item ) {
+	private function get_paypal_order_item_amount( WC_Order $order, \WC_Order_Item $item ): float {
 		if ( 'fee' === $item->get_type() && $item instanceof \WC_Order_Item_Fee ) {
 			return (float) $item->get_amount();
 		}
@@ -817,7 +817,7 @@ class Request {
 	 *
 	 * @return string
 	 */
-	private function get_paypal_order_intent() {
+	private function get_paypal_order_intent(): string {
 		$payment_action = $this->gateway->get_option( 'paymentaction' );
 		if ( 'authorization' === $payment_action ) {
 			return PayPalConstants::INTENT_AUTHORIZE;
@@ -832,7 +832,7 @@ class Request {
 	 * @param WC_Order $order Order object.
 	 * @return string
 	 */
-	private function get_paypal_shipping_preference( $order ) {
+	private function get_paypal_shipping_preference( WC_Order $order ): string {
 		if ( ! $order->needs_shipping() ) {
 			return PayPalConstants::SHIPPING_NO_SHIPPING;
 		}
@@ -848,7 +848,7 @@ class Request {
 	 * @return array|null Returns null if the shipping is not required,
 	 *  or the address is not set, or is incomplete.
 	 */
-	private function get_paypal_order_shipping( $order ) {
+	private function get_paypal_order_shipping( WC_Order $order ): ?array {
 		if ( ! $order->needs_shipping() ) {
 			return null;
 		}
@@ -916,7 +916,7 @@ class Request {
 	 * @param string $country_code Country code to normalize.
 	 * @return string|null
 	 */
-	private function normalize_paypal_order_shipping_country_code( $country_code ) {
+	private function normalize_paypal_order_shipping_country_code( string $country_code ): ?string {
 		// Normalize to uppercase.
 		$code = strtoupper( trim( (string) $country_code ) );
 
@@ -954,7 +954,7 @@ class Request {
 	 * @param string $url The URL to check.
 	 * @return string Normalized URL.
 	 */
-	private function normalize_url_for_paypal( $url ) {
+	private function normalize_url_for_paypal( string $url ): string {
 		// Replace encoded ampersand with actual ampersand.
 		// In some cases, the URL may contain encoded ampersand but PayPal expects the actual ampersand.
 		// PayPal request fails if the URL contains encoded ampersand.
@@ -987,7 +987,7 @@ class Request {
 	 * @return string|null The PayPal client-id, or null if the request fails.
 	 * @throws Exception If the request fails.
 	 */
-	public function fetch_paypal_client_id() {
+	public function fetch_paypal_client_id(): ?string {
 		try {
 			$request_body = array(
 				'test_mode' => $this->gateway->testmode,
@@ -1028,7 +1028,7 @@ class Request {
 	 * @return array|\WP_Error The API response body, or WP_Error if the request fails.
 	 * @throws Exception If the site ID is not found.
 	 */
-	private function send_wpcom_proxy_request( $method, $endpoint, $request_body ) {
+	private function send_wpcom_proxy_request( string $method, string $endpoint, array $request_body ): array|\WP_Error {
 		$site_id = \Jetpack_Options::get_option( 'id' );
 		if ( ! $site_id ) {
 			\WC_Gateway_Paypal::log( sprintf( 'Site ID not found. Cannot send request to %s.', $endpoint ) );
@@ -1064,7 +1064,7 @@ class Request {
 	 * @param  integer $limit Limit size in characters.
 	 * @return string
 	 */
-	private function limit_length( $text, $limit = 127 ) {
+	private function limit_length( string $text, int $limit = 127 ): string {
 		$str_limit = $limit - 3;
 		if ( function_exists( 'mb_strimwidth' ) ) {
 			if ( mb_strlen( $text ) > $limit ) {
