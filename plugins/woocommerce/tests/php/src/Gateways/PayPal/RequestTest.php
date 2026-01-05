@@ -147,6 +147,9 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order_payload = $body['order'];
 		$this->assertEquals( 'CAPTURE', $order_payload['intent'] );
 
+		echo 'debug: order_payload';
+		echo wp_json_encode( $order_payload );
+
 		$purchase_unit = $order_payload['purchase_units'][0];
 		$this->assertEquals( '60.00', $purchase_unit['amount']['value'] );
 		$this->assertEquals( 'USD', $purchase_unit['amount']['currency_code'] );
