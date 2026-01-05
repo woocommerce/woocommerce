@@ -1,0 +1,89 @@
+name: Email Editor Test Reminder
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened, closed]
+
+concurrency:
+    group: email-editor-test-reminder-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    pull-requests: write
+    contents: read
+
+jobs:
+    check-and-comment:
+        name: Check and add test reminder comment
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+              with:
+                  node-version-file: '.nvmrc'
+
+            - name: Check if PR touches email editor
+              id: check-email-editor
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+              with:
+                  script: |
+                      const { checkEmailEditorTestReminderComment } = require( './.github/workflows/scripts/check-email-editor-test-reminder-comment.js' );
+                      const result = await checkEmailEditorTestReminderComment( github, context, core );
+                      core.setOutput( 'touches-email-editor', result.touchesEmailEditor ? 'true' : 'false' );
+
+            - name: Find existing comment
+              uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
+              id: find-comment
+              with:
+                  issue-number: ${{ github.event.pull_request.number }}
+                  comment-author: 'github-actions[bot]'
+                  body-includes: '<!-- email-editor-test-reminder -->'
+
+            - name: Create or update test reminder comment
+              if: steps.check-email-editor.outputs.touches-email-editor == 'true'
+              uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
+              with:
+                  comment-id: ${{ steps.find-comment.outputs.comment-id }}
+                  issue-number: ${{ github.event.pull_request.number }}
+                  body: |
+                      <!-- email-editor-test-reminder -->
+                      ## Email Editor Testing Required
+
+                      Are you an Automattician? This PR touches the email editor package and will need to be tested on WordPress.com.
+
+                      ### Testing Steps
+
+                      1. Log into your sandbox and authenticate with Github:
+                         ```bash
+                         gh auth login
+                         ```
+                         You can choose https and complete the authentication in your local browser with the code provided.
+
+                      2. Run the downloader script on your sandbox:
+                         ```bash
+                         bash bin/woocommerce-email-editor-downloader test ${{ github.event.pull_request.number }}
+                         ```
+                         You'll see the PR title, author, and state, and then be asked to confirm the download. You may see a bunch of composer deprecation notices. Once it completes, check that there's a `/dev` directory in `wp-content/lib/woocommerce-email-editor/`.
+
+                      3. Sandbox the API and send a test email.
+
+                      4. To remove the changes after testing:
+                         ```bash
+                         bash bin/woocommerce-email-editor-downloader reset
+                         ```
+                  edit-mode: replace
+
+            - name: Delete test reminder comment
+              if: steps.check-email-editor.outputs.touches-email-editor == 'false' && steps.find-comment.outputs.comment-id != ''
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+              with:
+                  script: |
+                      await github.rest.issues.deleteComment( {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          comment_id: ${{ steps.find-comment.outputs.comment-id }},
+                      } );
+
