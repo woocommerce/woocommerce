@@ -59,7 +59,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
-		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ), 10, 2 );
+		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ), 10, 3 );
 
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
@@ -78,13 +78,15 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
-		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ), 10, 2 );
+		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ), 10, 3 );
 
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
 
+		$this->assertNotNull( $result, 'create_paypal_order should return an array, not null' );
+		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'id', $result );
 		$this->assertArrayHasKey( 'redirect_url', $result );
 	}
@@ -101,7 +103,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order->set_total( 60 );
 		$order->save();
 
-		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 2 );
+		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 3 );
 
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$this->assertNotNull( $request->create_paypal_order( $order ) );
@@ -112,12 +114,24 @@ class RequestTest extends \WC_Unit_Test_Case {
 	/**
 	 * Check that the create_paypal_order params are correct.
 	 *
-	 * @param bool  $value      Original value.
-	 * @param array $parsed_args Parsed arguments.
+	 * @param bool   $value      Original value.
+	 * @param array  $parsed_args Parsed arguments.
+	 * @param string $url The URL of the request.
 	 *
-	 * @return array Return a 200 response.
+	 * @return array|bool Return a 200 response or false if the URL is not a create-order request.
 	 */
-	public function check_create_paypal_order_params( $value, $parsed_args ): array {
+	public function check_create_paypal_order_params( $value, $parsed_args, $url ) {
+		// Match Jetpack proxy requests for PayPal orders.
+		// Check if this is a POST request to the proxy order endpoint.
+		if ( ! isset( $parsed_args['method'] ) || 'POST' !== $parsed_args['method'] ) {
+			return $value;
+		}
+
+		// Check if URL contains the create order endpoint.
+		if ( strpos( $url, 'paypal_standard/proxy/order' ) === false ) {
+			return $value;
+		}
+
 		$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
 		$this->assertEquals( 'POST', $parsed_args['method'] );
 		$body = json_decode( $parsed_args['body'], true );
@@ -158,18 +172,30 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'site_id', $custom_id );
 		$this->assertArrayHasKey( 'v', $custom_id );
 
-		return $this->create_paypal_order_success( $value, $parsed_args );
+		return $this->create_paypal_order_success( $value, $parsed_args, $url );
 	}
 
 	/**
 	 * Helper function for creating PayPal order success response.
 	 *
-	 * @param bool  $value      Original pre-value, likely to be false.
-	 * @param array $parsed_url Parsed URL object.
+	 * @param bool   $value      Original pre-value, likely to be false.
+	 * @param array  $parsed_url Parsed URL object.
+	 * @param string $url The URL of the request.
 	 *
-	 * @return array Return a 200 response.
+	 * @return array|bool Return a 200 response or false if the URL is not a create-order request.
 	 */
-	public function create_paypal_order_success( $value, $parsed_url ): array {
+	public function create_paypal_order_success( $value, $parsed_args, $url ) {
+		// Match Jetpack proxy requests for PayPal orders.
+		// Check if this is a POST request to the proxy order endpoint.
+		if ( ! isset( $parsed_args['method'] ) || 'POST' !== $parsed_args['method'] ) {
+			return $value;
+		}
+
+		// Check if URL contains the create order endpoint.
+		if ( strpos( $url, 'paypal_standard/proxy/order' ) === false ) {
+			return $value;
+		}
+
 		return array(
 			'response' => array(
 				'code' => 200,
@@ -193,12 +219,24 @@ class RequestTest extends \WC_Unit_Test_Case {
 	/**
 	 * Helper function for creating PayPal order error response.
 	 *
-	 * @param bool  $value      Original pre-value, likely to be false.
-	 * @param array $parsed_url Parsed URL object.
+	 * @param bool   $value      Original pre-value, likely to be false.
+	 * @param array  $parsed_url Parsed URL object.
+	 * @param string $url The URL of the request.
 	 *
-	 * @return array Return a 500 error response.
+	 * @return array|bool Return a 500 error response or false if the URL is not a create-order request.
 	 */
-	public function create_paypal_order_error( $value, $parsed_url ): array {
+	public function create_paypal_order_error( $value, $parsed_args, $url ) {
+		// Match Jetpack proxy requests for PayPal orders.
+		// Check if this is a POST request to the proxy order endpoint.
+		if ( ! isset( $parsed_args['method'] ) || 'POST' !== $parsed_args['method'] ) {
+			return $value;
+		}
+
+		// Check if URL contains the create order endpoint.
+		if ( strpos( $url, 'paypal_standard/proxy/order' ) === false ) {
+			return $value;
+		}
+
 		// Return a 500 error.
 		return array( 'response' => array( 'code' => 500 ) );
 	}
