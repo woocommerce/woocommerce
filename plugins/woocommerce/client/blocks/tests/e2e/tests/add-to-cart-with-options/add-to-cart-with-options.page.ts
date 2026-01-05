@@ -86,6 +86,7 @@ class AddToCartWithOptionsPage {
 					name: 'Use the Add to Cart + Options block',
 				} )
 				.click();
+		}
 	}
 
 	async updateSingleProductTemplate() {
