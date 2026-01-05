@@ -270,7 +270,7 @@ class PageController {
 			return $classes;
 		}
 
-		return $classes . ' ' . 'woocommerce-orders-screen-' . $this->current_action;
+		return "$classes woocommerce-orders-screen-{$this->current_action}";
 	}
 
 	/**
