@@ -1092,7 +1092,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		for ( const optionStyle of [ 'pills', 'dropdown' ] as ( 'pills' | 'dropdown' )[] ) {
-			test( `${ optionStyle }: Add to Cart + Options: Auto-select should work (on page load)`, async ( {
+			test( `${ optionStyle }: Add to Cart + Options: Auto-select should work`, async ( {
 				page,
 				pageObject,
 				editor,
@@ -1104,23 +1104,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await pageObject.expectSelectedAttributes( productAttributes, { Type: '', Color: '', Size: '' }, optionStyle );
 				} );
 
-				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
-					await pageObject.updateSingleProductTemplate();
-					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
-				} );
-				await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
-					await page.goto( productPermalink );
-
-					// Expect Size to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
-					await pageObject.expectSelectedAttributes( productAttributes, { Type: 'T-shirt', Color: '', Size: '' }, optionStyle );
-				} );
-			} );
-			test( `${ optionStyle }: Add to Cart + Options: Auto-select on user selection should work`, async ( {
-				page,
-				pageObject,
-				editor,
-			} ) => {
-				await pageObject.updateSingleProductTemplate();
 				await test.step( `${ optionStyle }: Expect attributes to NOT auto-select when user selects something`, async () => {
 					await page.goto( productPermalink );
 
@@ -1134,6 +1117,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await pageObject.updateSingleProductTemplate();
 					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
 				} );
+
+				await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
+					await page.goto( productPermalink );
+
+					// Expect Size to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
+					await pageObject.expectSelectedAttributes( productAttributes, { Type: 'T-shirt', Color: '', Size: '' }, optionStyle );
+				} );
+
 				await test.step( `${ optionStyle }: Expect attributes to auto-select when user selects something`, async () => {
 					await page.goto( productPermalink );
 
