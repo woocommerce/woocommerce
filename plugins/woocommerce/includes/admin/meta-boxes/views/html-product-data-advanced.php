@@ -57,7 +57,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<?php if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) : ?>
 	<div class="options_group">
 		<?php
-		$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $post_id );
+		$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_object->get_id() );
 		woocommerce_wp_checkbox(
 			array(
 				'id'          => '_visible_in_pos',
