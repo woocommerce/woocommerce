@@ -178,8 +178,8 @@ class Request {
 				);
 			}
 			echo 'debug: return null';
-			echo $e->getMessage();
-			echo $e;
+			echo 'debug: ' . $e->getMessage();
+			echo 'debug: ' . $e;
 			return null;
 		}
 	}
