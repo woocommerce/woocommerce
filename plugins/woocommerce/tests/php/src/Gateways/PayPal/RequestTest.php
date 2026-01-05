@@ -106,9 +106,11 @@ class RequestTest extends \WC_Unit_Test_Case {
 		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 3 );
 
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
-		$this->assertNotNull( $request->create_paypal_order( $order ) );
+		$result = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
+
+		$this->assertNotNull( $result );
 	}
 
 	/**
