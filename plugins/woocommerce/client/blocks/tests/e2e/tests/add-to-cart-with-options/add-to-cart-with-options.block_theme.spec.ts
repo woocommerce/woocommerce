@@ -1098,6 +1098,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 				editor,
 			} ) => {
 				await pageObject.updateSingleProductTemplate();
+				await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle } );
+
 				await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
 					await page.goto( productPermalink );
 
@@ -1140,6 +1142,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				editor,
 			} ) => {
 				await pageObject.updateSingleProductTemplate();
+				await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle } );
 
 				await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "hide"`, async () => {
 					await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: 'hide' } );
@@ -1172,6 +1175,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 				editor,
 			} ) => {
 				await pageObject.updateSingleProductTemplate();
+				await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle } );
+
 				for ( const value of [ 'disable', 'hide' ] ) {
 					await pageObject.updateSingleProductTemplate();
 
