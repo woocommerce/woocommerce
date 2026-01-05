@@ -1085,11 +1085,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			page: Page,
 			attributeName: any,
 			attributeValue: any,
-			optionStyle: string | undefined = undefined,
+			optionStyle: 'pills' | 'dropdown',
 		) {
-			if ( optionStyle === 'Dropdown' ) {
+			if ( optionStyle === 'dropdown' ) {
 				await page.getByLabel( attributeName ).selectOption( attributeValue );
-			} else if ( optionStyle === 'Pills' ) {
+			} else if ( optionStyle === 'pills' ) {
 				if ( attributeValue === '' ) {
 					await page.getByLabel( attributeName ).locator( 'label:has(:checked)' ).click();
 				} else {
@@ -1103,10 +1103,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 		async function expectSelectedAttributes(
 			page: Page,
 			expectedValues: Record< string, string >={},
-			optionStyle: string | undefined = undefined,
+			optionStyle: 'pills' | 'dropdown',
 		) {
 			for ( let { name: attributeName, options: attributeValues } of productAttributes ) {
-				if ( optionStyle === 'Dropdown' ) {
+				if ( optionStyle === 'dropdown' ) {
 					if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
 						await expect(
 							page.getByLabel( attributeName, { exact: true } )
@@ -1116,7 +1116,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 							page.getByLabel( attributeName, { exact: true } )
 						).toHaveValue( '' );
 					}
-				} else if ( optionStyle === 'Pills' ) {
+				} else if ( optionStyle === 'pills' ) {
 					if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
 						attributeValues = attributeValues.filter( item => item !== expectedValues[ attributeName ] ); // Omit attributeName
 						await expect (
@@ -1157,7 +1157,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await pageObject.updateSingleProductTemplate();
 		} );
 
-		for ( const optionStyle of [ 'Pills', 'Dropdown' ] ) {
+		for ( const optionStyle of [ 'pills', 'dropdown' ] as ( 'pills' | 'dropdown' )[] ) {
 			test( `${ optionStyle }: Add to Cart + Options: Auto-select should work (on page load)`, async ( {
 				page,
 				pageObject,
