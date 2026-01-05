@@ -152,6 +152,7 @@ class PageController {
 
 		add_action( "load-{$page_name}", array( $this, 'handle_load_page_action' ) );
 		add_action( 'admin_title', array( $this, 'set_page_title' ) );
+		add_filter( 'admin_body_class', array( $this, 'update_body_classes' ) );
 	}
 
 	/**
@@ -248,6 +249,28 @@ class PageController {
 				$this->current_action = 'list_orders';
 				break;
 		}
+	}
+
+	/**
+	 * When an order-related admin screen is loaded (and if HPOS is enabled), add an extra body class that is consistent
+	 * regardless of the actual order type.
+	 *
+	 * For example, when an order is being edited, add `woocommerce-orders-screen-edit_order` for regular orders as well
+	 * as sub-types, such as subscription orders.
+	 *
+	 * @param string|mixed $classes The admin body classes. Expected to be a string.
+	 *
+	 * @return mixed The updated body class string, or else the original value (which may be something other than a string in exceptional cases).
+	 */
+	public function update_body_classes( $classes ) {
+		if (
+			! is_string( $classes )
+			|| ! in_array( $this->current_action, array( 'edit_order', 'new_order', 'list_orders' ), true )
+		) {
+			return $classes;
+		}
+
+		return $classes . ' ' . 'woocommerce-orders-screen-' . $this->current_action;
 	}
 
 	/**
