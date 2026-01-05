@@ -728,7 +728,7 @@ class Request {
 				// Endpoint for the proxy to forward webhooks to.
 				'site_url'  => home_url(),
 				'site_id'   => class_exists( '\Jetpack_Options' ) ? \Jetpack_Options::get_option( 'id' ) : null,
-				'v'         => defined( 'WC_VERSION' ) ? WC_VERSION : \WC()->version,
+				'v'         => defined( 'WC_VERSION' ) ? WC_VERSION : WC()->version,
 			)
 		);
 
@@ -937,7 +937,7 @@ class Request {
 		}
 
 		// Check if it's a valid alpha-3 code.
-		$alpha2 = wc()->countries->get_country_from_alpha_3_code( $code );
+		$alpha2 = WC()->countries->get_country_from_alpha_3_code( $code );
 		if ( null === $alpha2 ) {
 			\WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
 		}
