@@ -108,23 +108,23 @@ class DefaultMarketingRecommendations {
 				'tags'           => array(),
 			),
 			array(
-				'title' => 'Blaze Ads',
-				'description' => __(
+				'title'          => 'Blaze Ads',
+				'description'    => __(
 					"The quickest way to grow your business by advertising to over 100 million users across Tumblr and WordPress, starting at just \$5/day.",
 					'woocommerce'
 				),
-				'url' => "https://woocommerce.com/products/blaze-ads/{$utm_string}",
+				'url'            => "https://woocommerce.com/products/blaze-ads/{$utm_string}",
 				'direct_install' => true,
-				'icon' => "{$icon_dir_url}/blaze.svg",
-				'product' => 'blaze-ads',
-				'plugin' => 'blaze-ads/blaze-ads.php',
-				'categories' => array(
+				'icon'           => "{$icon_dir_url}/blaze.svg",
+				'product'        => 'blaze-ads',
+				'plugin'         => 'blaze-ads/blaze-ads.php',
+				'categories'     => array(
 					$marketing,
 				),
-				'subcategories' => array(
+				'subcategories'  => array(
 					$sales_channels,
 				),
-				'tags' => array(
+				'tags'           => array(
 					$built_by_woocommerce,
 				),
 			),
