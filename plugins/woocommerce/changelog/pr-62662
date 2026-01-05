@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Pass callbacks instead of strings for name and description when registering features
