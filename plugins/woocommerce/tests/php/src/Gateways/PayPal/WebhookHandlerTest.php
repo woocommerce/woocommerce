@@ -1,43 +1,48 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Webhook_Handler class.
+ * Unit tests for Automattic\WooCommerce\Gateways\PayPal\WebhookHandler class.
  *
- * @package WooCommerce\Tests\Paypal.
+ * @package WooCommerce\Tests\Gateways\Paypal
  */
 
 // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- Required for testing WordPress globals
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php';
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\WebhookHandler as PayPalWebhookHandler;
 
 /**
- * Class WC_Gateway_Paypal_Webhook_Handler_Test.
+ * Class WebhookHandlerTest.
  */
-class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
+class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The webhook handler instance.
 	 *
-	 * @var WC_Gateway_Paypal_Webhook_Handler
+	 * @var PayPalWebhookHandler
 	 */
 	private $webhook_handler;
 
 	/**
 	 * The mock request instance.
 	 *
-	 * @var WP_REST_Request
+	 * @var \WP_REST_Request
 	 */
 	private $mock_request;
 
 	/**
 	 * Set up the test environment.
+	 *
+	 * @return void
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->webhook_handler = new WC_Gateway_Paypal_Webhook_Handler();
-		$this->mock_request    = $this->createMock( WP_REST_Request::class );
+		$this->webhook_handler = new PayPalWebhookHandler();
+		$this->mock_request    = $this->createMock( \WP_REST_Request::class );
 
 		// Prevent real network calls to PayPal during tests.
 		add_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ) );
@@ -45,6 +50,8 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Tear down the test environment.
+	 *
+	 * @return void
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ) );
@@ -55,16 +62,20 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Mock HTTP calls to PayPal endpoints in tests.
+	 *
+	 * @return array
 	 */
-	public function mock_paypal_http_response() {
+	public function mock_paypal_http_response(): array {
 		return array( 'response' => array( 'code' => 200 ) );
 	}
 
 	/**
 	 * Test process_checkout_order_approved with valid data.
+	 *
+	 * @return void
 	 */
-	public function test_process_checkout_order_approved_with_valid_data() {
-		$test_order = WC_Helper_Order::create_order();
+	public function test_process_checkout_order_approved_with_valid_data(): void {
+		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->save();
 
@@ -110,11 +121,13 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_checkout_order_approved skips already processed orders.
+	 *
+	 * @return void
 	 */
-	public function test_process_checkout_order_approved_skips_already_processed() {
-		$test_order = WC_Helper_Order::create_order();
+	public function test_process_checkout_order_approved_skips_already_processed(): void {
+		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_COMPLETED );
+		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(
@@ -151,9 +164,11 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_payment_capture_completed with valid data.
+	 *
+	 * @return void
 	 */
-	public function test_process_payment_capture_completed_with_valid_data() {
-		$test_order = WC_Helper_Order::create_order();
+	public function test_process_payment_capture_completed_with_valid_data(): void {
+		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->save();
 
@@ -187,11 +202,13 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_payment_capture_completed skips already processed orders.
+	 *
+	 * @return void
 	 */
-	public function test_process_payment_capture_completed_skips_already_processed() {
-		$test_order = WC_Helper_Order::create_order();
+	public function test_process_payment_capture_completed_skips_already_processed(): void {
+		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_COMPLETED );
+		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(
@@ -224,9 +241,11 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_payment_authorization_created with valid data.
+	 *
+	 * @return void
 	 */
-	public function test_process_payment_authorization_created_with_valid_data() {
-		$test_order = WC_Helper_Order::create_order();
+	public function test_process_payment_authorization_created_with_valid_data(): void {
+		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
 		$test_order->save();
 
@@ -261,11 +280,13 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test process_payment_authorization_created skips already processed orders.
+	 *
+	 * @return void
 	 */
-	public function test_process_payment_authorization_created_skips_already_processed() {
-		$test_order = WC_Helper_Order::create_order();
+	public function test_process_payment_authorization_created_skips_already_processed(): void {
+		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_COMPLETED );
+		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(
@@ -304,7 +325,7 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_get_action_url_scenarios() {
+	public function provider_get_action_url_scenarios(): array {
 		return array(
 			'valid_capture_link'   => array(
 				'links'    => array(
@@ -377,10 +398,11 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 	 * @param array  $links    The links array.
 	 * @param string $action   The action to find.
 	 * @param mixed  $expected The expected result.
+	 * @return void
 	 */
-	public function test_get_action_url_scenarios( $links, $action, $expected ) {
+	public function test_get_action_url_scenarios( array $links, string $action, $expected ): void {
 		// Use reflection to test private method.
-		$reflection = new ReflectionClass( $this->webhook_handler );
+		$reflection = new \ReflectionClass( $this->webhook_handler );
 		$method     = $reflection->getMethod( 'get_action_url' );
 		$method->setAccessible( true );
 

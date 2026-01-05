@@ -84,7 +84,7 @@ function wc_get_orders( $args ) {
  *
  * @param mixed $the_order       Post object or post ID of the order.
  *
- * @return bool|WC_Order|WC_Order_Refund
+ * @return false|WC_Order|WC_Order_Refund
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
