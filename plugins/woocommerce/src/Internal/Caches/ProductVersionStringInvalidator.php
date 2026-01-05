@@ -4,8 +4,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Caches;
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
-
 /**
  * Product version string invalidation handler.
  *
@@ -21,41 +19,6 @@ class ProductVersionStringInvalidator {
 	const DEFAULT_TAXONOMY_LOOKUP_CACHE_TTL = 300;
 
 	/**
-	 * Features controller.
-	 *
-	 * @var FeaturesController
-	 */
-	private FeaturesController $features_controller;
-
-	/**
-	 * Initialize the invalidator and register hooks.
-	 *
-	 * Hooks are only registered when both conditions are met:
-	 * - The REST API caching feature is enabled
-	 * - The backend caching setting is active
-	 *
-	 * @param FeaturesController $features_controller The features controller.
-	 *
-	 * @return void
-	 *
-	 * @since 10.5.0
-	 *
-	 * @internal
-	 */
-	final public function init( FeaturesController $features_controller ): void {
-		$this->features_controller = $features_controller;
-	}
-
-	/**
-	 * Register the hooks, related to the class.
-	 *
-	 * @return void
-	 */
-	public function register(): void {
-		add_action( 'init', array( $this, 'on_init' ) );
-	}
-
-	/**
 	 * Register all product-related hooks.
 	 *
 	 * Registers ALL hooks (WordPress and WooCommerce) to ensure comprehensive coverage.
@@ -64,10 +27,10 @@ class ProductVersionStringInvalidator {
 	 *
 	 * @return void
 	 */
-	public function on_init(): void {
+	public function register(): void {
 		if (
 			// The feature should be enabled first.
-			! $this->features_controller->feature_is_enabled( 'rest_api_caching' )
+			'yes' !== get_option( 'woocommerce_feature_rest_api_caching_enabled', 'no' )
 
 			// And then the setting within the "REST API caching" section.
 			|| ( 'yes' !== get_option( 'woocommerce_rest_api_enable_backend_caching', 'no' ) )
