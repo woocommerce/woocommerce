@@ -102,6 +102,10 @@ class Request {
 				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
 			}
 
+			if ( ! is_array( $response ) ) {
+				throw new Exception( 'PayPal order creation failed. Invalid response type.' );
+			}
+
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
