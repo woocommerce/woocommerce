@@ -103,4 +103,73 @@ class LocalPickupUtils {
 	public static function is_local_pickup_method( $method_id ) {
 		return in_array( $method_id, self::get_local_pickup_method_ids(), true );
 	}
+
+	/**
+	 * Gets local pickup locations for block editor preview, including placeholder
+	 * locations for custom shipping methods that support local pickup.
+	 *
+	 * This method combines the built-in pickup_location locations with placeholder
+	 * entries for any other shipping methods that declare 'local-pickup' support.
+	 * This allows custom shipping methods to appear in the block editor preview.
+	 *
+	 * @return array Array of pickup locations with the following structure:
+	 *               - 'name' (string) The location name.
+	 *               - 'enabled' (bool) Whether the location is enabled.
+	 *               - 'address' (array) Address array with keys: address_1, city, state, postcode, country.
+	 *               - 'details' (string) Additional details about the location.
+	 *               - 'method_id' (string) The shipping method ID this location belongs to.
+	 *
+	 * @since 10.5.0
+	 */
+	public static function get_local_pickup_method_locations() {
+		// Get the built-in pickup locations.
+		$builtin_locations = get_option( 'pickup_location_pickup_locations', array() );
+
+		// Add method_id to built-in locations.
+		foreach ( $builtin_locations as $index => $location ) {
+			$builtin_locations[ $index ]['method_id'] = 'pickup_location';
+		}
+
+		// Get all shipping methods that support local-pickup.
+		$shipping_methods = WC()->shipping()->get_shipping_methods();
+
+		// Get store base address for placeholder locations.
+		$base_country = WC()->countries->get_base_country();
+		$base_state   = WC()->countries->get_base_state();
+
+		$custom_method_locations = array();
+
+		foreach ( $shipping_methods as $method ) {
+			// Skip if method doesn't support local-pickup.
+			if ( ! $method->supports( 'local-pickup' ) ) {
+				continue;
+			}
+
+			// Skip the built-in pickup_location method (already handled above).
+			if ( 'pickup_location' === $method->id ) {
+				continue;
+			}
+
+			// Create a placeholder location for this custom method.
+			$custom_method_locations[] = array(
+				'name'      => $method->get_method_title(),
+				'enabled'   => true,
+				'address'   => array(
+					'address_1' => '123 Main Street',
+					'city'      => 'Sample City',
+					'state'     => $base_state,
+					'postcode'  => '12345',
+					'country'   => $base_country,
+				),
+				'details'   => sprintf(
+					/* translators: %s: shipping method title */
+					__( 'Pickup location for %s', 'woocommerce' ),
+					$method->get_method_title()
+				),
+				'method_id' => $method->id,
+			);
+		}
+
+		return array_merge( $builtin_locations, $custom_method_locations );
+	}
 }
