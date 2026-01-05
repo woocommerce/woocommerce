@@ -78,7 +78,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$this->sut->register();
 
 		$user_id = $this->factory->user->create();
-		
+
 		$token = new \WC_Payment_Token_CC();
 		$token->set_token( 'test_token_123' );
 		$token->set_gateway_id( 'stripe' );
