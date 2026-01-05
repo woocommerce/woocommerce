@@ -207,12 +207,12 @@ class Request {
 	 * This method authorizes or captures a PayPal payment and updates the order status.
 	 *
 	 * @param WC_Order|null $order Order object.
-	 * @param string        $action_url The URL to authorize or capture the payment.
+	 * @param string|null   $action_url The URL to authorize or capture the payment.
 	 * @param string        $action The action to perform. Either 'authorize' or 'capture'.
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
-	public function authorize_or_capture_payment( ?WC_Order $order, string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
+	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Order not found to authorize or capture payment.' );
 			return;

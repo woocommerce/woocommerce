@@ -141,9 +141,9 @@ class WC_Gateway_Paypal_Request {
 	 * This method authorizes or captures a PayPal payment and updates the order status.
 	 *
 	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Request::authorize_or_capture_payment() instead.
-	 * @param WC_Order $order Order object.
-	 * @param string   $action_url The URL to authorize or capture the payment.
-	 * @param string   $action The action to perform. Either 'authorize' or 'capture'.
+	 * @param WC_Order    $order Order object.
+	 * @param string|null $action_url The URL to authorize or capture the payment.
+	 * @param string      $action The action to perform. Either 'authorize' or 'capture'.
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
