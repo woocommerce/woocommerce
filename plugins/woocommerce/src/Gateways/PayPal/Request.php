@@ -102,10 +102,6 @@ class Request {
 				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
 			}
 
-			if ( ! is_array( $response ) ) {
-				throw new Exception( 'PayPal order creation failed. Invalid response type.' );
-			}
-
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
@@ -192,10 +188,6 @@ class Request {
 			throw new Exception( 'PayPal order details request failed: ' . esc_html( $response->get_error_message() ) );
 		}
 
-		if ( ! is_array( $response ) ) {
-			throw new Exception( 'PayPal order details request failed. Invalid response type.' );
-		}
-
 		$http_code     = wp_remote_retrieve_response_code( $response );
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
@@ -214,13 +206,18 @@ class Request {
 	 *
 	 * This method authorizes or captures a PayPal payment and updates the order status.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order|null $order Order object.
 	 * @param string   $action_url The URL to authorize or capture the payment.
 	 * @param string   $action The action to perform. Either 'authorize' or 'capture'.
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
-	public function authorize_or_capture_payment( WC_Order $order, string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
+	public function authorize_or_capture_payment( ?WC_Order $order, string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
+		if ( ! $order ) {
+			\WC_Gateway_Paypal::log( 'Order not found to authorize or capture payment.' );
+			return;
+		}
+
 		$paypal_debug_id = null;
 		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
 		if ( ! $paypal_order_id ) {
@@ -262,10 +259,6 @@ class Request {
 				throw new Exception( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
 			}
 
-			if ( ! is_array( $response ) ) {
-				throw new Exception( 'PayPal ' . $action . ' payment request failed. Invalid response type.' );
-			}
-
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
@@ -301,11 +294,11 @@ class Request {
 	/**
 	 * Capture a PayPal payment that has been authorized.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order|null $order Order object.
 	 * @return void
 	 * @throws Exception If the PayPal payment capture fails.
 	 */
-	public function capture_authorized_payment( WC_Order $order ): void {
+	public function capture_authorized_payment( ?WC_Order $order ): void {
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Order not found to capture authorized payment.' );
 			return;
@@ -364,10 +357,6 @@ class Request {
 
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
-			}
-
-			if ( ! is_array( $response ) ) {
-				throw new Exception( 'PayPal capture payment request failed. Invalid response type.' );
 			}
 
 			$http_code             = wp_remote_retrieve_response_code( $response );
@@ -509,7 +498,7 @@ class Request {
 	 * @return array|null The latest authorization or capture or null if array is empty or no valid update_time found.
 	 */
 	private function get_latest_transaction_data( array $items ): ?array {
-		if ( empty( $items ) || ! is_array( $items ) ) {
+		if ( empty( $items ) ) {
 			return null;
 		}
 
@@ -685,10 +674,14 @@ class Request {
 	/**
 	 * Get the amount data  for the PayPal order purchase unit field.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order|null $order Order object.
 	 * @return array
 	 */
-	public function get_paypal_order_purchase_unit_amount( WC_Order $order ): array {
+	public function get_paypal_order_purchase_unit_amount( ?WC_Order $order ): array {
+		if ( ! $order ) {
+			return array();
+		}
+
 		$currency = $order->get_currency();
 
 		return array(
@@ -999,10 +992,6 @@ class Request {
 				throw new Exception( 'Failed to fetch the client ID. Response error: ' . $response->get_error_message() );
 			}
 
-			if ( ! is_array( $response ) ) {
-				throw new Exception( 'Failed to fetch the client ID. Invalid response type.' );
-			}
-
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
@@ -1028,7 +1017,7 @@ class Request {
 	 * @return array|\WP_Error The API response body, or WP_Error if the request fails.
 	 * @throws Exception If the site ID is not found.
 	 */
-	private function send_wpcom_proxy_request( string $method, string $endpoint, array $request_body ): array|\WP_Error {
+	private function send_wpcom_proxy_request( string $method, string $endpoint, array $request_body ) {
 		$site_id = \Jetpack_Options::get_option( 'id' );
 		if ( ! $site_id ) {
 			\WC_Gateway_Paypal::log( sprintf( 'Site ID not found. Cannot send request to %s.', $endpoint ) );
