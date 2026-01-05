@@ -33,7 +33,6 @@ test.describe(
 			const paypalDiv = await waitForPayPalToLoad( page );
 
 			await test.step( 'Install PayPal Standard', async () => {
-
 				// Confirm the Enable button is present.
 				const enableButton = paypalDiv.getByRole( 'link', {
 					name: 'Enable',
