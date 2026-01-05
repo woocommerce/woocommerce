@@ -307,16 +307,16 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 		$post = get_post( $post_id );
 
 		// Mock the appropriate page type.
-		if ( $is_checkout ) {
-			wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
-				array(
-					'is_checkout' => fn() => true,
-				)
-			);
-		}
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'is_checkout' => fn() => $is_checkout,
+			)
+		);
 
 		if ( $is_cart ) {
 			add_filter( 'woocommerce_is_cart', '__return_true' );
+		} else {
+			add_filter( 'woocommerce_is_cart', '__return_false' );
 		}
 
 		$url = $this->buttons->get_current_page_for_app_switch();
@@ -331,12 +331,12 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 		// Clean up.
 		wp_delete_post( $post_id, true );
 
-		if ( $is_checkout ) {
-			wc_get_container()->get( LegacyProxy::class )->clear_function_mocks();
-		}
+		wc_get_container()->get( LegacyProxy::class )->reset();
 
 		if ( $is_cart ) {
 			remove_filter( 'woocommerce_is_cart', '__return_true' );
+		} else {
+			remove_filter( 'woocommerce_is_cart', '__return_false' );
 		}
 	}
 
@@ -405,6 +405,8 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 
 		// Clean up.
 		wp_delete_post( $post_id, true );
+		wc_get_container()->get( LegacyProxy::class )->reset();
+		remove_filter( 'woocommerce_is_cart', '__return_false' );
 	}
 
 	/**
