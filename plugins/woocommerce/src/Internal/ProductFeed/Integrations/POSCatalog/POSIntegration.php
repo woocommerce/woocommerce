@@ -55,6 +55,7 @@ class POSIntegration implements IntegrationInterface {
 	public function get_product_feed_query_args(): array {
 		return array(
 			'type'      => array( 'simple', 'variable', 'variation' ),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			'tax_query' => array(
 				array(
 					'taxonomy' => 'pos_product_visibility',
