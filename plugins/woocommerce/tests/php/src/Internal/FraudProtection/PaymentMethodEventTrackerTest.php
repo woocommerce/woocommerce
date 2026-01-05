@@ -10,7 +10,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 /**
@@ -79,8 +78,11 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	 * Test payment method added event tracking.
 	 */
 	public function test_handle_payment_method_added(): void {
-		$user_id = $this->factory->user->create();
+		$tracker = $this->get_testable_tracker();
+		$tracker->register();
 
+		$user_id = $this->factory->user->create();
+		
 		$token = new \WC_Payment_Token_CC();
 		$token->set_token( 'test_token_123' );
 		$token->set_gateway_id( 'stripe' );
@@ -90,12 +92,6 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token->set_expiry_year( '2025' );
 		$token->set_user_id( $user_id );
 		$token->save();
-
-		$tracker = $this->get_testable_tracker();
-		$tracker->register();
-
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
-		do_action( 'woocommerce_new_payment_token', $token->get_id(), $token );
 
 		$this->assertCount( 1, $this->captured_logs );
 		$this->assertEquals( 'info', $this->captured_logs[0]['level'] );
