@@ -869,7 +869,7 @@ class WC_Form_Handler {
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
 		if ( ! WC()->cart ) {
-			wc_doing_it_wrong( __FUNCTION__, 'Cart is not initialized.', '10.5.0');
+			wc_doing_it_wrong( __FUNCTION__, 'Cart is not initialized.', '10.5.0' );
 			return false;
 		}
 
