@@ -145,7 +145,7 @@ export default defineConfig( {
 		},
 		{
 			name: 'paypal-standard',
-			testMatch: [ '**/tests/paypal-standard/**' ],
+			testMatch: [ '**/tests/paypal/**' ],
 			dependencies: [ 'site setup' ],
 		},
 	],
