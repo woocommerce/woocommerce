@@ -537,28 +537,25 @@ class SessionDataCollector {
 				$this
 			);
 
-			/**
-			 * Filters payment data for a specific payment gateway.
-			 *
-			 * This is a dynamic filter that includes the payment gateway ID in the hook name,
-			 * allowing payment gateways to hook into their specific filter without checking
-			 * the payment method in the callback.
-			 *
-			 * Example: 'woocommerce_fraud_protection_payment_data_stripe'
-			 *
-			 * @since 10.5.0
-			 *
-			 * @param array                $payment_data   Payment data array with fields to populate.
-			 * @param SessionDataCollector $data_collector The SessionDataCollector instance for additional context.
-			 *
-			 * @return array Modified payment data array.
-			 */
 			if ( $chosen_payment_method ) {
 				/**
-			 * Hook: woocommerce_fraud_protection_payment_data_{payment_method}.
-			 *
-			 * @since 10.5.0
-			 */
+				 * Hook: woocommerce_fraud_protection_payment_data_{payment_method}
+				 
+				* Filters payment data for a specific payment gateway.
+				*
+				* This is a dynamic filter that includes the payment gateway ID in the hook name,
+				* allowing payment gateways to hook into their specific filter without checking
+				* the payment method in the callback.
+				*
+				* Example: 'woocommerce_fraud_protection_payment_data_stripe'
+				*
+				* @since 10.5.0
+				*
+				* @param array                $payment_data   Payment data array with fields to populate.
+				* @param SessionDataCollector $data_collector The SessionDataCollector instance for additional context.
+				*
+				* @return array Modified payment data array.
+				*/
 				$payment_data = apply_filters(
 					"woocommerce_fraud_protection_payment_data_{$chosen_payment_method}",
 					$payment_data,
