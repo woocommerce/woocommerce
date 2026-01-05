@@ -132,6 +132,7 @@ class WC_Admin_Duplicate_Product {
 	 */
 	public function product_duplicate( $product ) {
 		if ( ! $product instanceof WC_Product ) {
+			wc_doing_it_wrong( __METHOD__, 'product_duplicate() expects a WC_Product instance', '10.5.0' );
 			return new WC_Product();
 		}
 
@@ -197,6 +198,7 @@ class WC_Admin_Duplicate_Product {
 				$child = wc_get_product( $child_id );
 
 				if ( ! $child instanceof WC_Product ) {
+					wc_doing_it_wrong( __METHOD__, 'product_duplicate() expects product children to be WC_Product instances', '10.5.0' );
 					continue;
 				}
 
