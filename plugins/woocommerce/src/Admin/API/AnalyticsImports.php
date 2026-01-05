@@ -92,8 +92,8 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 * @return \WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_status( $request ) {
-		$is_immediate_mode = $this->is_immediate_import_enabled();
-		$mode              = $is_immediate_mode ? 'immediate' : 'scheduled';
+		$is_scheduled_mode = $this->is_scheduled_import_enabled();
+		$mode              = $is_scheduled_mode ? 'scheduled' : 'immediate';
 
 		$response = array(
 			'mode'                      => $mode,
@@ -103,7 +103,7 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 		);
 
 		// For scheduled mode, populate additional fields.
-		if ( ! $is_immediate_mode ) {
+		if ( $is_scheduled_mode ) {
 			$last_processed_gmt                    = get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, null );
 			$response['last_processed_date']       = ( is_string( $last_processed_gmt ) && $last_processed_gmt ) ? get_date_from_gmt( $last_processed_gmt, 'Y-m-d H:i:s' ) : null;
 			$response['next_scheduled']            = $this->get_next_scheduled_time();
@@ -120,10 +120,10 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	 * @return \WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function trigger_import( $request ) {
-		$is_immediate_mode = $this->is_immediate_import_enabled();
+		$is_scheduled_mode = $this->is_scheduled_import_enabled();
 
 		// Return error if in immediate mode.
-		if ( $is_immediate_mode ) {
+		if ( ! $is_scheduled_mode ) {
 			return new WP_Error(
 				'woocommerce_rest_analytics_import_immediate_mode',
 				__( 'Manual import is not available in immediate mode. Imports happen automatically.', 'woocommerce' ),
@@ -162,12 +162,12 @@ class AnalyticsImports extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check if immediate import is enabled.
+	 * Check if scheduled import is enabled.
 	 *
 	 * @return bool
 	 */
-	private function is_immediate_import_enabled() {
-		return 'no' !== get_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, OrdersScheduler::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE );
+	private function is_scheduled_import_enabled() {
+		return 'yes' === get_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, OrdersScheduler::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE );
 	}
 
 	/**
