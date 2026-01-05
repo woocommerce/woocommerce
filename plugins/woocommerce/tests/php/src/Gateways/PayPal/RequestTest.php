@@ -179,7 +179,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 * Helper function for creating PayPal order success response.
 	 *
 	 * @param bool   $value      Original pre-value, likely to be false.
-	 * @param array  $parsed_url Parsed URL object.
+	 * @param array  $parsed_args Parsed arguments.
 	 * @param string $url The URL of the request.
 	 *
 	 * @return array|bool Return a 200 response or false if the URL is not a create-order request.
@@ -220,7 +220,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 * Helper function for creating PayPal order error response.
 	 *
 	 * @param bool   $value      Original pre-value, likely to be false.
-	 * @param array  $parsed_url Parsed URL object.
+	 * @param array  $parsed_args Parsed arguments.
 	 * @param string $url The URL of the request.
 	 *
 	 * @return array|bool Return a 500 error response or false if the URL is not a create-order request.
