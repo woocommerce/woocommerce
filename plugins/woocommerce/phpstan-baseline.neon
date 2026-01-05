@@ -25243,44 +25243,8 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
 
 		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_checkout_order_approved\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_payment_authorization_created\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_payment_capture_completed\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_payment_capture_pending\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_webhook\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
 			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_webhook\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Parameter \#2 \$action_url of method WC_Gateway_Paypal_Request\:\:authorize_or_capture_payment\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
 
@@ -34095,12 +34059,6 @@ parameters:
 		-
 			message: '#^Class Automattic\\Jetpack\\Connection\\Rest_Authentication referenced with incorrect case\: Automattic\\Jetpack\\Connection\\REST_Authentication\.$#'
 			identifier: class.nameCase
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-webhooks-controller.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-webhooks-controller.php
 
@@ -64274,6 +64232,18 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: src/Gateways/PayPal/AddressRequirements.php
+
+		-
+			message: '#^Constant WC_ABSPATH not found\.$#'
+			identifier: constant.notFound
+			count: 1
+			path: src/Gateways/PayPal/WebhookHandler.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\WebhookHandler\:\:process_webhook\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Gateways/PayPal/WebhookHandler.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$payload\.$#'
