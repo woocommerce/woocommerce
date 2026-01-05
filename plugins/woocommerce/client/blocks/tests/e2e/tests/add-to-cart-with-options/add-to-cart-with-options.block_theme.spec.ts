@@ -1,15 +1,13 @@
 /**
  * External dependencies
  */
-import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI, Editor } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { Page } from '@playwright/test';
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
-import { Editor } from '@wordpress/e2e-test-utils-playwright';
 import config from '../../../../../admin/config/core.json';
 
 const test = base.extend< {
