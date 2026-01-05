@@ -98,11 +98,15 @@ class Request {
 			);
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_ORDER_ENDPOINT, $request_body );
 
+			echo 'debug:' . wp_json_encode( $response );
+
 			if ( is_wp_error( $response ) ) {
+				echo 'debug: is_wp_error';
 				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
 			}
 
 			if ( ! is_array( $response ) ) {
+				echo 'debug: ! is_array';
 				throw new Exception( 'PayPal order creation failed. Invalid response type.' );
 			}
 
@@ -133,6 +137,7 @@ class Request {
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
+				echo 'debug: throw not 2xx';
 				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
@@ -141,6 +146,7 @@ class Request {
 				// We only need an approve link for the classic, redirect flow.
 				$redirect_url = $this->get_approve_link( $http_code, $response_data );
 				if ( empty( $redirect_url ) ) {
+					echo 'debug: throw missing approval link';
 					throw new Exception( 'PayPal order creation failed. Missing approval link.' );
 				}
 			}
@@ -171,6 +177,9 @@ class Request {
 					)
 				);
 			}
+			echo 'debug: return null';
+			echo $e->getMessage();
+			echo $e;
 			return null;
 		}
 	}
