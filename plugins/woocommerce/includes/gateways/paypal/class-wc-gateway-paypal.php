@@ -15,6 +15,9 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
+use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -22,10 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
 	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
 }
 
 /**
@@ -270,8 +269,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		try {
-			include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-			$paypal_request       = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request       = new PayPalRequest( $this );
 			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
 
 			// Update the addresses in the order with the addresses from the PayPal order details.
@@ -316,8 +314,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
 		$transact_account_manager->do_onboarding();
 	}
 
@@ -600,12 +597,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+		$order = wc_get_order( $order_id );
 
-		$order          = wc_get_order( $order_id );
-		$paypal_request = new WC_Gateway_Paypal_Request( $this );
+		if ( ! $order || ! $order instanceof WC_Order ) {
+			return array();
+		}
 
 		if ( $this->should_use_orders_v2() ) {
+			$paypal_request = new PayPalRequest( $this );
+
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception(
@@ -615,7 +615,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$redirect_url = $paypal_order['redirect_url'];
 		} else {
-			$redirect_url = $paypal_request->get_request_url( $order, $this->testmode );
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+
+			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$redirect_url   = $paypal_request->get_request_url( $order, $this->testmode );
 		}
 
 		return array(
@@ -700,7 +703,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		if ( ! $order || ! $order instanceof WC_Order ) {
 			return;
 		}
 
@@ -713,9 +716,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
 
 		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
-			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request = new PayPalRequest( $this );
 			$paypal_request->capture_authorized_payment( $order );
 			return;
 		}
@@ -951,8 +952,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// We need merchant and provider accounts with Transact to be able to use the proxy.
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
 		$merchant_account_data    = $transact_account_manager->get_transact_account_data( 'merchant' );
 		if ( empty( $merchant_account_data ) ) {
 			return false;
@@ -1029,7 +1029,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		WC_Gateway_Paypal_Notices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
+		PayPalNotices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
 	}
 }
 
@@ -1042,6 +1042,6 @@ add_action(
 		}
 
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
-		new WC_Gateway_Paypal_Notices();
+		new PayPalNotices();
 	}
 );
