@@ -5,7 +5,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Caches;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 /**
  * Product version string invalidation handler.
@@ -14,7 +13,7 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
  * the version string for a given product, which in turn invalidates
  * any cached REST API responses containing that product.
  */
-class ProductVersionStringInvalidator implements RegisterHooksInterface {
+class ProductVersionStringInvalidator {
 
 	/**
 	 * Default cache TTL in seconds for term/taxonomy entity lookups.
