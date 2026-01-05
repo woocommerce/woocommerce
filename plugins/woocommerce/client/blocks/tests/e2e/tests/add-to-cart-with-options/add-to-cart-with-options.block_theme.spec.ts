@@ -1029,14 +1029,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const productPermalink = '/product/' + productSlug;
 		let productAttributes: [ { name: string, options: any[] } ];
 
-		async function goToProductTemplateEditor ( pageObject: AddToCartWithOptionsPage, editor: Editor ) {
-			await pageObject.updateSingleProductTemplate();
-			await editor.setPreferences( 'core/edit-site', {
-				welcomeGuide: false,
-			} );
-			await editor.openDocumentSettingsSidebar();
-		}
-
 		async function setCartBlockAttributes(
 			pageObject: AddToCartWithOptionsPage,
 			editor: Editor,
@@ -1160,10 +1152,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		test.beforeEach( async ( {
 			pageObject,
-			editor,
 		} ) => {
 			// Tests expect to start in editor of product template
-			await goToProductTemplateEditor( pageObject, editor );
+			await pageObject.updateSingleProductTemplate();
 		} );
 
 		for ( const optionStyle of [ 'Pills', 'Dropdown' ] ) {
@@ -1182,7 +1173,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} );
 
 				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
-					await goToProductTemplateEditor( pageObject, editor );
+					await pageObject.updateSingleProductTemplate();
 					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
 				} );
 				await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
@@ -1210,7 +1201,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} );
 
 				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
-					await goToProductTemplateEditor( pageObject, editor );
+					await pageObject.updateSingleProductTemplate();
 					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
 				} );
 				await test.step( `${ optionStyle }: Expect attributes to auto-select when user selects something`, async () => {
@@ -1248,7 +1239,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					).not.toBeVisible();
 				} );
 
-				await goToProductTemplateEditor( pageObject, editor );
+				await pageObject.updateSingleProductTemplate();
 				await setDisabledAttributesAction( 'disable' );
 				await test.step( `${ optionStyle }: Expect unattached options to be disabled (by prop)`, async () => {
 					await preselect();
@@ -1284,7 +1275,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				}
 
 				for ( const value of [ 'hide', 'disable' ] ) {
-					await goToProductTemplateEditor( pageObject, editor );
+					await pageObject.updateSingleProductTemplate();
 
 					await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
 						await setCartBlockAttributes( pageObject, editor, { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
