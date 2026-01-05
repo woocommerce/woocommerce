@@ -354,7 +354,47 @@ class WC_Admin_Duplicate_Product {
 			}
 		}
 
-		$product->set_sku( $root_sku . '-' . ( $max_suffix + 1 ) );
+		// We set a limit of SKUs to try in order to avoid infinite loops.
+		$limit      = $max_suffix + 100;
+		$product_id = $product->get_id();
+
+		while ( $max_suffix < $limit ) {
+			$new_sku = $root_sku . '-' . ( $max_suffix + 1 );
+
+			/**
+			 * Gives plugins an opportunity to verify SKU uniqueness themselves. Filter added to keep backwards
+			 * compatibility with `wc_product_has_unique_sku()`.
+			 * See: https://github.com/woocommerce/woocommerce/pull/62628
+			 *
+			 * @since 10.5.0
+			 *
+			 * @param bool|null $has_unique_sku Set to a boolean value to short-circuit the default SKU check.
+			 * @param int $product_id The ID of the current product.
+			 * @param string $sku The SKU to check for uniqueness.
+			 */
+			$pre_has_unique_sku = apply_filters( 'wc_product_pre_has_unique_sku', true, $product_id, $new_sku );
+
+			if ( $pre_has_unique_sku ) {
+				/**
+				 * Gives plugins an opportunity to verify SKU uniqueness themselves. Filter added to keep backwards
+				 * compatibility with `wc_product_has_unique_sku()`.
+				 * See: https://github.com/woocommerce/woocommerce/pull/62628
+				 *
+				 * @since 10.5.0
+				 *
+				 * @param bool|null $sku_found Set to a boolean value to short-circuit the default SKU check.
+				 * @param int $product_id The ID of the current product.
+				 * @param string $sku The SKU to check for uniqueness.
+				 */
+				$sku_found = apply_filters( 'wc_product_has_unique_sku', false, $product_id, $new_sku );
+
+				if ( ! $sku_found ) {
+					$product->set_sku( $new_sku );
+					return;
+				}
+			}
+			++$max_suffix;
+		}
 	}
 }
 
