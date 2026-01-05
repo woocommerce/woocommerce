@@ -91,6 +91,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		productGalleryPageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
 		const variationDescription =
 			'This is the output of the variation description';
