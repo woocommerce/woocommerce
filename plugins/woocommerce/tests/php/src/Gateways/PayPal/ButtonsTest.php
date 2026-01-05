@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * Class ButtonsTest.
@@ -277,14 +278,16 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 	 * @dataProvider provider_app_switch_url_scenarios
 	 *
 	 * @param string $page_type The page type.
-	 * @param string $filter_name The filter name.
+	 * @param bool   $is_checkout Whether the current page is checkout.
+	 * @param bool   $is_cart Whether the current page is cart.
 	 * @param string $post_type The post type.
 	 * @param bool   $expected_contains Whether the expected contains.
 	 * @return void
 	 */
 	public function test_get_current_page_for_app_switch(
 		string $page_type,
-		?string $filter_name = null,
+		bool $is_checkout,
+		bool $is_cart,
 		string $post_type,
 		bool $expected_contains
 	): void {
@@ -299,12 +302,21 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 
 		// Set global post.
 		global $post;
+
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = get_post( $post_id );
 
 		// Mock the appropriate page type.
-		if ( $filter_name ) {
-			add_filter( $filter_name, '__return_true' );
+		if ( $is_checkout ) {
+			wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+				array(
+					'is_checkout' => fn() => true,
+				)
+			);
+		}
+
+		if ( $is_checkout ) {
+			add_filter( 'woocommerce_is_cart', '__return_true' );
 		}
 
 		$url = $this->buttons->get_current_page_for_app_switch();
@@ -318,6 +330,14 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 
 		// Clean up.
 		wp_delete_post( $post_id, true );
+
+		if ( $is_checkout ) {
+			wc_get_container()->get( LegacyProxy::class )->clear_function_mocks();
+		}
+
+		if ( $is_cart ) {
+			remove_filter( 'woocommerce_is_cart', '__return_true' );
+		}
 	}
 
 	/**
@@ -329,19 +349,22 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 		return array(
 			'checkout_page' => array(
 				'page_type'         => 'checkout',
-				'filter_name'       => 'woocommerce_is_checkout',
+				'is_checkout'       => true,
+				'is_cart'           => false,
 				'post_type'         => 'page',
 				'expected_contains' => true,
 			),
 			'cart_page'     => array(
 				'page_type'         => 'cart',
-				'filter_name'       => 'woocommerce_is_cart',
+				'is_checkout'       => false,
+				'is_cart'           => true,
 				'post_type'         => 'page',
 				'expected_contains' => true,
 			),
 			'other_page'    => array(
 				'page_type'         => 'other',
-				'filter_name'       => null,
+				'is_checkout'       => false,
+				'is_cart'           => false,
 				'post_type'         => 'page',
 				'expected_contains' => false,
 			),
