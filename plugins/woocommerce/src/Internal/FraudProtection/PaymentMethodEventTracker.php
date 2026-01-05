@@ -72,7 +72,6 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		add_action( 'woocommerce_payment_token_updated', array( $this, 'handle_payment_method_updated' ), 10, 1 );
 		add_action( 'woocommerce_payment_token_set_default', array( $this, 'handle_payment_method_set_default' ), 10, 2 );
 		add_action( 'woocommerce_payment_token_deleted', array( $this, 'handle_payment_method_deleted' ), 10, 2 );
-		add_action( 'woocommerce_payment_token_add_failed', array( $this, 'handle_payment_method_add_failed' ), 10, 2 );
 	}
 
 	/**
@@ -139,24 +138,6 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	public function handle_payment_method_deleted( $token_id, $token ): void {
 		$event_data = $this->build_payment_method_event_data( 'deleted', $token );
 		$this->track_event( 'payment_method_deleted', $event_data );
-	}
-
-	/**
-	 * Handle payment method add failed event.
-	 *
-	 * Triggers fraud protection event tracking when a payment method fails to be added.
-	 * This hook should be fired by payment gateways when a payment method addition
-	 * attempt fails, providing the token object that was attempted and the failure reason.
-	 *
-	 * @internal
-	 *
-	 * @param \WC_Payment_Token $token          The payment token object that failed to be added.
-	 * @param string            $failure_reason The reason for failure (e.g., 'validation_failed', 'gateway_error', 'declined').
-	 */
-	public function handle_payment_method_add_failed( \WC_Payment_Token $token, string $failure_reason ): void {
-		$event_data                   = $this->build_payment_method_event_data( 'add_failed', $token );
-		$event_data['failure_reason'] = $failure_reason;
-		$this->track_event( 'payment_method_add_failed', $event_data );
 	}
 
 	/**
