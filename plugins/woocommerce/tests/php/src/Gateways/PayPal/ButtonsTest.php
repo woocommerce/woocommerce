@@ -33,9 +33,9 @@ class ButtonsTest extends \WC_Unit_Test_Case {
 	/**
 	 * Original global post.
 	 *
-	 * @var \WP_Post
+	 * @var \WP_Post|null
 	 */
-	private \WP_Post $original_post;
+	private ?\WP_Post $original_post;
 
 	/**
 	 * Set up the test environment.
