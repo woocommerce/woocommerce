@@ -1027,7 +1027,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const productPermalink = '/product/' + productSlug;
 		let productAttributes: [ { name: string, options: any[] } ];
 
-		async function setCartBlockAttributes(
+		async function setAddToCartWithOptionsBlockAttributes(
 			pageObject: AddToCartWithOptionsPage,
 			editor: Editor,
 			{
@@ -1115,7 +1115,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
 					await pageObject.updateSingleProductTemplate();
-					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
+					await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: true } );
 				} );
 
 				await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
@@ -1142,7 +1142,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await pageObject.updateSingleProductTemplate();
 				async function setDisabledAttributesAction( value: string ) {
 					await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "${ value }"`, async () => {
-						await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: value } );
+						await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: value } );
 					} );
 				}
 				async function preselect() {
@@ -1199,7 +1199,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await pageObject.updateSingleProductTemplate();
 
 					await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
-						await setCartBlockAttributes( pageObject, editor, { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
+						await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
 					} );
 					await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
 						await preselect();
