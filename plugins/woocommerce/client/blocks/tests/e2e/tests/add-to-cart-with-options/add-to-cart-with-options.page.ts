@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor, Admin, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
+import { expect, Editor, Admin, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 class AddToCartWithOptionsPage {
 	private page: Page;
@@ -123,6 +123,58 @@ class AddToCartWithOptionsPage {
 		await this.updateAddToCartWithOptionsBlock();
 
 		await this.editor.publishAndVisitPost();
+	}
+
+	async selectBlockAttribute(
+		attributeName: any,
+		attributeValue: any,
+		optionStyle: 'pills' | 'dropdown',
+	) {
+		if ( optionStyle === 'dropdown' ) {
+			await this.page.getByLabel( attributeName ).selectOption( attributeValue );
+			return;
+		}
+		if ( attributeValue !== '' ) {
+			await this.page.getByLabel( attributeName ).getByText( attributeValue ).click();
+			return;
+		}
+		await this.page.getByLabel( attributeName ).locator( 'label:has(:checked)' ).click();
+	}
+
+	async expectSelectedAttributes(
+		productAttributes: [ { name: string, options: any[] } ],
+		expectedValues: Record< string, string | RegExp > = {},
+		optionStyle: 'pills' | 'dropdown',
+	) {
+		for ( let { name: attributeName, options: attributeValues } of productAttributes ) {
+			const attributeNameLocator = this.page.getByLabel( attributeName, { exact: true } );
+			if ( optionStyle === 'dropdown' ) {
+				let expectedValue: string | RegExp;
+				if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
+					expectedValue = expectedValues[ attributeName ];
+				} else {
+					expectedValue = '';
+				}
+				await expect(
+					attributeNameLocator
+				).toHaveValue( expectedValue );
+				return;
+			}
+			if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
+				attributeValues = attributeValues.filter( item => item !== expectedValues[ attributeName ] ); // Omit attributeName
+				await expect (
+					attributeNameLocator.getByLabel( expectedValues[ attributeName ], { exact: true } )
+				).toBeChecked();
+			}
+			if ( attributeValues.length ) {
+				for ( const attributeValue of attributeValues ) {
+					await expect(
+							attributeNameLocator
+							.getByLabel( attributeValue, { exact: true } )
+					).not.toBeChecked();
+				}
+			}
+		}
 	}
 }
 

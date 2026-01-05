@@ -1081,63 +1081,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 			}
 		}
 
-		async function selectBlockAttribute(
-			page: Page,
-			attributeName: any,
-			attributeValue: any,
-			optionStyle: 'pills' | 'dropdown',
-		) {
-			if ( optionStyle === 'dropdown' ) {
-				await page.getByLabel( attributeName ).selectOption( attributeValue );
-			} else if ( optionStyle === 'pills' ) {
-				if ( attributeValue === '' ) {
-					await page.getByLabel( attributeName ).locator( 'label:has(:checked)' ).click();
-				} else {
-					await page.getByLabel( attributeName ).getByText( attributeValue ).click();
-				}
-			} else {
-				throw new Error( `Bad values for optionStyle (${ optionStyle })` );
-			}
-		}
-
-		async function expectSelectedAttributes(
-			page: Page,
-			expectedValues: Record< string, string >={},
-			optionStyle: 'pills' | 'dropdown',
-		) {
-			for ( let { name: attributeName, options: attributeValues } of productAttributes ) {
-				if ( optionStyle === 'dropdown' ) {
-					if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
-						await expect(
-							page.getByLabel( attributeName, { exact: true } )
-						).toHaveValue( expectedValues[ attributeName ] );
-					} else {
-						await expect(
-							page.getByLabel( attributeName, { exact: true } )
-						).toHaveValue( '' );
-					}
-				} else if ( optionStyle === 'pills' ) {
-					if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
-						attributeValues = attributeValues.filter( item => item !== expectedValues[ attributeName ] ); // Omit attributeName
-						await expect (
-							page.getByLabel( attributeName, { exact: true } ).getByLabel( expectedValues[ attributeName ], { exact: true } )
-						).toBeChecked();
-					}
-					if ( attributeValues.length ) {
-						for ( const attributeValue of attributeValues ) {
-							await expect(
-								page
-									.getByLabel( attributeName, { exact: true } )
-									.getByLabel( attributeValue, { exact: true } )
-							).not.toBeChecked();
-						}
-					}
-				} else {
-					throw new Error( `Bad value for optionStyle (${ optionStyle })` );
-				}
-			}
-		}
-
 		test.beforeAll( async () => {
 			const cliOutput = await wpCLI(
 				`wc product list --user=1 --slug="${ productSlug }" --format=json`
@@ -1169,7 +1112,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
 					await page.goto( productPermalink );
 
-					await expectSelectedAttributes( page, { Type: '', Color: '', Size: '' }, optionStyle );
+					await pageObject.expectSelectedAttributes( productAttributes, { Type: '', Color: '', Size: '' }, optionStyle );
 				} );
 
 				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
@@ -1180,7 +1123,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// Expect Size to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
-					await expectSelectedAttributes( page, { Type: 'T-shirt', Color: '', Size: '' }, optionStyle );
+					await pageObject.expectSelectedAttributes( productAttributes, { Type: 'T-shirt', Color: '', Size: '' }, optionStyle );
 				} );
 			} );
 			test( `${ optionStyle }: Add to Cart + Options: Auto-select on user selection should work`, async ( {
@@ -1195,9 +1138,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// Expect nothing to be auto-selected
-					await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
 
-					await expectSelectedAttributes( page, { Type: '', Color: 'Blue', Size: '' }, optionStyle );
+					await pageObject.expectSelectedAttributes( productAttributes, { Type: '', Color: 'Blue', Size: '' }, optionStyle );
 				} );
 
 				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
@@ -1208,9 +1151,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
-					await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
 
-					await expectSelectedAttributes( page, { Type: 'T-shirt', Color: 'Blue', Size: 'XL' }, optionStyle );
+					await pageObject.expectSelectedAttributes( productAttributes, { Type: 'T-shirt', Color: 'Blue', Size: 'XL' }, optionStyle );
 				} );
 			} );
 			test( `${ optionStyle }: Add to Cart + Options: Test the multiple choices of the Values in conflict setting`, async ( {
@@ -1227,7 +1170,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", the only possible Size remaining is "XL".
-					await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
 				}
 
 				await setDisabledAttributesAction( 'hide' );
@@ -1258,16 +1201,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", the only possible Size remaining is "XL".
-					await selectBlockAttribute( page, 'Color', 'Blue', optionStyle );
+					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
 					// Now, we deselect the Color.
-					await selectBlockAttribute( page, 'Color', '', optionStyle );
+					await pageObject.selectBlockAttribute( 'Color', '', optionStyle );
 					// Now, the options should look like this:
 					// Type: T-shirt
 					// Color: ''
 					// Size: XL
 					// Because the Size is XL, the only Colors possible are Red and Blue.
 					// Now if we select Size: S, the Color should auto-select to Green.
-					await selectBlockAttribute( page, 'Size', 'S', optionStyle );
+					await pageObject.selectBlockAttribute( 'Size', 'S', optionStyle );
 					// Now, the options should look like this:
 					// Type: T-shirt
 					// Color: Green
@@ -1283,7 +1226,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
 						await preselect();
 
-						await expectSelectedAttributes( page, { Type: 'T-shirt', Color: 'Green', Size: 'S' }, optionStyle );
+						await pageObject.expectSelectedAttributes( productAttributes, { Type: 'T-shirt', Color: 'Green', Size: 'S' }, optionStyle );
 					} );
 				}
 			} );
