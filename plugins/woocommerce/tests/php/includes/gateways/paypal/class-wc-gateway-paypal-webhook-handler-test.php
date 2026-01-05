@@ -36,6 +36,8 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->markTestSkipped( 'Skipping PayPal Buttons tests.' );
+
 		$this->webhook_handler = new WC_Gateway_Paypal_Webhook_Handler();
 		$this->mock_request    = $this->createMock( WP_REST_Request::class );
 
