@@ -1140,11 +1140,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 				editor,
 			} ) => {
 				await pageObject.updateSingleProductTemplate();
-				async function setDisabledAttributesAction( value: string ) {
-					await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "${ value }"`, async () => {
-						await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: value } );
-					} );
-				}
 				async function preselect() {
 					await page.goto( productPermalink );
 
@@ -1152,7 +1147,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await pageObject.selectBlockAttribute( 'Color', 'Blue', optionStyle );
 				}
 
-				await setDisabledAttributesAction( 'hide' );
+				await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "hide"`, async () => {
+					await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: 'hide' } );
+				} );
 				await test.step( `${ optionStyle }: Expect unattached options to be hidden (by attribute)`, async () => {
 					await preselect();
 
