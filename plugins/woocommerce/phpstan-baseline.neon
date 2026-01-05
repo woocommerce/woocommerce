@@ -64084,12 +64084,6 @@ parameters:
 			path: src/Gateways/PayPal/TransactAccountManager.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Gateways/PayPal/WebhookHandler.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\WebhookHandler\:\:process_webhook\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
