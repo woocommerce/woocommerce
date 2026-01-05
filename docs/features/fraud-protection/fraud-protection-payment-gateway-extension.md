@@ -14,6 +14,8 @@ To enable fraud protection head to /wp-admin > WooCommerce > Settings > Advanced
 
 A general-purpose filter that applies to all payment gateways, allowing them to populate payment-specific data fields.
 
+**When it's called:** This filter is triggered during the checkout process when fraud protection data is being collected by the SessionDataCollector. It's called when building the payment data array, before the gateway-specific filter. The filter runs on every checkout where fraud protection is enabled, regardless of which payment gateway is selected.
+
 **Parameters:**
 - `$payment_data` (array): Payment data array with fields to populate
 - `$chosen_payment_method` (string|null): The chosen payment method ID, or null if not available
@@ -65,6 +67,8 @@ function my_gateway_add_payment_data( $payment_data, $chosen_payment_method, $da
 ### 2. `woocommerce_fraud_protection_payment_data_{gateway_id}`
 
 A gateway-specific filter that only applies to a specific payment gateway. This allows gateways to hook directly into their own filter without checking the payment method ID in the callback.
+
+**When it's called:** This filter is triggered immediately after `woocommerce_fraud_protection_payment_data` during the checkout fraud protection data collection process. It only runs if a valid `$gateway_id` is available (i.e., when a payment method has been selected). This provides a more targeted hook for individual payment gateways to add or modify their specific payment data without needing to check which gateway is active.
 
 **Dynamic hook name:** The `{gateway_id}` portion is replaced with the actual payment gateway ID (e.g., `stripe`, `paypal`, `square`).
 
