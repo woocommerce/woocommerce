@@ -33,19 +33,6 @@ interface WC_Product_Data_Store_Interface {
 	public function get_featured_product_ids();
 
 	/**
-	 * Check if product sku is found for any other product IDs, optionally excluding certain statuses.
-	 *
-	 * @param int    $product_id Product ID.
-	 * @param string $sku SKU.
-	 * @param array  $excluded_statuses Statuses to exclude from the check. Defaults to array( 'trash' ).
-	 * @return bool
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed. Use is_existing_sku()
-	 *           instead, which calls this method with the default excluded statuses.
-	 */
-	public function is_existing_sku_with_excluded_statuses( $product_id, $sku, $excluded_statuses );
-
-	/**
 	 * Check if product sku is found for any other product IDs.
 	 *
 	 * @param int    $product_id Product ID.

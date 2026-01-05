@@ -1207,32 +1207,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
-	 * Check if product sku is found for any other product IDs, optionally excluding certain statuses.
+	 * Check if product sku is found for any other product IDs.
 	 *
-	 * @since 10.5.0
+	 * @since 3.0.0
 	 * @param int    $product_id Product ID.
 	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
-	 * @param array  $excluded_statuses Statuses to exclude from the check. Defaults to array( 'trash' ).
 	 * @return bool
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed. Use is_existing_sku()
-	 *           instead, which calls this method with the default excluded statuses.
 	 */
-	public function is_existing_sku_with_excluded_statuses( $product_id, $sku, $excluded_statuses ) {
+	public function is_existing_sku( $product_id, $sku ) {
 		global $wpdb;
-
-		$excluded_statuses_sql = '';
-
-		if ( is_array( $excluded_statuses ) && count( $excluded_statuses ) > 0 ) {
-			$valid_statuses    = array_keys( get_post_stati() );
-			$excluded_statuses = array_values( array_map( 'sanitize_key', array_intersect( $excluded_statuses, $valid_statuses ) ) );
-
-			if ( count( $excluded_statuses ) > 0 ) {
-				// Note: this is directly injected into the SQL query. Be mindful
-				// if using it with untrusted data.
-				$excluded_statuses_sql = "AND posts.post_status NOT IN ( '" . implode( "','", $excluded_statuses ) . "' )";
-			}
-		}
 
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return (bool) $wpdb->get_var(
@@ -1243,32 +1226,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 				WHERE
 				posts.post_type IN ( 'product', 'product_variation' )
-				" .
-				// Variables used inside $excluded_statuses_sql are whitelisted
-				// and sanitized, so it's safe to not pass $excluded_statuses_sql
-				// as a $wpdb->prepare() variable.
-				$excluded_statuses_sql // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-				. '
+				AND posts.post_status != 'trash'
 				AND lookup.sku = %s
 				AND lookup.product_id <> %d
 				LIMIT 1
-				',
+				",
 				wp_slash( $sku ),
 				$product_id
 			)
 		);
-	}
-
-	/**
-	 * Check if product sku is found for any other product IDs.
-	 *
-	 * @since 3.0.0
-	 * @param int    $product_id Product ID.
-	 * @param string $sku Will be slashed to work around https://core.trac.wordpress.org/ticket/27421.
-	 * @return bool
-	 */
-	public function is_existing_sku( $product_id, $sku ) {
-		return $this->is_existing_sku_with_excluded_statuses( $product_id, $sku, array( 'trash' ) );
 	}
 
 	/**

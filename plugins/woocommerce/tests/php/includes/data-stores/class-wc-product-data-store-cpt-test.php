@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
@@ -150,50 +149,6 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product1->save();
 		$product2->save();
 		$product3->save();
-	}
-
-	/**
-	 * @testdox is_existing_sku() and is_existing_sku_with_excluded_statuses() correctly check for existing SKUs and respects the excluded_statuses parameter.
-	 */
-	public function test_is_existing_sku_with_excluded_statuses_parameter() {
-		$data_store = WC_Data_Store::load( 'product' );
-		$test_sku   = 'product-sku-' . time();
-
-		// Create a product with a specific SKU.
-		$product_with_sku = new WC_Product_Simple();
-		$product_with_sku->set_name( 'Product with SKU' );
-		$product_with_sku->set_sku( $test_sku );
-		$product_with_sku->save();
-
-		// Create another product to use as the product_id parameter (since is_existing_sku excludes the product_id passed in).
-		$other_product = new WC_Product_Simple();
-		$other_product->set_name( 'Other Product' );
-		$other_product->save();
-
-		// When the product is published, is_existing_sku and is_existing_sku_with_excluded_statuses should return true in all cases.
-		$this->assertTrue(
-			$data_store->is_existing_sku( $other_product->get_id(), $test_sku ),
-			'is_existing_sku should return true when product is published and check does not include trashed products.'
-		);
-		$this->assertTrue(
-			$data_store->is_existing_sku_with_excluded_statuses( $other_product->get_id(), $test_sku, array() ),
-			'is_existing_sku should return true when product is published and check includes trashed products.'
-		);
-
-		// Move the product to trash.
-		$product_with_sku->delete();
-
-		// When the product is trashed, is_existing_sku should return false.
-		$this->assertFalse(
-			$data_store->is_existing_sku( $other_product->get_id(), $test_sku ),
-			'is_existing_sku should return false when product is trashed and check does not include trashed products.'
-		);
-
-		// When the product is trashed, is_existing_sku_with_excluded_statuses should return true when excluded_statuses doesn't contain 'trash'.
-		$this->assertTrue(
-			$data_store->is_existing_sku_with_excluded_statuses( $other_product->get_id(), $test_sku, array() ),
-			'is_existing_sku should return true when product is trashed and check includes trashed products.'
-		);
 	}
 
 	/**
