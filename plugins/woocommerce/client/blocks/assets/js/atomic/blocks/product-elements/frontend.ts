@@ -81,8 +81,10 @@ function getVariationData(
 
 	// First check if data exists in config (pre-loaded).
 	const preloadedData = products?.[ productId ]?.variations?.[ variationId ];
-	if ( preloadedData && 'price_html' in preloadedData ) {
-		// Duck typing with `price_html` to validate the expected full data is present.
+	if ( preloadedData && 'is_in_stock' in preloadedData ) {
+		// is_in_stock is always set by AddToCartWithOptions in non-lazy mode,
+		// and always set after a lazy fetch. It's never in lazy mode's minimal
+		// data (which only contains attributes).
 		return preloadedData;
 	}
 
