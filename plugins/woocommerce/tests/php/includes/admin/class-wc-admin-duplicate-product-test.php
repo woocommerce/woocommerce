@@ -104,9 +104,9 @@ class WC_Admin_Duplicate_Product_Test extends WC_Unit_Test_Case {
 		// Verify the filter 'wc_product_has_unique_sku' is honored.
 		add_filter( 'wc_product_has_unique_sku', array( $this, 'dont_allow_skus_with_numbers_lower_than_8' ), 10, 3 );
 
-		$third_duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
-		$this->assertEquals( 'woo-cap-8', $third_duplicate->get_sku() );
-		$this->assertNotEquals( $product->get_id(), $third_duplicate->get_id() );
+		$fourth_duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
+		$this->assertEquals( 'woo-cap-8', $fourth_duplicate->get_sku() );
+		$this->assertNotEquals( $product->get_id(), $fourth_duplicate->get_id() );
 
 		remove_filter( 'wc_product_has_unique_sku', array( $this, 'dont_allow_skus_with_numbers_lower_than_8' ) );
 	}
