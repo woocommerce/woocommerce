@@ -103,12 +103,16 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order->set_total( 60 );
 		$order->save();
 
-		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 3 );
+		// Ensure no other filters interfere with this test.
+		remove_all_filters( 'pre_http_request' );
+
+		// Use priority 5 to ensure this filter runs before other filters that might intercept the request.
+		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 5, 3 );
 
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
-		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
+		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 5 );
 
 		$this->assertNotNull( $result );
 	}
@@ -134,6 +138,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 			return $value;
 		}
 
+		// Perform assertions to validate the request parameters.
 		$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
 		$this->assertEquals( 'POST', $parsed_args['method'] );
 		$body = json_decode( $parsed_args['body'], true );
@@ -174,7 +179,24 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'site_id', $custom_id );
 		$this->assertArrayHasKey( 'v', $custom_id );
 
-		return $this->create_paypal_order_success( $value, $parsed_args, $url );
+		return array(
+			'response' => array(
+				'code' => 200,
+			),
+			'body'     => wp_json_encode(
+				array(
+					'id'     => '123',
+					'status' => 'CREATED',
+					'links'  => array(
+						array(
+							'rel'    => 'approve',
+							'href'   => 'https://www.paypal.com/checkoutnow?token=123',
+							'method' => 'GET',
+						),
+					),
+				)
+			),
+		);
 	}
 
 	/**
