@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Change country code default value from false to empty string in woocommerce_geolocate_ip hook
