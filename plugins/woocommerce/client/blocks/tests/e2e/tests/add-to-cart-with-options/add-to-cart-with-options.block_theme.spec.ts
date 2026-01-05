@@ -1091,19 +1091,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 			productAttributes = cliOutputJSON[0].attributes;
 		} );
 
-		test.beforeEach( async ( {
-			pageObject,
-		} ) => {
-			// Tests expect to start in editor of product template
-			await pageObject.updateSingleProductTemplate();
-		} );
-
 		for ( const optionStyle of [ 'pills', 'dropdown' ] as ( 'pills' | 'dropdown' )[] ) {
 			test( `${ optionStyle }: Add to Cart + Options: Auto-select should work (on page load)`, async ( {
 				page,
 				pageObject,
 				editor,
 			} ) => {
+				await pageObject.updateSingleProductTemplate();
 				await test.step( `${ optionStyle }: Set the autoselect setting to false`, async () => {
 					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: false } );
 				} );
@@ -1129,6 +1123,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				pageObject,
 				editor,
 			} ) => {
+				await pageObject.updateSingleProductTemplate();
 				await test.step( `${ optionStyle }: Set the autoselect setting to false`, async () => {
 					await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, autoselect: false } );
 				} );
@@ -1159,6 +1154,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				pageObject,
 				editor,
 			} ) => {
+				await pageObject.updateSingleProductTemplate();
 				async function setDisabledAttributesAction( value: string ) {
 					await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "${ value }"`, async () => {
 						await setCartBlockAttributes( pageObject, editor, { optionStyle: optionStyle, disabledAttributesAction: value } );
@@ -1195,6 +1191,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				pageObject,
 				editor,
 			} ) => {
+				await pageObject.updateSingleProductTemplate();
 				async function preselect() {
 					await page.goto( productPermalink );
 
