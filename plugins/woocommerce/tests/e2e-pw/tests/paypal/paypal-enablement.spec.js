@@ -5,7 +5,7 @@ import { expect, tags, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe(
-	'PayPal Standard Installation',
+	'PayPal Standard Enablement',
 	{ tag: [ tags.PAYMENTS, tags.PAYPAL ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
@@ -32,7 +32,7 @@ test.describe(
 
 			const paypalDiv = await waitForPayPalToLoad( page );
 
-			await test.step( 'Install PayPal Standard', async () => {
+			await test.step( 'Enable PayPal Standard', async () => {
 				// Confirm the Enable button is present.
 				const enableButton = paypalDiv.getByRole( 'link', {
 					name: 'Enable',
