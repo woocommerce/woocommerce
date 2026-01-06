@@ -297,7 +297,7 @@ class Theme_Controller {
 	}
 
 	/**
-	 * Translate color slug to color.
+	 * Translate color slug to color. Test change.
 	 *
 	 * @param string $color_slug Color slug.
 	 * @return string
