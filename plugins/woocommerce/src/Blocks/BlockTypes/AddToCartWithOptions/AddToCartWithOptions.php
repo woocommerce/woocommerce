@@ -37,7 +37,8 @@ class AddToCartWithOptions extends AbstractBlock {
 		}
 
 		/**
-		 * Filter to declare product type's cart block template is supported.
+		 * Experimental filter for extensions to register a block template part
+		 * for a product type.
 		 *
 		 * @since 9.9.0
 		 * @param mixed string|boolean The template part path if it exists
@@ -48,7 +49,9 @@ class AddToCartWithOptions extends AbstractBlock {
 
 	/**
 	 * Enqueue assets specific to this block.
-	 * We enqueue frontend scripts only if the quantitySelectorStyle is set to 'stepper'.
+	 * We enqueue frontend scripts only if the product type has a block template
+	 * part (that's WC core product types and extensions that migrated to block
+	 * templates).
 	 *
 	 * @param array    $attributes Block attributes.
 	 * @param string   $content Block content.
@@ -207,10 +210,9 @@ class AddToCartWithOptions extends AbstractBlock {
 		);
 
 		$template_part_path = $this->get_template_part_path( $product_type );
-		$slug               = $product_type . '-product-add-to-cart-with-options';
 
 		if ( is_string( $template_part_path ) && '' !== $template_part_path && file_exists( $template_part_path ) ) {
-
+			$slug                   = $product_type . '-product-add-to-cart-with-options';
 			$template_part_contents = '';
 			// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( $slug ), 'wp_template_part' );
