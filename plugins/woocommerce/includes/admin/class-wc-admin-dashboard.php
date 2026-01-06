@@ -417,7 +417,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		public function recent_reviews() {
 			global $wpdb;
 
-			// Enforce the use of a Woo-index for this query, as the database is not engaging with Woo-indexes (whatever we tried).
+			// Enforce the use of a Woo-index for this query, as the database prefers join over our indexes.
 			$force_comments_index = '';
 			if ( ! has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
 				// Backward compatibility with https://github.com/woocommerce/woocommerce/pull/13409 (back from 2017):
