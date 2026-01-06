@@ -44,7 +44,11 @@
 
 
 		@media screen and ( max-width: $break-wide ) {
-			gap: 24px;
+			gap: $gap-large;
+		}
+
+		@media screen and ( max-width: $break-large ) {
+			gap: $gap;
 		}
 	}
 
