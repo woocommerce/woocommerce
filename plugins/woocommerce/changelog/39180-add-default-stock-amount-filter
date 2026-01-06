@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Added default stock amount function and filter.
+Added a new function `wc_get_default_stock_amount` along with the filter to allow change of the default stock amount.
