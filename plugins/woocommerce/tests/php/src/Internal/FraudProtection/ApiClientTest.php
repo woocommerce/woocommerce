@@ -171,9 +171,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API response is missing verdict field.
+	 * @testdox Track Event should return allow when API response is missing decision field.
 	 */
-	public function test_track_event_returns_allow_when_response_missing_verdict_field(): void {
+	public function test_track_event_returns_allow_when_response_missing_decision_field(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -189,7 +189,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
 			'error',
-			'missing "verdict" field',
+			'missing "decision" field',
 			array(
 				'source'   => 'woo-fraud-protection',
 				'response' => array( 'fraud_event_id' => 123 ),
@@ -198,15 +198,15 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API returns invalid verdict value.
+	 * @testdox Track Event should return allow when API returns invalid decision value.
 	 */
-	public function test_track_event_returns_allow_when_invalid_verdict_value(): void {
+	public function test_track_event_returns_allow_when_invalid_decision_value(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
 				return array(
 					'response' => array( 'code' => 200 ),
-					'body'     => wp_json_encode( array( 'verdict' => 'invalid_verdict' ) ),
+					'body'     => wp_json_encode( array( 'decision' => 'invalid_decision' ) ),
 				);
 			}
 		);
@@ -216,18 +216,18 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
 			'error',
-			'Invalid verdict value "invalid_verdict"',
+			'Invalid decision value "invalid_decision"',
 			array(
 				'source'   => 'woo-fraud-protection',
-				'response' => array( 'verdict' => 'invalid_verdict' ),
+				'response' => array( 'decision' => 'invalid_decision' ),
 			)
 		);
 	}
 
 	/**
-	 * @testdox Track Event should return allow verdict from API.
+	 * @testdox Track Event should return allow decision from API.
 	 */
-	public function test_track_event_returns_allow_verdict_from_api(): void {
+	public function test_track_event_returns_allow_decision_from_api(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -236,7 +236,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 					'body'     => wp_json_encode(
 						array(
 							'fraud_event_id' => 123,
-							'verdict'        => 'allow',
+							'decision'        => 'allow',
 							'risk_score'     => 10,
 						)
 					),
@@ -246,15 +246,15 @@ class ApiClientTest extends WC_Unit_Test_Case {
 
 		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
-		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should return allow verdict' );
+		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should return allow decision' );
 		$this->assertLogged(
 			'info',
-			'Fraud verdict received: allow',
+			'Fraud decision received: allow',
 			array(
 				'source'   => 'woo-fraud-protection',
 				'response' => array(
 					'fraud_event_id' => 123,
-					'verdict'        => 'allow',
+					'decision'        => 'allow',
 					'risk_score'     => 10,
 				),
 			)
@@ -263,9 +263,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return block verdict from API.
+	 * @testdox Track Event should return block decision from API.
 	 */
-	public function test_track_event_returns_block_verdict_from_api(): void {
+	public function test_track_event_returns_block_decision_from_api(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -274,7 +274,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 					'body'     => wp_json_encode(
 						array(
 							'fraud_event_id' => 123,
-							'verdict'        => 'block',
+							'decision'        => 'block',
 							'risk_score'     => 95,
 							'reason_tags'    => array( 'failures_per_ip' ),
 						)
@@ -285,15 +285,15 @@ class ApiClientTest extends WC_Unit_Test_Case {
 
 		$result = $this->sut->track_event( 'checkout_started', array( 'session_id' => 'test-session' ) );
 
-		$this->assertSame( ApiClient::DECISION_BLOCK, $result, 'Should return block verdict' );
+		$this->assertSame( ApiClient::DECISION_BLOCK, $result, 'Should return block decision' );
 		$this->assertLogged(
 			'info',
-			'Fraud verdict received: block',
+			'Fraud decision received: block',
 			array(
 				'source'   => 'woo-fraud-protection',
 				'response' => array(
 					'fraud_event_id' => 123,
-					'verdict'        => 'block',
+					'decision'        => 'block',
 					'risk_score'     => 95,
 					'reason_tags'    => array( 'failures_per_ip' ),
 				),
@@ -303,9 +303,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API returns challenge verdict (challenge flow not yet implemented).
+	 * @testdox Track Event should return allow when API returns challenge decision (challenge flow not yet implemented).
 	 */
-	public function test_track_event_returns_allow_when_challenge_verdict_from_api(): void {
+	public function test_track_event_returns_allow_when_challenge_decision_from_api(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -314,7 +314,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 					'body'     => wp_json_encode(
 						array(
 							'fraud_event_id' => 123,
-							'verdict'        => 'challenge',
+							'decision'        => 'challenge',
 							'risk_score'     => 65,
 						)
 					),
@@ -325,7 +325,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$result = $this->sut->track_event( 'checkout_started', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow until challenge flow is implemented' );
-		$this->assertLogged( 'error', 'Invalid verdict value "challenge"' );
+		$this->assertLogged( 'error', 'Invalid decision value "challenge"' );
 	}
 
 	/**
@@ -340,7 +340,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 				$captured_request_body = $args['body'];
 				return array(
 					'response' => array( 'code' => 200 ),
-					'body'     => wp_json_encode( array( 'verdict' => 'allow' ) ),
+					'body'     => wp_json_encode( array( 'decision' => 'allow' ) ),
 				);
 			},
 			10,

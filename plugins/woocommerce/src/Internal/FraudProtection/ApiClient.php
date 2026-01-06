@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * Handles communication with the WPCOM fraud protection endpoint.
  *
  * Uses Jetpack Connection for authenticated requests to the WPCOM endpoint
- * to get fraud protection verdicts (allow, block, or challenge).
+ * to get fraud protection decisions (allow, block, or challenge).
  *
  * This class implements a fail-open pattern: if the endpoint is unreachable,
  * times out, or returns an error, it returns an "allow" decision to ensure
@@ -107,23 +107,23 @@ class ApiClient {
 			return self::DECISION_ALLOW;
 		}
 
-		if ( ! isset( $response['verdict'] ) ) {
+		if ( ! isset( $response['decision'] ) ) {
 			FraudProtectionController::log(
 				'error',
-				'Response missing "verdict" field. Failing open with "allow" decision.',
+				'Response missing "decision" field. Failing open with "allow" decision.',
 				array( 'response' => $response )
 			);
 			return self::DECISION_ALLOW;
 		}
 
-		$verdict = $response['verdict'];
+		$decision = $response['decision'];
 
-		if ( ! in_array( $verdict, self::VALID_DECISIONS, true ) ) {
+		if ( ! in_array( $decision, self::VALID_DECISIONS, true ) ) {
 			FraudProtectionController::log(
 				'error',
 				sprintf(
-					'Invalid verdict value "%s". Failing open with "allow" decision.',
-					$verdict
+					'Invalid decision value "%s". Failing open with "allow" decision.',
+					$decision
 				),
 				array( 'response' => $response )
 			);
@@ -134,15 +134,15 @@ class ApiClient {
 		FraudProtectionController::log(
 			'info',
 			sprintf(
-				'Fraud verdict received: %s | Event: %s | Session: %s',
-				$verdict,
+				'Fraud decision received: %s | Event: %s | Session: %s',
+				$decision,
 				$event_type,
 				$session_id
 			),
 			array( 'response' => $response )
 		);
 
-		return $verdict;
+		return $decision;
 	}
 
 	/**
