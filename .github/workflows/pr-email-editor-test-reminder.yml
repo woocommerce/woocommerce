@@ -56,7 +56,7 @@ jobs:
 
                       ### Testing Steps
 
-                      1. Log into your sandbox and authenticate with Github:
+                      1. Log into your sandbox. You'll need to authenticate with Github if you haven't already.
                          ```bash
                          gh auth login
                          ```
