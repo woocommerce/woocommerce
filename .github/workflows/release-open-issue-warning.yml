@@ -220,7 +220,7 @@ jobs:
             for ( const milestone of releaseMilestones ) {
               const milestoneResults = await github.rest.search.issuesAndPullRequests( {
                 q: `milestone:"${milestone.title}" state:open repo:${context.repo.owner}/${context.repo.repo}`,
-                per_page: 11 // Paginate to 11 items.
+                per_page: 6
               } );
 
               const totalCount = milestoneResults.data.total_count;
@@ -242,28 +242,30 @@ jobs:
                 reportLines.push( `  _*${releaseEventTitle}* coming up on *${formattedDate}*_` );
               }
 
-              const shouldPaginate = totalCount >= 12;
-              const itemsToShow    = shouldPaginate ? milestoneItems.slice( 0, 10 ) : milestoneItems;
+              const shouldPaginate = totalCount >= 6;
+              const itemsToShow    = shouldPaginate ? milestoneItems.slice( 0, 5 ) : milestoneItems;
               reportLines.push( ...( await Promise.all( itemsToShow.map( formatItem ) ) ) );
 
               if ( shouldPaginate ) {
-                const remainingCount = totalCount - 10;
+                const remainingCount = totalCount - 5;
                 const milestoneUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/milestone/${milestone.number}`;
-                reportLines.push( `<${milestoneUrl}|... and ${remainingCount} more>` );
+                reportLines.push( `• <${milestoneUrl}|... and *${remainingCount}* more items>.` );
               }
 
               milestoneReports.push( reportLines.join( '\n' ) );
             }
 
-            const fullReport = [];
-            fullReport.push( `:fyi: The following release milestones have open items:` );
-            fullReport.push( '\n\n' );
-            fullReport.push( milestoneReports.join( '\n\n' ) );
+            if ( milestoneReports.length > 0 ) {
+              const fullReport = [];
+              fullReport.push( `:fyi: The following release milestones have open items:` );
+              fullReport.push( '\n\n' );
+              fullReport.push( milestoneReports.join( '\n\n' ) );
 
-            console.log( fullReport.join( '' ) );
+              core.setOutput( 'slack-message', fullReport.join( '' ) );
+            } else {
+              core.setOutput( 'slack-message', '' );
+            }
 
-            // core.setOutput( 'slack-message', fullReport.join( '' ) );
-            core.setOutput( 'slack-message', '' );
 
       - name: Send Slack Message
         if: ${{ steps.process-milestones.outputs.slack-message != '' }}
