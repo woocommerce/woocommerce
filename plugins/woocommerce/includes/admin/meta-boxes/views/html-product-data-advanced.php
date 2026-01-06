@@ -62,8 +62,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 			array(
 				'id'          => '_visible_in_pos',
 				'value'       => $visible_in_pos ? 'yes' : 'no',
-				'label'       => __( 'Show in Point of Sale', 'woocommerce' ),
-				'description' => __( 'Enable this to show the product in Point of Sale.', 'woocommerce' ),
+				'label'       => __( 'Available for POS', 'woocommerce' ),
+				'description' => __( 'Controls whether this product appears in the Point of Sale system.', 'woocommerce' ),
 			)
 		);
 		?>
