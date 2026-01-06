@@ -601,8 +601,13 @@ class MiniCart extends AbstractBlock {
 		
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
-				data-wp-init="callbacks.setupEventListeners"
+				data-wp-init="callbacks.setupJQueryEventBridge"
 				data-wp-init--refresh-cart-items="woocommerce::actions.refreshCartItems"
+				data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCartItems"
+				data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCartItems"
+				<?php if ( 'open_drawer' === $attributes['addToCartBehaviour'] ) : ?>
+				data-wp-on-document--wc-blocks_added_to_cart---open-drawer="actions.openDrawer"
+				<?php endif; ?>
 				data-wp-watch="callbacks.disableScrollingOnBody"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>

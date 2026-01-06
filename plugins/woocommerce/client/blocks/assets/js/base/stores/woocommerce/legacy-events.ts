@@ -57,7 +57,7 @@ export const translateJQueryEventToNative = (
 	nativeEventName: string
 ): ( () => void ) => {
 	const eventDispatcher = () => {
-		dispatchEvent( nativeEventName, {} );
+		dispatchEvent( nativeEventName, { bubbles: true } );
 	};
 
 	jQuery( document ).on( jQueryEventName, eventDispatcher );
