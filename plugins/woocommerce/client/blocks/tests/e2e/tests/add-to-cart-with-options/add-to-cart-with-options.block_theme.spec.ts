@@ -1022,7 +1022,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		).toBeVisible();
 	} );
 
-	test.describe( 'Add to Cart + Options autoselect behavior', () => {
+	test.describe( 'autoselect behavior', () => {
 		const productSlug = 'autoselect-t-shirt';
 		const productPermalink = '/product/' + productSlug;
 		let productAttributes: [ { name: string, options: any[] } ];
@@ -1092,7 +1092,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		for ( const optionStyle of [ 'Pills', 'Dropdown' ] as ( 'Pills' | 'Dropdown' )[] ) {
-			test( `${ optionStyle }: Add to Cart + Options: Auto-select should work`, async ( {
+			test( `${ optionStyle }: Auto-select should work`, async ( {
 				page,
 				pageObject,
 				editor,
@@ -1136,7 +1136,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await pageObject.expectSelectedAttributes( productAttributes, { Type: 'T-shirt', Color: 'Blue', Size: 'XL' }, optionStyle );
 				} );
 			} );
-			test( `${ optionStyle }: Add to Cart + Options: Test the multiple choices of the Values in conflict setting`, async ( {
+			test( `${ optionStyle }: Test the multiple choices of the Values in conflict setting`, async ( {
 				page,
 				pageObject,
 				editor,
@@ -1169,7 +1169,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					).toBeDisabled();
 				} );
 			} );
-			test( `${ optionStyle }: Add to Cart + Options: Combining Auto-select on user selection and Values in conflict settings should work`, async ( {
+			test( `${ optionStyle }: Combining Auto-select on user selection and Values in conflict settings should work`, async ( {
 				page,
 				pageObject,
 				editor,
