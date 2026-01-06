@@ -1178,11 +1178,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "2.2.0",
+            "version": "2.3.0",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "da6aeda1376537e61639a9fbfe6fb20da9b11b0f"
+                "reference": "47291f4dc0ddd0b30bbc50f89a9f9c12f6e2d579"
             },
             "require": {
                 "php": ">=7.4"
