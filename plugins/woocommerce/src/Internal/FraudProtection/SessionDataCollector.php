@@ -491,8 +491,8 @@ class SessionDataCollector {
 			// Try to get chosen payment method from session.
 			$chosen_payment_method = $this->get_chosen_payment_method();
 			if ( $chosen_payment_method ) {
+				$payment_gateway_name = \sanitize_text_field( $chosen_payment_method );
 				$payment_method_type  = \sanitize_text_field( $chosen_payment_method );
-				$payment_gateway_name = PaymentMethodHelper::get_payment_method_name( $payment_method_type );
 			}
 
 			// Initialize payment data with default null values.
