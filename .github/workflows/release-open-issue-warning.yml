@@ -83,8 +83,13 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
-            // Helper function to format an item (issue or PR).
-            const formatItem = async (item, github, context) => {
+            /**
+              * Formats an item (issue or PR) into a string for a Slack message.
+              *
+              * @param {Object} item - The item to format.
+              * @returns {string} The formatted item.
+              */
+            const formatItem = async (item) => {
               let waitingOn = [];
 
               // Get assignees.
@@ -121,7 +126,7 @@ jobs:
                 ? `https://github.com/${context.repo.owner}/${context.repo.repo}/pull/${item.number}`
                 : `https://github.com/${context.repo.owner}/${context.repo.repo}/issues/${item.number}`;
 
-              return `• [#${item.number}] <${itemUrl}|${item.title}> (${author})\n  Created ${createdDate} · ${waitingOnText}`;
+              return `• <${itemUrl}|#${item.number}: ${item.title}> (${author})\n  Created ${createdDate} · ${waitingOnText}`;
             }
 
             const releaseEventFound = '${{ needs.check-upcoming-release-events.outputs.release-event-found }}' === 'true';
@@ -130,33 +135,58 @@ jobs:
             const releaseEventDate  = '${{ needs.check-upcoming-release-events.outputs.release-event-date }}';
 
             // Fetch all open milestones.
-            const milestones = await github.rest.issues.listMilestones({
+            const milestones = await github.rest.issues.listMilestones( {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               per_page: 10
-            });
+            } );
 
-            // Filter milestones matching X.Y.0 format.
             const versionPattern = /^(\d+\.\d+)\.0$/;
-            const filteredMilestones = milestones.data
-              .filter(m => versionPattern.test(m.title))
-              .map(m => {
-                const match = m.title.match(versionPattern);
-                return {
-                  title: m.title,
-                  number: m.number,
-                  version: parseFloat(match[1])
-                };
-              })
-              .sort((a, b) => b.version - a.version);
+            let releaseMilestones = [];
 
+            for ( const milestone of milestones.data ) {
+              // Skip if not in format "X.Y.0".
+              if ( ! versionPattern.test( milestone.title ) ) {
+                continue;
+              }
+
+              // Extract X.Y from milestone title.
+              const version = milestone.title.match( versionPattern )[1];
+
+              // Skip if there isn't a release branch associated.
+              try {
+                await github.rest.repos.getBranch( {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  branch: `release/${version}`
+                } );
+
+                releaseMilestones.push( {
+                  title: milestone.title,
+                  number: milestone.number,
+                  version: parseFloat( version )
+                } );
+              } catch ( error ) {
+                if ( 404 === error.status ) {
+                  console.log( `Skipping milestone ${milestone.title} - release branch does not exist.` );
+                } else {
+                  throw error;
+                }
+              }
+            }
+
+            // Sort and filter milestones. Don't include the upcoming milestone unless it matches the upcoming release event.
+            releaseMilestones = releaseMilestones
+              .sort( (a, b) => b.version - a.version )
+              .filter( ( m, index ) => 0 !== index || ( releaseEventFound && m.title === upcomingMilestone ) );
+
+            // Build report.
             const milestoneReports = [];
-            for ( const milestone of filteredMilestones ) {
-              // Search for issues and PRs in the milestone (fetch only 11 items).
+            for ( const milestone of releaseMilestones ) {
               const milestoneResults = await github.rest.search.issuesAndPullRequests( {
                 q: `milestone:"${milestone.title}" state:open repo:${context.repo.owner}/${context.repo.repo}`,
-                per_page: 11
+                per_page: 11 // Paginate to 11 items.
               } );
 
               const totalCount = milestoneResults.data.total_count;
@@ -168,39 +198,30 @@ jobs:
               }
 
               // Build the report for this milestone.
-              const formattedItems = [];
-              const shouldPaginate = totalCount >= 12;
-              const itemsToShow = shouldPaginate ? milestoneItems.slice( 0, 10 ) : milestoneItems;
+              let reportLines = [];
 
-              for (const item of itemsToShow) {
-                const formattedItem = await formatItem( item, github, context );
-                formattedItems.push( formattedItem );
+              reportLines.push( `*${milestone.title}*` );
+
+              if ( releaseEventFound && milestone.title === upcomingMilestone ) {
+                // Milestone matches upcoming release.
+                const formattedDate = new Date( releaseEventDate ).toISOString().split( 'T' )[0];
+                reportLines.push( `  _*${releaseEventTitle}* coming up on *${formattedDate}*_` );
               }
 
-              // Add "... and X more" link if there are more items.
-              if (shouldPaginate) {
+              const shouldPaginate = totalCount >= 12;
+              const itemsToShow    = shouldPaginate ? milestoneItems.slice( 0, 10 ) : milestoneItems;
+              reportLines.push( ...( await Promise.all( itemsToShow.map( formatItem ) ) ) );
+
+              if ( shouldPaginate ) {
                 const remainingCount = totalCount - 10;
                 const milestoneUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/milestone/${milestone.number}`;
-                formattedItems.push(`<${milestoneUrl}|... and ${remainingCount} more>`);
+                reportLines.push( `<${milestoneUrl}|... and ${remainingCount} more>` );
               }
-
-              const reportLines = [];
-              reportLines.push( `*_${milestone.title}_* (${totalCount} items)` );
-
-              // Milestone matches upcoming release.
-              if ( releaseEventFound && milestone.title === upcomingMilestone ) {
-                const formattedDate = new Date( releaseEventDate ).toISOString().split( 'T' )[0];
-                reportLines.push( `📅 ${releaseEventTitle} on ${formattedDate}` );
-              }
-
-              reportLines.push( '' ); // Empty line before items.
-              reportLines.push( ...formattedItems );
 
               milestoneReports.push( reportLines.join( '\n' ) );
             }
 
-            const fullReport = milestoneReports.join('\n\n');
-            core.setOutput( 'slack-message', fullReport );
+            core.setOutput( 'slack-message', milestoneReports.join( '\n\n' ) );
 
       - name: Send Slack Message
         if: ${{ steps.process-milestones.outputs.slack-message != '' }}
