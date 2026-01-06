@@ -75,7 +75,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				array(
 					'id'      => '_pos_visibility_note',
 					'label'   => __( 'Point of Sale', 'woocommerce' ),
-					'message' => __( 'This product type is not currently supported in Point of Sale.', 'woocommerce' ),
+					'message' => __( 'This product type is not currently supported.', 'woocommerce' ),
 				)
 			);
 			?>
