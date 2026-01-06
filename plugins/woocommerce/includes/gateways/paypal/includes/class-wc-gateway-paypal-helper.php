@@ -31,6 +31,7 @@ class WC_Gateway_Paypal_Helper {
 	 * @return bool
 	 */
 	public static function is_paypal_gateway_available() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Helper::is_paypal_gateway_available()' );
 		return PayPalHelper::is_paypal_gateway_available();
 	}
 
@@ -41,6 +42,7 @@ class WC_Gateway_Paypal_Helper {
 	 * @return bool
 	 */
 	public static function is_orders_v2_migration_eligible() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Helper::is_orders_v2_migration_eligible()' );
 		return PayPalHelper::is_orders_v2_migration_eligible();
 	}
 
@@ -52,6 +54,7 @@ class WC_Gateway_Paypal_Helper {
 	 * @return WC_Order|null
 	 */
 	public static function get_wc_order_from_paypal_custom_id( $custom_id ) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Helper::get_wc_order_from_paypal_custom_id()' );
 		if ( ! is_string( $custom_id ) || '' === $custom_id ) {
 			return null;
 		}
@@ -70,6 +73,7 @@ class WC_Gateway_Paypal_Helper {
 	 * @return mixed The data with PII redacted.
 	 */
 	public static function redact_data( $data ) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Helper::redact_data()' );
 		return PayPalHelper::redact_data( $data );
 	}
 
@@ -81,6 +85,7 @@ class WC_Gateway_Paypal_Helper {
 	 * @return string The masked email address or original input if invalid.
 	 */
 	public static function mask_email( $email ) {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Helper::mask_email()' );
 		return PayPalHelper::mask_email( (string) $email );
 	}
 
@@ -93,6 +98,7 @@ class WC_Gateway_Paypal_Helper {
 	 * @return void
 	 */
 	public static function update_addresses_in_order( ?WC_Order $order, array $paypal_order_details ): void {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Helper::update_addresses_in_order()' );
 		PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
 	}
 }

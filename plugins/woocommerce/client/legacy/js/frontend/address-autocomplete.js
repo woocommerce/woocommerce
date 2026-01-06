@@ -226,6 +226,14 @@ if (
 					return;
 				}
 
+				// Store the original autocomplete value before disabling
+				const originalAutocomplete =
+					input.getAttribute( 'autocomplete' ) || '';
+				input.setAttribute(
+					'data-original-autocomplete',
+					originalAutocomplete
+				);
+
 				input.setAttribute( 'autocomplete', 'none' );
 				input.setAttribute( 'data-lpignore', 'true' );
 				input.setAttribute( 'data-op-ignore', 'true' );
@@ -274,7 +282,11 @@ if (
 					return;
 				}
 
-				input.setAttribute( 'autocomplete', 'address-line1' );
+				// Restore the original autocomplete value
+				const originalAutocomplete =
+					input.getAttribute( 'data-original-autocomplete' ) ||
+					'address-line1';
+				input.setAttribute( 'autocomplete', originalAutocomplete );
 				input.setAttribute( 'data-lpignore', 'false' );
 				input.setAttribute( 'data-op-ignore', 'false' );
 				input.setAttribute( 'data-1p-ignore', 'false' );
