@@ -1045,9 +1045,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await pageObject.switchProductType( 'Variable product' );
 			await page.getByRole( 'tab', { name: 'Block' } ).click();
-			const blockCart = editor.canvas.getByLabel( 'Block: Add to Cart + Options' );
-			blockCart.click();
-			await blockCart.getByLabel( 'Block: Variation Selector: Attribute Options' ).first().click();
+			const addToCartWithOptionsBlock = editor.canvas.getByLabel( 'Block: Add to Cart + Options' );
+			addToCartWithOptionsBlock.click();
+			await addToCartWithOptionsBlock.getByLabel( 'Block: Variation Selector: Attribute Options' ).first().click();
 
 			const optionStyleInput = page.getByRole( 'radio', { name: optionStyle, exact: true } )
 			if ( ! await optionStyleInput.isChecked() ) {

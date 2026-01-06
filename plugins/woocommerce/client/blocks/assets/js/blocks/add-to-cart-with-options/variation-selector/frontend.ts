@@ -335,7 +335,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						if ( validOptions.length === 1 ) {
 							const validOption = validOptions[ 0 ];
 							actions.setAttribute( attribute, validOption );
-							return;
 						}
 					}
 				);
