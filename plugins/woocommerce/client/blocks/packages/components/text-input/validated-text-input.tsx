@@ -300,7 +300,12 @@ const ValidatedTextInput = forwardRef<
 						onChange( formattedValue );
 					}
 				} }
-				onBlur={ () => validateInput( false ) }
+				onBlur={ () => {
+					// Don't show validation error on blur for empty fields.
+					// Empty field errors should only appear on form submission.
+					const isEmpty = ! inputRef.current?.value.trim();
+					validateInput( isEmpty );
+				} }
 				aria-describedby={ ariaDescribedBy }
 				value={ value }
 				title="" // This prevents the same error being shown on hover.
