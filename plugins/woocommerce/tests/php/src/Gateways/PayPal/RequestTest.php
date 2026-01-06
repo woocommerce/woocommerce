@@ -105,7 +105,6 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order->set_total( 60 );
 		$order->save();
 
-		// Use priority 5 to ensure this filter runs before other filters that might intercept the request.
 		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 3 );
 
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
