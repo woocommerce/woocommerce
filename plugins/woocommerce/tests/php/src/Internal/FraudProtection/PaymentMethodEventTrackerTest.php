@@ -89,13 +89,19 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token->set_user_id( $user_id );
 		$token->save();
 
-		$this->assertCount( 1, $this->captured_logs );
-		$this->assertEquals( 'info', $this->captured_logs[0]['level'] );
-		$this->assertStringContainsString( 'payment_method_added', $this->captured_logs[0]['message'] );
-		$this->assertEquals( 'payment_method_added', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'added', $this->captured_logs[0]['context']['event_data']['action'] );
-		$this->assertEquals( $token->get_id(), $this->captured_logs[0]['context']['event_data']['token_id'] );
-		$this->assertEquals( 'stripe', $this->captured_logs[0]['context']['event_data']['gateway_id'] );
+		$this->assertLogged(
+			'info',
+			'payment_method_added',
+			array(
+				'source' => 'woo-fraud-protection',
+				'event_type' => 'payment_method_added',
+				'event_data' => array(
+					'action' => 'added',
+					'token_id' => $token->get_id(),
+					'gateway_id' => 'stripe',
+				),
+			)
+		);
 	}
 
 	/**
@@ -116,16 +122,23 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token->set_user_id( $user_id );
 		$token->save();
 
-		// Clear logs from the initial save (which triggers the 'added' event).
-		$this->captured_logs = array();
-
 		// Update the token to trigger the 'updated' event.
 		$token->set_expiry_year( '2027' );
 		$token->save();
 
-		$this->assertCount( 1, $this->captured_logs );
-		$this->assertEquals( 'payment_method_updated', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'updated', $this->captured_logs[0]['context']['event_data']['action'] );
+		$this->assertLogged(
+			'info',
+			'payment_method_updated',
+			array(
+				'source' => 'woo-fraud-protection',
+				'event_type' => 'payment_method_updated',
+				'event_data' => array(
+					'action' => 'updated',
+					'token_id' => $token->get_id(),
+					'gateway_id' => 'stripe',
+				),
+			)
+		);
 	}
 
 	/**
@@ -158,19 +171,26 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token2->set_user_id( $user_id );
 		$token2->save();
 
-		// Clear logs from the initial saves (which triggered 'added' events).
-		$this->captured_logs = array();
-
 		// Note: We use do_action() here because WC_Payment_Tokens::set_users_default()
 		// relies on get_customer_tokens() which doesn't retrieve tokens properly in the test environment.
 		// In production, the hook is triggered by WC_Payment_Tokens::set_users_default().
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		do_action( 'woocommerce_payment_token_set_default', $token2->get_id(), $token2 );
 
-		$this->assertCount( 1, $this->captured_logs );
-		$this->assertEquals( 'payment_method_set_default', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'set_default', $this->captured_logs[0]['context']['event_data']['action'] );
-		$this->assertTrue( $this->captured_logs[0]['context']['event_data']['is_default'] );
+		$this->assertLogged(
+			'info',
+			'payment_method_set_default',
+			array(
+				'source' => 'woo-fraud-protection',
+				'event_type' => 'payment_method_set_default',
+				'event_data' => array(
+					'action' => 'set_default',
+					'token_id' => $token2->get_id(),
+					'gateway_id' => 'stripe',
+					'is_default' => true,
+				),
+			)
+		);
 	}
 
 	/**
@@ -191,15 +211,22 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token->set_user_id( $user_id );
 		$token->save();
 
-		// Clear logs from the initial save (which triggers the 'added' event).
-		$this->captured_logs = array();
-
 		// Delete the token to trigger the 'deleted' event.
 		\WC_Payment_Tokens::delete( $token->get_id() );
 
-		$this->assertCount( 1, $this->captured_logs );
-		$this->assertEquals( 'payment_method_deleted', $this->captured_logs[0]['context']['event_type'] );
-		$this->assertEquals( 'deleted', $this->captured_logs[0]['context']['event_data']['action'] );
+		$this->assertLogged(
+			'info',
+			'payment_method_deleted',
+			array(
+				'source' => 'woo-fraud-protection',
+				'event_type' => 'payment_method_deleted',
+				'event_data' => array(
+					'action' => 'deleted',
+					'token_id' => $token->get_id(),
+					'gateway_id' => 'stripe',
+				),
+			)
+		);
 	}
 
 	/**
