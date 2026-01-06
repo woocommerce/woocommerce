@@ -417,16 +417,20 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		public function recent_reviews() {
 			global $wpdb;
 
-			// The hook has been introduced via https://github.com/woocommerce/woocommerce/pull/13409 (back in 2017),
-			// and limits us in the optimizations options (ideally we should cache latest five approved review IDs so
-			// the SQL query uses those IDs and PKs when joining the table) to caching the query results and invalidating
-			// those on review creation/update/deletion.
-
-			// TODO: latest reviews caching
+			// Enforce the use of a Woo-index for this query, as the database is not selecting any Woo-indexes.
+			$force_comments_index = '';
+			if ( ! has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
+				// Backward compatibility with https://github.com/woocommerce/woocommerce/pull/13409 (back from 2017):
+				// the filter can modify the query, for example by forcing a custom index, which may conflict with our optimizations.
+				$exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
+				if ( null !== $exists ) {
+					$force_comments_index = ' USE INDEX (woo_idx_comment_date_type)';
+				}
+			}
 
 			$query_from = apply_filters(
 				'woocommerce_report_recent_reviews_query_from',
-				"FROM {$wpdb->comments} comments
+				"FROM {$wpdb->comments} comments{$force_comments_index}
 				LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
 				WHERE comments.comment_approved = '1'
 				AND comments.comment_type = 'review'
