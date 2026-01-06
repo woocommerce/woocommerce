@@ -258,6 +258,8 @@ class PageController {
 	 * For example, when an order is being edited, add `woocommerce-orders-screen-edit_order` for regular orders as well
 	 * as sub-types, such as subscription orders.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param string|mixed $classes The admin body classes. Expected to be a string.
 	 *
 	 * @return mixed The updated body class string, or else the original value (which may be something other than a string in exceptional cases).
