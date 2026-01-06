@@ -187,18 +187,22 @@ jobs:
                   const content = Buffer.from( fileResponse.data.content, 'base64' ).toString( 'utf8' );
                   const versionMatch = content.match( /^\s*\*\s*Version:\s*(.+)$/m );
 
-                  if ( versionMatch ) {
-                    const pluginVersion = versionMatch[1].trim().toLowerCase();
-                    const isPreRelease = /dev|rc|beta/.test( pluginVersion );
+                  if ( ! versionMatch ) {
+                    console.log( `Could not find version in ${milestone.title}` );
+                    continue;
+                  }
 
-                    // Skip pre-release versions unless they match the upcoming milestone.
-                    if ( isPreRelease && milestone.title !== upcomingMilestone ) {
-                      console.log( `Skipping milestone ${milestone.title} - pre-release version (${pluginVersion}) and not upcoming.` );
-                      continue;
-                    }
+                  const pluginVersion = versionMatch[1].trim().toLowerCase();
+                  const isPreRelease = /dev|rc|beta/.test( pluginVersion );
+
+                  // Skip pre-release versions unless they match the upcoming milestone.
+                  if ( isPreRelease && milestone.title !== upcomingMilestone ) {
+                    console.log( `Skipping milestone ${milestone.title} - pre-release version (${pluginVersion}) and not upcoming.` );
+                    continue;
                   }
                 } catch ( error ) {
                   console.log( `Could not check plugin version for ${milestone.title}: ${error.message}` );
+                  continue;
                 }
 
                 result.push( {
