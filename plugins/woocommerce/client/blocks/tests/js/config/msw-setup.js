@@ -1,29 +1,41 @@
 /**
  * External dependencies
  */
-const { setupServer } = require( 'msw/node' );
-const { http, HttpResponse } = require( 'msw' );
+let server, http, HttpResponse;
 
-// Create MSW server instance for testing
-const server = setupServer();
+try {
+	const mswNode = require( 'msw/node' );
+	const msw = require( 'msw' );
 
-// Setup MSW for all tests
-beforeAll( () => {
-	// Start the server before all tests
-	server.listen( {
-		onUnhandledRequest: 'bypass', // Allow unhandled requests to pass through
+	( { setupServer } = mswNode );
+	( { http, HttpResponse } = msw );
+
+	// Create MSW server instance for testing
+	server = setupServer();
+
+	// Setup MSW for all tests
+	beforeAll( () => {
+		// Start the server before all tests
+		server.listen( {
+			onUnhandledRequest: 'bypass', // Allow unhandled requests to pass through
+		} );
 	} );
-} );
 
-afterEach( () => {
-	// Reset any runtime request handlers after each test
-	server.resetHandlers();
-} );
+	afterEach( () => {
+		// Reset any runtime request handlers after each test
+		server.resetHandlers();
+	} );
 
-afterAll( () => {
-	// Clean up after all tests are done
-	server.close();
-} );
+	afterAll( () => {
+		// Clean up after all tests are done
+		server.close();
+	} );
+} catch ( error ) {
+	// MSW is not installed or not available - tests that don't need it can still run
+	server = null;
+	http = null;
+	HttpResponse = null;
+}
 
 // Export utilities for use in tests
 module.exports = { server, http, HttpResponse };

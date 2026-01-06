@@ -2,18 +2,19 @@
  * @jest-environment jsdom
  */
 
-/**
- * External dependencies
- */
-import { addAction } from '@wordpress/hooks';
-import apiFetch from '@wordpress/api-fetch';
-
-// Mock WordPress dependencies
+// Mock WordPress dependencies - must be before imports
 jest.mock( '@wordpress/hooks', () => ( {
 	addAction: jest.fn(),
 } ) );
 
 jest.mock( '@wordpress/api-fetch' );
+
+/**
+ * External dependencies
+ */
+import { addAction } from '@wordpress/hooks';
+import apiFetch from '@wordpress/api-fetch';
+import {} from '@woocommerce/test-utils/msw';
 
 const mockAddAction = addAction as jest.MockedFunction< typeof addAction >;
 const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
@@ -34,7 +35,11 @@ describe( 'Fraud Protection Frontend', () => {
 		it( 'should not register hook when settings are not defined', () => {
 			// Re-import to trigger initialization
 			jest.isolateModules( () => {
-				require( '../frontend' );
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+				require( '../frontend.tsx' );
 			} );
 
 			// Verify addAction was not called
@@ -53,7 +58,11 @@ describe( 'Fraud Protection Frontend', () => {
 
 			// Re-import to trigger initialization
 			jest.isolateModules( () => {
-				require( '../frontend' );
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+				require( '../frontend.tsx' );
 			} );
 
 			// Verify addAction was not called
@@ -72,7 +81,13 @@ describe( 'Fraud Protection Frontend', () => {
 
 			// Re-import to trigger initialization
 			jest.isolateModules( () => {
-				require( '../frontend' );
+				// Set up mocks within isolated module context
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+
+				require( '../frontend.tsx' );
 			} );
 
 			// Verify addAction was called with correct parameters
@@ -93,7 +108,11 @@ describe( 'Fraud Protection Frontend', () => {
 			};
 
 			jest.isolateModules( () => {
-				require( '../frontend' );
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+				require( '../frontend.tsx' );
 			} );
 
 			// Verify a function was registered as the handler
@@ -114,14 +133,17 @@ describe( 'Fraud Protection Frontend', () => {
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
-
 			jest.isolateModules( () => {
-				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
-					data: unknown
-				) => void;
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+				require( '../frontend.tsx' );
 			} );
+
+			const registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+				data: unknown
+			) => void;
 
 			// Assert handler is defined
 			expect( registeredHandler ).toBeDefined();
@@ -150,14 +172,17 @@ describe( 'Fraud Protection Frontend', () => {
 				enabled: true,
 			};
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
-
 			jest.isolateModules( () => {
-				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
-					data: unknown
-				) => void;
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+				require( '../frontend.tsx' );
 			} );
+
+			const registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+				data: unknown
+			) => void;
 
 			// Assert handler is defined
 			expect( registeredHandler ).toBeDefined();
@@ -184,14 +209,17 @@ describe( 'Fraud Protection Frontend', () => {
 
 			mockApiFetch.mockRejectedValue( new Error( 'API Error' ) );
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
-
 			jest.isolateModules( () => {
-				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
-					data: unknown
-				) => void;
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+				require( '../frontend.tsx' );
 			} );
+
+			const registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+				data: unknown
+			) => void;
 
 			// Assert handler is defined
 			expect( registeredHandler ).toBeDefined();
@@ -227,16 +255,14 @@ describe( 'Fraud Protection Frontend', () => {
 
 			for ( const method of paymentMethods ) {
 				jest.clearAllMocks();
-
-				let registeredHandler:
-					| ( ( data: unknown ) => void )
-					| undefined;
+				jest.resetModules();
 
 				jest.isolateModules( () => {
-					require( '../frontend' );
-					registeredHandler = mockAddAction.mock
-						.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
+					require( '../frontend.tsx' );
 				} );
+
+				const registeredHandler = mockAddAction.mock
+					.calls[ 0 ]?.[ 2 ] as ( data: unknown ) => void;
 
 				// Assert handler is defined
 				expect( registeredHandler ).toBeDefined();
@@ -268,14 +294,17 @@ describe( 'Fraud Protection Frontend', () => {
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
-
 			jest.isolateModules( () => {
-				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
-					data: unknown
-				) => void;
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+				require( '../frontend.tsx' );
 			} );
+
+			const registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+				data: unknown
+			) => void;
 
 			// Assert handler is defined
 			expect( registeredHandler ).toBeDefined();
@@ -302,14 +331,17 @@ describe( 'Fraud Protection Frontend', () => {
 
 			mockApiFetch.mockResolvedValue( {} );
 
-			let registeredHandler: ( ( data: unknown ) => void ) | undefined;
-
 			jest.isolateModules( () => {
-				require( '../frontend' );
-				registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
-					data: unknown
-				) => void;
+				jest.doMock( '@wordpress/hooks', () => ( {
+					addAction: mockAddAction,
+				} ) );
+				jest.doMock( '@wordpress/api-fetch', () => mockApiFetch );
+				require( '../frontend.tsx' );
 			} );
+
+			const registeredHandler = mockAddAction.mock.calls[ 0 ]?.[ 2 ] as (
+				data: unknown
+			) => void;
 
 			// Assert handler is defined
 			expect( registeredHandler ).toBeDefined();
