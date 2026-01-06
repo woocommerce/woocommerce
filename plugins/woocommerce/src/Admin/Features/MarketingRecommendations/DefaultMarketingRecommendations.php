@@ -110,7 +110,7 @@ class DefaultMarketingRecommendations {
 			array(
 				'title'          => 'Blaze Ads',
 				'description'    => __(
-					"The quickest way to grow your business by advertising to over 100 million users across Tumblr and WordPress, starting at just \$5/day.",
+					'The quickest way to grow your business by advertising to over 100 million users across Tumblr and WordPress, starting at just \$5/day.',
 					'woocommerce'
 				),
 				'url'            => "https://woocommerce.com/products/blaze-ads/{$utm_string}",
