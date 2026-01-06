@@ -1846,7 +1846,7 @@ class WC_Helper {
 			$source      = '';
 			if ( stripos( $request_uri, 'wc/v3/marketplace/refresh' ) ) :
 				$source = 'refresh-button';
-			elseif ( stripos( $request_uri, 'wc-addons' ) ) :
+			elseif ( stripos( $request_uri, 'my-subscriptions' ) ) :
 				$source = 'my-subscriptions';
 			elseif ( stripos( $request_uri, 'plugins.php' ) ) :
 				$source = 'plugins';
