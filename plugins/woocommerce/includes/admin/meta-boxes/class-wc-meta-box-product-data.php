@@ -427,12 +427,14 @@ class WC_Meta_Box_Product_Data {
 		// Remove _product_template_id for products that were created with the new product editor.
 		$product->delete_meta_data( '_product_template_id' );
 
-		// Handle product visibility in POS.
-		$visible_in_pos = isset( $_POST['_visible_in_pos'] ) && 'yes' === wc_clean( wp_unslash( $_POST['_visible_in_pos'] ) );
-		if ( $visible_in_pos ) {
-			wp_remove_object_terms( $post_id, 'pos-hidden', 'pos_product_visibility' );
-		} else {
-			wp_set_object_terms( $post_id, 'pos-hidden', 'pos_product_visibility' );
+		// Handle product visibility in POS only if the field was submitted.
+		if ( isset( $_POST['_visible_in_pos'] ) ) {
+			$visible_in_pos = 'yes' === wc_clean( wp_unslash( $_POST['_visible_in_pos'] ) );
+			if ( $visible_in_pos ) {
+				wp_remove_object_terms( $post_id, 'pos-hidden', 'pos_product_visibility' );
+			} else {
+				wp_set_object_terms( $post_id, 'pos-hidden', 'pos_product_visibility' );
+			}
 		}
 
 		/**
