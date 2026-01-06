@@ -381,5 +381,7 @@ class WC_Stock_Functions_Tests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertIsIntAndEquals( 200, wc_get_default_stock_amount() );
+
+		remove_all_filters( 'woocommerce_default_stock_amount' );
 	}
 }
