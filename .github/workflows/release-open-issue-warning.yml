@@ -161,25 +161,47 @@ jobs:
                   repo: context.repo.repo,
                   branch: `release/${version}`
                 } );
-
-                releaseMilestones.push( {
-                  title: milestone.title,
-                  number: milestone.number,
-                  version: parseFloat( version )
-                } );
               } catch ( error ) {
                 if ( 404 === error.status ) {
                   console.log( `Skipping milestone ${milestone.title} - release branch does not exist.` );
+                  continue;
                 } else {
                   throw error;
                 }
               }
-            }
 
-            // Sort and filter milestones. Don't include the upcoming milestone unless it matches the upcoming release event.
-            releaseMilestones = releaseMilestones
-              .sort( (a, b) => b.version - a.version )
-              .filter( ( m, index ) => 0 !== index || ( releaseEventFound && m.title === upcomingMilestone ) );
+              // Check the plugin version on the release branch.
+              try {
+                const fileResponse = await github.rest.repos.getContent( {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  path: 'plugins/woocommerce/woocommerce.php',
+                  ref: `release/${version}`
+                } );
+
+                const content = Buffer.from( fileResponse.data.content, 'base64' ).toString( 'utf8' );
+                const versionMatch = content.match( /^\s*\*\s*Version:\s*(.+)$/m );
+
+                if ( versionMatch ) {
+                  const pluginVersion = versionMatch[1].trim().toLowerCase();
+                  const isPreRelease = /dev|rc|beta/.test( pluginVersion );
+
+                  // Skip pre-release versions unless they match the upcoming milestone.
+                  if ( isPreRelease && milestone.title !== upcomingMilestone ) {
+                    console.log( `Skipping milestone ${milestone.title} - pre-release version (${pluginVersion}) and not upcoming.` );
+                    continue;
+                  }
+                }
+              } catch ( error ) {
+                console.log( `Could not check plugin version for ${milestone.title}: ${error.message}` );
+              }
+
+              releaseMilestones.push( {
+                  title: milestone.title,
+                  number: milestone.number,
+                  version: parseFloat( version )
+              } );
+            }
 
             // Build report.
             const milestoneReports = [];
@@ -221,7 +243,12 @@ jobs:
               milestoneReports.push( reportLines.join( '\n' ) );
             }
 
-            core.setOutput( 'slack-message', milestoneReports.join( '\n\n' ) );
+            const fullReport = [];
+            fullReport.push( `:fyi: The following release milestones have open items:` );
+            fullReport.push( '\n\n' );
+            fullReport.push( milestoneReports.join( '\n\n' ) );
+
+            core.setOutput( 'slack-message', fullReport.join( '' ) );
 
       - name: Send Slack Message
         if: ${{ steps.process-milestones.outputs.slack-message != '' }}
