@@ -218,6 +218,63 @@ describe( 'ValidatedTextInput', () => {
 			select( validationStore ).getValidationError( 'test-input' )
 		).toBe( undefined );
 	} );
+	it( 'Shows validation error for non-empty invalid input on blur', async () => {
+		const user = userEvent.setup();
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( '' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '5' }
+					id={ 'test-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Test Input' }
+					type="email"
+				/>
+			);
+		};
+		render( <TestComponent /> );
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+
+		await act( async () => {
+			await user.type( textInputElement, 'invalid-email' );
+			textInputElement.blur();
+		} );
+
+		// Non-empty invalid fields SHOULD show validation errors on blur
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeInTheDocument();
+	} );
+	it( 'Shows validation error for pattern mismatch on blur', async () => {
+		const user = userEvent.setup();
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( '' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '6' }
+					id={ 'pattern-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Pattern Input' }
+					pattern="^[A-Za-z]+$"
+				/>
+			);
+		};
+		render( <TestComponent /> );
+		const textInputElement = await screen.getByLabelText( 'Pattern Input' );
+
+		await act( async () => {
+			await user.type( textInputElement, '123456' );
+			textInputElement.blur();
+		} );
+
+		// Non-empty invalid fields (pattern mismatch) SHOULD show validation errors on blur
+		const validationError =
+			select( validationStore ).getValidationError( 'pattern-input' );
+		expect( validationError ).not.toBeUndefined();
+		expect( validationError?.hidden ).toBe( false );
+	} );
 	it( 'Shows a custom error message for an invalid required input after form submission', async () => {
 		const user = userEvent.setup();
 		const TestComponent = () => {
