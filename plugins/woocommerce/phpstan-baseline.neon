@@ -74389,12 +74389,6 @@ parameters:
 			path: src/Internal/ProductDownloads/ApprovedDirectories/Synchronize.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\CacheController\:\:clear_filter_data_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/ProductFilters/CacheController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\CacheController\:\:clear_taxonomy_hierarchy_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
