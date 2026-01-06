@@ -1844,7 +1844,9 @@ class WC_Helper {
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$source      = '';
-			if ( stripos( $request_uri, 'wc-addons' ) ) :
+			if ( stripos( $request_uri, 'wc/v3/marketplace/refresh' ) ) :
+				$source = 'refresh-button';
+			elseif ( stripos( $request_uri, 'wc-addons' ) ) :
 				$source = 'my-subscriptions';
 			elseif ( stripos( $request_uri, 'plugins.php' ) ) :
 				$source = 'plugins';
