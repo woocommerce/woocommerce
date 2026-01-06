@@ -225,7 +225,6 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 			);
 		}
 	}
-	
 
 	/**
 	 * Build payment method event-specific data.
