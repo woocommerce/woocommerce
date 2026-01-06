@@ -68,18 +68,18 @@ class ApiClient {
 	);
 
 	/**
-	 * Track a fraud protection event and get a decision from WPCOM endpoint.
+	 * Send a fraud protection event and get a decision from WPCOM endpoint.
 	 *
 	 * Implements fail-open pattern: if the endpoint is unreachable or times out,
 	 * returns "allow" decision and logs the error.
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param string               $event_type   Type of event being tracked (e.g., 'cart_updated', 'checkout_started').
+	 * @param string               $event_type   Type of event being sent (e.g., 'cart_updated', 'checkout_started').
 	 * @param array<string, mixed> $session_data Session data to send to the endpoint.
 	 * @return string Decision: "allow" or "block".
 	 */
-	public function track_event( string $event_type, array $session_data ): string {
+	public function send_event( string $event_type, array $session_data ): string {
 		$payload = array_merge(
 			array( 'event_type' => $event_type ),
 			array_filter( $session_data, fn( $value ) => null !== $value )

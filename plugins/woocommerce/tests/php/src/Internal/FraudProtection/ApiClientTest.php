@@ -49,21 +49,21 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when Jetpack blog ID is not found.
+	 * @testdox Send Event should return allow when Jetpack blog ID is not found.
 	 */
-	public function test_track_event_returns_allow_when_blog_id_not_found(): void {
+	public function test_send_event_returns_allow_when_blog_id_not_found(): void {
 		update_option( 'jetpack_options', array( 'id' => null ) );
 
-		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged( 'error', 'Jetpack blog ID not found', array( 'source' => 'woo-fraud-protection' ) );
 	}
 
 	/**
-	 * @testdox Track Event should return allow when HTTP request fails.
+	 * @testdox Send Event should return allow when HTTP request fails.
 	 */
-	public function test_track_event_returns_allow_when_http_request_fails(): void {
+	public function test_send_event_returns_allow_when_http_request_fails(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -71,7 +71,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
@@ -85,9 +85,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API returns HTTP error status.
+	 * @testdox Send Event should return allow when API returns HTTP error status.
 	 */
-	public function test_track_event_returns_allow_when_api_returns_http_error(): void {
+	public function test_send_event_returns_allow_when_api_returns_http_error(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -98,7 +98,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
@@ -112,9 +112,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API returns HTTP error with JSON body.
+	 * @testdox Send Event should return allow when API returns HTTP error with JSON body.
 	 */
-	public function test_track_event_returns_allow_when_api_returns_http_error_with_json_body(): void {
+	public function test_send_event_returns_allow_when_api_returns_http_error_with_json_body(): void {
 		$response = array(
 			'error'   => 'invalid_request',
 			'message' => 'Missing required field',
@@ -130,7 +130,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
@@ -144,9 +144,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API returns invalid JSON.
+	 * @testdox Send Event should return allow when API returns invalid JSON.
 	 */
-	public function test_track_event_returns_allow_when_api_returns_invalid_json(): void {
+	public function test_send_event_returns_allow_when_api_returns_invalid_json(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -157,7 +157,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
@@ -171,9 +171,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API response is missing decision field.
+	 * @testdox Send Event should return allow when API response is missing decision field.
 	 */
-	public function test_track_event_returns_allow_when_response_missing_decision_field(): void {
+	public function test_send_event_returns_allow_when_response_missing_decision_field(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -184,7 +184,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
@@ -198,9 +198,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API returns invalid decision value.
+	 * @testdox Send Event should return allow when API returns invalid decision value.
 	 */
-	public function test_track_event_returns_allow_when_invalid_decision_value(): void {
+	public function test_send_event_returns_allow_when_invalid_decision_value(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -211,7 +211,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
@@ -225,9 +225,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow decision from API.
+	 * @testdox Send Event should return allow decision from API.
 	 */
-	public function test_track_event_returns_allow_decision_from_api(): void {
+	public function test_send_event_returns_allow_decision_from_api(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -244,7 +244,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'cart_updated', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should return allow decision' );
 		$this->assertLogged(
@@ -263,9 +263,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return block decision from API.
+	 * @testdox Send Event should return block decision from API.
 	 */
-	public function test_track_event_returns_block_decision_from_api(): void {
+	public function test_send_event_returns_block_decision_from_api(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -283,7 +283,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'checkout_started', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'checkout_started', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_BLOCK, $result, 'Should return block decision' );
 		$this->assertLogged(
@@ -303,9 +303,9 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Track Event should return allow when API returns challenge decision (challenge flow not yet implemented).
+	 * @testdox Send Event should return allow when API returns challenge decision (challenge flow not yet implemented).
 	 */
-	public function test_track_event_returns_allow_when_challenge_decision_from_api(): void {
+	public function test_send_event_returns_allow_when_challenge_decision_from_api(): void {
 		add_filter(
 			'pre_http_request',
 			function () {
@@ -322,7 +322,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$result = $this->sut->track_event( 'checkout_started', array( 'session_id' => 'test-session' ) );
+		$result = $this->sut->send_event( 'checkout_started', array( 'session_id' => 'test-session' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow until challenge flow is implemented' );
 		$this->assertLogged( 'error', 'Invalid decision value "challenge"' );
@@ -355,7 +355,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 			'billing_name' => null,
 		);
 
-		$this->sut->track_event( 'cart_updated', $session_data );
+		$this->sut->send_event( 'cart_updated', $session_data );
 
 		$this->assertNotNull( $captured_request_body, 'Request body should be captured' );
 
