@@ -134,74 +134,86 @@ jobs:
             const releaseEventTitle = '${{ needs.check-upcoming-release-events.outputs.release-event-title }}';
             const releaseEventDate  = '${{ needs.check-upcoming-release-events.outputs.release-event-date }}';
 
-            // Fetch all open milestones.
-            const milestones = await github.rest.issues.listMilestones( {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              per_page: 10
-            } );
-
+            /**
+             * Fetches and filters milestones to only include those with a release branch and valid version.
+             *
+             * @returns {Array} The filtered milestones.
+             */
             const versionPattern = /^(\d+\.\d+)\.0$/;
-            let releaseMilestones = [];
+            const getReleaseMilestones = async () => {
+              const milestones = await github.rest.issues.listMilestones( {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                per_page: 10
+              } );
 
-            for ( const milestone of milestones.data ) {
-              // Skip if not in format "X.Y.0".
-              if ( ! versionPattern.test( milestone.title ) ) {
-                continue;
-              }
+              const result = [];
 
-              // Extract X.Y from milestone title.
-              const version = milestone.title.match( versionPattern )[1];
-
-              // Skip if there isn't a release branch associated.
-              try {
-                await github.rest.repos.getBranch( {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  branch: `release/${version}`
-                } );
-              } catch ( error ) {
-                if ( 404 === error.status ) {
-                  console.log( `Skipping milestone ${milestone.title} - release branch does not exist.` );
+              for ( const milestone of milestones.data ) {
+                // Skip if not in format "X.Y.0".
+                if ( ! versionPattern.test( milestone.title ) ) {
                   continue;
-                } else {
-                  throw error;
                 }
-              }
 
-              // Check the plugin version on the release branch.
-              try {
-                const fileResponse = await github.rest.repos.getContent( {
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  path: 'plugins/woocommerce/woocommerce.php',
-                  ref: `release/${version}`
-                } );
+                // Extract X.Y from milestone title.
+                const version = milestone.title.match( versionPattern )[1];
 
-                const content = Buffer.from( fileResponse.data.content, 'base64' ).toString( 'utf8' );
-                const versionMatch = content.match( /^\s*\*\s*Version:\s*(.+)$/m );
-
-                if ( versionMatch ) {
-                  const pluginVersion = versionMatch[1].trim().toLowerCase();
-                  const isPreRelease = /dev|rc|beta/.test( pluginVersion );
-
-                  // Skip pre-release versions unless they match the upcoming milestone.
-                  if ( isPreRelease && milestone.title !== upcomingMilestone ) {
-                    console.log( `Skipping milestone ${milestone.title} - pre-release version (${pluginVersion}) and not upcoming.` );
+                // Skip if there isn't a release branch associated.
+                try {
+                  await github.rest.repos.getBranch( {
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    branch: `release/${version}`
+                  } );
+                } catch ( error ) {
+                  if ( 404 === error.status ) {
+                    console.log( `Skipping milestone ${milestone.title} - release branch does not exist.` );
                     continue;
+                  } else {
+                    throw error;
                   }
                 }
-              } catch ( error ) {
-                console.log( `Could not check plugin version for ${milestone.title}: ${error.message}` );
-              }
 
-              releaseMilestones.push( {
+                // Check the plugin version on the release branch.
+                try {
+                  const fileResponse = await github.rest.repos.getContent( {
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    path: 'plugins/woocommerce/woocommerce.php',
+                    ref: `release/${version}`
+                  } );
+
+                  const content = Buffer.from( fileResponse.data.content, 'base64' ).toString( 'utf8' );
+                  const versionMatch = content.match( /^\s*\*\s*Version:\s*(.+)$/m );
+
+                  if ( versionMatch ) {
+                    const pluginVersion = versionMatch[1].trim().toLowerCase();
+                    const isPreRelease = /dev|rc|beta/.test( pluginVersion );
+
+                    // Skip pre-release versions unless they match the upcoming milestone.
+                    if ( isPreRelease && milestone.title !== upcomingMilestone ) {
+                      console.log( `Skipping milestone ${milestone.title} - pre-release version (${pluginVersion}) and not upcoming.` );
+                      continue;
+                    }
+                  }
+                } catch ( error ) {
+                  console.log( `Could not check plugin version for ${milestone.title}: ${error.message}` );
+                }
+
+                result.push( {
                   title: milestone.title,
                   number: milestone.number,
                   version: parseFloat( version )
-              } );
-            }
+                } );
+              }
+
+              result.sort( (a, b) => b.version - a.version );
+
+              return result;
+            };
+
+            const releaseMilestones = await getReleaseMilestones();
 
             // Build report.
             const milestoneReports = [];
@@ -248,7 +260,10 @@ jobs:
             fullReport.push( '\n\n' );
             fullReport.push( milestoneReports.join( '\n\n' ) );
 
-            core.setOutput( 'slack-message', fullReport.join( '' ) );
+            console.log( fullReport.join( '' ) );
+
+            // core.setOutput( 'slack-message', fullReport.join( '' ) );
+            core.setOutput( 'slack-message', '' );
 
       - name: Send Slack Message
         if: ${{ steps.process-milestones.outputs.slack-message != '' }}
