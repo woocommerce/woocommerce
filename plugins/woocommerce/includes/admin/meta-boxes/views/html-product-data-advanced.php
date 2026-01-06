@@ -63,6 +63,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				'id'          => '_visible_in_pos',
 				'value'       => $visible_in_pos ? 'yes' : 'no',
 				'label'       => __( 'Available for POS', 'woocommerce' ),
+				'desc_tip'    => true,
 				'description' => __( 'Controls whether this product appears in the Point of Sale system.', 'woocommerce' ),
 			)
 		);
