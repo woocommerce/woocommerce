@@ -156,11 +156,20 @@ export function ImportStatusBar(): JSX.Element | null {
 						variant="tertiary"
 						onClick={ handleTriggerImport }
 						disabled={ isLoading || isBusy }
+						aria-disabled={ isLoading || isBusy }
+						aria-busy={ isBusy }
 						className="woocommerce-analytics-import-status-bar__trigger"
-						aria-label={ __(
-							'Manually trigger analytics data import',
-							'woocommerce'
-						) }
+						aria-label={
+							isBusy
+								? __(
+										'Analytics data import in progress',
+										'woocommerce'
+								  )
+								: __(
+										'Manually trigger analytics data import',
+										'woocommerce'
+								  )
+						}
 					>
 						{ isBusy ? (
 							<Spinner />
