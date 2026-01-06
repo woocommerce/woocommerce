@@ -218,7 +218,7 @@ describe( 'ValidatedTextInput', () => {
 			select( validationStore ).getValidationError( 'test-input' )
 		).toBe( undefined );
 	} );
-	it( 'Shows a custom error message for an invalid required input', async () => {
+	it( 'Shows a custom error message for an invalid required input after form submission', async () => {
 		const user = userEvent.setup();
 		const TestComponent = () => {
 			const [ inputValue, setInputValue ] = useState( '' );
@@ -239,13 +239,25 @@ describe( 'ValidatedTextInput', () => {
 		await act( async () => {
 			await user.type( textInputElement, 'test' );
 			await user.clear( textInputElement );
-			await textInputElement.blur();
+			textInputElement.blur();
 		} );
 
-		await expect(
+		// Empty fields don't show validation errors on blur - they stay hidden
+		// until form submission (showAllValidationErrors is called)
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeNull();
+
+		// Simulate form submission which reveals all hidden validation errors
+		await act( () =>
+			dispatch( validationStore ).showAllValidationErrors()
+		);
+
+		expect(
 			screen.queryByText( 'Please enter a valid test input' )
 		).not.toBeNull();
 	} );
+
 	describe( 'correctly validates on mount', () => {
 		it( 'validates when focusOnMount is true and validateOnMount is not set', async () => {
 			const setValidationErrors = jest.fn();
