@@ -97,25 +97,22 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_create_paypal_order_params_are_correct(): void {
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
 		$order = \WC_Helper_Order::create_order();
 		$order->set_cart_tax( 10 );
 		$order->set_shipping_tax( 0 );
 		$order->set_total( 60 );
 		$order->save();
 
-		// Ensure no other filters interfere with this test.
-		remove_all_filters( 'pre_http_request' );
-
-		// Use priority 5 to ensure this filter runs before other filters that might intercept the request.
-		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 5, 3 );
+		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 3 );
 
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
-		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 5 );
+		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10 );
 
-		// temporarily disabled this assertion. Will re-enable later when all the refactor is done.
-		// $this->assertNotNull( $result ); // todo: re-enable this assertion.
+		$this->assertNotNull( $result );
 	}
 
 	/**
