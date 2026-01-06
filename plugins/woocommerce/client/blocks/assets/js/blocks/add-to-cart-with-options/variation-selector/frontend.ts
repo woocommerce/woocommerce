@@ -7,7 +7,10 @@ import {
 	getConfig,
 	getElement,
 } from '@wordpress/interactivity';
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import {
+	SelectedAttributes,
+	VariationData,
+} from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
@@ -19,6 +22,7 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
+import type { NormalizedProductData } from '../types';
 import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
@@ -138,14 +142,18 @@ const isAttributeValueValid = ( {
 /**
  * Return the product attributes and options.
  */
-const getProductAttributesAndOptions = ( productObject: Record< any, any> | null ) => {
+const getProductAttributesAndOptions = (
+	productObject: NormalizedProductData | null
+): Record< string, string[] > => {
 	if ( ! productObject?.variations ) {
 		return {};
 	}
 
-	const variations: Record< string, any >[] = Object.values( productObject.variations );
+	const variations: VariationData[] = Object.values(
+		productObject.variations
+	);
 	const productAttributesAndOptions = {} as Record< string, string[] >;
-	variations.forEach( ( variation: Record< string, any > ) => {
+	variations.forEach( ( variation: VariationData ) => {
 		if ( ! variation?.attributes ) {
 			return;
 		}
@@ -180,8 +188,8 @@ export type VariableProductAddToCartWithOptionsStore =
 				event: ChangeEvent< HTMLSelectElement >
 			) => void;
 			autoselectAttributes: ( args: {
-				includedAttributes?: string[],
-				excludedAttributes?: string[],
+				includedAttributes?: string[];
+				excludedAttributes?: string[];
 			} ) => void;
 		};
 		callbacks: {
@@ -282,7 +290,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 				actions.setAttribute( context.name, context.selectedValue );
 				if ( context.selectedValue !== '' ) {
-					actions.autoselectAttributes( { excludedAttributes: [ context.name ] } );
+					actions.autoselectAttributes( {
+						excludedAttributes: [ context.name ],
+					} );
 				}
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
@@ -290,17 +300,18 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
 				if ( context.selectedValue !== '' ) {
-					actions.autoselectAttributes( { excludedAttributes: [ context.name ] } );
+					actions.autoselectAttributes( {
+						excludedAttributes: [ context.name ],
+					} );
 				}
 			},
 			autoselectAttributes( {
 				includedAttributes = [],
 				excludedAttributes = [],
 			}: {
-				includedAttributes?: Array< string >,
-				excludedAttributes?: Array< string >,
-			} = {},
-			) {
+				includedAttributes?: Array< string >;
+				excludedAttributes?: Array< string >;
+			} = {} ) {
 				const { autoselect, selectedAttributes } =
 					getContext< Context >();
 
@@ -308,21 +319,25 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const productObject: Record< any, any > | null = getProductData(
-					productDataState.productId,
-					[]
-				);
+				const productObject: NormalizedProductData | null =
+					getProductData( productDataState.productId, [] );
 				if ( ! productObject ) {
 					return;
 				}
-				const productAttributesAndOptions =
+				const productAttributesAndOptions: Record< string, string[] > =
 					getProductAttributesAndOptions( productObject );
 				Object.entries( productAttributesAndOptions ).forEach(
 					( [ attribute, options ] ) => {
-						if ( includedAttributes.length !== 0 && ! includedAttributes.includes( attribute ) ) {
+						if (
+							includedAttributes.length !== 0 &&
+							! includedAttributes.includes( attribute )
+						) {
 							return;
 						}
-						if ( excludedAttributes.length !== 0 && excludedAttributes.includes( attribute ) ) {
+						if (
+							excludedAttributes.length !== 0 &&
+							excludedAttributes.includes( attribute )
+						) {
 							return;
 						}
 						const validOptions = options.filter( ( option ) =>
@@ -347,7 +362,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
-				actions.autoselectAttributes( { includedAttributes: [ context.name ] } );
+				actions.autoselectAttributes( {
+					includedAttributes: [ context.name ],
+				} );
 			},
 			setSelectedVariationId: () => {
 				const { products } = getConfig( 'woocommerce' );
