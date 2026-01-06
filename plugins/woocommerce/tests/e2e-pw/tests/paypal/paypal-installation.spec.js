@@ -27,7 +27,7 @@ test.describe(
 			return paypalDiv;
 		}
 
-		test( 'PayPal Standard can be installed', async ( { page } ) => {
+		test( 'PayPal Standard can be enabled', async ( { page } ) => {
 			await openPayments( page );
 
 			const paypalDiv = await waitForPayPalToLoad( page );
