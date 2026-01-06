@@ -155,5 +155,4 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 		$this->assertSame( ApiClient::DECISION_BLOCK, $result );
 		$this->assertLogged( 'warning', 'Filter `woocommerce_fraud_protection_decision` returned invalid decision "totally_invalid"' );
 	}
-
 }
