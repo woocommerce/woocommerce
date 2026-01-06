@@ -1031,13 +1031,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 			pageObject: AddToCartWithOptionsPage,
 			editor: Editor,
 			{
-				optionStyle = undefined,
+				optionStyle = 'Pills',
 				autoselect = false,
 				disabledAttributesAction = 'disable',
 			}: {
-				optionStyle?: any,
+				optionStyle?: 'Pills' | 'Dropdown',
 				autoselect?: boolean,
-				disabledAttributesAction?: string,
+				disabledAttributesAction?: 'disable' | 'hide',
 			} = {},
 			) {
 			const page = editor.page;
@@ -1177,7 +1177,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await pageObject.updateSingleProductTemplate();
 				await setAddToCartWithOptionsBlockAttributes( pageObject, editor, { optionStyle: optionStyle } );
 
-				for ( const value of [ 'disable', 'hide' ] ) {
+				for ( const value of [ 'disable', 'hide' ] as ( 'disable' | 'hide' )[] ) {
 					await pageObject.updateSingleProductTemplate();
 
 					await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
