@@ -236,7 +236,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 					'body'     => wp_json_encode(
 						array(
 							'fraud_event_id' => 123,
-							'decision'        => 'allow',
+							'decision'       => 'allow',
 							'risk_score'     => 10,
 						)
 					),
@@ -254,7 +254,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 				'source'   => 'woo-fraud-protection',
 				'response' => array(
 					'fraud_event_id' => 123,
-					'decision'        => 'allow',
+					'decision'       => 'allow',
 					'risk_score'     => 10,
 				),
 			)
@@ -274,7 +274,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 					'body'     => wp_json_encode(
 						array(
 							'fraud_event_id' => 123,
-							'decision'        => 'block',
+							'decision'       => 'block',
 							'risk_score'     => 95,
 							'reason_tags'    => array( 'failures_per_ip' ),
 						)
@@ -293,7 +293,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 				'source'   => 'woo-fraud-protection',
 				'response' => array(
 					'fraud_event_id' => 123,
-					'decision'        => 'block',
+					'decision'       => 'block',
 					'risk_score'     => 95,
 					'reason_tags'    => array( 'failures_per_ip' ),
 				),
@@ -314,7 +314,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 					'body'     => wp_json_encode(
 						array(
 							'fraud_event_id' => 123,
-							'decision'        => 'challenge',
+							'decision'       => 'challenge',
 							'risk_score'     => 65,
 						)
 					),
