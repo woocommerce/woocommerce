@@ -29,7 +29,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * Get the template part path for a product type.
 	 *
 	 * @param string $product_type The product type.
-	 * @return string|false The template part path if it exists, false otherwise.
+	 * @return string|bool The template part path if it exists, false otherwise.
 	 */
 	protected function get_template_part_path( $product_type ) {
 		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
@@ -41,7 +41,7 @@ class AddToCartWithOptions extends AbstractBlock {
 		 * for a product type.
 		 *
 		 * @since 9.9.0
-		 * @param mixed string|boolean The template part path if it exists
+		 * @param string|boolean $template_part_path The template part path if it exists
 		 * @param string $product_type The product type
 		 */
 		return apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
@@ -53,9 +53,11 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * part (that's WC core product types and extensions that migrated to block
 	 * templates).
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
+	 *
+	 * @return void
 	 */
 	protected function enqueue_assets( $attributes, $content, $block ) {
 		$product_id = $block->context['postId'];
@@ -172,11 +174,11 @@ class AddToCartWithOptions extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 *
-	 * @return string | void Rendered block output.
+	 * @return string|void Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
 		global $product;
