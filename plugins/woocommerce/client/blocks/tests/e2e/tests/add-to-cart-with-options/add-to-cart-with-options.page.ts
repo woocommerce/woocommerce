@@ -142,7 +142,12 @@ class AddToCartWithOptionsPage {
 	}
 
 	async expectSelectedAttributes(
-		productAttributes: [ { name: string, options: any[] } ],
+		productAttributes: {
+			name: string,
+			options: string[],
+			variation: boolean,
+			visible: boolean,
+		}[],
 		expectedValues: Record< string, string | RegExp > = {},
 		optionStyle: 'Pills' | 'Dropdown',
 	) {

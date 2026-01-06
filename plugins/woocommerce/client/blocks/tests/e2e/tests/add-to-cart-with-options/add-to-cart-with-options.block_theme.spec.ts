@@ -1025,7 +1025,113 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test.describe( 'autoselect behavior', () => {
 		const productSlug = 'autoselect-t-shirt';
 		const productPermalink = '/product/' + productSlug;
-		let productAttributes: [ { name: string, options: any[] } ];
+		const productPrice = '13.99';
+		const productAttributes: {
+			name: string,
+			options: string[],
+			variation: boolean,
+			visible: boolean,
+		}[] = [
+			{
+				name: "Type",
+				options: [
+					"T-shirt",
+				],
+				variation: true,
+				visible: true,
+			},
+			{
+				name: "Color",
+				options: [
+					"Red",
+					"Blue",
+					"Green",
+				],
+				variation: true,
+				visible: true,
+			},
+			{
+				name: "Size",
+				options: [
+					"S",
+					"L",
+					"XL",
+				],
+				variation: true,
+				visible: true,
+			},
+		];
+		const productVariations: {
+			attributes: {
+				name: string,
+				option: string,
+			}[]
+		}[] = [
+			{
+				attributes: [
+					{
+						name: "Type",
+						option: "T-shirt"
+					},
+					{
+						name: "Color",
+						option: "Green"
+					},
+					{
+						name: "Size",
+						option: "S"
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: "Type",
+						option: "T-shirt"
+					},
+					{
+						name: "Color",
+						option: "Red"
+					},
+					{
+						name: "Size",
+						option: "L"
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: "Type",
+						option: "T-shirt"
+					},
+					{
+						name: "Color",
+						option: "Red"
+					},
+					{
+						name: "Size",
+						option: "XL"
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: "Type",
+						option: "T-shirt"
+					},
+					{
+						name: "Color",
+						option: "Blue"
+					},
+					{
+						name: "Size",
+						option: "XL"
+					},
+				],
+			},
+		];
 
 		async function setAddToCartWithOptionsBlockAttributes(
 			pageObject: AddToCartWithOptionsPage,
@@ -1079,16 +1185,21 @@ test.describe( 'Add to Cart + Options Block', () => {
 			}
 		}
 
-		test.beforeAll( async () => {
+		test.beforeEach( async () => {
 			const cliOutput = await wpCLI(
-				`wc product list --user=1 --slug="${ productSlug }" --format=json`
+				`wc product create --user=1 --slug="${ productSlug }" --type="variable" --attributes="${ productAttributes }"`
 			);
-			const match = cliOutput.stdout.match( /\[\{.*\}\]\n?$/ );
-			if ( ! match ) {
-				throw new Error( `No match found, productSlug: ${ productSlug }` );
+			const match: RegExpMatchArray | null = cliOutput.stdout.match( /Success:\s+Created\s+product\s+(\d+)\.\n?$/ );
+			const productId: string | null = match ? match[1] : null;
+			if ( ! productId ) {
+				throw new Error( `No productId found, cliOutput: ${ JSON.stringify( cliOutput ) }` );
 			}
-			const cliOutputJSON = JSON.parse( match[0] );
-			productAttributes = cliOutputJSON[0].attributes;
+
+			for ( const productVariation of productVariations ) {
+				await wpCLI(
+					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes="${ productVariation.attributes }"`
+				);
+			}
 		} );
 
 		for ( const optionStyle of [ 'Pills', 'Dropdown' ] as ( 'Pills' | 'Dropdown' )[] ) {
