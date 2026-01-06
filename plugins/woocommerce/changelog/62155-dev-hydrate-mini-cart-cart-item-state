@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix a bug where Preact warns in development about inconsistent rendering between SSR content and client.

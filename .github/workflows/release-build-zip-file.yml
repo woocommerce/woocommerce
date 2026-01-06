@@ -92,13 +92,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-            # No PRs by automated tools should remain open.
-            count=$( gh pr list --search "is:open label:Release" --limit 1 --json number | jq length )
-            if (( count > 0 )); then
-                echo "::error::Pre-build verification: there are release PRs still open."
-                exit 1
-            fi
-
             # Branch name must be 'release/*'.
             branch_name="${BRANCH#refs/heads/}"
             if  [[ $branch_name != release/* ]] ; then

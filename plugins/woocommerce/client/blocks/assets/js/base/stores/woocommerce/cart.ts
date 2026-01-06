@@ -270,6 +270,7 @@ const { state, actions } = store< Store >(
 						`${ state.restUrl }wc/store/v1/cart/remove-item`,
 						{
 							method: 'POST',
+							cache: 'no-store',
 							headers: {
 								Nonce: state.nonce,
 								'Content-Type': 'application/json',
@@ -365,6 +366,7 @@ const { state, actions } = store< Store >(
 						`${ state.restUrl }wc/store/v1/cart/${ endpoint }`,
 						{
 							method: 'POST',
+							cache: 'no-store',
 							headers: {
 								Nonce: state.nonce,
 								'Content-Type': 'application/json',
@@ -449,6 +451,7 @@ const { state, actions } = store< Store >(
 							return {
 								method: 'POST',
 								path: `/wc/store/v1/cart/update-item`,
+								cache: 'no-store',
 								headers: {
 									Nonce: state.nonce,
 									'Content-Type': 'application/json',
@@ -477,6 +480,7 @@ const { state, actions } = store< Store >(
 						return {
 							method: 'POST',
 							path: `/wc/store/v1/cart/add-item`,
+							cache: 'no-store',
 							headers: {
 								Nonce: state.nonce,
 								'Content-Type': 'application/json',
@@ -489,6 +493,7 @@ const { state, actions } = store< Store >(
 						`${ state.restUrl }wc/store/v1/batch`,
 						{
 							method: 'POST',
+							cache: 'no-store',
 							headers: {
 								Nonce: state.nonce,
 								'Content-Type': 'application/json',
@@ -599,7 +604,11 @@ const { state, actions } = store< Store >(
 				try {
 					const res: Response = yield fetch(
 						`${ state.restUrl }wc/store/v1/cart`,
-						{ headers: { 'Content-Type': 'application/json' } }
+						{
+							method: 'GET',
+							cache: 'no-store',
+							headers: { 'Content-Type': 'application/json' },
+						}
 					);
 					const json: Cart = yield res.json();
 

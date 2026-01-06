@@ -74,6 +74,26 @@ To ensure the correct functionality of the Email Editor and its features, you mu
 The required minimum version of this package is stored in the assets directory.
 If your WordPress installation does not use the Gutenberg plugin or does not include the required version, replace the existing `@wordpress/rich-text` package with the one provided in the assets directory.
 
+#### Global Styles Engine
+
+A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
+
+**Impact**: If your build configuration marks all `@wordpress/*` packages as externals (common in webpack configs), you will encounter runtime errors: `"Cannot find module '@wordpress/global-styles-engine'"`.
+
+**Solution**: Configure your webpack dependency extraction plugin to bundle this package instead of treating it as an external:
+
+```javascript
+new DependencyExtractionWebpackPlugin( {
+    requestToExternal( request ) {
+        if ( request === '@wordpress/global-styles-engine' ) {
+            // Return null to bundle this package instead of treating it as external
+            return null;
+        }
+        // ... handle other dependencies
+    }
+} )
+```
+
 ### Email Editor
 
 -   Bootstrapped in the plugin in the [email editor controller](https://github.com/mailpoet/mailpoet/blob/13bf305aeb29bbadd0695ee02a3735e62cc4f21f/mailpoet/lib/EmailEditor/Integrations/MailPoet/EmailEditor.php)
@@ -147,3 +167,4 @@ We may add, update and delete any of them.
 | `woocommerce_email_editor_iframe_stylesheet_should_remove`         | `boolean` (false-default), `CSSStyleSheet` stylesheet | `boolean`                                  | Controls whether the iframe stylesheet should be removed. Returning `true` will remove the iframe stylesheet.                  |
 | `woocommerce_email_editor_close_action_callback`                   | `function` backAction                                 | `function` backAction                      | Action to perform when the close (back) button is clicked                                                                      |
 | `woocommerce_email_editor_close_content`                           | `React.ComponentType` DefaultBackButtonContent        | `React.ComponentType` Back button content  | Custom component for the back button content in the editor header                                                              |
+| `woocommerce_email_editor_create_coupon_handler`                   | `() => void` handler                                  | `() => void` handler                       | Handler function called when user clicks "Create new coupon". Should open the coupon creation UI.                              |

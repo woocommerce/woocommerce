@@ -210,7 +210,6 @@ jobs:
     with:
       branch: trunk
       bump-type: dev
-      milestone: ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}
 
   build-dev-release:
     name: 'Build WooCommerce -dev release'

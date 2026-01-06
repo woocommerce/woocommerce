@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\ProductFilters\Params;
  * ProductFilters class.
  */
 class ProductFilters extends AbstractBlock {
-	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -40,7 +39,7 @@ class ProductFilters extends AbstractBlock {
 		global $pagenow;
 		parent::enqueue_data( $attributes );
 
-		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		BlocksSharedState::load_store_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),
