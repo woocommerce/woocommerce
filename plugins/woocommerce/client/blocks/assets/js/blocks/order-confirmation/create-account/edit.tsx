@@ -9,6 +9,10 @@ import {
 	PanelBody,
 	ToggleControl,
 	ExternalLink,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 import {
 	InnerBlocks,
@@ -110,23 +114,35 @@ export const Edit = ( {
 			</Disabled>
 			{ ! generatePassword && (
 				<InspectorControls>
-					<PanelBody title={ __( 'Style', 'woocommerce' ) }>
-						<ToggleControl
-							__nextHasNoMarginBottom
+					<ToolsPanel
+						label={ __( 'Style', 'woocommerce' ) }
+						resetAll={ () => {
+							setAttributes( { hasDarkControls: false } );
+						} }
+					>
+						<ToolsPanelItem
+							hasValue={ () => attributes.hasDarkControls === true }
 							label={ __( 'Dark mode inputs', 'woocommerce' ) }
-							help={ __(
-								'Inputs styled specifically for use on dark background colors.',
-								'woocommerce'
-							) }
-							checked={ attributes.hasDarkControls }
-							onChange={ () =>
-								setAttributes( {
-									hasDarkControls:
-										! attributes.hasDarkControls,
-								} )
-							}
-						/>
-					</PanelBody>
+							onDeselect={ () => setAttributes( { hasDarkControls: false } ) }
+							isShownByDefault
+						>
+							<ToggleControl
+								__nextHasNoMarginBottom
+								label={ __( 'Dark mode inputs', 'woocommerce' ) }
+								help={ __(
+									'Inputs styled specifically for use on dark background colors.',
+									'woocommerce'
+								) }
+								checked={ attributes.hasDarkControls }
+								onChange={ () =>
+									setAttributes( {
+										hasDarkControls:
+											! attributes.hasDarkControls,
+									} )
+								}
+							/>
+						</ToolsPanelItem>
+					</ToolsPanel>
 				</InspectorControls>
 			) }
 			<InspectorControls>
