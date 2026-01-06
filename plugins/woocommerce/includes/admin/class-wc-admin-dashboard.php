@@ -418,14 +418,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			global $wpdb;
 
 			// Enforce the use of a Woo-index for this query, as the database prefers join over our indexes.
+			// Backward compatible with https://github.com/woocommerce/woocommerce/pull/13409 (back from 2017):
+			// the filter can modify the query, for example by forcing a custom index, which may conflict with our optimizations.
 			$force_comments_index = '';
-			if ( ! has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
-				// Backward compatibility with https://github.com/woocommerce/woocommerce/pull/13409 (back from 2017):
-				// the filter can modify the query, for example by forcing a custom index, which may conflict with our optimizations.
-				$exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
-				if ( null !== $exists ) {
-					$force_comments_index = ' USE INDEX (woo_idx_comment_date_type)';
-				}
+			if ( ! has_filter( 'woocommerce_report_recent_reviews_query_from' ) && version_compare( Constants::get_constant( 'WC_VERSION' ), '10.3.0', '>' ) ) {
+				$force_comments_index = ' USE INDEX (woo_idx_comment_date_type)';
 			}
 
 			$query_from = apply_filters(
