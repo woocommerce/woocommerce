@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Added deprecation notices for deprecated methods in 'WC_Gateway_Paypal_Helper' and 'WC_Gateway_Paypal_Notices' classes.
