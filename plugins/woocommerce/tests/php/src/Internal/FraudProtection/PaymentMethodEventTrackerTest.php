@@ -93,8 +93,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 			'info',
 			'payment_method_added',
 			array(
-				'source'     => 'woo-fraud-protection',
-				'event_type' => 'payment_method_added',
+				'source'         => 'woo-fraud-protection',
+				'event_type'     => 'payment_method_added',
 				'collected_data' => array(
 					'event_data' => array(
 						'action'     => 'added',
@@ -132,10 +132,10 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 			'info',
 			'payment_method_updated',
 			array(
-				'source'     => 'woo-fraud-protection',
-				'event_type' => 'payment_method_updated',
+				'source'         => 'woo-fraud-protection',
+				'event_type'     => 'payment_method_updated',
 				'collected_data' => array(
-					'event_data' => array(	
+					'event_data' => array(
 						'action'     => 'updated',
 						'token_id'   => $token->get_id(),
 						'gateway_id' => 'stripe',
@@ -185,8 +185,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 			'info',
 			'payment_method_set_default',
 			array(
-				'source'     => 'woo-fraud-protection',
-				'event_type' => 'payment_method_set_default',
+				'source'         => 'woo-fraud-protection',
+				'event_type'     => 'payment_method_set_default',
 				'collected_data' => array(
 					'event_data' => array(
 						'action'     => 'set_default',
@@ -224,8 +224,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 			'info',
 			'payment_method_deleted',
 			array(
-				'source'     => 'woo-fraud-protection',
-				'event_type' => 'payment_method_deleted',
+				'source'         => 'woo-fraud-protection',
+				'event_type'     => 'payment_method_deleted',
 				'collected_data' => array(
 					'event_data' => array(
 						'action'     => 'deleted',
