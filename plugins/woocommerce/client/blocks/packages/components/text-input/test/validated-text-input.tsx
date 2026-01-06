@@ -305,6 +305,17 @@ describe( 'ValidatedTextInput', () => {
 			screen.queryByText( 'Please enter a valid test input' )
 		).toBeNull();
 
+		// Add whitespace only to verify this also doesn't trigger validation error on blur.
+		await act( async () => {
+			await user.type( textInputElement, ' ' );
+			textInputElement.blur();
+		} );
+
+		// Empty fields, even whitespace don't show validation errors on blur.
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeNull();
+
 		// Simulate form submission which reveals all hidden validation errors
 		await act( () =>
 			dispatch( validationStore ).showAllValidationErrors()
