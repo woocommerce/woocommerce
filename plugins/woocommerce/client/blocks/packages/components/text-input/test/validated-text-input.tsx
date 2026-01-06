@@ -255,7 +255,7 @@ describe( 'ValidatedTextInput', () => {
 
 		expect(
 			screen.queryByText( 'Please enter a valid test input' )
-		).not.toBeNull();
+		).toBeInTheDocument();
 	} );
 
 	describe( 'correctly validates on mount', () => {
