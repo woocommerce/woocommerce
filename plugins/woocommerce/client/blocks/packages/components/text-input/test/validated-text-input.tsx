@@ -303,7 +303,7 @@ describe( 'ValidatedTextInput', () => {
 		// until form submission (showAllValidationErrors is called)
 		expect(
 			screen.queryByText( 'Please enter a valid test input' )
-		).toBeNull();
+		).not.toBeInTheDocument();
 
 		// Add whitespace only to verify this also doesn't trigger validation error on blur.
 		await act( async () => {
@@ -314,7 +314,7 @@ describe( 'ValidatedTextInput', () => {
 		// Empty fields, even whitespace don't show validation errors on blur.
 		expect(
 			screen.queryByText( 'Please enter a valid test input' )
-		).toBeNull();
+		).not.toBeInTheDocument();
 
 		// Simulate form submission which reveals all hidden validation errors
 		await act( () =>
