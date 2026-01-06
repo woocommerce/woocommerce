@@ -10,13 +10,10 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
-	require_once WC_ABSPATH . 'includes/class-wc-gateway-paypal-request.php';
 }
 
 /**
@@ -51,9 +48,9 @@ class Buttons {
 	/**
 	 * The request instance.
 	 *
-	 * @var \WC_Gateway_Paypal_Request
+	 * @var PayPalRequest
 	 */
-	private \WC_Gateway_Paypal_Request $request;
+	private PayPalRequest $request;
 
 	/**
 	 * Constructor.
@@ -62,7 +59,7 @@ class Buttons {
 	 */
 	public function __construct( \WC_Gateway_Paypal $gateway ) {
 		$this->gateway = $gateway;
-		$this->request = new \WC_Gateway_Paypal_Request( $this->gateway );
+		$this->request = new PayPalRequest( $this->gateway );
 
 		$this->enabled = $this->gateway->should_use_orders_v2() && 'yes' === $this->gateway->get_option( 'paypal_buttons', 'yes' );
 	}
