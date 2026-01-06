@@ -7,13 +7,10 @@ namespace Automattic\WooCommerce\Gateways\PayPal;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
-	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
 }
 
 /**
@@ -243,7 +240,7 @@ class WebhookHandler {
 			return;
 		}
 		$gateway        = $payment_gateways['paypal'];
-		$paypal_request = new \WC_Gateway_Paypal_Request( $gateway );
+		$paypal_request = new PayPalRequest( $gateway );
 		$paypal_request->authorize_or_capture_payment( $order, $action_url, $action );
 	}
 

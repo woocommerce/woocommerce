@@ -868,6 +868,11 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
+		if ( ! WC()->cart ) {
+			wc_doing_it_wrong( __FUNCTION__, 'Cart is not initialized.', '10.5.0' );
+			return false;
+		}
+
 		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
