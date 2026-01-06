@@ -556,7 +556,7 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => true,
+				'skip_compatibility_checks'    => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'rest_api_caching'                   => array(
