@@ -111,7 +111,7 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 		$result = $this->sut->apply_decision( ApiClient::DECISION_BLOCK, array( 'session_id' => 'test' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result );
-		$this->assertLogged( 'info', 'Decision overridden by filter' );
+		$this->assertLogged( 'info', 'Decision overridden by filter `woocommerce_fraud_protection_decision`' );
 	}
 
 	/**
@@ -132,7 +132,7 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 		$result = $this->sut->apply_decision( ApiClient::DECISION_ALLOW, array( 'session_id' => 'test' ) );
 
 		$this->assertSame( ApiClient::DECISION_BLOCK, $result );
-		$this->assertLogged( 'info', 'Decision overridden by filter' );
+		$this->assertLogged( 'info', 'Decision overridden by filter `woocommerce_fraud_protection_decision`' );
 	}
 
 	/**
@@ -153,7 +153,7 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 		$result = $this->sut->apply_decision( ApiClient::DECISION_BLOCK, array( 'session_id' => 'test' ) );
 
 		$this->assertSame( ApiClient::DECISION_BLOCK, $result );
-		$this->assertLogged( 'warning', 'Filter returned invalid decision "totally_invalid"' );
+		$this->assertLogged( 'warning', 'Filter `woocommerce_fraud_protection_decision` returned invalid decision "totally_invalid"' );
 	}
 
 }

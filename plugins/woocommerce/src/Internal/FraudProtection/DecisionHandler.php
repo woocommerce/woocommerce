@@ -94,7 +94,7 @@ class DecisionHandler {
 		if ( ! $this->is_valid_decision( $decision ) ) {
 			FraudProtectionController::log(
 				'warning',
-				sprintf( 'Filter returned invalid decision "%s". Using original decision "%s".', $decision, $original_decision ),
+				sprintf( 'Filter `woocommerce_fraud_protection_decision` returned invalid decision "%s". Using original decision "%s".', $decision, $original_decision ),
 				array(
 					'original_decision' => $original_decision,
 					'filtered_decision' => $decision,
@@ -108,7 +108,7 @@ class DecisionHandler {
 		if ( $decision !== $original_decision ) {
 			FraudProtectionController::log(
 				'info',
-				sprintf( 'Decision overridden by filter: "%s" -> "%s"', $original_decision, $decision ),
+				sprintf( 'Decision overridden by filter `woocommerce_fraud_protection_decision`: "%s" -> "%s"', $original_decision, $decision ),
 				array(
 					'original_decision' => $original_decision,
 					'final_decision'    => $decision,
