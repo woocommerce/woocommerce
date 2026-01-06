@@ -57,14 +57,13 @@ class ApiClient {
 	public const DECISION_CHALLENGE = 'challenge';
 
 	/**
-	 * Valid decision values.
+	 * Valid decision values that can be returned by the API.
 	 *
 	 * @var array<string>
 	 */
-	private const VALID_DECISIONS = array(
+	public const VALID_DECISIONS = array(
 		self::DECISION_ALLOW,
 		self::DECISION_BLOCK,
-		// Note: self::DECISION_CHALLENGE will be added here after the challenge flow is implemented (stretch goal for alpha).
 	);
 
 	/**
