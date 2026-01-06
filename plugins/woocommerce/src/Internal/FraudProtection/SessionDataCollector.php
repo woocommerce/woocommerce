@@ -477,12 +477,7 @@ class SessionDataCollector {
 	 *
 	 * Returns payment data structure with all 11 supported fields. Currently populates
 	 * payment_gateway_name and payment_method_type when available from the chosen payment
-	 * method. Other fields can be populated by payment gateways using extension filters.
-	 *
-	 * Payment gateways can use the 'woocommerce_fraud_protection_payment_data' filter
-	 * or the gateway-specific 'woocommerce_fraud_protection_payment_data_{gateway_id}' filter
-	 * to populate payment-specific fields like card BIN, last 4 digits, card brand, payer ID,
-	 * tokens, and other payment metadata.
+	 * method. Other fields are initialized with null values.
 	 *
 	 * @since 10.5.0
 	 *
@@ -514,54 +509,6 @@ class SessionDataCollector {
 				'cvc_result'                => null,
 				'tokenized_card_identifier' => null,
 			);
-
-			/**
-			 * Filters payment data to allow payment gateways to add custom data.
-			 *
-			 * Payment gateways can use this filter to populate payment-specific fields
-			 * like card BIN, last 4 digits, card brand, payer ID, tokens, and other
-			 * payment metadata that should be included in fraud protection analysis.
-			 *
-			 * @since 10.5.0
-			 *
-			 * @param array       $payment_data         Payment data array with fields to populate.
-			 * @param string|null $chosen_payment_method The chosen payment method ID, or null if not available.
-			 * @param SessionDataCollector $data_collector The SessionDataCollector instance for additional context.
-			 *
-			 * @return array Modified payment data array.
-			 */
-			$payment_data = apply_filters(
-				'woocommerce_fraud_protection_payment_data',
-				$payment_data,
-				$chosen_payment_method,
-				$this
-			);
-
-			if ( $chosen_payment_method ) {
-				/**
-				 * Hook: woocommerce_fraud_protection_payment_data_{payment_method}
-				 
-				* Filters payment data for a specific payment gateway.
-				*
-				* This is a dynamic filter that includes the payment gateway ID in the hook name,
-				* allowing payment gateways to hook into their specific filter without checking
-				* the payment method in the callback.
-				*
-				* Example: 'woocommerce_fraud_protection_payment_data_stripe'
-				*
-				* @since 10.5.0
-				*
-				* @param array                $payment_data   Payment data array with fields to populate.
-				* @param SessionDataCollector $data_collector The SessionDataCollector instance for additional context.
-				*
-				* @return array Modified payment data array.
-				*/
-				$payment_data = apply_filters(
-					"woocommerce_fraud_protection_payment_data_{$chosen_payment_method}",
-					$payment_data,
-					$this
-				);
-			}
 
 			return $payment_data;
 		} catch ( \Exception $e ) {
