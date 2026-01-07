@@ -172,6 +172,9 @@ jobs:
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
           GITHUB_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
+          # Write summary header.
+          echo "📝 Compiling changelog for \`$VERSION\` on \`$SELECTED_BRANCH\`." >> $GITHUB_STEP_SUMMARY
+
           echo "Using branch: $SELECTED_BRANCH"
           echo "Generating changelog for version: $VERSION"
 
@@ -196,4 +199,18 @@ jobs:
             OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
           fi
 
-          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE -ga ${{ github.actor }}
+          # Run changelog tool and capture output.
+          output=$(pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE -ga ${{ github.actor }} 2>&1 | tee /dev/stderr)
+
+          # Parse PR output (tab-separated: URL, branch, type) and write to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "$output" | grep "^https://github.com/" | while IFS=$'\t' read -r url branch type; do
+            if [[ "$type" == "changelog" ]]; then
+              echo "✅ Changelog PR targeting \`$branch\` [created]($url)." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Changefile deletion PR targeting \`$branch\` [created]($url)." >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Review and merge the PRs listed above." >> $GITHUB_STEP_SUMMARY
