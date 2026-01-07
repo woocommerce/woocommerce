@@ -440,7 +440,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					LIMIT 5"
 				);
 				$comments   = $wpdb->get_results(
-					"SELECT posts.ID as product_ID, comments.comment_ID {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					"SELECT posts.ID as product_id, comments.comment_ID as comment_id {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				);
 			} else {
 				// Optimized and actualized version of the query: leverage a lookup table for faster joins.
@@ -457,14 +457,14 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 
 			if ( $comments ) {
-				_prime_comment_caches( array_column( $comments, 'comment_ID' ), false );
-				_prime_post_caches( array_column( $comments, 'product_ID' ), false, false );
+				_prime_comment_caches( array_column( $comments, 'comment_id' ), false );
+				_prime_post_caches( array_column( $comments, 'product_id' ), false, false );
 
 				echo '<ul>';
 				foreach ( $comments as $comment ) {
-					if ( current_user_can( 'read_product', $comment->product_ID ) ) {
-						$product = wc_get_product( $comment->product_ID );
-						$comment = get_comment( $comment->comment_ID );
+					if ( current_user_can( 'read_product', $comment->product_id ) ) {
+						$product = wc_get_product( $comment->product_id );
+						$comment = get_comment( $comment->comment_id );
 
 						echo '<li>';
 
