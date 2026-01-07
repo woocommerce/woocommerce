@@ -320,6 +320,7 @@ const ProductPrice = ( {
 				priceStyle={ priceStyle }
 			/>
 		);
+		// Explicitly check price === 0 to render when regularPrice is undefined.
 	} else if ( ! shouldHidePrice && ( price || price === 0 ) ) {
 		priceComponent = (
 			<FormattedMonetaryAmount
