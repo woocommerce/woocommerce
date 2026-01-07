@@ -60,4 +60,53 @@ describe( 'ProductPrice', () => {
 
 		expect( component.toJSON() ).toMatchSnapshot();
 	} );
+
+	test( 'should hide price when both price and regularPrice are 0', () => {
+		const component = TestRenderer.create(
+			<ProductPrice
+				price={ 0 }
+				regularPrice={ 0 }
+				currency={ currency }
+			/>
+		);
+
+		// Should render wrapper with empty price span (no FormattedMonetaryAmount)
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'span' );
+		expect( json.children ).toHaveLength( 1 );
+		expect( json.children[ 0 ].type ).toBe( 'span' );
+		expect( json.children[ 0 ].children ).toBeNull();
+	} );
+
+	test( 'should show $0.00 when price is 0 and regularPrice is undefined', () => {
+		const component = TestRenderer.create(
+			<ProductPrice price={ 0 } currency={ currency } />
+		);
+
+		// Should render $0.00 - regularPrice must be explicitly 0 to hide
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'span' );
+		// Should contain FormattedMonetaryAmount with £0.00
+		const priceSpan = json.children[ 0 ];
+		expect( priceSpan.props.className ).toContain(
+			'wc-block-components-product-price__value'
+		);
+		expect( priceSpan.children[ 0 ] ).toBe( '£0.00' );
+	} );
+
+	test( 'should show strikethrough price when price is 0 but regularPrice is greater', () => {
+		const component = TestRenderer.create(
+			<ProductPrice
+				price={ 0 }
+				regularPrice={ 100 }
+				currency={ currency }
+			/>
+		);
+
+		// Should render as SalePrice (strikethrough)
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'span' );
+		// Should contain screen reader text and price elements
+		expect( json.children.length ).toBeGreaterThan( 1 );
+	} );
 } );
