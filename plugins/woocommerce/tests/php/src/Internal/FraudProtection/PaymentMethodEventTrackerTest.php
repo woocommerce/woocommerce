@@ -42,6 +42,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that hooks are registered when feature is enabled.
+	 *
 	 * @testdox Should register hooks when feature is enabled.
 	 */
 	public function test_hooks_registered_when_feature_enabled(): void {
@@ -54,6 +56,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that hooks are not registered when feature is disabled.
+	 *
 	 * @testdox Should not register hooks when feature is disabled.
 	 */
 	public function test_hooks_not_registered_when_feature_disabled(): void {
@@ -72,6 +76,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test payment method added event tracking.
+	 *
 	 * @testdox Should track payment method added event.
 	 */
 	public function test_handle_payment_method_added(): void {
@@ -110,6 +116,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test payment method updated event tracking.
+	 *
 	 * @testdox Should track payment method updated event.
 	 */
 	public function test_handle_payment_method_updated(): void {
@@ -151,6 +159,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test payment method set as default event tracking.
+	 *
 	 * @testdox Should track payment method set as default event.
 	 */
 	public function test_handle_payment_method_set_default(): void {
@@ -206,6 +216,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test payment method deleted event tracking.
+	 *
 	 * @testdox Should track payment method deleted event.
 	 */
 	public function test_handle_payment_method_deleted(): void {

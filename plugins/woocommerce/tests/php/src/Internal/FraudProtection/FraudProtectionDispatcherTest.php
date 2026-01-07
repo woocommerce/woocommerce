@@ -1,6 +1,8 @@
 <?php
 /**
  * FraudProtectionDispatcherTest class file.
+ *
+ * @package WooCommerce\Tests
  */
 
 declare( strict_types = 1 );
