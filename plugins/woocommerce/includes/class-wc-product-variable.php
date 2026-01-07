@@ -304,6 +304,8 @@ class WC_Product_Variable extends WC_Product {
 	 * @param string $return Optional. The format to return the results in. Can be 'array' to return an array of variation data or 'objects' for the product objects. Default 'array'.
 	 *
 	 * @return array[]|WC_Product_Variation[]
+	 * @phpstan-param 'array'|'objects' $return
+	 * @phpstan-return ($return is 'array' ? array[] : WC_Product_Variation[])
 	 */
 	public function get_available_variations( $return = 'array' ) {
 		$variation_ids           = $this->get_children();

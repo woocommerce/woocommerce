@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * Handles communication with the WPCOM fraud protection endpoint.
  *
  * Uses Jetpack Connection for authenticated requests to the WPCOM endpoint
- * to get fraud protection verdicts (allow, block, or challenge).
+ * to get fraud protection decisions (allow, block, or challenge).
  *
  * This class implements a fail-open pattern: if the endpoint is unreachable,
  * times out, or returns an error, it returns an "allow" decision to ensure
@@ -57,29 +57,28 @@ class ApiClient {
 	public const DECISION_CHALLENGE = 'challenge';
 
 	/**
-	 * Valid decision values.
+	 * Valid decision values that can be returned by the API.
 	 *
 	 * @var array<string>
 	 */
-	private const VALID_DECISIONS = array(
+	public const VALID_DECISIONS = array(
 		self::DECISION_ALLOW,
 		self::DECISION_BLOCK,
-		// Note: self::DECISION_CHALLENGE will be added here after the challenge flow is implemented (stretch goal for alpha).
 	);
 
 	/**
-	 * Track a fraud protection event and get a decision from WPCOM endpoint.
+	 * Send a fraud protection event and get a decision from WPCOM endpoint.
 	 *
 	 * Implements fail-open pattern: if the endpoint is unreachable or times out,
 	 * returns "allow" decision and logs the error.
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param string               $event_type   Type of event being tracked (e.g., 'cart_updated', 'checkout_started').
+	 * @param string               $event_type   Type of event being sent (e.g., 'cart_updated', 'checkout_started').
 	 * @param array<string, mixed> $session_data Session data to send to the endpoint.
 	 * @return string Decision: "allow" or "block".
 	 */
-	public function track_event( string $event_type, array $session_data ): string {
+	public function send_event( string $event_type, array $session_data ): string {
 		$payload = array_merge(
 			array( 'event_type' => $event_type ),
 			array_filter( $session_data, fn( $value ) => null !== $value )
@@ -107,23 +106,23 @@ class ApiClient {
 			return self::DECISION_ALLOW;
 		}
 
-		if ( ! isset( $response['verdict'] ) ) {
+		if ( ! isset( $response['decision'] ) ) {
 			FraudProtectionController::log(
 				'error',
-				'Response missing "verdict" field. Failing open with "allow" decision.',
+				'Response missing "decision" field. Failing open with "allow" decision.',
 				array( 'response' => $response )
 			);
 			return self::DECISION_ALLOW;
 		}
 
-		$verdict = $response['verdict'];
+		$decision = $response['decision'];
 
-		if ( ! in_array( $verdict, self::VALID_DECISIONS, true ) ) {
+		if ( ! in_array( $decision, self::VALID_DECISIONS, true ) ) {
 			FraudProtectionController::log(
 				'error',
 				sprintf(
-					'Invalid verdict value "%s". Failing open with "allow" decision.',
-					$verdict
+					'Invalid decision value "%s". Failing open with "allow" decision.',
+					$decision
 				),
 				array( 'response' => $response )
 			);
@@ -134,15 +133,15 @@ class ApiClient {
 		FraudProtectionController::log(
 			'info',
 			sprintf(
-				'Fraud verdict received: %s | Event: %s | Session: %s',
-				$verdict,
+				'Fraud decision received: %s | Event: %s | Session: %s',
+				$decision,
 				$event_type,
 				$session_id
 			),
 			array( 'response' => $response )
 		);
 
-		return $verdict;
+		return $decision;
 	}
 
 	/**

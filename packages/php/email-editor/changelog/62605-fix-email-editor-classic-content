@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Email Editor: make Cleanup_Preprocessor only remove truly empty blocks.
-
