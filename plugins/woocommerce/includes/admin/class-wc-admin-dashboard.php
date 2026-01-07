@@ -475,7 +475,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						/* translators: %s: rating */
 						echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
 
-						/* translators: %s: review author */
 						/**
 						 * Filters product title to display in the last reviews.
 						 *
@@ -484,7 +483,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						 * @param string      $product_title The product title.
 						 * @param \WP_Comment $comment       The comment.
 						 */
-						echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $product->get_id() ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $product->get_title(), $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
+						$product_title = apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $product->get_title(), $comment );
+
+						/* translators: %s: review author */
+						echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $product->get_id() ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( $product_title ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
 						echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
 					}
 				}
