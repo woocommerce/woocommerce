@@ -35,7 +35,7 @@ class ProductVersionStringInvalidator {
 	 */
 	final public function init(): void {
 		// We can't use FeaturesController::feature_is_enabled at this point
-		// (before the 'init' action ins triggered) because that would cause
+		// (before the 'init' action is triggered) because that would cause
 		// "Translation loading for the woocommerce domain was triggered too early" warnings.
 		if ( 'yes' !== get_option( 'woocommerce_feature_rest_api_caching_enabled' ) ) {
 			return;
