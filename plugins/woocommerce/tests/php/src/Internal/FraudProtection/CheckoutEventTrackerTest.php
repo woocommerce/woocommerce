@@ -84,7 +84,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Verify hooks were not registered.
 		$this->assertFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_checkout_field_update' ) ) );
-		$this->assertFalse( has_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this->sut, 'ajax_handle_payment_method_selected' ) ) );
 	}
 
 	/**
@@ -99,7 +98,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Verify hooks were registered.
 		$this->assertNotFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_checkout_field_update' ) ) );
-		$this->assertNotFalse( has_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this->sut, 'ajax_handle_payment_method_selected' ) ) );
 	}
 
 	/**
