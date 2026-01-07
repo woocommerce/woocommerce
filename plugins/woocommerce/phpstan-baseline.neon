@@ -2461,12 +2461,6 @@ parameters:
 			path: includes/admin/class-wc-admin-dashboard.php
 
 		-
-			message: '#^Parameter \#1 \$text of function esc_html expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$ID\.$#'
 			identifier: property.notFound
 			count: 2
