@@ -3,9 +3,13 @@
  * Class WC_Gateway_Paypal_Buttons file.
  *
  * @package WooCommerce\Gateways
+ *
+ * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons instead. This class will be removed in 11.0.0.
  */
 
 declare(strict_types=1);
+
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -17,37 +21,17 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 
 /**
  * Handles PayPal Buttons.
+ *
+ * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons instead. This class will be removed in 11.0.0.
  */
 class WC_Gateway_Paypal_Buttons {
 
 	/**
-	 * The option for the client-id.
+	 * The delegated buttons instance.
 	 *
-	 * @var string
+	 * @var PayPalButtons
 	 */
-	private const CLIENT_ID_OPTION = 'woocommerce_paypal_client_id';
-
-
-	/**
-	 * The gateway instance.
-	 *
-	 * @var WC_Gateway_Paypal
-	 */
-	private $gateway;
-
-	/**
-	 * Whether the gateway should use Orders v2 API.
-	 *
-	 * @var bool
-	 */
-	private $enabled = false;
-
-	/**
-	 * The request instance.
-	 *
-	 * @var WC_Gateway_Paypal_Request
-	 */
-	private $request;
+	private $buttons;
 
 	/**
 	 * Constructor.
@@ -55,94 +39,92 @@ class WC_Gateway_Paypal_Buttons {
 	 * @param WC_Gateway_Paypal $gateway The gateway instance.
 	 */
 	public function __construct( WC_Gateway_Paypal $gateway ) {
-		$this->gateway = $gateway;
-		$this->request = new WC_Gateway_Paypal_Request( $this->gateway );
-
-		// phpcs:ignore Generic.Commenting.Todo.TaskFound
-		$this->enabled = $this->gateway->should_use_orders_v2() && 'yes' === $this->gateway->get_option( 'paypal_buttons', 'yes' );
+		$this->buttons = new PayPalButtons( $gateway );
 	}
 
 	/**
 	 * Get the options for the PayPal buttons.
 	 *
 	 * @return array
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_options() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_options() {
-		$common_options = $this->get_common_options();
-		$options        = array(
-			'partner-attribution-id' => 'Woo_Cart_CoreUpgrade',
-			'page-type'              => $this->get_page_type(),
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_options() instead.'
 		);
 
-		return array_merge( $common_options, $options );
+		return $this->buttons->get_options();
 	}
 
 	/**
 	 * Get the common attributes for the PayPal JS SDK script and modules.
 	 *
 	 * @return array
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_common_options() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_common_options() {
-		$intent = $this->gateway->get_option( 'paymentaction' ) === 'authorization' ? 'authorize' : 'capture';
-
-		return array(
-			'client-id'       => $this->get_client_id(),
-			'components'      => 'buttons,funding-eligibility,messages',
-			'disable-funding' => 'card,applepay',
-			'enable-funding'  => 'venmo,paylater',
-			'currency'        => get_woocommerce_currency(),
-			'intent'          => $intent,
-			'merchant-id'     => $this->gateway->email,
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_common_options() instead.'
 		);
+
+		return $this->buttons->get_common_options();
 	}
 
 	/**
 	 * Get the client-id for the PayPal buttons.
 	 *
 	 * @return string|null The PayPal client-id, or null if the request fails.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_client_id() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_client_id() {
-		if ( ! $this->gateway->should_use_orders_v2() ) {
-			return null;
-		}
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_client_id() instead.'
+		);
 
-		$option_key = self::CLIENT_ID_OPTION . ( $this->gateway->testmode ? '_sandbox' : '_live' );
-		$client_id  = get_option( $option_key, null );
-
-		if ( empty( $client_id ) ) {
-			$client_id = $this->request->fetch_paypal_client_id();
-			if ( empty( $client_id ) ) {
-				return null;
-			}
-			update_option( $option_key, $client_id );
-		}
-
-		return $client_id;
+		return $this->buttons->get_client_id();
 	}
 
 	/**
 	 * Get the page type for the PayPal buttons.
 	 *
 	 * @return string
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_page_type() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_page_type() {
-		$page_type = 'checkout';
-		if ( is_cart() || has_block( 'woocommerce/cart' ) ) {
-			$page_type = 'cart';
-		} elseif ( is_product() ) {
-			$page_type = 'product-details';
-		}
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_page_type() instead.'
+		);
 
-		return $page_type;
+		return $this->buttons->get_page_type();
 	}
 
 	/**
 	 * Whether PayPal Buttons is enabled.
 	 *
 	 * @return bool
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::is_enabled() instead. This method will be removed in 11.0.0.
 	 */
 	public function is_enabled() {
-		return $this->enabled;
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::is_enabled() instead.'
+		);
+
+		return $this->buttons->is_enabled();
 	}
 
 	/**
@@ -150,13 +132,16 @@ class WC_Gateway_Paypal_Buttons {
 	 * Limited to checkout, cart, and product pages for security.
 	 *
 	 * @return string
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_current_page_for_app_switch() instead. This method will be removed in 11.0.0.
 	 */
 	public function get_current_page_for_app_switch() {
-		// If checkout, cart or product page, return the current page URL.
-		if ( is_checkout() || is_cart() || is_product() ) {
-			return get_permalink( get_the_ID() );
-		}
+		wc_deprecated_function(
+			__METHOD__,
+			'10.5.0',
+			'Use Automattic\WooCommerce\Gateways\PayPal\Buttons::get_current_page_for_app_switch() instead.'
+		);
 
-		return '';
+		return $this->buttons->get_current_page_for_app_switch();
 	}
 }
