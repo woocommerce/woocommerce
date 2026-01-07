@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Blocks - Footer Large
+ * Title: Footer Large
  * Slug: woocommerce-blocks/footer-large
  * Categories: WooCommerce
  * Block Types: core/template-part/footer

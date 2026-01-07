@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce - Coming Soon Modern Black
+ * Title: Coming Soon Modern Black
  * Slug: woocommerce/page-coming-soon-modern-black
  * Categories: WooCommerce
  * Template Types: coming-soon

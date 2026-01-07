@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Blocks - Hero Product Chessboard
+ * Title: Hero Product Chessboard
  * Slug: woocommerce-blocks/hero-product-chessboard
  * Categories: WooCommerce, featured-selling
  */

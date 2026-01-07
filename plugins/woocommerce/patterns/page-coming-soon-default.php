@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce - Default Coming Soon
+ * Title: Default Coming Soon
  * Slug: woocommerce/page-coming-soon-default
  * Categories: WooCommerce
  * Template Types: coming-soon

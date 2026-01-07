@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Blocks - Footer with 3 Menus
+ * Title: Footer with 3 Menus
  * Slug: woocommerce-blocks/footer-with-3-menus
  * Categories: WooCommerce
  * Block Types: core/template-part/footer

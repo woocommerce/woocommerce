@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Blocks - Four Image Grid Content Left
+ * Title: Four Image Grid Content Left
  * Slug: woocommerce-blocks/four-image-grid-content-left
  * Categories: WooCommerce, About
  */

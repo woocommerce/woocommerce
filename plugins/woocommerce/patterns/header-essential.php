@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Blocks - Essential Header
+ * Title: Essential Header
  * Slug: woocommerce-blocks/header-essential
  * Categories: WooCommerce
  * Block Types: core/template-part/header

@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Blocks - Banner
+ * Title: Banner
  * Slug: woocommerce-blocks/banner
  * Categories: WooCommerce, featured-selling
  */

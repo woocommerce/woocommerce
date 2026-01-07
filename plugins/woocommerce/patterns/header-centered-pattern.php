@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce Blocks - Centered Header Menu
+ * Title: Centered Header Menu
  * Slug: woocommerce-blocks/header-centered-menu
  * Categories: WooCommerce
  * Block Types: core/template-part/header

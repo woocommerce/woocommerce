@@ -5,7 +5,7 @@
  */
 
 /**
- * Title: WooCommerce - Coming Soon Store Only
+ * Title: Coming Soon Store Only
  * Slug: woocommerce/coming-soon-store-only
  * Categories: WooCommerce
  * Inserter: false

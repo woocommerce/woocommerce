@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce - Coming Soon Minimal Left Image
+ * Title: Coming Soon Minimal Left Image
  * Slug: woocommerce/page-coming-soon-minimal-left-image
  * Categories: WooCommerce
  * Template Types: coming-soon

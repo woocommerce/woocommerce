@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce - Coming Soon Image Gallery
+ * Title: Coming Soon Image Gallery
  * Slug: woocommerce/page-coming-soon-image-gallery
  * Categories: WooCommerce
  * Template Types: coming-soon

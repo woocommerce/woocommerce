@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: WooCommerce - No Products Found
+ * Title: No Products Found
  * Slug: woocommerce/no-products-found
  * Inserter: no
  * Categories: WooCommerce
