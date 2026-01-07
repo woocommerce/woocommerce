@@ -14,7 +14,8 @@ test.describe(
 			await page.goto( '/wp-admin/index.php?page=wc-settings' );
 			const navTabWrapper = page.locator( '.nav-tab-wrapper' );
 			await navTabWrapper
-				.getByRole( 'link', { name: 'Payments', exact: true } )
+				.locator( 'a.nav-tab' )
+				.filter( { hasText: 'Payments' } )
 				.click();
 			await page.waitForSelector(
 				'.settings-payment-gateways__header-title'
