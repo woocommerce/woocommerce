@@ -121,14 +121,21 @@ export const Edit = ( {
 						} }
 					>
 						<ToolsPanelItem
-							hasValue={ () => attributes.hasDarkControls === true }
+							hasValue={ () =>
+								attributes.hasDarkControls === true
+							}
 							label={ __( 'Dark mode inputs', 'woocommerce' ) }
-							onDeselect={ () => setAttributes( { hasDarkControls: false } ) }
+							onDeselect={ () =>
+								setAttributes( { hasDarkControls: false } )
+							}
 							isShownByDefault
 						>
 							<ToggleControl
 								__nextHasNoMarginBottom
-								label={ __( 'Dark mode inputs', 'woocommerce' ) }
+								label={ __(
+									'Dark mode inputs',
+									'woocommerce'
+								) }
 								help={ __(
 									'Inputs styled specifically for use on dark background colors.',
 									'woocommerce'
