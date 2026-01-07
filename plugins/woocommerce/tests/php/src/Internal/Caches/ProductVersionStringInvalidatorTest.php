@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\VersionStringGenerator;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * Tests for the ProductVersionStringInvalidator class.
@@ -53,11 +54,16 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * @return ProductVersionStringInvalidator The initialized invalidator.
 	 */
 	private function get_invalidator_with_hooks_enabled(): ProductVersionStringInvalidator {
-		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
+		$features_controller = $this->createMock( FeaturesController::class );
+		$features_controller->method( 'feature_is_enabled' )
+			->with( 'rest_api_caching' )
+			->willReturn( true );
+
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
 
 		$invalidator = new ProductVersionStringInvalidator();
-		$invalidator->register();
+		$invalidator->init( $features_controller );
+		$invalidator->on_init();
 
 		return $invalidator;
 	}
@@ -94,11 +100,15 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * @testdox Hooks are not registered when feature is disabled.
 	 */
 	public function test_hooks_not_registered_when_feature_disabled() {
-		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'no' );
+		$features_controller = $this->createMock( FeaturesController::class );
+		$features_controller->method( 'feature_is_enabled' )
+			->with( 'rest_api_caching' )
+			->willReturn( false );
+
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
 
 		$invalidator = new ProductVersionStringInvalidator();
-		$invalidator->register();
+		$invalidator->init( $features_controller );
 
 		$this->assertFalse( has_action( 'save_post_product', array( $invalidator, 'handle_save_post_product' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_new_product', array( $invalidator, 'handle_woocommerce_new_product' ) ) );
@@ -109,11 +119,15 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * @testdox Hooks are not registered when backend caching setting is disabled.
 	 */
 	public function test_hooks_not_registered_when_backend_caching_disabled() {
-		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
+		$features_controller = $this->createMock( FeaturesController::class );
+		$features_controller->method( 'feature_is_enabled' )
+			->with( 'rest_api_caching' )
+			->willReturn( true );
+
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
 
 		$invalidator = new ProductVersionStringInvalidator();
-		$invalidator->register();
+		$invalidator->init( $features_controller );
 
 		$this->assertFalse( has_action( 'save_post_product', array( $invalidator, 'handle_save_post_product' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_new_product', array( $invalidator, 'handle_woocommerce_new_product' ) ) );
@@ -124,11 +138,15 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * @testdox Hooks are not registered when backend caching setting is not set (defaults to no).
 	 */
 	public function test_hooks_not_registered_when_backend_caching_not_set() {
-		delete_option( 'woocommerce_feature_rest_api_caching_enabled' );
+		$features_controller = $this->createMock( FeaturesController::class );
+		$features_controller->method( 'feature_is_enabled' )
+			->with( 'rest_api_caching' )
+			->willReturn( true );
+
 		delete_option( 'woocommerce_rest_api_enable_backend_caching' );
 
 		$invalidator = new ProductVersionStringInvalidator();
-		$invalidator->register();
+		$invalidator->init( $features_controller );
 
 		$this->assertFalse( has_action( 'save_post_product', array( $invalidator, 'handle_save_post_product' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_new_product', array( $invalidator, 'handle_woocommerce_new_product' ) ) );
