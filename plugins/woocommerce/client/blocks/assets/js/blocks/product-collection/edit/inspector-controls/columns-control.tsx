@@ -78,6 +78,7 @@ const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 				onDeselect={ onPanelDeselect }
 			>
 				<ToggleControl
+					__nextHasNoMarginBottom
 					checked={ !! shrinkColumns }
 					label={ toggleLabel }
 					help={ toggleHelp }
