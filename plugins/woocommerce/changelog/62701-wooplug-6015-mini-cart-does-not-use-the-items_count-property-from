@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Mini-Cart, fix issue where it does not display the items_count property from Store API.
