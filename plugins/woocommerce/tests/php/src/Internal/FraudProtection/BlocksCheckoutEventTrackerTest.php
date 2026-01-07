@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\BlocksCheckoutEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher;
 
 /**
  * Tests for BlocksCheckoutEventTracker.
@@ -28,7 +28,7 @@ class BlocksCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	/**
 	 * Mock fraud protection tracker.
 	 *
-	 * @var FraudProtectionTracker|\PHPUnit\Framework\MockObject\MockObject
+	 * @var FraudProtectionDispatcher|\PHPUnit\Framework\MockObject\MockObject
 	 */
 	private $mock_tracker;
 
@@ -51,7 +51,7 @@ class BlocksCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_tracker    = $this->createMock( FraudProtectionTracker::class );
+		$this->mock_tracker    = $this->createMock( FraudProtectionDispatcher::class );
 		$this->mock_controller = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
@@ -127,7 +127,7 @@ class BlocksCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$captured_event_data = null;
 		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->with(
 				$this->equalTo( 'checkout_blocks_customer_update' ),
 				$this->callback(
@@ -201,7 +201,7 @@ class BlocksCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$captured_event_data = null;
 		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->willReturnCallback(
 				function ( $event_type, $event_data ) use ( &$captured_event_data ) {
 					$captured_event_data = $event_data;
@@ -244,7 +244,7 @@ class BlocksCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock scheduler - should still be called.
 		$this->mock_tracker
 			->expects( $this->once() )
-			->method( 'track_event' );
+			->method( 'dispatch_event' );
 
 		// Register hooks.
 		$this->sut->register();

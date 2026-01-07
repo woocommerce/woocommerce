@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\ShortcodeCheckoutEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
@@ -26,11 +26,11 @@ class ShortcodeCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Mock fraud protection tracker.
+	 * Mock fraud protection dispatcher.
 	 *
-	 * @var FraudProtectionTracker|\PHPUnit\Framework\MockObject\MockObject
+	 * @var FraudProtectionDispatcher|\PHPUnit\Framework\MockObject\MockObject
 	 */
-	private $mock_tracker;
+	private $mock_dispatcher;
 
 	/**
 	 * Mock fraud protection controller.
@@ -51,13 +51,13 @@ class ShortcodeCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_tracker    = $this->createMock( FraudProtectionTracker::class );
+		$this->mock_dispatcher = $this->createMock( FraudProtectionDispatcher::class );
 		$this->mock_controller = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
 		$this->sut = new ShortcodeCheckoutEventTracker();
 		$this->sut->init(
-			$this->mock_tracker,
+			$this->mock_dispatcher,
 			$this->mock_controller
 		);
 	}
@@ -98,9 +98,9 @@ class ShortcodeCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
 		// Mock scheduler to verify schedule_tracking is called.
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->with(
 				$this->equalTo( 'checkout_field_update' ),
 				$this->callback(
@@ -130,9 +130,9 @@ class ShortcodeCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Mock scheduler to capture event data.
 		$captured_event_data = null;
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->willReturnCallback(
 				function ( $event_type, $event_data ) use ( &$captured_event_data ) {
 					$captured_event_data = $event_data;
@@ -165,9 +165,9 @@ class ShortcodeCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Mock scheduler to capture event data.
 		$captured_event_data = null;
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->willReturnCallback(
 				function ( $event_type, $event_data ) use ( &$captured_event_data ) {
 					$captured_event_data = $event_data;
@@ -197,9 +197,9 @@ class ShortcodeCheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Mock scheduler to capture event data.
 		$captured_event_data = null;
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->willReturnCallback(
 				function ( $event_type, $event_data ) use ( &$captured_event_data ) {
 					$captured_event_data = $event_data;

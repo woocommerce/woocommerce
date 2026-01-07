@@ -1,28 +1,28 @@
 <?php
 /**
- * FraudProtectionTrackerTest class file.
+ * FraudProtectionDispatcherTest class file.
  */
 
 declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 
 /**
- * Tests for FraudProtectionTracker.
+ * Tests for FraudProtectionDispatcher.
  *
- * @covers \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker
+ * @covers \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher
  */
-class FraudProtectionTrackerTest extends \WC_Unit_Test_Case {
+class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 
 	use LoggerSpyTrait;
 
 	/**
 	 * The system under test.
 	 *
-	 * @var FraudProtectionTracker
+	 * @var FraudProtectionDispatcher
 	 */
 	private $sut;
 
@@ -33,7 +33,7 @@ class FraudProtectionTrackerTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Create system under test.
-		$this->sut = new FraudProtectionTracker();
+		$this->sut = new FraudProtectionDispatcher();
 	}
 
 	/**
@@ -48,7 +48,7 @@ class FraudProtectionTrackerTest extends \WC_Unit_Test_Case {
 		);
 
 		// Call track_event.
-		$this->sut->track_event( $event_type, $collected_data );
+		$this->sut->dispatch_event( $event_type, $collected_data );
 
 		// Verify the log was captured.
 		$this->assertCount( 1, $this->captured_logs );
@@ -67,7 +67,7 @@ class FraudProtectionTrackerTest extends \WC_Unit_Test_Case {
 		$collected_data = array( 'invalid' => 'data_without_session' );
 
 		// Call track_event with data without session - should handle gracefully and log with N/A.
-		$this->sut->track_event( $event_type, $collected_data );
+		$this->sut->dispatch_event( $event_type, $collected_data );
 
 		// Verify the log was captured with N/A for session ID.
 		$this->assertCount( 1, $this->captured_logs );
@@ -91,7 +91,7 @@ class FraudProtectionTrackerTest extends \WC_Unit_Test_Case {
 		);
 
 		// Call track_event.
-		$this->sut->track_event( $event_type, $collected_data );
+		$this->sut->dispatch_event( $event_type, $collected_data );
 
 		// Verify the log was captured with all data.
 		$this->assertCount( 1, $this->captured_logs );
@@ -112,7 +112,7 @@ class FraudProtectionTrackerTest extends \WC_Unit_Test_Case {
 		$collected_data = array();
 
 		// Call track_event with empty data.
-		$this->sut->track_event( $event_type, $collected_data );
+		$this->sut->dispatch_event( $event_type, $collected_data );
 
 		// Verify the log was captured even with empty data.
 		$this->assertCount( 1, $this->captured_logs );

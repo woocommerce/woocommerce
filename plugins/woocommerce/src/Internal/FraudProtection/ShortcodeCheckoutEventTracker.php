@@ -26,9 +26,9 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	/**
 	 * Checkout event scheduler instance.
 	 *
-	 * @var FraudProtectionTracker
+	 * @var FraudProtectionDispatcher
 	 */
-	private FraudProtectionTracker $tracker;
+	private FraudProtectionDispatcher $dispatcher;
 
 	/**
 	 * Fraud protection controller instance.
@@ -42,14 +42,14 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionTracker    $tracker The fraud protection tracker instance.
+	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		FraudProtectionTracker $tracker,
+		FraudProtectionDispatcher $dispatcher,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->tracker                     = $tracker;
+		$this->dispatcher                  = $dispatcher;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
@@ -89,7 +89,7 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		$event_data = $this->build_checkout_event_data( 'field_update', $data );
-		$this->tracker->track_event( 'checkout_field_update', $event_data );
+		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
 	}
 
 	/**

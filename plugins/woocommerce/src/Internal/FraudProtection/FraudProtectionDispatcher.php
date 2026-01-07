@@ -1,6 +1,6 @@
 <?php
 /**
- * FraudProtectionTracker class file.
+ * FraudProtectionDispatcher class file.
  */
 
 declare( strict_types=1 );
@@ -10,15 +10,15 @@ namespace Automattic\WooCommerce\Internal\FraudProtection;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Centralized fraud protection event tracker.
+ * Centralized fraud protection event dispatcher.
  *
- * This class provides a unified interface for tracking fraud protection events.
+ * This class provides a unified interface for dispatching fraud protection events.
  * It logs events for the fraud protection service using already-collected data.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class FraudProtectionTracker {
+class FraudProtectionDispatcher {
 
 	/**
 	 * Track fraud protection event with already-collected data.
@@ -33,7 +33,7 @@ class FraudProtectionTracker {
 	 * @param array  $collected_data Fully-collected event data including session context.
 	 * @return void
 	 */
-	public function track_event( string $event_type, array $collected_data ): void {
+	public function dispatch_event( string $event_type, array $collected_data ): void {
 		try {
 			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			// TODO: Once EventTracker/API client is implemented (WOOSUBS-1249), call it here:

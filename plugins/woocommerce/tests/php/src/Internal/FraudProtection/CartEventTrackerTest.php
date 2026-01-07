@@ -8,7 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
@@ -29,9 +29,9 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	/**
 	 * Mock fraud protection tracker.
 	 *
-	 * @var FraudProtectionTracker|\PHPUnit\Framework\MockObject\MockObject
+	 * @var FraudProtectionDispatcher|\PHPUnit\Framework\MockObject\MockObject
 	 */
-	private $mock_tracker;
+	private $mock_dispatcher;
 
 	/**
 	 * Mock session data collector.
@@ -66,14 +66,14 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_tracker        = $this->createMock( FraudProtectionTracker::class );
+		$this->mock_dispatcher     = $this->createMock( FraudProtectionDispatcher::class );
 		$this->mock_data_collector = $this->createMock( SessionDataCollector::class );
 		$this->mock_controller     = $this->createMock( FraudProtectionController::class );
 
 		// Create system under test.
 		$this->sut = new CartEventTracker();
 		$this->sut->init(
-			$this->mock_tracker,
+			$this->mock_dispatcher,
 			$this->mock_data_collector,
 			$this->mock_controller
 		);
@@ -138,9 +138,9 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker to verify track_event is called with collected data.
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->with(
 				$this->equalTo( 'cart_item_added' ),
 				$this->equalTo( $collected_data )
@@ -178,9 +178,9 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker.
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->with(
 				$this->equalTo( 'cart_item_updated' ),
 				$this->equalTo( $collected_data )
@@ -214,9 +214,9 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker.
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->with(
 				$this->equalTo( 'cart_item_removed' ),
 				$this->equalTo( $collected_data )
@@ -248,9 +248,9 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker.
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->with(
 				$this->equalTo( 'cart_item_restored' ),
 				$this->equalTo( $collected_data )
@@ -285,9 +285,9 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			->willReturn( $collected_data );
 
 		// Mock the tracker to capture event data.
-		$this->mock_tracker
+		$this->mock_dispatcher
 			->expects( $this->once() )
-			->method( 'track_event' )
+			->method( 'dispatch_event' )
 			->with(
 				$this->equalTo( 'cart_item_added' ),
 				$this->equalTo( $collected_data )

@@ -27,11 +27,11 @@ defined( 'ABSPATH' ) || exit;
 class PaymentMethodEventTracker implements RegisterHooksInterface {
 
 	/**
-	 * Fraud protection tracker instance.
+	 * Fraud protection dispatcher instance.
 	 *
-	 * @var FraudProtectionTracker
+	 * @var FraudProtectionDispatcher
 	 */
-	private FraudProtectionTracker $tracker;
+	private FraudProtectionDispatcher $dispatcher;
 
 	/**
 	 * Session data collector instance.
@@ -52,16 +52,16 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionTracker    $tracker                     The fraud protection tracker instance.
+	 * @param FraudProtectionDispatcher $dispatcher                     The fraud protection dispatcher instance.
 	 * @param SessionDataCollector      $data_collector              The session data collector instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		FraudProtectionTracker $tracker,
+		FraudProtectionDispatcher $dispatcher,
 		SessionDataCollector $data_collector,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->tracker                     = $tracker;
+		$this->dispatcher                  = $dispatcher;
 		$this->data_collector              = $data_collector;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
@@ -100,7 +100,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		// Collect comprehensive session data.
 		try {
 			$collected_data = $this->data_collector->collect( 'payment_method_added', $event_data );
-			$this->tracker->track_event( 'payment_method_added', $collected_data );
+			$this->dispatcher->dispatch_event( 'payment_method_added', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -140,7 +140,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		// Collect comprehensive session data.
 		try {
 			$collected_data = $this->data_collector->collect( 'payment_method_updated', $event_data );
-			$this->tracker->track_event( 'payment_method_updated', $collected_data );
+			$this->dispatcher->dispatch_event( 'payment_method_updated', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -174,7 +174,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		// Collect comprehensive session data.
 		try {
 			$collected_data = $this->data_collector->collect( 'payment_method_set_default', $event_data );
-			$this->tracker->track_event( 'payment_method_set_default', $collected_data );
+			$this->dispatcher->dispatch_event( 'payment_method_set_default', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -208,7 +208,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		// Collect comprehensive session data.
 		try {
 			$collected_data = $this->data_collector->collect( 'payment_method_deleted', $event_data );
-			$this->tracker->track_event( 'payment_method_deleted', $collected_data );
+			$this->dispatcher->dispatch_event( 'payment_method_deleted', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
