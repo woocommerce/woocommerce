@@ -2,7 +2,7 @@ name: Email Editor Test Reminder
 
 on:
     pull_request:
-        types: [opened, synchronize, reopened, closed]
+        types: [opened, synchronize, reopened]
 
 concurrency:
     group: email-editor-test-reminder-${{ github.event.pull_request.number }}
@@ -34,22 +34,13 @@ jobs:
                       const result = await checkEmailEditorTestReminderComment( github, context, core );
                       core.setOutput( 'touches-email-editor', result.touchesEmailEditor ? 'true' : 'false' );
 
-            - name: Find existing comment
-              uses: peter-evans/find-comment@034abe94d3191f9c89d870519735beae326f2bdb
-              id: find-comment
-              with:
-                  issue-number: ${{ github.event.pull_request.number }}
-                  comment-author: 'github-actions[bot]'
-                  body-includes: '<!-- email-editor-test-reminder -->'
-
             - name: Create or update test reminder comment
               if: steps.check-email-editor.outputs.touches-email-editor == 'true'
-              uses: peter-evans/create-or-update-comment@67dcc547d311b736a8e6c5c236542148a47adc3d
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
-                  comment-id: ${{ steps.find-comment.outputs.comment-id }}
-                  issue-number: ${{ github.event.pull_request.number }}
-                  body: |
-                      <!-- email-editor-test-reminder -->
+                  script: |
+                      const prNumber = context.issue.number;
+                      const commentBody = `<!-- email-editor-test-reminder -->
                       ## Email Editor Testing Required
 
                       Are you an Automattician? This PR touches the email editor package and will need to be tested on WordPress.com.
@@ -57,33 +48,85 @@ jobs:
                       ### Testing Steps
 
                       1. Log into your sandbox. You'll need to authenticate with Github if you haven't already.
-                         ```bash
+                         \`\`\`bash
                          gh auth login
-                         ```
+                         \`\`\`
                          You can choose https and complete the authentication in your local browser with the code provided.
 
                       2. Run the downloader script on your sandbox:
-                         ```bash
-                         bash bin/woocommerce-email-editor-downloader test ${{ github.event.pull_request.number }}
-                         ```
-                         You'll see the PR title, author, and state, and then be asked to confirm the download. You may see a bunch of composer deprecation notices. Once it completes, check that there's a `/dev` directory in `wp-content/lib/woocommerce-email-editor/`.
+                         \`\`\`bash
+                         bash bin/woocommerce-email-editor-downloader test ${ prNumber }
+                         \`\`\`
+                         You'll see the PR title, author, and state, and then be asked to confirm the download. You may see a bunch of composer deprecation notices. Once it completes, check that there's a \`/dev\` directory in \`wp-content/lib/woocommerce-email-editor/\`.
 
-                      3. Sandbox the API and send a test email.
+                      3. Sandbox the API and turn on write access:
+                         \`\`\`bash
+                         allow-sandbox-production-writes "10 minutes"
+                         \`\`\`
 
-                      4. To remove the changes after testing:
-                         ```bash
+                      4. On a test WP.com site, create a new post. Use the Newsletter panel in the editor to send yourself a test email.
+
+                      5. To remove the changes after testing:
+                         \`\`\`bash
                          bash bin/woocommerce-email-editor-downloader reset
-                         ```
-                  edit-mode: replace
+                         \`\`\``;
+
+                      // Find existing comment
+                      const comments = await github.paginate( github.rest.issues.listComments, {
+                          owner: context.repo.owner,
+                          repo: context.repo.repo,
+                          issue_number: context.issue.number,
+                          per_page: 100,
+                      } );
+
+                      const existingComment = comments.find(
+                          ( comment ) =>
+                              comment.user.login === 'github-actions[bot]' &&
+                              comment.body.includes( '<!-- email-editor-test-reminder -->' )
+                      );
+
+                      if ( existingComment ) {
+                          // Update existing comment
+                          await github.rest.issues.updateComment( {
+                              owner: context.repo.owner,
+                              repo: context.repo.repo,
+                              comment_id: existingComment.id,
+                              body: commentBody,
+                          } );
+                      } else {
+                          // Create new comment
+                          await github.rest.issues.createComment( {
+                              owner: context.repo.owner,
+                              repo: context.repo.repo,
+                              issue_number: context.issue.number,
+                              body: commentBody,
+                          } );
+                      }
 
             - name: Delete test reminder comment
-              if: steps.check-email-editor.outputs.touches-email-editor == 'false' && steps.find-comment.outputs.comment-id != ''
+              if: steps.check-email-editor.outputs.touches-email-editor == 'false'
               uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
               with:
                   script: |
-                      await github.rest.issues.deleteComment( {
+                      // Find existing comment
+                      const comments = await github.paginate( github.rest.issues.listComments, {
                           owner: context.repo.owner,
                           repo: context.repo.repo,
-                          comment_id: ${{ steps.find-comment.outputs.comment-id }},
+                          issue_number: context.issue.number,
+                          per_page: 100,
                       } );
+
+                      const existingComment = comments.find(
+                          ( comment ) =>
+                              comment.user.login === 'github-actions[bot]' &&
+                              comment.body.includes( '<!-- email-editor-test-reminder -->' )
+                      );
+
+                      if ( existingComment ) {
+                          await github.rest.issues.deleteComment( {
+                              owner: context.repo.owner,
+                              repo: context.repo.repo,
+                              comment_id: existingComment.id,
+                          } );
+                      }
 
