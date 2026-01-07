@@ -283,6 +283,10 @@ const ProductPrice = ( {
 		price !== undefined &&
 		price < regularPrice;
 
+	// Hide price display when both price and regularPrice are explicitly 0 (e.g., quote products).
+	// Don't hide when regularPrice is undefined, as that's used for line totals/subtotals.
+	const shouldHidePrice = price === 0 && regularPrice === 0;
+
 	let priceComponent = (
 		<span
 			className={ clsx(
@@ -314,7 +318,7 @@ const ProductPrice = ( {
 				priceStyle={ priceStyle }
 			/>
 		);
-	} else if ( price || price === 0 ) {
+	} else if ( ! shouldHidePrice && ( price || price === 0 ) ) {
 		priceComponent = (
 			<FormattedMonetaryAmount
 				className={ clsx(
