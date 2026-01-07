@@ -35,6 +35,7 @@ const OrderByControl = ( {
 			resetAllFilter={ onDeselect }
 		>
 			<SelectControl
+				__nextHasNoMarginBottom
 				value={ selectedValue }
 				options={ orderOptions }
 				label={ label || __( 'Order by', 'woocommerce' ) }
