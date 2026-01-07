@@ -151,7 +151,7 @@ class Constants {
 	 *
 	 * @since 10.5.0
 	 */
-	const PAYPAL_META_STATUS = '_paypal_status';
+	public const PAYPAL_META_STATUS = '_paypal_status';
 
 	/**
 	 * Meta key for storing PayPal capture ID in order meta.
@@ -160,7 +160,7 @@ class Constants {
 	 *
 	 * @since 10.5.0
 	 */
-	const PAYPAL_META_CAPTURE_ID = '_paypal_capture_id';
+	public const PAYPAL_META_CAPTURE_ID = '_paypal_capture_id';
 
 	/**
 	 * Meta key for storing PayPal authorization ID in order meta.
@@ -169,7 +169,7 @@ class Constants {
 	 *
 	 * @since 10.5.0
 	 */
-	const PAYPAL_META_AUTHORIZATION_ID = '_paypal_authorization_id';
+	public const PAYPAL_META_AUTHORIZATION_ID = '_paypal_authorization_id';
 
 	/**
 	 * Meta key for storing PayPal authorization checked flag in order meta.
@@ -178,7 +178,7 @@ class Constants {
 	 *
 	 * @since 10.5.0
 	 */
-	const PAYPAL_META_AUTHORIZATION_CHECKED = '_paypal_authorization_checked';
+	public const PAYPAL_META_AUTHORIZATION_CHECKED = '_paypal_authorization_checked';
 
 	/**
 	 * Meta key for storing PayPal order ID in order meta.
@@ -187,7 +187,7 @@ class Constants {
 	 *
 	 * @since 10.5.0
 	 */
-	const PAYPAL_META_ORDER_ID = '_paypal_order_id';
+	public const PAYPAL_META_ORDER_ID = '_paypal_order_id';
 
 	/**
 	 * Meta key for storing PayPal addresses updated flag in order meta.
@@ -196,7 +196,7 @@ class Constants {
 	 *
 	 * @since 10.5.0
 	 */
-	const PAYPAL_META_ADDRESSES_UPDATED = '_paypal_addresses_updated';
+	public const PAYPAL_META_ADDRESSES_UPDATED = '_paypal_addresses_updated';
 
 	/**
 	 * Meta key for storing PayPal payment source in order meta.
@@ -205,5 +205,5 @@ class Constants {
 	 *
 	 * @since 10.5.0
 	 */
-	const PAYPAL_META_PAYMENT_SOURCE = '_paypal_payment_source';
+	public const PAYPAL_META_PAYMENT_SOURCE = '_paypal_payment_source';
 }
