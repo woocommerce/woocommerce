@@ -418,7 +418,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			global $wpdb;
 
 			if ( has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
-				// TODO: flag deprecation here
+				// Deprecation path here: only raise notice and delete this logical branch in later versions.
+
 				$query_from = apply_filters(
 					'woocommerce_report_recent_reviews_query_from',
 					"FROM {$wpdb->comments} comments
@@ -431,7 +432,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					ORDER BY comments.comment_date_gmt DESC
 					LIMIT 5"
 				);
-				$comments = $wpdb->get_results(
+				$comments   = $wpdb->get_results(
 					"SELECT posts.ID as product_ID, comments.comment_ID {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				);
 			} else {
