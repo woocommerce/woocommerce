@@ -210,7 +210,7 @@ class SessionDataCollector {
 			$tax_total         = 0;
 			$shipping_tax_rate = null;
 			$discount_total    = 0;
-			$currency          = get_woocommerce_currency();
+			$currency          = WC()->call_function( 'get_woocommerce_currency' );
 			$cart_hash         = null;
 			$items             = array();
 
