@@ -155,7 +155,6 @@ const Edit = ( {
 							}
 						/>
 						<ToggleGroupControl
-							__nextHasNoMarginBottom
 							label={ __( 'Resolution', 'woocommerce' ) }
 							isBlock
 							help={
