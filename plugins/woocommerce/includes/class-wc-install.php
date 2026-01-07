@@ -317,7 +317,7 @@ class WC_Install {
 			'wc_update_1050_migrate_brand_permalink_setting',
 			'wc_update_1050_enable_autoload_options',
 			'wc_update_1050_add_idx_user_email',
-			'wc_update_1050_set_deprecated_marketplace_option',
+			'wc_update_1050_remove_deprecated_marketplace_option',
 		),
 	);
 
