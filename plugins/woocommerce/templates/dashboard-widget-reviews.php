@@ -42,7 +42,7 @@ $product_title = apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $p
 	<?php echo wc_get_rating_html( (int) get_comment_meta( $comment->comment_ID, 'rating', true ) ); ?>
 
 	<h4 class="meta">
-		<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>"><?php echo wp_kses_post( $product->get_name() ); ?></a>
+		<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>"><?php echo wp_kses_post( $product_title ); ?></a>
 		<?php
 		/* translators: %s: review author */
 		echo sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), get_comment_author( $comment->comment_ID ) );
