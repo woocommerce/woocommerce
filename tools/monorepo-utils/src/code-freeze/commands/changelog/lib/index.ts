@@ -280,7 +280,7 @@ export const updateReleaseBranchChangelogs = async (
 			owner,
 			name,
 			title: `Release: Prepare the changelog for ${ version }`,
-			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }<!-- is-release-pr -->`,
+			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
 			reviewers: [ githubActor ],
@@ -398,7 +398,7 @@ export const updateBranchChangelog = async (
 			title: `Release: Remove ${ version } change files from ${ releaseBranch }`,
 			body: `This pull request was automatically generated to remove the changefiles from ${ version } that are compiled into the \`${ releaseBranch }\` ${
 				prNumber > 0 ? `branch via #${ prNumber }` : ''
-			}<!-- is-release-pr -->`,
+			}`,
 			head: branch,
 			base: releaseBranch,
 			reviewers: [ githubActor ],
