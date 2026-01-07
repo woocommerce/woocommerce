@@ -203,6 +203,11 @@ class FeaturesController {
 	 *                                                 Higher number = higher in the list. Defaults to 10.
 	 *     @type array   $setting                      The properties used by the Settings API to render the setting control on
 	 *                                                 the Features screen. See the Settings API for the schema of these props.
+	 *     @type string  $deprecated_since             The WooCommerce version since which this feature is deprecated.
+	 *                                                 When set, feature_is_enabled() will force feature value to the deprecated_value
+	 *                                                 instead of reading from the database.
+	 *     @type bool    $deprecated_value             The value to return for deprecated features when feature_is_enabled()
+	 *                                                 is called. Defaults to false.
 	 * }
 	 *
 	 * @return void
