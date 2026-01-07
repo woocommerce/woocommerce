@@ -11,14 +11,16 @@ test.describe(
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		async function openPayments( page ) {
-			await page.goto( '/wp-admin/index.php?page=wc-settings' );
-			const navTabWrapper = page.locator( '.nav-tab-wrapper' );
-			await navTabWrapper
+			await page.goto( '/wp-admin/index.php', {
+				waitUntil: 'networkidle0',
+			} );
+			const adminMenu = page.locator( '#adminmenu' );
+			await adminMenu
 				.getByRole( 'link', { name: 'Payments', exact: true } )
 				.click();
-			await page.waitForSelector(
-				'.settings-payment-gateways__header-title'
-			);
+			await expect(
+				page.locator( '.settings-payment-gateways__header-title' )
+			).toBeVisible();
 		}
 
 		async function waitForPayPalToLoad( page ) {
