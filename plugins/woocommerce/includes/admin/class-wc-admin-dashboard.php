@@ -439,7 +439,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					ORDER BY comments.comment_date_gmt DESC
 					LIMIT 5"
 				);
-				$entries   = $wpdb->get_results(
+				$entries    = $wpdb->get_results(
 					"SELECT posts.ID as product_id, comments.comment_ID as comment_id {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				);
 			} else {
@@ -458,7 +458,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			if ( $entries ) {
 				_prime_comment_caches( array_column( $entries, 'comment_id' ) );
-				_prime_post_caches( array_column( $entries, 'product_id'), false, false );
+				_prime_post_caches( array_column( $entries, 'product_id' ), false, false );
 
 				echo '<ul>';
 				foreach ( $entries as $entry ) {
@@ -476,7 +476,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			} else {
 				echo '<p>' . esc_html__( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
 			}
-
 		}
 
 		/**
