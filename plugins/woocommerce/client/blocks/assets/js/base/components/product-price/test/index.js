@@ -109,4 +109,79 @@ describe( 'ProductPrice', () => {
 		// Should contain screen reader text and price elements
 		expect( json.children.length ).toBeGreaterThan( 1 );
 	} );
+
+	test( 'should hide price when both price and regularPrice are string "0"', () => {
+		const component = TestRenderer.create(
+			<ProductPrice
+				price={ '0' }
+				regularPrice={ '0' }
+				currency={ currency }
+			/>
+		);
+
+		// Should render wrapper with empty price span (no FormattedMonetaryAmount)
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'span' );
+		expect( json.children ).toHaveLength( 1 );
+		expect( json.children[ 0 ].type ).toBe( 'span' );
+		expect( json.children[ 0 ].children ).toBeNull();
+	} );
+
+	test( 'should show price when price is negative', () => {
+		const component = TestRenderer.create(
+			<ProductPrice price={ -10 } currency={ currency } />
+		);
+
+		// Negative prices should still be displayed
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'span' );
+		const priceSpan = json.children[ 0 ];
+		expect( priceSpan.props.className ).toContain(
+			'wc-block-components-product-price__value'
+		);
+	} );
+
+	test( 'should show price when regularPrice is negative and price is 0', () => {
+		const component = TestRenderer.create(
+			<ProductPrice
+				price={ 0 }
+				regularPrice={ -10 }
+				currency={ currency }
+			/>
+		);
+
+		// Should show price since regularPrice is not 0
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'span' );
+		const priceSpan = json.children[ 0 ];
+		expect( priceSpan.props.className ).toContain(
+			'wc-block-components-product-price__value'
+		);
+	} );
+
+	test( 'should render empty span when price is null', () => {
+		const component = TestRenderer.create(
+			<ProductPrice price={ null } currency={ currency } />
+		);
+
+		// Should render wrapper with empty price span
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'span' );
+		expect( json.children ).toHaveLength( 1 );
+		expect( json.children[ 0 ].type ).toBe( 'span' );
+		expect( json.children[ 0 ].children ).toBeNull();
+	} );
+
+	test( 'should render empty span when price is undefined', () => {
+		const component = TestRenderer.create(
+			<ProductPrice currency={ currency } />
+		);
+
+		// Should render wrapper with empty price span
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'span' );
+		expect( json.children ).toHaveLength( 1 );
+		expect( json.children[ 0 ].type ).toBe( 'span' );
+		expect( json.children[ 0 ].children ).toBeNull();
+	} );
 } );
