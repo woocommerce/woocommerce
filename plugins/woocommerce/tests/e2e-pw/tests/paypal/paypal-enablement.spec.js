@@ -11,7 +11,7 @@ test.describe(
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		async function openPayments( page ) {
-			await page.goto( '/wp-admin/admin.php?page=wc-settings' );
+			await page.goto( '/wp-admin/index.php' );
 			await page
 				.getByRole( 'link', { name: 'Payments', exact: true } )
 				.click();
