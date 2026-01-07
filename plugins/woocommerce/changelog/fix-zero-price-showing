@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent 0 priced (and not on sale) products from showing $0.00 in the cart block
