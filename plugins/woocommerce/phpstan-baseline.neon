@@ -2461,25 +2461,7 @@ parameters:
 			path: includes/admin/class-wc-admin-dashboard.php
 
 		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/admin/class-wc-admin-dashboard.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_html expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard.php
-
-		-
-			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard.php
-
-		-
-			message: '#^Parameter \#2 \$size of function get_avatar expects int, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/admin/class-wc-admin-dashboard.php
