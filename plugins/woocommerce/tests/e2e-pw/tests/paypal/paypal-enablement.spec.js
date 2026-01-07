@@ -3,7 +3,6 @@
  */
 import { expect, tags, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-// import { skipOnboardingWizard } from '../../utils/onboarding';
 
 test.describe(
 	'PayPal Standard Enablement',
@@ -12,8 +11,6 @@ test.describe(
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		async function openWCSettings( page ) {
-			// await skipOnboardingWizard();
-
 			await page.goto( '/wp-admin/index.php', {
 				waitUntil: 'networkidle0',
 			} );
