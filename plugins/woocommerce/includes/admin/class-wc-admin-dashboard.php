@@ -420,6 +420,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			if ( has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
 				// Deprecation path here: only raise notice and delete this logical branch in later versions.
 
+				/**
+				 * Filters the from-clause used for fetching latest product reviews.
+				 *
+				 * @since 3.1.0
+				 *
+				 * @param string $clause The from-clause.
+				 */
 				$query_from = apply_filters(
 					'woocommerce_report_recent_reviews_query_from',
 					"FROM {$wpdb->comments} comments
