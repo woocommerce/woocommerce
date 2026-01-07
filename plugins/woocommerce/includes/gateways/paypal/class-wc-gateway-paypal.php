@@ -24,6 +24,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
+}
+
 /**
  * WC_Gateway_Paypal Class.
  */
