@@ -22,14 +22,6 @@ defined( 'ABSPATH' ) || exit;
  * @internal This class is part of the internal API and is subject to change without notice.
  */
 class BlocksCheckoutEventTracker implements RegisterHooksInterface {
-
-	/**
-	 * Checkout event scheduler instance.
-	 *
-	 * @var CheckoutEventScheduler
-	 */
-	private CheckoutEventScheduler $scheduler;
-
 	/**
 	 * Fraud protection controller instance.
 	 *
@@ -38,18 +30,25 @@ class BlocksCheckoutEventTracker implements RegisterHooksInterface {
 	private FraudProtectionController $fraud_protection_controller;
 
 	/**
+	 * Fraud protection tracker instance.
+	 *
+	 * @var FraudProtectionTracker
+	 */
+	private FraudProtectionTracker $tracker;
+
+	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param CheckoutEventScheduler    $scheduler                   The checkout event scheduler instance.
+	 * @param FraudProtectionTracker    $tracker The fraud protection tracker instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		CheckoutEventScheduler $scheduler,
+		FraudProtectionTracker $tracker,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->scheduler                   = $scheduler;
+		$this->tracker                     = $tracker;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
@@ -150,7 +149,7 @@ class BlocksCheckoutEventTracker implements RegisterHooksInterface {
 
 		// Build and schedule the event.
 		$event_data = $this->build_checkout_event_data( 'store_api_update', $posted_data );
-		$this->scheduler->schedule_tracking( 'checkout_blocks_customer_update', $event_data );
+		$this->tracker->track_event( 'checkout_blocks_customer_update', $event_data );
 	}
 
 	/**

@@ -26,9 +26,9 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	/**
 	 * Checkout event scheduler instance.
 	 *
-	 * @var CheckoutEventScheduler
+	 * @var FraudProtectionTracker
 	 */
-	private CheckoutEventScheduler $scheduler;
+	private FraudProtectionTracker $tracker;
 
 	/**
 	 * Fraud protection controller instance.
@@ -42,14 +42,14 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param CheckoutEventScheduler    $scheduler                   The checkout event scheduler instance.
+	 * @param FraudProtectionTracker    $tracker The fraud protection tracker instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		CheckoutEventScheduler $scheduler,
+		FraudProtectionTracker $tracker,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->scheduler                   = $scheduler;
+		$this->tracker                     = $tracker;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
@@ -89,7 +89,7 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		$event_data = $this->build_checkout_event_data( 'field_update', $data );
-		$this->track_checkout_event( 'checkout_field_update', $event_data );
+		$this->tracker->track_event( 'checkout_field_update', $event_data );
 	}
 
 	/**
@@ -240,39 +240,6 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 		return $shipping_method_data;
 	}
 
-	/**
-	 * Track a checkout event immediately.
-	 *
-	 * Collects comprehensive session data and tracks the event immediately.
-	 *
-	 * @param string $event_type          Event type identifier.
-	 * @param array  $event_specific_data Event-specific data to merge with session context.
-	 * @return void
-	 */
-	private function track_checkout_event( string $event_type, array $event_specific_data ): void {
-		// Collect comprehensive session data.
-		try {
-			$collected_data = $this->data_collector->collect( $event_type, $event_specific_data );
-		} catch ( \Exception $e ) {
-			// If collection fails, log and abort tracking.
-			FraudProtectionController::log(
-				'error',
-				sprintf(
-					'Failed to collect session data for checkout event: %s | Error: %s',
-					$event_type,
-					$e->getMessage()
-				),
-				array(
-					'event_type' => $event_type,
-					'exception'  => $e,
-				)
-			);
-			return;
-		}
-
-		// Track the event immediately.
-		$this->tracker->track_event( $event_type, $collected_data );		$this->tracker->track_event( $event_type, $collected_data );
-	}
 
 	/**
 	 * Get readable shipping method names from shipping method IDs.
