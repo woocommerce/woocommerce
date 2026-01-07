@@ -703,7 +703,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		 *
 		 * @param array        $converted The converted tax data array.
 		 * @param float|string $value     The original legacy scalar value.
-			* @param WC_Order_Item $this  The order item being processed.
+		 * @param WC_Order_Item $item     The order item being processed.
 		 */
 		return apply_filters( 'woocommerce_order_item_legacy_tax_conversion', $converted, $value, $this );
 	}

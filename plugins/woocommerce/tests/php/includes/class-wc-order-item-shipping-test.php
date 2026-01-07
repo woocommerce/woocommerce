@@ -51,6 +51,7 @@ class WC_Order_Item_Shipping_Test extends WC_Unit_Test_Case {
 		$item = new WC_Order_Item_Shipping();
 		$item->set_order_id( $order->get_id() );
 
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Testing legacy serialized data format.
 		$serialized_tax_data = serialize(
 			array(
 				'total' => array( 1 => '24.00' ),
@@ -118,9 +119,10 @@ class WC_Order_Item_Shipping_Test extends WC_Unit_Test_Case {
 		$item->set_order_id( $order->get_id() );
 
 		// Serialized legacy data with float (as stored in wp_woocommerce_order_itemmeta).
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Testing legacy serialized data format.
 		$serialized_legacy_data = serialize(
 			array(
-				'total' => 144.00,  // Float instead of array.
+				'total' => 144.00,
 			)
 		);
 
@@ -245,11 +247,12 @@ class WC_Order_Item_Shipping_Test extends WC_Unit_Test_Case {
 		$item->set_order_id( $order->get_id() );
 
 		// Add a filter to customize the conversion.
-		$filter_callback = function ( $converted, $value, $order_item ) {
+		$filter_callback = function ( $converted, $value ) {
 			// Custom rate ID mapping.
+			unset( $converted );
 			return array( 999 => $value );
 		};
-		add_filter( 'woocommerce_order_item_legacy_tax_conversion', $filter_callback, 10, 3 );
+		add_filter( 'woocommerce_order_item_legacy_tax_conversion', $filter_callback, 10, 2 );
 
 		// Legacy tax data as float.
 		$legacy_tax_data = array(
