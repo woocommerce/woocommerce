@@ -285,7 +285,9 @@ const ProductPrice = ( {
 
 	// Hide price display when both price and regularPrice are explicitly 0 (e.g., quote products).
 	// Don't hide when regularPrice is undefined, as that's used for line totals/subtotals.
-	const shouldHidePrice = price === 0 && regularPrice === 0;
+	// Use Number() to handle string values from the API (e.g., "0") consistently with isDiscounted.
+	const shouldHidePrice =
+		Number( price ) === 0 && Number( regularPrice ) === 0;
 
 	let priceComponent = (
 		<span
