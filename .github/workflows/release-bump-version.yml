@@ -176,12 +176,22 @@ jobs:
           milestone="${{ steps.compute-new-version.outputs.prMilestone }}"
           milestone_arg=""
           if [[ -n "$milestone" ]]; then
-            if [ "$(gh api repos/${{ github.repository }}/milestones --jq "any(.[]; .title==\"$milestone\")")" = "true" ]; then
+            milestone_info=$(gh api repos/${{ github.repository }}/milestones --jq ".[] | select(.title==\"$milestone\")")
+
+            if [[ -n "$milestone_info" ]]; then
+              is_closed=$(echo "$milestone_info" | jq -r '.state=="closed"')
+              milestone_number=$(echo "$milestone_info" | jq -r '.number')
+
+              if [[ "$is_closed" == "true" ]]; then
+                echo "Milestone '$milestone' is closed, reopening it..."
+                gh api --method PATCH repos/${{ github.repository }}/milestones/"$milestone_number" -f state=open
+              fi
+
               milestone_arg="--milestone $milestone"
             fi
           fi
 
-          # Create PR
+          # Create PR.
           gh pr create \
             --title 'Bump WooCommerce version to `${{ steps.compute-new-version.outputs.nextVersion }}` on `${{ inputs.branch }}`' \
             --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.'$'\n\n''<!-- [x] This Pull Request does not require a changelog -->' \
