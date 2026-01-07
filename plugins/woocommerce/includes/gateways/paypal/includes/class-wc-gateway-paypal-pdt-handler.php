@@ -158,7 +158,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 			// We have a valid response from PayPal.
 			WC_Gateway_Paypal::log( 'PDT Transaction Status: ' . wc_print_r( $status, true ) );
 
-			$order->add_meta_data( PayPalConstants::PAYPAL_META_STATUS, $status );
+			$order->add_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
 			$order->set_transaction_id( $transaction );
 
 			if ( OrderStatus::COMPLETED === $status ) {

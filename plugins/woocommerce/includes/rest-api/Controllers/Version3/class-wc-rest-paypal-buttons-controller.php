@@ -154,7 +154,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( array( 'error' => 'Failed to create PayPal order' ), 400 );
 		}
 
-		$order->update_meta_data( PayPalConstants::PAYPAL_META_ORDER_ID, $paypal_order['id'] );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, $paypal_order['id'] );
 		$order->update_status( OrderStatus::PENDING );
 		$order->save();
 

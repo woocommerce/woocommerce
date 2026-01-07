@@ -33,7 +33,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->save();
 
-		$order->update_meta_data( PayPalConstants::PAYPAL_META_STATUS, 'pending' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, 'pending' );
 		$order->set_transaction_id( $this->transaction_id_26960 );
 		$order->set_payment_method( WC_Gateway_Paypal::ID );
 		$order->save();
@@ -60,7 +60,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->save();
 
-		$order->update_meta_data( PayPalConstants::PAYPAL_META_STATUS, 'pending' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, 'pending' );
 		$order->set_transaction_id( $this->transaction_id_26960 );
 		$order->set_payment_method( WC_Gateway_Paypal::ID );
 		$order->save();
@@ -104,7 +104,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_payment() {
 		$order = WC_Helper_Order::create_order();
-		$order->update_meta_data( PayPalConstants::PAYPAL_META_STATUS, 'pending' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, 'pending' );
 		$order->set_transaction_id( $this->transaction_id_26960 );
 		$order->set_payment_method( WC_Gateway_Paypal::ID );
 		$order->save();
@@ -117,7 +117,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'pre_http_request', array( $this, '__return_paypal_success' ) );
 
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( 'Completed', $order->get_meta( PayPalConstants::PAYPAL_META_STATUS ) );
+		$this->assertEquals( 'Completed', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS ) );
 	}
 
 	/**
@@ -170,7 +170,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_meta( 'Payment type' ), WC_Gateway_Paypal::ID );
 		$this->assertEquals( $order->get_transaction_id(), $this->transaction_id_26960 );
-		$this->assertEquals( $order->get_meta( PayPalConstants::PAYPAL_META_STATUS ), 'Completed' );
+		$this->assertEquals( $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS ), 'Completed' );
 	}
 
 	/**

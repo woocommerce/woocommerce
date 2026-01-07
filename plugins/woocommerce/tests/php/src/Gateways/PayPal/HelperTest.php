@@ -489,7 +489,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'Suite 100', $order->get_billing_address_2() );
 
 		// Verify meta flag was set.
-		$this->assertEquals( 'yes', $order->get_meta( PayPalConstants::PAYPAL_META_ADDRESSES_UPDATED, true ) );
+		$this->assertEquals( 'yes', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, true ) );
 
 		// Clean up.
 		$order->delete( true );
@@ -531,7 +531,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 		// Order should not be modified.
 		$this->assertEquals( $original_shipping_first_name, $order->get_shipping_first_name() );
 		$this->assertEquals( $original_billing_first_name, $order->get_billing_first_name() );
-		$this->assertEmpty( $order->get_meta( PayPalConstants::PAYPAL_META_ADDRESSES_UPDATED, true ) );
+		$this->assertEmpty( $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, true ) );
 
 		// Clean up.
 		$order->delete( true );
@@ -542,7 +542,7 @@ class HelperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_update_addresses_in_order_skips_already_updated() {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( PayPalConstants::PAYPAL_META_ADDRESSES_UPDATED, 'yes' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'yes' );
 		$order->save();
 
 		$original_shipping_first_name = $order->get_shipping_first_name();

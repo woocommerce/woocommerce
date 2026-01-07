@@ -165,7 +165,7 @@ class Helper {
 		}
 
 		// Bail early if '_paypal_addresses_updated' is 'yes', meaning the addresses update already have been successful.
-		if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_META_ADDRESSES_UPDATED, true ) ) {
+		if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, true ) ) {
 			return;
 		}
 
@@ -208,7 +208,7 @@ class Helper {
 			$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
 		}
 
-		$order->update_meta_data( PayPalConstants::PAYPAL_META_ADDRESSES_UPDATED, 'yes' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'yes' );
 		$order->save();
 	}
 }
