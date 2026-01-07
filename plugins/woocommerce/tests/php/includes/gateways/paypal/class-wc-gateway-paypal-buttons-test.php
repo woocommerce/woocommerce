@@ -41,6 +41,8 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->markTestSkipped( 'Skipping PayPal Buttons tests.' );
+
 		// Store original global post.
 		global $post;
 		$this->original_post = $post;

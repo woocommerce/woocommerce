@@ -1,23 +1,25 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Notices class.
+ * Unit tests for Automattic\WooCommerce\Gateways\PayPal\Notices class.
  *
- * @package WooCommerce\Tests\Paypal.
+ * @package WooCommerce\Tests\Gateways\PayPal
  */
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-notices.php';
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Notices;
 
 /**
- * Class WC_Gateway_Paypal_Notices_Test.
+ * Class NoticesTest.
  */
-class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
+class NoticesTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The PayPal gateway instance.
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var \WC_Gateway_Paypal
 	 */
 	private $gateway;
 
@@ -97,7 +99,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_paypal_account_restricted_status' );
 
 		// Reset the gateway singleton to null.
-		WC_Gateway_Paypal::set_instance( null );
+		\WC_Gateway_Paypal::set_instance( null );
 
 		parent::tearDown();
 	}
@@ -110,7 +112,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		remove_all_actions( 'admin_notices' );
 		remove_all_actions( 'admin_head' );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		$this->assertNotFalse( has_action( 'admin_notices', array( $notices, 'add_paypal_notices' ) ) );
 		$this->assertNotFalse( has_action( 'admin_head', array( $notices, 'add_paypal_notices_on_payments_settings_page' ) ) );
@@ -153,7 +155,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		);
 		wp_set_current_user( $user_id_map[ $user_role ] );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -170,7 +172,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	 * Test that migration notice is displayed when not dismissed.
 	 */
 	public function test_migration_notice_displayed_when_not_dismissed() {
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -187,7 +189,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	public function test_migration_notice_not_displayed_when_dismissed() {
 		update_user_meta( $this->admin_user_id, 'dismissed_paypal_migration_completed_notice', true );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -203,7 +205,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_paypal_account_restricted_status', 'yes' );
 		$this->mock_gateway_available();
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -220,7 +222,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	public function test_account_restricted_notice_not_displayed_when_flag_not_set() {
 		$this->mock_gateway_available();
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -238,7 +240,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		$this->create_mock_gateway();
 		update_user_meta( $this->admin_user_id, 'dismissed_paypal_account_restricted_notice', true );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -285,7 +287,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		// Set the currency.
 		update_option( 'woocommerce_currency', $currency );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -311,7 +313,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_currency', 'TRY' );
 		update_user_meta( $this->admin_user_id, 'dismissed_paypal_unsupported_currency_notice', true );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -330,7 +332,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		// Ensure the flag is not set initially.
 		update_option( 'woocommerce_paypal_account_restricted_status', 'no' );
 
-		WC_Gateway_Paypal_Notices::set_account_restriction_flag();
+		Notices::set_account_restriction_flag();
 
 		// Verify the flag was set.
 		$this->assertEquals( 'yes', get_option( 'woocommerce_paypal_account_restricted_status', 'no' ) );
@@ -354,7 +356,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		add_filter( 'pre_update_option_woocommerce_paypal_account_restricted_status', $track_updates, 10, 3 );
 
 		// Call set again - should not change the value.
-		WC_Gateway_Paypal_Notices::set_account_restriction_flag();
+		Notices::set_account_restriction_flag();
 
 		// Verify update_option was not called (the filter would have been triggered).
 		$this->assertEquals( 0, $update_calls, 'update_option should not be called when flag is already set' );
@@ -373,7 +375,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		// Set the flag initially.
 		update_option( 'woocommerce_paypal_account_restricted_status', 'yes' );
 
-		WC_Gateway_Paypal_Notices::clear_account_restriction_flag();
+		Notices::clear_account_restriction_flag();
 
 		// Verify the flag was cleared.
 		$this->assertEquals( 'no', get_option( 'woocommerce_paypal_account_restricted_status', 'no' ) );
@@ -397,7 +399,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		add_filter( 'pre_update_option_woocommerce_paypal_account_restricted_status', $track_updates, 10, 3 );
 
 		// Call clear again - should not change the value.
-		WC_Gateway_Paypal_Notices::clear_account_restriction_flag();
+		Notices::clear_account_restriction_flag();
 
 		// Verify update_option was not called (the filter would have been triggered).
 		$this->assertEquals( 0, $update_calls, 'update_option should not be called when flag is already cleared' );
@@ -415,7 +417,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	public function test_notices_not_displayed_when_gateway_not_available() {
 		$this->mock_gateway_not_available();
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -428,13 +430,13 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	 * Test that notices are not displayed when Orders v2 is not enabled.
 	 */
 	public function test_notices_not_displayed_when_orders_v2_not_enabled() {
-		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+		$mock_gateway = $this->getMockBuilder( \WC_Gateway_Paypal::class )
 			->onlyMethods( array( 'should_use_orders_v2' ) )
 			->getMock();
 		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( false );
-		WC_Gateway_Paypal::set_instance( $mock_gateway );
+		\WC_Gateway_Paypal::set_instance( $mock_gateway );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -455,7 +457,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		$current_tab     = 'checkout';
 		$current_section = '';
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices_on_payments_settings_page();
@@ -477,7 +479,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		$current_tab     = 'general';
 		$current_section = '';
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices_on_payments_settings_page();
@@ -496,7 +498,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 		$store_currency = get_option( 'woocommerce_currency' );
 		update_option( 'woocommerce_currency', 'TRY' );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new Notices();
 
 		ob_start();
 		$notices->add_paypal_notices();
@@ -542,17 +544,17 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Create a mock gateway instance.
 	 *
-	 * @return WC_Gateway_Paypal|\PHPUnit\Framework\MockObject\MockObject
+	 * @return \WC_Gateway_Paypal|\PHPUnit\Framework\MockObject\MockObject
 	 */
 	private function create_mock_gateway() {
-		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+		$mock_gateway = $this->getMockBuilder( \WC_Gateway_Paypal::class )
 			->onlyMethods( array( 'should_use_orders_v2' ) )
 			->getMock();
 
 		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
 
 		// Inject the mock gateway as the singleton instance.
-		WC_Gateway_Paypal::set_instance( $mock_gateway );
+		\WC_Gateway_Paypal::set_instance( $mock_gateway );
 
 		return $mock_gateway;
 	}
