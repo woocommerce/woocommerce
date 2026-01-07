@@ -245,7 +245,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
+		$paypal_order_id = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID );
 		if ( empty( $paypal_order_id ) ) {
 			return;
 		}
@@ -260,7 +260,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 * Once an attempt is made (meta exists), we skip to prevent repeated API calls on page reloads.
 		 * The webhook handler will always update the addresses.
 		 */
-		$addresses_update_attempted = $order->meta_exists( '_paypal_addresses_updated' );
+		$addresses_update_attempted = $order->meta_exists( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED );
 		if ( $addresses_update_attempted ) {
 			return;
 		}
@@ -273,7 +273,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
-			$order->update_meta_data( '_paypal_addresses_updated', 'no' );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'no' );
 			$order->save();
 		}
 	}
@@ -710,7 +710,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If the order is authorized via legacy API, the '_paypal_status' meta will be 'pending'.
-		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
+		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true );
 
 		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
 			$paypal_request = new PayPalRequest( $this );
@@ -718,7 +718,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		if ( 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
@@ -737,7 +737,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					case 'Completed':
 						/* translators: 1: Amount, 2: Authorization ID, 3: Transaction ID */
 						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						$order->update_meta_data( '_paypal_status', $result->PAYMENTSTATUS );
+						$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $result->PAYMENTSTATUS );
 						$order->set_transaction_id( $result->TRANSACTIONID );
 						$order->save();
 						break;
