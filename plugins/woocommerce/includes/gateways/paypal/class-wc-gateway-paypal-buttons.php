@@ -9,11 +9,11 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-
-use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 	require_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
