@@ -457,16 +457,26 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 
 			if ( $entries ) {
-				_prime_comment_caches( array_column( $entries, 'comment_id' ), false );
+				_prime_comment_caches( array_column( $entries, 'comment_id' ) );
 				_prime_post_caches( array_column( $entries, 'product_id'), false, false );
+
+				echo '<ul>';
+				foreach ($entries as $entry ) {
+					if ( current_user_can( 'read_product', $entry->product_id ) ) {
+						wc_get_template(
+							'dashboard-widget-reviews.php',
+							array(
+								'product' => wc_get_product( $entry->product_id ),
+								'comment' => get_comment( $entry->comment_id ),
+							)
+						);
+					}
+				}
+				echo '</ul>';
+			} else {
+				echo '<p>' . esc_html__( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
 			}
 
-			wc_get_template(
-				'dashboard-widget-last-reviews.php',
-				array(
-					'entries' => $entries,
-				)
-			);
 		}
 
 		/**
