@@ -3,6 +3,7 @@
  */
 import { expect, tags, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+// import { skipOnboardingWizard } from '../../utils/onboarding';
 
 test.describe(
 	'PayPal Standard Enablement',
@@ -10,14 +11,40 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		async function openPayments( page ) {
+		async function openWCSettings( page ) {
+			// await skipOnboardingWizard();
+
 			await page.goto( '/wp-admin/index.php', {
 				waitUntil: 'networkidle0',
 			} );
+
 			const adminMenu = page.locator( '#adminmenu' );
 			await adminMenu
-				.getByRole( 'link', { name: 'Payments', exact: true } )
+				.getByRole( 'link', { name: 'WooCommerce', exact: true } )
 				.click();
+
+			const wcMenu = page.locator(
+				'#toplevel_page_woocommerce .wp-submenu'
+			);
+			await expect( wcMenu ).toBeVisible();
+
+			await wcMenu
+				.getByRole( 'link', { name: 'Settings', exact: true } )
+				.click();
+		}
+
+		async function openPayments( page ) {
+			await openWCSettings( page );
+
+			const navTabWrapper = page.locator( '.woo-nav-tab-wrapper' );
+
+			await navTabWrapper
+				.getByRole( 'link', {
+					name: 'Payments',
+					exact: true,
+				} )
+				.click();
+
 			await expect(
 				page.locator( '.settings-payment-gateways__header-title' )
 			).toBeVisible();
