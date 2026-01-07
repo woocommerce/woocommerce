@@ -462,9 +462,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 				echo '<ul>';
 				foreach ( $comments as $comment ) {
-					if ( current_user_can( 'read_product', $comment->product_id ) ) {
-						$product = wc_get_product( $comment->product_id );
-						$comment = get_comment( $comment->comment_id );
+					$product = wc_get_product( $comment->product_id );
+					$comment = get_comment( $comment->comment_id );
+					if ( $product && $comment && current_user_can( 'read_product', $product->get_id() ) ) {
 
 						echo '<li>';
 
