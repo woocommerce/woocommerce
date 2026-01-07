@@ -15,11 +15,12 @@ async function checkEmailEditorTestReminderComment( github, context, core ) {
 
 	core.info( `Checking if PR #${ prNumber } touches packages/php/email-editor` );
 
-	// Get the list of files changed in this PR
-	const { data: files } = await github.rest.pulls.listFiles( {
+	// Get the list of files changed in this PR (paginated to get all files)
+	const files = await github.paginate( github.rest.pulls.listFiles, {
 		owner,
 		repo: repoName,
 		pull_number: prNumber,
+		per_page: 100,
 	} );
 
 	// Check if any file is in packages/php/email-editor
@@ -37,11 +38,12 @@ async function checkEmailEditorTestReminderComment( github, context, core ) {
 		);
 	}
 
-	// Check if a comment already exists
-	const { data: comments } = await github.rest.issues.listComments( {
+	// Check if a comment already exists (paginated to get all comments)
+	const comments = await github.paginate( github.rest.issues.listComments, {
 		owner,
 		repo: repoName,
 		issue_number: prNumber,
+		per_page: 100,
 	} );
 
 	const existingComment = comments.find(
