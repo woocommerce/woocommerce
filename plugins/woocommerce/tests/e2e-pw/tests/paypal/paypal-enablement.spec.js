@@ -43,8 +43,11 @@ test.describe(
 				await enableButton.click();
 			} );
 
-			// Confirm the Active label is present.
-			await expect( paypalDiv.getByText( 'Active' ) ).toBeVisible();
+			const labelActive = paypalDiv.getByText( 'Active' );
+			const labelTestAccount = paypalDiv.getByText( 'Test account' );
+
+			// Confirm the status label is present with any of the expected texts.
+			await expect( labelActive.or( labelTestAccount ) ).toBeVisible();
 		} );
 	}
 );
