@@ -445,7 +445,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			} else {
 				// Optimized and actualized version of the query: leverage a lookup table for faster joins.
 				$comments = $wpdb->get_results(
-					"SELECT posts.ID as product_ID, comments.comment_ID
+					"SELECT posts.ID as product_id, comments.comment_ID as comment_id
 					 FROM wp_comments comments
 						LEFT JOIN wp_wc_product_meta_lookup lookup ON(lookup.product_id = comments.comment_post_ID)
 						LEFT JOIN wp_posts posts ON(posts.ID = lookup.product_id)
@@ -476,6 +476,14 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
 
 						/* translators: %s: review author */
+						/**
+						 * Filters product title to display in the last reviews.
+						 *
+						 * @since 2.1.0
+						 *
+						 * @param string      $product_title The product title.
+						 * @param \WP_Comment $comment       The comment.
+						 */
 						echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $product->get_id() ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $product->get_title(), $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
 						echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
 					}
