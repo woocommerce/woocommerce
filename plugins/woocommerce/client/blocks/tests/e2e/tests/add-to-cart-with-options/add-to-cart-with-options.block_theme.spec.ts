@@ -1356,13 +1356,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 				pageObject,
 				editor,
 			} ) => {
-				await pageObject.updateSingleProductTemplate();
-				await setAddToCartWithOptionsBlockAttributes(
-					pageObject,
-					editor,
-					{ optionStyle }
-				);
-
 				for ( const value of [ 'disable', 'hide' ] as (
 					| 'disable'
 					| 'hide'
