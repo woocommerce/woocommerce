@@ -113,7 +113,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 		// Verify order was updated.
 		$test_order = wc_get_order( $test_order->get_id() );
-		$this->assertEquals( 'APPROVED', $test_order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( 'APPROVED', $test_order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 
 		// Clean up.
 		$test_order->delete( true );
@@ -127,7 +127,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 	public function test_process_checkout_order_approved_skips_already_processed(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
+		$test_order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(
@@ -157,7 +157,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 		// Verify order was not updated.
 		$test_order = wc_get_order( $test_order->get_id() );
-		$this->assertEquals( 'COMPLETED', $test_order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( 'COMPLETED', $test_order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 
 		$test_order->delete( true );
 	}
@@ -194,7 +194,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 
 		// Verify order was updated.
 		$test_order = wc_get_order( $test_order->get_id() );
-		$this->assertEquals( 'COMPLETED', $test_order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( 'COMPLETED', $test_order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 
 		// Clean up.
 		$test_order->delete( true );
@@ -208,7 +208,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 	public function test_process_payment_capture_completed_skips_already_processed(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
+		$test_order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(
@@ -233,7 +233,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 		$this->webhook_handler->process_webhook( $this->mock_request );
 
 		$test_order = wc_get_order( $test_order->get_id() );
-		$this->assertEquals( 'COMPLETED', $test_order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( 'COMPLETED', $test_order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 		$this->assertEquals( $original_transaction_id, $test_order->get_transaction_id() );
 
 		$test_order->delete( true );
@@ -286,7 +286,7 @@ class WebhookHandlerTest extends \WC_Unit_Test_Case {
 	public function test_process_payment_authorization_created_skips_already_processed(): void {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
+		$test_order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(
