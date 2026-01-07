@@ -6,7 +6,6 @@ import {
 	StrictMode,
 	createRoot,
 	useEffect,
-	useLayoutEffect,
 	useState,
 	useMemo,
 } from '@wordpress/element';
@@ -157,7 +156,7 @@ export function ExperimentalEmailEditor( {
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
-	useLayoutEffect( () => {
+	useEffect( () => {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
 		// Set configuration to store from window object for backward compatibility
 		const editorConfig = config || getEditorConfigFromWindow();
