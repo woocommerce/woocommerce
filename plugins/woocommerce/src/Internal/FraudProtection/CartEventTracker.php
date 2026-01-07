@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * Tracks cart events for fraud protection analysis.
  *
  * This class hooks into WooCommerce cart events (add, update, remove, restore)
- * and triggers comprehensive event tracking with full session context. It orchestrates
- * the event tracking by collecting session data and preparing it for the fraud
+ * and triggers comprehensive event dispatching with full session context. It orchestrates
+ * the event dispatching by collecting session data and preparing it for the fraud
  * protection service.
  *
  * @since 10.5.0
@@ -87,7 +87,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	/**
 	 * Handle cart item added event.
 	 *
-	 * Triggers fraud protection event tracking when an item is added to the cart.
+	 * Triggers fraud protection event dispatching when an item is added to the cart.
 	 *
 	 * @internal
 	 *
@@ -107,7 +107,7 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		// Collect comprehensive session data and trigger event tracking.
+		// Collect comprehensive session data and trigger event dispatching.
 		try {
 			$collected_data = $this->data_collector->collect( 'cart_item_added', $event_data );
 			$this->dispatcher->dispatch_event( 'cart_item_added', $collected_data );
@@ -131,7 +131,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	/**
 	 * Handle cart item quantity updated event.
 	 *
-	 * Triggers fraud protection event tracking when cart item quantity is updated.
+	 * Triggers fraud protection event dispatching when cart item quantity is updated.
 	 *
 	 * @internal
 	 *
@@ -161,7 +161,7 @@ class CartEventTracker implements RegisterHooksInterface {
 		// Add old quantity for context.
 		$event_data['old_quantity'] = (int) $old_quantity;
 
-		// Collect comprehensive session data and trigger event tracking.
+		// Collect comprehensive session data and trigger event dispatching.
 		try {
 			$collected_data = $this->data_collector->collect( 'cart_item_updated', $event_data );
 			$this->dispatcher->dispatch_event( 'cart_item_updated', $collected_data );
@@ -185,7 +185,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	/**
 	 * Handle cart item removed event.
 	 *
-	 * Triggers fraud protection event tracking when an item is removed from the cart.
+	 * Triggers fraud protection event dispatching when an item is removed from the cart.
 	 *
 	 * @internal
 	 *
@@ -211,7 +211,7 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		// Collect comprehensive session data and trigger event tracking.
+		// Collect comprehensive session data and trigger event dispatching.
 		try {
 			$collected_data = $this->data_collector->collect( 'cart_item_removed', $event_data );
 			$this->dispatcher->dispatch_event( 'cart_item_removed', $collected_data );
@@ -235,7 +235,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	/**
 	 * Handle cart item restored event.
 	 *
-	 * Triggers fraud protection event tracking when a removed item is restored to the cart.
+	 * Triggers fraud protection event dispatching when a removed item is restored to the cart.
 	 *
 	 * @internal
 	 *
@@ -261,7 +261,7 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		// Collect comprehensive session data and trigger event tracking.
+		// Collect comprehensive session data and trigger event dispatching.
 		try {
 			$collected_data = $this->data_collector->collect( 'cart_item_restored', $event_data );
 			$this->dispatcher->dispatch_event( 'cart_item_restored', $collected_data );
@@ -287,7 +287,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 *
 	 * Prepares the cart event data including action type, product details,
 	 * and current cart state. This data will be merged with comprehensive
-	 * session data during event tracking.
+	 * session data during event dispatching.
 	 *
 	 * @param string $action       Action type (item_added, item_updated, item_removed, item_restored).
 	 * @param int    $product_id   Product ID.
