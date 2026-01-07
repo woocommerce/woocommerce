@@ -233,7 +233,7 @@ class WC_Post_Types {
 					'hierarchical'      => false,
 					'show_ui'           => false,
 					'show_in_nav_menus' => false,
-					'query_var'         => is_admin(),
+					'query_var'         => false,
 					'rewrite'           => false,
 					'public'            => false,
 					'label'             => _x( 'POS Product visibility', 'Taxonomy name', 'woocommerce' ),
