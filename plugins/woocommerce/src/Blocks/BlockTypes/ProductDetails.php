@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use WP_Block;
 use WP_HTML_Tag_Processor;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * ProductDetails class.
@@ -141,13 +140,20 @@ class ProductDetails extends AbstractBlock {
 
 		$accordion_blocks = array();
 
+		$accordion_anchor_block = $this->get_accordion_anchor_block( $parsed_block );
+
+		if ( ! $accordion_anchor_block ) {
+			return $parsed_block;
+		}
+
 		foreach ( $product_tabs as $key => $tab ) {
 			ob_start();
 			call_user_func( $tab['callback'], $key, $tab );
 			$tab_content        = ob_get_clean();
 			$accordion_blocks[] = $this->create_accordion_item_block(
 				$tab['title'],
-				'<!-- wp:html -->' . $tab_content . '<!-- /wp:html -->'
+				'<!-- wp:html -->' . $tab_content . '<!-- /wp:html -->',
+				$accordion_anchor_block
 			);
 		}
 
@@ -159,11 +165,12 @@ class ProductDetails extends AbstractBlock {
 	 *
 	 * @param string $title Title of the accordion item.
 	 * @param string $content Content of the accordion item as block markup.
+	 * @param array  $anchor_block Accordion anchor block to determine which item block to create.
 	 *
 	 * @return array Accordion item.
 	 */
-	private function create_accordion_item_block( $title, $content ) {
-		if ( Utils::wp_version_compare( '6.9', '>=' ) ) {
+	private function create_accordion_item_block( $title, $content, $anchor_block ) {
+		if ( isset( $anchor_block['blockName'] ) && 'core/accordion' === $anchor_block['blockName'] ) {
 			$template = '<!-- wp:accordion-item -->
 				<div class="wp-block-accordion-item">
 					<!-- wp:accordion-heading -->
@@ -174,7 +181,7 @@ class ProductDetails extends AbstractBlock {
 						</button>
 					</h3>
 					<!-- /wp:accordion-heading -->
-					
+
 					<!-- wp:accordion-panel -->
 					<div class="wp-block-accordion-panel">
 						%2$s
@@ -316,6 +323,28 @@ class ProductDetails extends AbstractBlock {
 	}
 
 	/**
+	 * Get the first accordion anchor block in a parsed block.
+	 *
+	 * @param array $parsed_block Parsed block.
+	 *
+	 * @return array|null Accordion anchor block or null.
+	 */
+	private function get_accordion_anchor_block( $parsed_block ) {
+		if ( 'core/accordion' === $parsed_block['blockName'] || 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
+			return $parsed_block;
+		}
+
+		foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
+			$anchor_block = $this->get_accordion_anchor_block( $inner_block );
+			if ( $anchor_block ) {
+				return $anchor_block;
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Validate hooked blocks data. Remove duplicated entries with the same title
 	 * and invalid entries with invalid content. Log errors to the WC logger.
 	 *
@@ -407,7 +436,7 @@ class ProductDetails extends AbstractBlock {
 					return null;
 				}
 
-				return $this->create_accordion_item_block( $block['title'], $block['content'] );
+				return $this->create_accordion_item_block( $block['title'], $block['content'], $parsed_anchor_block );
 			},
 			10,
 			4

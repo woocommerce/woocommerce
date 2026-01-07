@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductDetails;
 
 use WC_Helper_Product;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductDetailsNoRegisterMock;
-use Automattic\WooCommerce\Blocks\Utils\Utils;
 
 /**
  * Tests for the ProductDetails block type
@@ -99,11 +98,32 @@ class ProductDetails extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @return array
+	 */
+	public function render_with_hook_provider() {
+		return array(
+			'woocommerce_accordion' => array(
+				'template.html',
+				'render_with_hook_expected_result.html',
+			),
+			'core_accordion'        => array(
+				'template_wp69.html',
+				'render_with_hook_expected_result_wp69.html',
+			),
+		);
+	}
+
+	/**
 	 * Test Product Details render function when `woocommerce_product_tabs` hook is used.
 	 * IMPORTANT: The current test doesn't validate the entire HTML, but only the text content inside the HTML.
 	 * This is because some ids are generated dynamically via wp_unique_id that it is not straightforward to mock.
+	 *
+	 * @dataProvider render_with_hook_provider
+	 *
+	 * @param string $template_file Template file.
+	 * @param string $expected_file Expected result file.
 	 */
-	public function test_product_details_render_with_hook() {
+	public function test_product_details_render_with_hook( $template_file, $expected_file ) {
 		add_filter(
 			'woocommerce_product_tabs',
 			function ( $tabs ) {
@@ -128,15 +148,11 @@ class ProductDetails extends \WP_UnitTestCase {
 			}
 		);
 
-		$template_file = Utils::wp_version_compare( '6.9', '>=' ) ? 'template_wp69.html' : 'template.html';
-		$template      = file_get_contents( __DIR__ . '/' . $template_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$template = file_get_contents( __DIR__ . '/' . $template_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$serialized_blocks = do_blocks( $template );
 
-		$expected_file              = Utils::wp_version_compare( '6.9', '>=' )
-			? __DIR__ . '/render_with_hook_expected_result_wp69.html'
-			: __DIR__ . '/render_with_hook_expected_result.html';
-		$expected_serialized_blocks = file_get_contents( $expected_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$expected_serialized_blocks = file_get_contents( __DIR__ . '/' . $expected_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 		$serialized_blocks_without_whitespace          = wp_strip_all_tags( $serialized_blocks, true );
 		$expected_serialized_blocks_without_whitespace = wp_strip_all_tags( $expected_serialized_blocks, true );
@@ -145,16 +161,38 @@ class ProductDetails extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @return array
+	 */
+	public function hooked_blocks_provider() {
+		return array(
+			'woocommerce_accordion' => array(
+				'woocommerce/accordion-group',
+				'woocommerce/accordion-item',
+				'woocommerce/accordion-header',
+				'woocommerce/accordion-panel',
+			),
+			'core_accordion'        => array(
+				'core/accordion',
+				'core/accordion-item',
+				'core/accordion-heading',
+				'core/accordion-panel',
+			),
+		);
+	}
+
+	/**
 	 * Test the `woocommerce_product_details_hooked_blocks` hook. This hook allows developers to
 	 * specify a title and block markup that will be automatically wrapped in the required
 	 * Accordion Item block and appended to the Product Details' Accordion Group block.
+	 *
+	 * @dataProvider hooked_blocks_provider
+	 *
+	 * @param string $accordion_group_name Accordion group block name.
+	 * @param string $accordion_item_name Accordion item block name.
+	 * @param string $accordion_header_name Accordion header block name.
+	 * @param string $accordion_panel_name Accordion panel block name.
 	 */
-	public function test_hooked_blocks() {
-		$accordion_group_name  = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion' : 'woocommerce/accordion-group';
-		$accordion_item_name   = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion-item' : 'woocommerce/accordion-item';
-		$accordion_header_name = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion-heading' : 'woocommerce/accordion-header';
-		$accordion_panel_name  = Utils::wp_version_compare( '6.9', '>=' ) ? 'core/accordion-panel' : 'woocommerce/accordion-panel';
-
+	public function test_hooked_blocks( $accordion_group_name, $accordion_item_name, $accordion_header_name, $accordion_panel_name ) {
 		$test_block = array(
 			'slug'    => 'custom-info',
 			'title'   => 'Custom Info',
