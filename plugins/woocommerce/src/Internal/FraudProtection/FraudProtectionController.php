@@ -38,6 +38,13 @@ class FraudProtectionController implements RegisterHooksInterface {
 	private JetpackConnectionManager $connection_manager;
 
 	/**
+	 * Checkout blocker instance.
+	 *
+	 * @var CheckoutBlocker
+	 */
+	private CheckoutBlocker $checkout_blocker;
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
@@ -49,12 +56,19 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 * Initialize the instance, runs when the instance is created by the dependency injection container.
 	 *
 	 * @internal
+	 *
 	 * @param FeaturesController       $features_controller The instance of FeaturesController to use.
 	 * @param JetpackConnectionManager $connection_manager  The instance of JetpackConnectionManager to use.
+	 * @param CheckoutBlocker          $checkout_blocker    The instance of CheckoutBlocker to use.
 	 */
-	final public function init( FeaturesController $features_controller, JetpackConnectionManager $connection_manager ): void {
+	final public function init(
+		FeaturesController $features_controller,
+		JetpackConnectionManager $connection_manager,
+		CheckoutBlocker $checkout_blocker
+	): void {
 		$this->features_controller = $features_controller;
 		$this->connection_manager  = $connection_manager;
+		$this->checkout_blocker    = $checkout_blocker;
 	}
 
 	/**
@@ -68,8 +82,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 			return;
 		}
 
-		// Future implementation: Register hooks and initialize components here.
-		// For now, this is a placeholder for the infrastructure.
+		$this->checkout_blocker->register();
 	}
 
 	/**
