@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Minimal Header
+ * Title: WooCommerce Blocks - Minimal Header
  * Slug: woocommerce-blocks/header-minimal
  * Categories: WooCommerce
  * Block Types: core/template-part/header

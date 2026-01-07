@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Coming Soon
+ * Title: WooCommerce - Coming Soon
  * Slug: woocommerce/coming-soon
  * Categories: WooCommerce
  * Inserter: false

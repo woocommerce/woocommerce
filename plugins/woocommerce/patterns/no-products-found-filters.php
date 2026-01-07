@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: No Products Found - Clear Filters
+ * Title: WooCommerce - No Products Found - Clear Filters
  * Slug: woocommerce/no-products-found-clear-filters
  * Inserter: no
  * Categories: WooCommerce

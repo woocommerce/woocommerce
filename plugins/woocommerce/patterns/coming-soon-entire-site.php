@@ -5,7 +5,7 @@
  */
 
 /**
- * Title: Coming Soon Entire Site
+ * Title: WooCommerce - Coming Soon Entire Site
  * Slug: woocommerce/coming-soon-entire-site
  * Categories: WooCommerce
  * Inserter: false

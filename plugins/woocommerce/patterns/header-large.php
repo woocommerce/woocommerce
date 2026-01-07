@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Large Header
+ * Title: WooCommerce Blocks - Large Header
  * Slug: woocommerce-blocks/header-large
  * Categories: WooCommerce
  * Block Types: core/template-part/header

@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Related Products
+ * Title: WooCommerce Blocks - Related Products
  * Slug: woocommerce-blocks/related-products
  * Categories: WooCommerce
  * Inserter: false

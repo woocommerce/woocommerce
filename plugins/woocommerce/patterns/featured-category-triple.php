@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Featured Category Triple
+ * Title: WooCommerce Blocks - Featured Category Triple
  * Slug: woocommerce-blocks/featured-category-triple
  * Categories: WooCommerce, featured-selling
  */

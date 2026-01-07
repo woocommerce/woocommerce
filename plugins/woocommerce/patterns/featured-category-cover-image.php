@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Featured Category Cover Image
+ * Title: WooCommerce Blocks - Featured Category Cover Image
  * Slug: woocommerce-blocks/featured-category-cover-image
  * Categories: WooCommerce, Intro
  */

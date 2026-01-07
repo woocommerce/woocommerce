@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Product Search
+ * Title: WooCommerce - Product Search Form
  * Slug: woocommerce/product-search-form
  * Inserter: no
  * Categories: WooCommerce

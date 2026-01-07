@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Product Collection 5 Columns
+ * Title: WooCommerce Blocks - Product Collection 5 Columns
  * Slug: woocommerce-blocks/product-collection-5-columns
  * Categories: WooCommerce, featured-selling
  */

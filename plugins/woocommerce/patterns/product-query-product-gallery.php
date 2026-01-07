@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Product Gallery
+ * Title: WooCommerce Blocks - Product Gallery
  * Slug: woocommerce-blocks/product-query-product-gallery
  * Categories: WooCommerce, featured-selling
  * Block Types: core/query/woocommerce/product-query

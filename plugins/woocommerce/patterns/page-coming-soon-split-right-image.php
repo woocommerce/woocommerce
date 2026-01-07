@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Coming Soon Split Right Image
+ * Title: WooCommerce - Coming Soon Split Right Image
  * Slug: woocommerce/page-coming-soon-split-right-image
  * Categories: WooCommerce
  * Template Types: coming-soon

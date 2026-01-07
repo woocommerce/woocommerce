@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Distraction Free Header
+ * Title: WooCommerce Blocks - Distraction Free Header
  * Slug: woocommerce-blocks/header-distraction-free
  * Categories: WooCommerce
  * Block Types: core/template-part/header
