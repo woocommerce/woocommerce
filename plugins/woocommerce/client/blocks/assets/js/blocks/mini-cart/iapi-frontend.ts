@@ -172,10 +172,7 @@ store< MiniCart >(
 	{
 		state: {
 			get totalItemsInCart() {
-				return woocommerceState.cart.items.reduce< number >(
-					( total, { quantity } ) => total + quantity,
-					0
-				);
+				return woocommerceState.cart.items_count;
 			},
 
 			get formattedSubtotal(): string {
