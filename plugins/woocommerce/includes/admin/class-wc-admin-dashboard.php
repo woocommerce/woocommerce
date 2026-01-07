@@ -439,12 +439,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					ORDER BY comments.comment_date_gmt DESC
 					LIMIT 5"
 				);
-				$comments   = $wpdb->get_results(
+				$entries   = $wpdb->get_results(
 					"SELECT posts.ID as product_id, comments.comment_ID as comment_id {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				);
 			} else {
 				// Optimized and actualized version of the query: leverage a lookup table for faster joins.
-				$comments = $wpdb->get_results(
+				$entries = $wpdb->get_results(
 					"SELECT posts.ID as product_id, comments.comment_ID as comment_id
 					 FROM wp_comments comments
 						LEFT JOIN wp_wc_product_meta_lookup lookup ON(lookup.product_id = comments.comment_post_ID)
@@ -456,43 +456,17 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				);
 			}
 
-			if ( $comments ) {
-				_prime_comment_caches( array_column( $comments, 'comment_id' ), false );
-				_prime_post_caches( array_column( $comments, 'product_id' ), false, false );
-
-				echo '<ul>';
-				foreach ( $comments as $comment ) {
-					$product = wc_get_product( $comment->product_id );
-					$comment = get_comment( $comment->comment_id );
-					if ( $product && $comment && current_user_can( 'read_product', $product->get_id() ) ) {
-						echo '<li>';
-
-						echo get_avatar( $comment->comment_author_email, '32' );
-
-						$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
-
-						/* translators: %s: rating */
-						echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
-
-						/**
-						 * Filters product title to display in the last reviews.
-						 *
-						 * @since 2.1.0
-						 *
-						 * @param string      $product_title The product title.
-						 * @param \WP_Comment $comment       The comment.
-						 */
-						$product_title = apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $product->get_title(), $comment );
-
-						/* translators: %s: review author */
-						echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $product->get_id() ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( $product_title ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
-						echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
-					}
-				}
-				echo '</ul>';
-			} else {
-				echo '<p>' . esc_html__( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
+			if ( $entries ) {
+				_prime_comment_caches( array_column( $entries, 'comment_id' ), false );
+				_prime_post_caches( array_column( $entries, 'product_id'), false, false );
 			}
+
+			wc_get_template(
+				'dashboard-widget-last-reviews.php',
+				array(
+					'entries' => $entries,
+				)
+			);
 		}
 
 		/**
