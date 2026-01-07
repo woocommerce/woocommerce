@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove usage of feature_is_enabled in ProductVersionStringInvalidator::init

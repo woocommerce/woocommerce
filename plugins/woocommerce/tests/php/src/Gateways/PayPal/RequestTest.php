@@ -97,25 +97,22 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_create_paypal_order_params_are_correct(): void {
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
 		$order = \WC_Helper_Order::create_order();
 		$order->set_cart_tax( 10 );
 		$order->set_shipping_tax( 0 );
 		$order->set_total( 60 );
 		$order->save();
 
-		// Ensure no other filters interfere with this test.
-		remove_all_filters( 'pre_http_request' );
-
-		// Use priority 5 to ensure this filter runs before other filters that might intercept the request.
-		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 5, 3 );
+		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 3 );
 
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
-		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 5 );
+		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10 );
 
-		// temporarily disabled this assertion. Will re-enable later when all the refactor is done.
-		// $this->assertNotNull( $result ); // todo: re-enable this assertion.
+		$this->assertNotNull( $result );
 	}
 
 	/**
@@ -452,8 +449,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_skipped_when_already_captured_via_capture_id(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_capture_id', 'CAPTURE_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, 'CAPTURE_123' );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -480,7 +477,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		// Verify capture_auth API was not called.
 		$this->assertEquals( 0, $capture_api_call_count, 'Expected no capture_auth API call when payment already captured' );
 		// Verify status was not changed.
-		$this->assertEquals( 'CAPTURE_123', $order->get_meta( '_paypal_capture_id', true ) );
+		$this->assertEquals( 'CAPTURE_123', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, true ) );
 	}
 
 	/**
@@ -506,8 +503,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_skipped_when_status_already_captured( string $status ): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_status', $status );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -534,7 +531,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		// Verify capture_auth API was not called.
 		$this->assertEquals( 0, $capture_api_call_count, 'Expected no capture_auth API call when status is ' . $status );
 		// Verify status remained the same.
-		$this->assertEquals( $status, $order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( $status, $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 	}
 
 	/**
@@ -544,8 +541,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_succeeds_with_http_200(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, 'AUTH_123' );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -575,7 +572,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals(
 			PayPalConstants::STATUS_CAPTURED,
-			$order->get_meta( '_paypal_status', true )
+			$order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true )
 		);
 	}
 
@@ -586,9 +583,9 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_fails(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
-		$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_AUTHORIZED );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, 'AUTH_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_AUTHORIZED );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -628,9 +625,9 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $notes[0]->content );
 		$this->assertStringContainsString( $debug_id, $notes[0]->content );
 		// Verify capture ID was not set.
-		$this->assertEmpty( $order->get_meta( '_paypal_capture_id', true ) );
+		$this->assertEmpty( $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, true ) );
 		// Verify status was not updated.
-		$this->assertEquals( PayPalConstants::STATUS_AUTHORIZED, $order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( PayPalConstants::STATUS_AUTHORIZED, $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 	}
 
 	/**
@@ -640,9 +637,9 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_handles_404_error_and_sets_authorization_checked_flag(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
-		$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_AUTHORIZED );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, 'AUTH_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_AUTHORIZED );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -679,11 +676,11 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $notes[0]->content );
 		$this->assertStringContainsString( 'Authorization ID: ' . $authorization_id . ' not found', $notes[0]->content );
 		// Verify authorization_checked flag was set.
-		$this->assertEquals( 'yes', $order->get_meta( '_paypal_authorization_checked', true ), 'Expected _paypal_authorization_checked flag to be set to yes' );
+		$this->assertEquals( 'yes', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_CHECKED, true ), 'Expected _paypal_authorization_checked flag to be set to yes' );
 		// Verify capture ID was not set.
-		$this->assertEmpty( $order->get_meta( '_paypal_capture_id', true ) );
+		$this->assertEmpty( $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, true ) );
 		// Verify status was not updated.
-		$this->assertEquals( PayPalConstants::STATUS_AUTHORIZED, $order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( PayPalConstants::STATUS_AUTHORIZED, $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 	}
 
 	/**
@@ -693,8 +690,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_handles_wp_error_response(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, 'AUTH_123' );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -740,8 +737,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_request_includes_correct_parameters(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, 'AUTH_123' );
 		$order->save();
 
 		$captured_request       = null;
@@ -787,7 +784,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_retrieves_authorization_id_from_api(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
 		// Don't set _paypal_authorization_id.
 		$order->save();
 
@@ -848,7 +845,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 
 		// Verify authorization ID was stored.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( 'AUTH_3', $order->get_meta( '_paypal_authorization_id', true ) );
+		$this->assertEquals( 'AUTH_3', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, true ) );
 	}
 
 	/**
@@ -858,7 +855,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_skipped_when_api_returns_capture_data(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -924,8 +921,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, $capture_api_call_count, 'Expected no capture_auth API call when capture already exists' );
 		// Verify capture ID was stored and no capture request was made.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( 'CAPTURE_2', $order->get_meta( '_paypal_capture_id', true ) );
-		$this->assertEquals( PayPalConstants::STATUS_COMPLETED, $order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( 'CAPTURE_2', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, true ) );
+		$this->assertEquals( PayPalConstants::STATUS_COMPLETED, $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 	}
 
 	/**
@@ -935,7 +932,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_skipped_when_authorization_status_is_captured(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -989,7 +986,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, $capture_api_call_count, 'Expected no capture_auth API call when authorization already captured' );
 		// Verify status was updated but no capture request was made.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( PayPalConstants::STATUS_CAPTURED, $order->get_meta( '_paypal_status', true ) );
+		$this->assertEquals( PayPalConstants::STATUS_CAPTURED, $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) );
 	}
 
 	/**
@@ -999,8 +996,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_authorization_checked_flag_prevents_repeated_calls(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_authorization_checked', 'yes' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_CHECKED, 'yes' );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -1027,7 +1024,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		// Verify capture_auth API was not called.
 		$this->assertEquals( 0, $capture_api_call_count, 'Expected no capture_auth API call when authorization_checked flag is set' );
 		// Verify capture ID was not set.
-		$this->assertEmpty( $order->get_meta( '_paypal_capture_id', true ) );
+		$this->assertEmpty( $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, true ) );
 	}
 
 	/**
@@ -1037,7 +1034,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_handles_api_exception_during_retrieval(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -1073,7 +1070,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, $capture_api_call_count, 'Expected no capture_auth API call when order details retrieval fails' );
 		// Verify capture ID was not set.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEmpty( $order->get_meta( '_paypal_capture_id', true ) );
+		$this->assertEmpty( $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, true ) );
 	}
 
 	/**
@@ -1083,7 +1080,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_selects_most_recent_authorization(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
 		$order->save();
 
 		add_filter(
@@ -1143,7 +1140,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 
 		// Verify the most recent authorization ID was stored.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( 'AUTH_NEWEST', $order->get_meta( '_paypal_authorization_id', true ) );
+		$this->assertEquals( 'AUTH_NEWEST', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, true ) );
 	}
 
 	/**
@@ -1153,8 +1150,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_respects_test_mode_setting(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, 'AUTH_123' );
 		$order->save();
 
 		// Test with test mode enabled.
@@ -1197,7 +1194,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_handles_empty_authorization_array(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
 		$order->save();
 
 		add_filter(
@@ -1241,7 +1238,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 
 		// Verify authorization_checked flag was set.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( 'yes', $order->get_meta( '_paypal_authorization_checked', true ) );
+		$this->assertEquals( 'yes', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_CHECKED, true ) );
 	}
 
 	/**
@@ -1251,7 +1248,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_handles_invalid_update_time(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
 		$order->save();
 
 		add_filter(
@@ -1306,7 +1303,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 
 		// Verify the valid authorization was used.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( 'AUTH_VALID', $order->get_meta( '_paypal_authorization_id', true ) );
+		$this->assertEquals( 'AUTH_VALID', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, true ) );
 	}
 
 	/**
@@ -1316,7 +1313,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_handles_missing_purchase_units(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
 		$order->save();
 
 		add_filter(
@@ -1353,7 +1350,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 
 		// Verify authorization_checked flag was set.
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( 'yes', $order->get_meta( '_paypal_authorization_checked', true ) );
+		$this->assertEquals( 'yes', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_CHECKED, true ) );
 	}
 
 	/**
@@ -1363,8 +1360,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_authorized_payment_handles_auth_already_captured_errors(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_order_id', 'PAYPAL_ORDER_123' );
-		$order->update_meta_data( '_paypal_authorization_id', 'AUTH_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, 'AUTH_123' );
 		$order->save();
 
 		$capture_api_call_count = 0;
@@ -1410,7 +1407,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals(
 			PayPalConstants::STATUS_CAPTURED,
-			$order->get_meta( '_paypal_status', true )
+			$order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true )
 		);
 	}
 
