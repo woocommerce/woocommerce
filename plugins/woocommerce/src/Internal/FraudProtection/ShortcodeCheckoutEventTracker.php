@@ -69,9 +69,6 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 
 		// Traditional checkout: Track when checkout fields are updated.
 		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
-
-		// WooCommerce AJAX: Handle payment method selection tracking.
-		add_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this, 'ajax_handle_payment_method_selected' ) );
 	}
 
 	/**
@@ -93,36 +90,6 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 
 		$event_data = $this->build_checkout_event_data( 'field_update', $data );
 		$this->track_checkout_event( 'checkout_field_update', $event_data );
-	}
-
-	/**
-	 * Handle AJAX payment method selection event.
-	 *
-	 * Triggered via WooCommerce AJAX when payment method is changed in checkout.
-	 * This is called from JavaScript when the payment_method_selected event fires.
-	 *
-	 * @internal
-	 *
-	 * @return void
-	 */
-	public function ajax_handle_payment_method_selected(): void {
-		// Get payment method from POST data.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce AJAX endpoints don't require nonce for logged-out users.
-		$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method'] ) ) : '';
-
-		if ( empty( $payment_method ) ) {
-			wp_send_json_error( array( 'message' => 'Payment method is required.' ) );
-		}
-
-		// Track the payment method selection.
-		$event_data = $this->build_checkout_event_data(
-			'payment_method_selected',
-			array( 'payment' => array( 'payment_method_type' => $payment_method ) )
-		);
-
-		$this->track_checkout_event( 'checkout_payment_method_selected', $event_data );
-		// Send success response.
-		wp_send_json_success( array( 'message' => 'Payment method tracked.' ) );
 	}
 
 	/**
