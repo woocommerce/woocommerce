@@ -444,6 +444,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				);
 			} else {
 				// Optimized and actualized version of the query: leverage a lookup table for faster joins.
+				// The double join covers potential hiccups around tables sync (if Actions Scheduler is busy).
 				$entries = $wpdb->get_results(
 					"SELECT posts.ID as product_id, comments.comment_ID as comment_id
 					 FROM wp_comments comments
