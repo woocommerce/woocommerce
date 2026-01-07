@@ -68,37 +68,8 @@ class BlocksCheckoutEventTracker implements RegisterHooksInterface {
 
 		// WooCommerce Blocks (Store API): Track when customer data is updated in Blocks checkout.
 		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'handle_store_api_customer_update' ), 10, 2 );
-
-		// Add script parameters for payment method tracking.
-		add_action( 'wp_enqueue_scripts', array( $this, 'add_script_params' ) );
 	}
-
-	/**
-	 * Add fraud protection parameters to the checkout blocks script.
-	 *
-	 * @return void
-	 */
-	public function add_script_params(): void {
-		// Only add params on checkout page.
-		if ( ! is_checkout() || is_order_received_page() ) {
-			return;
-		}
-
-		// Only add params if fraud protection is enabled.
-		if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
-			return;
-		}
-
-		// Add script parameters to the existing blocks-checkout script.
-		wp_localize_script(
-			'wc-checkout-block-frontend',
-			'wc_fraud_protection_blocks_params',
-			array(
-				'enabled' => true,
-			)
-		);
-	}
-
+	
 	/**
 	 * Handle Store API customer update event (WooCommerce Blocks checkout).
 	 *
