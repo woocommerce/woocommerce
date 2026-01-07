@@ -63,6 +63,7 @@ const LayoutOptionsControl = ( props: DisplayLayoutControlProps ) => {
 			} }
 		>
 			<ToggleGroupControl
+				__nextHasNoMarginBottom
 				label={ __( 'Layout', 'woocommerce' ) }
 				isBlock
 				onChange={ ( value: LayoutOptions ) => {

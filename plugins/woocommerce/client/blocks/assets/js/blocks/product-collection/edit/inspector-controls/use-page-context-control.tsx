@@ -76,6 +76,7 @@ const InheritQueryControl = ( {
 			} }
 		>
 			<ToggleGroupControl
+				__nextHasNoMarginBottom
 				className="wc-block-product-collection__inherit-query-control"
 				isBlock
 				label={ label }
@@ -134,6 +135,7 @@ const FilterableControl = ( {
 			} }
 		>
 			<ToggleGroupControl
+				__nextHasNoMarginBottom
 				className="wc-block-product-collection__inherit-query-control"
 				isBlock
 				label={ label }

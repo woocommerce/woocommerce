@@ -54,6 +54,7 @@ const WidthOptionsControl = ( {
 			isShownByDefault
 		>
 			<ToggleGroupControl
+				__nextHasNoMarginBottom
 				label={ __( 'Width', 'woocommerce' ) }
 				value={ widthType }
 				help={ getHelpText( widthType ) }
