@@ -325,12 +325,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Filter by visibility in POS.
-		if ( is_bool( $request['visible_in_pos'] ) ) {
+		if ( true === $request['pos_products_only'] ) {
 			$args['tax_query'][] = array(
 				'taxonomy' => 'pos_product_visibility',
 				'field'    => 'slug',
 				'terms'    => 'pos-hidden',
-				'operator' => true === $request['visible_in_pos'] ? 'NOT IN' : 'IN',
+				'operator' => 'NOT IN',
 			);
 		}
 
@@ -1954,7 +1954,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$params['visible_in_pos'] = array(
+		$params['pos_products_only'] = array(
 			'description'       => __( 'Limit result set to products visible in Point of Sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
