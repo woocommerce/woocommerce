@@ -39,7 +39,7 @@ class ApiClient {
 	/**
 	 * WPCOM fraud protection events endpoint path within Transact platform.
 	 */
-	private const EVENTS_ENDPOINT = 'transact/fraud-protection/events';
+	private const EVENTS_ENDPOINT = 'transact/fraud_protection/events';
 
 	/**
 	 * Decision type: allow session.
