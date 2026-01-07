@@ -27,7 +27,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Mock event tracker.
+	 * Mock event dispatcher.
 	 *
 	 * @var FraudProtectionDispatcher|\PHPUnit\Framework\MockObject\MockObject
 	 */
