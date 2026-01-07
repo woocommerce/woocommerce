@@ -101,9 +101,9 @@ function onInit() {
 	initDomTracking();
 	createStore();
 	initContentValidationMiddleware();
-	initializeLayout();
 	initBlocks();
 	initTextHooks();
+	initializeLayout();
 }
 
 export function initialize( elementId: string ) {
