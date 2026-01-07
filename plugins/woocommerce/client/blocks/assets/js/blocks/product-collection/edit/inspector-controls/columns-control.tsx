@@ -62,6 +62,7 @@ const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 			>
 				<RangeControl
 					__next40pxDefaultSize
+					__nextHasNoMarginBottom
 					label={ columnsLabel }
 					onChange={ onColumnsChange }
 					value={ columns }
