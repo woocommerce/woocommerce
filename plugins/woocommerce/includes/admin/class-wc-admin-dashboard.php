@@ -465,7 +465,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					$product = wc_get_product( $comment->product_id );
 					$comment = get_comment( $comment->comment_id );
 					if ( $product && $comment && current_user_can( 'read_product', $product->get_id() ) ) {
-
 						echo '<li>';
 
 						echo get_avatar( $comment->comment_author_email, '32' );
