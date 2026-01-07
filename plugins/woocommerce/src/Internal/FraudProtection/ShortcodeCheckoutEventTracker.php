@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * This class hooks into traditional WooCommerce checkout events (billing/email changes,
  * payment selection) and triggers comprehensive event tracking with full session
- * context. It implements batching to reduce API calls for rapid successive updates.
+ * context.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
@@ -78,7 +78,6 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	 * Handle traditional checkout field update event.
 	 *
 	 * Triggered when checkout fields are updated via AJAX (woocommerce_update_order_review).
-	 * Implements batching to reduce API calls for rapid successive updates.
 	 *
 	 * @internal
 	 *
@@ -93,7 +92,7 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		$event_data = $this->build_checkout_event_data( 'field_update', $data );
-		$this->scheduler->schedule_tracking( 'checkout_field_update', $event_data );
+		$this->track_checkout_event( 'checkout_field_update', $event_data );
 	}
 
 	/**
@@ -121,7 +120,7 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 			array( 'payment' => array( 'payment_method_type' => $payment_method ) )
 		);
 
-		$this->scheduler->schedule_tracking( 'checkout_payment_method_selected', $event_data );
+		$this->track_checkout_event( 'checkout_payment_method_selected', $event_data );
 		// Send success response.
 		wp_send_json_success( array( 'message' => 'Payment method tracked.' ) );
 	}
@@ -272,6 +271,40 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		return $shipping_method_data;
+	}
+
+	/**
+	 * Track a checkout event immediately.
+	 *
+	 * Collects comprehensive session data and tracks the event immediately.
+	 *
+	 * @param string $event_type          Event type identifier.
+	 * @param array  $event_specific_data Event-specific data to merge with session context.
+	 * @return void
+	 */
+	private function track_checkout_event( string $event_type, array $event_specific_data ): void {
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( $event_type, $event_specific_data );
+		} catch ( \Exception $e ) {
+			// If collection fails, log and abort tracking.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for checkout event: %s | Error: %s',
+					$event_type,
+					$e->getMessage()
+				),
+				array(
+					'event_type' => $event_type,
+					'exception'  => $e,
+				)
+			);
+			return;
+		}
+
+		// Track the event immediately.
+		$this->tracker->track_event( $event_type, $collected_data );		$this->tracker->track_event( $event_type, $collected_data );
 	}
 
 	/**

@@ -24511,18 +24511,6 @@ parameters:
 			path: includes/gateways/cod/class-wc-gateway-cod.php
 
 		-
-			message: '#^Method WC_Gateway_Paypal_Buttons\:\:get_current_page_for_app_switch\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal-buttons.php
-
-		-
-			message: '#^Parameter \#1 \$post of function get_permalink expects int\|WP_Post, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal-buttons.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$ACK\.$#'
 			identifier: property.notFound
 			count: 1
@@ -62704,12 +62692,6 @@ parameters:
 			path: src/Blocks/Payments/Integrations/Cheque.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Blocks/Payments/Integrations/PayPal.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Payments\\Integrations\\PayPal\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -64028,6 +64010,18 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: src/Gateways/PayPal/AddressRequirements.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Buttons\:\:get_current_page_for_app_switch\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Gateways/PayPal/Buttons.php
+
+		-
+			message: '#^Parameter \#1 \$post of function get_permalink expects int\|WP_Post, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/Buttons.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Request\:\:send_wpcom_proxy_request\(\) never returns array so it can be removed from the return type\.$#'
