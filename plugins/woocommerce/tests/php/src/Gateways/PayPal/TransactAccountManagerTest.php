@@ -1,38 +1,39 @@
 <?php
 /**
- * Class WC_Gateway_Paypal_Transact_Account_Manager_Test file.
+ * Class TransactAccountManagerTest file.
  *
  * @package WooCommerce\Tests\Gateways\PayPal
  */
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php';
+use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 /**
- * WC_Gateway_Paypal_Transact_Account_Manager_Test class.
+ * TransactAccountManagerTest class.
  *
  * @package WooCommerce\Tests\Gateways\PayPal
  */
-class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case {
+class TransactAccountManagerTest extends \WC_Unit_Test_Case {
 	/**
 	 * Mock PayPal gateway.
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var \WC_Gateway_Paypal
 	 */
-	private $gateway;
+	private \WC_Gateway_Paypal $gateway;
 
 	/**
 	 * Account manager instance.
 	 *
-	 * @var WC_Gateway_Paypal_Transact_Account_Manager
+	 * @var PayPalTransactAccountManager
 	 */
-	private $account_manager;
+	private PayPalTransactAccountManager $account_manager;
 
 	/**
 	 * Set up test fixtures.
@@ -41,7 +42,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		parent::setUp();
 
 		// Create mock PayPal gateway.
-		$this->gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+		$this->gateway = $this->getMockBuilder( \WC_Gateway_Paypal::class )
 			->disableOriginalConstructor()
 			->getMock();
 
@@ -50,17 +51,19 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		$this->gateway->testmode = true;
 
 		// Create account manager instance.
-		$this->account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+		$this->account_manager = new PayPalTransactAccountManager( $this->gateway );
 	}
 
 	/**
 	 * Test constructor sets gateway.
+	 *
+	 * @return void
 	 */
-	public function test_constructor_sets_gateway() {
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+	public function test_constructor_sets_gateway(): void {
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
 
 		// Use reflection to access the private gateway property.
-		$reflection       = new ReflectionClass( $account_manager );
+		$reflection       = new \ReflectionClass( $account_manager );
 		$gateway_property = $reflection->getProperty( 'gateway' );
 		$gateway_property->setAccessible( true );
 
@@ -69,8 +72,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test do_onboarding when email is empty.
+	 *
+	 * @return void
 	 */
-	public function test_do_onboarding_when_email_empty() {
+	public function test_do_onboarding_when_email_empty(): void {
 		$this->gateway->email = '';
 
 		// Should not throw any errors and should return early.
@@ -81,8 +86,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test do_onboarding when Jetpack registration fails.
+	 *
+	 * @return void
 	 */
-	public function test_do_onboarding_when_jetpack_registration_fails() {
+	public function test_do_onboarding_when_jetpack_registration_fails(): void {
 		// Mock the gateway to return a mock Jetpack connection manager.
 		$jetpack_manager = $this->getMockBuilder( 'stdClass' )
 			->addMethods( array( 'is_connected', 'try_registration' ) )
@@ -92,7 +99,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 			->willReturn( false );
 
 		$jetpack_manager->method( 'try_registration' )
-			->willReturn( new WP_Error( 'registration_failed', 'Registration failed' ) );
+			->willReturn( new \WP_Error( 'registration_failed', 'Registration failed' ) );
 
 		$this->gateway->method( 'get_jetpack_connection_manager' )
 			->willReturn( $jetpack_manager );
@@ -105,8 +112,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test do_onboarding when merchant account creation fails.
+	 *
+	 * @return void
 	 */
-	public function test_do_onboarding_when_merchant_account_creation_fails() {
+	public function test_do_onboarding_when_merchant_account_creation_fails(): void {
 		// Mock the gateway to return a mock Jetpack connection manager.
 		$jetpack_manager = $this->getMockBuilder( 'stdClass' )
 			->addMethods( array( 'is_connected' ) )
@@ -128,7 +137,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		// Should do nothing. Should not throw any errors.
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
 		$account_manager->do_onboarding();
 
 		// Clean up the filters.
@@ -141,8 +150,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test do_onboarding when provider account creation fails.
+	 *
+	 * @return void
 	 */
-	public function test_do_onboarding_when_provider_account_creation_fails() {
+	public function test_do_onboarding_when_provider_account_creation_fails(): void {
 		// Mock the gateway to return a mock Jetpack connection manager.
 		$jetpack_manager = $this->getMockBuilder( 'stdClass' )
 			->addMethods( array( 'is_connected' ) )
@@ -164,7 +175,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		// Should do nothing. Should not throw any errors.
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
 		$account_manager->do_onboarding();
 
 		// Check that it returns true.
@@ -177,8 +188,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test get_merchant_account_data returns cached data when available.
+	 *
+	 * @return void
 	 */
-	public function test_get_merchant_account_data_returns_cached_data() {
+	public function test_get_merchant_account_data_returns_cached_data(): void {
 		// Return valid cache data.
 		add_filter(
 			'pre_option_woocommerce_paypal_transact_merchant_account_test',
@@ -199,8 +212,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test get_merchant_account_data returns null when cache is expired.
+	 *
+	 * @return void
 	 */
-	public function test_get_merchant_account_data_returns_null_when_cache_expired() {
+	public function test_get_merchant_account_data_returns_null_when_cache_expired(): void {
 		// Mock cache to return expired data.
 		add_filter(
 			'pre_option_woocommerce_paypal_transact_merchant_account_test',
@@ -220,8 +235,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test get_merchant_account_data fetches when cache is empty and caches fetched data.
+	 *
+	 * @return void
 	 */
-	public function test_get_merchant_account_data_fetches_and_caches_data() {
+	public function test_get_merchant_account_data_fetches_and_caches_data(): void {
 		// Return empty cache.
 		add_filter(
 			'pre_option_woocommerce_paypal_transact_merchant_account_test',
@@ -237,7 +254,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		// Return a successful response, with the merchant account data.
 		add_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ) );
 
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
 		$result          = $account_manager->get_transact_account_data( 'merchant' );
 
 		// Clean up the filters.
@@ -260,8 +277,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test get_provider_account_data returns cached data when available.
+	 *
+	 * @return void
 	 */
-	public function test_get_provider_account_data_returns_cached_data() {
+	public function test_get_provider_account_data_returns_cached_data(): void {
 		// Return valid cache data.
 		add_filter(
 			'pre_option_woocommerce_paypal_transact_provider_account_test',
@@ -282,8 +301,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test get_provider_account_data returns null when cache is expired.
+	 *
+	 * @return void
 	 */
-	public function test_get_provider_account_data_returns_null_when_cache_expired() {
+	public function test_get_provider_account_data_returns_null_when_cache_expired(): void {
 		// Mock cache to return expired data.
 		add_filter(
 			'pre_option_woocommerce_paypal_transact_provider_account_test',
@@ -303,8 +324,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test get_provider_account_data fetches when cache is empty and caches fetched data.
+	 *
+	 * @return void
 	 */
-	public function test_get_provider_account_data_fetches_and_caches_data() {
+	public function test_get_provider_account_data_fetches_and_caches_data(): void {
 		// Return empty cache.
 		add_filter(
 			'pre_option_woocommerce_paypal_transact_provider_account_test',
@@ -320,7 +343,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		// Return a successful response, with the provider account data.
 		add_filter( 'pre_http_request', array( $this, 'return_provider_account_api_success' ) );
 
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
 		$result          = $account_manager->get_transact_account_data( 'provider' );
 
 		// Clean up the filters.
@@ -340,8 +363,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test fetch_merchant_account when API request fails.
+	 *
+	 * @return void
 	 */
-	public function test_fetch_merchant_account_when_api_request_fails() {
+	public function test_fetch_merchant_account_when_api_request_fails(): void {
 		// Mock Jetpack options to return a valid site ID.
 		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
@@ -351,8 +376,8 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		// Mock the HTTP request to return an error.
 		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
-		$reflection      = new ReflectionClass( $account_manager );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
+		$reflection      = new \ReflectionClass( $account_manager );
 		$method          = $reflection->getMethod( 'fetch_merchant_account' );
 		$method->setAccessible( true );
 
@@ -368,8 +393,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test fetch_merchant_account when API response is successful.
+	 *
+	 * @return void
 	 */
-	public function test_fetch_merchant_account_when_api_response_successful() {
+	public function test_fetch_merchant_account_when_api_response_successful(): void {
 		// Mock Jetpack options to return a valid site ID.
 		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
@@ -379,8 +406,8 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		// Mock the HTTP request to return a successful response.
 		add_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ) );
 
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
-		$reflection      = new ReflectionClass( $account_manager );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
+		$reflection      = new \ReflectionClass( $account_manager );
 		$method          = $reflection->getMethod( 'fetch_merchant_account' );
 		$method->setAccessible( true );
 
@@ -396,8 +423,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test fetch_provider_account when API request fails.
+	 *
+	 * @return void
 	 */
-	public function test_fetch_provider_account_when_api_request_fails() {
+	public function test_fetch_provider_account_when_api_request_fails(): void {
 		// Mock Jetpack options to return a valid site ID.
 		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
@@ -408,10 +437,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		// Create a real account manager instance.
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
 
 		// Use reflection to access the private fetch_provider_account method.
-		$reflection = new ReflectionClass( $account_manager );
+		$reflection = new \ReflectionClass( $account_manager );
 		$method     = $reflection->getMethod( 'fetch_provider_account' );
 		$method->setAccessible( true );
 		$result = $method->invoke( $account_manager );
@@ -426,8 +455,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test fetch_provider_account when API response is successful.
+	 *
+	 * @return void
 	 */
-	public function test_fetch_provider_account_when_api_response_successful() {
+	public function test_fetch_provider_account_when_api_response_successful(): void {
 		// Mock Jetpack options to return a valid site ID.
 		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
@@ -437,8 +468,8 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		// Mock the HTTP request to return a successful response.
 		add_filter( 'pre_http_request', array( $this, 'return_provider_account_api_success' ) );
 
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
-		$reflection      = new ReflectionClass( $account_manager );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
+		$reflection      = new \ReflectionClass( $account_manager );
 		$method          = $reflection->getMethod( 'fetch_provider_account' );
 		$method->setAccessible( true );
 		$result = $method->invoke( $account_manager );
@@ -454,8 +485,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test create_merchant_account when API request fails.
+	 *
+	 * @return void
 	 */
-	public function test_create_merchant_account_when_api_request_fails() {
+	public function test_create_merchant_account_when_api_request_fails(): void {
 		// Mock Jetpack options to return a valid site ID.
 		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
@@ -466,10 +499,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
 		// Create a real account manager instance.
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
 
 		// Use reflection to access the private create_merchant_account method.
-		$reflection    = new ReflectionClass( $account_manager );
+		$reflection    = new \ReflectionClass( $account_manager );
 		$create_method = $reflection->getMethod( 'create_merchant_account' );
 		$create_method->setAccessible( true );
 
@@ -486,8 +519,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test create_merchant_account when API response is successful.
+	 *
+	 * @return void
 	 */
-	public function test_create_merchant_account_when_api_response_successful() {
+	public function test_create_merchant_account_when_api_response_successful(): void {
 		// Mock Jetpack options to return a valid site ID.
 		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
@@ -498,10 +533,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ) );
 
 		// Create a real account manager instance.
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
 
 		// Use reflection to access the private create_merchant_account method.
-		$reflection = new ReflectionClass( $account_manager );
+		$reflection = new \ReflectionClass( $account_manager );
 		$method     = $reflection->getMethod( 'create_merchant_account' );
 		$method->setAccessible( true );
 
@@ -518,8 +553,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test create_provider_account when API request fails.
+	 *
+	 * @return void
 	 */
-	public function test_create_provider_account_when_api_request_fails() {
+	public function test_create_provider_account_when_api_request_fails(): void {
 		// Mock Jetpack options to return a valid site ID.
 		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
@@ -529,8 +566,8 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		// Mock the HTTP request to return an error.
 		add_filter( 'pre_http_request', array( $this, 'return_api_error' ) );
 
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
-		$reflection      = new ReflectionClass( $account_manager );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
+		$reflection      = new \ReflectionClass( $account_manager );
 		$method          = $reflection->getMethod( 'create_provider_account' );
 		$method->setAccessible( true );
 		$result = $method->invoke( $account_manager );
@@ -546,8 +583,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 
 	/**
 	 * Test create_provider_account when API response is successful.
+	 *
+	 * @return void
 	 */
-	public function test_create_provider_account_when_api_response_successful() {
+	public function test_create_provider_account_when_api_response_successful(): void {
 		// Mock Jetpack options to return a valid site ID.
 		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
@@ -557,8 +596,8 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		// Mock the HTTP request to return a successful response.
 		add_filter( 'pre_http_request', array( $this, 'return_provider_account_api_success' ) );
 
-		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
-		$reflection      = new ReflectionClass( $account_manager );
+		$account_manager = new PayPalTransactAccountManager( $this->gateway );
+		$reflection      = new \ReflectionClass( $account_manager );
 		$method          = $reflection->getMethod( 'create_provider_account' );
 		$method->setAccessible( true );
 		$result = $method->invoke( $account_manager );
@@ -575,10 +614,10 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	/**
 	 * Helper method to return API error response.
 	 *
-	 * @return WP_Error Error response.
+	 * @return \WP_Error Error response.
 	 */
-	public function return_api_error() {
-		return new WP_Error( 'api_error', 'API request failed' );
+	public function return_api_error(): \WP_Error {
+		return new \WP_Error( 'api_error', 'API request failed' );
 	}
 
 	/**
@@ -586,7 +625,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return array Success response.
 	 */
-	public function return_merchant_account_api_success() {
+	public function return_merchant_account_api_success(): array {
 		return array(
 			'response' => array( 'code' => 200 ),
 			'body'     => wp_json_encode(
@@ -602,7 +641,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return array Success response.
 	 */
-	public function return_provider_account_api_success() {
+	public function return_provider_account_api_success(): array {
 		return array( 'response' => array( 'code' => 200 ) );
 	}
 
@@ -611,9 +650,9 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @param mixed $value The option value.
 	 *
-	 * @return null
+	 * @return array
 	 */
-	public function return_null_site_id( $value ) {
+	public function return_null_site_id( $value ): array {
 		return array( 'id' => null );
 	}
 
@@ -622,9 +661,9 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @param mixed $value The option value.
 	 *
-	 * @return int
+	 * @return array
 	 */
-	public function return_valid_site_id( $value ) {
+	public function return_valid_site_id( $value ): array {
 		return array( 'id' => 12345 );
 	}
 
@@ -633,7 +672,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return false
 	 */
-	public function return_empty_merchant_account_cache() {
+	public function return_empty_merchant_account_cache(): bool {
 		return false;
 	}
 
@@ -642,7 +681,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return array
 	 */
-	public function return_expired_merchant_account_cache() {
+	public function return_expired_merchant_account_cache(): array {
 		return array(
 			'account' => array( 'public_id' => 'test_public_id' ),
 			'expiry'  => time() - 3600, // Expired 1 hour ago.
@@ -654,7 +693,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return array
 	 */
-	public function return_valid_merchant_account_cache() {
+	public function return_valid_merchant_account_cache(): array {
 		return array(
 			'account' => array( 'public_id' => 'test_public_id' ),
 			'expiry'  => time() + 3600, // Expires in 1 hour.
@@ -666,7 +705,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return false
 	 */
-	public function return_empty_provider_account_cache() {
+	public function return_empty_provider_account_cache(): bool {
 		return false;
 	}
 
@@ -675,7 +714,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return array
 	 */
-	public function return_expired_provider_account_cache() {
+	public function return_expired_provider_account_cache(): array {
 		return array(
 			'account' => true,
 			'expiry'  => time() - 3600, // Expired 1 hour ago.
@@ -687,7 +726,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return array
 	 */
-	public function return_valid_provider_account_cache() {
+	public function return_valid_provider_account_cache(): array {
 		return array(
 			'account' => true,
 			'expiry'  => time() + 3600, // Expires in 1 hour.
@@ -701,7 +740,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 	 *
 	 * @return array
 	 */
-	public function return_blog_token( $value ) {
+	public function return_blog_token( $value ): array {
 		return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
 	}
 

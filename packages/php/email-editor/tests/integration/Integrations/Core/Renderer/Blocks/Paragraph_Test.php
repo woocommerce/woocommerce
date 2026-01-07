@@ -172,4 +172,78 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
 	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-center class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignCenterClass(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_paragraph['attrs']['textAlign'] );
+		unset( $parsed_paragraph['attrs']['align'] );
+
+		$content                          = '<p class="has-text-align-center">Centered text</p>';
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:center;', $rendered );
+		$this->assertStringContainsString( 'align="center"', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-right class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignRightClass(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_paragraph['attrs']['textAlign'] );
+		unset( $parsed_paragraph['attrs']['align'] );
+
+		$content                          = '<p class="has-text-align-right">Right aligned text</p>';
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-left class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignLeftClass(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_paragraph['attrs']['textAlign'] );
+		unset( $parsed_paragraph['attrs']['align'] );
+
+		$content                          = '<p class="has-text-align-left">Left aligned text</p>';
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:left;', $rendered );
+		$this->assertStringContainsString( 'align="left"', $rendered );
+	}
+
+	/**
+	 * Test it prioritizes textAlign attribute over has-text-align-* class
+	 */
+	public function testItPrioritizesTextAlignAttributeOverClass(): void {
+		$parsed_paragraph                       = $this->parsed_paragraph;
+		$parsed_paragraph['attrs']['textAlign'] = 'right';
+		unset( $parsed_paragraph['attrs']['align'] );
+
+		$content                          = '<p class="has-text-align-center">Text with center class but right attribute</p>';
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		// Should use the attribute, not the class.
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+		$this->assertStringNotContainsString( 'text-align:center;', $rendered );
+		$this->assertStringNotContainsString( 'align="center"', $rendered );
+	}
 }

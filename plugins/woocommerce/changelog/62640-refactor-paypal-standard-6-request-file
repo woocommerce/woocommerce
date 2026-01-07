@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Deprecate orders v2 related methods in WC_Gateway_Paypal_Request class in favor of the Automattic\WooCommerce\Gateways\PayPal\Request class.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Performance: clean up filter data transients cache along with the product/shop transients cache.
