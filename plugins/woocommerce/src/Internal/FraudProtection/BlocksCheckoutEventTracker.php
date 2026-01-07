@@ -69,7 +69,7 @@ class BlocksCheckoutEventTracker implements RegisterHooksInterface {
 		// WooCommerce Blocks (Store API): Track when customer data is updated in Blocks checkout.
 		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'handle_store_api_customer_update' ), 10, 2 );
 	}
-	
+
 	/**
 	 * Handle Store API customer update event (WooCommerce Blocks checkout).
 	 *
