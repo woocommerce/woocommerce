@@ -461,7 +461,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				_prime_post_caches( array_column( $entries, 'product_id'), false, false );
 
 				echo '<ul>';
-				foreach ($entries as $entry ) {
+				foreach ( $entries as $entry ) {
 					if ( current_user_can( 'read_product', $entry->product_id ) ) {
 						wc_get_template(
 							'dashboard-widget-reviews.php',
