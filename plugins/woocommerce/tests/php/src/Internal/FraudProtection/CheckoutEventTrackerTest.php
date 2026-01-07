@@ -136,7 +136,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Simulate checkout field update with billing email.
 		$posted_data = 'billing_email=test@example.com&billing_first_name=John&billing_last_name=Doe';
 		$this->sut->handle_checkout_field_update( $posted_data );
-	}	
+	}
 
 	/**
 	 * Test handle_checkout_field_update tracks shipping method immediately.
