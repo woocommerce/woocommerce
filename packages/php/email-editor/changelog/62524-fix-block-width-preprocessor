@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Email Editor: prevent fatal type errors in Blocks_Width_Preprocessor

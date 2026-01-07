@@ -22,14 +22,6 @@ defined( 'ABSPATH' ) || exit;
  * @internal This class is part of the internal API and is subject to change without notice.
  */
 class BlocksCheckoutEventTracker implements RegisterHooksInterface {
-
-	/**
-	 * Checkout event scheduler instance.
-	 *
-	 * @var CheckoutEventScheduler
-	 */
-	private CheckoutEventScheduler $scheduler;
-
 	/**
 	 * Fraud protection controller instance.
 	 *
@@ -38,18 +30,25 @@ class BlocksCheckoutEventTracker implements RegisterHooksInterface {
 	private FraudProtectionController $fraud_protection_controller;
 
 	/**
+	 * Fraud protection dispatcher instance.
+	 *
+	 * @var FraudProtectionDispatcher
+	 */
+	private FraudProtectionDispatcher $dispatcher;
+
+	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param CheckoutEventScheduler    $scheduler                   The checkout event scheduler instance.
+	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		CheckoutEventScheduler $scheduler,
+		FraudProtectionDispatcher $dispatcher,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->scheduler                   = $scheduler;
+		$this->dispatcher                  = $dispatcher;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
@@ -69,35 +68,6 @@ class BlocksCheckoutEventTracker implements RegisterHooksInterface {
 
 		// WooCommerce Blocks (Store API): Track when customer data is updated in Blocks checkout.
 		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'handle_store_api_customer_update' ), 10, 2 );
-
-		// Add script parameters for payment method tracking.
-		add_action( 'wp_enqueue_scripts', array( $this, 'add_script_params' ) );
-	}
-
-	/**
-	 * Add fraud protection parameters to the checkout blocks script.
-	 *
-	 * @return void
-	 */
-	public function add_script_params(): void {
-		// Only add params on checkout page.
-		if ( ! is_checkout() || is_order_received_page() ) {
-			return;
-		}
-
-		// Only add params if fraud protection is enabled.
-		if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
-			return;
-		}
-
-		// Add script parameters to the existing blocks-checkout script.
-		wp_localize_script(
-			'wc-checkout-block-frontend',
-			'wc_fraud_protection_blocks_params',
-			array(
-				'enabled' => true,
-			)
-		);
 	}
 
 	/**
@@ -150,7 +120,7 @@ class BlocksCheckoutEventTracker implements RegisterHooksInterface {
 
 		// Build and schedule the event.
 		$event_data = $this->build_checkout_event_data( 'store_api_update', $posted_data );
-		$this->scheduler->schedule_tracking( 'checkout_blocks_customer_update', $event_data );
+		$this->dispatcher->dispatch_event( 'checkout_blocks_customer_update', $event_data );
 	}
 
 	/**

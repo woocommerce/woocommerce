@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * This class hooks into traditional WooCommerce checkout events (billing/email changes,
  * payment selection) and triggers comprehensive event tracking with full session
- * context. It implements batching to reduce API calls for rapid successive updates.
+ * context.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
@@ -26,9 +26,9 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	/**
 	 * Checkout event scheduler instance.
 	 *
-	 * @var CheckoutEventScheduler
+	 * @var FraudProtectionDispatcher
 	 */
-	private CheckoutEventScheduler $scheduler;
+	private FraudProtectionDispatcher $dispatcher;
 
 	/**
 	 * Fraud protection controller instance.
@@ -42,14 +42,14 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param CheckoutEventScheduler    $scheduler                   The checkout event scheduler instance.
+	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		CheckoutEventScheduler $scheduler,
+		FraudProtectionDispatcher $dispatcher,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->scheduler                   = $scheduler;
+		$this->dispatcher                  = $dispatcher;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
@@ -69,16 +69,12 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 
 		// Traditional checkout: Track when checkout fields are updated.
 		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
-
-		// WooCommerce AJAX: Handle payment method selection tracking.
-		add_action( 'wc_ajax_fraud_protection_payment_method_selected', array( $this, 'ajax_handle_payment_method_selected' ) );
 	}
 
 	/**
 	 * Handle traditional checkout field update event.
 	 *
 	 * Triggered when checkout fields are updated via AJAX (woocommerce_update_order_review).
-	 * Implements batching to reduce API calls for rapid successive updates.
 	 *
 	 * @internal
 	 *
@@ -93,37 +89,7 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		$event_data = $this->build_checkout_event_data( 'field_update', $data );
-		$this->scheduler->schedule_tracking( 'checkout_field_update', $event_data );
-	}
-
-	/**
-	 * Handle AJAX payment method selection event.
-	 *
-	 * Triggered via WooCommerce AJAX when payment method is changed in checkout.
-	 * This is called from JavaScript when the payment_method_selected event fires.
-	 *
-	 * @internal
-	 *
-	 * @return void
-	 */
-	public function ajax_handle_payment_method_selected(): void {
-		// Get payment method from POST data.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce AJAX endpoints don't require nonce for logged-out users.
-		$payment_method = isset( $_POST['payment_method'] ) ? sanitize_text_field( wp_unslash( $_POST['payment_method'] ) ) : '';
-
-		if ( empty( $payment_method ) ) {
-			wp_send_json_error( array( 'message' => 'Payment method is required.' ) );
-		}
-
-		// Track the payment method selection.
-		$event_data = $this->build_checkout_event_data(
-			'payment_method_selected',
-			array( 'payment' => array( 'payment_method_type' => $payment_method ) )
-		);
-
-		$this->scheduler->schedule_tracking( 'checkout_payment_method_selected', $event_data );
-		// Send success response.
-		wp_send_json_success( array( 'message' => 'Payment method tracked.' ) );
+		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
 	}
 
 	/**
@@ -273,6 +239,7 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 
 		return $shipping_method_data;
 	}
+
 
 	/**
 	 * Get readable shipping method names from shipping method IDs.

@@ -27,11 +27,11 @@ defined( 'ABSPATH' ) || exit;
 class PaymentMethodEventTracker implements RegisterHooksInterface {
 
 	/**
-	 * Event tracker instance.
+	 * Fraud protection dispatcher instance.
 	 *
-	 * @var EventTracker
+	 * @var FraudProtectionDispatcher
 	 */
-	private EventTracker $event_tracker;
+	private FraudProtectionDispatcher $dispatcher;
 
 	/**
 	 * Session data collector instance.
@@ -52,16 +52,16 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param EventTracker              $event_tracker               The event tracker instance.
+	 * @param FraudProtectionDispatcher $dispatcher                     The fraud protection dispatcher instance.
 	 * @param SessionDataCollector      $data_collector              The session data collector instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		EventTracker $event_tracker,
+		FraudProtectionDispatcher $dispatcher,
 		SessionDataCollector $data_collector,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->event_tracker               = $event_tracker;
+		$this->dispatcher                  = $dispatcher;
 		$this->data_collector              = $data_collector;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
@@ -82,7 +82,6 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		add_action( 'woocommerce_payment_token_updated', array( $this, 'handle_payment_method_updated' ), 10, 1 );
 		add_action( 'woocommerce_payment_token_set_default', array( $this, 'handle_payment_method_set_default' ), 10, 2 );
 		add_action( 'woocommerce_payment_token_deleted', array( $this, 'handle_payment_method_deleted' ), 10, 2 );
-		add_action( 'woocommerce_payment_token_add_failed', array( $this, 'handle_payment_method_add_failed' ), 10, 2 );
 	}
 
 	/**
@@ -101,7 +100,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		// Collect comprehensive session data.
 		try {
 			$collected_data = $this->data_collector->collect( 'payment_method_added', $event_data );
-			$this->event_tracker->track_event( 'payment_method_added', $collected_data );
+			$this->dispatcher->dispatch_event( 'payment_method_added', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -141,7 +140,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		// Collect comprehensive session data.
 		try {
 			$collected_data = $this->data_collector->collect( 'payment_method_updated', $event_data );
-			$this->event_tracker->track_event( 'payment_method_updated', $collected_data );
+			$this->dispatcher->dispatch_event( 'payment_method_updated', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -175,7 +174,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		// Collect comprehensive session data.
 		try {
 			$collected_data = $this->data_collector->collect( 'payment_method_set_default', $event_data );
-			$this->event_tracker->track_event( 'payment_method_set_default', $collected_data );
+			$this->dispatcher->dispatch_event( 'payment_method_set_default', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -209,7 +208,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		// Collect comprehensive session data.
 		try {
 			$collected_data = $this->data_collector->collect( 'payment_method_deleted', $event_data );
-			$this->event_tracker->track_event( 'payment_method_deleted', $collected_data );
+			$this->dispatcher->dispatch_event( 'payment_method_deleted', $collected_data );
 		} catch ( \Exception $e ) {
 			// Log error but don't break functionality.
 			FraudProtectionController::log(
@@ -221,43 +220,6 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 				),
 				array(
 					'event_type' => 'payment_method_deleted',
-					'exception'  => $e,
-				)
-			);
-		}
-	}
-
-	/**
-	 * Handle payment method add failed event.
-	 *
-	 * Triggers fraud protection event tracking when a payment method fails to be added.
-	 * This hook should be fired by payment gateways when a payment method addition
-	 * attempt fails, providing the token object that was attempted and the failure reason.
-	 *
-	 * @internal
-	 *
-	 * @param \WC_Payment_Token $token          The payment token object that failed to be added.
-	 * @param string            $failure_reason The reason for failure (e.g., 'validation_failed', 'gateway_error', 'declined').
-	 */
-	public function handle_payment_method_add_failed( \WC_Payment_Token $token, string $failure_reason ): void {
-		$event_data                   = $this->build_payment_method_event_data( 'add_failed', $token );
-		$event_data['failure_reason'] = $failure_reason;
-
-		// Collect comprehensive session data.
-		try {
-			$collected_data = $this->data_collector->collect( 'payment_method_add_failed', $event_data );
-			$this->event_tracker->track_event( 'payment_method_add_failed', $collected_data );
-		} catch ( \Exception $e ) {
-			// Log error but don't break functionality.
-			FraudProtectionController::log(
-				'error',
-				sprintf(
-					'Failed to collect session data for payment method event: %s | Error: %s',
-					'payment_method_add_failed',
-					$e->getMessage()
-				),
-				array(
-					'event_type' => 'payment_method_add_failed',
 					'exception'  => $e,
 				)
 			);
