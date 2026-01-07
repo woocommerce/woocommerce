@@ -417,48 +417,60 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		public function recent_reviews() {
 			global $wpdb;
 
-			// Enforce the use of a Woo-index for this query, as the database prefers join over our indexes.
-			// Backward compatible with https://github.com/woocommerce/woocommerce/pull/13409 (back from 2017):
-			// the filter can modify the query, for example by forcing a custom index, which may conflict with our optimizations.
-			$force_comments_index = '';
-			if ( ! has_filter( 'woocommerce_report_recent_reviews_query_from' ) && version_compare( Constants::get_constant( 'WC_VERSION' ), '10.3.0', '>=' ) ) {
-				$force_comments_index = ' USE INDEX (woo_idx_comment_date_type)';
+			if ( has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
+				// TODO: flag deprecation here
+				$query_from = apply_filters(
+					'woocommerce_report_recent_reviews_query_from',
+					"FROM {$wpdb->comments} comments
+					LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
+					WHERE comments.comment_approved = '1'
+					AND comments.comment_type = 'review'
+					AND posts.post_password = ''
+					AND posts.post_type = 'product'
+					AND comments.comment_parent = 0
+					ORDER BY comments.comment_date_gmt DESC
+					LIMIT 5"
+				);
+				$comments = $wpdb->get_results(
+					"SELECT posts.ID as product_ID, comments.comment_ID {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				);
+			} else {
+				// Optimized and actualized version of the query: leverage a lookup table for faster joins.
+				$comments = $wpdb->get_results(
+					"SELECT posts.ID as product_ID, comments.comment_ID
+					 FROM wp_comments comments
+						LEFT JOIN wp_wc_product_meta_lookup lookup ON(lookup.product_id = comments.comment_post_ID)
+						LEFT JOIN wp_posts posts ON(posts.ID = lookup.product_id)
+					 WHERE
+						comments.comment_type = 'review' AND comments.comment_approved = '1'
+					 ORDER BY comments.comment_date_gmt DESC
+					 LIMIT 5"
+				);
 			}
 
-			$query_from = apply_filters(
-				'woocommerce_report_recent_reviews_query_from',
-				"FROM {$wpdb->comments} comments{$force_comments_index}
-				LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
-				WHERE comments.comment_approved = '1'
-				AND comments.comment_type = 'review'
-				AND posts.post_password = ''
-				AND posts.post_type = 'product'
-				AND comments.comment_parent = 0
-				ORDER BY comments.comment_date_gmt DESC
-				LIMIT 5"
-			);
-
-			$comments = $wpdb->get_results(
-				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_author_email, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			);
-
 			if ( $comments ) {
+				_prime_comment_caches( array_column( $comments, 'comment_ID' ), false );
+				_prime_post_caches( array_column( $comments, 'product_ID' ), false, false );
+
 				echo '<ul>';
 				foreach ( $comments as $comment ) {
+					if ( current_user_can( 'read_product', $comment->product_ID ) ) {
+						$product = wc_get_product( $comment->product_ID );
+						$comment = get_comment( $comment->comment_ID );
 
-					echo '<li>';
+						echo '<li>';
 
-					echo get_avatar( $comment->comment_author_email, '32' );
+						echo get_avatar( $comment->comment_author_email, '32' );
 
-					$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
+						$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
-					/* translators: %s: rating */
-					echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
+						/* translators: %s: rating */
+						echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
 
-					/* translators: %s: review author */
-					echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $comment->ID ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
-					echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
-
+						/* translators: %s: review author */
+						echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $product->get_id() ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $product->get_title(), $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
+						echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
+					}
 				}
 				echo '</ul>';
 			} else {
