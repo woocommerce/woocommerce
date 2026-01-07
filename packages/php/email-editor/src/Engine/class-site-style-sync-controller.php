@@ -134,7 +134,40 @@ class Site_Style_Sync_Controller {
 			// Get only the theme and user customizations (e.g. from site editor).
 			$this->site_theme = new WP_Theme_JSON();
 			$this->site_theme->merge( WP_Theme_JSON_Resolver::get_theme_data() );
-			$this->site_theme->merge( WP_Theme_JSON_Resolver::get_user_data() );
+			
+			$user_data = WP_Theme_JSON_Resolver::get_user_data();
+			
+			// Fallback: If get_user_data() returns empty data, loop through all global styles posts
+			// to find one with actual data. This handles cases where theme paths don't match
+			// the post slug (e.g., subdirectory themes like 'pub/arbutus').
+			$user_data_raw = $user_data->get_raw_data();
+			$is_empty_data = ! isset( $user_data_raw['settings'] ) && ! isset( $user_data_raw['styles'] );
+			
+			if ( $is_empty_data ) {
+				$global_styles_posts = get_posts(
+					array(
+						'post_type'      => 'wp_global_styles',
+						'posts_per_page' => -1,
+						'post_status'    => 'publish',
+					)
+				);
+				
+				foreach ( $global_styles_posts as $post ) {
+					$decoded_content = json_decode( $post->post_content, true );
+					if ( ! is_array( $decoded_content ) ) {
+						continue;
+					}
+					
+					// Check if this post has actual data (settings or styles).
+					$has_data = isset( $decoded_content['settings'] ) || isset( $decoded_content['styles'] );
+					if ( $has_data ) {
+						$user_data = new WP_Theme_JSON( $decoded_content, 'custom' );
+						break;
+					}
+				}
+			}
+			
+			$this->site_theme->merge( $user_data );
 
 			if ( isset( $this->site_theme->get_raw_data()['styles'] ) ) {
 				$this->site_theme = WP_Theme_JSON::resolve_variables( $this->site_theme );
