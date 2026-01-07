@@ -47,6 +47,7 @@ const KeywordControl = ( props: QueryControlProps ) => {
 			resetAllFilter={ deselectCallback }
 		>
 			<TextControl
+				__nextHasNoMarginBottom
 				label={ __( 'Keyword', 'woocommerce' ) }
 				value={ querySearch }
 				onChange={ setQuerySearch }
