@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Email Editor: Handle cases where theme paths don't match the post slug.
