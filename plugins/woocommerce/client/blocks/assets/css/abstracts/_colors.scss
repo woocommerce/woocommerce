@@ -9,7 +9,7 @@ $input-text-dark: currentColor;
 $input-placeholder-dark: color-mix(in srgb, currentColor 80%, transparent);
 $input-border-dark: currentColor;
 $input-background-light: #fff;
-$input-background-dark: rgba(0, 0, 0, 0.1);
+$input-background-dark: transparent;
 $image-placeholder-border-color: #f2f2f2;
 
 // Universal colors for use on the frontend, currently being applied to checkout blocks.
