@@ -87,8 +87,8 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
-		// TODO: We should not use the existing Cart type which was perhaps designed for redux,
-		// the props are camel case, but we're using the Store API cart representation which is snake case.
+		// TODO: We should not use the existing Cart type. The props are camel case,
+		// but we're using the Store API cart representation which is snake case.
 		cart: Omit< Cart, 'items' | 'item_count' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
