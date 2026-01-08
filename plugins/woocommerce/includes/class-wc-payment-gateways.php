@@ -344,6 +344,33 @@ All at %6$s
 	}
 
 	/**
+	 * Get readable payment method name from payment method ID.
+	 *
+	 * Retrieves the payment gateway title from the payment method ID by loading
+	 * the payment gateway instance.
+	 *
+	 * @param string $payment_gateway_id Payment method ID (e.g., "stripe", "paypal", "bacs").
+	 * @return string Payment method name or ID if name not found.
+	 */
+	public function get_payment_gateway_name_by_id( string $payment_gateway_id ): string {
+		// Get available payment gateways.
+		$payment_gateways = $this->payment_gateways();
+
+		// Check if the payment method exists and has a title.
+		if ( isset( $payment_gateways[ $payment_gateway_id ] ) ) {
+			$gateway = $payment_gateways[ $payment_gateway_id ];
+			if ( is_object( $gateway ) && method_exists( $gateway, 'get_title' ) ) {
+				return $gateway->get_title();
+			} elseif ( is_object( $gateway ) && isset( $gateway->title ) ) {
+				return $gateway->title;
+			}
+		}
+
+		// Return the ID as fallback if no title found.
+		return $payment_gateway_id;
+	}
+
+	/**
 	 * Get array of registered gateway ids
 	 *
 	 * @since 2.6.0
