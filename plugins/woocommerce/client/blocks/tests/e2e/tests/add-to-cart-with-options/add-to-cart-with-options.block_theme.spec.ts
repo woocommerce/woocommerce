@@ -1219,7 +1219,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			| 'Pills'
 			| 'Dropdown'
 		 )[] ) {
-			test( `${ optionStyle }: Auto-select should work`, async ( {
+			test( `${ optionStyle }: Test the autoselect block attribute`, async ( {
 				page,
 				pageObject,
 				editor,
@@ -1244,13 +1244,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await test.step( `${ optionStyle }: Expect attributes to NOT auto-select when user selects something`, async () => {
 					await page.goto( productPermalink );
 
-					// Expect nothing to be auto-selected
 					await pageObject.selectVariationSelectorOptionsBlockAttribute(
 						'Color',
 						'Blue',
 						optionStyle
 					);
 
+					// Expect nothing to be auto-selected
 					await pageObject.expectSelectedAttributes(
 						productAttributes,
 						{ Type: '', Color: 'Blue', Size: '' },
@@ -1267,10 +1267,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 					);
 				} );
 
-				await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
+				await test.step( `${ optionStyle }: Expect only the Type attribute to be auto-selected (on page load)`, async () => {
 					await page.goto( productPermalink );
 
-					// Expect Size to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
+					// Expect the Type attribute to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
 					await pageObject.expectSelectedAttributes(
 						productAttributes,
 						{ Type: 'T-shirt', Color: '', Size: '' },
@@ -1281,7 +1281,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await test.step( `${ optionStyle }: Expect attributes to auto-select when user selects something`, async () => {
 					await page.goto( productPermalink );
 
-					// By setting the Color to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
+					// By setting the Color to "Blue", we expect the Type attribute to be auto-selected to "T-shirt", and the Size to "XL".
 					await pageObject.selectVariationSelectorOptionsBlockAttribute(
 						'Color',
 						'Blue',
@@ -1295,7 +1295,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					);
 				} );
 			} );
-			test( `${ optionStyle }: Test the multiple choices of the Values in conflict setting`, async ( {
+			test( `${ optionStyle }: Test the disabledAttributesAction block attribute`, async ( {
 				page,
 				pageObject,
 				editor,
@@ -1307,7 +1307,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					{ optionStyle }
 				);
 
-				await test.step( `${ optionStyle }: Set the unattached_attribute_action setting to "hide"`, async () => {
+				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "hide"`, async () => {
 					await setAddToCartWithOptionsBlockAttributes(
 						pageObject,
 						editor,
@@ -1317,7 +1317,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 						}
 					);
 				} );
-				await test.step( `${ optionStyle }: Expect unattached options to be hidden (by attribute)`, async () => {
+				await test.step( `${ optionStyle }: Expect invalid options to be hidden (by attribute)`, async () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", the only possible Size remaining is "XL".
@@ -1334,7 +1334,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					).toBeHidden();
 				} );
 
-				await test.step( `${ optionStyle }: Expect unattached options to be disabled (by prop)`, async () => {
+				await test.step( `${ optionStyle }: Expect invalid options to be disabled (by prop)`, async () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", the only possible Size remaining is "XL".
@@ -1351,32 +1351,32 @@ test.describe( 'Add to Cart + Options Block', () => {
 					).toBeDisabled();
 				} );
 			} );
-			test( `${ optionStyle }: Combining Auto-select on user selection and Values in conflict settings should work`, async ( {
+			test( `${ optionStyle }: Combining autoselect and disabledAttributesAction block attributes should work`, async ( {
 				page,
 				pageObject,
 				editor,
 			} ) => {
-				for ( const value of [ 'disable', 'hide' ] as (
+				for ( const disabledAttributesAction of [ 'disable', 'hide' ] as (
 					| 'disable'
 					| 'hide'
 				 )[] ) {
 					await pageObject.updateSingleProductTemplate();
 
-					await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
+					await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "${ disabledAttributesAction }"`, async () => {
 						await setAddToCartWithOptionsBlockAttributes(
 							pageObject,
 							editor,
 							{
 								autoselect: true,
 								optionStyle,
-								disabledAttributesAction: value,
+								disabledAttributesAction,
 							}
 						);
 					} );
-					await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
+					await test.step( `disabledAttributesAction === ${ disabledAttributesAction }: Expect options to be properly auto-selected`, async () => {
 						await page.goto( productPermalink );
 
-						// By setting the Color to "Blue", the only possible Size remaining is "XL".
+						// By selecting the Color to "Blue", the only possible Size remaining is "XL".
 						await pageObject.selectVariationSelectorOptionsBlockAttribute(
 							'Color',
 							'Blue',
@@ -1388,7 +1388,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 							'',
 							optionStyle
 						);
-						// Now, the options should look like this:
+						// Now, the attributes should look like this:
 						// Type: T-shirt
 						// Color: ''
 						// Size: XL

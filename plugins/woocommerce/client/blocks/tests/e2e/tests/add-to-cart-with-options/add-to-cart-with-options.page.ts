@@ -126,8 +126,8 @@ class AddToCartWithOptionsPage {
 	}
 
 	async selectVariationSelectorOptionsBlockAttribute(
-		attributeName: any,
-		attributeValue: any,
+		attributeName: string,
+		attributeValue: string,
 		optionStyle: 'Pills' | 'Dropdown',
 	) {
 		if ( optionStyle === 'Dropdown' ) {
