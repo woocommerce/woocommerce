@@ -217,18 +217,18 @@ const program = new Command( 'changefile' )
 			} );
 
 			if ( isGithubCI() ) {
-				// await git.raw(
-				// 	'config',
-				// 	'--global',
-				// 	'user.email',
-				// 	'woocommercebot@users.noreply.github.com'
-				// );
-				// await git.raw(
-				// 	'config',
-				// 	'--global',
-				// 	'user.name',
-				// 	'woocommercebot'
-				// );
+				await git.raw(
+					'config',
+					'--global',
+					'user.email',
+					'woocommercebot@users.noreply.github.com'
+				);
+				await git.raw(
+					'config',
+					'--global',
+					'user.name',
+					'woocommercebot'
+				);
 			}
 
 			const shortStatus = await git.raw( [ 'status', '--short' ] );
