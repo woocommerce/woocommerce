@@ -217,18 +217,18 @@ const program = new Command( 'changefile' )
 			} );
 
 			if ( isGithubCI() ) {
-				await git.raw(
-					'config',
-					'--global',
-					'user.email',
-					'github-actions@github.com'
-				);
-				await git.raw(
-					'config',
-					'--global',
-					'user.name',
-					'github-actions'
-				);
+				// await git.raw(
+				// 	'config',
+				// 	'--global',
+				// 	'user.email',
+				// 	'github-actions@github.com'
+				// );
+				// await git.raw(
+				// 	'config',
+				// 	'--global',
+				// 	'user.name',
+				// 	'github-actions'
+				// );
 			}
 
 			const shortStatus = await git.raw( [ 'status', '--short' ] );
