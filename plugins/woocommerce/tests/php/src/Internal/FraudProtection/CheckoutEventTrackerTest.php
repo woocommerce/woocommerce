@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 
 /**
  * Tests for CheckoutEventTracker.
@@ -40,6 +41,13 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	private $mock_controller;
 
 	/**
+	 * Mock session data collector.
+	 *
+	 * @var SessionDataCollector|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $mock_data_collector;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -51,14 +59,16 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create mocks.
-		$this->mock_dispatcher = $this->createMock( FraudProtectionDispatcher::class );
-		$this->mock_controller = $this->createMock( FraudProtectionController::class );
+		$this->mock_dispatcher     = $this->createMock( FraudProtectionDispatcher::class );
+		$this->mock_controller     = $this->createMock( FraudProtectionController::class );
+		$this->mock_data_collector = $this->createMock( SessionDataCollector::class );
 
 		// Create system under test.
 		$this->sut = new CheckoutEventTracker();
 		$this->sut->init(
 			$this->mock_dispatcher,
-			$this->mock_controller
+			$this->mock_controller,
+			$this->mock_data_collector
 		);
 	}
 
@@ -73,12 +83,11 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$this->sut->register();
 
 		// Verify hooks were not registered.
-		$this->assertFalse( has_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this->sut, 'handle_store_api_customer_update' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_checkout_field_update' ) ) );
 	}
 
 	/**
-	 * Test that register registers both Blocks and shortcode hooks when feature is enabled.
+	 * Test that register registers shortcode checkout hooks when feature is enabled.
 	 */
 	public function test_register_registers_hooks_when_feature_enabled(): void {
 		// Mock feature as enabled.
@@ -87,8 +96,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Call register.
 		$this->sut->register();
 
-		// Verify both hooks were registered.
-		$this->assertNotFalse( has_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this->sut, 'handle_store_api_customer_update' ) ) );
+		// Verify hook was registered.
 		$this->assertNotFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_checkout_field_update' ) ) );
 	}
 
@@ -97,166 +105,128 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	// ========================================
 
 	/**
-	 * Test handle_store_api_customer_update schedules event with billing address.
+	 * Test track_blocks_checkout_update dispatches event with session data.
 	 */
-	public function test_handle_store_api_customer_update_schedules_event_with_billing_address(): void {
-		// Mock feature as enabled.
-		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
-
-		// Create mock customer and request.
-		$customer = $this->createMock( \WC_Customer::class );
-		$request  = $this->createMock( \WP_REST_Request::class );
-
-		// Mock request to return billing address with all fields.
-		$request->method( 'get_param' )->willReturnMap(
-			array(
-				array(
-					'billing_address',
-					array(
-						'first_name' => 'John',
-						'last_name'  => 'Doe',
-						'email'      => 'john@example.com',
-						'phone'      => '555-1234',
-						'address_1'  => '123 Main St',
-						'address_2'  => 'Apt 4B',
-						'city'       => 'New York',
-						'state'      => 'NY',
-						'postcode'   => '10001',
-						'country'    => 'US',
-					),
-				),
-				array( 'shipping_address', array() ),
-			)
+	public function test_track_blocks_checkout_update_dispatches_event_with_session_data(): void {
+		// Mock data collector to return session data.
+		$session_data = array(
+			'session_id'       => 'test_session_123',
+			'billing_email'    => 'test@example.com',
+			'billing_address'  => array(
+				'first_name' => 'John',
+				'last_name'  => 'Doe',
+			),
+			'shipping_address' => array(
+				'city' => 'New York',
+			),
 		);
+		$this->mock_data_collector
+			->expects( $this->once() )
+			->method( 'collect' )
+			->with(
+				$this->equalTo( 'checkout_blocks_address_update' ),
+				$this->equalTo( array() )
+			)
+			->willReturn( $session_data );
 
-		// Mock scheduler to capture event data.
+		// Mock dispatcher to verify event is dispatched.
+		$this->mock_dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' )
+			->with(
+				$this->equalTo( 'checkout_blocks_address_update' ),
+				$this->equalTo( $session_data )
+			);
+
+		// Call the method.
+		$this->sut->track_blocks_checkout_update();
+	}
+
+	/**
+	 * Test track_blocks_checkout_update can be called directly without hooks.
+	 */
+	public function test_track_blocks_checkout_update_works_without_hooks(): void {
+		// Mock data collector to return minimal session data.
+		$session_data = array(
+			'session_id' => 'test_session_456',
+		);
+		$this->mock_data_collector
+			->method( 'collect' )
+			->willReturn( $session_data );
+
+		// Mock dispatcher to verify event is dispatched.
+		$this->mock_dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' );
+
+		// Call the method directly (as done from CartUpdateCustomer endpoint).
+		$this->sut->track_blocks_checkout_update();
+	}
+
+	// ========================================
+	// Shipping Rate Selection Tests
+	// ========================================
+
+	/**
+	 * Test handle_shipping_rate_selection dispatches event with rate information.
+	 */
+	public function test_handle_shipping_rate_selection_dispatches_event_with_rate_info(): void {
+		// Create mock request.
+		$request = $this->createMock( \WP_REST_Request::class );
+
+		// Mock dispatcher to capture event data.
 		$captured_event_data = null;
 		$this->mock_dispatcher
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
 			->with(
-				$this->equalTo( 'checkout_blocks_customer_update' ),
+				$this->equalTo( 'checkout_blocks_shipping_rate_select' ),
 				$this->callback(
 					function ( $event_data ) use ( &$captured_event_data ) {
 						$captured_event_data = $event_data;
 						return isset( $event_data['action'] )
-							&& 'store_api_update' === $event_data['action']
-							&& isset( $event_data['billing_email'] )
-							&& 'john@example.com' === $event_data['billing_email']
-							&& isset( $event_data['billing_first_name'] )
-							&& 'John' === $event_data['billing_first_name'];
+							&& 'shipping_rate_select' === $event_data['action']
+							&& isset( $event_data['shipping_methods'] )
+							&& is_array( $event_data['shipping_methods'] );
 					}
 				)
 			);
 
-		// Register hooks.
-		$this->sut->register();
-
 		// Call the handler.
-		$this->sut->handle_store_api_customer_update( $customer, $request );
+		$this->sut->handle_shipping_rate_selection( '0', 'flat_rate:1', $request );
 
-		// Verify all billing fields were extracted.
+		// Verify the event data was captured correctly.
 		$this->assertNotNull( $captured_event_data );
-		$this->assertEquals( 'store_api_update', $captured_event_data['action'] );
-		$this->assertEquals( 'John', $captured_event_data['billing_first_name'] );
-		$this->assertEquals( 'Doe', $captured_event_data['billing_last_name'] );
-		$this->assertEquals( 'john@example.com', $captured_event_data['billing_email'] );
-		$this->assertEquals( '555-1234', $captured_event_data['billing_phone'] );
-		$this->assertEquals( '123 Main St', $captured_event_data['billing_address_1'] );
-		$this->assertEquals( 'Apt 4B', $captured_event_data['billing_address_2'] );
-		$this->assertEquals( 'New York', $captured_event_data['billing_city'] );
-		$this->assertEquals( 'NY', $captured_event_data['billing_state'] );
-		$this->assertEquals( '10001', $captured_event_data['billing_postcode'] );
-		$this->assertEquals( 'US', $captured_event_data['billing_country'] );
+		$this->assertEquals( 'shipping_rate_select', $captured_event_data['action'] );
+		$this->assertIsArray( $captured_event_data['shipping_methods'] );
+		$this->assertArrayHasKey( 'flat_rate:1', $captured_event_data['shipping_methods'] );
 	}
 
 	/**
-	 * Test handle_store_api_customer_update schedules event with shipping address.
+	 * Test handle_shipping_rate_selection handles different shipping rates.
 	 */
-	public function test_handle_store_api_customer_update_schedules_event_with_shipping_address(): void {
-		// Mock feature as enabled.
-		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
+	public function test_handle_shipping_rate_selection_handles_different_rates(): void {
+		// Create mock request.
+		$request = $this->createMock( \WP_REST_Request::class );
 
-		// Create mock customer and request.
-		$customer = $this->createMock( \WC_Customer::class );
-		$request  = $this->createMock( \WP_REST_Request::class );
-
-		// Mock request to return both billing and shipping addresses.
-		$request->method( 'get_param' )->willReturnMap(
-			array(
-				array(
-					'billing_address',
-					array(
-						'email' => 'john@example.com',
-					),
-				),
-				array(
-					'shipping_address',
-					array(
-						'first_name' => 'Jane',
-						'last_name'  => 'Smith',
-						'address_1'  => '456 Oak Ave',
-						'city'       => 'Los Angeles',
-						'country'    => 'US',
-					),
-				),
-			)
-		);
-
-		// Mock scheduler to capture event data.
-		$captured_event_data = null;
+		// Mock dispatcher to verify event is dispatched with correct structure.
 		$this->mock_dispatcher
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
-			->willReturnCallback(
-				function ( $event_type, $event_data ) use ( &$captured_event_data ) {
-					$captured_event_data = $event_data;
-				}
+			->with(
+				$this->equalTo( 'checkout_blocks_shipping_rate_select' ),
+				$this->callback(
+					function ( $event_data ) {
+						return isset( $event_data['action'] )
+							&& 'shipping_rate_select' === $event_data['action']
+							&& isset( $event_data['shipping_methods'] )
+							&& is_array( $event_data['shipping_methods'] );
+					}
+				)
 			);
 
-		// Register hooks.
-		$this->sut->register();
-
-		// Call the handler.
-		$this->sut->handle_store_api_customer_update( $customer, $request );
-
-		// Verify shipping fields were extracted.
-		$this->assertNotNull( $captured_event_data );
-		$this->assertEquals( 'Jane', $captured_event_data['shipping_first_name'] );
-		$this->assertEquals( 'Smith', $captured_event_data['shipping_last_name'] );
-		$this->assertEquals( '456 Oak Ave', $captured_event_data['shipping_address_1'] );
-		$this->assertEquals( 'Los Angeles', $captured_event_data['shipping_city'] );
-	}
-
-	/**
-	 * Test handle_store_api_customer_update handles empty addresses gracefully.
-	 */
-	public function test_handle_store_api_customer_update_handles_empty_addresses(): void {
-		// Mock feature as enabled.
-		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
-
-		// Create mock customer and request.
-		$customer = $this->createMock( \WC_Customer::class );
-		$request  = $this->createMock( \WP_REST_Request::class );
-
-		// Mock request with empty addresses.
-		$request->method( 'get_param' )->willReturnMap(
-			array(
-				array( 'billing_address', array() ),
-				array( 'shipping_address', array() ),
-			)
-		);
-
-		// Mock scheduler - should still be called.
-		$this->mock_dispatcher
-			->expects( $this->once() )
-			->method( 'dispatch_event' );
-
-		// Register hooks.
-		$this->sut->register();
-
-		// Call the handler - should not throw errors.
-		$this->sut->handle_store_api_customer_update( $customer, $request );
+		// Call the handler with different rate.
+		$this->sut->handle_shipping_rate_selection( null, 'free_shipping:2', $request );
 	}
 
 	// ========================================
