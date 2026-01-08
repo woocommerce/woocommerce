@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
@@ -108,6 +110,11 @@ class CartSelectShippingRate extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_cart_select_shipping_rate', $package_id, $rate_id, $request );
 
 		$cart->calculate_totals();
+
+		$container = wc_get_container();
+		if ( $container->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			$container->get( CheckoutEventTracker::class )->track_blocks_checkout_shipping_method_update( $package_id, $rate_id );
+		}
 
 		return rest_ensure_response( $this->cart_schema->get_item_response( $cart ) );
 	}

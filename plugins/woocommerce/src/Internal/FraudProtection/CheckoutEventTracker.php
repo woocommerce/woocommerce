@@ -98,6 +98,27 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Handle Store API shipping update event (WooCommerce Blocks checkout).
+	 *
+	 * Triggered when shipping information is updated via the Store API endpoint
+	 * /wc/store/v1/cart/select-shipping-rate during Blocks checkout flow.
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function track_blocks_checkout_shipping_method_update( $package_id, $rate_id ): void {
+		$shipping_method_names = $this->get_shipping_method_names( array( $rate_id ) );
+		$event_data = array(
+			'package_id' => $package_id,
+			'rate_id' => $rate_id,
+			'shipping_method_name' => reset( $shipping_method_names ),
+		);
+
+		$collected_data = $this->data_collector->collect( 'checkout_blocks_shipping_method_update', $event_data );
+		$this->dispatcher->dispatch_event( 'checkout_blocks_shipping_method_update', $collected_data );
+	}
+
+	/**
 	 * Get payment data structure for fraud protection analysis.
 	 *
 	 * Returns payment data structure with all 11 supported fields. Currently populates
