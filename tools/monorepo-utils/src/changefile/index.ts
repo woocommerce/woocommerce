@@ -10,7 +10,6 @@ import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
  * Internal dependencies
  */
 import { Logger } from '../core/logger';
-import { isGithubCI } from '../core/environment';
 import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
 import {
 	getPullRequestData,
@@ -215,25 +214,6 @@ const program = new Command( 'changefile' )
 				baseDir: tmpRepoPath,
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
-
-			// if ( isGithubCI() ) {
-			// 	await git.raw(
-			// 		'config',
-			// 		'--global',
-			// 		'user.email',
-			// 		'woocommercebot@users.noreply.github.com'
-			// 	);
-			// 	await git.raw(
-			// 		'config',
-			// 		'--global',
-			// 		'user.name',
-			// 		'woocommercebot'
-			// 	);
-			// }
-
-			Logger.notice(
-				`Debug: identities ${ process.env.GIT_COMMITTER_NAME }, ${ process.env.GIT_AUTHOR_NAME }`
-			);
 
 			const shortStatus = await git.raw( [ 'status', '--short' ] );
 
