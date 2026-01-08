@@ -216,20 +216,20 @@ const program = new Command( 'changefile' )
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
 
-			if ( isGithubCI() ) {
-				await git.raw(
-					'config',
-					'--global',
-					'user.email',
-					'woocommercebot@users.noreply.github.com'
-				);
-				await git.raw(
-					'config',
-					'--global',
-					'user.name',
-					'woocommercebot'
-				);
-			}
+			// if ( isGithubCI() ) {
+			// 	await git.raw(
+			// 		'config',
+			// 		'--global',
+			// 		'user.email',
+			// 		'woocommercebot@users.noreply.github.com'
+			// 	);
+			// 	await git.raw(
+			// 		'config',
+			// 		'--global',
+			// 		'user.name',
+			// 		'woocommercebot'
+			// 	);
+			// }
 
 			const shortStatus = await git.raw( [ 'status', '--short' ] );
 
