@@ -341,13 +341,12 @@ class SessionDataCollector {
 			'first_name' => null,
 			'last_name'  => null,
 			'address'    => null,
-			'address_1'   => null,
-			'address_2'   => null,
+			'address_1'  => null,
+			'address_2'  => null,
 			'city'       => null,
 			'state'      => null,
 			'country'    => null,
 			'phone'      => null,
-			'email'      => null,
 			'postcode'   => null,
 		);
 
