@@ -37,7 +37,7 @@ class SessionDataCollector {
 	 *
 	 * @param SessionClearanceManager $session_clearance_manager The session clearance manager instance.
 	 */
-	final public function init( SessionClearanceManager $session_clearance_manager,  ): void {
+	final public function init( SessionClearanceManager $session_clearance_manager, ): void {
 		$this->session_clearance_manager = $session_clearance_manager;
 	}
 
@@ -138,6 +138,7 @@ class SessionDataCollector {
 			'lifetime_order_count' => 0,
 		);
 		try {
+			$lifetime_order_count = 0;
 
 			// Try WC_Customer object first.
 			if ( WC()->customer instanceof \WC_Customer ) {
@@ -147,26 +148,31 @@ class SessionDataCollector {
 					$lifetime_order_count = $customer->get_order_count();
 				}
 
-				$customer_data = array_merge( $customer_data, array(
-					'first_name'           => \sanitize_text_field( WC()->customer->get_billing_first_name() ),
-					'last_name'            => \sanitize_text_field( WC()->customer->get_billing_last_name() ),
-					'billing_email'        => \sanitize_email( \WC()->customer->get_billing_email() ),
-					'lifetime_order_count' => $lifetime_order_count,
-				) );
+				$customer_data = array_merge(
+					$customer_data,
+					array(
+						'first_name'           => \sanitize_text_field( WC()->customer->get_billing_first_name() ),
+						'last_name'            => \sanitize_text_field( WC()->customer->get_billing_last_name() ),
+						'billing_email'        => \sanitize_email( \WC()->customer->get_billing_email() ),
+						'lifetime_order_count' => $lifetime_order_count,
+					)
+				);
 
 			} elseif ( WC()->session instanceof \WC_Session ) {
 				// Fallback to session customer data if WC_Customer not available.
 				$customer_session_data = WC()->session->get( 'customer' );
-				if ( is_array( $customer_data ) ) {
-					$customer_data = array_merge( $customer_data, array(
-						'first_name'           => \sanitize_text_field( $customer_session_data['first_name'] ?? null ),
-						'last_name'            => \sanitize_text_field( $customer_session_data['last_name'] ?? null ),
-						'billing_email'        => \sanitize_email( $customer_session_data[ 'email' ] ?? null ),
-					) );
+				if ( is_array( $customer_session_data ) ) {
+					$customer_data = array_merge(
+						$customer_data,
+						array(
+							'first_name'    => \sanitize_text_field( $customer_session_data['first_name'] ?? null ),
+							'last_name'     => \sanitize_text_field( $customer_session_data['last_name'] ?? null ),
+							'billing_email' => \sanitize_email( $customer_session_data['email'] ?? null ),
+						)
+					);
 				}
 			}
-
-		} catch ( \Exception $e ) {
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Graceful degradation - return as much data as possible.
 		}
 
@@ -332,51 +338,57 @@ class SessionDataCollector {
 	 */
 	private function get_billing_address(): array {
 		$billing_data = array(
-			'first_name'   => null,
-			'last_name'    => null,
-			'street_1'     => null,
-			'street_2'     => null,
-			'city'         => null,
-			'state'        => null,
-			'country'      => null,
-			'phone'        => null,
-			'email'        => null,
-			'postcode'     => null,
+			'first_name' => null,
+			'last_name'  => null,
+			'street_1'   => null,
+			'street_2'   => null,
+			'city'       => null,
+			'state'      => null,
+			'country'    => null,
+			'phone'      => null,
+			'email'      => null,
+			'postcode'   => null,
 		);
 
 		try {
 			// Try WC_Customer object first.
 			if ( WC()->customer instanceof \WC_Customer ) {
-				$billing_data = array_merge( $billing_data, array(
-					'first_name'   => \sanitize_text_field( WC()->customer->get_billing_first_name() ),
-					'last_name'    => \sanitize_text_field( WC()->customer->get_billing_last_name() ),
-					'address_1'    => \sanitize_text_field( WC()->customer->get_billing_address_1() ) ,
-					'address_2'    => \sanitize_text_field( WC()->customer->get_billing_address_2() ),
-					'city'         => \sanitize_text_field( WC()->customer->get_billing_city() ),
-					'state'        => \sanitize_text_field( WC()->customer->get_billing_state() ),
-					'country'      => \sanitize_text_field( WC()->customer->get_billing_country() ),
-					'phone'        => \sanitize_text_field( WC()->customer->get_billing_phone() ),
-					'postcode'      => \sanitize_text_field( WC()->customer->get_billing_postcode() ),
-				) );
+				$billing_data = array_merge(
+					$billing_data,
+					array(
+						'first_name' => \sanitize_text_field( WC()->customer->get_billing_first_name() ),
+						'last_name'  => \sanitize_text_field( WC()->customer->get_billing_last_name() ),
+						'address_1'  => \sanitize_text_field( WC()->customer->get_billing_address_1() ),
+						'address_2'  => \sanitize_text_field( WC()->customer->get_billing_address_2() ),
+						'city'       => \sanitize_text_field( WC()->customer->get_billing_city() ),
+						'state'      => \sanitize_text_field( WC()->customer->get_billing_state() ),
+						'country'    => \sanitize_text_field( WC()->customer->get_billing_country() ),
+						'phone'      => \sanitize_text_field( WC()->customer->get_billing_phone() ),
+						'postcode'   => \sanitize_text_field( WC()->customer->get_billing_postcode() ),
+					)
+				);
 			} elseif ( WC()->session instanceof \WC_Session ) {
 				// Fallback to session customer data if WC_Customer not available.
 				$customer_data = WC()->session->get( 'customer' );
 				if ( is_array( $customer_data ) ) {
-					$billing_data = array_merge( $billing_data, array(
-						'first_name'   => \sanitize_text_field( $customer_data['first_name'] ?? null ),
-						'last_name'    => \sanitize_text_field( $customer_data['last_name'] ?? null ),
-						'address'       => \sanitize_text_field( $customer_data['address'] ?? null ),
-						'address_1'    => \sanitize_text_field( $customer_data['address_1'] ?? null ),
-						'address_2'    => \sanitize_text_field( $customer_data['address_2'] ?? null ),
-						'city'         => \sanitize_text_field( $customer_data['city'] ?? null ),
-						'state'        => \sanitize_text_field( $customer_data['state'] ?? null ),
-						'country'      => \sanitize_text_field( $customer_data['country'] ?? null ),
-						'phone'        => \sanitize_text_field( $customer_data['phone'] ?? null ),
-						'postcode'     => \sanitize_text_field( $customer_data['postcode'] ?? null ),
-					) );
+					$billing_data = array_merge(
+						$billing_data,
+						array(
+							'first_name' => \sanitize_text_field( $customer_data['first_name'] ?? null ),
+							'last_name'  => \sanitize_text_field( $customer_data['last_name'] ?? null ),
+							'address'    => \sanitize_text_field( $customer_data['address'] ?? null ),
+							'address_1'  => \sanitize_text_field( $customer_data['address_1'] ?? null ),
+							'address_2'  => \sanitize_text_field( $customer_data['address_2'] ?? null ),
+							'city'       => \sanitize_text_field( $customer_data['city'] ?? null ),
+							'state'      => \sanitize_text_field( $customer_data['state'] ?? null ),
+							'country'    => \sanitize_text_field( $customer_data['country'] ?? null ),
+							'phone'      => \sanitize_text_field( $customer_data['phone'] ?? null ),
+							'postcode'   => \sanitize_text_field( $customer_data['postcode'] ?? null ),
+						)
+					);
 				}
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Graceful degradation - prevents any errors from being thrown.
 		}
 
@@ -395,45 +407,51 @@ class SessionDataCollector {
 	 */
 	private function get_shipping_address(): array {
 		$shipping_data = array(
-			'first_name'  => null,
-			'last_name'   => null,
-			'address'     => null,
-			'address_1'   => null,
-			'address_2'   => null,
-			'city'        => null,
-			'state'       => null,
-			'postcode'    => null,
-			'country'     => null,
+			'first_name' => null,
+			'last_name'  => null,
+			'address'    => null,
+			'address_1'  => null,
+			'address_2'  => null,
+			'city'       => null,
+			'state'      => null,
+			'postcode'   => null,
+			'country'    => null,
 		);
-		try{
+		try {
 			if ( WC()->customer instanceof \WC_Customer ) {
-				$shipping_data = array_merge( $shipping_data, array(
-					'first_name'  => \sanitize_text_field( WC()->customer->get_shipping_first_name() ),
-					'last_name'   => \sanitize_text_field( WC()->customer->get_shipping_last_name() ),
-					'address_1'   => \sanitize_text_field( WC()->customer->get_shipping_address_1() ),
-					'address_2'   => \sanitize_text_field( WC()->customer->get_shipping_address_2() ),
-					'city'        => \sanitize_text_field( WC()->customer->get_shipping_city() ),
-					'state'       => \sanitize_text_field( WC()->customer->get_shipping_state() ),
-					'postcode'    => \sanitize_text_field( WC()->customer->get_shipping_postcode() ),
-					'country'     => \sanitize_text_field( WC()->customer->get_shipping_country() ),
-				) );
+				$shipping_data = array_merge(
+					$shipping_data,
+					array(
+						'first_name' => \sanitize_text_field( WC()->customer->get_shipping_first_name() ),
+						'last_name'  => \sanitize_text_field( WC()->customer->get_shipping_last_name() ),
+						'address_1'  => \sanitize_text_field( WC()->customer->get_shipping_address_1() ),
+						'address_2'  => \sanitize_text_field( WC()->customer->get_shipping_address_2() ),
+						'city'       => \sanitize_text_field( WC()->customer->get_shipping_city() ),
+						'state'      => \sanitize_text_field( WC()->customer->get_shipping_state() ),
+						'postcode'   => \sanitize_text_field( WC()->customer->get_shipping_postcode() ),
+						'country'    => \sanitize_text_field( WC()->customer->get_shipping_country() ),
+					)
+				);
 			} elseif ( WC()->session instanceof \WC_Session ) {
 				// Fallback to session customer data if WC_Customer not available.
 				$customer_data = WC()->session->get( 'customer' );
 				if ( is_array( $customer_data ) ) {
-					$shipping_data = array_merge( $shipping_data, array(
-						'first_name'  => \sanitize_text_field( $customer_data['shipping_first_name'] ?? null ),
-						'last_name'   => \sanitize_text_field( $customer_data['shipping_last_name'] ?? null ),
-						'address_1'   => \sanitize_text_field( $customer_data['shipping_address_1'] ?? null ),
-						'address_2'   => \sanitize_text_field( $customer_data['shipping_address_2'] ?? null ),
-						'city'        => \sanitize_text_field( $customer_data['shipping_city'] ?? null ),
-						'state'       => \sanitize_text_field( $customer_data['shipping_state'] ?? null ),
-						'postcode'    => \sanitize_text_field( $customer_data['shipping_postcode'] ?? null ),
-						'country'     => \sanitize_text_field( $customer_data['shipping_country'] ?? null ),
-					) );
+					$shipping_data = array_merge(
+						$shipping_data,
+						array(
+							'first_name' => \sanitize_text_field( $customer_data['shipping_first_name'] ?? null ),
+							'last_name'  => \sanitize_text_field( $customer_data['shipping_last_name'] ?? null ),
+							'address_1'  => \sanitize_text_field( $customer_data['shipping_address_1'] ?? null ),
+							'address_2'  => \sanitize_text_field( $customer_data['shipping_address_2'] ?? null ),
+							'city'       => \sanitize_text_field( $customer_data['shipping_city'] ?? null ),
+							'state'      => \sanitize_text_field( $customer_data['shipping_state'] ?? null ),
+							'postcode'   => \sanitize_text_field( $customer_data['shipping_postcode'] ?? null ),
+							'country'    => \sanitize_text_field( $customer_data['shipping_country'] ?? null ),
+						)
+					);
 				}
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Graceful degradation - returns as much data as possible.
 		}
 

@@ -51,6 +51,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 *
 	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
+	 * @param SessionDataCollector      $data_collector The session data collector instance.
 	 */
 	final public function init(
 		FraudProtectionDispatcher $dispatcher,
@@ -104,13 +105,16 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * /wc/store/v1/cart/select-shipping-rate during Blocks checkout flow.
 	 *
 	 * @internal
+	 *
+	 * @param string|null $package_id The package ID being updated (null for all packages).
+	 * @param string      $rate_id The chosen shipping rate ID.
 	 * @return void
 	 */
-	public function track_blocks_checkout_shipping_method_update( $package_id, $rate_id ): void {
+	public function track_blocks_checkout_shipping_method_update( ?string $package_id, string $rate_id ): void {
 		$shipping_method_names = $this->get_shipping_method_names( array( $rate_id ) );
-		$event_data = array(
-			'package_id' => $package_id,
-			'rate_id' => $rate_id,
+		$event_data            = array(
+			'package_id'           => $package_id,
+			'rate_id'              => $rate_id,
 			'shipping_method_name' => reset( $shipping_method_names ),
 		);
 
@@ -146,12 +150,11 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * This is called directly from CartSelectShippingRate endpoint to track
 	 * shipping method changes in Blocks checkout.
 	 *
-	 * @param string|null      $package_id The package ID being updated (null for all packages).
-	 * @param string           $rate_id The chosen rate ID.
-	 * @param \WP_REST_Request $request REST request object.
+	 * @param string|null $package_id The package ID being updated (null for all packages).
+	 * @param string      $rate_id The chosen rate ID.
 	 * @return void
 	 */
-	public function handle_shipping_rate_selection( $package_id, string $rate_id, $request ): void {
+	public function handle_shipping_rate_selection( $package_id, string $rate_id ): void {
 		// Build event data with the shipping rate information.
 		$collected_event_data = array(
 			'shipping_method' => array( $rate_id ),
@@ -171,7 +174,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 *
 	 * @param string $action                   Action type (field_update, store_api_update).
 	 * @param array  $collected_event_data              Posted form data or event context (may include session data).
-	 * @param bool   $include_payment_shipping Whether to include payment method and shipping methods.
 	 * @return array Checkout event data.
 	 */
 	private function format_checkout_event_data( string $action, array $collected_event_data ): array {
@@ -187,39 +189,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		);
 
 		return $event_data;
-	}
-
-	/**
-	 * Populate posted data with payment and shipping methods from session.
-	 *
-	 * Used for Blocks checkout where payment/shipping methods are stored in session
-	 * but not included in the Store API customer update request.
-	 *
-	 * @return array
-	 */
-	private function get_payment_and_shipping_methods_from_session_data(): array {
-		$session_data = array();
-		// Bail if WooCommerce or session is not available.
-		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
-			return array();
-		}
-
-		// Get chosen payment method from session.
-		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
-		if ( $chosen_payment_method ) {
-			// Format it the same way as traditional checkout posts it.
-			$session_data['payment'] = array(
-				'payment_method_type' => $chosen_payment_method,
-			);
-		}
-
-		// Get chosen shipping methods from session.
-		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
-		if ( ! empty( $chosen_shipping_methods ) && is_array( $chosen_shipping_methods ) ) {
-			$session_data['shipping_method'] = $chosen_shipping_methods;
-		}
-
-		return $session_data;
 	}
 
 	/**

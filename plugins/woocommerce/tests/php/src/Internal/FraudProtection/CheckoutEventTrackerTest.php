@@ -83,7 +83,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$this->sut->register();
 
 		// Verify hooks were not registered.
-		$this->assertFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_checkout_field_update' ) ) );
+		$this->assertFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_shortcode_checkout_field_update' ) ) );
 	}
 
 	/**
@@ -97,7 +97,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$this->sut->register();
 
 		// Verify hook was registered.
-		$this->assertNotFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_checkout_field_update' ) ) );
+		$this->assertNotFalse( has_action( 'woocommerce_checkout_update_order_review', array( $this->sut, 'handle_shortcode_checkout_field_update' ) ) );
 	}
 
 	// ========================================
@@ -251,9 +251,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	 * Test handle_shipping_rate_selection dispatches event with rate information.
 	 */
 	public function test_handle_shipping_rate_selection_dispatches_event_with_rate_info(): void {
-		// Create mock request.
-		$request = $this->createMock( \WP_REST_Request::class );
-
 		// Mock dispatcher to capture event data.
 		$captured_event_data = null;
 		$this->mock_dispatcher
@@ -273,7 +270,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			);
 
 		// Call the handler.
-		$this->sut->handle_shipping_rate_selection( '0', 'flat_rate:1', $request );
+		$this->sut->handle_shipping_rate_selection( '0', 'flat_rate:1' );
 
 		// Verify the event data was captured correctly.
 		$this->assertNotNull( $captured_event_data );
@@ -286,9 +283,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	 * Test handle_shipping_rate_selection handles different shipping rates.
 	 */
 	public function test_handle_shipping_rate_selection_handles_different_rates(): void {
-		// Create mock request.
-		$request = $this->createMock( \WP_REST_Request::class );
-
 		// Mock dispatcher to verify event is dispatched with correct structure.
 		$this->mock_dispatcher
 			->expects( $this->once() )
@@ -306,7 +300,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			);
 
 		// Call the handler with different rate.
-		$this->sut->handle_shipping_rate_selection( null, 'free_shipping:2', $request );
+		$this->sut->handle_shipping_rate_selection( null, 'free_shipping:2' );
 	}
 
 	// ========================================
@@ -314,9 +308,9 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	// ========================================
 
 	/**
-	 * Test handle_checkout_field_update schedules event with billing email.
+	 * Test handle_shortcode_checkout_field_update schedules event with billing email.
 	 */
-	public function test_handle_checkout_field_update_schedules_event_with_billing_email(): void {
+	public function test_handle_shortcode_checkout_field_update_schedules_event_with_billing_email(): void {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
@@ -341,13 +335,13 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Simulate checkout field update with billing email.
 		$posted_data = 'billing_email=test@example.com&billing_first_name=John&billing_last_name=Doe';
-		$this->sut->handle_checkout_field_update( $posted_data );
+		$this->sut->handle_shortcode_checkout_field_update( $posted_data );
 	}
 
 	/**
-	 * Test handle_checkout_field_update extracts billing fields correctly.
+	 * Test handle_shortcode_checkout_field_update extracts billing fields correctly.
 	 */
-	public function test_handle_checkout_field_update_extracts_billing_fields(): void {
+	public function test_handle_shortcode_checkout_field_update_extracts_billing_fields(): void {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
@@ -367,7 +361,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Simulate checkout field update with multiple billing fields.
 		$posted_data = 'billing_email=test@example.com&billing_first_name=John&billing_last_name=Doe&billing_country=US&billing_city=New+York';
-		$this->sut->handle_checkout_field_update( $posted_data );
+		$this->sut->handle_shortcode_checkout_field_update( $posted_data );
 
 		// Verify extracted fields.
 		$this->assertNotNull( $captured_event_data );
@@ -380,9 +374,9 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handle_checkout_field_update extracts shipping fields when ship_to_different_address is set.
+	 * Test handle_shortcode_checkout_field_update extracts shipping fields when ship_to_different_address is set.
 	 */
-	public function test_handle_checkout_field_update_extracts_shipping_fields(): void {
+	public function test_handle_shortcode_checkout_field_update_extracts_shipping_fields(): void {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
@@ -402,7 +396,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Simulate checkout field update with shipping fields.
 		$posted_data = 'billing_email=test@example.com&ship_to_different_address=1&shipping_first_name=Jane&shipping_last_name=Smith&shipping_city=Los+Angeles';
-		$this->sut->handle_checkout_field_update( $posted_data );
+		$this->sut->handle_shortcode_checkout_field_update( $posted_data );
 
 		// Verify extracted fields.
 		$this->assertNotNull( $captured_event_data );
@@ -412,9 +406,9 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handle_checkout_field_update does not extract shipping fields when ship_to_different_address is not set.
+	 * Test handle_shortcode_checkout_field_update does not extract shipping fields when ship_to_different_address is not set.
 	 */
-	public function test_handle_checkout_field_update_skips_shipping_fields_when_not_different_address(): void {
+	public function test_handle_shortcode_checkout_field_update_skips_shipping_fields_when_not_different_address(): void {
 		// Mock feature as enabled.
 		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
 
@@ -434,7 +428,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Simulate checkout field update without ship_to_different_address.
 		$posted_data = 'billing_email=test@example.com&shipping_first_name=Jane&shipping_last_name=Smith';
-		$this->sut->handle_checkout_field_update( $posted_data );
+		$this->sut->handle_shortcode_checkout_field_update( $posted_data );
 
 		// Verify shipping fields are not extracted.
 		$this->assertNotNull( $captured_event_data );
