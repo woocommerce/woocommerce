@@ -211,15 +211,30 @@ const LinkedProductControl = ( {
 		if ( newValue === PRODUCT_REFERENCE_TYPE.CURRENT_PRODUCT ) {
 			const { productReference: toSave, ...rest } = query;
 			prevReference.current = toSave;
-			setAttributes( { query: rest } );
+
+			let referenceType: ProductCollectionQuery[ 'productReferenceType' ] =
+				null;
+			if ( isCartLocation || hasCartReference ) {
+				referenceType = 'cart';
+			} else if ( isOrderLocation || hasOrderReference ) {
+				referenceType = 'order';
+			}
+
+			setAttributes( {
+				query: {
+					...rest,
+					productReferenceType: referenceType,
+				},
+			} );
 		} else {
+			const { productReferenceType, ...restQuery } = query;
 			setAttributes( {
 				query: prevReference.current
 					? {
-							...query,
+							...restQuery,
 							productReference: prevReference.current,
 					  }
-					: query,
+					: restQuery,
 			} );
 		}
 		setRadioControlState( newValue );
