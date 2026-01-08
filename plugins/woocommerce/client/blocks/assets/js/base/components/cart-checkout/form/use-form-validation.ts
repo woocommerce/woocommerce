@@ -118,7 +118,6 @@ export const useFormValidation = (
 	let values:
 		| BillingAddress
 		| ShippingAddress
-		| BillingAddress
 		| ContactFormValues
 		| OrderFormValues
 		| Record< string, never >;
