@@ -84,7 +84,7 @@ jest.mock( '../sidebar-container', () => ( {
 } ) );
 
 // Mock the SiteHub
-jest.mock( '~/customize-store/assembler-hub/site-hub', () => ( {
+jest.mock( '~/customize-store/site-hub', () => ( {
 	SiteHub: () => <div data-testid="site-hub">SiteHub</div>,
 } ) );
 

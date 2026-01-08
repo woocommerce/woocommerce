@@ -25,9 +25,9 @@ jest.mock( '../../../components/header', () => ( {
 } ) );
 
 jest.mock( '../data/business-verification-context', () => ( {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars -- initialData is required by the component interface.
 	BusinessVerificationContextProvider: ( {
 		children,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars -- initialData is required by the component interface.
 		initialData,
 	}: {
 		children: React.ReactNode;
