@@ -1,6 +1,6 @@
 <?php
 /**
- * ShortcodeCheckoutEventTracker class file.
+ * CheckoutEventTracker class file.
  */
 
 declare( strict_types=1 );
@@ -12,19 +12,19 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Tracks traditional (shortcode) checkout events for fraud protection analysis.
+ * Tracks checkout events for fraud protection analysis.
  *
- * This class hooks into traditional WooCommerce checkout events (billing/email changes,
- * payment selection) and triggers comprehensive event tracking with full session
- * context.
+ * This class hooks into both WooCommerce Blocks (Store API) and traditional
+ * shortcode checkout events, triggering comprehensive event tracking with
+ * full session context for fraud protection analysis.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
+class CheckoutEventTracker implements RegisterHooksInterface {
 
 	/**
-	 * Checkout event scheduler instance.
+	 * Fraud protection dispatcher instance.
 	 *
 	 * @var FraudProtectionDispatcher
 	 */
@@ -54,10 +54,11 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Register traditional checkout event hooks.
+	 * Register checkout event hooks.
 	 *
-	 * Hooks into WooCommerce checkout actions to track fraud protection events.
-	 * Only registers hooks if the fraud protection feature is enabled.
+	 * Hooks into both WooCommerce Blocks (Store API) and traditional checkout
+	 * actions to track fraud protection events. Only registers hooks if the
+	 * fraud protection feature is enabled.
 	 *
 	 * @return void
 	 */
@@ -67,8 +68,64 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 			return;
 		}
 
+		// WooCommerce Blocks (Store API): Track when customer data is updated in Blocks checkout.
+		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'handle_store_api_customer_update' ), 10, 2 );
+
 		// Traditional checkout: Track when checkout fields are updated.
 		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
+	}
+
+	/**
+	 * Handle Store API customer update event (WooCommerce Blocks checkout).
+	 *
+	 * Triggered when customer information is updated via the Store API endpoint
+	 * /wc/store/v1/cart/update-customer during Blocks checkout flow.
+	 *
+	 * @internal
+	 *
+	 * @param \WC_Customer     $customer Customer object being updated.
+	 * @param \WP_REST_Request $request  REST request object containing customer data.
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @return void
+	 */
+	public function handle_store_api_customer_update( $customer, $request ): void {
+		// Extract customer data from the REST request.
+		$billing_address  = $request->get_param( 'billing_address' ) ?? array();
+		$shipping_address = $request->get_param( 'shipping_address' ) ?? array();
+
+		// Build posted data array in the format expected by build_checkout_event_data.
+		$posted_data = array();
+
+		// Extract billing fields.
+		if ( ! empty( $billing_address ) ) {
+			$posted_data['billing_first_name'] = $billing_address['first_name'] ?? '';
+			$posted_data['billing_last_name']  = $billing_address['last_name'] ?? '';
+			$posted_data['billing_address_1']  = $billing_address['address_1'] ?? '';
+			$posted_data['billing_address_2']  = $billing_address['address_2'] ?? '';
+			$posted_data['billing_city']       = $billing_address['city'] ?? '';
+			$posted_data['billing_state']      = $billing_address['state'] ?? '';
+			$posted_data['billing_postcode']   = $billing_address['postcode'] ?? '';
+			$posted_data['billing_country']    = $billing_address['country'] ?? '';
+			$posted_data['billing_phone']      = $billing_address['phone'] ?? '';
+			$posted_data['billing_email']      = $billing_address['email'] ?? '';
+		}
+
+		// Extract shipping fields if present.
+		if ( ! empty( $shipping_address ) ) {
+			$posted_data['ship_to_different_address'] = true;
+			$posted_data['shipping_first_name']       = $shipping_address['first_name'] ?? '';
+			$posted_data['shipping_last_name']        = $shipping_address['last_name'] ?? '';
+			$posted_data['shipping_address_1']        = $shipping_address['address_1'] ?? '';
+			$posted_data['shipping_address_2']        = $shipping_address['address_2'] ?? '';
+			$posted_data['shipping_city']             = $shipping_address['city'] ?? '';
+			$posted_data['shipping_state']            = $shipping_address['state'] ?? '';
+			$posted_data['shipping_postcode']         = $shipping_address['postcode'] ?? '';
+			$posted_data['shipping_country']          = $shipping_address['country'] ?? '';
+		}
+
+		// Build and dispatch the event (Blocks checkout doesn't include payment/shipping methods).
+		$event_data = $this->build_checkout_event_data( 'store_api_update', $posted_data, false );
+		$this->dispatcher->dispatch_event( 'checkout_blocks_customer_update', $event_data );
 	}
 
 	/**
@@ -88,7 +145,8 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 			parse_str( $posted_data, $data );
 		}
 
-		$event_data = $this->build_checkout_event_data( 'field_update', $data );
+		// Build and dispatch the event (traditional checkout includes payment/shipping methods).
+		$event_data = $this->build_checkout_event_data( 'field_update', $data, true );
 		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
 	}
 
@@ -98,47 +156,31 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	 * Prepares the checkout event data including action type and any changed fields.
 	 * This data will be merged with comprehensive session data during event tracking.
 	 *
-	 * @param string $action      Action type (field_update, payment_method_selected).
-	 * @param array  $posted_data Posted form data or event context.
+	 * @param string $action                   Action type (field_update, store_api_update).
+	 * @param array  $posted_data              Posted form data or event context.
+	 * @param bool   $include_payment_shipping Whether to include payment method and shipping methods.
 	 * @return array Checkout event data.
 	 */
-	private function build_checkout_event_data( string $action, array $posted_data ): array {
+	private function build_checkout_event_data( string $action, array $posted_data, bool $include_payment_shipping ): array {
 		$event_data = array( 'action' => $action );
 
 		// Extract and merge all checkout field groups.
 		$event_data = array_merge(
 			$event_data,
 			$this->extract_billing_fields( $posted_data ),
-			$this->extract_shipping_fields( $posted_data ),
-			$this->extract_payment_method( $posted_data ),
-			$this->extract_shipping_methods( $posted_data )
+			$this->extract_shipping_fields( $posted_data )
 		);
 
-		return $event_data;
-	}
-
-	/**
-	 * Extract payment method data from posted data.
-	 *
-	 * Extracts payment method ID and retrieves the readable gateway name.
-	 *
-	 * @param array $posted_data Posted form data.
-	 * @return array Payment method data with ID and name, or empty array if not found.
-	 */
-	private static function extract_payment_method( array $posted_data ): array {
-		$payment_data = array();
-
-		if ( ! empty( $posted_data['payment']['payment_method_type'] ) ) {
-			$payment_gateway_id   = sanitize_text_field( wp_unslash( $posted_data['payment']['payment_method_type'] ) );
-			$payment_gateway_name = WC()->payment_gateways()->get_payment_gateway_name_by_id( $payment_gateway_id );
-
-			$payment_data['payment'] = array(
-				'payment_gateway_type' => $payment_gateway_id,
-				'payment_gateway_name' => $payment_gateway_name,
+		// Conditionally include payment and shipping methods (not available in Blocks Store API updates).
+		if ( $include_payment_shipping ) {
+			$event_data = array_merge(
+				$event_data,
+				$this->extract_payment_method( $posted_data ),
+				$this->extract_shipping_methods( $posted_data )
 			);
 		}
 
-		return $payment_data;
+		return $event_data;
 	}
 
 	/**
@@ -220,6 +262,30 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Extract payment method data from posted data.
+	 *
+	 * Extracts payment method ID and retrieves the readable gateway name.
+	 *
+	 * @param array $posted_data Posted form data.
+	 * @return array Payment method data with ID and name, or empty array if not found.
+	 */
+	private function extract_payment_method( array $posted_data ): array {
+		$payment_data = array();
+
+		if ( ! empty( $posted_data['payment']['payment_method_type'] ) ) {
+			$payment_gateway_id   = sanitize_text_field( wp_unslash( $posted_data['payment']['payment_method_type'] ) );
+			$payment_gateway_name = WC()->payment_gateways()->get_payment_gateway_name_by_id( $payment_gateway_id );
+
+			$payment_data['payment'] = array(
+				'payment_gateway_type' => $payment_gateway_id,
+				'payment_gateway_name' => $payment_gateway_name,
+			);
+		}
+
+		return $payment_data;
+	}
+
+	/**
 	 * Extract and convert shipping method IDs to readable names.
 	 *
 	 * @param array $posted_data Posted form data.
@@ -239,7 +305,6 @@ class ShortcodeCheckoutEventTracker implements RegisterHooksInterface {
 
 		return $shipping_method_data;
 	}
-
 
 	/**
 	 * Get readable shipping method names from shipping method IDs.
