@@ -418,7 +418,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			global $wpdb;
 
 			if ( has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
-				wc_deprecated_function( 'The woocommerce_report_recent_reviews_query_from filter', '10.5.0' );
+				wc_deprecated_hook( 'woocommerce_report_recent_reviews_query_from', '10.5.0' );
 
 				/**
 				 * Filters the from-clause used for fetching latest product reviews.
@@ -462,7 +462,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				_prime_post_caches( array_column( $entries, 'product_id' ), false, false );
 
 				if ( has_filter( 'woocommerce_admin_dashboard_recent_reviews' ) ) {
-					wc_deprecated_function( 'The woocommerce_admin_dashboard_recent_reviews filter', '10.5.0', 'dashboard-widget-reviews.php template' );
+					wc_deprecated_hook( 'woocommerce_admin_dashboard_recent_reviews', '10.5.0', 'dashboard-widget-reviews.php template' );
 				}
 
 				echo '<ul>';
