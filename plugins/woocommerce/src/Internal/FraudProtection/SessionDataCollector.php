@@ -481,6 +481,7 @@ class SessionDataCollector {
 	 *
 	 * @since 10.5.0
 	 *
+	 * @param array $event_data Event-specific data that may contain payment information.
 	 * @return array Payment data array with 11 keys.
 	 */
 	private function get_payment_data( array $event_data = array() ): array {
@@ -500,8 +501,7 @@ class SessionDataCollector {
 
 		try {
 			if ( ! empty( $event_data['payment'] ) ) {
-				array_merge( $payment_data, $event_data['payment'] );
-				return $payment_data;
+				return array_merge( $payment_data, $event_data['payment'] );
 			}
 
 			// Try to get chosen payment method from session.
