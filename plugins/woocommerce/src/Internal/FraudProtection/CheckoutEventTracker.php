@@ -15,8 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * Tracks checkout events for fraud protection analysis.
  *
  * This class hooks into both WooCommerce Blocks (Store API) and traditional
- * shortcode checkout events, triggering comprehensive event tracking with
- * full session context for fraud protection analysis.
+ * shortcode checkout events, triggering fraud protection event dispatching.
+ * Event-specific data is passed to the dispatcher which handles session data collection internally.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
@@ -38,29 +38,19 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	private FraudProtectionController $fraud_protection_controller;
 
 	/**
-	 * Session data collector instance.
-	 *
-	 * @var SessionDataCollector
-	 */
-	private SessionDataCollector $data_collector;
-
-	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
 	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
-	 * @param SessionDataCollector      $data_collector The session data collector instance.
 	 */
 	final public function init(
 		FraudProtectionDispatcher $dispatcher,
-		FraudProtectionController $fraud_protection_controller,
-		SessionDataCollector $data_collector
+		FraudProtectionController $fraud_protection_controller
 	): void {
 		$this->dispatcher                  = $dispatcher;
 		$this->fraud_protection_controller = $fraud_protection_controller;
-		$this->data_collector              = $data_collector;
 	}
 
 	/**
@@ -92,10 +82,8 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function track_blocks_checkout_update(): void {
-		// The data collector already has up to date customer data, so we don't need to pass it as a parameter.
-		// At this point we don't have any payment or shipping data, so we don't need to pass it as a parameter either.
-		$collected_data = $this->data_collector->collect( 'checkout_blocks_address_update', array() );
-		$this->dispatcher->dispatch_event( 'checkout_blocks_address_update', $collected_data );
+		// At this point we don't have any payment or shipping data, so we pass an empty array.
+		$this->dispatcher->dispatch_event( 'checkout_blocks_address_update', array() );
 	}
 
 	/**
@@ -111,13 +99,12 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function track_blocks_checkout_shipping_method_update( ?string $package_id, string $rate_id ): void {
-		$event_data            = array(
-			'package_id'           => $package_id,
-			'rate_id'              => $rate_id,
+		$event_data = array(
+			'package_id' => $package_id,
+			'rate_id'    => $rate_id,
 		);
 
-		$collected_data = $this->data_collector->collect( 'checkout_blocks_shipping_method_update', $event_data );
-		$this->dispatcher->dispatch_event( 'checkout_blocks_shipping_method_update', $collected_data );
+		$this->dispatcher->dispatch_event( 'checkout_blocks_shipping_method_update', $event_data );
 	}
 
 	/**
@@ -137,7 +124,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			parse_str( $posted_data, $data );
 		}
 
-		// Build and dispatch the event (traditional checkout includes payment/shipping methods).
+		// Build and dispatch the event.
 		$event_data = $this->format_checkout_event_data( 'field_update', $data );
 		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
 	}
@@ -146,10 +133,9 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * Build checkout event-specific data.
 	 *
 	 * Prepares the checkout event data including action type and any changed fields.
-	 * This data will be merged with comprehensive session data during event tracking.
 	 *
 	 * @param string $action                   Action type (field_update, store_api_update).
-	 * @param array  $collected_event_data              Posted form data or event context (may include session data).
+	 * @param array  $collected_event_data              Posted form data or event context.
 	 * @return array Checkout event data.
 	 */
 	private function format_checkout_event_data( string $action, array $collected_event_data ): array {

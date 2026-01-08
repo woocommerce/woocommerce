@@ -43,6 +43,13 @@ class FraudProtectionDispatcher {
 	private FraudProtectionController $fraud_protection_controller;
 
 	/**
+	 * Session data collector instance.
+	 *
+	 * @var SessionDataCollector
+	 */
+	private SessionDataCollector $data_collector;
+
+	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
@@ -50,36 +57,39 @@ class FraudProtectionDispatcher {
 	 * @param ApiClient                 $api_client                  The API client instance.
 	 * @param DecisionHandler           $decision_handler            The decision handler instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
+	 * @param SessionDataCollector      $data_collector              The session data collector instance.
 	 */
 	final public function init(
 		ApiClient $api_client,
 		DecisionHandler $decision_handler,
-		FraudProtectionController $fraud_protection_controller
+		FraudProtectionController $fraud_protection_controller,
+		SessionDataCollector $data_collector
 	): void {
 		$this->api_client                  = $api_client;
 		$this->decision_handler            = $decision_handler;
 		$this->fraud_protection_controller = $fraud_protection_controller;
+		$this->data_collector              = $data_collector;
 	}
 
 	/**
-	 * Dispatch fraud protection event with already-collected data.
+	 * Dispatch fraud protection event.
 	 *
-	 * This method accepts fully-collected event data (including session context)
-	 * and dispatches it to the fraud protection service. It orchestrates the
-	 * following flow:
+	 * This method collects session data and dispatches it to the fraud protection service.
+	 * It orchestrates the following flow:
 	 * 1. Check if feature is enabled (fail-open if not)
-	 * 2. Apply extension data filter to allow custom data
-	 * 3. Send event to API and get decision
-	 * 4. Apply decision via DecisionHandler
+	 * 2. Collect comprehensive session data via SessionDataCollector
+	 * 3. Apply extension data filter to allow custom data
+	 * 4. Send event to API and get decision
+	 * 5. Apply decision via DecisionHandler
 	 *
 	 * The method implements graceful degradation - any errors during tracking
 	 * will be logged but will not break the functionality.
 	 *
-	 * @param string $event_type     Event type identifier (e.g., 'cart_item_added').
-	 * @param array  $collected_data Fully-collected event data including session context.
+	 * @param string $event_type Event type identifier (e.g., 'cart_item_added').
+	 * @param array  $event_data Optional event-specific data to include with session data.
 	 * @return void
 	 */
-	public function dispatch_event( string $event_type, array $collected_data ): void {
+	public function dispatch_event( string $event_type, array $event_data = array() ): void {
 		try {
 			// Check if feature is enabled - fail-open if not.
 			if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
@@ -93,6 +103,9 @@ class FraudProtectionDispatcher {
 				);
 				return;
 			}
+
+			// Collect comprehensive session data.
+			$collected_data = $this->data_collector->collect( $event_type, $event_data );
 
 			/**
 			 * Filters the fraud protection event data before sending to the API.
