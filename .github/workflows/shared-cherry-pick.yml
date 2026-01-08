@@ -270,6 +270,11 @@ jobs:
 
               prBody += `## Original PR Description\n\n${originalPr.body || '*No description provided*'}`;
 
+              // Replace milestone selection and changelog sections.
+              prBody = prBody.replace(/\[\s*(?:[xX])?\s*\]\s*(Automatically create a changelog.*)/g, '[ ] ~~$1~~');
+              prBody = prBody.replace(/\[\s*(?:[xX])?\s*\]\s*(This Pull Request does not require a changelog.*)/g, '[ ] ~~$1~~');
+              prBody = prBody.replace(/\[\s*(?:[xX])?\s*\]\s*(Automatically assign milestone.*\*\*.*next WooCommerce version.*\*\*.*)/g, '[ ] ~~$1~~');
+
               // Create new PR
               const { data: newPr } = await github.rest.pulls.create({
                 owner: context.repo.owner,
