@@ -231,6 +231,10 @@ const program = new Command( 'changefile' )
 			// 	);
 			// }
 
+			Logger.notice(
+				`Debug: identities ${ process.env.GIT_COMMITTER_NAME }, ${ process.env.GIT_AUTHOR_NAME }`
+			);
+
 			const shortStatus = await git.raw( [ 'status', '--short' ] );
 
 			if ( shortStatus.length === 0 ) {
