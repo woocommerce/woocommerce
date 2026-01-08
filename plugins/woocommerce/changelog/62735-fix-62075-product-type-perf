@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Add runtime cache to `get_product_type()` to reduce Redis/Memcached round-trips when external object caching is enabled.
