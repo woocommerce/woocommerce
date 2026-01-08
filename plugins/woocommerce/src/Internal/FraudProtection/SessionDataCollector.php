@@ -441,33 +441,6 @@ class SessionDataCollector {
 	}
 
 	/**
-	 * Get the chosen payment method from session or POST data.
-	 *
-	 * Tries to get payment method from session first, then falls back to
-	 * POST data during checkout submission.
-	 *
-	 * @since 10.5.0
-	 *
-	 * @return string|null Payment method ID or null if not available.
-	 */
-	private function get_chosen_payment_method(): ?string {
-		// Try getting from session first.
-		if ( WC()->session instanceof \WC_Session ) {
-			$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
-			if ( $chosen_payment_method ) {
-				return $chosen_payment_method;
-			}
-		}
-
-		// Try getting from POST data (during checkout).
-		if ( isset( $_POST['payment_method'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			return \sanitize_text_field( \wp_unslash( $_POST['payment_method'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		}
-
-		return null;
-	}
-
-	/**
 	 * Get client IP address using WooCommerce geolocation utility.
 	 *
 	 * @since 10.5.0

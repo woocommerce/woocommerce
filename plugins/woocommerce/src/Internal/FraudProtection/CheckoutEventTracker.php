@@ -78,7 +78,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		// Shortcode checkout: Track when checkout fields are updated.
-		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
+		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_shortcode_checkout_field_update' ), 10, 1 );
 	}
 
 	/**
@@ -119,53 +119,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Get payment data structure for fraud protection analysis.
-	 *
-	 * Returns payment data structure with all 11 supported fields. Currently populates
-	 * payment_gateway_name and payment_method_type when available from the chosen payment
-	 * method. Other fields are initialized with null values.
-	 *
-	 * @since 10.5.0
-	 *
-	 * @param array $event_data Event-specific data that may contain payment information.
-	 * @return array Payment data array with 11 keys.
-	 */
-	private function get_payment_data( array $event_data = array() ): array {
-		$payment_data = array(
-			'payment_gateway_name'      => null,
-			'payment_method_type'       => null,
-			'card_bin'                  => null,
-			'card_last4'                => null,
-			'card_brand'                => null,
-			'payer_id'                  => null,
-			'outcome'                   => null,
-			'decline_reason'            => null,
-			'avs_result'                => null,
-			'cvc_result'                => null,
-			'tokenized_card_identifier' => null,
-		);
-
-		try {
-			if ( ! empty( $event_data['payment'] ) ) {
-				return array_merge( $payment_data, $event_data['payment'] );
-			}
-
-			// Try to get chosen payment method from session.
-			$chosen_payment_method = $this->get_chosen_payment_method();
-			if ( $chosen_payment_method ) {
-				$payment_data['payment_gateway_name'] = \sanitize_text_field( $chosen_payment_method );
-				$payment_data['payment_method_type']  = \sanitize_text_field( $chosen_payment_method );
-			}
-
-			return $payment_data;
-		} catch ( \Exception $e ) {
-			// Graceful degradation.
-			return $payment_data;
-		}
-	}
-
-	/**
-	 * Handle traditional checkout field update event.
+	 * Handle shortcode checkout field update event.
 	 *
 	 * Triggered when checkout fields are updated via AJAX (woocommerce_update_order_review).
 	 *
@@ -174,7 +128,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @param string $posted_data Serialized checkout form data.
 	 * @return void
 	 */
-	public function handle_checkout_field_update( $posted_data ): void {
+	public function handle_shortcode_checkout_field_update( $posted_data ): void {
 		// Parse the posted data to extract relevant fields.
 		$data = array();
 		if ( $posted_data ) {
@@ -357,12 +311,11 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	private function extract_payment_method( array $posted_data ): array {
 		$payment_data = array();
 
-		if ( ! empty( $posted_data['payment']['payment_method_type'] ) ) {
-			$payment_gateway_id   = sanitize_text_field( wp_unslash( $posted_data['payment']['payment_method_type'] ) );
-			$payment_gateway_name = WC()->payment_gateways()->get_payment_gateway_name_by_id( $payment_gateway_id );
+		if ( ! empty( $posted_data['payment_method'] ) ) {
+			$payment_gateway_name = WC()->payment_gateways()->get_payment_gateway_name_by_id( $posted_data['payment_method'] );
 
 			$payment_data['payment'] = array(
-				'payment_gateway_type' => $payment_gateway_id,
+				'payment_gateway_type' => $posted_data['payment_method'],
 				'payment_gateway_name' => $payment_gateway_name,
 			);
 		}
