@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 // Mock problematic imports before importing the module under test.
@@ -227,7 +227,7 @@ const mockProps = {
 describe( 'PaymentsSidebar', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
-		// Reset context mock values
+		// Reset context mock values.
 		mockSetUpPaymentsContext.isWooPaymentsActive = false;
 		mockSetUpPaymentsContext.isWooPaymentsInstalled = false;
 		mockSetUpPaymentsContext.wooPaymentsRecentlyActivated = false;
@@ -235,6 +235,14 @@ describe( 'PaymentsSidebar', () => {
 		mockOnboardingContext.currentStep = null;
 		mockOnboardingContext.justCompletedStepId = null;
 		mockOnboardingContext.isLoading = false;
+		// Reset the tasklist mock to its default resolved value.
+		mockGetPaymentsTaskFromLysTasklist.mockResolvedValue( {
+			id: 'payments',
+			title: 'Set up payments',
+			additionalData: {
+				wooPaymentsIsInstalled: false,
+			},
+		} );
 	} );
 
 	describe( 'InstallWooPaymentsStep visibility', () => {
@@ -293,7 +301,7 @@ describe( 'PaymentsSidebar', () => {
 		it( 'displays "Install WooPayments" text when WooPayments is NOT installed', async () => {
 			mockSetUpPaymentsContext.isWooPaymentsActive = false;
 
-			// Mock the task to indicate WooPayments is not installed
+			// Mock the task to indicate WooPayments is not installed.
 			mockGetPaymentsTaskFromLysTasklist.mockResolvedValue( {
 				id: 'payments',
 				title: 'Set up payments',
@@ -304,21 +312,22 @@ describe( 'PaymentsSidebar', () => {
 
 			render( <PaymentsSidebar { ...mockProps } /> );
 
-			// Wait for the effect to run and state to update
-			// The text should contain "Install"
-			const sidebarItems = screen.getAllByTestId(
-				'sidebar-navigation-item'
-			);
-			expect( sidebarItems[ 0 ] ).toHaveTextContent(
-				/Install.*WooPayments/i
-			);
+			// Wait for the async task to resolve and state to update.
+			await waitFor( () => {
+				const sidebarItems = screen.getAllByTestId(
+					'sidebar-navigation-item'
+				);
+				expect( sidebarItems[ 0 ] ).toHaveTextContent(
+					/Install.*WooPayments/i
+				);
+			} );
 		} );
 
 		it( 'displays "Enable WooPayments" text when WooPayments IS installed but not active', async () => {
 			mockSetUpPaymentsContext.isWooPaymentsActive = false;
 			mockSetUpPaymentsContext.isWooPaymentsInstalled = true;
 
-			// Mock the task to indicate WooPayments is installed
+			// Mock the task to indicate WooPayments is installed.
 			mockGetPaymentsTaskFromLysTasklist.mockResolvedValue( {
 				id: 'payments',
 				title: 'Set up payments',
@@ -327,22 +336,17 @@ describe( 'PaymentsSidebar', () => {
 				},
 			} );
 
-			const { rerender } = render( <PaymentsSidebar { ...mockProps } /> );
+			render( <PaymentsSidebar { ...mockProps } /> );
 
-			// Force rerender to pick up the async update
-			rerender( <PaymentsSidebar { ...mockProps } /> );
-
-			// Wait a tick for state update
-			await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
-
-			rerender( <PaymentsSidebar { ...mockProps } /> );
-
-			// The text should contain "Enable" after state updates
-			const sidebarItems = screen.getAllByTestId(
-				'sidebar-navigation-item'
-			);
-			// Note: The text check depends on the async state update from useEffect
-			expect( sidebarItems[ 0 ] ).toBeInTheDocument();
+			// Wait for the async task to resolve and state to update.
+			await waitFor( () => {
+				const sidebarItems = screen.getAllByTestId(
+					'sidebar-navigation-item'
+				);
+				expect( sidebarItems[ 0 ] ).toHaveTextContent(
+					/Enable.*WooPayments/i
+				);
+			} );
 		} );
 
 		it( 'renders additional onboarding steps when WooPayments is active', () => {
