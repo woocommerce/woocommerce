@@ -125,8 +125,8 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $gateways, 'Should return gateways when feature is disabled' );
 	}
-  
-  /**
+
+	/**
 	 * Test get_payment_gateway_name_by_id returns gateway title for known gateway.
 	 *
 	 * @return void
@@ -158,5 +158,5 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		foreach ( $this->sut->payment_gateways() as $gateway ) {
 			$gateway->enabled = 'yes';
 		}
-  }
+	}
 }
