@@ -462,7 +462,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				_prime_comment_caches( array_column( $entries, 'comment_id' ) );
 				_prime_post_caches( array_column( $entries, 'product_id' ), false, false );
 
-				if( has_filter( 'woocommerce_admin_dashboard_recent_reviews' ) ) {
+				if ( has_filter( 'woocommerce_admin_dashboard_recent_reviews' ) ) {
 					wc_deprecated_function( 'The woocommerce_admin_dashboard_recent_reviews filter', '10.5.0', 'dashboard-widget-reviews.php template' );
 				}
 
