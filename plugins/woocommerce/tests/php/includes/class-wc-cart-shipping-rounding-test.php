@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 /**
  * Class WC_Cart_Shipping_Rounding_Test
  *
