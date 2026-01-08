@@ -206,7 +206,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 					array(
 						'source'        => 'woocommerce-order-item-product',
 						'order_item_id' => $this->get_id(),
-						'order_id'      => $order ? $order->get_id() : 'unknown',
+						'order_id'      => $order ? $order->get_id() : 0,
 					)
 				);
 			}
