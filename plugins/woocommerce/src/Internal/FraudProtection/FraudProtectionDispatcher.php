@@ -1,8 +1,6 @@
 <?php
 /**
  * FraudProtectionDispatcher class file.
- *
- * @package WooCommerce\Internal
  */
 
 declare( strict_types=1 );
