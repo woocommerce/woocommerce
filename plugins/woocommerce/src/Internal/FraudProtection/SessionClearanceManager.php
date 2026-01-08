@@ -135,7 +135,7 @@ class SessionClearanceManager {
 		// This is important because fraud protection may set session status before
 		// any cart action triggers the cookie to be set.
 		// Skip cookie setting if headers have already been sent (e.g., in test environment).
-		if ( WC()->session instanceof \WC_Session_Handler && ! headers_sent() ) {
+		if ( WC()->session instanceof \WC_Session_Handler ) {
 			WC()->session->set_customer_session_cookie( true );
 		}
 	}
@@ -159,7 +159,7 @@ class SessionClearanceManager {
 	 */
 	public function ensure_cart_loaded(): void {
 		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && function_exists( 'wc_load_cart' ) ) {
-			wc_load_cart();
+			WC()->call_function( 'wc_load_cart' );
 		}
 	}
 
@@ -186,7 +186,7 @@ class SessionClearanceManager {
 		// Use or generate a stable session ID for tracking consistency.
 		$fraud_customer_session_id = WC()->session->get( '_fraud_protection_customer_session_id' );
 		if ( ! $fraud_customer_session_id ) {
-			$fraud_customer_session_id = wc_rand_hash( 'customer_', 30 );
+			$fraud_customer_session_id = WC()->call_function( 'wc_rand_hash', 'customer_', 30 );
 			WC()->session->set( '_fraud_protection_customer_session_id', $fraud_customer_session_id );
 		}
 		return $fraud_customer_session_id;

@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
@@ -38,27 +40,27 @@ class CartSelectShippingRate extends AbstractCartRoute {
 	 * @return array An array of endpoints.
 	 */
 	public function get_args() {
-		return [
-			[
+		return array(
+			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => [ $this, 'get_response' ],
+				'callback'            => array( $this, 'get_response' ),
 				'permission_callback' => '__return_true',
-				'args'                => [
+				'args'                => array(
 					'package_id' => array(
 						'description' => __( 'The ID of the package being shipped. Leave blank to apply to all packages.', 'woocommerce' ),
-						'type'        => [ 'integer', 'string', 'null' ],
+						'type'        => array( 'integer', 'string', 'null' ),
 						'required'    => false,
 					),
-					'rate_id'    => [
+					'rate_id'    => array(
 						'description' => __( 'The chosen rate ID for the package.', 'woocommerce' ),
 						'type'        => 'string',
 						'required'    => true,
-					],
-				],
-			],
-			'schema'      => [ $this->schema, 'get_public_item_schema' ],
-			'allow_batch' => [ 'v1' => true ],
-		];
+					),
+				),
+			),
+			'schema'      => array( $this->schema, 'get_public_item_schema' ),
+			'allow_batch' => array( 'v1' => true ),
+		);
 	}
 
 	/**
@@ -108,6 +110,11 @@ class CartSelectShippingRate extends AbstractCartRoute {
 		do_action( 'woocommerce_store_api_cart_select_shipping_rate', $package_id, $rate_id, $request );
 
 		$cart->calculate_totals();
+
+		$container = wc_get_container();
+		if ( $container->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			$container->get( CheckoutEventTracker::class )->track_blocks_checkout_shipping_method_update( $package_id, $rate_id );
+		}
 
 		return rest_ensure_response( $this->cart_schema->get_item_response( $cart ) );
 	}
