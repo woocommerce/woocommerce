@@ -340,8 +340,9 @@ class SessionDataCollector {
 		$billing_data = array(
 			'first_name' => null,
 			'last_name'  => null,
-			'street_1'   => null,
-			'street_2'   => null,
+			'address'    => null,
+			'address_1'   => null,
+			'address_2'   => null,
 			'city'       => null,
 			'state'      => null,
 			'country'    => null,
