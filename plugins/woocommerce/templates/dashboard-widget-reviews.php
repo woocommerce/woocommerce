@@ -64,7 +64,7 @@ $product_title = apply_filters(
 		?>
 	</h4>
 
-	<blockquote><?php echo wp_kses_data( $comment->comment_content ); ?>
+	<blockquote><?php echo wp_kses_data( $comment->comment_content ); ?></blockquote>
 
 	<?php
 	// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
