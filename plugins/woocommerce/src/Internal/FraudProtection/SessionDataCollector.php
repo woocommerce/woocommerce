@@ -263,7 +263,7 @@ class SessionDataCollector {
 				'tax_total'         => 0,
 				'shipping_tax_rate' => null,
 				'discount_total'    => 0,
-				'currency'          => get_woocommerce_currency(),
+				'currency'          => WC()->call_function( 'get_woocommerce_currency' ),
 				'cart_hash'         => null,
 				'items'             => array(),
 			);
@@ -624,7 +624,7 @@ class SessionDataCollector {
 	 * @return string|null Comma-separated category names or null if none.
 	 */
 	private function get_product_category_names( \WC_Product $product ): ?string {
-		$terms = wc_get_product_terms( $product->get_id(), 'product_cat' );
+		$terms = WC()->call_function( 'wc_get_product_terms', $product->get_id(), 'product_cat' );
 		if ( empty( $terms ) || ! is_array( $terms ) ) {
 			return null;
 		}
