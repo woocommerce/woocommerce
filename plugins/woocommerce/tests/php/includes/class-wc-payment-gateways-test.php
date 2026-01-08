@@ -84,4 +84,29 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		}
 		remove_filter( 'wp_mail', $watcher );
 	}
+
+	/**
+	 * Test get_payment_gateway_name_by_id returns gateway title for known gateway.
+	 *
+	 * @return void
+	 */
+	public function test_get_payment_gateway_name_by_id_returns_gateway_title_for_known_gateway(): void {
+		// Test with a known gateway (bacs is available by default in WooCommerce).
+		$result = $this->sut->get_payment_gateway_name_by_id( 'bacs' );
+
+		// Should return a readable name, not just the ID.
+		$this->assertNotEmpty( $result );
+		$this->assertEquals( 'Direct bank transfer', $result );
+	}
+
+	/**
+	 * Test get_payment_gateway_name_by_id returns ID when gateway not found.
+	 *
+	 * @return void
+	 */
+	public function test_get_payment_gateway_name_by_id_returns_id_when_gateway_not_found(): void {
+		// Test that get_payment_gateway_name_by_id returns the ID as fallback.
+		$result = $this->sut->get_payment_gateway_name_by_id( 'nonexistent_gateway' );
+		$this->assertEquals( 'nonexistent_gateway', $result );
+	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add performance guidance to WC_Product_Variable::get_available_variations() docblock

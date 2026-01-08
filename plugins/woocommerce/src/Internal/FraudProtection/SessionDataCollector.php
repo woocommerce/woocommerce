@@ -70,7 +70,7 @@ class SessionDataCollector {
 			'order'            => $this->get_order_data( $order_id_from_event ),
 			'shipping_address' => $this->get_shipping_address(),
 			'billing_address'  => $this->get_billing_address(),
-			'payment'          => $event_data['payment'] ?? $this->get_payment_data(),
+			'payment'          => $this->get_payment_data( $event_data ),
 			'event_data'       => $event_data,
 		);
 	}
@@ -210,7 +210,7 @@ class SessionDataCollector {
 			$tax_total         = 0;
 			$shipping_tax_rate = null;
 			$discount_total    = 0;
-			$currency          = get_woocommerce_currency();
+			$currency          = WC()->call_function( 'get_woocommerce_currency' );
 			$cart_hash         = null;
 			$items             = array();
 
@@ -483,49 +483,38 @@ class SessionDataCollector {
 	 *
 	 * @return array Payment data array with 11 keys.
 	 */
-	private function get_payment_data(): array {
+	private function get_payment_data( array $event_data = array() ): array {
+		$payment_data = array(
+			'payment_gateway_name'      => null,
+			'payment_method_type'       => null,
+			'card_bin'                  => null,
+			'card_last4'                => null,
+			'card_brand'                => null,
+			'payer_id'                  => null,
+			'outcome'                   => null,
+			'decline_reason'            => null,
+			'avs_result'                => null,
+			'cvc_result'                => null,
+			'tokenized_card_identifier' => null,
+		);
+
 		try {
-			$payment_gateway_name = null;
-			$payment_method_type  = null;
+			if ( ! empty( $event_data['payment'] ) ) {
+				array_merge( $payment_data, $event_data['payment'] );
+				return $payment_data;
+			}
 
 			// Try to get chosen payment method from session.
 			$chosen_payment_method = $this->get_chosen_payment_method();
 			if ( $chosen_payment_method ) {
-				$payment_gateway_name = \sanitize_text_field( $chosen_payment_method );
-				$payment_method_type  = \sanitize_text_field( $chosen_payment_method );
+				$payment_data['payment_gateway_name'] = \sanitize_text_field( $chosen_payment_method );
+				$payment_data['payment_method_type']  = \sanitize_text_field( $chosen_payment_method );
 			}
-
-			// Initialize payment data with default null values.
-			$payment_data = array(
-				'payment_gateway_name'      => $payment_gateway_name,
-				'payment_method_type'       => $payment_method_type,
-				'card_bin'                  => null,
-				'card_last4'                => null,
-				'card_brand'                => null,
-				'payer_id'                  => null,
-				'outcome'                   => null,
-				'decline_reason'            => null,
-				'avs_result'                => null,
-				'cvc_result'                => null,
-				'tokenized_card_identifier' => null,
-			);
 
 			return $payment_data;
 		} catch ( \Exception $e ) {
-			// Graceful degradation - return structure with null values.
-			return array(
-				'payment_gateway_name'      => null,
-				'payment_method_type'       => null,
-				'card_bin'                  => null,
-				'card_last4'                => null,
-				'card_brand'                => null,
-				'payer_id'                  => null,
-				'outcome'                   => null,
-				'decline_reason'            => null,
-				'avs_result'                => null,
-				'cvc_result'                => null,
-				'tokenized_card_identifier' => null,
-			);
+			// Graceful degradation.
+			return $payment_data;
 		}
 	}
 
