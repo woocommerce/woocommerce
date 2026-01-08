@@ -6,10 +6,12 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
+use WC_Logger;
 use WC_Unit_Test_Case;
 
 /**
@@ -106,20 +108,15 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 * enablement check.
 	 */
 	public function test_it_logs_error_when_jetpack_connection_check_throws_exception() {
-		// phpcs:disable Squiz.Commenting
-		$fake_logger = new class() {
-			public $errors = array();
+		$logger_mock = $this->createMock( WC_Logger::class );
+		$logger_mock->expects( $this->once() )
+			->method( 'error' )
+			->with(
+				$this->stringContains( 'Error determining if PushNotifications feature should be enabled' ),
+				$this->anything()
+			);
 
-			public function error( $message, $data = array() ) {
-				$this->errors[] = array(
-					'message' => $message,
-					'data'    => $data,
-				);
-			}
-		};
-		// phpcs:enable Squiz.Commenting
-
-		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $fake_logger ) );
+		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
 		$this->set_up_features_controller_mock( true );
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
@@ -132,13 +129,6 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$result             = $push_notifications->should_be_enabled();
 
 		$this->assertFalse( $result, 'Should be disabled when exception is thrown' );
-		$this->assertCount( 1, $fake_logger->errors, 'Should have logged exactly one error' );
-		$this->assertStringContainsString( 'Connection check failed', $fake_logger->errors[0]['message'] );
-
-		$this->assertStringContainsString(
-			'Error determining if PushNotifications feature should be enabled',
-			$fake_logger->errors[0]['message']
-		);
 	}
 
 	/**
@@ -173,6 +163,59 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 
 		// Subsequent call should return cached true.
 		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should return cached true value' );
+	}
+
+	/**
+	 * @testdox Tests that register() hooks register_post_types to init when enabled.
+	 */
+	public function test_it_hooks_register_post_types_when_enabled() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( true );
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->register();
+
+		$callback_priority = has_action( 'init', array( $push_notifications, 'register_post_types' ) );
+
+		$this->assertTrue( (bool) $callback_priority, 'register_post_types should be hooked to init' );
+		$this->assertEquals( 10, $callback_priority, 'register_post_types should have priority 10' );
+	}
+
+	/**
+	 * @testdox Tests that register_post_types() registers push_token post type with correct properties.
+	 */
+	public function test_it_registers_push_token_post_type_with_correct_properties() {
+		$push_notifications = new PushNotifications();
+		$push_notifications->register_post_types();
+
+		$this->assertTrue( post_type_exists( PushToken::POST_TYPE ), 'Push token post type should be registered' );
+
+		$post_type_object = get_post_type_object( PushToken::POST_TYPE );
+
+		$this->assertNotNull( $post_type_object );
+		$this->assertFalse( $post_type_object->public );
+		$this->assertFalse( $post_type_object->publicly_queryable );
+		$this->assertTrue( $post_type_object->delete_with_user );
+	}
+
+	/**
+	 * @testdox Tests that push_token post type is not registered when disabled.
+	 */
+	public function test_it_does_not_register_push_token_post_type_when_disabled() {
+		$this->set_up_features_controller_mock( false );
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->register();
+
+		$this->assertFalse(
+			has_action( 'init', array( $push_notifications, 'register_post_types' ) ),
+			'register_post_types should not be hooked to init when disabled'
+		);
 	}
 
 	/**

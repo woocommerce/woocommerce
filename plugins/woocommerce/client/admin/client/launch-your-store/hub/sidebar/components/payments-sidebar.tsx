@@ -24,7 +24,7 @@ import type { TaskType } from '@woocommerce/data';
  */
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
-import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
+import { SiteHub } from '~/customize-store/site-hub';
 import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';

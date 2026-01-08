@@ -13,25 +13,19 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
+use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
-}
-
 if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
 	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
 }
 
 /**
@@ -218,7 +212,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for PayPal order responses to manage account restriction notices.
 				add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
 
-				$buttons = new WC_Gateway_Paypal_Buttons( $this );
+				$buttons = new PayPalButtons( $this );
 				if ( $buttons->is_enabled() && ! $this->needs_setup() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
@@ -246,7 +240,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		// Bail early if the order is not a PayPal order.
-		if ( ! $order || $order->get_payment_method() !== $this->id ) {
+		if ( ! $order instanceof WC_Order || $order->get_payment_method() !== $this->id ) {
 			return;
 		}
 
@@ -255,57 +249,36 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
+		$paypal_order_id = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID );
 		if ( empty( $paypal_order_id ) ) {
 			return;
 		}
 
+		/**
+		 * Bail early if the addresses update already have been attempted (whether successful or not).
+		 * Prevent duplicate address update attempts from the thankyou page.
+		 *
+		 * Address updates are primarily handled by the PayPal webhook when the order is approved.
+		 * This method serves as a fallback if the webhook hasn't fired yet,
+		 * but we want to show the correct addresses to the customer on the thankyou page.
+		 * Once an attempt is made (meta exists), we skip to prevent repeated API calls on page reloads.
+		 * The webhook handler will always update the addresses.
+		 */
+		$addresses_update_attempted = $order->meta_exists( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED );
+		if ( $addresses_update_attempted ) {
+			return;
+		}
+
 		try {
-			include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-			$paypal_request       = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request       = new PayPalRequest( $this );
 			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
 
-			// Update the shipping information.
-			$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
-			if ( ! empty( $full_name ) ) {
-				$approximate_first_name = explode( ' ', $full_name )[0] ?? '';
-				$approximate_last_name  = explode( ' ', $full_name )[1] ?? '';
-				$order->set_shipping_first_name( $approximate_first_name );
-				$order->set_shipping_last_name( $approximate_last_name );
-			}
-
-			$shipping_address = $paypal_order_details['purchase_units'][0]['shipping']['address'] ?? array();
-			if ( ! empty( $shipping_address ) ) {
-				$order->set_shipping_country( $shipping_address['country_code'] ?? '' );
-				$order->set_shipping_postcode( $shipping_address['postal_code'] ?? '' );
-				$order->set_shipping_state( $shipping_address['admin_area_1'] ?? '' );
-				$order->set_shipping_city( $shipping_address['admin_area_2'] ?? '' );
-				$order->set_shipping_address_1( $shipping_address['address_line_1'] ?? '' );
-				$order->set_shipping_address_2( $shipping_address['address_line_2'] ?? '' );
-			}
-
-			// Update the billing information.
-			$full_name = $paypal_order_details['payer']['name'] ?? array();
-			$email     = $paypal_order_details['payer']['email_address'] ?? '';
-			if ( ! empty( $full_name ) ) {
-				$order->set_billing_first_name( $full_name['given_name'] ?? '' );
-				$order->set_billing_last_name( $full_name['surname'] ?? '' );
-				$order->set_billing_email( $email );
-			}
-
-			$billing_address = $paypal_order_details['payer']['address'] ?? array();
-			if ( ! empty( $billing_address ) ) {
-				$order->set_billing_country( $billing_address['country_code'] ?? '' );
-				$order->set_billing_postcode( $billing_address['postal_code'] ?? '' );
-				$order->set_billing_state( $billing_address['admin_area_1'] ?? '' );
-				$order->set_billing_city( $billing_address['admin_area_2'] ?? '' );
-				$order->set_billing_address_1( $billing_address['address_line_1'] ?? '' );
-				$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
-			}
-
-			$order->save();
+			// Update the addresses in the order with the addresses from the PayPal order details.
+			PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'no' );
+			$order->save();
 		}
 	}
 
@@ -333,7 +306,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible()
+			PayPalHelper::is_orders_v2_migration_eligible()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -342,8 +315,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
 		$transact_account_manager->do_onboarding();
 	}
 
@@ -540,7 +512,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function is_valid_for_use() {
 		if ( $this->should_use_orders_v2() ) {
-			$valid_currencies = WC_Gateway_Paypal_Constants::SUPPORTED_CURRENCIES;
+			$valid_currencies = PayPalConstants::SUPPORTED_CURRENCIES;
 		} else {
 			$valid_currencies = array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' );
 		}
@@ -626,12 +598,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+		$order = wc_get_order( $order_id );
 
-		$order          = wc_get_order( $order_id );
-		$paypal_request = new WC_Gateway_Paypal_Request( $this );
+		if ( ! $order || ! $order instanceof WC_Order ) {
+			return array();
+		}
 
 		if ( $this->should_use_orders_v2() ) {
+			$paypal_request = new PayPalRequest( $this );
+
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception(
@@ -641,7 +616,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$redirect_url = $paypal_order['redirect_url'];
 		} else {
-			$redirect_url = $paypal_request->get_request_url( $order, $this->testmode );
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+
+			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$redirect_url   = $paypal_request->get_request_url( $order, $this->testmode );
 		}
 
 		return array(
@@ -726,7 +704,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		if ( ! $order || ! $order instanceof WC_Order ) {
 			return;
 		}
 
@@ -736,17 +714,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If the order is authorized via legacy API, the '_paypal_status' meta will be 'pending'.
-		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
+		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true );
 
 		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
-			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request = new PayPalRequest( $this );
 			$paypal_request->capture_authorized_payment( $order );
 			return;
 		}
 
-		if ( 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
@@ -765,7 +741,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					case 'Completed':
 						/* translators: 1: Amount, 2: Authorization ID, 3: Transaction ID */
 						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						$order->update_meta_data( '_paypal_status', $result->PAYMENTSTATUS );
+						$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $result->PAYMENTSTATUS );
 						$order->set_transaction_id( $result->TRANSACTIONID );
 						$order->save();
 						break;
@@ -808,7 +784,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
-		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$buttons           = new PayPalButtons( $this );
 		$options           = $buttons->get_common_options();
 
 		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
@@ -849,7 +825,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function add_paypal_sdk_attributes( $attrs ) {
 		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
-			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$buttons   = new PayPalButtons( $this );
 			$page_type = $buttons->get_page_type();
 
 			$attrs['data-page-type']              = $page_type;
@@ -956,7 +932,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible()
+			PayPalHelper::is_orders_v2_migration_eligible()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -977,8 +953,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// We need merchant and provider accounts with Transact to be able to use the proxy.
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
 		$merchant_account_data    = $transact_account_manager->get_transact_account_data( 'merchant' );
 		if ( empty( $merchant_account_data ) ) {
 			return false;
@@ -1055,7 +1030,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		WC_Gateway_Paypal_Notices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
+		PayPalNotices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
 	}
 }
 
@@ -1068,6 +1043,6 @@ add_action(
 		}
 
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
-		new WC_Gateway_Paypal_Notices();
+		new PayPalNotices();
 	}
 );
