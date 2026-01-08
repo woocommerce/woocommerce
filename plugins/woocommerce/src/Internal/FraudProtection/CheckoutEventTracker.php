@@ -139,12 +139,12 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		$payment_data = array();
 
 		if ( ! empty( $posted_data['payment']['payment_method_type'] ) ) {
-			$payment_method_id   = sanitize_text_field( wp_unslash( $posted_data['payment']['payment_method_type'] ) );
-			$payment_method_name = PaymentMethodHelper::get_payment_method_name( $payment_method_id );
+			$payment_gateway_id   = sanitize_text_field( wp_unslash( $posted_data['payment']['payment_method_type'] ) );
+			$payment_gateway_name = WC()->payment_gateways()->get_payment_gateway_name_by_id( $payment_gateway_id );
 
 			$payment_data['payment'] = array(
-				'payment_method_type' => $payment_method_id,
-				'payment_method_name' => $payment_method_name,
+				'payment_gateway_type' => $payment_gateway_id,
+				'payment_gateway_name' => $payment_gateway_name,
 			);
 		}
 
