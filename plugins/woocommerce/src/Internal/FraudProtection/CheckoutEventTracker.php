@@ -145,28 +145,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Track shipping rate selection from Store API if fraud protection is enabled.
-	 *
-	 * This is called directly from CartSelectShippingRate endpoint to track
-	 * shipping method changes in Blocks checkout.
-	 *
-	 * @param string|null $package_id The package ID being updated (null for all packages).
-	 * @param string      $rate_id The chosen rate ID.
-	 * @return void
-	 */
-	public function handle_shipping_rate_selection( $package_id, string $rate_id ): void {
-		// Build event data with the shipping rate information.
-		$collected_event_data = array(
-			'shipping_method' => array( $rate_id ),
-			'package_id'      => $package_id,
-		);
-
-		// Build and dispatch the event.
-		$event_data = $this->format_checkout_event_data( 'shipping_rate_select', $collected_event_data );
-		$this->dispatcher->dispatch_event( 'checkout_blocks_shipping_rate_select', $event_data );
-	}
-
-	/**
 	 * Build checkout event-specific data.
 	 *
 	 * Prepares the checkout event data including action type and any changed fields.

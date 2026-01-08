@@ -247,62 +247,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$this->sut->track_blocks_checkout_shipping_method_update( null, 'free_shipping:2' );
 	}
 
-	/**
-	 * Test handle_shipping_rate_selection dispatches event with rate information.
-	 */
-	public function test_handle_shipping_rate_selection_dispatches_event_with_rate_info(): void {
-		// Mock dispatcher to capture event data.
-		$captured_event_data = null;
-		$this->mock_dispatcher
-			->expects( $this->once() )
-			->method( 'dispatch_event' )
-			->with(
-				$this->equalTo( 'checkout_blocks_shipping_rate_select' ),
-				$this->callback(
-					function ( $event_data ) use ( &$captured_event_data ) {
-						$captured_event_data = $event_data;
-						return isset( $event_data['action'] )
-							&& 'shipping_rate_select' === $event_data['action']
-							&& isset( $event_data['shipping_methods'] )
-							&& is_array( $event_data['shipping_methods'] );
-					}
-				)
-			);
-
-		// Call the handler.
-		$this->sut->handle_shipping_rate_selection( '0', 'flat_rate:1' );
-
-		// Verify the event data was captured correctly.
-		$this->assertNotNull( $captured_event_data );
-		$this->assertEquals( 'shipping_rate_select', $captured_event_data['action'] );
-		$this->assertIsArray( $captured_event_data['shipping_methods'] );
-		$this->assertArrayHasKey( 'flat_rate:1', $captured_event_data['shipping_methods'] );
-	}
-
-	/**
-	 * Test handle_shipping_rate_selection handles different shipping rates.
-	 */
-	public function test_handle_shipping_rate_selection_handles_different_rates(): void {
-		// Mock dispatcher to verify event is dispatched with correct structure.
-		$this->mock_dispatcher
-			->expects( $this->once() )
-			->method( 'dispatch_event' )
-			->with(
-				$this->equalTo( 'checkout_blocks_shipping_rate_select' ),
-				$this->callback(
-					function ( $event_data ) {
-						return isset( $event_data['action'] )
-							&& 'shipping_rate_select' === $event_data['action']
-							&& isset( $event_data['shipping_methods'] )
-							&& is_array( $event_data['shipping_methods'] );
-					}
-				)
-			);
-
-		// Call the handler with different rate.
-		$this->sut->handle_shipping_rate_selection( null, 'free_shipping:2' );
-	}
-
 	// ========================================
 	// Traditional Shortcode Checkout Tests
 	// ========================================
