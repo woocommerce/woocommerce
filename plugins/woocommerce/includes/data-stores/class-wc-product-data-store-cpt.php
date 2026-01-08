@@ -104,6 +104,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected $updated_props = array();
 
+	/**
+	 * Runtime cache for product types.
+	 *
+	 * @since 9.6.0
+	 * @var array
+	 */
+	protected static $product_type_cache = array();
+
 
 	/**
 	 * Method to obtain DB lock on SKU to make sure we only
@@ -1086,6 +1094,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$this->updated_props[] = 'product_type';
 			do_action( 'woocommerce_product_type_changed', $product, $old_type, $new_type );
 		}
+
+		// Clear runtime cache to ensure fresh data if type changed.
+		self::clear_product_type_cache( $product->get_id() );
 	}
 
 	/**
@@ -2042,10 +2053,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return bool|string
 	 */
 	public function get_product_type( $product_id ) {
+		// Check runtime cache first (L1 Memory Cache).
+		if ( isset( self::$product_type_cache[ $product_id ] ) ) {
+			return self::$product_type_cache[ $product_id ];
+		}
+
 		$cache_key    = WC_Cache_Helper::get_cache_prefix( 'product_' . $product_id ) . '_type_' . $product_id;
 		$product_type = wp_cache_get( $cache_key, 'products' );
 
 		if ( $product_type ) {
+			self::$product_type_cache[ $product_id ] = $product_type;
 			return $product_type;
 		}
 
@@ -2061,8 +2078,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		wp_cache_set( $cache_key, $product_type, 'products' );
+		self::$product_type_cache[ $product_id ] = $product_type;
 
 		return $product_type;
+	}
+
+	/**
+	 * Clear the product type runtime cache.
+	 *
+	 * @since 9.6.0
+	 * @param int|null $product_id Specific product ID to clear, or null for all.
+	 */
+	public static function clear_product_type_cache( $product_id = null ) {
+		if ( null === $product_id ) {
+			self::$product_type_cache = array();
+		} else {
+			unset( self::$product_type_cache[ $product_id ] );
+		}
 	}
 
 	/**
