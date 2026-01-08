@@ -34,7 +34,7 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	color: $input-text-light;
 
 	.has-dark-controls & {
-		color: $input-text-dark;
+		color: currentColor;
 	}
 
 	&:hover,
