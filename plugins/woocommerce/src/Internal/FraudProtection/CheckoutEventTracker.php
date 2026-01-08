@@ -111,9 +111,9 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function track_blocks_checkout_shipping_method_update( ?string $package_id, string $rate_id ): void {
-		$event_data            = array(
-			'package_id'           => $package_id,
-			'rate_id'              => $rate_id,
+		$event_data = array(
+			'package_id' => $package_id,
+			'rate_id'    => $rate_id,
 		);
 
 		$collected_data = $this->data_collector->collect( 'checkout_blocks_shipping_method_update', $event_data );
