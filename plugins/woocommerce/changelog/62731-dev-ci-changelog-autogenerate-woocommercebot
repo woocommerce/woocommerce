@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: change the committer for autogerated changelog entries to
