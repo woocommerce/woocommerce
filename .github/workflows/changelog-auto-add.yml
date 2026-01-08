@@ -28,7 +28,7 @@ env:
 jobs:
     add-changelog:
         name: 'Add changelog to PR'
-        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' && ( github.event_name != 'pull_request_target' || contains( github.event.pull_request.body, '[x] Automatically create a changelog' ) ) }}
+        if: ${{ github.event.pull_request.user.login != 'github-actions[bot]' && github.event.pull_request.user.login != 'woocommercebot' && ( github.event_name != 'pull_request_target' || contains( github.event.pull_request.body, '[x] Automatically create a changelog' ) ) }}
         runs-on: ubuntu-latest
         permissions:
             contents: write
