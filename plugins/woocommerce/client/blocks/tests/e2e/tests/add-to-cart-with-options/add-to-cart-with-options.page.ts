@@ -125,7 +125,7 @@ class AddToCartWithOptionsPage {
 		await this.editor.publishAndVisitPost();
 	}
 
-	async selectBlockAttribute(
+	async selectVariationSelectorOptionsBlockAttribute(
 		attributeName: any,
 		attributeValue: any,
 		optionStyle: 'Pills' | 'Dropdown',

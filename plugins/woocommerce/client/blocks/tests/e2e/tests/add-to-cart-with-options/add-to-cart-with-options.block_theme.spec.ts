@@ -1245,7 +1245,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// Expect nothing to be auto-selected
-					await pageObject.selectBlockAttribute(
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
 						'Color',
 						'Blue',
 						optionStyle
@@ -1282,7 +1282,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
-					await pageObject.selectBlockAttribute(
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
 						'Color',
 						'Blue',
 						optionStyle
@@ -1321,7 +1321,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", the only possible Size remaining is "XL".
-					await pageObject.selectBlockAttribute(
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
 						'Color',
 						'Blue',
 						optionStyle
@@ -1338,7 +1338,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", the only possible Size remaining is "XL".
-					await pageObject.selectBlockAttribute(
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
 						'Color',
 						'Blue',
 						optionStyle
@@ -1377,13 +1377,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 						await page.goto( productPermalink );
 
 						// By setting the Color to "Blue", the only possible Size remaining is "XL".
-						await pageObject.selectBlockAttribute(
+						await pageObject.selectVariationSelectorOptionsBlockAttribute(
 							'Color',
 							'Blue',
 							optionStyle
 						);
 						// Now, we deselect the Color.
-						await pageObject.selectBlockAttribute(
+						await pageObject.selectVariationSelectorOptionsBlockAttribute(
 							'Color',
 							'',
 							optionStyle
@@ -1394,7 +1394,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 						// Size: XL
 						// Because the Size is XL, the only Colors possible are Red and Blue.
 						// Now if we select Size: S, the Color should auto-select to Green.
-						await pageObject.selectBlockAttribute(
+						await pageObject.selectVariationSelectorOptionsBlockAttribute(
 							'Size',
 							'S',
 							optionStyle
