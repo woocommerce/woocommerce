@@ -149,7 +149,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			$this->extract_payment_method( $collected_event_data ),
 		);
 
-		$event_data['shipping_methods'] = $collected_event_data['shipping_method'];
+		$event_data['shipping_methods'] = $collected_event_data['shipping_method'] ?? array();
 
 		return $event_data;
 	}
