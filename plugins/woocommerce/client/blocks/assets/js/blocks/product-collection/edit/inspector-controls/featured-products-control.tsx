@@ -34,6 +34,7 @@ const FeaturedProductsControl = ( props: QueryControlProps ) => {
 			resetAllFilter={ deselectCallback }
 		>
 			<BaseControl
+				__nextHasNoMarginBottom
 				id="product-collection-featured-products-control"
 				label={ __( 'Featured', 'woocommerce' ) }
 			>
