@@ -220,7 +220,7 @@ class WC_Post_Types {
 			 * @since 10.5.0
 			 * @param array $post_types Array of post types.
 			 */
-			apply_filters( 'woocommerce_taxonomy_objects_pos_product_visibility', array( 'product' ) ),
+			apply_filters( 'woocommerce_taxonomy_objects_pos_product_visibility', array( 'product', 'product_variation' ) ),
 			/**
 			 * Filter the arguments for the POS product visibility taxonomy.
 			 *

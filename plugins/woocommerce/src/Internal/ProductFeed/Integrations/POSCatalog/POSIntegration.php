@@ -73,6 +73,7 @@ class POSIntegration implements IntegrationInterface {
 	public function register_hooks(): void {
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 		$this->container->get( AsyncGenerator::class )->register_hooks();
+		$this->container->get( POSProductVisibilitySync::class )->register_hooks();
 	}
 
 	/**
