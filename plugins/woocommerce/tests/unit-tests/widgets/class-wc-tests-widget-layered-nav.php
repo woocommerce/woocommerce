@@ -21,19 +21,14 @@ class WC_Tests_Widget_Layered_Nav extends WC_Unit_Test_Case {
 	 *
 	 * @return WC_Widget_Layered_Nav An instance of WC_Widget_Layered_Nav ready to test.
 	 */
-	private function get_widget( $filter_operation, $filter_colors = array(), $filter_styles = array() ) {
-		$tax_query = array(
-			'relation' => 'and',
-			0          => array(
-				'taxonomy' => 'product_visibility',
-				'terms'    => array(
-					get_term_by( 'slug', ProductStockStatus::OUT_OF_STOCK, 'product_visibility' )->term_taxonomy_id,
-					get_term_by( 'slug', 'exclude-from-catalog', 'product_visibility' )->term_taxonomy_id,
-				),
-				'field'    => 'term_taxonomy_id',
-				'operator' => 'NOT IN',
-			),
-		);
+/**
+ * Test getting order ID for a new order object.
+ */
+public function test_new_order_has_zero_id() {
+    $new_order = new WC_Order();
+    // Verifying that a fresh order instance has ID 0 by default
+    $this->assertSame( 0, $new_order->get_id(), 'New order ID should be 0' );
+}
 
 		if ( ! empty( $filter_colors ) ) {
 			array_push(
