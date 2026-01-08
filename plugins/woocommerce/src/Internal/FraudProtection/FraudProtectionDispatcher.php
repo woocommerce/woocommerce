@@ -123,14 +123,11 @@ class FraudProtectionDispatcher {
 			 */
 			$collected_data = apply_filters( 'woocommerce_fraud_protection_event_data', $collected_data, $event_type );
 
-			// Extract session data for API call.
-			$session_data = $collected_data['session'] ?? array();
-
 			// Send event to API and get decision.
 			$decision = $this->api_client->send_event( $event_type, $collected_data );
 
 			// Apply decision via DecisionHandler.
-			$this->decision_handler->apply_decision( $decision, $session_data );
+			$this->decision_handler->apply_decision( $decision, $collected_data );
 		} catch ( \Exception $e ) {
 			// Gracefully handle errors - fraud protection should never break functionality.
 			FraudProtectionController::log(

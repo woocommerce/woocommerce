@@ -124,11 +124,11 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 			)
 			->willReturn( ApiClient::DECISION_ALLOW );
 
-		// Expect decision handler to be called with the decision and session data.
+		// Expect decision handler to be called with the decision and collected data.
 		$this->decision_handler_mock
 			->expects( $this->once() )
 			->method( 'apply_decision' )
-			->with( ApiClient::DECISION_ALLOW, array( 'session_id' => 'test-session-123' ) );
+			->with( ApiClient::DECISION_ALLOW, $collected_data );
 
 		// Call dispatch_event with event data.
 		$this->sut->dispatch_event( $event_type, $event_data );
@@ -168,11 +168,11 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 			)
 			->willReturn( ApiClient::DECISION_ALLOW );
 
-		// Expect decision handler to be called with empty session data.
+		// Expect decision handler to be called with collected data.
 		$this->decision_handler_mock
 			->expects( $this->once() )
 			->method( 'apply_decision' )
-			->with( ApiClient::DECISION_ALLOW, array() );
+			->with( ApiClient::DECISION_ALLOW, $collected_data );
 
 		// Call dispatch_event - should handle gracefully.
 		$this->sut->dispatch_event( $event_type, $event_data );
@@ -220,11 +220,11 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 			)
 			->willReturn( ApiClient::DECISION_BLOCK );
 
-		// Expect decision handler to be called with block decision.
+		// Expect decision handler to be called with block decision and collected data.
 		$this->decision_handler_mock
 			->expects( $this->once() )
 			->method( 'apply_decision' )
-			->with( ApiClient::DECISION_BLOCK, array( 'session_id' => 'test' ) );
+			->with( ApiClient::DECISION_BLOCK, $collected_data );
 
 		// Call dispatch_event.
 		$this->sut->dispatch_event( $event_type, $event_data );
