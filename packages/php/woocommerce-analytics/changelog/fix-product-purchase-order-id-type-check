@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Fix product_purchase event not tracking for shortcode checkout due to incorrect order ID type check
