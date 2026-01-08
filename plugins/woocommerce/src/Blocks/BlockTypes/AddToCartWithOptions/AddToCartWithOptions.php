@@ -60,7 +60,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * @return void
 	 */
 	protected function enqueue_assets( $attributes, $content, $block ) {
-		$product_id = isset( $block->context ) && is_array( $block->context ) && array_key_exists( 'postId', $block->context ) ? $block->context['postId'] : null;
+		$product_id = ( is_object( $block ) && property_exists( $block, 'context' ) && is_array( $block->context ) && array_key_exists( 'postId', $block->context ) ) ? $block->context['postId'] : null;
 
 		if ( isset( $product_id ) ) {
 			$rendered_product = wc_get_product( $product_id );
@@ -183,7 +183,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		global $product;
 
-		$product_id = isset( $block->context ) && is_array( $block->context ) && array_key_exists( 'postId', $block->context ) ? $block->context['postId'] : null;
+		$product_id = ( is_object( $block ) && property_exists( $block, 'context' ) && is_array( $block->context ) && array_key_exists( 'postId', $block->context ) ) ? $block->context['postId'] : null;
 
 		if ( ! isset( $product_id ) ) {
 			return '';
