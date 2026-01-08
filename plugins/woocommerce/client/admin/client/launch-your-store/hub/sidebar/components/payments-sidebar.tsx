@@ -214,11 +214,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 							animate={ { opacity: 1, y: 0 } }
 							transition={ { duration: 0.7, delay: 0.2 } }
 						>
-							{ wooPaymentsRecentlyActivated && (
-								<InstallWooPaymentsStep
-									isStepComplete={ true }
-								/>
-							) }
+							<InstallWooPaymentsStep isStepComplete={ true } />
 							{ sortedSteps.map( ( step ) => {
 								return (
 									<SidebarNavigationItem
