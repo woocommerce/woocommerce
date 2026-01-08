@@ -1,8 +1,8 @@
 <?php
 /**
- * The template for displaying last product review widget on the WordPress dashboard.
+ * This template displays the recent product review widget on the WordPress dashboard.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/dashboard-widget-last-reviews.php
+ * This template can be overridden by copying it to yourtheme/woocommerce/dashboard-widget-reviews.php
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -18,16 +18,16 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * For this template, the following variables have been dispatched:
- *
+ * For this template, the following variables are available:
  * @var $product \WC_Product
  * @var $comment \WP_Comment
  */
 
 /**
- * Filters product name to display in the last reviews.
+ * Filters the product name for display in the latest reviews.
  *
  * @since 2.1.0
+ * @deprecated since 10.5.0
  *
  * @param string      $product_name The product name.
  * @param \WP_Comment $comment      The comment.

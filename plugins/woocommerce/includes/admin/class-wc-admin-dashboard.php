@@ -419,11 +419,13 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 			if ( has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
 				// Deprecation path here: only raise notice and delete this logical branch in later versions.
+				wc_deprecated_function( 'The woocommerce_report_recent_reviews_query_from filter', '10.5.0' );
 
 				/**
 				 * Filters the from-clause used for fetching latest product reviews.
 				 *
 				 * @since 3.1.0
+				 * @deprecated since 10.5.0
 				 *
 				 * @param string $clause The from-clause.
 				 */
@@ -443,13 +445,12 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					"SELECT posts.ID as product_id, comments.comment_ID as comment_id {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				);
 			} else {
-				// Optimized and actualized version of the query: leverage a lookup table for faster joins.
-				// The double join covers potential hiccups around tables sync (if Action Scheduler is busy).
+				// To improve performance, use a lookup table to enable faster joins in the optimized query.
 				$entries = $wpdb->get_results(
 					"SELECT posts.ID as product_id, comments.comment_ID as comment_id
-					 FROM wp_comments comments
-						LEFT JOIN wp_wc_product_meta_lookup lookup ON(lookup.product_id = comments.comment_post_ID)
-						LEFT JOIN wp_posts posts ON(posts.ID = lookup.product_id)
+					 FROM {$wpdb->comments} comments
+						LEFT JOIN {$wpdb->wc_product_meta_lookup} lookup ON(lookup.product_id = comments.comment_post_ID)
+						LEFT JOIN {$wpdb->posts} posts ON(posts.ID = lookup.product_id)
 					 WHERE
 						comments.comment_type = 'review' AND comments.comment_approved = '1'
 					 ORDER BY comments.comment_date_gmt DESC
@@ -460,6 +461,10 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			if ( $entries ) {
 				_prime_comment_caches( array_column( $entries, 'comment_id' ) );
 				_prime_post_caches( array_column( $entries, 'product_id' ), false, false );
+
+				if( has_filter( 'woocommerce_admin_dashboard_recent_reviews' ) ) {
+					wc_deprecated_function( 'The woocommerce_admin_dashboard_recent_reviews filter', '10.5.0', 'dashboard-widget-reviews.php template' );
+				}
 
 				echo '<ul>';
 				foreach ( $entries as $entry ) {
