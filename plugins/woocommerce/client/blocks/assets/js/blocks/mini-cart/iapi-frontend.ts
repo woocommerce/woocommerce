@@ -74,7 +74,7 @@ type MiniCartContext = {
 	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
 };
 
-type MiniCart = {
+export type MiniCart = {
 	state: {
 		isOpen: boolean;
 		totalItemsInCart: number;

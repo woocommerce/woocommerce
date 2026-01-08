@@ -79,14 +79,54 @@ class Renderer {
 	 * @return string
 	 */
 	public function handle_rendering( $block_content, $block ) {
+		$query                  = $block['attrs']['query'] ?? array();
+		$product_reference_type = $query['productReferenceType'] ?? null;
+		$is_cart_reference      = 'cart' === $product_reference_type;
+
 		if ( $this->should_prevent_render() ) {
-			return ''; // Prevent rendering.
+			// For cart-referencing collections (e.g., cross-sells in Mini Cart),
+			// render an empty placeholder with router-region so the Interactivity
+			// Router can refresh it when the cart changes.
+			if ( $is_cart_reference ) {
+				$this->reset_render_state();
+				return $this->render_empty_placeholder();
+			}
+
+			return '';
 		}
 
 		// Reset the render state for the next render.
 		$this->reset_render_state();
 
 		return $this->enhance_product_collection_with_interactivity( $block_content, $block );
+	}
+
+	/**
+	 * Render an empty placeholder for cart-referencing collections.
+	 * This allows the Interactivity Router to find and replace the content
+	 * when the cart changes.
+	 *
+	 * @return string Empty placeholder HTML with router-region and watch attributes.
+	 */
+	private function render_empty_placeholder() {
+		$query_id = $this->parsed_block['attrs']['queryId'] ?? null;
+		if ( ! $query_id ) {
+			return '';
+		}
+
+		wp_enqueue_script_module( 'woocommerce/product-collection' );
+
+		ob_start();
+		?>
+		<div
+			class="wp-block-woocommerce-product-collection"
+			data-wp-interactive="woocommerce/product-collection"
+			data-wp-router-region="<?php echo esc_attr( 'wc-product-collection-' . $query_id ); ?>"
+			data-wp-watch="callbacks.onMiniCartOpen"
+			data-product-reference-type="cart"
+		></div>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -152,6 +192,13 @@ class Renderer {
 						'data-wp-router-region',
 						'wc-product-collection-' . $this->parsed_block['attrs']['queryId']
 					);
+				}
+
+				$query                  = $block['attrs']['query'] ?? array();
+				$product_reference_type = $query['productReferenceType'] ?? null;
+				if ( 'cart' === $product_reference_type ) {
+					$p->set_attribute( 'data-product-reference-type', 'cart' );
+					$p->set_attribute( 'data-wp-watch', 'callbacks.onMiniCartOpen' );
 				}
 			}
 

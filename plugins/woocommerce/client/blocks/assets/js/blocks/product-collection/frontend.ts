@@ -11,6 +11,7 @@ import {
 	triggerViewedProductEvent,
 } from './legacy-events';
 import { CoreCollectionNames } from './types';
+import type { MiniCart } from '../mini-cart/iapi-frontend';
 import './style.scss';
 
 export type ProductCollectionStoreContext = {
@@ -146,6 +147,11 @@ function isValidEvent( event: MouseEvent ): boolean {
 	);
 }
 
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+let wasMiniCartOpen = false;
+
 const productCollectionStore = {
 	actions: {
 		*navigate( event: MouseEvent ) {
@@ -267,9 +273,67 @@ const productCollectionStore = {
 
 			observer.observe( scrollableElement );
 		},
+		/**
+		 * Watches Mini Cart's drawer state and refreshes cart-referencing
+		 * Product Collections (e.g., cross-sells) when the drawer opens.
+		 * This is needed because Product Collections are SSR'd at page load,
+		 * so they don't automatically update when cart items change.
+		 */
+		*onMiniCartOpen() {
+			const { state: miniCartState } = store< MiniCart >(
+				'woocommerce/mini-cart',
+				{},
+				{ lock: universalLock }
+			);
+
+			const isOpen = miniCartState.isOpen;
+			const wasOpen = wasMiniCartOpen;
+			wasMiniCartOpen = isOpen;
+
+			// Only refresh on transition from closed to open.
+			if ( ! isOpen || isOpen === wasOpen ) {
+				return;
+			}
+
+			const { actions: routerActions } = yield import(
+				'@wordpress/interactivity-router'
+			);
+			yield routerActions.navigate( window.location.href );
+		},
 	},
 };
 
 store( 'woocommerce/product-collection', productCollectionStore, {
 	lock: true,
 } );
+
+/**
+ * Set up prefetching when cart changes.
+ * This pre-loads the updated page content so it's ready when the drawer opens,
+ * eliminating jank caused by waiting for the network request.
+ */
+const setupCartChangePrefetch = () => {
+	const prefetchPage = async () => {
+		// Only prefetch if there are cart-referencing Product Collections.
+		const collections = document.querySelectorAll(
+			'[data-product-reference-type="cart"]'
+		);
+		if ( collections.length === 0 ) {
+			return;
+		}
+
+		const { actions: routerActions } = await import(
+			'@wordpress/interactivity-router'
+		);
+
+		await routerActions.prefetch( window.location.href, { force: true } );
+	};
+
+	document.body.addEventListener( 'wc-blocks_added_to_cart', prefetchPage );
+	document.body.addEventListener(
+		'wc-blocks_removed_from_cart',
+		prefetchPage
+	);
+};
+
+setupCartChangePrefetch();
