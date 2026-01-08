@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
  * @param string      $product_name The product name.
  * @param \WP_Comment $comment      The comment.
  */
-$product_name = apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $product->get_name(), $comment )
+$product_name = apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $product->get_name(), $comment );
 
 ?>
 
