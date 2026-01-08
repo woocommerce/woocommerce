@@ -418,7 +418,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			global $wpdb;
 
 			if ( has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
-				// Deprecation path here: only raise notice and delete this logical branch in later versions.
 				wc_deprecated_function( 'The woocommerce_report_recent_reviews_query_from filter', '10.5.0' );
 
 				/**
