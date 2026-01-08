@@ -1371,10 +1371,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 				pageObject,
 				editor,
 			} ) => {
-				for ( const disabledAttributesAction of [ 'disable', 'hide' ] as (
-					| 'disable'
-					| 'hide'
-				 )[] ) {
+				for ( const disabledAttributesAction of [
+					'disable',
+					'hide',
+				] as ( 'disable' | 'hide' )[] ) {
 					await pageObject.updateSingleProductTemplate();
 
 					await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "${ disabledAttributesAction }"`, async () => {
