@@ -277,8 +277,10 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	private function extract_shipping_methods( array $posted_data ): array {
 		$shipping_method_data = array( 'shipping_methods' => array() );
 
-		foreach ( $posted_data['shipping_method'] as $shipping_method ) {
-			$shipping_method_data['shipping_methods'][] = $shipping_method['shipping_method'];
+		if ( ! empty( $posted_data['shipping_method'] ) && is_array( $posted_data['shipping_method'] ) ) {
+			foreach ( $posted_data['shipping_method'] as $shipping_method ) {
+				$shipping_method_data['shipping_methods'][] = $shipping_method['shipping_method'];
+			}
 		}
 
 		return $shipping_method_data;
