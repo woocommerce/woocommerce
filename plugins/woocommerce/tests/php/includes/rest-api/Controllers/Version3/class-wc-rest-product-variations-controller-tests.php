@@ -729,9 +729,9 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		$request->set_param( 'pos_products_only', true );
 
-		$response       = $this->server->dispatch( $request );
-		$response_data  = $response->get_data();
-		$variation_ids  = wp_list_pluck( $response_data, 'id' );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertNotContains( $variations[0]->get_id(), $variation_ids );
@@ -751,9 +751,9 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		$request->set_param( 'pos_products_only', false );
 
-		$response       = $this->server->dispatch( $request );
-		$response_data  = $response->get_data();
-		$variation_ids  = wp_list_pluck( $response_data, 'id' );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( $variations[0]->get_id(), $variation_ids );
@@ -773,9 +773,9 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
 		// Do not set pos_products_only parameter.
 
-		$response       = $this->server->dispatch( $request );
-		$response_data  = $response->get_data();
-		$variation_ids  = wp_list_pluck( $response_data, 'id' );
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( $variations[0]->get_id(), $variation_ids );
