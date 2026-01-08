@@ -3902,7 +3902,7 @@ function wc_display_product_attributes( $product ) {
 			}
 		}
 
-		$product_attributes[ 'attribute_' . sanitize_title_with_dashes( $attribute->get_name() ) ] = array(
+		$product_attributes[ 'attribute_' . sanitize_html_class( sanitize_title( $attribute->get_name() ) ) ] = array(
 			'label' => wc_attribute_label( $attribute->get_name() ),
 			'value' => apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values ),
 		);
