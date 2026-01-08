@@ -2509,30 +2509,6 @@ parameters:
 			path: includes/admin/class-wc-admin-duplicate-product.php
 
 		-
-			message: '#^Cannot call method get_global_unique_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot call method get_sku\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot call method read_meta_data\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot clone non\-object variable \$child of type WC_Product\|false\|null\.$#'
-			identifier: clone.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
 			message: '#^Method WC_Admin_Duplicate_Product\:\:dupe_button\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
