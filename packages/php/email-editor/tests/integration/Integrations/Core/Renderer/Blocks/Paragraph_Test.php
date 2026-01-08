@@ -246,4 +246,58 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringNotContainsString( 'text-align:center;', $rendered );
 		$this->assertStringNotContainsString( 'align="center"', $rendered );
 	}
+
+	/**
+	 * Test it skips spacer when margin-top is set
+	 */
+	public function testItSkipsSpacerWhenMarginTopIsSet(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		$parsed_paragraph['attrs']['style']['spacing']['margin']['top']  = '10px';
+		$parsed_paragraph['attrs']['style']['spacing']['margin']['left'] = '20px';
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		// Spacer wrapper should not be added when margin-top is set.
+		// The spacer adds a div with class "email-block-layout" and Outlook conditional comments.
+		$this->assertStringNotContainsString( 'email-block-layout', $rendered );
+		$this->assertStringNotContainsString( '<!--[if mso | IE]>', $rendered );
+		// Content should still be rendered.
+		$this->assertStringContainsString( 'Lorem Ipsum', $rendered );
+		$this->assertStringContainsString( 'font-size:16px;', $rendered );
+		// Margins should be applied to the table cell.
+		$this->assertStringContainsString( 'margin-top:10px', $rendered );
+		$this->assertStringContainsString( 'margin-left:20px', $rendered );
+	}
+
+	/**
+	 * Test it adds spacer when only margin-left is set
+	 */
+	public function testItAddsSpacerWhenOnlyMarginLeftIsSet(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		$parsed_paragraph['attrs']['style']['spacing']['margin']['left'] = '20px';
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		// Spacer wrapper should be added when only margin-left is set (not margin-top).
+		$this->assertStringContainsString( 'email-block-layout', $rendered );
+		// Content should still be rendered.
+		$this->assertStringContainsString( 'Lorem Ipsum', $rendered );
+		$this->assertStringContainsString( 'font-size:16px;', $rendered );
+		// Margin-left should be applied to the table cell.
+		$this->assertStringContainsString( 'margin-left:20px', $rendered );
+	}
+
+	/**
+	 * Test it adds spacer when margin-top is zero
+	 */
+	public function testItAddsSpacerWhenMarginTopIsZero(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		$parsed_paragraph['attrs']['style']['spacing']['margin']['top']  = '0';
+		$parsed_paragraph['attrs']['style']['spacing']['margin']['left'] = '20px';
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		// Spacer wrapper should be added when margin-top is 0.
+		$this->assertStringContainsString( 'email-block-layout', $rendered );
+		// Content should still be rendered.
+		$this->assertStringContainsString( 'Lorem Ipsum', $rendered );
+		$this->assertStringContainsString( 'font-size:16px;', $rendered );
+	}
 }

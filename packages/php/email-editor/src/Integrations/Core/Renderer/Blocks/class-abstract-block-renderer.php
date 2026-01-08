@@ -97,8 +97,21 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 * @return string
 	 */
 	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$rendered_content = $this->render_content( $block_content, $parsed_block, $rendering_context );
+
+		// Skip adding spacer if the block has its own margin-top set.
+		// The spacer adds wrapper divs that get extra margins from CSS inlining.
+		$block_margins = $parsed_block['attrs']['style']['spacing']['margin'] ?? array();
+		if ( ! empty( $block_margins ) ) {
+			$margin_top = $block_margins['top'] ?? '';
+			// Check if margin-top exists and is not explicitly '0' or empty.
+			if ( is_string( $margin_top ) && '' !== $margin_top && '0' !== $margin_top && '0px' !== $margin_top && '0em' !== $margin_top && '0rem' !== $margin_top ) {
+				return $rendered_content;
+			}
+		}
+
 		return $this->add_spacer(
-			$this->render_content( $block_content, $parsed_block, $rendering_context ),
+			$rendered_content,
 			$parsed_block['email_attrs'] ?? array()
 		);
 	}
