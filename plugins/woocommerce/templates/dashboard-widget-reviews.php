@@ -18,7 +18,8 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * For this template, the following variables are available:
+ * For this template, the following variables are available
+ *
  * @var $product \WC_Product
  * @var $comment \WP_Comment
  */
