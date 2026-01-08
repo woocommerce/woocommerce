@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Add to Cart + Options: Avoid loading unnecessary scripts when rendering 3rd-party product types

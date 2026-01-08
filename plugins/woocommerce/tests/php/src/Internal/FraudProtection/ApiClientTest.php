@@ -103,7 +103,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
 			'error',
-			'Endpoint POST transact/fraud-protection/events returned status code 500',
+			'Endpoint POST transact/fraud_protection/events returned status code 500',
 			array(
 				'source'   => 'woo-fraud-protection',
 				'response' => 'Internal Server Error',
@@ -135,7 +135,7 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result, 'Should fail open with allow decision' );
 		$this->assertLogged(
 			'error',
-			'Endpoint POST transact/fraud-protection/events returned status code 400',
+			'Endpoint POST transact/fraud_protection/events returned status code 400',
 			array(
 				'source'   => 'woo-fraud-protection',
 				'response' => $response,
