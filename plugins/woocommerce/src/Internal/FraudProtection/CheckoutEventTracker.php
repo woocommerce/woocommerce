@@ -111,11 +111,9 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function track_blocks_checkout_shipping_method_update( ?string $package_id, string $rate_id ): void {
-		$shipping_method_names = $this->get_shipping_method_names( array( $rate_id ) );
 		$event_data            = array(
 			'package_id'           => $package_id,
 			'rate_id'              => $rate_id,
-			'shipping_method_name' => reset( $shipping_method_names ),
 		);
 
 		$collected_data = $this->data_collector->collect( 'checkout_blocks_shipping_method_update', $event_data );
@@ -277,105 +275,12 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @return array Shipping method data wrapped in 'shipping_methods' key.
 	 */
 	private function extract_shipping_methods( array $posted_data ): array {
-		$shipping_method_data = array();
+		$shipping_method_data = array( 'shipping_methods' => array() );
 
-		if ( ! empty( $posted_data['shipping_method'] ) ) {
-			$shipping_method_ids = $posted_data['shipping_method'];
-
-			$shipping_methods = $this->get_shipping_method_names( $shipping_method_ids );
-			if ( ! empty( $shipping_methods ) ) {
-				$shipping_method_data['shipping_methods'] = $shipping_methods;
-			}
+		foreach ( $posted_data['shipping_method'] as $shipping_method ) {
+			$shipping_method_data['shipping_methods'][] = $shipping_method['shipping_method'];
 		}
 
 		return $shipping_method_data;
-	}
-
-	/**
-	 * Get readable shipping method names from shipping method IDs.
-	 *
-	 * Converts shipping method IDs (e.g., "flat_rate:1", "free_shipping:2")
-	 * to their human-readable labels by loading the shipping method instances.
-	 *
-	 * @param array $shipping_method_ids Array of shipping method IDs.
-	 * @return array Associative array mapping shipping method IDs to their names.
-	 */
-	private function get_shipping_method_names( array $shipping_method_ids ): array {
-		$shipping_method_map = array();
-
-		try {
-			// Get WooCommerce shipping instance.
-			$shipping = WC()->shipping();
-			if ( ! $shipping ) {
-				return $shipping_method_map;
-			}
-
-			// Get all available shipping methods.
-			$shipping_methods = $shipping->get_shipping_methods();
-
-			foreach ( $shipping_method_ids as $method_id ) {
-				if ( ! is_string( $method_id ) ) {
-					continue;
-				}
-
-				// Sanitize the method ID.
-				$method_id = sanitize_text_field( $method_id );
-
-				// Shipping method IDs can be in format "method_id:instance_id".
-				// Extract the base method ID.
-				$method_parts   = explode( ':', $method_id );
-				$base_method_id = $method_parts[0];
-				$instance_id    = isset( $method_parts[1] ) ? $method_parts[1] : null;
-
-				// Try to get the method label.
-				$method_label = null;
-
-				// If we have an instance ID, try to get the specific instance label.
-				if ( $instance_id && WC()->session instanceof \WC_Session ) {
-					// Get chosen shipping methods from session or packages.
-					$packages = WC()->shipping()->get_packages();
-
-					foreach ( $packages as $package ) {
-						if ( isset( $package['rates'][ $method_id ] ) ) {
-							$rate         = $package['rates'][ $method_id ];
-							$method_label = $rate->get_label();
-							break;
-						}
-					}
-				}
-
-				// Fallback to base method title if no instance label found.
-				if ( ! $method_label && isset( $shipping_methods[ $base_method_id ] ) ) {
-					$method = $shipping_methods[ $base_method_id ];
-					if ( method_exists( $method, 'get_method_title' ) ) {
-						$method_label = $method->get_method_title();
-					} elseif ( property_exists( $method, 'method_title' ) ) {
-						$method_label = $method->method_title;
-					}
-				}
-
-				// Use the method ID as fallback if no label found.
-				if ( ! $method_label ) {
-					$method_label = $method_id;
-				}
-
-				$shipping_method_map[ $method_id ] = $method_label;
-			}
-		} catch ( \Exception $e ) {
-			// Gracefully handle errors - return what we have so far.
-			FraudProtectionController::log(
-				'warning',
-				sprintf(
-					'Failed to get shipping method names: %s',
-					$e->getMessage()
-				),
-				array(
-					'shipping_method_ids' => $shipping_method_ids,
-					'exception'           => $e,
-				)
-			);
-		}
-
-		return $shipping_method_map;
 	}
 }

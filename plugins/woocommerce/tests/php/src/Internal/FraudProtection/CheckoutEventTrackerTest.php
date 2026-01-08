@@ -173,10 +173,9 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	public function test_track_blocks_checkout_shipping_method_update_dispatches_event(): void {
 		// Mock data collector to return session data.
 		$session_data = array(
-			'session_id'           => 'test_session_789',
-			'shipping_method_name' => 'Flat rate',
-			'package_id'           => '0',
-			'rate_id'              => 'flat_rate:1',
+			'session_id' => 'test_session_789',
+			'package_id' => '0',
+			'rate_id'    => 'flat_rate:1',
 		);
 		$this->mock_data_collector
 			->expects( $this->once() )
@@ -188,8 +187,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 						return isset( $event_data['package_id'] )
 							&& '0' === $event_data['package_id']
 							&& isset( $event_data['rate_id'] )
-							&& 'flat_rate:1' === $event_data['rate_id']
-							&& isset( $event_data['shipping_method_name'] );
+							&& 'flat_rate:1' === $event_data['rate_id'];
 					}
 				)
 			)
@@ -226,9 +224,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 						return array_key_exists( 'package_id', $event_data )
 							&& null === $event_data['package_id']
 							&& isset( $event_data['rate_id'] )
-							&& 'free_shipping:2' === $event_data['rate_id']
-							&& isset( $event_data['shipping_method_name'] )
-							&& false !== $event_data['shipping_method_name'];
+							&& 'free_shipping:2' === $event_data['rate_id'];
 					}
 				)
 			)
