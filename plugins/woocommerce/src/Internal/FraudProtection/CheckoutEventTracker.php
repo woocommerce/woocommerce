@@ -71,7 +71,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		// WooCommerce Blocks (Store API): Track when customer data is updated in Blocks checkout.
 		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'handle_store_api_customer_update' ), 10, 2 );
 
-		// Traditional checkout: Track when checkout fields are updated.
+		// Shortcode checkout: Track when checkout fields are updated.
 		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
 	}
 
@@ -94,37 +94,40 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		$shipping_address = $request->get_param( 'shipping_address' ) ?? array();
 
 		// Build posted data array in the format expected by build_checkout_event_data.
-		$posted_data = array();
+		$collected_event_data = array();
 
 		// Extract billing fields.
 		if ( ! empty( $billing_address ) ) {
-			$posted_data['billing_first_name'] = $billing_address['first_name'] ?? '';
-			$posted_data['billing_last_name']  = $billing_address['last_name'] ?? '';
-			$posted_data['billing_address_1']  = $billing_address['address_1'] ?? '';
-			$posted_data['billing_address_2']  = $billing_address['address_2'] ?? '';
-			$posted_data['billing_city']       = $billing_address['city'] ?? '';
-			$posted_data['billing_state']      = $billing_address['state'] ?? '';
-			$posted_data['billing_postcode']   = $billing_address['postcode'] ?? '';
-			$posted_data['billing_country']    = $billing_address['country'] ?? '';
-			$posted_data['billing_phone']      = $billing_address['phone'] ?? '';
-			$posted_data['billing_email']      = $billing_address['email'] ?? '';
+			$collected_event_data['billing_first_name'] = $billing_address['first_name'] ?? '';
+			$collected_event_data['billing_last_name']  = $billing_address['last_name'] ?? '';
+			$collected_event_data['billing_address_1']  = $billing_address['address_1'] ?? '';
+			$collected_event_data['billing_address_2']  = $billing_address['address_2'] ?? '';
+			$collected_event_data['billing_city']       = $billing_address['city'] ?? '';
+			$collected_event_data['billing_state']      = $billing_address['state'] ?? '';
+			$collected_event_data['billing_postcode']   = $billing_address['postcode'] ?? '';
+			$collected_event_data['billing_country']    = $billing_address['country'] ?? '';
+			$collected_event_data['billing_phone']      = $billing_address['phone'] ?? '';
+			$collected_event_data['billing_email']      = $billing_address['email'] ?? '';
 		}
 
 		// Extract shipping fields if present.
 		if ( ! empty( $shipping_address ) ) {
-			$posted_data['ship_to_different_address'] = true;
-			$posted_data['shipping_first_name']       = $shipping_address['first_name'] ?? '';
-			$posted_data['shipping_last_name']        = $shipping_address['last_name'] ?? '';
-			$posted_data['shipping_address_1']        = $shipping_address['address_1'] ?? '';
-			$posted_data['shipping_address_2']        = $shipping_address['address_2'] ?? '';
-			$posted_data['shipping_city']             = $shipping_address['city'] ?? '';
-			$posted_data['shipping_state']            = $shipping_address['state'] ?? '';
-			$posted_data['shipping_postcode']         = $shipping_address['postcode'] ?? '';
-			$posted_data['shipping_country']          = $shipping_address['country'] ?? '';
+			$collected_event_data['ship_to_different_address'] = true;
+			$collected_event_data['shipping_first_name']       = $shipping_address['first_name'] ?? '';
+			$collected_event_data['shipping_last_name']        = $shipping_address['last_name'] ?? '';
+			$collected_event_data['shipping_address_1']        = $shipping_address['address_1'] ?? '';
+			$collected_event_data['shipping_address_2']        = $shipping_address['address_2'] ?? '';
+			$collected_event_data['shipping_city']             = $shipping_address['city'] ?? '';
+			$collected_event_data['shipping_state']            = $shipping_address['state'] ?? '';
+			$collected_event_data['shipping_postcode']         = $shipping_address['postcode'] ?? '';
+			$collected_event_data['shipping_country']          = $shipping_address['country'] ?? '';
 		}
 
-		// Build and dispatch the event (Blocks checkout doesn't include payment/shipping methods).
-		$event_data = $this->build_checkout_event_data( 'store_api_update', $posted_data, false );
+		// Extract payment and shipping methods from session (not available in Store API request).
+		$collected_event_data = array_merge($collected_event_data, $this->get_payment_and_shipping_methods_from_session_data() );
+
+		// Build and dispatch the event (now includes session data).
+		$event_data = $this->format_checkout_event_data( 'store_api_update', $collected_event_data );
 		$this->dispatcher->dispatch_event( 'checkout_blocks_customer_update', $event_data );
 	}
 
@@ -146,7 +149,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		// Build and dispatch the event (traditional checkout includes payment/shipping methods).
-		$event_data = $this->build_checkout_event_data( 'field_update', $data, true );
+		$event_data = $this->format_checkout_event_data( 'field_update', $data );
 		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
 	}
 
@@ -157,30 +160,56 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * This data will be merged with comprehensive session data during event tracking.
 	 *
 	 * @param string $action                   Action type (field_update, store_api_update).
-	 * @param array  $posted_data              Posted form data or event context.
+	 * @param array  $collected_event_data              Posted form data or event context (may include session data).
 	 * @param bool   $include_payment_shipping Whether to include payment method and shipping methods.
 	 * @return array Checkout event data.
 	 */
-	private function build_checkout_event_data( string $action, array $posted_data, bool $include_payment_shipping ): array {
+	private function format_checkout_event_data( string $action, array $collected_event_data ): array {
 		$event_data = array( 'action' => $action );
 
 		// Extract and merge all checkout field groups.
 		$event_data = array_merge(
 			$event_data,
-			$this->extract_billing_fields( $posted_data ),
-			$this->extract_shipping_fields( $posted_data )
+			$this->extract_billing_fields( $collected_event_data ),
+			$this->extract_shipping_fields( $collected_event_data ),
+			$this->extract_payment_method( $collected_event_data ),
+			$this->extract_shipping_methods( $collected_event_data ),
 		);
 
-		// Conditionally include payment and shipping methods (not available in Blocks Store API updates).
-		if ( $include_payment_shipping ) {
-			$event_data = array_merge(
-				$event_data,
-				$this->extract_payment_method( $posted_data ),
-				$this->extract_shipping_methods( $posted_data )
+		return $event_data;
+	}
+
+	/**
+	 * Populate posted data with payment and shipping methods from session.
+	 *
+	 * Used for Blocks checkout where payment/shipping methods are stored in session
+	 * but not included in the Store API customer update request.
+	 *
+	 * @return array
+	 */
+	private function get_payment_and_shipping_methods_from_session_data(): array {
+		$session_data = array();
+		// Bail if WooCommerce or session is not available.
+		if ( ! function_exists( 'WC' ) || ! WC()->session ) {
+			return array();
+		}
+
+		// Get chosen payment method from session.
+		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
+		if ( $chosen_payment_method ) {
+			// Format it the same way as traditional checkout posts it.
+			$session_data['payment'] = array(
+				'payment_method_type' => $chosen_payment_method,
 			);
 		}
 
-		return $event_data;
+		// Get chosen shipping methods from session.
+		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
+		if ( ! empty( $chosen_shipping_methods ) && is_array( $chosen_shipping_methods ) ) {
+			$session_data['shipping_method'] = $chosen_shipping_methods;
+		}
+
+		return $session_data;
 	}
 
 	/**
