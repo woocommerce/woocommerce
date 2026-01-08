@@ -244,7 +244,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	// ========================================
-	// Traditional Shortcode Checkout Tests
+	// Shortcode Checkout Tests
 	// ========================================
 
 	/**
