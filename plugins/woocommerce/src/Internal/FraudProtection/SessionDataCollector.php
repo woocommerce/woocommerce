@@ -37,7 +37,7 @@ class SessionDataCollector {
 	 *
 	 * @param SessionClearanceManager $session_clearance_manager The session clearance manager instance.
 	 */
-	final public function init( SessionClearanceManager $session_clearance_manager, ): void {
+	final public function init( SessionClearanceManager $session_clearance_manager ): void {
 		$this->session_clearance_manager = $session_clearance_manager;
 	}
 

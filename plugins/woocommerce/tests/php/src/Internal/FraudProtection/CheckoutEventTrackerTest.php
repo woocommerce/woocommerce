@@ -173,10 +173,10 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	public function test_track_blocks_checkout_shipping_method_update_dispatches_event(): void {
 		// Mock data collector to return session data.
 		$session_data = array(
-			'session_id'             => 'test_session_789',
-			'shipping_method_name'   => 'Flat rate',
-			'package_id'             => '0',
-			'rate_id'                => 'flat_rate:1',
+			'session_id'           => 'test_session_789',
+			'shipping_method_name' => 'Flat rate',
+			'package_id'           => '0',
+			'rate_id'              => 'flat_rate:1',
 		);
 		$this->mock_data_collector
 			->expects( $this->once() )
