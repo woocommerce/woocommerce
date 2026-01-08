@@ -1300,41 +1300,18 @@ test.describe( 'Add to Cart + Options Block', () => {
 				pageObject,
 				editor,
 			} ) => {
-				await pageObject.updateSingleProductTemplate();
-				await setAddToCartWithOptionsBlockAttributes(
-					pageObject,
-					editor,
-					{ optionStyle }
-				);
-
-				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "hide"`, async () => {
+				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "disable"`, async () => {
+					await pageObject.updateSingleProductTemplate();
 					await setAddToCartWithOptionsBlockAttributes(
 						pageObject,
 						editor,
 						{
 							optionStyle,
-							disabledAttributesAction: 'hide',
+							disabledAttributesAction: 'disable',
 						}
 					);
 				} );
-				await test.step( `${ optionStyle }: Expect invalid options to be hidden (by attribute)`, async () => {
-					await page.goto( productPermalink );
-
-					// By setting the Color to "Blue", the only possible Size remaining is "XL".
-					await pageObject.selectVariationSelectorOptionsBlockAttribute(
-						'Color',
-						'Blue',
-						optionStyle
-					);
-
-					await expect(
-						page
-							.getByLabel( 'Size' )
-							.getByText( 'L', { exact: true } )
-					).toBeHidden();
-				} );
-
-				await test.step( `${ optionStyle }: Expect invalid options to be disabled (by prop)`, async () => {
+				await test.step( `${ optionStyle }: Expect invalid options to be disabled (by prop) and visible`, async () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", the only possible Size remaining is "XL".
@@ -1349,6 +1326,44 @@ test.describe( 'Add to Cart + Options Block', () => {
 							.getByLabel( 'Size' )
 							.getByText( 'L', { exact: true } )
 					).toBeDisabled();
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).not.toHaveAttribute( 'hidden' );
+				} );
+
+				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "hide"`, async () => {
+					await pageObject.updateSingleProductTemplate();
+					await setAddToCartWithOptionsBlockAttributes(
+						pageObject,
+						editor,
+						{
+							optionStyle,
+							disabledAttributesAction: 'hide',
+						}
+					);
+				} );
+				await test.step( `${ optionStyle }: Expect invalid options to be isabled (by prop) and hidden`, async () => {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).toBeDisabled();
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).toBeHidden();
 				} );
 			} );
 			test( `${ optionStyle }: Combining autoselect and disabledAttributesAction block attributes should work`, async ( {
