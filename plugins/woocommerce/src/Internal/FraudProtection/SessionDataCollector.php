@@ -347,7 +347,6 @@ class SessionDataCollector {
 			'state'      => null,
 			'country'    => null,
 			'phone'      => null,
-			'email'      => null,
 			'postcode'   => null,
 		);
 
