@@ -208,6 +208,7 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 	return (
 		<div className="wc-block-editor-product-collection-inspector__taxonomy-control">
 			<FormTokenField
+				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 				label={ taxonomy.name }
 				value={ existingTokens }

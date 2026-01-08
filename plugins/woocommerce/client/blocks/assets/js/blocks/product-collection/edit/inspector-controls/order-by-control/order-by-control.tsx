@@ -35,6 +35,7 @@ const OrderByControl = ( {
 			resetAllFilter={ onDeselect }
 		>
 			<SelectControl
+				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 				value={ selectedValue }
 				options={ orderOptions }

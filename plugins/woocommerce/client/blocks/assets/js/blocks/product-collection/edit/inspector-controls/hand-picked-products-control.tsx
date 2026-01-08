@@ -175,6 +175,7 @@ export const HandPickedProductsControlField = ( {
 
 	return (
 		<FormTokenField
+			__next40pxDefaultSize
 			__nextHasNoMarginBottom
 			displayTransform={ transformTokenIntoProductName }
 			label={ __( 'Hand-Picked', 'woocommerce' ) }

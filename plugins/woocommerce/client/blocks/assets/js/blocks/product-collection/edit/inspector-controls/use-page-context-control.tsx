@@ -76,6 +76,7 @@ const InheritQueryControl = ( {
 			} }
 		>
 			<ToggleGroupControl
+				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 				className="wc-block-product-collection__inherit-query-control"
 				isBlock
@@ -135,6 +136,7 @@ const FilterableControl = ( {
 			} }
 		>
 			<ToggleGroupControl
+				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 				className="wc-block-product-collection__inherit-query-control"
 				isBlock
