@@ -31,19 +31,18 @@ defined( 'ABSPATH' ) || exit;
  * @param \stdClass $comment      The comment.
  * @since 2.1.0
  * @deprecated since 10.5.0
- *
  */
 $product_title = apply_filters(
 	'woocommerce_admin_dashboard_recent_reviews',
 	$product->get_title(),
-	(object)[
+	(object) array(
 		'ID'                   => $product->get_id(),
 		'post_title'           => $product->get_title(),
 		'comment_author'       => $comment->comment_author,
 		'comment_author_email' => $comment->comment_author_email,
 		'comment_ID'           => $comment->comment_ID,
 		'comment_content'      => $comment->comment_content,
-	]
+	)
 );
 
 ?>
