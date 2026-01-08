@@ -16039,12 +16039,6 @@ parameters:
 			path: includes/class-wc-order-item-meta.php
 
 		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -16179,12 +16173,6 @@ parameters:
 		-
 			message: '#^Method WC_Order_Item_Product\:\:set_variation_id\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order_Item_Product \$this  The order item product object\.\)\: Unexpected token "\$this", expected variable at offset 209 on line 7$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order-item-product.php
 
