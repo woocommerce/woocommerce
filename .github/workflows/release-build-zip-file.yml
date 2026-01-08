@@ -53,16 +53,14 @@ jobs:
             exit 0
           fi
 
-          # Build options summary.
+          # Log inputs to console.
+          echo "Building WooCommerce ZIP: branch=${BRANCH}, skip_verify=${{ inputs.skip_verify }}, create_github_release=${{ inputs.create_github_release }}"
+
+          # Write summary header.
           options=""
           [ "${{ inputs.skip_verify }}" = "true" ] && options="skipping verification"
           [ "${{ inputs.create_github_release }}" = "true" ] && options="${options:+$options, }creating release"
           [ -n "$options" ] && options=" ($options)"
-
-          # Log to console.
-          echo "Building WooCommerce ZIP: branch=${BRANCH}, skip_verify=${{ inputs.skip_verify }}, create_github_release=${{ inputs.create_github_release }}"
-
-          # Write summary header.
           echo "🔨 Building WooCommerce ZIP from \`${BRANCH}\`${options}." >> $GITHUB_STEP_SUMMARY
 
           # Must run from trunk.

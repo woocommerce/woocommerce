@@ -172,11 +172,11 @@ jobs:
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
           GITHUB_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
+          # Log inputs to console.
+          echo "Compiling changelog: version=$VERSION, branch=$SELECTED_BRANCH, append_changelog=${{ github.event.inputs.append_changelog }}, release_date=${{ github.event.inputs.release_date }}"
+
           # Write summary header.
           echo "📝 Compiling changelog for \`$VERSION\` on \`$SELECTED_BRANCH\`." >> $GITHUB_STEP_SUMMARY
-
-          echo "Using branch: $SELECTED_BRANCH"
-          echo "Generating changelog for version: $VERSION"
 
           # Determine whether to replace or append.
           APPEND_CHANGELOG=""

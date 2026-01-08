@@ -48,6 +48,9 @@ jobs:
       - name: Get current version
         id: get-current-version
         run: |
+          # Log inputs to console.
+          echo "Bumping version: branch=${{ inputs.branch }}, bump-type=${{ inputs.bump-type }}"
+
           version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
           echo "Current version: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
