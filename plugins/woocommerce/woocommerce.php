@@ -3,7 +3,7 @@
  * Plugin Name: WooCommerce
  * Plugin URI: https://woocommerce.com/
  * Description: An ecommerce toolkit that helps you sell anything. Beautifully.
- * Version: 10.3.6
+ * Version: 10.3.7
  * Author: Automattic
  * Author URI: https://woocommerce.com
  * Text Domain: woocommerce

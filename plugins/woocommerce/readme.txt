@@ -4,7 +4,7 @@ Tags: online store, ecommerce, shop, shopping cart, sell online
 Requires at least: 6.7
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 10.3.6
+Stable tag: 10.3.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,15 +170,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.3.6 2025-12-02 =
+= 10.3.7 2025-12-18 =
 
 **WooCommerce**
 
-* Fix - Fix Abilities API integration tests for WordPress 6.9+ compatibility with backward compatibility for earlier versions. [#62105](https://github.com/woocommerce/woocommerce/pull/62105)
-* Fix - Fix fatal error in needs_shipping() when order contains permanently deleted product [#62102](https://github.com/woocommerce/woocommerce/pull/62102)
-* Fix - Fix PHP 8.4 fatal error in WooCommerce Helper updater when transient contains malformed data [#62095](https://github.com/woocommerce/woocommerce/pull/62095)
-* Fix - Support both WordPress 6.9+ and pre-6.9 action hook names for Abilities API registration to ensure compatibility across WordPress versions. [#62089](https://github.com/woocommerce/woocommerce/pull/62089)
-* Update - Updated MCP adapter to v0.3.0 and refactored initialization process. [#62090](https://github.com/woocommerce/woocommerce/pull/62090)
-
+* Security - Fixed an authorization bypass vulnerability in the Store API order endpoint
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
