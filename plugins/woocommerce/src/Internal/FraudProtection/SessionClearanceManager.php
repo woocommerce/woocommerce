@@ -186,7 +186,7 @@ class SessionClearanceManager {
 		// Use or generate a stable session ID for tracking consistency.
 		$fraud_customer_session_id = WC()->session->get( '_fraud_protection_customer_session_id' );
 		if ( ! $fraud_customer_session_id ) {
-			$fraud_customer_session_id = wc_rand_hash( 'customer_', 30 );
+			$fraud_customer_session_id = WC()->call_function( 'wc_rand_hash', 'customer_', 30 );
 			WC()->session->set( '_fraud_protection_customer_session_id', $fraud_customer_session_id );
 		}
 		return $fraud_customer_session_id;
