@@ -45,6 +45,7 @@ $GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
  */
 function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
 	return WooCommerce::instance();
+	return false;
 }
 
 /**
