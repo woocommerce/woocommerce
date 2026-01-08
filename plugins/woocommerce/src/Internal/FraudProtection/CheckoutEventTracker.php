@@ -38,6 +38,13 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	private FraudProtectionController $fraud_protection_controller;
 
 	/**
+	 * Session data collector instance.
+	 *
+	 * @var SessionDataCollector
+	 */
+	private SessionDataCollector $data_collector;
+
+	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
@@ -47,10 +54,12 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 */
 	final public function init(
 		FraudProtectionDispatcher $dispatcher,
-		FraudProtectionController $fraud_protection_controller
+		FraudProtectionController $fraud_protection_controller,
+		SessionDataCollector $data_collector
 	): void {
 		$this->dispatcher                  = $dispatcher;
 		$this->fraud_protection_controller = $fraud_protection_controller;
+		$this->data_collector              = $data_collector;
 	}
 
 	/**
@@ -68,9 +77,6 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			return;
 		}
 
-		// WooCommerce Blocks (Store API): Track when customer data is updated in Blocks checkout.
-		add_action( 'woocommerce_store_api_cart_update_customer_from_request', array( $this, 'handle_store_api_customer_update' ), 10, 2 );
-
 		// Shortcode checkout: Track when checkout fields are updated.
 		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
 	}
@@ -82,53 +88,57 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * /wc/store/v1/cart/update-customer during Blocks checkout flow.
 	 *
 	 * @internal
-	 *
-	 * @param \WC_Customer     $customer Customer object being updated.
-	 * @param \WP_REST_Request $request  REST request object containing customer data.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 * @return void
 	 */
-	public function handle_store_api_customer_update( $customer, $request ): void {
-		// Extract customer data from the REST request.
-		$billing_address  = $request->get_param( 'billing_address' ) ?? array();
-		$shipping_address = $request->get_param( 'shipping_address' ) ?? array();
+	public function track_blocks_checkout_update(): void {
+		$collected_data = $this->data_collector->collect( 'checkout_blocks_address_update', array() );
+		$this->dispatcher->dispatch_event( 'checkout_blocks_address_update', $collected_data );
+	}
 
-		// Build posted data array in the format expected by build_checkout_event_data.
-		$collected_event_data = array();
+	/**
+	 * Get payment data structure for fraud protection analysis.
+	 *
+	 * Returns payment data structure with all 11 supported fields. Currently populates
+	 * payment_gateway_name and payment_method_type when available from the chosen payment
+	 * method. Other fields are initialized with null values.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param array $event_data Event-specific data that may contain payment information.
+	 * @return array Payment data array with 11 keys.
+	 */
+	private function get_payment_data( array $event_data = array() ): array {
+		$payment_data = array(
+			'payment_gateway_name'      => null,
+			'payment_method_type'       => null,
+			'card_bin'                  => null,
+			'card_last4'                => null,
+			'card_brand'                => null,
+			'payer_id'                  => null,
+			'outcome'                   => null,
+			'decline_reason'            => null,
+			'avs_result'                => null,
+			'cvc_result'                => null,
+			'tokenized_card_identifier' => null,
+		);
 
-		// Extract billing fields.
-		if ( ! empty( $billing_address ) ) {
-			$collected_event_data['billing_first_name'] = $billing_address['first_name'] ?? '';
-			$collected_event_data['billing_last_name']  = $billing_address['last_name'] ?? '';
-			$collected_event_data['billing_address_1']  = $billing_address['address_1'] ?? '';
-			$collected_event_data['billing_address_2']  = $billing_address['address_2'] ?? '';
-			$collected_event_data['billing_city']       = $billing_address['city'] ?? '';
-			$collected_event_data['billing_state']      = $billing_address['state'] ?? '';
-			$collected_event_data['billing_postcode']   = $billing_address['postcode'] ?? '';
-			$collected_event_data['billing_country']    = $billing_address['country'] ?? '';
-			$collected_event_data['billing_phone']      = $billing_address['phone'] ?? '';
-			$collected_event_data['billing_email']      = $billing_address['email'] ?? '';
+		try {
+			if ( ! empty( $event_data['payment'] ) ) {
+				return array_merge( $payment_data, $event_data['payment'] );
+			}
+
+			// Try to get chosen payment method from session.
+			$chosen_payment_method = $this->get_chosen_payment_method();
+			if ( $chosen_payment_method ) {
+				$payment_data['payment_gateway_name'] = \sanitize_text_field( $chosen_payment_method );
+				$payment_data['payment_method_type']  = \sanitize_text_field( $chosen_payment_method );
+			}
+
+			return $payment_data;
+		} catch ( \Exception $e ) {
+			// Graceful degradation.
+			return $payment_data;
 		}
-
-		// Extract shipping fields if present.
-		if ( ! empty( $shipping_address ) ) {
-			$collected_event_data['ship_to_different_address'] = true;
-			$collected_event_data['shipping_first_name']       = $shipping_address['first_name'] ?? '';
-			$collected_event_data['shipping_last_name']        = $shipping_address['last_name'] ?? '';
-			$collected_event_data['shipping_address_1']        = $shipping_address['address_1'] ?? '';
-			$collected_event_data['shipping_address_2']        = $shipping_address['address_2'] ?? '';
-			$collected_event_data['shipping_city']             = $shipping_address['city'] ?? '';
-			$collected_event_data['shipping_state']            = $shipping_address['state'] ?? '';
-			$collected_event_data['shipping_postcode']         = $shipping_address['postcode'] ?? '';
-			$collected_event_data['shipping_country']          = $shipping_address['country'] ?? '';
-		}
-
-		// Extract payment and shipping methods from session (not available in Store API request).
-		$collected_event_data = array_merge($collected_event_data, $this->get_payment_and_shipping_methods_from_session_data() );
-
-		// Build and dispatch the event (now includes session data).
-		$event_data = $this->format_checkout_event_data( 'store_api_update', $collected_event_data );
-		$this->dispatcher->dispatch_event( 'checkout_blocks_customer_update', $event_data );
 	}
 
 	/**
@@ -151,6 +161,29 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		// Build and dispatch the event (traditional checkout includes payment/shipping methods).
 		$event_data = $this->format_checkout_event_data( 'field_update', $data );
 		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
+	}
+
+	/**
+	 * Track shipping rate selection from Store API if fraud protection is enabled.
+	 *
+	 * This is called directly from CartSelectShippingRate endpoint to track
+	 * shipping method changes in Blocks checkout.
+	 *
+	 * @param string|null      $package_id The package ID being updated (null for all packages).
+	 * @param string           $rate_id The chosen rate ID.
+	 * @param \WP_REST_Request $request REST request object.
+	 * @return void
+	 */
+	public function handle_shipping_rate_selection( $package_id, string $rate_id, $request ): void {
+		// Build event data with the shipping rate information.
+		$collected_event_data = array(
+			'shipping_method' => array( $rate_id ),
+			'package_id'      => $package_id,
+		);
+
+		// Build and dispatch the event.
+		$event_data = $this->format_checkout_event_data( 'shipping_rate_select', $collected_event_data );
+		$this->dispatcher->dispatch_event( 'checkout_blocks_shipping_rate_select', $event_data );
 	}
 
 	/**
