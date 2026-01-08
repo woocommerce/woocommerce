@@ -27,6 +27,13 @@ defined( 'ABSPATH' ) || exit;
 class PaymentMethodEventTracker implements RegisterHooksInterface {
 
 	/**
+	 * Fraud protection tracker instance.
+	 *
+	 * @var FraudProtectionTracker
+	 */
+	private FraudProtectionTracker $tracker;
+
+	/**
 	 * Session data collector instance.
 	 *
 	 * @var SessionDataCollector
@@ -45,13 +52,16 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
+	 * @param FraudProtectionTracker    $tracker                     The fraud protection tracker instance.
 	 * @param SessionDataCollector      $data_collector              The session data collector instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
+		FraudProtectionTracker $tracker,
 		SessionDataCollector $data_collector,
 		FraudProtectionController $fraud_protection_controller
 	): void {
+		$this->tracker                     = $tracker;
 		$this->data_collector              = $data_collector;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
@@ -86,7 +96,26 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 */
 	public function handle_payment_method_added( $token_id, $token ): void {
 		$event_data = $this->build_payment_method_event_data( 'added', $token );
-		$this->track_event( 'payment_method_added', $event_data );
+
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( 'payment_method_added', $event_data );
+			$this->tracker->track_event( 'payment_method_added', $collected_data );
+		} catch ( \Exception $e ) {
+			// Log error but don't break functionality.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for payment method event: %s | Error: %s',
+					'payment_method_added',
+					$e->getMessage()
+				),
+				array(
+					'event_type' => 'payment_method_added',
+					'exception'  => $e,
+				)
+			);
+		}
 	}
 
 	/**
@@ -107,7 +136,26 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		}
 
 		$event_data = $this->build_payment_method_event_data( 'updated', $token );
-		$this->track_event( 'payment_method_updated', $event_data );
+
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( 'payment_method_updated', $event_data );
+			$this->tracker->track_event( 'payment_method_updated', $collected_data );
+		} catch ( \Exception $e ) {
+			// Log error but don't break functionality.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for payment method event: %s | Error: %s',
+					'payment_method_updated',
+					$e->getMessage()
+				),
+				array(
+					'event_type' => 'payment_method_updated',
+					'exception'  => $e,
+				)
+			);
+		}
 	}
 
 	/**
@@ -122,7 +170,26 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 */
 	public function handle_payment_method_set_default( $token_id, $token ): void {
 		$event_data = $this->build_payment_method_event_data( 'set_default', $token );
-		$this->track_event( 'payment_method_set_default', $event_data );
+
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( 'payment_method_set_default', $event_data );
+			$this->tracker->track_event( 'payment_method_set_default', $collected_data );
+		} catch ( \Exception $e ) {
+			// Log error but don't break functionality.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for payment method event: %s | Error: %s',
+					'payment_method_set_default',
+					$e->getMessage()
+				),
+				array(
+					'event_type' => 'payment_method_set_default',
+					'exception'  => $e,
+				)
+			);
+		}
 	}
 
 	/**
@@ -137,7 +204,26 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 */
 	public function handle_payment_method_deleted( $token_id, $token ): void {
 		$event_data = $this->build_payment_method_event_data( 'deleted', $token );
-		$this->track_event( 'payment_method_deleted', $event_data );
+
+		// Collect comprehensive session data.
+		try {
+			$collected_data = $this->data_collector->collect( 'payment_method_deleted', $event_data );
+			$this->tracker->track_event( 'payment_method_deleted', $collected_data );
+		} catch ( \Exception $e ) {
+			// Log error but don't break functionality.
+			FraudProtectionController::log(
+				'error',
+				sprintf(
+					'Failed to collect session data for payment method event: %s | Error: %s',
+					'payment_method_deleted',
+					$e->getMessage()
+				),
+				array(
+					'event_type' => 'payment_method_deleted',
+					'exception'  => $e,
+				)
+			);
+		}
 	}
 
 	/**
@@ -170,63 +256,5 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 		}
 
 		return $event_data;
-	}
-
-	/**
-	 * Track fraud protection event with comprehensive session context.
-	 *
-	 * This method orchestrates the event tracking by:
-	 * 1. Collecting comprehensive session data via SessionDataCollector
-	 * 2. Merging with event-specific data
-	 * 3. Logging the event (will call EventTracker/API client once available)
-	 *
-	 * The method implements graceful degradation - any errors during tracking
-	 * will be logged but will not break the payment method functionality.
-	 *
-	 * @param string $event_type          Event type identifier (e.g., 'payment_method_added').
-	 * @param array  $event_specific_data Event-specific data to merge with session context.
-	 */
-	private function track_event( string $event_type, array $event_specific_data ): void {
-		try {
-			// Collect comprehensive session data.
-			$session_data = $this->data_collector->collect( $event_type, $event_specific_data );
-
-			// phpcs:ignore Generic.Commenting.Todo.TaskFound
-			// TODO: Once EventTracker/API client is implemented (WOOSUBS-1249), call it here:
-			// $event_tracker = wc_get_container()->get( EventTracker::class );
-			// $event_tracker->track( $event_type, $session_data );
-			//
-			// For now, log the event for debugging and verification.
-			FraudProtectionController::log(
-				'info',
-				sprintf(
-					'Fraud protection event tracked: %s | Token ID: %s | Gateway: %s | User ID: %s | Session ID: %s',
-					$event_type,
-					$event_specific_data['token_id'] ?? 'N/A',
-					$event_specific_data['gateway_id'] ?? 'N/A',
-					$event_specific_data['user_id'] ?? 'N/A',
-					$session_data['session']['session_id'] ?? 'N/A'
-				),
-				array(
-					'event_type'   => $event_type,
-					'event_data'   => $event_specific_data,
-					'session_data' => $session_data,
-				)
-			);
-		} catch ( \Exception $e ) {
-			// Gracefully handle errors - fraud protection should never break payment method management.
-			FraudProtectionController::log(
-				'error',
-				sprintf(
-					'Failed to track fraud protection event: %s | Error: %s',
-					$event_type,
-					$e->getMessage()
-				),
-				array(
-					'event_type' => $event_type,
-					'exception'  => $e,
-				)
-			);
-		}
 	}
 }
