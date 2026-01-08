@@ -9,7 +9,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFeed\Integrations\POSCatalog;
 
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\ProductFeed\Feed\FeedValidatorInterface;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -30,13 +29,6 @@ final class FeedValidator implements FeedValidatorInterface {
 	 * @return array Array of validation issues.
 	 */
 	public function validate_entry( array $entry, \WC_Product $product ): array { //phpcs:ignore VariableAnalysis
-		if ( ProductType::VARIATION === $product->get_type() ) {
-			if ( has_term( 'pos-hidden', 'pos_product_visibility', $product->get_parent_id() ) ) {
-				return array(
-					'Parent product is hidden from the POS catalog',
-				);
-			}
-		}
 		return array();
 	}
 }
