@@ -29,26 +29,14 @@ class CheckoutEventTracker {
 	private FraudProtectionDispatcher $dispatcher;
 
 	/**
-	 * Fraud protection controller instance.
-	 *
-	 * @var FraudProtectionController
-	 */
-	private FraudProtectionController $fraud_protection_controller;
-
-	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
 	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
-	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
-	final public function init(
-		FraudProtectionDispatcher $dispatcher,
-		FraudProtectionController $fraud_protection_controller
-	): void {
-		$this->dispatcher                  = $dispatcher;
-		$this->fraud_protection_controller = $fraud_protection_controller;
+	final public function init( FraudProtectionDispatcher $dispatcher ): void {
+		$this->dispatcher = $dispatcher;
 	}
 
 	/**

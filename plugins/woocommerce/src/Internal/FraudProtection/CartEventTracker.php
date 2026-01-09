@@ -29,26 +29,14 @@ class CartEventTracker {
 	private FraudProtectionDispatcher $dispatcher;
 
 	/**
-	 * Fraud protection controller instance.
-	 *
-	 * @var FraudProtectionController
-	 */
-	private FraudProtectionController $fraud_protection_controller;
-
-	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionDispatcher $dispatcher               The fraud protection dispatcher instance.
-	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
+	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
 	 */
-	final public function init(
-		FraudProtectionDispatcher $dispatcher,
-		FraudProtectionController $fraud_protection_controller
-	): void {
-		$this->dispatcher                  = $dispatcher;
-		$this->fraud_protection_controller = $fraud_protection_controller;
+	final public function init( FraudProtectionDispatcher $dispatcher ): void {
+		$this->dispatcher = $dispatcher;
 	}
 
 	/**
@@ -62,11 +50,9 @@ class CartEventTracker {
 	 * @param int    $product_id     Product ID.
 	 * @param int    $quantity       Quantity added.
 	 * @param int    $variation_id   Variation ID.
-	 * @param array  $variation      Variation data.
-	 * @param array  $cart_item_data Cart item data.
 	 * @return void
 	 */
-	public function track_cart_item_added( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ): void {
+	public function track_cart_item_added( $cart_item_key, $product_id, $quantity, $variation_id ): void {
 		$event_data = $this->build_cart_event_data(
 			'item_added',
 			$product_id,

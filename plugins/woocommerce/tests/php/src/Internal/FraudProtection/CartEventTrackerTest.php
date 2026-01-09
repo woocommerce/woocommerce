@@ -63,10 +63,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Create system under test.
 		$this->sut = new CartEventTracker();
-		$this->sut->init(
-			$this->mock_dispatcher,
-			$this->mock_controller
-		);
+		$this->sut->init( $this->mock_dispatcher );
 
 		// Create a test product.
 		$this->test_product = \WC_Helper_Product::create_simple_product();
@@ -104,9 +101,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			'test_cart_key',
 			$this->test_product->get_id(),
 			2,
-			0,
-			array(),
-			array()
+			0
 		);
 	}
 
@@ -238,9 +233,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 			'test_cart_key',
 			$variable_product->get_id(),
 			1,
-			$variation_id,
-			array(),
-			array()
+			$variation_id
 		);
 
 		// Clean up.

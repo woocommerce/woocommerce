@@ -59,10 +59,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Create system under test.
 		$this->sut = new CheckoutEventTracker();
-		$this->sut->init(
-			$this->mock_dispatcher,
-			$this->mock_controller
-		);
+		$this->sut->init( $this->mock_dispatcher );
 	}
 
 	// ========================================

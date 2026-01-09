@@ -1347,7 +1347,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Track cart event for fraud protection.
 			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
 				wc_get_container()->get( CartEventTracker::class )
-					->track_cart_item_added( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
+					->track_cart_item_added( $cart_item_key, (int) $product_id, $quantity, $variation_id );
 			}
 
 			return $cart_item_key;
