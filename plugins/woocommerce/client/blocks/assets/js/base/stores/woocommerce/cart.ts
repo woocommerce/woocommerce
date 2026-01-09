@@ -20,6 +20,7 @@ import type {
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
+import { createMutationBatcher, type MutationBatcher } from './mutation-batcher';
 
 export type WooCommerceConfig = {
 	products?: {
@@ -252,6 +253,44 @@ function emitSyncEvent( {
 	);
 }
 
+/**
+ * Cart mutation batcher singleton
+ *
+ * Lazily initialized on first use since state isn't available at module load.
+ * Batches all cart mutations within a single microtask tick into one request.
+ * Batching is invisible to callers - each call gets its own promise.
+ */
+let cartBatcher: MutationBatcher< Cart > | null = null;
+
+function getCartBatcher( stateRef: Store[ 'state' ] ): MutationBatcher< Cart > {
+	if ( ! cartBatcher ) {
+		cartBatcher = createMutationBatcher< Cart >( {
+			batchEndpoint: `${ stateRef.restUrl }wc/store/v1/batch`,
+			getHeaders: () => ( {
+				Nonce: stateRef.nonce,
+			} ),
+			// Global state handler - ONE snapshot at start of batch cycle
+			stateHandler: {
+				takeSnapshot: () =>
+					JSON.parse( JSON.stringify( stateRef.cart ) ),
+				rollback: ( snapshot ) => {
+					// Only called if ALL batches had total failures
+					stateRef.cart = snapshot;
+				},
+				applyServerState: ( serverState ) => {
+					// Called if ANY batch succeeded - overwrite with server state
+					stateRef.cart = serverState;
+				},
+			},
+			extractServerState: ( body ) => body as Cart,
+		} );
+	}
+	return cartBatcher;
+}
+
+// Counter for generating unique request IDs
+let requestIdCounter = 0;
+
 // Todo: export this store once the store is public.
 const { state, actions } = store< Store >(
 	'woocommerce',
@@ -311,12 +350,11 @@ const { state, actions } = store< Store >(
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				const a11yModulePromise = import( '@wordpress/a11y' );
-				let item = state.cart.items.find( ( cartItem ) => {
+				const batcher = getCartBatcher( state );
+
+				// Find existing item
+				const existingItem = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
-						// If it's a variation, check that attributes match.
-						// While different variations have different attributes,
-						// some variations might accept 'Any' value for an attribute,
-						// in which case, we need to check that the attributes match.
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||
@@ -330,77 +368,73 @@ const { state, actions } = store< Store >(
 							variation
 						);
 					}
-					// If no key is provided, rely on the id.
 					return key ? key === cartItem.key : id === cartItem.id;
 				} );
-				const endpoint = item ? 'update-item' : 'add-item';
-				const previousCart = JSON.stringify( state.cart );
-				const quantityChanges: QuantityChanges = {};
 
-				// Optimistically update the number of items in the cart except
-				// if the product is sold individually and is already in the
-				// cart.
-				let updatedItem = null;
-				if ( item ) {
-					const isSoldIndividually =
-						isCartItem( item ) && item.sold_individually;
-					updatedItem = { ...item, quantity };
-					if ( item.key && ! isSoldIndividually ) {
-						quantityChanges.cartItemsPendingQuantity = [ item.key ];
-						item.quantity = quantity;
-					}
+				const isUpdate = !! existingItem;
+				const endpoint = isUpdate ? 'update-item' : 'add-item';
+
+				// Prepare the item to send
+				let itemToSend: OptimisticCartItem;
+				if ( existingItem ) {
+					itemToSend = { ...existingItem, quantity };
 				} else {
-					item = {
+					itemToSend = {
 						id,
 						quantity,
+						type: variation ? 'variation' : 'simple',
 						...( variation && { variation } ),
 					} as OptimisticCartItem;
-					quantityChanges.productsPendingAdd = [ id ];
-					state.cart.items.push( item );
-					updatedItem = item;
 				}
 
-				// Updates the database.
+				// Queue the mutation (batching is invisible)
+				const requestId = `cart-${ ++requestIdCounter }`;
+
 				try {
-					const res: Response = yield fetch(
-						`${ state.restUrl }wc/store/v1/cart/${ endpoint }`,
-						{
-							method: 'POST',
-							cache: 'no-store',
-							headers: {
-								Nonce: state.nonce,
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify( updatedItem ),
-						}
-					);
-					const json: Cart = yield res.json();
-
-					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
-						throw generateError( json );
-
-					const infoNotices = showCartUpdatesNotices
-						? getInfoNoticesFromCartUpdates(
-								state.cart,
-								json,
-								quantityChanges
-						  )
-						: [];
-					const errorNotices = json.errors.map( generateErrorNotice );
-					yield actions.updateNotices(
-						[ ...infoNotices, ...errorNotices ],
-						true
-					);
-
-					// Updates the local cart.
-					state.cart = json;
-
-					// Dispatches a legacy event.
-					triggerAddedToCartEvent( {
-						preserveCartData: true,
+					const result = yield batcher.queueMutation( {
+						id: requestId,
+						path: `/wc/store/v1/cart/${ endpoint }`,
+						method: 'POST',
+						body: itemToSend,
+						applyOptimistic: () => {
+							if ( isUpdate && existingItem ) {
+								const isSoldIndividually =
+									isCartItem( existingItem ) &&
+									existingItem.sold_individually;
+								if ( ! isSoldIndividually ) {
+									existingItem.quantity = quantity;
+								}
+							} else {
+								state.cart.items.push( itemToSend );
+							}
+						},
 					} );
 
+					// Success - handle side effects
+					const cart = result.data as Cart;
+
+					// Show notices if enabled
+					if ( showCartUpdatesNotices && cart ) {
+						const errorNotices =
+							cart.errors.map( generateErrorNotice );
+						yield actions.updateNotices( errorNotices, true );
+					}
+
+					// Dispatch legacy event
+					triggerAddedToCartEvent( { preserveCartData: true } );
+
+					// Dispatch sync event
+					emitSyncEvent( {
+						quantityChanges: isUpdate
+							? {
+									cartItemsPendingQuantity: existingItem?.key
+										? [ existingItem.key ]
+										: [],
+							  }
+							: { productsPendingAdd: [ id ] },
+					} );
+
+					// Announce to screen readers
 					const { messages } = getConfig(
 						'woocommerce'
 					) as WooCommerceConfig;
@@ -408,15 +442,8 @@ const { state, actions } = store< Store >(
 						const { speak } = yield a11yModulePromise;
 						speak( messages.addedToCartText, 'polite' );
 					}
-
-					// Dispatches the event to sync the @wordpress/data store.
-					emitSyncEvent( { quantityChanges } );
 				} catch ( error ) {
-					// Reverts the optimistic update.
-					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = JSON.parse( previousCart );
-
-					// Shows the error notice.
+					// Show error notice
 					actions.showNoticeError( error as Error );
 				}
 			},
