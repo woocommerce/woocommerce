@@ -53,8 +53,10 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * Register the REST API endpoints handled by this controller.
 	 *
 	 * @since 10.5.0
+	 *
+	 * @return void
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		// Routes will be registered here, can't omit method due to parent class
 		// constraints.
 	}
@@ -84,7 +86,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param WP_REST_Request $request The request object.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request object.
 	 * @return bool|WP_Error
 	 */
 	public function authorize( WP_REST_Request $request ) {
