@@ -107,13 +107,13 @@ class FraudProtectionController implements RegisterHooksInterface {
 		}
 
 		$result = $manager->try_registration();
-		if ( ! is_wp_error( $result ) ) {
+		if ( ! empty( $result ) && ! is_wp_error( $result ) ) {
 			return;
 		}
 
 		?>
 		<div class="notice notice-warning is-dismissible">
-			<?php if ( is_wp_error( $result ) ) : ?>
+			<?php if ( is_wp_error( $result ) ) : // phpstan:ignore function.alreadyNarrowedType ?>
 				<p>
 					<strong><?php esc_html_e( 'Fraud protection warning:', 'woocommerce' ); ?></strong>
 					<?php echo esc_html( $result->get_error_message() ); ?>
@@ -123,7 +123,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 				<?php
 				printf(
 					/* translators: %s: Settings page URL */
-					wp_kses_post( __( 'Fraud protection will fail open and allow all sessions until connected. <a href="%s">How to connect to Jetpack</a>', 'woocommerce' ) ),
+					wp_kses_post( __( 'Fraud protection will fail open and allow all sessions until your site is connected to Jetpack. <a href="%s">How to connect to Jetpack</a>', 'woocommerce' ) ),
 					esc_url( 'https://jetpack.com/support/getting-started-with-jetpack/' )
 				);
 				?>
