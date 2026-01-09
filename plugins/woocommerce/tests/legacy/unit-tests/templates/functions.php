@@ -427,17 +427,17 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'test value'
 		);
 
-		// Should contain label without "for" attribute
+		// Should contain label without "for" attribute.
 		$this->assertStringContainsString( '<label class="">', $actual_html );
 		$this->assertStringNotContainsString( 'for=', $actual_html );
 		$this->assertStringContainsString( 'Test Label', $actual_html );
 	}
 
 	/**
-	 * Test that country field with one country does not have "for" attribute.
+	 * Test that country field with one country uses a readonly text input.
 	 */
 	public function test_country_field_single_country() {
-		// Mock WC()->countries to return only one country
+		// Mock WC()->countries to return only one country.
 		$mock_countries = $this->getMockBuilder( WC_Countries::class )
 			->onlyMethods( array( 'get_allowed_countries' ) )
 			->getMock();
@@ -445,7 +445,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$mock_countries->method( 'get_allowed_countries' )
 			->willReturn( array( 'US' => 'United States' ) );
 
-		// Store original countries object
+		// Store original countries object.
 		$original_countries = WC()->countries;
 		WC()->countries     = $mock_countries;
 
@@ -460,24 +460,29 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'US'
 		);
 
-		// Restore original countries object
+		// Restore original countries object.
 		WC()->countries = $original_countries;
 
-		// Should contain label without "for" attribute
-		$this->assertStringContainsString( '<label class="">', $actual_html );
-		$this->assertStringNotContainsString( 'for=', $actual_html );
+		// Should contain label WITH "for" attribute (since it points to a visible readonly input).
+		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
 		$this->assertStringContainsString( 'Country / Region', $actual_html );
-		// Should contain hidden input
-		$this->assertStringContainsString( 'type="hidden"', $actual_html );
-		// Should display the country name
-		$this->assertStringContainsString( '<strong>United States</strong>', $actual_html );
+		// Should contain readonly text input with country name as value.
+		$this->assertStringContainsString( 'type="text"', $actual_html );
+		$this->assertStringContainsString( 'readonly="readonly"', $actual_html );
+		$this->assertStringContainsString( 'country_readonly', $actual_html );
+		$this->assertStringContainsString( 'value="United States"', $actual_html );
+		// Should have data attribute with country code.
+		$this->assertStringContainsString( 'data-country-code="US"', $actual_html );
+		// Should NOT have strong tag or hidden input.
+		$this->assertStringNotContainsString( '<strong>', $actual_html );
+		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
 	}
 
 	/**
 	 * Test that country field with multiple countries has "for" attribute.
 	 */
 	public function test_country_field_multiple_countries() {
-		// Mock WC()->countries to return multiple countries
+		// Mock WC()->countries to return multiple countries.
 		$mock_countries = $this->getMockBuilder( WC_Countries::class )
 			->onlyMethods( array( 'get_allowed_countries' ) )
 			->getMock();
@@ -490,7 +495,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 				)
 			);
 
-		// Store original countries object
+		// Store original countries object.
 		$original_countries = WC()->countries;
 		WC()->countries     = $mock_countries;
 
@@ -505,13 +510,13 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 			'US'
 		);
 
-		// Restore original countries object
+		// Restore original countries object.
 		WC()->countries = $original_countries;
 
-		// Should contain label with "for" attribute
+		// Should contain label with "for" attribute.
 		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
 		$this->assertStringContainsString( 'Country / Region', $actual_html );
-		// Should contain select dropdown
+		// Should contain select dropdown.
 		$this->assertStringContainsString( '<select', $actual_html );
 		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
 	}
