@@ -494,7 +494,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 
 			// Optimized version of the widget: faster SQL queries and templates-based rendering for customization.
-			/** @var \WP_Comment[] $comments */
+			/* @var \WP_Comment[] $comments */
 			$comments = get_comments(
 				array(
 					'type'   => 'review',
