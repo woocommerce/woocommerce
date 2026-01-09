@@ -1844,15 +1844,17 @@ class WC_Helper {
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$source      = '';
-			if ( stripos( $request_uri, 'wc-addons' ) ) :
+			if ( false !== stripos( $request_uri, 'wc/v3/marketplace/refresh' ) ) :
+				$source = 'refresh-button';
+			elseif ( false !== stripos( $request_uri, 'my-subscriptions' ) ) :
 				$source = 'my-subscriptions';
-			elseif ( stripos( $request_uri, 'plugins.php' ) ) :
+			elseif ( false !== stripos( $request_uri, 'plugins.php' ) ) :
 				$source = 'plugins';
-			elseif ( stripos( $request_uri, 'wc-admin' ) ) :
+			elseif ( false !== stripos( $request_uri, 'wc-admin' ) ) :
 				$source = 'inbox-notes';
-			elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
+			elseif ( false !== stripos( $request_uri, 'admin-ajax.php' ) ) :
 				$source = 'heartbeat-api';
-			elseif ( stripos( $request_uri, 'installer' ) ) :
+			elseif ( false !== stripos( $request_uri, 'installer' ) ) :
 				$source = 'wccom-site-installer';
 			elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
 				$source = 'wc-cli';

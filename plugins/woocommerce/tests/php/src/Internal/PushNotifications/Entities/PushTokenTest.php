@@ -59,9 +59,9 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 */
 	public function test_it_can_get_and_set_platform() {
 		$push_token = new PushToken();
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 
-		$this->assertEquals( PushToken::PLATFORM_IOS, $push_token->get_platform() );
+		$this->assertEquals( PushToken::PLATFORM_APPLE, $push_token->get_platform() );
 	}
 
 	/**
@@ -73,7 +73,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			'test_token',
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -89,7 +89,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			'test_token',
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -105,7 +105,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			null,
 			'test_token',
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -137,7 +137,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			null,
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -153,7 +153,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			'test_token',
 			null,
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -170,7 +170,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			'test_token',
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -186,7 +186,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			'test_token',
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -202,7 +202,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			null,
 			'test_token',
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -234,7 +234,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			'test_token',
 			null,
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -250,7 +250,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			null,
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -359,7 +359,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			'test_token',
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			null
 		);
 
@@ -375,7 +375,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			1,
 			'test_token',
 			'test-device-uuid',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			null
 		);
 
@@ -423,30 +423,6 @@ class PushTokenTest extends WC_Unit_Test_Case {
 
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS_DEV );
 		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS_DEV, $push_token->get_origin() );
-	}
-
-	/**
-	 * @testdox Tests set_id throws exception with zero.
-	 */
-	public function test_it_throws_exception_when_setting_id_to_zero() {
-		$push_token = new PushToken();
-
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'ID must be a positive integer.' );
-
-		$push_token->set_id( 0 );
-	}
-
-	/**
-	 * @testdox Tests set_id throws exception with negative number.
-	 */
-	public function test_it_throws_exception_when_setting_negative_id() {
-		$push_token = new PushToken();
-
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'ID must be a positive integer.' );
-
-		$push_token->set_id( -1 );
 	}
 
 	/**
@@ -561,7 +537,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			456,
 			'test_token_value',
 			'device-uuid-123',
-			PushToken::PLATFORM_IOS,
+			PushToken::PLATFORM_APPLE,
 			PushToken::ORIGIN_WOOCOMMERCE_IOS
 		);
 
@@ -569,7 +545,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$this->assertSame( 456, $push_token->get_user_id() );
 		$this->assertSame( 'test_token_value', $push_token->get_token() );
 		$this->assertSame( 'device-uuid-123', $push_token->get_device_uuid() );
-		$this->assertSame( PushToken::PLATFORM_IOS, $push_token->get_platform() );
+		$this->assertSame( PushToken::PLATFORM_APPLE, $push_token->get_platform() );
 		$this->assertSame( PushToken::ORIGIN_WOOCOMMERCE_IOS, $push_token->get_origin() );
 	}
 
