@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -56,6 +57,8 @@ class PushNotifications {
 		}
 
 		add_action( 'init', array( $this, 'register_post_types' ) );
+
+		wc_get_container()->get( PushTokenRestController::class )->register();
 
 		// Library endpoints and scheduled tasks will be registered here.
 	}
