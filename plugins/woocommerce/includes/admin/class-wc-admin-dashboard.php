@@ -507,7 +507,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID )
 			);
 			if ( $comments ) {
-				_prime_post_caches( array_column( $comments, 'comment_post_ID' ), false, false );
+				_prime_post_caches( array_map( 'intval', array_column( $comments, 'comment_post_ID' ) ), false, false );
 
 				echo '<ul>';
 				foreach ( $comments as $comment ) {
