@@ -113,10 +113,12 @@ class FraudProtectionController implements RegisterHooksInterface {
 
 		?>
 		<div class="notice notice-warning is-dismissible">
-			<p>
-				<strong><?php esc_html_e( 'Fraud protection warning:', 'woocommerce' ); ?></strong>
-				<?php echo esc_html( $result->get_error_message() ); ?>
-			</p>
+			<?php if ( is_wp_error( $result ) ) : ?>
+				<p>
+					<strong><?php esc_html_e( 'Fraud protection warning:', 'woocommerce' ); ?></strong>
+					<?php echo esc_html( $result->get_error_message() ); ?>
+				</p>
+			<?php endif; ?>
 			<p>
 				<?php
 				printf(
