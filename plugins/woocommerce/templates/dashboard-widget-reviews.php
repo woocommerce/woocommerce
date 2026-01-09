@@ -24,27 +24,6 @@ defined( 'ABSPATH' ) || exit;
  * @var $comment \WP_Comment
  */
 
-/**
- * Filters the product name for display in the latest reviews.
- *
- * @param string    $product_title The product name.
- * @param \stdClass $comment      The comment.
- * @since 2.1.0
- * @deprecated since 10.5.0
- */
-$product_title = apply_filters(
-	'woocommerce_admin_dashboard_recent_reviews',
-	$product->get_title(),
-	(object) array(
-		'ID'                   => $product->get_id(),
-		'post_title'           => $product->get_title(),
-		'comment_author'       => $comment->comment_author,
-		'comment_author_email' => $comment->comment_author_email,
-		'comment_ID'           => $comment->comment_ID,
-		'comment_content'      => $comment->comment_content,
-	)
-);
-
 ?>
 
 <li>
@@ -57,7 +36,7 @@ $product_title = apply_filters(
 	<?php echo wc_get_rating_html( (int) get_comment_meta( $comment->comment_ID, 'rating', true ) ); ?>
 
 	<h4 class="meta">
-		<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>"><?php echo wp_kses_post( $product_title ); ?></a>
+		<a href="<?php echo esc_url( get_comment_link( $comment->comment_ID ) ); ?>"><?php echo wp_kses_post( $product->get_name() ); ?></a>
 		<?php
 		/* translators: %s: review author */
 		printf( esc_html__( 'reviewed by %s', 'woocommerce' ), get_comment_author( $comment->comment_ID ) );
