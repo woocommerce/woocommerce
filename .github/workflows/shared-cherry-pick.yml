@@ -54,7 +54,6 @@ jobs:
       error_message: ${{ steps.aggregate-status.outputs.error_message }}
       cherry_pick_branch: ${{ steps.aggregate-status.outputs.cherry_pick_branch }}
       merge_commit_sha: ${{ steps.check-pr.outputs.merge_commit_sha }}
-      cherry_pick_pr_number: ${{ steps.aggregate-status.outputs.cherry_pick_pr_number }}
     steps:
       - name: Validate PR and get merge commit
         id: check-pr
