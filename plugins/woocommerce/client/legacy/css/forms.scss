@@ -101,6 +101,19 @@
 			box-shadow: none;
 		}
 
+		.country_readonly {
+			background: transparent;
+			border: 0;
+			padding: 0;
+			font-weight: 700;
+			cursor: default;
+			width: auto;
+
+			&:focus {
+				outline: none;
+			}
+		}
+
 		.required {
 			color: var(--wc-red);
 			font-weight: 700;
