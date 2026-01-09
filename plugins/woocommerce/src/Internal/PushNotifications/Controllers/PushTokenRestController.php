@@ -74,7 +74,17 @@ class PushTokenRestController extends RestApiControllerBase {
 			array(
 				'title'      => PushToken::POST_TYPE,
 				'properties' => array_map(
-					fn ( $item ) => array_diff_key( $item, array( 'validate_callback' => null ) ),
+					fn ( $item ) => array_intersect_key(
+						$item,
+						array(
+							'description' => null,
+							'type'        => null,
+							'enum'        => null,
+							'minimum'     => null,
+							'default'     => null,
+							'required'    => null,
+						)
+					),
 					$this->get_args()
 				),
 			)
@@ -208,7 +218,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		if ( $context ) {
 			$args = array_filter(
 				$args,
-				fn ( $arg ) => in_array( $context, $arg['context'], true )
+				fn ( $arg ) => in_array( $context, $arg['context'] ?? [], true )
 			);
 		}
 
