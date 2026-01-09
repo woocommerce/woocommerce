@@ -86,7 +86,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param WP_REST_Request<array<string, mixed>> $request The request object.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request object. phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 	 * @return bool|WP_Error
 	 */
 	public function authorize( WP_REST_Request $request ) {
