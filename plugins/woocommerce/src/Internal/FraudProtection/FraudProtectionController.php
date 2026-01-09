@@ -81,8 +81,6 @@ class FraudProtectionController implements RegisterHooksInterface {
 		if ( ! $this->feature_is_enabled() ) {
 			return;
 		}
-
-		$this->blocked_session_notice->register();
 	}
 
 	/**
