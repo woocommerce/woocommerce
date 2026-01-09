@@ -693,16 +693,16 @@ final class BlockTypesController {
 
 		// If we have a post ID, determine the specific term using WooCommerce's logic.
 		if ( ! empty( $post_id ) ) {
-			/**
-			 * Filters the arguments used to fetch product terms for breadcrumbs.
-			 *
-			 * @since 9.5.0
-			 *
-			 * @param array $args Array of arguments for `wc_get_product_terms()`.
-			 */
 			$terms = wc_get_product_terms(
 				$post_id,
 				'product_cat',
+				/**
+				 * Filters the arguments used to fetch product terms for breadcrumbs.
+				 *
+				 * @since 9.5.0
+				 *
+				 * @param array $args Array of arguments for `wc_get_product_terms()`.
+				 */
 				apply_filters(
 					'woocommerce_breadcrumb_product_terms_args',
 					array(
