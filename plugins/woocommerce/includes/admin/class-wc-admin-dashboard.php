@@ -494,16 +494,14 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			}
 
 			// Optimized version of the widget: faster SQL queries and templates-based rendering for customization.
-			/* @var WP_Comment[] $comments */
-			$comments  = get_comments(
-				array(
-					'type'   => 'review',
-					'status' => 'approve',
-					'number' => 5,
-				)
-			);
 			$comments = array_filter(
-				$comments,
+				get_comments(
+					array(
+						'type'   => 'review',
+						'status' => 'approve',
+						'number' => 5,
+					)
+				),
 				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID )
 			);
 			if ( $comments ) {
