@@ -57,7 +57,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 			'BAM' => 'Bosnia and Herzegovina convertible mark',
 			'BBD' => 'Barbadian dollar',
 			'BDT' => 'Bangladeshi taka',
-			'BGN' => 'Bulgarian lev',
 			'BHD' => 'Bahraini dinar',
 			'BIF' => 'Burundian franc',
 			'BMD' => 'Bermudian dollar',
@@ -519,7 +518,7 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_create_update_order_currency() {
 		$old_currency = get_woocommerce_currency();
-		$new_currency = 'BGN';
+		$new_currency = 'BHD';
 
 		update_option( 'woocommerce_currency', $new_currency );
 

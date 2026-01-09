@@ -4370,32 +4370,6 @@ test.describe( 'Data API tests', () => {
 		expect( responseJSON ).toEqual(
 			expect.arrayContaining( [
 				expect.objectContaining( {
-					code: 'BGN',
-					name: 'Bulgarian lev',
-					symbol: '&#1083;&#1074;.',
-					_links: {
-						self: [
-							{
-								href: expect.stringContaining(
-									'data/currencies/BGN'
-								),
-								targetHints: { allow: [ 'GET' ] },
-							},
-						],
-						collection: [
-							{
-								href: expect.stringContaining(
-									'data/currencies'
-								),
-							},
-						],
-					},
-				} ),
-			] )
-		);
-		expect( responseJSON ).toEqual(
-			expect.arrayContaining( [
-				expect.objectContaining( {
 					code: 'BHD',
 					name: 'Bahraini dinar',
 					symbol: '.&#x62f;.&#x628;',
