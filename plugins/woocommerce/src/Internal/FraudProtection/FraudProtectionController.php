@@ -113,7 +113,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 
 		?>
 		<div class="notice notice-warning is-dismissible">
-			<?php if ( is_wp_error( $result ) ) : // phpstan:ignore function.alreadyNarrowedType ?>
+			<?php if ( is_wp_error( $result ) ) : // phpstan:ignore function.alreadyNarrowedType. ?>
 				<p>
 					<strong><?php esc_html_e( 'Fraud protection warning:', 'woocommerce' ); ?></strong>
 					<?php echo esc_html( $result->get_error_message() ); ?>
