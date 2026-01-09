@@ -3216,3 +3216,30 @@ function wc_update_1050_enable_autoload_options() {
 		)
 	);
 }
+
+/**
+ * Update currency settings for 10.6.0
+ *
+ * Migrate BGN (Bulgarian lev) to EUR (Euro) for store currency setting.
+ * Bulgaria transitioned from BGN to EUR on 2026-01-01.
+ * Historical orders retain their original currency for accuracy.
+ *
+ * @return void
+ */
+function wc_update_1060_bgn_to_eur_currency() {
+	// Update store currency setting from BGN to EUR if currently set to BGN.
+	$current_currency = get_option( 'woocommerce_currency' );
+
+	if ( 'BGN' === $current_currency ) {
+		update_option( 'woocommerce_currency', 'EUR' );
+	}
+}
+
+/**
+ * Update DB Version for 10.6.0
+ *
+ * @return void
+ */
+function wc_update_1060_db_version() {
+	WC_Install::update_db_version( '10.6.0' );
+}

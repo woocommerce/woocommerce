@@ -318,6 +318,10 @@ class WC_Install {
 			'wc_update_1050_enable_autoload_options',
 			'wc_update_1050_add_idx_user_email',
 		),
+		'10.6.0' => array(
+			'wc_update_1060_bgn_to_eur_currency',
+			'wc_update_1060_db_version',
+		),
 	);
 
 	/**
