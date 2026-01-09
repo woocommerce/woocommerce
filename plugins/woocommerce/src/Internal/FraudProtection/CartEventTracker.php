@@ -7,21 +7,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Tracks cart events for fraud protection analysis.
  *
- * This class hooks into WooCommerce cart events (add, update, remove, restore)
- * and triggers fraud protection event dispatching. Event-specific data is passed
+ * This class provides methods to track cart events (add, update, remove, restore)
+ * for fraud protection event dispatching. Event-specific data is passed
  * to the dispatcher which handles session data collection internally.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class CartEventTracker implements RegisterHooksInterface {
+class CartEventTracker {
 
 	/**
 	 * Fraud protection dispatcher instance.
@@ -54,27 +52,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Register cart event hooks.
-	 *
-	 * Hooks into WooCommerce cart actions to track fraud protection events.
-	 * Only registers hooks if the fraud protection feature is enabled.
-	 *
-	 * @return void
-	 */
-	public function register(): void {
-		// Only register hooks if fraud protection is enabled.
-		if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
-			return;
-		}
-
-		add_action( 'woocommerce_add_to_cart', array( $this, 'handle_track_cart_item_added' ), 10, 6 );
-		add_action( 'woocommerce_after_cart_item_quantity_update', array( $this, 'handle_track_cart_item_updated' ), 10, 4 );
-		add_action( 'woocommerce_remove_cart_item', array( $this, 'handle_track_cart_item_removed' ), 10, 2 );
-		add_action( 'woocommerce_restore_cart_item', array( $this, 'handle_track_cart_item_restored' ), 10, 2 );
-	}
-
-	/**
-	 * Handle cart item added event.
+	 * Track cart item added event.
 	 *
 	 * Triggers fraud protection event dispatching when an item is added to the cart.
 	 *
@@ -88,7 +66,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @param array  $cart_item_data Cart item data.
 	 * @return void
 	 */
-	public function handle_track_cart_item_added( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ): void {
+	public function track_cart_item_added( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ): void {
 		$event_data = $this->build_cart_event_data(
 			'item_added',
 			$product_id,
@@ -101,7 +79,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle cart item quantity updated event.
+	 * Track cart item quantity updated event.
 	 *
 	 * Triggers fraud protection event dispatching when cart item quantity is updated.
 	 *
@@ -113,7 +91,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @param object $cart          Cart object.
 	 * @return void
 	 */
-	public function handle_track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $cart ): void {
+	public function track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $cart ): void {
 		$cart_item = $cart->cart_contents[ $cart_item_key ] ?? null;
 
 		if ( (int) $quantity === (int) $old_quantity || ! $cart_item ) {
@@ -138,7 +116,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle cart item removed event.
+	 * Track cart item removed event.
 	 *
 	 * Triggers fraud protection event dispatching when an item is removed from the cart.
 	 *
@@ -148,7 +126,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @param object $cart          Cart object.
 	 * @return void
 	 */
-	public function handle_track_cart_item_removed( $cart_item_key, $cart ): void {
+	public function track_cart_item_removed( $cart_item_key, $cart ): void {
 		$cart_item = $cart->removed_cart_contents[ $cart_item_key ] ?? null;
 
 		if ( ! $cart_item ) {
@@ -171,7 +149,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle cart item restored event.
+	 * Track cart item restored event.
 	 *
 	 * Triggers fraud protection event dispatching when a removed item is restored to the cart.
 	 *
@@ -181,7 +159,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @param object $cart          Cart object.
 	 * @return void
 	 */
-	public function handle_track_cart_item_restored( $cart_item_key, $cart ): void {
+	public function track_cart_item_restored( $cart_item_key, $cart ): void {
 		$cart_item = $cart->cart_contents[ $cart_item_key ] ?? null;
 
 		if ( ! $cart_item ) {
