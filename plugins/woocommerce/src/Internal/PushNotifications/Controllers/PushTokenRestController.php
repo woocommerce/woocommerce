@@ -124,17 +124,20 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return WP_Error
 	 */
 	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
-		$slug = match ( get_class( $e ) ) {
-			PushTokenNotFoundException::class => 'rest_invalid_push_token',
-			InvalidArgumentException::class => 'rest_invalid_argument',
-			default => 'rest_internal_error',
-		};
+		$exception_class = get_class( $e );
 
-		$status = match ( get_class( $e ) ) {
+		$slugs = array(
+			PushTokenNotFoundException::class => 'rest_invalid_push_token',
+			InvalidArgumentException::class   => 'rest_invalid_argument',
+		);
+
+		$statuses = array(
 			PushTokenNotFoundException::class => WP_Http::NOT_FOUND,
-			InvalidArgumentException::class => WP_Http::BAD_REQUEST,
-			default => WP_Http::INTERNAL_SERVER_ERROR,
-		};
+			InvalidArgumentException::class   => WP_Http::BAD_REQUEST,
+		);
+
+		$slug   = $slugs[ $exception_class ] ?? 'rest_internal_error';
+		$status = $statuses[ $exception_class ] ?? WP_Http::INTERNAL_SERVER_ERROR;
 
 		return new WP_Error( $slug, $e->getMessage(), array( 'status' => $status ) );
 	}
