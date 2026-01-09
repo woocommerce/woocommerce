@@ -2711,8 +2711,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
-			self::NGENIUS,
 			self::PAYPAL_FULL_STACK,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'KZ' => array(
