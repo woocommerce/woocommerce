@@ -394,6 +394,7 @@ jobs:
           if [[ "$verify_status" == "skipped" ]]; then
             echo "status=skipped" >> $GITHUB_OUTPUT
             echo "error_message=${{ needs.verify.outputs.error_message }}" >> $GITHUB_OUTPUT
+            echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
           elif [[ "$verify_status" != "success" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
             echo "error_message=${{ needs.verify.outputs.error_message }}" >> $GITHUB_OUTPUT
