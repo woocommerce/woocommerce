@@ -190,10 +190,6 @@ return array(
 		'default' => $global_formats['rx_dot_comma_ltr'],
 		'bn_BD'   => $global_formats['rx_dot_comma_ltr'],
 	),
-	'BGN' => array(
-		'default' => $global_formats['rs_comma_space_ltr'],
-		'bg_BG'   => $global_formats['rs_comma_space_ltr'],
-	),
 	'BHD' => array(
 		'ar_BH'   => $global_formats['rs_comma_dot_rtl'],
 		'default' => $global_formats['rs_comma_dot_rtl'],
