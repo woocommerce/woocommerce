@@ -88,8 +88,8 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 				$order->delete_meta_data( '_debug_log_source' );
 				if ( OrderUtil::unknown_orders_data_store_in_use() ) {
 					if ( $logger instanceof WC_Logger_Interface && is_callable( array( $logger, 'clear' ) ) ) {
-					$logger->clear( $context['source'] );
-				}
+						$logger->clear( $context['source'] );
+					}
 					$order->save();
 				} else {
 					$order->add_meta_data( '_debug_log_source_pending_deletion', $context['source'], true );
