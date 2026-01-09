@@ -129,6 +129,14 @@ class FeaturesController {
 	private bool $lazy = true;
 
 	/**
+	 * Flag indicating if translatable strings (name, description) have been
+	 * resolved from callbacks in the feature definitions.
+	 *
+	 * @var bool
+	 */
+	private bool $strings_initialized = false;
+
+	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
@@ -174,40 +182,65 @@ class FeaturesController {
 	 * This used to be called during the `woocommerce_register_feature_definitions` action hook,
 	 * now it's called directly from get_feature_definitions as needed.
 	 *
-	 * @param string $slug The ID slug of the feature.
-	 * @param string $name The name of the feature that will appear on the Features screen and elsewhere.
-	 * @param array  $args {
+	 * @param string          $slug The ID slug of the feature.
+	 * @param callable|string $name A callback that returns the translated name of the feature,
+	 *                              or the name directly (deprecated, triggers doing_it_wrong).
+	 * @param array           $args {
 	 *     Properties that make up the feature definition. Each of these properties can also be set as a
 	 *     callback function, as long as that function returns the specified type.
 	 *
-	 *     @type string  $default_plugin_compatibility The default plugin compatibility for the feature: either 'compatible' or 'incompatible'. Required.
-	 *     @type array[] $additional_settings          An array of definitions for additional settings controls related to
-	 *                                                 the feature that will display on the Features screen. See the Settings API
-	 *                                                 for the schema of these props.
-	 *     @type string  $description                  A brief description of the feature, used as an input label if the feature
-	 *                                                 setting is a checkbox.
-	 *     @type bool    $disabled                     True to disable the setting field for this feature on the Features screen,
-	 *                                                 so it can't be changed.
-	 *     @type bool    $disable_ui                   Set to true to hide the setting field for this feature on the
-	 *                                                 Features screen. Defaults to false.
-	 *     @type bool    $enabled_by_default           Set to true to have this feature by opt-out instead of opt-in.
-	 *                                                 Defaults to false.
-	 *     @type bool    $is_experimental              Set to true to display this feature under the "Experimental" heading on
-	 *                                                 the Features screen. Features set to experimental are also omitted from
-	 *                                                 the features list in some cases. Defaults to true.
-	 *     @type bool    $skip_compatibility_checks    Set to true if the feature should not produce warnings about incompatible plugins.
-	 *                                                 Defaults to false.
-	 *     @type string  $learn_more_url               The URL to the learn more page for the feature.
-	 *     @type string  $option_key                   The key name for the option that enables/disables the feature.
-	 *     @type int     $order                        The order that the feature will appear in the list on the Features screen.
-	 *                                                 Higher number = higher in the list. Defaults to 10.
-	 *     @type array   $setting                      The properties used by the Settings API to render the setting control on
-	 *                                                 the Features screen. See the Settings API for the schema of these props.
+	 *     @type string   $default_plugin_compatibility The default plugin compatibility for the feature: either 'compatible' or 'incompatible'. Required.
+	 *     @type array[]  $additional_settings          An array of definitions for additional settings controls related to
+	 *                                                  the feature that will display on the Features screen. See the Settings API
+	 *                                                  for the schema of these props.
+	 *     @type callable|string $description           A callback that returns the translated description, or the description
+	 *                                                  directly (deprecated). Used as an input label if the feature setting is a checkbox.
+	 *     @type bool     $disabled                     True to disable the setting field for this feature on the Features screen,
+	 *                                                  so it can't be changed.
+	 *     @type bool     $disable_ui                   Set to true to hide the setting field for this feature on the
+	 *                                                  Features screen. Defaults to false.
+	 *     @type bool     $enabled_by_default           Set to true to have this feature by opt-out instead of opt-in.
+	 *                                                  Defaults to false.
+	 *     @type bool     $is_experimental              Set to true to display this feature under the "Experimental" heading on
+	 *                                                  the Features screen. Features set to experimental are also omitted from
+	 *                                                  the features list in some cases. Defaults to true.
+	 *     @type bool     $skip_compatibility_checks    Set to true if the feature should not produce warnings about incompatible plugins.
+	 *                                                  Defaults to false.
+	 *     @type string   $learn_more_url               The URL to the learn more page for the feature.
+	 *     @type string   $option_key                   The key name for the option that enables/disables the feature.
+	 *     @type int      $order                        The order that the feature will appear in the list on the Features screen.
+	 *                                                  Higher number = higher in the list. Defaults to 10.
+	 *     @type array    $setting                      The properties used by the Settings API to render the setting control on
+	 *                                                  the Features screen. See the Settings API for the schema of these props.
 	 * }
 	 *
 	 * @return void
 	 */
 	public function add_feature_definition( $slug, $name, array $args = array() ) {
+		if ( is_string( $name ) ) {
+			$this->proxy->call_function(
+				'wc_doing_it_wrong',
+				__FUNCTION__,
+				sprintf(
+					'Passing a string for the feature name is deprecated. Pass a callback that returns the translated name instead for feature "%s".',
+					esc_html( $slug )
+				),
+				'10.5.0'
+			);
+		}
+
+		if ( is_string( $args['description'] ?? null ) ) {
+			$this->proxy->call_function(
+				'wc_doing_it_wrong',
+				__FUNCTION__,
+				sprintf(
+					'Passing a string for the feature description is deprecated. Pass a callback that returns the translated description instead for feature "%s".',
+					esc_html( $slug )
+				),
+				'10.5.0'
+			);
+		}
+
 		$defaults = array(
 			'disable_ui'                   => false,
 			'enabled_by_default'           => false,
@@ -220,7 +253,8 @@ class FeaturesController {
 		);
 
 		if ( empty( $args['default_plugin_compatibility'] ) ) {
-			wc_doing_it_wrong(
+			$this->proxy->call_function(
+				'wc_doing_it_wrong',
 				__FUNCTION__,
 				sprintf(
 					'Assuming positive compatibility by default will be deprecated in the future. Please set \'default_plugin_compatibility\' for feature "%s".',
@@ -270,6 +304,20 @@ class FeaturesController {
 			$this->init_compatibility_info_by_feature();
 		}
 
+		// Resolve name and description callbacks to strings after the init hook.
+		// This allows feature_is_enabled() to be called early without triggering translation loading.
+		if ( ! $this->strings_initialized && did_action( 'init' ) ) {
+			$this->strings_initialized = true;
+			foreach ( $this->features as $slug => &$feature ) {
+				if ( is_callable( $feature['name'] ) ) {
+					$feature['name'] = call_user_func( $feature['name'] );
+				}
+				if ( is_callable( $feature['description'] ?? null ) ) {
+					$feature['description'] = call_user_func( $feature['description'] );
+				}
+			}
+		}
+
 		return $this->features;
 	}
 
@@ -286,8 +334,8 @@ class FeaturesController {
 
 		$legacy_features = array(
 			'analytics'                          => array(
-				'name'                         => __( 'Analytics', 'woocommerce' ),
-				'description'                  => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
+				'name'                         => fn() => __( 'Analytics', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
@@ -296,27 +344,24 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'product_block_editor'               => array(
-				'name'                         => __( 'New product editor', 'woocommerce' ),
-				'description'                  => __( 'Try the new product editor (Beta)', 'woocommerce' ),
+				'name'                         => fn() => __( 'New product editor', 'woocommerce' ),
+				'description'                  => fn() => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'cart_checkout_blocks'               => array(
-				'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-				'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+				'name'                         => fn() => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+				'description'                  => fn() => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental'              => false,
 				'disable_ui'                   => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'rate_limit_checkout'                => array(
-				'name'                         => __( 'Rate limit Checkout', 'woocommerce' ),
-				'description'                  => sprintf(
-					// translators: %s is the URL to the rate limiting documentation.
-					__( 'Enables rate limiting for Checkout place order and Store API /checkout endpoint. To further control this, refer to <a href="%s" target="_blank">rate limiting documentation</a>.', 'woocommerce' ),
-					'https://developer.woocommerce.com/docs/apis/store-api/rate-limiting/'
-				),
+				'name'                         => fn() => __( 'Rate limit Checkout', 'woocommerce' ),
+				// translators: %s is the URL to the rate limiting documentation.
+				'description'                  => fn() => sprintf( __( 'Enables rate limiting for Checkout place order and Store API /checkout endpoint. To further control this, refer to <a href="%s" target="_blank">rate limiting documentation</a>.', 'woocommerce' ), 'https://developer.woocommerce.com/docs/apis/store-api/rate-limiting/' ),
 				'is_experimental'              => false,
 				'disable_ui'                   => false,
 				'enabled_by_default'           => false,
@@ -324,11 +369,8 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'marketplace'                        => array(
-				'name'                         => __( 'Marketplace', 'woocommerce' ),
-				'description'                  => __(
-					'New, faster way to find extensions and themes for your WooCommerce store',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Marketplace', 'woocommerce' ),
+				'description'                  => fn() => __( 'New, faster way to find extensions and themes for your WooCommerce store', 'woocommerce' ),
 				'is_experimental'              => false,
 				'enabled_by_default'           => true,
 				'disable_ui'                   => true,
@@ -338,11 +380,8 @@ class FeaturesController {
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
 			'order_attribution'                  => array(
-				'name'                         => __( 'Order Attribution', 'woocommerce' ),
-				'description'                  => __(
-					'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Order Attribution', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable this feature to track and credit channels and campaigns that contribute to orders on your site', 'woocommerce' ),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
@@ -350,11 +389,8 @@ class FeaturesController {
 				'is_experimental'              => false,
 			),
 			'site_visibility_badge'              => array(
-				'name'                         => __( 'Site visibility badge', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the site visibility badge in the WordPress admin bar',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Site visibility badge', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable the site visibility badge in the WordPress admin bar', 'woocommerce' ),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
@@ -363,11 +399,8 @@ class FeaturesController {
 				'disabled'                     => false,
 			),
 			'hpos_fts_indexes'                   => array(
-				'name'                         => __( 'HPOS Full text search indexes', 'woocommerce' ),
-				'description'                  => __(
-					'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'HPOS Full text search indexes', 'woocommerce' ),
+				'description'                  => fn() => __( 'Create and use full text search indexes for orders. This feature only works with high-performance order storage.', 'woocommerce' ),
 				'is_experimental'              => true,
 				'enabled_by_default'           => false,
 				'skip_compatibility_checks'    => true,
@@ -375,11 +408,8 @@ class FeaturesController {
 				'option_key'                   => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 			),
 			'hpos_datastore_caching'             => array(
-				'name'                         => __( 'HPOS Data Caching', 'woocommerce' ),
-				'description'                  => __(
-					'Enable order data caching in the datastore. This feature only works with high-performance order storage and is recommended for stores using object caching.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'HPOS Data Caching', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable order data caching in the datastore. This feature only works with high-performance order storage and is recommended for stores using object caching.', 'woocommerce' ),
 				'is_experimental'              => false,
 				'enabled_by_default'           => false,
 				'skip_compatibility_checks'    => true,
@@ -388,13 +418,9 @@ class FeaturesController {
 				'option_key'                   => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
 			'remote_logging'                     => array(
-				'name'                         => __( 'Remote Logging', 'woocommerce' ),
-				'description'                  => sprintf(
-					/* translators: %1$s: opening link tag, %2$s: closing link tag */
-					__( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. This feature requires %1$susage tracking%2$s to be enabled.', 'woocommerce' ),
-					'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ) . '">',
-					'</a>'
-				),
+				'name'                         => fn() => __( 'Remote Logging', 'woocommerce' ),
+				/* translators: %1$s: opening link tag, %2$s: closing link tag */
+				'description'                  => fn() => sprintf( __( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. This feature requires %1$susage tracking%2$s to be enabled.', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ) . '">', '</a>' ),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 
@@ -423,11 +449,8 @@ class FeaturesController {
 				),
 			),
 			'email_improvements'                 => array(
-				'name'                         => __( 'Email improvements', 'woocommerce' ),
-				'description'                  => __(
-					'Enable modern email design for transactional emails',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Email improvements', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable modern email design for transactional emails', 'woocommerce' ),
 
 				/*
 				 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -443,11 +466,8 @@ class FeaturesController {
 				'is_experimental'              => false,
 			),
 			'blueprint'                          => array(
-				'name'                         => __( 'Blueprint (beta)', 'woocommerce' ),
-				'description'                  => __(
-					'Enable blueprint to import and export settings in bulk',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Blueprint (beta)', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable blueprint to import and export settings in bulk', 'woocommerce' ),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 
@@ -464,11 +484,8 @@ class FeaturesController {
 				'is_experimental'              => false,
 			),
 			'block_email_editor'                 => array(
-				'name'                         => __( 'Block Email Editor (alpha)', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the block-based email editor for transactional emails.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Block Email Editor (alpha)', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable the block-based email editor for transactional emails.', 'woocommerce' ),
 				'learn_more_url'               => 'https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256',
 
 				/*
@@ -484,11 +501,8 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 			),
 			'point_of_sale'                      => array(
-				'name'                         => __( 'Point of Sale', 'woocommerce' ),
-				'description'                  => __(
-					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Point of Sale', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable Point of Sale functionality in the WooCommerce mobile apps.', 'woocommerce' ),
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 
@@ -505,19 +519,16 @@ class FeaturesController {
 				'is_experimental'              => true,
 			),
 			'fulfillments'                       => array(
-				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the Order Fulfillments feature to manage order fulfillment and shipping.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Order Fulfillments', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable the Order Fulfillments feature to manage order fulfillment and shipping.', 'woocommerce' ),
 				'enabled_by_default'           => false,
 				'disable_ui'                   => true,
 				'is_experimental'              => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'mcp_integration'                    => array(
-				'name'                         => __( 'WooCommerce MCP', 'woocommerce' ),
-				'description'                  => $this->get_mcp_integration_description(),
+				'name'                         => fn() => __( 'WooCommerce MCP', 'woocommerce' ),
+				'description'                  => fn() => $this->get_mcp_integration_description(),
 				'enabled_by_default'           => false,
 				'disable_ui'                   => false,
 				'is_experimental'              => true,
@@ -525,22 +536,16 @@ class FeaturesController {
 				'is_legacy'                    => false,
 			),
 			'destroy-empty-sessions'             => array(
-				'name'                         => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
-				'description'                  => __(
-					'[Performance] Removes session cookies for non-logged in customers when session data is empty, improving page caching performance. May cause compatibility issues with extensions that depend on the session cookie without using session data.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
+				'description'                  => fn() => __( '[Performance] Removes session cookies for non-logged in customers when session data is empty, improving page caching performance. May cause compatibility issues with extensions that depend on the session cookie without using session data.', 'woocommerce' ),
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'agentic_checkout'                   => array(
-				'name'                         => __( 'Agentic Checkout API', 'woocommerce' ),
-				'description'                  => __(
-					'Enable the Agentic Checkout API for AI-powered checkout experiences (e.g., ChatGPT). This adds REST API endpoints that allow AI agents to create and manage checkout sessions.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Agentic Checkout API', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable the Agentic Checkout API for AI-powered checkout experiences (e.g., ChatGPT). This adds REST API endpoints that allow AI agents to create and manage checkout sessions.', 'woocommerce' ),
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => true,
@@ -548,11 +553,8 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			PushNotifications::FEATURE_NAME      => array(
-				'name'                         => __( 'Push Notifications', 'woocommerce' ),
-				'description'                  => __(
-					'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Push Notifications', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable push notifications for the WooCommerce mobile apps to receive order notifications and store updates.', 'woocommerce' ),
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => true,
@@ -560,13 +562,9 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'rest_api_caching'                   => array(
-				'name'                         => __( 'REST API Caching', 'woocommerce' ),
-				'description'                  => sprintf(
-					/* translators: %1$s and %2$s are opening and closing <a> tags */
-					__( 'Enable backend caching and cache control headers for REST API responses via the <code>RestApiCache</code> trait. ⚙️ %1$sConfiguration%2$s', 'woocommerce' ),
-					'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=rest_api_caching' ) . '">',
-					'</a>'
-				),
+				'name'                         => fn() => __( 'REST API Caching', 'woocommerce' ),
+				/* translators: %1$s and %2$s are opening and closing <a> tags */
+				'description'                  => fn() => sprintf( __( 'Enable backend caching and cache control headers for REST API responses via the <code>RestApiCache</code> trait. ⚙️ %1$sConfiguration%2$s', 'woocommerce' ), '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=rest_api_caching' ) . '">', '</a>' ),
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
@@ -574,8 +572,8 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			ProductCacheController::FEATURE_NAME => array(
-				'name'                         => __( 'Cache Product Objects', 'woocommerce' ),
-				'description'                  => __(
+				'name'                         => fn() => __( 'Cache Product Objects', 'woocommerce' ),
+				'description'                  => fn() => __(
 					'[Performance] Speeds up your store by caching product objects during each request, preventing duplicate product loads. Can improve page load times on product-heavy pages.',
 					'woocommerce'
 				),
@@ -585,11 +583,8 @@ class FeaturesController {
 				'disable_ui'                   => false,
 			),
 			'fraud_protection'                   => array(
-				'name'                         => __( 'Fraud protection', 'woocommerce' ),
-				'description'                  => __(
-					'Enable fraud protection features for your store.',
-					'woocommerce'
-				),
+				'name'                         => fn() => __( 'Fraud protection', 'woocommerce' ),
+				'description'                  => fn() => __( 'Enable fraud protection features for your store.', 'woocommerce' ),
 				'enabled_by_default'           => false,
 				'disable_ui'                   => false,
 				'is_experimental'              => true,
@@ -1347,12 +1342,21 @@ class FeaturesController {
 	 * @return array The parameters to add to the settings array.
 	 */
 	private function get_setting_for_feature( string $feature_id, array $feature ): array {
+		$name               = $feature['name'] ?? '';
 		$description        = $feature['description'] ?? '';
 		$disabled           = false;
 		$desc_tip           = '';
 		$tooltip            = $feature['tooltip'] ?? '';
 		$type               = $feature['type'] ?? 'checkbox';
 		$setting_definition = $feature['setting'] ?? array();
+
+		// Resolve callbacks if they haven't been resolved yet.
+		if ( is_callable( $name ) ) {
+			$name = $name();
+		}
+		if ( is_callable( $description ) ) {
+			$description = $description();
+		}
 
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		/**
@@ -1412,7 +1416,7 @@ class FeaturesController {
 		$desc_tip = apply_filters( 'woocommerce_feature_description_tip', $desc_tip, $feature_id, $disabled );
 
 		$feature_setting_defaults = array(
-			'title'    => $feature['name'],
+			'title'    => $name,
 			'desc'     => $description,
 			'type'     => $type,
 			'id'       => $this->feature_enable_option_name( $feature_id ),

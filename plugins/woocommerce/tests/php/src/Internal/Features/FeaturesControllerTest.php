@@ -74,26 +74,26 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	public function register_dummy_features( $features_controller ) {
 		$features = array(
 			'mature1'       => array(
-				'name'                         => 'Mature feature 1',
-				'description'                  => 'The mature feature number 1',
+				'name'                         => fn() => 'Mature feature 1',
+				'description'                  => fn() => 'The mature feature number 1',
 				'is_experimental'              => false,
 				'default_plugin_compatibility' => 'compatible',
 			),
 			'mature2'       => array(
-				'name'                         => 'Mature feature 2',
-				'description'                  => 'The mature feature number 2',
+				'name'                         => fn() => 'Mature feature 2',
+				'description'                  => fn() => 'The mature feature number 2',
 				'is_experimental'              => false,
 				'default_plugin_compatibility' => 'compatible',
 			),
 			'experimental1' => array(
-				'name'                         => 'Experimental feature 1',
-				'description'                  => 'The experimental feature number 1',
+				'name'                         => fn() => 'Experimental feature 1',
+				'description'                  => fn() => 'The experimental feature number 1',
 				'is_experimental'              => true,
 				'default_plugin_compatibility' => 'compatible',
 			),
 			'experimental2' => array(
-				'name'                         => 'Experimental feature 2',
-				'description'                  => 'The experimental feature number 2',
+				'name'                         => fn() => 'Experimental feature 2',
+				'description'                  => fn() => 'The experimental feature number 2',
 				'is_experimental'              => true,
 				'default_plugin_compatibility' => 'compatible',
 			),
@@ -170,6 +170,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$compat_property = $reflection_class->getProperty( 'compatibility_info_by_feature' );
 		$compat_property->setAccessible( true );
 		$compat_property->setValue( $sut, array() );
+
+		$strings_initialized_property = $reflection_class->getProperty( 'strings_initialized' );
+		$strings_initialized_property->setAccessible( true );
+		$strings_initialized_property->setValue( $sut, false );
 
 		foreach ( $features as $slug => $definition ) {
 			$sut->add_feature_definition( $slug, $definition['name'], $definition );
@@ -551,38 +555,38 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'mature1'       => array(
-						'name'                         => 'Mature feature 1',
-						'description'                  => 'The mature feature number 1',
+						'name'                         => fn() => 'Mature feature 1',
+						'description'                  => fn() => 'The mature feature number 1',
 						'is_experimental'              => false,
 						'default_plugin_compatibility' => 'compatible',
 					),
 					'mature2'       => array(
-						'name'                         => 'Mature feature 2',
-						'description'                  => 'The mature feature number 2',
+						'name'                         => fn() => 'Mature feature 2',
+						'description'                  => fn() => 'The mature feature number 2',
 						'is_experimental'              => false,
 						'default_plugin_compatibility' => 'compatible',
 					),
 					'mature3'       => array(
-						'name'                         => 'Mature feature 3',
-						'description'                  => 'The mature feature number 3',
+						'name'                         => fn() => 'Mature feature 3',
+						'description'                  => fn() => 'The mature feature number 3',
 						'is_experimental'              => false,
 						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental1' => array(
-						'name'                         => 'Experimental feature 1',
-						'description'                  => 'The experimental feature number 1',
+						'name'                         => fn() => 'Experimental feature 1',
+						'description'                  => fn() => 'The experimental feature number 1',
 						'is_experimental'              => true,
 						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental2' => array(
-						'name'                         => 'Experimental feature 2',
-						'description'                  => 'The experimental feature number 2',
+						'name'                         => fn() => 'Experimental feature 2',
+						'description'                  => fn() => 'The experimental feature number 2',
 						'is_experimental'              => true,
 						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental3' => array(
-						'name'                         => 'Experimental feature 3',
-						'description'                  => 'The experimental feature number 3',
+						'name'                         => fn() => 'Experimental feature 3',
+						'description'                  => fn() => 'The experimental feature number 3',
 						'is_experimental'              => true,
 						'default_plugin_compatibility' => 'compatible',
 					),
@@ -900,14 +904,14 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'name'                         => fn() => __( 'High-Performance order storage', 'woocommerce' ),
 						'is_experimental'              => true,
 						'enabled_by_default'           => false,
 						'default_plugin_compatibility' => 'compatible',
 					),
 					'cart_checkout_blocks' => array(
-						'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-						'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'name'                         => fn() => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'                  => fn() => __( 'Optimize for faster checkout', 'woocommerce' ),
 						'is_experimental'              => false,
 						'disable_ui'                   => true,
 						'default_plugin_compatibility' => 'compatible',
@@ -1000,15 +1004,15 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'name'                         => fn() => __( 'High-Performance order storage', 'woocommerce' ),
 						'is_experimental'              => false,
 						'enabled_by_default'           => false,
 						'option_key'                   => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 						'default_plugin_compatibility' => 'incompatible',
 					),
 					'cart_checkout_blocks' => array(
-						'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-						'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'name'                         => fn() => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'                  => fn() => __( 'Optimize for faster checkout', 'woocommerce' ),
 						'is_experimental'              => false,
 						'disable_ui'                   => true,
 						'default_plugin_compatibility' => 'compatible',
@@ -1242,5 +1246,98 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$compat_after = $this->sut->get_compatible_plugins_for_feature( 'mature1' );
 		$this->assertNotContains( 'plugin/plugin.php', $compat_after['compatible'] );
 		$this->assertContains( 'plugin/plugin.php', $compat_after['uncertain'] );
+	}
+
+	/**
+	 * @testdox 'add_feature_definition' triggers doing_it_wrong when a string is passed for the feature name.
+	 */
+	public function test_add_feature_definition_with_string_name_triggers_doing_it_wrong() {
+		$function = null;
+		$message  = null;
+		$version  = null;
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_doing_it_wrong' => function ( $f, $m, $v ) use ( &$function, &$message, &$version ) {
+					$function = $f;
+					$message  = $m;
+					$version  = $v;
+				},
+			)
+		);
+
+		$this->sut->add_feature_definition(
+			'test_string_name',
+			'String Name Feature',
+			array( 'default_plugin_compatibility' => 'compatible' )
+		);
+
+		$this->assertEquals( 'add_feature_definition', $function );
+		$this->assertStringContainsString( 'Passing a string for the feature name is deprecated', $message );
+		$this->assertStringContainsString( 'test_string_name', $message );
+		$this->assertEquals( '10.5.0', $version );
+	}
+
+	/**
+	 * @testdox 'add_feature_definition' triggers doing_it_wrong when a string is passed for the feature description.
+	 */
+	public function test_add_feature_definition_with_string_description_triggers_doing_it_wrong() {
+		$function = null;
+		$message  = null;
+		$version  = null;
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_doing_it_wrong' => function ( $f, $m, $v ) use ( &$function, &$message, &$version ) {
+					$function = $f;
+					$message  = $m;
+					$version  = $v;
+				},
+			)
+		);
+
+		$this->sut->add_feature_definition(
+			'test_string_description',
+			fn() => 'Callback Name Feature',
+			array(
+				'description'                  => 'String description',
+				'default_plugin_compatibility' => 'compatible',
+			)
+		);
+
+		$this->assertEquals( 'add_feature_definition', $function );
+		$this->assertStringContainsString( 'Passing a string for the feature description is deprecated', $message );
+		$this->assertStringContainsString( 'test_string_description', $message );
+		$this->assertEquals( '10.5.0', $version );
+	}
+
+	/**
+	 * @testdox 'add_feature_definition' does not trigger doing_it_wrong when callbacks are used for name and description.
+	 */
+	public function test_add_feature_definition_with_callbacks_does_not_trigger_doing_it_wrong() {
+		$doing_it_wrong_called = false;
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'wc_doing_it_wrong' => function ( $f, $m, $v ) use ( &$doing_it_wrong_called ) {
+					unset( $f, $v ); // Avoid parameter not used PHPCS errors.
+					// Only track if it's about name/description strings.
+					if ( strpos( $m, 'Passing a string for the feature' ) !== false ) {
+						$doing_it_wrong_called = true;
+					}
+				},
+			)
+		);
+
+		$this->sut->add_feature_definition(
+			'test_callback_feature',
+			fn() => 'Callback Name Feature',
+			array(
+				'description'                  => fn() => 'Callback description',
+				'default_plugin_compatibility' => 'compatible',
+			)
+		);
+
+		$this->assertFalse( $doing_it_wrong_called );
 	}
 }
