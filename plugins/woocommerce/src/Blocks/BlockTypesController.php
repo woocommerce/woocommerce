@@ -718,8 +718,8 @@ final class BlockTypesController {
 				 *
 				 * @since 9.5.0
 				 *
-				 * @param WP_Term   $main_term The main term to be used in breadcrumbs.
-				 * @param WP_Term[] $terms     Array of all product category terms.
+				 * @param \WP_Term   $main_term The main term to be used in breadcrumbs.
+				 * @param \WP_Term[] $terms     Array of all product category terms.
 				 */
 				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
 
