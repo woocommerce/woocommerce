@@ -381,7 +381,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			self::$log->clear( self::ID );
+			if ( self::$log instanceof WC_Logger_Interface && is_callable( array( self::$log, 'clear' ) ) ) {
+				self::$log->clear( self::ID );
+			}
 		}
 
 		// Trigger Transact onboarding when settings are saved.
