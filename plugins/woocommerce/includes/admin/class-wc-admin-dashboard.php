@@ -496,7 +496,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			// Optimized version of the widget: faster SQL queries and templates-based rendering for customization.
 			$comments = array_filter(
 				get_comments(
-					array (
+					array(
 						'type'   => 'review',
 						'status' => 'approve',
 						'number' => 5,
