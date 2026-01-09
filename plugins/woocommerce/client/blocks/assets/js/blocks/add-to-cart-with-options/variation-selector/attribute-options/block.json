@@ -17,7 +17,7 @@
 			"default": false
 		},
 		"disabledAttributesAction": {
-			"type": "string",
+			"enum": [ "disable", "hide" ],
 			"default": "disable"
 		}
 	},
