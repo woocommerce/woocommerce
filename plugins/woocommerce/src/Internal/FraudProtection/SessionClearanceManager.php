@@ -134,6 +134,7 @@ class SessionClearanceManager {
 		// Ensure session cookie is set so the session persists across page loads.
 		// This is important because fraud protection may set session status before
 		// any cart action triggers the cookie to be set.
+		// Skip cookie setting if headers have already been sent (e.g., in test environment).
 		if ( WC()->session instanceof \WC_Session_Handler ) {
 			WC()->session->set_customer_session_cookie( true );
 		}

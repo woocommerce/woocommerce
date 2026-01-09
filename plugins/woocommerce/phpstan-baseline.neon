@@ -2509,30 +2509,6 @@ parameters:
 			path: includes/admin/class-wc-admin-duplicate-product.php
 
 		-
-			message: '#^Cannot call method get_global_unique_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot call method get_sku\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot call method read_meta_data\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot clone non\-object variable \$child of type WC_Product\|false\|null\.$#'
-			identifier: clone.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
 			message: '#^Method WC_Admin_Duplicate_Product\:\:dupe_button\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -16063,12 +16039,6 @@ parameters:
 			path: includes/class-wc-order-item-meta.php
 
 		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -16203,12 +16173,6 @@ parameters:
 		-
 			message: '#^Method WC_Order_Item_Product\:\:set_variation_id\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order_Item_Product \$this  The order item product object\.\)\: Unexpected token "\$this", expected variable at offset 209 on line 7$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order-item-product.php
 
@@ -24509,18 +24473,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: includes/gateways/cod/class-wc-gateway-cod.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Buttons\:\:get_current_page_for_app_switch\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal-buttons.php
-
-		-
-			message: '#^Parameter \#1 \$post of function get_permalink expects int\|WP_Post, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal-buttons.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$ACK\.$#'
@@ -57940,12 +57892,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartForm.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -57976,18 +57922,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(mixed string\|boolean The template part path if it exists\)\: Unexpected token "string", expected variable at offset 121 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
 			message: '#^Parameter \#1 \$amount of function wc_stock_amount expects float\|int, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -58009,12 +57943,6 @@ parameters:
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
 			identifier: argument.type
 			count: 4
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\AddToCartWithOptions\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
@@ -58160,18 +58088,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
-
-		-
-			message: '#^Cannot call method get_description\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
 
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\VariationDescription\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
@@ -62704,12 +62620,6 @@ parameters:
 			path: src/Blocks/Payments/Integrations/Cheque.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Blocks/Payments/Integrations/PayPal.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Payments\\Integrations\\PayPal\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -64028,6 +63938,18 @@ parameters:
 			identifier: new.static
 			count: 1
 			path: src/Gateways/PayPal/AddressRequirements.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Buttons\:\:get_current_page_for_app_switch\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Gateways/PayPal/Buttons.php
+
+		-
+			message: '#^Parameter \#1 \$post of function get_permalink expects int\|WP_Post, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/Buttons.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Request\:\:send_wpcom_proxy_request\(\) never returns array so it can be removed from the return type\.$#'

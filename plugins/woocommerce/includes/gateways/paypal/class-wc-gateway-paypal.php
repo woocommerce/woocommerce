@@ -13,6 +13,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
@@ -211,7 +212,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for PayPal order responses to manage account restriction notices.
 				add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
 
-				$buttons = new WC_Gateway_Paypal_Buttons( $this );
+				$buttons = new PayPalButtons( $this );
 				if ( $buttons->is_enabled() && ! $this->needs_setup() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
@@ -783,7 +784,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
-		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$buttons           = new PayPalButtons( $this );
 		$options           = $buttons->get_common_options();
 
 		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
@@ -824,7 +825,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function add_paypal_sdk_attributes( $attrs ) {
 		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
-			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$buttons   = new PayPalButtons( $this );
 			$page_type = $buttons->get_page_type();
 
 			$attrs['data-page-type']              = $page_type;
