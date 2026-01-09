@@ -4158,6 +4158,16 @@ class PaymentsExtensionSuggestions {
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'ngenius',
 				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/ngenius/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/gocardless/',
+					),
+				),
 			),
 			self::GOCARDLESS        => array(
 				'_type'       => self::TYPE_PSP,
