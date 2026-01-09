@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
@@ -58,16 +59,13 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 * @internal
 	 *
 	 * @param FeaturesController       $features_controller      The instance of FeaturesController to use.
-	 * @param JetpackConnectionManager $connection_manager       The instance of JetpackConnectionManager to use.
 	 * @param BlockedSessionNotice     $blocked_session_notice   The instance of BlockedSessionNotice to use.
 	 */
 	final public function init(
 		FeaturesController $features_controller,
-		JetpackConnectionManager $connection_manager,
 		BlockedSessionNotice $blocked_session_notice
 	): void {
 		$this->features_controller    = $features_controller;
-		$this->connection_manager     = $connection_manager;
 		$this->blocked_session_notice = $blocked_session_notice;
 	}
 
@@ -102,25 +100,29 @@ class FraudProtectionController implements RegisterHooksInterface {
 			return;
 		}
 
-		$connection_status = $this->connection_manager->get_connection_status();
-		if ( $connection_status['connected'] ) {
+		$manager = JetpackConnection::get_manager();
+
+		if ( $manager->is_connected() ) {
 			return;
 		}
 
-		$settings_url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
+		$result = $manager->try_registration();
+		if ( ! is_wp_error( $result ) ) {
+			return;
+		}
 
 		?>
 		<div class="notice notice-warning is-dismissible">
 			<p>
 				<strong><?php esc_html_e( 'Fraud protection warning:', 'woocommerce' ); ?></strong>
-				<?php echo esc_html( $connection_status['error'] ); ?>
+				<?php echo esc_html( $result->get_error_message() ); ?>
 			</p>
 			<p>
 				<?php
 				printf(
 					/* translators: %s: Settings page URL */
-					wp_kses_post( __( 'Fraud protection will fail open and allow all sessions until connected. <a href="%s">Connect to Jetpack</a>', 'woocommerce' ) ),
-					esc_url( $settings_url )
+					wp_kses_post( __( 'Fraud protection will fail open and allow all sessions until connected. <a href="%s">How to connect to Jetpack</a>', 'woocommerce' ) ),
+					esc_url( 'https://jetpack.com/support/getting-started-with-jetpack/' )
 				);
 				?>
 			</p>
