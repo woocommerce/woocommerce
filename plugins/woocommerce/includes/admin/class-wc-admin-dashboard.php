@@ -412,22 +412,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Recent reviews widget.
+		 * Recent reviews widget: legacy implementation without modifications.
 		 */
-		public function recent_reviews() {
+		private function legacy_recent_reviews(): void {
 			global $wpdb;
 
-			if ( has_filter( 'woocommerce_report_recent_reviews_query_from' ) ) {
-				wc_deprecated_hook( 'woocommerce_report_recent_reviews_query_from', '10.5.0' );
-
-				/**
-				 * Filters the from-clause used for fetching latest product reviews.
-				 *
-				 * @since 3.1.0
-				 * @deprecated since 10.5.0
-				 *
-				 * @param string $clause The from-clause.
-				 */
 				$query_from = apply_filters(
 					'woocommerce_report_recent_reviews_query_from',
 					"FROM {$wpdb->comments} comments
@@ -440,42 +429,76 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 					ORDER BY comments.comment_date_gmt DESC
 					LIMIT 5"
 				);
-				$entries    = $wpdb->get_results(
-					"SELECT posts.ID as product_id, comments.comment_ID as comment_id {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+			$comments = $wpdb->get_results(
+				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_author_email, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				);
+
+			if ( $comments ) {
+				echo '<ul>';
+				foreach ( $comments as $comment ) {
+
+					echo '<li>';
+
+					echo get_avatar( $comment->comment_author_email, '32' );
+
+					$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
+
+					/* translators: %s: rating */
+					echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
+
+					/* translators: %s: review author */
+					echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $comment->ID ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
+					echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
+
+				}
+				echo '</ul>';
 			} else {
-				// To improve performance, use a lookup table to enable faster joins in the optimized query.
-				$entries = $wpdb->get_results(
-					"SELECT posts.ID as product_id, comments.comment_ID as comment_id
-					 FROM {$wpdb->comments} comments
-						LEFT JOIN {$wpdb->wc_product_meta_lookup} lookup ON(lookup.product_id = comments.comment_post_ID)
-						LEFT JOIN {$wpdb->posts} posts ON(posts.ID = lookup.product_id)
-					 WHERE
-						comments.comment_type = 'review' AND comments.comment_approved = '1'
-					 ORDER BY comments.comment_date_gmt DESC
-					 LIMIT 5"
-				);
+				echo '<p>' . esc_html__( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
 			}
+		}
 
-			if ( $entries ) {
-				_prime_comment_caches( array_column( $entries, 'comment_id' ) );
-				_prime_post_caches( array_column( $entries, 'product_id' ), false, false );
-
-				if ( has_filter( 'woocommerce_admin_dashboard_recent_reviews' ) ) {
+		/**
+		 * Recent reviews widget.
+		 */
+		public function recent_reviews()
+		{
+			// Backward compatibility mode: if any of the checked below hooks are in use, use the legacy implementation.
+			$has_legacy_query_filter         = has_filter( 'woocommerce_report_recent_reviews_query_from' );
+			$has_legacy_product_title_filter = has_filter( 'woocommerce_admin_dashboard_recent_reviews' );
+			$use_legacy_implementation       = $has_legacy_query_filter || $has_legacy_product_title_filter;
+			if ( $use_legacy_implementation ) {
+				if ( $has_legacy_query_filter ) {
+					wc_deprecated_hook( 'woocommerce_report_recent_reviews_query_from', '10.5.0' );
+				}
+				if ( $has_legacy_product_title_filter ) {
 					wc_deprecated_hook( 'woocommerce_admin_dashboard_recent_reviews', '10.5.0', 'dashboard-widget-reviews.php template' );
 				}
 
+				$this->legacy_recent_reviews();
+			}
+
+			// Optimized version of the widget: faster SQL queries and templates-based rendering for customization.
+			$comments = array_filter(
+				get_comments( array(
+					'type'    => 'review',
+					'status'  => 'approve',
+					'number'  => 5,
+				) ),
+				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID )
+			);
+			if ( $comments ) {
+				_prime_post_caches( array_column( $comments, 'comment_post_ID' ), false, false );
+
 				echo '<ul>';
-				foreach ( $entries as $entry ) {
-					if ( current_user_can( 'read_product', $entry->product_id ) ) {
-						wc_get_template(
-							'dashboard-widget-reviews.php',
-							array(
-								'product' => wc_get_product( $entry->product_id ),
-								'comment' => get_comment( $entry->comment_id ),
-							)
-						);
-					}
+				foreach ( $comments as $comment ) {
+					wc_get_template(
+						'dashboard-widget-reviews.php',
+						array(
+							'product' => wc_get_product( $comment->comment_post_ID ),
+							'comment' => $comment,
+						)
+					);
 				}
 				echo '</ul>';
 			} else {
