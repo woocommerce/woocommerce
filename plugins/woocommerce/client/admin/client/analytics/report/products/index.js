@@ -153,10 +153,12 @@ export default compose(
 			const includeArgs = { include: productId };
 			// TODO Look at similar usage to populate tags in the Search component.
 			const products = getItems( 'products', includeArgs );
+			const product = products?.get( productId );
 			const isVariable =
-				products &&
-				products.get( productId ) &&
-				products.get( productId ).type === 'variable';
+				product &&
+				( product.type === 'variable' ||
+					( Array.isArray( product.variations ) &&
+						product.variations.length > 0 ) );
 			const isProductsRequesting = isResolving( 'getItems', [
 				'products',
 				includeArgs,

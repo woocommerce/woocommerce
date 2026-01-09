@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add `woocommerce_email_content_post_data` filter hook for customizing email template post data before creation.

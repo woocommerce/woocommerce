@@ -26,6 +26,58 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options';
 
 	/**
+	 * Get the template part path for a product type.
+	 *
+	 * @param string $product_type The product type.
+	 * @return string|bool The template part path if it exists, false otherwise.
+	 */
+	protected function get_template_part_path( $product_type ) {
+		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+			return Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $product_type . '-product-add-to-cart-with-options.html';
+		}
+
+		/**
+		 * Experimental filter for extensions to register a block template part
+		 * for a product type.
+		 *
+		 * @since 9.9.0
+		 * @param string|boolean $template_part_path The template part path if it exists
+		 * @param string $product_type The product type
+		 */
+		return apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
+	}
+
+	/**
+	 * Enqueue assets specific to this block.
+	 * We enqueue frontend scripts only if the product type has a block template
+	 * part (that's WC core product types and extensions that migrated to block
+	 * templates).
+	 *
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
+	 *
+	 * @return void
+	 */
+	protected function enqueue_assets( $attributes, $content, $block ) {
+		$product_id = ( is_object( $block ) && property_exists( $block, 'context' ) && is_array( $block->context ) && array_key_exists( 'postId', $block->context ) ) ? $block->context['postId'] : null;
+
+		if ( isset( $product_id ) ) {
+			$rendered_product = wc_get_product( $product_id );
+
+			if ( $rendered_product instanceof \WC_Product ) {
+				$template_part_path = $this->get_template_part_path( $rendered_product->get_type() );
+
+				if ( is_string( $template_part_path ) && '' !== $template_part_path && file_exists( $template_part_path ) ) {
+					wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options' );
+				}
+			}
+		}
+
+		parent::enqueue_assets( $attributes, $content, $block );
+	}
+
+	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes  Any attributes that currently are available from the block.
@@ -122,16 +174,16 @@ class AddToCartWithOptions extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 *
-	 * @return string | void Rendered block output.
+	 * @return string|void Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
 		global $product;
 
-		$product_id = $block->context['postId'];
+		$product_id = ( is_object( $block ) && property_exists( $block, 'context' ) && is_array( $block->context ) && array_key_exists( 'postId', $block->context ) ) ? $block->context['postId'] : null;
 
 		if ( ! isset( $product_id ) ) {
 			return '';
@@ -148,21 +200,6 @@ class AddToCartWithOptions extends AbstractBlock {
 		// For variations, we display the simple product form.
 		$product_type = ProductType::VARIATION === $product->get_type() ? ProductType::SIMPLE : $product->get_type();
 
-		$slug = $product_type . '-product-add-to-cart-with-options';
-
-		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
-			$template_part_path = Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html';
-		} else {
-			/**
-			 * Filter to declare product type's cart block template is supported.
-			 *
-			 * @since 9.9.0
-			 * @param mixed string|boolean The template part path if it exists
-			 * @param string $product_type The product type
-			 */
-			$template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
-		}
-
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$classes            = implode(
 			' ',
@@ -174,8 +211,10 @@ class AddToCartWithOptions extends AbstractBlock {
 			)
 		);
 
-		if ( is_string( $template_part_path ) && file_exists( $template_part_path ) ) {
+		$template_part_path = $this->get_template_part_path( $product_type );
 
+		if ( is_string( $template_part_path ) && '' !== $template_part_path && file_exists( $template_part_path ) ) {
+			$slug                   = $product_type . '-product-add-to-cart-with-options';
 			$template_part_contents = '';
 			// Determine if we need to load the template part from the DB, the theme or WooCommerce in that order.
 			$templates_from_db = BlockTemplateUtils::get_block_templates_from_db( array( $slug ), 'wp_template_part' );
