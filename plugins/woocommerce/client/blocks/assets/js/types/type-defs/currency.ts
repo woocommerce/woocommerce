@@ -59,7 +59,6 @@ export type CurrencyCode =
 	| 'BAM'
 	| 'BBD'
 	| 'BDT'
-	| 'BGN'
 	| 'BHD'
 	| 'BIF'
 	| 'BMD'
