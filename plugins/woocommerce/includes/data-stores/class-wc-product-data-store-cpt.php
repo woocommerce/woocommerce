@@ -1957,13 +1957,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 				// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- an array of placeholders is a valid arg.
 				$term_query = $wpdb->prepare(
-					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s )',
-					array_fill( 0, 4, $like )
+					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) OR ( wc_product_meta_lookup.global_unique_id LIKE %s )',
+					array_fill( 0, 5, $like )
 				);
 
-				// Variations should also search the parent's meta table for fallback fields.
+				// For variations, also check parent if variation has empty value.
 				if ( $include_variations ) {
 					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s )", $like );
+					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.global_unique_id = '' AND parent_wc_product_meta_lookup.global_unique_id LIKE %s )", $like );
 				}
 
 				$term_group_query[] = "( {$term_query} )";
