@@ -7581,12 +7581,6 @@ parameters:
 		-
 			message: '#^Variable \$product_object might not be defined\.$#'
 			identifier: variable.undefined
-			count: 6
-			path: includes/admin/meta-boxes/views/html-product-data-advanced.php
-
-		-
-			message: '#^Variable \$product_object might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-product-data-attributes.php
 

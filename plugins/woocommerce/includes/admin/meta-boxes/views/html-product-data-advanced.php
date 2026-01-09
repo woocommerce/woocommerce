@@ -1,4 +1,11 @@
 <?php
+/**
+ * Product advanced data panel.
+ *
+ * @package WooCommerce\Admin
+ * @var WC_Product $product_object
+ */
+
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
