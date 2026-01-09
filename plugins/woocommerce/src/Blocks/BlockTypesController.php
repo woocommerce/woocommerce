@@ -709,8 +709,8 @@ final class BlockTypesController {
 				// Apply the same filter WooCommerce uses to determine the main term.
 				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
 
-				if ( $main_term && isset( $main_term->term_id ) ) {
-					$settings['term_id'] = $main_term->term_id;
+				if ( $main_term && isset( $main_term->slug ) ) {
+					$settings['term'] = $main_term->slug;
 				}
 			}
 		}
