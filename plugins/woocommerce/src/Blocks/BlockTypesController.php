@@ -723,7 +723,7 @@ final class BlockTypesController {
 				 */
 				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
 
-				if ( $main_term && isset( $main_term->slug ) ) {
+				if ( $main_term instanceof \WP_Term ) {
 					$settings['term'] = $main_term->slug;
 				}
 			}
