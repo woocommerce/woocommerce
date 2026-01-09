@@ -9,21 +9,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Tracks payment method events for fraud protection analysis.
  *
- * This class hooks into WooCommerce payment method events in My Account
- * (add, update, set default, delete) and triggers fraud protection event dispatching.
+ * This class provides methods to track payment method events in My Account
+ * (add, update, set default, delete) for fraud protection event dispatching.
  * Event-specific data is passed to the dispatcher which handles session data collection internally.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class PaymentMethodEventTracker implements RegisterHooksInterface {
+class PaymentMethodEventTracker {
 
 	/**
 	 * Fraud protection dispatcher instance.
@@ -56,25 +54,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Register payment method event hooks.
-	 *
-	 * Hooks into WooCommerce payment token actions to track fraud protection events.
-	 * Only registers hooks if the fraud protection feature is enabled.
-	 */
-	public function register(): void {
-		// Only register hooks if fraud protection is enabled.
-		if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
-			return;
-		}
-
-		add_action( 'woocommerce_new_payment_token', array( $this, 'handle_payment_method_added' ), 10, 2 );
-		add_action( 'woocommerce_payment_token_updated', array( $this, 'handle_payment_method_updated' ), 10, 1 );
-		add_action( 'woocommerce_payment_token_set_default', array( $this, 'handle_payment_method_set_default' ), 10, 2 );
-		add_action( 'woocommerce_payment_token_deleted', array( $this, 'handle_payment_method_deleted' ), 10, 2 );
-	}
-
-	/**
-	 * Handle payment method added event.
+	 * Track payment method added event.
 	 *
 	 * Triggers fraud protection event tracking when a payment method is added.
 	 *
@@ -83,7 +63,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 * @param int               $token_id The newly created token ID.
 	 * @param \WC_Payment_Token $token    The payment token object.
 	 */
-	public function handle_payment_method_added( $token_id, $token ): void {
+	public function track_payment_method_added( $token_id, $token ): void {
 		$event_data = $this->build_payment_method_event_data( 'added', $token );
 
 		// Trigger event dispatching.
@@ -91,7 +71,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle payment method updated event.
+	 * Track payment method updated event.
 	 *
 	 * Triggers fraud protection event tracking when a payment method is updated.
 	 *
@@ -99,7 +79,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 *
 	 * @param int $token_id The ID of the updated token.
 	 */
-	public function handle_payment_method_updated( $token_id ): void {
+	public function track_payment_method_updated( $token_id ): void {
 		// Get the token object to extract details.
 		$token = \WC_Payment_Tokens::get( $token_id );
 
@@ -114,7 +94,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle payment method set as default event.
+	 * Track payment method set as default event.
 	 *
 	 * Triggers fraud protection event tracking when a payment method is set as default.
 	 *
@@ -123,7 +103,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 * @param int               $token_id The ID of the token being set as default.
 	 * @param \WC_Payment_Token $token    The payment token object.
 	 */
-	public function handle_payment_method_set_default( $token_id, $token ): void {
+	public function track_payment_method_set_default( $token_id, $token ): void {
 		$event_data = $this->build_payment_method_event_data( 'set_default', $token );
 
 		// Trigger event dispatching.
@@ -131,7 +111,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle payment method deleted event.
+	 * Track payment method deleted event.
 	 *
 	 * Triggers fraud protection event tracking when a payment method is deleted.
 	 *
@@ -140,7 +120,7 @@ class PaymentMethodEventTracker implements RegisterHooksInterface {
 	 * @param int               $token_id The ID of the deleted token.
 	 * @param \WC_Payment_Token $token    The payment token object.
 	 */
-	public function handle_payment_method_deleted( $token_id, $token ): void {
+	public function track_payment_method_deleted( $token_id, $token ): void {
 		$event_data = $this->build_payment_method_event_data( 'deleted', $token );
 
 		// Trigger event dispatching.

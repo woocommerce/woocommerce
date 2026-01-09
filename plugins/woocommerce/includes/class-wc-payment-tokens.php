@@ -204,6 +204,12 @@ class WC_Payment_Tokens {
 			if ( $token_id === $token->get_id() ) {
 				$data_store->set_default_status( $token->get_id(), true );
 				do_action( 'woocommerce_payment_token_set_default', $token_id, $token );
+
+				// Track payment method event for fraud protection.
+				if ( wc_get_container()->get( \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->feature_is_enabled() ) {
+					wc_get_container()->get( \Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker::class )
+						->track_payment_method_set_default( $token_id, $token );
+				}
 			} else {
 				$data_store->set_default_status( $token->get_id(), false );
 			}
