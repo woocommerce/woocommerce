@@ -3090,10 +3090,7 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				if ( 1 === count( $countries ) ) {
 
-					$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
-
-					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" readonly="readonly" />';
-					$is_hidden_field = true;
+					$field .= '<input type="text" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( current( array_values( $countries ) ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state country_readonly ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" readonly="readonly" data-country-code="' . esc_attr( current( array_keys( $countries ) ) ) . '" />';
 
 				} else {
 					$data_label = ! empty( $args['label'] ) ? 'data-label="' . esc_attr( $args['label'] ) . '"' : '';
