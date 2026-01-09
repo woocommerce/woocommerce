@@ -120,7 +120,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.4 WP: latest",
+					"name": "PHP: 8.5 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -139,18 +139,18 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.4-wp-latest"
+						"php-unit-php-8.5-wp-latest"
 					]
 				},
 				{
-					"name": "PHP: 8.4 WP: latest - Legacy MiniCart",
+					"name": "PHP: 8.5 WP: latest - Legacy MiniCart",
 					"testType": "unit:php",
 					"command": "test:php:legacy-mini-cart",
 					"shardingArguments": [
@@ -169,7 +169,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
@@ -407,7 +407,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PHP 8.4",
+					"name": "Core e2e tests - PHP 8.5",
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -426,17 +426,17 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4"
+							"phpVersion": "8.5"
 						}
 					},
 					"events": [
 						"pull_request",
 						"nightly-checks",
 						"release-checks",
-						"core-e2e-php-8.4"
+						"core-e2e-php-8.5"
 					],
 					"report": {
-						"resultsBlobName": "core-e2e-report-php-8.4",
+						"resultsBlobName": "core-e2e-report-php-8.5",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -580,7 +580,7 @@
 					}
 				},
 				{
-					"name": "PHP: 8.4 WP: latest (HPOS:off)",
+					"name": "PHP: 8.5 WP: latest (HPOS:off)",
 					"testType": "unit:php",
 					"command": "test:php:env:hpos-off",
 					"shardingArguments": [
@@ -599,14 +599,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.4-wp-latest-hpos-off"
+						"php-unit-php-8.5-wp-latest-hpos-off"
 					]
 				},
 				{
