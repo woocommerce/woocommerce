@@ -412,23 +412,30 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Recent reviews widget: legacy implementation without modifications.
+		 * Recent reviews widget: legacy implementation.
 		 */
 		private function legacy_recent_reviews(): void {
 			global $wpdb;
 
-				$query_from = apply_filters(
-					'woocommerce_report_recent_reviews_query_from',
-					"FROM {$wpdb->comments} comments
-					LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
-					WHERE comments.comment_approved = '1'
-					AND comments.comment_type = 'review'
-					AND posts.post_password = ''
-					AND posts.post_type = 'product'
-					AND comments.comment_parent = 0
-					ORDER BY comments.comment_date_gmt DESC
-					LIMIT 5"
-				);
+			/**
+			 * Filters the from-clause used for fetching latest product reviews.
+			 *
+			 * @since 3.1.0
+			 *
+			 * @param string $clause The from-clause.
+			 */
+			$query_from = apply_filters(
+				'woocommerce_report_recent_reviews_query_from',
+				"FROM {$wpdb->comments} comments
+				LEFT JOIN {$wpdb->posts} posts ON (comments.comment_post_ID = posts.ID)
+				WHERE comments.comment_approved = '1'
+				AND comments.comment_type = 'review'
+				AND posts.post_password = ''
+				AND posts.post_type = 'product'
+				AND comments.comment_parent = 0
+				ORDER BY comments.comment_date_gmt DESC
+				LIMIT 5"
+			);
 
 			$comments = $wpdb->get_results(
 				"SELECT posts.ID, posts.post_title, comments.comment_author, comments.comment_author_email, comments.comment_ID, comments.comment_content {$query_from};" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -442,13 +449,21 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 
 					echo get_avatar( $comment->comment_author_email, '32' );
 
-					$rating = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
+					/**
+					 * Filters the product name for display in the latest reviews.
+					 *
+					 * @param string    $product_title The product name.
+					 * @param \stdClass $comment      The comment.
+					 * @since 2.1.0
+					 */
+					$product_title = apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment );
+					$rating        = intval( get_comment_meta( $comment->comment_ID, 'rating', true ) );
 
 					/* translators: %s: rating */
 					echo '<div class="star-rating"><span style="width:' . esc_attr( $rating * 20 ) . '%">' . sprintf( esc_html__( '%s out of 5', 'woocommerce' ), esc_html( $rating ) ) . '</span></div>';
 
 					/* translators: %s: review author */
-					echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $comment->ID ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( apply_filters( 'woocommerce_admin_dashboard_recent_reviews', $comment->post_title, $comment ) ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
+					echo '<h4 class="meta"><a href="' . esc_url( get_permalink( $comment->ID ) ) . '#comment-' . esc_attr( absint( $comment->comment_ID ) ) . '">' . esc_html( $product_title ) . '</a> ' . sprintf( esc_html__( 'reviewed by %s', 'woocommerce' ), esc_html( $comment->comment_author ) ) . '</h4>';
 					echo '<blockquote>' . wp_kses_data( $comment->comment_content ) . '</blockquote></li>';
 
 				}
