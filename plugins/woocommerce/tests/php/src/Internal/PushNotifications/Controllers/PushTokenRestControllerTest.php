@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use WC_REST_Unit_Test_Case;
 use WP_Error;

@@ -20,6 +20,8 @@ use WP_Http;
 /**
  * Controller for the REST endpoints associated with push notification device
  * tokens.
+ *
+ * @since 10.5.0
  */
 class PushTokenRestController extends RestApiControllerBase {
 	/**
@@ -39,6 +41,8 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Get the WooCommerce REST API namespace for the class.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
@@ -47,14 +51,18 @@ class PushTokenRestController extends RestApiControllerBase {
 
 	/**
 	 * Register the REST API endpoints handled by this controller.
+	 *
+	 * @since 10.5.0
 	 */
 	public function register_routes() {
-		// Routes will registered here, can't omit method due to parent class
+		// Routes will be registered here, can't omit method due to parent class
 		// constraints.
 	}
 
 	/**
 	 * Get the schema for the POST endpoint.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @return array[]
 	 */
@@ -73,6 +81,8 @@ class PushTokenRestController extends RestApiControllerBase {
 
 	/**
 	 * Checks user is authorized to access this endpoint.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @return bool|WP_Error
@@ -120,6 +130,8 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Converts an exception to an instance of WP_Error.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param Exception $e The exception to convert.
 	 * @return WP_Error
 	 */
@@ -144,6 +156,8 @@ class PushTokenRestController extends RestApiControllerBase {
 
 	/**
 	 * Get the accepted arguments for the POST request.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param string $context The context to return args for.
 	 * @return array
@@ -170,7 +184,6 @@ class PushTokenRestController extends RestApiControllerBase {
 				'default'           => '',
 				'type'              => 'string',
 				'context'           => array( 'create' ),
-				'validate_callback' => array( $this, 'validate_device_uuid' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'platform'    => array(
@@ -185,8 +198,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'type'              => 'string',
 				'required'          => true,
 				'context'           => array( 'create' ),
-				'validate_callback' => array( $this, 'validate_token' ),
-				'sanitize_callback' => 'wp_unslash',
+				'sanitize_callback' => 'sanitize_text_field',
 			),
 		);
 
