@@ -474,8 +474,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				if ( $has_legacy_product_title_filter ) {
 					wc_deprecated_hook( 'woocommerce_admin_dashboard_recent_reviews', '10.5.0', 'dashboard-widget-reviews.php template' );
 				}
-
 				$this->legacy_recent_reviews();
+
+				return;
 			}
 
 			// Optimized version of the widget: faster SQL queries and templates-based rendering for customization.
