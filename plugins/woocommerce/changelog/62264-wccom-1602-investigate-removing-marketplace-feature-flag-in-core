@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Deprecate the marketplace feature flag - the in-app marketplace is now always enabled and the feature check is no longer necessary.
