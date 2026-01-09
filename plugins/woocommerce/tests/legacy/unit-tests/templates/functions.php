@@ -463,17 +463,17 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		// Restore original countries object.
 		WC()->countries = $original_countries;
 
-		// Should contain label WITH "for" attribute (since it points to a visible readonly input).
+		// Should contain label "for" attribute pointing to the input.
 		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
 		$this->assertStringContainsString( 'Country / Region', $actual_html );
-		// Should contain readonly text input with country name as value.
+		// Should contain strong tag with country name for display.
+		$this->assertStringContainsString( '<strong>United States</strong>', $actual_html );
+		// Should contain visually hidden text input with country code for form submission.
 		$this->assertStringContainsString( 'type="text"', $actual_html );
+		$this->assertStringContainsString( 'value="US"', $actual_html );
+		$this->assertStringContainsString( 'country_to_state--hidden', $actual_html );
 		$this->assertStringContainsString( 'readonly="readonly"', $actual_html );
-		$this->assertStringContainsString( 'value="United States"', $actual_html );
-		// Should have data attribute with country code.
-		$this->assertStringContainsString( 'data-country-code="US"', $actual_html );
-		// Should NOT have strong tag or hidden input.
-		$this->assertStringNotContainsString( '<strong>', $actual_html );
+		// Should NOT have type="hidden" input.
 		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
 	}
 

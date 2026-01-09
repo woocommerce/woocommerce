@@ -3089,8 +3089,11 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				$countries = 'shipping_country' === $key ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
 
 				if ( 1 === count( $countries ) ) {
+					$country_code = current( array_keys( $countries ) );
+					$country_name = current( array_values( $countries ) );
 
-					$field .= '<input type="text" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( current( array_values( $countries ) ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" readonly="readonly" data-country-code="' . esc_attr( current( array_keys( $countries ) ) ) . '" />';
+					$field .= '<strong>' . esc_html( $country_name ) . '</strong>';
+					$field .= '<input type="text" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $country_code ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state country_to_state--hidden ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" readonly="readonly" tabindex="-1" />';
 
 				} else {
 					$data_label = ! empty( $args['label'] ) ? 'data-label="' . esc_attr( $args['label'] ) . '"' : '';
