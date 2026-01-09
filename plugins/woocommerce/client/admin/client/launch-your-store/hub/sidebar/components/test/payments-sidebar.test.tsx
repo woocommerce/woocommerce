@@ -110,7 +110,7 @@ jest.mock( '@wordpress/components', () => ( {
 		onClick,
 	}: {
 		children: React.ReactNode;
-		onClick: () => void;
+		onClick?: () => void;
 	} ) => (
 		<button data-testid="button" onClick={ onClick }>
 			{ children }
@@ -257,10 +257,10 @@ describe( 'PaymentsSidebar', () => {
 			);
 			expect( sidebarItems ).toHaveLength( 1 );
 
-			// The item should have the install-woopayments class but NOT is-complete
+			// The item should have the install-woopayments class but NOT is-complete.
 			const installStep = sidebarItems[ 0 ];
 			expect( installStep ).toHaveClass( 'install-woopayments' );
-			expect( installStep.className ).not.toContain( 'is-complete' );
+			expect( installStep ).not.toHaveClass( 'is-complete' );
 		} );
 
 		it( 'renders InstallWooPaymentsStep with isStepComplete=true when WooPayments IS active and NOT loading', () => {
