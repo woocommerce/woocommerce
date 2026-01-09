@@ -125,8 +125,8 @@ jobs:
                   repo: context.repo.repo,
                   branch: cherryPickBranch
                 });
-                core.setOutput('error_message', `Branch '${cherryPickBranch}' already exists. Please delete it first.`);
-                core.setFailed(`Branch '${cherryPickBranch}' already exists.`);
+                core.setOutput('error_message', `Branch '${cherryPickBranch}' already exists. Skipping cherry-pick.`);
+                core.setOutput('status', 'skipped');
                 return;
               } catch (branchError) {
                 if (branchError.status !== 404) {
