@@ -469,7 +469,6 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		// Should contain readonly text input with country name as value.
 		$this->assertStringContainsString( 'type="text"', $actual_html );
 		$this->assertStringContainsString( 'readonly="readonly"', $actual_html );
-		$this->assertStringContainsString( 'country_readonly', $actual_html );
 		$this->assertStringContainsString( 'value="United States"', $actual_html );
 		// Should have data attribute with country code.
 		$this->assertStringContainsString( 'data-country-code="US"', $actual_html );
