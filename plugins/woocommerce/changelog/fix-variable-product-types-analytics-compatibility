@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Analytics Products report to support product types extending WC_Product_Variable by checking variations array as fallback.
