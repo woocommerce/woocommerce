@@ -343,6 +343,11 @@ body.wc-block-product-gallery-modal-open {
 	}
 }
 
+.wp-block-columns .wc-block-components-filter:first-child {
+	margin-top: 0;
+}
+
+
 .theme-twentytwentytwo {
 	.wc-block-grid__product-add-to-cart {
 		.added_to_cart {
