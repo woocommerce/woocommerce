@@ -237,6 +237,6 @@ jobs:
 
           # Write success to summary.
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✅ **Next step:** Review and merge [the pull request](${pr_url})." >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Review and merge [the pull request](${pr_url})." >> $GITHUB_STEP_SUMMARY
 
 
