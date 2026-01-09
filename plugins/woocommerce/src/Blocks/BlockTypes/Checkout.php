@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
  * Checkout class.
@@ -231,8 +233,8 @@ class Checkout extends AbstractBlock {
 		}
 
 		// Track checkout page loaded for fraud protection.
-		if ( wc_get_container()->get( \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->feature_is_enabled() ) {
-			wc_get_container()->get( \Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker::class )
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CheckoutEventTracker::class )
 				->track_checkout_page_loaded();
 		}
 
