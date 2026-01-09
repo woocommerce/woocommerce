@@ -345,6 +345,12 @@ class WC_Shortcode_Checkout {
 			return;
 		}
 
+		// Track checkout page loaded for fraud protection.
+		if ( wc_get_container()->get( \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker::class )
+				->track_checkout_page_loaded();
+		}
+
 		// Check cart contents for errors.
 		do_action( 'woocommerce_check_cart_items' );
 

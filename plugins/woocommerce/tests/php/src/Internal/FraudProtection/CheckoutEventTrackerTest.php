@@ -71,6 +71,30 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	// ========================================
+	// Checkout Page Load Tests
+	// ========================================
+
+	/**
+	 * Test track_checkout_page_loaded dispatches event.
+	 * The CheckoutEventTracker::track_checkout_page_loaded does not add any event data.
+	 * The data collection is handled by the SessionDataCollector.
+	 * So we only need to test if the dispatcher is called with no event data.
+	 */
+	public function test_track_checkout_page_loaded_dispatches_event(): void {
+		// Mock dispatcher to verify event is dispatched with empty event data.
+		$this->mock_dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' )
+			->with(
+				$this->equalTo( 'checkout_page_loaded' ),
+				$this->equalTo( array() )
+			);
+
+		// Call the method.
+		$this->sut->track_checkout_page_loaded();
+	}
+
+	// ========================================
 	// Blocks Checkout Tests
 	// ========================================
 

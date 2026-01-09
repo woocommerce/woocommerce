@@ -230,6 +230,12 @@ class Checkout extends AbstractBlock {
 			return wp_is_block_theme() ? do_shortcode( '[woocommerce_checkout]' ) : '[woocommerce_checkout]';
 		}
 
+		// Track checkout page loaded for fraud protection.
+		if ( wc_get_container()->get( \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( \Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker::class )
+				->track_checkout_page_loaded();
+		}
+
 		// Dequeue the core scripts when rendering this block.
 		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_woocommerce_core_scripts' ), 20 );
 

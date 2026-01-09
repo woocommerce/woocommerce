@@ -49,6 +49,20 @@ class CheckoutEventTracker {
 	}
 
 	/**
+	 * Track checkout page loaded event.
+	 *
+	 * Triggers fraud protection event dispatching when the checkout page is initially loaded.
+	 * This captures the initial session state before any user interactions.
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function track_checkout_page_loaded(): void {
+		// Track the page load event. Session data will be collected by the dispatcher.
+		$this->dispatcher->dispatch_event( 'checkout_page_loaded', array() );
+	}
+
+	/**
 	 * Track Store API customer update event (WooCommerce Blocks checkout).
 	 *
 	 * Triggered when customer information is updated via the Store API endpoint
