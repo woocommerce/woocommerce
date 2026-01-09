@@ -61,6 +61,7 @@ class PaymentsExtensionSuggestions {
 	const RAPYD             = 'rapyd';
 	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 	const VISA              = 'visa_as';
+	const NGENIUS           = 'ngenius';
 
 	/*
 	 * The extension types.
@@ -2710,6 +2711,7 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::NGENIUS,
 			self::PAYPAL_FULL_STACK,
 			self::PAYPAL_WALLET,
 		),
@@ -2787,6 +2789,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'SD' => array(
@@ -2817,6 +2820,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'UZ' => array(
@@ -4143,6 +4147,16 @@ class PaymentsExtensionSuggestions {
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=visa-acceptance-solutions',
 					),
+				),
+			),
+			self::NGENIUS           => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'N-Genius Online', 'woocommerce' ),
+				'description' => esc_html__( 'Smart, secure, and seamless online payments for your store.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/ngenius.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'ngenius',
 				),
 			),
 			self::GOCARDLESS        => array(
