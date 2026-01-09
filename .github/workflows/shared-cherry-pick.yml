@@ -152,7 +152,10 @@ jobs:
         id: aggregate-status
         if: always()
         run: |
-          if [[ "${{ steps.check-pr.outcome }}" == "failure" ]]; then
+          if [[ "${{ steps.verify-branches.outputs.status }}" == "skipped" ]]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "error_message=${{ steps.verify-branches.outputs.error_message }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ steps.check-pr.outcome }}" == "failure" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
             echo "error_message=${{ steps.check-pr.outputs.error_message }}" >> $GITHUB_OUTPUT
           elif [[ "${{ steps.verify-branches.outcome }}" == "failure" ]]; then
