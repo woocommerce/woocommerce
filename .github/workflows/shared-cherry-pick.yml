@@ -138,12 +138,10 @@ jobs:
                 if (prs.length > 0) {
                   const existingPr = prs[0];
                   core.info(`Found existing PR #${existingPr.number}`);
-                  core.setOutput('existing_pr_number', existingPr.number.toString());
-                  console.log('Existing PR details:', existingPr);
                   if (existingPr.merged_at) {
-                    core.setOutput('error_message', `An existing cherry-pick PR was already merged: #${existingPr.number}`);
+                    core.setOutput('error_message', `A cherry-pick PR for the same PR was already merged: #{existingPr.number});
                   } else if (existingPr.state === 'closed') {
-                    core.setOutput('error_message', `An existing cherry-pick PR was closed without merging: #${existingPr.number}`);
+                    core.setOutput('error_message', `A cherry-pick PR was closed without merging: #${existingPr.number}`);
                   } else {
                     core.setOutput('error_message', `An open cherry-pick PR already exists: #${existingPr.number}`);
                   }
