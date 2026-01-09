@@ -40,6 +40,20 @@ class CartEventTracker {
 	}
 
 	/**
+	 * Track cart page loaded event.
+	 *
+	 * Triggers fraud protection event dispatching when the cart page is initially loaded.
+	 * This captures the initial session state before any user interactions.
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function track_cart_page_loaded(): void {
+		// Track the page load event. Session data will be collected by the dispatcher.
+		$this->dispatcher->dispatch_event( 'cart_page_loaded', array() );
+	}
+
+	/**
 	 * Track cart item added event.
 	 *
 	 * Triggers fraud protection event dispatching when an item is added to the cart.
