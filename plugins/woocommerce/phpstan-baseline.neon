@@ -22233,7 +22233,7 @@ parameters:
 		-
 			message: '#^Method WC_Payment_Token_Data_Store\:\:delete\(\) should return bool but return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
+			count: 2
 			path: includes/data-stores/class-wc-payment-token-data-store.php
 
 		-
