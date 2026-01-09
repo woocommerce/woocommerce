@@ -218,7 +218,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		if ( $context ) {
 			$args = array_filter(
 				$args,
-				fn ( $arg ) => in_array( $context, $arg['context'] ?? [], true )
+				fn ( $arg ) => in_array( $context, $arg['context'], true )
 			);
 		}
 
