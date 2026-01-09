@@ -4165,7 +4165,7 @@ class PaymentsExtensionSuggestions {
 					),
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
-						'url'   => 'https://woocommerce.com/document/gocardless/',
+						'url'   => 'https://woocommerce.com/document/ngenius/',
 					),
 				),
 			),
