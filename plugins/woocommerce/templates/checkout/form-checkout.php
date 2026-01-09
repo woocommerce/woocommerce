@@ -21,11 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 do_action( 'woocommerce_before_checkout_form', $checkout );
 
-// Display blocked session notice for fraud protection.
-if ( wc_get_container()->get( Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->feature_is_enabled() ) {
-	wc_get_container()->get( Automattic\WooCommerce\Internal\FraudProtection\BlockedSessionNotice::class )->maybe_display_blocked_notice();
-}
-
 // If checkout registration is disabled and not logged in, the user cannot checkout.
 if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_required() && ! is_user_logged_in() ) {
 	echo esc_html( apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) ) );

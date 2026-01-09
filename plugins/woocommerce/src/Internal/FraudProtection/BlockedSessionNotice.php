@@ -7,13 +7,16 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Handles blocked session messaging for fraud protection.
  *
- * This class provides message generation for both HTML (shortcode) and
- * plaintext (Store API) contexts, and displays notices on shortcode checkout.
+ * This class provides:
+ * - Hook into shortcode checkout to display blocked notice
+ * - Message generation for both HTML (shortcode) and plaintext (Store API) contexts
  *
  * Note: Store API (block checkout) and payment gateway filtering are handled
  * directly in WC Core classes (Checkout.php and WC_Payment_Gateways).
@@ -21,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class BlockedSessionNotice {
+class BlockedSessionNotice implements RegisterHooksInterface {
 
 	/**
 	 * Session clearance manager instance.
@@ -42,7 +45,18 @@ class BlockedSessionNotice {
 	}
 
 	/**
-	 * Display blocked notice on shortcode checkout page if session is blocked.
+	 * Register hooks for displaying blocked notice.
+	 *
+	 * This method should only be called when fraud protection is enabled.
+	 *
+	 * @return void
+	 */
+	public function register(): void {
+		add_action( 'woocommerce_before_checkout_form', array( $this, 'display_blocked_notice' ), 1, 0 );
+	}
+
+	/**
+	 * Display blocked notice on shortcode checkout page.
 	 *
 	 * Shows a user-friendly message explaining that the request cannot be
 	 * processed online and provides contact information for support.
@@ -51,7 +65,7 @@ class BlockedSessionNotice {
 	 *
 	 * @return void
 	 */
-	public function maybe_display_blocked_notice(): void {
+	public function display_blocked_notice(): void {
 		if ( ! $this->session_manager->is_session_blocked() ) {
 			return;
 		}

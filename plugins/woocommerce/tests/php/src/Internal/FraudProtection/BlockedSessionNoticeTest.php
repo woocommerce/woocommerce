@@ -41,6 +41,7 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 
 		$this->sut = new BlockedSessionNotice();
 		$this->sut->init( $this->mock_session_manager );
+		$this->sut->register();
 
 		// Set a custom support email.
 		update_option( 'woocommerce_email_from_address', 'support@example.com' );
@@ -51,17 +52,18 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
+		remove_all_actions( 'woocommerce_before_checkout_form' );
 		delete_option( 'woocommerce_email_from_address' );
 	}
 
 	/**
-	 * @testdox Should display error notice when maybe_display_blocked_notice is called for blocked sessions.
+	 * @testdox Should display error notice when woocommerce_before_checkout_form action fires for blocked sessions.
 	 */
-	public function test_maybe_display_blocked_notice_shows_message_for_blocked_session(): void {
+	public function test_checkout_action_displays_blocked_message(): void {
 		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( true );
 
 		ob_start();
-		$this->sut->maybe_display_blocked_notice();
+		do_action( 'woocommerce_before_checkout_form' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$output = ob_get_clean();
 
 		$this->assertStringContainsString( 'unable to process this request online', $output, 'Should display blocked message on checkout' );
@@ -70,13 +72,13 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not display message when maybe_display_blocked_notice is called for non-blocked sessions.
+	 * @testdox Should not display message when checkout action fires for non-blocked sessions.
 	 */
-	public function test_maybe_display_blocked_notice_shows_no_message_for_non_blocked_session(): void {
+	public function test_checkout_action_no_message_for_non_blocked_session(): void {
 		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( false );
 
 		ob_start();
-		$this->sut->maybe_display_blocked_notice();
+		do_action( 'woocommerce_before_checkout_form' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$output = ob_get_clean();
 
 		$this->assertEmpty( $output, 'Non-blocked sessions should not display any message' );
