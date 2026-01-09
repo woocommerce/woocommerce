@@ -17,6 +17,13 @@ class OrderItemSchema extends ItemSchema {
 	protected $title = 'order_item';
 
 	/**
+	 * Cache for parent product attributes.
+	 *
+	 * @var array|null
+	 */
+	private $cached_parent_attributes = null;
+
+	/**
 	 * The schema item identifier.
 	 *
 	 * @var string
@@ -30,6 +37,8 @@ class OrderItemSchema extends ItemSchema {
 	 * @return array
 	 */
 	public function get_item_response( $order_item ) {
+		$this->cached_parent_attributes = null;
+
 		$order   = $order_item->get_order();
 		$product = $order_item->get_product();
 
@@ -71,7 +80,8 @@ class OrderItemSchema extends ItemSchema {
 			$product_properties['catalog_visibility'] = $product->get_catalog_visibility();
 			$product_properties['prices']             = $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) );
 			$product_properties['sold_individually']  = $product->is_sold_individually();
-			$product_properties['images']             = $this->get_images( $product );
+			$product_properties['images'] 			  = $this->get_images( $product );
+
 			// Only include variation data for product variations, not simple products.
 			// This is consistent with the cart endpoint behavior.
 			if ( $product instanceof \WC_Product_Variation ) {
@@ -136,22 +146,28 @@ class OrderItemSchema extends ItemSchema {
 		$variation_data = array();
 		$meta_data      = $order_item->get_meta_data();
 
+		$parent_attributes = $this->get_parent_product_attributes( $product );
+
 		foreach ( $meta_data as $meta ) {
 			$meta_key   = $meta->key;
 			$meta_value = $meta->value;
 
-			if ( empty( $meta_key ) || '' === $meta_value || ! is_scalar( $meta_value ) || strpos( $meta_key, '_' ) === 0 ) {
+			if ( empty( $meta_key ) || ! is_scalar( $meta_value ) || '' === $meta_value || strpos( $meta_key, '_' ) === 0 ) {
 				continue;
 			}
 
 			$is_variation_attribute = false;
+			$normalized_key         = $meta_key;
 
-			if ( strpos( $meta_key, 'pa_' ) === 0 ) {
+			if ( strpos( $meta_key, 'attribute_' ) === 0 ) {
+				$normalized_key = substr( $meta_key, strlen( 'attribute_' ) );
+			}
+
+			if ( strpos( $normalized_key, 'pa_' ) === 0 ) {
 				$is_variation_attribute = true;
 			} else {
-				$product_attributes = $product->get_parent_id() ? wc_get_product( $product->get_parent_id() )->get_attributes() : array();
-				foreach ( $product_attributes as $attribute ) {
-					if ( strtolower( $attribute->get_name() ) === strtolower( $meta_key ) ) {
+				foreach ( $parent_attributes as $attribute ) {
+					if ( strtolower( $attribute->get_name() ) === strtolower( $normalized_key ) ) {
 						$is_variation_attribute = true;
 						break;
 					}
@@ -159,10 +175,39 @@ class OrderItemSchema extends ItemSchema {
 			}
 
 			if ( $is_variation_attribute ) {
-				$variation_data[ 'attribute_' . $meta_key ] = $meta_value;
+				$variation_data[ wc_variation_attribute_name( $normalized_key ) ] = $meta_value;
 			}
 		}
 
 		return $this->format_variation_data( $variation_data, $product );
+	}
+
+	/**
+	 * Get parent product attributes.
+	 *
+	 * Cached to avoid multiple DB lookups when processing multiple meta items.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return array Array of WC_Product_Attribute objects.
+	 */
+	protected function get_parent_product_attributes( $product ) {
+		if ( null !== $this->cached_parent_attributes ) {
+			return $this->cached_parent_attributes;
+		}
+
+		$this->cached_parent_attributes = array();
+
+		if ( ! $product->get_parent_id() ) {
+			return $this->cached_parent_attributes;
+		}
+
+		$parent_product = wc_get_product( $product->get_parent_id() );
+		if ( ! $parent_product instanceof \WC_Product ) {
+			return $this->cached_parent_attributes;
+		}
+
+		$this->cached_parent_attributes = $parent_product->get_attributes();
+
+		return $this->cached_parent_attributes;
 	}
 }
