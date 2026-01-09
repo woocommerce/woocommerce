@@ -70,7 +70,7 @@ class SessionDataCollector {
 			'order'            => $this->get_order_data( $order_id_from_event ),
 			'shipping_address' => $this->get_shipping_address(),
 			'billing_address'  => $this->get_billing_address(),
-			'payment'          => $this->get_payment_data(),
+			'payment'          => $this->get_payment_data( $event_data ),
 			'event_data'       => $event_data,
 		);
 	}
@@ -477,56 +477,72 @@ class SessionDataCollector {
 	 *
 	 * Returns payment data structure with all 11 supported fields. Currently populates
 	 * payment_gateway_name and payment_method_type when available from the chosen payment
-	 * method. All other fields are set to null and supposed to be populated by payment gateway
-	 * extensions when available.
+	 * method. Other fields are initialized with null values.
 	 *
 	 * @since 10.5.0
 	 *
+	 * @param array $event_data Event-specific data that may contain payment information.
 	 * @return array Payment data array with 11 keys.
 	 */
-	private function get_payment_data(): array {
-		try {
-			$payment_gateway_name = null;
-			$payment_method_type  = null;
+	private function get_payment_data( array $event_data = array() ): array {
+		$payment_data = array(
+			'payment_gateway_name'      => null,
+			'payment_method_type'       => null,
+			'card_bin'                  => null,
+			'card_last4'                => null,
+			'card_brand'                => null,
+			'payer_id'                  => null,
+			'outcome'                   => null,
+			'decline_reason'            => null,
+			'avs_result'                => null,
+			'cvc_result'                => null,
+			'tokenized_card_identifier' => null,
+		);
 
-			// Try to get chosen payment method from session.
-			if ( WC()->session instanceof \WC_Session ) {
-				$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
-				if ( $chosen_payment_method ) {
-					$payment_gateway_name = \sanitize_text_field( $chosen_payment_method );
-					$payment_method_type  = \sanitize_text_field( $chosen_payment_method );
-				}
+		try {
+			if ( ! empty( $event_data['payment'] ) ) {
+				return array_merge( $payment_data, $event_data['payment'] );
 			}
 
-			return array(
-				'payment_gateway_name'      => $payment_gateway_name,
-				'payment_method_type'       => $payment_method_type,
-				'card_bin'                  => null,
-				'card_last4'                => null,
-				'card_brand'                => null,
-				'payer_id'                  => null,
-				'outcome'                   => null,
-				'decline_reason'            => null,
-				'avs_result'                => null,
-				'cvc_result'                => null,
-				'tokenized_card_identifier' => null,
-			);
+			// Try to get chosen payment method from session.
+			$chosen_payment_method = $this->get_chosen_payment_method();
+			if ( $chosen_payment_method ) {
+				$payment_data['payment_gateway_name'] = \sanitize_text_field( $chosen_payment_method );
+				$payment_data['payment_method_type']  = \sanitize_text_field( $chosen_payment_method );
+			}
+
+			return $payment_data;
 		} catch ( \Exception $e ) {
-			// Graceful degradation - return structure with null values.
-			return array(
-				'payment_gateway_name'      => null,
-				'payment_method_type'       => null,
-				'card_bin'                  => null,
-				'card_last4'                => null,
-				'card_brand'                => null,
-				'payer_id'                  => null,
-				'outcome'                   => null,
-				'decline_reason'            => null,
-				'avs_result'                => null,
-				'cvc_result'                => null,
-				'tokenized_card_identifier' => null,
-			);
+			// Graceful degradation.
+			return $payment_data;
 		}
+	}
+
+	/**
+	 * Get the chosen payment method from session or POST data.
+	 *
+	 * Tries to get payment method from session first, then falls back to
+	 * POST data during checkout submission.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return string|null Payment method ID or null if not available.
+	 */
+	private function get_chosen_payment_method(): ?string {
+		// Try getting from session first.
+		if ( WC()->session instanceof \WC_Session ) {
+			$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
+			if ( $chosen_payment_method ) {
+				return $chosen_payment_method;
+			}
+		}
+
+		// Try getting from POST data (during checkout).
+		if ( isset( $_POST['payment_method'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			return \sanitize_text_field( \wp_unslash( $_POST['payment_method'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		}
+
+		return null;
 	}
 
 	/**

@@ -44,6 +44,7 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * Tear down test.
 	 */
 	public function tearDown(): void {
+		delete_option( 'woocommerce_feature_rest_api_caching_enabled' );
 		delete_option( 'woocommerce_rest_api_enable_backend_caching' );
 		parent::tearDown();
 	}
@@ -55,10 +56,8 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 */
 	private function get_invalidator_with_hooks_enabled(): ProductVersionStringInvalidator {
 		$features_controller = $this->createMock( FeaturesController::class );
-		$features_controller->method( 'feature_is_enabled' )
-			->with( 'rest_api_caching' )
-			->willReturn( true );
 
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
 
 		$invalidator = new ProductVersionStringInvalidator();
@@ -100,10 +99,8 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_hooks_not_registered_when_feature_disabled() {
 		$features_controller = $this->createMock( FeaturesController::class );
-		$features_controller->method( 'feature_is_enabled' )
-			->with( 'rest_api_caching' )
-			->willReturn( false );
 
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'no' );
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
 
 		$invalidator = new ProductVersionStringInvalidator();
@@ -119,10 +116,8 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_hooks_not_registered_when_backend_caching_disabled() {
 		$features_controller = $this->createMock( FeaturesController::class );
-		$features_controller->method( 'feature_is_enabled' )
-			->with( 'rest_api_caching' )
-			->willReturn( true );
 
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
 
 		$invalidator = new ProductVersionStringInvalidator();
@@ -138,10 +133,8 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_hooks_not_registered_when_backend_caching_not_set() {
 		$features_controller = $this->createMock( FeaturesController::class );
-		$features_controller->method( 'feature_is_enabled' )
-			->with( 'rest_api_caching' )
-			->willReturn( true );
 
+		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
 		delete_option( 'woocommerce_rest_api_enable_backend_caching' );
 
 		$invalidator = new ProductVersionStringInvalidator();
