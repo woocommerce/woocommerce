@@ -7,21 +7,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Tracks checkout events for fraud protection analysis.
  *
- * This class hooks into both WooCommerce Blocks (Store API) and traditional
- * shortcode checkout events, triggering fraud protection event dispatching.
+ * This class provides methods to track both WooCommerce Blocks (Store API) and traditional
+ * shortcode checkout events for fraud protection event dispatching.
  * Event-specific data is passed to the dispatcher which handles session data collection internally.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class CheckoutEventTracker implements RegisterHooksInterface {
+class CheckoutEventTracker {
 
 	/**
 	 * Fraud protection dispatcher instance.
@@ -54,26 +52,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Register checkout event hooks.
-	 *
-	 * Hooks into both WooCommerce Blocks (Store API) and traditional checkout
-	 * actions to track fraud protection events. Only registers hooks if the
-	 * fraud protection feature is enabled.
-	 *
-	 * @return void
-	 */
-	public function register(): void {
-		// Only register hooks if fraud protection is enabled.
-		if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
-			return;
-		}
-
-		// Shortcode checkout: Track when checkout fields are updated.
-		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_shortcode_checkout_field_update' ), 10, 1 );
-	}
-
-	/**
-	 * Handle Store API customer update event (WooCommerce Blocks checkout).
+	 * Track Store API customer update event (WooCommerce Blocks checkout).
 	 *
 	 * Triggered when customer information is updated via the Store API endpoint
 	 * /wc/store/v1/cart/update-customer during Blocks checkout flow.
@@ -87,7 +66,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle Store API shipping update event (WooCommerce Blocks checkout).
+	 * Track Store API shipping update event (WooCommerce Blocks checkout).
 	 *
 	 * Triggered when shipping information is updated via the Store API endpoint
 	 * /wc/store/v1/cart/select-shipping-rate during Blocks checkout flow.
@@ -108,7 +87,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle shortcode checkout field update event.
+	 * Track shortcode checkout field update event.
 	 *
 	 * Triggered when checkout fields are updated via AJAX (woocommerce_update_order_review).
 	 *
@@ -117,7 +96,7 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @param string $posted_data Serialized checkout form data.
 	 * @return void
 	 */
-	public function handle_shortcode_checkout_field_update( $posted_data ): void {
+	public function track_shortcode_checkout_field_update( $posted_data ): void {
 		// Parse the posted data to extract relevant fields.
 		$data = array();
 		if ( $posted_data ) {
