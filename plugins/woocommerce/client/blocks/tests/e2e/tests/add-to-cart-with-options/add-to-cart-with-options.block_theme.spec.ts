@@ -1024,6 +1024,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 	test.describe( 'autoselect behavior', () => {
 		const productSlug = 'autoselect-t-shirt';
+		const productName = 'Autoselect T-shirt';
 		const productPermalink = '/product/' + productSlug;
 		const productPrice = '13.99';
 		const productAttributes: {
@@ -1194,7 +1195,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		test.beforeEach( async () => {
 			const cliOutput = await wpCLI(
-				`wc product create --user=1 --slug="${ productSlug }" --type="variable" --attributes="${ productAttributes }"`
+				`wc product create --user=1 --slug="${ productSlug }" --name="${ productName }" --type="variable" --attributes='${ JSON.stringify( productAttributes ) }'`
 			);
 			const match: RegExpMatchArray | null = cliOutput.stdout.match(
 				/Success:\s+Created\s+product\s+(\d+)\.\n?$/
@@ -1203,14 +1204,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 			if ( ! productId ) {
 				throw new Error(
 					`No productId found, cliOutput: ${ JSON.stringify(
-						cliOutput
+						cliOutput,
+						null,
+						2,
 					) }`
 				);
 			}
 
 			for ( const productVariation of productVariations ) {
 				await wpCLI(
-					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes="${ productVariation.attributes }"`
+					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes='${ JSON.stringify( productVariation.attributes ) }'`
 				);
 			}
 		} );
