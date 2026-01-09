@@ -13,9 +13,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use InvalidArgumentException;
 use Exception;
-use WP_REST_Server;
 use WP_REST_Request;
-use WP_REST_Response;
 use WP_Error;
 use WP_Http;
 
@@ -132,13 +130,13 @@ class PushTokenRestController extends RestApiControllerBase {
 			default => 'rest_internal_error',
 		};
 
-		$code = match ( get_class( $e ) ) {
+		$status = match ( get_class( $e ) ) {
 			PushTokenNotFoundException::class => WP_Http::NOT_FOUND,
 			InvalidArgumentException::class => WP_Http::BAD_REQUEST,
 			default => WP_Http::INTERNAL_SERVER_ERROR,
 		};
 
-		return new WP_Error( $slug, $e->getMessage(), array( 'status' => $code ) );
+		return new WP_Error( $slug, $e->getMessage(), array( 'status' => $status ) );
 	}
 
 	/**

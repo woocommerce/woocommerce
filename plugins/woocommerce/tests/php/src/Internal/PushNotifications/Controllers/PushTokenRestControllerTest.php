@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use ReflectionClass;
 use WC_REST_Unit_Test_Case;
+use WP_Error;
 use WP_Http;
 use WP_REST_Request;
 
@@ -76,8 +77,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-
-		$result = $this->controller->authorize( $request );
+		$result  = $this->controller->authorize( $request );
 
 		$this->assertFalse( $result );
 	}
@@ -91,8 +91,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( false );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-
-		$result = $this->controller->authorize( $request );
+		$result  = $this->controller->authorize( $request );
 
 		$this->assertFalse( $result );
 	}
@@ -107,8 +106,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-
-		$result = $this->controller->authorize( $request );
+		$result  = $this->controller->authorize( $request );
 
 		$this->assertFalse( $result );
 	}
@@ -122,8 +120,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-
-		$result = $this->controller->authorize( $request );
+		$result  = $this->controller->authorize( $request );
 
 		$this->assertTrue( $result );
 	}
@@ -138,8 +135,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-
-		$result = $this->controller->authorize( $request );
+		$result  = $this->controller->authorize( $request );
 
 		$this->assertTrue( $result );
 	}
@@ -154,10 +150,9 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/999999' );
 		$request->set_param( 'id', 999999 );
-
 		$result = $this->controller->authorize( $request );
 
-		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'rest_invalid_push_token', $result->get_error_code() );
 		$this->assertEquals( WP_Http::NOT_FOUND, $result->get_error_data()['status'] );
 	}
@@ -194,7 +189,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$result = $this->controller->authorize( $request );
 
-		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'rest_invalid_push_token', $result->get_error_code() );
 		$this->assertEquals( WP_Http::NOT_FOUND, $result->get_error_data()['status'] );
 	}
@@ -207,9 +202,6 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
-		/**
-		 * Create a token for the current user.
-		 */
 		$push_token = new PushToken();
 		$push_token->set_user_id( $this->user_id );
 		$push_token->set_token( str_repeat( 'a', 64 ) );
