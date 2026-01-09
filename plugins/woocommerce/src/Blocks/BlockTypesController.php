@@ -693,6 +693,13 @@ final class BlockTypesController {
 
 		// If we have a post ID, determine the specific term using WooCommerce's logic.
 		if ( ! empty( $post_id ) ) {
+			/**
+			 * Filters the arguments used to fetch product terms for breadcrumbs.
+			 *
+			 * @since 9.5.0
+			 *
+			 * @param array $args Array of arguments for `wc_get_product_terms()`.
+			 */
 			$terms = wc_get_product_terms(
 				$post_id,
 				'product_cat',
@@ -706,7 +713,14 @@ final class BlockTypesController {
 			);
 
 			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
-				// Apply the same filter WooCommerce uses to determine the main term.
+				/**
+				 * Filters the main term used in product breadcrumbs.
+				 *
+				 * @since 9.5.0
+				 *
+				 * @param WP_Term   $main_term The main term to be used in breadcrumbs.
+				 * @param WP_Term[] $terms     Array of all product category terms.
+				 */
 				$main_term = apply_filters( 'woocommerce_breadcrumb_main_term', $terms[0], $terms );
 
 				if ( $main_term && isset( $main_term->slug ) ) {
