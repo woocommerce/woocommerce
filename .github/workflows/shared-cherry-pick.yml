@@ -139,7 +139,7 @@ jobs:
                   const existingPr = prs[0];
                   core.info(`Found existing PR #${existingPr.number}`);
                   if (existingPr.merged_at) {
-                    core.setOutput('error_message', `A cherry-pick PR for the same PR was already merged: #{existingPr.number}`);
+                    core.setOutput('error_message', `A cherry-pick PR for the same PR was already merged: #${existingPr.number}`);
                   } else if (existingPr.state === 'closed') {
                     core.setOutput('error_message', `A cherry-pick PR was closed without merging: #${existingPr.number}`);
                   } else {
