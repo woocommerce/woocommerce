@@ -83,29 +83,9 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 */
 	public function track_blocks_checkout_update(): void {
 		// At this point we don't have any payment or shipping data, so we pass an empty array.
-		$this->dispatcher->dispatch_event( 'checkout_blocks_address_update', array() );
+		$this->dispatcher->dispatch_event( 'checkout_update', array() );
 	}
 
-	/**
-	 * Handle Store API shipping update event (WooCommerce Blocks checkout).
-	 *
-	 * Triggered when shipping information is updated via the Store API endpoint
-	 * /wc/store/v1/cart/select-shipping-rate during Blocks checkout flow.
-	 *
-	 * @internal
-	 *
-	 * @param string|null $package_id The package ID being updated (null for all packages).
-	 * @param string      $rate_id The chosen shipping rate ID.
-	 * @return void
-	 */
-	public function track_blocks_checkout_shipping_method_update( ?string $package_id, string $rate_id ): void {
-		$event_data = array(
-			'package_id' => $package_id,
-			'rate_id'    => $rate_id,
-		);
-
-		$this->dispatcher->dispatch_event( 'checkout_blocks_shipping_method_update', $event_data );
-	}
 
 	/**
 	 * Handle shortcode checkout field update event.
@@ -134,8 +114,8 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 *
 	 * Prepares the checkout event data including action type and any changed fields.
 	 *
-	 * @param string $action                   Action type (field_update, store_api_update).
-	 * @param array  $collected_event_data              Posted form data or event context.
+	 * @param string $action Action type (field_update, store_api_update).
+	 * @param array  $collected_event_data Posted form data or event context (may include session data).
 	 * @return array Checkout event data.
 	 */
 	private function format_checkout_event_data( string $action, array $collected_event_data ): array {
