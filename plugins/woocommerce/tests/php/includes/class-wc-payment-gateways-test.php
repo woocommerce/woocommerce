@@ -3,6 +3,8 @@
  * @package WooCommerce\Tests\PaymentGateways
  */
 
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
+
 /**
  * Class WC_Payment_Gateways_Test.
  */
@@ -23,6 +25,15 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		$container->reset_all_resolved();
 		$this->sut = new WC_Payment_Gateways();
 		$this->sut->init();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
+		wc_get_container()->get( SessionClearanceManager::class )->reset_session();
 	}
 
 	/**
@@ -86,6 +97,36 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that payment gateways are hidden when fraud protection blocks the session.
+	 */
+	public function test_get_available_payment_gateways_returns_empty_when_session_blocked() {
+		// Enable fraud protection and block the session.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
+		wc_get_container()->get( SessionClearanceManager::class )->block_session();
+
+		$this->enable_all_gateways();
+
+		$gateways = $this->sut->get_available_payment_gateways();
+
+		$this->assertEmpty( $gateways, 'Should return empty array when session is blocked' );
+	}
+
+	/**
+	 * Test that payment gateways are returned when fraud protection is disabled, even if session is blocked.
+	 */
+	public function test_get_available_payment_gateways_returns_gateways_when_feature_disabled() {
+		// Disable fraud protection but block the session.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'no' );
+		wc_get_container()->get( SessionClearanceManager::class )->block_session();
+
+		$this->enable_all_gateways();
+
+		$gateways = $this->sut->get_available_payment_gateways();
+
+		$this->assertNotEmpty( $gateways, 'Should return gateways when feature is disabled' );
+	}
+
+	/**
 	 * Test get_payment_gateway_name_by_id returns gateway title for known gateway.
 	 *
 	 * @return void
@@ -108,5 +149,14 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		// Test that get_payment_gateway_name_by_id returns the ID as fallback.
 		$result = $this->sut->get_payment_gateway_name_by_id( 'nonexistent_gateway' );
 		$this->assertEquals( 'nonexistent_gateway', $result );
+	}
+
+	/**
+	 * Enable all payment gateways.
+	 */
+	private function enable_all_gateways() {
+		foreach ( $this->sut->payment_gateways() as $gateway ) {
+			$gateway->enabled = 'yes';
+		}
 	}
 }

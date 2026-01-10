@@ -12,6 +12,7 @@ use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
@@ -125,6 +126,9 @@ class Checkout extends MockeryTestCase {
 		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
 		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
 		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
+
+		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
+		wc_get_container()->get( SessionClearanceManager::class )->reset_session();
 
 		update_option( 'woocommerce_ship_to_countries', 'all' );
 		update_option( 'woocommerce_allowed_countries', 'all' );
@@ -1787,5 +1791,53 @@ class Checkout extends MockeryTestCase {
 
 		// Order shouldn't stay in custom status, instead we let payment gateway set the correct status.
 		$this->assertEquals( 'on-hold', $order->get_status(), 'Order status should be controlled by the payment gateway, not remain custom.' );
+	}
+
+	/**
+	 * Test that checkout is blocked when fraud protection blocks the session.
+	 */
+	public function test_checkout_blocked_when_session_blocked() {
+		// Enable fraud protection and block the session.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
+		wc_get_container()->get( SessionClearanceManager::class )->block_session();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status(), 'Should return 403 when session is blocked' );
+		$this->assertEquals( 'woocommerce_rest_checkout_error', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'unable to process this request online', $response->get_data()['message'] );
 	}
 }
