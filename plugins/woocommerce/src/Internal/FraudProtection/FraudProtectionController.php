@@ -58,8 +58,8 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController       $features_controller      The instance of FeaturesController to use.
-	 * @param BlockedSessionNotice     $blocked_session_notice   The instance of BlockedSessionNotice to use.
+	 * @param FeaturesController   $features_controller      The instance of FeaturesController to use.
+	 * @param BlockedSessionNotice $blocked_session_notice   The instance of BlockedSessionNotice to use.
 	 */
 	final public function init(
 		FeaturesController $features_controller,
