@@ -57,29 +57,6 @@ class PaymentMethodEventTracker {
 	}
 
 	/**
-	 * Track payment method updated event.
-	 *
-	 * Triggers fraud protection event tracking when a payment method is updated.
-	 *
-	 * @internal
-	 *
-	 * @param int $token_id The ID of the updated token.
-	 */
-	public function track_payment_method_updated( $token_id ): void {
-		// Get the token object to extract details.
-		$token = \WC_Payment_Tokens::get( $token_id );
-
-		if ( ! $token instanceof \WC_Payment_Token ) {
-			return;
-		}
-
-		$event_data = $this->build_payment_method_event_data( 'updated', $token );
-
-		// Trigger event dispatching.
-		$this->dispatcher->dispatch_event( 'payment_method_updated', $event_data );
-	}
-
-	/**
 	 * Build payment method event-specific data.
 	 *
 	 * Extracts relevant information from the payment token object including

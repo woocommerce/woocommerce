@@ -81,48 +81,6 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test payment method updated event tracking.
-	 *
-	 * @testdox Should track payment method updated event.
-	 */
-	public function test_handle_payment_method_updated(): void {
-
-		$user_id = $this->factory->user->create();
-
-		$token = new \WC_Payment_Token_CC();
-		$token->set_token( 'test_token_456' );
-		$token->set_gateway_id( 'stripe' );
-		$token->set_card_type( 'mastercard' );
-		$token->set_last4( '5555' );
-		$token->set_expiry_month( '06' );
-		$token->set_expiry_year( '2026' );
-		$token->set_user_id( $user_id );
-		$token->save();
-
-		// Update the token to trigger the 'updated' event.
-		$token->set_expiry_year( '2027' );
-		$token->save();
-
-		// Verify that the event was sent to the API with correct payload.
-		$this->assertLogged(
-			'info',
-			'Sending fraud protection event: payment_method_updated',
-			array(
-				'source'  => 'woo-fraud-protection',
-				'payload' => array(
-					'event_type' => 'payment_method_updated',
-					'event_data' => array(
-						'action'     => 'updated',
-						'token_id'   => $token->get_id(),
-						'gateway_id' => 'stripe',
-						'card_type'  => 'mastercard',
-					),
-				),
-			)
-		);
-	}
-
-	/**
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {
