@@ -124,7 +124,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'collect' )
 			->with(
-				$this->equalTo( 'checkout_blocks_address_update' ),
+				$this->equalTo( 'checkout_update' ),
 				$this->equalTo( array() )
 			)
 			->willReturn( $session_data );
@@ -134,7 +134,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
 			->with(
-				$this->equalTo( 'checkout_blocks_address_update' ),
+				$this->equalTo( 'checkout_update' ),
 				$this->equalTo( $session_data )
 			);
 

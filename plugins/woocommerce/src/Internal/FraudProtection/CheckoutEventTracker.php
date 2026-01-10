@@ -94,8 +94,8 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	public function track_blocks_checkout_update(): void {
 		// The data collector already has up to date customer data, so we don't need to pass it as a parameter.
 		// At this point we don't have any payment or shipping data, so we don't need to pass it as a parameter either.
-		$collected_data = $this->data_collector->collect( 'checkout_blocks_address_update', array() );
-		$this->dispatcher->dispatch_event( 'checkout_blocks_address_update', $collected_data );
+		$collected_data = $this->data_collector->collect( 'checkout_update', array() );
+		$this->dispatcher->dispatch_event( 'checkout_update', $collected_data );
 	}
 
 	/**
