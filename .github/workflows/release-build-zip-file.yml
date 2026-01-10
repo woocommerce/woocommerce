@@ -143,6 +143,13 @@ jobs:
                 exit 1
             fi
 
+            # Changelog section must have at least one entry.
+            changelog_section=$( awk '/^== Changelog ==$/,/^\[See changelog/' checkout-branch/plugins/woocommerce/readme.txt )
+            if ! echo "$changelog_section" | grep -qE '^\* '; then
+                echo "::error::Pre-build verification: changelog section in readme.txt has no entries. Please add at least one entry before releasing."
+                exit 1
+            fi
+
             echo "release_version=$branch_plugin_version" >> $GITHUB_OUTPUT
 
       - name: 'Pre-build verification: db updates'
