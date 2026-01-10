@@ -1195,7 +1195,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		test.beforeEach( async () => {
 			const cliOutput = await wpCLI(
-				`wc product create --user=1 --slug="${ productSlug }" --name="${ productName }" --type="variable" --attributes='${ JSON.stringify( productAttributes ) }'`
+				`wc product create --user=1 --slug="${ productSlug }" --name="${ productName }" --type="variable" --attributes='${ JSON.stringify(
+					productAttributes
+				) }'`
 			);
 			const match: RegExpMatchArray | null = cliOutput.stdout.match(
 				/Success:\s+Created\s+product\s+(\d+)\.\n?$/
@@ -1206,14 +1208,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 					`No productId found, cliOutput: ${ JSON.stringify(
 						cliOutput,
 						null,
-						2,
+						2
 					) }`
 				);
 			}
 
 			for ( const productVariation of productVariations ) {
 				await wpCLI(
-					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes='${ JSON.stringify( productVariation.attributes ) }'`
+					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes='${ JSON.stringify(
+						productVariation.attributes
+					) }'`
 				);
 			}
 		} );
@@ -1222,6 +1226,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			| 'Pills'
 			| 'Dropdown'
 		 )[] ) {
+			// eslint-disable-next-line playwright/expect-expect
 			test( `${ optionStyle }: Test the autoselect block attribute`, async ( {
 				page,
 				pageObject,
@@ -1369,6 +1374,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					).toBeHidden();
 				} );
 			} );
+			// eslint-disable-next-line playwright/expect-expect
 			test( `${ optionStyle }: Combining autoselect and disabledAttributesAction block attributes should work`, async ( {
 				page,
 				pageObject,
