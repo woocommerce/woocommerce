@@ -117,27 +117,6 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$this->sut->track_blocks_checkout_update();
 	}
 
-	/**
-	 * Test track_blocks_checkout_update can be called directly without hooks.
-	 */
-	public function test_track_blocks_checkout_update_works_without_hooks(): void {
-		// Mock data collector to return minimal session data.
-		$session_data = array(
-			'session_id' => 'test_session_456',
-		);
-		$this->mock_data_collector
-			->method( 'collect' )
-			->willReturn( $session_data );
-
-		// Mock dispatcher to verify event is dispatched.
-		$this->mock_dispatcher
-			->expects( $this->once() )
-			->method( 'dispatch_event' );
-
-		// Call the method directly (as done from CartUpdateCustomer endpoint).
-		$this->sut->track_blocks_checkout_update();
-	}
-
 	// ========================================
 	// Shortcode Checkout Tests
 	// ========================================
