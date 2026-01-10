@@ -148,8 +148,8 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * Prepares the checkout event data including action type and any changed fields.
 	 * This data will be merged with comprehensive session data during event tracking.
 	 *
-	 * @param string $action                   Action type (field_update, store_api_update).
-	 * @param array  $collected_event_data              Posted form data or event context (may include session data).
+	 * @param string $action Action type (field_update, store_api_update).
+	 * @param array  $collected_event_data Posted form data or event context (may include session data).
 	 * @return array Checkout event data.
 	 */
 	private function format_checkout_event_data( string $action, array $collected_event_data ): array {
