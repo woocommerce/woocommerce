@@ -70,7 +70,6 @@ class SessionDataCollector {
 			'order'            => $this->get_order_data( $order_id_from_event ),
 			'shipping_address' => $this->get_shipping_address(),
 			'billing_address'  => $this->get_billing_address(),
-			'payment'          => $this->get_payment_data( $event_data ),
 			'event_data'       => $event_data,
 		);
 	}
@@ -132,59 +131,52 @@ class SessionDataCollector {
 	 * @return array Customer data array with 4 keys.
 	 */
 	private function get_customer_data(): array {
+		$customer_data = array(
+			'first_name'           => null,
+			'last_name'            => null,
+			'billing_email'        => null,
+			'lifetime_order_count' => 0,
+		);
 		try {
-			$first_name           = null;
-			$last_name            = null;
-			$billing_email        = null;
 			$lifetime_order_count = 0;
 
 			// Try WC_Customer object first.
 			if ( WC()->customer instanceof \WC_Customer ) {
-				$first_name    = WC()->customer->get_billing_first_name();
-				$last_name     = WC()->customer->get_billing_last_name();
-				$billing_email = WC()->customer->get_billing_email();
-
 				if ( WC()->customer->get_id() > 0 ) {
 					// We need to reload the customer so it uses the correct data store to count the orders.
 					$customer             = new \WC_Customer( WC()->customer->get_id() );
 					$lifetime_order_count = $customer->get_order_count();
 				}
 
-				// Sanitize email.
-				if ( $billing_email ) {
-					$billing_email = \sanitize_email( $billing_email );
-				}
+				$customer_data = array_merge(
+					$customer_data,
+					array(
+						'first_name'           => \sanitize_text_field( WC()->customer->get_billing_first_name() ),
+						'last_name'            => \sanitize_text_field( WC()->customer->get_billing_last_name() ),
+						'billing_email'        => \sanitize_email( \WC()->customer->get_billing_email() ),
+						'lifetime_order_count' => $lifetime_order_count,
+					)
+				);
+
 			} elseif ( WC()->session instanceof \WC_Session ) {
 				// Fallback to session customer data if WC_Customer not available.
-				$customer_data = WC()->session->get( 'customer' );
-				if ( is_array( $customer_data ) ) {
-					if ( ! empty( $customer_data['first_name'] ) ) {
-						$first_name = \sanitize_text_field( $customer_data['first_name'] );
-					}
-					if ( ! empty( $customer_data['last_name'] ) ) {
-						$last_name = \sanitize_text_field( $customer_data['last_name'] );
-					}
-					if ( ! empty( $customer_data['email'] ) ) {
-						$billing_email = \sanitize_email( $customer_data['email'] );
-					}
+				$customer_session_data = WC()->session->get( 'customer' );
+				if ( is_array( $customer_session_data ) ) {
+					$customer_data = array_merge(
+						$customer_data,
+						array(
+							'first_name'    => \sanitize_text_field( $customer_session_data['first_name'] ?? null ),
+							'last_name'     => \sanitize_text_field( $customer_session_data['last_name'] ?? null ),
+							'billing_email' => \sanitize_email( $customer_session_data['email'] ?? null ),
+						)
+					);
 				}
 			}
-
-			return array(
-				'first_name'           => $first_name ? $first_name : null,
-				'last_name'            => $last_name ? $last_name : null,
-				'billing_email'        => $billing_email ? $billing_email : null,
-				'lifetime_order_count' => $lifetime_order_count,
-			);
-		} catch ( \Exception $e ) {
-			// Graceful degradation - return structure with null values.
-			return array(
-				'first_name'           => null,
-				'last_name'            => null,
-				'billing_email'        => null,
-				'lifetime_order_count' => 0,
-			);
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Graceful degradation - return as much data as possible.
 		}
+
+		return $customer_data;
 	}
 
 	/**
@@ -345,62 +337,62 @@ class SessionDataCollector {
 	 * @return array Billing address array with 6 keys.
 	 */
 	private function get_billing_address(): array {
+		$billing_data = array(
+			'first_name' => null,
+			'last_name'  => null,
+			'address'    => null,
+			'address_1'  => null,
+			'address_2'  => null,
+			'city'       => null,
+			'state'      => null,
+			'country'    => null,
+			'phone'      => null,
+			'postcode'   => null,
+		);
+
 		try {
-			$street         = null;
-			$street2        = null;
-			$city           = null;
-			$state_province = null;
-			$country        = null;
-			$zip_code       = null;
-
+			// Try WC_Customer object first.
 			if ( WC()->customer instanceof \WC_Customer ) {
-				$street         = WC()->customer->get_billing_address_1();
-				$street2        = WC()->customer->get_billing_address_2();
-				$city           = WC()->customer->get_billing_city();
-				$state_province = WC()->customer->get_billing_state();
-				$country        = WC()->customer->get_billing_country();
-				$zip_code       = WC()->customer->get_billing_postcode();
-
-				// Sanitize all fields.
-				if ( $street ) {
-					$street = \sanitize_text_field( $street );
-				}
-				if ( $street2 ) {
-					$street2 = \sanitize_text_field( $street2 );
-				}
-				if ( $city ) {
-					$city = \sanitize_text_field( $city );
-				}
-				if ( $state_province ) {
-					$state_province = \sanitize_text_field( $state_province );
-				}
-				if ( $country ) {
-					$country = \sanitize_text_field( $country );
-				}
-				if ( $zip_code ) {
-					$zip_code = \sanitize_text_field( $zip_code );
+				$billing_data = array_merge(
+					$billing_data,
+					array(
+						'first_name' => \sanitize_text_field( WC()->customer->get_billing_first_name() ),
+						'last_name'  => \sanitize_text_field( WC()->customer->get_billing_last_name() ),
+						'address_1'  => \sanitize_text_field( WC()->customer->get_billing_address_1() ),
+						'address_2'  => \sanitize_text_field( WC()->customer->get_billing_address_2() ),
+						'city'       => \sanitize_text_field( WC()->customer->get_billing_city() ),
+						'state'      => \sanitize_text_field( WC()->customer->get_billing_state() ),
+						'country'    => \sanitize_text_field( WC()->customer->get_billing_country() ),
+						'phone'      => \sanitize_text_field( WC()->customer->get_billing_phone() ),
+						'postcode'   => \sanitize_text_field( WC()->customer->get_billing_postcode() ),
+					)
+				);
+			} elseif ( WC()->session instanceof \WC_Session ) {
+				// Fallback to session customer data if WC_Customer not available.
+				$customer_data = WC()->session->get( 'customer' );
+				if ( is_array( $customer_data ) ) {
+					$billing_data = array_merge(
+						$billing_data,
+						array(
+							'first_name' => \sanitize_text_field( $customer_data['first_name'] ?? null ),
+							'last_name'  => \sanitize_text_field( $customer_data['last_name'] ?? null ),
+							'address'    => \sanitize_text_field( $customer_data['address'] ?? null ),
+							'address_1'  => \sanitize_text_field( $customer_data['address_1'] ?? null ),
+							'address_2'  => \sanitize_text_field( $customer_data['address_2'] ?? null ),
+							'city'       => \sanitize_text_field( $customer_data['city'] ?? null ),
+							'state'      => \sanitize_text_field( $customer_data['state'] ?? null ),
+							'country'    => \sanitize_text_field( $customer_data['country'] ?? null ),
+							'phone'      => \sanitize_text_field( $customer_data['phone'] ?? null ),
+							'postcode'   => \sanitize_text_field( $customer_data['postcode'] ?? null ),
+						)
+					);
 				}
 			}
-
-			return array(
-				'street'         => $street ? $street : null,
-				'street2'        => $street2 ? $street2 : null,
-				'city'           => $city ? $city : null,
-				'state_province' => $state_province ? $state_province : null,
-				'country'        => $country ? $country : null,
-				'zip_code'       => $zip_code ? $zip_code : null,
-			);
-		} catch ( \Exception $e ) {
-			// Graceful degradation - return structure with null values.
-			return array(
-				'street'         => null,
-				'street2'        => null,
-				'city'           => null,
-				'state_province' => null,
-				'country'        => null,
-				'zip_code'       => null,
-			);
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Graceful degradation - prevents any errors from being thrown.
 		}
+
+		return $billing_data;
 	}
 
 	/**
@@ -414,135 +406,56 @@ class SessionDataCollector {
 	 * @return array Shipping address array with 6 keys.
 	 */
 	private function get_shipping_address(): array {
-		try {
-			$street         = null;
-			$street2        = null;
-			$city           = null;
-			$state_province = null;
-			$country        = null;
-			$zip_code       = null;
-
-			if ( WC()->customer instanceof \WC_Customer ) {
-				$street         = WC()->customer->get_shipping_address_1();
-				$street2        = WC()->customer->get_shipping_address_2();
-				$city           = WC()->customer->get_shipping_city();
-				$state_province = WC()->customer->get_shipping_state();
-				$country        = WC()->customer->get_shipping_country();
-				$zip_code       = WC()->customer->get_shipping_postcode();
-
-				// Sanitize all fields.
-				if ( $street ) {
-					$street = \sanitize_text_field( $street );
-				}
-				if ( $street2 ) {
-					$street2 = \sanitize_text_field( $street2 );
-				}
-				if ( $city ) {
-					$city = \sanitize_text_field( $city );
-				}
-				if ( $state_province ) {
-					$state_province = \sanitize_text_field( $state_province );
-				}
-				if ( $country ) {
-					$country = \sanitize_text_field( $country );
-				}
-				if ( $zip_code ) {
-					$zip_code = \sanitize_text_field( $zip_code );
-				}
-			}
-
-			return array(
-				'street'         => $street ? $street : null,
-				'street2'        => $street2 ? $street2 : null,
-				'city'           => $city ? $city : null,
-				'state_province' => $state_province ? $state_province : null,
-				'country'        => $country ? $country : null,
-				'zip_code'       => $zip_code ? $zip_code : null,
-			);
-		} catch ( \Exception $e ) {
-			// Graceful degradation - return structure with null values.
-			return array(
-				'street'         => null,
-				'street2'        => null,
-				'city'           => null,
-				'state_province' => null,
-				'country'        => null,
-				'zip_code'       => null,
-			);
-		}
-	}
-
-	/**
-	 * Get payment data structure for fraud protection analysis.
-	 *
-	 * Returns payment data structure with all 11 supported fields. Currently populates
-	 * payment_gateway_name and payment_method_type when available from the chosen payment
-	 * method. Other fields are initialized with null values.
-	 *
-	 * @since 10.5.0
-	 *
-	 * @param array $event_data Event-specific data that may contain payment information.
-	 * @return array Payment data array with 11 keys.
-	 */
-	private function get_payment_data( array $event_data = array() ): array {
-		$payment_data = array(
-			'payment_gateway_name'      => null,
-			'payment_method_type'       => null,
-			'card_bin'                  => null,
-			'card_last4'                => null,
-			'card_brand'                => null,
-			'payer_id'                  => null,
-			'outcome'                   => null,
-			'decline_reason'            => null,
-			'avs_result'                => null,
-			'cvc_result'                => null,
-			'tokenized_card_identifier' => null,
+		$shipping_data = array(
+			'first_name' => null,
+			'last_name'  => null,
+			'address'    => null,
+			'address_1'  => null,
+			'address_2'  => null,
+			'city'       => null,
+			'state'      => null,
+			'postcode'   => null,
+			'country'    => null,
 		);
-
 		try {
-			if ( ! empty( $event_data['payment'] ) ) {
-				return array_merge( $payment_data, $event_data['payment'] );
+			if ( WC()->customer instanceof \WC_Customer ) {
+				$shipping_data = array_merge(
+					$shipping_data,
+					array(
+						'first_name' => \sanitize_text_field( WC()->customer->get_shipping_first_name() ),
+						'last_name'  => \sanitize_text_field( WC()->customer->get_shipping_last_name() ),
+						'address_1'  => \sanitize_text_field( WC()->customer->get_shipping_address_1() ),
+						'address_2'  => \sanitize_text_field( WC()->customer->get_shipping_address_2() ),
+						'city'       => \sanitize_text_field( WC()->customer->get_shipping_city() ),
+						'state'      => \sanitize_text_field( WC()->customer->get_shipping_state() ),
+						'postcode'   => \sanitize_text_field( WC()->customer->get_shipping_postcode() ),
+						'country'    => \sanitize_text_field( WC()->customer->get_shipping_country() ),
+					)
+				);
+			} elseif ( WC()->session instanceof \WC_Session ) {
+				// Fallback to session customer data if WC_Customer not available.
+				$customer_data = WC()->session->get( 'customer' );
+				if ( is_array( $customer_data ) ) {
+					$shipping_data = array_merge(
+						$shipping_data,
+						array(
+							'first_name' => \sanitize_text_field( $customer_data['shipping_first_name'] ?? null ),
+							'last_name'  => \sanitize_text_field( $customer_data['shipping_last_name'] ?? null ),
+							'address_1'  => \sanitize_text_field( $customer_data['shipping_address_1'] ?? null ),
+							'address_2'  => \sanitize_text_field( $customer_data['shipping_address_2'] ?? null ),
+							'city'       => \sanitize_text_field( $customer_data['shipping_city'] ?? null ),
+							'state'      => \sanitize_text_field( $customer_data['shipping_state'] ?? null ),
+							'postcode'   => \sanitize_text_field( $customer_data['shipping_postcode'] ?? null ),
+							'country'    => \sanitize_text_field( $customer_data['shipping_country'] ?? null ),
+						)
+					);
+				}
 			}
-
-			// Try to get chosen payment method from session.
-			$chosen_payment_method = $this->get_chosen_payment_method();
-			if ( $chosen_payment_method ) {
-				$payment_data['payment_gateway_name'] = \sanitize_text_field( $chosen_payment_method );
-				$payment_data['payment_method_type']  = \sanitize_text_field( $chosen_payment_method );
-			}
-
-			return $payment_data;
-		} catch ( \Exception $e ) {
-			// Graceful degradation.
-			return $payment_data;
-		}
-	}
-
-	/**
-	 * Get the chosen payment method from session or POST data.
-	 *
-	 * Tries to get payment method from session first, then falls back to
-	 * POST data during checkout submission.
-	 *
-	 * @since 10.5.0
-	 *
-	 * @return string|null Payment method ID or null if not available.
-	 */
-	private function get_chosen_payment_method(): ?string {
-		// Try getting from session first.
-		if ( WC()->session instanceof \WC_Session ) {
-			$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
-			if ( $chosen_payment_method ) {
-				return $chosen_payment_method;
-			}
-		}
-
-		// Try getting from POST data (during checkout).
-		if ( isset( $_POST['payment_method'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			return \sanitize_text_field( \wp_unslash( $_POST['payment_method'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Graceful degradation - returns as much data as possible.
 		}
 
-		return null;
+		return $shipping_data;
 	}
 
 	/**

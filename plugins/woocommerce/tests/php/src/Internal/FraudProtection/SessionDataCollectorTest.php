@@ -51,7 +51,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that collect() method returns properly structured nested array with 9 top-level keys.
+	 * Test that collect() method returns properly structured nested array with 8 top-level keys.
 	 */
 	public function test_collect_returns_properly_structured_nested_array() {
 		$result = $this->sut->collect();
@@ -64,9 +64,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'order', $result );
 		$this->assertArrayHasKey( 'shipping_address', $result );
 		$this->assertArrayHasKey( 'billing_address', $result );
-		$this->assertArrayHasKey( 'payment', $result );
 		$this->assertArrayHasKey( 'event_data', $result );
-		$this->assertCount( 9, $result );
+		$this->assertCount( 8, $result );
 	}
 
 	/**
@@ -95,7 +94,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$result = $this->sut->collect();
 
 		$this->assertIsArray( $result );
-		$this->assertCount( 9, $result );
+		$this->assertCount( 8, $result );
 		// All sections should be initialized even if session unavailable.
 		$this->assertIsArray( $result['session'] );
 		$this->assertIsArray( $result['customer'] );
@@ -142,7 +141,6 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result['order'] );
 		$this->assertIsArray( $result['shipping_address'] );
 		$this->assertIsArray( $result['billing_address'] );
-		$this->assertIsArray( $result['payment'] );
 	}
 
 	/**
@@ -447,7 +445,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test billing address includes all 6 required fields.
+	 * Test billing address includes all required fields.
 	 */
 	public function test_billing_address_includes_all_required_fields() {
 		// Set billing address data.
@@ -463,26 +461,26 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$result = $this->sut->collect();
 
 		$this->assertIsArray( $result['billing_address'] );
-		$this->assertArrayHasKey( 'street', $result['billing_address'] );
-		$this->assertArrayHasKey( 'street2', $result['billing_address'] );
+		$this->assertArrayHasKey( 'address_1', $result['billing_address'] );
+		$this->assertArrayHasKey( 'address_2', $result['billing_address'] );
 		$this->assertArrayHasKey( 'city', $result['billing_address'] );
-		$this->assertArrayHasKey( 'state_province', $result['billing_address'] );
+		$this->assertArrayHasKey( 'state', $result['billing_address'] );
 		$this->assertArrayHasKey( 'country', $result['billing_address'] );
-		$this->assertArrayHasKey( 'zip_code', $result['billing_address'] );
+		$this->assertArrayHasKey( 'postcode', $result['billing_address'] );
 
 		// Verify values.
 		if ( isset( WC()->customer ) ) {
-			$this->assertEquals( '123 Main St', $result['billing_address']['street'] );
-			$this->assertEquals( 'Apt 4B', $result['billing_address']['street2'] );
+			$this->assertEquals( '123 Main St', $result['billing_address']['address_1'] );
+			$this->assertEquals( 'Apt 4B', $result['billing_address']['address_2'] );
 			$this->assertEquals( 'New York', $result['billing_address']['city'] );
-			$this->assertEquals( 'NY', $result['billing_address']['state_province'] );
+			$this->assertEquals( 'NY', $result['billing_address']['state'] );
 			$this->assertEquals( 'US', $result['billing_address']['country'] );
-			$this->assertEquals( '10001', $result['billing_address']['zip_code'] );
+			$this->assertEquals( '10001', $result['billing_address']['postcode'] );
 		}
 	}
 
 	/**
-	 * Test shipping address includes all 6 required fields.
+	 * Test shipping address includes all required fields.
 	 */
 	public function test_shipping_address_includes_all_required_fields() {
 		// Set shipping address data.
@@ -498,21 +496,21 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$result = $this->sut->collect();
 
 		$this->assertIsArray( $result['shipping_address'] );
-		$this->assertArrayHasKey( 'street', $result['shipping_address'] );
-		$this->assertArrayHasKey( 'street2', $result['shipping_address'] );
+		$this->assertArrayHasKey( 'address_1', $result['shipping_address'] );
+		$this->assertArrayHasKey( 'address_2', $result['shipping_address'] );
 		$this->assertArrayHasKey( 'city', $result['shipping_address'] );
-		$this->assertArrayHasKey( 'state_province', $result['shipping_address'] );
+		$this->assertArrayHasKey( 'state', $result['shipping_address'] );
 		$this->assertArrayHasKey( 'country', $result['shipping_address'] );
-		$this->assertArrayHasKey( 'zip_code', $result['shipping_address'] );
+		$this->assertArrayHasKey( 'postcode', $result['shipping_address'] );
 
 		// Verify values.
 		if ( isset( WC()->customer ) ) {
-			$this->assertEquals( '456 Oak Ave', $result['shipping_address']['street'] );
-			$this->assertEquals( 'Suite 100', $result['shipping_address']['street2'] );
+			$this->assertEquals( '456 Oak Ave', $result['shipping_address']['address_1'] );
+			$this->assertEquals( 'Suite 100', $result['shipping_address']['address_2'] );
 			$this->assertEquals( 'Los Angeles', $result['shipping_address']['city'] );
-			$this->assertEquals( 'CA', $result['shipping_address']['state_province'] );
+			$this->assertEquals( 'CA', $result['shipping_address']['state'] );
 			$this->assertEquals( 'US', $result['shipping_address']['country'] );
-			$this->assertEquals( '90001', $result['shipping_address']['zip_code'] );
+			$this->assertEquals( '90001', $result['shipping_address']['postcode'] );
 		}
 	}
 
@@ -582,27 +580,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test payment data structure includes all 11 required fields.
-	 */
-	public function test_payment_data_includes_all_required_fields() {
-		$result = $this->sut->collect();
-
-		$this->assertIsArray( $result['payment'] );
-		$this->assertArrayHasKey( 'payment_gateway_name', $result['payment'] );
-		$this->assertArrayHasKey( 'payment_method_type', $result['payment'] );
-		$this->assertArrayHasKey( 'card_bin', $result['payment'] );
-		$this->assertArrayHasKey( 'card_last4', $result['payment'] );
-		$this->assertArrayHasKey( 'card_brand', $result['payment'] );
-		$this->assertArrayHasKey( 'payer_id', $result['payment'] );
-		$this->assertArrayHasKey( 'outcome', $result['payment'] );
-		$this->assertArrayHasKey( 'decline_reason', $result['payment'] );
-		$this->assertArrayHasKey( 'avs_result', $result['payment'] );
-		$this->assertArrayHasKey( 'cvc_result', $result['payment'] );
-		$this->assertArrayHasKey( 'tokenized_card_identifier', $result['payment'] );
-	}
-
-	/**
-	 * Test complete collect() output includes all 9 top-level sections with data.
+	 * Test complete collect() output includes all 8 top-level sections with data.
 	 */
 	public function test_complete_collect_output_includes_all_sections() {
 		// Create a logged-in user.
@@ -629,7 +607,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 
 		$result = $this->sut->collect( 'checkout_started', array( 'test' => 'data' ) );
 
-		// Verify all 9 sections exist.
+		// Verify all 8 sections exist.
 		$this->assertArrayHasKey( 'event_type', $result );
 		$this->assertArrayHasKey( 'timestamp', $result );
 		$this->assertArrayHasKey( 'session', $result );
@@ -637,7 +615,6 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'order', $result );
 		$this->assertArrayHasKey( 'shipping_address', $result );
 		$this->assertArrayHasKey( 'billing_address', $result );
-		$this->assertArrayHasKey( 'payment', $result );
 		$this->assertArrayHasKey( 'event_data', $result );
 
 		// Verify sections contain expected data types.
@@ -648,7 +625,6 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result['order'] );
 		$this->assertIsArray( $result['shipping_address'] );
 		$this->assertIsArray( $result['billing_address'] );
-		$this->assertIsArray( $result['payment'] );
 		$this->assertEquals( array( 'test' => 'data' ), $result['event_data'] );
 	}
 
@@ -730,16 +706,12 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 2, $result['order']['items'] );
 
 		// Billing address.
-		$this->assertEquals( '123 Test St', $result['billing_address']['street'] );
+		$this->assertEquals( '123 Test St', $result['billing_address']['address_1'] );
 		$this->assertEquals( 'Test City', $result['billing_address']['city'] );
 
 		// Shipping address.
-		$this->assertEquals( '456 Ship St', $result['shipping_address']['street'] );
+		$this->assertEquals( '456 Ship St', $result['shipping_address']['address_1'] );
 		$this->assertEquals( 'Ship City', $result['shipping_address']['city'] );
-
-		// Payment data structure exists.
-		$this->assertIsArray( $result['payment'] );
-		$this->assertArrayHasKey( 'payment_gateway_name', $result['payment'] );
 
 		// Event data.
 		$this->assertEquals( array( 'gateway' => 'stripe' ), $result['event_data'] );
@@ -770,7 +742,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 
 		// Verify structure is intact even with minimal data.
 		$this->assertIsArray( $result );
-		$this->assertCount( 9, $result );
+		$this->assertCount( 8, $result );
 
 		// All sections should be arrays.
 		$this->assertIsArray( $result['session'] );
@@ -778,7 +750,6 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result['order'] );
 		$this->assertIsArray( $result['shipping_address'] );
 		$this->assertIsArray( $result['billing_address'] );
-		$this->assertIsArray( $result['payment'] );
 
 		// Key fields should have appropriate defaults.
 		$this->assertEquals( 'guest', $result['order']['customer_id'] );
