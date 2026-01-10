@@ -80,23 +80,6 @@ class PaymentMethodEventTracker {
 	}
 
 	/**
-	 * Track payment method set as default event.
-	 *
-	 * Triggers fraud protection event tracking when a payment method is set as default.
-	 *
-	 * @internal
-	 *
-	 * @param int               $token_id The ID of the token being set as default.
-	 * @param \WC_Payment_Token $token    The payment token object.
-	 */
-	public function track_payment_method_set_default( $token_id, $token ): void {
-		$event_data = $this->build_payment_method_event_data( 'set_default', $token );
-
-		// Trigger event dispatching.
-		$this->dispatcher->dispatch_event( 'payment_method_set_default', $event_data );
-	}
-
-	/**
 	 * Track payment method deleted event.
 	 *
 	 * Triggers fraud protection event tracking when a payment method is deleted.
