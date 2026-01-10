@@ -80,23 +80,6 @@ class PaymentMethodEventTracker {
 	}
 
 	/**
-	 * Track payment method deleted event.
-	 *
-	 * Triggers fraud protection event tracking when a payment method is deleted.
-	 *
-	 * @internal
-	 *
-	 * @param int               $token_id The ID of the deleted token.
-	 * @param \WC_Payment_Token $token    The payment token object.
-	 */
-	public function track_payment_method_deleted( $token_id, $token ): void {
-		$event_data = $this->build_payment_method_event_data( 'deleted', $token );
-
-		// Trigger event dispatching.
-		$this->dispatcher->dispatch_event( 'payment_method_deleted', $event_data );
-	}
-
-	/**
 	 * Build payment method event-specific data.
 	 *
 	 * Extracts relevant information from the payment token object including

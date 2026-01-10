@@ -123,46 +123,6 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test payment method deleted event tracking.
-	 *
-	 * @testdox Should track payment method deleted event.
-	 */
-	public function test_handle_payment_method_deleted(): void {
-
-		$user_id = $this->factory->user->create();
-
-		$token = new \WC_Payment_Token_CC();
-		$token->set_token( 'test_token_delete' );
-		$token->set_gateway_id( 'stripe' );
-		$token->set_card_type( 'visa' );
-		$token->set_last4( '1111' );
-		$token->set_expiry_month( '09' );
-		$token->set_expiry_year( '2028' );
-		$token->set_user_id( $user_id );
-		$token->save();
-
-		// Delete the token to trigger the 'deleted' event.
-		\WC_Payment_Tokens::delete( $token->get_id() );
-
-		// Verify that the event was sent to the API with correct payload.
-		$this->assertLogged(
-			'info',
-			'Sending fraud protection event: payment_method_deleted',
-			array(
-				'source'  => 'woo-fraud-protection',
-				'payload' => array(
-					'event_type' => 'payment_method_deleted',
-					'event_data' => array(
-						'action'     => 'deleted',
-						'token_id'   => $token->get_id(),
-						'gateway_id' => 'stripe',
-					),
-				),
-			)
-		);
-	}
-
-	/**
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {

@@ -151,12 +151,6 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokens', array( 'token_id' => $token->get_id() ), array( '%d' ) );
 		$wpdb->delete( $wpdb->prefix . 'woocommerce_payment_tokenmeta', array( 'payment_token_id' => $token->get_id() ), array( '%d' ) );
 		do_action( 'woocommerce_payment_token_deleted', $token->get_id(), $token );
-
-		// Track payment method event for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-			wc_get_container()->get( PaymentMethodEventTracker::class )
-				->track_payment_method_deleted( $token->get_id(), $token );
-		}
 	}
 
 	/**
