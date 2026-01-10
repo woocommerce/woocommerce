@@ -80,7 +80,7 @@ class OrderItemSchema extends ItemSchema {
 			$product_properties['catalog_visibility'] = $product->get_catalog_visibility();
 			$product_properties['prices']             = $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) );
 			$product_properties['sold_individually']  = $product->is_sold_individually();
-			$product_properties['images'] 			  = $this->get_images( $product );
+			$product_properties['images']             = $this->get_images( $product );
 
 			// Only include variation data for product variations, not simple products.
 			// This is consistent with the cart endpoint behavior.
@@ -189,6 +189,8 @@ class OrderItemSchema extends ItemSchema {
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return array Array of WC_Product_Attribute objects.
+	 *
+	 * @since 10.5.0
 	 */
 	protected function get_parent_product_attributes( $product ) {
 		if ( null !== $this->cached_parent_attributes ) {
