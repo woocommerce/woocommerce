@@ -115,7 +115,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 			<p>
 				<?php
 				printf(
-					/* translators: %s: Settings page URL */
+					/* translators: %s: Getting Started with Jetpack documentation URL */
 					wp_kses_post( __( 'Fraud protection will fail open and allow all sessions until your site is connected to Jetpack. <a href="%s">How to connect to Jetpack</a>', 'woocommerce' ) ),
 					esc_url( 'https://jetpack.com/support/getting-started-with-jetpack/' )
 				);
