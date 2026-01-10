@@ -134,7 +134,14 @@ class FraudProtectionController implements RegisterHooksInterface {
 			return;
 		}
 
-		$manager->try_registration();
+		$result = $manager->try_registration();
+
+		if ( is_wp_error( $result ) ) {
+			$this->log( 'error', 'Failed to register Jetpack connection: ' . $result->get_error_message() );
+			return;
+		}
+
+		$this->log( 'info', 'Jetpack connection registered successfully' );
 	}
 
 	/**
