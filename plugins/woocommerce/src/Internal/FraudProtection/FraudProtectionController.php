@@ -110,6 +110,15 @@ class FraudProtectionController implements RegisterHooksInterface {
 		<?php
 	}
 
+	/**
+	 * Maybe register Jetpack connection when fraud protection is enabled.
+	 *
+	 * Attempts to automatically register the site with Jetpack when the fraud protection
+	 * feature is enabled and the site is not already connected.
+	 *
+	 * @param string $feature_id The feature ID being toggled.
+	 * @param bool   $is_enabled Whether the feature is being enabled or disabled.
+	 */
 	public function maybe_register_jetpack_connection( string $feature_id, bool $is_enabled ): void {
 		if ( 'fraud_protection' !== $feature_id || ! $is_enabled ) {
 			return;
