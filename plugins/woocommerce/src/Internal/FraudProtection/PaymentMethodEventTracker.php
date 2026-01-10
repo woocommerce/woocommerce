@@ -40,6 +40,20 @@ class PaymentMethodEventTracker {
 	}
 
 	/**
+	 * Track add payment method page loaded event.
+	 *
+	 * Triggers fraud protection event dispatching when the add payment method page is initially loaded.
+	 * This captures the initial session state before any user interactions.
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function track_add_payment_method_page_loaded(): void {
+		// Track the page load event. Session data will be collected by the dispatcher.
+		$this->dispatcher->dispatch_event( 'add_payment_method_page_loaded', array() );
+	}
+
+	/**
 	 * Track payment method added event.
 	 *
 	 * Triggers fraud protection event tracking when a payment method is added.

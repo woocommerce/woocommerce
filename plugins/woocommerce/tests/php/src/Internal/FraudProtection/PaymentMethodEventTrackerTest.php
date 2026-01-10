@@ -27,6 +27,13 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Mock fraud protection dispatcher.
+	 *
+	 * @var \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $mock_dispatcher;
+
+	/**
 	 * Setup test.
 	 */
 	public function setUp(): void {
@@ -39,6 +46,32 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$container->reset_all_resolved();
 
 		$this->sut = $container->get( PaymentMethodEventTracker::class );
+	}
+
+	/**
+	 * Test add payment method page loaded event tracking.
+	 *
+	 * @testdox Should track add payment method page loaded event.
+	 */
+	public function test_track_add_payment_method_page_loaded_dispatches_event(): void {
+		// Create mock dispatcher.
+		$this->mock_dispatcher = $this->createMock( \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher::class );
+
+		// Create system under test with mock dispatcher.
+		$sut = new PaymentMethodEventTracker();
+		$sut->init( $this->mock_dispatcher );
+
+		// Mock dispatcher to verify event is dispatched with empty event data.
+		$this->mock_dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' )
+			->with(
+				$this->equalTo( 'add_payment_method_page_loaded' ),
+				$this->equalTo( array() )
+			);
+
+		// Call the method.
+		$sut->track_add_payment_method_page_loaded();
 	}
 
 	/**
