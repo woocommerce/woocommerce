@@ -53,6 +53,7 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		remove_all_actions( 'woocommerce_before_checkout_form' );
+		remove_all_actions( 'before_woocommerce_add_payment_method' );
 		delete_option( 'woocommerce_email_from_address' );
 	}
 
@@ -79,6 +80,34 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 
 		ob_start();
 		do_action( 'woocommerce_before_checkout_form' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output, 'Non-blocked sessions should not display any message' );
+	}
+
+	/**
+	 * @testdox Should display error notice when before_woocommerce_add_payment_method action fires for blocked sessions.
+	 */
+	public function test_add_payment_method_action_displays_blocked_message(): void {
+		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( true );
+
+		ob_start();
+		do_action( 'before_woocommerce_add_payment_method' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'unable to process this request online', $output, 'Should display blocked message on add payment method page' );
+		$this->assertStringContainsString( 'support@example.com', $output, 'Should include support email in message' );
+		$this->assertStringContainsString( 'mailto:support@example.com', $output, 'Should include mailto link' );
+	}
+
+	/**
+	 * @testdox Should not display message when add payment method action fires for non-blocked sessions.
+	 */
+	public function test_add_payment_method_action_no_message_for_non_blocked_session(): void {
+		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( false );
+
+		ob_start();
+		do_action( 'before_woocommerce_add_payment_method' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$output = ob_get_clean();
 
 		$this->assertEmpty( $output, 'Non-blocked sessions should not display any message' );

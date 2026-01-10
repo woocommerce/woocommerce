@@ -53,10 +53,11 @@ class BlockedSessionNotice implements RegisterHooksInterface {
 	 */
 	public function register(): void {
 		add_action( 'woocommerce_before_checkout_form', array( $this, 'display_blocked_notice' ), 1, 0 );
+		add_action( 'before_woocommerce_add_payment_method', array( $this, 'display_blocked_notice' ), 1, 0 );
 	}
 
 	/**
-	 * Display blocked notice on shortcode checkout page.
+	 * Display blocked notice on shortcode checkout and add payment method pages.
 	 *
 	 * Shows a user-friendly message explaining that the request cannot be
 	 * processed online and provides contact information for support.
