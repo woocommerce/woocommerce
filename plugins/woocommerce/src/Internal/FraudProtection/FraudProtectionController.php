@@ -38,6 +38,13 @@ class FraudProtectionController implements RegisterHooksInterface {
 	private JetpackConnectionManager $connection_manager;
 
 	/**
+	 * Blocked session notice instance.
+	 *
+	 * @var BlockedSessionNotice
+	 */
+	private BlockedSessionNotice $blocked_session_notice;
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
@@ -49,12 +56,19 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 * Initialize the instance, runs when the instance is created by the dependency injection container.
 	 *
 	 * @internal
-	 * @param FeaturesController       $features_controller The instance of FeaturesController to use.
-	 * @param JetpackConnectionManager $connection_manager  The instance of JetpackConnectionManager to use.
+	 *
+	 * @param FeaturesController       $features_controller      The instance of FeaturesController to use.
+	 * @param JetpackConnectionManager $connection_manager       The instance of JetpackConnectionManager to use.
+	 * @param BlockedSessionNotice     $blocked_session_notice   The instance of BlockedSessionNotice to use.
 	 */
-	final public function init( FeaturesController $features_controller, JetpackConnectionManager $connection_manager ): void {
-		$this->features_controller = $features_controller;
-		$this->connection_manager  = $connection_manager;
+	final public function init(
+		FeaturesController $features_controller,
+		JetpackConnectionManager $connection_manager,
+		BlockedSessionNotice $blocked_session_notice
+	): void {
+		$this->features_controller    = $features_controller;
+		$this->connection_manager     = $connection_manager;
+		$this->blocked_session_notice = $blocked_session_notice;
 	}
 
 	/**
@@ -68,8 +82,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 			return;
 		}
 
-		// Future implementation: Register hooks and initialize components here.
-		// For now, this is a placeholder for the infrastructure.
+		$this->blocked_session_notice->register();
 	}
 
 	/**
@@ -119,11 +132,15 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 * Check if fraud protection feature is enabled.
 	 *
 	 * This method can be used by other fraud protection classes to check
-	 * the feature flag status.
+	 * the feature flag status. Returns false (fail-open) if init hasn't run yet.
 	 *
-	 * @return bool True if enabled.
+	 * @return bool True if enabled, false if not enabled or init hasn't run yet.
 	 */
 	public function feature_is_enabled(): bool {
+		// Fail-open: don't block if init hasn't run yet to avoid FeaturesController translation notices.
+		if ( ! did_action( 'init' ) ) {
+			return false;
+		}
 		return $this->features_controller->feature_is_enabled( 'fraud_protection' );
 	}
 
