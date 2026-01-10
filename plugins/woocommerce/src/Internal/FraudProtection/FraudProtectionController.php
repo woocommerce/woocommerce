@@ -44,6 +44,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 	public function register(): void {
 		add_action( 'init', array( $this, 'on_init' ) );
 		add_action( 'admin_notices', array( $this, 'on_admin_notices' ) );
+		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'maybe_register_jetpack_connection' ), 10, 2 );
 	}
 
 	/**
@@ -83,13 +84,34 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 */
 	public function on_admin_notices(): void {
 		// Only show if feature is enabled.
-		if ( ! $this->feature_is_enabled() ) {
+		if ( ! $this->feature_is_enabled() || JetpackConnection::get_manager()->is_connected() ) {
 			return;
 		}
 
 		// Only show on WooCommerce settings page.
 		$screen = get_current_screen();
+
 		if ( ! $screen || 'woocommerce_page_wc-settings' !== $screen->id ) {
+			return;
+		}
+
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p>
+				<?php
+				printf(
+					/* translators: %s: Getting Started with Jetpack documentation URL */
+					wp_kses_post( __( 'Your site failed to connect to Jetpack automatically. Fraud protection will fail open and allow all sessions until your site is connected to Jetpack. <a href="%s">How to connect to Jetpack</a>', 'woocommerce' ) ),
+					esc_url( 'https://jetpack.com/support/getting-started-with-jetpack/' )
+				);
+				?>
+			</p>
+		</div>
+		<?php
+	}
+
+	public function maybe_register_jetpack_connection( string $feature_id, bool $is_enabled ): void {
+		if ( 'fraud_protection' !== $feature_id || ! $is_enabled ) {
 			return;
 		}
 
@@ -99,30 +121,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 			return;
 		}
 
-		$result = $manager->try_registration();
-		if ( ! empty( $result ) && ! is_wp_error( $result ) ) {
-			return;
-		}
-
-		?>
-		<div class="notice notice-warning is-dismissible">
-			<?php if ( is_wp_error( $result ) ) : // phpstan:ignore function.alreadyNarrowedType. ?>
-				<p>
-					<strong><?php esc_html_e( 'Fraud protection warning:', 'woocommerce' ); ?></strong>
-					<?php echo esc_html( $result->get_error_message() ); ?>
-				</p>
-			<?php endif; ?>
-			<p>
-				<?php
-				printf(
-					/* translators: %s: Getting Started with Jetpack documentation URL */
-					wp_kses_post( __( 'Fraud protection will fail open and allow all sessions until your site is connected to Jetpack. <a href="%s">How to connect to Jetpack</a>', 'woocommerce' ) ),
-					esc_url( 'https://jetpack.com/support/getting-started-with-jetpack/' )
-				);
-				?>
-			</p>
-		</div>
-		<?php
+		$manager->try_registration();
 	}
 
 	/**
