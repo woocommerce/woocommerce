@@ -32,13 +32,6 @@ class FraudProtectionController implements RegisterHooksInterface {
 	private FeaturesController $features_controller;
 
 	/**
-	 * Jetpack connection manager instance.
-	 *
-	 * @var JetpackConnectionManager
-	 */
-	private JetpackConnectionManager $connection_manager;
-
-	/**
 	 * Blocked session notice instance.
 	 *
 	 * @var BlockedSessionNotice
