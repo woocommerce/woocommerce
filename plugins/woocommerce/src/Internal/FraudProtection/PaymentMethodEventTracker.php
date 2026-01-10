@@ -1,8 +1,6 @@
 <?php
 /**
  * PaymentMethodEventTracker class file.
- *
- * @package WooCommerce\Classes
  */
 
 declare( strict_types=1 );

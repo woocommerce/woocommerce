@@ -50,7 +50,7 @@ class CheckoutEventTracker {
 	 */
 	public function track_blocks_checkout_update(): void {
 		// At this point we don't have any payment or shipping data, so we pass an empty array.
-		$this->dispatcher->dispatch_event( 'checkout_blocks_address_update', array() );
+		$this->dispatcher->dispatch_event( 'checkout_update', array() );
 	}
 
 	/**
@@ -101,8 +101,8 @@ class CheckoutEventTracker {
 	 *
 	 * Prepares the checkout event data including action type and any changed fields.
 	 *
-	 * @param string $action                   Action type (field_update, store_api_update).
-	 * @param array  $collected_event_data              Posted form data or event context.
+	 * @param string $action Action type (field_update, store_api_update).
+	 * @param array  $collected_event_data Posted form data or event context (may include session data).
 	 * @return array Checkout event data.
 	 */
 	private function format_checkout_event_data( string $action, array $collected_event_data ): array {

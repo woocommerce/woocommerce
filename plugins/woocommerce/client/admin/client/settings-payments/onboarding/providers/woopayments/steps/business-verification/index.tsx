@@ -2,6 +2,8 @@
  * External dependencies
  */
 import React from 'react';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -18,6 +20,34 @@ import Step from './components/step';
 import { getMccFromIndustry, getComingSoonShareKey } from './utils';
 import './style.scss';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+import type { OnboardingError } from '~/settings-payments/onboarding/types';
+
+/**
+ * Maximum number of individual error messages to display before showing a summary.
+ */
+const MAX_DISPLAYED_ERRORS = 3;
+
+/**
+ * Fallback error message used when an error object lacks a valid message.
+ */
+const FALLBACK_ERROR_MESSAGE = __(
+	'Something went wrong. Please try again.',
+	'woocommerce'
+);
+
+/**
+ * Normalizes an error message string to ensure it's safe for rendering.
+ * Returns the fallback message if the input is not a valid, non-empty string.
+ *
+ * @param message - The error message to normalize.
+ * @return A safe string suitable for rendering.
+ */
+const normalizeErrorMessage = ( message: unknown ): string => {
+	if ( typeof message === 'string' && message.trim().length > 0 ) {
+		return message.trim();
+	}
+	return FALLBACK_ERROR_MESSAGE;
+};
 
 export const BusinessVerificationStep: React.FC = () => {
 	const { currentStep, closeModal, sessionEntryPoint } =
@@ -70,6 +100,50 @@ export const BusinessVerificationStep: React.FC = () => {
 		<div className="settings-payments-onboarding-modal__step-business-verification">
 			<WooPaymentsStepHeader onClose={ closeModal } />
 			<div className="settings-payments-onboarding-modal__step-business-verification-content">
+				{ currentStep?.errors && currentStep.errors.length > 0 && (
+					<Notice
+						status="error"
+						isDismissible={ false }
+						className="settings-payments-onboarding-modal__step-business-verification-error"
+						// Adding role="alert" for explicit screen reader announcement.
+						// While @wordpress/components Notice uses speak() internally,
+						// role="alert" provides better backwards compatibility with older AT.
+						// Type assertion needed as Notice component types don't include standard HTML attributes.
+						{ ...( {
+							role: 'alert',
+						} as React.HTMLAttributes< HTMLDivElement > ) }
+					>
+						{ currentStep.errors.length <= MAX_DISPLAYED_ERRORS ? (
+							// Display individual error messages when count is manageable.
+							( currentStep.errors as OnboardingError[] ).map(
+								( error, index ) => (
+									<p key={ error?.code ?? index }>
+										{ normalizeErrorMessage(
+											error?.message
+										) }
+									</p>
+								)
+							)
+						) : (
+							// Display a summary when there are too many errors.
+							<>
+								<p>
+									{ sprintf(
+										/* translators: %d: number of errors */
+										_n(
+											'%d error occurred during setup.',
+											'%d errors occurred during setup.',
+											currentStep.errors.length,
+											'woocommerce'
+										),
+										currentStep.errors.length
+									) }
+								</p>
+								<p>{ FALLBACK_ERROR_MESSAGE }</p>
+							</>
+						) }
+					</Notice>
+				) }
 				<BusinessVerificationContextProvider
 					initialData={ initialData }
 				>

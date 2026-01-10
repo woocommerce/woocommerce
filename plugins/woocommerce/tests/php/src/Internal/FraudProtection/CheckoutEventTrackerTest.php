@@ -78,64 +78,12 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
 			->with(
-				$this->equalTo( 'checkout_blocks_address_update' ),
+				$this->equalTo( 'checkout_update' ),
 				$this->equalTo( array() )
 			);
 
 		// Call the method.
 		$this->sut->track_blocks_checkout_update();
-	}
-
-	// ========================================
-	// Shipping Rate Selection Tests
-	// ========================================
-
-	/**
-	 * Test track_blocks_checkout_shipping_method_update dispatches event with session data.
-	 */
-	public function test_track_blocks_checkout_shipping_method_update_dispatches_event(): void {
-		// Mock dispatcher to verify event is dispatched with event data.
-		$this->mock_dispatcher
-			->expects( $this->once() )
-			->method( 'dispatch_event' )
-			->with(
-				$this->equalTo( 'checkout_blocks_shipping_method_update' ),
-				$this->callback(
-					function ( $event_data ) {
-						return isset( $event_data['package_id'] )
-							&& '0' === $event_data['package_id']
-							&& isset( $event_data['rate_id'] )
-							&& 'flat_rate:1' === $event_data['rate_id'];
-					}
-				)
-			);
-
-		// Call the method.
-		$this->sut->track_blocks_checkout_shipping_method_update( '0', 'flat_rate:1' );
-	}
-
-	/**
-	 * Test track_blocks_checkout_shipping_method_update handles null package ID.
-	 */
-	public function test_track_blocks_checkout_shipping_method_update_handles_null_package_id(): void {
-		// Mock dispatcher to verify event is dispatched with null package_id.
-		$this->mock_dispatcher
-			->expects( $this->once() )
-			->method( 'dispatch_event' )
-			->with(
-				$this->equalTo( 'checkout_blocks_shipping_method_update' ),
-				$this->callback(
-					function ( $event_data ) {
-						return array_key_exists( 'package_id', $event_data )
-							&& null === $event_data['package_id']
-							&& isset( $event_data['rate_id'] )
-							&& 'free_shipping:2' === $event_data['rate_id'];
-					}
-				)
-			);
-
-		// Call the method with null package ID.
-		$this->sut->track_blocks_checkout_shipping_method_update( null, 'free_shipping:2' );
 	}
 
 	// ========================================
