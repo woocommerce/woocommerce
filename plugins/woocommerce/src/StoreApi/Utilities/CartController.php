@@ -226,7 +226,7 @@ class CartController {
 		);
 
 		// Track cart event for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+		if ( $product instanceof \WC_Product && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
 			wc_get_container()->get( CartEventTracker::class )
 				->track_cart_item_added( $cart_id, $this->get_product_id( $product ), (int) $request_quantity, $this->get_variation_id( $product ) );
 		}
