@@ -29,14 +29,23 @@ class CheckoutEventTracker {
 	private FraudProtectionDispatcher $dispatcher;
 
 	/**
+	 * Session data collector instance.
+	 *
+	 * @var SessionDataCollector
+	 */
+	private SessionDataCollector $session_data_collector;
+
+	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
 	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
+	 * @param SessionDataCollector $session_data_collector The session data collector instance.
 	 */
-	final public function init( FraudProtectionDispatcher $dispatcher ): void {
+	final public function init( FraudProtectionDispatcher $dispatcher, SessionDataCollector $session_data_collector ): void {
 		$this->dispatcher = $dispatcher;
+		$this->session_data_collector = $session_data_collector;
 	}
 
 	/**
@@ -78,6 +87,7 @@ class CheckoutEventTracker {
 	 * Track shortcode checkout field update event.
 	 *
 	 * Triggered when checkout fields are updated via AJAX (woocommerce_update_order_review).
+	 * Only dispatches event when billing or shipping country changes to reduce unnecessary API calls.
 	 *
 	 * @internal
 	 *
@@ -91,9 +101,34 @@ class CheckoutEventTracker {
 			parse_str( $posted_data, $data );
 		}
 
-		// Build and dispatch the event.
-		$event_data = $this->format_checkout_event_data( 'field_update', $data );
-		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
+		// Get current customer countries using SessionDataCollector.
+		$current_billing_country  = $this->session_data_collector->get_current_billing_country();
+		$current_shipping_country = $this->session_data_collector->get_current_shipping_country();
+
+		// Get posted countries.
+		$posted_billing_country  = $data['billing_country'] ?? '';
+		$posted_shipping_country = $data['shipping_country'] ?? '';
+
+		// Check if billing country changed.
+		$billing_changed = ! empty( $posted_billing_country ) && $posted_billing_country !== $current_billing_country;
+
+		// Check if shipping country changed.
+		$ship_to_different = ! empty( $data['ship_to_different_address'] );
+		if ( $ship_to_different ) {
+			// User wants different shipping address - check if shipping country changed.
+			$shipping_changed = ! empty( $posted_shipping_country ) && $posted_shipping_country !== $current_shipping_country;
+		} else {
+			// User wants same address for billing and shipping.
+			// If current shipping country exists and differs from billing country, it's a change.
+			$effective_billing_country = ! empty( $posted_billing_country ) ? $posted_billing_country : $current_billing_country;
+			$shipping_changed          = ! empty( $current_shipping_country ) && $current_shipping_country !== $effective_billing_country;
+		}
+
+		// Only dispatch if either country changed.
+		if ( $billing_changed || $shipping_changed ) {
+			$event_data = $this->format_checkout_event_data( 'field_update', $data );
+			$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
+		}
 	}
 
 	/**

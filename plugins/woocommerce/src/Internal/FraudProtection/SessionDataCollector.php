@@ -75,6 +75,60 @@ class SessionDataCollector {
 	}
 
 	/**
+	 * Get current billing country from customer data.
+	 *
+	 * Reuses the same logic as get_billing_address() but returns only the country.
+	 * Tries WC_Customer first, falls back to session data, with graceful error handling.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return string|null Current billing country code or null if unavailable.
+	 */
+	public function get_current_billing_country(): ?string {
+		try {
+			if ( WC()->customer instanceof \WC_Customer ) {
+				$country = WC()->customer->get_billing_country();
+				return ! empty( $country ) ? \sanitize_text_field( $country ) : null;
+			} elseif ( WC()->session instanceof \WC_Session ) {
+				$customer_data = WC()->session->get( 'customer' );
+				if ( is_array( $customer_data ) && ! empty( $customer_data['country'] ) ) {
+					return \sanitize_text_field( $customer_data['country'] );
+				}
+			}
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Graceful degradation.
+		}
+		return null;
+	}
+
+	/**
+	 * Get current shipping country from customer data.
+	 *
+	 * Reuses the same logic as get_shipping_address() but returns only the country.
+	 * Tries WC_Customer first, falls back to session data, with graceful error handling.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return string|null Current shipping country code or null if unavailable.
+	 */
+	public function get_current_shipping_country(): ?string {
+		try {
+			if ( WC()->customer instanceof \WC_Customer ) {
+				$country = WC()->customer->get_shipping_country();
+				return ! empty( $country ) ? \sanitize_text_field( $country ) : null;
+			} elseif ( WC()->session instanceof \WC_Session ) {
+				$customer_data = WC()->session->get( 'customer' );
+				if ( is_array( $customer_data ) && ! empty( $customer_data['shipping_country'] ) ) {
+					return \sanitize_text_field( $customer_data['shipping_country'] );
+				}
+			}
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Graceful degradation.
+		}
+		return null;
+	}
+
+	/**
 	 * Get session data including session ID, IP address, email, and user agent.
 	 *
 	 * Collects session identification and tracking data with graceful degradation
