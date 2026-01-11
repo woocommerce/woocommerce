@@ -1338,17 +1338,17 @@ class WC_Cart extends WC_Legacy_Cart {
 					),
 					$cart_item_key
 				);
+
+				// Track cart event for fraud protection (only for newly added items).
+				if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+					wc_get_container()->get( CartEventTracker::class )
+						->track_cart_item_added( $cart_item_key, (int) $product_id, (int) $quantity, $variation_id );
+				}
 			}
 
 			$this->cart_contents = apply_filters( 'woocommerce_cart_contents_changed', $this->cart_contents );
 
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
-
-			// Track cart event for fraud protection.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-				wc_get_container()->get( CartEventTracker::class )
-					->track_cart_item_added( $cart_item_key, (int) $product_id, $quantity, $variation_id );
-			}
 
 			return $cart_item_key;
 
