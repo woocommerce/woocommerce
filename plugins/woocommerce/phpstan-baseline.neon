@@ -82281,7 +82281,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_product_id\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 4
 			path: src/StoreApi/Utilities/CartController.php
 
 		-
@@ -82293,7 +82293,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$product of method Automattic\\WooCommerce\\StoreApi\\Utilities\\CartController\:\:get_variation_id\(\) expects WC_Product, Automattic\\WooCommerce\\StoreApi\\Utilities\\Error\|WC_Product given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 4
 			path: src/StoreApi/Utilities/CartController.php
 
 		-
