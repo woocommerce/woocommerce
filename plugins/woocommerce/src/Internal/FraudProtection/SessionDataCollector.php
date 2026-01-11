@@ -65,6 +65,7 @@ class SessionDataCollector {
 		return array(
 			'event_type'       => $event_type,
 			'timestamp'        => gmdate( 'Y-m-d H:i:s' ),
+			'wc_version'       => WC()->version,
 			'session'          => $this->get_session_data(),
 			'customer'         => $this->get_customer_data(),
 			'order'            => $this->get_order_data( $order_id_from_event ),
