@@ -108,7 +108,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock SessionDataCollector to return different billing country.
 		$this->mock_session_data_collector
 			->method( 'get_current_billing_country' )
-			->willReturn( 'CA' ); // Current country is CA
+			->willReturn( 'CA' ); // Current country is CA.
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
@@ -145,7 +145,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock SessionDataCollector to return different billing country.
 		$this->mock_session_data_collector
 			->method( 'get_current_billing_country' )
-			->willReturn( 'CA' ); // Current country is CA
+			->willReturn( 'CA' ); // Current country is CA.
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
@@ -190,7 +190,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
-			->willReturn( 'CA' ); // Current shipping country is CA
+			->willReturn( 'CA' ); // Current shipping country is CA.
 
 		// Mock scheduler to capture event data.
 		$captured_event_data = null;
@@ -224,7 +224,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock SessionDataCollector to return different billing country.
 		$this->mock_session_data_collector
 			->method( 'get_current_billing_country' )
-			->willReturn( 'CA' ); // Current billing country is CA
+			->willReturn( 'CA' ); // Current billing country is CA.
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
@@ -262,7 +262,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock SessionDataCollector to return different billing country.
 		$this->mock_session_data_collector
 			->method( 'get_current_billing_country' )
-			->willReturn( 'CA' ); // Current country is CA
+			->willReturn( 'CA' ); // Current country is CA.
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
@@ -293,11 +293,11 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock SessionDataCollector to return current countries.
 		$this->mock_session_data_collector
 			->method( 'get_current_billing_country' )
-			->willReturn( 'US' ); // Current billing country matches posted
+			->willReturn( 'US' ); // Current billing country matches posted.
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
-			->willReturn( 'CA' ); // Current shipping country is CA
+			->willReturn( 'CA' ); // Current shipping country is CA.
 
 		// Expect event to be dispatched once.
 		$this->mock_dispatcher
@@ -324,11 +324,11 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock SessionDataCollector to return same countries as posted.
 		$this->mock_session_data_collector
 			->method( 'get_current_billing_country' )
-			->willReturn( 'US' ); // Same as posted
+			->willReturn( 'US' ); // Same as posted.
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
-			->willReturn( 'US' ); // Same as posted
+			->willReturn( 'US' ); // Same as posted.
 
 		// Expect event to NOT be dispatched.
 		$this->mock_dispatcher
@@ -374,7 +374,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
-			->willReturn( 'US' ); // Already matches billing - no change
+			->willReturn( 'US' ); // Already matches billing - no change.
 
 		// Expect event to NOT be dispatched (no effective change).
 		$this->mock_dispatcher
@@ -393,7 +393,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Mock SessionDataCollector to return null for current billing country.
 		$this->mock_session_data_collector
 			->method( 'get_current_billing_country' )
-			->willReturn( null ); // No current billing country
+			->willReturn( null ); // No current billing country.
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
@@ -423,7 +423,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
-			->willReturn( 'CA' ); // Was different
+			->willReturn( 'CA' ); // Was different.
 
 		// Expect event to be dispatched (shipping effectively changed from CA to US).
 		$this->mock_dispatcher
@@ -450,7 +450,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 
 		$this->mock_session_data_collector
 			->method( 'get_current_shipping_country' )
-			->willReturn( 'US' ); // Same as billing
+			->willReturn( 'US' ); // Same as billing.
 
 		// Expect event to NOT be dispatched (no effective change).
 		$this->mock_dispatcher

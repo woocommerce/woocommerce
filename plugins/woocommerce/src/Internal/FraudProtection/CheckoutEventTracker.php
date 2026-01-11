@@ -40,11 +40,11 @@ class CheckoutEventTracker {
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
-	 * @param SessionDataCollector $session_data_collector The session data collector instance.
+	 * @param FraudProtectionDispatcher $dispatcher                The fraud protection dispatcher instance.
+	 * @param SessionDataCollector      $session_data_collector    The session data collector instance.
 	 */
 	final public function init( FraudProtectionDispatcher $dispatcher, SessionDataCollector $session_data_collector ): void {
-		$this->dispatcher = $dispatcher;
+		$this->dispatcher             = $dispatcher;
 		$this->session_data_collector = $session_data_collector;
 	}
 
