@@ -129,8 +129,8 @@ class ApiClient {
 			return self::DECISION_ALLOW;
 		}
 
-		$session     = is_array( $session_data['session'] ?? null ) ? $session_data['session'] : array();
-		$session_id  = $session['session_id'] ?? 'unknown';
+		$session    = is_array( $session_data['session'] ?? null ) ? $session_data['session'] : array();
+		$session_id = $session['session_id'] ?? 'unknown';
 		FraudProtectionController::log(
 			'info',
 			sprintf(
