@@ -42,6 +42,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that hooks are registered when feature is enabled.
+	 *
 	 * @testdox Should register hooks when feature is enabled.
 	 */
 	public function test_hooks_registered_when_feature_enabled(): void {
@@ -54,6 +56,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that hooks are not registered when feature is disabled.
+	 *
 	 * @testdox Should not register hooks when feature is disabled.
 	 */
 	public function test_hooks_not_registered_when_feature_disabled(): void {
@@ -72,6 +76,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test payment method added event tracking.
+	 *
 	 * @testdox Should track payment method added event.
 	 */
 	public function test_handle_payment_method_added(): void {
@@ -89,17 +95,20 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token->set_user_id( $user_id );
 		$token->save();
 
+		// Verify that the event was sent to the API with correct payload.
 		$this->assertLogged(
 			'info',
-			'payment_method_added',
+			'Sending fraud protection event: payment_method_added',
 			array(
-				'source'         => 'woo-fraud-protection',
-				'event_type'     => 'payment_method_added',
-				'collected_data' => array(
+				'source'  => 'woo-fraud-protection',
+				'payload' => array(
+					'event_type' => 'payment_method_added',
 					'event_data' => array(
 						'action'     => 'added',
 						'token_id'   => $token->get_id(),
 						'gateway_id' => 'stripe',
+						'card_type'  => 'visa',
+						'card_last4' => '4242',
 					),
 				),
 			)
@@ -107,6 +116,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test payment method updated event tracking.
+	 *
 	 * @testdox Should track payment method updated event.
 	 */
 	public function test_handle_payment_method_updated(): void {
@@ -128,17 +139,19 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token->set_expiry_year( '2027' );
 		$token->save();
 
+		// Verify that the event was sent to the API with correct payload.
 		$this->assertLogged(
 			'info',
-			'payment_method_updated',
+			'Sending fraud protection event: payment_method_updated',
 			array(
-				'source'         => 'woo-fraud-protection',
-				'event_type'     => 'payment_method_updated',
-				'collected_data' => array(
+				'source'  => 'woo-fraud-protection',
+				'payload' => array(
+					'event_type' => 'payment_method_updated',
 					'event_data' => array(
 						'action'     => 'updated',
 						'token_id'   => $token->get_id(),
 						'gateway_id' => 'stripe',
+						'card_type'  => 'mastercard',
 					),
 				),
 			)
@@ -146,6 +159,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test payment method set as default event tracking.
+	 *
 	 * @testdox Should track payment method set as default event.
 	 */
 	public function test_handle_payment_method_set_default(): void {
@@ -181,13 +196,14 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment, WooCommerce.Commenting.CommentHooks.MissingSinceComment
 		do_action( 'woocommerce_payment_token_set_default', $token2->get_id(), $token2 );
 
+		// Verify that the event was sent to the API with correct payload.
 		$this->assertLogged(
 			'info',
-			'payment_method_set_default',
+			'Sending fraud protection event: payment_method_set_default',
 			array(
-				'source'         => 'woo-fraud-protection',
-				'event_type'     => 'payment_method_set_default',
-				'collected_data' => array(
+				'source'  => 'woo-fraud-protection',
+				'payload' => array(
+					'event_type' => 'payment_method_set_default',
 					'event_data' => array(
 						'action'     => 'set_default',
 						'token_id'   => $token2->get_id(),
@@ -200,6 +216,8 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test payment method deleted event tracking.
+	 *
 	 * @testdox Should track payment method deleted event.
 	 */
 	public function test_handle_payment_method_deleted(): void {
@@ -220,13 +238,14 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		// Delete the token to trigger the 'deleted' event.
 		\WC_Payment_Tokens::delete( $token->get_id() );
 
+		// Verify that the event was sent to the API with correct payload.
 		$this->assertLogged(
 			'info',
-			'payment_method_deleted',
+			'Sending fraud protection event: payment_method_deleted',
 			array(
-				'source'         => 'woo-fraud-protection',
-				'event_type'     => 'payment_method_deleted',
-				'collected_data' => array(
+				'source'  => 'woo-fraud-protection',
+				'payload' => array(
+					'event_type' => 'payment_method_deleted',
 					'event_data' => array(
 						'action'     => 'deleted',
 						'token_id'   => $token->get_id(),

@@ -14,9 +14,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Tracks checkout events for fraud protection analysis.
  *
- * This class hooks into WooCommerce checkout events (billing/email changes,
- * payment selection) and triggers comprehensive event tracking with full session
- * context.
+ * This class hooks into both WooCommerce Blocks (Store API) and traditional
+ * shortcode checkout events, triggering fraud protection event dispatching.
+ * Event-specific data is passed to the dispatcher which handles session data collection internally.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
@@ -24,18 +24,11 @@ defined( 'ABSPATH' ) || exit;
 class CheckoutEventTracker implements RegisterHooksInterface {
 
 	/**
-	 * Fraud protection tracker instance.
+	 * Fraud protection dispatcher instance.
 	 *
-	 * @var FraudProtectionTracker
+	 * @var FraudProtectionDispatcher
 	 */
-	private FraudProtectionTracker $tracker;
-
-	/**
-	 * Session data collector instance.
-	 *
-	 * @var SessionDataCollector
-	 */
-	private SessionDataCollector $data_collector;
+	private FraudProtectionDispatcher $dispatcher;
 
 	/**
 	 * Fraud protection controller instance.
@@ -49,25 +42,23 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionTracker    $tracker                     The fraud protection tracker instance.
-	 * @param SessionDataCollector      $data_collector              The session data collector instance.
+	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
 	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
 	 */
 	final public function init(
-		FraudProtectionTracker $tracker,
-		SessionDataCollector $data_collector,
+		FraudProtectionDispatcher $dispatcher,
 		FraudProtectionController $fraud_protection_controller
 	): void {
-		$this->tracker                     = $tracker;
-		$this->data_collector              = $data_collector;
+		$this->dispatcher                  = $dispatcher;
 		$this->fraud_protection_controller = $fraud_protection_controller;
 	}
 
 	/**
 	 * Register checkout event hooks.
 	 *
-	 * Hooks into WooCommerce checkout actions to track fraud protection events.
-	 * Only registers hooks if the fraud protection feature is enabled.
+	 * Hooks into both WooCommerce Blocks (Store API) and traditional checkout
+	 * actions to track fraud protection events. Only registers hooks if the
+	 * fraud protection feature is enabled.
 	 *
 	 * @return void
 	 */
@@ -77,12 +68,27 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 			return;
 		}
 
-		// Traditional checkout: Track when checkout fields are updated.
-		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_checkout_field_update' ), 10, 1 );
+		// Shortcode checkout: Track when checkout fields are updated.
+		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_shortcode_checkout_field_update' ), 10, 1 );
 	}
 
 	/**
-	 * Handle traditional checkout field update event.
+	 * Handle Store API customer update event (WooCommerce Blocks checkout).
+	 *
+	 * Triggered when customer information is updated via the Store API endpoint
+	 * /wc/store/v1/cart/update-customer during Blocks checkout flow.
+	 *
+	 * @internal
+	 * @return void
+	 */
+	public function track_blocks_checkout_update(): void {
+		// At this point we don't have any payment or shipping data, so we pass an empty array.
+		$this->dispatcher->dispatch_event( 'checkout_update', array() );
+	}
+
+
+	/**
+	 * Handle shortcode checkout field update event.
 	 *
 	 * Triggered when checkout fields are updated via AJAX (woocommerce_update_order_review).
 	 *
@@ -91,64 +97,39 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	 * @param string $posted_data Serialized checkout form data.
 	 * @return void
 	 */
-	public function handle_checkout_field_update( $posted_data ): void {
+	public function handle_shortcode_checkout_field_update( $posted_data ): void {
 		// Parse the posted data to extract relevant fields.
 		$data = array();
 		if ( $posted_data ) {
 			parse_str( $posted_data, $data );
 		}
 
-		$event_data = $this->build_checkout_event_data( 'field_update', $data );
-		$this->track_checkout_event( 'checkout_field_update', $event_data );
+		// Build and dispatch the event.
+		$event_data = $this->format_checkout_event_data( 'field_update', $data );
+		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
 	}
 
 	/**
 	 * Build checkout event-specific data.
 	 *
 	 * Prepares the checkout event data including action type and any changed fields.
-	 * This data will be merged with comprehensive session data during event tracking.
 	 *
-	 * @param string $action      Action type (field_update, payment_method_selected, store_api_update).
-	 * @param array  $posted_data Posted form data or event context.
+	 * @param string $action Action type (field_update, store_api_update).
+	 * @param array  $collected_event_data Posted form data or event context (may include session data).
 	 * @return array Checkout event data.
 	 */
-	private function build_checkout_event_data( string $action, array $posted_data ): array {
+	private function format_checkout_event_data( string $action, array $collected_event_data ): array {
 		$event_data = array( 'action' => $action );
 
 		// Extract and merge all checkout field groups.
 		$event_data = array_merge(
 			$event_data,
-			$this->extract_billing_fields( $posted_data ),
-			$this->extract_shipping_fields( $posted_data ),
-			$this->extract_payment_method( $posted_data ),
-			$this->extract_shipping_methods( $posted_data )
+			$this->extract_billing_fields( $collected_event_data ),
+			$this->extract_shipping_fields( $collected_event_data ),
+			$this->extract_payment_method( $collected_event_data ),
 		);
 
 		return $event_data;
-	}
-
-	/**
-	 * Extract payment method data from posted data.
-	 *
-	 * Extracts payment method ID and retrieves the readable gateway name.
-	 *
-	 * @param array $posted_data Posted form data.
-	 * @return array Payment method data with ID and name, or empty array if not found.
-	 */
-	private static function extract_payment_method( array $posted_data ): array {
-		$payment_data = array();
-
-		if ( ! empty( $posted_data['payment']['payment_method_type'] ) ) {
-			$payment_gateway_id   = sanitize_text_field( wp_unslash( $posted_data['payment']['payment_method_type'] ) );
-			$payment_gateway_name = WC()->payment_gateways()->get_payment_gateway_name_by_id( $payment_gateway_id );
-
-			$payment_data['payment'] = array(
-				'payment_gateway_type' => $payment_gateway_id,
-				'payment_gateway_name' => $payment_gateway_name,
-			);
-		}
-
-		return $payment_data;
 	}
 
 	/**
@@ -230,145 +211,25 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Extract and convert shipping method IDs to readable names.
+	 * Extract payment method data from posted data.
+	 *
+	 * Extracts payment method ID and retrieves the readable gateway name.
 	 *
 	 * @param array $posted_data Posted form data.
-	 * @return array Shipping method data wrapped in 'shipping_methods' key.
+	 * @return array Payment method data with ID and name, or empty array if not found.
 	 */
-	private function extract_shipping_methods( array $posted_data ): array {
-		$shipping_method_data = array();
+	private function extract_payment_method( array $posted_data ): array {
+		$payment_data = array();
 
-		if ( ! empty( $posted_data['shipping_method'] ) ) {
-			$shipping_method_ids = $posted_data['shipping_method'];
+		if ( ! empty( $posted_data['payment_method'] ) ) {
+			$payment_gateway_name = WC()->payment_gateways()->get_payment_gateway_name_by_id( $posted_data['payment_method'] );
 
-			$shipping_methods = $this->get_shipping_method_names( $shipping_method_ids );
-			if ( ! empty( $shipping_methods ) ) {
-				$shipping_method_data['shipping_methods'] = $shipping_methods;
-			}
-		}
-
-		return $shipping_method_data;
-	}
-
-	/**
-	 * Track a checkout event immediately.
-	 *
-	 * Collects comprehensive session data and tracks the event immediately.
-	 *
-	 * @param string $event_type          Event type identifier.
-	 * @param array  $event_specific_data Event-specific data to merge with session context.
-	 * @return void
-	 */
-	private function track_checkout_event( string $event_type, array $event_specific_data ): void {
-		// Collect comprehensive session data.
-		try {
-			$collected_data = $this->data_collector->collect( $event_type, $event_specific_data );
-		} catch ( \Exception $e ) {
-			// If collection fails, log and abort tracking.
-			FraudProtectionController::log(
-				'error',
-				sprintf(
-					'Failed to collect session data for checkout event: %s | Error: %s',
-					$event_type,
-					$e->getMessage()
-				),
-				array(
-					'event_type' => $event_type,
-					'exception'  => $e,
-				)
-			);
-			return;
-		}
-
-		// Track the event immediately.
-		$this->tracker->track_event( $event_type, $collected_data );
-	}
-
-	/**
-	 * Get readable shipping method names from shipping method IDs.
-	 *
-	 * Converts shipping method IDs (e.g., "flat_rate:1", "free_shipping:2")
-	 * to their human-readable labels by loading the shipping method instances.
-	 *
-	 * @param array $shipping_method_ids Array of shipping method IDs.
-	 * @return array Associative array mapping shipping method IDs to their names.
-	 */
-	private function get_shipping_method_names( array $shipping_method_ids ): array {
-		$shipping_method_map = array();
-
-		try {
-			// Get WooCommerce shipping instance.
-			$shipping = WC()->shipping();
-			if ( ! $shipping ) {
-				return $shipping_method_map;
-			}
-
-			// Get all available shipping methods.
-			$shipping_methods = $shipping->get_shipping_methods();
-
-			foreach ( $shipping_method_ids as $method_id ) {
-				if ( ! is_string( $method_id ) ) {
-					continue;
-				}
-
-				// Sanitize the method ID.
-				$method_id = sanitize_text_field( $method_id );
-
-				// Shipping method IDs can be in format "method_id:instance_id".
-				// Extract the base method ID.
-				$method_parts   = explode( ':', $method_id );
-				$base_method_id = $method_parts[0];
-				$instance_id    = isset( $method_parts[1] ) ? $method_parts[1] : null;
-
-				// Try to get the method label.
-				$method_label = null;
-
-				// If we have an instance ID, try to get the specific instance label.
-				if ( $instance_id && WC()->session instanceof \WC_Session ) {
-					// Get chosen shipping methods from session or packages.
-					$packages = WC()->shipping()->get_packages();
-
-					foreach ( $packages as $package ) {
-						if ( isset( $package['rates'][ $method_id ] ) ) {
-							$rate         = $package['rates'][ $method_id ];
-							$method_label = $rate->get_label();
-							break;
-						}
-					}
-				}
-
-				// Fallback to base method title if no instance label found.
-				if ( ! $method_label && isset( $shipping_methods[ $base_method_id ] ) ) {
-					$method = $shipping_methods[ $base_method_id ];
-					if ( method_exists( $method, 'get_method_title' ) ) {
-						$method_label = $method->get_method_title();
-					} elseif ( property_exists( $method, 'method_title' ) ) {
-						$method_label = $method->method_title;
-					}
-				}
-
-				// Use the method ID as fallback if no label found.
-				if ( ! $method_label ) {
-					$method_label = $method_id;
-				}
-
-				$shipping_method_map[ $method_id ] = $method_label;
-			}
-		} catch ( \Exception $e ) {
-			// Gracefully handle errors - return what we have so far.
-			FraudProtectionController::log(
-				'warning',
-				sprintf(
-					'Failed to get shipping method names: %s',
-					$e->getMessage()
-				),
-				array(
-					'shipping_method_ids' => $shipping_method_ids,
-					'exception'           => $e,
-				)
+			$payment_data['payment'] = array(
+				'payment_gateway_type' => $posted_data['payment_method'],
+				'payment_gateway_name' => $payment_gateway_name,
 			);
 		}
 
-		return $shipping_method_map;
+		return $payment_data;
 	}
 }
