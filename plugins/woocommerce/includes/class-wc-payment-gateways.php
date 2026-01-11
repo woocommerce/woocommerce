@@ -11,6 +11,8 @@
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -392,6 +394,12 @@ All at %6$s
 	 * @return array The available payment gateways.
 	 */
 	public function get_available_payment_gateways() {
+		// Early return if fraud protection blocks session.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+			return array();
+		}
+
 		$_available_gateways = array();
 
 		foreach ( $this->payment_gateways as $gateway ) {
