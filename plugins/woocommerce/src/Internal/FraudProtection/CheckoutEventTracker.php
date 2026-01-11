@@ -63,27 +63,6 @@ class CheckoutEventTracker {
 	}
 
 	/**
-	 * Track Store API shipping update event (WooCommerce Blocks checkout).
-	 *
-	 * Triggered when shipping information is updated via the Store API endpoint
-	 * /wc/store/v1/cart/select-shipping-rate during Blocks checkout flow.
-	 *
-	 * @internal
-	 *
-	 * @param string|null $package_id The package ID being updated (null for all packages).
-	 * @param string      $rate_id The chosen shipping rate ID.
-	 * @return void
-	 */
-	public function track_blocks_checkout_shipping_method_update( ?string $package_id, string $rate_id ): void {
-		$event_data = array(
-			'package_id' => $package_id,
-			'rate_id'    => $rate_id,
-		);
-
-		$this->dispatcher->dispatch_event( 'checkout_blocks_shipping_method_update', $event_data );
-	}
-
-	/**
 	 * Track shortcode checkout field update event.
 	 *
 	 * Triggered when checkout fields are updated via AJAX (woocommerce_update_order_review).
