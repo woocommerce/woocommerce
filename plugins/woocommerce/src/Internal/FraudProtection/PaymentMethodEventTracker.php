@@ -12,8 +12,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Tracks payment method events for fraud protection analysis.
  *
- * This class provides methods to track payment method events in My Account
- * (add, update, set default, delete) for fraud protection event dispatching.
+ * This class provides methods to track events for adding payment methods in My Account page
+ * for fraud protection.
  * Event-specific data is passed to the dispatcher which handles session data collection internally.
  *
  * @since 10.5.0
