@@ -119,7 +119,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
 			->with(
-				$this->equalTo( 'checkout_field_update' ),
+				$this->equalTo( 'checkout_update' ),
 				$this->callback(
 					function ( $event_data ) {
 						return isset( $event_data['action'] )
@@ -273,7 +273,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
 			->with(
-				$this->equalTo( 'checkout_field_update' ),
+				$this->equalTo( 'checkout_update' ),
 				$this->callback(
 					function ( $event_data ) {
 						return isset( $event_data['billing_country'] ) && 'US' === $event_data['billing_country'];
@@ -304,7 +304,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
 			->with(
-				$this->equalTo( 'checkout_field_update' ),
+				$this->equalTo( 'checkout_update' ),
 				$this->callback(
 					function ( $event_data ) {
 						return isset( $event_data['shipping_country'] ) && 'US' === $event_data['shipping_country'];
@@ -430,7 +430,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
 			->with(
-				$this->equalTo( 'checkout_field_update' ),
+				$this->equalTo( 'checkout_update' ),
 				$this->anything()
 			);
 

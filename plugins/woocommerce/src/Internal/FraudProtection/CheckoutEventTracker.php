@@ -127,7 +127,7 @@ class CheckoutEventTracker {
 		// Only dispatch if either country changed.
 		if ( $billing_changed || $shipping_changed ) {
 			$event_data = $this->format_checkout_event_data( 'field_update', $data );
-			$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
+			$this->dispatcher->dispatch_event( 'checkout_update', $event_data );
 		}
 	}
 
