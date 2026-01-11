@@ -315,10 +315,10 @@ class CartControllerTests extends TestCase {
 			->expects( $this->once() )
 			->method( 'track_cart_item_added' )
 			->with(
-				$this->isType( 'string' ), // cart_id
-				$this->equalTo( $product->get_id() ), // product_id
-				$this->equalTo( 2 ), // quantity
-				$this->equalTo( 0 ) // variation_id
+				$this->isType( 'string' ), // cart_id.
+				$this->equalTo( $product->get_id() ), // product_id.
+				$this->equalTo( 2 ), // quantity.
+				$this->equalTo( 0 ) // variation_id.
 			);
 
 		// Use Store API CartController to add item.
@@ -404,10 +404,10 @@ class CartControllerTests extends TestCase {
 			->expects( $this->once() )
 			->method( 'track_cart_item_added' )
 			->with(
-				$this->isType( 'string' ), // cart_id
-				$this->equalTo( $variable_product->get_id() ), // product_id
-				$this->equalTo( 1 ), // quantity
-				$this->equalTo( $variation_id ) // variation_id
+				$this->isType( 'string' ), // cart_id.
+				$this->equalTo( $variable_product->get_id() ), // product_id.
+				$this->equalTo( 1 ), // quantity.
+				$this->equalTo( $variation_id ) // variation_id.
 			);
 
 		// Use Store API CartController to add variation with all required attributes.
