@@ -21,6 +21,11 @@ class CartControllerTests extends TestCase {
 		parent::tearDown();
 		WC()->cart->empty_cart();
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
+
+		// Reset DI container to clear any mocks.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->reset_all_replacements();
 	}
 
 	/**
@@ -329,9 +334,6 @@ class CartControllerTests extends TestCase {
 				'quantity' => 2,
 			)
 		);
-
-		// Reset container.
-		$container->reset_all_resolved();
 	}
 
 	/**
@@ -371,9 +373,6 @@ class CartControllerTests extends TestCase {
 				'quantity' => 1,
 			)
 		);
-
-		// Reset container.
-		$container->reset_all_resolved();
 	}
 
 	/**
@@ -411,23 +410,30 @@ class CartControllerTests extends TestCase {
 			);
 
 		// Use Store API CartController to add variation with all required attributes.
+		// CartController::parse_variation_data() expects an array of {attribute, value} pairs.
 		$cart_controller = new CartController();
 		$cart_controller->add_to_cart(
 			array(
 				'id'        => $variation_id,
 				'quantity'  => 1,
 				'variation' => array(
-					'attribute_pa_size'   => 'huge',
-					'attribute_pa_colour' => 'red',
-					'attribute_pa_number' => '0',
+					array(
+						'attribute' => 'attribute_pa_size',
+						'value'     => 'huge',
+					),
+					array(
+						'attribute' => 'attribute_pa_colour',
+						'value'     => 'red',
+					),
+					array(
+						'attribute' => 'attribute_pa_number',
+						'value'     => '0',
+					),
 				),
 			)
 		);
 
 		// Clean up.
 		$variable_product->delete( true );
-
-		// Reset container.
-		$container->reset_all_resolved();
 	}
 }
