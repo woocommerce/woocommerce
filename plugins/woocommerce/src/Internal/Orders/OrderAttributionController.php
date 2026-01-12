@@ -58,10 +58,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private $proxy;
 
 	/**
-	 * Tracks whether stamp_html_element() has been called in single-output mode.
+	 * Tracks whether stamp_html_element() has been called in single-output mode during the current request.
 	 *
 	 * When wc_order_attribution_allow_multiple_elements filter returns false,
-	 * this flag prevents duplicate outputs across multiple action hooks.
+	 * this flag prevents duplicate outputs across multiple action hooks within a single request.
+	 *
+	 * Note: This flag is reset at the start of each request in on_init() to ensure
+	 * proper behavior in persistent PHP environments (PHP-FPM, OpCache).
 	 *
 	 * @var bool
 	 */
@@ -108,6 +111,9 @@ class OrderAttributionController implements RegisterHooksInterface {
 		if ( ! $this->feature_controller->feature_is_enabled( 'order_attribution' ) ) {
 			return;
 		}
+
+		// Reset the static flag at the start of each request to prevent issues in persistent PHP environments.
+		self::$is_stamp_html_called = false;
 
 		// Register WPConsentAPI integration.
 		$this->consent->register();
