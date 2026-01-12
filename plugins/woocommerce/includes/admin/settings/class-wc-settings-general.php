@@ -405,6 +405,9 @@ class WC_Settings_General extends WC_Settings_Page {
 	public function output() {
 		// Use React-based settings UI if feature flag is enabled.
 		if ( Features::is_enabled( 'general-settings-react' ) ) {
+			// Hide the default save button since React UI has its own.
+			$GLOBALS['hide_save_button'] = true;
+
 			// Slot for React-based settings UI.
 			echo '<div id="wc_general_settings_slotfill"> </div>';
 
