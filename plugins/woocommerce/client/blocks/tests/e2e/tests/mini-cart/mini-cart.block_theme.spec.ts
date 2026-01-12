@@ -222,7 +222,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			.getByRole( 'button', { name: 'Increase quantity of Polo' } )
 			.click();
 
-		await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+		await page.waitForResponse( '**/wp-json/wc/store/v1/batch**' );
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
@@ -232,7 +232,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			.getByRole( 'button', { name: 'Reduce quantity of Polo' } )
 			.click();
 
-		await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+		await page.waitForResponse( '**/wp-json/wc/store/v1/batch**' );
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
