@@ -8,6 +8,9 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
+use Automattic\WooCommerce\Internal\FraudProtection\BlockedSessionNotice;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 
 /**
  * Checkout class.
@@ -151,6 +154,16 @@ class Checkout extends AbstractCartRoute {
 
 		if ( is_wp_error( $nonce_check ) ) {
 			$response = $nonce_check;
+		}
+
+		// Block early if session is blocked by fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+			$response = $this->get_route_error_response(
+				'woocommerce_rest_checkout_error',
+				wc_get_container()->get( BlockedSessionNotice::class )->get_message_plaintext( 'checkout' ),
+				403
+			);
 		}
 
 		if ( ! $response ) {

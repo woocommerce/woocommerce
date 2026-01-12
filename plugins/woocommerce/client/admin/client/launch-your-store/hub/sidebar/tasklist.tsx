@@ -4,7 +4,7 @@
  * External dependencies
  */
 import { onboardingStore, TaskType } from '@woocommerce/data';
-import { navigateTo, getNewPath } from '@woocommerce/navigation';
+import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { resolveSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
 import clsx from 'clsx';
@@ -81,6 +81,37 @@ export const getLysTasklist = async () => {
 			filteredTasks.includes( task.id )
 		),
 	};
+};
+
+/**
+ * Helper function to fetch the payments task from the LYS tasklist.
+ * Handles validation and error logging.
+ *
+ * @return {Promise<TaskType | undefined>} The payments task or undefined if not found or on error.
+ */
+export const getPaymentsTaskFromLysTasklist = async (): Promise<
+	TaskType | undefined
+> => {
+	try {
+		const tasklist = await getLysTasklist();
+
+		// Validate that fullLysTaskList is an array
+		if ( ! Array.isArray( tasklist?.fullLysTaskList ) ) {
+			// eslint-disable-next-line no-console
+			console.error(
+				'Invalid tasklist data: fullLysTaskList is not an array'
+			);
+			return undefined;
+		}
+
+		return tasklist.fullLysTaskList.find(
+			( task ) => task.id === 'payments'
+		);
+	} catch ( error ) {
+		// eslint-disable-next-line no-console
+		console.error( 'Error fetching payments task:', error );
+		return undefined;
+	}
 };
 
 export function taskClickedAction( event: {
