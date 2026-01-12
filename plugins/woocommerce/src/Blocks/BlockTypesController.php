@@ -57,14 +57,14 @@ final class BlockTypesController {
 	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'init', array( $this, 'register_blocks' ) );
 		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
-		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
+		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 1 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
-		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 2 );
+		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
 	}
 
 	/**
@@ -748,7 +748,7 @@ final class BlockTypesController {
 	public function apply_woocommerce_breadcrumb_filters( $items ) {
 		// Convert Core format to WooCommerce format.
 		// Core: array( 'url' => '...', 'title' => '...' )
-		// Woo: array( 'title', 'url' )
+		// Woo: array( 'title', 'url' ).
 		$wc_crumbs = array_map(
 			function ( $item ) {
 				return array(
