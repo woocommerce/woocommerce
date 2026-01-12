@@ -403,11 +403,15 @@ function wc_sanitize_coupon_code( $value ) {
  * @return string|array
  */
 function wc_clean( $var ) {
-	if ( is_array( $var ) ) {
-		return array_map( 'wc_clean', $var );
-	} else {
-		return is_scalar( $var ) ? sanitize_text_field( $var ) : $var;
-	}
+    if ( is_array( $var ) ) {
+        return array_map( 'wc_clean', $var );
+    }
+
+    if ( is_object( $var ) || is_bool( $var ) || is_null( $var ) ) {
+        return '';
+    }
+
+    return is_scalar( $var ) ? sanitize_text_field( $var ) : $var;
 }
 
 /**
