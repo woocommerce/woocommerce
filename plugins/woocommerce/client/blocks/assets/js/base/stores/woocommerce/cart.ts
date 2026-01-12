@@ -323,6 +323,14 @@ const { state, actions } = store< Store >(
 	{
 		actions: {
 			*removeCartItem( key: string ) {
+				// Track what changes we're making for notice comparison.
+				const quantityChanges: QuantityChanges = {
+					cartItemsPendingDelete: [ key ],
+				};
+
+				// Capture cart state after optimistic updates for notice comparison.
+				let cartAfterOptimistic: typeof state.cart | null = null;
+
 				try {
 					const result = yield sendCartRequest( state, {
 						path: '/wc/store/v1/cart/remove-item',
@@ -332,27 +340,35 @@ const { state, actions } = store< Store >(
 							state.cart.items = state.cart.items.filter(
 								( item ) => item.key !== key
 							);
+							// Capture state after optimistic update.
+							cartAfterOptimistic = JSON.parse(
+								JSON.stringify( state.cart )
+							);
 						},
 						// Side effects run synchronously during reconciliation,
 						// before isProcessing clears. This prevents
 						// refreshCartItems from running during these events.
 						onSettled: ( { success } ) => {
 							if ( success ) {
-								emitSyncEvent( {
-									quantityChanges: {
-										cartItemsPendingDelete: [ key ],
-									},
-								} );
+								emitSyncEvent( { quantityChanges } );
 							}
 						},
 					} );
 
 					// Show notices from server response.
 					const cart = result.data as Cart;
-					if ( cart ) {
+					if ( cart && cartAfterOptimistic ) {
+						const infoNotices = getInfoNoticesFromCartUpdates(
+							cartAfterOptimistic,
+							cart,
+							quantityChanges
+						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices( errorNotices, true );
+						yield actions.updateNotices(
+							[ ...infoNotices, ...errorNotices ],
+							true
+						);
 					}
 				} catch ( error ) {
 					actions.showNoticeError( error as Error );
@@ -389,6 +405,15 @@ const { state, actions } = store< Store >(
 				const isUpdate = !! existingItem?.key;
 				const endpoint = isUpdate ? 'update-item' : 'add-item';
 
+				// Track what changes we're making for notice comparison.
+				const quantityChanges: QuantityChanges = isUpdate
+					? {
+							cartItemsPendingQuantity: existingItem?.key
+								? [ existingItem.key ]
+								: [],
+					  }
+					: { productsPendingAdd: [ id ] };
+
 				// Prepare the item to send.
 				let itemToSend: OptimisticCartItem;
 				if ( isUpdate && existingItem ) {
@@ -403,6 +428,9 @@ const { state, actions } = store< Store >(
 						...( variation && { variation } ),
 					} as OptimisticCartItem;
 				}
+
+				// Capture cart state after optimistic updates for notice comparison.
+				let cartAfterOptimistic: typeof state.cart | null = null;
 
 				try {
 					const result = yield sendCartRequest( state, {
@@ -422,6 +450,10 @@ const { state, actions } = store< Store >(
 								// No existing item: push new optimistic item.
 								state.cart.items.push( itemToSend );
 							}
+							// Capture state after optimistic update.
+							cartAfterOptimistic = JSON.parse(
+								JSON.stringify( state.cart )
+							);
 						},
 						// Side effects run synchronously during reconciliation,
 						// before isProcessing clears. This prevents
@@ -434,16 +466,7 @@ const { state, actions } = store< Store >(
 								} );
 
 								// Dispatch sync event
-								emitSyncEvent( {
-									quantityChanges: isUpdate
-										? {
-												cartItemsPendingQuantity:
-													existingItem?.key
-														? [ existingItem.key ]
-														: [],
-										  }
-										: { productsPendingAdd: [ id ] },
-								} );
+								emitSyncEvent( { quantityChanges } );
 							}
 						},
 					} );
@@ -452,10 +475,18 @@ const { state, actions } = store< Store >(
 					const cart = result.data as Cart;
 
 					// Show notices if enabled
-					if ( showCartUpdatesNotices && cart ) {
+					if ( showCartUpdatesNotices && cart && cartAfterOptimistic ) {
+						const infoNotices = getInfoNoticesFromCartUpdates(
+							cartAfterOptimistic,
+							cart,
+							quantityChanges
+						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices( errorNotices, true );
+						yield actions.updateNotices(
+							[ ...infoNotices, ...errorNotices ],
+							true
+						);
 					}
 
 					// Announce to screen readers
