@@ -1,0 +1,25 @@
+/**
+ * External dependencies
+ */
+@import '@wordpress/components/build-style/style.css';
+
+// Container padding to match settings-editor pattern
+.woocommerce-settings-general {
+	padding-inline: 48px;
+
+	// Card styling - dataviews provides form field styling but not card container styling
+	.dataforms-layouts-card__field.components-card,
+	.dataforms-layouts-card__field.components-surface {
+		border: 1px solid #ddd !important;
+		border-radius: 2px !important;
+		box-shadow: none !important;
+
+		.components-card__body {
+			padding: 24px !important;
+		}
+	}
+
+	.woocommerce-settings-general__actions {
+		padding-top: 24px;
+	}
+}
