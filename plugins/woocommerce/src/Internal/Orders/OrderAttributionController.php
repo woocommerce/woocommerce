@@ -391,7 +391,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 	 * Handles the `<wc-order-attribution-inputs>` element for checkout forms.
 	 *
 	 * @since 9.0.0
-	 * @deprecated 9.5.0 Use stamp_html_element() instead. This method is maintained for backwards compatibility.
+	 * @deprecated 10.5.0 Use stamp_html_element() instead. This method is maintained for backwards compatibility.
 	 *
 	 * @return void
 	 */
@@ -401,7 +401,7 @@ class OrderAttributionController implements RegisterHooksInterface {
 		/**
 		 * Filter to allow sites to opt back into single-output behavior during the transition period.
 		 *
-		 * @since 9.5.0
+		 * @since 10.5.0
 		 *
 		 * @param bool $allow_multiple_elements True to allow multiple elements (new behavior), false for single element (old behavior).
 		 */
