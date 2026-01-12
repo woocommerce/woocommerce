@@ -7,15 +7,24 @@
 .woocommerce-settings-general {
 	padding-inline: 48px;
 
-	// Card styling - dataviews provides form field styling but not card container styling
-	.dataforms-layouts-card__field.components-card,
-	.dataforms-layouts-card__field.components-surface {
-		border: 1px solid #ddd !important;
-		border-radius: 2px !important;
-		box-shadow: none !important;
+	// Add padding to card fields
+	.dataforms-layouts-card__field {
+		&.components-card,
+		&.components-surface {
+			margin-bottom: 24px !important;
 
-		.components-card__body {
-			padding: 24px !important;
+			.components-card__body {
+				padding: 24px !important;
+				// Remove top padding since header already has bottom padding
+				padding-top: 0 !important;
+			}
+
+			// Header padding - include bottom padding for spacing when collapsed
+			.components-card__header,
+			.dataforms-layouts-card__field-header {
+				padding: 24px !important;
+				margin-bottom: 0 !important;
+			}
 		}
 	}
 
