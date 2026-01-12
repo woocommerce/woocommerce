@@ -901,6 +901,91 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test searching products by global_unique_id (EAN/barcode).
+	 *
+	 * @return void
+	 */
+	public function test_search_products_by_global_unique_id() {
+		$product = new WC_Product();
+		$product->set_regular_price( 42 );
+		$product->set_name( 'Product A' );
+		$product->set_sku( 'PROD-A' );
+		$product->set_global_unique_id( '4521121209036' );
+		$product->save();
+
+		$product2 = new WC_Product();
+		$product2->set_regular_price( 42 );
+		$product2->set_name( 'Product B' );
+		$product2->set_sku( 'PROD-B' );
+		$product2->set_global_unique_id( '1234567890123' );
+		$product2->save();
+
+		$product3 = new WC_Product();
+		$product3->set_regular_price( 42 );
+		$product3->set_name( 'Product C' );
+		$product3->set_sku( 'PROD-C' );
+		$product3->set_global_unique_id( '9876543210987' );
+		$product3->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		// Full barcode search.
+		$results = $data_store->search_products( '4521121209036', '', true, true );
+		$this->assertContains( $product->get_id(), $results );
+		$this->assertNotContains( $product2->get_id(), $results );
+		$this->assertNotContains( $product3->get_id(), $results );
+
+		// Partial barcode search.
+		$results = $data_store->search_products( '123456', '', true, true );
+		$this->assertNotContains( $product->get_id(), $results );
+		$this->assertContains( $product2->get_id(), $results );
+		$this->assertNotContains( $product3->get_id(), $results );
+
+		// Another barcode search.
+		$results = $data_store->search_products( '9876543210987', '', true, true );
+		$this->assertNotContains( $product->get_id(), $results );
+		$this->assertNotContains( $product2->get_id(), $results );
+		$this->assertContains( $product3->get_id(), $results );
+	}
+
+	/**
+	 * Test searching variations by global_unique_id.
+	 *
+	 * @return void
+	 */
+	public function test_search_products_by_global_unique_id_with_variations() {
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'Variable Product' );
+		$variable_product->set_global_unique_id( '1111111111111' );
+		$variable_product->save();
+
+		// Variation with its own barcode.
+		$variation1 = new WC_Product_Variation();
+		$variation1->set_parent_id( $variable_product->get_id() );
+		$variation1->set_global_unique_id( '2222222222222' );
+		$variation1->save();
+
+		// Variation without barcode - inherits from parent.
+		$variation2 = new WC_Product_Variation();
+		$variation2->set_parent_id( $variable_product->get_id() );
+		$variation2->set_global_unique_id( '' );
+		$variation2->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		// Search parent barcode - finds parent and variation that inherits.
+		$results = $data_store->search_products( '1111111111111', '', true, true );
+		$this->assertContains( $variable_product->get_id(), $results );
+		$this->assertContains( $variation2->get_id(), $results );
+
+		// Search variation barcode - finds variation and parent (WC includes parents when variations match).
+		$results = $data_store->search_products( '2222222222222', '', true, true );
+		$this->assertContains( $variation1->get_id(), $results );
+		$this->assertContains( $variable_product->get_id(), $results );
+		$this->assertNotContains( $variation2->get_id(), $results );
+	}
+	
+	/**
 	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
 	 */
 	public function test_variable_create_all_product_variations() {
