@@ -747,8 +747,8 @@ final class BlockTypesController {
 	 */
 	public function apply_woocommerce_breadcrumb_filters( $items ) {
 		// Convert Core format to WooCommerce format.
-		// Core: array( 'url' => '...', 'title' => '...' )
-		// Woo: array( 'title', 'url' ).
+		// Core: array( 'url' => '...', 'label' => '...' )
+		// Woo: array( 'label', 'url' ).
 		$wc_crumbs = array_map(
 			function ( $item ) {
 				return array(
