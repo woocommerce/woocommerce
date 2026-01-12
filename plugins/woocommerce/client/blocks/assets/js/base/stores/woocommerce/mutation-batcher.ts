@@ -192,12 +192,17 @@ export function createMutationBatcher< TState >(
 		transitionTo( 'sending' );
 
 		try {
-			// Build the batch request
+			// Build the batch request - each inner request needs headers too
+			const requestHeaders = getHeaders();
 			const batchRequests = requestIdsToSend.map( ( id ) => {
 				const tracked = trackedRequests.get( id )!;
 				return {
 					path: tracked.request.path,
 					method: tracked.request.method,
+					headers: {
+						...requestHeaders,
+						'Content-Type': 'application/json',
+					},
 					body: tracked.request.body,
 				};
 			} );
@@ -208,7 +213,7 @@ export function createMutationBatcher< TState >(
 				cache: 'no-store',
 				headers: {
 					'Content-Type': 'application/json',
-					...getHeaders(),
+					...requestHeaders,
 				},
 				body: JSON.stringify( { requests: batchRequests } ),
 			} );
