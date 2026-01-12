@@ -261,12 +261,13 @@ class CheckoutEventTracker {
 	 * @return void
 	 */
 	public function track_order_placed( int $order_id, \WC_Order $order ): void {
-		$event_data = array(
+		$customer_id = $order->get_customer_id();
+		$event_data  = array(
 			'order_id'       => $order_id,
 			'payment_method' => $order->get_payment_method(),
 			'total'          => (float) $order->get_total(),
 			'currency'       => $order->get_currency(),
-			'customer_id'    => $order->get_customer_id() ?: 'guest',
+			'customer_id'    => $customer_id ? $customer_id : 'guest',
 			'status'         => $order->get_status(),
 		);
 
