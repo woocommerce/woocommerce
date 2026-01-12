@@ -74,14 +74,14 @@ class ApiClient {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param string               $event_type   Type of event being sent (e.g., 'cart_updated', 'checkout_started').
-	 * @param array<string, mixed> $session_data Session data to send to the endpoint.
+	 * @param string               $event_type Type of event being sent (e.g., 'cart_updated', 'checkout_started').
+	 * @param array<string, mixed> $event_data Event data to send to the endpoint.
 	 * @return string Decision: "allow" or "block".
 	 */
-	public function send_event( string $event_type, array $session_data ): string {
+	public function send_event( string $event_type, array $event_data ): string {
 		$payload = array_merge(
 			array( 'event_type' => $event_type ),
-			array_filter( $session_data, fn( $value ) => null !== $value )
+			array_filter( $event_data, fn( $value ) => null !== $value )
 		);
 
 		FraudProtectionController::log(
@@ -129,7 +129,8 @@ class ApiClient {
 			return self::DECISION_ALLOW;
 		}
 
-		$session_id = $session_data['session_id'] ?? 'unknown';
+		$session    = is_array( $event_data['session'] ?? null ) ? $event_data['session'] : array();
+		$session_id = $session['session_id'] ?? 'unknown';
 		FraudProtectionController::log(
 			'info',
 			sprintf(

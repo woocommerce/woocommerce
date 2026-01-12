@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
  * Checkout class.
@@ -228,6 +230,12 @@ class Checkout extends AbstractBlock {
 			// Note: Currently the block only takes care of the main checkout form -- if an endpoint is set, refer to the
 			// legacy shortcode instead and do not render block.
 			return wp_is_block_theme() ? do_shortcode( '[woocommerce_checkout]' ) : '[woocommerce_checkout]';
+		}
+
+		// Track checkout page loaded for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CheckoutEventTracker::class )
+				->track_checkout_page_loaded();
 		}
 
 		// Dequeue the core scripts when rendering this block.
