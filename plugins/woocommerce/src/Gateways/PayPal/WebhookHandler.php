@@ -75,7 +75,7 @@ class WebhookHandler {
 		}
 
 		// Skip if the payment is already processed.
-		$paypal_status = $order->get_meta( '_paypal_status', true );
+		$paypal_status = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true );
 		if ( in_array( $paypal_status, array( PayPalConstants::STATUS_COMPLETED, PayPalConstants::STATUS_APPROVED ), true ) ) {
 			return;
 		}
@@ -84,7 +84,7 @@ class WebhookHandler {
 		$paypal_order_id = $event['resource']['id'] ?? null;
 		if ( PayPalConstants::STATUS_APPROVED === $status ) {
 			\WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
-			$order->update_meta_data( '_paypal_status', $status );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: PayPal order ID */
@@ -133,15 +133,15 @@ class WebhookHandler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) ) {
 			return;
 		}
 
 		$transaction_id = $event['resource']['id'] ?? null;
 		$status         = $event['resource']['status'] ?? null;
 		$order->set_transaction_id( $transaction_id );
-		$order->update_meta_data( '_paypal_capture_id', $transaction_id );
-		$order->update_meta_data( '_paypal_status', $status );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, $transaction_id );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
 		$order->payment_complete();
 		$order->add_order_note(
 			sprintf(
@@ -170,7 +170,7 @@ class WebhookHandler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) ) {
 			return;
 		}
 
@@ -178,8 +178,8 @@ class WebhookHandler {
 		$status         = $event['resource']['status'] ?? null;
 		$reason         = $event['resource']['status_details']['reason'] ?? 'Unknown';
 		$order->set_transaction_id( $transaction_id );
-		$order->update_meta_data( '_paypal_capture_id', $transaction_id );
-		$order->update_meta_data( '_paypal_status', $status );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, $transaction_id );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
 		/* translators: %s: reason */
 		$order->update_status( OrderStatus::ON_HOLD, sprintf( __( 'Payment pending (reason: %s).', 'woocommerce' ), $reason ) );
 		$order->save();
@@ -202,14 +202,14 @@ class WebhookHandler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) ) {
 			return;
 		}
 
 		$transaction_id = $event['resource']['id'] ?? null;
 		$order->set_transaction_id( $transaction_id );
-		$order->update_meta_data( '_paypal_authorization_id', $transaction_id );
-		$order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_AUTHORIZED );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_ID, $transaction_id );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_AUTHORIZED );
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */

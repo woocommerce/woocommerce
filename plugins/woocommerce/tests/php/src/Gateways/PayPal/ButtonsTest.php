@@ -1,42 +1,47 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Buttons class.
+ * Unit tests for Automattic\WooCommerce\Gateways\PayPal\Buttons class.
  *
- * @package WooCommerce\Tests\Paypal.
+ * @package WooCommerce\Tests\Gateways\Paypal
  */
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/class-wc-gateway-paypal-buttons.php';
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Class WC_Gateway_Paypal_Buttons_Test.
+ * Class ButtonsTest.
  */
-class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
+class ButtonsTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The buttons instance.
 	 *
-	 * @var WC_Gateway_Paypal_Buttons
+	 * @var PayPalButtons
 	 */
-	private $buttons;
+	private PayPalButtons $buttons;
 
 	/**
 	 * Mock gateway instance.
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var \WC_Gateway_Paypal
 	 */
-	private $mock_gateway;
+	private \WC_Gateway_Paypal $mock_gateway;
 
 	/**
 	 * Original global post.
 	 *
-	 * @var WP_Post
+	 * @var \WP_Post|null
 	 */
-	private $original_post;
+	private ?\WP_Post $original_post;
 
 	/**
 	 * Set up the test environment.
+	 *
+	 * @return void
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -48,7 +53,7 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 		$this->original_post = $post;
 
 		// Create a mock gateway.
-		$this->mock_gateway           = $this->createMock( WC_Gateway_Paypal::class );
+		$this->mock_gateway           = $this->createMock( \WC_Gateway_Paypal::class );
 		$this->mock_gateway->email    = 'paypalmerchant@paypal.com';
 		$this->mock_gateway->testmode = false;
 		$this->mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
@@ -59,11 +64,13 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->buttons = new WC_Gateway_Paypal_Buttons( $this->mock_gateway );
+		$this->buttons = new PayPalButtons( $this->mock_gateway );
 	}
 
 	/**
 	 * Tear down the test environment.
+	 *
+	 * @return void
 	 */
 	public function tearDown(): void {
 		delete_option( 'woocommerce_paypal_client_id_live' );
@@ -71,6 +78,7 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 		// Restore original global post.
 		global $post;
+
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = $this->original_post;
 
@@ -84,10 +92,12 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_options returns correct structure with common options and specific options.
+	 *
+	 * @return void
 	 */
-	public function test_get_options_returns_correct_structure() {
+	public function test_get_options_returns_correct_structure(): void {
 		// Mock get_client_id and get_page_type to return test values.
-		$buttons = $this->getMockBuilder( WC_Gateway_Paypal_Buttons::class )
+		$buttons = $this->getMockBuilder( PayPalButtons::class )
 			->setConstructorArgs( array( $this->mock_gateway ) )
 			->onlyMethods( array( 'get_client_id', 'get_page_type' ) )
 			->getMock();
@@ -111,10 +121,12 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_common_options returns correct default values.
+	 *
+	 * @return void
 	 */
-	public function test_get_common_options_returns_correct_defaults() {
+	public function test_get_common_options_returns_correct_defaults(): void {
 		// Mock get_client_id to return a test client ID.
-		$buttons = $this->getMockBuilder( WC_Gateway_Paypal_Buttons::class )
+		$buttons = $this->getMockBuilder( PayPalButtons::class )
 			->setConstructorArgs( array( $this->mock_gateway ) )
 			->onlyMethods( array( 'get_client_id' ) )
 			->getMock();
@@ -138,10 +150,11 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @param bool   $is_cart Whether the current page is a cart page.
 	 * @param string $expected_page_type The expected page type.
+	 * @return void
 	 *
 	 * @dataProvider provider_page_type_scenarios
 	 */
-	public function test_get_page_type_returns_correct_value( $is_cart, $expected_page_type ) {
+	public function test_get_page_type_returns_correct_value( $is_cart, $expected_page_type ): void {
 		// Mock WordPress conditional functions using filters.
 		if ( $is_cart ) {
 			add_filter( 'woocommerce_is_cart', '__return_true' );
@@ -159,7 +172,7 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_page_type_scenarios() {
+	public function provider_page_type_scenarios(): array {
 		return array(
 			'cart_page'     => array(
 				'is_cart'            => true,
@@ -174,19 +187,23 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_client_id returns null when Orders v2 is not enabled.
+	 *
+	 * @return void
 	 */
-	public function test_get_client_id_returns_null_when_orders_v2_disabled() {
+	public function test_get_client_id_returns_null_when_orders_v2_disabled(): void {
 		$this->mock_gateway->method( 'should_use_orders_v2' )->willReturn( false );
 
-		$buttons = new WC_Gateway_Paypal_Buttons( $this->mock_gateway );
+		$buttons = new PayPalButtons( $this->mock_gateway );
 
 		$this->assertNull( $buttons->get_client_id() );
 	}
 
 	/**
 	 * Test get_client_id returns cached value when available.
+	 *
+	 * @return void
 	 */
-	public function test_get_client_id_returns_cached_value() {
+	public function test_get_client_id_returns_cached_value(): void {
 		$this->mock_gateway->testmode = false;
 
 		// Set cached client ID.
@@ -199,8 +216,10 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_client_id uses sandbox option when testmode is enabled.
+	 *
+	 * @return void
 	 */
-	public function test_get_client_id_uses_sandbox_option_in_testmode() {
+	public function test_get_client_id_uses_sandbox_option_in_testmode(): void {
 		$this->mock_gateway->testmode = true;
 
 		// Set sandbox client ID.
@@ -213,14 +232,16 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_client_id fetches from API when not cached.
+	 *
+	 * @return void
 	 */
-	public function test_get_client_id_fetches_from_api_when_not_cached() {
-		$mock_request = $this->createMock( WC_Gateway_Paypal_Request::class );
+	public function test_get_client_id_fetches_from_api_when_not_cached(): void {
+		$mock_request = $this->createMock( \WC_Gateway_Paypal_Request::class );
 		$mock_request->method( 'fetch_paypal_client_id' )->willReturn( 'test_client_id' );
 
-		$buttons = new WC_Gateway_Paypal_Buttons( $this->mock_gateway );
+		$buttons = new PayPalButtons( $this->mock_gateway );
 
-		$reflection       = new ReflectionClass( $buttons );
+		$reflection       = new \ReflectionClass( $buttons );
 		$request_property = $reflection->getProperty( 'request' );
 		$request_property->setAccessible( true );
 		$request_property->setValue( $buttons, $mock_request );
@@ -233,15 +254,17 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_client_id returns null when API fails.
+	 *
+	 * @return void
 	 */
-	public function test_get_client_id_returns_null_when_api_fails() {
-		$mock_request = $this->createMock( WC_Gateway_Paypal_Request::class );
+	public function test_get_client_id_returns_null_when_api_fails(): void {
+		$mock_request = $this->createMock( \WC_Gateway_Paypal_Request::class );
 		$mock_request->method( 'fetch_paypal_client_id' )->willReturn( '' );
 
-		$buttons = new WC_Gateway_Paypal_Buttons( $this->mock_gateway );
+		$buttons = new PayPalButtons( $this->mock_gateway );
 
 		// Use reflection to set the request property.
-		$reflection       = new ReflectionClass( $buttons );
+		$reflection       = new \ReflectionClass( $buttons );
 		$request_property = $reflection->getProperty( 'request' );
 		$request_property->setAccessible( true );
 		$request_property->setValue( $buttons, $mock_request );
@@ -257,11 +280,19 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 * @dataProvider provider_app_switch_url_scenarios
 	 *
 	 * @param string $page_type The page type.
-	 * @param string $filter_name The filter name.
+	 * @param bool   $is_checkout Whether the current page is checkout.
+	 * @param bool   $is_cart Whether the current page is cart.
 	 * @param string $post_type The post type.
 	 * @param bool   $expected_contains Whether the expected contains.
+	 * @return void
 	 */
-	public function test_get_current_page_for_app_switch( $page_type, $filter_name = null, $post_type, $expected_contains ) {
+	public function test_get_current_page_for_app_switch(
+		string $page_type,
+		bool $is_checkout,
+		bool $is_cart,
+		string $post_type,
+		bool $expected_contains
+	): void {
 		// Create a test post.
 		$post_id = $this->factory->post->create(
 			array(
@@ -273,12 +304,21 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 		// Set global post.
 		global $post;
+
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = get_post( $post_id );
 
 		// Mock the appropriate page type.
-		if ( $filter_name ) {
-			add_filter( $filter_name, '__return_true' );
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'is_checkout' => fn() => $is_checkout,
+			)
+		);
+
+		if ( $is_cart ) {
+			add_filter( 'woocommerce_is_cart', '__return_true' );
+		} else {
+			add_filter( 'woocommerce_is_cart', '__return_false' );
 		}
 
 		$url = $this->buttons->get_current_page_for_app_switch();
@@ -292,6 +332,14 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 		// Clean up.
 		wp_delete_post( $post_id, true );
+
+		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		if ( $is_cart ) {
+			remove_filter( 'woocommerce_is_cart', '__return_true' );
+		} else {
+			remove_filter( 'woocommerce_is_cart', '__return_false' );
+		}
 	}
 
 	/**
@@ -299,23 +347,26 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_app_switch_url_scenarios() {
+	public function provider_app_switch_url_scenarios(): array {
 		return array(
 			'checkout_page' => array(
 				'page_type'         => 'checkout',
-				'filter_name'       => 'woocommerce_is_checkout',
+				'is_checkout'       => true,
+				'is_cart'           => false,
 				'post_type'         => 'page',
 				'expected_contains' => true,
 			),
 			'cart_page'     => array(
 				'page_type'         => 'cart',
-				'filter_name'       => 'woocommerce_is_cart',
+				'is_checkout'       => false,
+				'is_cart'           => true,
 				'post_type'         => 'page',
 				'expected_contains' => true,
 			),
 			'other_page'    => array(
 				'page_type'         => 'other',
-				'filter_name'       => null,
+				'is_checkout'       => false,
+				'is_cart'           => false,
 				'post_type'         => 'page',
 				'expected_contains' => false,
 			),
@@ -324,8 +375,10 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test get_current_page_for_app_switch returns empty string for other pages.
+	 *
+	 * @return void
 	 */
-	public function test_get_current_page_for_app_switch_returns_empty_for_other_pages() {
+	public function test_get_current_page_for_app_switch_returns_empty_for_other_pages(): void {
 		// Create a test post.
 		$post_id = $this->factory->post->create(
 			array(
@@ -336,11 +389,16 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 		);
 
 		global $post;
+
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = get_post( $post_id );
 
 		// Mock all page types to return false.
-		add_filter( 'woocommerce_is_checkout', '__return_false' );
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'is_checkout' => fn() => false,
+			)
+		);
 		add_filter( 'woocommerce_is_cart', '__return_false' );
 
 		$url = $this->buttons->get_current_page_for_app_switch();
@@ -349,6 +407,8 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 		// Clean up.
 		wp_delete_post( $post_id, true );
+		wc_get_container()->get( LegacyProxy::class )->reset();
+		remove_filter( 'woocommerce_is_cart', '__return_false' );
 	}
 
 	/**
@@ -360,17 +420,23 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 * @param string $buttons_option    The buttons option value ('yes' or 'no').
 	 * @param bool   $expected_result   The expected result from is_enabled().
 	 * @param string $description       Description of the test scenario.
+	 * @return void
 	 */
-	public function test_is_enabled_returns_correct_value( $orders_v2_enabled, $buttons_option, $expected_result, $description ) {
+	public function test_is_enabled_returns_correct_value(
+		bool $orders_v2_enabled,
+		string $buttons_option,
+		bool $expected_result,
+		string $description
+	): void {
 		// Create a fresh mock gateway for each test scenario.
-		$mock_gateway           = $this->createMock( WC_Gateway_Paypal::class );
+		$mock_gateway           = $this->createMock( \WC_Gateway_Paypal::class );
 		$mock_gateway->email    = 'paypalmerchant@paypal.com';
 		$mock_gateway->testmode = false;
 
 		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( $orders_v2_enabled );
 		$mock_gateway->method( 'get_option' )->with( 'paypal_buttons', 'yes' )->willReturn( $buttons_option );
 
-		$buttons = new WC_Gateway_Paypal_Buttons( $mock_gateway );
+		$buttons = new PayPalButtons( $mock_gateway );
 
 		$this->assertEquals( $expected_result, $buttons->is_enabled(), $description );
 	}
@@ -380,7 +446,7 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
-	public function provider_is_enabled_scenarios() {
+	public function provider_is_enabled_scenarios(): array {
 		return array(
 			'enabled_when_orders_v2_and_buttons_enabled' => array(
 				'orders_v2_enabled' => true,
