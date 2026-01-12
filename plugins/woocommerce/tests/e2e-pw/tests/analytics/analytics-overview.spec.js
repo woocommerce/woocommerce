@@ -357,7 +357,7 @@ test.describe(
 			await expect( page.getByText( 'Data status:' ) ).toBeVisible();
 			// Verify "Update now" button is visible
 			const updateButton = page.getByRole( 'button', {
-				name: 'Manually trigger analytics',
+				name: 'Manually trigger analytics data import',
 			} );
 			await expect( updateButton ).toBeVisible();
 
@@ -373,7 +373,11 @@ test.describe(
 			await updateButton.click();
 
 			// Verify button shows loading state (isBusy)
-			await expect( updateButton ).toBeDisabled();
+			// After clicking, the aria-label changes to "Analytics data import in progress"
+			const busyButton = page.getByRole( 'button', {
+				name: 'Analytics data import in progress',
+			} );
+			await expect( busyButton ).toBeDisabled();
 
 			// Wait for API response
 			await responsePromise;

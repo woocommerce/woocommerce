@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
@@ -19,6 +21,11 @@ class CartControllerTests extends TestCase {
 		parent::tearDown();
 		WC()->cart->empty_cart();
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
+
+		// Reset DI container to clear any mocks.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->reset_all_replacements();
 	}
 
 	/**
@@ -282,5 +289,151 @@ class CartControllerTests extends TestCase {
 		$this->assertArrayHasKey( 'package_name', $packages[0], 'Package should still have package_name.' );
 
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
+	}
+
+	/**
+	 * Test that fraud protection tracking is called when adding items via Store API.
+	 */
+	public function test_add_to_cart_triggers_fraud_protection_tracking(): void {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Fraud Protection Test Product',
+				'regular_price' => 10,
+			)
+		);
+
+		// Create mock for CartEventTracker.
+		$mock_cart_tracker = $this->createMock( CartEventTracker::class );
+
+		// Create mock for FraudProtectionController that returns enabled.
+		$mock_controller = $this->createMock( FraudProtectionController::class );
+		$mock_controller->method( 'feature_is_enabled' )->willReturn( true );
+
+		// Replace container instances with mocks.
+		$container = wc_get_container();
+		$container->replace( FraudProtectionController::class, $mock_controller );
+		$container->replace( CartEventTracker::class, $mock_cart_tracker );
+
+		// Expect track_cart_item_added to be called once with correct parameters.
+		$mock_cart_tracker
+			->expects( $this->once() )
+			->method( 'track_cart_item_added' )
+			->with(
+				$this->isType( 'string' ), // cart_id.
+				$this->equalTo( $product->get_id() ), // product_id.
+				$this->equalTo( 2 ), // quantity.
+				$this->equalTo( 0 ) // variation_id.
+			);
+
+		// Use Store API CartController to add item.
+		$cart_controller = new CartController();
+		$cart_controller->add_to_cart(
+			array(
+				'id'       => $product->get_id(),
+				'quantity' => 2,
+			)
+		);
+	}
+
+	/**
+	 * Test that fraud protection tracking is NOT called when feature is disabled.
+	 */
+	public function test_add_to_cart_skips_fraud_protection_tracking_when_disabled(): void {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Fraud Protection Disabled Test Product',
+				'regular_price' => 10,
+			)
+		);
+
+		// Create mock for CartEventTracker.
+		$mock_cart_tracker = $this->createMock( CartEventTracker::class );
+
+		// Create mock for FraudProtectionController that returns disabled.
+		$mock_controller = $this->createMock( FraudProtectionController::class );
+		$mock_controller->method( 'feature_is_enabled' )->willReturn( false );
+
+		// Replace container instances with mocks.
+		$container = wc_get_container();
+		$container->replace( FraudProtectionController::class, $mock_controller );
+		$container->replace( CartEventTracker::class, $mock_cart_tracker );
+
+		// Expect track_cart_item_added to NOT be called.
+		$mock_cart_tracker
+			->expects( $this->never() )
+			->method( 'track_cart_item_added' );
+
+		// Use Store API CartController to add item.
+		$cart_controller = new CartController();
+		$cart_controller->add_to_cart(
+			array(
+				'id'       => $product->get_id(),
+				'quantity' => 1,
+			)
+		);
+	}
+
+	/**
+	 * Test that fraud protection tracking includes variation_id for variable products.
+	 */
+	public function test_add_to_cart_tracks_variation_id_for_variable_products(): void {
+		// Create a variable product with variations using WC_Helper_Product.
+		$variable_product = \WC_Helper_Product::create_variation_product();
+
+		// Get the third variation which has all attributes defined (size, colour, number).
+		$children     = $variable_product->get_children();
+		$variation_id = $children[2]; // "DUMMY SKU VARIABLE HUGE RED 0" - has all attributes.
+
+		// Create mock for CartEventTracker.
+		$mock_cart_tracker = $this->createMock( CartEventTracker::class );
+
+		// Create mock for FraudProtectionController that returns enabled.
+		$mock_controller = $this->createMock( FraudProtectionController::class );
+		$mock_controller->method( 'feature_is_enabled' )->willReturn( true );
+
+		// Replace container instances with mocks.
+		$container = wc_get_container();
+		$container->replace( FraudProtectionController::class, $mock_controller );
+		$container->replace( CartEventTracker::class, $mock_cart_tracker );
+
+		// Expect track_cart_item_added to be called with the correct variation_id.
+		$mock_cart_tracker
+			->expects( $this->once() )
+			->method( 'track_cart_item_added' )
+			->with(
+				$this->isType( 'string' ), // cart_id.
+				$this->equalTo( $variable_product->get_id() ), // product_id.
+				$this->equalTo( 1 ), // quantity.
+				$this->equalTo( $variation_id ) // variation_id.
+			);
+
+		// Use Store API CartController to add variation with all required attributes.
+		// CartController::parse_variation_data() expects an array of {attribute, value} pairs.
+		$cart_controller = new CartController();
+		$cart_controller->add_to_cart(
+			array(
+				'id'        => $variation_id,
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => 'attribute_pa_size',
+						'value'     => 'huge',
+					),
+					array(
+						'attribute' => 'attribute_pa_colour',
+						'value'     => 'red',
+					),
+					array(
+						'attribute' => 'attribute_pa_number',
+						'value'     => '0',
+					),
+				),
+			)
+		);
+
+		// Clean up.
+		$variable_product->delete( true );
 	}
 }

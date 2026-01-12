@@ -25,7 +25,7 @@ class Cleanup_Preprocessor implements Preprocessor {
 			// https://core.trac.wordpress.org/ticket/45312
 			// \WP_Block_Parser::parse_blocks() sometimes add a block with name null that can cause unexpected spaces in rendered content
 			// This behavior was reported as an issue, but it was closed as won't fix.
-			if ( null === $block['blockName'] ) {
+			if ( null === $block['blockName'] && '' === trim( $block['innerHTML'] ?? '' ) ) {
 				unset( $parsed_blocks[ $key ] );
 			}
 		}

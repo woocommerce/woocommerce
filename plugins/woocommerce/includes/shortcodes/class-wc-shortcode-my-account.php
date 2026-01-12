@@ -8,6 +8,9 @@
  * @version 2.0.0
  */
 
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -409,6 +412,12 @@ class WC_Shortcode_My_Account {
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit();
 		} else {
+			// Track add payment method page loaded for fraud protection.
+			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				wc_get_container()->get( PaymentMethodEventTracker::class )
+					->track_add_payment_method_page_loaded();
+			}
+
 			do_action( 'before_woocommerce_add_payment_method' );
 
 			wc_get_template( 'myaccount/form-add-payment-method.php' );
