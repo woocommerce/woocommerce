@@ -141,6 +141,20 @@ trait RestApiCache {
 	);
 
 	/**
+	 * Cache group for warning suppression (separate from main cache to avoid interference).
+	 *
+	 * @var string
+	 */
+	private static string $warning_cache_group = 'woocommerce_rest_api_cache_warnings';
+
+	/**
+	 * TTL for suppressing duplicate file tracking warnings (1 hour).
+	 *
+	 * @var int
+	 */
+	private static int $file_warning_suppression_ttl = HOUR_IN_SECONDS;
+
+	/**
 	 * The instance of VersionStringGenerator to use, or null if caching is disabled.
 	 *
 	 * @var VersionStringGenerator|null
@@ -1121,13 +1135,48 @@ trait RestApiCache {
 	/**
 	 * Log a warning about a file that couldn't be tracked.
 	 *
+	 * Each unique file path + reason combination is logged only once per the
+	 * suppression TTL period to avoid flooding the log with repeated warnings.
+	 * With a persistent object cache (Redis, Memcached), this works across requests.
+	 * Without one, it prevents duplicates within the same request.
+	 *
 	 * @since 10.6.0
 	 *
 	 * @param string $file_path The file path that couldn't be tracked.
 	 * @param string $reason    The reason the file couldn't be tracked.
 	 */
 	private function log_file_tracking_warning( string $file_path, string $reason ): void {
-		$logger = wc_get_logger();
+		/**
+		 * Filter the TTL for suppressing duplicate file tracking warnings.
+		 *
+		 * By default, each unique warning (file path + reason) is logged only once per hour
+		 * to avoid flooding the log. Use this filter to customize the suppression period.
+		 * Return 0 to disable suppression and log all warnings.
+		 *
+		 * @since 10.6.0
+		 *
+		 * @param int    $ttl       The suppression TTL in seconds. Default is HOUR_IN_SECONDS.
+		 * @param string $file_path The file path that couldn't be tracked.
+		 * @param string $reason    The reason the file couldn't be tracked.
+		 */
+		$suppression_ttl = apply_filters(
+			'woocommerce_rest_api_cache_file_warning_suppression_ttl',
+			self::$file_warning_suppression_ttl,
+			$file_path,
+			$reason
+		);
+
+		if ( $suppression_ttl > 0 ) {
+			$warning_key = 'wc_rest_file_warning_' . md5( $file_path . '|' . $reason );
+
+			if ( false !== wp_cache_get( $warning_key, self::$warning_cache_group ) ) {
+				return;
+			}
+
+			wp_cache_set( $warning_key, true, self::$warning_cache_group, $suppression_ttl );
+		}
+
+		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 		$logger->warning(
 			sprintf(
 				'REST API cache: Could not track file "%s" for cache invalidation. Reason: %s',

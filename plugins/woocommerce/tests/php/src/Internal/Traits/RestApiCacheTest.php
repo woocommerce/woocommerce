@@ -2137,6 +2137,121 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox File tracking warnings are suppressed by default to avoid log flooding.
+	 */
+	public function test_file_tracking_warnings_are_suppressed_by_default() {
+		wp_cache_flush_group( 'woocommerce_rest_api_cache_warnings' );
+
+		$warning_count = 0;
+		$logger_mock   = $this->createMock( \WC_Logger::class );
+		$logger_mock->expects( $this->any() )
+			->method( 'warning' )
+			->willReturnCallback(
+				function () use ( &$warning_count ) {
+					++$warning_count;
+				}
+			);
+
+		$this->register_legacy_proxy_function_mocks(
+			array( 'wc_get_logger' => fn() => $logger_mock )
+		);
+
+		// Use a file path in temp dir (which is in allowed_directories).
+		$non_existent_file           = sys_get_temp_dir() . '/wc_test_warning_' . uniqid() . '.txt';
+		$this->sut->controller_files = array( $non_existent_file );
+
+		// First request should log the warning.
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 1, $warning_count, 'First request should log the warning' );
+
+		// Subsequent request should NOT log the warning again (suppressed).
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 1, $warning_count, 'Second request should not log again (suppressed)' );
+
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 1, $warning_count, 'Third request should not log again (still suppressed)' );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File tracking warnings are not suppressed when filter returns zero.
+	 */
+	public function test_file_tracking_warnings_not_suppressed_when_filter_returns_zero() {
+		wp_cache_flush_group( 'woocommerce_rest_api_cache_warnings' );
+
+		$warning_count = 0;
+		$logger_mock   = $this->createMock( \WC_Logger::class );
+		$logger_mock->expects( $this->any() )
+			->method( 'warning' )
+			->willReturnCallback(
+				function () use ( &$warning_count ) {
+					++$warning_count;
+				}
+			);
+
+		$this->register_legacy_proxy_function_mocks(
+			array( 'wc_get_logger' => fn() => $logger_mock )
+		);
+
+		// Disable warning suppression.
+		add_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', '__return_zero' );
+
+		// Use a file path in temp dir (which is in allowed_directories).
+		$non_existent_file           = sys_get_temp_dir() . '/wc_test_warning_' . uniqid() . '.txt';
+		$this->sut->controller_files = array( $non_existent_file );
+
+		// All three requests should log the warning.
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 1, $warning_count, 'First request should log the warning' );
+
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 2, $warning_count, 'Second request should log again (suppression disabled)' );
+
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 3, $warning_count, 'Third request should log again (suppression disabled)' );
+
+		remove_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', '__return_zero' );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File tracking warning suppression filter receives correct parameters.
+	 */
+	public function test_file_tracking_warning_suppression_filter_receives_correct_parameters() {
+		wp_cache_flush_group( 'woocommerce_rest_api_cache_warnings' );
+
+		$filter_called   = false;
+		$received_params = array();
+
+		$filter = function ( $ttl, $file_path, $reason ) use ( &$filter_called, &$received_params ) {
+			$filter_called   = true;
+			$received_params = array(
+				'ttl'       => $ttl,
+				'file_path' => $file_path,
+				'reason'    => $reason,
+			);
+			return $ttl;
+		};
+
+		add_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', $filter, 10, 3 );
+
+		// Use a file path in temp dir (which is in allowed_directories).
+		$non_existent_file           = sys_get_temp_dir() . '/wc_test_warning_' . uniqid() . '.txt';
+		$this->sut->controller_files = array( $non_existent_file );
+
+		$this->query_endpoint( 'with_controller_files' );
+
+		$this->assertTrue( $filter_called, 'Filter should be called' );
+		$this->assertSame( HOUR_IN_SECONDS, $received_params['ttl'], 'Default TTL should be HOUR_IN_SECONDS' );
+		$this->assertSame( $non_existent_file, $received_params['file_path'], 'File path should be passed to filter' );
+		$this->assertNotEmpty( $received_params['reason'], 'Reason should be passed to filter' );
+
+		remove_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', $filter, 10 );
+		$this->sut->controller_files = array();
+	}
+
+	/**
 	 * Create a temporary test file for file tracking tests.
 	 *
 	 * @return string Path to the created file.
