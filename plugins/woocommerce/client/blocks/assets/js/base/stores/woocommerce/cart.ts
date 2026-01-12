@@ -475,7 +475,11 @@ const { state, actions } = store< Store >(
 					const cart = result.data as Cart;
 
 					// Show notices if enabled
-					if ( showCartUpdatesNotices && cart && cartAfterOptimistic ) {
+					if (
+						showCartUpdatesNotices &&
+						cart &&
+						cartAfterOptimistic
+					) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
 							cart,
