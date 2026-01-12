@@ -31,20 +31,44 @@ class FraudProtectionController implements RegisterHooksInterface {
 	private FeaturesController $features_controller;
 
 	/**
+	 * Jetpack connection manager instance.
+	 *
+	 * @var JetpackConnectionManager
+	 */
+	private JetpackConnectionManager $connection_manager;
+
+	/**
+	 * Blocked session notice instance.
+	 *
+	 * @var BlockedSessionNotice
+	 */
+	private BlockedSessionNotice $blocked_session_notice;
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
 		add_action( 'init', array( $this, 'on_init' ) );
+		add_action( 'admin_notices', array( $this, 'on_admin_notices' ) );
 	}
 
 	/**
 	 * Initialize the instance, runs when the instance is created by the dependency injection container.
 	 *
 	 * @internal
-	 * @param FeaturesController $features_controller The instance of FeaturesController to use.
+	 *
+	 * @param FeaturesController       $features_controller      The instance of FeaturesController to use.
+	 * @param JetpackConnectionManager $connection_manager       The instance of JetpackConnectionManager to use.
+	 * @param BlockedSessionNotice     $blocked_session_notice   The instance of BlockedSessionNotice to use.
 	 */
-	final public function init( FeaturesController $features_controller ): void {
-		$this->features_controller = $features_controller;
+	final public function init(
+		FeaturesController $features_controller,
+		JetpackConnectionManager $connection_manager,
+		BlockedSessionNotice $blocked_session_notice
+	): void {
+		$this->features_controller    = $features_controller;
+		$this->connection_manager     = $connection_manager;
+		$this->blocked_session_notice = $blocked_session_notice;
 	}
 
 	/**
@@ -58,19 +82,65 @@ class FraudProtectionController implements RegisterHooksInterface {
 			return;
 		}
 
-		// Future implementation: Register hooks and initialize components here.
-		// For now, this is a placeholder for the infrastructure.
+		$this->blocked_session_notice->register();
+	}
+
+	/**
+	 * Display admin notice when Jetpack connection is not available.
+	 *
+	 * @internal
+	 */
+	public function on_admin_notices(): void {
+		// Only show if feature is enabled.
+		if ( ! $this->feature_is_enabled() ) {
+			return;
+		}
+
+		// Only show on WooCommerce settings page.
+		$screen = get_current_screen();
+		if ( ! $screen || 'woocommerce_page_wc-settings' !== $screen->id ) {
+			return;
+		}
+
+		$connection_status = $this->connection_manager->get_connection_status();
+		if ( $connection_status['connected'] ) {
+			return;
+		}
+
+		$settings_url = admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' );
+
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p>
+				<strong><?php esc_html_e( 'Fraud protection warning:', 'woocommerce' ); ?></strong>
+				<?php echo esc_html( $connection_status['error'] ); ?>
+			</p>
+			<p>
+				<?php
+				printf(
+					/* translators: %s: Settings page URL */
+					wp_kses_post( __( 'Fraud protection will fail open and allow all sessions until connected. <a href="%s">Connect to Jetpack</a>', 'woocommerce' ) ),
+					esc_url( $settings_url )
+				);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 
 	/**
 	 * Check if fraud protection feature is enabled.
 	 *
 	 * This method can be used by other fraud protection classes to check
-	 * the feature flag status.
+	 * the feature flag status. Returns false (fail-open) if init hasn't run yet.
 	 *
-	 * @return bool True if enabled.
+	 * @return bool True if enabled, false if not enabled or init hasn't run yet.
 	 */
 	public function feature_is_enabled(): bool {
+		// Fail-open: don't block if init hasn't run yet to avoid FeaturesController translation notices.
+		if ( ! did_action( 'init' ) ) {
+			return false;
+		}
 		return $this->features_controller->feature_is_enabled( 'fraud_protection' );
 	}
 

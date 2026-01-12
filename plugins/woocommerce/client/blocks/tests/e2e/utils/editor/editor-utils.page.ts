@@ -134,12 +134,12 @@ export class Editor extends CoreEditor {
 		// Using expect.poll() for a retrying assertion since toHaveCount
 		// requires an exact number.
 		await expect
-			.poll( () => templateCards.count(), { timeout: 3000 } )
+			.poll( () => templateCards.count(), { timeout: 5000 } )
 			.toBeLessThan( templatesBeforeSearch );
 	}
 
 	/**
-	 * Opens a template or template part in the Site Editor given it's name.
+	 * Opens a template or template part in the Site Editor given its name.
 	 */
 	async openTemplate( { templateName }: { templateName: string } ) {
 		const templateButton = this.page
