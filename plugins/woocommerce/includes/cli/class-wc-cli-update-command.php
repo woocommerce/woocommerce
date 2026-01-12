@@ -22,29 +22,6 @@ class WC_CLI_Update_Command {
 	 */
 	public static function register_commands() {
 		WC()->call_static( WP_CLI::class, 'add_command', 'wc update', array( 'WC_CLI_Update_Command', 'update' ) );
-		WC()->call_static( WP_CLI::class, 'add_command', 'wc gentestdata', array( 'WC_CLI_Update_Command', 'gentestdata' ) );
-	}
-
-	/**
-	 * Generates test data
-	 */
-	public static function gentestdata() {
-		global $wpdb;
-
-		$product_id = 156885;
-
-		for ( $i = 0; $i < 10_000; ++$i ) {
-			$wpdb->query( $wpdb->prepare(
-				"REPLACE INTO wp_wc_product_attributes_lookup
-        			( product_id, product_or_parent_id, taxonomy, term_id, is_variation_attribute, in_stock )
-        			VALUES ( %d, %s, 'pa_size', 78, 1, 1 )",
-				$product_id + $i + 1,
-				$product_id
-			) );
-			if ( 0 === ( $i % 1_000 ) ) {
-				echo '.';
-			}
-		}
 	}
 
 	/**
