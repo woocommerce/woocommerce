@@ -27,9 +27,18 @@ export type BatchStateHandler< TState = unknown > = {
 };
 
 /**
+ * Result passed to onSettled callback
+ */
+export type SettledResult< TState = unknown > = {
+	success: boolean;
+	data?: TState;
+	error?: Error;
+};
+
+/**
  * A mutation request to be batched
  */
-export type MutationRequest = {
+export type MutationRequest< TState = unknown > = {
 	/** Unique identifier for this request */
 	id: string;
 	/** The path for this request (e.g., /wc/store/v1/cart/add-item) */
@@ -40,6 +49,12 @@ export type MutationRequest = {
 	body?: unknown;
 	/** Apply optimistic update immediately (modifies state in place) */
 	applyOptimistic?: () => void;
+	/**
+	 * Called synchronously after reconciliation, before batchCycleActive clears.
+	 * Use this for side effects (events, notifications) that must complete
+	 * before external code (like refreshCartItems) is allowed to run.
+	 */
+	onSettled?: ( result: SettledResult< TState > ) => void;
 };
 
 /**
@@ -90,9 +105,9 @@ export type BatcherState =
 /**
  * Tracked request with its promise resolvers
  */
-type TrackedRequest = {
+type TrackedRequest< TState = unknown > = {
 	id: string;
-	request: MutationRequest;
+	request: MutationRequest< TState >;
 	resolve: ( result: MutationResult ) => void;
 	reject: ( error: Error ) => void;
 	batchIndex: number;
@@ -145,6 +160,16 @@ export function createMutationBatcher< TState >(
 
 	// Flag to track if we've scheduled a microtask
 	let microtaskScheduled = false;
+
+	// Flag to track if we're in an active batch cycle (including time for handlers)
+	let batchCycleActive = false;
+	let batchCycleId = 0;
+
+	// Track the last cycle that applied server state (to prevent older cycles overwriting newer state)
+	let lastAppliedCycleId = 0;
+
+	// The cycle ID for the current batch cycle (captured at start, used at reconcile)
+	let currentBatchCycleId = 0;
 
 	/**
 	 * Transition to a new state
@@ -335,17 +360,39 @@ export function createMutationBatcher< TState >(
 		transitionTo( 'reconciling' );
 
 		const hasServerState = lastServerState !== null;
+		const currentCycleId = currentBatchCycleId;
 
-		// Apply final state
-		if ( hasServerState ) {
-			// ANY batch succeeded → overwrite with last server state
-			stateHandler.applyServerState( lastServerState! );
-		} else if ( snapshot !== null ) {
-			// ALL total failures → rollback to snapshot
-			stateHandler.rollback( snapshot );
+		// Only apply state if this cycle is newer than or equal to the last applied
+		// This prevents older cycles from overwriting newer optimistic state
+		if ( currentCycleId >= lastAppliedCycleId ) {
+			// Apply final state
+			if ( hasServerState ) {
+				// ANY batch succeeded → overwrite with last server state
+				stateHandler.applyServerState( lastServerState! );
+				lastAppliedCycleId = currentCycleId;
+			} else if ( snapshot !== null ) {
+				// ALL total failures → rollback to snapshot
+				stateHandler.rollback( snapshot );
+				lastAppliedCycleId = currentCycleId;
+			}
 		}
 
-		// Resolve/reject all pending promises
+		// Run onSettled callbacks synchronously BEFORE clearing batchCycleActive
+		// This allows side effects (like firing events) to complete while
+		// external code (like refreshCartItems) is still blocked
+		trackedRequests.forEach( ( tracked ) => {
+			const error = accumulatedErrors.get( tracked.id );
+			tracked.request.onSettled?.( {
+				success: ! error,
+				data: lastServerState ?? undefined,
+				error,
+			} );
+		} );
+
+		// Clear batch cycle flag synchronously after onSettled callbacks
+		batchCycleActive = false;
+
+		// NOW resolve/reject promises (generators will resume async)
 		trackedRequests.forEach( ( tracked ) => {
 			const error = accumulatedErrors.get( tracked.id );
 
@@ -368,6 +415,7 @@ export function createMutationBatcher< TState >(
 		accumulatedErrors.clear();
 		trackedRequests.clear();
 
+		// Transition to idle
 		transitionTo( 'idle' );
 	}
 
@@ -384,6 +432,9 @@ export function createMutationBatcher< TState >(
 			// If idle, take snapshot and transition to collecting
 			if ( currentState === 'idle' ) {
 				snapshot = stateHandler.takeSnapshot();
+				batchCycleActive = true;
+				batchCycleId++;
+				currentBatchCycleId = batchCycleId; // Capture for this cycle's reconciliation
 				transitionTo( 'collecting' );
 			}
 
@@ -418,6 +469,7 @@ export function createMutationBatcher< TState >(
 	function getStatus() {
 		return {
 			state: currentState,
+			batchCycleActive,
 			pendingCount: pendingRequestIds.length,
 			inFlightCount: inFlightBatches.size,
 			trackedCount: trackedRequests.size,

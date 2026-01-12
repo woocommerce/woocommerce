@@ -408,9 +408,32 @@ const { state, actions } = store< Store >(
 								state.cart.items.push( itemToSend );
 							}
 						},
+						// Side effects run synchronously during reconciliation,
+						// before batchCycleActive is cleared. This prevents
+						// refreshCartItems from running during these events.
+						onSettled: ( { success } ) => {
+							if ( success ) {
+								// Dispatch legacy event
+								triggerAddedToCartEvent( {
+									preserveCartData: true,
+								} );
+
+								// Dispatch sync event
+								emitSyncEvent( {
+									quantityChanges: isUpdate
+										? {
+												cartItemsPendingQuantity:
+													existingItem?.key
+														? [ existingItem.key ]
+														: [],
+										  }
+										: { productsPendingAdd: [ id ] },
+								} );
+							}
+						},
 					} );
 
-					// Success - handle side effects
+					// Success - handle side effects that don't trigger refreshCartItems
 					const cart = result.data as Cart;
 
 					// Show notices if enabled
@@ -419,20 +442,6 @@ const { state, actions } = store< Store >(
 							cart.errors.map( generateErrorNotice );
 						yield actions.updateNotices( errorNotices, true );
 					}
-
-					// Dispatch legacy event
-					triggerAddedToCartEvent( { preserveCartData: true } );
-
-					// Dispatch sync event
-					emitSyncEvent( {
-						quantityChanges: isUpdate
-							? {
-									cartItemsPendingQuantity: existingItem?.key
-										? [ existingItem.key ]
-										: [],
-							  }
-							: { productsPendingAdd: [ id ] },
-					} );
 
 					// Announce to screen readers
 					const { messages } = getConfig(
@@ -623,6 +632,11 @@ const { state, actions } = store< Store >(
 			},
 
 			*refreshCartItems() {
+				// Skip if batcher cycle is active - it will apply server state when reconciling
+				if ( cartBatcher?.getStatus().batchCycleActive ) {
+					return;
+				}
+
 				// Skips if there's a pending request.
 				if ( pendingRefresh ) return;
 
