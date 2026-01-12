@@ -375,7 +375,6 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\FraudProtection\AdminSettingsHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
