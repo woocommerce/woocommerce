@@ -137,7 +137,7 @@ export function createMutationQueue< TState >(
 	let snapshot: TState | null = null;
 
 	// All tracked requests for the current cycle
-	const trackedRequests: Map< string, TrackedRequest > = new Map();
+	const trackedRequests: Map< string, TrackedRequest< TState > > = new Map();
 
 	// Requests waiting to be sent (collected this tick)
 	let pendingRequestIds: string[] = [];
@@ -378,8 +378,8 @@ export function createMutationQueue< TState >(
 			const error = accumulatedErrors.get( tracked.id );
 			tracked.request.onSettled?.( {
 				success: ! error,
-				data: lastServerState ?? undefined,
-				error,
+				...( lastServerState !== null && { data: lastServerState } ),
+				...( error && { error } ),
 			} );
 		} );
 
@@ -395,7 +395,7 @@ export function createMutationQueue< TState >(
 			} else {
 				tracked.resolve( {
 					success: true,
-					data: lastServerState ?? undefined,
+					...( lastServerState !== null && { data: lastServerState } ),
 					requestId: tracked.id,
 				} );
 			}
@@ -420,7 +420,7 @@ export function createMutationQueue< TState >(
 	 * Queuing is invisible to the caller.
 	 */
 	function submit(
-		request: MutationRequest
+		request: MutationRequest< TState >
 	): Promise< MutationResult< TState > > {
 		return new Promise( ( resolve, reject ) => {
 			// If idle, take snapshot and transition to collecting
@@ -438,7 +438,7 @@ export function createMutationQueue< TState >(
 			}
 
 			// Track this request
-			const tracked: TrackedRequest = {
+			const tracked: TrackedRequest< TState > = {
 				id: request.id,
 				request,
 				resolve: resolve as ( result: MutationResult ) => void,
