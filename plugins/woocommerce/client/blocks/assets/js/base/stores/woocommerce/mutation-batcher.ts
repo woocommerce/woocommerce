@@ -160,189 +160,10 @@ export function createMutationQueue< TState >(
 	let isProcessing = false;
 
 	/**
-	 * Transition to a new state
+	 * Transition to a new state.
 	 */
 	function transitionTo( newState: QueueState ) {
 		currentState = newState;
-	}
-
-	/**
-	 * Process pending requests after the microtask tick completes
-	 */
-	async function processRequests() {
-		microtaskScheduled = false;
-
-		if ( pendingRequestIds.length === 0 ) {
-			if ( inFlightGroups.size === 0 ) {
-				transitionTo( 'idle' );
-			}
-			return;
-		}
-
-		// Assign group index
-		const groupIndex = nextGroupIndex++;
-		const requestIdsToSend = [ ...pendingRequestIds ];
-
-		// Update tracked requests with their group index
-		requestIdsToSend.forEach( ( id ) => {
-			const tracked = trackedRequests.get( id );
-			if ( tracked ) {
-				tracked.requestIndex = groupIndex;
-			}
-		} );
-
-		// Store this group as in-flight
-		inFlightGroups.set( groupIndex, {
-			groupIndex,
-			requestIds: requestIdsToSend,
-		} );
-
-		// Clear pending for next collection
-		pendingRequestIds = [];
-
-		// Transition to SENDING
-		transitionTo( 'sending' );
-
-		try {
-			// Build the request - each inner request needs headers too
-			const requestHeaders = getHeaders();
-			const requests = requestIdsToSend.map( ( id ) => {
-				const tracked = trackedRequests.get( id );
-
-				// We check truthyness here, because non-null assertions are not allowed.
-				// Should we throw if tracked is not available?
-				if ( tracked ) {
-					return {
-						path: tracked.request.path,
-						method: tracked.request.method,
-						headers: {
-							...requestHeaders,
-							'Content-Type': 'application/json',
-						},
-						body: tracked.request.body,
-					};
-				}
-			} );
-
-			// Send the request.
-			const response = await fetch( endpoint, {
-				method: 'POST',
-				cache: 'no-store',
-				headers: {
-					'Content-Type': 'application/json',
-					...requestHeaders,
-				},
-				body: JSON.stringify( { requests } ),
-			} );
-
-			transitionTo( 'recording' );
-
-			if ( ! response.ok ) {
-				handleTotalFailure(
-					groupIndex,
-					new Error( `Request failed: ${ response.status }` )
-				);
-			} else {
-				const json = await response.json();
-				handleResponse( groupIndex, json.responses || [] );
-			}
-		} catch ( error ) {
-			transitionTo( 'recording' );
-			handleTotalFailure(
-				groupIndex,
-				error instanceof Error ? error : new Error( String( error ) )
-			);
-		}
-	}
-
-	/**
-	 * Handle total failure of a request group (network error, non-200 response)
-	 */
-	function handleTotalFailure( groupIndex: number, error: Error ) {
-		const group = inFlightGroups.get( groupIndex );
-		if ( ! group ) return;
-
-		// Add errors for all requests in this group
-		group.requestIds.forEach( ( id ) => {
-			accumulatedErrors.set( id, error );
-		} );
-
-		// Remove from in-flight
-		inFlightGroups.delete( groupIndex );
-
-		checkAndReconcile();
-	}
-
-	/**
-	 * Handle response (RESPONSE_RECORDING phase)
-	 */
-	function handleResponse(
-		groupIndex: number,
-		responses: BatchItemResponse[]
-	) {
-		const group = inFlightGroups.get( groupIndex );
-		if ( ! group ) return;
-
-		let latestServerState: TState | null = null;
-
-		// Process each response.
-		responses.forEach( ( itemResponse, index ) => {
-			const requestId = group.requestIds[ index ];
-			if ( ! requestId ) return;
-
-			const isSuccess =
-				itemResponse.status >= 200 && itemResponse.status < 300;
-
-			if ( isSuccess ) {
-				// Extract server state from successful response.
-				latestServerState = extractServerState( itemResponse.body );
-			} else {
-				// Extract error.
-				const errorBody = itemResponse.body as {
-					message?: string;
-					code?: string;
-				};
-				const error = Object.assign(
-					new Error( errorBody?.message || 'Request failed' ),
-					{ code: errorBody?.code || 'unknown_error' }
-				);
-				accumulatedErrors.set( requestId, error );
-			}
-		} );
-
-		// Store server state if this group is newer than what we have
-		if ( latestServerState !== null && groupIndex > lastStoredIndex ) {
-			lastServerState = latestServerState;
-			lastStoredIndex = groupIndex;
-		}
-
-		// Remove from in-flight.
-		inFlightGroups.delete( groupIndex );
-
-		checkAndReconcile();
-	}
-
-	/**
-	 * Check if we should reconcile.
-	 */
-	function checkAndReconcile() {
-		// If still in-flight groups, wait.
-		if ( inFlightGroups.size > 0 ) {
-			transitionTo( 'sending' );
-			return;
-		}
-
-		// If new requests came in, schedule them.
-		if ( pendingRequestIds.length > 0 ) {
-			if ( ! microtaskScheduled ) {
-				microtaskScheduled = true;
-				queueMicrotask( () => processRequests() );
-			}
-			transitionTo( 'collecting' );
-			return;
-		}
-
-		reconcile();
 	}
 
 	/**
@@ -400,8 +221,188 @@ export function createMutationQueue< TState >(
 		accumulatedErrors.clear();
 		trackedRequests.clear();
 
-		// Transition to idle
+		// Transition to idle.
 		transitionTo( 'idle' );
+	}
+
+	/**
+	 * Check if we should reconcile.
+	 */
+	function checkAndReconcile() {
+		// If still in-flight groups, wait.
+		if ( inFlightGroups.size > 0 ) {
+			transitionTo( 'sending' );
+			return;
+		}
+
+		// If new requests came in, schedule them.
+		if ( pendingRequestIds.length > 0 ) {
+			if ( ! microtaskScheduled ) {
+				microtaskScheduled = true;
+				// eslint-disable-next-line @typescript-eslint/no-use-before-define -- processRequests is defined below, but called async via queueMicrotask
+				queueMicrotask( () => processRequests() );
+			}
+			transitionTo( 'collecting' );
+			return;
+		}
+
+		reconcile();
+	}
+
+	/**
+	 * Handle total failure of a request group (network error, non-200 response).
+	 */
+	function handleTotalFailure( groupIndex: number, error: Error ) {
+		const group = inFlightGroups.get( groupIndex );
+		if ( ! group ) return;
+
+		// Add errors for all requests in this group.
+		group.requestIds.forEach( ( id ) => {
+			accumulatedErrors.set( id, error );
+		} );
+
+		// Remove from in-flight.
+		inFlightGroups.delete( groupIndex );
+
+		checkAndReconcile();
+	}
+
+	/**
+	 * Handle response (RESPONSE_RECORDING phase).
+	 */
+	function handleResponse(
+		groupIndex: number,
+		responses: BatchItemResponse[]
+	) {
+		const group = inFlightGroups.get( groupIndex );
+		if ( ! group ) return;
+
+		let latestServerState: TState | null = null;
+
+		// Process each response.
+		responses.forEach( ( itemResponse, index ) => {
+			const requestId = group.requestIds[ index ];
+			if ( ! requestId ) return;
+
+			const isSuccess =
+				itemResponse.status >= 200 && itemResponse.status < 300;
+
+			if ( isSuccess ) {
+				// Extract server state from successful response.
+				latestServerState = extractServerState( itemResponse.body );
+			} else {
+				// Extract error.
+				const errorBody = itemResponse.body as {
+					message?: string;
+					code?: string;
+				};
+				const error = Object.assign(
+					new Error( errorBody?.message || 'Request failed' ),
+					{ code: errorBody?.code || 'unknown_error' }
+				);
+				accumulatedErrors.set( requestId, error );
+			}
+		} );
+
+		// Store server state if this group is newer than what we have.
+		if ( latestServerState !== null && groupIndex > lastStoredIndex ) {
+			lastServerState = latestServerState;
+			lastStoredIndex = groupIndex;
+		}
+
+		// Remove from in-flight.
+		inFlightGroups.delete( groupIndex );
+
+		checkAndReconcile();
+	}
+
+	/**
+	 * Process pending requests after the microtask tick completes.
+	 */
+	async function processRequests() {
+		microtaskScheduled = false;
+
+		if ( pendingRequestIds.length === 0 ) {
+			if ( inFlightGroups.size === 0 ) {
+				transitionTo( 'idle' );
+			}
+			return;
+		}
+
+		// Assign group index.
+		const groupIndex = nextGroupIndex++;
+		const requestIdsToSend = [ ...pendingRequestIds ];
+
+		// Update tracked requests with their group index.
+		requestIdsToSend.forEach( ( id ) => {
+			const tracked = trackedRequests.get( id );
+			if ( tracked ) {
+				tracked.requestIndex = groupIndex;
+			}
+		} );
+
+		// Store this group as in-flight.
+		inFlightGroups.set( groupIndex, {
+			groupIndex,
+			requestIds: requestIdsToSend,
+		} );
+
+		// Clear pending for next collection.
+		pendingRequestIds = [];
+
+		// Transition to SENDING.
+		transitionTo( 'sending' );
+
+		try {
+			// Build the request - each inner request needs headers too.
+			const requestHeaders = getHeaders();
+			const requests = requestIdsToSend
+				.map( ( id ) => {
+					const tracked = trackedRequests.get( id );
+					if ( ! tracked ) {
+						return null;
+					}
+					return {
+						path: tracked.request.path,
+						method: tracked.request.method,
+						headers: {
+							...requestHeaders,
+							'Content-Type': 'application/json',
+						},
+						body: tracked.request.body,
+					};
+				} )
+				.filter( Boolean );
+
+			// Send the request.
+			const response = await fetch( endpoint, {
+				method: 'POST',
+				cache: 'no-store',
+				headers: {
+					'Content-Type': 'application/json',
+					...requestHeaders,
+				},
+				body: JSON.stringify( { requests } ),
+			} );
+
+			transitionTo( 'recording' );
+
+			if ( ! response.ok ) {
+				handleTotalFailure(
+					groupIndex,
+					new Error( `Request failed: ${ response.status }` )
+				);
+			} else {
+				const json = await response.json();
+				handleResponse( groupIndex, json.responses || [] );
+			}
+		} catch ( error ) {
+			transitionTo( 'recording' );
+			handleTotalFailure(
+				groupIndex,
+				error instanceof Error ? error : new Error( String( error ) )
+			);
+		}
 	}
 
 	/**
