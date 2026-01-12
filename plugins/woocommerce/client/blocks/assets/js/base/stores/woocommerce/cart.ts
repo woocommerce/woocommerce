@@ -324,50 +324,39 @@ const { state, actions } = store< Store >(
 	{
 		actions: {
 			*removeCartItem( key: string ) {
-				const previousCart = JSON.stringify( state.cart );
-
-				// optimistically update the cart
-				state.cart.items = state.cart.items.filter(
-					( item ) => item.key !== key
-				);
-
 				try {
-					const res: Response = yield fetch(
-						`${ state.restUrl }wc/store/v1/cart/remove-item`,
-						{
-							method: 'POST',
-							cache: 'no-store',
-							headers: {
-								Nonce: state.nonce,
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify( { key } ),
-						}
-					);
+					const result = yield sendCartRequest( state, {
+						path: '/wc/store/v1/cart/remove-item',
+						method: 'POST',
+						body: { key },
+						applyOptimistic: () => {
+							state.cart.items = state.cart.items.filter(
+								( item ) => item.key !== key
+							);
+						},
+						// Side effects run synchronously during reconciliation,
+						// before isProcessing clears. This prevents
+						// refreshCartItems from running during these events.
+						onSettled: ( { success } ) => {
+							if ( success ) {
+								emitSyncEvent( {
+									quantityChanges: {
+										cartItemsPendingDelete: [ key ],
+									},
+								} );
+							}
+						},
+					} );
 
-					const json: Cart | ApiErrorResponse = yield res.json();
-
-					if ( isApiErrorResponse( res, json ) ) {
-						throw generateError( json );
+					// Show notices from server response
+					const cart = result.data as Cart;
+					if ( cart ) {
+						const errorNotices =
+							cart.errors.map( generateErrorNotice );
+						yield actions.updateNotices( errorNotices, true );
 					}
-					const quantityChanges = { cartItemsPendingDelete: [ key ] };
-					const infoNotices = getInfoNoticesFromCartUpdates(
-						state.cart,
-						json,
-						quantityChanges
-					);
-					const errorNotices = json.errors.map( generateErrorNotice );
-					yield actions.updateNotices(
-						[ ...infoNotices, ...errorNotices ],
-						true
-					);
-
-					state.cart = json;
-					emitSyncEvent( { quantityChanges } );
 				} catch ( error ) {
-					state.cart = JSON.parse( previousCart );
-
-					// Shows the error notice.
+					// Show error notice
 					actions.showNoticeError( error as Error );
 				}
 			},
