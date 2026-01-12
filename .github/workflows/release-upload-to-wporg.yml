@@ -146,10 +146,15 @@ jobs:
             echo "overwrite_trunk=0" >> "$GITHUB_OUTPUT"
           fi
 
+      - if: ${{ github.repository != 'woocommerce/woocommerce' }}
+        run: |
+          echo "::notice::This is not the 'woocommerce/woocommerce' repository. Commit to WordPress.org SVN will be skipped."
+
   commit:
     name: Commit release to WordPress.org
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     needs: [get-and-validate-release-asset]
+    if: ${{ github.repository == 'woocommerce/woocommerce' }}
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     env:
