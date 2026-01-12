@@ -33,7 +33,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 		$this->attribution_class = new OrderAttributionController();
 
@@ -65,7 +65,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		// Reset the static flag between tests using reflection.
 		$reflection = new \ReflectionClass( OrderAttributionController::class );
 		$property   = $reflection->getProperty( 'is_stamp_html_called' );
@@ -206,6 +206,8 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	 * @return void
 	 */
 	public function test_deprecated_method_calls_main_method() {
+		$this->setExpectedDeprecated( 'Automattic\WooCommerce\Internal\Orders\OrderAttributionController::stamp_checkout_html_element_once' );
+
 		ob_start();
 		$this->attribution_class->stamp_checkout_html_element_once();
 		$output = ob_get_clean();
