@@ -1839,5 +1839,6 @@ class Checkout extends MockeryTestCase {
 		$this->assertEquals( 403, $response->get_status(), 'Should return 403 when session is blocked' );
 		$this->assertEquals( 'woocommerce_rest_checkout_error', $response->get_data()['code'] );
 		$this->assertStringContainsString( 'unable to process this request online', $response->get_data()['message'] );
+		$this->assertStringContainsString( 'to complete your purchase', $response->get_data()['message'], 'Should use checkout-specific message' );
 	}
 }

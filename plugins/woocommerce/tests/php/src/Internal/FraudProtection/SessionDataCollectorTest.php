@@ -51,7 +51,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that collect() method returns properly structured nested array with 8 top-level keys.
+	 * Test that collect() method returns properly structured nested array with 9 top-level keys.
 	 */
 	public function test_collect_returns_properly_structured_nested_array() {
 		$result = $this->sut->collect();
@@ -59,13 +59,14 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'event_type', $result );
 		$this->assertArrayHasKey( 'timestamp', $result );
+		$this->assertArrayHasKey( 'wc_version', $result );
 		$this->assertArrayHasKey( 'session', $result );
 		$this->assertArrayHasKey( 'customer', $result );
 		$this->assertArrayHasKey( 'order', $result );
 		$this->assertArrayHasKey( 'shipping_address', $result );
 		$this->assertArrayHasKey( 'billing_address', $result );
 		$this->assertArrayHasKey( 'event_data', $result );
-		$this->assertCount( 8, $result );
+		$this->assertCount( 9, $result );
 	}
 
 	/**
@@ -94,11 +95,20 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$result = $this->sut->collect();
 
 		$this->assertIsArray( $result );
-		$this->assertCount( 8, $result );
+		$this->assertCount( 9, $result );
 		// All sections should be initialized even if session unavailable.
 		$this->assertIsArray( $result['session'] );
 		$this->assertIsArray( $result['customer'] );
 		$this->assertIsArray( $result['order'] );
+	}
+
+	/**
+	 * Test wc_version field is included in collected data.
+	 */
+	public function test_wc_version_is_included() {
+		$result = $this->sut->collect();
+
+		$this->assertEquals( WC()->version, $result['wc_version'] );
 	}
 
 	/**
@@ -742,7 +752,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 
 		// Verify structure is intact even with minimal data.
 		$this->assertIsArray( $result );
-		$this->assertCount( 8, $result );
+		$this->assertCount( 9, $result );
 
 		// All sections should be arrays.
 		$this->assertIsArray( $result['session'] );
