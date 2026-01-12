@@ -271,8 +271,6 @@ class GeneralSettingsSchema extends AbstractSchema {
 				return $options;
 
 			case 'woocommerce_default_country':
-			case 'woocommerce_specific_allowed_countries':
-			case 'woocommerce_specific_ship_to_countries':
 				if ( ! function_exists( 'WC' ) ) {
 					return array();
 				}
@@ -294,6 +292,16 @@ class GeneralSettingsSchema extends AbstractSchema {
 				}
 
 				return $options;
+
+			case 'woocommerce_all_except_countries':
+			case 'woocommerce_specific_allowed_countries':
+			case 'woocommerce_specific_ship_to_countries':
+				if ( ! function_exists( 'WC' ) ) {
+					return array();
+				}
+
+				// For multiselect country fields, return simple country list (no states).
+				return WC()->countries->get_countries();
 		}
 
 		return array();
