@@ -403,7 +403,10 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * @return void
 	 */
 	public function output() {
-		parent::output();
+		//parent::output();
+
+		// Slot for React-based settings UI.
+		echo '<div id="wc_general_settings_slotfill"> </div>';
 
 		$handle = 'wc-admin-settings-general';
 		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
