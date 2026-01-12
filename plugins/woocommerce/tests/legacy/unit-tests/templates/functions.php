@@ -463,18 +463,18 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		// Restore original countries object.
 		WC()->countries = $original_countries;
 
-		// Should contain label "for" attribute pointing to the input.
+		// Should contain label "for" attribute pointing to the select.
 		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
 		$this->assertStringContainsString( 'Country / Region', $actual_html );
-		// Should contain strong tag with country name for display.
-		$this->assertStringContainsString( '<strong>United States</strong>', $actual_html );
-		// Should contain visually hidden text input with country code for form submission.
-		$this->assertStringContainsString( 'type="text"', $actual_html );
+		// Should contain single-option select styled as plain text.
+		$this->assertStringContainsString( '<select', $actual_html );
+		$this->assertStringContainsString( 'country_to_state--single', $actual_html );
 		$this->assertStringContainsString( 'value="US"', $actual_html );
-		$this->assertStringContainsString( 'country_to_state--hidden', $actual_html );
-		$this->assertStringContainsString( 'readonly="readonly"', $actual_html );
-		// Should NOT have type="hidden" input.
+		$this->assertStringContainsString( '>United States</option>', $actual_html );
+		// Should NOT have strong tag, hidden input, or text input.
+		$this->assertStringNotContainsString( '<strong>', $actual_html );
 		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
+		$this->assertStringNotContainsString( 'type="text"', $actual_html );
 	}
 
 	/**
