@@ -352,7 +352,11 @@ export function getWarningInfo(
 			: undefined;
 
 	// Case 2: Unregistered script or malformed registry entry.
-	if ( ! scriptInfo || ! scriptInfo.handle || ! Array.isArray( scriptInfo.deps ) ) {
+	if (
+		! scriptInfo ||
+		! scriptInfo.handle ||
+		! Array.isArray( scriptInfo.deps )
+	) {
 		return {
 			type: 'unregistered',
 			message: `[WooCommerce] Unregistered script "${ getFilenameFn(
