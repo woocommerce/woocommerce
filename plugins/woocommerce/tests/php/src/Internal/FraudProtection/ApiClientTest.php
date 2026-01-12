@@ -329,6 +329,119 @@ class ApiClientTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Send Event should log session ID from nested session data structure.
+	 */
+	public function test_send_event_logs_session_id_from_nested_structure(): void {
+		add_filter(
+			'pre_http_request',
+			function () {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode(
+						array(
+							'fraud_event_id' => 123,
+							'decision'       => 'allow',
+						)
+					),
+				);
+			}
+		);
+
+		// Use the nested structure that SessionDataCollector::collect() returns.
+		$session_data = array(
+			'event_type' => 'cart_item_added',
+			'session'    => array(
+				'session_id' => 'nested-test-session-id',
+				'ip_address' => '192.168.1.1',
+			),
+			'customer'   => array(
+				'first_name' => 'Test',
+			),
+		);
+
+		$result = $this->sut->send_event( 'cart_item_added', $session_data );
+
+		$this->assertSame( ApiClient::DECISION_ALLOW, $result );
+		$this->assertLogged(
+			'info',
+			'Session: nested-test-session-id',
+			array( 'source' => 'woo-fraud-protection' )
+		);
+	}
+
+	/**
+	 * @testdox Send Event should log 'unknown' session ID when session data is missing.
+	 */
+	public function test_send_event_logs_unknown_when_session_data_missing(): void {
+		add_filter(
+			'pre_http_request',
+			function () {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode(
+						array(
+							'fraud_event_id' => 123,
+							'decision'       => 'allow',
+						)
+					),
+				);
+			}
+		);
+
+		// Session data without the 'session' key.
+		$session_data = array(
+			'event_type' => 'cart_item_added',
+			'customer'   => array(
+				'first_name' => 'Test',
+			),
+		);
+
+		$result = $this->sut->send_event( 'cart_item_added', $session_data );
+
+		$this->assertSame( ApiClient::DECISION_ALLOW, $result );
+		$this->assertLogged(
+			'info',
+			'Session: unknown',
+			array( 'source' => 'woo-fraud-protection' )
+		);
+	}
+
+	/**
+	 * @testdox Send Event should log 'unknown' session ID when session is not an array.
+	 */
+	public function test_send_event_logs_unknown_when_session_is_not_array(): void {
+		add_filter(
+			'pre_http_request',
+			function () {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode(
+						array(
+							'fraud_event_id' => 123,
+							'decision'       => 'allow',
+						)
+					),
+				);
+			}
+		);
+
+		// Session data with 'session' as a non-array value.
+		$session_data = array(
+			'event_type' => 'cart_item_added',
+			'session'    => 'invalid-string-value',
+		);
+
+		$result = $this->sut->send_event( 'cart_item_added', $session_data );
+
+		$this->assertSame( ApiClient::DECISION_ALLOW, $result );
+		$this->assertLogged(
+			'info',
+			'Session: unknown',
+			array( 'source' => 'woo-fraud-protection' )
+		);
+	}
+
+	/**
 	 * @testdox Should filter out null values from session data payload.
 	 */
 	public function test_filters_null_values_from_payload(): void {
