@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Don't pass attributes: undefined while registering some blocks

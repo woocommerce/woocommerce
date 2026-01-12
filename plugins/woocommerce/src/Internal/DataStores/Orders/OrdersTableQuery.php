@@ -697,7 +697,11 @@ class OrdersTableQuery {
 			$this->args['status'] = array( $this->args['status'] );
 		}
 
-		if ( in_array( 'any', $this->args['status'], true ) || in_array( 'all', $this->args['status'], true ) ) {
+		if ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) ) {
+			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses().
+			$this->args['status'] = $valid_statuses;
+		} elseif ( in_array( 'all', $this->args['status'], true ) ) {
+			// Querying for 'all' status does not filter by status at all.
 			$this->args['status'] = array();
 		}
 

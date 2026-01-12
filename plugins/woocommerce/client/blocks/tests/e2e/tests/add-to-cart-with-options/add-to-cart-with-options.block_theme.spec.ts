@@ -59,14 +59,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -100,12 +93,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		editor,
 		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		const variationDescription =
 			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
@@ -183,6 +170,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.first();
 		const quantitySelector = page.getByLabel( 'Product quantity' );
 
+		const additionalInfoPanel =
+			wpCoreVersion >= 6.9
+				? page
+						.getByRole( 'button', {
+							name: 'Additional Information',
+						} )
+						.locator( '../..' )
+						.locator( '.wp-block-accordion-panel' )
+				: page.getByLabel( 'Additional Information', { exact: true } );
+
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
 
@@ -204,13 +201,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( quantitySelector ).toBeVisible();
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			const visibleImage =
-				await productGalleryPageObject.getVisibleLargeImageId();
+				await productGalleryPageObject.getViewerImageId();
 			expect( visibleImage ).toBe( '34' );
 
 			await colorBlueOption.click();
@@ -224,18 +219,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 				page.getByText( 'SKU: woo-hoodie-blue' )
 			).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '2 lbs' )
+				additionalInfoPanel.getByText( '2 lbs' )
 			).toBeVisible();
 			await expect(
 				page.getByText( variationDescription )
 			).toBeVisible();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '35' );
+				expect( newViewerImageId ).toBe( '35' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -247,16 +240,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '34' );
+				expect( newViewerImageId ).toBe( '34' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -288,14 +279,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		// Make Hoodie with Logo to be sold individually.
 		const cliOutput = await wpCLI(
 			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
@@ -825,14 +809,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
 
 		await pageObject.updateSingleProductTemplate();
@@ -944,14 +921,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding simple products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 't-shirt' );
 
 		const addToCartButton = page.getByRole( 'button', {
@@ -966,14 +936,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variable products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 'hoodie' );
 
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
@@ -997,14 +960,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variations to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock(
 			'hoodie',
 			'hoodie-blue-yes'
@@ -1024,14 +980,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 'logo-collection' );
 
 		const increaseQuantityButton = page.getByLabel(
@@ -1064,7 +1013,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await editor.selectBlocks( addToCartFormBlock );
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeHidden();
 
 		await page
@@ -1074,7 +1023,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeVisible();
 	} );
 } );

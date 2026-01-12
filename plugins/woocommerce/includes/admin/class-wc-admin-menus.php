@@ -56,14 +56,10 @@ class WC_Admin_Menus {
 		 * @param bool $show_addons_page If the addons page should be included.
 		 */
 		if ( apply_filters( 'woocommerce_show_addons_page', true ) ) {
-			if ( FeaturesUtil::feature_is_enabled( 'marketplace' ) ) {
-				$container = wc_get_container();
-				$container->get( Marketplace::class );
+			$container = wc_get_container();
+			$container->get( Marketplace::class );
 
-				add_action( 'admin_menu', array( $this, 'addons_my_subscriptions' ), 70 );
-			} else {
-				add_action( 'admin_menu', array( $this, 'addons_menu' ), 70 );
-			}
+			add_action( 'admin_menu', array( $this, 'addons_my_subscriptions' ), 70 );
 		}
 
 		add_filter( 'menu_order', array( $this, 'menu_order' ) );
@@ -207,8 +203,12 @@ class WC_Admin_Menus {
 
 	/**
 	 * Addons menu item.
+	 *
+	 * @deprecated 10.5.0 The marketplace feature is now always enabled. Use the Extensions menu instead.
 	 */
 	public function addons_menu() {
+		wc_deprecated_function( __METHOD__, '10.5.0' );
+
 		$count_html = WC_Helper_Updater::get_updates_count_html();
 		/* translators: %s: extensions count */
 		$menu_title = sprintf( __( 'Extensions %s', 'woocommerce' ), $count_html );
@@ -414,8 +414,10 @@ class WC_Admin_Menus {
 			unset( $endpoints['dashboard'] );
 		}
 
-		// Include missing lost password.
-		$endpoints['lost-password'] = __( 'Lost password', 'woocommerce' );
+		// Include missing lost password endpoint, if set in WooCommerce > Settings > Advanced > Account endpoints.
+		if ( ! empty( get_option( 'woocommerce_myaccount_lost_password_endpoint' ) ) ) {
+			$endpoints['lost-password'] = __( 'Lost password', 'woocommerce' );
+		}
 
 		$endpoints = apply_filters( 'woocommerce_custom_nav_menu_items', $endpoints );
 

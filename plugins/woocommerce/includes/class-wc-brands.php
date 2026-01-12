@@ -57,9 +57,7 @@ class WC_Brands {
 
 		add_filter( 'post_type_link', array( $this, 'post_type_link' ), 11, 2 );
 
-		if ( 'yes' === get_option( 'wc_brands_show_description' ) ) {
-			add_action( 'woocommerce_archive_description', array( $this, 'brand_description' ) );
-		}
+		add_action( 'woocommerce_archive_description', array( $this, 'brand_description' ) );
 
 		add_filter( 'woocommerce_product_query_tax_query', array( $this, 'update_product_query_tax_query' ), 10, 1 );
 
@@ -302,17 +300,9 @@ class WC_Brands {
 	 * Initializes brand taxonomy.
 	 */
 	public static function init_taxonomy() {
-		$shop_page_id = wc_get_page_id( 'shop' );
+		// Get the custom brand permalink slug, or use the default translatable slug.
+		$slug = get_option( 'woocommerce_brand_permalink', '' );
 
-		$base_slug     = $shop_page_id > 0 && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
-		$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) === 'yes' ? trailingslashit( $base_slug ) : '';
-
-		$slug = $category_base . __( 'brand', 'woocommerce' );
-		if ( '' === $category_base ) {
-			$slug = get_option( 'woocommerce_brand_permalink', '' );
-		}
-
-		// Can't provide transatable string as get_option default.
 		if ( '' === $slug ) {
 			$slug = __( 'brand', 'woocommerce' );
 		}
@@ -429,6 +419,10 @@ class WC_Brands {
 	 * Displays brand description.
 	 */
 	public function brand_description() {
+		if ( 'yes' !== get_option( 'wc_brands_show_description' ) ) {
+			return;
+		}
+
 		if ( ! is_tax( 'product_brand' ) ) {
 			return;
 		}
