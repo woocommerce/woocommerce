@@ -115,9 +115,9 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 *
 	 * Attempts to automatically register the site with Jetpack when the fraud protection
 	 * feature is enabled and the site is not already connected.
-	 * 
+	 *
 	 * @since 10.5.0
-	 * 
+	 *
 	 * @internal
 	 *
 	 * @param string $feature_id The feature ID being toggled.
