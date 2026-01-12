@@ -384,14 +384,18 @@ const { state, actions } = store< Store >(
 					return key ? key === cartItem.key : id === cartItem.id;
 				} );
 
-				const isUpdate = !! existingItem;
+				// Only treat as update if the item has a key (server-confirmed item).
+				// Optimistic items don't have keys, so we should add them instead.
+				const isUpdate = !! existingItem?.key;
 				const endpoint = isUpdate ? 'update-item' : 'add-item';
 
-				// Prepare the item to send
+				// Prepare the item to send.
 				let itemToSend: OptimisticCartItem;
-				if ( existingItem ) {
+				if ( isUpdate && existingItem ) {
+					// Server-confirmed item: include the key for update-item endpoint.
 					itemToSend = { ...existingItem, quantity };
 				} else {
+					// New item or optimistic item: build fresh for add-item endpoint.
 					itemToSend = {
 						id,
 						quantity,
@@ -406,7 +410,8 @@ const { state, actions } = store< Store >(
 						method: 'POST',
 						body: itemToSend,
 						applyOptimistic: () => {
-							if ( isUpdate && existingItem ) {
+							if ( existingItem ) {
+								// Update existing item's quantity (whether server-confirmed or optimistic).
 								const isSoldIndividually =
 									isCartItem( existingItem ) &&
 									existingItem.sold_individually;
@@ -414,6 +419,7 @@ const { state, actions } = store< Store >(
 									existingItem.quantity = quantity;
 								}
 							} else {
+								// No existing item: push new optimistic item.
 								state.cart.items.push( itemToSend );
 							}
 						},
