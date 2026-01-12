@@ -58,8 +58,10 @@ class OrderAttributionController implements RegisterHooksInterface {
 	private $proxy;
 
 	/**
-	 * Whether the `stamp_html_element` method has been called.
-	 * Used when single-output mode is enabled via filter.
+	 * Tracks whether stamp_html_element() has been called in single-output mode.
+	 *
+	 * When wc_order_attribution_allow_multiple_elements filter returns false,
+	 * this flag prevents duplicate outputs across multiple action hooks.
 	 *
 	 * @var bool
 	 */
