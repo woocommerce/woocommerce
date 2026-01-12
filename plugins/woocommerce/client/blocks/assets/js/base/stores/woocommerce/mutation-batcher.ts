@@ -207,19 +207,24 @@ export function createMutationQueue< TState >(
 			// Build the request - each inner request needs headers too
 			const requestHeaders = getHeaders();
 			const requests = requestIdsToSend.map( ( id ) => {
-				const tracked = trackedRequests.get( id )!;
-				return {
-					path: tracked.request.path,
-					method: tracked.request.method,
-					headers: {
-						...requestHeaders,
-						'Content-Type': 'application/json',
-					},
-					body: tracked.request.body,
-				};
+				const tracked = trackedRequests.get( id );
+
+				// We check truthyness here, because non-null assertions are not allowed.
+				// Should we throw if tracked is not available?
+				if ( tracked ) {
+					return {
+						path: tracked.request.path,
+						method: tracked.request.method,
+						headers: {
+							...requestHeaders,
+							'Content-Type': 'application/json',
+						},
+						body: tracked.request.body,
+					};
+				}
 			} );
 
-			// Send the request
+			// Send the request.
 			const response = await fetch( endpoint, {
 				method: 'POST',
 				cache: 'no-store',
@@ -280,7 +285,7 @@ export function createMutationQueue< TState >(
 
 		let latestServerState: TState | null = null;
 
-		// Process each response
+		// Process each response.
 		responses.forEach( ( itemResponse, index ) => {
 			const requestId = group.requestIds[ index ];
 			if ( ! requestId ) return;
@@ -289,10 +294,10 @@ export function createMutationQueue< TState >(
 				itemResponse.status >= 200 && itemResponse.status < 300;
 
 			if ( isSuccess ) {
-				// Extract server state from successful response
+				// Extract server state from successful response.
 				latestServerState = extractServerState( itemResponse.body );
 			} else {
-				// Extract error
+				// Extract error.
 				const errorBody = itemResponse.body as {
 					message?: string;
 					code?: string;
@@ -311,23 +316,23 @@ export function createMutationQueue< TState >(
 			lastStoredIndex = groupIndex;
 		}
 
-		// Remove from in-flight
+		// Remove from in-flight.
 		inFlightGroups.delete( groupIndex );
 
 		checkAndReconcile();
 	}
 
 	/**
-	 * Check if we should reconcile
+	 * Check if we should reconcile.
 	 */
 	function checkAndReconcile() {
-		// If still in-flight groups, wait
+		// If still in-flight groups, wait.
 		if ( inFlightGroups.size > 0 ) {
 			transitionTo( 'sending' );
 			return;
 		}
 
-		// If new requests came in, schedule them
+		// If new requests came in, schedule them.
 		if ( pendingRequestIds.length > 0 ) {
 			if ( ! microtaskScheduled ) {
 				microtaskScheduled = true;
@@ -341,17 +346,17 @@ export function createMutationQueue< TState >(
 	}
 
 	/**
-	 * Final reconciliation (RECONCILIATION phase)
+	 * Final reconciliation (RECONCILIATION phase).
 	 */
 	function reconcile() {
 		transitionTo( 'reconciling' );
 
-		// Apply final state
+		// Apply final state.
 		if ( lastServerState !== null ) {
-			// ANY request succeeded → overwrite with last server state
+			// ANY request succeeded → overwrite with last server state.
 			stateHandler.applyServerState( lastServerState );
 		} else if ( snapshot !== null ) {
-			// ALL total failures → rollback to snapshot
+			// ALL total failures → rollback to snapshot.
 			stateHandler.rollback( snapshot );
 		}
 
@@ -367,10 +372,10 @@ export function createMutationQueue< TState >(
 			} );
 		} );
 
-		// Clear processing flag synchronously after onSettled callbacks
+		// Clear processing flag synchronously after onSettled callbacks.
 		isProcessing = false;
 
-		// NOW resolve/reject promises (generators will resume async)
+		// Now resolve/reject promises (generators will resume async).
 		trackedRequests.forEach( ( tracked ) => {
 			const error = accumulatedErrors.get( tracked.id );
 
@@ -387,7 +392,7 @@ export function createMutationQueue< TState >(
 			}
 		} );
 
-		// Clear everything for next cycle
+		// Clear everything for next cycle.
 		snapshot = null;
 		lastServerState = null;
 		lastStoredIndex = -1;
@@ -400,7 +405,7 @@ export function createMutationQueue< TState >(
 	}
 
 	/**
-	 * Submit a mutation request
+	 * Submit a mutation request.
 	 *
 	 * Returns a promise that resolves when processing completes.
 	 * Queuing is invisible to the caller.
@@ -409,19 +414,19 @@ export function createMutationQueue< TState >(
 		request: MutationRequest< TState >
 	): Promise< MutationResult< TState > > {
 		return new Promise( ( resolve, reject ) => {
-			// If idle, take snapshot and transition to collecting
+			// If idle, take snapshot and transition to collecting.
 			if ( currentState === 'idle' ) {
 				snapshot = stateHandler.takeSnapshot();
 				isProcessing = true;
 				transitionTo( 'collecting' );
 			}
 
-			// Apply optimistic update immediately
+			// Apply optimistic update immediately.
 			if ( request.applyOptimistic ) {
 				request.applyOptimistic();
 			}
 
-			// Track this request
+			// Track this request.
 			const tracked: TrackedRequest< TState > = {
 				id: request.id,
 				request,
@@ -433,7 +438,7 @@ export function createMutationQueue< TState >(
 			trackedRequests.set( request.id, tracked );
 			pendingRequestIds.push( request.id );
 
-			// Schedule microtask if not already scheduled
+			// Schedule microtask if not already scheduled.
 			if ( ! microtaskScheduled ) {
 				microtaskScheduled = true;
 				queueMicrotask( () => processRequests() );
@@ -442,7 +447,7 @@ export function createMutationQueue< TState >(
 	}
 
 	/**
-	 * Get current queue status
+	 * Get current queue status.
 	 */
 	function getStatus() {
 		return {
@@ -458,7 +463,7 @@ export function createMutationQueue< TState >(
 }
 
 /**
- * Type for the queue instance
+ * Type for the queue instance.
  */
 export type MutationQueue< TState = unknown > = ReturnType<
 	typeof createMutationQueue< TState >

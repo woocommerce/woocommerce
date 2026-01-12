@@ -279,16 +279,15 @@ type CartRequestOptions = {
 };
 
 /**
- * Send a cart request through the queue
+ * Send a cart request through the queue.
  *
  * Handles optimistic updates, request queuing, and state reconciliation.
- * The queue is an implementation detail - callers just send requests.
  */
 function sendCartRequest(
 	stateRef: Store[ 'state' ],
 	options: CartRequestOptions
 ): Promise< MutationResult< Cart > > {
-	// Lazily initialize queue on first use
+	// Lazily initialize queue on first use.
 	if ( ! cartQueue ) {
 		cartQueue = createMutationQueue< Cart >( {
 			endpoint: `${ stateRef.restUrl }wc/store/v1/batch`,
@@ -309,7 +308,7 @@ function sendCartRequest(
 		} );
 	}
 
-	// Auto-generate request ID
+	// Auto-generate request ID.
 	const requestId = `cart-${ ++requestIdCounter }`;
 
 	return cartQueue.submit( {
@@ -348,7 +347,7 @@ const { state, actions } = store< Store >(
 						},
 					} );
 
-					// Show notices from server response
+					// Show notices from server response.
 					const cart = result.data as Cart;
 					if ( cart ) {
 						const errorNotices =
@@ -356,7 +355,6 @@ const { state, actions } = store< Store >(
 						yield actions.updateNotices( errorNotices, true );
 					}
 				} catch ( error ) {
-					// Show error notice
 					actions.showNoticeError( error as Error );
 				}
 			},
