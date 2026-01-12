@@ -13,6 +13,7 @@ import type { FormField } from '@wordpress/dataviews';
 import {
 	useGeneralSettings,
 	type SettingsGroup,
+	SettingsField,
 } from './hooks/use-general-settings';
 import { baseFieldTransformer } from './utils';
 import './settings-general-main.scss';
@@ -67,6 +68,30 @@ const rowConfigurations: Record<
 	Array< { id: string; fields: string[] } >
 > = {};
 
+const localTransformer = ( field: SettingsField ) => {
+	const baseField = baseFieldTransformer( field );
+	if ( field.type === 'multiselect' ) {
+		return {
+			...baseField,
+			isVisible: ( item: Record< string, string | string[] > ) => {
+				if ( field.id === 'woocommerce_specific_ship_to_countries' ) {
+					return item.woocommerce_ship_to_countries === 'specific';
+				}
+
+				if ( field.id === 'woocommerce_all_except_countries' ) {
+					return item.woocommerce_allowed_countries === 'all_except';
+				}
+
+				if ( field.id === 'woocommerce_specific_allowed_countries' ) {
+					return item.woocommerce_allowed_countries === 'specific';
+				}
+				return true;
+			},
+		};
+	}
+	return baseField;
+};
+
 /**
  * Main component for the General Settings page.
  * Uses WordPress DataForms for rendering settings.
@@ -98,7 +123,7 @@ export const SettingsGeneralMain = () => {
 		// Select only fields from all groups and transform them.
 		const allFields = ( Object.values( data.groups ) as SettingsGroup[] )
 			.flatMap( ( group ) => group.fields )
-			.map( ( field ) => baseFieldTransformer( field ) );
+			.map( ( field ) => localTransformer( field ) );
 
 		// Type assertion needed because baseFieldTransformer returns a generic object
 		// that matches the Field structure expected by DataForm at runtime
