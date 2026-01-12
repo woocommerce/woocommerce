@@ -57,7 +57,7 @@ final class BlockTypesController {
 	protected function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod.MissingPublic
 		add_action( 'init', array( $this, 'register_blocks' ) );
 		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
-		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 1 );
+		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), 10, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
