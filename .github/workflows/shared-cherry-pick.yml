@@ -282,7 +282,8 @@ jobs:
                 head: cherryPickBranch,
                 base: targetBranch,
                 title: `[Backport to ${targetBranch}] ${originalPr.title}`,
-                body: prBody
+                body: prBody,
+                labels: hasConflicts ? ['cherry pick has conflicts'] : []
               });
               await github.rest.pulls.requestReviewers({
                 owner: context.repo.owner,
