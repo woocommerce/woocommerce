@@ -745,6 +745,10 @@ p.demo_store,
 							font-size: 0.83em;
 						}
 					}
+
+					&.no-avatar .comment-text {
+						margin-left: 0;
+					}
 				}
 
 				ul.children {
