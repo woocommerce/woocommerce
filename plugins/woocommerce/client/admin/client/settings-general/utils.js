@@ -168,6 +168,20 @@ export const baseFieldTransformer = ( setting ) => {
 					};
 				},
 			};
+		case 'multiselect':
+			return {
+				...baseField,
+				type: 'array',
+				elements: parseOptions( setting.options ),
+				isValid: ( value ) => {
+					return (
+						Array.isArray( value ) &&
+						value.every( ( item ) =>
+							setting.options.includes( item )
+						)
+					);
+				},
+			};
 		default:
 			// Return a read-only text field for unsupported field types
 			// This prevents silent failures when rendering unsupported fields
