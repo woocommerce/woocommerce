@@ -158,13 +158,6 @@ export function createMutationQueue< TState >(
 
 	// Flag to track if we're actively processing requests
 	let isProcessing = false;
-	let cycleId = 0;
-
-	// Track the last cycle that applied server state (to prevent older cycles overwriting newer state)
-	let lastAppliedCycleId = 0;
-
-	// The cycle ID for the current processing cycle (captured at start, used at reconcile)
-	let currentCycleId = 0;
 
 	/**
 	 * Transition to a new state
@@ -353,27 +346,18 @@ export function createMutationQueue< TState >(
 	function reconcile() {
 		transitionTo( 'reconciling' );
 
-		const hasServerState = lastServerState !== null;
-		const thisCycleId = currentCycleId;
-
-		// Only apply state if this cycle is newer than or equal to the last applied
-		// This prevents older cycles from overwriting newer optimistic state
-		if ( thisCycleId >= lastAppliedCycleId ) {
-			// Apply final state
-			if ( hasServerState ) {
-				// ANY request succeeded → overwrite with last server state
-				stateHandler.applyServerState( lastServerState! );
-				lastAppliedCycleId = thisCycleId;
-			} else if ( snapshot !== null ) {
-				// ALL total failures → rollback to snapshot
-				stateHandler.rollback( snapshot );
-				lastAppliedCycleId = thisCycleId;
-			}
+		// Apply final state
+		if ( lastServerState !== null ) {
+			// ANY request succeeded → overwrite with last server state
+			stateHandler.applyServerState( lastServerState );
+		} else if ( snapshot !== null ) {
+			// ALL total failures → rollback to snapshot
+			stateHandler.rollback( snapshot );
 		}
 
 		// Run onSettled callbacks synchronously BEFORE clearing isProcessing
 		// This allows side effects (like firing events) to complete while
-		// external code (like refreshCartItems) is still blocked
+		// external code (like refreshCartItems) is still blocked.
 		trackedRequests.forEach( ( tracked ) => {
 			const error = accumulatedErrors.get( tracked.id );
 			tracked.request.onSettled?.( {
@@ -395,7 +379,9 @@ export function createMutationQueue< TState >(
 			} else {
 				tracked.resolve( {
 					success: true,
-					...( lastServerState !== null && { data: lastServerState } ),
+					...( lastServerState !== null && {
+						data: lastServerState,
+					} ),
 					requestId: tracked.id,
 				} );
 			}
@@ -427,8 +413,6 @@ export function createMutationQueue< TState >(
 			if ( currentState === 'idle' ) {
 				snapshot = stateHandler.takeSnapshot();
 				isProcessing = true;
-				cycleId++;
-				currentCycleId = cycleId; // Capture for this cycle's reconciliation
 				transitionTo( 'collecting' );
 			}
 
