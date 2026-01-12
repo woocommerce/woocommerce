@@ -204,10 +204,59 @@ class Controller extends AbstractController {
 				continue;
 			}
 
+			// Get the old value to detect if filters prevent saving.
+			$old_value = get_option( $setting_id, null );
+
 			// Sanitize the value based on the setting type.
 			$setting_definition = $settings_by_id[ $setting_id ];
 			$setting_type       = $setting_definition['type'] ?? 'text';
-			$sanitized_value    = $this->sanitize_setting_value( $setting_type, $setting_value );
+			$sanitized_before_filters = $this->sanitize_setting_value( $setting_type, $setting_value );
+
+			// Apply WooCommerce sanitization filters to allow plugins to add business logic.
+			// This matches the behavior of WC_Admin_Settings::save_fields().
+			$raw_value = $setting_value; // Store original for filter compatibility.
+			$sanitized_value = apply_filters( 'woocommerce_admin_settings_sanitize_option', $sanitized_before_filters, $setting_definition, $raw_value );
+			$sanitized_value = apply_filters( "woocommerce_admin_settings_sanitize_option_{$setting_id}", $sanitized_value, $setting_definition, $raw_value );
+
+			// Skip if filter returned null (indicates the setting should not be saved).
+			if ( is_null( $sanitized_value ) ) {
+				continue;
+			}
+
+			// Check if filter prevented saving by returning the old value (common pattern for validation errors).
+			// If the value after filters matches the old value but differs from what we're trying to save,
+			// it means a filter prevented the update (e.g., validation failed).
+			if ( null !== $old_value 
+				&& $sanitized_value === $old_value 
+				&& $sanitized_before_filters !== $old_value ) {
+				// A filter prevented saving by returning the old value.
+				// Check for errors added by filters via WC_Admin_Settings::add_error() using reflection.
+				$errors = array();
+				try {
+					$reflection = new \ReflectionClass( 'WC_Admin_Settings' );
+					$property   = $reflection->getProperty( 'errors' );
+					$property->setAccessible( true );
+					$errors = $property->getValue();
+					$property->setAccessible( false );
+				} catch ( \ReflectionException $e ) {
+					// If reflection fails, continue without error details.
+				}
+
+				// Return error response with filter error messages if available.
+				$error_message = ! empty( $errors ) 
+					? implode( ' ', $errors )
+					: /* translators: %s: Setting ID */
+					  sprintf( __( 'Setting "%s" could not be updated. Validation failed.', 'woocommerce' ), $setting_id );
+
+				return new WP_Error(
+					'rest_setting_validation_failed',
+					$error_message,
+					array(
+						'status'      => 400,
+						'setting_id' => $setting_id,
+					)
+				);
+			}
 
 			// Additional validation for specific settings.
 			$validation_result = $this->validate_setting_value( $setting_id, $sanitized_value );
