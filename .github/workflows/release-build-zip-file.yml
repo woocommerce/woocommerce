@@ -135,6 +135,7 @@ jobs:
               if [[ $branch_stable_version != $svn_stable_version ]] ; then
                 echo "::error::Pre-build verification: stable version in release branch ($branch_stable_version) is not matching the one in SVN trunk ($svn_stable_version)."
                 exit 1
+              fi
             fi
 
             # No PRs against release branch should remain open.
