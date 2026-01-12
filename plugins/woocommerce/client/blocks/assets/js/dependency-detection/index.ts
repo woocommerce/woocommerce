@@ -168,9 +168,10 @@ interface PendingCheck {
 		},
 		set( newValue: Record< string, unknown > ) {
 			// When WC scripts set window.wc, wrap the new value.
-			originalWc = newValue;
+			// Handle null/undefined to prevent Proxy TypeError.
+			originalWc = newValue || {};
 			wcProxy = createWcProxy(
-				newValue,
+				originalWc,
 				WC_GLOBAL_EXPORTS,
 				getCallerScriptUrl,
 				checkDependency

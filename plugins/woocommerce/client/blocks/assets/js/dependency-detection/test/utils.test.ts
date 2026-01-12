@@ -542,6 +542,23 @@ setTimeout handler*@https://store.local/wp-content/plugins/wc-dependency-test/ba
 			expect( result?.type ).toBe( 'unregistered' );
 		} );
 
+		it( 'returns unregistered warning for malformed registry entry with missing handle', () => {
+			const malformedRegistry = {
+				'https://example.com/malformed.js': {
+					deps: [ 'wc-blocks-checkout' ],
+				},
+			} as unknown as ScriptRegistry;
+
+			const result = getWarningInfo(
+				'https://example.com/malformed.js',
+				'blocksCheckout',
+				'wc-blocks-checkout',
+				malformedRegistry
+			);
+
+			expect( result?.type ).toBe( 'unregistered' );
+		} );
+
 		it( 'returns unregistered warning for malformed registry entry with non-array deps', () => {
 			const malformedRegistry = {
 				'https://example.com/malformed.js': {
