@@ -1,28 +1,26 @@
 /**
- * Mutation Batcher - Order-dependent batching system for WooCommerce Store API
+ * Mutation Queue - Order-dependent request queue for WooCommerce Store API
  *
  * This implements a state machine that:
- * 1. Takes ONE snapshot when first request arrives (start of batch cycle)
+ * 1. Takes ONE snapshot when first request arrives (start of processing cycle)
  * 2. Collects mutations within a single microtask tick
- * 3. Sends them as a batch to the server
- * 4. Handles out-of-order responses using batch indexing
+ * 3. Sends them to the server
+ * 4. Handles out-of-order responses using request indexing
  * 5. Reconciles: apply last server state OR rollback to snapshot (if all failed)
  *
- * Batching is invisible to callers - each queueMutation() returns a promise
+ * Queuing is invisible to callers - each submit() returns a promise
  * that resolves/rejects based on that request's success/failure.
- *
- * States: IDLE -> COLLECTING -> SENDING -> RECORDING -> RECONCILING -> IDLE
  */
 
 /**
- * Global state handler for the batch cycle
+ * State handler for managing snapshots and state application
  */
-export type BatchStateHandler< TState = unknown > = {
-	/** Take a snapshot of state (called once at start of batch cycle) */
+export type StateHandler< TState = unknown > = {
+	/** Take a snapshot of state (called once at start of processing cycle) */
 	takeSnapshot: () => TState;
-	/** Rollback to snapshot (only if ALL batches had total failures) */
+	/** Rollback to snapshot (only if ALL requests failed) */
 	rollback: ( snapshot: TState ) => void;
-	/** Apply server state (called if ANY batch succeeded) */
+	/** Apply server state (called if ANY request succeeded) */
 	applyServerState: ( serverState: TState ) => void;
 };
 
@@ -36,7 +34,7 @@ export type SettledResult< TState = unknown > = {
 };
 
 /**
- * A mutation request to be batched
+ * A mutation request to be queued
  */
 export type MutationRequest< TState = unknown > = {
 	/** Unique identifier for this request */
@@ -50,7 +48,7 @@ export type MutationRequest< TState = unknown > = {
 	/** Apply optimistic update immediately (modifies state in place) */
 	applyOptimistic?: () => void;
 	/**
-	 * Called synchronously after reconciliation, before batchCycleActive clears.
+	 * Called synchronously after reconciliation, before isProcessing clears.
 	 * Use this for side effects (events, notifications) that must complete
 	 * before external code (like refreshCartItems) is allowed to run.
 	 */
@@ -58,7 +56,7 @@ export type MutationRequest< TState = unknown > = {
 };
 
 /**
- * Result of a single mutation in the batch
+ * Result of a single mutation
  */
 export type MutationResult< TState = unknown > = {
 	success: boolean;
@@ -68,34 +66,32 @@ export type MutationResult< TState = unknown > = {
 };
 
 /**
- * API response for a single request in the batch
+ * API response for a single request
  */
-export type BatchItemResponse = {
+type BatchItemResponse = {
 	status: number;
 	body: unknown;
 	headers?: Record< string, string >;
 };
 
 /**
- * Configuration for the mutation batcher
+ * Configuration for the mutation queue
  */
-export type MutationBatcherConfig< TState = unknown > = {
-	/** Base URL for the batch endpoint */
-	batchEndpoint: string;
+export type MutationQueueConfig< TState = unknown > = {
+	/** URL for the batch endpoint */
+	endpoint: string;
 	/** Function to get auth headers (nonce, etc.) */
 	getHeaders: () => Record< string, string >;
-	/** Global state handler for the batch cycle */
-	stateHandler: BatchStateHandler< TState >;
+	/** State handler for snapshots and reconciliation */
+	stateHandler: StateHandler< TState >;
 	/** Extract server state from a successful response body */
 	extractServerState?: ( body: unknown ) => TState;
-	/** Optional callback for state changes (debugging) */
-	onStateChange?: ( state: BatcherState ) => void;
 };
 
 /**
- * Internal state of the batcher
+ * Internal state of the queue
  */
-export type BatcherState =
+type QueueState =
 	| 'idle'
 	| 'collecting'
 	| 'sending'
@@ -110,50 +106,49 @@ type TrackedRequest< TState = unknown > = {
 	request: MutationRequest< TState >;
 	resolve: ( result: MutationResult ) => void;
 	reject: ( error: Error ) => void;
-	batchIndex: number;
+	requestIndex: number;
 };
 
 /**
- * In-flight batch information
+ * In-flight request group information
  */
-type InFlightBatch = {
-	batchIndex: number;
+type InFlightGroup = {
+	groupIndex: number;
 	requestIds: string[];
 };
 
 /**
- * Creates a mutation batcher instance
+ * Creates a mutation queue instance
  */
-export function createMutationBatcher< TState >(
-	config: MutationBatcherConfig< TState >
+export function createMutationQueue< TState >(
+	config: MutationQueueConfig< TState >
 ) {
 	const {
-		batchEndpoint,
+		endpoint,
 		getHeaders,
 		stateHandler,
 		extractServerState = ( body ) => body as TState,
-		onStateChange,
 	} = config;
 
 	// State machine state
-	let currentState: BatcherState = 'idle';
+	let currentState: QueueState = 'idle';
 
-	// Single snapshot for the entire batch cycle (taken at IDLE → COLLECTING)
+	// Single snapshot for the entire processing cycle (taken at IDLE → COLLECTING)
 	let snapshot: TState | null = null;
 
 	// All tracked requests for the current cycle
 	const trackedRequests: Map< string, TrackedRequest > = new Map();
 
-	// Requests waiting to be batched (collected this tick)
+	// Requests waiting to be sent (collected this tick)
 	let pendingRequestIds: string[] = [];
 
-	// Batch indexing for ordering responses
-	let nextBatchIndex = 0;
+	// Request group indexing for ordering responses
+	let nextGroupIndex = 0;
 	let lastStoredIndex = -1;
 	let lastServerState: TState | null = null;
 
-	// In-flight batches
-	const inFlightBatches: Map< number, InFlightBatch > = new Map();
+	// In-flight request groups
+	const inFlightGroups: Map< number, InFlightGroup > = new Map();
 
 	// Accumulated errors (keyed by request id)
 	const accumulatedErrors: Map< string, Error > = new Map();
@@ -161,52 +156,51 @@ export function createMutationBatcher< TState >(
 	// Flag to track if we've scheduled a microtask
 	let microtaskScheduled = false;
 
-	// Flag to track if we're in an active batch cycle (including time for handlers)
-	let batchCycleActive = false;
-	let batchCycleId = 0;
+	// Flag to track if we're actively processing requests
+	let isProcessing = false;
+	let cycleId = 0;
 
 	// Track the last cycle that applied server state (to prevent older cycles overwriting newer state)
 	let lastAppliedCycleId = 0;
 
-	// The cycle ID for the current batch cycle (captured at start, used at reconcile)
-	let currentBatchCycleId = 0;
+	// The cycle ID for the current processing cycle (captured at start, used at reconcile)
+	let currentCycleId = 0;
 
 	/**
 	 * Transition to a new state
 	 */
-	function transitionTo( newState: BatcherState ) {
+	function transitionTo( newState: QueueState ) {
 		currentState = newState;
-		onStateChange?.( newState );
 	}
 
 	/**
-	 * Process the batch after the microtask tick completes
+	 * Process pending requests after the microtask tick completes
 	 */
-	async function processBatch() {
+	async function processRequests() {
 		microtaskScheduled = false;
 
 		if ( pendingRequestIds.length === 0 ) {
-			if ( inFlightBatches.size === 0 ) {
+			if ( inFlightGroups.size === 0 ) {
 				transitionTo( 'idle' );
 			}
 			return;
 		}
 
-		// Assign batch index
-		const batchIndex = nextBatchIndex++;
+		// Assign group index
+		const groupIndex = nextGroupIndex++;
 		const requestIdsToSend = [ ...pendingRequestIds ];
 
-		// Update tracked requests with their batch index
+		// Update tracked requests with their group index
 		requestIdsToSend.forEach( ( id ) => {
 			const tracked = trackedRequests.get( id );
 			if ( tracked ) {
-				tracked.batchIndex = batchIndex;
+				tracked.requestIndex = groupIndex;
 			}
 		} );
 
-		// Store this batch as in-flight
-		inFlightBatches.set( batchIndex, {
-			batchIndex,
+		// Store this group as in-flight
+		inFlightGroups.set( groupIndex, {
+			groupIndex,
 			requestIds: requestIdsToSend,
 		} );
 
@@ -217,9 +211,9 @@ export function createMutationBatcher< TState >(
 		transitionTo( 'sending' );
 
 		try {
-			// Build the batch request - each inner request needs headers too
+			// Build the request - each inner request needs headers too
 			const requestHeaders = getHeaders();
-			const batchRequests = requestIdsToSend.map( ( id ) => {
+			const requests = requestIdsToSend.map( ( id ) => {
 				const tracked = trackedRequests.get( id )!;
 				return {
 					path: tracked.request.path,
@@ -232,70 +226,70 @@ export function createMutationBatcher< TState >(
 				};
 			} );
 
-			// Send the batch
-			const response = await fetch( batchEndpoint, {
+			// Send the request
+			const response = await fetch( endpoint, {
 				method: 'POST',
 				cache: 'no-store',
 				headers: {
 					'Content-Type': 'application/json',
 					...requestHeaders,
 				},
-				body: JSON.stringify( { requests: batchRequests } ),
+				body: JSON.stringify( { requests } ),
 			} );
 
 			transitionTo( 'recording' );
 
 			if ( ! response.ok ) {
 				handleTotalFailure(
-					batchIndex,
-					new Error( `Batch request failed: ${ response.status }` )
+					groupIndex,
+					new Error( `Request failed: ${ response.status }` )
 				);
 			} else {
 				const json = await response.json();
-				handleBatchResponse( batchIndex, json.responses || [] );
+				handleResponse( groupIndex, json.responses || [] );
 			}
 		} catch ( error ) {
 			transitionTo( 'recording' );
 			handleTotalFailure(
-				batchIndex,
+				groupIndex,
 				error instanceof Error ? error : new Error( String( error ) )
 			);
 		}
 	}
 
 	/**
-	 * Handle total failure of a batch (network error, non-200 response)
+	 * Handle total failure of a request group (network error, non-200 response)
 	 */
-	function handleTotalFailure( batchIndex: number, error: Error ) {
-		const batch = inFlightBatches.get( batchIndex );
-		if ( ! batch ) return;
+	function handleTotalFailure( groupIndex: number, error: Error ) {
+		const group = inFlightGroups.get( groupIndex );
+		if ( ! group ) return;
 
-		// Add errors for all requests in this batch
-		batch.requestIds.forEach( ( id ) => {
+		// Add errors for all requests in this group
+		group.requestIds.forEach( ( id ) => {
 			accumulatedErrors.set( id, error );
 		} );
 
 		// Remove from in-flight
-		inFlightBatches.delete( batchIndex );
+		inFlightGroups.delete( groupIndex );
 
 		checkAndReconcile();
 	}
 
 	/**
-	 * Handle batch response (RESPONSE_RECORDING phase)
+	 * Handle response (RESPONSE_RECORDING phase)
 	 */
-	function handleBatchResponse(
-		batchIndex: number,
+	function handleResponse(
+		groupIndex: number,
 		responses: BatchItemResponse[]
 	) {
-		const batch = inFlightBatches.get( batchIndex );
-		if ( ! batch ) return;
+		const group = inFlightGroups.get( groupIndex );
+		if ( ! group ) return;
 
 		let latestServerState: TState | null = null;
 
 		// Process each response
 		responses.forEach( ( itemResponse, index ) => {
-			const requestId = batch.requestIds[ index ];
+			const requestId = group.requestIds[ index ];
 			if ( ! requestId ) return;
 
 			const isSuccess =
@@ -318,14 +312,14 @@ export function createMutationBatcher< TState >(
 			}
 		} );
 
-		// Store server state if this batch is newer than what we have
-		if ( latestServerState !== null && batchIndex > lastStoredIndex ) {
+		// Store server state if this group is newer than what we have
+		if ( latestServerState !== null && groupIndex > lastStoredIndex ) {
 			lastServerState = latestServerState;
-			lastStoredIndex = batchIndex;
+			lastStoredIndex = groupIndex;
 		}
 
 		// Remove from in-flight
-		inFlightBatches.delete( batchIndex );
+		inFlightGroups.delete( groupIndex );
 
 		checkAndReconcile();
 	}
@@ -334,8 +328,8 @@ export function createMutationBatcher< TState >(
 	 * Check if we should reconcile
 	 */
 	function checkAndReconcile() {
-		// If still in-flight batches, wait
-		if ( inFlightBatches.size > 0 ) {
+		// If still in-flight groups, wait
+		if ( inFlightGroups.size > 0 ) {
 			transitionTo( 'sending' );
 			return;
 		}
@@ -344,7 +338,7 @@ export function createMutationBatcher< TState >(
 		if ( pendingRequestIds.length > 0 ) {
 			if ( ! microtaskScheduled ) {
 				microtaskScheduled = true;
-				queueMicrotask( () => processBatch() );
+				queueMicrotask( () => processRequests() );
 			}
 			transitionTo( 'collecting' );
 			return;
@@ -360,24 +354,24 @@ export function createMutationBatcher< TState >(
 		transitionTo( 'reconciling' );
 
 		const hasServerState = lastServerState !== null;
-		const currentCycleId = currentBatchCycleId;
+		const thisCycleId = currentCycleId;
 
 		// Only apply state if this cycle is newer than or equal to the last applied
 		// This prevents older cycles from overwriting newer optimistic state
-		if ( currentCycleId >= lastAppliedCycleId ) {
+		if ( thisCycleId >= lastAppliedCycleId ) {
 			// Apply final state
 			if ( hasServerState ) {
-				// ANY batch succeeded → overwrite with last server state
+				// ANY request succeeded → overwrite with last server state
 				stateHandler.applyServerState( lastServerState! );
-				lastAppliedCycleId = currentCycleId;
+				lastAppliedCycleId = thisCycleId;
 			} else if ( snapshot !== null ) {
 				// ALL total failures → rollback to snapshot
 				stateHandler.rollback( snapshot );
-				lastAppliedCycleId = currentCycleId;
+				lastAppliedCycleId = thisCycleId;
 			}
 		}
 
-		// Run onSettled callbacks synchronously BEFORE clearing batchCycleActive
+		// Run onSettled callbacks synchronously BEFORE clearing isProcessing
 		// This allows side effects (like firing events) to complete while
 		// external code (like refreshCartItems) is still blocked
 		trackedRequests.forEach( ( tracked ) => {
@@ -389,8 +383,8 @@ export function createMutationBatcher< TState >(
 			} );
 		} );
 
-		// Clear batch cycle flag synchronously after onSettled callbacks
-		batchCycleActive = false;
+		// Clear processing flag synchronously after onSettled callbacks
+		isProcessing = false;
 
 		// NOW resolve/reject promises (generators will resume async)
 		trackedRequests.forEach( ( tracked ) => {
@@ -411,7 +405,7 @@ export function createMutationBatcher< TState >(
 		snapshot = null;
 		lastServerState = null;
 		lastStoredIndex = -1;
-		nextBatchIndex = 0;
+		nextGroupIndex = 0;
 		accumulatedErrors.clear();
 		trackedRequests.clear();
 
@@ -420,21 +414,21 @@ export function createMutationBatcher< TState >(
 	}
 
 	/**
-	 * Queue a mutation request
+	 * Submit a mutation request
 	 *
-	 * Returns a promise that resolves when the batch cycle completes.
-	 * Batching is invisible to the caller.
+	 * Returns a promise that resolves when processing completes.
+	 * Queuing is invisible to the caller.
 	 */
-	function queueMutation(
+	function submit(
 		request: MutationRequest
 	): Promise< MutationResult< TState > > {
 		return new Promise( ( resolve, reject ) => {
 			// If idle, take snapshot and transition to collecting
 			if ( currentState === 'idle' ) {
 				snapshot = stateHandler.takeSnapshot();
-				batchCycleActive = true;
-				batchCycleId++;
-				currentBatchCycleId = batchCycleId; // Capture for this cycle's reconciliation
+				isProcessing = true;
+				cycleId++;
+				currentCycleId = cycleId; // Capture for this cycle's reconciliation
 				transitionTo( 'collecting' );
 			}
 
@@ -449,7 +443,7 @@ export function createMutationBatcher< TState >(
 				request,
 				resolve: resolve as ( result: MutationResult ) => void,
 				reject,
-				batchIndex: -1,
+				requestIndex: -1,
 			};
 
 			trackedRequests.set( request.id, tracked );
@@ -458,37 +452,30 @@ export function createMutationBatcher< TState >(
 			// Schedule microtask if not already scheduled
 			if ( ! microtaskScheduled ) {
 				microtaskScheduled = true;
-				queueMicrotask( () => processBatch() );
+				queueMicrotask( () => processRequests() );
 			}
 		} );
 	}
 
 	/**
-	 * Get current batcher state (for debugging/testing)
+	 * Get current queue status
 	 */
 	function getStatus() {
 		return {
-			state: currentState,
-			batchCycleActive,
+			isProcessing,
 			pendingCount: pendingRequestIds.length,
-			inFlightCount: inFlightBatches.size,
-			trackedCount: trackedRequests.size,
-			hasSnapshot: snapshot !== null,
-			hasServerState: lastServerState !== null,
-			nextBatchIndex,
-			lastStoredIndex,
 		};
 	}
 
 	return {
-		queueMutation,
+		submit,
 		getStatus,
 	};
 }
 
 /**
- * Type for the batcher instance
+ * Type for the queue instance
  */
-export type MutationBatcher< TState = unknown > = ReturnType<
-	typeof createMutationBatcher< TState >
+export type MutationQueue< TState = unknown > = ReturnType<
+	typeof createMutationQueue< TState >
 >;

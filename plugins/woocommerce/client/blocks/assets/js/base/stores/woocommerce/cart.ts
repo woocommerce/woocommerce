@@ -20,7 +20,12 @@ import type {
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
-import { createMutationBatcher, type MutationBatcher } from './mutation-batcher';
+import {
+	createMutationQueue,
+	type MutationQueue,
+	type MutationResult,
+	type SettledResult,
+} from './mutation-batcher';
 
 export type WooCommerceConfig = {
 	products?: {
@@ -254,42 +259,64 @@ function emitSyncEvent( {
 }
 
 /**
- * Cart mutation batcher singleton
+ * Cart request queue singleton
  *
  * Lazily initialized on first use since state isn't available at module load.
- * Batches all cart mutations within a single microtask tick into one request.
- * Batching is invisible to callers - each call gets its own promise.
+ * Queues cart requests and handles optimistic updates and reconciliation.
  */
-let cartBatcher: MutationBatcher< Cart > | null = null;
+let cartQueue: MutationQueue< Cart > | null = null;
+let requestIdCounter = 0;
 
-function getCartBatcher( stateRef: Store[ 'state' ] ): MutationBatcher< Cart > {
-	if ( ! cartBatcher ) {
-		cartBatcher = createMutationBatcher< Cart >( {
-			batchEndpoint: `${ stateRef.restUrl }wc/store/v1/batch`,
+/**
+ * Request options for sendCartRequest
+ */
+type CartRequestOptions = {
+	path: string;
+	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+	body?: unknown;
+	applyOptimistic?: () => void;
+	onSettled?: ( result: SettledResult< Cart > ) => void;
+};
+
+/**
+ * Send a cart request through the queue
+ *
+ * Handles optimistic updates, request queuing, and state reconciliation.
+ * The queue is an implementation detail - callers just send requests.
+ */
+function sendCartRequest(
+	stateRef: Store[ 'state' ],
+	options: CartRequestOptions
+): Promise< MutationResult< Cart > > {
+	// Lazily initialize queue on first use
+	if ( ! cartQueue ) {
+		cartQueue = createMutationQueue< Cart >( {
+			endpoint: `${ stateRef.restUrl }wc/store/v1/batch`,
 			getHeaders: () => ( {
 				Nonce: stateRef.nonce,
 			} ),
-			// Global state handler - ONE snapshot at start of batch cycle
 			stateHandler: {
 				takeSnapshot: () =>
 					JSON.parse( JSON.stringify( stateRef.cart ) ),
 				rollback: ( snapshot ) => {
-					// Only called if ALL batches had total failures
 					stateRef.cart = snapshot;
 				},
 				applyServerState: ( serverState ) => {
-					// Called if ANY batch succeeded - overwrite with server state
 					stateRef.cart = serverState;
 				},
 			},
 			extractServerState: ( body ) => body as Cart,
 		} );
 	}
-	return cartBatcher;
-}
 
-// Counter for generating unique request IDs
-let requestIdCounter = 0;
+	// Auto-generate request ID
+	const requestId = `cart-${ ++requestIdCounter }`;
+
+	return cartQueue.submit( {
+		id: requestId,
+		...options,
+	} );
+}
 
 // Todo: export this store once the store is public.
 const { state, actions } = store< Store >(
@@ -350,7 +377,6 @@ const { state, actions } = store< Store >(
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				const a11yModulePromise = import( '@wordpress/a11y' );
-				const batcher = getCartBatcher( state );
 
 				// Find existing item
 				const existingItem = state.cart.items.find( ( cartItem ) => {
@@ -387,12 +413,8 @@ const { state, actions } = store< Store >(
 					} as OptimisticCartItem;
 				}
 
-				// Queue the mutation (batching is invisible)
-				const requestId = `cart-${ ++requestIdCounter }`;
-
 				try {
-					const result = yield batcher.queueMutation( {
-						id: requestId,
+					const result = yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
 						method: 'POST',
 						body: itemToSend,
@@ -409,7 +431,7 @@ const { state, actions } = store< Store >(
 							}
 						},
 						// Side effects run synchronously during reconciliation,
-						// before batchCycleActive is cleared. This prevents
+						// before isProcessing clears. This prevents
 						// refreshCartItems from running during these events.
 						onSettled: ( { success } ) => {
 							if ( success ) {
@@ -632,8 +654,8 @@ const { state, actions } = store< Store >(
 			},
 
 			*refreshCartItems() {
-				// Skip if batcher cycle is active - it will apply server state when reconciling
-				if ( cartBatcher?.getStatus().batchCycleActive ) {
+				// Skip if queue is processing - it will apply server state when done
+				if ( cartQueue?.getStatus().isProcessing ) {
 					return;
 				}
 
