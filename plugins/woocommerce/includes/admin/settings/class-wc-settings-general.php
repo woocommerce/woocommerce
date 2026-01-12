@@ -403,37 +403,42 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * @return void
 	 */
 	public function output() {
-		//parent::output();
+		// Use React-based settings UI if feature flag is enabled.
+		if ( Features::is_enabled( 'general-settings-react' ) ) {
+			// Slot for React-based settings UI.
+			echo '<div id="wc_general_settings_slotfill"> </div>';
 
-		// Slot for React-based settings UI.
-		echo '<div id="wc_general_settings_slotfill"> </div>';
-
-		$handle = 'wc-admin-settings-general';
-		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
-		wp_enqueue_script( $handle );
-		wp_add_inline_script(
-			$handle,
-			"
-			const preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
-			const autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
-			let preferredProviderRow = null;
-			if ( preferredProviderInput ) {
-				preferredProviderRow = preferredProviderInput.closest( 'tr' );
-			}
-			if ( autocompleteEnabledInput && preferredProviderRow ) {
-				if ( ! autocompleteEnabledInput.checked ) {
-					preferredProviderRow.style.display = 'none';
+			$handle = 'wc-admin-settings-general';
+			wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+			wp_enqueue_script( $handle );
+			wp_add_inline_script(
+				$handle,
+				"
+				const preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
+				const autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
+				let preferredProviderRow = null;
+				if ( preferredProviderInput ) {
+					preferredProviderRow = preferredProviderInput.closest( 'tr' );
 				}
-				autocompleteEnabledInput.addEventListener( 'change', function( e ) {
-					if ( e.target.checked ) {
-						preferredProviderRow.style.display = 'table-row';
-					} else {
+				if ( autocompleteEnabledInput && preferredProviderRow ) {
+					if ( ! autocompleteEnabledInput.checked ) {
 						preferredProviderRow.style.display = 'none';
 					}
-				} );
-			}
-			"
-		);
+					autocompleteEnabledInput.addEventListener( 'change', function( e ) {
+						if ( e.target.checked ) {
+							preferredProviderRow.style.display = 'table-row';
+						} else {
+							preferredProviderRow.style.display = 'none';
+						}
+					} );
+				}
+				"
+			);
+			return;
+		}
+
+		// Fall back to default settings output.
+		parent::output();
 	}
 }
 
