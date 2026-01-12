@@ -752,7 +752,7 @@ final class BlockTypesController {
 		$wc_crumbs = array_map(
 			function ( $item ) {
 				return array(
-					$item['title'] ?? '',
+					$item['label'] ?? '',
 					$item['url'] ?? '',
 				);
 			},
@@ -773,7 +773,7 @@ final class BlockTypesController {
 		return array_map(
 			function ( $crumb ) {
 				return array(
-					'title' => $crumb[0] ?? '',
+					'label' => $crumb[0] ?? '',
 					'url'   => $crumb[1] ?? '',
 				);
 			},
