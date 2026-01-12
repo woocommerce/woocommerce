@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Ensure LYS Payments NOX flows correctly portray the WooPayments' plugin state when calling for action.
+
+

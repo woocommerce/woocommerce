@@ -65,7 +65,7 @@ class WC_Comments {
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 
-		// Delete comments count cache whenever there is a new comment or a comment status changes.
+		// Actualize comments count cache whenever there is a new comment or a comment status changes.
 		add_action( 'wp_insert_comment', array( __CLASS__, 'increment_comments_count_cache_on_wp_insert_comment' ), 10, 2 );
 		add_action( 'transition_comment_status', array( __CLASS__, 'update_comments_count_cache_on_comment_status_change' ), 10, 3 );
 
