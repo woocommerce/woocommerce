@@ -15,50 +15,8 @@ import {
 	type SettingsGroup,
 	SettingsField,
 } from './hooks/use-general-settings';
-import { baseFieldTransformer } from './utils';
+import { baseFieldTransformer, createChildrenWithRows } from './utils';
 import './settings-general-main.scss';
-
-/**
- * Creates form field children with row configurations.
- *
- * @param fieldIds          Array of field IDs.
- * @param rowConfigurations Row configuration for the group.
- * @return Array of field IDs or row objects.
- */
-const createChildrenWithRows = (
-	fieldIds: string[],
-	rowConfigurations: Array< { id: string; fields: string[] } >
-): ( string | FormField )[] => {
-	const result: ( string | FormField )[] = [];
-	const usedFields = new Set< string >();
-
-	// Add row configurations first.
-	rowConfigurations.forEach( ( rowConfig ) => {
-		const rowFields = rowConfig.fields.filter( ( fieldId ) =>
-			fieldIds.includes( fieldId )
-		);
-		if ( rowFields.length > 0 ) {
-			result.push( {
-				id: rowConfig.id,
-				layout: {
-					type: 'row' as const,
-					fields: rowFields,
-				},
-				children: rowFields,
-			} as unknown as FormField );
-			rowFields.forEach( ( fieldId ) => usedFields.add( fieldId ) );
-		}
-	} );
-
-	// Add remaining fields that weren't in any row.
-	fieldIds.forEach( ( fieldId ) => {
-		if ( ! usedFields.has( fieldId ) ) {
-			result.push( fieldId );
-		}
-	} );
-
-	return result;
-};
 
 /**
  * Row configuration for grouping fields into rows.
@@ -66,7 +24,36 @@ const createChildrenWithRows = (
 const rowConfigurations: Record<
 	string,
 	Array< { id: string; fields: string[] } >
-> = {};
+> = {
+	store_address: [
+		{
+			id: 'city_zipcode_row',
+			fields: [ 'woocommerce_store_city', 'woocommerce_store_postcode' ],
+		},
+	],
+	pricing_options: [
+		{
+			id: 'separators_row',
+			fields: [
+				'woocommerce_price_thousand_sep',
+				'woocommerce_price_decimal_sep',
+			],
+		},
+		{
+			id: 'position_decimals_row',
+			fields: [
+				'woocommerce_currency_pos',
+				'woocommerce_price_num_decimals',
+			],
+		},
+	],
+	time_date_format_settings: [
+		{
+			id: 'datetime_formats_row',
+			fields: [ 'date_format', 'time_format' ],
+		},
+	],
+};
 
 const localTransformer = ( field: SettingsField ) => {
 	const baseField = baseFieldTransformer( field );
