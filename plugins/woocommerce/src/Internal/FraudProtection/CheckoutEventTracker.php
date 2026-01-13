@@ -7,21 +7,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Tracks checkout events for fraud protection analysis.
  *
- * This class hooks into both WooCommerce Blocks (Store API) and traditional
- * shortcode checkout events, triggering fraud protection event dispatching.
+ * This class provides methods to track both WooCommerce Blocks (Store API) and traditional
+ * shortcode checkout events for fraud protection event dispatching.
  * Event-specific data is passed to the dispatcher which handles session data collection internally.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class CheckoutEventTracker implements RegisterHooksInterface {
+class CheckoutEventTracker {
 
 	/**
 	 * Fraud protection dispatcher instance.
@@ -31,49 +29,41 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 	private FraudProtectionDispatcher $dispatcher;
 
 	/**
-	 * Fraud protection controller instance.
+	 * Session data collector instance.
 	 *
-	 * @var FraudProtectionController
+	 * @var SessionDataCollector
 	 */
-	private FraudProtectionController $fraud_protection_controller;
+	private SessionDataCollector $session_data_collector;
 
 	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
-	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
+	 * @param FraudProtectionDispatcher $dispatcher                The fraud protection dispatcher instance.
+	 * @param SessionDataCollector      $session_data_collector    The session data collector instance.
 	 */
-	final public function init(
-		FraudProtectionDispatcher $dispatcher,
-		FraudProtectionController $fraud_protection_controller
-	): void {
-		$this->dispatcher                  = $dispatcher;
-		$this->fraud_protection_controller = $fraud_protection_controller;
+	final public function init( FraudProtectionDispatcher $dispatcher, SessionDataCollector $session_data_collector ): void {
+		$this->dispatcher             = $dispatcher;
+		$this->session_data_collector = $session_data_collector;
 	}
 
 	/**
-	 * Register checkout event hooks.
+	 * Track checkout page loaded event.
 	 *
-	 * Hooks into both WooCommerce Blocks (Store API) and traditional checkout
-	 * actions to track fraud protection events. Only registers hooks if the
-	 * fraud protection feature is enabled.
+	 * Triggers fraud protection event dispatching when the checkout page is initially loaded.
+	 * This captures the initial session state before any user interactions.
 	 *
+	 * @internal
 	 * @return void
 	 */
-	public function register(): void {
-		// Only register hooks if fraud protection is enabled.
-		if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
-			return;
-		}
-
-		// Shortcode checkout: Track when checkout fields are updated.
-		add_action( 'woocommerce_checkout_update_order_review', array( $this, 'handle_shortcode_checkout_field_update' ), 10, 1 );
+	public function track_checkout_page_loaded(): void {
+		// Track the page load event. Session data will be collected by the dispatcher.
+		$this->dispatcher->dispatch_event( 'checkout_page_loaded', array() );
 	}
 
 	/**
-	 * Handle Store API customer update event (WooCommerce Blocks checkout).
+	 * Track Store API customer update event (WooCommerce Blocks checkout).
 	 *
 	 * Triggered when customer information is updated via the Store API endpoint
 	 * /wc/store/v1/cart/update-customer during Blocks checkout flow.
@@ -86,27 +76,52 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		$this->dispatcher->dispatch_event( 'checkout_update', array() );
 	}
 
-
 	/**
-	 * Handle shortcode checkout field update event.
+	 * Track shortcode checkout field update event.
 	 *
 	 * Triggered when checkout fields are updated via AJAX (woocommerce_update_order_review).
+	 * Only dispatches event when billing or shipping country changes to reduce unnecessary API calls.
 	 *
 	 * @internal
 	 *
 	 * @param string $posted_data Serialized checkout form data.
 	 * @return void
 	 */
-	public function handle_shortcode_checkout_field_update( $posted_data ): void {
+	public function track_shortcode_checkout_field_update( $posted_data ): void {
 		// Parse the posted data to extract relevant fields.
 		$data = array();
 		if ( $posted_data ) {
 			parse_str( $posted_data, $data );
 		}
 
-		// Build and dispatch the event.
-		$event_data = $this->format_checkout_event_data( 'field_update', $data );
-		$this->dispatcher->dispatch_event( 'checkout_field_update', $event_data );
+		// Get current customer countries using SessionDataCollector.
+		$current_billing_country  = $this->session_data_collector->get_current_billing_country();
+		$current_shipping_country = $this->session_data_collector->get_current_shipping_country();
+
+		// Get posted countries.
+		$posted_billing_country  = $data['billing_country'] ?? '';
+		$posted_shipping_country = $data['shipping_country'] ?? '';
+
+		// Check if billing country changed.
+		$billing_changed = ! empty( $posted_billing_country ) && $posted_billing_country !== $current_billing_country;
+
+		// Check if shipping country changed.
+		$ship_to_different = ! empty( $data['ship_to_different_address'] );
+		if ( $ship_to_different ) {
+			// User wants different shipping address - check if shipping country changed.
+			$shipping_changed = ! empty( $posted_shipping_country ) && $posted_shipping_country !== $current_shipping_country;
+		} else {
+			// User wants same address for billing and shipping.
+			// If current shipping country exists and differs from billing country, it's a change.
+			$effective_billing_country = ! empty( $posted_billing_country ) ? $posted_billing_country : $current_billing_country;
+			$shipping_changed          = ! empty( $current_shipping_country ) && $current_shipping_country !== $effective_billing_country;
+		}
+
+		// Only dispatch if either country changed.
+		if ( $billing_changed || $shipping_changed ) {
+			$event_data = $this->format_checkout_event_data( 'field_update', $data );
+			$this->dispatcher->dispatch_event( 'checkout_update', $event_data );
+		}
 	}
 
 	/**
@@ -231,5 +246,31 @@ class CheckoutEventTracker implements RegisterHooksInterface {
 		}
 
 		return $payment_data;
+	}
+
+	/**
+	 * Track successful order placement.
+	 *
+	 * Called when an order is successfully placed, with or without payment.
+	 * Works for both shortcode and Store API checkout flows.
+	 *
+	 * @internal
+	 *
+	 * @param int       $order_id The order ID.
+	 * @param \WC_Order $order    The order object.
+	 * @return void
+	 */
+	public function track_order_placed( int $order_id, \WC_Order $order ): void {
+		$customer_id = $order->get_customer_id();
+		$event_data  = array(
+			'order_id'       => $order_id,
+			'payment_method' => $order->get_payment_method(),
+			'total'          => (float) $order->get_total(),
+			'currency'       => $order->get_currency(),
+			'customer_id'    => $customer_id ? $customer_id : 'guest',
+			'status'         => $order->get_status(),
+		);
+
+		$this->dispatcher->dispatch_event( 'order_placed', $event_data );
 	}
 }

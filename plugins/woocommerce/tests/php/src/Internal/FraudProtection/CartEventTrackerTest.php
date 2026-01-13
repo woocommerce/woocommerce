@@ -63,10 +63,7 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Create system under test.
 		$this->sut = new CartEventTracker();
-		$this->sut->init(
-			$this->mock_dispatcher,
-			$this->mock_controller
-		);
+		$this->sut->init( $this->mock_dispatcher );
 
 		// Create a test product.
 		$this->test_product = \WC_Helper_Product::create_simple_product();
@@ -76,43 +73,29 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that register does not register hooks when feature is disabled.
+	 * Test track_cart_page_loaded dispatches event.
+	 * The CartEventTracker::track_cart_page_loaded does not add any event data.
+	 * The data collection is handled by the SessionDataCollector.
+	 * So we only need to test if the dispatcher is called with no event data.
 	 */
-	public function test_register_does_not_register_hooks_when_feature_disabled(): void {
-		// Mock feature as disabled.
-		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( false );
+	public function test_track_cart_page_loaded_dispatches_event(): void {
+		// Mock dispatcher to verify event is dispatched with empty event data.
+		$this->mock_dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' )
+			->with(
+				$this->equalTo( 'cart_page_loaded' ),
+				$this->equalTo( array() )
+			);
 
-		// Call register.
-		$this->sut->register();
-
-		// Verify hooks were not registered.
-		$this->assertFalse( has_action( 'woocommerce_add_to_cart', array( $this->sut, 'handle_track_cart_item_added' ) ) );
-		$this->assertFalse( has_action( 'woocommerce_after_cart_item_quantity_update', array( $this->sut, 'handle_track_cart_item_updated' ) ) );
-		$this->assertFalse( has_action( 'woocommerce_remove_cart_item', array( $this->sut, 'handle_track_cart_item_removed' ) ) );
-		$this->assertFalse( has_action( 'woocommerce_restore_cart_item', array( $this->sut, 'handle_track_cart_item_restored' ) ) );
+		// Call the method.
+		$this->sut->track_cart_page_loaded();
 	}
 
 	/**
-	 * Test that register registers hooks when feature is enabled.
+	 * Test track_cart_item_added tracks event.
 	 */
-	public function test_register_registers_hooks_when_feature_enabled(): void {
-		// Mock feature as enabled.
-		$this->mock_controller->method( 'feature_is_enabled' )->willReturn( true );
-
-		// Call register.
-		$this->sut->register();
-
-		// Verify hooks were registered with correct priority.
-		$this->assertEquals( 10, has_action( 'woocommerce_add_to_cart', array( $this->sut, 'handle_track_cart_item_added' ) ) );
-		$this->assertEquals( 10, has_action( 'woocommerce_after_cart_item_quantity_update', array( $this->sut, 'handle_track_cart_item_updated' ) ) );
-		$this->assertEquals( 10, has_action( 'woocommerce_remove_cart_item', array( $this->sut, 'handle_track_cart_item_removed' ) ) );
-		$this->assertEquals( 10, has_action( 'woocommerce_restore_cart_item', array( $this->sut, 'handle_track_cart_item_restored' ) ) );
-	}
-
-	/**
-	 * Test handle_track_cart_item_added tracks event.
-	 */
-	public function test_handle_track_cart_item_added_tracks_event(): void {
+	public function test_track_cart_item_added_tracks_event(): void {
 		// Mock the dispatcher to verify dispatch_event is called with event data.
 		$this->mock_dispatcher
 			->expects( $this->once() )
@@ -133,21 +116,19 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 				)
 			);
 
-		// Call the handler.
-		$this->sut->handle_track_cart_item_added(
+		// Call the method.
+		$this->sut->track_cart_item_added(
 			'test_cart_key',
 			$this->test_product->get_id(),
 			2,
-			0,
-			array(),
-			array()
+			0
 		);
 	}
 
 	/**
-	 * Test handle_track_cart_item_updated tracks event.
+	 * Test track_cart_item_updated tracks event.
 	 */
-	public function test_handle_track_cart_item_updated_tracks_event(): void {
+	public function test_track_cart_item_updated_tracks_event(): void {
 		// Add item to cart first.
 		$cart_item_key = WC()->cart->add_to_cart( $this->test_product->get_id(), 1 );
 
@@ -171,8 +152,8 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 				)
 			);
 
-		// Call the handler.
-		$this->sut->handle_track_cart_item_updated(
+		// Call the method.
+		$this->sut->track_cart_item_updated(
 			$cart_item_key,
 			5,
 			1,
@@ -181,9 +162,9 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test handle_track_cart_item_removed tracks event.
+	 * Test track_cart_item_removed tracks event.
 	 */
-	public function test_handle_track_cart_item_removed_tracks_event(): void {
+	public function test_track_cart_item_removed_tracks_event(): void {
 		// Add item to cart.
 		$cart_item_key = WC()->cart->add_to_cart( $this->test_product->get_id(), 1 );
 
@@ -206,14 +187,14 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 		// Remove the item from cart.
 		WC()->cart->remove_cart_item( $cart_item_key );
 
-		// Call the handler directly (since hooks aren't registered in test context).
-		$this->sut->handle_track_cart_item_removed( $cart_item_key, WC()->cart );
+		// Call the method directly.
+		$this->sut->track_cart_item_removed( $cart_item_key, WC()->cart );
 	}
 
 	/**
-	 * Test handle_track_cart_item_restored tracks event.
+	 * Test track_cart_item_restored tracks event.
 	 */
-	public function test_handle_track_cart_item_restored_tracks_event(): void {
+	public function test_track_cart_item_restored_tracks_event(): void {
 		// Add item to cart.
 		$cart_item_key = WC()->cart->add_to_cart( $this->test_product->get_id(), 1 );
 
@@ -233,8 +214,8 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 				)
 			);
 
-		// Call the handler directly (simulating restore action).
-		$this->sut->handle_track_cart_item_restored(
+		// Call the method directly (simulating restore action).
+		$this->sut->track_cart_item_restored(
 			$cart_item_key,
 			WC()->cart
 		);
@@ -267,14 +248,12 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 				)
 			);
 
-		// Call the handler with variation ID.
-		$this->sut->handle_track_cart_item_added(
+		// Call the method with variation ID.
+		$this->sut->track_cart_item_added(
 			'test_cart_key',
 			$variable_product->get_id(),
 			1,
-			$variation_id,
-			array(),
-			array()
+			$variation_id
 		);
 
 		// Clean up.
@@ -294,11 +273,5 @@ class CartEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Empty cart.
 		WC()->cart->empty_cart();
-
-		// Remove all registered hooks.
-		remove_all_actions( 'woocommerce_add_to_cart' );
-		remove_all_actions( 'woocommerce_after_cart_item_quantity_update' );
-		remove_all_actions( 'woocommerce_remove_cart_item' );
-		remove_all_actions( 'woocommerce_restore_cart_item' );
 	}
 }
