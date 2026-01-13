@@ -62,8 +62,6 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 			)
 		);
 
-		// Error icon SVG path - matches ICON_PATHS.error in store-notices.ts.
-		$error_icon_path    = 'M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z';
 		$dismiss_aria_label = __( 'Dismiss this notice', 'woocommerce' );
 
 		ob_start();
@@ -72,10 +70,8 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 			<div
 				class="wc-block-components-notices"
 				data-wp-interactive="woocommerce/store-notices"
-				data-wp-context="<?php echo esc_attr( $context ); ?>"
-			>
-				<template
-					data-wp-each--notice="context.notices"
+			><template
+					data-wp-each--notice="state.notices"
 					data-wp-each-key="context.notice.id"
 				>
 					<div
@@ -85,17 +81,8 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 						data-wp-class--is-info="state.isInfo"
 						data-wp-class--is-dismissible="context.notice.dismissible"
 						data-wp-bind--role="state.role"
+						data-wp-watch="callbacks.injectIcon"
 					>
-						<span class="wc-block-components-notice-banner__icon" data-wp-bind--hidden="!state.isErrorOrInfo">
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-								<path d="M12 3.2c-4.8 0-8.8 3.9-8.8 8.8 0 4.8 3.9 8.8 8.8 8.8 4.8 0 8.8-3.9 8.8-8.8 0-4.8-4-8.8-8.8-8.8zm0 16c-4 0-7.2-3.3-7.2-7.2C4.8 8 8 4.8 12 4.8s7.2 3.3 7.2 7.2c0 4-3.2 7.2-7.2 7.2zM11 17h2v-6h-2v6zm0-8h2V7h-2v2z" />
-							</svg>
-						</span>
-						<span class="wc-block-components-notice-banner__icon" data-wp-bind--hidden="!state.isSuccess">
-							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-								<path d="M16.7 7.1l-6.3 8.5-3.3-2.5-.9 1.2 4.5 3.4L17.9 8z" />
-							</svg>
-						</span>
 						<div class="wc-block-components-notice-banner__content">
 							<span data-wp-init="callbacks.renderNoticeContent"></span>
 						</div>
