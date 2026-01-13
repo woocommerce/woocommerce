@@ -128,8 +128,8 @@ class ProductsStore {
 		);
 
 		// Re-key array by product ID and merge into state.
-		$keyed_products  = array_column( $purchasable_products, null, 'id' );
-		self::$products  = array_merge( self::$products, $keyed_products );
+		$keyed_products = array_column( $purchasable_products, null, 'id' );
+		self::$products = array_merge( self::$products, $keyed_products );
 		self::register_state();
 
 		return $keyed_products;
@@ -153,7 +153,7 @@ class ProductsStore {
 		}
 
 		// Re-key array by variation ID and merge into state.
-		$keyed_variations        = array_column( $response['body'], null, 'id' );
+		$keyed_variations         = array_column( $response['body'], null, 'id' );
 		self::$product_variations = array_merge( self::$product_variations, $keyed_variations );
 		self::register_state();
 
