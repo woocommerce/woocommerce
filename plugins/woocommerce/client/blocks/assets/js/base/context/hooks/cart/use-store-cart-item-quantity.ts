@@ -95,12 +95,24 @@ export const useStoreCartItemQuantity = (
 		const hasInflightRequest = isPending.quantity;
 		// Only block if debounce JUST caught up and differs from server (about to fire API)
 		// If debounce didn't change, server must have changed cartItemQuantity → allow sync
-		const debouncedJustChanged = debouncedQuantity !== previousDebouncedQuantity;
-		const aboutToFireApiCall = debouncedJustChanged && debouncedQuantity !== cartItemQuantity;
-		if ( ! hasPendingLocalChange && ! hasInflightRequest && ! aboutToFireApiCall ) {
+		const debouncedJustChanged =
+			debouncedQuantity !== previousDebouncedQuantity;
+		const aboutToFireApiCall =
+			debouncedJustChanged && debouncedQuantity !== cartItemQuantity;
+		if (
+			! hasPendingLocalChange &&
+			! hasInflightRequest &&
+			! aboutToFireApiCall
+		) {
 			setQuantity( cartItemQuantity );
 		}
-	}, [ cartItemQuantity, quantity, debouncedQuantity, previousDebouncedQuantity, isPending.quantity ] );
+	}, [
+		cartItemQuantity,
+		quantity,
+		debouncedQuantity,
+		previousDebouncedQuantity,
+		isPending.quantity,
+	] );
 
 	const removeItem = useCallback( () => {
 		if ( cartItemKey ) {
