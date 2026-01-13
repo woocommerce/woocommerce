@@ -26,7 +26,6 @@ import { createNoticesFromResponse } from '~/lib/notices';
 import { getPluginSlug } from '~/utils';
 import { isWcPaySupported } from './utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
 
 const WcPayPromotionGateway = document.querySelector(
 	'[data-gateway_id="pre_install_woocommerce_payments_promotion"]'
@@ -267,18 +266,10 @@ const PaymentRecommendations = () => {
 						'woocommerce'
 					) }
 					eventName="settings_payment_recommendations_visit_marketplace_click"
-					targetUrl={
-						isFeatureEnabled( 'marketplace' )
-							? getAdminLink(
-									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
-							  )
-							: 'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/'
-					}
-					linkType={
-						isFeatureEnabled( 'marketplace' )
-							? 'wc-admin'
-							: 'external'
-					}
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
+					) }
+					linkType="wc-admin"
 				/>
 			</CardFooter>
 		</Card>

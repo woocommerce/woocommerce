@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent an error that occurred when duplicating a product if the duplicate's SKU matched the SKU of a trashed product

@@ -1,4 +1,6 @@
-<?php declare( strict_types = 1 );
+<?php
+
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
@@ -140,13 +142,20 @@ class ProductDetails extends AbstractBlock {
 
 		$accordion_blocks = array();
 
+		$accordion_anchor_block = $this->get_accordion_anchor_block( $parsed_block );
+
+		if ( ! $accordion_anchor_block ) {
+			return $parsed_block;
+		}
+
 		foreach ( $product_tabs as $key => $tab ) {
 			ob_start();
 			call_user_func( $tab['callback'], $key, $tab );
 			$tab_content        = ob_get_clean();
 			$accordion_blocks[] = $this->create_accordion_item_block(
 				$tab['title'],
-				'<!-- wp:html -->' . $tab_content . '<!-- /wp:html -->'
+				'<!-- wp:html -->' . $tab_content . '<!-- /wp:html -->',
+				$accordion_anchor_block
 			);
 		}
 
@@ -158,26 +167,48 @@ class ProductDetails extends AbstractBlock {
 	 *
 	 * @param string $title Title of the accordion item.
 	 * @param string $content Content of the accordion item as block markup.
+	 * @param array  $anchor_block Accordion anchor block to determine which item block to create.
 	 *
 	 * @return array Accordion item.
 	 */
-	private function create_accordion_item_block( $title, $content ) {
-		$template = '<!-- wp:woocommerce/accordion-item -->
-			<div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header -->
-			<h3 class="wp-block-woocommerce-accordion-header accordion-item__heading">
-			<button class="accordion-item__toggle">
-			<span>%1$s</span>
-			<span class="accordion-item__toggle-icon has-icon-plus" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11Z" fill="currentColor"></path></svg></span>
-			</button>
-			</h3>
-			<!-- /wp:woocommerce/accordion-header -->
+	private function create_accordion_item_block( $title, $content, $anchor_block ) {
+		if ( isset( $anchor_block['blockName'] ) && 'core/accordion' === $anchor_block['blockName'] ) {
+			$template = '<!-- wp:accordion-item -->
+				<div class="wp-block-accordion-item">
+					<!-- wp:accordion-heading -->
+					<h3 class="wp-block-accordion-heading">
+						<button class="wp-block-accordion-heading__toggle">
+							<span class="wp-block-accordion-heading__toggle-title">%1$s</span>
+							<span class="wp-block-accordion-heading__toggle-icon" aria-hidden="true">+</span>
+						</button>
+					</h3>
+					<!-- /wp:accordion-heading -->
 
-			<!-- wp:woocommerce/accordion-panel -->
-			<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper">
-			%2$s
-			</div></div>
-			<!-- /wp:woocommerce/accordion-panel --></div>
-			<!-- /wp:woocommerce/accordion-item -->';
+					<!-- wp:accordion-panel -->
+					<div class="wp-block-accordion-panel">
+						%2$s
+					</div>
+					<!-- /wp:accordion-panel -->
+				</div>
+				<!-- /wp:accordion-item -->';
+		} else {
+			$template = '<!-- wp:woocommerce/accordion-item -->
+				<div class="wp-block-woocommerce-accordion-item"><!-- wp:woocommerce/accordion-header -->
+				<h3 class="wp-block-woocommerce-accordion-header accordion-item__heading">
+				<button class="accordion-item__toggle">
+				<span>%1$s</span>
+				<span class="accordion-item__toggle-icon has-icon-plus" style="width:1.2em;height:1.2em"><svg width="1.2em" height="1.2em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11Z" fill="currentColor"></path></svg></span>
+				</button>
+				</h3>
+				<!-- /wp:woocommerce/accordion-header -->
+
+				<!-- wp:woocommerce/accordion-panel -->
+				<div class="wp-block-woocommerce-accordion-panel"><div class="accordion-content__wrapper">
+				%2$s
+				</div></div>
+				<!-- /wp:woocommerce/accordion-panel --></div>
+				<!-- /wp:woocommerce/accordion-item -->';
+		}
 
 		return parse_blocks( sprintf( $template, $title, $content ) )[0];
 	}
@@ -191,7 +222,7 @@ class ProductDetails extends AbstractBlock {
 	 * @return array Parsed block.
 	 */
 	private function inject_parsed_accordion_blocks( $parsed_block, $accordion_blocks ) {
-		if ( 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
+		if ( 'core/accordion' === $parsed_block['blockName'] || 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
 			$parsed_block['innerBlocks']  = array_merge( $parsed_block['innerBlocks'], $accordion_blocks );
 			$parsed_block['innerBlocks']  = array_values( array_filter( $parsed_block['innerBlocks'] ) );
 			$opening_tag                  = reset( $parsed_block['innerContent'] );
@@ -224,7 +255,7 @@ class ProductDetails extends AbstractBlock {
 			return $parsed_block;
 		}
 
-		if ( 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
+		if ( 'core/accordion' === $parsed_block['blockName'] || 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
 			foreach ( $parsed_block['innerBlocks'] as $key => $inner_block ) {
 				$parsed_block['innerBlocks'][ $key ] = $this->mark_accordion_item_hidden( $inner_block, $context );
 			}
@@ -280,7 +311,7 @@ class ProductDetails extends AbstractBlock {
 	 * @return bool True if the block has an accordion, false otherwise.
 	 */
 	private function has_accordion( $parsed_block ) {
-		if ( 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
+		if ( 'core/accordion' === $parsed_block['blockName'] || 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
 			return true;
 		}
 
@@ -291,6 +322,28 @@ class ProductDetails extends AbstractBlock {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the first accordion anchor block in a parsed block.
+	 *
+	 * @param array $parsed_block Parsed block.
+	 *
+	 * @return array|null Accordion anchor block or null.
+	 */
+	private function get_accordion_anchor_block( $parsed_block ) {
+		if ( 'core/accordion' === $parsed_block['blockName'] || 'woocommerce/accordion-group' === $parsed_block['blockName'] ) {
+			return $parsed_block;
+		}
+
+		foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
+			$anchor_block = $this->get_accordion_anchor_block( $inner_block );
+			if ( $anchor_block ) {
+				return $anchor_block;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -310,10 +363,10 @@ class ProductDetails extends AbstractBlock {
 
 		foreach ( $hooked_blocks as $block ) {
 			$invalid = ! is_array( $block ) ||
-					! isset( $block['title'] ) ||
-					! isset( $block['content'] ) ||
-					! is_string( $block['title'] ) ||
-					! is_string( $block['content'] );
+				! isset( $block['title'] ) ||
+				! isset( $block['content'] ) ||
+				! is_string( $block['title'] ) ||
+				! is_string( $block['content'] );
 
 			if ( ! $invalid ) {
 				$parsed_content = parse_blocks( $block['content'] );
@@ -361,7 +414,7 @@ class ProductDetails extends AbstractBlock {
 			'hooked_block_types',
 			function ( $hooked_block_types, $relative_position, $anchor_block_type ) use ( $slug ) {
 				if (
-					'woocommerce/accordion-group' === $anchor_block_type &&
+					( 'core/accordion' === $anchor_block_type || 'woocommerce/accordion-group' === $anchor_block_type ) &&
 					'last_child' === $relative_position &&
 					! in_array( $slug, $hooked_block_types, true )
 				) {
@@ -378,14 +431,14 @@ class ProductDetails extends AbstractBlock {
 			function ( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block ) use ( $block ) {
 				if (
 					is_null( $parsed_hooked_block ) ||
-					'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ||
+					( 'core/accordion' !== $parsed_anchor_block['blockName'] && 'woocommerce/accordion-group' !== $parsed_anchor_block['blockName'] ) ||
 					'last_child' !== $relative_position ||
 					empty( $parsed_anchor_block['attrs']['metadata']['isDescendantOfProductDetails'] )
 				) {
 					return null;
 				}
 
-				return $this->create_accordion_item_block( $block['title'], $block['content'] );
+				return $this->create_accordion_item_block( $block['title'], $block['content'], $parsed_anchor_block );
 			},
 			10,
 			4
