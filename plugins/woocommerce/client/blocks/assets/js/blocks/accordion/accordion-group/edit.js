@@ -20,70 +20,6 @@ const ACCORDION_BLOCK = {
 };
 
 /**
- * Recursively convert WooCommerce accordion blocks to WordPress core accordion blocks.
- *
- * @param {Array<*>} innerBlocks - The inner blocks to convert.
- *
- * @return {Array<*>} The converted blocks.
- */
-function convertInnerBlocks( innerBlocks ) {
-	// Define attributes to REMOVE for each block type.
-	const attributesToRemove = {
-		'woocommerce/accordion-header': [
-			'icon',
-			'textAlignment',
-			'levelOptions',
-		],
-		'woocommerce/accordion-panel': [
-			'allowedBlocks',
-			'isSelected',
-			'openByDefault',
-		],
-	};
-
-	return innerBlocks.map( ( block ) => {
-		let newBlockName = block.name;
-		const newAttributes = { ...block.attributes };
-
-		// Map WooCommerce block names to WordPress core block names
-		if ( block.name === 'woocommerce/accordion-item' ) {
-			newBlockName = 'core/accordion-item';
-			// No attribute changes needed.
-		} else if ( block.name === 'woocommerce/accordion-header' ) {
-			newBlockName = 'core/accordion-heading';
-
-			// Convert icon to showIcon
-			if ( block.attributes.icon !== undefined ) {
-				newAttributes.showIcon = block.attributes.icon !== false;
-			}
-
-			// Remove incompatible attributes
-			const headerAttrs =
-				attributesToRemove[ 'woocommerce/accordion-header' ];
-			headerAttrs.forEach( ( attr ) => {
-				delete newAttributes[ attr ];
-			} );
-		} else if ( block.name === 'woocommerce/accordion-panel' ) {
-			newBlockName = 'core/accordion-panel';
-
-			// Remove incompatible attributes
-			const panelAttrs =
-				attributesToRemove[ 'woocommerce/accordion-panel' ];
-			panelAttrs.forEach( ( attr ) => {
-				delete newAttributes[ attr ];
-			} );
-		}
-
-		// Recursively convert inner blocks
-		const convertedInnerBlocks = block.innerBlocks?.length
-			? convertInnerBlocks( block.innerBlocks )
-			: [];
-
-		return createBlock( newBlockName, newAttributes, convertedInnerBlocks );
-	} );
-}
-
-/**
  * Deprecation notice component for the WooCommerce Accordion block.
  *
  * @param {Object} props          - Component props.
@@ -105,6 +41,74 @@ function DeprecatedBlockEdit( { clientId } ) {
 		},
 		[ clientId ]
 	);
+
+	/**
+	 * Recursively convert WooCommerce accordion blocks to WordPress core accordion blocks.
+	 *
+	 * @param {Array<*>} blocks - The inner blocks to convert.
+	 *
+	 * @return {Array<*>} The converted blocks.
+	 */
+	const convertInnerBlocks = ( blocks ) => {
+		// Define attributes to REMOVE for each block type.
+		const attributesToRemove = {
+			'woocommerce/accordion-header': [
+				'icon',
+				'textAlignment',
+				'levelOptions',
+			],
+			'woocommerce/accordion-panel': [
+				'allowedBlocks',
+				'isSelected',
+				'openByDefault',
+			],
+		};
+
+		return blocks.map( ( block ) => {
+			let newBlockName = block.name;
+			const newAttributes = { ...block.attributes };
+
+			// Map WooCommerce block names to WordPress core block names.
+			if ( block.name === 'woocommerce/accordion-item' ) {
+				newBlockName = 'core/accordion-item';
+				// No attribute changes needed.
+			} else if ( block.name === 'woocommerce/accordion-header' ) {
+				newBlockName = 'core/accordion-heading';
+
+				// Convert icon to showIcon.
+				if ( block.attributes.icon !== undefined ) {
+					newAttributes.showIcon = block.attributes.icon !== false;
+				}
+
+				// Remove incompatible attributes.
+				const headerAttrs =
+					attributesToRemove[ 'woocommerce/accordion-header' ];
+				headerAttrs.forEach( ( attr ) => {
+					delete newAttributes[ attr ];
+				} );
+			} else if ( block.name === 'woocommerce/accordion-panel' ) {
+				newBlockName = 'core/accordion-panel';
+
+				// Remove incompatible attributes.
+				const panelAttrs =
+					attributesToRemove[ 'woocommerce/accordion-panel' ];
+				panelAttrs.forEach( ( attr ) => {
+					delete newAttributes[ attr ];
+				} );
+			}
+
+			// Recursively convert inner blocks.
+			const convertedInnerBlocks = block.innerBlocks?.length
+				? convertInnerBlocks( block.innerBlocks )
+				: [];
+
+			return createBlock(
+				newBlockName,
+				newAttributes,
+				convertedInnerBlocks
+			);
+		} );
+	};
 
 	const updateBlock = () => {
 		if ( ! currentBlockAttributes ) {
