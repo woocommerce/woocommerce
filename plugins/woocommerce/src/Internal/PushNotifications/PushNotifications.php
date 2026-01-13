@@ -45,18 +45,29 @@ class PushNotifications {
 	private ?bool $enabled = null;
 
 	/**
-	 * Loads the push notifications class.
+	 * Registers initialisation tasks to the `init` hook.
 	 *
 	 * @return void
 	 *
 	 * @since 10.4.0
 	 */
 	public function register(): void {
+		add_action( 'init', array( $this, 'on_init' ) );
+	}
+
+	/**
+	 * Loads the push notifications class.
+	 *
+	 * @return void
+	 *
+	 * @since 10.6.0
+	 */
+	public function on_init(): void {
 		if ( ! $this->should_be_enabled() ) {
 			return;
 		}
 
-		add_action( 'init', array( $this, 'register_post_types' ) );
+		$this->register_post_types();
 
 		wc_get_container()->get( PushTokenRestController::class )->register();
 
