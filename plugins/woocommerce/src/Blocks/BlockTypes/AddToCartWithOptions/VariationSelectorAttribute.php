@@ -57,16 +57,17 @@ class VariationSelectorAttribute extends AbstractBlock {
 		global $product;
 
 		$attribute_terms    = $this->get_terms( $attribute_name, $product_attribute_terms );
-		$product_variations = $product->get_available_variations();
+		$product_variations = $product->get_available_variations( 'objects' );
 
 		// Filter out terms which are not available in any product variation.
 		$attribute_terms = array_filter(
 			$attribute_terms,
-			function ( $term ) use ( $product_variations, $attribute_name, $attribute_terms ) {
-				foreach ( $product_variations as $product_variation ) {
+			function ( $term ) use ( $product_variations, $attribute_name ) {
+				foreach ( $product_variations as $variation ) {
+					$attributes = $variation->get_variation_attributes();
 					if (
-						$term['value'] === $product_variation['attributes'][ wc_variation_attribute_name( $attribute_name ) ] ||
-						'' === $product_variation['attributes'][ wc_variation_attribute_name( $attribute_name ) ]
+						$term['value'] === $attributes[ wc_variation_attribute_name( $attribute_name ) ] ||
+						'' === $attributes[ wc_variation_attribute_name( $attribute_name ) ]
 					) {
 						return true;
 					}
