@@ -66,9 +66,6 @@ export const useStoreCartItemQuantity = (
 	const { removeItemFromCart, changeCartItemQuantity } =
 		useDispatch( cartStore );
 
-	// Update local state when server updates.
-	useEffect( () => setQuantity( cartItemQuantity ), [ cartItemQuantity ] );
-
 	// Track when things are already pending updates.
 	const isPending = useSelect(
 		( select ) => {
@@ -86,6 +83,20 @@ export const useStoreCartItemQuantity = (
 		},
 		[ cartItemKey ]
 	);
+
+	// Update local state when server updates, but only if:
+	// 1. User hasn't made a change waiting to be debounced
+	// 2. No API request is currently in flight
+	// 3. Debounced quantity matches server (no pending API call about to fire)
+	// This prevents stale API responses from overwriting user's pending changes.
+	useEffect( () => {
+		const hasPendingLocalChange = quantity !== debouncedQuantity;
+		const hasInflightRequest = isPending.quantity;
+		const hasPendingApiCall = debouncedQuantity !== cartItemQuantity;
+		if ( ! hasPendingLocalChange && ! hasInflightRequest && ! hasPendingApiCall ) {
+			setQuantity( cartItemQuantity );
+		}
+	}, [ cartItemQuantity, quantity, debouncedQuantity, isPending.quantity ] );
 
 	const removeItem = useCallback( () => {
 		if ( cartItemKey ) {
