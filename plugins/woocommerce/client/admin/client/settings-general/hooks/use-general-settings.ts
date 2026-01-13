@@ -53,6 +53,7 @@ export const useGeneralSettings = (): UseGeneralSettingsReturn => {
 	const [ error, setError ] = useState< Error | null >( null );
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ saveError, setSaveError ] = useState< Error | null >( null );
+	const GENERAL_SETTINGS_PATH = '/wc/v4/settings/general';
 
 	const fetchSettings = async () => {
 		try {
@@ -60,7 +61,7 @@ export const useGeneralSettings = (): UseGeneralSettingsReturn => {
 			setError( null );
 
 			const response = await apiFetch< GeneralSettingsResponse >( {
-				path: '/wc/v4/settings/general',
+				path: GENERAL_SETTINGS_PATH,
 				method: 'GET',
 			} );
 
@@ -80,7 +81,7 @@ export const useGeneralSettings = (): UseGeneralSettingsReturn => {
 			setSaveError( null );
 
 			const response = await apiFetch< GeneralSettingsResponse >( {
-				path: '/wc/v4/settings/general',
+				path: GENERAL_SETTINGS_PATH,
 				method: 'POST',
 				data: { values },
 			} );
