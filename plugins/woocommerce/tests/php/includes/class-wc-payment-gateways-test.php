@@ -21,6 +21,11 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->reset_legacy_proxy_mocks();
+
+		// Set jetpack_activation_source option to prevent "Cannot use bool as array" error
+		// in Jetpack Connection Manager's apply_activation_source_to_args method.
+		update_option( 'jetpack_activation_source', array( '', '' ) );
+
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 		$this->sut = new WC_Payment_Gateways();
@@ -33,6 +38,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
+		delete_option( 'jetpack_activation_source' );
 		wc_get_container()->get( SessionClearanceManager::class )->reset_session();
 	}
 

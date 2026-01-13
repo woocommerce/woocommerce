@@ -28,11 +28,25 @@
 	}
 
 	/**
+	 * Remove duplicate `<wc-order-attribution-inputs>` elements, leaving only the first one,
+	 * to prevent sending the same data multiple times.
+	 */
+	function removeDuplicateInputGroups() {
+		document.querySelectorAll( 'wc-order-attribution-inputs' ).forEach( ( group, index ) => {
+			if ( index > 0 ) {
+				group.remove();
+			}
+		} );
+	}
+
+	/**
 	 * Update `wc_order_attribution` input elements' values.
 	 *
 	 * @param {Object} values Object containing field values.
 	 */
 	function updateFormValues( values ) {
+		// Remove duplicates before updating to ensure only one set of elements exists.
+		removeDuplicateInputGroups();
 		// Update `<wc-order-attribution-inputs>` elements if any exist.
 		for( const element of document.querySelectorAll( 'wc-order-attribution-inputs' ) ) {
 			element.values = values;
