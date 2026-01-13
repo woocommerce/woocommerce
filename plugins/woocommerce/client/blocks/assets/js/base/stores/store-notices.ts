@@ -31,7 +31,6 @@ const getProductCollectionContext = () =>
 
 type StoreNoticesState = {
 	get role(): string;
-	get iconHTML(): string;
 	get iconPath(): string;
 	get isError(): boolean;
 	get isSuccess(): boolean;
@@ -82,9 +81,6 @@ const { state } = store< Store >(
 				}
 
 				return 'status';
-			},
-			get iconHTML(): string {
-				return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path d="${ state.iconPath }"/></svg>`;
 			},
 			get iconPath() {
 				const context = getStoreNoticeContext();

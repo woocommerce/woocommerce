@@ -38,17 +38,13 @@ const entries = {
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
 
-	// Interactivity API stores.
+	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
 	'@woocommerce/stores/woocommerce/product-data':
 		'./assets/js/base/stores/woocommerce/product-data.ts',
-
-	// Interactivity API directives.
-	'@woocommerce/directives/dangerous-html':
-		'./assets/js/base/stores/data-wp-woocommerce-experimental-dangerous-html.ts',
 };
 
 module.exports = {
