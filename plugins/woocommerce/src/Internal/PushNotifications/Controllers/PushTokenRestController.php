@@ -211,7 +211,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'type'              => 'string',
 				'required'          => true,
 				'context'           => array( 'create' ),
-				'sanitize_callback' => 'sanitize_text_field',
+				'sanitize_callback' => 'wp_unslash',
 			),
 		);
 
