@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal error when viewing old orders with legacy tax data format in order item metadata. The fix preserves tax values and attempts to infer the tax rate ID from order context for better backwards compatibility. Applies to product, shipping, and fee order items.

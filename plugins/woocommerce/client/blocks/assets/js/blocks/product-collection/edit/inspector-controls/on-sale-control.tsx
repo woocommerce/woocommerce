@@ -34,6 +34,7 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 			resetAllFilter={ deselectCallback }
 		>
 			<ToggleControl
+				__nextHasNoMarginBottom
 				label={ __( 'Show only products on sale', 'woocommerce' ) }
 				checked={ query.woocommerceOnSale || false }
 				onChange={ ( woocommerceOnSale ) => {
