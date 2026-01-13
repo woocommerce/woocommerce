@@ -27,6 +27,20 @@ const ACCORDION_BLOCK = {
  * @return {Array<*>} The converted blocks.
  */
 function convertInnerBlocks( innerBlocks ) {
+	// Define attributes to REMOVE for each block type.
+	const attributesToRemove = {
+		'woocommerce/accordion-header': [
+			'icon',
+			'textAlignment',
+			'levelOptions',
+		],
+		'woocommerce/accordion-panel': [
+			'allowedBlocks',
+			'isSelected',
+			'openByDefault',
+		],
+	};
+
 	return innerBlocks.map( ( block ) => {
 		let newBlockName = block.name;
 		const newAttributes = { ...block.attributes };
@@ -34,10 +48,30 @@ function convertInnerBlocks( innerBlocks ) {
 		// Map WooCommerce block names to WordPress core block names
 		if ( block.name === 'woocommerce/accordion-item' ) {
 			newBlockName = 'core/accordion-item';
+			// No attribute changes needed.
 		} else if ( block.name === 'woocommerce/accordion-header' ) {
 			newBlockName = 'core/accordion-heading';
+
+			// Convert icon to showIcon
+			if ( block.attributes.icon !== undefined ) {
+				newAttributes.showIcon = block.attributes.icon !== false;
+			}
+
+			// Remove incompatible attributes
+			const headerAttrs =
+				attributesToRemove[ 'woocommerce/accordion-header' ];
+			headerAttrs.forEach( ( attr ) => {
+				delete newAttributes[ attr ];
+			} );
 		} else if ( block.name === 'woocommerce/accordion-panel' ) {
 			newBlockName = 'core/accordion-panel';
+
+			// Remove incompatible attributes
+			const panelAttrs =
+				attributesToRemove[ 'woocommerce/accordion-panel' ];
+			panelAttrs.forEach( ( attr ) => {
+				delete newAttributes[ attr ];
+			} );
 		}
 
 		// Recursively convert inner blocks
@@ -75,11 +109,15 @@ function DeprecatedBlockEdit( { clientId } ) {
 	const updateBlock = () => {
 		const convertedInnerBlocks = convertInnerBlocks( innerBlocks );
 
+		// Filter accordion-group attributes - remove 'allowedBlocks'.
+		const { allowedBlocks, ...filteredGroupAttributes } =
+			currentBlockAttributes;
+
 		replaceBlocks(
 			clientId,
 			createBlock(
 				'core/accordion',
-				currentBlockAttributes,
+				filteredGroupAttributes,
 				convertedInnerBlocks
 			)
 		);
