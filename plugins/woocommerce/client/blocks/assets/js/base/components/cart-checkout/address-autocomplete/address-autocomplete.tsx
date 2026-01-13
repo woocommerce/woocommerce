@@ -21,6 +21,7 @@ import { ValidatedTextInputProps } from '../../../../../../packages/components/t
 import './style.scss';
 import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
+import { useCheckoutAddress } from '@woocommerce/base-context';
 
 /**
  * Address Autocomplete component.
@@ -37,6 +38,8 @@ export const AddressAutocomplete = ( {
 }: { addressType: AddressFormType; id: string } & ValidatedTextInputProps ) => {
 	// This hook will monitor for changes in country and update the provider accordingly.
 	useUpdatePreferredAutocompleteProvider( addressType );
+
+	const { useShippingAsBilling, useBillingAsShipping } = useCheckoutAddress();
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
 	const observerRef = useRef< MutationObserver | null >( null );
 	const serverProviders = getSettingWithCoercion<
@@ -279,13 +282,17 @@ export const AddressAutocomplete = ( {
 					provider
 						.select( selected.id, country )
 						.then( ( address ) => {
-							const actionToDispatch =
-								addressType === 'shipping'
-									? setShippingAddress
-									: setBillingAddress;
-							actionToDispatch( {
-								...address,
-							} );
+							if ( addressType === 'shipping' ) {
+								setShippingAddress( address );
+								if ( useShippingAsBilling ) {
+									setBillingAddress( address );
+								}
+							} else {
+								setBillingAddress( address );
+								if ( useBillingAsShipping ) {
+									setShippingAddress( address );
+								}
+							}
 						} )
 						.finally( () => {
 							// Clear suggestions.
@@ -312,13 +319,17 @@ export const AddressAutocomplete = ( {
 			}, 1000 );
 			try {
 				const address = await provider.select( suggestionId, country );
-				const actionToDispatch =
-					addressType === 'shipping'
-						? setShippingAddress
-						: setBillingAddress;
-				actionToDispatch( {
-					...address,
-				} );
+				if ( addressType === 'shipping' ) {
+					setShippingAddress( address );
+					if ( useShippingAsBilling ) {
+						setBillingAddress( address );
+					}
+				} else {
+					setBillingAddress( address );
+					if ( useBillingAsShipping ) {
+						setShippingAddress( address );
+					}
+				}
 			} finally {
 				// Clear suggestions.
 				setIsSettingAddress( false );
