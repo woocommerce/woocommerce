@@ -849,7 +849,7 @@ class LookupDataStore {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				'DELETE FROM %i WHERE product_or_parent_id=%d',
+				'DELETE FROM %i WHERE product_or_parent_id = %d',
 				$this->lookup_table_name,
 				$product_id
 			)
