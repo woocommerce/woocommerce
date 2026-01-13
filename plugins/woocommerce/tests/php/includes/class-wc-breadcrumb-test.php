@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 /**
  * Tests for WC_Breadcrumb.
  *
@@ -65,7 +67,7 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 		);
 
 		$mock_query = $this->getMockBuilder( 'WC_Query' )
-			->setMethods( array( 'get_current_endpoint', 'get_endpoint_title' ) )
+			->onlyMethods( array( 'get_current_endpoint', 'get_endpoint_title' ) )
 			->getMock();
 		$mock_query->expects( $this->any() )
 			->method( 'get_current_endpoint' )
@@ -124,7 +126,7 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 		);
 
 		$mock_query = $this->getMockBuilder( 'WC_Query' )
-			->setMethods( array( 'get_current_endpoint', 'get_endpoint_title' ) )
+			->onlyMethods( array( 'get_current_endpoint', 'get_endpoint_title' ) )
 			->getMock();
 		$mock_query->expects( $this->any() )
 			->method( 'get_current_endpoint' )
