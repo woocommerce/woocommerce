@@ -496,21 +496,26 @@ export const changeCartItemQuantity =
 					quantity,
 				},
 				cache: 'no-store',
-				signal: abortController?.signal,
+				signal: abortController?.signal ?? null,
 			} );
 
 			dispatch.receiveCart( response );
 			return response;
 		} catch ( error ) {
 			// Don't treat aborted requests as errors - they were intentionally cancelled.
-			if ( error instanceof DOMException && error.name === 'AbortError' ) {
+			if (
+				error instanceof DOMException &&
+				error.name === 'AbortError'
+			) {
 				return;
 			}
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
 		} finally {
 			// Clean up controller if it's still the current one for this item.
-			if ( quantityAbortControllers.get( cartItemKey ) === abortController ) {
+			if (
+				quantityAbortControllers.get( cartItemKey ) === abortController
+			) {
 				quantityAbortControllers.delete( cartItemKey );
 			}
 			dispatch.itemIsPendingQuantity( cartItemKey, false );

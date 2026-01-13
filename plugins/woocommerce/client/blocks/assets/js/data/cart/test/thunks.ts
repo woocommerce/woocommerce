@@ -135,7 +135,9 @@ describe( 'changeCartItemQuantity', () => {
 					// Resolve after delay if not aborted
 					setTimeout( () => {
 						resolve( {
-							response: { items: [ { key: 'item-1', quantity: 5 } ] },
+							response: {
+								items: [ { key: 'item-1', quantity: 5 } ],
+							},
 						} );
 					}, 100 );
 				} );
