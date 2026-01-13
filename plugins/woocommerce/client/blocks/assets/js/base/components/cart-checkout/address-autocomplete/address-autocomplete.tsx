@@ -13,6 +13,7 @@ import { cartStore, checkoutStore } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import { AddressFormType, getSettingWithCoercion } from '@woocommerce/settings';
+import { useCheckoutAddress } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -21,7 +22,6 @@ import { ValidatedTextInputProps } from '../../../../../../packages/components/t
 import './style.scss';
 import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
-import { useCheckoutAddress } from '@woocommerce/base-context';
 
 /**
  * Address Autocomplete component.
