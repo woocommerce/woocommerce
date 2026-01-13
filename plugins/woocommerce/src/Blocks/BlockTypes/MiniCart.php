@@ -578,7 +578,6 @@ class MiniCart extends AbstractBlock {
 				$this->get_full_block_name(),
 				array(
 					'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
-					'addToCartBehaviour'           => $attributes['addToCartBehaviour'],
 					'onCartClickBehaviour'         => $on_cart_click_behaviour,
 					'checkoutUrl'                  => wc_get_checkout_url(),
 					'buttonAriaLabelTemplate'      => $button_aria_label_template,
