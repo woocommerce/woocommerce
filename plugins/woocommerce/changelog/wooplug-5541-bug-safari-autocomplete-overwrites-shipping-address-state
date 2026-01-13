@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add prefixes to checkout autocomplete attributes to help with Safari autofill

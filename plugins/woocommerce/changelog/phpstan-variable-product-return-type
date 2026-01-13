@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add PHPStan conditional return type to WC_Product_Variable::get_available_variations().

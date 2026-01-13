@@ -5,38 +5,53 @@
  */
 
 .woocommerce-analytics-report-header {
-	position: relative;
-	display: flex;
-	align-items: flex-start;
+	// Only apply this layout when the import status bar is present
+	&:has(> .woocommerce-analytics-import-status-bar-wrapper) {
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+		gap: $gap;
 
-	.woocommerce-filters {
-		flex: 1; // Allow the filters to grow and take up remaining space
-		width: 100%;
-	}
-
-	.woocommerce-analytics-import-status-bar-wrapper {
-		// Absolute positioning ensures the filters’ width is independent from the status bar, which can change its size dynamically as needed
-		position: absolute;
-		right: 0;
-	}
-
-	@media screen and ( max-width: $break-large ) {
-		flex-direction: column;
-
-		.woocommerce-analytics-import-status-bar-wrapper {
-			position: relative;
-			right: auto;
-		}
-	}
-
-	@media screen and ( max-width: $break-medium ) {
-		.woocommerce-analytics-import-status-bar-wrapper,
-		.woocommerce-analytics-import-status-bar__content {
+		.woocommerce-filters {
+			flex: 1; // Allow the filters to grow and take up remaining space
 			width: 100%;
 		}
 
-		.woocommerce-analytics-import-status-bar__content {
-			justify-content: space-between;
+		.woocommerce-filters-filter {
+			min-width: fit-content;
+		}
+
+		@media screen and ( max-width: $break-wide ) {
+			.woocommerce-filters-filter {
+				width: 100%;
+			}
+
+			.woocommerce-analytics-import-status-bar-wrapper {
+				flex: 1;
+			}
+		}
+
+		@media screen and ( max-width: $break-medium ) {
+			flex-direction: column;
+			gap: 0;
+
+			.woocommerce-filters__basic-filters {
+				margin-bottom: $gap;
+			}
+
+			.woocommerce-analytics-import-status-bar-wrapper {
+				margin-bottom: $gap-large;
+				width: 100%;
+			}
+
+			.woocommerce-analytics-import-status-bar__content {
+				width: 100%;
+				justify-content: space-between;
+			}
+		}
+
+		@media screen and ( max-width: $break-small ) {
+			align-items: center;
 		}
 	}
 }
