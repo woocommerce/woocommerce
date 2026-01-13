@@ -200,14 +200,26 @@ jobs:
           if git cherry-pick -m1 "$MERGE_COMMIT_SHA"; then
             # Success case
             echo "has_conflicts=false" >> $GITHUB_OUTPUT
+            echo "conflict_files=" >> $GITHUB_OUTPUT
+            echo "conflict_details=" >> $GITHUB_OUTPUT
             echo "Cherry-pick completed successfully"
           else
-            # Look for conflict markers in git status
-            if git status --porcelain | grep -E "^(DD|AU|UD|UA|DU|AA|UU)"; then
+            # Capture conflicted files with their status codes
+            CONFLICTED_STATUS=$(git status --porcelain | grep -E "^(DD|AU|UD|UA|DU|AA|UU)" || true)
+            
+            if [[ -n "$CONFLICTED_STATUS" ]]; then
               echo "has_conflicts=true" >> $GITHUB_OUTPUT
-              echo "Cherry-pick had conflicts - resolving automatically"
+              
+              # Extract file paths
+              CONFLICT_FILES=$(echo "$CONFLICTED_STATUS" | awk '{print $2}' | tr '\n' ',' | sed 's/,$//')
+              echo "conflict_files=$CONFLICT_FILES" >> $GITHUB_OUTPUT
+              
+              # Create detailed conflict information (status_code:filename)
+              CONFLICT_DETAILS=$(echo "$CONFLICTED_STATUS" | awk '{print $1":"$2}' | tr '\n' '|' | sed 's/|$//')
+              echo "conflict_details=$CONFLICT_DETAILS" >> $GITHUB_OUTPUT
+              
+              echo "Cherry-pick had conflicts - details: $CONFLICT_DETAILS"
 
-              # For modify/delete conflicts, we need to handle them specifically
               # Add all files (both conflicted and resolved)
               git add .
 
@@ -252,6 +264,18 @@ jobs:
             const targetBranch = '${{ inputs.target_branch }}';
             const cherryPickBranch = '${{ needs.verify.outputs.cherry_pick_branch }}';
             const hasConflicts = '${{ steps.cherry-pick.outputs.has_conflicts }}' === 'true';
+            const conflictDetails = '${{ steps.cherry-pick.outputs.conflict_details }}';
+
+            // Map status codes to human-readable descriptions
+            const conflictTypeMap = {
+              'DD': 'deleted by both',
+              'AU': 'added by cherry-pick, does not exist in target branch',
+              'UD': 'modified by cherry-pick, deleted in target branch',
+              'UA': 'modified by cherry-pick, added in target branch',
+              'DU': 'deleted by cherry-pick, modified in target branch',
+              'AA': 'added by both with different content',
+              'UU': 'modified by both (standard merge conflict)'
+            };
 
             try {
               // Get original PR details
@@ -266,6 +290,18 @@ jobs:
 
               if (hasConflicts) {
                 prBody += `⚠️ **WARNING**: This cherry-pick contained conflicts that have not been resolved. Please review the changes carefully before merging!\n\n`;
+                
+                if (conflictDetails) {
+                  const conflicts = conflictDetails.split('|').filter(c => c.trim());
+                  prBody += `### Files with conflicts:\n\n`;
+                  
+                  conflicts.forEach(conflict => {
+                    const [statusCode, file] = conflict.split(':');
+                    const description = conflictTypeMap[statusCode] || 'unknown conflict type';
+                    prBody += `- \`${file}\` — *${description}*\n`;
+                  });
+                  prBody += `\n`;
+                }
               }
 
               prBody += `## Original PR Description\n\n${originalPr.body || '*No description provided*'}`;
@@ -282,15 +318,30 @@ jobs:
                 head: cherryPickBranch,
                 base: targetBranch,
                 title: `[Backport to ${targetBranch}] ${originalPr.title}`,
-                body: prBody,
-                labels: hasConflicts ? ['cherry pick has conflicts'] : []
+                body: prBody
               });
+              
               await github.rest.pulls.requestReviewers({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: newPr.number,
                 reviewers: [context.actor, originalPr.user.login]
               });
+
+              // Add label if there are conflicts
+              if (hasConflicts) {
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: newPr.number,
+                    labels: ['cherry pick has conflicts']
+                  });
+                  core.info(`Added 'cherry pick has conflicts' label to PR #${newPr.number}`);
+                } catch (error) {
+                  core.warning(`Failed to add conflicts label: ${error.message}`);
+                }
+              }
 
               core.setOutput('pr_number', newPr.number.toString());
               core.setOutput('original_author', originalPr.user?.login || '');
