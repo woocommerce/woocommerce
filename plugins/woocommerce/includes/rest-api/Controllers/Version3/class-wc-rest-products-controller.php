@@ -469,7 +469,17 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		}
 
-		return $args;
+		/**
+		 * Filters the final query arguments for products REST API.
+		 *
+		 * This filter runs after all internal argument processing, allowing
+		 * modification of final query arguments.
+		 *
+		 * @since 10.6.0
+		 * @param array           $args    Query arguments.
+		 * @param WP_REST_Request $request Request object.
+		 */
+		return apply_filters( 'woocommerce_rest_products_prepare_objects_query', $args, $request );
 	}
 
 	/**
