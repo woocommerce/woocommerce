@@ -59,7 +59,7 @@
 		"@wordpress/base-styles": "wp-6.6",
 		"@wordpress/blob": "wp-6.6",
 		"@wordpress/blocks": "wp-6.6",
-		"@wordpress/components": "latest",
+		"@wordpress/components": "wp-6.6",
 		"@wordpress/compose": "wp-6.6",
 		"@wordpress/core-data": "wp-6.6",
 		"@wordpress/data-controls": "wp-6.6",
