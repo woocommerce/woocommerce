@@ -4,6 +4,7 @@
 import { select } from '@wordpress/data';
 import { hasCollectableRate } from '@woocommerce/base-utils';
 import { isString, objectHasProp } from '@woocommerce/types';
+import type { AddressFormType } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -110,4 +111,26 @@ export const prefersCollection = ( state: CheckoutState ) => {
 		}
 	}
 	return state.prefersCollection;
+};
+
+/**
+ * Get registered address autocomplete providers.
+ *
+ * @param state
+ */
+export const getRegisteredAutocompleteProviders = ( state: CheckoutState ) => {
+	return state.addressAutocompleteProviders;
+};
+
+/**
+ * Get active address autocomplete provider.
+ *
+ * @param state
+ * @param type
+ */
+export const getActiveAutocompleteProvider = (
+	state: CheckoutState,
+	type: AddressFormType
+) => {
+	return state.activeAddressAutocompleteProvider?.[ type ];
 };

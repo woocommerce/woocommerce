@@ -7,6 +7,7 @@ import { CartResponseItem } from '@woocommerce/types';
 import { createRef, useEffect, useRef } from '@wordpress/element';
 import type { RefObject } from 'react';
 import { CartLineItemsCartSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 
 /**
  * Internal dependencies
@@ -40,33 +41,44 @@ const CartLineItemsTable = ( {
 	}, [ lineItems ] );
 
 	const onRemoveRow = ( nextItemKey: string | null ) => () => {
-		if (
-			rowRefs?.current &&
-			nextItemKey &&
-			rowRefs.current[ nextItemKey ].current instanceof HTMLElement
-		) {
-			( rowRefs.current[ nextItemKey ].current as HTMLElement ).focus();
-		} else if ( tableRef.current instanceof HTMLElement ) {
-			tableRef.current.focus();
-		}
+		requestAnimationFrame( () => {
+			if (
+				rowRefs?.current &&
+				nextItemKey &&
+				rowRefs.current[ nextItemKey ].current instanceof HTMLElement
+			) {
+				(
+					rowRefs.current[ nextItemKey ].current as HTMLElement
+				 ).focus();
+			} else if ( tableRef.current instanceof HTMLElement ) {
+				tableRef.current.focus();
+			}
+		} );
 	};
 
-	const products = isLoading ? (
-		<CartLineItemsCartSkeleton />
-	) : (
-		lineItems.map( ( lineItem, i ) => {
-			const nextItemKey =
-				lineItems.length > i + 1 ? lineItems[ i + 1 ].key : null;
-			return (
-				<CartLineItemRow
-					key={ lineItem.key }
-					lineItem={ lineItem }
-					onRemove={ onRemoveRow( nextItemKey ) }
-					ref={ rowRefs.current[ lineItem.key ] }
-					tabIndex={ -1 }
-				/>
-			);
-		} )
+	const products = (
+		<DelayedContentWithSkeleton
+			isLoading={ isLoading }
+			skeleton={ <CartLineItemsCartSkeleton /> }
+		>
+			<>
+				{ lineItems.map( ( lineItem, i ) => {
+					const nextItemKey =
+						lineItems.length > i + 1
+							? lineItems[ i + 1 ].key
+							: null;
+					return (
+						<CartLineItemRow
+							key={ lineItem.key }
+							lineItem={ lineItem }
+							onRemove={ onRemoveRow( nextItemKey ) }
+							ref={ rowRefs.current[ lineItem.key ] }
+							tabIndex={ -1 }
+						/>
+					);
+				} ) }
+			</>
+		</DelayedContentWithSkeleton>
 	);
 
 	return (

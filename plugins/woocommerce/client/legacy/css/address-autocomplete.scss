@@ -25,6 +25,7 @@
 			text-overflow: ellipsis;
 			overflow: hidden;
 			white-space: nowrap;
+			color: var(--wc-form-color-text, #444);
 
 			&:last-child {
 				border-bottom: none;
@@ -42,6 +43,15 @@
 				color: #fff;
 			}
 		}
+	}
+
+	.woocommerce-address-autocomplete-branding {
+		background: #d3d3d3;
+		padding: 8px 12px;
+		color: rgba(34, 34, 34, 0.66);
+		font-size: 12px;
+		display: flex;
+		align-items: center;
 	}
 }
 

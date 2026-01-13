@@ -2840,10 +2840,18 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		$thumbnail_id         = get_term_meta( $category->term_id, 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
-			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
-			$image        = $image[0];
-			$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
-			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+			$image_data = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
+
+			// Category image guard - fallback to placeholder.
+			if ( is_array( $image_data ) && isset( $image_data[0] ) ) {
+				$image        = $image_data[0];
+				$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
+				$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+			} else {
+				$image        = wc_placeholder_img_src();
+				$image_srcset = false;
+				$image_sizes  = false;
+			}
 		} else {
 			$image        = wc_placeholder_img_src();
 			$image_srcset = false;
@@ -4307,7 +4315,7 @@ function wc_set_hooked_blocks_version() {
 		return;
 	}
 
-	add_option( $option_name, WC()->version );
+	add_option( $option_name, WC()->stable_version() );
 }
 
 /**
@@ -4379,7 +4387,7 @@ function wc_set_hooked_blocks_version_on_theme_switch( $old_name, $old_theme ) {
 
 	// Sites with the option value set to "no" have already been migrated, and block hooks have been disabled. Checking explicitly for false to avoid setting the option again.
 	if ( ! $old_theme->is_block_theme() && ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) && false === $option_value ) {
-		add_option( $option_name, WC()->version );
+		add_option( $option_name, WC()->stable_version() );
 	}
 }
 

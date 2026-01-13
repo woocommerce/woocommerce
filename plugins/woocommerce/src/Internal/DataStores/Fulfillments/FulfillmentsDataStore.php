@@ -158,7 +158,8 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			throw new \Exception( esc_html__( 'Fulfillment not found.', 'woocommerce' ) );
 		}
 
-		$data->set_props( $fulfillment_data );
+		$data->set_props( array_diff_key( $fulfillment_data, array( 'fulfillment_id' => true ) ) );
+		$data->set_id( (int) $fulfillment_data['fulfillment_id'] );
 		$data->read_meta_data( true );
 		$data->set_object_read( true );
 	}

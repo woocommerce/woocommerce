@@ -27,8 +27,15 @@ The `render_block` filter allows you to modify the output of any WordPress block
 add_filter(
     'render_block_woocommerce/checkout-actions-block',
     function( $block_content ) {
-        $captcha = '<div class="my-captcha-element" data-sitekey="' . esc_attr( get_option( 'plugin_captcha_sitekey' ) ) . '"></div>';
-        return $block_content . $captcha;
+        ob_start();
+        ?>
+        <div class="my-captcha-element" data-sitekey="<?php echo esc_attr( get_option( 'plugin_captcha_sitekey' ) ); ?>">
+        </div>
+        <?php
+        echo $block_content;
+        $block_content = ob_get_contents();
+        ob_end_clean();
+        return $block_content;
     },
     999,
     1
@@ -37,10 +44,10 @@ add_filter(
 
 **Key points about this code:**
 
-- The filter targets `woocommerce/checkout-actions-block` which is the block containing the place order button
-- We use a priority of `999` to ensure our content is added after other modifications
-- The `data-sitekey` attribute stores your CAPTCHA configuration, but this may be different for your plugin
-- We append our protection element after the original block content by concatenating it to `$block_content` (no output buffering needed)
+-   The filter targets `woocommerce/checkout-actions-block` which is the block containing the place order button
+-   We use a priority of `999` to ensure our content is added after other modifications
+-   The `data-sitekey` attribute stores your CAPTCHA configuration, but this may be different for your plugin
+-   We append our protection element after the original block content.
 
 ## Step 2: Client-Side Integration
 
@@ -52,34 +59,38 @@ The checkout block uses a data store to manage state. You can use the `setExtens
 
 ```js
 /* Woo Checkout Block */
-if ( wp && wp.data ) {
-  var unsubscribe = wp.data.subscribe( function () {
-    const turnstileItem = document.querySelector(".my-captcha-element");
+document.addEventListener( 'DOMContentLoaded', function () {
+	if ( wp && wp.data ) {
+		var unsubscribe = wp.data.subscribe( function () {
+			const turnstileItem = document.querySelector(
+				'.my-captcha-element'
+			);
 
-    if ( turnstile && turnstileItem ) {
-      turnstile.render( turnstileItem, {
-        sitekey: turnstileItem.dataset.sitekey,
-        callback: function( data ) {
-          wp.data
-            .dispatch("wc/store/checkout")
-            .setExtensionData("plugin-namespace-turnstile", {
-              token: data,
-            });
-        },
-      });
+			if ( turnstile && turnstileItem ) {
+				turnstile.render( turnstileItem, {
+					sitekey: turnstileItem.dataset.sitekey,
+					callback: function ( data ) {
+						wp.data
+							.dispatch( 'wc/store/checkout' )
+							.setExtensionData( 'plugin-namespace-turnstile', {
+								token: data,
+							} );
+					},
+				} );
 
-      unsubscribe();
-    }
-  }, "wc/store/cart" );
-}
+				unsubscribe();
+			}
+		}, 'wc/store/cart' );
+	}
+} );
 ```
 
 **Key points about this JavaScript:**
 
-- We subscribe to the cart data store to detect when the checkout is ready
-- The `turnstile.render()` method initializes your CAPTCHA (replace with your specific implementation)
-- `setExtensionData()` stores the token in the checkout data store
-- The namespace should be unique to your plugin (e.g., `my-plugin-turnstile`)
+-   We subscribe to the cart data store to detect when the checkout is ready
+-   The `turnstile.render()` method initializes your CAPTCHA (replace with your specific implementation)
+-   `setExtensionData()` stores the token in the checkout data store
+-   The namespace should be unique to your plugin (e.g., `my-plugin-turnstile`)
 
 ### Data Store Integration
 
@@ -104,10 +115,7 @@ function plugin_check_turnstile_token( $result ) {
     }
 
     // Skip if this is not the checkout endpoint.
-    if (
-        ! isset( $GLOBALS['wp']->query_vars['rest_route'] ) ||
-        ! preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] )
-    ) {
+    if ( ! preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] ) ) {
         return $result;
     }
 
@@ -126,15 +134,16 @@ function plugin_check_turnstile_token( $result ) {
         }
     }
 
-    if (
-        ! isset( $request_body['extensions'] ) ||
-        empty( $request_body['extensions'] ) ||
-        ! isset( $request_body['extensions']['plugin-namespace-turnstile'] )
-    ) {
+    $extensions = $request_body['extensions'];
+    if ( empty( $extensions ) || ! isset( $extensions['plugin-namespace-turnstile'] ) ) {
         return new WP_Error( 'challenge_failed', 'Captcha challenge failed' );
     }
-    $extensions = $request_body['extensions'];
     $token = sanitize_text_field( $extensions['plugin-namespace-turnstile']['token'] );
+
+    /**
+     * Note: The function `my_token_check_function` would be
+     * implemented in your plugin to handle token validation.
+     **/
     $check = my_token_check_function( $token );
     $success = $check['success'];
 
@@ -146,27 +155,28 @@ function plugin_check_turnstile_token( $result ) {
 }
 ```
 
-## Key points about server-side validation
+**Key points about server-side validation:**
 
-- **Check for POST requests and the correct endpoint:** Ensure your validation logic only runs for POST requests to the checkout endpoint. This prevents unnecessary processing and avoids interfering with unrelated requests.
-- **Safely access the protection token:** Always verify that the `extensions` key and your namespace exist in the request body before accessing the token. This prevents PHP notices and ensures your code handles malformed requests gracefully.
-- **Return the `$result` parameter unless validation fails:** Always return the original `$result` parameter if your validation passes or if your logic should not run. Only return a `WP_Error` object if validation fails. This avoids interfering with other authentication or validation logic that may be running in WooCommerce or other plugins.
-- **Allow certain payment methods to bypass protection (optional):** For example, you may want to skip CAPTCHA for express payment methods or hosted checkouts. Make this configurable via a filter so other developers can extend or override the behavior.
+-   We check for POST requests to the checkout endpoint specifically
+-   The protection token is accessed via `$request_body['extensions']['your-namespace']`
+-   Always return the `$result` parameter to avoid interfering with other authentication checks
+-   Return a `WP_Error` object if validation fails
+-   Consider allowing certain payment methods to bypass protection (e.g., express payments)
 
 ## Important Notes
 
 ### Security Considerations
 
-1. **Always validate on the server side:** Client-side validation (e.g., JavaScript) can be bypassed by malicious users. Never rely solely on client-side checks for security-critical features like CAPTCHA or fraud protection.
-2. **Use HTTPS:** Ensure your site uses HTTPS so that protection tokens and other sensitive data are transmitted securely between the client and server.
-3. **Implement rate limiting:** Protect your endpoints from abuse by implementing [rate limiting](/docs/apis/store-api/rate-limiting/). This helps prevent brute-force attacks and reduces server load.
-4. **Token expiration:** Ensure that protection tokens (e.g., CAPTCHA tokens) have appropriate expiration times and are validated for freshness on the server. Expired tokens should be rejected.
+1. **Always validate on the server side** - Client-side validation can be bypassed
+2. **Use HTTPS** - Protection tokens should be transmitted securely
+3. **Rate limiting** - Consider implementing [rate limiting](/docs/apis/store-api/rate-limiting/) for your protection endpoints
+4. **Token expiration** - Ensure your protection tokens have appropriate expiration times
 
 ### Testing Your Integration
 
-When testing your protection integration, consider the following:
+When testing your protection integration:
 
-1. **Test with the Checkout block enabled:** Ensure your protection mechanism works as expected in the block-based checkout flow.
-2. **Verify validation failure for missing or invalid tokens:** Attempt to submit the checkout without a token or with an invalid token, and confirm that the server rejects the request appropriately.
-3. **Test with different payment methods:** Make sure your logic correctly allows or blocks requests based on the selected payment method, especially if you allow some methods to bypass protection.
-4. **Ensure compatibility with legitimate checkout flows:** Confirm that your protection mechanism does not interfere with normal, valid checkout submissions and that it works smoothly for real customers.
+1. Test with the checkout block enabled
+2. Verify that validation fails when no token is provided
+3. Test with different payment methods
+4. Ensure the protection doesn't interfere with legitimate checkout flows

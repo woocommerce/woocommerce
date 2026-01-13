@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Optimize hierarchical taxonomy ordering for Product Filter Taxonomy block with new TaxonomyHierarchyData class

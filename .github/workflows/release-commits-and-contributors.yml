@@ -195,9 +195,20 @@ jobs:
       updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
       formatted_updates: ${{ steps.find-pr.outputs.formatted_updates }}
     steps:
+      - name: Checkout utilities
+        uses: actions/checkout@v4
+        with:
+          ref: trunk
+          path: checkout-trunk
+          sparse-checkout: |
+            /.github/workflows/scripts/release-check-db-updates.js
+          sparse-checkout-cone-mode: false
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: release/${{ needs.extract-versions.outputs.current_version }}
+          path: checkout-release
           fetch-depth: 0
 
       - name: Check for database updates
@@ -206,52 +217,45 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const path = 'plugins/woocommerce/includes/class-wc-install.php';
+            const { readDbUpdatesFromString } = require( './checkout-trunk/.github/workflows/scripts/release-check-db-updates' );
+            const path = 'checkout-release/plugins/woocommerce/includes/class-wc-install.php';
             const version = '${{ needs.extract-versions.outputs.current_version }}';
 
             console.log(`Checking for database updates for version: ${version}`);
 
             try {
               const fileContent = fs.readFileSync(path, 'utf8');
+              const dbUpdates   = readDbUpdatesFromString( fileContent );
 
-              const dbUpdatesMatch = fileContent.match(/\$db_updates\s*=\s*array\s*\((.*?)\);/s);
-
-              if (!dbUpdatesMatch) {
-                console.log('Could not find `$db_updates` array in the file');
+              if ( ! dbUpdates || 0 === dbUpdates.size ) {
+                console.log('Could not find `$db_updates` array in the file.');
                 core.setOutput('has_updates', 'false');
                 return;
               }
 
-              const dbUpdatesContent = dbUpdatesMatch[1];
+              // Group all db updates for this version.
+              const updates = [];
 
-              // Check if the version exists as a key in the array
-              // This regex looks for the version as a string key with the format X.Y.Z
-              const escapedVersion = version.replace('.', '\\.');
-              const versionPattern = new RegExp(`['"]${escapedVersion}(?:\\.\\d+)?['"]\\s*=>\\s*array\\s*\\((.*?)\\)`, 's');
-              const versionMatch = dbUpdatesContent.match(versionPattern);
+              const fullVersion = version + '.0';
+              for ( const [ key, value ] of dbUpdates ) {
+                if ( key.replace( /-.*$/, '' ) !== fullVersion ) {
+                  continue;
+                }
 
-              if (versionMatch) {
-                console.log(`✅ Found database updates for version ${version}`);
-                core.setOutput('has_updates', 'true');
-
-                const updatesContent = versionMatch[1];
-
-                // Split by comma and clean up each update function
-                const updates = updatesContent
-                  .split(',')
-                  .map(update => update.trim().replace(/['"]/g, ''))
-                  .filter(update => update.length > 0);
-
-                // Store updates for the PR finding step
-                core.setOutput('updates_list', updates.join(','));
-
-              } else {
-                console.log(`⛔ No database updates found for version ${version}`);
-                core.setOutput('has_updates', 'false');
-                core.setOutput('updates_list', '');
+                updates.push( ...value );
               }
+
+              if ( updates.length > 0 ) {
+                console.log( `✅ Found database updates for version ${version}` );
+
+                core.setOutput( 'has_updates', 'true' );
+                core.setOutput( 'updates_list', updates.join( ',' ) );
+              } else {
+                console.log( `⛔ No database updates found for version ${version}` );
+                core.setOutput( 'has_updates', 'false' );
+                core.setOutput( 'updates_list', '' );
+               }
             } catch (error) {
-              console.error(`Error reading file: ${error.message}`);
               core.setFailed(`Failed to check database updates: ${error.message}`);
             }
 
@@ -261,6 +265,8 @@ jobs:
         run: |
           FILE_PATH="plugins/woocommerce/includes/class-wc-install.php"
           UPDATES="${{ steps.check-db-updates.outputs.updates_list }}"
+
+          cd checkout-release
 
           echo "Searching for PRs that introduced database updates"
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed incorrect count for brands through the /wp-json/wc/v3/products/brands endpoint. The product_brand taxonomy was using WordPress's default _update_post_term_count callback instead of WooCommerce's custom _wc_term_recount function, and was not included in the wc_change_term_counts filter. This caused brand counts to return 0 instead of the correct count.

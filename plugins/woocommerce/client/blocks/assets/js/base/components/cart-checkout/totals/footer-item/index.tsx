@@ -25,6 +25,7 @@ import {
 import { formatPrice } from '@woocommerce/price-format';
 import { hasSelectedShippingRate } from '@woocommerce/base-utils';
 import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 
 /**
  * Internal dependencies
@@ -128,6 +129,17 @@ const TotalsFooterItem = ( {
 
 	const hasSelectedRates = hasSelectedShippingRate( cart.shippingRates );
 	const cartNeedsShipping = cart.cartNeedsShipping;
+	const skeleton = (
+		<>
+			<span>{ __( 'Including', 'woocommerce' ) }</span>
+			<Skeleton
+				height="1em"
+				width="45px"
+				tag="span"
+				ariaMessage={ __( 'Loading price… ', 'woocommerce' ) }
+			/>
+		</>
+	);
 
 	return (
 		<TotalsItem
@@ -142,32 +154,22 @@ const TotalsFooterItem = ( {
 				<>
 					{ SHOW_TAXES && parsedTaxValue !== 0 && (
 						<p className="wc-block-components-totals-footer-item-tax">
-							{ isLoading ? (
+							<DelayedContentWithSkeleton
+								isLoading={ isLoading }
+								skeleton={ skeleton }
+							>
 								<>
-									<span>
-										{ __( 'Including', 'woocommerce' ) }
-									</span>
-									<Skeleton
-										height="1em"
-										width="45px"
-										tag="span"
-										ariaMessage={ __(
-											'Loading price… ',
-											'woocommerce'
-										) }
-									/>
+									{ createInterpolateElement( description, {
+										TaxAmount: (
+											<FormattedMonetaryAmount
+												className="wc-block-components-totals-footer-item-tax-value"
+												currency={ currency }
+												value={ parsedTaxValue }
+											/>
+										),
+									} ) }
 								</>
-							) : (
-								createInterpolateElement( description, {
-									TaxAmount: (
-										<FormattedMonetaryAmount
-											className="wc-block-components-totals-footer-item-tax-value"
-											currency={ currency }
-											value={ parsedTaxValue }
-										/>
-									),
-								} )
-							) }
+							</DelayedContentWithSkeleton>
 						</p>
 					) }
 					{ isEstimate && ! hasSelectedRates && cartNeedsShipping && (

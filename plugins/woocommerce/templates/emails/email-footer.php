@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.0.0
+ * @version 10.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -37,10 +37,10 @@ $email = $email ?? null;
 							<tr>
 								<td align="center" valign="top">
 									<!-- Footer -->
-									<table border="0" cellpadding="10" cellspacing="0" width="100%" id="template_footer">
+									<table border="0" cellpadding="10" cellspacing="0" width="100%" id="template_footer" role="presentation">
 										<tr>
 											<td valign="top">
-												<table border="0" cellpadding="10" cellspacing="0" width="100%">
+												<table border="0" cellpadding="10" cellspacing="0" width="100%" role="presentation">
 													<tr>
 														<td colspan="2" valign="middle" id="credit">
 															<?php

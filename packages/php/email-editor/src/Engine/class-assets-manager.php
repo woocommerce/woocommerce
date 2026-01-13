@@ -191,7 +191,7 @@ class Assets_Manager {
 		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L116-L120.
 		wp_add_inline_script(
 			'wp-blocks',
-			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $context ) ) ),
+			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $context ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) ),
 			'after'
 		);
 
@@ -199,7 +199,7 @@ class Assets_Manager {
 		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L144C1-L148C3.
 		wp_add_inline_script(
 			'wp-blocks',
-			sprintf( 'wp.blocks.unstable__bootstrapServerSideBlockDefinitions( %s );', wp_json_encode( get_block_editor_server_block_settings() ) )
+			sprintf( 'wp.blocks.unstable__bootstrapServerSideBlockDefinitions( %s );', wp_json_encode( get_block_editor_server_block_settings(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) )
 		);
 
 		$localization_data = array(
@@ -210,11 +210,11 @@ class Assets_Manager {
 			'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
 			'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
 			'urls'                  => array(
-				'listings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
-				'send'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
-				'back'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+				'listings'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+				'send'         => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+				'back'         => admin_url( 'admin.php?page=wc-settings&tab=email' ),
+				'createCoupon' => admin_url( 'post-new.php?post_type=shop_coupon' ),
 			),
-			'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),
 		);
 
 		wp_localize_script(
@@ -266,7 +266,7 @@ class Assets_Manager {
 			'wp-blocks',
 			sprintf(
 				'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( %s ) );',
-				wp_json_encode( $preload_data )
+				wp_json_encode( $preload_data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
 			)
 		);
 	}

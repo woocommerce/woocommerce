@@ -30,7 +30,7 @@ export const useForcedLayout = ( {
 	// An array of registered blocks that may be forced in this particular layout.
 	registeredBlocks: Array< string >;
 	// The default template for the inner blocks in this layout.
-	defaultTemplate: TemplateArray;
+	defaultTemplate?: TemplateArray;
 } ) => {
 	const currentRegisteredBlocks = useRef( registeredBlocks );
 	const currentDefaultTemplate = useRef( defaultTemplate );

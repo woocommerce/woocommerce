@@ -11,6 +11,8 @@
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -85,11 +87,8 @@ class WC_Payment_Gateways {
 			'WC_Gateway_BACS',
 			'WC_Gateway_Cheque',
 			'WC_Gateway_COD',
+			'WC_Gateway_Paypal',
 		);
-
-		if ( $this->should_load_paypal_standard() ) {
-			$load_gateways[] = 'WC_Gateway_Paypal';
-		}
 
 		// Filter.
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
@@ -102,6 +101,13 @@ class WC_Payment_Gateways {
 		foreach ( $load_gateways as $gateway ) {
 			if ( is_string( $gateway ) && class_exists( $gateway ) ) {
 				$gateway = new $gateway();
+			}
+
+			if ( is_a( $gateway, 'WC_Gateway_Paypal' ) ) {
+				WC_Gateway_Paypal::set_instance( $gateway );
+				if ( ! $this->should_load_paypal_standard() ) {
+					continue;
+				}
 			}
 
 			// Gateways need to be valid and extend WC_Payment_Gateway.
@@ -340,6 +346,33 @@ All at %6$s
 	}
 
 	/**
+	 * Get readable payment method name from payment method ID.
+	 *
+	 * Retrieves the payment gateway title from the payment method ID by loading
+	 * the payment gateway instance.
+	 *
+	 * @param string $payment_gateway_id Payment method ID (e.g., "stripe", "paypal", "bacs").
+	 * @return string Payment method name or ID if name not found.
+	 */
+	public function get_payment_gateway_name_by_id( string $payment_gateway_id ): string {
+		// Get available payment gateways.
+		$payment_gateways = $this->payment_gateways();
+
+		// Check if the payment method exists and has a title.
+		if ( isset( $payment_gateways[ $payment_gateway_id ] ) ) {
+			$gateway = $payment_gateways[ $payment_gateway_id ];
+			if ( is_object( $gateway ) && method_exists( $gateway, 'get_title' ) ) {
+				return $gateway->get_title();
+			} elseif ( is_object( $gateway ) && isset( $gateway->title ) ) {
+				return $gateway->title;
+			}
+		}
+
+		// Return the ID as fallback if no title found.
+		return $payment_gateway_id;
+	}
+
+	/**
 	 * Get array of registered gateway ids
 	 *
 	 * @since 2.6.0
@@ -361,6 +394,12 @@ All at %6$s
 	 * @return array The available payment gateways.
 	 */
 	public function get_available_payment_gateways() {
+		// Early return if fraud protection blocks session.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+			return array();
+		}
+
 		$_available_gateways = array();
 
 		foreach ( $this->payment_gateways as $gateway ) {
@@ -443,9 +482,7 @@ All at %6$s
 	 * @return bool Whether PayPal Standard should be loaded or not.
 	 */
 	protected function should_load_paypal_standard() {
-		// Tech debt: This class needs to be initialized to make sure any existing subscriptions gets processed as expected, even if the gateway is not enabled for new orders.
-		// Eventually, we want to load this via a singleton pattern to avoid unnecessary instantiation.
-		$paypal = new WC_Gateway_Paypal();
+		$paypal = WC_Gateway_Paypal::get_instance();
 		return $paypal->should_load();
 	}
 

@@ -1,12 +1,12 @@
 /**
  * External dependencies
  */
-
-import { Button, ExternalLink, TextControl } from '@wordpress/components';
+import { Button, ExternalLink, Flex, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -17,13 +17,18 @@ import { EditIcon } from '../../utils/icons';
 import { findShipmentProviderName } from '../../utils/fulfillment-utils';
 import ShipmentProviders from '../../data/shipment-providers';
 import { useFulfillmentContext } from '../../context/fulfillment-context';
+import { SHIPMENT_OPTION_MANUAL_ENTRY } from '../../data/constants';
+
+interface TrackingNumberParsingPossibility {
+	url: string;
+	ambiguity_score: number;
+}
 
 interface TrackingNumberParsingResponse {
-	tracking_number_details: {
-		tracking_number: string;
-		tracking_url: string;
-		shipping_provider: string;
-	};
+	tracking_number: string;
+	tracking_url: string;
+	shipping_provider: string;
+	possibilities?: Record< string, TrackingNumberParsingPossibility >;
 }
 
 const ShipmentProviderIcon = ( { providerKey }: { providerKey: string } ) => {
@@ -42,6 +47,7 @@ const ShipmentProviderIcon = ( { providerKey }: { providerKey: string } ) => {
 
 export default function ShipmentTrackingNumberForm() {
 	const [ trackingNumberTemp, setTrackingNumberTemp ] = useState( '' );
+	const [ isAmbiguousProvider, setIsAmbiguousProvider ] = useState( false );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ editMode, setEditMode ] = useState( false );
 	const [ isLoading, setIsLoading ] = useState( false );
@@ -54,6 +60,7 @@ export default function ShipmentTrackingNumberForm() {
 		setProviderName,
 		shipmentProvider,
 		setShipmentProvider,
+		setSelectedOption,
 	} = useShipmentFormContext();
 
 	// Reset error when order changes
@@ -65,12 +72,17 @@ export default function ShipmentTrackingNumberForm() {
 		setError( null );
 		try {
 			setIsLoading( true );
-			const { tracking_number_details } =
+			const tracking_number_response =
 				await apiFetch< TrackingNumberParsingResponse >( {
-					path: `/wc/v3/orders/${ order?.id }/fulfillments/lookup?tracking_number=${ trackingNumberTemp }`,
+					path: addQueryArgs(
+						`/wc/v3/orders/${ order?.id }/fulfillments/lookup`,
+						{
+							tracking_number: trackingNumberTemp.trim(),
+						}
+					),
 					method: 'GET',
 				} );
-			if ( ! tracking_number_details.tracking_number ) {
+			if ( ! tracking_number_response.tracking_number ) {
 				setError(
 					__(
 						'No information found for this tracking number. Check the number or enter the details manually.',
@@ -79,9 +91,35 @@ export default function ShipmentTrackingNumberForm() {
 				);
 				return;
 			}
-			setTrackingNumber( tracking_number_details.tracking_number );
-			setTrackingUrl( tracking_number_details.tracking_url );
-			setShipmentProvider( tracking_number_details.shipping_provider );
+
+			// Reset the ambiguous provider state when a new tracking number is looked up
+			setIsAmbiguousProvider( false );
+
+			if (
+				tracking_number_response.possibilities &&
+				Object.keys( tracking_number_response.possibilities ).length > 1
+			) {
+				const possibilities = Object.values(
+					tracking_number_response.possibilities
+				);
+				// If one possibility has an ambiguity score of 85 or more, we assume it's a clear match. (test  123456789012:US)
+				// If all possibilities have an ambiguity score less than 85, show the ambiguous provider message. (test 1234567890123456:US)
+				// If multiple possibilities have ambiguity scores of 85 or more, we still consider it ambiguous. (test AB123456789US:US)
+				const hasAmbiguousPossibilities =
+					possibilities.every(
+						( possibility ) => possibility.ambiguity_score < 85
+					) ||
+					possibilities.filter(
+						( possibility ) => possibility.ambiguity_score >= 85
+					).length > 1;
+				if ( hasAmbiguousPossibilities ) {
+					setIsAmbiguousProvider( true );
+				}
+			}
+
+			setTrackingNumber( tracking_number_response.tracking_number );
+			setTrackingUrl( tracking_number_response.tracking_url );
+			setShipmentProvider( tracking_number_response.shipping_provider );
 			setProviderName( '' );
 			setEditMode( false );
 		} catch ( err ) {
@@ -196,6 +234,31 @@ export default function ShipmentTrackingNumberForm() {
 								</span>
 							</div>
 						</div>
+						{ isAmbiguousProvider && (
+							<Flex direction={ 'column' } gap={ 0 }>
+								<p className="woocommerce-fulfillment-description">
+									{ __(
+										'Not your provider?',
+										'woocommerce'
+									) }
+								</p>
+								<Button
+									variant="link"
+									size="small"
+									className="woocommerce-fulfillment-description-button"
+									onClick={ () => {
+										setSelectedOption(
+											SHIPMENT_OPTION_MANUAL_ENTRY
+										);
+									} }
+								>
+									{ __(
+										'Select your provider manually',
+										'woocommerce'
+									) }
+								</Button>
+							</Flex>
+						) }
 					</div>
 					<div className="woocommerce-fulfillment-input-container">
 						<h4>{ __( 'Tracking URL', 'woocommerce' ) }</h4>

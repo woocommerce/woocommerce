@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed accessibility for all classic store notices added by the `wc_add_notice` function.

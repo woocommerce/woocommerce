@@ -38,7 +38,7 @@ $second_description = __( 'Get your favorite vinyl at record-breaking prices.', 
 			<div class="wp-block-buttons" style="margin-top:20px;margin-bottom:0">
 				<!-- wp:button {"style":{"typography":{"fontSize":"16px"},"border":{"width":"0px","style":"none"}},"className":"is-style-fill"} -->
 				<div class="wp-block-button has-custom-font-size is-style-fill" style="font-size:16px">
-					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>" style="border-style:none;border-width:0px;">
+					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>" style="border-style:none;border-width:0px;">
 						<?php echo esc_html( $banner_button ); ?>
 					</a>
 				</div>

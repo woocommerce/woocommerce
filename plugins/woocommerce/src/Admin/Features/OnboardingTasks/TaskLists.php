@@ -50,7 +50,6 @@ class TaskLists {
 		'Tax',
 		'Shipping',
 		'Marketing',
-		'Appearance',
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
@@ -109,11 +108,10 @@ class TaskLists {
 	 */
 	public static function init_default_lists() {
 		$tasks = array(
-			'CustomizeStore',
 			'StoreDetails',
 			'Products',
-			'Appearance',
 			'Payments',
+			'CustomizeStore',
 			'Tax',
 			'Shipping',
 			'LaunchYourStore',
@@ -124,13 +122,6 @@ class TaskLists {
 			if ( false !== $key ) {
 				unset( $tasks[ $key ] );
 			}
-		}
-
-		// Remove the old Personalize your store task if the new CustomizeStore is enabled.
-		$task_to_remove                 = Features::is_enabled( 'customize-store' ) ? 'Appearance' : 'CustomizeStore';
-		$store_customisation_task_index = array_search( $task_to_remove, $tasks, true );
-		if ( false !== $store_customisation_task_index ) {
-			unset( $tasks[ $store_customisation_task_index ] );
 		}
 
 		self::add_list(

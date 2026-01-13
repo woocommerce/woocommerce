@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add Cache-Control headers to cart API responses to prevent browser caching

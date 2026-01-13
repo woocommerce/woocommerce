@@ -241,10 +241,10 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			),
 			array(
 				'status'  => 200,
-				'message' => 'Billing email updated to another@example.org. Email template &quot;Completed order&quot; sent to another@example.org, via some app.',
+				'message' => 'Billing email updated to another@example.org. Email template &quot;Completed order&quot; sent to another@example.org.',
 				'notes'   => array(
 					'Billing email updated to another@example.org.',
-					'Email template &quot;Completed order&quot; sent to another@example.org, via some app.',
+					'Email template &quot;Completed order&quot; sent to another@example.org.',
 				),
 			),
 		);
@@ -269,10 +269,10 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			),
 			array(
 				'status'  => 200,
-				'message' => 'Billing email updated to another@example.org. Email template &quot;Completed order&quot; sent to another@example.org, via some app.',
+				'message' => 'Billing email updated to another@example.org. Email template &quot;Completed order&quot; sent to another@example.org.',
 				'notes'   => array(
 					'Billing email updated to another@example.org.',
-					'Email template &quot;Completed order&quot; sent to another@example.org, via some app.',
+					'Email template &quot;Completed order&quot; sent to another@example.org.',
 				),
 			),
 		);
@@ -284,9 +284,9 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			),
 			array(
 				'status'  => 200,
-				'message' => 'Email template &quot;Completed order&quot; sent to customer@example.org, via some app.',
+				'message' => 'Email template &quot;Completed order&quot; sent to customer@example.org.',
 				'notes'   => array(
-					'Email template &quot;Completed order&quot; sent to customer@example.org, via some app.',
+					'Email template &quot;Completed order&quot; sent to customer@example.org.',
 				),
 			),
 		);
@@ -296,9 +296,9 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			array(),
 			array(
 				'status'  => 200,
-				'message' => 'Email template &quot;Completed order&quot; sent to customer@example.org, via some app.',
+				'message' => 'Email template &quot;Completed order&quot; sent to customer@example.org.',
 				'notes'   => array(
-					'Email template &quot;Completed order&quot; sent to customer@example.org, via some app.',
+					'Email template &quot;Completed order&quot; sent to customer@example.org.',
 				),
 			),
 		);
@@ -387,11 +387,11 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'message', $data );
-		$this->assertEquals( 'Order details sent to customer@email.com, via some app.', $data['message'] );
+		$this->assertEquals( 'Order details sent to customer@email.com.', $data['message'] );
 
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$this->assertCount( 1, $notes );
-		$this->assertEquals( 'Order details sent to customer@email.com, via some app.', $notes[0]->content );
+		$this->assertEquals( 'Order details sent to customer@email.com.', $notes[0]->content );
 	}
 
 	/**
@@ -468,14 +468,14 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'message', $data );
-		$this->assertEquals( 'Billing email updated to another@email.com. Order details sent to another@email.com, via some app.', $data['message'] );
+		$this->assertEquals( 'Billing email updated to another@email.com. Order details sent to another@email.com.', $data['message'] );
 
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$this->assertCount( 2, $notes );
 
 		$notes_content = wp_list_pluck( $notes, 'content' );
 		$this->assertContainsEquals( 'Billing email updated to another@email.com.', $notes_content );
-		$this->assertContainsEquals( 'Order details sent to another@email.com, via some app.', $notes_content );
+		$this->assertContainsEquals( 'Order details sent to another@email.com.', $notes_content );
 	}
 
 	/**

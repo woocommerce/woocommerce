@@ -49,6 +49,7 @@ declare global {
 			};
 		};
 		wcAdminFeatures: {
+			'analytics-scheduled-import': boolean;
 			'activity-panels': boolean;
 			analytics: boolean;
 			'coming-soon-newsletter-template': boolean;

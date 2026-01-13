@@ -3,6 +3,7 @@
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
@@ -53,6 +54,12 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
 const productButtonStore = {
 	state: {
 		get quantity(): number {
@@ -66,16 +73,22 @@ const productButtonStore = {
 
 			// Return the product quantity when the item is a non-variable product.
 			if ( products[ 0 ]?.type !== 'variation' ) {
-				return products[ 0 ]?.quantity || 0;
+				return products.reduce(
+					( acc, item ) => acc + item.quantity,
+					0
+				);
 			}
 
 			const selectedAttributes =
 				addToCartWithOptionsState?.selectedAttributes;
-			const selectedVariableProduct = products.find( ( item ) =>
+			const selectedVariableProducts = products.filter( ( item ) =>
 				doesCartItemMatchAttributes( item, selectedAttributes )
 			);
 
-			return selectedVariableProduct?.quantity || 0;
+			return selectedVariableProducts.reduce(
+				( acc, item ) => acc + item.quantity,
+				0
+			);
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -135,10 +148,14 @@ const productButtonStore = {
 			return state.quantity > 0;
 		},
 		get productId() {
-			return (
-				addToCartWithOptionsState?.variationId ||
-				getContext< Context >().productId
-			);
+			const { productId } = getContext< Context >();
+
+			const isDescendantOfAddToCartWithOptions =
+				productId === productDataState?.productId;
+
+			return isDescendantOfAddToCartWithOptions
+				? productDataState?.variationId || productId
+				: productId;
 		},
 	},
 	actions: {
@@ -155,11 +172,16 @@ const productButtonStore = {
 				{ lock: universalLock }
 			);
 
-			yield actions.addCartItem( {
-				id: state.productId,
-				quantity: state.quantity + context.quantityToAdd,
-				type: context.productType,
-			} );
+			yield actions.addCartItem(
+				{
+					id: state.productId,
+					quantity: state.quantity + context.quantityToAdd,
+					type: context.productType,
+				},
+				{
+					showCartUpdatesNotices: false,
+				}
+			);
 
 			context.displayViewCart = true;
 		},
@@ -197,7 +219,15 @@ const productButtonStore = {
 				addToCartWithOptionsState?.isFormValid
 			) {
 				context.hasPressedButton = true;
-				context.animationStatus = AnimationStatus.SLIDE_OUT;
+
+				// Only animate if the quantity number changes and there is no
+				// animation in progress.
+				if (
+					context.tempQuantity !== state.quantity &&
+					context.animationStatus === AnimationStatus.IDLE
+				) {
+					context.animationStatus = AnimationStatus.SLIDE_OUT;
+				}
 			}
 		},
 	},
@@ -219,7 +249,6 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
-			// We skip the animation altogether if the Add to Cart + Options form is invalid.
 			if (
 				context.tempQuantity !== state.quantity &&
 				context.animationStatus === AnimationStatus.IDLE
