@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed order creation failures in PayPal Standard when items contain negative amounts or fractional quantities by omitting the item breakdown in these cases, allowing orders to proceed with the total amount only.

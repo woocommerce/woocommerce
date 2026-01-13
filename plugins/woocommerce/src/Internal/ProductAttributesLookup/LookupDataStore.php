@@ -265,15 +265,14 @@ class LookupDataStore {
 
 		$in_stock = $product->is_in_stock();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query(
 			$wpdb->prepare(
-				'UPDATE ' . $this->lookup_table_name . ' SET in_stock = %d WHERE product_id = %d',
+				'UPDATE %i SET in_stock = %d WHERE product_id = %d',
+				$this->lookup_table_name,
 				$in_stock ? 1 : 0,
 				$product->get_id()
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -359,15 +358,21 @@ class LookupDataStore {
 	private function delete_data_for( int $product_id ) {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		// Single query handled with `index_merge` strategy, while separate with `range` (better performing) on available indexes.
 		$wpdb->query(
 			$wpdb->prepare(
-				'DELETE FROM ' . $this->lookup_table_name . ' WHERE product_id = %d OR product_or_parent_id = %d',
-				$product_id,
+				'DELETE FROM %i WHERE product_or_parent_id = %d',
+				$this->lookup_table_name,
 				$product_id
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query(
+			$wpdb->prepare(
+				'DELETE FROM %i WHERE product_id = %d',
+				$this->lookup_table_name,
+				$product_id
+			)
+		);
 	}
 
 	/**
@@ -601,20 +606,19 @@ class LookupDataStore {
 	/**
 	 * Insert one entry in the lookup table.
 	 *
-	 * @param int    $product_id The product id.
-	 * @param int    $product_or_parent_id The product id for non-variable products, the main/parent product id for variations.
-	 * @param string $taxonomy Taxonomy name.
-	 * @param int    $term_id Term id.
+	 * @param int    $product_id             The product id.
+	 * @param int    $product_or_parent_id   The product id for non-variable products, the main/parent product id for variations.
+	 * @param string $taxonomy               Taxonomy name.
+	 * @param int    $term_id                Term id.
 	 * @param bool   $is_variation_attribute True if the taxonomy corresponds to an attribute used to define variations.
-	 * @param bool   $has_stock True if the product is in stock.
+	 * @param bool   $has_stock              True if the product is in stock.
 	 */
 	private function insert_lookup_table_data( int $product_id, int $product_or_parent_id, string $taxonomy, int $term_id, bool $is_variation_attribute, bool $has_stock ) {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 		$wpdb->query(
 			$wpdb->prepare(
-				'INSERT INTO ' . $this->lookup_table_name . ' (
+				'INSERT INTO %i (
 					  product_id,
 					  product_or_parent_id,
 					  taxonomy,
@@ -623,6 +627,7 @@ class LookupDataStore {
 					  in_stock)
 					VALUES
 					  ( %d, %d, %s, %d, %d, %d )',
+				$this->lookup_table_name,
 				$product_id,
 				$product_or_parent_id,
 				$taxonomy,
@@ -631,7 +636,6 @@ class LookupDataStore {
 				$has_stock ? 1 : 0
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -843,13 +847,13 @@ class LookupDataStore {
 	private function create_data_for_product_cpt_core( int $product_id ) {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL
-		$sql = $wpdb->prepare(
-			"delete from {$this->lookup_table_name} where product_or_parent_id=%d",
-			$product_id
+		$wpdb->query(
+			$wpdb->prepare(
+				'DELETE FROM %i WHERE product_or_parent_id = %d',
+				$this->lookup_table_name,
+				$product_id
+			)
 		);
-		$wpdb->query( $sql );
-		// phpcs:enable WordPress.DB.PreparedSQL
 
 		// * Obtain list of product variations, together with stock statuses; also get the product type.
 		// For a variation this will return just one entry, with type 'variation'.

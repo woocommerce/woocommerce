@@ -34,7 +34,6 @@ const { currency, placeholderImgSrc } = getConfig(
 	'woocommerce'
 ) as WooCommerceConfig;
 const {
-	addToCartBehaviour,
 	onCartClickBehaviour,
 	checkoutUrl,
 	displayCartPriceIncludingTax,
@@ -61,7 +60,11 @@ const scalePrice = ( {
 	price,
 	inputDecimals,
 	outputDecimals = 0,
-}: ScalePriceArgs ) => price * Math.pow( 10, outputDecimals - inputDecimals );
+}: ScalePriceArgs ) => {
+	const scaledPrice = price * Math.pow( 10, outputDecimals - inputDecimals );
+	// Remove extra decimals.
+	return Math.round( scaledPrice );
+};
 
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
@@ -91,10 +94,9 @@ type MiniCart = {
 		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
 	};
 	callbacks: {
-		setupEventListeners: () => void;
+		setupJQueryEventBridge: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
-		saveMiniCartButtonRef: () => void;
 	};
 };
 
@@ -251,6 +253,8 @@ store< MiniCart >(
 					window.location.href = checkoutUrl;
 					return;
 				}
+				const { ref } = getElement();
+				state.miniCartButtonRef = ref;
 				state.isOpen = true;
 			},
 
@@ -302,56 +306,26 @@ store< MiniCart >(
 		},
 
 		callbacks: {
-			*setupEventListeners() {
-				// eslint-disable-next-line @typescript-eslint/no-empty-function
-				const noop = () => {};
-				let removeJQueryAddedToCartEvent = noop;
-				let removeJQueryRemovedFromCartEvent = noop;
-				if ( 'jQuery' in window ) {
-					// Make it so we can read jQuery events triggered by WC Core elements.
-					removeJQueryAddedToCartEvent = translateJQueryEventToNative(
+			*setupJQueryEventBridge() {
+				if ( ! ( 'jQuery' in window ) ) {
+					return;
+				}
+
+				// Make it so we can read jQuery events triggered by WC Core elements.
+				const removeJQueryAddedToCartEvent =
+					translateJQueryEventToNative(
 						'added_to_cart',
 						'wc-blocks_added_to_cart'
 					);
-					removeJQueryRemovedFromCartEvent =
-						translateJQueryEventToNative(
-							'removed_from_cart',
-							'wc-blocks_removed_from_cart'
-						);
-				}
-				document.body.addEventListener(
-					'wc-blocks_added_to_cart',
-					actions.refreshCartItems
-				);
-				document.body.addEventListener(
-					'wc-blocks_removed_from_cart',
-					actions.refreshCartItems
-				);
-
-				if ( addToCartBehaviour === 'open_drawer' ) {
-					document.body.addEventListener(
-						'wc-blocks_added_to_cart',
-						miniCartActions.openDrawer
+				const removeJQueryRemovedFromCartEvent =
+					translateJQueryEventToNative(
+						'removed_from_cart',
+						'wc-blocks_removed_from_cart'
 					);
-				}
 
 				return () => {
-					document.body.removeEventListener(
-						'wc-blocks_added_to_cart',
-						actions.refreshCartItems
-					);
-					document.body.removeEventListener(
-						'wc-blocks_removed_from_cart',
-						actions.refreshCartItems
-					);
-					document.body.removeEventListener(
-						'wc-blocks_added_to_cart',
-						miniCartActions.openDrawer
-					);
-					if ( 'jQuery' in window ) {
-						removeJQueryAddedToCartEvent();
-						removeJQueryRemovedFromCartEvent();
-					}
+					removeJQueryAddedToCartEvent();
+					removeJQueryRemovedFromCartEvent();
 				};
 			},
 
@@ -378,11 +352,6 @@ store< MiniCart >(
 					// Focus first element when the minicart is opened.
 					getFocusableElements( ref )[ 0 ]?.focus();
 				}
-			},
-
-			saveMiniCartButtonRef() {
-				const { ref } = getElement();
-				state.miniCartButtonRef = ref;
 			},
 		},
 	},
@@ -420,11 +389,11 @@ const { state: cartItemState } = store(
 			// state.cartItem to get the cart item.
 			get cartItem() {
 				const {
-					cartItem: { key },
+					cartItem: { id, key },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				const cartItem = ( woocommerceState.cart.items.find(
-					( item ) => item.key === key
+				const cartItem = ( woocommerceState.cart.items.find( ( item ) =>
+					key ? item.key === key : item.id === id
 				) || {} ) as CartItem;
 
 				cartItem.variation = cartItem.variation || [];

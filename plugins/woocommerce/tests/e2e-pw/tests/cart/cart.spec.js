@@ -124,6 +124,81 @@ const test = baseTest.extend( {
 /* endregion */
 
 /* region tests */
+test(
+	'can undo product removal in classic cart',
+	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
+	async ( { page, products, tax } ) => {
+		const slug = CLASSIC_CART_PAGE.slug;
+
+		await test.step( 'add product to cart', async () => {
+			await addAProductToCart( page, products[ 0 ].id, 1 );
+			await page.goto( slug );
+			await checkCartContent(
+				true,
+				page,
+				[ { data: products[ 0 ], qty: 1 } ],
+				tax
+			);
+		} );
+
+		await test.step( 'remove product and verify undo link appears', async () => {
+			await page
+				.getByLabel( /Remove .* from cart/ )
+				.first()
+				.click();
+
+			// Verify the product was removed
+			await checkCartContent( true, page, [], tax );
+
+			// Verify the undo link appears
+			await expect(
+				page.getByRole( 'link', { name: 'Undo?' } )
+			).toBeVisible();
+		} );
+
+		await test.step( 'click undo to restore product', async () => {
+			await page.getByRole( 'link', { name: 'Undo?' } ).click();
+
+			// Verify the product is back in the cart
+			await checkCartContent(
+				true,
+				page,
+				[ { data: products[ 0 ], qty: 1 } ],
+				tax
+			);
+		} );
+
+		await test.step( 'remove product again after undo', async () => {
+			await page
+				.getByLabel( /Remove .* from cart/ )
+				.first()
+				.click();
+
+			// Verify the product was removed again
+			await checkCartContent( true, page, [], tax );
+
+			// Verify undo link is visible
+			await expect(
+				page.getByRole( 'link', { name: 'Undo?' } )
+			).toBeVisible();
+		} );
+
+		await test.step( 'verify undo link disappears after navigation', async () => {
+			// Navigate to shop page and return to cart
+			await page.goto( 'shop' );
+			await page.goto( slug );
+
+			// Verify cart is still empty
+			await checkCartContent( true, page, [], tax );
+
+			// Verify undo link is no longer visible (cleanup occurred)
+			await expect(
+				page.getByRole( 'link', { name: 'Undo?' } )
+			).not.toBeVisible();
+		} );
+	}
+);
+
 cartPages.forEach( ( { name, slug } ) => {
 	test(
 		`can add and remove products, increase quantity and proceed to checkout - ${ name }`,

@@ -60,6 +60,7 @@
 
 		.wc-block-components-radio-control__description,
 		.wc-block-components-radio-control__secondary-description {
+			@include font-small-locked;
 			width: 100%;
 			text-align: left;
 			margin: 0;
@@ -71,8 +72,6 @@
 			align-items: center;
 			gap: $gap-smallest;
 
-			color: $gray-700;
-
 			.has-dark-controls & {
 				color: $gray-300;
 			}
@@ -81,7 +80,6 @@
 				fill: currentColor;
 				// Pixel perfect alignement needed as internal padding of the SVG
 				// is inconsistent (top one bigger that the bottom one).
-				margin-top: -2px;
 				margin-left: -3px;
 			}
 		}

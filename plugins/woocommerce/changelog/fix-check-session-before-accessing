@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent errors when plugins incorrectly call wc_add_notice before session is initialized
