@@ -1291,7 +1291,10 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 
 				wpData.useDispatch.mockImplementation(
 					( store: StoreDescriptor | string ) => {
-						if ( store === cartStore || store === 'wc/store/cart' ) {
+						if (
+							store === cartStore ||
+							store === 'wc/store/cart'
+						) {
 							return {
 								...jest
 									.requireActual( '@wordpress/data' )
@@ -1386,7 +1389,10 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 
 				wpData.useDispatch.mockImplementation(
 					( store: StoreDescriptor | string ) => {
-						if ( store === cartStore || store === 'wc/store/cart' ) {
+						if (
+							store === cartStore ||
+							store === 'wc/store/cart'
+						) {
 							return {
 								...jest
 									.requireActual( '@wordpress/data' )
