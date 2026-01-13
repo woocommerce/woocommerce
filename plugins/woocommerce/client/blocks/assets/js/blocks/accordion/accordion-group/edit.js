@@ -96,7 +96,7 @@ function DeprecatedBlockEdit( { clientId } ) {
 
 	const { currentBlockAttributes, innerBlocks } = useSelect(
 		( select ) => {
-			const blockEditor = select( 'core/block-editor' );
+			const blockEditor = select( blockEditorStore );
 			return {
 				currentBlockAttributes:
 					blockEditor.getBlockAttributes( clientId ),
@@ -107,6 +107,10 @@ function DeprecatedBlockEdit( { clientId } ) {
 	);
 
 	const updateBlock = () => {
+		if ( ! currentBlockAttributes ) {
+			return;
+		}
+
 		const convertedInnerBlocks = convertInnerBlocks( innerBlocks );
 
 		// Filter accordion-group attributes - remove 'allowedBlocks'.
