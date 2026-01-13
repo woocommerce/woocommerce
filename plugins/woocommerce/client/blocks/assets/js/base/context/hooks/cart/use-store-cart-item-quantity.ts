@@ -87,16 +87,20 @@ export const useStoreCartItemQuantity = (
 	// Update local state when server updates, but only if:
 	// 1. User hasn't made a change waiting to be debounced
 	// 2. No API request is currently in flight
-	// 3. Debounced quantity matches server (no pending API call about to fire)
-	// This prevents stale API responses from overwriting user's pending changes.
+	// 3. No API call about to fire (debounce just caught up but thunk hasn't started)
+	// This prevents stale API responses from overwriting user's pending changes,
+	// while still allowing server-initiated changes (e.g., bundled products) to sync.
 	useEffect( () => {
 		const hasPendingLocalChange = quantity !== debouncedQuantity;
 		const hasInflightRequest = isPending.quantity;
-		const hasPendingApiCall = debouncedQuantity !== cartItemQuantity;
-		if ( ! hasPendingLocalChange && ! hasInflightRequest && ! hasPendingApiCall ) {
+		// Only block if debounce JUST caught up and differs from server (about to fire API)
+		// If debounce didn't change, server must have changed cartItemQuantity → allow sync
+		const debouncedJustChanged = debouncedQuantity !== previousDebouncedQuantity;
+		const aboutToFireApiCall = debouncedJustChanged && debouncedQuantity !== cartItemQuantity;
+		if ( ! hasPendingLocalChange && ! hasInflightRequest && ! aboutToFireApiCall ) {
 			setQuantity( cartItemQuantity );
 		}
-	}, [ cartItemQuantity, quantity, debouncedQuantity, isPending.quantity ] );
+	}, [ cartItemQuantity, quantity, debouncedQuantity, previousDebouncedQuantity, isPending.quantity ] );
 
 	const removeItem = useCallback( () => {
 		if ( cartItemKey ) {
