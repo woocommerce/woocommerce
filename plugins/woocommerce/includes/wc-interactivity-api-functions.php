@@ -1,6 +1,4 @@
 <?php
-declare( strict_types = 1 );
-
 /**
  * WooCommerce Interactivity API Functions
  *
@@ -9,6 +7,8 @@ declare( strict_types = 1 );
  *
  * @package WooCommerce\Functions
  */
+
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 
