@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Added filter woocommerce_rest_products_prepare_objects_query to modify final query arguments in products REST API.
