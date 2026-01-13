@@ -162,13 +162,12 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	// TODO: This test is flaky, we will fix it in https://github.com/woocommerce/woocommerce/pull/55246
-	test.skip( 'Renders correct image when selecting a product variation in the Add to Cart with Options block', async ( {
+	test( 'Renders correct image when selecting a product variation in the Add to Cart with Options block', async ( {
 		page,
 		editor,
 		pageObject,
 	} ) => {
-		await pageObject.addProductGalleryBlock( { cleanContent: false } );
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 		await pageObject.addAddToCartWithOptionsBlock();
 
 		const viewerBlock = await pageObject.getViewerBlock( {
@@ -201,7 +200,7 @@ test.describe( `${ blockData.name }`, () => {
 			const variationImageId = await pageObject.getViewerImageId();
 
 			expect( initialImageId ).not.toEqual( variationImageId );
-		} ).toPass( { timeout: 1_000 } );
+		} ).toPass( { timeout: 5_000 } );
 	} );
 
 	test.describe( 'Swipe to navigate', () => {
