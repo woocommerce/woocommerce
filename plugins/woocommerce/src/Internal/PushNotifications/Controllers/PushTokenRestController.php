@@ -21,7 +21,7 @@ use WP_Http;
  * Controller for the REST endpoints associated with push notification device
  * tokens.
  *
- * @since 10.5.0
+ * @since 10.6.0
  */
 class PushTokenRestController extends RestApiControllerBase {
 	/**
@@ -41,7 +41,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Get the WooCommerce REST API namespace for the class.
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 *
 	 * @return string
 	 */
@@ -52,7 +52,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Register the REST API endpoints handled by this controller.
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 *
 	 * @return void
 	 */
@@ -64,7 +64,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Get the schema for the POST endpoint.
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 *
 	 * @return array[]
 	 */
@@ -94,7 +94,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Checks user is authorized to access this endpoint.
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
@@ -143,7 +143,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Converts an exception to an instance of WP_Error.
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 *
 	 * @param Exception $e The exception to convert.
 	 * @return WP_Error
@@ -170,7 +170,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Get the accepted arguments for the POST request.
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 *
 	 * @param string $context The context to return args for.
 	 * @return array
