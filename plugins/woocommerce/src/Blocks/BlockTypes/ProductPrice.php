@@ -79,7 +79,7 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
-				// phpcs:ignore Squiz.Commenting.VariableComment.MissingVar -- Type hint for PHPStan.
+				// phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
 				/** @var \WC_Product_Variable $product */
 				// Check if variation prices differ (replicates logic from WC_Product_Variable::get_available_variation).
 				$prices_vary = $product->get_variation_sale_price( 'min' ) !== $product->get_variation_sale_price( 'max' )
@@ -94,6 +94,8 @@ class ProductPrice extends AbstractBlock {
 						/**
 						 * Filter whether to show variation price.
 						 * Replicates the filter from WC_Product_Variable::get_available_variation().
+						 *
+						 * @since 2.4.0
 						 *
 						 * @param bool                  $show_price Whether to show the price.
 						 * @param \WC_Product_Variable  $product    The variable product.
