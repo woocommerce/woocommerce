@@ -36,7 +36,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @var string
 	 */
-	protected string $rest_base = '/push-tokens';
+	protected string $rest_base = 'push-tokens';
 
 	/**
 	 * Get the WooCommerce REST API namespace for the class.
