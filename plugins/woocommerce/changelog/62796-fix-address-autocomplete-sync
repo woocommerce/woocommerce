@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-fix: esure address autocomplete is persisted on both billing and shipping forms
+fix: ensure address autocomplete is persisted on both billing and shipping forms
