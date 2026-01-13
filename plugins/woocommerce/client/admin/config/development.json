@@ -15,7 +15,7 @@
 		"customer-effort-score-tracks": true,
 		"import-products-task": true,
 		"experimental-fashion-sample-products": true,
-		"general-settings-react": true,
+		"general-settings-react": false,
 		"shipping-smart-defaults": true,
 		"shipping-setting-tour": true,
 		"homescreen": true,
@@ -44,6 +44,6 @@
 		"launch-your-store": true,
 		"product-editor-template-system": false,
 		"use-wp-horizon": false,
-		"rest-api-v4": true
+		"rest-api-v4": false
 	}
 }
