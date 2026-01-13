@@ -21,6 +21,7 @@ import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 import type { NormalizedProductData, NormalizedVariationData } from './types';
+import type { ProductResponseItem } from '../../types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -78,7 +79,7 @@ const { state: productsStoreState } = store( 'woocommerce/products' );
  * @param product Product data in either format
  * @return Quantity constraints
  */
-const getQuantityConstraints = ( product: any ) => {
+const getQuantityConstraints = ( product: ProductResponseItem ) => {
 	// New format (REST API from shared store)
 	if ( product.add_to_cart ) {
 		return {
