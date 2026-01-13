@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
     outputs:
       status: ${{ steps.aggregate-status.outputs.status }}
       error_message: ${{ steps.aggregate-status.outputs.error_message }}
@@ -153,7 +153,7 @@ jobs:
                   branch: cherryPickBranch
                 });
 
-                core.setOutput('error_message', `Branch '${cherryPickBranch}' existed without PR. A new PR has been created automatically and needs a review.`);
+                core.info('error_message', `Branch '${cherryPickBranch}' exists without PR. A new PR will be created automatically and needs a review.`);
 
               } catch (branchError) {
                 if (branchError.status !== 404) {
