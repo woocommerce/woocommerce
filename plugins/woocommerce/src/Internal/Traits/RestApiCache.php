@@ -972,7 +972,7 @@ trait RestApiCache {
 	 * To avoid filesystem calls on every request, file check results are cached
 	 * for the interval returned by get_file_check_interval_for_response_caching().
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 *
 	 * @param array $file_paths Array of file paths (absolute or relative to the first allowed directory).
 	 *
