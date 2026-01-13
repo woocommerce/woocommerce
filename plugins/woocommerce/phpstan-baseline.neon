@@ -20131,12 +20131,6 @@ parameters:
 			path: includes/class-wc-tracker.php
 
 		-
-			message: '#^Parameter \#1 \$block_name of static method Automattic\\WooCommerce\\Internal\\Utilities\\BlocksUtil\:\:get_blocks_from_widget_area\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
 			message: '#^Parameter \#1 \$size of function wc_let_to_num expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
