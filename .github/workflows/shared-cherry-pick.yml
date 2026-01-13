@@ -118,38 +118,43 @@ jobs:
               });
               core.info(`Target branch '${targetBranch}' exists`);
 
-              // Check cherry-pick branch doesn't exist
+              core.info(`Looking for existing PRs for branch '${cherryPickBranch}'...`);
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: `${context.repo.owner}:${cherryPickBranch}`,
+                state: 'all'
+              });
+
+              if (prs.length > 0) {
+                const existingPr = prs[0];
+                core.info(`Found existing PR #${existingPr.number}`);
+                core.setOutput('status', 'skipped');
+                if (existingPr.merged_at) {
+                  core.setOutput('error_message', `A cherry-pick PR for the same PR was already merged: #${existingPr.number}`);
+                } else if (existingPr.state === 'closed') {
+                  await github.rest.pulls.update({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    pull_number: existingPr.number,
+                    state: 'open'
+                  });
+                  core.setOutput('error_message', `A cherry-pick PR was closed without merging and has been reopened for review: #${existingPr.number}`);
+                } else {
+                  core.setOutput('error_message', `An open cherry-pick PR already exists: #${existingPr.number}`);
+                }
+                return;
+              }
+
               try {
                 await github.rest.repos.getBranch({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   branch: cherryPickBranch
                 });
-                core.info(`Branch '${cherryPickBranch}' already exists. Looking for existing PR...`);
 
-                const { data: prs } = await github.rest.pulls.list({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  head: `${context.repo.owner}:${cherryPickBranch}`,
-                  state: 'all'
-                });
+                core.setOutput('error_message', `Branch '${cherryPickBranch}' existed without PR. A new PR has been created automatically and needs a review.`);
 
-                if (prs.length > 0) {
-                  const existingPr = prs[0];
-                  core.info(`Found existing PR #${existingPr.number}`);
-                  if (existingPr.merged_at) {
-                    core.setOutput('error_message', `A cherry-pick PR for the same PR was already merged: #${existingPr.number}`);
-                  } else if (existingPr.state === 'closed') {
-                    core.setOutput('error_message', `A cherry-pick PR was closed without merging: #${existingPr.number}`);
-                  } else {
-                    core.setOutput('error_message', `An open cherry-pick PR already exists: #${existingPr.number}`);
-                  }
-                } else {
-                  core.setOutput('error_message', `Branch '${cherryPickBranch}' already exists but no PR found.`);
-                }
-
-                core.setOutput('status', 'skipped');
-                return;
               } catch (branchError) {
                 if (branchError.status !== 404) {
                   core.setOutput('error_message', `Error checking cherry-pick branch: ${branchError.message}`);
@@ -216,6 +221,12 @@ jobs:
           MERGE_COMMIT_SHA="${{ needs.verify.outputs.merge_commit_sha }}"
           PR_NUMBER="${{ inputs.pr_number }}"
           TARGET_BRANCH="${{ inputs.target_branch }}"
+
+          # Check if branch already exists
+          if git ls-remote --heads origin "$CHERRY_PICK_BRANCH" | grep -q "$CHERRY_PICK_BRANCH"; then
+            echo "Branch $CHERRY_PICK_BRANCH already exists remotely. Skipping cherry-pick."
+            exit 0
+          fi
 
           # Create cherry-pick branch
           git checkout -b "$CHERRY_PICK_BRANCH"
