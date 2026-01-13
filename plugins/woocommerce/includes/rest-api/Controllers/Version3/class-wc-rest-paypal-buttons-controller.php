@@ -114,7 +114,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		$order_id = $data['order_id'];
 		$order    = wc_get_order( $order_id );
 
-		if ( ! $order ) {
+		if ( ! $order || ! ( $order instanceof \WC_Order ) ) {
 			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
 		}
 
@@ -177,7 +177,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		}
 
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		if ( ! $order || ! ( $order instanceof \WC_Order ) ) {
 			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
 		}
 
