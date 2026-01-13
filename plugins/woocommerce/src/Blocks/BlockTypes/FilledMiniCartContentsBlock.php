@@ -40,6 +40,8 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_filled_mini_cart_contents( $attributes, $content, $block ) {
+		wp_enqueue_script_module( '@woocommerce/directives/dangerous-html' );
+
 		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 		$notices = BlocksSharedState::get_cart_error_notices( $consent );
 
@@ -86,9 +88,10 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 						data-wp-class--is-dismissible="context.notice.dismissible"
 						data-wp-bind--role="state.role"
 					>
-						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
-							<path data-wp-bind--d="state.iconPath"></path>
-						</svg>
+						<span
+							class="wc-block-components-notice-banner__icon"
+							data-wp-woocommerce-experimental-dangerous-html="state.iconHTML"
+						></span>
 						<div class="wc-block-components-notice-banner__content">
 							<span data-wp-init="callbacks.renderNoticeContent"></span>
 						</div>
