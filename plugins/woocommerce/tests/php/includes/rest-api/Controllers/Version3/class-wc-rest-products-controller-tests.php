@@ -2114,4 +2114,30 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertContains( $visible_product->get_id(), $product_ids );
 		$this->assertContains( $hidden_product->get_id(), $product_ids );
 	}
-}
+
+	/**
+	 * Test that woocommerce_rest_products_prepare_objects_query filter can modify query arguments.
+	 */
+	public function test_prepare_objects_query_filter() {
+		$filter_called = false;
+
+		add_filter(
+			'woocommerce_rest_products_prepare_objects_query',
+			function ( $args, $request ) use ( &$filter_called ) {
+				$filter_called = true;
+				$args['posts_per_page'] = 5;
+				return $args;
+			},
+			10,
+			2
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'per_page', 10 );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertTrue( $filter_called, 'Filter should be called' );
+		$this->assertEquals( 200, $response->get_status() );
+	}
+ }
