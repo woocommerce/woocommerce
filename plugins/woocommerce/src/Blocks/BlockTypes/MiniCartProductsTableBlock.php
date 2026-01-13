@@ -147,16 +147,16 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 											<span class="screen-reader-text">
 												<?php esc_html_e( 'Previous price:', 'woocommerce' ); ?>
 											</span>
-											<del data-wp-text="state.priceWithoutDiscount" class="wc-block-components-product-price__regular"></del>
+											<del data-wp-text="state.priceWithoutDiscount" class="wc-block-components-product-price__regular" translate="no"></del>
 											<span class="screen-reader-text">
 												<?php esc_html_e( 'Discounted price:', 'woocommerce' ); ?>
 											</span>
-											<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted"></ins>
+											<ins data-wp-text="state.itemPrice" class="wc-block-components-product-price__value is-discounted" translate="no"></ins>
 											<span data-wp-text="state.afterItemPrice"></span>
 										</span>
 										<span data-wp-bind--hidden="state.cartItemHasDiscount" class="price wc-block-components-product-price">
 											<span data-wp-text="state.beforeItemPrice"></span>
-											<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
+											<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value" translate="no">
 											</span>
 											<span data-wp-text="state.afterItemPrice"></span>
 										</span>
@@ -169,6 +169,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<span
 											data-wp-text="state.cartItemDiscount" 
 											class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+											translate="no"
 										>
 										</span>
 									</div>
@@ -226,7 +227,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 							<td class="wc-block-cart-item__total">
 								<div class="wc-block-cart-item__total-price-and-sale-badge-wrapper">
 									<span class="price wc-block-components-product-price">
-										<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
+										<span data-wp-text="state.lineItemTotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value" translate="no">
 										</span>											
 									</span>
 									<div 
@@ -238,6 +239,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<span
 											data-wp-text="state.lineItemDiscount" 
 											class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
+											 translate="no"
 										>
 										</span>
 									</div>
