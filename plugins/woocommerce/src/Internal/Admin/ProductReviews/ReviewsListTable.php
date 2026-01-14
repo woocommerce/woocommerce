@@ -103,7 +103,9 @@ class ReviewsListTable extends WP_List_Table {
 		 *
 		 * @param array $args Comment query args.
 		 */
-		$args     = (array) apply_filters( 'woocommerce_product_reviews_list_table_prepare_items_args', $args );
+		$args = (array) apply_filters( 'woocommerce_product_reviews_list_table_prepare_items_args', $args );
+
+		/** @var \WP_Comment[] $comments */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
