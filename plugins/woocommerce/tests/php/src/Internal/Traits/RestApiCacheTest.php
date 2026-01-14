@@ -2096,6 +2096,43 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Files in directories with similar prefix names are correctly rejected (prefix collision prevention).
+	 */
+	public function test_directory_prefix_collision_prevented() {
+		// Simulate a directory structure where /var/www/htmlevil exists alongside /var/www/html.
+		// A file in /var/www/htmlevil should NOT be allowed when only /var/www/html is permitted.
+		$allowed_dir = '/var/www/html';
+		$evil_file   = '/var/www/htmlevil/malicious.php';
+
+		$this->sut->allowed_directories = array( $allowed_dir );
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'realpath' => function ( $path ) use ( $allowed_dir, $evil_file ) {
+					if ( $path === $allowed_dir || $path === $evil_file ) {
+						return $path;
+					}
+					return \realpath( $path );
+				},
+			)
+		);
+
+		$this->sut->controller_files = array( $evil_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry, 'File in /var/www/htmlevil should not be allowed when only /var/www/html is permitted' );
+
+		$this->sut->controller_files    = array();
+		$this->sut->allowed_directories = null;
+	}
+
+	/**
 	 * @testdox Cache is invalidated when file modification time changes (using mocked filemtime).
 	 */
 	public function test_cache_invalidated_when_mocked_file_mtime_changes() {

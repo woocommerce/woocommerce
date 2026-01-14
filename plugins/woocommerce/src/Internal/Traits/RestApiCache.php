@@ -1124,7 +1124,9 @@ trait RestApiCache {
 			if ( false === $real_dir ) {
 				continue;
 			}
-			if ( 0 === strpos( $normalized_path, wp_normalize_path( $real_dir ) ) ) {
+
+			$normalized_dir = trailingslashit( wp_normalize_path( $real_dir ) );
+			if ( 0 === strpos( $normalized_path, $normalized_dir ) ) {
 				return $normalized_path;
 			}
 		}
