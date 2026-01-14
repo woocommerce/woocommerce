@@ -32,33 +32,19 @@ function generateCommentBody( prNumber ) {
 	return `<!-- email-editor-test-reminder -->
 ## Email Editor Testing Required
 
-Are you an Automattician? This PR touches the email editor package and will need to be tested on WordPress.com.
+Are you an Automattician? If this PR relates to email rendering or reading site data, please test it on WordPress.com.
 
-### Testing Steps
+To test, run the downloader script on your sandbox:
+\`\`\`bash
+bash bin/woocommerce-email-editor-downloader test ${ prNumber }
+\`\`\`
 
-1. Log into your sandbox. You'll need to authenticate with Github if you haven't already.
-   \`\`\`bash
-   gh auth login
-   \`\`\`
-   You can choose https and complete the authentication in your local browser with the code provided.
+To remove the changes after testing:
+\`\`\`bash
+bash bin/woocommerce-email-editor-downloader reset
+\`\`\`
 
-2. Run the downloader script on your sandbox:
-   \`\`\`bash
-   bash bin/woocommerce-email-editor-downloader test ${ prNumber }
-   \`\`\`
-   You'll see the PR title, author, and state, and then be asked to confirm the download. You may see a bunch of composer deprecation notices. Once it completes, check that there's a \`/dev\` directory in \`wp-content/lib/woocommerce-email-editor/\`.
-
-3. Sandbox the API and turn on write access:
-   \`\`\`bash
-   allow-sandbox-production-writes "10 minutes"
-   \`\`\`
-
-4. On a test WP.com site, create a new post. Use the Newsletter panel in the editor to send yourself a test email.
-
-5. To remove the changes after testing:
-   \`\`\`bash
-   bash bin/woocommerce-email-editor-downloader reset
-   \`\`\``;
+For a complete list of steps, see: PCYsg-19om-p2`;
 }
 
 /**
