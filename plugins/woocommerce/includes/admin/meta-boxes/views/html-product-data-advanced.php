@@ -1,4 +1,11 @@
 <?php
+/**
+ * Product advanced data panel.
+ *
+ * @package WooCommerce\Admin
+ * @var WC_Product $product_object
+ */
+
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -55,20 +62,32 @@ if ( ! defined( 'ABSPATH' ) ) {
 		</div>
 	<?php endif; ?>
 	<?php if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) : ?>
-	<div class="options_group">
-		<?php
-		$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_object->get_id() );
-		woocommerce_wp_checkbox(
-			array(
-				'id'          => '_visible_in_pos',
-				'value'       => $visible_in_pos ? 'yes' : 'no',
-				'label'       => __( 'Available for POS', 'woocommerce' ),
-				'desc_tip'    => true,
-				'description' => __( 'Controls whether this product appears in the Point of Sale system.', 'woocommerce' ),
-			)
-		);
-		?>
-	</div>
+		<?php $is_pos_supported = $product_object->is_type( array( 'simple', 'variable' ) ) && ! $product_object->is_downloadable(); ?>
+		<div class="options_group" id="pos_visibility_supported" <?php echo $is_pos_supported ? '' : 'style="display: none;"'; ?>>
+			<?php
+			$visible_in_pos = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_object->get_id() );
+			woocommerce_wp_checkbox(
+				array(
+					'id'          => '_visible_in_pos',
+					'value'       => $visible_in_pos ? 'yes' : 'no',
+					'label'       => __( 'Available for POS', 'woocommerce' ),
+					'desc_tip'    => true,
+					'description' => __( 'Controls whether this product appears in the Point of Sale system.', 'woocommerce' ),
+				)
+			);
+			?>
+		</div>
+		<div class="options_group" id="pos_visibility_unsupported" <?php echo $is_pos_supported ? 'style="display: none;"' : ''; ?>>
+			<?php
+			woocommerce_wp_note(
+				array(
+					'id'      => '_pos_visibility_note',
+					'label'   => __( 'Point of Sale', 'woocommerce' ),
+					'message' => __( 'This product type is not currently supported.', 'woocommerce' ),
+				)
+			);
+			?>
+		</div>
 	<?php endif; ?>
 
 	<?php do_action( 'woocommerce_product_options_advanced' ); ?>

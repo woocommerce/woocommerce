@@ -7551,12 +7551,6 @@ parameters:
 		-
 			message: '#^Variable \$product_object might not be defined\.$#'
 			identifier: variable.undefined
-			count: 4
-			path: includes/admin/meta-boxes/views/html-product-data-advanced.php
-
-		-
-			message: '#^Variable \$product_object might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-product-data-attributes.php
 
@@ -20132,12 +20126,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Parameter \#1 \$block_name of static method Automattic\\WooCommerce\\Internal\\Utilities\\BlocksUtil\:\:get_blocks_from_widget_area\(\) expects array, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-tracker.php

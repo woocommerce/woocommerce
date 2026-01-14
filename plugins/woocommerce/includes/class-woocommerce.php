@@ -50,7 +50,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.5.0-dev';
+	public $version = '10.6.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -375,10 +375,6 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\FraudProtection\AdminSettingsHandler::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
