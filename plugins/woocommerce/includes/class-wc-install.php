@@ -319,6 +319,9 @@ class WC_Install {
 			'wc_update_1050_add_idx_user_email',
 			'wc_update_1050_remove_deprecated_marketplace_option',
 		),
+		'10.6.0' => array(
+			'wc_update_1060_update_woo_idx_comment_type_index',
+		),
 	);
 
 	/**
@@ -1721,7 +1724,7 @@ class WC_Install {
 		$db_delta_result = dbDelta( self::get_schema() );
 
 		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
-		if (  null === $comment_type_index_exists ) {
+		if ( null === $comment_type_index_exists ) {
 			// Improve performance of the admin comments query when counting approved comments while excluding internal notes.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_approved, comment_type, comment_post_ID)" );
 		}
