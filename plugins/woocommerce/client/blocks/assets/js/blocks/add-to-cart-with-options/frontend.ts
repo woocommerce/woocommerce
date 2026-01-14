@@ -82,12 +82,10 @@ const { state: productsStoreState } = store( 'woocommerce/products' );
 const getQuantityConstraints = ( product: ProductResponseItem ) => {
 	// New format (REST API from shared store)
 	if ( product.add_to_cart ) {
+		const maximum = product.add_to_cart.maximum ?? Number.MAX_SAFE_INTEGER;
 		return {
 			min: product.add_to_cart.minimum ?? 1,
-			max:
-				product.add_to_cart.maximum ?? Number.MAX_SAFE_INTEGER > 0
-					? product.add_to_cart.maximum ?? Number.MAX_SAFE_INTEGER
-					: Number.MAX_SAFE_INTEGER,
+			max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
 			step: product.add_to_cart.multiple_of ?? 1,
 		};
 	}
