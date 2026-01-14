@@ -1,0 +1,37 @@
+name: 'Require milestone on pull requests'
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+      - ready_for_review
+      - milestoned
+      - demilestoned
+    branches:
+        - trunk
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  ensure-milestone:
+    name: 'Ensure milestone is or will be assigned'
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/workflows/scripts
+
+      - name: 'Validate milestone or checkbox selection'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const script = require('./.github/workflows/scripts/validate-milestone-selection.js');
+            await script({ github, context, core });

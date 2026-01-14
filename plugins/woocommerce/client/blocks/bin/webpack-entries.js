@@ -46,7 +46,6 @@ const blocks = {
 		customDir:
 			'add-to-cart-with-options/grouped-product-selector/product-item-selector',
 	},
-
 	'add-to-cart-with-options-grouped-product-item-label': {
 		customDir:
 			'add-to-cart-with-options/grouped-product-selector/product-item-label',
@@ -60,7 +59,10 @@ const blocks = {
 	'attribute-filter': {},
 	breadcrumbs: {},
 	'catalog-sorting': {},
+	'category-description': {},
+	'category-title': {},
 	'coming-soon': {},
+	'coupon-code': {},
 	'customer-account': {},
 	'email-content': {},
 	'featured-category': {
@@ -347,6 +349,7 @@ const entries = {
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
 		priceFormat: './packages/prices/index.js',
 		wcTypes: './assets/js/types/index.ts',
+		wcEntities: './assets/js/entities/index.ts',
 	},
 	main: {
 		// Shared blocks code

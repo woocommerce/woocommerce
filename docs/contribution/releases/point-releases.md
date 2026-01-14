@@ -16,7 +16,7 @@ Point releases are patch releases that address specific issues without adding su
 
 ## Timing a Point Release
 
-When considering the exact time to create a point release, use your best judgement based on the urgency and severity of outsanding issues:
+When considering the exact time to create a point release, use your best judgement based on the urgency and severity of outstanding issues:
 
 - If the issue is not very urgent, consider waiting 3–4 days to see if additional related issues are reported before proceeding. This helps consolidate fixes and reduces the number of patch releases.
 - For high-severity or critical issues, prioritize releasing as soon as possible to minimize impact on users.

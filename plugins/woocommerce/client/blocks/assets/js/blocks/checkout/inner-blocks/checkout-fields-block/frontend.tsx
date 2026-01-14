@@ -4,6 +4,7 @@
 import type { ReactElement } from 'react';
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
+import domReady from '@wordpress/dom-ready';
 import { Main } from '@woocommerce/base-components/sidebar-layout';
 import { useStoreEvents } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
@@ -21,7 +22,9 @@ const FrontendBlock = ( {
 
 	// Ignore changes to dispatchCheckoutEvent callback so this is ran on first mount only.
 	useEffect( () => {
-		dispatchCheckoutEvent( 'render-checkout-form' );
+		domReady( () => {
+			dispatchCheckoutEvent( 'render-checkout-form' );
+		} );
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 

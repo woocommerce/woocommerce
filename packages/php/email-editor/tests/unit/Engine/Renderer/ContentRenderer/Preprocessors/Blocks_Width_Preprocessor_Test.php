@@ -539,4 +539,56 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$image_block = $result[0]['innerBlocks'][2]['innerBlocks'][0];
 		$this->assertEquals( '215px', $image_block['email_attrs']['width'] );
 	}
+
+	/**
+	 * Test it handles non-string width values
+	 */
+	public function testItHandlesNonStringWidthValues(): void {
+		$styles                       = $this->styles;
+		$styles['spacing']['padding'] = array(
+			'left'   => '0px',
+			'right'  => '0px',
+			'top'    => '0px',
+			'bottom' => '0px',
+		);
+
+		// Test numeric width (should be treated as percentage).
+		$blocks = array(
+			array(
+				'blockName'   => 'core/paragraph',
+				'attrs'       => array(
+					'width' => 50,
+				),
+				'innerBlocks' => array(),
+			),
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
+		$this->assertEquals( '330px', $result[0]['email_attrs']['width'] ); // 660 * 0.5
+
+		// Test array width (should default to 100%).
+		$blocks = array(
+			array(
+				'blockName'   => 'core/paragraph',
+				'attrs'       => array(
+					'width' => array( 'value' => 50 ),
+				),
+				'innerBlocks' => array(),
+			),
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
+		$this->assertEquals( '660px', $result[0]['email_attrs']['width'] ); // 100% of 660
+
+		// Test boolean width (should default to 100%).
+		$blocks = array(
+			array(
+				'blockName'   => 'core/paragraph',
+				'attrs'       => array(
+					'width' => true,
+				),
+				'innerBlocks' => array(),
+			),
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
+		$this->assertEquals( '660px', $result[0]['email_attrs']['width'] ); // 100% of 660
+	}
 }

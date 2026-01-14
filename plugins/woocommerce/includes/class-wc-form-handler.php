@@ -868,6 +868,11 @@ class WC_Form_Handler {
 	 * @return bool success or not
 	 */
 	private static function add_to_cart_handler_simple( $product_id ) {
+		if ( ! WC()->cart ) {
+			wc_doing_it_wrong( __FUNCTION__, 'Cart is not initialized.', '10.5.0' );
+			return false;
+		}
+
 		$quantity          = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
 
@@ -959,8 +964,19 @@ class WC_Form_Handler {
 
 		// Prevent parent variable product from being added to cart.
 		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
-			/* translators: 1: product link, 2: product name */
-			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) ), 'error' );
+			$current_url        = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
+			$product_url        = wp_parse_url( get_permalink( $product_id ), PHP_URL_PATH );
+			$is_in_product_page = $current_url && $product_url && untrailingslashit( $current_url ) === untrailingslashit( $product_url );
+
+			if ( $is_in_product_page ) {
+				/* translators: 1: product name */
+				$error_message = sprintf( __( 'Please choose product options for %1$s.', 'woocommerce' ), esc_html( $product->get_name() ) );
+			} else {
+				/* translators: 1: product link, 2: product name */
+				$error_message = sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) );
+			}
+
+			wc_add_notice( $error_message, 'error' );
 
 			return false;
 		}

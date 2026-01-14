@@ -11,17 +11,19 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
@@ -29,9 +31,10 @@ use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
+use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
+use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\Jetpack\Constants;
 
@@ -47,7 +50,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.3.0-dev';
+	public $version = '10.6.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -341,6 +344,7 @@ final class WooCommerce {
 		$container->get( MatchImageBySKU::class );
 		$container->get( RestockRefundedItemsAdjuster::class );
 		$container->get( CustomOrdersTableController::class );
+		$container->get( ProductCacheController::class );
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
@@ -353,6 +357,9 @@ final class WooCommerce {
 		$container->get( OrderCountCacheService::class );
 		$container->get( EmailImprovements::class );
 		$container->get( AddressProviderController::class );
+		$container->get( AbilitiesRegistry::class );
+		$container->get( MCPAdapterProvider::class );
+		$container->get( ProductVersionStringInvalidator::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -367,11 +374,14 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -1130,6 +1140,8 @@ final class WooCommerce {
 		$above[] = "Disallow: $path/wp-content/uploads/wc-logs/";
 		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_transient_files/";
 		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
+		$above[] = 'Disallow: /*?add-to-cart=';
+		$above[] = 'Disallow: /*?*add-to-cart=';
 
 		$lines = array_merge( $above, $below );
 
@@ -1524,10 +1536,11 @@ final class WooCommerce {
 			return;
 		}
 
-		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
+		$gmt_offset   = get_option( 'gmt_offset' );
+		$offset_hours = ( $gmt_offset > 0 ? '-' : '+' ) . absint( $gmt_offset ) . ' hours';
 
 		// Schedule daily sales event at midnight tomorrow.
-		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $ve . absint( get_option( 'gmt_offset' ) ) . ' HOURS' );
+		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $offset_hours );
 
 		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
 
@@ -1545,31 +1558,29 @@ final class WooCommerce {
 
 		}
 
+		$tomorrow_3am = strtotime( 'tomorrow 03:00 am ' . $offset_hours );
+		$tomorrow_6am = strtotime( 'tomorrow 06:00 am ' . $offset_hours );
+
 		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules
 		// a daily cron that gets lost due to a race condition. WC_Privacy's background
 		// processing instance updates the cron schedule from within a cron job.
-
 		as_schedule_recurring_action( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', true );
 
-		// Schedule daily cleanup logs at 3 AM.
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
+		$next_run_timestamp = as_next_scheduled_action( 'woocommerce_cleanup_sessions', array(), 'woocommerce' );
+		if ( $next_run_timestamp !== $tomorrow_6am ) {
+			as_unschedule_all_actions( 'woocommerce_cleanup_sessions' );
+			as_schedule_recurring_action( $tomorrow_6am, 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
+		}
 
-		// Schedule twice daily cleanup sessions at 6 AM and 6 PM.
-
-		as_schedule_recurring_action( time() + ( 6 * HOUR_IN_SECONDS ), 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
-
-		// Schedule geoip updater every 15 days.
-
-		as_schedule_recurring_action( time() + MINUTE_IN_SECONDS, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $tomorrow_6am, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
 
 		// Schedule the action to send tracking events if tracking is enabled.
 		$this->schedule_tracking_action();
 
-		// Schedule daily cleanup rate limits at 3 AM.
-
-		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
 
 		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 

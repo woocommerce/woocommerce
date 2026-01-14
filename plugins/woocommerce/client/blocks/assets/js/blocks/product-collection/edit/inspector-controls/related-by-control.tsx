@@ -36,6 +36,7 @@ const RelatedByControl = ( {
 		<PanelBody title={ __( 'Related by', 'woocommerce' ) }>
 			<div className="wc-block-editor-product-collection-inspector-controls__relate-by">
 				<CheckboxControl
+					__nextHasNoMarginBottom
 					label={ __( 'Categories', 'woocommerce' ) }
 					checked={ relatedBy?.categories }
 					onChange={ ( value ) => {
@@ -44,6 +45,7 @@ const RelatedByControl = ( {
 				/>
 
 				<CheckboxControl
+					__nextHasNoMarginBottom
 					label={ __( 'Tags', 'woocommerce' ) }
 					checked={ relatedBy?.tags }
 					onChange={ ( value ) => {

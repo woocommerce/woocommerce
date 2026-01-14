@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Move experimental fields from v3/products to v4/products endpoint

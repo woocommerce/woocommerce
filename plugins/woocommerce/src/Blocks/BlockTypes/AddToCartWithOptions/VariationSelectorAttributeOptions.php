@@ -23,21 +23,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute-options';
 
 	/**
-	 * Get the block's attributes.
-	 *
-	 * @param array $attributes Block attributes. Default empty array.
-	 * @return array  Block attributes merged with defaults.
-	 */
-	private function parse_attributes( $attributes ) {
-		// These should match what's set in JS `registerBlockType`.
-		$defaults = array(
-			'style' => 'pills',
-		);
-
-		return wp_parse_args( $attributes, $defaults );
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -58,12 +43,15 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$attribute_slug = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 
-		$attributes = $this->parse_attributes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
-		// `$attributes['style']` is the layout selector ("pills" | "dropdown"), not the block supports style object.
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'style' ) );
+		$option_style = array_key_exists( 'optionStyle', $attributes ) ? $attributes['optionStyle'] : null;
 
-		$field_style = $attributes['style'];
+		// During the beta period, `optionStyle` was called `style`, so we check
+		// `style` for backwards compatibility.
+		if ( ! $option_style && array_key_exists( 'style', $attributes ) && 'dropdown' === $attributes['style'] ) {
+			$option_style = 'dropdown';
+		}
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -72,7 +60,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			)
 		);
 
-		if ( 'dropdown' === $field_style ) {
+		if ( 'dropdown' === $option_style ) {
 			$content = $this->render_dropdown( $attributes, $content, $block );
 		} else {
 			$content = $this->render_pills( $attributes, $content, $block );
@@ -151,9 +139,11 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	 * @return string The pills.
 	 */
 	protected function render_pills( $attributes, $content, $block ) {
-		$attribute_id    = $block->context['woocommerce/attributeId'];
-		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
-		$attribute_terms = $block->context['woocommerce/attributeTerms'];
+		$attribute_id               = $block->context['woocommerce/attributeId'];
+		$attribute_slug             = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
+		$attribute_terms            = $block->context['woocommerce/attributeTerms'];
+		$autoselect                 = $attributes['autoselect'] ?? false;
+		$disabled_attributes_action = $attributes['disabledAttributesAction'] ?? 'disable';
 
 		wp_interactivity_state(
 			'woocommerce/add-to-cart-with-options',
@@ -178,6 +168,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 						'value'                  => $attribute_term['value'],
 						'data-wp-bind--checked'  => 'state.isOptionSelected',
 						'data-wp-bind--disabled' => 'state.isOptionDisabled',
+						'data-wp-bind--hidden'   => 'hide' === $disabled_attributes_action ? 'state.isOptionDisabled' : null,
 						'data-wp-watch'          => 'callbacks.watchSelected',
 						'data-wp-on--click'      => 'actions.handlePillClick',
 						'data-wp-on--keydown'    => 'actions.handleKeyDown',
@@ -204,6 +195,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 						'options'       => $attribute_terms,
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
 						'focused'       => '',
+						'autoselect'    => $autoselect,
 					),
 					'data-wp-init'    => 'callbacks.setDefaultSelectedAttribute',
 				),
@@ -235,13 +227,17 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			$attribute_terms
 		);
 
-		$selected_attribute = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
+		$selected_attribute         = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
+		$autoselect                 = $attributes['autoselect'] ?? false;
+		$disabled_attributes_action = $attributes['disabledAttributesAction'] ?? 'disable';
 
 		$options = '';
 		foreach ( $attribute_terms as $attribute_term ) {
 			$option_attributes = array(
 				'value'                  => $attribute_term['value'],
+				'data-wp-bind--selected' => 'state.isOptionSelected',
 				'data-wp-bind--disabled' => 'state.isOptionDisabled',
+				'data-wp-bind--hidden'   => 'hide' === $disabled_attributes_action ? 'state.isOptionDisabled' : null,
 				'data-wp-context'        => array(
 					'option'  => $attribute_term,
 					'name'    => $attribute_slug,
@@ -272,6 +268,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
 						'selectedValue' => $selected_attribute,
+						'autoselect'    => $autoselect,
 					),
 					'data-wp-init'       => 'callbacks.setDefaultSelectedAttribute',
 					'data-wp-on--change' => 'actions.handleDropdownChange',

@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Remove hard cap on session expiration and respect developer filters

@@ -61,7 +61,7 @@ jobs:
         with:
           script: |
             const prNumber = parseInt('${{ inputs.pr_number }}', 10);
-            
+
             if (isNaN(prNumber)) {
               core.setOutput('error_message', 'PR number is not a valid integer');
               core.setFailed('PR number is not a valid integer');
@@ -91,10 +91,10 @@ jobs:
               core.info(`PR #${prNumber} is merged with commit SHA: ${pr.merge_commit_sha}`);
 
             } catch (error) {
-              const errorMsg = error.status === 404 
+              const errorMsg = error.status === 404
                 ? `Pull request #${prNumber} does not exist.`
                 : `Error fetching PR: ${error.message}`;
-            
+
               core.setOutput('error_message', errorMsg);
               core.setFailed(errorMsg);
             }
@@ -108,7 +108,7 @@ jobs:
             const targetBranch = '${{ inputs.target_branch }}';
             const prNumber = '${{ inputs.pr_number }}';
             const cherryPickBranch = `cherry-pick-PR${prNumber}-to-${targetBranch}`;
-            
+
             try {
               // Check target branch exists
               await github.rest.repos.getBranch({
@@ -140,10 +140,10 @@ jobs:
               core.info(`Cherry-pick branch '${cherryPickBranch}' is available`);
 
             } catch (error) {
-              const errorMsg = error.status === 404 
+              const errorMsg = error.status === 404
                 ? `Target branch '${targetBranch}' does not exist`
                 : `Error checking target branch: ${error.message}`;
-            
+
               core.setOutput('error_message', errorMsg);
               core.setFailed(errorMsg);
             }
@@ -186,16 +186,16 @@ jobs:
         id: cherry-pick
         run: |
           set -e
-          
+
           CHERRY_PICK_BRANCH="${{ needs.verify.outputs.cherry_pick_branch }}"
           MERGE_COMMIT_SHA="${{ needs.verify.outputs.merge_commit_sha }}"
           PR_NUMBER="${{ inputs.pr_number }}"
           TARGET_BRANCH="${{ inputs.target_branch }}"
-          
+
           # Create cherry-pick branch
           git checkout -b "$CHERRY_PICK_BRANCH"
           git fetch origin "$MERGE_COMMIT_SHA"
-          
+
           # Attempt cherry-pick with explicit conflict handling
           if git cherry-pick -m1 "$MERGE_COMMIT_SHA"; then
             # Success case
@@ -206,11 +206,11 @@ jobs:
             if git status --porcelain | grep -E "^(DD|AU|UD|UA|DU|AA|UU)"; then
               echo "has_conflicts=true" >> $GITHUB_OUTPUT
               echo "Cherry-pick had conflicts - resolving automatically"
-          
+
               # For modify/delete conflicts, we need to handle them specifically
               # Add all files (both conflicted and resolved)
               git add .
-          
+
               # Check if we have anything to commit
               if ! git diff --cached --quiet; then
                 git commit -m "Cherry-pick $MERGE_COMMIT_SHA with unresolved conflicts from #$PR_NUMBER"
@@ -219,7 +219,7 @@ jobs:
                 echo "error_message=Cherry-pick had conflicts but resulted in no changes to commit. Manual resolution required." >> $GITHUB_OUTPUT
                 exit 1
               fi
-          
+
             else
               # No conflicts detected, check for other failure reasons
               if git log --oneline -1 2>/dev/null | grep -q "$MERGE_COMMIT_SHA"; then
@@ -232,13 +232,13 @@ jobs:
               fi
             fi
           fi
-          
+
           # Validate we have commits to push
           if git rev-list --count "origin/$TARGET_BRANCH..HEAD" | grep -q "^0$"; then
             echo "error_message=Cherry-pick completed but created no new commits. PR #$PR_NUMBER appears to already exist in '$TARGET_BRANCH'." >> $GITHUB_OUTPUT
             exit 1
           fi
-          
+
           # Push the branch
           git push origin "$CHERRY_PICK_BRANCH"
 
@@ -252,7 +252,7 @@ jobs:
             const targetBranch = '${{ inputs.target_branch }}';
             const cherryPickBranch = '${{ needs.verify.outputs.cherry_pick_branch }}';
             const hasConflicts = '${{ steps.cherry-pick.outputs.has_conflicts }}' === 'true';
-            
+
             try {
               // Get original PR details
               const { data: originalPr } = await github.rest.pulls.get({
@@ -260,16 +260,21 @@ jobs:
                 repo: context.repo.repo,
                 pull_number: prNumber
               });
-            
+
               // Create PR body
               let prBody = `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n`;
-            
+
               if (hasConflicts) {
                 prBody += `⚠️ **WARNING**: This cherry-pick contained conflicts that have not been resolved. Please review the changes carefully before merging!\n\n`;
               }
-            
+
               prBody += `## Original PR Description\n\n${originalPr.body || '*No description provided*'}`;
-            
+
+              // Replace milestone selection and changelog sections.
+              prBody = prBody.replace(/\[\s*(?:[xX])?\s*\]\s*(Automatically create a changelog.*)/g, '[ ] ~~$1~~');
+              prBody = prBody.replace(/\[\s*(?:[xX])?\s*\]\s*(This Pull Request does not require a changelog.*)/g, '[ ] ~~$1~~');
+              prBody = prBody.replace(/\[\s*(?:[xX])?\s*\]\s*(Automatically assign milestone.*\*\*.*next WooCommerce version.*\*\*.*)/g, '[ ] ~~$1~~');
+
               // Create new PR
               const { data: newPr } = await github.rest.pulls.create({
                 owner: context.repo.owner,
@@ -279,11 +284,17 @@ jobs:
                 title: `[Backport to ${targetBranch}] ${originalPr.title}`,
                 body: prBody
               });
-            
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: newPr.number,
+                reviewers: [context.actor, originalPr.user.login]
+              });
+
               core.setOutput('pr_number', newPr.number.toString());
               core.setOutput('original_author', originalPr.user?.login || '');
               core.setOutput('original_merger', originalPr.merged_by?.login || '');
-            
+
               core.info(`Created PR #${newPr.number}: ${newPr.html_url}`);
 
             } catch (error) {
@@ -301,12 +312,12 @@ jobs:
             const originalAuthor = '${{ steps.create-pr.outputs.original_author }}';
             const originalMerger = '${{ steps.create-pr.outputs.original_merger }}';
             const hasConflicts = '${{ steps.cherry-pick.outputs.has_conflicts }}' === 'true';
-            
+
             // Assign PR to original author and merger
-            const assignees = [originalAuthor, originalMerger].filter((user, index, arr) => 
+            const assignees = [originalAuthor, originalMerger].filter((user, index, arr) =>
               user && user.trim() !== '' && arr.indexOf(user) === index
             );
-            
+
             if (assignees.length > 0) {
               try {
                 await github.rest.issues.addAssignees({
@@ -360,7 +371,7 @@ jobs:
         run: |
           verify_status="${{ needs.verify.outputs.status }}"
           cherry_status="${{ needs.cherry-pick.outputs.status }}"
-          
+
           if [[ "$verify_status" != "success" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
             echo "error_message=${{ needs.verify.outputs.error_message }}" >> $GITHUB_OUTPUT

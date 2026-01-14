@@ -2,14 +2,77 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0](https://github.com/woocommerce/email-editor/releases/tag/2.3.0) - 2026-01-05 
+
+-   Patch - Email Editor: prevent fatal type errors in Blocks_Width_Preprocessor [#62524]
+-   Minor - Email editor: Add text alignment for has-text-align-* classes. [#62588]
+
+## [2.2.0](https://github.com/woocommerce/email-editor/releases/tag/2.2.0) - 2025-12-15 
+
+-   Minor - Add category tabs navigation to email template selection modal. [#62441]
+-   Minor - Renderer for the coupon code block
+
+## [2.1.1](https://github.com/woocommerce/email-editor/releases/tag/2.1.1) - 2025-12-11 
+
+-   Patch - Update email editor core default styles. [#62051]
+
+## [2.1.0](https://github.com/woocommerce/email-editor/releases/tag/2.1.0) - 2025-11-30 
+
+-   Minor - Email Editor: retrieve image width in a more efficient manner. [#62118]
+
+## [2.0.1](https://github.com/woocommerce/email-editor/releases/tag/2.0.1) - 2025-11-25 
+
+-   Patch - Swap core/post-content render callback only during email rendering to prevent conflicts with other plugins like MailPoet. [#61874]
+-   Patch - Add support for conditional "Finish checkout" button text in cart collections for email rendering [#61822]
+-   Patch - Improve email editor preview in new tab functionality by adding post context to the rendered data filter. [#62010]
+
+## [2.0.0](https://github.com/woocommerce/email-editor/releases/tag/2.0.0) - 2025-11-07 
+
+-   Patch - Fix core/post-content block rendering empty on second email in batch processing by overriding WordPress render callback with stateless version [#61546]
+-   Minor - Extend Rendering_Context with email-specific context support (user_id, order_id, recipient_email), add woocommerce_email_editor_rendering_email_context filter [#61546]
+-   Major [ **BREAKING CHANGE** ] - ** BREAKING CHANGE ** Updated all PHP dependencies. [#61753]
+
+## [1.9.0](https://github.com/woocommerce/email-editor/releases/tag/1.9.0) - 2025-10-31 
+
+-   Patch - Add type validation for fontSize and textColor attributes in Typography_Preprocessor to prevent errors from third-party blocks with incompatible attribute types [#61687]
+-   Patch - Remove the unused package class from the email editor and add the LICENSE file for prefixed third-party packages to the build output. [#61673]
+-   Minor - Add unregister method to Personalization_Tags_Registry [#61679]
+
+## [1.8.1](https://github.com/woocommerce/email-editor/releases/tag/1.8.1) - 2025-10-27 
+
+-   Patch - Refactor personalization tags fetching to use core entities [#61467]
+
+## [1.8.0](https://github.com/woocommerce/email-editor/releases/tag/1.8.0) - 2025-10-09 
+
+-   Patch - Allow fetching core blocks' styles in the editor's iframe for blocks that support emails [#61306]
+-   Patch - Fix an error where group blocks with margin styles were causing the editor to crash. [#61309]
+-   Patch - Fixed image block link removal. [#61329]
+-   Patch - Fixed type errors caused by passing int to Styles_Helper::parse_value. [#61339]
+-   Patch - Prevent callback replacement attacks via __unserialize() [#61335]
+-   Patch - Add CssInliner library and ensure packages are prefixed to prevent package conflicts. [#61210]
+-   Patch - Angle brackets are now encoded in hex when rendered in a `<script>` tag via `json_encode()`. [#61245]
+-   Minor - Add email rendering instructions for the woocommerce/product-collection block. [#60941]
+
+## [1.7.0](https://github.com/woocommerce/email-editor/releases/tag/1.7.0) - 2025-09-26 
+
+-   Patch - Fix Fatal error when reading site styles for some themes [#60967]
+-   Minor - Add email rendering instructions for the core/video block and YouTube embeds. [#60957]
+
+## [1.6.0](https://github.com/woocommerce/email-editor/releases/tag/1.6.0) - 2025-09-18 
+
+-   Patch - Downgrade Emogrifier dependency to avoid conflict [#60994]
+-   Minor - Add email rendering instructions for the core/audio and core/embed blocks. [#60813]
+-   Minor - Add email rendering instructions for the core/cover block. [#60837]
+-   Minor - Add email rendering instructions for the core/gallery block. [#60775]
+
 ## [1.5.0](https://github.com/woocommerce/email-editor/releases/tag/1.5.0) - 2025-09-09 
 
 -   Patch - Add type check when extracting vars from theme style values in email editor [#60538]
 -   Patch - Upgrade pelago/emogrifier to v8.0 [#60489]
+-   Patch - Use a more robust way to post-process the style attribute values within the Email Editor. [#60764]
 -   Minor - Add email block renderer for the Table core block. [#60514]
 -   Minor - Add email rendering instructions for the core/media-text block. [#60752]
 -   Minor - Remove `block_preview_url` from `WooCommerceEmailEditor` object [#60603]
--   Patch - Use a more robust way to post-process the style attribute values within the Email Editor. [#60764]
 
 ## [1.4.2](https://github.com/woocommerce/email-editor/releases/tag/1.4.2) - 2025-08-21 
 

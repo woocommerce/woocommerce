@@ -12,9 +12,34 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
+use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+// Require the deprecated classes for backward compatibility.
+// This will be removed in 11.0.0.
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
 }
 
 /**
@@ -34,7 +59,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @var bool
 	 */
-	public static $log_enabled = false;
+	public static $log_enabled = null;
 
 	/**
 	 * Logger instance
@@ -58,6 +83,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public $debug;
 
 	/**
+	 * The intent of the payment (capture or authorize).
+	 *
+	 * @var string
+	 */
+	public $intent;
+
+	/**
 	 * Email address to send payments to.
 	 *
 	 * @var string
@@ -78,6 +110,48 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public $identity_token;
 
+	/**
+	 * Jetpack connection manager.
+	 *
+	 * @var Jetpack_Connection_Manager
+	 */
+	private $jetpack_connection_manager;
+
+	/**
+	 * Whether the Transact onboarding is complete.
+	 *
+	 * @var bool
+	 */
+	private $transact_onboarding_complete;
+
+	/**
+	 * The *Singleton* instance of this class
+	 *
+	 * @var WC_Gateway_Paypal
+	 */
+	private static $instance;
+
+	/**
+	 * Returns the *Singleton* instance of this class.
+	 *
+	 * @return WC_Gateway_Paypal The *Singleton* instance.
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
+
+	/**
+	 * Set the instance of the gateway.
+	 *
+	 * @param WC_Gateway_Paypal $instance The instance of the gateway.
+	 * @return void
+	 */
+	public static function set_instance( $instance ) {
+		self::$instance = $instance;
+	}
 
 	/**
 	 * Constructor for the gateway.
@@ -99,18 +173,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->init_settings();
 
 		// Define user set variables.
-		$this->title          = $this->get_option( 'title' );
-		$this->description    = $this->get_option( 'description' );
-		$this->testmode       = 'yes' === $this->get_option( 'testmode', 'no' );
-		$this->debug          = 'yes' === $this->get_option( 'debug', 'no' );
-		$this->email          = $this->get_option( 'email' );
-		$this->receiver_email = $this->get_option( 'receiver_email', $this->email );
-		$this->identity_token = $this->get_option( 'identity_token' );
-		self::$log_enabled    = $this->debug;
+		$this->title                        = $this->get_option( 'title' );
+		$this->description                  = $this->get_option( 'description' );
+		$this->testmode                     = 'yes' === $this->get_option( 'testmode', 'no' );
+		$this->intent                       = 'sale' === $this->get_option( 'paymentaction', 'sale' ) ? 'capture' : 'authorize';
+		$this->debug                        = 'yes' === $this->get_option( 'debug', 'no' );
+		$this->email                        = $this->get_option( 'email' );
+		$this->receiver_email               = $this->get_option( 'receiver_email', $this->email );
+		$this->identity_token               = $this->get_option( 'identity_token' );
+		$this->transact_onboarding_complete = 'yes' === $this->get_option( 'transact_onboarding_complete', 'no' );
+		self::$log_enabled                  = $this->debug;
 
 		if ( $this->testmode ) {
 			/* translators: %s: Link to PayPal sandbox testing guide page */
-			$this->description .= ' ' . sprintf( __( 'SANDBOX ENABLED. You can use sandbox testing accounts only. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/' );
+			$this->description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/' );
 			$this->description  = trim( $this->description );
 		}
 
@@ -123,11 +199,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
-			include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-ipn-handler.php';
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-ipn-handler.php';
 			new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
 
 			if ( $this->identity_token ) {
-				include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-pdt-handler.php';
+				include_once __DIR__ . '/includes/class-wc-gateway-paypal-pdt-handler.php';
 				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
 				$pdt_handler->set_receiver_email( $this->receiver_email );
 			}
@@ -135,7 +211,140 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( 'yes' === $this->enabled ) {
 			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
+			// Hide action buttons for pending orders as they take a while to be captured with orders v2.
+			add_filter( 'woocommerce_my_account_my_orders_actions', array( $this, 'hide_action_buttons' ), 10, 2 );
+
+			add_filter( 'woocommerce_settings_api_form_fields_paypal', array( $this, 'maybe_remove_fields' ), 15 );
+
+			// Hook for plugin upgrades.
+			add_action( 'woocommerce_updated', array( $this, 'maybe_onboard_with_transact' ) );
+
+			if ( $this->should_use_orders_v2() ) {
+				// Hook for updating the shipping information on order approval (Orders v2).
+				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
+
+				// Hook for PayPal order responses to manage account restriction notices.
+				add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
+
+				$buttons = new PayPalButtons( $this );
+				if ( $buttons->is_enabled() && ! $this->needs_setup() ) {
+					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
+
+					// Render the buttons container to load the buttons via PayPal JS SDK.
+					// Classic checkout page.
+					add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
+					// Classic cart page.
+					add_action( 'woocommerce_after_cart_totals', array( $this, 'render_buttons_container' ) );
+					// Product page.
+					add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
+				}
+			}
 		}
+	}
+
+	/**
+	 * Update the shipping and billing information for the order.
+	 * Hooked on 'woocommerce_before_thankyou'.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return void
+	 */
+	public function update_addresses_in_order( $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		// Bail early if the order is not a PayPal order.
+		if ( ! $order instanceof WC_Order || $order->get_payment_method() !== $this->id ) {
+			return;
+		}
+
+		// Bail early if not on Orders v2.
+		if ( ! $this->should_use_orders_v2() ) {
+			return;
+		}
+
+		$paypal_order_id = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID );
+		if ( empty( $paypal_order_id ) ) {
+			return;
+		}
+
+		/**
+		 * Bail early if the addresses update already have been attempted (whether successful or not).
+		 * Prevent duplicate address update attempts from the thankyou page.
+		 *
+		 * Address updates are primarily handled by the PayPal webhook when the order is approved.
+		 * This method serves as a fallback if the webhook hasn't fired yet,
+		 * but we want to show the correct addresses to the customer on the thankyou page.
+		 * Once an attempt is made (meta exists), we skip to prevent repeated API calls on page reloads.
+		 * The webhook handler will always update the addresses.
+		 */
+		$addresses_update_attempted = $order->meta_exists( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED );
+		if ( $addresses_update_attempted ) {
+			return;
+		}
+
+		try {
+			$paypal_request       = new PayPalRequest( $this );
+			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
+
+			// Update the addresses in the order with the addresses from the PayPal order details.
+			PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
+		} catch ( Exception $e ) {
+			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'no' );
+			$order->save();
+		}
+	}
+
+	/**
+	 * Onboard the merchant with the Transact platform.
+	 *
+	 * @return void
+	 */
+	public function maybe_onboard_with_transact() {
+		if ( ! is_admin() || ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		// Do not run if PayPal Standard is not enabled.
+		if ( 'yes' !== $this->enabled ) {
+			return;
+		}
+
+		/**
+		 * Filters whether the gateway should use Orders v2 API.
+		 *
+		 * @param bool $use_orders_v2 Whether the gateway should use Orders v2 API.
+		 *
+		 * @since 10.2.0
+		 */
+		$use_orders_v2 = apply_filters(
+			'woocommerce_paypal_use_orders_v2',
+			PayPalHelper::is_orders_v2_migration_eligible()
+		);
+
+		// If the conditions are met, but there is an override to not use Orders v2,
+		// respect the override. Bail early -- we don't need to onboard if not using Orders v2.
+		if ( ! $use_orders_v2 ) {
+			return;
+		}
+
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
+		$transact_account_manager->do_onboarding();
+	}
+
+	/**
+	 * Check if the gateway is available for use.
+	 *
+	 * @return bool
+	 */
+	public function is_available() {
+		// For Orders v2, require a valid email address to be set up in the gateway settings.
+		if ( $this->should_use_orders_v2() && $this->needs_setup() ) {
+			return false;
+		}
+
+		return parent::is_available();
 	}
 
 	/**
@@ -148,7 +357,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function needs_setup() {
-		return ! is_email( $this->email );
+		return empty( $this->email ) || ! is_email( $this->email );
 	}
 
 	/**
@@ -159,6 +368,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *                      emergency|alert|critical|error|warning|notice|info|debug.
 	 */
 	public static function log( $message, $level = 'info' ) {
+		if ( is_null( self::$log_enabled ) ) {
+			$settings          = get_option( 'woocommerce_paypal_settings' );
+			self::$log_enabled = 'yes' === ( $settings['debug'] ?? 'no' );
+		}
+
 		if ( self::$log_enabled ) {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
@@ -182,6 +396,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				self::$log = wc_get_logger();
 			}
 			self::$log->clear( self::ID );
+		}
+
+		// Trigger Transact onboarding when settings are saved.
+		if ( $saved ) {
+			$this->maybe_onboard_with_transact();
 		}
 
 		return $saved;
@@ -306,11 +525,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_valid_for_use() {
+		if ( $this->should_use_orders_v2() ) {
+			$valid_currencies = PayPalConstants::SUPPORTED_CURRENCIES;
+		} else {
+			$valid_currencies = array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' );
+		}
 		return in_array(
 			get_woocommerce_currency(),
 			apply_filters(
 				'woocommerce_paypal_supported_currencies',
-				array( 'AUD', 'BRL', 'CAD', 'MXN', 'NZD', 'HKD', 'SGD', 'USD', 'EUR', 'JPY', 'TRY', 'NOK', 'CZK', 'DKK', 'HUF', 'ILS', 'MYR', 'PHP', 'PLN', 'SEK', 'CHF', 'TWD', 'THB', 'GBP', 'RMB', 'RUB', 'INR' )
+				$valid_currencies
 			),
 			true
 		);
@@ -325,7 +549,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function admin_options() {
 		if ( $this->is_valid_for_use() ) {
 			parent::admin_options();
-		} else {
+		} elseif ( ! $this->should_use_orders_v2() ) {
 			?>
 			<div class="inline error">
 				<p>
@@ -341,6 +565,28 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function init_form_fields() {
 		$this->form_fields = include __DIR__ . '/includes/settings-paypal.php';
+	}
+
+	/**
+	 * Filter to remove fields for Orders v2.
+	 *
+	 * @param array $form_fields Form fields.
+	 * @return array
+	 */
+	public function maybe_remove_fields( $form_fields ) {
+		// Remove legacy setting fiels when using Orders v2.
+		if ( $this->should_use_orders_v2() ) {
+			foreach ( $form_fields as $key => $field ) {
+				if ( isset( $field['is_legacy'] ) && $field['is_legacy'] ) {
+					unset( $form_fields[ $key ] );
+				}
+			}
+		}
+
+		if ( ! $this->should_use_orders_v2() ) {
+			unset( $form_fields['paypal_buttons'] );
+		}
+		return $form_fields;
 	}
 
 	/**
@@ -363,16 +609,36 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @param  int $order_id Order ID.
 	 * @return array
+	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-request.php';
+		$order = wc_get_order( $order_id );
 
-		$order          = wc_get_order( $order_id );
-		$paypal_request = new WC_Gateway_Paypal_Request( $this );
+		if ( ! $order || ! $order instanceof WC_Order ) {
+			return array();
+		}
+
+		if ( $this->should_use_orders_v2() ) {
+			$paypal_request = new PayPalRequest( $this );
+
+			$paypal_order = $paypal_request->create_paypal_order( $order );
+			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
+				throw new Exception(
+					esc_html__( 'We are unable to process your PayPal payment at this time. Please try again or use a different payment method.', 'woocommerce' )
+				);
+			}
+
+			$redirect_url = $paypal_order['redirect_url'];
+		} else {
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+
+			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$redirect_url   = $paypal_request->get_request_url( $order, $this->testmode );
+		}
 
 		return array(
 			'result'   => 'success',
-			'redirect' => $paypal_request->get_request_url( $order, $this->testmode ),
+			'redirect' => $redirect_url,
 		);
 	}
 
@@ -398,7 +664,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Init the API class and set the username/password etc.
 	 */
 	protected function init_api() {
-		include_once dirname( __FILE__ ) . '/includes/class-wc-gateway-paypal-api-handler.php';
+		include_once __DIR__ . '/includes/class-wc-gateway-paypal-api-handler.php';
 
 		WC_Gateway_Paypal_API_Handler::$api_username  = $this->testmode ? $this->get_option( 'sandbox_api_username' ) : $this->get_option( 'api_username' );
 		WC_Gateway_Paypal_API_Handler::$api_password  = $this->testmode ? $this->get_option( 'sandbox_api_password' ) : $this->get_option( 'api_password' );
@@ -452,8 +718,25 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+		if ( ! $order || ! $order instanceof WC_Order ) {
+			return;
+		}
 
-		if ( self::ID === $order->get_payment_method() && 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
+		// Bail if the order is not a PayPal order.
+		if ( self::ID !== $order->get_payment_method() ) {
+			return;
+		}
+
+		// If the order is authorized via legacy API, the '_paypal_status' meta will be 'pending'.
+		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true );
+
+		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
+			$paypal_request = new PayPalRequest( $this );
+			$paypal_request->capture_authorized_payment( $order );
+			return;
+		}
+
+		if ( 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
@@ -472,7 +755,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					case 'Completed':
 						/* translators: 1: Amount, 2: Authorization ID, 3: Transaction ID */
 						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						$order->update_meta_data( '_paypal_status', $result->PAYMENTSTATUS );
+						$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $result->PAYMENTSTATUS );
 						$order->set_transaction_id( $result->TRANSACTIONID );
 						$order->save();
 						break;
@@ -506,6 +789,76 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Enqueue scripts.
+	 */
+	public function enqueue_scripts() {
+		if ( 'no' === $this->enabled ) {
+			return;
+		}
+
+		$version           = Constants::get_constant( 'WC_VERSION' );
+		$is_page_supported = is_checkout() || is_cart() || is_product();
+		$buttons           = new PayPalButtons( $this );
+		$options           = $buttons->get_common_options();
+
+		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
+			return;
+		}
+
+		$sdk_host = $this->testmode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
+
+		// Add PayPal JS SDK script.
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), array(), null, false );
+		wp_enqueue_script( 'paypal-standard-sdk' );
+
+		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery', 'wp-api-fetch' ), $version, true );
+
+		wp_localize_script(
+			'wc-paypal-frontend',
+			'paypal_standard',
+			array(
+				'gateway_id'                => $this->id,
+				'is_product_page'           => is_product(),
+				'app_switch_request_origin' => $buttons->get_current_page_for_app_switch(),
+				'wc_store_api_nonce'        => wp_create_nonce( 'wc_store_api' ),
+				'create_order_nonce'        => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
+				'cancel_payment_nonce'      => wp_create_nonce( 'wc_gateway_paypal_standard_cancel_payment' ),
+				'generic_error_message'     => __( 'An unknown error occurred', 'woocommerce' ),
+			)
+		);
+
+		wp_enqueue_script( 'wc-paypal-frontend' );
+	}
+
+	/**
+	 * Add PayPal SDK attributes to the script.
+	 *
+	 * @param array $attrs Attributes.
+	 * @return array
+	 */
+	public function add_paypal_sdk_attributes( $attrs ) {
+		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
+			$buttons   = new PayPalButtons( $this );
+			$page_type = $buttons->get_page_type();
+
+			$attrs['data-page-type']              = $page_type;
+			$attrs['data-partner-attribution-id'] = 'Woo_Cart_CoreUpgrade';
+		}
+
+		return $attrs;
+	}
+
+	/**
+	 * Builds the PayPal payment fields area.
+	 *
+	 * @since 10.3.0
+	 */
+	public function render_buttons_container() {
+		echo '<div id="paypal-standard-container"></div>';
+	}
+
+	/**
 	 * Custom PayPal order received text.
 	 *
 	 * @since 3.9.0
@@ -519,6 +872,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		return $text;
+	}
+
+	/**
+	 * Hide "Pay" and "Cancel" action buttons for pending orders as orders v2 takes a while to be captured.
+	 *
+	 * @param array    $actions An array with the default actions.
+	 * @param WC_Order $order The order.
+	 * @return array
+	 */
+	public function hide_action_buttons( $actions, $order ) {
+		if ( $this->should_use_orders_v2() && $this->id === $order->get_payment_method() ) {
+			unset( $actions['pay'], $actions['cancel'] );
+		}
+		return $actions;
 	}
 
 	/**
@@ -563,6 +930,122 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		return is_countable( $paypal_orders ) ? 1 === count( $paypal_orders ) : false;
 	}
+
+	/**
+	 * Check if the gateway should use Orders v2 API.
+	 *
+	 * @return bool
+	 */
+	public function should_use_orders_v2() {
+		/**
+		 * Filters whether the gateway should use Orders v2 API.
+		 *
+		 * @param bool $use_orders_v2 Whether the gateway should use Orders v2 API.
+		 *
+		 * @since 10.2.0
+		 */
+		$use_orders_v2 = apply_filters(
+			'woocommerce_paypal_use_orders_v2',
+			PayPalHelper::is_orders_v2_migration_eligible()
+		);
+
+		// If the conditions are met, but there is an override to not use Orders v2,
+		// respect the override.
+		if ( ! $use_orders_v2 ) {
+			return false;
+		}
+
+		// If the gateway is not onboarded, bail early.
+		if ( ! $this->is_transact_onboarding_complete() ) {
+			return false;
+		}
+
+		// We need a Jetpack connection to be able to send authenticated requests to the proxy.
+		$jetpack_connection_manager = $this->get_jetpack_connection_manager();
+		if ( ! $jetpack_connection_manager || ! $jetpack_connection_manager->is_connected() ) {
+			return false;
+		}
+
+		// We need merchant and provider accounts with Transact to be able to use the proxy.
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
+		$merchant_account_data    = $transact_account_manager->get_transact_account_data( 'merchant' );
+		if ( empty( $merchant_account_data ) ) {
+			return false;
+		}
+
+		$provider_account_data = $transact_account_manager->get_transact_account_data( 'provider' );
+		if ( empty( $provider_account_data ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get the Jetpack connection manager.
+	 *
+	 * @return Jetpack_Connection_Manager
+	 */
+	public function get_jetpack_connection_manager() {
+		if ( ! $this->jetpack_connection_manager ) {
+			$this->jetpack_connection_manager = new Jetpack_Connection_Manager( 'woocommerce' );
+		}
+		return $this->jetpack_connection_manager;
+	}
+
+	/**
+	 * Whether the Transact onboarding is complete.
+	 *
+	 * @return bool
+	 */
+	public function is_transact_onboarding_complete() {
+		return $this->transact_onboarding_complete;
+	}
+
+	/**
+	 * Set the Transact onboarding as complete.
+	 *
+	 * @return void
+	 */
+	public function set_transact_onboarding_complete() {
+		if ( $this->transact_onboarding_complete ) {
+			return;
+		}
+
+		$this->update_option( 'transact_onboarding_complete', 'yes' );
+		$this->transact_onboarding_complete = true;
+	}
+
+	/**
+	 * Handle PayPal order response to manage account restriction notices.
+	 *
+	 * This method is called via the 'woocommerce_paypal_standard_order_created_response' hook
+	 * and manages the account restriction flag based on PayPal API responses.
+	 *
+	 * Extensions can disable this feature using the filter:
+	 * add_filter( 'woocommerce_paypal_account_restriction_notices_enabled', '__return_false' );
+	 *
+	 * @param int|string $http_code     The HTTP status code from the PayPal API response.
+	 * @param array      $response_data The decoded response data from the PayPal API.
+	 * @param WC_Order   $order         The WooCommerce order object.
+	 * @return void
+	 */
+	public function manage_account_restriction_status( $http_code, $response_data, $order ): void {
+		/**
+		 * Filters whether account restriction notices should be enabled.
+		 *
+		 * This filter allows extensions to opt out of the account restriction notice functionality.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool $enabled Whether account restriction notices are enabled. Default true.
+		 */
+		if ( ! apply_filters( 'woocommerce_paypal_account_restriction_notices_enabled', true ) ) {
+			return;
+		}
+
+		PayPalNotices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
+	}
 }
 
 // Initialize PayPal admin notices handler on 'init' hook to ensure the class loads before admin_init and admin_notices hooks fire.
@@ -574,6 +1057,6 @@ add_action(
 		}
 
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
-		new WC_Gateway_Paypal_Notices();
+		new PayPalNotices();
 	}
 );

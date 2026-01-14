@@ -243,32 +243,20 @@ abstract class CustomMetaDataStore {
 	 *
 	 * @since 8.8.0
 	 *
-	 * @param int    $limit           Maximum number of meta keys to return. Defaults to 100.
-	 * @param string $order           Order to use for the results. Either 'ASC' or 'DESC'. Defaults to 'ASC'.
-	 * @param bool   $include_private Whether to include private meta keys in the results. Defaults to FALSE.
+	 * @param int $limit Maximum number of meta keys to return. Defaults to 100.
 	 * @return string[]
 	 */
-	public function get_meta_keys( $limit = 100, $order = 'ASC', $include_private = false ) {
+	public function get_meta_keys( int $limit = 100 ): array {
 		global $wpdb;
 
-		$db_info = $this->get_db_info();
-
-		$query = "SELECT DISTINCT meta_key FROM {$db_info['table']} ";
-
-		if ( ! $include_private ) {
-			$query .= $wpdb->prepare( "WHERE meta_key !='' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ", $wpdb->esc_like( '_' ) . '%' );
-		} else {
-			$query .= "WHERE meta_key != '' ";
-		}
-
-		$order  = in_array( strtoupper( $order ), array( 'ASC', 'DESC' ), true ) ? $order : 'ASC';
-		$query .= 'ORDER BY meta_key ' . $order . ' ';
-
-		if ( $limit ) {
-			$query .= $wpdb->prepare( 'LIMIT %d ', $limit );
-		}
-
-		return $wpdb->get_col( $query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $query is prepared.
+		return $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT meta_key FROM %i WHERE meta_key != '' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ORDER BY meta_key ASC LIMIT %d",
+				$this->get_db_info()['table'],
+				$wpdb->esc_like( '_' ) . '%',
+				$limit
+			)
+		);
 	}
 
 	/**

@@ -75,6 +75,8 @@ const PriceEdit = ( {
 		]
 	);
 
+	const isExperimentalWcRestApiEnabled = isExperimentalWcRestApiV4Enabled();
+
 	const { product } = useProduct( context.postId );
 
 	return (
@@ -88,12 +90,27 @@ const PriceEdit = ( {
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block
-					{ ...blockAttrs }
-					isAdmin={ true }
-					product={ product }
-					isExperimentalWcRestApiV4Enabled={ isExperimentalWcRestApiV4Enabled() }
-				/>
+				{
+					// If experimental WC API is not available we must fallback to "old" way of fetching product data.
+					// Once it's available everywhere we can remove this fallback.
+					isExperimentalWcRestApiEnabled ? (
+						<Block
+							{ ...blockAttrs }
+							isAdmin={ true }
+							product={ product }
+							isExperimentalWcRestApiV4Enabled={
+								isExperimentalWcRestApiEnabled
+							}
+						/>
+					) : (
+						<Block
+							{ ...blockAttrs }
+							product={ undefined }
+							isAdmin={ false }
+							isExperimentalWcRestApiV4Enabled={ false }
+						/>
+					)
+				}
 			</div>
 		</>
 	);

@@ -161,9 +161,13 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$featured_image_id          = (int) $product->get_image_id();
-		$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
-		$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
-		$provided_image_id_is_valid = $image_id && in_array( $image_id, $available_image_ids, true );
+		$provided_image_id_is_valid = false;
+
+		if ( $image_id ) {
+			$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
+			$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
+			$provided_image_id_is_valid = in_array( $image_id, $available_image_ids, true );
+		}
 
 		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
 
@@ -176,7 +180,7 @@ class ProductImage extends AbstractBlock {
 		$attr = array(
 			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
 			'data-testid'   => 'product-image',
-			'data-image-id' => $provided_image_id_is_valid ? $image_id : $featured_image_id,
+			'data-image-id' => $target_image_id,
 			'style'         => $image_style,
 		);
 

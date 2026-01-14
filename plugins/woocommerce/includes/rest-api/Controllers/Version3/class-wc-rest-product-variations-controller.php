@@ -350,7 +350,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				// Check ID for global attributes or name for product attributes.
 				if ( ! empty( $attribute['id'] ) ) {
 					$attribute_id   = absint( $attribute['id'] );
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					$attribute_name = sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
 				} elseif ( ! empty( $attribute['name'] ) ) {
 					$attribute_name = sanitize_title( $attribute['name'] );
 				}
@@ -364,7 +364,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				}
 
 				$attribute_key   = sanitize_title( $parent_attributes[ $attribute_name ]->get_name() );
-				$attribute_value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+				$attribute_value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
 					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
@@ -1102,6 +1102,16 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			);
 		}
 
+		// Filter by visibility in POS.
+		if ( true === $request['pos_products_only'] ) {
+			$args['tax_query'][] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'taxonomy' => 'pos_product_visibility',
+				'field'    => 'slug',
+				'terms'    => 'pos-hidden',
+				'operator' => 'NOT IN',
+			);
+		}
+
 		$args['post_parent'] = $request['product_id'];
 
 		return $args;
@@ -1220,6 +1230,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				'enum' => array_merge( array( 'future', 'trash' ), array_keys( get_post_statuses() ) ),
 			),
 			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['pos_products_only'] = array(
+			'description'       => __( 'Limit result set to variations visible in Point of Sale.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

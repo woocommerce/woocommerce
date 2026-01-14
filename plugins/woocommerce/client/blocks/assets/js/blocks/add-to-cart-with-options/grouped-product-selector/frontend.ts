@@ -23,8 +23,8 @@ const universalLock =
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
-			validateQuantity: ( value?: number ) => void;
-			addToCart: () => void;
+			validateGroupedProductQuantity: () => void;
+			batchAddToCart: () => void;
 		};
 		callbacks: {
 			validateQuantities: () => void;
@@ -35,7 +35,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		actions: {
-			validateQuantity() {
+			validateGroupedProductQuantity() {
 				actions.clearErrors( 'invalid-quantities' );
 
 				const { errorMessages } = getConfig();
@@ -65,14 +65,14 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				).some( ( [ id, qty ] ) => {
 					const productObject = getProductData(
 						Number( id ),
-						context.productType,
-						context.availableVariations,
 						context.selectedAttributes
 					);
+					if ( ! productObject ) {
+						return false;
+					}
 					return (
 						qty !== 0 &&
-						( qty < ( productObject?.min ?? 0 ) ||
-							qty > ( productObject?.max ?? Infinity ) )
+						( qty < productObject.min || qty > productObject.max )
 					);
 				} );
 
@@ -84,17 +84,13 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 					} );
 				}
 			},
-			*addToCart() {
+			*batchAddToCart() {
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const {
-					quantity,
-					selectedAttributes,
-					productType,
-					groupedProductIds,
-				} = getContext< AddToCartWithOptionsStoreContext >();
+				const { quantity, selectedAttributes, groupedProductIds } =
+					getContext< AddToCartWithOptionsStoreContext >();
 
 				const addedItems: ClientCartItem[] = [];
 
@@ -108,11 +104,20 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						quantity[ childProductId ]
 					);
 
+					const productObject = getProductData(
+						Number( childProductId ),
+						selectedAttributes
+					);
+
+					if ( ! productObject ) {
+						continue;
+					}
+
 					addedItems.push( {
-						id: childProductId,
+						id: Number( childProductId ),
 						quantity: newQuantity,
 						variation: selectedAttributes,
-						type: productType,
+						type: productObject.type,
 					} );
 				}
 
@@ -129,7 +134,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 		},
 		callbacks: {
 			validateQuantities() {
-				actions.validateQuantity();
+				actions.validateGroupedProductQuantity();
 			},
 		},
 	},

@@ -39,9 +39,12 @@ class VariationDescription extends AbstractBlock {
 		$variations                = $product->get_available_variations( 'objects' );
 		$formatted_variations_data = array();
 		foreach ( $variations as $variation ) {
-			$formatted_variations_data[ $variation->get_id() ] = array(
-				'variation_description' => wp_kses_post( wc_format_content( $variation->get_description() ) ),
-			);
+			$variation_description = $variation->get_description();
+			if ( is_string( $variation_description ) && ! empty( $variation_description ) ) {
+				$formatted_variations_data[ $variation->get_id() ] = array(
+					'variation_description' => wp_kses_post( wc_format_content( $variation_description ) ),
+				);
+			}
 		}
 
 		wp_interactivity_config(
