@@ -107,6 +107,7 @@ class ReviewsListTable extends WP_List_Table {
 		$comments = get_comments( $args );
 
 		update_comment_cache( $comments );
+		_prime_post_caches( array_map( fn( $comment ) => (int) $comment->comment_post_ID, $comments ), false, false );
 
 		$this->items = $comments;
 
@@ -368,20 +369,6 @@ class ReviewsListTable extends WP_List_Table {
 		<?php
 
 		$this->display_tablenav( 'bottom' );
-	}
-
-	/**
-	 * Generates the list table rows.
-	 *
-	 * @return void
-	 */
-	public function display_rows() {
-		if ( ! empty( $this->items ) ) {
-			_prime_comment_caches( array_map( fn( $item ) => (int) $item->comment_post_ID, $this->items ) );
-			_prime_post_caches( array_map( fn( $item ) => (int) $item->comment_post_ID, $this->items ), false, false );
-		}
-
-		parent::display_rows();
 	}
 
 	/**
