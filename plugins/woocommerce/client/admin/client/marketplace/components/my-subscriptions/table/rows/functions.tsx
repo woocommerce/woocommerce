@@ -177,7 +177,11 @@ function getStatusBadge(
 		};
 	}
 
-	if ( ! subscription.autorenew && ! subscription.lifetime && ! subscription.expired ) {
+	if (
+		! subscription.autorenew &&
+		! subscription.lifetime &&
+		! subscription.expired
+	) {
 		return {
 			text: __( 'Auto-renew: off', 'woocommerce' ),
 			level: StatusLevel.Warning,
