@@ -377,5 +377,4 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			)
 		);
 	}
-
 }
