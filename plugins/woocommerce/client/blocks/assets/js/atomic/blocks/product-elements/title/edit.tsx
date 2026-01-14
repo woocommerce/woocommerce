@@ -32,7 +32,7 @@ interface Props {
 
 const DEFAULT_ATTRIBUTES = {
 	showProductLink: true,
-	linkTarget: undefined,
+	linkTarget: '_self',
 };
 
 const TitleEdit = ( { attributes, setAttributes }: Props ): JSX.Element => {
