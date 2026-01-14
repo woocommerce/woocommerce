@@ -204,6 +204,28 @@ jobs:
           slack-text: |
             :info: *Cherry pick <${{ env.CHERRY_PICK_PR_URL }}|created> (`trunk` → `${{ needs.prepare.outputs.milestoned_branch }}`)* Please ensure <${{ env.CHERRY_PICK_PR_URL }}|this cherry pick> is merged before releasing. Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
 
+  handle-skipped-milestoned:
+    needs: [prepare, cherry-pick-milestoned]
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.cherry-pick-milestoned.outputs.status == 'skipped' }}
+    steps:
+      - name: Comment on original PR about skip
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          ERROR_MESSAGE: ${{ needs.cherry-pick-milestoned.outputs.error_message }}
+        with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            let body = '⚠️ **Cherry-pick to `${{ needs.prepare.outputs.milestoned_branch }}` was skipped.**\n\n' +
+              '**Reason:** ' + process.env.ERROR_MESSAGE + '\n\n';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
+              body
+            });
+
   # Handle successful cherry-pick to next branch
   handle-success-next:
     needs: [prepare, cherry-pick-next]
@@ -273,6 +295,28 @@ jobs:
           slack-optional-unfurl_links: false
           slack-text: |
             :info: *Cherry pick <${{ env.CHERRY_PICK_PR_URL }}|created> (`trunk` → `${{ needs.prepare.outputs.next_branch }}`)* Please ensure <${{ env.CHERRY_PICK_PR_URL }}|this cherry pick> is merged before releasing. Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
+
+  handle-skipped-next:
+    needs: [prepare, cherry-pick-next]
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.cherry-pick-next.outputs.status == 'skipped' }}
+    steps:
+      - name: Comment on original PR about skip
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          ERROR_MESSAGE: ${{ needs.cherry-pick-next.outputs.error_message }}
+        with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            let body = '⚠️ **Cherry-pick to `${{ needs.prepare.outputs.next_branch }}` was skipped.**\n\n' +
+              '**Reason:** ' + process.env.ERROR_MESSAGE + '\n\n';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
+              body
+            });
 
   # Handle failed cherry-pick to milestoned branch
   handle-failures-milestoned:
