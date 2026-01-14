@@ -12,6 +12,7 @@ declare(strict_types=1);
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-constants.php';
@@ -153,7 +154,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( array( 'error' => 'Failed to create PayPal order' ), 400 );
 		}
 
-		$order->update_meta_data( '_paypal_order_id', $paypal_order['id'] );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, $paypal_order['id'] );
 		$order->update_status( OrderStatus::PENDING );
 		$order->save();
 

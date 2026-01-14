@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Changed subscription status from "Cancelled" to "Auto-renew: off" for non-auto-renewing subscriptions in My Subscriptions.

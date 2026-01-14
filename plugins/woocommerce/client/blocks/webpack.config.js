@@ -15,6 +15,7 @@ const {
 
 const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
 const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
+const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
 
 // Only options shared between all configs should be defined here.
 const sharedConfig = {
@@ -104,6 +105,15 @@ const InteractivityAPIConfig = {
 	...interactivityAPIConfig,
 };
 
+/**
+ * Config for the dependency detection inline script.
+ * This is a standalone IIFE that PHP reads and inlines.
+ */
+const DependencyDetectionConfig = {
+	...sharedConfig,
+	...dependencyDetectionConfig,
+};
+
 module.exports = [
 	CartAndCheckoutFrontendConfig,
 	CoreConfig,
@@ -115,4 +125,5 @@ module.exports = [
 	StylingConfig,
 	InteractivityBlocksConfig,
 	InteractivityAPIConfig,
+	DependencyDetectionConfig,
 ];
