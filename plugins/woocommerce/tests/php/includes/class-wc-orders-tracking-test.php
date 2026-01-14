@@ -18,6 +18,11 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 	private $current_screen_backup;
 
 	/**
+	 * @var bool Was HPOS enabled before the test?
+	 */
+	private $prev_hpos_enabled;
+
+	/**
 	 * Set up test
 	 *
 	 * @return void
@@ -37,6 +42,8 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		$orders_tracking->init();
 		parent::setUp();
 
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->prev_hpos_enabled = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->setup_cot();
 	}
 
@@ -50,9 +57,12 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 		if ( $this->current_screen_backup ) {
 			$GLOBALS['current_screen'] = $this->current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
-		parent::tearDown();
+
 		$this->clean_up_cot_setup();
+		$this->toggle_cot_feature_and_usage( $this->prev_hpos_enabled );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
+		parent::tearDown();
 	}
 
 	/**

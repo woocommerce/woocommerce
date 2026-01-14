@@ -108,7 +108,7 @@ test.describe(
 					.filter( { hasText: couponCode } )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'cell', { name: 'Coupon(s)' } )
+				page.getByRole( 'cell', { name: 'Discount:', exact: true } )
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
@@ -132,7 +132,7 @@ test.describe(
 					.filter( { hasText: couponCode } )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'cell', { name: 'Coupon(s)' } )
+				page.getByRole( 'cell', { name: 'Discount:', exact: true } )
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', {

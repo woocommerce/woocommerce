@@ -283,3 +283,27 @@ function wc_admin_update_340_remove_is_primary_from_note_action() {
 function wc_update_670_delete_deprecated_remote_inbox_notifications_option() {
 	delete_option( 'wc_remote_inbox_notifications_specs' );
 }
+
+/**
+ * Add an index to the wc_order_stats table for (date_paid, status, parent) to improve report performance.
+ */
+function wc_update_1040_add_idx_date_paid_status_parent() {
+	global $wpdb;
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}wc_order_stats WHERE key_name = 'idx_date_paid_status_parent'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_stats ADD INDEX idx_date_paid_status_parent (date_paid, status, parent_id)" );
+	}
+}
+
+/**
+ * Add an index to the woocommerce_downloadable_product_permissions table for (user_email) to improve anonymization/deletion performance.
+ */
+function wc_update_1050_add_idx_user_email() {
+	global $wpdb;
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE key_name = 'idx_user_email'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX idx_user_email (user_email(100))" );
+	}
+}

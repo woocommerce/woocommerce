@@ -219,7 +219,7 @@ test.describe(
 			await expect(
 				page.locator( '.system-note >> nth=1' )
 			).toContainText(
-				/Stock levels reduced: Product with stock \(#\d+\) 10→8/
+				/Stock levels reduced: Product with stock \(10→8\)/
 			);
 
 			// Click the Refund button

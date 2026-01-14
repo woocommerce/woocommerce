@@ -65,7 +65,7 @@ class PageController {
 		}
 
 		if ( ! current_user_can( get_post_type_object( $this->order_type )->cap->edit_post, $this->order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
+			wp_die( esc_html__( 'You do not have permission to edit this order.', 'woocommerce' ) );
 		}
 
 		if ( 'trash' === $this->order->get_status() ) {
@@ -80,7 +80,7 @@ class PageController {
 	 */
 	private function verify_create_permission() {
 		if ( ! current_user_can( get_post_type_object( $this->order_type )->cap->publish_posts ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You don\'t have permission to create a new order', 'woocommerce' ) );
+			wp_die( esc_html__( 'You don\'t have permission to create a new order.', 'woocommerce' ) );
 		}
 
 		if ( isset( $this->order ) ) {
@@ -148,8 +148,9 @@ class PageController {
 		$this->set_action();
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
+		$page_name   = ( \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce_page_wc-orders' : 'admin_page_wc-orders' ) . $page_suffix;
 
-		add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
+		add_action( "load-{$page_name}", array( $this, 'handle_load_page_action' ) );
 		add_action( 'admin_title', array( $this, 'set_page_title' ) );
 	}
 
@@ -261,7 +262,7 @@ class PageController {
 			$post_type = get_post_type_object( $order_type );
 
 			add_submenu_page(
-				'woocommerce',
+				\WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : 'admin.php',
 				$post_type->labels->name,
 				$post_type->labels->menu_name,
 				$post_type->cap->edit_posts,

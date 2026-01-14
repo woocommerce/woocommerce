@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add relevant hooks tracking for cached outputs in RestApiCache

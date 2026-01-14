@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Include @woocommerce/sanitize package in dependency extraction

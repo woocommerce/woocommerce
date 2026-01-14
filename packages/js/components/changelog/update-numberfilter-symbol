@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Unify currency symbol behavior in NumberFilter, disallow HTML.

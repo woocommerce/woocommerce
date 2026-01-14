@@ -8,7 +8,6 @@
  * @since   2.6.0
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
@@ -94,7 +93,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_suggested_products' ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_suggested_products' ),
+						array( 'endpoint_id' => 'get_suggested_products' )
+					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_suggested_products_collection_params(),
 				),
@@ -322,6 +324,16 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'field'    => 'name',
 				'terms'    => 'featured',
 				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
+			);
+		}
+
+		// Filter by visibility in POS.
+		if ( true === $request['pos_products_only'] ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'pos_product_visibility',
+				'field'    => 'slug',
+				'terms'    => 'pos-hidden',
+				'operator' => 'NOT IN',
 			);
 		}
 
@@ -1835,20 +1847,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
-		if ( Features::is_enabled( 'experimental-wc-rest-api' ) ) {
-			$schema['properties']['__experimental_min_price'] = array(
-				'description' => __( 'Product minimum price.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-			);
-
-			$schema['properties']['__experimental_max_price'] = array(
-				'description' => __( 'Product maximum price.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-			);
-		}
-
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -1959,6 +1957,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['pos_products_only'] = array(
+			'description'       => __( 'Limit result set to products visible in Point of Sale.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		return $params;
 	}
 
@@ -2058,14 +2063,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 			if ( in_array( 'global_unique_id', $fields, true ) ) {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
-			}
-
-			if ( in_array( '__experimental_min_price', $fields, true ) ) {
-				$data['__experimental_min_price'] = method_exists( $product, 'get_min_price' ) ? $product->get_min_price() : '';
-			}
-
-			if ( in_array( '__experimental_max_price', $fields, true ) ) {
-				$data['__experimental_max_price'] = method_exists( $product, 'get_max_price' ) ? $product->get_max_price() : '';
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );

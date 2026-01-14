@@ -2,16 +2,14 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Exception;
-use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Exception;
 
 /**
  * OrderController class.
@@ -523,10 +521,35 @@ class OrderController {
 	 */
 	protected function validate_coupon_email_restriction( \WC_Coupon $coupon, \WC_Order $order ) {
 		$restrictions = $coupon->get_email_restrictions();
-		// Email is forced lowercase like in validate_coupon_allowed_emails.
-		$billing_email = strtolower( $order->get_billing_email() );
 
-		if ( ! empty( $restrictions ) && $billing_email && ! DiscountsUtil::is_coupon_emails_allowed( array( $billing_email ), $restrictions ) ) {
+		if ( empty( $restrictions ) ) {
+			return;
+		}
+
+		$check_emails = array();
+
+		// Check the logged-in user's email.
+		$current_user = wp_get_current_user();
+		if ( $current_user->exists() ) {
+			$user_email = trim( sanitize_email( $current_user->user_email ) );
+			if ( ! empty( $user_email ) ) {
+				$check_emails[] = strtolower( $user_email );
+			}
+		}
+
+		// Also check the billing email from the order.
+		$billing_email = $order->get_billing_email();
+		if ( ! empty( $billing_email ) ) {
+			$billing_email = trim( sanitize_email( $billing_email ) );
+			if ( ! empty( $billing_email ) ) {
+				$check_emails[] = strtolower( $billing_email );
+			}
+		}
+
+		// Remove duplicates and empty values.
+		$check_emails = array_unique( array_filter( $check_emails ) );
+
+		if ( ! empty( $check_emails ) && ! DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ) );
 		}
@@ -559,10 +582,8 @@ class OrderController {
 			);
 		} else {
 			// Otherwise we check if the email doesn't belong to an existing user.
-			$customer_data_store = \WC_Data_Store::load( 'customer' );
-
 			// This will get us any user ids for the given billing email.
-			$user_ids = $customer_data_store->get_user_ids_for_billing_email( array( $order->get_billing_email() ) );
+			$user_ids = wc_get_container()->get( CustomerSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( array( $order->get_billing_email() ) );
 
 			// Convert all found user ids to a list of email addresses.
 			$user_emails = array_map( array( $this, 'get_email_from_user_id' ), $user_ids );

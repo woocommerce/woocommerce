@@ -1,8 +1,7 @@
 .wc-block-components-checkbox {
 	@include reset-color();
 	@include reset-typography();
-	margin-top: em($gap);
-	line-height: 1;
+	line-height: 0;
 
 	// Validated checkbox is set to grid because we need to display the validation error below the checkbox, the flex
 	// layout doesn't allow for that without extra markup.
@@ -16,12 +15,14 @@
 	}
 
 	label {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		line-height: $gap * 1.25;
 		align-items: flex-start;
 		display: inline-flex;
 		position: relative;
 		cursor: pointer;
-		@include font-size(small);
 		margin-bottom: 0 !important;
+		gap: $gap-small;
 
 		input[type="checkbox"] {
 			cursor: inherit;
@@ -29,20 +30,18 @@
 	}
 
 	.wc-block-components-checkbox__input[type="checkbox"] {
-		font-size: 1em;
 		appearance: none;
 		border: 1px solid $universal-border-medium;
 		border-radius: $universal-border-radius;
 		box-sizing: border-box;
-		height: em(24px);
-		width: em(24px);
+		height: 20px;
+		width: 20px;
+		// prevents input from shrinking when text next to it takes too much space
+		// to fit within the available width of the page
+		min-width: 20px;
 		margin: 0;
-		margin-right: em($gap);
-		min-height: em(24px);
-		min-width: em(24px);
 		overflow: hidden;
 		position: static;
-		vertical-align: middle;
 		background-color: $input-background-light;
 
 		&:checked {
@@ -103,21 +102,15 @@
 	.wc-block-components-checkbox__mark {
 		fill: #000;
 		position: absolute;
-		margin-left: em(3px);
-		margin-top: em(1px);
-		width: em(18px);
-		height: em(18px);
+		margin-left: 3px;
+		margin-top: 1px;
+		width: 15px;
+		height: 15px;
 		pointer-events: none;
 
 		.has-dark-controls & {
 			fill: $input-text-dark;
 		}
-	}
-
-	> span,
-	.wc-block-components-checkbox__label {
-		vertical-align: middle;
-		line-height: em(24px);
 	}
 }
 

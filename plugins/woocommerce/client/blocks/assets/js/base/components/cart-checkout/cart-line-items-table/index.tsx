@@ -41,15 +41,19 @@ const CartLineItemsTable = ( {
 	}, [ lineItems ] );
 
 	const onRemoveRow = ( nextItemKey: string | null ) => () => {
-		if (
-			rowRefs?.current &&
-			nextItemKey &&
-			rowRefs.current[ nextItemKey ].current instanceof HTMLElement
-		) {
-			( rowRefs.current[ nextItemKey ].current as HTMLElement ).focus();
-		} else if ( tableRef.current instanceof HTMLElement ) {
-			tableRef.current.focus();
-		}
+		requestAnimationFrame( () => {
+			if (
+				rowRefs?.current &&
+				nextItemKey &&
+				rowRefs.current[ nextItemKey ].current instanceof HTMLElement
+			) {
+				(
+					rowRefs.current[ nextItemKey ].current as HTMLElement
+				 ).focus();
+			} else if ( tableRef.current instanceof HTMLElement ) {
+				tableRef.current.focus();
+			}
+		} );
 	};
 
 	const products = (

@@ -105,8 +105,6 @@ class Email_Editor {
 		$this->logger->info( 'Initializing email editor' );
 		do_action( 'woocommerce_email_editor_initialized' );
 		add_filter( 'woocommerce_email_editor_rendering_theme_styles', array( $this, 'extend_email_theme_styles' ), 10, 2 );
-		// Initialize the assets manager.
-		$this->assets_manager->initialize();
 
 		$this->register_block_patterns();
 		$this->register_email_post_types();
@@ -116,6 +114,8 @@ class Email_Editor {
 		$is_editor_page = apply_filters( 'woocommerce_is_email_editor_page', false );
 		if ( $is_editor_page ) {
 			$this->extend_email_post_api();
+			// Initialize the assets manager.
+			$this->assets_manager->initialize();
 		}
 		add_action( 'rest_api_init', array( $this, 'register_email_editor_api_routes' ) );
 		add_filter( 'woocommerce_email_editor_send_preview_email', array( $this->send_preview_email, 'send_preview_email' ), 11, 1 ); // allow for other filter methods to take precedent.
@@ -274,6 +274,17 @@ class Email_Editor {
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( $this->email_api_controller, 'get_personalization_tags' ),
+				'permission_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+			)
+		);
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/personalization_tags',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this->email_api_controller, 'get_personalization_tags_collection' ),
 				'permission_callback' => function () {
 					return current_user_can( 'edit_posts' );
 				},

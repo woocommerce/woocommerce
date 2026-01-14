@@ -1,13 +1,15 @@
 /**
  * External dependencies
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { Disabled } from '@wordpress/components';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
+import { BlockEditProps } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
+import { UpgradeNotice } from './upgrade-notice';
 import './editor.scss';
 
 const Placeholder = () => {
@@ -29,11 +31,14 @@ const Placeholder = () => {
 	);
 };
 
-const Edit = () => {
+const Edit = ( props: BlockEditProps< Record< string, never > > ) => {
 	const blockProps = useBlockProps();
 
 	return (
 		<div { ...blockProps }>
+			<InspectorControls>
+				<UpgradeNotice blockClientId={ props.clientId } />
+			</InspectorControls>
 			<Disabled>
 				<Placeholder />
 			</Disabled>

@@ -285,7 +285,7 @@ class WC_Shop_Customizer {
 			?>
 			<script type="text/javascript">
 				jQuery( document ).ready( function( $ ) {
-					const message = <?php echo wp_json_encode( $message ); ?>;
+					const message = <?php echo wp_json_encode( $message, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 					$( "#sub-accordion-panel-woocommerce" ).append( "<li class='notice notice-info'>" + message + "</li>" );
 				} );
 			</script>

@@ -1,22 +1,29 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import {
+	store,
+	getContext,
+	getConfig,
+	getElement,
+} from '@wordpress/interactivity';
+import {
+	SelectedAttributes,
+	VariationData,
+} from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
  */
+import { getProductData } from '../frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import {
-	getMatchedVariation,
-	type AvailableVariation,
-} from '../../../base/utils/variations/get-matched-variation';
+import type { NormalizedProductData } from '../types';
+import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
 type Option = {
@@ -30,6 +37,7 @@ type Context = AddToCartWithOptionsStoreContext & {
 	selectedValue: string | null;
 	option: Option;
 	options: Option[];
+	autoselect: boolean;
 };
 
 // Set selected pill styles for proper contrast.
@@ -51,18 +59,15 @@ const isAttributeValueValid = ( {
 	attributeName,
 	attributeValue,
 	selectedAttributes,
-	availableVariations,
 }: {
 	attributeName: string;
 	attributeValue: string;
 	selectedAttributes: SelectedAttributes[];
-	availableVariations: AvailableVariation[];
 } ) => {
 	if (
 		! attributeName ||
 		! attributeValue ||
-		! Array.isArray( selectedAttributes ) ||
-		! Array.isArray( availableVariations )
+		! Array.isArray( selectedAttributes )
 	) {
 		return false;
 	}
@@ -78,6 +83,16 @@ const isAttributeValueValid = ( {
 	const attributesToMatch = isCurrentAttributeSelected
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
+
+	const { products } = getConfig( 'woocommerce' );
+
+	if ( ! products || ! products[ productDataState.productId ] ) {
+		return false;
+	}
+
+	const availableVariations = Object.values(
+		products[ productDataState.productId ].variations || {}
+	);
 
 	// Check if there is at least one available variation matching the current
 	// selected attributes and the attribute value being checked.
@@ -124,11 +139,43 @@ const isAttributeValueValid = ( {
 	} );
 };
 
+/**
+ * Return the product attributes and options.
+ */
+const getProductAttributesAndOptions = (
+	productObject: NormalizedProductData | null
+): Record< string, string[] > => {
+	if ( ! productObject?.variations ) {
+		return {};
+	}
+
+	const variations: VariationData[] = Object.values(
+		productObject.variations
+	);
+	const productAttributesAndOptions = {} as Record< string, string[] >;
+	variations.forEach( ( variation: VariationData ) => {
+		if ( ! variation?.attributes ) {
+			return;
+		}
+		Object.entries( variation.attributes ).forEach( ( [ key, value ] ) => {
+			if ( typeof key !== 'string' || typeof value !== 'string' ) {
+				return;
+			}
+			if ( ! Array.isArray( productAttributesAndOptions[ key ] ) ) {
+				productAttributesAndOptions[ key ] = [];
+			}
+			if ( ! productAttributesAndOptions[ key ].includes( value ) ) {
+				productAttributesAndOptions[ key ].push( value );
+			}
+		} );
+	} );
+
+	return productAttributesAndOptions;
+};
+
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
-			isVariableProductFormValid: boolean;
-			variationId: number | null;
 			selectedAttributes: SelectedAttributes[];
 			isOptionSelected: boolean;
 			isOptionDisabled: boolean;
@@ -140,47 +187,29 @@ export type VariableProductAddToCartWithOptionsStore =
 			handleDropdownChange: (
 				event: ChangeEvent< HTMLSelectElement >
 			) => void;
+			autoselectAttributes: ( args: {
+				includedAttributes?: string[];
+				excludedAttributes?: string[];
+			} ) => void;
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
 			setSelectedVariationId: () => void;
+			validateVariation: () => void;
+			watchQuantityConstraints: () => void;
 		};
 	};
+
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
 
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get isVariableProductFormValid(): boolean {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return true;
-				}
-				const { availableVariations, selectedAttributes } = context;
-
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-
-				// Variable products must be in stock and have a selected variation
-				return Boolean(
-					matchedVariation?.is_in_stock &&
-						matchedVariation?.variation_id
-				);
-			},
-			get variationId(): number | null {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return null;
-				}
-				const { availableVariations, selectedAttributes } = context;
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-				return matchedVariation?.variation_id || null;
-			},
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				if ( ! context ) {
@@ -189,16 +218,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				return context.selectedAttributes;
 			},
 			get isOptionSelected() {
-				const { selectedValue, option } = getContext< Context >();
-				return selectedValue === option.value;
+				const { selectedAttributes, option, name } =
+					getContext< Context >();
+
+				return selectedAttributes.some( ( attrObject ) => {
+					return (
+						attrObject.attribute === name &&
+						attrObject.value === option.value
+					);
+				} );
 			},
 			get isOptionDisabled() {
-				const {
-					name,
-					option,
-					selectedAttributes,
-					availableVariations,
-				} = getContext< Context >();
+				const { name, option, selectedAttributes } =
+					getContext< Context >();
 
 				if ( option.value === '' ) {
 					return false;
@@ -208,7 +240,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes,
-					availableVariations,
 				} );
 			},
 		},
@@ -250,21 +281,78 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 			},
 			handlePillClick() {
-				if ( state.isOptionDisabled ) {
-					return;
-				}
 				const context = getContext< Context >();
-				if ( context.selectedValue === context.option.value ) {
+
+				if ( state.isOptionSelected ) {
 					context.selectedValue = '';
 				} else {
 					context.selectedValue = context.option.value;
 				}
 				actions.setAttribute( context.name, context.selectedValue );
+				if ( context.selectedValue !== '' ) {
+					actions.autoselectAttributes( {
+						excludedAttributes: [ context.name ],
+					} );
+				}
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
+				if ( context.selectedValue !== '' ) {
+					actions.autoselectAttributes( {
+						excludedAttributes: [ context.name ],
+					} );
+				}
+			},
+			autoselectAttributes( {
+				includedAttributes = [],
+				excludedAttributes = [],
+			}: {
+				includedAttributes?: Array< string >;
+				excludedAttributes?: Array< string >;
+			} = {} ) {
+				const { autoselect, selectedAttributes } =
+					getContext< Context >();
+
+				if ( ! autoselect ) {
+					return;
+				}
+
+				const productObject: NormalizedProductData | null =
+					getProductData( productDataState.productId, [] );
+				if ( ! productObject ) {
+					return;
+				}
+				const productAttributesAndOptions: Record< string, string[] > =
+					getProductAttributesAndOptions( productObject );
+				Object.entries( productAttributesAndOptions ).forEach(
+					( [ attribute, options ] ) => {
+						if (
+							includedAttributes.length !== 0 &&
+							! includedAttributes.includes( attribute )
+						) {
+							return;
+						}
+						if (
+							excludedAttributes.length !== 0 &&
+							excludedAttributes.includes( attribute )
+						) {
+							return;
+						}
+						const validOptions = options.filter( ( option ) =>
+							isAttributeValueValid( {
+								attributeName: attribute,
+								attributeValue: option,
+								selectedAttributes,
+							} )
+						);
+						if ( validOptions.length === 1 ) {
+							const validOption = validOptions[ 0 ];
+							actions.setAttribute( attribute, validOption );
+						}
+					}
+				);
 			},
 		},
 		callbacks: {
@@ -274,12 +362,20 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
+				actions.autoselectAttributes( {
+					includedAttributes: [ context.name ],
+				} );
 			},
 			setSelectedVariationId: () => {
-				const { availableVariations, selectedAttributes } =
-					getContext< Context >();
+				const { products } = getConfig( 'woocommerce' );
+
+				const variations =
+					products?.[ productDataState.productId ].variations;
+
+				const { selectedAttributes } = getContext< Context >();
+
 				const matchedVariation = getMatchedVariation(
-					availableVariations,
+					variations,
 					selectedAttributes
 				);
 
@@ -289,8 +385,93 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						{},
 						{ lock: universalLock }
 					);
-				const matchedVariationId = matchedVariation?.variation_id;
-				productDataActions.setVariationId( matchedVariationId ?? null );
+				const matchedVariationId =
+					matchedVariation?.variation_id || null;
+				productDataActions.setVariationId( matchedVariationId );
+			},
+			validateVariation() {
+				actions.clearErrors( 'variable-product' );
+
+				const { products } = getConfig( 'woocommerce' );
+
+				if ( ! products || ! products[ productDataState.productId ] ) {
+					return;
+				}
+
+				const variations =
+					products[ productDataState.productId ].variations;
+
+				const { selectedAttributes } = getContext< Context >();
+
+				const matchedVariation = getMatchedVariation(
+					variations,
+					selectedAttributes
+				);
+
+				const { errorMessages } = getConfig();
+
+				if ( ! matchedVariation?.variation_id ) {
+					actions.addError( {
+						code: 'variableProductMissingAttributes',
+						message:
+							errorMessages?.variableProductMissingAttributes ||
+							'',
+						group: 'variable-product',
+					} );
+					return;
+				}
+
+				if ( ! matchedVariation?.is_in_stock ) {
+					actions.addError( {
+						code: 'variableProductOutOfStock',
+						message: errorMessages?.variableProductOutOfStock || '',
+						group: 'variable-product',
+					} );
+				}
+			},
+			// Quantity constraints might change dynamically when switching
+			// variations. Based on this, we might need to update the quantity.
+			watchQuantityConstraints() {
+				const { ref } = getElement();
+
+				if ( ! ( ref instanceof HTMLInputElement ) ) {
+					return;
+				}
+
+				// Let's not do anything if the user is typing in the input.
+				if ( ref === document.activeElement ) {
+					return;
+				}
+
+				const { selectedAttributes } = getContext< Context >();
+
+				const productObject = getProductData(
+					productDataState.productId,
+					selectedAttributes
+				);
+
+				if ( productObject ) {
+					const { quantity } = getContext< Context >();
+					const currentValue = quantity[ productObject.id ];
+					const { min, max } = productObject;
+
+					let newValue = currentValue;
+					if ( currentValue < min ) {
+						newValue = min;
+					} else if ( currentValue > max ) {
+						newValue = max;
+					}
+
+					if (
+						newValue !== ref.valueAsNumber ||
+						newValue !== currentValue
+					) {
+						actions.setQuantity(
+							productDataState.productId,
+							newValue
+						);
+					}
+				}
 			},
 		},
 	},

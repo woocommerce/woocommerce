@@ -40,6 +40,7 @@
 			"aspectRatio": true,
 			"__experimentalSkipSerialization": true
 		},
+		"email": true,
 		"__experimentalSelector": ".wc-block-components-product-image"
 	},
 	"ancestor": [

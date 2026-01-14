@@ -164,50 +164,6 @@ class DefaultShippingPartners {
 				'available_layouts' => array( 'row', 'column' ),
 			),
 			array(
-				'id'                => 'sendcloud-shipping',
-				'name'              => 'Sendcloud',
-				'slug'              => 'sendcloud-shipping',
-				'description'       => __( 'All-in-one shipping tool:', 'woocommerce' ),
-				'layout_column'     => array(
-					'image'    => $asset_base_url . 'sendcloud-column.svg',
-					'features' => $column_layout_features,
-				),
-				'layout_row'        => array(
-					'image'    => $asset_base_url . 'sendcloud-row.svg',
-					'features' => array(
-						array(
-							'icon'        => $check_icon,
-							'description' => __( 'Print labels from 80+ carriers', 'woocommerce' ),
-						),
-						array(
-							'icon'        => $check_icon,
-							'description' => __(
-								'Process orders in just a few clicks',
-								'woocommerce'
-							),
-						),
-						array(
-							'icon'        => $check_icon,
-							'description' => __( 'Customize checkout options', 'woocommerce' ),
-						),
-
-						array(
-							'icon'        => $check_icon,
-							'description' => __( 'Self-service tracking & returns', 'woocommerce' ),
-						),
-						array(
-							'icon'        => $check_icon,
-							'description' => __( 'Start with a free plan', 'woocommerce' ),
-						),
-					),
-				),
-				'learn_more_link'   => 'https://wordpress.org/plugins/sendcloud-shipping/',
-				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'NL', 'AT', 'BE', 'FR', 'DE', 'ES', 'GB', 'IT' ) ),
-				),
-				'available_layouts' => array( 'row', 'column' ),
-			),
-			array(
 				'id'                => 'packlink-pro-shipping',
 				'name'              => 'Packlink',
 				'slug'              => 'packlink-pro-shipping',

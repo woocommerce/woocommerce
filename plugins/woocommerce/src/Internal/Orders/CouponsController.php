@@ -92,7 +92,7 @@ class CouponsController {
 		}
 
 		// translators: %s coupon code.
-		$order->add_order_note( esc_html( sprintf( __( 'Coupon applied: "%s".', 'woocommerce' ), $code ) ), 0, true );
+		$order->add_order_note( esc_html( sprintf( __( 'Coupon applied: "%s".', 'woocommerce' ), $code ) ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 
 		return $order;
 	}

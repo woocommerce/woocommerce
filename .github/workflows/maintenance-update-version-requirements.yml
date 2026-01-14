@@ -6,147 +6,251 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-versions:
-    name: Update WordPress and PHP version requirements
+  preparation:
+    name: Check versions and prep for update
     runs-on: ubuntu-latest
+    outputs:
+      current_wp_version: ${{ steps.compute-wp-versions.outputs.wp_version }}
+      required_wp_version: ${{ steps.compute-wp-versions.outputs.wp_required_version }}
+      matrix: ${{ steps.compute-branches.outputs.matrix }}
     steps:
-      - name: Install SVN
-        run: sudo apt-get -qq install -y subversion
-
-      - name: Get current WordPress version
-        id: wp-version
-        run: |
-          WP_VERSION=$(svn ls https://core.svn.wordpress.org/tags | sort -V | tail -n 1 | tr -d '/')
-          if [[ -z "$WP_VERSION" ]]; then
-            echo "Failed to get WordPress version"
-            exit 1
-          fi
-          
-          echo "wp_version=$WP_VERSION" >> $GITHUB_OUTPUT
-          echo "Latest WordPress version is $WP_VERSION"
-
-      - name: Calculate L-1 WordPress version
-        id: wp-previous-version
-        uses: actions/github-script@v7
-        env:
-          WP_VERSION: ${{ steps.wp-version.outputs.wp_version }}
-        with:
-          script: |
-            const version = process.env.WP_VERSION;
-            
-            const parts = version.split('.').map(Number);
-            const [major, minor] = parts;
-            
-            let previousVersion;
-            if (minor > 0) {
-              previousVersion = `${major}.${minor - 1}`;
-            } else {
-              previousVersion = `${major - 1}.9`;
-            }
-            
-            core.info(`Previous WordPress version is ${previousVersion}`);
-            core.setOutput('wp_prev_version', previousVersion);
-
       - name: Check out trunk
         uses: actions/checkout@v4
         with:
           ref: trunk
-
-      - name: Get minimum PHP version from composer.json
-        id: php-version
+      - name: Compute WordPress versions
+        id: compute-wp-versions
         run: |
-          REQUIRED_PHP=$(jq -r '.config.platform.php' plugins/woocommerce/composer.json)
-          if [[ -z "$REQUIRED_PHP" ]]; then
-            echo "Failed to get PHP version from composer.json"
+          # Fetch latest WP version.
+          wp_version=$(curl -s https://api.wordpress.org/core/version-check/1.7/ | jq -r '.offers[0].current' | sed -E 's/^([0-9]+\.[0-9]+).*/\1/' )
+          if [[ -z "$wp_version" ]]; then
+            echo "Failed to get WordPress version"
             exit 1
           fi
-          
-          echo "required_php_version=$REQUIRED_PHP" >> $GITHUB_OUTPUT
-          echo "Required PHP version from composer.json: $REQUIRED_PHP"
 
+          echo "wp_version=$wp_version" >> $GITHUB_OUTPUT
+          echo "Latest WordPress version is $wp_version."
+
+          # Calculate L-1 version.
+          wp_required_version=$(echo "$wp_version - 0.1" | bc)
+          echo "wp_required_version=$wp_required_version" >> $GITHUB_OUTPUT
+          echo "L-1 WordPress version is $wp_required_version."
+      - name: Compute target branches
+        id: compute-branches
+        run: |
+          # Fetch all branches from origin.
+          git fetch origin
+
+          # Main version on trunk (e.g. '10.4')
+          trunk_main_version=$( git show origin/trunk:plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed -E 's/^([0-9]+\.[0-9]+).*/\1/' )
+
+          # If release/<trunk_main_version> exists, we might be on a feature freeze day and just haven't merged the bump version PR yet.
+          if git ls-remote --exit-code --heads origin "release/$trunk_main_version" >/dev/null 2>&1; then
+            trunk_main_version=$(echo "$trunk_main_version + 0.1" | bc)
+          fi
+
+          # Frozen main version (e.g. '10.3').
+          frozen_main_version=$(echo "$trunk_main_version - 0.1" | bc)
+
+          # Check version on frozen release branch to see if it's out or not.
+          include_frozen_release="no"
+          frozen_release_branch="release/$frozen_main_version"
+          frozen_version=""
+
+          if git ls-remote --exit-code --heads origin "$frozen_release_branch" >/dev/null 2>&1; then
+            frozen_version=$( git show origin/$frozen_release_branch:plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+          fi
+
+          if [[ -n "$frozen_version" ]] && php -r "exit( version_compare( '$frozen_version', '$frozen_main_version.0-rc.1', '<' ) ? 0 : 1 );"; then
+            include_frozen_release="yes"
+          fi
+
+          # Build the matrix.
+          matrix=$(jq -n '{ include: [] }')
+
+          if [[ "$include_frozen_release" == "yes" ]]; then
+            matrix=$(jq -n --arg frozen_main_version "$frozen_main_version" '
+              {
+                include: [
+                  { branch: ("release/" + $frozen_main_version), milestone: ($frozen_main_version + ".0"), skip_wp_version_changelog: "no" },
+                  { branch: "trunk", milestone: ($frozen_main_version + ".0"), skip_wp_version_changelog: "yes" }
+                ]
+              }
+            ')
+          else
+            matrix=$(jq -n --arg trunk_main_version "$trunk_main_version" '
+              {
+                include: [
+                  { branch: "trunk", milestone: ($trunk_main_version + ".0"), skip_wp_version_changelog: "no" }
+                ]
+              }
+            ')
+          fi
+
+          {
+            echo "matrix<<EOF"
+            echo "$matrix"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+  update-versions:
+    needs: [preparation]
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.preparation.outputs.matrix) }}
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
       - name: Set up dev environment
         run: |
+          # Configure Git.
+          git config --global user.name "woocommercebot"
+          git config --global user.email "woocommercebot@users.noreply.github.com"
+
+          # Configure token for Composer.
+          composer config --global github-oauth.github.com "${{ secrets.GITHUB_TOKEN }}"
+
           cd plugins/woocommerce
 
           # Install dev packages. Required for changelogger use.
           composer install --quiet
-
-          # Configure Git.
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - name: Update version requirements and create PR
-        id: update-pr
+      - name: Update version requirements
+        id: update-versions
         env:
-          WP_PREV_VERSION: ${{ steps.wp-previous-version.outputs.wp_prev_version }}
-          PHP_VERSION: ${{ steps.php-version.outputs.required_php_version }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WP_VERSION: ${{ needs.preparation.outputs.current_wp_version }}
+          WP_REQUIRED_VERSION: ${{ needs.preparation.outputs.required_wp_version }}
+          GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          # Update the version requirements in woocommerce.php
-          WOOCOMMERCE_FILE="plugins/woocommerce/woocommerce.php"
-          sed -i "s/\* Requires at least: [0-9.]*/\* Requires at least: $WP_PREV_VERSION/" "$WOOCOMMERCE_FILE"
-          sed -i "s/\* Requires PHP: [0-9.]*/\* Requires PHP: $PHP_VERSION/" "$WOOCOMMERCE_FILE"
+          current_branch="${{ matrix.branch }}"
 
-          # Update the version requirements in readme.txt
-          README_FILE="plugins/woocommerce/readme.txt"
-          sed -i "s/Requires at least: [0-9.]*/Requires at least: $WP_PREV_VERSION/" "$README_FILE"
-          sed -i "s/Requires PHP: [0-9.]*/Requires PHP: $PHP_VERSION/" "$README_FILE"
-          sed -i "s/WordPress [0-9.]\+/WordPress $WP_PREV_VERSION/" "$README_FILE"
-          sed -i "s/PHP [0-9.]\+ or greater is required/PHP $PHP_VERSION or greater is required/" "$README_FILE"
+          git fetch origin
 
-          # Check for changes and exit early if none
+          # Branch name hardcoded to avoid conflicts.
+          branch_name="update-wp-php-requirements-on-${current_branch#release/}"
+
+          # Delete local branch if it exists and create fresh from branch.
+          git branch -D "$branch_name" 2>/dev/null || true
+          git checkout -b "$branch_name" "origin/${current_branch}"
+
+          # Change to woocommerce dir.
+          cd plugins/woocommerce
+
+          # Handle PHP version update.
+          required_php_version=$(jq -r '.config.platform.php' composer.json)
+          if [[ -z "$required_php_version" ]]; then
+            echo "Failed to get PHP version from composer.json"
+            exit 1
+          fi
+
+          echo "Required PHP version from composer.json: $required_php_version"
+
+          # Update PHP version requirements.
+          sed -i "s/\* Requires PHP: [0-9.]*/\* Requires PHP: $required_php_version/" "woocommerce.php"
+          sed -i "s/Requires PHP: [0-9.]*/Requires PHP: $required_php_version/" "readme.txt"
+          sed -i "s/PHP [0-9.]\+ or greater is required/PHP $required_php_version or greater is required/" "readme.txt"
+
+          # If this resulted in changes, create a commit and changelog entry for the PHP version update.
+          if ! git diff --quiet; then
+            rm -f "changelog/${branch_name}-php"
+            composer exec -- changelogger add \
+              --significance minor \
+              --type update \
+              --entry "Update PHP version requirement to $required_php_version." \
+              --filename "${branch_name}-php" \
+              --no-interaction
+
+            git add .
+            git commit -m "Update PHP version requirement to $required_php_version"
+          fi
+
+          # Update WordPress version requirements.
+          sed -i "s/\* Requires at least: [0-9.]*/\* Requires at least: $WP_REQUIRED_VERSION/" "woocommerce.php"
+          sed -i "s/Requires at least: [0-9.]*/Requires at least: $WP_REQUIRED_VERSION/" "readme.txt"
+          sed -i "s/Tested up to: [0-9.]*/Tested up to: $WP_VERSION/" "readme.txt"
+          sed -i "s/WordPress [0-9.]\+/WordPress $WP_REQUIRED_VERSION/" "readme.txt"
+
+          # Check for changes and exit early if none.
           if git diff --quiet; then
             echo "No changes detected. No PR needed."
             exit 0
           fi
 
-          # Create new branch with timestamp
-          BRANCH_NAME="update-version-requirements-$(date +%s)"
-          git checkout -b "$BRANCH_NAME"
+          # Add changelog entry.
+          rm -f "changelog/${branch_name}-wp"
 
-          cd plugins/woocommerce
-          composer exec -- changelogger add \
-            --significance minor \
-            --type update \
-            --entry "Update version requirements to WordPress $WP_PREV_VERSION and PHP $PHP_VERSION in readme.txt and woocommerce.php." \
-            --no-interaction
+          skip_changelog=""
+          if [[ "${{ matrix.skip_wp_version_changelog }}" == "yes" ]]; then
+            skip_changelog="<!-- [x] This Pull Request does not require a changelog -->"
+          else
+            composer exec -- changelogger add \
+              --significance minor \
+              --type update \
+              --entry "Update version requirements to WordPress $WP_REQUIRED_VERSION." \
+              --filename "${branch_name}-wp" \
+              --no-interaction
+          fi
 
+          # Commit changes.
           git add .
-          git commit -m "Update version requirements to WP $WP_PREV_VERSION / PHP $PHP_VERSION"
+          git commit -m "Update version requirements to WP $WP_REQUIRED_VERSION"
 
-          git push origin "$BRANCH_NAME"
+          # Push only if remote branch doesn't exist or differs from our changes.
+          if ! git ls-remote --exit-code --heads origin "$branch_name" >/dev/null 2>&1 || ! git diff --quiet HEAD origin/"$branch_name"; then
+            echo "Pushing changes to remote branch."
+            git push --force origin "$branch_name"
+          else
+            echo "No changes compared to remote branch. Skipping push."
+          fi
 
-          PR_URL=$(gh pr create \
-            --title "Update version requirements to WP $WP_PREV_VERSION / PHP $PHP_VERSION" \
-            --body "This PR automatically updates the version requirements in \`$WOOCOMMERCE_FILE\` and \`$README_FILE\`:
+          # Prepare PR content.
+          pr_title="Update WP/PHP version requirements on \`$current_branch\`"
+          pr_body="This PR automatically updates the version requirements in \`woocommerce.php\` and \`readme.txt\`:
 
           ## Changes
-          - **WordPress requirement**: $WP_PREV_VERSION
-          - **PHP requirement**: $PHP_VERSION
+          - **WordPress requirement**: $WP_REQUIRED_VERSION
+          - **PHP requirement**: $required_php_version
+          - **Tested up to**: $WP_VERSION
 
-          Auto-generated by the \`maintenance-update-version-requirements.yml\` workflow." \
-            --head "$BRANCH_NAME" \
-            --base trunk)
-          
-          echo "PR created successfully: $PR_URL"
-          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          ### ⚠️ Before merging
 
-      - name: Send Slack notification
-        if: steps.update-pr.outputs.pr_url != ''
-        uses: archive/github-actions-slack@v2.10.0
-        with:
-          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
-          slack-channel: ${{ secrets.WOO_DOCS_SLACK_CHANNEL }}
-          slack-optional-unfurl_links: false
-          slack-text: |
-            :woo: *WooCommerce Versions Requirements Updated*
+          Ensure that:
 
-            Version requirements for :woo: have been automatically updated and a PR has been created.
+          - [ ] **WordPress $WP_VERSION compatibility** has been tested and verified.
+          - [ ] **PHP $required_php_version compatibility** has been tested and verified.
 
-            *WordPress Requirement:* ${{ steps.wp-previous-version.outputs.wp_prev_version }}
-            *PHP Requirement:* ${{ steps.php-version.outputs.required_php_version }}
-            *Pull Request:* <${{ steps.update-pr.outputs.pr_url }}|${{ steps.update-pr.outputs.pr_url }}>
+          ## ⚠️ After merging
 
-            <!subteam^S011VV34JTX> Please also update these documentation pages:
-            • <https://woocommerce.com/document/update-php-wordpress/|Update PHP and WordPress>
-            • <https://woocommerce.com/document/server-requirements/|WooCommerce Server Recommendations>
+          Please check with the Woo Docs team in \`#woo-docs\` to ensure the following documentation pages are updated:
+
+          - [ ] [Update PHP and WordPress](https://woocommerce.com/document/update-php-wordpress/)
+          - [ ] [WooCommerce Server Requirements](https://woocommerce.com/document/server-requirements/)
+
+          ---
+          _Auto-generated by the \`maintenance-update-version-requirements.yml\` workflow._
+
+          $skip_changelog
+          "
+
+          # Check if PR already exists.
+          pr_number_or_url=$(gh pr list --head "$branch_name" --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [[ -n "$pr_number_or_url" ]]; then
+            echo "PR #$pr_number_or_url already exists. Updating title and body."
+            gh pr edit "$pr_number_or_url" \
+              --title "$pr_title" \
+              --body "$pr_body"
+          else
+            echo "Creating new PR."
+            pr_number_or_url=$(gh pr create \
+              --title "$pr_title" \
+              --body "$pr_body" \
+              --head "$branch_name" \
+              --base "$current_branch" \
+              --label "Release")
+          fi
+
+          # Set milestone.
+          gh pr edit "$pr_number_or_url" --milestone "${{ matrix.milestone }}"

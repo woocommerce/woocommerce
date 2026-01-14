@@ -18,6 +18,14 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		$this->disable_cogs_feature();
+	}
+
+	/**
 	 * Test when rounding is different when doing per line and in subtotal.
 	 */
 	public function test_order_calculate_26582() {
@@ -554,101 +562,77 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox In case order::save() is canceled in WC_Abstract_Order (maybe by a hook throwing an Exception),
-	 *          hooks dependent on Wc_Order::$status_transition should not be called
+	 * @testdox get_cogs_total_value_html throws 'doing it wrong' if the Cost of Goods Sold feature is disabled.
 	 */
-	public function test_status_transition_hooks_shouldnot_be_called_when_order_save_canceled() {
-		$initial_status  = OrderStatus::AUTO_DRAFT;
-		$refunded_status = OrderStatus::REFUNDED;
+	public function test_get_cogs_total_value_html_with_cogs_disabled() {
+		$order = new WC_Order();
 
-		// add an action that will cancel the save in case the new status is "refunded".
-		$callback = static function ( WC_Order $order ) use ( $refunded_status ) {
-			$changes = $order->get_changes();
-			if ( ! empty( $changes ) && isset( $changes['status'] ) && $changes['status'] === $refunded_status ) {
-				throw new \RuntimeException( 'Interrupt order persistence.' );
-			}
-		};
-		add_action( 'woocommerce_before_order_object_save', $callback );
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::get_cogs_total_value_html' );
 
-		// Simple action to make sure hook is not triggered.
-		$triggered                     = false;
-		$should_not_be_called_callback = static function () use ( &$triggered ) {
-			$triggered = true;
-		};
-		add_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
-
-		$order = new Wc_Order();
-		$order->set_status( $initial_status );
-		$order->save();
-
-		$order->set_status( $refunded_status );
-		$order->save();
-
-		// Make sure status update has not been saved to database
-		// and our RuntimeException('Interrupt order persistence.') worked.
-		$this->assertSame(
-			$order->get_data()['status'],
-			$initial_status,
-			'Order status in database has been modified but but shouldn\'t have been'
-		);
-		$this->assertFalse(
-			$triggered,
-			'"woocommerce_order_status_' . $refunded_status . '" action hook has been triggered but shouldn\'t have been'
-		);
-
-		remove_action( 'woocommerce_before_order_object_save', $callback );
-		remove_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
+		$order->get_cogs_total_value_html();
 	}
 
 	/**
-	 * @testDox In case an error happened while saving an WC_Order_Item,
-	 *          hooks dependent on Wc_Order::$status_transition should not be called
+	 * @testdox Test get_cogs_total_value_html with implicit WC_Price argument value.
 	 */
-	public function test_status_transition_hooks_shouldnot_be_called_when_order_save_errored_on_item_save() {
-		$initial_status          = OrderStatus::AUTO_DRAFT;
-		$initial_order_item_name = 'Initial Order Item name';
-		$refunded_status         = OrderStatus::REFUNDED;
+	public function test_get_cogs_total_value_html_with_implicit_arguments() {
+		$this->enable_cogs_feature();
 
-		// Simple action to make sure hook is not triggered.
-		$triggered                     = false;
-		$should_not_be_called_callback = static function () use ( &$triggered ) {
-			$triggered = true;
-		};
-		add_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
+		$order = $this->get_order_with_fixed_cogs_total_value();
 
-		$order_item = new WC_Order_Item_Product();
-		$order_item->set_name( $initial_order_item_name );
+		$actual   = $order->get_cogs_total_value_html();
+		$expected = wc_price( 12.34, array( 'currency' => $order->get_currency() ) );
+		$this->assertEquals( $expected, $actual );
+	}
 
-		$order = new Wc_Order();
-		$order->set_status( $initial_status );
-		$order->add_item( $order_item );
-		$order->save();
+	/**
+	 * @testdox Test get_cogs_total_value_html with explicit WC_Price argument value.
+	 */
+	public function test_get_cogs_total_value_html_with_explicit_arguments() {
+		$this->enable_cogs_feature();
 
-		$order_item_id = $order_item->get_id();
+		$order = $this->get_order_with_fixed_cogs_total_value();
 
-		// add an action that will simulate an error while saving WC_Order_Item.
-		$callback = static function () {
-			throw new \RuntimeException( 'Error while saving WC_Order_Item' );
-		};
-		add_action( 'woocommerce_before_order_item_object_save', $callback, 10, 0 );
+		$actual   = $order->get_cogs_total_value_html( array( 'currency' => '!' ) );
+		$expected = wc_price( 12.34, array( 'currency' => '!' ) );
+		$this->assertEquals( $expected, $actual );
+	}
 
-		$order->get_items()[ $order_item_id ]->set_name( 'CHANGED Order Item name' );
-		$order->set_status( $refunded_status );
-		$order->save();
+	/**
+	 * @testdox Test the woocommerce_order_cogs_total_value_html filter invoked by get_cogs_total_value_html.
+	 */
+	public function test_get_cogs_total_value_html_with_filter() {
+		$this->enable_cogs_feature();
 
-		// Make sure status update has not been saved to database
-		// and our RuntimeException('Error while saving WC_Order_Item') worked.
-		$this->assertSame(
-			$order->get_items()[ $order_item_id ]->get_data()['name'],
-			$initial_order_item_name,
-			'Modified order item name has been saved to database but shouldn\'t have been'
-		);
-		$this->assertFalse(
-			$triggered,
-			'"woocommerce_order_status_' . $refunded_status . '" action hook has been triggered but shouldn\'t have been'
+		$order = $this->get_order_with_fixed_cogs_total_value();
+
+		add_filter(
+			'woocommerce_order_cogs_total_value_html',
+			function ( $html, $amount, $the_order ) {
+				return sprintf( 'amount: %s, order: %s', $amount, $the_order->get_id() );
+			},
+			10,
+			3
 		);
 
-		remove_action( 'woocommerce_before_order_item_object_save', $callback );
-		remove_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
+		$actual = $order->get_cogs_total_value_html();
+		remove_all_filters( 'woocommerce_order_cogs_total_value_html' );
+		$expected = sprintf( 'amount: %s, order: %s', 12.34, $order->get_id() );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Get an order object with a fixed total COGS value.
+	 *
+	 * @return WC_Order
+	 */
+	private function get_order_with_fixed_cogs_total_value(): WC_Order {
+		// phpcs:disable Squiz.Commenting
+		return new class() extends WC_Order {
+			public function get_cogs_total_value(): float {
+				return 12.34;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
 	}
 }

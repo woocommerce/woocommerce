@@ -324,4 +324,67 @@ class HandlerRegistry extends \WP_UnitTestCase {
 		$this->assertEquals( $product_ids, $result_frontend['post__in'] );
 		$this->assertEquals( $product_ids, $result_editor['post__in'] );
 	}
+
+	/**
+	 * Tests that the cross-sells collection handler works with cart context.
+	 */
+	public function test_collection_cross_sells_cart_context() {
+		// Create cart products with cross-sells.
+		$cart_product_1 = WC_Helper_Product::create_simple_product( false );
+		$cart_product_2 = WC_Helper_Product::create_simple_product( false );
+
+		// Create cross-sell products.
+		$cross_sell_1 = WC_Helper_Product::create_simple_product();
+		$cross_sell_2 = WC_Helper_Product::create_simple_product();
+		$cross_sell_3 = WC_Helper_Product::create_simple_product();
+
+		// Set up cross-sells for cart products.
+		$cart_product_1->set_cross_sell_ids( array( $cross_sell_1->get_id(), $cross_sell_2->get_id() ) );
+		$cart_product_1->save();
+
+		$cart_product_2->set_cross_sell_ids( array( $cross_sell_2->get_id(), $cross_sell_3->get_id() ) );
+		$cart_product_2->save();
+
+		$cart_product_ids = array( $cart_product_1->get_id(), $cart_product_2->get_id() );
+
+		// Frontend - test using the standard block setup pattern.
+		$parsed_block                        = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['collection'] = 'woocommerce/product-collection/cross-sells';
+
+		// Set the product collection location context for cart.
+		$this->block_instance->set_parsed_block( $parsed_block );
+
+		// Create a mock block context with cart location.
+		$block                                       = new \stdClass();
+		$block->context                              = $parsed_block['attrs'];
+		$block->context['productCollectionLocation'] = array(
+			'type'       => 'cart',
+			'sourceData' => array(
+				'productIds' => $cart_product_ids,
+			),
+		);
+
+		// Test the frontend query building process.
+		$query_args = $this->block_instance->build_frontend_query( array(), $block, 1 );
+
+		// Verify that cross-sells from both cart products are included.
+		$this->assertArrayHasKey( 'post__in', $query_args );
+		$this->assertContains( $cross_sell_1->get_id(), $query_args['post__in'] );
+		$this->assertContains( $cross_sell_2->get_id(), $query_args['post__in'] );
+		$this->assertContains( $cross_sell_3->get_id(), $query_args['post__in'] );
+
+		// Verify cart products are NOT included in cross-sells.
+		$this->assertNotContains( $cart_product_1->get_id(), $query_args['post__in'] );
+		$this->assertNotContains( $cart_product_2->get_id(), $query_args['post__in'] );
+
+		// Verify we have exactly 3 cross-sell products (no duplicates).
+		$this->assertCount( 3, $query_args['post__in'] );
+
+		// Clean up.
+		$cart_product_1->delete( true );
+		$cart_product_2->delete( true );
+		$cross_sell_1->delete( true );
+		$cross_sell_2->delete( true );
+		$cross_sell_3->delete( true );
+	}
 }

@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCacheController;
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -576,13 +577,13 @@ class CustomOrdersTableController {
 	 */
 	public function add_feature_definition( $features_controller ) {
 		$definition = array(
-			'option_key'                          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-			'is_experimental'                     => false,
-			'enabled_by_default'                  => false,
-			'order'                               => 50,
-			'setting'                             => $this->get_hpos_setting_for_feature(),
-			'plugins_are_incompatible_by_default' => true,
-			'additional_settings'                 => array(
+			'option_key'                   => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			'is_experimental'              => false,
+			'enabled_by_default'           => false,
+			'order'                        => 50,
+			'setting'                      => $this->get_hpos_setting_for_feature(),
+			'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
+			'additional_settings'          => array(
 				$this->get_hpos_setting_for_sync(),
 			),
 		);

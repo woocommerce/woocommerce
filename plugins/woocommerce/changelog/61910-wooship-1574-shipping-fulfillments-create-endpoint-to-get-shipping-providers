@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add REST API endpoint `/wc/v4/fulfillments/providers` to expose shipping provider information including labels, icons, and tracking URLs for CIAB Next Admin integration.

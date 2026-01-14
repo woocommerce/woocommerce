@@ -8,6 +8,9 @@
  * @version 2.3.0
  */
 
+use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -77,6 +80,12 @@ class WC_Shortcode_Cart {
 
 		// Constants.
 		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
+
+		// Track cart page loaded for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CartEventTracker::class )
+				->track_cart_page_loaded();
+		}
 
 		$atts        = shortcode_atts( array(), $atts, 'woocommerce_cart' );
 		$nonce_value = wc_get_var( $_REQUEST['woocommerce-shipping-calculator-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.

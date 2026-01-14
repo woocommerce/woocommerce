@@ -36,10 +36,10 @@ add_filter( 'woocommerce_add_to_cart_validation', 'wc_protected_product_add_to_c
  * Clears the cart session when called.
  */
 function wc_empty_cart() {
-	if ( ! WC()->cart instanceof WC_Cart ) {
+	if ( ! isset( WC()->cart ) || '' === WC()->cart ) {
 		WC()->cart = new WC_Cart();
 	}
-	WC()->cart->empty_cart();
+	WC()->cart->empty_cart( false );
 }
 
 /**
@@ -257,8 +257,7 @@ function wc_cart_totals_shipping_html() {
 				'show_package_details'     => count( $packages ) > 1,
 				'show_shipping_calculator' => is_cart() && apply_filters( 'woocommerce_shipping_show_shipping_calculator', $first, $i, $package ),
 				'package_details'          => implode( ', ', $product_names ),
-				/* translators: %d: shipping package number */
-				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping packages', 'woocommerce' ), $i, $package ),
+				'package_name'             => $package['package_name'],
 				'index'                    => $i,
 				'chosen_method'            => $chosen_method,
 				'formatted_destination'    => WC()->countries->get_formatted_address( $package['destination'], ', ' ),

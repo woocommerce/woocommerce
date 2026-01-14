@@ -8,7 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
- * Class WC_Admin_Functions_Test_Test
+ * Class WC_Admin_Functions_Test
  */
 class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
@@ -87,7 +87,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -99,9 +99,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 10,
 					'refund_total' => 0,
@@ -142,7 +142,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -154,9 +154,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 10,
 					'refund_total' => 0,
@@ -195,7 +195,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -207,9 +207,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 5,
 					'refund_total' => 0,
@@ -250,7 +250,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -262,9 +262,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 5,
 					'refund_total' => 0,
@@ -306,7 +306,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$order->set_status( OrderStatus::ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -318,9 +318,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 5,
 					'refund_total' => 0,
@@ -365,7 +365,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$order->set_status( OrderStatus::ON_HOLD );
 		$order_item_id = $order->add_product( $product, 10 );
-		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
 
 		// Stocks have not reduced yet.
 		$product = wc_get_product( $product->get_id() );
@@ -377,9 +377,9 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 90, $product->get_stock_quantity() );
 
 		$args = array(
-			'amount'     => 10,
-			'order_id'   => $order->get_id(),
-			'line_items' => array(
+			'amount'         => 10,
+			'order_id'       => $order->get_id(),
+			'line_items'     => array(
 				$order_item_id => array(
 					'qty'          => 5,
 					'refund_total' => 0,
@@ -405,5 +405,134 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		// Stocks should remain unchanged from the original order.
 		$this->assertEquals( 90, $product->get_stock_quantity() );
+	}
+
+	/**
+	 * Test adjust line item function that results in negative stock quantities.
+	 * Ensures stock adjustments work correctly when inventory goes negative.
+	 *
+	 * Covers the scenario where:
+	 * 1. Product starts with stock of 1
+	 * 2. Order line item quantity is edited from 2 to 5 (increasing by 3)
+	 * 3. Stock should go negative: 1 - 3 = -2
+	 */
+	public function test_wc_maybe_adjust_line_item_product_stock_negative_inventory() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'yes' );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order_item_id = $order->add_product( $product, 2 );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
+
+		// Verify initial stock.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( 1, $product->get_stock_quantity() );
+
+		// Actually reduce stock for this order item (simulating initial order processing).
+		wc_maybe_adjust_line_item_product_stock( $order_item, 2 );
+
+		// This should have made stock negative: 1 - 2 = -1.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( -1, $product->get_stock_quantity(), 'Stock should be -1 after reducing by 2 from initial stock of 1' );
+
+		// Now edit the order item quantity from 2 to 5 (increasing by 3).
+		$order_item->set_quantity( 5 );
+		$result = wc_maybe_adjust_line_item_product_stock( $order_item, 5 );
+
+		// Verify the function returned expected change data.
+		$this->assertIsArray( $result, 'Stock adjustment should return change data array' );
+		$this->assertArrayHasKey( 'from', $result, 'Result should contain from value' );
+		$this->assertArrayHasKey( 'to', $result, 'Result should contain to value' );
+
+		// Verify stock was decreased by 3 more (from -1 to -4).
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( -4, $product->get_stock_quantity(), 'Stock should be adjusted from -1 to -4 when increasing order quantity by 3' );
+
+		// Verify the _reduced_stock meta was updated.
+		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$this->assertEquals( 5, $order_item->get_meta( '_reduced_stock', true ), 'Reduced stock meta should be updated to new quantity' );
+	}
+
+	/**
+	 * Test adjust line item function - decrease order quantity with already negative stock.
+	 * Tests the scenario where we reduce order quantity and return stock to negative inventory.
+	 */
+	public function test_wc_maybe_adjust_line_item_product_stock_negative_inventory_decrease_quantity() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'yes' );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order_item_id = $order->add_product( $product, 5 );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
+
+		// Actually reduce stock for this order item (simulating initial order processing).
+		wc_maybe_adjust_line_item_product_stock( $order_item, 5 );
+
+		// This should have made stock negative: 1 - 5 = -4.
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( -4, $product->get_stock_quantity(), 'Stock should be -4 after reducing by 5 from initial stock of 1' );
+
+		// Now edit the order item quantity from 5 to 3 (decreasing by 2).
+		$order_item->set_quantity( 3 );
+		$result = wc_maybe_adjust_line_item_product_stock( $order_item, 3 );
+
+		// Verify the function returned expected change data.
+		$this->assertIsArray( $result, 'Stock adjustment should return change data array' );
+
+		// Verify stock was increased by 2 (from -4 to -2).
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( -2, $product->get_stock_quantity(), 'Stock should be adjusted from -4 to -2 when decreasing order quantity by 2' );
+
+		// Verify the _reduced_stock meta was updated.
+		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$this->assertEquals( 3, $order_item->get_meta( '_reduced_stock', true ), 'Reduced stock meta should be updated to new quantity' );
+	}
+
+	/**
+	 * Test adjust line item function when backorders are NOT enabled.
+	 * Tests the scenario where stock adjustments are made when backorders are disabled.
+	 * WooCommerce should still handle the stock adjustment calculations correctly.
+	 */
+	public function test_wc_maybe_adjust_line_item_product_stock_no_backorders() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 1 );
+		$product->set_backorders( 'no' );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order_item_id = $order->add_product( $product, 2 );
+		$order_item    = new WC_Order_Item_Product( $order_item_id );
+
+		// Actually reduce stock for this order item (simulating initial order processing).
+		wc_maybe_adjust_line_item_product_stock( $order_item, 2 );
+
+		// This should have made stock negative: 1 - 2 = -1 (even with backorders disabled, stock can go negative).
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( -1, $product->get_stock_quantity(), 'Stock should be -1 after reducing by 2 from initial stock of 1, even with backorders disabled' );
+
+		// Now edit the order item quantity from 2 to 4 (increasing by 2).
+		$order_item->set_quantity( 4 );
+		$result = wc_maybe_adjust_line_item_product_stock( $order_item, 4 );
+
+		// Verify the function returned expected change data.
+		$this->assertIsArray( $result, 'Stock adjustment should return change data array' );
+
+		// Verify stock was decreased by 2 more (from -1 to -3).
+		$product = wc_get_product( $product->get_id() );
+		$this->assertEquals( -3, $product->get_stock_quantity(), 'Stock should be adjusted from -1 to -3 when increasing order quantity by 2, regardless of backorder setting' );
+
+		// Verify the _reduced_stock meta was updated.
+		$order_item = new WC_Order_Item_Product( $order_item_id );
+		$this->assertEquals( 4, $order_item->get_meta( '_reduced_stock', true ), 'Reduced stock meta should be updated to new quantity' );
 	}
 }

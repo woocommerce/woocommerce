@@ -149,3 +149,20 @@
 		box-shadow: none;
 	}
 }
+
+html[dir="rtl"] {
+	.components-country-select-control__button svg {
+		margin-left: 0;
+		margin-right: auto;
+	}
+
+	.components-country-select-control__search--input-suffix {
+		right: auto;
+		left: 5px;
+	}
+
+	.components-country-select-control__search--input {
+		padding-right: 8px;
+		padding-left: 40px;
+	}
+}
