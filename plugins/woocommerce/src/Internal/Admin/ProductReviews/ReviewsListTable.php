@@ -1183,8 +1183,6 @@ class ReviewsListTable extends WP_List_Table {
 
 		if ( $product_post ) :
 
-
-
 			?>
 			<div class="response-links">
 				<?php
