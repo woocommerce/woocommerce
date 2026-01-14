@@ -5,6 +5,12 @@ import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import type { TemplateArray, BlockAttributes } from '@wordpress/blocks';
 import {
+	InnerBlocks,
+	useBlockProps,
+	InspectorControls,
+} from '@wordpress/block-editor';
+import { getSetting, ADMIN_URL } from '@woocommerce/settings';
+import {
 	Disabled,
 	PanelBody,
 	ToggleControl,
@@ -14,12 +20,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-import {
-	InnerBlocks,
-	useBlockProps,
-	InspectorControls,
-} from '@wordpress/block-editor';
-import { getSetting, ADMIN_URL } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
