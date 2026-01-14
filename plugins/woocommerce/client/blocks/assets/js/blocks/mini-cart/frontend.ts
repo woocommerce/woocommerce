@@ -108,6 +108,16 @@ window.addEventListener( 'load', () => {
 		}
 	);
 
+	// Check if any Mini-Cart block has 'open_drawer' behavior enabled.
+	const shouldOpenDrawerOnAddToCart = Array.from( miniCartBlocks ).some(
+		( block ) => {
+			if ( ! ( block instanceof HTMLElement ) ) {
+				return false;
+			}
+			return block.dataset.addToCartBehaviour === 'open_drawer';
+		}
+	);
+
 	miniCartBlocks.forEach( ( miniCartBlock, i ) => {
 		if ( ! ( miniCartBlock instanceof HTMLElement ) ) {
 			return;
@@ -180,10 +190,11 @@ window.addEventListener( 'load', () => {
 
 		miniCartButton.addEventListener( 'click', openDrawer );
 
-		const funcOnAddToCart =
-			miniCartBlock.dataset.addToCartBehaviour === 'open_drawer'
-				? openDrawerWithRefresh
-				: loadContentsWithRefresh;
+		// Open drawer if any of the mini cart block on the page
+		// has 'open_drawer' behavior enabled.
+		const funcOnAddToCart = shouldOpenDrawerOnAddToCart
+			? openDrawerWithRefresh
+			: loadContentsWithRefresh;
 
 		// There might be more than one Mini-Cart block in the page. Make sure
 		// only one opens when adding a product to the cart.

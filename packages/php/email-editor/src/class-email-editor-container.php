@@ -8,7 +8,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor;
 
-use Automattic\WooCommerce\EmailEditor\Container;
+use Automattic\WooCommerce\EmailEditor\Engine\Assets_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
@@ -33,7 +33,9 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
-use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
+use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as CoreInitializer;
+use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Initializer as WooCommerceInitializer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -73,9 +75,15 @@ class Email_Editor_Container {
 		$container = new Container();
 
 		$container->set(
-			Initializer::class,
+			CoreInitializer::class,
 			function () {
-				return new Initializer();
+				return new CoreInitializer();
+			}
+		);
+		$container->set(
+			WooCommerceInitializer::class,
+			function () {
+				return new WooCommerceInitializer();
 			}
 		);
 		// Start: Email editor dependencies.
@@ -164,6 +172,17 @@ class Email_Editor_Container {
 			}
 		);
 		$container->set(
+			Assets_Manager::class,
+			function ( $container ) {
+				return new Assets_Manager(
+					$container->get( Settings_Controller::class ),
+					$container->get( Theme_Controller::class ),
+					$container->get( User_Theme::class ),
+					$container->get( Email_Editor_Logger::class )
+				);
+			}
+		);
+		$container->set(
 			Process_Manager::class,
 			function ( $container ) {
 				return new Process_Manager(
@@ -197,6 +216,7 @@ class Email_Editor_Container {
 					$container->get( Templates::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
+					$container->get( Personalization_Tags_Registry::class ),
 				);
 			}
 		);
@@ -246,6 +266,12 @@ class Email_Editor_Container {
 			}
 		);
 		$container->set(
+			Site_Style_Sync_Controller::class,
+			function () {
+				return new Site_Style_Sync_Controller();
+			}
+		);
+		$container->set(
 			Email_Editor::class,
 			function ( $container ) {
 				return new Email_Editor(
@@ -254,7 +280,8 @@ class Email_Editor_Container {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
-					$container->get( Email_Editor_Logger::class )
+					$container->get( Email_Editor_Logger::class ),
+					$container->get( Assets_Manager::class )
 				);
 			}
 		);
@@ -266,7 +293,8 @@ class Email_Editor_Container {
 			function ( $container ) {
 				return new Bootstrap(
 					$container->get( Email_Editor::class ),
-					$container->get( Initializer::class ),
+					$container->get( CoreInitializer::class ),
+					$container->get( WooCommerceInitializer::class ),
 				);
 			}
 		);

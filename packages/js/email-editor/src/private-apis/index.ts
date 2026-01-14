@@ -25,11 +25,6 @@ const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 const { ColorPanel: StylesColorPanel } = unlock( blockEditorPrivateApis );
 
 /**
- * The useGlobalStylesOutputWithConfig is used to generate the CSS for the email editor content from the style settings.
- */
-const { useGlobalStylesOutputWithConfig } = unlock( blockEditorPrivateApis );
-
-/**
  * The Editor is the main component for the email editor.
  */
 const { Editor, FullscreenMode, ViewMoreMenuGroup, BackButton } =
@@ -46,7 +41,6 @@ const { registerEntityAction, unregisterEntityAction } = unlock(
 
 export {
 	StylesColorPanel,
-	useGlobalStylesOutputWithConfig,
 	Editor,
 	FullscreenMode,
 	ViewMoreMenuGroup,

@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
+use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 
 /**
  * Tests related to Counts service.
@@ -18,13 +19,22 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	private $sut;
 
 	/**
+	 * TaxonomyHierarchyData instance for clearing the cache.
+	 *
+	 * @var TaxonomyHierarchyData
+	 */
+	private $taxonomy_hierarchy_data;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$container = wc_get_container();
-		$this->sut = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
+
+		$this->sut                     = $container->get( FilterDataProvider::class )->with( $container->get( QueryClauses::class ) );
+		$this->taxonomy_hierarchy_data = $container->get( TaxonomyHierarchyData::class );
 
 		$this->fixture_data->add_product_review( $this->products[0]->get_id(), 5 );
 		$this->fixture_data->add_product_review( $this->products[1]->get_id(), 3 );
@@ -298,6 +308,82 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		);
 
 		$this->assertEqualsCanonicalizing( $expected_taxonomy_counts, $actual_taxonomy_counts );
+	}
+
+	/**
+	 * @testdox Test taxonomy count with hierarchical categories.
+	 *
+	 * Note: We create test categories here rather than using the existing ones from setUp()
+	 * because calculating expected counts for hierarchical categories would require complex
+	 * filtering logic in the callback passed to get_expected_category_counts(). The callback
+	 * would need to analyze the $product_data property to handle parent-child relationships.
+	 * For these hierarchy-specific tests, we directly create a simple parent-child
+	 * structure and assert the expected counts based on our test data.
+	 */
+	public function test_get_taxonomy_counts_with_hierarchical_categories() {
+		// Create parent category.
+		$parent_term = wp_insert_term( 'Electronics', 'product_cat' );
+		$parent_id   = $parent_term['term_id'];
+
+		// Create child category.
+		$child_term = wp_insert_term( 'Phones', 'product_cat', array( 'parent' => $parent_id ) );
+		$child_id   = $child_term['term_id'];
+
+		wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), 'product_cat' );
+		wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), 'product_cat' );
+
+		$this->taxonomy_hierarchy_data->clear_cache( 'product_cat' );
+
+		$wp_query   = new \WP_Query( array( 'post_type' => 'product' ) );
+		$query_vars = array_filter( $wp_query->query_vars );
+
+		$actual_taxonomy_counts = $this->sut->get_taxonomy_counts( $query_vars, 'product_cat' );
+
+		// Parent category should have count of 2, child category should have count of 1.
+		$this->assertSame( 2, $actual_taxonomy_counts[ $parent_id ] );
+		$this->assertSame( 1, $actual_taxonomy_counts[ $child_id ] );
+
+		wp_delete_term( $child_id, 'product_cat' );
+		wp_delete_term( $parent_id, 'product_cat' );
+	}
+
+	/**
+	 * @testdox Test taxonomy count with hierarchical categories and max price.
+	 *
+	 * Note: We create test categories here rather than using the existing ones from setUp()
+	 * because calculating expected counts for hierarchical categories would require complex
+	 * filtering logic in the callback passed to get_expected_category_counts(). The callback
+	 * would need to analyze the $product_data property to handle parent-child relationships.
+	 * For these hierarchy-specific tests, we directly create a simple parent-child
+	 * structure and assert the expected counts based on our test data.
+	 */
+	public function test_get_taxonomy_counts_with_hierarchical_categories_with_max_price() {
+		// Create parent category.
+		$parent_term = wp_insert_term( 'Electronics', 'product_cat' );
+		$parent_id   = $parent_term['term_id'];
+
+		// Create child category.
+		$child_term = wp_insert_term( 'Phones', 'product_cat', array( 'parent' => $parent_id ) );
+		$child_id   = $child_term['term_id'];
+
+		wp_set_object_terms( $this->products[0]->get_id(), array( $parent_id ), 'product_cat' );
+		wp_set_object_terms( $this->products[1]->get_id(), array( $child_id ), 'product_cat' );
+
+		$this->taxonomy_hierarchy_data->clear_cache( 'product_cat' );
+
+		$wp_query = new \WP_Query( array( 'post_type' => 'product' ) );
+		$wp_query->set( 'max_price', 15 );
+
+		$query_vars = array_filter( $wp_query->query_vars );
+
+		$actual_taxonomy_counts = $this->sut->get_taxonomy_counts( $query_vars, 'product_cat' );
+
+		// Parent category should have count of 1, child category should not be in results.
+		$this->assertSame( 1, $actual_taxonomy_counts[ $parent_id ] );
+		$this->assertArrayNotHasKey( $child_id, $actual_taxonomy_counts );
+
+		wp_delete_term( $child_id, 'product_cat' );
+		wp_delete_term( $parent_id, 'product_cat' );
 	}
 
 	/**

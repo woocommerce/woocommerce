@@ -33,7 +33,18 @@ rsync -avhW --quiet \
     "$PACKAGE_DIR/composer.json" \
     "$PACKAGE_DIR/composer.lock" \
     "$PACKAGE_DIR/changelog.md" \
+    "$PACKAGE_DIR/license.txt" \
+    "$PACKAGE_DIR/SECURITY.md" \
     "$BUILD_DIR/woocommerce/email-editor/"
+
+# Copy vendor-prefixed directory
+echo "📋 Copying vendor-prefixed directory..."
+mkdir -p "$BUILD_DIR/woocommerce/email-editor/vendor-prefixed"
+rsync -avhW --quiet \
+    "$PACKAGE_DIR/vendor-prefixed/classes" \
+    "$PACKAGE_DIR/vendor-prefixed/packages" \
+    "$PACKAGE_DIR/vendor-prefixed/LICENSE" \
+    "$BUILD_DIR/woocommerce/email-editor/vendor-prefixed/"
 
 # Copy mirror-readme.md as README.md
 echo "📝 Copying mirror-readme.md as README.md..."

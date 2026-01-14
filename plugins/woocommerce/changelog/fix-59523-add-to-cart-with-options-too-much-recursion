@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix 'too much recursion' error when interacting with the an Add to Cart + Options quantity selector
-
-

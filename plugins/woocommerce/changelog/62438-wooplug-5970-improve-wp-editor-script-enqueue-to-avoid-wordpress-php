@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed enqueuing of the whole `wordpress/editor` script where unnecessary.

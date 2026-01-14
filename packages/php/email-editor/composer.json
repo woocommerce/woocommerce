@@ -5,10 +5,11 @@
 	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
-	"version": "1.0.0",
+	"version": "2.3.0",
 	"autoload": {
 		"classmap": [
-			"src/"
+			"src/",
+			"vendor-prefixed/"
 		]
 	},
 	"autoload-dev": {
@@ -17,12 +18,10 @@
 		]
 	},
 	"require": {
-		"php": ">=7.4",
-		"soundasleep/html2text": "^2.1"
+		"php": ">=7.4"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0",
-		"pelago/emogrifier": "^7.3",
 		"phpunit/phpunit": "^9.6",
 		"woocommerce/woocommerce-sniffs": "1.0.0",
 		"yoast/phpunit-polyfills": "^4.0"
@@ -36,6 +35,12 @@
 		}
 	},
 	"scripts": {
+		"post-install-cmd": [
+			"composer dump-autoload -o"
+		],
+		"post-update-cmd": [
+			"composer dump-autoload -o"
+		],
 		"env:destroy": "wp-env destroy",
 		"env:stop": "wp-env stop",
 		"env:start": "wp-env start",

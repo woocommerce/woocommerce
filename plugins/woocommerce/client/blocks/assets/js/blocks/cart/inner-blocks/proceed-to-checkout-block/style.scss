@@ -18,6 +18,11 @@
 		}
 	}
 }
+.wc-block-cart__submit-button[aria-disabled="true"] {
+	.wc-block-components-button__text {
+		opacity: 0.5;
+	}
+}
 
 .wc-block-cart {
 	.wc-block-cart__submit-container {

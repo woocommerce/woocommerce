@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Moved package_id and package_name generation from CartController to WC_Cart::get_shipping_packages() method to ensure these fields are always present in shipping packages, regardless of how they are accessed.

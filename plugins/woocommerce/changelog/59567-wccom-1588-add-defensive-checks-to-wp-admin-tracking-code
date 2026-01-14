@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Extra defensive coding in JS when editing products with some of the "standard" product fields removed from the UI

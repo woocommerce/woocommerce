@@ -108,4 +108,117 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->heading_renderer->render( '<h1 style="font-size:clamp(10px, 20px, 24px)">This is Heading 1</h1>', $this->parsed_heading, $this->rendering_context );
 		$this->assertStringContainsString( 'font-size:24px', $rendered );
 	}
+
+	/**
+	 * Test it uses inherited color from email_attrs when no color is specified
+	 */
+	public function testItUsesInheritedColorFromEmailAttrs(): void {
+		$parsed_heading = $this->parsed_heading;
+
+		unset( $parsed_heading['attrs']['style']['color'] );
+		unset( $parsed_heading['attrs']['textColor'] );
+
+		$parsed_heading['email_attrs'] = array(
+			'color' => '#ff0000',
+		);
+
+		$rendered = $this->heading_renderer->render( '<h1>This is Heading 1</h1>', $parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
+	}
+
+	/**
+	 * Test it renders site title block.
+	 */
+	public function testItRendersSiteTitle(): void {
+		$parsed_heading = array(
+			'blockName'    => 'core/site-title',
+			'attrs'        => array(
+				'level'      => 5,
+				'textAlign'  => 'center',
+				'isLink'     => false,
+				'linkTarget' => '_blank',
+				'style'      => array(
+					'typography' => array(
+						'fontStyle'      => 'normal',
+						'fontWeight'     => '900',
+						'lineHeight'     => '2',
+						'letterSpacing'  => '1px',
+						'textDecoration' => 'none',
+						'textTransform'  => 'none',
+						'fontSize'       => '28px',
+					),
+				),
+				'fontSize'   => 'medium',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '',
+			'innerContent' => array(),
+			'email_attrs'  => array(
+				'font-size'       => '28px',
+				'text-decoration' => 'none',
+				'width'           => '580px',
+				'color'           => 'var(--wp--preset--color--accent-3)',
+			),
+		);
+		$rendered       = $this->heading_renderer->render( '<h3>My Site Title</h3>', $parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( 'My Site Title', $rendered );
+		$this->assertStringContainsString( 'font-size:28px;', $rendered );
+		$this->assertStringContainsString( 'font-weight:900;', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-center class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignCenterClass(): void {
+		$parsed_heading = $this->parsed_heading;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_heading['attrs']['textAlign'] );
+		unset( $parsed_heading['attrs']['align'] );
+
+		$content                        = '<h1 class="has-text-align-center">Centered heading</h1>';
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:center;', $rendered );
+		$this->assertStringContainsString( 'align="center"', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-right class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignRightClass(): void {
+		$parsed_heading = $this->parsed_heading;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_heading['attrs']['textAlign'] );
+		unset( $parsed_heading['attrs']['align'] );
+
+		$content                        = '<h1 class="has-text-align-right">Right aligned heading</h1>';
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+	}
+
+	/**
+	 * Test it prioritizes textAlign attribute over has-text-align-* class
+	 */
+	public function testItPrioritizesTextAlignAttributeOverClass(): void {
+		$parsed_heading                       = $this->parsed_heading;
+		$parsed_heading['attrs']['textAlign'] = 'right';
+		unset( $parsed_heading['attrs']['align'] );
+
+		$content                        = '<h1 class="has-text-align-center">Heading with center class but right attribute</h1>';
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+		// Should use the attribute, not the class.
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+		$this->assertStringNotContainsString( 'text-align:center;', $rendered );
+		$this->assertStringNotContainsString( 'align="center"', $rendered );
+	}
 }

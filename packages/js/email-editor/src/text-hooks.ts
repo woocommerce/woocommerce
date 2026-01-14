@@ -1,8 +1,12 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import { addFilterForEmail } from './config-tools';
 
 /**
  * Replace text in the email editor.
@@ -20,7 +24,7 @@ export const initTextHooks = (): void => {
 			},
 	};
 
-	addFilter(
+	addFilterForEmail(
 		'i18n.gettext',
 		'woocommerce/email-editor/override-text',
 		( translation, text, domain ) => {

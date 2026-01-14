@@ -21,7 +21,7 @@ Form and iFrame based gateways post data offsite, meaning there are less securit
 
 ## Creating a basic payment gateway
 
-**Note:** The instructions below are for the default Checkout page. If you're looking to add a custom payment method for the new Checkout block, check out [the payment method integration documentation](/docs/block-development/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration).
+**Note:** The instructions below are for the default Checkout page. If you're looking to add a custom payment method for the new Checkout block, check out [the payment method integration documentation](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/checkout-payment-methods/payment-method-integration).
 
 Payment gateways should be created as additional plugins that hook into WooCommerce. Inside the plugin, you need to create a class after plugins are loaded. Example:
 

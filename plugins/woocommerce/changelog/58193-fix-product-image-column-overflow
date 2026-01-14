@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure product images in the Single Product block respect column boundaries in both editor and frontend views.

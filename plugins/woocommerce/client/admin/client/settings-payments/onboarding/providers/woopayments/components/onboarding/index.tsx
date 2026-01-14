@@ -23,6 +23,7 @@ export default function WooPaymentsOnboarding( {
 	const {
 		steps,
 		isLoading,
+		currentTopLevelStep,
 		currentStep,
 		navigateToStep,
 		justCompletedStepId,
@@ -34,12 +35,12 @@ export default function WooPaymentsOnboarding( {
 	// Forces navigation to the current step only if the URL does not already match.
 	useEffect( () => {
 		if (
-			currentStep?.path &&
-			! location.pathname.endsWith( currentStep?.path ?? '' )
+			currentTopLevelStep &&
+			! location.pathname.endsWith( currentTopLevelStep?.path ?? '' )
 		) {
-			navigateToStep( currentStep.id );
+			navigateToStep( currentTopLevelStep.id );
 		}
-	}, [ currentStep, navigateToStep, location.pathname ] );
+	}, [ currentTopLevelStep, navigateToStep, location.pathname ] );
 
 	// Displays a loading indicator if the content is still loading.
 	if ( isLoading ) {
@@ -60,7 +61,10 @@ export default function WooPaymentsOnboarding( {
 						<div className="settings-payments-onboarding-modal__wrapper">
 							<Stepper
 								steps={ steps }
-								active={ currentStep?.id ?? '' }
+								activeTopLevelStep={
+									currentTopLevelStep?.id ?? ''
+								}
+								activeSubStep={ currentStep }
 								justCompletedStepId={ justCompletedStepId }
 								includeSidebar={ includeSidebar }
 								sidebarTitle={ __(

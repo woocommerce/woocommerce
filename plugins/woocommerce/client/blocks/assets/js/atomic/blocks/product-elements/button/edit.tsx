@@ -18,6 +18,7 @@ import {
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -72,6 +73,7 @@ const Edit = ( {
 	context?: Context | undefined;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
+	const { product } = useProduct( context?.postId );
 	const isDescendentOfQueryLoop = Number.isFinite( context?.queryId );
 	const { width } = attributes;
 
@@ -99,6 +101,11 @@ const Edit = ( {
 				<Disabled>
 					<Block
 						{ ...{ ...attributes, ...context } }
+						product={ {
+							...product,
+							button_text: product?.button_text || '',
+						} }
+						isAdmin={ true }
 						blockClientId={ blockProps?.id }
 						className={ clsx( attributes.className, {
 							[ `has-custom-width wp-block-button__width-${ width }` ]:

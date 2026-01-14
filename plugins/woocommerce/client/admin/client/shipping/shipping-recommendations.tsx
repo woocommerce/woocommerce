@@ -23,7 +23,6 @@ import {
 import WoocommerceShippingItem from './woocommerce-shipping-item';
 import './shipping-recommendations.scss';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
 
 const useInstallPlugin = () => {
 	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
@@ -92,16 +91,10 @@ export const ShippingRecommendationsList = ( {
 					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
 					'woocommerce'
 				) }
-				targetUrl={
-					isFeatureEnabled( 'marketplace' )
-						? getAdminLink(
-								'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-						  )
-						: 'https://woocommerce.com/product-category/woocommerce-extensions/shipping-delivery-and-fulfillment/'
-				}
-				linkType={
-					isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
-				}
+				targetUrl={ getAdminLink(
+					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+				) }
+				linkType="wc-admin"
 				eventName="settings_shipping_recommendation_visit_marketplace_click"
 			/>
 		</CardFooter>

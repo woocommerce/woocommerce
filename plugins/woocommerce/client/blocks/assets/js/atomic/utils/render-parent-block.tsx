@@ -217,9 +217,8 @@ const renderInnerBlocks = ( {
 			? blockWrapper
 			: Fragment;
 
-		const isCheckoutBlockChild = /^woocommerce\/checkout-/.test(
-			blockName
-		);
+		const isCheckoutBlockChild = block === 'woocommerce/checkout';
+		const isCartBlockChild = block === 'woocommerce/cart';
 
 		const blockContent = (
 			<BlockErrorBoundary
@@ -266,8 +265,8 @@ const renderInnerBlocks = ( {
 			</BlockErrorBoundary>
 		);
 
-		// Temporary return until the Cart block is also updated
-		return isCheckoutBlockChild ? (
+		// The cart and checkout blocks have progressive loading enabled, so we need to render the block immediately.
+		return isCheckoutBlockChild || isCartBlockChild ? (
 			blockContent
 		) : (
 			<Suspense

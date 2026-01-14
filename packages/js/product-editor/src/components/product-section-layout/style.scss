@@ -12,8 +12,7 @@
 				padding: $gap-large;
 
 				.components-base-control,
-				.components-dropdown,
-				.woocommerce-rich-text-editor {
+				.components-dropdown {
 					&:not(:first-child):not(.components-radio-control) {
 						margin-top: $gap-large - $gap-smaller;
 						margin-bottom: 0;

@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
-import { apiFetch } from '@wordpress/data-controls';
+import { apiFetch, select } from '@wordpress/data-controls';
 
 /**
  * Internal dependencies
  */
 import { WC_ADMIN_NAMESPACE } from '../constants';
 import { OnboardingDataResponse } from './types';
+import { STORE_KEY } from './constants';
 import {
 	getOnboardingDataRequest,
 	getOnboardingDataSuccess,
@@ -15,6 +16,15 @@ import {
 } from './actions';
 
 export function* getOnboardingData( sessionEntryPoint?: string | null ) {
+	// Check if we're already fetching to prevent concurrent requests.
+	const isFetchingData: boolean = yield select(
+		STORE_KEY,
+		'isOnboardingDataRequestPending'
+	);
+	if ( isFetchingData ) {
+		return;
+	}
+
 	yield getOnboardingDataRequest();
 
 	try {

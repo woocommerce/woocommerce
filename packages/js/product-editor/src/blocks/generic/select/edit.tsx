@@ -4,12 +4,12 @@
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { SelectControl } from '@wordpress/components';
 import { createElement } from '@wordpress/element';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
-import { sanitizeHTML } from '../../../utils/sanitize-html';
 import type { ProductEditorBlockEditProps } from '../../../types';
 import type { SelectBlockAttributes } from './types';
 import { Label } from '../../../components/label/label';
@@ -41,7 +41,11 @@ export function Edit( {
 
 	function renderHelp() {
 		if ( help ) {
-			return <span dangerouslySetInnerHTML={ sanitizeHTML( help ) } />;
+			return (
+				<span
+					dangerouslySetInnerHTML={ { __html: sanitizeHTML( help ) } }
+				/>
+			);
 		}
 	}
 

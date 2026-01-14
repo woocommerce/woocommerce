@@ -222,6 +222,11 @@ if ( file_exists( $plugin_path ) ) {
 			</td>
 		</tr>
 		<tr>
+			<td data-export-label="WP Environment Type"><?php esc_html_e( 'Environment type', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The current environment type set for this site.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
+			<td><?php echo esc_html( $environment['wp_environment_type'] ); ?></td>
+		</tr>
+		<tr>
 			<td data-export-label="Language"><?php esc_html_e( 'Language', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The current language used by WordPress. Default = English', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td><?php echo esc_html( $environment['language'] ); ?></td>
@@ -903,8 +908,13 @@ if ( 0 < $mu_plugins_count ) :
 					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( $_page['block'] ) ) {
 						$additional_info = __( "This page's content is overridden by custom template content", 'woocommerce' );
 					} elseif ( $_page['shortcode_present'] ) {
-						/* Translators: %1$s: shortcode text. */
-						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> shortcode', 'woocommerce' ), esc_html( $_page['shortcode'] ) );
+						// Always display the shortcode with square brackets for consistency.
+						$shortcode_display = $_page['shortcode'];
+						if ( $shortcode_display && '[' !== $shortcode_display[0] ) {
+							$shortcode_display = '[' . $shortcode_display . ']';
+						}
+						/* translators: %1$s: shortcode text. */
+						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> shortcode', 'woocommerce' ), esc_html( $shortcode_display ) );
 					} elseif ( $_page['block_present'] ) {
 						/* Translators: %1$s: block slug. */
 						$additional_info = sprintf( __( 'Contains the <strong>%1$s</strong> block', 'woocommerce' ), esc_html( $_page['block'] ) );

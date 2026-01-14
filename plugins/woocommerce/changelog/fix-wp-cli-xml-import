@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fixed product attributes taxonomies during XML/WXR import via WP CLI.

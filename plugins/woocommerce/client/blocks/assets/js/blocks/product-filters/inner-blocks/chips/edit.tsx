@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import clsx from 'clsx';
+import { decodeHtmlEntities } from '@woocommerce/utils';
 import {
 	InspectorControls,
 	useBlockProps,
@@ -101,7 +102,9 @@ const Edit = ( props: EditProps ): JSX.Element => {
 							>
 								<span className="wc-block-product-filter-chips__label">
 									<span className="wc-block-product-filter-chips__text">
-										{ item.label }
+										{ typeof item.label === 'string'
+											? decodeHtmlEntities( item.label )
+											: item.label }
 									</span>
 									{ showCounts && (
 										<span className="wc-block-product-filter-chips__count">

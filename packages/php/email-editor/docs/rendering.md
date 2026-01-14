@@ -13,6 +13,7 @@ The email rendering system includes **Core Blocks Integration** that provides de
     -   [Content_Renderer](#content_renderer)
 -   [Core Blocks Integration](#core-blocks-integration)
 -   [Table Wrapper Helper](#table-wrapper-helper)
+-   [Styles Helper](#styles-helper)
 -   [Integration Example](#integration-example)
 
 ## Retrieving Services via DI Container
@@ -352,6 +353,241 @@ $outlook_cell = Table_Wrapper_Helper::render_outlook_table_cell(
 <!--[if mso | IE]><td align="center"><![endif]-->
 <p>Outlook-specific content</p>
 <!--[if mso | IE]></td><![endif]-->
+```
+
+## Styles Helper
+
+The `Styles_Helper` class provides utility methods to assist with handling email-compatible inline styles derived from WordPress block attributes.
+
+### Available Methods
+
+#### `parse_value()`
+
+Parse numeric values from CSS strings with units.
+
+```php
+/**
+ * Parse number value from a string.
+ *
+ * @param string $value String value with value and unit.
+ * @return float
+ */
+public static function parse_value( string $value ): float
+```
+
+**Example Usage:**
+
+```php
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+
+$width = Styles_Helper::parse_value( '12.5px' );  // Returns 12.5
+$height = Styles_Helper::parse_value( '100%' );   // Returns 100.0
+$invalid = Styles_Helper::parse_value( 'invalid' ); // Returns 0.0
+```
+
+#### `parse_styles_to_array()`
+
+Convert CSS style string to associative array.
+
+```php
+/**
+ * Parse styles string to array.
+ *
+ * @param string $styles Styles string.
+ * @return array
+ */
+public static function parse_styles_to_array( string $styles ): array
+```
+
+**Example Usage:**
+
+```php
+$styles = 'margin: 10px; padding: 5px; color: red;';
+$parsed = Styles_Helper::parse_styles_to_array( $styles );
+/*
+Example return value:
+array(
+    'margin' => '10px',
+    'padding' => '5px',
+    'color'   => 'red',
+)
+*/
+```
+
+#### `get_normalized_block_styles()`
+
+Normalize block attributes by translating color slugs to actual color values.
+
+```php
+/**
+ * Get normalized block styles by translating color slugs to actual color values.
+ *
+ * This method handles the normalization of color-related attributes like backgroundColor,
+ * textColor, borderColor, and linkColor by translating them from slugs to actual color values
+ * using the rendering context.
+ *
+ * @param array             $block_attributes Block attributes containing color slugs.
+ * @param Rendering_Context $rendering_context Rendering context for color translation.
+ * @return array Normalized block styles with translated color values.
+ */
+public static function get_normalized_block_styles( array $block_attributes, Rendering_Context $rendering_context ): array
+```
+
+**Example Usage:**
+
+```php
+$block_attributes = array(
+    'backgroundColor' => 'primary',
+    'textColor' => 'secondary',
+    'style' => array( 'spacing' => array( 'padding' => '10px' ) )
+);
+
+$normalized = Styles_Helper::get_normalized_block_styles( $block_attributes, $rendering_context );
+/*
+Example return value:
+array(
+    'spacing' => array(
+        'padding' => '10px',
+    ),
+    'color' => array(
+        'background' => '#ff0000', // assuming 'primary' translates to '#ff0000'
+        'text'       => '#00ff00', // assuming 'secondary' translates to '#00ff00'
+    ),
+)
+*/
+```
+
+#### `get_styles_from_block()`
+
+Wrapper for WordPress Style Engine with guaranteed return structure.
+
+```php
+/**
+ * Wrapper for wp_style_engine_get_styles which ensures all values are returned.
+ *
+ * @param array $block_styles Array of block styles.
+ * @param bool  $skip_convert_vars If true, --wp_preset--spacing--x type values will be left in the original var:preset:spacing:x format.
+ * @return array {
+ *     @type string   $css          A CSS ruleset or declarations block
+ *                                  formatted to be placed in an HTML `style` attribute or tag.
+ *     @type string[] $declarations An associative array of CSS definitions,
+ *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+ *     @type string   $classnames   Classnames separated by a space.
+ * }
+ */
+public static function get_styles_from_block( array $block_styles, $skip_convert_vars = false )
+```
+
+**Example Usage:**
+
+```php
+$result = Styles_Helper::get_styles_from_block( $block_styles );
+/*
+Example return value:
+array(
+    'css' => 'padding: 10px; color: red;',
+    'declarations' => array(
+        'padding' => '10px',
+        'color'   => 'red',
+    ),
+    'classnames' => 'has-padding has-color-red',
+)
+*/
+```
+
+#### `extend_block_styles()`
+
+Extend existing block styles with additional CSS declarations.
+
+```php
+/**
+ * Extend block styles with CSS declarations.
+ *
+ * @param array $block_styles WP_Style_Engine styles array (must contain 'declarations' and 'css' keys).
+ * @param array $css_declarations An associative array of CSS definitions,
+ *                                e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+ * @return array {
+ *     @type string   $css          A CSS ruleset or declarations block
+ *                                  formatted to be placed in an HTML `style` attribute or tag.
+ *     @type string[] $declarations An associative array of CSS definitions,
+ *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+ *     @type string   $classnames   Classnames separated by a space.
+ * }
+ */
+public static function extend_block_styles( array $block_styles, $css_declarations )
+```
+
+**Example Usage:**
+
+```php
+$extended = Styles_Helper::extend_block_styles( $block_styles, array(
+    'margin' => '20px',
+    'color' => 'red'
+) );
+
+/*
+Example return value:
+array(
+    'declarations' => array(
+        'padding' => '10px',
+        'margin'  => '20px',
+        'color'   => 'red',
+    ),
+    'css' => 'padding: 10px; margin: 20px; color: red;',
+    'classnames' => 'test-class',
+)
+*/
+```
+
+#### `get_block_styles()`
+
+Comprehensive method to get processed block styles with filtering and return type control.
+
+```php
+/**
+ * Get block styles.
+ *
+ * @param array             $block_attributes   Block attributes.
+ * @param Rendering_Context $rendering_context  Rendering context.
+ * @param array             $properties         List of style properties to include. Supported values:
+ *                                              'spacing', 'padding', 'margin',
+ *                                              'border', 'border-width', 'border-style', 'border-radius', 'border-color',
+ *                                              'background', 'background-color', 'color',
+ *                                              'typography', 'font-size', 'font-family', 'font-weight', 'text-align'.
+ * @return array {
+ *     @type string   $css          A CSS ruleset or declarations block
+ *                                  formatted to be placed in an HTML `style` attribute or tag.
+ *     @type string[] $declarations An associative array of CSS definitions,
+ *                                  e.g. `array( "$property" => "$value", "$property" => "$value" )`.
+ *     @type string   $classnames   Classnames separated by a space.
+ * }
+ */
+public static function get_block_styles( array $block_attributes, Rendering_Context $rendering_context, array $properties )
+```
+
+**Supported Properties:**
+
+-   `spacing`, `padding`, `margin`
+-   `border`, `border-width`, `border-style`, `border-radius`, `border-color`
+-   `background`, `background-color`, `color`
+-   `typography`, `font-size`, `font-family`, `font-weight`, `text-align`
+
+**Example Usage:**
+
+```php
+$styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'color' ) );
+
+/*
+Example return value:
+array(
+    'declarations' => array(
+        'padding' => '10px',
+        'color'   => '#ff0000',
+    ),
+    'css' => 'padding: 10px; color: #ff0000;',
+    'classnames' => 'has-text-color',
+)
+*/
 ```
 
 ## Integration Example

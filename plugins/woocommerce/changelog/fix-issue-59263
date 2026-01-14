@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent quantity selector from rendering in Add to Cart with Options and Add to Cart + Options blocks when min and max quantity are the same.

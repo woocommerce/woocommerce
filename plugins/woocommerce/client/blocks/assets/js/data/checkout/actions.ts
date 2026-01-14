@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { OrderFormValues } from '@woocommerce/settings';
+import type { AddressFormType, OrderFormValues } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
 
 /**
@@ -235,3 +235,25 @@ export const __internalSetExtensionData = (
 	} );
 	return setExtensionData( ...args );
 };
+
+/**
+ * Add a new address autocomplete provider to the list.
+ */
+export const addAddressAutocompleteProvider = ( providerId: string ) => ( {
+	type: types.ADD_ADDRESS_AUTOCOMPLETE_PROVIDER,
+	providerId,
+} );
+
+/**
+ * Set the active address autocomplete provider.
+ *
+ * @param providerId
+ */
+export const setActiveAddressAutocompleteProvider = (
+	providerId: string,
+	addressType: AddressFormType
+) => ( {
+	type: types.SET_ACTIVE_ADDRESS_AUTOCOMPLETE_PROVIDER,
+	addressType,
+	providerId,
+} );

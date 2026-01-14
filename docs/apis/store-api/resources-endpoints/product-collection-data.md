@@ -7,20 +7,22 @@ GET /products/collection-data
 GET /products/collection-data?calculate_price_range=true
 GET /products/collection-data?calculate_attribute_counts[0][query_type]=or&calculate_attribute_counts[0][taxonomy]=pa_color
 GET /products/collection-data?calculate_rating_counts=true
+GET /products/collection-data?calculate_taxonomy_counts=product_cat
 ```
 
-| Attribute                    | Type   | Required | Description                                                                                                                                                                                                |
-| :--------------------------- | :----- | :------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `calculate_price_range`      | bool   |    No    | Returns the min and max price for the product collection. If false, only `null` will be returned.                                                                                                          |
-| `calculate_attribute_counts` | object |    No    | Returns attribute counts for a list of attribute taxonomies you pass in via this parameter. Each should be provided as an object with keys "taxonomy" and "query_type". If empty, `null` will be returned. |
-| `calculate_rating_counts`    | bool   |    No    | Returns the counts of products with a certain average rating, 1-5. If false, only `null` will be returned.                                                                                                 |
-| `calculate_stock_status_counts` | bool   |    No    | Returns counts of products with each stock status (in stock, out of stock, on backorder). If false, only `null` will be returned.                                                                       |
+| Attribute                       | Type   | Required | Description                                                                                                                                                                                                |
+| :------------------------------ | :----- | :------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `calculate_price_range`         | bool   |    No    | Returns the min and max price for the product collection. If false, only `null` will be returned.                                                                                                          |
+| `calculate_attribute_counts`    | object |    No    | Returns attribute counts for a list of attribute taxonomies you pass in via this parameter. Each should be provided as an object with keys "taxonomy" and "query_type". If empty, `null` will be returned. |
+| `calculate_rating_counts`       | bool   |    No    | Returns the counts of products with a certain average rating, 1-5. If false, only `null` will be returned.                                                                                                 |
+| `calculate_stock_status_counts` | bool   |    No    | Returns counts of products with each stock status (in stock, out of stock, on backorder). If false, only `null` will be returned.                                                                         |
+| `calculate_taxonomy_counts`     | array  |    No    | Returns taxonomy counts for a list of taxonomies you pass in via this parameter. Each should be provided as a taxonomy name string. If empty, `null` will be returned.                                 |
 
 
 **In addition to the above attributes**, all product list attributes are supported. This allows you to get data for a certain subset of products. See [the products API list products section](/docs/apis/store-api/resources-endpoints/products#list-products) for the full list.
 
 ```sh
-curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?calculate_price_range=true&calculate_attribute_counts=pa_size,pa_color&calculate_rating_counts=true"
+curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?calculate_price_range=true&calculate_attribute_counts=pa_size,pa_color&calculate_rating_counts=true&calculate_taxonomy_counts=product_cat,product_tag"
 ```
 
 **Example response:**
@@ -61,6 +63,20 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/collection-data?cal
 		{
 			"rating": 4,
 			"count": 1
+		}
+	],
+	"taxonomy_counts": [
+		{
+			"term": 25,
+			"count": 8
+		},
+		{
+			"term": 26,
+			"count": 6
+		},
+		{
+			"term": 27,
+			"count": 2
 		}
 	]
 }

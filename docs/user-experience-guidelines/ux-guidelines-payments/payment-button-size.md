@@ -39,7 +39,7 @@ The height of the button can adapt based on the needs of the theme.
 
 Make payment buttons the same size, no bigger or smaller than other payment buttons, including the CTAs "Add to cart" and "Proceed to checkout".
 
-![Same button size.png](/img/doc_images/Same-button-size.png)
+![Same button size.png](/img/doc_images/Button-size.png)
 
 ## Button width
 

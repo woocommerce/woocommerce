@@ -1,0 +1,39 @@
+The folder contains auto generated content.
+
+This program incorporates work covered by the following copyright and
+permission notices:
+
+  Mobiledetect/MobileDetect
+
+  mobiledetect/mobiledetectlib is Copyright (c) 2021 Şerban Ghiţă, Nick Ilyin and contributors.
+  https://github.com/serbanghita/Mobile-Detect
+
+  mobiledetect/mobiledetectlib is released under the MIT License
+  https://github.com/serbanghita/Mobile-Detect/blob/ffafcc0d659e7794f5b4ba611087de1af684f3c2/LICENSE
+
+
+  Pelago/Emogrifier
+
+  pelago/emogrifier is Copyright (c) 2008-2018 Pelago
+  https://github.com/MyIntervals/emogrifier
+
+  pelago/emogrifier is released under the MIT License
+  https://github.com/MyIntervals/emogrifier/blob/2cb1701ab3f23e979a7201d20615b33e31c365d3/LICENSE
+
+
+  Sabberworm/PHP CSS Parser
+
+  sabberworm/php-css-parser is Copyright (c) 2011 Raphael Schweikert, https://www.sabberworm.com/
+
+  sabberworm/php-css-parser is released under the MIT License
+  https://github.com/MyIntervals/PHP-CSS-Parser/blob/92432abc08758613a166fc5af5fa89c15aca4af3/LICENSE
+
+
+  Psr/Container interface
+
+  psr/container is Copyright (c) 2013-2016 container-interop
+  Copyright (c) 2016 PHP Framework Interoperability Group
+  https://github.com/php-fig/container
+
+  psr/container is released under the MIT License
+  https://github.com/php-fig/container/blob/707984727bd5b2b670e59559d3ed2500240cf875/LICENSE

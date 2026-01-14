@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Updated wc-analytics/customers API route to include location filtering (country and state), and user type filtering (registered or guest)

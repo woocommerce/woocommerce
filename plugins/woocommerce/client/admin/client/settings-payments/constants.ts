@@ -6,3 +6,5 @@ export const wooPaymentsProviderSuggestionId = '_wc_pes_woopayments';
 export const wooPaymentsOnboardingSessionEntrySettings = 'settings_payments';
 // This should match the value of WooPaymentsService::SESSION_ENTRY_LYS.
 export const wooPaymentsOnboardingSessionEntryLYS = 'lys';
+
+export const WC_SETTINGS_PAYMENTS_NAMESPACE = '/wc-admin/settings/payments';

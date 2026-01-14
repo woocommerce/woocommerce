@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.1.0
+ * @version 10.4.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -25,6 +25,7 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 $heading_class              = $email_improvements_enabled ? 'email-order-detail-heading' : '';
 $order_table_class          = $email_improvements_enabled ? 'email-order-details' : '';
 $order_total_text_align     = $email_improvements_enabled ? 'right' : 'left';
+$order_quantity_text_align  = $email_improvements_enabled ? 'right' : 'left';
 
 if ( $email_improvements_enabled ) {
 	add_filter( 'woocommerce_order_shipping_to_display_shipped_via', '__return_false' );
@@ -71,15 +72,13 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 
 <div style="margin-bottom: <?php echo $email_improvements_enabled ? '24px' : '40px'; ?>;">
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
-		<?php if ( ! $email_improvements_enabled ) { ?>
 		<thead>
 			<tr>
 				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_quantity_text_align ); ?>;"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_total_text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
-		<?php } ?>
 		<tbody>
 			<?php
 			$image_size = $email_improvements_enabled ? 48 : 32;
@@ -95,52 +94,52 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 			);
 			?>
 		</tbody>
-		<tfoot>
-			<?php
-			$item_totals       = $order->get_order_item_totals();
-			$item_totals_count = count( $item_totals );
-
-			if ( $item_totals ) {
-				$i = 0;
-				foreach ( $item_totals as $total ) {
-					$i++;
-					$last_class = ( $i === $item_totals_count ) ? ' order-totals-last' : '';
-					?>
-					<tr class="order-totals order-totals-<?php echo esc_attr( $total['type'] ?? 'unknown' ); ?><?php echo esc_attr( $last_class ); ?>">
-						<th class="td text-align-left" scope="row" colspan="2" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>">
-							<?php
-							echo wp_kses_post( $total['label'] ) . ' ';
-							if ( $email_improvements_enabled ) {
-								echo isset( $total['meta'] ) ? wp_kses_post( $total['meta'] ) : '';
-							}
-							?>
-						</th>
-						<td class="td text-align-<?php echo esc_attr( $order_total_text_align ); ?>" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['value'] ); ?></td>
-					</tr>
-					<?php
-				}
-			}
-			if ( $order->get_customer_note() && ! $email_improvements_enabled ) {
-				?>
-				<tr>
-					<th class="td text-align-left" scope="row" colspan="2"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
-					<td class="td text-align-left"><?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array() ); ?></td>
-				</tr>
-				<?php
-			}
-			if ( $order->get_customer_note() && $email_improvements_enabled ) {
-				?>
-				<tr class="order-customer-note">
-					<td class="td text-align-left" colspan="3">
-						<b><?php esc_html_e( 'Customer note', 'woocommerce' ); ?></b><br>
-						<?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?>
-					</td>
-				</tr>
-				<?php
-			}
-			?>
-		</tfoot>
 	</table>
+	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
+		<?php
+		$item_totals       = $order->get_order_item_totals();
+		$item_totals_count = count( $item_totals );
+
+		if ( $item_totals ) {
+			$i = 0;
+			foreach ( $item_totals as $total ) {
+				++$i;
+				$last_class = ( $i === $item_totals_count ) ? ' order-totals-last' : '';
+				?>
+				<tr class="order-totals order-totals-<?php echo esc_attr( $total['type'] ?? 'unknown' ); ?><?php echo esc_attr( $last_class ); ?>">
+					<th class="td text-align-left" scope="row" colspan="2" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>">
+						<?php
+						echo wp_kses_post( $total['label'] ) . ' ';
+						if ( $email_improvements_enabled ) {
+							echo isset( $total['meta'] ) ? wp_kses_post( $total['meta'] ) : '';
+						}
+						?>
+					</th>
+					<td class="td text-align-<?php echo esc_attr( $order_total_text_align ); ?>" style="<?php echo ( 1 === $i ) ? 'border-top-width: 4px;' : ''; ?>"><?php echo wp_kses_post( $total['value'] ); ?></td>
+				</tr>
+				<?php
+			}
+		}
+		if ( $order->get_customer_note() && ! $email_improvements_enabled ) {
+			?>
+			<tr>
+				<th class="td text-align-left" scope="row" colspan="2"><?php esc_html_e( 'Note:', 'woocommerce' ); ?></th>
+				<td class="td text-align-left"><?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array() ); ?></td>
+			</tr>
+			<?php
+		}
+		?>
+	</table>
+	<?php if ( $order->get_customer_note() && $email_improvements_enabled ) { ?>
+		<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1" role="presentation">
+			<tr class="order-customer-note">
+				<td class="td text-align-left">
+					<b><?php esc_html_e( 'Customer note', 'woocommerce' ); ?></b><br>
+					<?php echo wp_kses( nl2br( wc_wptexturize_order_note( $order->get_customer_note() ) ), array( 'br' => array() ) ); ?>
+				</td>
+			</tr>
+		</table>
+	<?php } ?>
 </div>
 
 <?php

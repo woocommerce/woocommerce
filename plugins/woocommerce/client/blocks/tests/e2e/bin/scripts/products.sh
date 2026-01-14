@@ -31,7 +31,7 @@ wp wc product update $beanie_product_id --tags="[ { \"id\": $tag_id } ]" --user=
 cap_product_id=$(wp post list --post_type=product --field=ID --name="Cap" --format=ids)
 wp post meta update $beanie_product_id _crosssell_ids "$cap_product_id"
 
-# Set a product out of stock
+# Set a product out of stock.
 tshirt_with_logo_product_id=$(wp post list --post_type=product --field=ID --name="T-Shirt with Logo" --format=ids)
 wp wc product update $tshirt_with_logo_product_id --in_stock=false --user=1
 

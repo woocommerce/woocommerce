@@ -10,3 +10,5 @@ parameters:
 	ignoreErrors:
 		- # str_starts_with is not available in PHP 7.4. but polyfilled in core.
 			message: '#^Function str_starts_with not found\.$#'
+		- # str_ends_with is not available in PHP 7.4. but polyfilled in core.
+			message: '#^Function str_ends_with not found\.$#'

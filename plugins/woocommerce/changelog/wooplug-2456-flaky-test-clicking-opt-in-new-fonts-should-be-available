@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Font Picker E2E test: refactor response handling to ensure all font families are loaded before proceed with test

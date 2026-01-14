@@ -25,10 +25,6 @@ type AddToCartFormSettingsProps = {
 	setAttributes: ( attributes: {
 		quantitySelectorStyle: QuantitySelectorStyle;
 	} ) => void;
-
-	features: {
-		isStepperLayoutFeatureEnabled?: boolean;
-	};
 };
 
 const getHelpText = ( quantitySelectorStyle: QuantitySelectorStyle ) => {
@@ -49,37 +45,32 @@ const getHelpText = ( quantitySelectorStyle: QuantitySelectorStyle ) => {
 export const AddToCartFormSettings = ( {
 	quantitySelectorStyle,
 	setAttributes,
-	features,
 }: AddToCartFormSettingsProps ) => {
-	const { isStepperLayoutFeatureEnabled } = features;
-
 	return (
 		<InspectorControls>
-			{ isStepperLayoutFeatureEnabled && (
-				<PanelBody title={ __( 'Quantity Selector', 'woocommerce' ) }>
-					<ToggleGroupControl
-						__nextHasNoMarginBottom
-						value={ quantitySelectorStyle }
-						isBlock
-						onChange={ ( value: QuantitySelectorStyle ) => {
-							setAttributes( {
-								quantitySelectorStyle:
-									value as QuantitySelectorStyle,
-							} );
-						} }
-						help={ getHelpText( quantitySelectorStyle ) }
-					>
-						<ToggleGroupControlOption
-							label={ __( 'Input', 'woocommerce' ) }
-							value={ QuantitySelectorStyle.Input }
-						/>
-						<ToggleGroupControlOption
-							label={ __( 'Stepper', 'woocommerce' ) }
-							value={ QuantitySelectorStyle.Stepper }
-						/>
-					</ToggleGroupControl>
-				</PanelBody>
-			) }
+			<PanelBody title={ __( 'Quantity Selector', 'woocommerce' ) }>
+				<ToggleGroupControl
+					__nextHasNoMarginBottom
+					value={ quantitySelectorStyle }
+					isBlock
+					onChange={ ( value: QuantitySelectorStyle ) => {
+						setAttributes( {
+							quantitySelectorStyle:
+								value as QuantitySelectorStyle,
+						} );
+					} }
+					help={ getHelpText( quantitySelectorStyle ) }
+				>
+					<ToggleGroupControlOption
+						label={ __( 'Input', 'woocommerce' ) }
+						value={ QuantitySelectorStyle.Input }
+					/>
+					<ToggleGroupControlOption
+						label={ __( 'Stepper', 'woocommerce' ) }
+						value={ QuantitySelectorStyle.Stepper }
+					/>
+				</ToggleGroupControl>
+			</PanelBody>
 		</InspectorControls>
 	);
 };

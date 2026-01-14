@@ -47,6 +47,7 @@ export interface ProductCollectionAttributes {
 export enum LayoutOptions {
 	GRID = 'flex',
 	STACK = 'list',
+	CAROUSEL = 'carousel',
 }
 
 export enum WidthOptions {
@@ -189,6 +190,7 @@ export enum CoreCollectionNames {
 	CROSS_SELLS = 'woocommerce/product-collection/cross-sells',
 	BY_CATEGORY = 'woocommerce/product-collection/by-category',
 	BY_TAG = 'woocommerce/product-collection/by-tag',
+	CART_CONTENTS = 'woocommerce/product-collection/cart-contents',
 }
 
 export enum CoreFilterNames {

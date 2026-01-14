@@ -3,20 +3,19 @@
  */
 import React, { useState } from 'react';
 import { Button } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import { useStepperContext } from '../components/stepper';
-import {
-	disableWooPaymentsTestAccount,
-	recordPaymentsOnboardingEvent,
-} from '~/settings-payments/utils';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import strings from '../strings';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 
 const ActivatePayments: React.FC = () => {
-	const { currentStep, sessionEntryPoint } = useOnboardingContext();
+	const { currentStep, sessionEntryPoint, refreshStoreData } =
+		useOnboardingContext();
 	const { nextStep } = useStepperContext();
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
@@ -29,13 +28,31 @@ const ActivatePayments: React.FC = () => {
 			source: sessionEntryPoint,
 		} );
 
+		if ( ! currentStep?.actions?.test_account_disable?.href ) {
+			// If there is no test account disable URL, we can proceed to the next step directly.
+			return nextStep();
+		}
+
 		setIsContinueButtonLoading( true );
 
-		// Disable test account and proceed to live KYC.
-		disableWooPaymentsTestAccount()
-			.then( () => {
+		// Disable test account and proceed with business verification.
+		apiFetch( {
+			url: currentStep?.actions?.test_account_disable?.href,
+			method: 'POST',
+			data: {
+				from: 'step_' + ( currentStep?.id || 'unknown' ),
+				source: sessionEntryPoint,
+			},
+		} )
+			.then( async () => {
+				// Refresh the entire onboarding store data after disabling the test account.
+				// This ensures that the latest data is available for the next sub-steps.
+				await ( typeof refreshStoreData === 'function'
+					? refreshStoreData()
+					: Promise.resolve() );
+				// Stop loading before navigating to avoid setState-after-unmount.
 				setIsContinueButtonLoading( false );
-				// Navigate to the live account setup.
+				// Navigate to the business sub-step.
 				return nextStep();
 			} )
 			.catch( () => {

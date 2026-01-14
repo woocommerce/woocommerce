@@ -9,10 +9,11 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
- * This renderer covers both core/paragraph and core/heading blocks
+ * This renderer covers both core/paragraph, core/heading and core/site-title blocks.
  */
 class Text extends Abstract_Block_Renderer {
 	/**
@@ -29,20 +30,32 @@ class Text extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		$block_content    = $this->adjustStyleAttribute( $block_content );
-		$block_attributes = wp_parse_args(
+		$block_content        = $this->adjustStyleAttribute( $block_content );
+		$block_attributes     = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
 				'textAlign' => 'left',
 				'style'     => array(),
 			)
 		);
-		$html             = new \WP_HTML_Tag_Processor( $block_content );
-		$classes          = 'email-text-block';
+		$html                 = new \WP_HTML_Tag_Processor( $block_content );
+		$classes              = 'email-text-block';
+		$alignment_from_class = null;
 		if ( $html->next_tag() ) {
 			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$block_classes = $html->get_attribute( 'class' ) ?? '';
 			$classes      .= ' ' . $block_classes;
+
+			// Extract text alignment from has-text-align-* classes before they're potentially modified.
+			$class_attr = (string) $block_classes;
+			if ( false !== strpos( $class_attr, 'has-text-align-center' ) ) {
+				$alignment_from_class = 'center';
+			} elseif ( false !== strpos( $class_attr, 'has-text-align-right' ) ) {
+				$alignment_from_class = 'right';
+			} elseif ( false !== strpos( $class_attr, 'has-text-align-left' ) ) {
+				$alignment_from_class = 'left';
+			}
+
 			// remove has-background to prevent double padding applied for wrapper and inner element.
 			$block_classes = str_replace( 'has-background', '', $block_classes );
 			// remove border related classes because we handle border on wrapping table cell.
@@ -52,36 +65,27 @@ class Text extends Abstract_Block_Renderer {
 			$block_content = $html->get_updated_html();
 		}
 
-		// Add fallback text color when no custom text color or preset text color is set.
-		// Color styles are set on $block_attributes['style']['color'] only when custom values are used.
-		// In case of preset they are set on $block_attributes['textColor'] and $block_attributes['backgroundColor'].
-		$color_styles = $block_attributes['style']['color'] ?? array();
-		if ( empty( $color_styles['text'] ) && empty( $block_attributes['textColor'] ) ) {
-			$email_styles         = $rendering_context->get_theme_styles();
-			$color_styles['text'] = $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
-		}
-
-		$block_styles = $this->get_styles_from_block(
-			array(
-				'color'      => $color_styles,
-				'spacing'    => $block_attributes['style']['spacing'] ?? array(),
-				'typography' => $block_attributes['style']['typography'] ?? array(),
-				'border'     => $block_attributes['style']['border'] ?? array(),
-			)
-		);
-
-		$styles = array(
+		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'border', 'background-color', 'color', 'typography' ) );
+		$additional_styles = array(
 			'min-width' => '100%', // prevent Gmail App from shrinking the table on mobile devices.
 		);
 
-		$styles['text-align'] = 'left';
-		if ( ! empty( $parsed_block['attrs']['textAlign'] ) ) { // in this case, textAlign needs to be one of 'left', 'center', 'right'.
-			$styles['text-align'] = $parsed_block['attrs']['textAlign'];
-		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
-			$styles['text-align'] = $parsed_block['attrs']['align'];
+		// Add fallback text color when no custom text color or preset text color is set.
+		if ( empty( $block_styles['declarations']['color'] ) ) {
+			$email_styles               = $rendering_context->get_theme_styles();
+			$additional_styles['color'] = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#000000'; // Fallback for the text color.
 		}
 
-		$compiled_styles = $this->compile_css( $block_styles['declarations'], $styles );
+		$additional_styles['text-align'] = 'left';
+		if ( ! empty( $parsed_block['attrs']['textAlign'] ) ) { // in this case, textAlign needs to be one of 'left', 'center', 'right'.
+			$additional_styles['text-align'] = $parsed_block['attrs']['textAlign'];
+		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
+			$additional_styles['text-align'] = $parsed_block['attrs']['align'];
+		} elseif ( null !== $alignment_from_class ) {
+			$additional_styles['text-align'] = $alignment_from_class;
+		}
+
+		$block_styles = Styles_Helper::extend_block_styles( $block_styles, $additional_styles );
 
 		$table_attrs = array(
 			'style' => 'border-collapse: separate;', // Needed because of border radius.
@@ -90,8 +94,8 @@ class Text extends Abstract_Block_Renderer {
 
 		$cell_attrs = array(
 			'class' => $classes,
-			'style' => $compiled_styles,
-			'align' => $styles['text-align'],
+			'style' => $block_styles['css'],
+			'align' => $additional_styles['text-align'],
 		);
 
 		return Table_Wrapper_Helper::render_table_wrapper( $block_content, $table_attrs, $cell_attrs );

@@ -13,7 +13,7 @@ import CouponsReportTable from './table';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
-import ReportFilters from '../../components/report-filters';
+import { ReportHeader } from '../../components/report-header';
 
 class CouponsReport extends Component {
 	getChartMeta() {
@@ -47,7 +47,7 @@ class CouponsReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters
+				<ReportHeader
 					query={ query }
 					path={ path }
 					filters={ filters }

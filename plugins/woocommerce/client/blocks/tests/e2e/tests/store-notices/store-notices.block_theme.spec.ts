@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { expect, test } from '@woocommerce/e2e-utils';
+import { expect, test, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

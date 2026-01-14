@@ -263,6 +263,22 @@ class FixtureData {
 	}
 
 	/**
+	 * Create a product tag and return the result.
+	 *
+	 * @param array $props Tag props.
+	 * @return array
+	 */
+	public function get_product_tag( $props ) {
+		$tag_name = $props['name'] ?? 'Test Tag';
+
+		return wp_insert_term(
+			$tag_name,
+			'product_tag',
+			$props
+		);
+	}
+
+	/**
 	 * Create a product brand and return the result.
 	 *
 	 * @param array $props Product props.
