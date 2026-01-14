@@ -1722,7 +1722,7 @@ class WC_Install {
 
 		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
 		if (  null === $comment_type_index_exists ) {
-			// TBD (updated description).
+			// Improve performance of the admin comments query when counting approved comments while excluding internal notes.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_approved, comment_type, comment_post_ID)" );
 		}
 
