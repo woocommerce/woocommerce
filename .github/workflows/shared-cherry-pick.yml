@@ -153,7 +153,7 @@ jobs:
                   branch: cherryPickBranch
                 });
 
-                core.info('error_message', `Branch '${cherryPickBranch}' exists without PR. A new PR will be created automatically and needs a review.`);
+                core.info(`Branch '${cherryPickBranch}' exists without PR. A new PR will be created automatically and needs a review.`);
 
               } catch (branchError) {
                 if (branchError.status !== 404) {
