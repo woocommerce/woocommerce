@@ -7,6 +7,53 @@ const blockData = {
 	slug: 'woocommerce/accordion-group',
 };
 
+const accordionInnerBlocks = [
+	{
+		name: 'woocommerce/accordion-item',
+		innerBlocks: [
+			{
+				name: 'woocommerce/accordion-header',
+				attributes: {
+					title: 'First Accordion Header',
+				},
+			},
+			{
+				name: 'woocommerce/accordion-panel',
+				innerBlocks: [
+					{
+						name: 'core/paragraph',
+						attributes: {
+							content: 'First accordion content',
+						},
+					},
+				],
+			},
+		],
+	},
+	{
+		name: 'woocommerce/accordion-item',
+		innerBlocks: [
+			{
+				name: 'woocommerce/accordion-header',
+				attributes: {
+					title: 'Second Accordion Header',
+				},
+			},
+			{
+				name: 'woocommerce/accordion-panel',
+				innerBlocks: [
+					{
+						name: 'core/paragraph',
+						attributes: {
+							content: 'Second accordion content',
+						},
+					},
+				],
+			},
+		],
+	},
+];
+
 test.describe( `${ blockData.slug } Block - Deprecation`, () => {
 	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
@@ -15,16 +62,48 @@ test.describe( `${ blockData.slug } Block - Deprecation`, () => {
 	test( 'shows deprecation notice and converts all inner blocks to core accordion on upgrade', async ( {
 		editor,
 		frontendUtils,
+		page,
 	} ) => {
-		// Insert WooCommerce accordion block.
-		await editor.insertBlock( { name: blockData.slug } );
+		// Insert WooCommerce accordion block with inner blocks and content.
+		await editor.insertBlock( {
+			name: blockData.slug,
+			innerBlocks: accordionInnerBlocks,
+		} );
 
-		// Verify deprecation message is displayed in the canvas.
+		// Wait for the deprecation notice to appear.
 		await expect(
 			editor.canvas.getByText(
 				'This version of the Accordion block is outdated. Upgrade to continue using.'
 			)
 		).toBeVisible();
+
+		// Verify legacy block still renders as expected before upgrade. Save as draft and preview it.
+		await editor.saveDraft();
+		const postId = await page.evaluate( () => {
+			return window.wp.data.select( 'core/editor' ).getCurrentPostId();
+		} );
+		await page.goto( `/?p=${ postId }&preview=true` );
+		const legacyAccordionFrontend = frontendUtils.page.locator(
+			'.wp-block-woocommerce-accordion-group'
+		);
+		await expect( legacyAccordionFrontend ).toBeVisible();
+
+		// Verify legacy accordion has accordion items with buttons.
+		const legacyAccordionButtons =
+			legacyAccordionFrontend.getByRole( 'button' );
+		const legacyItemCount = await legacyAccordionButtons.count();
+		expect( legacyItemCount ).toBe( 2 );
+
+		// Verify the content is visible.
+		await expect(
+			legacyAccordionFrontend.getByText( 'First Accordion Header' )
+		).toBeVisible();
+		await expect(
+			legacyAccordionFrontend.getByText( 'Second Accordion Header' )
+		).toBeVisible();
+
+		// Go back to editor.
+		await page.goBack();
 
 		// Verify upgrade button is displayed.
 		const upgradeButton = editor.canvas.getByRole( 'button', {
