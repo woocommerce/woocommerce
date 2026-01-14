@@ -30,7 +30,7 @@ async function findExistingComment( github, context ) {
  */
 function generateCommentBody( prNumber ) {
 	return `<!-- email-editor-test-reminder -->
-## Email Editor Testing Required
+## Email Editor Testing (WordPress.com)
 
 Are you an Automattician? If this PR relates to email rendering or reading site data, please test it on WordPress.com.
 
