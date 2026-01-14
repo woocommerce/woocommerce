@@ -1720,17 +1720,14 @@ class WC_Install {
 
 		$db_delta_result = dbDelta( self::get_schema() );
 
-		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
-
-		if ( is_null( $comment_type_index_exists ) ) {
-			// Add an index to the field comment_type to improve the response time of the query
-			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
-			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
+		if (  null === $comment_type_index_exists ) {
+			// TBD (updated description).
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_approved, comment_type, comment_post_ID)" );
 		}
 
 		$date_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
-
-		if ( is_null( $date_type_index_exists ) ) {
+		if ( null === $date_type_index_exists ) {
 			// Improve performance of the admin comments query when fetching the latest 25 comments while excluding reviews and internal notes.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
 		}
