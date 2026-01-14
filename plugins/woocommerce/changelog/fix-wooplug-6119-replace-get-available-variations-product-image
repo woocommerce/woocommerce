@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Replace get_available_variations() with get_visible_children() and get_price() in product-image.php template for better performance.
