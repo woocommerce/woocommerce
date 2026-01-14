@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improved the performance of the product attributes lookup table synchronization (insert and delete operations).
