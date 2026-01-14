@@ -158,7 +158,7 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		// Block early if session is blocked by fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track()
 			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
 			$response = $this->get_route_error_response(
 				'woocommerce_rest_checkout_error',
@@ -586,7 +586,7 @@ class Checkout extends AbstractCartRoute {
 		// Track successful order placement (success or pending payment).
 		if ( in_array( $payment_result->get_status(), array( 'success', 'pending' ), true ) ) {
 			$container = wc_get_container();
-			if ( $container->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			if ( $container->get( FraudProtectionController::class )->should_track() ) {
 				$container->get( CheckoutEventTracker::class )
 					->track_order_placed( $this->order->get_id(), $this->order );
 			}

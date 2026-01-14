@@ -168,6 +168,86 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that should_track returns false when feature is enabled but user is admin.
+	 */
+	public function test_should_track_returns_false_when_enabled_for_admin(): void {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
+
+		// Create an admin user and set as current user.
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		// Get a fresh controller instance to pick up the option change.
+		$controller = $this->get_fresh_controller();
+
+		// Check if the method returns false (admins should NOT be tracked).
+		$this->assertFalse( $controller->should_track() );
+
+		// Clean up.
+		wp_delete_user( $admin_id );
+	}
+
+	/**
+	 * Test that should_track returns false when feature is disabled regardless of user role.
+	 */
+	public function test_should_track_returns_false_when_disabled_for_regular_user(): void {
+		// Disable the feature.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'no' );
+
+		// Create a subscriber user (regular user, no admin capability).
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+
+		// Get a fresh controller instance to pick up the option change.
+		$controller = $this->get_fresh_controller();
+
+		// Check if the method returns false (feature disabled = no tracking).
+		$this->assertFalse( $controller->should_track() );
+
+		// Clean up.
+		wp_delete_user( $subscriber_id );
+	}
+
+	/**
+	 * Test that should_track returns true when feature is enabled for regular users.
+	 */
+	public function test_should_track_returns_true_when_enabled_for_regular_user(): void {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
+
+		// Create a subscriber user (no manage_woocommerce capability) and set as current user.
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+
+		// Get a fresh controller instance to pick up the option change.
+		$controller = $this->get_fresh_controller();
+
+		// Check if the method returns true (regular users should be tracked).
+		$this->assertTrue( $controller->should_track() );
+
+		// Clean up.
+		wp_delete_user( $subscriber_id );
+	}
+
+	/**
+	 * Test that should_track returns true when no user is logged in (guest).
+	 */
+	public function test_should_track_returns_true_when_no_user(): void {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
+
+		// Ensure no user is logged in.
+		wp_set_current_user( 0 );
+
+		// Get a fresh controller instance to pick up the option change.
+		$controller = $this->get_fresh_controller();
+
+		// Check if the method returns true (guests should be tracked).
+		$this->assertTrue( $controller->should_track() );
+	}
+
+	/**
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {

@@ -413,7 +413,7 @@ class WC_Shortcode_My_Account {
 			exit();
 		} else {
 			// Track add payment method page loaded for fraud protection.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 				wc_get_container()->get( PaymentMethodEventTracker::class )
 					->track_add_payment_method_page_loaded();
 			}

@@ -1347,7 +1347,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
 			// Track cart event for fraud protection (only for newly added items).
-			if ( ! $item_was_already_in_cart && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			if ( ! $item_was_already_in_cart && wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 				wc_get_container()->get( CartEventTracker::class )
 					->track_cart_item_added( $cart_item_key, (int) $product_id, (int) $quantity, $variation_id );
 			}
@@ -1378,7 +1378,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
 
 			// Track cart event for fraud protection.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 				wc_get_container()->get( CartEventTracker::class )
 					->track_cart_item_removed( $cart_item_key, $this );
 			}
@@ -1407,7 +1407,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
 
 			// Track cart event for fraud protection.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 				wc_get_container()->get( CartEventTracker::class )
 					->track_cart_item_restored( $cart_item_key, $this );
 			}
@@ -1443,7 +1443,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity, $this );
 
 		// Track cart event for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 			wc_get_container()->get( CartEventTracker::class )
 				->track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $this );
 		}

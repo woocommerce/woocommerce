@@ -378,7 +378,7 @@ class WC_AJAX {
 		do_action( 'woocommerce_checkout_update_order_review', isset( $_POST['post_data'] ) ? wp_unslash( $_POST['post_data'] ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// Track checkout field update for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 			wc_get_container()->get( CheckoutEventTracker::class )
 				->track_shortcode_checkout_field_update( isset( $_POST['post_data'] ) ? wp_unslash( $_POST['post_data'] ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}

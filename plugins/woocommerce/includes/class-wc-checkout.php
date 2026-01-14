@@ -1103,7 +1103,7 @@ class WC_Checkout {
 			);
 
 			// Track successful order placement.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 				$fp_order = wc_get_order( $order_id );
 				if ( $fp_order instanceof \WC_Order ) {
 					wc_get_container()->get( CheckoutEventTracker::class )
@@ -1143,7 +1143,7 @@ class WC_Checkout {
 		);
 
 		// Track successful order placement.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() && $order instanceof \WC_Order ) {
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track() && $order instanceof \WC_Order ) {
 			wc_get_container()->get( CheckoutEventTracker::class )
 				->track_order_placed( $order_id, $order );
 		}

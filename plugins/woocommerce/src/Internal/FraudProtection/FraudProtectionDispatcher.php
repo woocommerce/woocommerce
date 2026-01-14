@@ -92,7 +92,7 @@ class FraudProtectionDispatcher {
 	public function dispatch_event( string $event_type, array $event_data = array() ): void {
 		try {
 			// Check if feature is enabled - fail-open if not.
-			if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
+			if ( ! $this->fraud_protection_controller->should_track() ) {
 				FraudProtectionController::log(
 					'debug',
 					sprintf(

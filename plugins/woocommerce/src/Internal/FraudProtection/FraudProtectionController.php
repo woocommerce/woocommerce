@@ -161,6 +161,14 @@ class FraudProtectionController implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Check if the fraud protection is enabled and should track events for the current user.
+	 * @return bool True if fraud protection should track events for the current user, false otherwise.
+	 */
+	public function should_track(){
+		return $this->feature_is_enabled() && ! current_user_can( 'manage_woocommerce' );
+	}
+
+	/**
 	 * Log helper method for consistent logging across all fraud protection components.
 	 *
 	 * This static method ensures all fraud protection logs are written with

@@ -85,7 +85,9 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_handle_payment_method_added(): void {
 
-		$user_id = $this->factory->user->create();
+		// Create a regular user (not admin) and set as current user for should_track() to pass.
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
 
 		$token = new \WC_Payment_Token_CC();
 		$token->set_token( 'test_token_123' );

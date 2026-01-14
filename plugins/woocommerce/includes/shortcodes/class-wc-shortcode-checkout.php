@@ -348,7 +348,7 @@ class WC_Shortcode_Checkout {
 		}
 
 		// Track checkout page loaded for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 			wc_get_container()->get( CheckoutEventTracker::class )
 				->track_checkout_page_loaded();
 		}

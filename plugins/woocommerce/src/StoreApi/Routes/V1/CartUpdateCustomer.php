@@ -216,7 +216,7 @@ class CartUpdateCustomer extends AbstractCartRoute {
 		$customer->save();
 
 		$container = wc_get_container();
-		if ( $container->get( FraudProtectionController::class )->feature_is_enabled() ) {
+		if ( $container->get( FraudProtectionController::class )->should_track() ) {
 			$container->get( CheckoutEventTracker::class )->track_blocks_checkout_update();
 		}
 

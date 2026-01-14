@@ -82,7 +82,7 @@ class WC_Shortcode_Cart {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 
 		// Track cart page loaded for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 			wc_get_container()->get( CartEventTracker::class )
 				->track_cart_page_loaded();
 		}

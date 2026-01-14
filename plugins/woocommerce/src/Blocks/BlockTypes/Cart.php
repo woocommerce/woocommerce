@@ -167,7 +167,7 @@ class Cart extends AbstractBlock {
 		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_woocommerce_core_scripts' ), 20 );
 
 		// Track cart page loaded for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 			wc_get_container()->get( CartEventTracker::class )
 				->track_cart_page_loaded();
 		}

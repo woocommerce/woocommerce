@@ -77,7 +77,7 @@ class WC_Payment_Token_Data_Store extends WC_Data_Store_WP implements WC_Object_
 		do_action( 'woocommerce_new_payment_token', $token_id, $token );
 
 		// Track payment method event for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track() ) {
 			wc_get_container()->get( PaymentMethodEventTracker::class )
 				->track_payment_method_added( $token_id, $token );
 		}

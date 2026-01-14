@@ -69,8 +69,8 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 		$this->controller_mock       = $this->createMock( FraudProtectionController::class );
 		$this->data_collector_mock   = $this->createMock( SessionDataCollector::class );
 
-		// By default, feature is enabled.
-		$this->controller_mock->method( 'feature_is_enabled' )->willReturn( true );
+		// By default, tracking is enabled (simulating a non-admin user with feature enabled).
+		$this->controller_mock->method( 'should_track' )->willReturn( true );
 
 		// Create dispatcher and inject mocks.
 		$this->sut = new FraudProtectionDispatcher();
@@ -245,10 +245,10 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 		$data_collector_mock = $this->createMock( SessionDataCollector::class );
 		$data_collector_mock->expects( $this->never() )->method( 'collect' );
 
-		// Create controller mock with feature disabled.
+		// Create controller mock with tracking disabled (feature disabled or admin user).
 		$controller_mock = $this->createMock( FraudProtectionController::class );
 		$controller_mock->expects( $this->once() )
-			->method( 'feature_is_enabled' )
+			->method( 'should_track' )
 			->willReturn( false );
 
 		// Create new dispatcher with feature disabled.

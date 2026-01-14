@@ -395,7 +395,7 @@ All at %6$s
 	 */
 	public function get_available_payment_gateways() {
 		// Early return if fraud protection blocks session.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+		if ( wc_get_container()->get( FraudProtectionController::class )->should_track()
 			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
 			return array();
 		}
