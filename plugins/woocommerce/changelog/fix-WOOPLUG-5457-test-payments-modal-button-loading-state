@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix the loading state of the Test payments button in the WooPayments NOX in-context flows.
-
-

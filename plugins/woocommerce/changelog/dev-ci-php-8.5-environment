@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+CI: Update the latest PHP version in use to 8.5

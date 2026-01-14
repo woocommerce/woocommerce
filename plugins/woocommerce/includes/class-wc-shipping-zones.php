@@ -129,7 +129,10 @@ class WC_Shipping_Zones {
 			if ( is_object( $class_name ) ) {
 				$class_name = get_class( $class_name );
 			}
-			return new $class_name( $raw_shipping_method->instance_id );
+			$instance               = new $class_name( $raw_shipping_method->instance_id );
+			$instance->enabled      = $raw_shipping_method->is_enabled ? 'yes' : 'no';
+			$instance->method_order = (int) $raw_shipping_method->method_order;
+			return $instance;
 		}
 		return false;
 	}

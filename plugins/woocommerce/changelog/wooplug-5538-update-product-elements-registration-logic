@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Improve template slug recognition in mechanism registering product blocks. Assure compatibility with WordPress 6.9

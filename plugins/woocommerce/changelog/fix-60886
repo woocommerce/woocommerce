@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Apply webhook delivery hook args filter to delivery pings

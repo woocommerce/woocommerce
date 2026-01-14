@@ -69,7 +69,6 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'google-listings-and-ads:alt' ),
-					self::get_plugin( 'multichannel-by-cedcommerce' ),
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
@@ -136,18 +135,6 @@ class DefaultFreeExtensions {
 				'image_url'      => plugins_url( '/assets/images/onboarding/google.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
-			),
-			'multichannel-by-cedcommerce'   => array(
-				'name'             => __( 'Multichannel for WooCommerce', 'woocommerce' ),
-				'description'      => __( 'Sync your sales data across platforms and manage everything from a unified dashboard.', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/onboarding/multichannel.webp', WC_PLUGIN_FILE ),
-				'manage_url'       => 'admin.php?page=sales_channel',
-				'is_built_by_wc'   => false,
-				'install_external' => true,
-				'learn_more_link'  => 'https://woocommerce.com/products/multichannel-by-cedcommerce-ebay-amazon-walmart-etsy-integration/?utm_source=marketing_task&utm_medium=product',
-				'tags'             => array(
-					'marketplace',
-				),
 			),
 			'facebook-for-woocommerce'      => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
@@ -489,7 +476,8 @@ class DefaultFreeExtensions {
 	public static function with_core_profiler_fields( array $plugins ) {
 		$_plugins = array(
 			'woocommerce-payments'      => array(
-				'label'            => __( 'Get paid with WooPayments', 'woocommerce' ),
+				/* translators: %s: Payment provider name. */
+				'label'            => sprintf( __( 'Get paid with %s', 'woocommerce' ), 'WooPayments' ),
 				'image_url'        => self::get_woo_logo(),
 				'description'      => __( "Securely accept payments and manage payment activity straight from your store's dashboard", 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/woocommerce-payments?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',

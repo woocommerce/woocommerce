@@ -4,17 +4,12 @@
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { type BlockInstance } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
-import { isBoolean, isNumber } from '@woocommerce/types';
+import { isBoolean } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import { MIGRATION_STATUS_LS_KEY, getInitialStatusLSValue } from './constants';
-import type {
-	IsBlockType,
-	GetBlocksClientIds,
-	UpgradeNoticeStatus,
-} from './types';
+import type { IsBlockType, GetBlocksClientIds } from './types';
 
 const isProductsBlock: IsBlockType = ( block ) =>
 	block.name === 'core/query' &&
@@ -70,35 +65,9 @@ const postTemplateHasSupportForGridView = getSettingWithCoercion(
 	isBoolean
 );
 
-const getUpgradeStatus = (): UpgradeNoticeStatus => {
-	const status = window.localStorage.getItem( MIGRATION_STATUS_LS_KEY );
-	return status ? JSON.parse( status ) : getInitialStatusLSValue();
-};
-
-const setUpgradeStatus = ( newStatus: UpgradeNoticeStatus ) => {
-	window.localStorage.setItem(
-		MIGRATION_STATUS_LS_KEY,
-		JSON.stringify( newStatus )
-	);
-};
-
-const incrementUpgradeStatusDisplayCount = () => {
-	const status = getUpgradeStatus();
-	const displayCount = isNumber( status.displayCount )
-		? status.displayCount + 1
-		: 0;
-	setUpgradeStatus( {
-		...status,
-		displayCount,
-	} );
-};
-
 export {
 	getProductsBlockClientIds,
 	getProductCollectionBlockClientIds,
 	checkIfBlockCanBeInserted,
 	postTemplateHasSupportForGridView,
-	getUpgradeStatus,
-	setUpgradeStatus,
-	incrementUpgradeStatusDisplayCount,
 };

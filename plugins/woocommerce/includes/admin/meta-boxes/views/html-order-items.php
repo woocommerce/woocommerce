@@ -130,7 +130,7 @@ if ( wc_tax_enabled() ) {
 						$coupon_info = json_decode( $coupon_info, true );
 						$post_id     = $coupon_info[0]; //phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					} else {
-						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE LOWER(post_title) = LOWER(%s) AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", wc_sanitize_coupon_code( $item->get_code() ), $order->get_date_created()->format( 'Y-m-d H:i:s' ) ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
+						$post_id = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE post_title = %s AND post_type = 'shop_coupon' AND post_status = 'publish' AND post_date < %s LIMIT 1;", wc_sanitize_coupon_code( $item->get_code() ), $order->get_date_created()->format( 'Y-m-d H:i:s' ) ) ); // phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
 					$class = $order->is_editable() ? 'code editable' : 'code';
 					?>
@@ -176,14 +176,14 @@ if ( wc_tax_enabled() ) {
 			</tr>
 		<?php if ( 0 < $order->get_total_discount() ) : ?>
 			<tr>
-				<td class="label"><?php esc_html_e( 'Coupon(s):', 'woocommerce' ); ?></td>
+				<td class="label"><?php esc_html_e( 'Discount:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
 				<td class="total">-
 					<?php echo wc_price( $order->get_total_discount(), array( 'currency' => $order->get_currency() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</td>
 			</tr>
 		<?php endif; ?>
-		<?php if ( 0 < $order->get_total_fees() ) : ?>
+		<?php if ( abs( $order->get_total_fees() ) > 0 ) : ?>
 			<tr>
 				<td class="label"><?php esc_html_e( 'Fees:', 'woocommerce' ); ?></td>
 				<td width="1%"></td>
@@ -296,18 +296,7 @@ if ( wc_tax_enabled() ) {
 				<td class="label cost-total"><?php esc_html_e( 'Cost Total', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
 				<td class="total cost-total">
-					<?php
-					/**
-					 * Filter to customize the total Cost of Goods Sold (COGS) value HTML for a given order.
-					 *
-					 * @since 10.3.0
-					 *
-					 * @param string   $total_html The formatted total COGS HTML.
-					 * @param float    $total      The total COGS value.
-					 * @param WC_Order $order      The order object.
-					 */
-					echo apply_filters( 'woocommerce_order_cogs_total_value_html', wc_price( $order->get_cogs_total_value(), array( 'currency' => $order->get_currency() ) ), $order->get_cogs_total_value(), $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					?>
+					<?php echo wp_kses_post( $order->get_cogs_total_value_html() ); ?>
 				</td>
 			</tr>
 		</table>

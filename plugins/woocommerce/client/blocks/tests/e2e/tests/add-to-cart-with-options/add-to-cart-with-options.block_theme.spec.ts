@@ -8,6 +8,7 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  */
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
+import config from '../../../../../admin/config/core.json';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
@@ -90,6 +91,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		productGalleryPageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
 		const variationDescription =
 			'This is the output of the variation description';
@@ -158,12 +160,25 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const colorRedOption = page.locator( 'label:has-text("Red")' );
+		// We use the Add to Cart + Options class to make sure we don't select
+		// the Add to Cart button from the Related Products block.
 		const addToCartButton = page
-			.getByRole( 'button', { name: 'Add to cart' } )
-			.first();
+			.locator( '.wp-block-add-to-cart-with-options' )
+			.getByRole( 'button', { name: 'Add to cart' } );
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
 			.first();
+		const quantitySelector = page.getByLabel( 'Product quantity' );
+
+		const additionalInfoPanel =
+			wpCoreVersion >= 6.9
+				? page
+						.getByRole( 'button', {
+							name: 'Additional Information',
+						} )
+						.locator( '../..' )
+						.locator( '.wp-block-accordion-panel' )
+				: page.getByLabel( 'Additional Information', { exact: true } );
 
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
@@ -182,15 +197,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 				.click();
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
 			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
+			await expect( addToCartButton ).toBeVisible();
+			await expect( quantitySelector ).toBeVisible();
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			const visibleImage =
-				await productGalleryPageObject.getVisibleLargeImageId();
+				await productGalleryPageObject.getViewerImageId();
 			expect( visibleImage ).toBe( '34' );
 
 			await colorBlueOption.click();
@@ -198,22 +213,22 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( productPrice ).toHaveText( '$45.00' );
 			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+			await expect( addToCartButton ).not.toBeVisible();
+			await expect( quantitySelector ).not.toBeVisible();
 			await expect(
 				page.getByText( 'SKU: woo-hoodie-blue' )
 			).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '2 lbs' )
+				additionalInfoPanel.getByText( '2 lbs' )
 			).toBeVisible();
 			await expect(
 				page.getByText( variationDescription )
 			).toBeVisible();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '35' );
+				expect( newViewerImageId ).toBe( '35' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -225,16 +240,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '34' );
+				expect( newViewerImageId ).toBe( '34' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -304,9 +317,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'successfully adds to cart when child products are selected', async () => {
-			const increaseQuantityButton = page.getByLabel(
-				'Increase quantity of Beanie'
-			);
+			const increaseQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of Beanie' );
 			await increaseQuantityButton.click();
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
@@ -322,13 +337,21 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 2'
+						: '2 items in cart'
+				)
+			).toBeVisible();
 		} );
 
 		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
-			const reduceQuantityButton = page.getByLabel(
-				'Reduce quantity of Beanie'
-			);
+			const reduceQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options-grouped-product-item-selector"]'
+				)
+				.getByLabel( 'Reduce quantity of Beanie' );
 			await reduceQuantityButton.click();
 			await reduceQuantityButton.click();
 
@@ -361,6 +384,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await addToCartButton.click();
 
+			// Wait for the add to cart request to complete before proceeding.
+			// This prevents a race condition where the subsequent page.reload()
+			// could execute before the product is fully added to the cart.
+			const addToCartRequest = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+
 			await expect(
 				page.getByRole( 'button', {
 					name: 'Added to cart',
@@ -368,7 +398,18 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
+			// Wait for the API response to ensure the DB has been updated.
+			await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 3'
+						: '3 items in cart'
+				)
+			).toBeVisible();
+
+			await addToCartRequest;
 		} );
 
 		await test.step( 'if one product succeeds and another fails, optimistic updates are applied and an error is displayed', async () => {
@@ -382,9 +423,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await individuallySoldProductCheckbox.click();
 
 			// Try to add another product to cart again (it will succeed).
-			const beanieIncreaseQuantityButton = page.getByLabel(
-				'Increase quantity of Beanie'
-			);
+			const beanieIncreaseQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of Beanie' );
 			await beanieIncreaseQuantityButton.click();
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
@@ -405,7 +448,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			// Verify optimistic updates were applied, so the product that was
 			// successfully added to cart is counted.
-			await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 4'
+						: '4 items in cart'
+				)
+			).toBeVisible();
 		} );
 	} );
 
@@ -559,10 +608,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await test.step( 'verify letters are reset to min value in simple products', async () => {
 				// Playwright doesn't support filling a numeric input with a
-				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// string, but we still want to test this case as users on older/mobile browsers
+				// are able to type letters directly in the input field .
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -632,9 +684,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await test.step( 'verify letters are reset to min value in variable products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -665,7 +720,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				name: 'T-Shirt',
 			} );
 
-			await expect( quantityInput ).toHaveValue( '' );
+			await expect( quantityInput ).toHaveValue( '0' );
 			const increaseQuantityButton = page.getByLabel(
 				'Increase quantity of T-Shirt'
 			);
@@ -723,25 +778,28 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify empty strings are not reset in grouped products', async () => {
+			await test.step( 'verify empty strings are reset to 0 in grouped products', async () => {
 				await quantityInput.fill( '' );
 				await quantityInput.blur();
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify letters are reset to an empty string in grouped products', async () => {
+			await test.step( 'verify letters are reset to 0 in grouped products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
 					} );
 				} );
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 		} );
@@ -899,6 +957,26 @@ test.describe( 'Add to Cart + Options Block', () => {
 		).toBeVisible();
 	} );
 
+	test( 'allows adding variations to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock(
+			'hoodie',
+			'hoodie-blue-yes'
+		);
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+		).toBeVisible();
+	} );
+
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
@@ -919,6 +997,33 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect(
 			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
+		).toBeVisible();
+	} );
+
+	test( 'allows updating the Product Image Gallery block to the Product Gallery block', async ( {
+		page,
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		const addToCartFormBlock = await editor.getBlockByName(
+			pageObject.BLOCK_SLUG
+		);
+		await editor.selectBlocks( addToCartFormBlock );
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
+		).toBeHidden();
+
+		await page
+			.getByRole( 'button', {
+				name: 'Upgrade to the Product Gallery block',
+			} )
+			.click();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeVisible();
 	} );
 } );

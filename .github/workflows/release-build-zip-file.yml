@@ -53,7 +53,7 @@ jobs:
 
           # Must run from trunk.
           if [ "${{ github.ref }}" != "refs/heads/trunk" ]; then
-              echo "::error::This workflow must be run from the `trunk` branch. Enter the release branch as input."
+              echo "::error::This workflow must be run from the 'trunk' branch. Enter the release branch as input."
               exit 1
           fi
 
@@ -92,13 +92,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-            # No PRs by automated tools should remain open.
-            count=$( gh pr list --search "is:open author:app/github-actions" --limit 1 --json number | jq length )
-            if (( count > 0 )); then
-                echo "::error::Pre-build verification: there are automated PRs by 'github-actions' still open."
-                exit 1
-            fi
-
             # Branch name must be 'release/*'.
             branch_name="${BRANCH#refs/heads/}"
             if  [[ $branch_name != release/* ]] ; then
@@ -147,6 +140,13 @@ jobs:
             count=$( gh pr list --search "is:open milestone:$milestone" --limit 1 --json number | jq length )
             if (( count > 0 )); then
                 echo "::error::Pre-build verification: there are PRs with milestone '$milestone' still open."
+                exit 1
+            fi
+
+            # Changelog section must have at least one entry.
+            changelog_section=$( awk '/^== Changelog ==$/,/^\[See changelog/' checkout-branch/plugins/woocommerce/readme.txt )
+            if ! echo "$changelog_section" | grep -qE '^\* '; then
+                echo "::error::Pre-build verification: changelog section in readme.txt has no entries. Please add at least one entry before releasing."
                 exit 1
             fi
 

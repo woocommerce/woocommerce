@@ -52,7 +52,8 @@
 			"allowInheriting": false,
 			"allowSizingOnChildren": false,
 			"allowVerticalAlignment": false
-		}
+		},
+		"email": true
 	},
 	"editorStyle": "file:../woocommerce/product-template-editor.css",
 	"style": "file:../woocommerce/product-template-style.css"

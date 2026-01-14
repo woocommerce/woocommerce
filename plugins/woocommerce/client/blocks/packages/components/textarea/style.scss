@@ -1,15 +1,28 @@
 .wc-block-components-textarea {
-	@include font-size(regular);
+	@include reset-typography();
+	@include font-regular-locked;
 	background-color: $input-background-light;
 	border: 1px solid $universal-border-strong;
 	border-radius: $universal-border-radius;
 	color: $input-text-light;
 	font-family: inherit;
-	line-height: 1.375; // =22px when font-size is 16px.
 	margin: 0;
-	padding: em($gap-small) $gap;
+	padding: $gap-small;
 	width: 100%;
 	box-sizing: border-box;
+
+	&::placeholder {
+		color: $universal-body-low-emphasis;
+	}
+
+	&:focus {
+		background-color: $input-background-light;
+		color: $input-text-light;
+		// Keep border at 1px to prevent layout shift, use box-shadow for the extra
+		// 0.5px thickness
+		border: 1px solid currentColor;
+		box-shadow: inset 0 0 0 0.5px currentColor;
+	}
 
 	.has-dark-controls & {
 		background-color: $input-background-dark;

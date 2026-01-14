@@ -23,7 +23,52 @@ jobs:
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
     steps:
+      - name: 'Checkout repository'
+        uses: actions/checkout@v4
+        with:
+          ref: trunk
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+          sparse-checkout-cone-mode: false
+
+      - name: 'Get release branch from tag'
+        id: get-branch
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag_name }}
+        run: |
+          # Extract major.minor from version (e.g., 10.3.5 -> 10.3)
+          if [[ "$RELEASE_TAG" =~ ^([0-9]+\.[0-9]+) ]]; then
+            major_minor="${BASH_REMATCH[1]}"
+            branch_name="release/${major_minor}"
+            echo "Release branch: $branch_name"
+            echo "branch_name=$branch_name" >> $GITHUB_OUTPUT
+          else
+            echo "::error::Could not extract version from tag: $RELEASE_TAG"
+            exit 1
+          fi
+
+      - name: 'Validate release tag version matches the release branch version'
+        id: validate-version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag_name }}
+          BRANCH_NAME: ${{ steps.get-branch.outputs.branch_name }}
+        run: |
+          git fetch origin ${BRANCH_NAME}
+          git checkout ${BRANCH_NAME}
+          current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+
+          echo "Current version from woocommerce.php: '$current_version'"
+          echo "Release tag version: '$RELEASE_TAG'"
+
+          if [[ "$current_version" != "$RELEASE_TAG" ]]; then
+            echo "::warning::The version in woocommerce.php ($current_version) does not match the release tag version ($RELEASE_TAG). Skipping notification."
+            echo "versions_match=false" >> $GITHUB_OUTPUT
+          else
+            echo "versions_match=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: 'Notify to release channel'
+        if: steps.validate-version.outputs.versions_match == 'true'
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
@@ -37,6 +82,10 @@ jobs:
     name: 'Update changelog.txt after any stable release'
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     if: ${{ github.event.action == 'published' && ! ( contains( inputs.release_tag_name, '-dev' ) || contains( inputs.release_tag_name, '-beta' ) || contains( inputs.release_tag_name, '-rc' ) ) }}
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
     steps:
       - name: 'Fetch release readme.txt'
         env:
@@ -65,12 +114,15 @@ jobs:
           php ./trunk/.github/workflows/scripts/release-readme-to-changelog.php ./woocommerce/readme.txt ./trunk/changelog.txt
       - name: 'Push changes and open PR'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
+          # Determine milestone from release version.
+          milestone=$( cat ./woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+$/.0/' )
+
           # Configure Git.
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "woocommercebot"
+          git config --global user.email "woocommercebot@users.noreply.github.com"
 
           # Push new changelog.txt.
           branch_name="update-changelog-${{ inputs.release_tag_name }}-$(date +%s)"
@@ -87,4 +139,6 @@ jobs:
             --body 'This PR updates the global changelog.txt file following the release of version ${{ inputs.release_tag_name }}.' \
             --base trunk \
             --head "$branch_name" \
-            --reviewer "${{ github.actor }}"
+            --reviewer "${{ github.actor }}" \
+            --label "Release" \
+            --milestone "$milestone"

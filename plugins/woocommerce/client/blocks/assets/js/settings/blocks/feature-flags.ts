@@ -23,9 +23,9 @@ export const isExperimentalBlocksEnabled = (): boolean => {
 };
 
 export const isExperimentalWcRestApiV4Enabled = (): boolean => {
-	const { experimentalWcRestApiV4 } = getSetting( 'wcBlocksConfig', {
-		experimentalWcRestApiV4: false,
-	} ) as WcBlocksConfig;
-
+	const experimentalWcRestApiV4 = getSetting(
+		'experimentalWcRestApiV4',
+		false
+	);
 	return experimentalWcRestApiV4;
 };

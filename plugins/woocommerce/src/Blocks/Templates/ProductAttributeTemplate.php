@@ -45,7 +45,7 @@ class ProductAttributeTemplate extends AbstractTemplateWithFallback {
 	}
 
 	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 * Run template-specific logic when the query matches this template.
 	 */
 	public function render_block_template() {
 		$queried_object = get_queried_object();

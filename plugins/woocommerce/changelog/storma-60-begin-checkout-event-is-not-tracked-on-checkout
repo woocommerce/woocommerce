@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix render-checkout-form event was possibly triggered too early for 3rd party scripts to catch

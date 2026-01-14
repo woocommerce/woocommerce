@@ -16,6 +16,7 @@ import TestOrLiveAccountStep from './test-or-live-account';
 import FinishStep from './finish';
 
 export const TESTING_ACCOUNT_STEP_ID = 'test_account';
+export const LIVE_ACCOUNT_STEP_ID = 'business_verification';
 
 export const steps: WooPaymentsProviderOnboardingStep[] = [
 	{
@@ -60,7 +61,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 				content: <TestAccountStep />,
 			},
 			{
-				id: 'business_verification',
+				id: LIVE_ACCOUNT_STEP_ID,
 				order: 3,
 				type: 'backend',
 				label: __( 'Activate payments', 'woocommerce' ),
@@ -74,7 +75,7 @@ export const steps: WooPaymentsProviderOnboardingStep[] = [
 		order: 4,
 		type: 'frontend',
 		label: __( 'Submit for verification', 'woocommerce' ),
-		dependencies: [ 'business_verification' ],
+		dependencies: [ LIVE_ACCOUNT_STEP_ID ],
 		content: <FinishStep />,
 	},
 ];
@@ -100,7 +101,7 @@ export const LYSPaymentsSteps: WooPaymentsProviderOnboardingStep[] = [
 		dependencies: [ 'payment_methods' ],
 	},
 	{
-		id: 'business_verification',
+		id: LIVE_ACCOUNT_STEP_ID,
 		order: 3,
 		type: 'backend',
 		label: __( 'Activate payments', 'woocommerce' ),

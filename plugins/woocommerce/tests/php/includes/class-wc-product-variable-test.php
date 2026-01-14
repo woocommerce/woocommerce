@@ -66,7 +66,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$product->set_props(
 			array(
 				'name' => 'Dummy Variable Product',
-				'sku'  => 'DUMMY VARIABLE SKU',
+				'sku'  => 'DUMMY VARIABLE SKU' . microtime(),
 			)
 		);
 
@@ -120,7 +120,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$product->set_props(
 			array(
 				'name' => 'Dummy Variable Product',
-				'sku'  => 'DUMMY VARIABLE SKU',
+				'sku'  => 'DUMMY VARIABLE SKU' . microtime(),
 			)
 		);
 

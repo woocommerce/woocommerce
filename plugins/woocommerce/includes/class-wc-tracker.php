@@ -12,6 +12,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
@@ -978,9 +979,16 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_migrator_data() {
-		return array(
-			'products_migrated' => absint( get_option( 'wc_migrator_products_count', 0 ) ),
-		);
+		if ( ! class_exists( MigratorTracker::class ) ) {
+			return array();
+		}
+
+		try {
+			$tracker = wc_get_container()->get( MigratorTracker::class );
+			return $tracker->get_data();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
 	}
 
 	/**

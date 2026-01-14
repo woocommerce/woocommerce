@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Optimize a service used for email editor to fetch WooCommerce emails lazily
+
+
