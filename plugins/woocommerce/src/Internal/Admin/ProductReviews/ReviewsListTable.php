@@ -371,6 +371,20 @@ class ReviewsListTable extends WP_List_Table {
 	}
 
 	/**
+	 * Generates the list table rows.
+	 *
+	 * @return void
+	 */
+	public function display_rows() {
+		if ( ! empty( $this->items ) ) {
+			_prime_comment_caches( array_map( fn( $item ) => (int) $item->comment_post_ID, $this->items ) );
+			_prime_post_caches( array_map( fn( $item ) => (int) $item->comment_post_ID, $this->items ), false, false );
+		}
+
+		parent::display_rows();
+	}
+
+	/**
 	 * Render a single row HTML.
 	 *
 	 * @global WP_Post $post
@@ -1168,6 +1182,8 @@ class ReviewsListTable extends WP_List_Table {
 		ob_start();
 
 		if ( $product_post ) :
+
+
 
 			?>
 			<div class="response-links">
