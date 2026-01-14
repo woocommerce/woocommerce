@@ -3,6 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import {
+	InspectorControls,
+	BlockControls,
+	AlignmentToolbar,
+	useBlockProps,
+} from '@wordpress/block-editor';
+import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
+import {
 	Disabled,
 	ToggleControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -10,13 +17,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-import {
-	InspectorControls,
-	BlockControls,
-	AlignmentToolbar,
-	useBlockProps,
-} from '@wordpress/block-editor';
-import HeadingToolbar from '@woocommerce/editor-components/heading-toolbar';
 
 /**
  * Internal dependencies

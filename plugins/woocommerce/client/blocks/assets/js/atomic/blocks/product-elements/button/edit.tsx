@@ -2,15 +2,6 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import {
-	Disabled,
-	Button,
-	ButtonGroup,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToolsPanel as ToolsPanel,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToolsPanelItem as ToolsPanelItem,
-} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
 	AlignmentToolbar,
@@ -22,6 +13,15 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
 import { useProduct } from '@woocommerce/entities';
+import {
+	Disabled,
+	Button,
+	ButtonGroup,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
