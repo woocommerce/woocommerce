@@ -118,9 +118,6 @@ curl "https://example-store.com/wp-json/wc/store/v1/products"
 		"is_purchasable": true,
 		"is_in_stock": true,
 		"low_stock_remaining": null,
-		"related_ids": [12, 34, 56],
-		"upsell_ids": [78, 90],
-		"cross_sell_ids": [23, 45],
 		"add_to_cart": {
 			"text": "Add to cart",
 			"description": "Add &ldquo;WordPress Pennant&rdquo; to your cart"
@@ -189,9 +186,6 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/34"
 	"is_purchasable": true,
 	"is_in_stock": true,
 	"low_stock_remaining": null,
-	"related_ids": [12, 34, 56],
-	"upsell_ids": [78, 90],
-	"cross_sell_ids": [23, 45],
 	"add_to_cart": {
 		"text": "Add to cart",
 		"description": "Add &ldquo;WordPress Pennant&rdquo; to your cart"
@@ -259,9 +253,6 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/wordpress-pennant"
 	"is_purchasable": true,
 	"is_in_stock": true,
 	"low_stock_remaining": null,
-	"related_ids": [12, 34, 56],
-	"upsell_ids": [78, 90],
-	"cross_sell_ids": [23, 45],
 	"add_to_cart": {
 		"text": "Add to cart",
 		"description": "Add &ldquo;WordPress Pennant&rdquo; to your cart"
