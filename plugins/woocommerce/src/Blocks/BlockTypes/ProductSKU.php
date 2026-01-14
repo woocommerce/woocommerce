@@ -2,7 +2,9 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * ProductSKU class.
@@ -70,23 +72,30 @@ class ProductSKU extends AbstractBlock {
 
 		$is_interactive = $product->is_type( ProductType::VARIABLE );
 
+		$use_lazy_load = false;
 		if ( $is_interactive ) {
-			$variations                = $product->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'sku' => $variation->get_sku(),
-				);
+			$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
+			$config_data   = array(
+				'sku' => $product_sku,
+			);
+
+			if ( ! $use_lazy_load ) {
+				// Pre-load all variation SKUs.
+				$variations                = $product->get_available_variations( 'objects' );
+				$formatted_variations_data = array();
+				foreach ( $variations as $variation ) {
+					$formatted_variations_data[ $variation->get_id() ] = array(
+						'sku' => $variation->get_sku(),
+					);
+				}
+				$config_data['variations'] = $formatted_variations_data;
 			}
 
 			wp_interactivity_config(
 				'woocommerce',
 				array(
 					'products' => array(
-						$product->get_id() => array(
-							'sku'        => $product_sku,
-							'variations' => $formatted_variations_data,
-						),
+						$product->get_id() => $config_data,
 					),
 				)
 			);
@@ -105,7 +114,9 @@ class ProductSKU extends AbstractBlock {
 			$suffix = sprintf( '<span class="wp-block-post-terms__suffix">%s</span>', $suffix );
 		}
 
-		$interactive_attributes = $is_interactive ? 'data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.sku"' : '';
+		$interactive_attributes = $is_interactive
+			? 'data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.sku"'
+			: '';
 
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">

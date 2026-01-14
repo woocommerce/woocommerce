@@ -1,9 +1,11 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * ProductStockIndicator class.
@@ -124,26 +126,32 @@ class ProductStockIndicator extends AbstractBlock {
 		$wrapper_attributes = array();
 		$watch_attribute    = '';
 
+		$use_lazy_load = false;
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
-			$variations                = $product_to_render->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$variation_availability = $variation->get_availability();
-				if ( is_string( $variation_availability['availability'] ) && ! empty( $variation_availability['availability'] ) ) {
-					$formatted_variations_data[ $variation->get_id() ] = array(
-						'availability' => $variation_availability['availability'],
-					);
+			$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product_to_render );
+			$config_data   = array(
+				'availability' => $availability['availability'],
+			);
+
+			if ( ! $use_lazy_load ) {
+				$variations                = $product_to_render->get_available_variations( 'objects' );
+				$formatted_variations_data = array();
+				foreach ( $variations as $variation ) {
+					$variation_availability = $variation->get_availability();
+					if ( is_string( $variation_availability['availability'] ) && ! empty( $variation_availability['availability'] ) ) {
+						$formatted_variations_data[ $variation->get_id() ] = array(
+							'availability' => $variation_availability['availability'],
+						);
+					}
 				}
+				$config_data['variations'] = $formatted_variations_data;
 			}
 
 			wp_interactivity_config(
 				'woocommerce',
 				array(
 					'products' => array(
-						$product_to_render->get_id() => array(
-							'availability' => $availability['availability'],
-							'variations'   => $formatted_variations_data,
-						),
+						$product_to_render->get_id() => $config_data,
 					),
 				)
 			);

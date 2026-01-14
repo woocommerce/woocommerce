@@ -4,7 +4,9 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * ProductGallery class.
@@ -155,36 +157,52 @@ class ProductGallery extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$variations_data           = $product->get_available_variations();
 				$formatted_variations_data = array();
 				$has_variation_images      = false;
-				foreach ( $variations_data as $variation ) {
-					if (
-						empty( $variation['variation_id'] )
-						|| ! array_key_exists( 'image_id', $variation )
-					) {
-						continue;
-					}
+				$parent_image_id           = (int) $product->get_image_id();
+				$use_lazy_load             = VariationDataUtils::should_lazy_load_variations( $product );
 
-					$variation_image_id = (int) $variation['image_id'];
-					if ( $variation_image_id && $variation_image_id !== (int) $product->get_image_id() ) {
-						$has_variation_images = true;
+				if ( $use_lazy_load ) {
+					// In lazy load mode, variation image_id will be fetched via AJAX.
+					// We just need to set the parent image_id and enable interactivity.
+					$has_variation_images = true;
+				} else {
+					$variations_data = $product->get_available_variations();
+					foreach ( $variations_data as $variation ) {
+						if (
+							empty( $variation['variation_id'] )
+							|| ! array_key_exists( 'image_id', $variation )
+						) {
+							continue;
+						}
 
-						$formatted_variations_data[ $variation['variation_id'] ] = array(
-							'image_id' => $variation_image_id,
-						);
+						$variation_image_id = (int) $variation['image_id'];
+						if ( $variation_image_id && $variation_image_id !== $parent_image_id ) {
+							$has_variation_images = true;
+
+							$formatted_variations_data[ $variation['variation_id'] ] = array(
+								'image_id' => $variation_image_id,
+							);
+						}
 					}
 				}
 
 				if ( $has_variation_images ) {
+					$config_data = array(
+						'image_id' => $parent_image_id,
+					);
+
+					// Only set variations in non-lazy mode to avoid overwriting
+					// AddToCartWithOptions's variation data that includes attributes.
+					if ( ! $use_lazy_load && ! empty( $formatted_variations_data ) ) {
+						$config_data['variations'] = $formatted_variations_data;
+					}
+
 					wp_interactivity_config(
 						'woocommerce',
 						array(
 							'products' => array(
-								$product->get_id() => array(
-									'image_id'   => (int) $product->get_image_id(),
-									'variations' => $formatted_variations_data,
-								),
+								$product->get_id() => $config_data,
 							),
 						)
 					);

@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
+use WP_Block;
 
 /**
  * VariationDescription class.
@@ -18,7 +20,6 @@ class VariationDescription extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'add-to-cart-with-options-variation-description';
-
 
 	/**
 	 * Render the block.
@@ -36,27 +37,31 @@ class VariationDescription extends AbstractBlock {
 			return '';
 		}
 
-		$variations                = $product->get_available_variations( 'objects' );
-		$formatted_variations_data = array();
-		foreach ( $variations as $variation ) {
-			$variation_description = $variation->get_description();
-			if ( is_string( $variation_description ) && ! empty( $variation_description ) ) {
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'variation_description' => wp_kses_post( wc_format_content( $variation_description ) ),
-				);
-			}
-		}
+		$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 
-		wp_interactivity_config(
-			'woocommerce',
-			array(
-				'products' => array(
-					$product->get_id() => array(
-						'variations' => $formatted_variations_data,
+		if ( ! $use_lazy_load ) {
+			$variations                = $product->get_available_variations( 'objects' );
+			$formatted_variations_data = array();
+			foreach ( $variations as $variation ) {
+				$variation_description = $variation->get_description();
+				if ( is_string( $variation_description ) && ! empty( $variation_description ) ) {
+					$formatted_variations_data[ $variation->get_id() ] = array(
+						'variation_description' => wp_kses_post( wc_format_content( $variation_description ) ),
+					);
+				}
+			}
+
+			wp_interactivity_config(
+				'woocommerce',
+				array(
+					'products' => array(
+						$product->get_id() => array(
+							'variations' => $formatted_variations_data,
+						),
 					),
-				),
-			)
-		);
+				)
+			);
+		}
 
 		$context_directive = wp_interactivity_data_wp_context(
 			array(

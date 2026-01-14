@@ -340,10 +340,16 @@ const { actions, state } = store<
 				}
 
 				const { quantity } = getContext< Context >();
+				// In lazy load mode, quantity may not be pre-set for variations.
+				// Fall back to the parent product's quantity (matches non-lazy behavior).
+				const quantityValue =
+					quantity[ id ] ??
+					quantity[ productDataState.productId ] ??
+					1;
 
 				const newQuantity = getNewQuantity(
 					id,
-					quantity[ id ],
+					quantityValue,
 					selectedAttributes
 				);
 

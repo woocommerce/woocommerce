@@ -11,9 +11,18 @@ import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type {
 	ProductData,
+	VariationData,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import { sanitizeHTML } from '@woocommerce/sanitize';
+
+/**
+ * Internal dependencies
+ */
+import {
+	state as variationDataState,
+	fetchVariationData,
+} from '../../../base/stores/woocommerce/variation-data';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -57,11 +66,37 @@ export type Context = {
 		| 'dimensions';
 };
 
+/**
+ * Get variation data from pre-loaded config or store state.
+ *
+ * @param productId   The parent product ID.
+ * @param variationId The variation ID.
+ * @return The variation data or undefined.
+ */
+function getVariationData(
+	productId: number,
+	variationId: number
+): VariationData | undefined {
+	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
+
+	// First check if data exists in config (pre-loaded).
+	const preloadedData = products?.[ productId ]?.variations?.[ variationId ];
+	if ( preloadedData && 'is_in_stock' in preloadedData ) {
+		// is_in_stock is always set by AddToCartWithOptions in non-lazy mode,
+		// and always set after a lazy fetch. It's never in lazy mode's minimal
+		// data (which only contains attributes).
+		return preloadedData;
+	}
+
+	// Check store state for lazy-loaded data.
+	return variationDataState.variations[ variationId ];
+}
+
 const productElementStore = store(
 	'woocommerce/product-elements',
 	{
 		state: {
-			get productData(): ProductData | undefined {
+			get productData(): ProductData | VariationData | undefined {
 				if ( ! productDataState?.productId ) {
 					return undefined;
 				}
@@ -74,23 +109,75 @@ const productElementStore = store(
 					return undefined;
 				}
 
-				return (
-					products?.[ productDataState.productId ]?.variations?.[
-						productDataState?.variationId || 0
-					] || products?.[ productDataState.productId ]
-				);
+				const variationId = productDataState?.variationId || 0;
+
+				// If a variation is selected, try to get its data.
+				if ( variationId ) {
+					const variationData = getVariationData(
+						productDataState.productId,
+						variationId
+					);
+					if ( variationData ) {
+						return variationData;
+					}
+				}
+
+				// Fall back to parent product data.
+				return products?.[ productDataState.productId ];
 			},
 		},
 		callbacks: {
-			updateValue: () => {
+			*updateValue() {
 				const element = getElement();
 
 				if ( ! element.ref || ! productDataState?.productId ) {
 					return;
 				}
 
-				const { productElementKey } = getContext< Context >();
+				const variationId = productDataState?.variationId || 0;
+				const productId = productDataState.productId;
 
+				// If variation is selected but data doesn't exist, fetch it.
+				if (
+					variationId &&
+					! getVariationData( productId, variationId )
+				) {
+					// Show loading state.
+					element.ref.style.opacity = '0.5';
+
+					// Fetch the variation data (caches in store).
+					const fetchedData: Awaited<
+						ReturnType< typeof fetchVariationData >
+					> = yield fetchVariationData( variationId );
+
+					// Check if variation changed during fetch (user switched quickly) and bail if not.
+					const currentVariationId =
+						productDataState?.variationId || 0;
+					if ( currentVariationId !== variationId ) {
+						return;
+					}
+
+					// Remove loading state.
+					element.ref.style.opacity = '1';
+
+					if ( fetchedData ) {
+						const { productElementKey } = getContext< Context >();
+						const html =
+							fetchedData[
+								productElementKey as keyof typeof fetchedData
+							];
+						if ( typeof html === 'string' ) {
+							element.ref.innerHTML = sanitizeHTML( html, {
+								tags: ALLOWED_TAGS,
+								attr: ALLOWED_ATTR,
+							} );
+						}
+					}
+					return;
+				}
+
+				// Use pre-loaded or cached data.
+				const { productElementKey } = getContext< Context >();
 				const productElementHtml =
 					productElementStore?.state?.productData?.[
 						productElementKey

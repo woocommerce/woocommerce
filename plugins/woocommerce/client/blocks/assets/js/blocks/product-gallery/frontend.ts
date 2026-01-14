@@ -15,6 +15,10 @@ import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
  * Internal dependencies
  */
 import type { ProductGalleryContext } from './types';
+import {
+	getCachedVariationData,
+	fetchVariationData,
+} from '../../base/stores/woocommerce/variation-data';
 import { checkOverflow } from './utils';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -425,22 +429,45 @@ const productGallery = {
 		},
 	},
 	callbacks: {
-		listenToProductDataChanges: () => {
+		*listenToProductDataChanges() {
 			const productId = productDataState?.productId;
 			if ( ! productId ) {
 				return;
 			}
 
+			const variationId = productDataState?.variationId;
 			const { products } = getConfig(
 				'woocommerce'
 			) as WooCommerceConfig;
 
-			const productData =
-				products?.[ productId ]?.variations?.[
-					productDataState?.variationId || 0
-				] || products?.[ productId ];
+			let imageId: number | undefined;
 
-			const imageId = productData?.image_id;
+			// First check config for pre-loaded variation data (non-lazy mode).
+			const configProductData =
+				products?.[ productId ]?.variations?.[ variationId || 0 ] ||
+				products?.[ productId ];
+			imageId = configProductData?.image_id;
+
+			// In lazy mode, fetch variation data if not in config.
+			if ( ! imageId && variationId ) {
+				// Check cache first, then fetch if needed.
+				let variationData = getCachedVariationData( variationId );
+				if ( ! variationData ) {
+					variationData = yield fetchVariationData( variationId );
+
+					// Verify variation didn't change during fetch.
+					if ( productDataState?.variationId !== variationId ) {
+						return;
+					}
+				}
+				imageId = variationData?.image_id;
+			}
+
+			// Fall back to parent product's image_id.
+			if ( ! imageId ) {
+				imageId = products?.[ productId ]?.image_id;
+			}
+
 			if ( ! imageId ) {
 				return;
 			}

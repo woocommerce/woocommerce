@@ -4,8 +4,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
-use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
+use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use WP_Block;
 
 /**
@@ -56,8 +57,22 @@ class VariationSelectorAttribute extends AbstractBlock {
 	private function get_product_row( $attribute_name, $product_attribute_terms, $block ): string {
 		global $product;
 
-		$attribute_terms    = $this->get_terms( $attribute_name, $product_attribute_terms );
-		$product_variations = $product->get_available_variations();
+		$attribute_terms = $this->get_terms( $attribute_name, $product_attribute_terms );
+
+		if ( VariationDataUtils::should_lazy_load_variations( $product ) ) {
+			// In lazy mode, we only need attributes for filtering - avoid loading full variation data.
+			$available_variations = $product->get_available_variations( 'objects' );
+			$product_variations   = array_map(
+				function ( $variation ) {
+					return array(
+						'attributes' => $variation->get_variation_attributes(),
+					);
+				},
+				$available_variations
+			);
+		} else {
+			$product_variations = $product->get_available_variations();
+		}
 
 		// Filter out terms which are not available in any product variation.
 		$attribute_terms = array_filter(

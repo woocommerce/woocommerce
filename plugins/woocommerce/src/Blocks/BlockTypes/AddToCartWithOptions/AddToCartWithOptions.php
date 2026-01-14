@@ -6,10 +6,10 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
-use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * AddToCartWithOptions class.
@@ -300,34 +300,63 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
+				// phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				/** @var \WC_Product_Variable $product */
 				$variations_data               = array();
 				$context['selectedAttributes'] = array();
-				$available_variations          = $product->get_available_variations( 'objects' );
-				foreach ( $available_variations as $variation ) {
-					// We intentionally set the default quantity to the product's min purchase quantity
-					// instead of the variation's min purchase quantity. That's because we use the same
-					// input for all variations, so we want quantities to be in sync.
-					$context['quantity'][ $variation->get_id() ] = $default_quantity;
 
-					$variation_data = array(
-						'attributes'        => $variation->get_variation_attributes(),
-						'is_in_stock'       => $variation->is_in_stock(),
-						'sold_individually' => $variation->is_sold_individually(),
-					);
+				if ( VariationDataUtils::should_lazy_load_variations( $product ) ) {
+					// Lazy load mode: Only embed attribute data for client-side matching.
+					// Stock status and other data will be fetched via AJAX when a variation is selected.
+					// Note: Unlike non-lazy mode, we don't pre-set quantities for each variation.
+					// The frontend handles missing quantities by using the parent's min quantity as default.
+					$available_variations = $product->get_available_variations( 'objects' );
+					foreach ( $available_variations as $variation ) {
+						$variations_data[ $variation->get_id() ] = array(
+							'attributes' => $variation->get_variation_attributes(),
+						);
+					}
 
-					$variations_data[ $variation->get_id() ] = $variation_data;
-				}
-
-				wp_interactivity_config(
-					'woocommerce',
-					array(
-						'products' => array(
-							$product->get_id() => array(
-								'variations' => $variations_data,
+					wp_interactivity_config(
+						'woocommerce',
+						array(
+							'products' => array(
+								$product->get_id() => array(
+									'lazy_load'  => true,
+									'variations' => $variations_data,
+								),
 							),
-						),
-					)
-				);
+						)
+					);
+				} else {
+					// Original behavior: Load full variation objects.
+					$available_variations = $product->get_available_variations( 'objects' );
+					foreach ( $available_variations as $variation ) {
+						// We intentionally set the default quantity to the product's min purchase quantity
+						// instead of the variation's min purchase quantity. That's because we use the same
+						// input for all variations, so we want quantities to be in sync.
+						$context['quantity'][ $variation->get_id() ] = $default_quantity;
+
+						$variation_data = array(
+							'attributes'        => $variation->get_variation_attributes(),
+							'is_in_stock'       => $variation->is_in_stock(),
+							'sold_individually' => $variation->is_sold_individually(),
+						);
+
+						$variations_data[ $variation->get_id() ] = $variation_data;
+					}
+
+					wp_interactivity_config(
+						'woocommerce',
+						array(
+							'products' => array(
+								$product->get_id() => array(
+									'variations' => $variations_data,
+								),
+							),
+						)
+					);
+				}
 			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
 				$variation_attributes = $product->get_variation_attributes();
 				$formatted_attributes = array_map(

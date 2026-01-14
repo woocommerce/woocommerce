@@ -2,7 +2,9 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * ProductPrice class.
@@ -53,6 +55,24 @@ class ProductPrice extends AbstractBlock {
 	}
 
 	/**
+	 * Check if any variations have different prices than the parent.
+	 *
+	 * This is a lightweight check that doesn't require loading all variation data.
+	 *
+	 * @param \WC_Product_Variable $product The variable product.
+	 * @return bool
+	 */
+	protected function has_price_variations( $product ): bool {
+		$prices = $product->get_variation_prices( true );
+		if ( empty( $prices['price'] ) ) {
+			return false;
+		}
+		$min_price = current( $prices['price'] );
+		$max_price = end( $prices['price'] );
+		return $min_price !== $max_price;
+	}
+
+	/**
 	 * Include and render the block.
 	 *
 	 * @param array    $attributes Block attributes. Default empty array.
@@ -79,48 +99,82 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
-				$variations_data           = $product->get_available_variations();
-				$formatted_variations_data = array();
-				$has_variation_price_html  = false;
-				foreach ( $variations_data as $variation ) {
-					if (
-						empty( $variation['variation_id'] )
-						|| ! array_key_exists( 'price_html', $variation )
-						|| '' === $variation['price_html']
-					) {
-						continue;
-					}
-					// Core behavior: when all variation prices are identical, Core returns '' for variation['price_html'].
-					// Therefore, the presence of any non-empty price_html implies price differences and warrants interactivity.
-					$has_variation_price_html                                = true;
-					$formatted_variations_data[ $variation['variation_id'] ] = array(
-						'price_html' => $variation['price_html'],
-					);
-				}
+				// phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				/** @var \WC_Product_Variable $product */
+				$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 
-				if ( ! $has_variation_price_html ) {
-					$is_interactive = false;
+				if ( $use_lazy_load ) {
+					// Lazy load mode: Only check if prices vary, don't pre-load variation data.
+					$has_variation_price_html = $this->has_price_variations( $product );
+
+					if ( $has_variation_price_html ) {
+						wp_interactivity_config(
+							'woocommerce',
+							array(
+								'products' => array(
+									$product->get_id() => array(
+										'price_html' => $product->get_price_html(),
+									),
+								),
+							)
+						);
+
+						wp_enqueue_script_module( 'woocommerce/product-elements' );
+						$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
+						$context_directive                         = wp_interactivity_data_wp_context(
+							array(
+								'productElementKey' => 'price_html',
+							)
+						);
+						$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
+					} else {
+						$is_interactive = false;
+					}
 				} else {
-					wp_interactivity_config(
-						'woocommerce',
-						array(
-							'products' => array(
-								$product->get_id() => array(
-									'price_html' => $product->get_price_html(),
-									'variations' => $formatted_variations_data,
+					// Original behavior: Pre-load all variation price data.
+					$variations_data           = $product->get_available_variations();
+					$formatted_variations_data = array();
+					$has_variation_price_html  = false;
+					foreach ( $variations_data as $variation ) {
+						if (
+							empty( $variation['variation_id'] )
+							|| ! array_key_exists( 'price_html', $variation )
+							|| '' === $variation['price_html']
+						) {
+							continue;
+						}
+						// Core behavior: when all variation prices are identical, Core returns '' for variation['price_html'].
+						// Therefore, the presence of any non-empty price_html implies price differences and warrants interactivity.
+						$has_variation_price_html                                = true;
+						$formatted_variations_data[ $variation['variation_id'] ] = array(
+							'price_html' => $variation['price_html'],
+						);
+					}
+
+					if ( ! $has_variation_price_html ) {
+						$is_interactive = false;
+					} else {
+						wp_interactivity_config(
+							'woocommerce',
+							array(
+								'products' => array(
+									$product->get_id() => array(
+										'price_html' => $product->get_price_html(),
+										'variations' => $formatted_variations_data,
+									),
 								),
 							),
-						)
-					);
+						);
 
-					wp_enqueue_script_module( 'woocommerce/product-elements' );
-					$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
-					$context_directive                         = wp_interactivity_data_wp_context(
-						array(
-							'productElementKey' => 'price_html',
-						)
-					);
-					$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
+						wp_enqueue_script_module( 'woocommerce/product-elements' );
+						$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
+						$context_directive                         = wp_interactivity_data_wp_context(
+							array(
+								'productElementKey' => 'price_html',
+							)
+						);
+						$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
+					}
 				}
 			}
 
