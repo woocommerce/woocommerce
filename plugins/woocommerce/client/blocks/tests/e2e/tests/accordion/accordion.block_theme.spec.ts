@@ -1,214 +1,97 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
-import { AccordionPage } from './accordion.page';
+import { expect, test } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	slug: 'woocommerce/accordion-group',
 };
 
-const test = base.extend< { pageObject: AccordionPage } >( {
-	pageObject: async (
-		{ page, editor, frontendUtils, requestUtils },
-		use
-	) => {
-		const pageObject = new AccordionPage( {
-			page,
-			editor,
-			frontendUtils,
-			requestUtils,
-		} );
-		await use( pageObject );
-	},
-} );
-
-test.describe( `${ blockData.slug } Block`, () => {
+test.describe( `${ blockData.slug } Block - Deprecation`, () => {
 	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
 	} );
 
-	test( 'can be inserted in Post Editor and it is visible on the frontend when feature flag is enabled', async ( {
+	test( 'shows deprecation notice and converts all inner blocks to core accordion on upgrade', async ( {
 		editor,
 		frontendUtils,
 	} ) => {
+		// Insert WooCommerce accordion block.
 		await editor.insertBlock( { name: blockData.slug } );
-		const blockLocator = await editor.getBlockByName( blockData.slug );
-		await expect(
-			blockLocator.getByLabel( 'Accordion title' )
-		).toHaveCount( 2 );
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
-		);
-		await expect( blockLocatorFrontend.getByRole( 'button' ) ).toHaveCount(
-			2
-		);
-	} );
 
-	test( 'can add title and panel content', async ( {
-		editor,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.insertAccordionGroup( [
-			{
-				title: 'Accordion title 1',
-				content: 'Test paragraph content for first panel',
-			},
-			{
-				title: 'Accordion title 2',
-				content: 'Test paragraph content for second panel',
-			},
-		] );
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
-		);
+		// Verify deprecation message is displayed in the canvas.
 		await expect(
-			blockLocatorFrontend.getByText( 'Accordion title 1' )
+			editor.canvas.getByText(
+				'This version of the Accordion block is outdated. Upgrade to continue using.'
+			)
 		).toBeVisible();
-		await expect(
-			blockLocatorFrontend.getByText( 'Accordion title 2' )
-		).toBeVisible();
-		await expect(
-			blockLocatorFrontend.getByText(
-				'Test paragraph content for first panel'
-			)
-		).toBeAttached();
-		await expect(
-			blockLocatorFrontend.getByText(
-				'Test paragraph content for second panel'
-			)
-		).toBeAttached();
-	} );
 
-	test( 'can toggle panel visibility', async ( {
-		editor,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.insertAccordionGroup( [
-			{
-				title: 'Accordion title',
-				content: 'Test paragraph content for first panel',
-			},
-			{
-				title: 'Accordion title 2',
-				content: 'Test paragraph content for second panel',
-			},
-		] );
+		// Verify upgrade button is displayed.
+		const upgradeButton = editor.canvas.getByRole( 'button', {
+			name: 'Upgrade Block',
+		} );
+		await expect( upgradeButton ).toBeVisible();
+
+		// Click the upgrade button.
+		await upgradeButton.click();
+
+		// Verify the block was converted to core/accordion.
+		const coreAccordion = await editor.getBlockByName( 'core/accordion' );
+		await expect( coreAccordion ).toBeVisible();
+
+		// Verify the WooCommerce accordion block is no longer present.
+		const wooAccordion = editor.canvas.locator(
+			'[data-type="woocommerce/accordion-group"]'
+		);
+		await expect( wooAccordion ).toHaveCount( 0 );
+
+		// Verify all inner blocks are converted correctly.
+		// Check that accordion items exist (woocommerce/accordion-item → core/accordion-item).
+		const coreAccordionItems = editor.canvas.locator(
+			'[data-type="core/accordion-item"]'
+		);
+		const itemCount = await coreAccordionItems.count();
+		expect( itemCount ).toBeGreaterThan( 0 );
+
+		// Check accordion headings (woocommerce/accordion-header → core/accordion-heading).
+		const coreAccordionHeadings = editor.canvas.locator(
+			'[data-type="core/accordion-heading"]'
+		);
+		await expect( coreAccordionHeadings ).toHaveCount( itemCount );
+
+		// Check accordion panels (woocommerce/accordion-panel → core/accordion-panel).
+		const coreAccordionPanels = editor.canvas.locator(
+			'[data-type="core/accordion-panel"]'
+		);
+		await expect( coreAccordionPanels ).toHaveCount( itemCount );
+
+		// Verify no WooCommerce accordion inner blocks remain.
+		const wooAccordionItems = editor.canvas.locator(
+			'[data-type="woocommerce/accordion-item"]'
+		);
+		await expect( wooAccordionItems ).toHaveCount( 0 );
+
+		const wooAccordionHeaders = editor.canvas.locator(
+			'[data-type="woocommerce/accordion-header"]'
+		);
+		await expect( wooAccordionHeaders ).toHaveCount( 0 );
+
+		const wooAccordionPanels = editor.canvas.locator(
+			'[data-type="woocommerce/accordion-panel"]'
+		);
+		await expect( wooAccordionPanels ).toHaveCount( 0 );
+
+		// Publish the post.
 		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
+
+		// Verify the core accordion block is visible on the frontend.
+		const accordionFrontend = frontendUtils.page.locator(
+			'.wp-block-accordion'
 		);
-		await expect(
-			blockLocatorFrontend.getByText(
-				'Test paragraph content for first panel'
-			)
-		).not.toBeInViewport();
-		await blockLocatorFrontend.getByRole( 'button' ).first().click();
-		await expect(
-			blockLocatorFrontend.getByText(
-				'Test paragraph content for first panel'
-			)
-		).toBeInViewport();
-	} );
+		await expect( accordionFrontend ).toBeVisible();
 
-	test( 'can set panel to open by default and should close when clicked', async ( {
-		editor,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.insertAccordionGroup( [
-			{
-				title: 'Accordion title',
-				content: 'Test paragraph content 1',
-			},
-			{
-				title: 'Accordion title 2',
-				content: 'Test paragraph content 2',
-			},
-		] );
-		const accordionPanel = await editor.getBlockByName(
-			'woocommerce/accordion-item'
-		);
-		await editor.selectBlocks( accordionPanel.first() );
-
-		// Open block settings sidebar and check "Open by default" option
-		await editor.openDocumentSettingsSidebar();
-		await editor.page
-			.getByLabel( 'Settings' )
-			.getByRole( 'checkbox', { name: 'Open by default' } )
-			.check();
-
-		// Publish and visit post and check that the panel is hidden.
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
-		);
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 1' )
-		).toBeInViewport();
-		await blockLocatorFrontend.getByRole( 'button' ).first().click();
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 1' )
-		).not.toBeInViewport();
-	} );
-
-	test( 'can set to auto close when another panel is clicked', async ( {
-		editor,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.insertAccordionGroup( [
-			{
-				title: 'Accordion title 1',
-				content: 'Test paragraph content 1',
-			},
-			{
-				title: 'Accordion title 2',
-				content: 'Test paragraph content 2',
-			},
-			{
-				title: 'Accordion title 3',
-				content: 'Test paragraph content 3',
-			},
-		] );
-		const accordionPanel = await editor.getBlockByName(
-			'woocommerce/accordion-group'
-		);
-		await editor.selectBlocks( accordionPanel.first() );
-
-		// Open block settings sidebar and check "Open by default" option
-		await editor.openDocumentSettingsSidebar();
-		await editor.page
-			.getByLabel( 'Settings' )
-			.getByRole( 'checkbox', {
-				name: 'Auto-close',
-			} )
-			.check();
-
-		// Publish and visit post and check that the panel is hidden.
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
-		);
-		await blockLocatorFrontend.getByRole( 'button' ).first().click();
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 1' )
-		).toBeInViewport();
-		await blockLocatorFrontend.getByRole( 'button' ).nth( 1 ).click();
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 1' )
-		).not.toBeInViewport();
-		await blockLocatorFrontend.getByRole( 'button' ).nth( 2 ).click();
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 2' )
-		).not.toBeInViewport();
+		// Verify accordion buttons are present.
+		const accordionButtons = accordionFrontend.getByRole( 'button' );
+		await expect( accordionButtons ).toHaveCount( itemCount );
 	} );
 } );
