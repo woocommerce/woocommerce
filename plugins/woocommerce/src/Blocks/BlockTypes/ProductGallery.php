@@ -160,7 +160,7 @@ class ProductGallery extends AbstractBlock {
 				$has_variation_images      = false;
 				foreach ( $variations_data as $variation ) {
 					$variation_image_id = (int) $variation->get_image_id();
-					if ( $variation_image_id && $variation_image_id !== (int) $product->get_image_id() ) {
+					if ( $variation_image_id ) {
 						$has_variation_images = true;
 
 						$formatted_variations_data[ $variation->get_id() ] = array(
