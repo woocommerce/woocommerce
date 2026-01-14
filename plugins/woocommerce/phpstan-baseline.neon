@@ -38466,7 +38466,7 @@ parameters:
 		-
 			message: '#^Constant WC_ABSPATH not found\.$#'
 			identifier: constant.notFound
-			count: 19
+			count: 20
 			path: includes/wc-core-functions.php
 
 		-
