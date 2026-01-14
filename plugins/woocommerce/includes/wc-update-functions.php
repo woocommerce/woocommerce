@@ -3243,7 +3243,6 @@ function wc_update_1060_update_woo_idx_comment_type_index(): void {
 
 	$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
 	if ( null !== $comment_type_index_exists ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type" );
-		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_approved, comment_type, comment_post_ID)" );
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type, ADD INDEX woo_idx_comment_type (comment_approved, comment_type, comment_post_ID)" );
 	}
 }
