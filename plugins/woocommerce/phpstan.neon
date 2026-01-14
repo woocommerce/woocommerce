@@ -20,6 +20,7 @@ parameters:
 		- vendor/wordpress/abilities-api
 	scanFiles:
 		- php-stubs/wc-admin-feature-config.php
+		- php-stubs/wc-constants.php
 	treatPhpDocTypesAsCertain: false
 	ignoreErrors:
 		- identifier: missingType.iterableValue
