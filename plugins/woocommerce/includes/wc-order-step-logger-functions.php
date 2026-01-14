@@ -87,7 +87,7 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			if ( $order && ( count( array_unique( $steps ) ) === count( $steps ) ) ) {
 				$order->delete_meta_data( '_debug_log_source' );
 				if ( OrderUtil::unknown_orders_data_store_in_use() ) {
-					if ( $logger instanceof WC_Logger && is_callable( array( $logger, 'clear' ) ) ) {
+					if ( $logger instanceof WC_Logger ) {
 						$logger->clear( $context['source'] );
 					}
 					$order->save();

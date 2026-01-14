@@ -395,7 +395,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			if ( self::$log instanceof WC_Logger && is_callable( array( self::$log, 'clear' ) ) ) {
+			if ( self::$log instanceof WC_Logger ) {
 				self::$log->clear( self::ID );
 			}
 		}

@@ -240,7 +240,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			if ( ! is_array( $item ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) ) {
 				throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_value' key and an 'order_id' key" );
 			}
-			if ( $logger instanceof \WC_Logger && is_callable( array( $logger, 'clear' ) ) ) {
+			if ( $logger instanceof \WC_Logger ) {
 				$logger->clear( $item['meta_value'] );
 			}
 		}
