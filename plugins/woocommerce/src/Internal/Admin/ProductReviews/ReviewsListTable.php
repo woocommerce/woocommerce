@@ -76,8 +76,9 @@ class ReviewsListTable extends WP_List_Table {
 		$this->set_review_product();
 
 		$args = [
-			'number'    => $this->get_per_page(),
-			'post_type' => 'product',
+			'number'                    => $this->get_per_page(),
+			'post_type'                 => 'product',
+			'update_comment_post_cache' => true,
 		];
 
 		// Include the order & orderby arguments.
@@ -106,11 +107,7 @@ class ReviewsListTable extends WP_List_Table {
 		$args = (array) apply_filters( 'woocommerce_product_reviews_list_table_prepare_items_args', $args );
 
 		/** @var \WP_Comment[] $comments */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
-		$comments = get_comments( $args );
-
-		update_comment_cache( $comments );
-		_prime_post_caches( array_map( fn( $comment ) => (int) $comment->comment_post_ID, $comments ), false, false );
-
+		$comments    = get_comments( $args );
 		$this->items = $comments;
 
 		$this->set_pagination_args(
