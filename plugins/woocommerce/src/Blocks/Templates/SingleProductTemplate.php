@@ -45,7 +45,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 * Run template-specific logic when the query matches this template.
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
@@ -66,7 +66,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			}
 
 			// Use the first template by default.
-			$template = $templates[0];
+			$template = reset( $templates );
 
 			// Check if there is a template matching the slug `single-product-{post_name}`.
 			if ( count( $valid_slugs ) > 1 && count( $templates ) > 1 ) {
@@ -82,7 +82,18 @@ class SingleProductTemplate extends AbstractTemplate {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
 
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
+			$product = wc_get_product( $post->ID );
+			if ( $product ) {
+				wp_interactivity_state(
+					'woocommerce/product-data',
+					array(
+						'templateState' => array(
+							'productId'   => $product->get_id(),
+							'variationId' => null,
+						),
+					)
+				);
+			}
 		}
 	}
 
@@ -128,6 +139,7 @@ class SingleProductTemplate extends AbstractTemplate {
 			},
 			$query_result
 		);
+
 		return $query_result;
 	}
 
@@ -141,7 +153,20 @@ class SingleProductTemplate extends AbstractTemplate {
 	private static function replace_first_single_product_template_block_with_password_form( $parsed_blocks, $is_already_replaced ) {
 		// We want to replace the first single product template block with the password form. We also want to remove all other single product template blocks.
 		// This array doesn't contains all the blocks. For example, it missing the breadcrumbs blocks: it doesn't make sense replace the breadcrumbs with the password form.
-		$single_product_template_blocks = array( 'woocommerce/product-image-gallery', 'woocommerce/product-details', 'woocommerce/add-to-cart-form', 'woocommerce/product-meta', 'woocommerce/product-rating', 'woocommerce/product-price', 'woocommerce/related-products', 'woocommerce/add-to-cart-with-options', 'woocommerce/product-gallery', 'woocommerce/blockified-product-details', 'woocommerce/product-collection', 'core/post-title', 'core/post-excerpt' );
+		$single_product_template_blocks = array(
+			'woocommerce/product-image-gallery',
+			'woocommerce/product-details',
+			'woocommerce/add-to-cart-form',
+			'woocommerce/product-meta',
+			'woocommerce/product-rating',
+			'woocommerce/product-price',
+			'woocommerce/related-products',
+			'woocommerce/add-to-cart-with-options',
+			'woocommerce/product-gallery',
+			'woocommerce/product-collection',
+			'core/post-title',
+			'core/post-excerpt',
+		);
 
 		return array_reduce(
 			$parsed_blocks,

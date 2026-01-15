@@ -11,11 +11,15 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import { CART_URL } from '@woocommerce/block-settings';
+import { useSelect } from '@wordpress/data';
+import { paymentStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
+import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 import './style.scss';
 
 export type BlockAttributes = {
@@ -34,13 +38,19 @@ const Block = ( {
 	placeOrderButtonLabel,
 	returnToCartButtonLabel,
 	priceSeparator,
-}: {
-	cartPageId: number;
-	showReturnToCart: boolean;
-	className?: string;
-	placeOrderButtonLabel: string;
-} ): JSX.Element => {
-	const { paymentMethodButtonLabel } = useCheckoutSubmit();
+}: BlockAttributes ) => {
+	const { paymentMethodButtonLabel, paymentMethodPlaceOrderButton } =
+		useCheckoutSubmit();
+
+	const activeSavedToken = useSelect(
+		( select ) => select( paymentStore ).getActiveSavedToken(),
+		[]
+	);
+
+	// not showing the custom button when a saved token is selected - only when the payment method is selected from the list.
+	const CustomButtonComponent = activeSavedToken
+		? undefined
+		: paymentMethodPlaceOrderButton;
 
 	const label = applyCheckoutFilter( {
 		filterName: 'placeOrderButtonLabel',
@@ -50,35 +60,33 @@ const Block = ( {
 			defaultPlaceOrderButtonLabel,
 	} );
 
+	const cartHref = getSetting( 'page-' + cartPageId, false );
+	const cartLink = cartHref || CART_URL;
+	const shouldShowReturnToCart = cartLink && showReturnToCart;
+
 	const showPrice = className?.includes( 'is-style-with-price' ) || false;
 
 	return (
 		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
+			<CheckoutOrderSummarySlot />
 			<StoreNoticesContainer
 				context={ noticeContexts.CHECKOUT_ACTIONS }
 			/>
-			<div className="wc-block-checkout__actions_row">
-				{ showReturnToCart && (
-					<ReturnToCartButton
-						href={ getSetting( 'page-' + cartPageId, false ) }
-					>
+			<div
+				className={ clsx( 'wc-block-checkout__actions_row', {
+					'wc-block-checkout__actions_row--justify-flex-end':
+						! shouldShowReturnToCart,
+				} ) }
+			>
+				{ shouldShowReturnToCart && (
+					<ReturnToCartButton href={ cartLink }>
 						{ returnToCartButtonLabel }
 					</ReturnToCartButton>
 				) }
-				{ showPrice && (
-					<style>
-						{ `.wp-block-woocommerce-checkout-actions-block {
-						.wc-block-components-checkout-place-order-button__separator {
-							&::after {
-								content: "${ priceSeparator }";
-							}
-						}
-					}` }
-					</style>
-				) }
 				<PlaceOrderButton
+					CustomButtonComponent={ CustomButtonComponent }
 					label={ label }
-					fullWidth={ ! showReturnToCart }
+					fullWidth={ ! shouldShowReturnToCart }
 					showPrice={ showPrice }
 					priceSeparator={ priceSeparator }
 				/>

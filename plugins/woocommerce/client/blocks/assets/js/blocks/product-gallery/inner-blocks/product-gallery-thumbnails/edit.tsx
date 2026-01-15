@@ -1,19 +1,19 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
-import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
-import { useProductDataContext } from '@woocommerce/shared-context';
-import { useRef, useState, useEffect } from '@wordpress/element';
+import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 import type { ProductResponseImageItem } from '@woocommerce/types';
+import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
+import { useEffect, useRef, useState } from '@wordpress/element';
+import { useProduct } from '@woocommerce/entities';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
  */
-import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
 import { checkOverflow } from '../../utils';
+import { ProductGalleryThumbnailsBlockSettings } from './block-settings';
 import type { ProductGalleryThumbnailsBlockAttributes } from './types';
 
 const MAX_THUMBNAILS = 10;
@@ -39,22 +39,23 @@ const prepareProductImages = (
 export const Edit = ( {
 	attributes,
 	setAttributes,
-}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > ) => {
-	const { thumbnailSize, aspectRatio } = attributes;
+	context,
+}: BlockEditProps< ProductGalleryThumbnailsBlockAttributes > & {
+	context: {
+		postId?: string;
+	};
+} ) => {
+	const { thumbnailSize, aspectRatio, activeThumbnailStyle } = attributes;
 
-	const placeholderSrc = `${ WC_BLOCKS_IMAGE_URL }block-placeholders/product-image-gallery.svg`;
-	const productContext = useProductDataContext();
-	const product = productContext?.product;
+	const { product } = useProduct( context.postId );
 
-	// If the product is not loaded, the default product object is returned.
-	// That's why we're checking if product id is truthy as by default it's 0.
-	const isProductContext = Boolean( product?.id );
-	const productThumbnails = isProductContext
-		? prepareProductImages( product?.images )
-		: Array( MAX_THUMBNAILS ).fill( {
-				src: placeholderSrc,
-				alt: '',
-		  } );
+	const productThumbnails =
+		product && product.images && product.images.length > 0
+			? prepareProductImages( product.images )
+			: Array( MAX_THUMBNAILS ).fill( {
+					src: PLACEHOLDER_IMG_SRC,
+					alt: '',
+			  } );
 
 	const renderThumbnails = productThumbnails.length > 1;
 
@@ -90,7 +91,7 @@ export const Edit = ( {
 	const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
 	const className = clsx(
 		'wc-block-product-gallery-thumbnails',
-		`wc-block-product-gallery-thumbnails--thumbnails-size-${ thumbnailSizeValue }`,
+		`wc-block-product-gallery-thumbnails--active-${ activeThumbnailStyle }`,
 		{
 			'wc-block-product-gallery-thumbnails--overflow-right':
 				overflowState.right,
@@ -98,7 +99,12 @@ export const Edit = ( {
 				overflowState.bottom,
 		}
 	);
-	const blockProps = useBlockProps( { className } );
+	const blockProps = useBlockProps( {
+		className,
+		style: {
+			'--wc-block-product-gallery-thumbnails-size': thumbnailSizeValue,
+		},
+	} );
 	const imageStyles: Record< string, string | undefined > = {
 		aspectRatio,
 	};

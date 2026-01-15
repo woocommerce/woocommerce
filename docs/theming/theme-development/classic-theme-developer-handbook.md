@@ -223,4 +223,4 @@ add_filter( 'woocommerce_enqueue_styles', '__return_false' );
 
 With this definition in place, your theme will no longer use the WooCommerce stylesheet and give you a blank canvas upon which you can build your own desired layout and styles.
 
-Styling a WooCommerce theme from scratch for the first time is no easy task. There are many different pages and elements that need to be styled, and if you're new to WooCommerce, you are probably not familiar with many of them. A non-exhaustive list of WooCommerce elements to style can be found [here](https://developer.files.wordpress.com/2017/12/woocommerce-theme-testing-checklist.pdf).
+Styling a WooCommerce theme from scratch for the first time is no easy task. There are many different pages and elements that need to be styled, and if you're new to WooCommerce, you are probably not familiar with many of them. A non-exhaustive list of WooCommerce elements to style can be found in this [WooCommerce Theme Testing Checklist](https://developer.files.wordpress.com/2017/12/woocommerce-theme-testing-checklist.pdf).

@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InnerBlocks } from '@wordpress/block-editor';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, useEffect, useState } from '@wordpress/element';
 import type { BlockAttributes } from '@wordpress/blocks';
 import { useWooBlockProps } from '@woocommerce/block-templates';
@@ -29,7 +29,7 @@ export function TabBlockEdit( {
 	const blockProps = useWooBlockProps( attributes );
 	const { id, title, _templateBlockOrder: order, isSelected } = attributes;
 
-	const classes = classnames( 'wp-block-woocommerce-product-tab__content', {
+	const classes = clsx( 'wp-block-woocommerce-product-tab__content', {
 		'is-selected': isSelected,
 	} );
 

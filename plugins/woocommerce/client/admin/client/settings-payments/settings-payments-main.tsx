@@ -37,10 +37,12 @@ import {
 	isIncentiveDismissedEarlierThanTimestamp,
 	isActionIncentive,
 	recordPaymentsEvent,
+	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import { WooPaymentsPostSandboxAccountSetupModal } from '~/settings-payments/components/modals';
 import WooPaymentsModal from '~/settings-payments/onboarding/providers/woopayments';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 /**
  * A component that renders the main settings page for managing payment gateways in WooCommerce.
@@ -64,7 +66,7 @@ export const SettingsPaymentsMain = () => {
 		setPostSandboxAccountSetupModalVisible,
 	] = useState( false );
 
-	const [ storeCountry, setStoreCountry ] = useState< string | null >(
+	const [ businessCountry, setBusinessCountry ] = useState< string | null >(
 		window.wcSettings?.admin?.woocommerce_payments_nox_profile
 			?.business_country_code || null
 	);
@@ -138,15 +140,19 @@ export const SettingsPaymentsMain = () => {
 			const paymentSettings = select( paymentSettingsStore );
 
 			return {
-				providers: paymentSettings.getPaymentProviders( storeCountry ),
+				providers:
+					paymentSettings.getPaymentProviders( businessCountry ),
 				offlinePaymentGateways:
-					paymentSettings.getOfflinePaymentGateways(),
-				suggestions: paymentSettings.getSuggestions(),
-				suggestionCategories: paymentSettings.getSuggestionCategories(),
+					paymentSettings.getOfflinePaymentGateways(
+						businessCountry
+					),
+				suggestions: paymentSettings.getSuggestions( businessCountry ),
+				suggestionCategories:
+					paymentSettings.getSuggestionCategories( businessCountry ),
 				isFetching: paymentSettings.isFetching(),
 			};
 		},
-		[ storeCountry ]
+		[ businessCountry ]
 	);
 
 	const dismissIncentive = useCallback(
@@ -303,7 +309,8 @@ export const SettingsPaymentsMain = () => {
 		(
 			paymentsEntity: PaymentsEntity,
 			onboardingUrl: string | null,
-			attachUrl: string | null
+			attachUrl: string | null,
+			context = 'wc_settings_payments__main'
 		) => {
 			if ( installingPlugin ) {
 				return;
@@ -315,7 +322,7 @@ export const SettingsPaymentsMain = () => {
 					url: paymentsEntity?.onboarding?._links?.preload.href,
 					method: 'POST',
 					data: {
-						location: storeCountry,
+						location: businessCountry,
 					},
 				} );
 			}
@@ -329,6 +336,15 @@ export const SettingsPaymentsMain = () => {
 			setInstallingPlugin( paymentsEntity.id );
 			recordPaymentsEvent( 'recommendations_setup', {
 				extension_selected: paymentsEntity.plugin.slug,
+				extension_action:
+					paymentsEntity.plugin.status === 'not_installed'
+						? 'install'
+						: 'activate',
+				provider_id: paymentsEntity.id,
+				suggestion_id: paymentsEntity?._suggestion_id ?? 'unknown',
+				provider_extension_slug: paymentsEntity.plugin.slug,
+				from: context,
+				source: context,
 			} );
 			installAndActivatePlugins( [ paymentsEntity.plugin.slug ] )
 				.then( async ( response ) => {
@@ -341,15 +357,24 @@ export const SettingsPaymentsMain = () => {
 						'getPaymentProviders'
 					);
 
-					// Record the plugin installation event.
-					recordPaymentsEvent( 'provider_installed', {
-						provider_id: paymentsEntity.id,
-					} );
+					if ( paymentsEntity.plugin.status === 'not_installed' ) {
+						// Record the extension installation event.
+						recordPaymentsEvent( 'provider_installed', {
+							provider_id: paymentsEntity.id,
+							suggestion_id:
+								paymentsEntity?._suggestion_id ?? 'unknown',
+							provider_extension_slug: paymentsEntity.plugin.slug,
+							from: context,
+						} );
+					}
+					// Note: The provider extension activation is tracked from the backend (the `provider_extension_activated` event).
+
+					setInstallingPlugin( null );
 
 					// Wait for the state update and fetch the latest providers.
 					const updatedProviders = await resolveSelect(
 						paymentSettingsStore
-					).getPaymentProviders( storeCountry );
+					).getPaymentProviders( businessCountry );
 
 					// Find the matching provider in the updated list.
 					const updatedPaymentsEntity = updatedProviders.find(
@@ -359,11 +384,6 @@ export const SettingsPaymentsMain = () => {
 							current.plugin.slug === paymentsEntity.plugin.slug // Last resort to find the provider.
 					);
 
-					// Record the event when the user successfully enables a gateway.
-					recordPaymentsEvent( 'provider_enable', {
-						provider_id: paymentsEntity.id,
-					} );
-
 					/**
 					 * If the onboarding type is 'native_in_context', we need to open the WooPayments onboarding modal.
 					 * Otherwise, we redirect to the onboarding URL or the payment methods page.
@@ -372,8 +392,14 @@ export const SettingsPaymentsMain = () => {
 						updatedPaymentsEntity?.onboarding?.type ===
 						'native_in_context'
 					) {
+						recordPaymentsOnboardingEvent(
+							'woopayments_onboarding_modal_opened',
+							{
+								from: context,
+								source: wooPaymentsOnboardingSessionEntrySettings,
+							}
+						);
 						setIsOnboardingModalOpen( true );
-						setInstallingPlugin( null );
 					} else {
 						// If the installed and/or activated extension has recommended payment methods,
 						// redirect to the payment methods page.
@@ -388,11 +414,8 @@ export const SettingsPaymentsMain = () => {
 								getNewPath( {}, '/payment-methods' )
 							);
 
-							setInstallingPlugin( null );
 							return;
 						}
-
-						setInstallingPlugin( null );
 
 						if ( onboardingUrl ) {
 							window.location.href = onboardingUrl;
@@ -400,6 +423,19 @@ export const SettingsPaymentsMain = () => {
 					}
 				} )
 				.catch( ( response: { errors: Record< string, string > } ) => {
+					let eventName = 'provider_extension_installation_failed';
+					if ( paymentsEntity.plugin.status !== 'not_installed' ) {
+						eventName = 'provider_extension_activation_failed';
+					}
+					recordPaymentsEvent( eventName, {
+						provider_id: paymentsEntity.id,
+						suggestion_id:
+							paymentsEntity?._suggestion_id ?? 'unknown',
+						provider_extension_slug: paymentsEntity.plugin.slug,
+						from: context,
+						source: wooPaymentsOnboardingSessionEntrySettings,
+						reason: 'error',
+					} );
 					createNoticesFromResponse( response );
 					setInstallingPlugin( null );
 				} );
@@ -408,7 +444,7 @@ export const SettingsPaymentsMain = () => {
 			installingPlugin,
 			installAndActivatePlugins,
 			invalidateResolutionForStoreSelector,
-			storeCountry,
+			businessCountry,
 		]
 	);
 
@@ -450,7 +486,8 @@ export const SettingsPaymentsMain = () => {
 		<Button
 			variant={ 'link' }
 			target="_blank"
-			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/"
+			rel="noopener noreferrer"
+			href="https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations"
 			className="more-payment-options-link"
 			onClick={ trackMorePaymentsOptionsClicked }
 		>
@@ -509,8 +546,8 @@ export const SettingsPaymentsMain = () => {
 					shouldHighlightIncentive={ shouldHighlightIncentive }
 					updateOrdering={ handleOrderingUpdate }
 					isFetching={ isFetching }
-					businessRegistrationCountry={ storeCountry }
-					setBusinessRegistrationCountry={ setStoreCountry }
+					businessRegistrationCountry={ businessCountry }
+					setBusinessRegistrationCountry={ setBusinessCountry }
 					setIsOnboardingModalOpen={ setIsOnboardingModalOpen }
 				/>
 				{

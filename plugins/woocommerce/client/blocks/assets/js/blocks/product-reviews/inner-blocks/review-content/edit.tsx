@@ -29,11 +29,14 @@ export default function Edit( {
 			[ `has-text-align-${ textAlign }` ]: textAlign,
 		} ),
 	} );
+
 	const [ content ] = useEntityProp(
 		'root',
 		'comment',
 		'content',
-		String( commentId )
+		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+		// @ts-expect-error - the type of useEntityProp is not correct
+		commentId
 	);
 
 	const blockControls = (

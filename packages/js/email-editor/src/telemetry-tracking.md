@@ -1,6 +1,6 @@
 # Editor Telemetry Tracking
 
-The email editor has a built in system for tracking it's telemetry that can be used to track users interactions with the editor.
+The email editor has a built in system for tracking its telemetry that can be used to track users interactions with the editor.
 
 ## Enabling Tracking
 
@@ -10,7 +10,7 @@ To enable tracking an integrator needs to add the following filters.
 // enable email editor event tracking
 addFilter(
 	'woocommerce_email_editor_events_tracking_enabled',
-	'your_plugin_namespace`,
+	'your_plugin_namespace',
 	() => true
 );
 
@@ -19,6 +19,7 @@ addAction( 'woocommerce_email_editor_events', 'your_plugin_namespace', ( editorE
 	const { name, ...data } = editorEvent;
 	// Replace console.log with your tracking code
   console.log( name, data );
+});
 ```
 
 ## Tracked events

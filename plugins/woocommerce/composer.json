@@ -2,9 +2,9 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "10.0.0",
+	"version": "10.6.0",
 	"type": "wordpress-plugin",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
 	"repositories": [
@@ -32,10 +32,19 @@
 			"options": {
 				"symlink": false
 			}
+		},
+		{
+			"type": "vcs",
+			"url": "https://github.com/WordPress/mcp-adapter.git"
+		},
+		{
+			"type": "vcs",
+			"url": "https://github.com/WordPress/abilities-api"
 		}
 	],
 	"require": {
 		"php": ">=7.4",
+		"automattic/block-delimiter": "0.3.4",
 		"automattic/jetpack-a8c-mc-stats": "^3.0.0",
 		"automattic/jetpack-autoloader": "5.0.0",
 		"automattic/jetpack-config": "3.0.0",
@@ -44,10 +53,11 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"opis/json-schema": "*",
-		"pelago/emogrifier": "^6.0",
-		"woocommerce/action-scheduler": "3.9.2",
+		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
-		"woocommerce/email-editor": "*"
+		"woocommerce/email-editor": "*",
+		"wordpress/abilities-api": "^0.4.0",
+		"wordpress/mcp-adapter": "^0.3.0"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -55,9 +65,12 @@
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "1.6.6",
+		"php-stubs/wordpress-stubs": "^6.8",
+		"phpstan/phpstan": "^2.1",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
+		"szepeviktor/phpstan-wordpress": "^2.0",
 		"woocommerce/monorepo-plugin": "*",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
@@ -143,6 +156,12 @@
 		],
 		"build-lib": [
 			"sh ./bin/build-lib.sh"
+		],
+		"phpstan": [
+			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G"
+		],
+		"phpstan:baseline": [
+			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G --generate-baseline=phpstan-baseline.neon"
 		]
 	},
 	"extra": {
@@ -157,6 +176,8 @@
 			"test": "Run unit tests",
 			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
 			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
+			"phpstan": "Run PHPStan static analysis on the WooCommerce plugin",
+			"phpstan:baseline": "Generate a PHPStan baseline file to ignore existing errors",
 			"makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
 			"makepot": "Generate i18n/languages/woocommerce.pot file"
 		},

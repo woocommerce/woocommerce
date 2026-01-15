@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Summary from '@woocommerce/base-components/summary';
 import { blocksConfig } from '@woocommerce/block-settings';
-import { isEmpty } from '@woocommerce/types';
+import { isEmpty, ProductResponseItem } from '@woocommerce/types';
 
 import {
 	useInnerBlockLayoutContext,
@@ -13,6 +13,7 @@ import {
 } from '@woocommerce/shared-context';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -36,7 +37,7 @@ const isLegacyProductSummary = ( props: Partial< BlockProps > ) => {
 };
 
 const getSource = (
-	product: { short_description?: string; description?: string },
+	product: ProductResponseItem | ProductEntityResponse,
 	showDescriptionIfEmpty: boolean
 ) => {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
@@ -62,9 +63,14 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 		linkText,
 		isDescendantOfAllProducts,
 		isDescendentOfSingleProductTemplate,
+		product: productEntity,
+		isAdmin,
 	} = props;
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { product } = useProductDataContext();
+	const { product } = useProductDataContext( {
+		product: productEntity,
+		isAdmin,
+	} );
 	const styleProps = useStyleProps( props );
 
 	// The attributes of this block have been updated. There's migration
@@ -88,38 +94,40 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 		: showDescriptionIfEmptyAttr;
 	const showLink = isLegacy ? allProductsShowLink : showLinkAttr;
 
-	const source = getSource( product, showDescriptionIfEmpty );
+	const source = product ? getSource( product, showDescriptionIfEmpty ) : '';
 	const maxLength = summaryLength || Infinity;
+
+	const summaryClassName = 'wc-block-components-product-summary';
+
+	if ( isDescendentOfSingleProductTemplate ) {
+		return (
+			<div className={ summaryClassName }>
+				<p>
+					{ __(
+						'This block displays the product summary and all its customizations.',
+						'woocommerce'
+					) }
+				</p>
+			</div>
+		);
+	}
 
 	if ( ! product ) {
 		return (
 			<div
-				className={ clsx(
-					className,
-					`wc-block-components-product-summary`,
-					{
-						[ `${ parentClassName }__product-summary` ]:
-							parentClassName,
-					}
-				) }
+				className={ clsx( className, summaryClassName, {
+					[ `${ parentClassName }__product-summary` ]:
+						parentClassName,
+				} ) }
 			/>
-		);
-	}
-
-	if ( isDescendentOfSingleProductTemplate ) {
-		return (
-			<p>
-				{ __(
-					'This block displays the product summary and all its customizations.',
-					'woocommerce'
-				) }
-			</p>
 		);
 	}
 
 	if ( ! source ) {
 		return isDescendantOfAllProducts ? null : (
-			<p>{ __( 'No product summary to show.', 'woocommerce' ) }</p>
+			<div className={ summaryClassName }>
+				<p>{ __( 'No product summary to show.', 'woocommerce' ) }</p>
+			</div>
 		);
 	}
 
@@ -129,7 +137,7 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 				className={ clsx(
 					className,
 					styleProps.className,
-					`wc-block-components-product-summary`,
+					summaryClassName,
 					{
 						[ `${ parentClassName }__product-summary` ]:
 							parentClassName,
@@ -140,7 +148,10 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 				countType={ blocksConfig.wordCountType || 'words' }
 				style={ styleProps.style }
 			/>
-			{ isDescendantOfAllProducts && showLink && linkText ? (
+			{ isDescendantOfAllProducts &&
+			showLink &&
+			linkText &&
+			product?.permalink ? (
 				<a href={ `${ product.permalink }#tab-description` }>
 					{ linkText }
 				</a>

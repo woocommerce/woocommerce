@@ -9,6 +9,7 @@
 	"apiVersion": 3,
 	"ancestor": [
 		"woocommerce/product-filter-attribute",
+		"woocommerce/product-filter-taxonomy",
 		"woocommerce/product-filter-status"
 	],
 	"supports": {

@@ -36,6 +36,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -52,6 +53,7 @@
 		]
 	},
 	"dependencies": {
+		"@woocommerce/data": "workspace:*",
 		"@wordpress/a11y": "wp-6.6",
 		"@wordpress/notices": "wp-6.6"
 	},
@@ -66,14 +68,12 @@
 	},
 	"private": true,
 	"devDependencies": {
-		"@automattic/data-stores": "^2.0.1",
 		"@babel/core": "7.25.7",
 		"@types/lodash": "^4.14.202",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"concurrently": "^7.6.0",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
-		"jest-cli": "27.5.x",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
 		"redux": "^4.2.1",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
@@ -90,7 +90,7 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -105,7 +105,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {
@@ -132,6 +132,9 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"node_modules/@woocommerce/data/build",
+				"node_modules/@woocommerce/data/build-module",
+				"node_modules/@woocommerce/data/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"

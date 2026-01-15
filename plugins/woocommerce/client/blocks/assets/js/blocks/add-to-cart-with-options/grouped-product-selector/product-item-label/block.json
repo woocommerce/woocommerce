@@ -1,10 +1,10 @@
 {
-	"name": "woocommerce/add-to-cart-with-options-grouped-product-selector-item-label",
+	"name": "woocommerce/add-to-cart-with-options-grouped-product-item-label",
 	"title": "Grouped Product: Item Label (Beta)",
 	"description": "Display the product title as a label or paragraph.",
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
-	"ancestor": [ "woocommerce/add-to-cart-with-options-grouped-product-selector-item" ],
+	"ancestor": [ "woocommerce/add-to-cart-with-options-grouped-product-item" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json",

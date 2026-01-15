@@ -206,6 +206,12 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
+						'wp_environment_type'       => array(
+							'description' => __( 'The WordPress environment type.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
 						'language'                  => array(
 							'description' => __( 'WordPress language.', 'woocommerce' ),
 							'type'        => 'string',
@@ -987,7 +993,9 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// Operating system.
-		$server_architecture = sprintf( '%s %s %s', php_uname( 's' ), php_uname( 'r' ), php_uname( 'm' ) );
+		$server_architecture = function_exists( 'php_uname' )
+			? sprintf( '%s %s %s', php_uname( 's' ), php_uname( 'r' ), php_uname( 'm' ) )
+			: '';
 
 		$database_version = wc_get_server_database_version();
 		$log_directory    = LoggingUtil::get_log_directory( false );
@@ -1005,6 +1013,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'wp_memory_limit'           => $wp_memory_limit,
 			'wp_debug_mode'             => ( defined( 'WP_DEBUG' ) && WP_DEBUG ),
 			'wp_cron'                   => ! ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ),
+			'wp_environment_type'       => wp_get_environment_type(),
 			'language'                  => get_locale(),
 			'external_object_cache'     => wp_using_ext_object_cache(),
 			'server_info'               => isset( $_SERVER['SERVER_SOFTWARE'] ) ? wc_clean( wp_unslash( $_SERVER['SERVER_SOFTWARE'] ) ) : '',

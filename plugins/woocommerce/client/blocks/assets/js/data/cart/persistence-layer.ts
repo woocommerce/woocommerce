@@ -29,7 +29,7 @@ export const hasCartSession = () => {
 };
 
 export const isAddingToCart = () => {
-	return !! window.location.search.match( /add-to-cart/ );
+	return !! window.location?.search?.match( /add-to-cart/ );
 };
 
 export const persistenceLayer = {

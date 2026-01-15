@@ -31,8 +31,10 @@ class WC_Marketplace_Suggestions {
 		add_action( 'wp_ajax_woocommerce_add_dismissed_marketplace_suggestion', array( __CLASS__, 'post_add_dismissed_suggestion_handler' ) );
 
 		// Register hooks for rendering suggestions container markup.
-		add_action( 'wc_marketplace_suggestions_products_empty_state', array( __CLASS__, 'render_products_list_empty_state' ) );
 		add_action( 'wc_marketplace_suggestions_orders_empty_state', array( __CLASS__, 'render_orders_list_empty_state' ) );
+
+		// Trigger suggestions fetch on wc-admin dashboard.
+		add_action( 'current_screen', array( __CLASS__, 'maybe_trigger_suggestions_fetch' ) );
 	}
 
 	/**
@@ -110,15 +112,6 @@ class WC_Marketplace_Suggestions {
 	}
 
 	/**
-	 * Render suggestions containers in products list empty state.
-	 */
-	public static function render_products_list_empty_state() {
-		self::render_suggestions_container( 'products-list-empty-header' );
-		self::render_suggestions_container( 'products-list-empty-body' );
-		self::render_suggestions_container( 'products-list-empty-footer' );
-	}
-
-	/**
 	 * Render suggestions containers in orders list empty state.
 	 */
 	public static function render_orders_list_empty_state() {
@@ -152,6 +145,17 @@ class WC_Marketplace_Suggestions {
 		return self::allow_suggestions();
 	}
 
+	/**
+	 * Trigger suggestion fetch for wc-admin dashboard.
+	 */
+	public static function maybe_trigger_suggestions_fetch() {
+		$screen    = get_current_screen();
+		$screen_id = $screen ? $screen->id : '';
+
+		if ( 'woocommerce_page_wc-admin' === $screen_id && self::allow_suggestions() ) {
+			self::get_suggestions_api_data();
+		}
+	}
 
 	/**
 	 * Should suggestions be displayed?

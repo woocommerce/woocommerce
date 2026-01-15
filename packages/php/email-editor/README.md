@@ -1,12 +1,14 @@
 # WooCommerce Email Editor
 
 This folder contains the code for the WooCommerce Email Editor PHP Package.
-We aim to extract the engine as an independent library, so it can be used in other projects.
-As we are still in an exploration phase, we keep it together with the WooCommerce codebase.
 
-You can locate the JS package here `packages/js/email-editor`
+This package covers functionality for bootstrapping the email editor JS application and code for rendering emails from Gutenberg blocks.
+
+You can locate the JS package in [`packages/js/email-editor`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/email-editor)
 
 ## Workflow Commands
+
+Note: The package is developed in [the WooCommerce monorepo](https://github.com/woocommerce/woocommerce/tree/trunk/packages/php/email-editor).
 
 We use `composer` run scripts to run the commands. You can run them using `composer run <command>`.
 If you don't have `composer` installed globally, you need to install it globally. [Please check how to install it](https://getcomposer.org/doc/00-intro.md).
@@ -79,25 +81,30 @@ We may add, update and delete any of them.
 ### Actions
 
 | Name                                            | Argument         | Description                                                                                                      |
-| ----------------------------------------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+|-------------------------------------------------|------------------|------------------------------------------------------------------------------------------------------------------|
 | `woocommerce_email_editor_initialized`          | `null`           | Called when the Email Editor is initialized                                                                      |
 | `woocommerce_email_blocks_renderer_initialized` | `BlocksRegistry` | Called when the block content renderer is initialized. You may use this to add a new BlockRenderer               |
 | `woocommerce_email_editor_register_templates`   |                  | Called when the basic blank email template is registered. You can add more templates via register_block_template |
 
 ### Filters
 
-| Name                                                               | Argument                                  | Return                                                       | Description                                                                                                                                                            |
-| ------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `woocommerce_email_editor_post_types`                              | `Array` $postTypes                        | `Array` EmailPostType                                        | Applied to the list of post types used by the `getPostTypes` method                                                                                                    |
-| `woocommerce_email_editor_theme_json`                              | `WP_Theme_JSON` $coreThemeData            | `WP_Theme_JSON` $themeJson                                   | Applied to the theme json data. This theme json data is created from the merging of the `WP_Theme_JSON_Resolver::get_core_data` and WooCommerce owns `theme.json` file |
-| `woocommerce_email_renderer_styles`                                | `string` $templateStyles, `WP_Post` $post | `string` $templateStyles                                     | Applied to the email editor template styles.                                                                                                                           |
-| `woocommerce_email_content_renderer_styles`                        | `string` $contentStyles, `WP_Post` $post  | `string` $contentStyles                                      | Applied to the inline content styles prior to use by the CSS Inliner.                                                                                                  |
-| `woocommerce_is_email_editor_page`                                 | `boolean` $isEditorPage                   | `boolean`                                                    | Check current page is the email editor page                                                                                                                            |
-| `woocommerce_email_editor_send_preview_email`                      | `Array` $postData                         | `boolean` Result of processing. Was email sent successfully? | Allows override of the send preview mail function. Folks may choose to use custom implementation                                                                       |
-| `woocommerce_email_editor_post_sent_status_args`                   | `Array` `sent` post status args           | `Array` register_post_status args                            | Allows update of the argument for the sent post status                                                                                                                 |
-| `woocommerce_email_blocks_renderer_parsed_blocks`                  | `Array` Parsed blocks data                | `Array` Parsed blocks data                                   | You can modify the parsed blocks before they are processed by email renderer.                                                                                          |
-| `woocommerce_email_editor_send_preview_email_rendered_data`        | `string` $data Rendered email             | `string` Rendered email                                      | Allows modifying the rendered email when displaying or sending it in preview                                                                                           |
-| `woocommerce_email_editor_send_preview_email_personalizer_context` | `Array` $personalizerContext              | `Array` Personalizer context data                            | Allows modifying the personalizer context data for the send preview email function                                                                                     |
+| Name                                                               | Argument                                                         | Return                                                       | Description                                                                                                                                                            |
+|--------------------------------------------------------------------|------------------------------------------------------------------|--------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `woocommerce_email_editor_post_types`                              | `Array` $post_types                                              | `Array` EmailPostType                                        | Applied to the list of post types used by the `getPostTypes` method                                                                                                    |
+| `woocommerce_email_editor_theme_json`                              | `WP_Theme_JSON` $core_theme_data                                 | `WP_Theme_JSON` $theme_json                                  | Applied to the theme json data. This theme json data is created from the merging of the `WP_Theme_JSON_Resolver::get_core_data` and WooCommerce owns `theme.json` file |
+| `woocommerce_email_renderer_styles`                                | `string` $template_styles, `WP_Post` $post                       | `string` $template_styles                                    | Applied to the email editor template styles.                                                                                                                           |
+| `woocommerce_email_content_renderer_styles`                        | `string` $content_styles, `WP_Post` $post                        | `string` $content_styles                                     | Applied to the inline content styles prior to use by the CSS Inliner.                                                                                                  |
+| `woocommerce_is_email_editor_page`                                 | `boolean` $is_editor_page                                        | `boolean`                                                    | Check current page is the email editor page                                                                                                                            |
+| `woocommerce_email_editor_send_preview_email`                      | `Array` $post_data                                               | `boolean` Result of processing. Was email sent successfully? | Allows override of the send preview mail function. Folks may choose to use custom implementation                                                                       |
+| `woocommerce_email_editor_post_sent_status_args`                   | `Array` `sent` post status args                                  | `Array` register_post_status args                            | Allows update of the argument for the sent post status                                                                                                                 |
+| `woocommerce_email_blocks_renderer_parsed_blocks`                  | `Array` Parsed blocks data                                       | `Array` Parsed blocks data                                   | You can modify the parsed blocks before they are processed by email renderer.                                                                                          |
+| `woocommerce_email_editor_rendering_email_context`                 | `Array` $email_context                                           | `Array` $email_context                                       | Applied during email rendering to provide context data (e.g., `recipient_email`, `user_id`, `order_id`) to block renderers.                                            |
+| `woocommerce_email_editor_send_preview_email_rendered_data`        | `string` $data Rendered email, `WP_Post` $post                                     | `string` Rendered email                                      | Allows modifying the rendered email when displaying or sending it in preview                                                                                           |
+| `woocommerce_email_editor_send_preview_email_personalizer_context` | `string` $content_styles, `WP_Post` $post` $personalizer_context | `Array` Personalizer context data                            | Allows modifying the personalizer context data for the send preview email function                                                                                     |
+| `woocommerce_email_editor_synced_site_styles`                      | `Array` $synced_data, `Array` $site_data                         | `Array` Modified synced data                                 | Used to filter the synced site style data before applying to email theme.                                                                                              |
+| `woocommerce_email_editor_site_style_sync_enabled`                 | `bool` $enabled                                                  | `bool`                                                       | Use to control whether site style sync functionality is enabled or disabled. Returning `false` will disable site theme sync.                                           |
+| `woocommerce_email_editor_allowed_iframe_style_handles`            | `Array` $allowed_iframe_style_handles                            | `Array` $allowed_iframe_style_handles                        | Filter the list of allowed stylesheet handles in the editor iframe.                                                                                                    |
+| `woocommerce_email_editor_script_localization_data`                | `Array` $localization_data                                       | `Array` $localization_data                                   | Use to modify inlined JavaScript variables used by Email Editor client.                                                                                                |
 
 ## Logging
 
@@ -122,7 +129,11 @@ The following log levels are supported:
 
 ### Log Locations
 
-By default, logs are written to the WordPress debug log if `WP_DEBUG_LOG` is enabled. The location is `wp-content/debug.log`.
+By default, logs are written to the WordPress debug log if `WP_DEBUG_LOG` is enabled. The behavior depends on how `WP_DEBUG_LOG` is configured:
+
+- If `WP_DEBUG_LOG` is set to `true`, logs are written to `wp-content/debug.log`
+- If `WP_DEBUG_LOG` is set to a string path (e.g., `/path/to/custom/debug.log`), logs are written to that custom location
+- If `WP_DEBUG_LOG` is not defined or set to `false`, logging is disabled
 
 ### Example Log Messages
 
@@ -144,7 +155,7 @@ Example log entry:
 
 You can customize the logging behavior by:
 
-1. Setting a delegate logger using `set_delegate_logger()` method to use another logging system (e.g., WooCommerce's logger)
+1. Setting a delegate logger using `set_logger()` method to use another logging system (e.g., WooCommerce's logger)
 2. Configuring WordPress debug logging through `WP_DEBUG_LOG` constant in wp-config.php to enable/disable logging to wp-content/debug.log
 
 ### Best Practices

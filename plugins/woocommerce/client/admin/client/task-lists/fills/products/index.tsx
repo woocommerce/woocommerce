@@ -195,13 +195,14 @@ export const Products = () => {
 					} }
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
 						'woocommerce'
 					) }
 					eventName="tasklist_add_product_visit_marketplace_click"
 					targetUrl={ getAdminLink(
 						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
 					) }
+					linkType="wc-admin"
 				/>
 			</div>
 			{ isLoadingSampleProducts ? (

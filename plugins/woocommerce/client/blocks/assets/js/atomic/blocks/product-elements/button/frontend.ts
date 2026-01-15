@@ -3,10 +3,12 @@
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
  */
+import { doesCartItemMatchAttributes } from '../../../../base/utils/variations/does-cart-item-match-attributes';
 import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -16,10 +18,14 @@ const universalLock =
 interface Context {
 	addToCartText: string;
 	productId: number;
+	productType: string;
+	groupedProductIds?: number[];
 	displayViewCart: boolean;
 	quantityToAdd: number;
 	tempQuantity: number;
 	animationStatus: AnimationStatus;
+	hasPressedButton: boolean;
+	inTheCartText: string;
 }
 
 enum AnimationStatus {
@@ -48,13 +54,41 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product = wooState.cart?.items.find(
+			const products = wooState.cart?.items.filter(
 				( item ) => item.id === state.productId
 			);
-			return product?.quantity || 0;
+
+			if ( products.length === 0 ) {
+				return 0;
+			}
+
+			// Return the product quantity when the item is a non-variable product.
+			if ( products[ 0 ]?.type !== 'variation' ) {
+				return products.reduce(
+					( acc, item ) => acc + item.quantity,
+					0
+				);
+			}
+
+			const selectedAttributes =
+				addToCartWithOptionsState?.selectedAttributes;
+			const selectedVariableProducts = products.filter( ( item ) =>
+				doesCartItemMatchAttributes( item, selectedAttributes )
+			);
+
+			return selectedVariableProducts.reduce(
+				( acc, item ) => acc + item.quantity,
+				0
+			);
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -65,8 +99,15 @@ const productButtonStore = {
 			return animationStatus === AnimationStatus.SLIDE_OUT;
 		},
 		get addToCartText(): string {
-			const { animationStatus, tempQuantity, addToCartText } =
-				getContext< Context >();
+			const {
+				animationStatus,
+				tempQuantity,
+				addToCartText,
+				productType,
+				groupedProductIds,
+				hasPressedButton,
+				inTheCartText,
+			} = getContext< Context >();
 
 			// We use the temporary quantity when there's no animation, or
 			// when the second part of the animation hasn't started yet.
@@ -77,9 +118,29 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( quantity === 0 ) return addToCartText;
+			if ( productType === 'grouped' ) {
+				const groupedProductIdsInCart = groupedProductIds?.map(
+					( productId ) => {
+						const product = wooState.cart?.items.find(
+							( item ) => item.id === productId
+						);
+						return product?.quantity || 0;
+					}
+				);
+				if (
+					groupedProductIdsInCart?.some( ( qty ) => qty > 0 ) &&
+					hasPressedButton
+				) {
+					return inTheCartText;
+				}
+				return addToCartText;
+			}
 
-			return state.inTheCartText.replace( '###', quantity.toString() );
+			if ( quantity > 0 ) {
+				return inTheCartText.replace( '###', quantity.toString() );
+			}
+
+			return addToCartText;
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();
@@ -87,10 +148,14 @@ const productButtonStore = {
 			return state.quantity > 0;
 		},
 		get productId() {
-			return (
-				addToCartWithOptionsState?.variationId ||
-				getContext< Context >().productId
-			);
+			const { productId } = getContext< Context >();
+
+			const isDescendantOfAddToCartWithOptions =
+				productId === productDataState?.productId;
+
+			return isDescendantOfAddToCartWithOptions
+				? productDataState?.variationId || productId
+				: productId;
 		},
 	},
 	actions: {
@@ -107,10 +172,16 @@ const productButtonStore = {
 				{ lock: universalLock }
 			);
 
-			yield actions.addCartItem( {
-				id: state.productId,
-				quantity: state.quantity + context.quantityToAdd,
-			} );
+			yield actions.addCartItem(
+				{
+					id: state.productId,
+					quantity: state.quantity + context.quantityToAdd,
+					type: context.productType,
+				},
+				{
+					showCartUpdatesNotices: false,
+				}
+			);
 
 			context.displayViewCart = true;
 		},
@@ -137,6 +208,26 @@ const productButtonStore = {
 				// animation status so it can be triggered again.
 				context.tempQuantity = state.quantity;
 				context.animationStatus = AnimationStatus.IDLE;
+			}
+		},
+		handlePressedState() {
+			const context = getContext< Context >();
+
+			// Only handle the pressed state if the form is valid.
+			if (
+				addToCartWithOptionsState?.isFormValid === undefined ||
+				addToCartWithOptionsState?.isFormValid
+			) {
+				context.hasPressedButton = true;
+
+				// Only animate if the quantity number changes and there is no
+				// animation in progress.
+				if (
+					context.tempQuantity !== state.quantity &&
+					context.animationStatus === AnimationStatus.IDLE
+				) {
+					context.animationStatus = AnimationStatus.SLIDE_OUT;
+				}
 			}
 		},
 	},

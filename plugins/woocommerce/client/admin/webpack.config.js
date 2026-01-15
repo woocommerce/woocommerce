@@ -5,7 +5,6 @@ const { get } = require( 'lodash' );
 const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
-const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
@@ -14,7 +13,8 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
 /**
  * Internal dependencies
  */
-const UnminifyWebpackPlugin = require( './unminify' );
+const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-style-build' );
@@ -57,8 +57,10 @@ const wcAdminPackages = [
 	'onboarding',
 	'block-templates',
 	'product-editor',
+	'sanitize',
 	'settings-editor',
 	'remote-logging',
+	'email-editor',
 ];
 
 const getEntryPoints = () => {
@@ -221,15 +223,15 @@ const webpackConfig = {
 			],
 		} ),
 
-		// The email-editor is integrated as admin dependency, hence this copy step.
+		// The email-editor assets for the rich-text.js file need to be copied to the build directory.
 		new CopyWebpackPlugin( {
 			patterns: [
 				{
 					from: path.join(
 						__dirname,
-						'../../../../packages/js/email-editor/build'
+						'../../../../packages/js/email-editor/assets'
 					),
-					to: './email-editor',
+					to: './email-editor/assets',
 				},
 			],
 		} ),
@@ -247,6 +249,10 @@ const webpackConfig = {
 							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
 							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
 							// For backward compatibility reasons we need to skip requesting to external here.
+							return null;
+						case '@wordpress/global-styles-engine':
+							// @wordpress/global-styles-engine is not a standard WordPress package available globally,
+							// so we need to bundle it instead of treating it as an external.
 							return null;
 					}
 

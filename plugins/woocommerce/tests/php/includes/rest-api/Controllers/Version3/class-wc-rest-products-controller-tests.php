@@ -12,11 +12,18 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
+	 * @var mixed
+	 */
+	protected $original_hid_out_of_stock_value;
+
+	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
+		update_option( 'woocommerce_hide_out_of_stock_items', $this->original_hid_out_of_stock_value );
 	}
 
 	/**
@@ -89,6 +96,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
+
+		$this->original_hid_out_of_stock_value = get_option( 'woocommerce_hide_out_of_stock_items' );
 	}
 
 	/**
@@ -1582,6 +1591,290 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the `search_fields` parameter works with single field.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_search_fields_single_field() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'             => 'Blue Shirt',
+				'sku'              => 'SHIRT-123',
+				'global_unique_id' => '987654321',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'name' ),
+				'search'        => 'Blue',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( 'Blue Shirt', $response_products[0]['name'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter works with multiple fields.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_search_fields_multiple_fields() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'             => 'Red Scarf',
+				'sku'              => 'SCARF-456',
+				'global_unique_id' => '123456789',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'name', 'sku', 'global_unique_id' ),
+				'search'        => 'SCARF',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( 'Red Scarf', $response_products[0]['name'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter supports cross-field matching.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_supports_cross_field_matching() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'             => 'Winter Scarf',
+				'sku'              => 'SCARF-W-789',
+				'global_unique_id' => '987654321',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'name', 'sku', 'global_unique_id' ),
+				'search'        => 'Winter 987',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $test_product->get_id(), $response_products[0]['id'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter takes precedence over other search parameters.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_search_fields_parameter_precedence() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'             => 'Blue Shirt',
+				'sku'              => 'SHIRT-BLUE',
+				'global_unique_id' => '111222333',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields'      => array( 'name' ),
+				'search'             => 'Blue',
+				'search_name_or_sku' => 'nonexistent',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( 'Blue Shirt', $response_products[0]['name'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter validates allowed fields.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_search_fields_invalid_field() {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'invalid_field' ),
+				'search'        => 'test',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter works with partial matching.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_search_fields_partial_matching() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'             => 'Premium Wool Scarf',
+				'sku'              => 'SCARF-W-PREMIUM',
+				'global_unique_id' => '9876543210123',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'global_unique_id' ),
+				'search'        => '987',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( 'Premium Wool Scarf', $response_products[0]['name'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter works with description field.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_description_field() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'        => 'Blue Widget',
+				'description' => 'A premium quality winter scarf made from wool.',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'description' ),
+				'search'        => 'winter wool',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $test_product->get_id(), $response_products[0]['id'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter works with short_description field.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_short_description_field() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'              => 'Green Gadget',
+				'short_description' => 'Perfect for summer activities.',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'short_description' ),
+				'search'        => 'summer activities',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $test_product->get_id(), $response_products[0]['id'] );
+	}
+
+	/**
+	 * Test that the `search_fields` parameter works with mixed content fields.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_with_mixed_content_fields() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'              => 'Red Tool',
+				'description'       => 'Essential tool for professionals.',
+				'short_description' => 'High quality craftsmanship.',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_fields' => array( 'description', 'short_description' ),
+				'search'        => 'quality professionals',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( $test_product->get_id(), $response_products[0]['id'] );
+	}
+
+	/**
+	 * Test that backward compatibility is maintained with existing search parameters.
+	 *
+	 * @return void
+	 */
+	public function test_products_search_backward_compatibility() {
+		$test_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Classic Shirt',
+				'sku'  => 'SHIRT-CLASSIC',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array(
+				'search_name_or_sku' => 'Classic',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_products = $response->get_data();
+
+		$this->assertEquals( 1, count( $response_products ) );
+		$this->assertEquals( 'Classic Shirt', $response_products[0]['name'] );
+	}
+
+	/**
 	 * Perform a REST POST request to update a product.
 	 *
 	 * @param WC_Product $product The product to update.
@@ -1594,5 +1887,231 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test that batch create operations update term counts correctly.
+	 *
+	 * Verifies that when creating products via batch operations, the term counts
+	 * are properly updated when hide out of stock is disabled.
+	 */
+	public function test_batch_create_updates_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$term         = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id      = $term['term_id'];
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'name'         => 'Batch Product 1',
+						'type'         => 'simple',
+						'status'       => 'publish',
+						'stock_status' => 'instock',
+						'categories'   => array( array( 'id' => $term_id ) ),
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before + 1, $count_after, 'Batch create should update term count.' );
+	}
+
+	/**
+	 * Test that batch create obeys hide out of stock setting.
+	 *
+	 * Verifies that when creating out of stock products via batch operations,
+	 * the term counts are not increased when hide out of stock is enabled.
+	 */
+	public function test_batch_create_out_of_stock_obeys_hide_setting() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$term         = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id      = $term['term_id'];
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'name'         => 'Batch Product 2',
+						'type'         => 'simple',
+						'status'       => 'publish',
+						'stock_status' => 'outofstock',
+						'categories'   => array( array( 'id' => $term_id ) ),
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before, $count_after, 'Out-of-stock products should not increment count with hide setting ON.' );
+	}
+
+	/**
+	 * Test that batch update of stock status affects term counts.
+	 *
+	 * Verifies that updating product stock status via batch operations properly
+	 * decrements term counts when hide out of stock is enabled.
+	 */
+	public function test_batch_update_stock_status_affects_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$update_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$update_request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'           => $product->get_id(),
+						'stock_status' => 'outofstock',
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $update_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.' );
+	}
+
+	/**
+	 * Test that batch update of product status affects term counts.
+	 *
+	 * Verifies that updating product status via batch operations properly
+	 * decrements term counts when products are changed to draft status.
+	 */
+	public function test_batch_update_status_affects_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$update_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$update_request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'     => $product->get_id(),
+						'status' => 'draft',
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $update_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.' );
+	}
+
+	/**
+	 * Test that batch delete operations update term counts.
+	 *
+	 * Verifies that when deleting products via batch operations, the term counts
+	 * are properly decremented immediately.
+	 */
+	public function test_batch_delete_product_updates_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$delete_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$delete_request->set_body_params( array( 'delete' => array( $product->get_id() ) ) );
+		$this->server->dispatch( $delete_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Batch delete should decrement term count immediately.' );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns only POS-visible products when true.
+	 */
+	public function test_pos_products_only_true_returns_only_pos_visible_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'pos_products_only', true );
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertNotContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns all products when false.
+	 */
+	public function test_pos_products_only_false_returns_all_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'pos_products_only', false );
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test that omitting `pos_products_only` filter returns all products regardless of visibility in POS.
+	 */
+	public function test_pos_products_only_omitted_returns_all_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		// Do not set pos_products_only parameter.
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertContains( $hidden_product->get_id(), $product_ids );
 	}
 }

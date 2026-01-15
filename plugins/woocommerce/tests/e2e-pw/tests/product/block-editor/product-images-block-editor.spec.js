@@ -1,9 +1,16 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as baseTest } from '../../../fixtures/block-editor-fixtures';
 import { expect, tags } from '../../../fixtures/fixtures';
-import { WC_API_PATH } from '../../../utils/api-client';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
+
+skipTestsForDeprecatedFeature();
 
 async function selectImagesInLibrary( page, imagesNames ) {
 	const dataIds = [];

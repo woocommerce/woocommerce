@@ -3,20 +3,14 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { type ElementType, useMemo } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
-import {
-	revertMigration,
-	getUpgradeStatus,
-	HOURS_TO_DISPLAY_UPGRADE_NOTICE,
-	UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD,
-} from '@woocommerce/blocks/migration-products-to-product-collection';
+import { useIsEmailEditor } from '@woocommerce/email-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { CesFeedbackButton } from '@woocommerce/editor-components/ces-feedback-button';
 import {
 	PanelBody,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 } from '@wordpress/components';
@@ -31,14 +25,18 @@ import {
 	ProductCollectionContentProps,
 	CoreFilterNames,
 	FilterName,
+	LayoutOptions,
+	CoreCollectionNames,
 } from '../../types';
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
-import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import {
 	InheritQueryControl,
 	FilterableControl,
 } from './use-page-context-control';
+import useCarouselLayoutAdjustments from './use-carousel-layout-adjustments';
+import useEmailPaginationAdjustments from './use-email-pagination-adjustments';
+import useEmailColumnAdjustments from './use-email-column-adjustments';
 import DefaultQueryOrderByControl from './order-by-control/default-query-order-by-control';
 import CustomQueryOrderByControl from './order-by-control/custom-query-order-by-control';
 import OnSaleControl from './on-sale-control';
@@ -68,8 +66,9 @@ const prepareShouldShowFilter =
 const ProductCollectionInspectorControls = (
 	props: ProductCollectionContentProps
 ) => {
-	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, dimensions, displayLayout } = attributes;
+	const { attributes, context, setAttributes, clientId } = props;
+	const { query, hideControls, dimensions, displayLayout, collection } =
+		attributes;
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -87,6 +86,13 @@ const ProductCollectionInspectorControls = (
 		tracksLocation === 'product-catalog' ||
 		tracksLocation === 'product-archive';
 
+	// Carousel layout influences the visibility and behavior of some controls.
+	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
+	const isEmailEditor = useIsEmailEditor();
+	useCarouselLayoutAdjustments( clientId, attributes );
+	useEmailPaginationAdjustments( clientId, attributes );
+	useEmailColumnAdjustments( attributes, setAttributes );
+
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
@@ -97,8 +103,10 @@ const ProductCollectionInspectorControls = (
 	const showDefaultOrderControl = ! showCustomQueryControls;
 	const showOffsetControl =
 		showCustomQueryControls && shouldShowFilter( CoreFilterNames.OFFSET );
+	const showColumnsControl = ! isCarouselLayout;
 	const showMaxPagesToShowControl =
 		showCustomQueryControls &&
+		! isCarouselLayout &&
 		shouldShowFilter( CoreFilterNames.MAX_PAGES_TO_SHOW );
 	const showProductsPerPageControl =
 		showCustomQueryControls &&
@@ -175,16 +183,25 @@ const ProductCollectionInspectorControls = (
 						trackInteraction={ trackInteraction }
 					/>
 				) }
-				<LayoutOptionsControl { ...displayControlProps } />
-				<WidthOptionsControl { ...dimensionsControlProps } />
-				{ showProductsPerPageControl && (
-					<ProductsPerPageControl { ...queryControlProps } />
+				{ ! isEmailEditor && (
+					<LayoutOptionsControl { ...displayControlProps } />
 				) }
-				<ColumnsControl { ...displayControlProps } />
-				{ showOffsetControl && (
+				{ ! isEmailEditor && (
+					<WidthOptionsControl { ...dimensionsControlProps } />
+				) }
+				{ showProductsPerPageControl && (
+					<ProductsPerPageControl
+						{ ...queryControlProps }
+						carouselVariant={ isCarouselLayout }
+					/>
+				) }
+				{ ! isEmailEditor && showColumnsControl && (
+					<ColumnsControl { ...displayControlProps } />
+				) }
+				{ ! isEmailEditor && showOffsetControl && (
 					<OffsetControl { ...queryControlProps } />
 				) }
-				{ showMaxPagesToShowControl && (
+				{ showMaxPagesToShowControl && ! isEmailEditor && (
 					<MaxPagesToShowControl { ...queryControlProps } />
 				) }
 			</ToolsPanel>
@@ -215,7 +232,11 @@ const ProductCollectionInspectorControls = (
 						<AttributesControl { ...queryControlProps } />
 					) }
 					{ showTaxonomyControls && (
-						<TaxonomyControls { ...queryControlProps } />
+						<TaxonomyControls
+							{ ...queryControlProps }
+							collection={ collection }
+							renderMode="panel"
+						/>
 					) }
 					{ showFeaturedControl && (
 						<FeaturedProductsControl { ...queryControlProps } />
@@ -241,62 +262,10 @@ export default ProductCollectionInspectorControls;
 const isProductCollection = ( blockName: string ) =>
 	blockName === metadata.name;
 
-const lessThanThresholdSinceUpdate = ( t: number ) => {
-	// Xh * 60m * 60s * 1000ms
-	const xHoursFromT = t + HOURS_TO_DISPLAY_UPGRADE_NOTICE * 60 * 60 * 1000;
-	return Date.now() < xHoursFromT;
-};
-
-const displayedLessThanThreshold = ( displayCount = 0 ) => {
-	return displayCount <= UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD;
-};
-
-// Upgrade Notice should be displayed only if:
-// - block is converted from Products
-// - user haven't acknowledged seeing the notice
-// - less than X hours since the notice was first displayed
-// - notice was displayed less than X times
-const shouldDisplayUpgradeNotice = (
-	props: ProductCollectionEditComponentProps
-) => {
-	const { attributes } = props;
-	const { convertedFromProducts } = attributes;
-	const { status, time, displayCount } = getUpgradeStatus();
-
-	return (
-		convertedFromProducts &&
-		status === 'notseen' &&
-		lessThanThresholdSinceUpdate( time ) &&
-		displayedLessThanThreshold( displayCount )
-	);
-};
-
-// Block should be unmarked as converted from Products if:
-// block is converted from Products and either:
-// - user acknowledged seeing the notice
-// - it's more than X hours since the notice was first displayed
-// - notice was displayed more than X times
-// We do that to prevent showing the notice again after Products on
-// other page were updated or local storage was cleared or user
-// switched to another machine/browser etc.
-const shouldBeUnmarkedAsConverted = (
-	props: ProductCollectionEditComponentProps
-) => {
-	const { attributes } = props;
-	const { convertedFromProducts } = attributes;
-	const { status, time, displayCount } = getUpgradeStatus();
-
-	return (
-		convertedFromProducts &&
-		( status === 'seen' ||
-			! lessThanThresholdSinceUpdate( time ) ||
-			! displayedLessThanThreshold( displayCount ) )
-	);
-};
-
 const CollectionSpecificControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
+	const { collection } = props.attributes;
 	const setQueryAttributeBind = useMemo(
 		() => setQueryAttribute.bind( null, props ),
 		[ props ]
@@ -306,7 +275,7 @@ const CollectionSpecificControls = (
 		return recordEvent(
 			'blocks_product_collection_inspector_control_clicked',
 			{
-				collection: props.attributes.collection,
+				collection,
 				location: tracksLocation,
 				filter,
 			}
@@ -318,14 +287,17 @@ const CollectionSpecificControls = (
 		query: props.attributes.query,
 	};
 
+	const isByCategoryOrTag =
+		collection === CoreCollectionNames.BY_CATEGORY ||
+		collection === CoreCollectionNames.BY_TAG;
+
 	return (
 		<InspectorControls>
 			{
 				/**
-				 * Hand-Picked collection-specific controls.
+				 * "Hand-Picked" collection-specific controls.
 				 */
-				props.attributes.collection ===
-					'woocommerce/product-collection/hand-picked' && (
+				collection === CoreCollectionNames.HAND_PICKED && (
 					<PanelBody>
 						<HandPickedProductsControlField
 							{ ...queryControlProps }
@@ -337,9 +309,22 @@ const CollectionSpecificControls = (
 				/**
 				 * "Related Products" collection-specific controls.
 				 */
-				props.attributes.collection ===
-					'woocommerce/product-collection/related' && (
+				collection === CoreCollectionNames.RELATED && (
 					<RelatedByControl { ...queryControlProps } />
+				)
+			}
+			{
+				/**
+				 * "Category and Tag" collection-specific controls.
+				 */
+				isByCategoryOrTag && (
+					<PanelBody>
+						<TaxonomyControls
+							{ ...queryControlProps }
+							collection={ collection }
+							renderMode="standalone"
+						/>
+					</PanelBody>
 				)
 			}
 		</InspectorControls>
@@ -362,35 +347,3 @@ const withCollectionSpecificControls =
 	};
 
 addFilter( 'editor.BlockEdit', metadata.name, withCollectionSpecificControls );
-
-export const withUpgradeNoticeControls =
-	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
-	( props: ProductCollectionEditComponentProps ) => {
-		if ( ! isProductCollection( props.name ) ) {
-			return <BlockEdit { ...props } />;
-		}
-
-		const displayUpgradeNotice = shouldDisplayUpgradeNotice( props );
-		const unmarkAsConverted = shouldBeUnmarkedAsConverted( props );
-
-		if ( unmarkAsConverted ) {
-			props.setAttributes( { convertedFromProducts: false } );
-		}
-
-		return (
-			<>
-				{ displayUpgradeNotice && (
-					<InspectorControls>
-						{
-							<UpgradeNotice
-								revertMigration={ revertMigration }
-							/>
-						}
-					</InspectorControls>
-				) }
-				<BlockEdit { ...props } />
-			</>
-		);
-	};
-
-addFilter( 'editor.BlockEdit', metadata.name, withUpgradeNoticeControls );

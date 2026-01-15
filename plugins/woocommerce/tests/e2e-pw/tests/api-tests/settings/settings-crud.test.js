@@ -1042,7 +1042,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 							yes: 'Yes, I will enter prices inclusive of tax',
 							no: 'No, I will enter prices exclusive of tax',
 						},
-						tip: 'This option is important as it will affect how you input prices. Changing it will not update existing products.',
+						tip: 'This option is important as it will affect how you input prices. If you select "Yes", enter prices including your base location\'s tax rate, the baseline for tax calculations. Changing this option will not update existing products.',
 						value: 'no',
 					} ),
 				] )
@@ -1805,7 +1805,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 								'Display suggestions within WooCommerce',
 							type: 'checkbox',
 							default: 'yes',
-							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.',
+							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com.',
 							value: expect.any( String ),
 						} ),
 					] )

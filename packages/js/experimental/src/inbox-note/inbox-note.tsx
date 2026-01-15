@@ -6,24 +6,15 @@ import { createElement, Fragment, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useInView } from 'react-intersection-observer';
 import moment from 'moment';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { H, Section } from '@woocommerce/components';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
 import { InboxNoteActionButton } from './action';
 import { useCallbackOnLinkClick } from './use-callback-on-link-click';
-
-const ALLOWED_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br' ];
-const ALLOWED_ATTR = [ 'target', 'href', 'rel', 'name', 'download' ];
-
-const sanitizeHTML = ( html: string ) => {
-	return {
-		__html: sanitize( html, { ALLOWED_TAGS, ALLOWED_ATTR } ),
-	};
-};
 
 type InboxNoteAction = {
 	id: number;
@@ -157,7 +148,7 @@ const InboxNoteCard = ( {
 
 	const unread = is_read === false;
 	const hasImage = layout === 'thumbnail';
-	const cardClassName = classnames(
+	const cardClassName = clsx(
 		'woocommerce-inbox-message',
 		className,
 		layout,
@@ -166,12 +157,9 @@ const InboxNoteCard = ( {
 		}
 	);
 
-	const actionWrapperClassName = classnames(
-		'woocommerce-inbox-message__actions',
-		{
-			'has-multiple-actions': note.actions?.length > 1,
-		}
-	);
+	const actionWrapperClassName = clsx( 'woocommerce-inbox-message__actions', {
+		'has-multiple-actions': note.actions?.length > 1,
+	} );
 
 	return (
 		<section ref={ ref } className={ cardClassName }>
@@ -213,7 +201,9 @@ const InboxNoteCard = ( {
 					</H>
 					<Section className="woocommerce-inbox-message__text">
 						<span
-							dangerouslySetInnerHTML={ sanitizeHTML( content ) }
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML( content ),
+							} }
 							ref={ linkCallbackRef }
 						/>
 					</Section>

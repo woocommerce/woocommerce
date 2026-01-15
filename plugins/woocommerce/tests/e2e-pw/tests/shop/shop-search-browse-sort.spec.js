@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test, expect, tags } from '../../fixtures/fixtures';
 import { getFakeCategory, getFakeProduct } from '../../utils/data';
-import { WC_API_PATH } from '../../utils/api-client';
 
 test.describe(
 	'Search, browse by categories and sort items in the shop',

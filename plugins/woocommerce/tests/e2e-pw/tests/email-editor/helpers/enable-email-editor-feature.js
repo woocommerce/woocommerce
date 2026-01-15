@@ -2,12 +2,13 @@
  * External dependencies
  */
 import { request } from '@playwright/test';
+import { createClient, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { setOption, deleteOption } from '../../../utils/options';
-import ApiClient, { WP_API_PATH } from '../../../utils/api-client';
+import { admin } from '../../../test-data/data';
 
 /**
  * Set the feature flag for email improvements feature.
@@ -53,7 +54,12 @@ export const disableEmailEditor = async ( baseURL ) =>
 export const deleteEmailPost = async ( baseURL, pageId ) => {
 	console.log( 'Deleting email post', { pageId } );
 
-	await ApiClient.getInstance().delete(
+	const apiClient = createClient( baseURL, {
+		type: 'basic',
+		username: admin.username,
+		password: admin.password,
+	} );
+	await apiClient.delete(
 		`${ WP_API_PATH }/woo_email/${ pageId }?force=true`
 	);
 

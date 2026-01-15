@@ -31,12 +31,13 @@ class OrderCountCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a valid status and order type can be cached.
+	 * Test that known and unknown, based on `wc_get_order_statuses()`, statuses and order type can be cached.
 	 */
 	public function test_cache_order_counts() {
 		$counts = array(
-			OrderInternalStatus::PENDING   => 5,
-			OrderInternalStatus::COMPLETED => 10,
+			OrderInternalStatus::PENDING      => 5,
+			OrderInternalStatus::COMPLETED    => 10,
+			'third-party-unregistered-status' => 20,
 		);
 
 		foreach ( $counts as $status => $count ) {
@@ -45,8 +46,16 @@ class OrderCountCacheTest extends \WC_Unit_Test_Case {
 
 		$this->assertTrue( $this->order_cache->is_cached( 'shop_order', OrderInternalStatus::PENDING ) );
 		$this->assertTrue( $this->order_cache->is_cached( 'shop_order', OrderInternalStatus::COMPLETED ) );
+		$this->assertTrue( $this->order_cache->is_cached( 'shop_order', 'third-party-unregistered-status' ) );
+
 		$this->assertEquals( 5, $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) )[ OrderInternalStatus::PENDING ] );
 		$this->assertEquals( 10, $this->order_cache->get( 'shop_order', array( OrderInternalStatus::COMPLETED ) )[ OrderInternalStatus::COMPLETED ] );
+		$this->assertEquals( 20, $this->order_cache->get( 'shop_order', array( 'third-party-unregistered-status' ) )['third-party-unregistered-status'] );
+
+		// verify when a specific set of statuses isn't requested.
+		$this->assertEquals( 5, $this->order_cache->get( 'shop_order' )[ OrderInternalStatus::PENDING ] );
+		$this->assertEquals( 10, $this->order_cache->get( 'shop_order' )[ OrderInternalStatus::COMPLETED ] );
+		$this->assertEquals( 20, $this->order_cache->get( 'shop_order' )['third-party-unregistered-status'] );
 	}
 
 	/**

@@ -58,7 +58,7 @@ For our Woo extension, we'll be appending our field right at the end with `wooco
 
 ## Creating our class
 
-Let's get started with creating a new class which will hold the code for the field. Add a new file with the name `class-product-fields.php` to the `/includes/admin/` folder. Within the class, we add our namespace, an abort if anyone tries to call the file directly and a \_\_construct method which calls the `hooks()` method:
+Let's get started with creating a new class which will hold the code for the field. Add a new file with the name `class-product-fields.php` to the `/includes/admin/` folder. Within the class, we add our namespace, an abort if anyone tries to call the file directly and a `__construct` method which calls the `hooks()` method:
 
 ```php
 <?php
@@ -77,7 +77,7 @@ class ProductFields {
 }
 ```
 
-Then in Terminal we run `composer dump-autoload -o` to regenerate the class map. Once that's done, we add the class to our `setup.php` \_\_construct() function like so:
+Then in Terminal we run `composer dump-autoload -o` to regenerate the class map. Once that's done, we add the class to our `setup.php` `__construct()` function like so:
 
 ```php
 class Setup {
@@ -86,6 +86,7 @@ class Setup {
 
 		new ProductFields();
     }
+}
 ```
 
 ## Adding the custom field
@@ -144,7 +145,7 @@ If we add data and save the product, then the new meta data is inserted into the
 
 At this point you have a working extension that saves a custom field for a product as product meta.
 Showing the field in the store
-If we want to display the new field in our store, then we can do this with the `get_meta()` method of the Woo product class: `$product->get_meta( '\_new_stock_information' )`
+If we want to display the new field in our store, then we can do this with the `get_meta()` method of the Woo product class: `$product->get_meta( '_new_stock_information' )`
 
 Let's get started by creating a new file /includes/class-product.php. You may have noticed that this is outside the `/admin/` folder as this code will run in the front. So when we set up the class, we also adjust the namespace accordingly:
 
@@ -229,10 +230,10 @@ public function add_variation_field( $loop, $variation_data, $variation ) {
 
 	woocommerce_wp_text_input(
 		array(
-			'id' => '\_new_stock_information' . '[' . $loop . ']',
-			'label' => \_\_( 'New Stock Information', 'woo_product_field' ),
+			'id' => '_new_stock_information' . '[' . $loop . ']',
+			'label' => __( 'New Stock Information', 'woo_product_field' ),
 			'wrapper_class' => 'form-row form-row-full',
-			'value' => $variation_product->get_meta( '\_new_stock_information' )
+			'value' => $variation_product->get_meta( '_new_stock_information' )
 		)
 	);
 }

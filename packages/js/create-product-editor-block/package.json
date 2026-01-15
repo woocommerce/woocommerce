@@ -3,7 +3,7 @@
 	"version": "1.3.0",
 	"description": "A template to be used with `@wordpress/create-block` to create a Product Editor block.",
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"main": "index.js",
 	"engines": {
 		"node": "^20.11.1"

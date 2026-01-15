@@ -10,6 +10,8 @@ use Automattic\WooCommerce\StoreApi\Exceptions\OutOfStockException;
 use Automattic\WooCommerce\StoreApi\Exceptions\PartialOutOfStockException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Exceptions\TooManyInCartException;
+use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
@@ -50,7 +52,12 @@ class CartController {
 			$normalized_qty = $quantity_limits->normalize_cart_item_quantity( $cart_item['quantity'], $cart_item );
 
 			if ( $normalized_qty !== $cart_item['quantity'] ) {
-				$this->set_cart_item_quantity( $cart_item['key'], $normalized_qty );
+				try {
+					$this->set_cart_item_quantity( $cart_item['key'], $normalized_qty );
+				} catch ( RouteException $e ) {
+					// Ignore errors and continue.
+					continue;
+				}
 			}
 		}
 	}
@@ -112,27 +119,37 @@ class CartController {
 			$request['cart_item_data']
 		);
 
-		$this->validate_add_to_cart( $product, $request );
+		$quantity_limits = new QuantityLimits();
 
-		$quantity_limits  = new QuantityLimits();
+		// If quantity was not passed, it should default to the minimum allowed quantity.
+		if ( null === $request['quantity'] ) {
+			$request['quantity'] = $quantity_limits->get_add_to_cart_limits( $product )['minimum'];
+		}
+
+		$this->validate_add_to_cart( $product, $request );
 		$existing_cart_id = $cart->find_product_in_cart( $cart_id );
+		$request_quantity = wc_stock_amount( $request['quantity'] );
 
 		if ( $existing_cart_id ) {
 			$cart_item           = $cart->cart_contents[ $existing_cart_id ];
-			$quantity_validation = $quantity_limits->validate_cart_item_quantity( $request['quantity'] + $cart_item['quantity'], $cart_item );
+			$updated_quantity    = $request_quantity + $cart_item['quantity'];
+			$quantity_validation = $quantity_limits->validate_cart_item_quantity( $updated_quantity, $cart_item );
 
 			if ( is_wp_error( $quantity_validation ) ) {
-				throw new RouteException( $quantity_validation->get_error_code(), $quantity_validation->get_error_message(), 400 );
+				throw new RouteException(
+					esc_html( $quantity_validation->get_error_code() ),
+					esc_html( $quantity_validation->get_error_message() ),
+					400
+				);
 			}
 
-			$cart->set_quantity( $existing_cart_id, $request['quantity'] + $cart->cart_contents[ $existing_cart_id ]['quantity'], true );
+			$cart->set_quantity( $existing_cart_id, $updated_quantity, true );
 
 			return $existing_cart_id;
 		}
 
 		// Normalize quantity.
 		$add_to_cart_limits = $quantity_limits->get_add_to_cart_limits( $product );
-		$request_quantity   = (int) $request['quantity'];
 
 		if ( $add_to_cart_limits['maximum'] ) {
 			$request_quantity = min( $request_quantity, $add_to_cart_limits['maximum'] );
@@ -208,6 +225,12 @@ class CartController {
 			$request['cart_item_data']
 		);
 
+		// Track cart event for fraud protection.
+		if ( $product instanceof \WC_Product && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CartEventTracker::class )
+				->track_cart_item_added( $cart_id, $this->get_product_id( $product ), (int) $request_quantity, $this->get_variation_id( $product ) );
+		}
+
 		return $cart_id;
 	}
 
@@ -217,8 +240,8 @@ class CartController {
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
 	 *
-	 * @param string  $item_id Cart item id.
-	 * @param integer $quantity Cart quantity.
+	 * @param string    $item_id Cart item id.
+	 * @param int|float $quantity Cart quantity.
 	 */
 	public function set_cart_item_quantity( $item_id, $quantity = 1 ) {
 		$cart_item = $this->get_cart_item( $item_id );
@@ -256,12 +279,24 @@ class CartController {
 			$this->throw_default_product_exception( $product );
 		}
 
+		if ( floatval( $request['quantity'] ) <= 0 ) {
+			throw new RouteException(
+				'woocommerce_rest_product_invalid_quantity',
+				sprintf(
+					/* translators: %s: product name */
+					esc_html__( 'You cannot add &quot;%s&quot; with a quantity less than or equal to 0 to the cart.', 'woocommerce' ),
+					esc_html( $product->get_name() )
+				),
+				400
+			);
+		}
+
 		if ( ! $product->is_in_stock() ) {
 			throw new RouteException(
 				'woocommerce_rest_product_out_of_stock',
 				sprintf(
 					/* translators: %s: product name */
-					__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ),
+					esc_html__( 'You cannot add &quot;%s&quot; to the cart because the product is out of stock.', 'woocommerce' ),
 					$product->get_name()
 				),
 				400
@@ -269,15 +304,16 @@ class CartController {
 		}
 
 		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
-			$qty_remaining = $this->get_remaining_stock_for_product( $product );
-			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
+			$request_quantity = wc_stock_amount( $request['quantity'] );
+			$qty_remaining    = $this->get_remaining_stock_for_product( $product );
+			$qty_in_cart      = $this->get_product_quantity_in_cart( $product );
 
-			if ( $qty_remaining < $qty_in_cart + $request['quantity'] ) {
+			if ( $qty_remaining < $qty_in_cart + $request_quantity ) {
 				throw new RouteException(
 					'woocommerce_rest_product_partially_out_of_stock',
 					sprintf(
 						/* translators: 1: product name 2: quantity in stock */
-						__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ),
+						esc_html__( 'You cannot add that amount of &quot;%1$s&quot; to the cart because there is not enough stock (%2$s remaining).', 'woocommerce' ),
 						$product->get_name(),
 						wc_format_stock_quantity_for_display( $qty_remaining, $product )
 					),
@@ -383,48 +419,48 @@ class CartController {
 		$stock_error_messages = [
 			'out_of_stock'         => [
 				/* translators: %s: product name. */
-				'singular' => __(
+				'singular' => esc_html__(
 					'%s is out of stock and cannot be purchased. Please remove it from your cart.',
 					'woocommerce'
 				),
 				/* translators: %s: product names. */
-				'plural'   => __(
+				'plural'   => esc_html__(
 					'%s are out of stock and cannot be purchased. Please remove them from your cart.',
 					'woocommerce'
 				),
 			],
 			'not_purchasable'      => [
 				/* translators: %s: product name. */
-				'singular' => __(
+				'singular' => esc_html__(
 					'%s cannot be purchased. Please remove it from your cart.',
 					'woocommerce'
 				),
 				/* translators: %s: product names. */
-				'plural'   => __(
+				'plural'   => esc_html__(
 					'%s cannot be purchased. Please remove them from your cart.',
 					'woocommerce'
 				),
 			],
 			'too_many_in_cart'     => [
 				/* translators: %s: product names. */
-				'singular' => __(
+				'singular' => esc_html__(
 					'There are too many %s in the cart. Only 1 can be purchased. Please reduce the quantity in your cart.',
 					'woocommerce'
 				),
 				/* translators: %s: product names. */
-				'plural'   => __(
+				'plural'   => esc_html__(
 					'There are too many %s in the cart. Only 1 of each can be purchased. Please reduce the quantities in your cart.',
 					'woocommerce'
 				),
 			],
 			'partial_out_of_stock' => [
 				/* translators: %s: product names. */
-				'singular' => __(
+				'singular' => esc_html__(
 					'There is not enough %s in stock. Please reduce the quantity in your cart.',
 					'woocommerce'
 				),
 				/* translators: %s: product names. */
-				'plural'   => __(
+				'plural'   => esc_html__(
 					'There are not enough %s in stock. Please reduce the quantities in your cart.',
 					'woocommerce'
 				),
@@ -438,7 +474,7 @@ class CartController {
 			return $stock_error_messages[ $exception_type ][ $singular_or_plural ];
 		}
 
-		return __( 'There was an error with an item in your cart.', 'woocommerce' );
+		return esc_html__( 'There was an error with an item in your cart.', 'woocommerce' );
 	}
 
 	/**
@@ -522,7 +558,7 @@ class CartController {
 			throw new InvalidCartException(
 				'woocommerce_cart_error',
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Errors are converted to response objects later.
-				new WP_Error( 'woocommerce_rest_cart_empty', __( 'Cannot place an order, your cart is empty.', 'woocommerce' ), 400 ),
+				new WP_Error( 'woocommerce_rest_cart_empty', esc_html__( 'Cannot place an order, your cart is empty.', 'woocommerce' ), 400 ),
 				400
 			);
 		}
@@ -822,7 +858,7 @@ class CartController {
 		$cart = $this->get_cart_instance();
 		return [
 			'line_items' => $cart->get_cart_hash(),
-			'shipping'   => md5( wp_json_encode( [ $cart->shipping_methods, wc()->session->get( 'chosen_shipping_methods' ) ] ) ),
+			'shipping'   => md5( wp_json_encode( [ $cart->get_shipping_methods(), wc()->session->get( 'chosen_shipping_methods' ) ] ) ),
 			'fees'       => md5( wp_json_encode( $cart->get_fees() ) ),
 			'coupons'    => md5( wp_json_encode( $cart->get_applied_coupons() ) ),
 			'taxes'      => md5( wp_json_encode( $cart->get_taxes() ) ),
@@ -877,58 +913,12 @@ class CartController {
 
 		$packages = $cart->get_shipping_packages();
 
-		// Return early if invalid object supplied by the filter or no packages.
-		if ( ! is_array( $packages ) || empty( $packages ) ) {
+		// Return early if no packages.
+		if ( empty( $packages ) ) {
 			return [];
 		}
 
-		// Add extra package data to array.
-		$packages = array_map(
-			function ( $key, $package, $index ) {
-				$package['package_id']   = isset( $package['package_id'] ) ? $package['package_id'] : $key;
-				$package['package_name'] = isset( $package['package_name'] ) ? $package['package_name'] : $this->get_package_name( $package, $index );
-				return $package;
-			},
-			array_keys( $packages ),
-			$packages,
-			range( 1, count( $packages ) )
-		);
-
 		return $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
-	}
-
-	/**
-	 * Creates a name for a package.
-	 *
-	 * @param array $package Shipping package from WooCommerce.
-	 * @param int   $index Package number.
-	 * @return string
-	 */
-	protected function get_package_name( $package, $index ) {
-		/**
-		 * Filters the shipping package name.
-		 *
-		 * @since 4.3.0
-		 *
-		 * @internal Matches filter name in WooCommerce core.
-		 *
-		 * @param string $shipping_package_name Shipping package name.
-		 * @param string $package_id Shipping package ID.
-		 * @param array $package Shipping package from WooCommerce.
-		 * @return string Shipping package name.
-		 */
-		return apply_filters(
-			'woocommerce_shipping_package_name',
-			$index > 1 ?
-				sprintf(
-					/* translators: %d: shipping package number */
-					_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
-					$index
-				) :
-				_x( 'Shipment 1', 'shipping packages', 'woocommerce' ),
-			$package['package_id'],
-			$package
-		);
 	}
 
 	/**
@@ -982,7 +972,7 @@ class CartController {
 				sprintf(
 					/* translators: %s coupon code */
 					esc_html__( 'Coupon code "%s" has already been applied.', 'woocommerce' ),
-					esc_html( $coupon_code )
+					esc_html( $coupon->get_code() )
 				),
 				400
 			);
@@ -1030,7 +1020,7 @@ class CartController {
 					sprintf(
 						/* translators: %s: coupon code */
 						esc_html__( '"%s" has already been applied and cannot be used in conjunction with other coupons.', 'woocommerce' ),
-						esc_html( $code )
+						esc_html( $individual_use_coupon->get_code() )
 					),
 					400
 				);
@@ -1090,7 +1080,7 @@ class CartController {
 				'woocommerce_rest_cart_coupon_error',
 				sprintf(
 					/* translators: %1$s coupon code, %2$s reason. */
-					__( 'The "%1$s" coupon has been removed from your cart: %2$s', 'woocommerce' ),
+					esc_html__( 'The "%1$s" coupon has been removed from your cart: %2$s', 'woocommerce' ),
 					$coupon->get_code(),
 					wp_strip_all_tags( $coupon->get_error_message() )
 				),
@@ -1140,7 +1130,11 @@ class CartController {
 		if ( ! $product || ProductStatus::TRASH === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_product',
-				__( 'This product cannot be added to the cart.', 'woocommerce' ),
+				sprintf(
+					/* translators: %s: product ID */
+					esc_html__( 'Product with ID "%s" was not found and cannot be added to the cart.', 'woocommerce' ),
+					esc_html( $request['id'] )
+				),
 				400
 			);
 		}
@@ -1169,6 +1163,19 @@ class CartController {
 	}
 
 	/**
+	 * Get product name, hiding it for draft and private products.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return string
+	 */
+	protected function get_product_name( \WC_Product $product ) {
+		if ( $product->get_status() === ProductStatus::DRAFT || $product->get_status() === ProductStatus::PRIVATE ) {
+			return '';
+		}
+		return $product->get_name();
+	}
+
+	/**
 	 * Default exception thrown when an item cannot be added to the cart.
 	 *
 	 * @throws RouteException Exception with code woocommerce_rest_product_not_purchasable.
@@ -1176,13 +1183,21 @@ class CartController {
 	 * @param \WC_Product $product Product object associated with the cart item.
 	 */
 	protected function throw_default_product_exception( \WC_Product $product ) {
-		throw new RouteException(
-			'woocommerce_rest_product_not_purchasable',
-			sprintf(
+		$product_name = $this->get_product_name( $product );
+
+		if ( empty( $product_name ) ) {
+			$message = __( 'This item is not available for purchase.', 'woocommerce' );
+		} else {
+			$message = sprintf(
 				/* translators: %s: product name */
 				__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
-				$product->get_name()
-			),
+				$product_name
+			);
+		}
+
+		throw new RouteException(
+			'woocommerce_rest_product_not_purchasable',
+			esc_html( $message ),
 			400
 		);
 	}
@@ -1298,8 +1313,12 @@ class CartController {
 
 				throw new RouteException(
 					'woocommerce_rest_invalid_variation_data',
-					/* translators: %1$s: Attribute name, %2$s: Allowed values. */
-					sprintf( __( 'Invalid value posted for %1$s. Allowed values: %2$s', 'woocommerce' ), $attribute_label, implode( ', ', $attribute->get_slugs() ) ),
+					sprintf(
+						/* translators: %1$s: Attribute name, %2$s: Allowed values. */
+						esc_html__( 'Invalid value posted for %1$s. Allowed values: %2$s', 'woocommerce' ),
+						esc_html( $attribute_label ),
+						esc_html( implode( ', ', $attribute->get_slugs() ) )
+					),
 					400
 				);
 			}
@@ -1318,8 +1337,19 @@ class CartController {
 		if ( ! empty( $missing_attributes ) ) {
 			throw new RouteException(
 				'woocommerce_rest_missing_variation_data',
-				/* translators: %s: Attribute name. */
-				__( 'Missing variation data for variable product.', 'woocommerce' ) . ' ' . sprintf( _n( '%s is a required field', '%s are required fields', count( $missing_attributes ), 'woocommerce' ), wc_format_list_of_items( $missing_attributes ) ),
+				esc_html__( 'Missing variation data for variable product.', 'woocommerce' ) . ' ' .
+				esc_html(
+					sprintf(
+						/* translators: %s: Attribute name. */
+						_n(
+							'%s is a required field',
+							'%s are required fields',
+							count( $missing_attributes ),
+							'woocommerce'
+						),
+						wc_format_list_of_items( $missing_attributes )
+					)
+				),
 				400
 			);
 		}
@@ -1344,9 +1374,30 @@ class CartController {
 		$variation_id     = $data_store->find_matching_product_variation( $product, $match_attributes );
 
 		if ( empty( $variation_id ) ) {
+			$required_attributes = array_filter(
+				$product->get_attributes(),
+				function ( $attribute ) {
+					return $attribute->get_variation();
+				}
+			);
+
+			$selected_attributes = array_filter(
+				$match_attributes,
+				function ( $value ) {
+					return '' !== $value && null !== $value;
+				}
+			);
+
+			if ( count( $selected_attributes ) < count( $required_attributes ) ) {
+				throw new RouteException(
+					'woocommerce_rest_missing_attributes',
+					esc_html__( 'Missing attributes for variable product.', 'woocommerce' ),
+					400
+				);
+			}
 			throw new RouteException(
 				'woocommerce_rest_variation_id_from_variation_data',
-				__( 'No matching variation found.', 'woocommerce' ),
+				esc_html__( 'No matching variation found.', 'woocommerce' ),
 				400
 			);
 		}
@@ -1443,7 +1494,7 @@ class CartController {
 		if ( ! $product || ProductStatus::TRASH === $product->get_status() ) {
 			throw new RouteException(
 				'woocommerce_rest_cart_invalid_parent_product',
-				__( 'This product cannot be added to the cart.', 'woocommerce' ),
+				esc_html__( 'This product cannot be added to the cart.', 'woocommerce' ),
 				400
 			);
 		}

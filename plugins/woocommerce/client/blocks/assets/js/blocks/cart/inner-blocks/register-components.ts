@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { lazy } from '@wordpress/element';
 import { WC_BLOCKS_BUILD_URL } from '@woocommerce/block-settings';
 import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
 
@@ -9,6 +8,25 @@ import { registerCheckoutBlock } from '@woocommerce/blocks-checkout';
  * Internal dependencies
  */
 import metadata from './component-metadata';
+import FilledCartFrontend from './filled-cart-block/frontend';
+import EmptyCartFrontend from './empty-cart-block/frontend';
+import CartItemsFrontend from './cart-items-block/frontend';
+import CartLineItemsBlock from './cart-line-items-block/frontend';
+import CartCrossSellsFrontend from './cart-cross-sells-block/frontend';
+import CartCrossSellsProductsFrontend from './cart-cross-sells-products/frontend';
+import CartTotalsFrontend from './cart-totals-block/frontend';
+import CartExpressPaymentFrontend from './cart-express-payment-block/frontend';
+import ProceedToCheckoutFrontend from './proceed-to-checkout-block/frontend';
+import CartAcceptedPaymentMethodsFrontend from './cart-accepted-payment-methods-block/frontend';
+import CartOrderSummaryFrontend from './cart-order-summary-block/frontend';
+import CartOrderSummaryHeadingFrontend from './cart-order-summary-heading/frontend';
+import CartOrderSummarySubtotalFrontend from './cart-order-summary-subtotal/frontend';
+import CartOrderSummaryFeeFrontend from './cart-order-summary-fee/frontend';
+import CartOrderSummaryDiscountFrontend from './cart-order-summary-discount/frontend';
+import CartOrderSummaryCouponFormFrontend from './cart-order-summary-coupon-form/frontend';
+import CartOrderSummaryShippingFrontend from './cart-order-summary-shipping/frontend';
+import CartOrderSummaryTotalsFrontend from './cart-order-summary-totals/frontend';
+import CartOrderSummaryTaxesFrontend from './cart-order-summary-taxes/frontend';
 
 // Modify webpack publicPath at runtime based on location of WordPress Plugin.
 // eslint-disable-next-line no-undef,camelcase
@@ -16,220 +34,95 @@ __webpack_public_path__ = WC_BLOCKS_BUILD_URL;
 
 registerCheckoutBlock( {
 	metadata: metadata.FILLED_CART,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/filled-cart" */
-				'./filled-cart-block/frontend'
-			)
-	),
+	component: FilledCartFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.EMPTY_CART,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/empty-cart" */
-				'./empty-cart-block/frontend'
-			)
-	),
+	component: EmptyCartFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ITEMS,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/cart-items" */
-				'./cart-items-block/frontend'
-			)
-	),
+	component: CartItemsFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_LINE_ITEMS,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/cart-line-items" */
-				'./cart-line-items-block/frontend'
-			)
-	),
+	component: CartLineItemsBlock,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_CROSS_SELLS,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/cart-cross-sells" */
-				'./cart-cross-sells-block/frontend'
-			)
-	),
+	component: CartCrossSellsFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_CROSS_SELLS_PRODUCTS,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/cart-cross-sells-products" */
-				'./cart-cross-sells-products/frontend'
-			)
-	),
+	component: CartCrossSellsProductsFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_TOTALS,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/cart-totals" */
-				'./cart-totals-block/frontend'
-			)
-	),
+	component: CartTotalsFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_EXPRESS_PAYMENT,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/cart-express-payment" */
-				'./cart-express-payment-block/frontend'
-			)
-	),
+	component: CartExpressPaymentFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.PROCEED_TO_CHECKOUT,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/proceed-to-checkout" */
-				'./proceed-to-checkout-block/frontend'
-			)
-	),
+	component: ProceedToCheckoutFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ACCEPTED_PAYMENT_METHODS,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/cart-accepted-payment-methods" */
-				'./cart-accepted-payment-methods-block/frontend'
-			)
-	),
+	component: CartAcceptedPaymentMethodsFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/cart-order-summary" */
-				'./cart-order-summary-block/frontend'
-			)
-	),
+	component: CartOrderSummaryFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_HEADING,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-heading" */
-				'./cart-order-summary-heading/frontend'
-			)
-	),
+	component: CartOrderSummaryHeadingFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_SUBTOTAL,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-subtotal" */
-				'./cart-order-summary-subtotal/frontend'
-			)
-	),
+	component: CartOrderSummarySubtotalFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_FEE,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-fee" */
-				'./cart-order-summary-fee/frontend'
-			)
-	),
+	component: CartOrderSummaryFeeFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_DISCOUNT,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-discount" */
-				'./cart-order-summary-discount/frontend'
-			)
-	),
+	component: CartOrderSummaryDiscountFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_COUPON_FORM,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-coupon-form" */
-				'./cart-order-summary-coupon-form/frontend'
-			)
-	),
+	component: CartOrderSummaryCouponFormFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_SHIPPING,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-shipping" */
-				'./cart-order-summary-shipping/frontend'
-			)
-	),
+	component: CartOrderSummaryShippingFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_TOTALS,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-totals" */
-				'./cart-order-summary-totals/frontend'
-			)
-	),
+	component: CartOrderSummaryTotalsFrontend,
 } );
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ORDER_SUMMARY_TAXES,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-taxes" */
-				'./cart-order-summary-taxes/frontend'
-			)
-	),
-} );
-
-registerCheckoutBlock( {
-	metadata: metadata.CART_ORDER_SUMMARY_HEADING,
-	component: lazy(
-		() =>
-			import(
-				/* webpackChunkName: "cart-blocks/order-summary-heading" */
-				'./cart-order-summary-heading/frontend'
-			)
-	),
+	component: CartOrderSummaryTaxesFrontend,
 } );

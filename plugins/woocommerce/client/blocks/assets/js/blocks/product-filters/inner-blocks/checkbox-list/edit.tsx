@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, Disabled } from '@wordpress/components';
 import { checkMark } from '@woocommerce/icons';
 import { useMemo } from '@wordpress/element';
+import { decodeHtmlEntities } from '@woocommerce/utils';
 import {
 	useBlockProps,
 	withColors,
@@ -62,15 +63,16 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 
 	const loadingState = useMemo( () => {
 		return [ ...Array( 5 ) ].map( ( x, i ) => (
-			<li
+			<div
+				className="wc-block-product-filter-checkbox-list__item"
 				key={ i }
 				style={ {
 					/* stylelint-disable */
-					width: Math.floor( Math.random() * ( 100 - 25 ) ) + '%',
+					width: Math.floor( Math.random() * 75 ) + '%',
 				} }
 			>
 				&nbsp;
-			</li>
+			</div>
 		) );
 	}, [] );
 
@@ -85,16 +87,22 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		<>
 			<div { ...blockProps }>
 				<Disabled>
-					<ul className="wc-block-product-filter-checkbox-list__list">
+					<div className="wc-block-product-filter-checkbox-list__items">
 						{ isLoading && loadingState }
 						{ ! isLoading &&
 							( isLongList
 								? items.slice( 0, threshold )
 								: items
 							).map( ( item, index ) => (
-								<li
+								<div
 									key={ index }
-									className="wc-block-product-filter-checkbox-list__item"
+									className={ clsx(
+										'wc-block-product-filter-checkbox-list__item',
+										{
+											[ `has-depth-${ item?.depth }` ]:
+												item?.depth,
+										}
+									) }
 								>
 									<label
 										htmlFor={ `interactive-checkbox-${ index }` }
@@ -116,7 +124,11 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 										</span>
 										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
 											<span className="wc-block-product-filter-checkbox-list__text">
-												{ item.label }
+												{ typeof item.label === 'string'
+													? decodeHtmlEntities(
+															item.label
+													  )
+													: item.label }
 											</span>
 											{ showCounts && (
 												<span className="wc-block-product-filter-checkbox-list__count">
@@ -125,9 +137,9 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 											) }
 										</span>
 									</label>
-								</li>
+								</div>
 							) ) }
-					</ul>
+					</div>
 					{ ! isLoading && isLongList && (
 						<button className="wc-block-product-filter-checkbox-list__show-more">
 							{ __( 'Show more…', 'woocommerce' ) }

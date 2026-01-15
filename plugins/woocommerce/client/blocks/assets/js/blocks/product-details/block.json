@@ -1,22 +1,26 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "woocommerce/blockified-product-details",
-	"title": "Blockified Product Details",
+	"name": "woocommerce/product-details",
+	"title": "Product Details",
 	"description": "Display a product's description, attributes, and reviews",
 	"category": "woocommerce",
 	"textdomain": "woocommerce",
-	"ancestor": [
-		"woocommerce/single-product",
-		"woocommerce/product-template",
-		"core/post-template"
-	],
 	"supports": {
 		"interactivity": {
 			"clientNavigation": true
 		},
 		"align": [ "wide", "full" ]
 	},
-	"attributes": {},
+	"attributes": {
+		"align": {
+			"type": "string",
+			"default": "wide"
+		},
+		"hideTabTitle": {
+			"type": "boolean",
+			"default": false
+		}
+	},
 	"usesContext": [ "query", "queryId", "postId", "postType" ]
 }

@@ -7,32 +7,30 @@ import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockConfiguration } from '@wordpress/blocks';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { Spinner } from '@wordpress/components';
+import { isProductResponseItem } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
  */
 import metadata from './block.json';
-import { shouldBlockifiedAddToCartWithOptionsBeRegistered } from '../../utils';
 
-if ( shouldBlockifiedAddToCartWithOptionsBeRegistered ) {
-	registerBlockType( metadata.name, {
-		...metadata,
-		edit: function Edit() {
-			const blockProps = useBlockProps();
-			const { isLoading, product } = useProductDataContext();
+registerBlockType( metadata.name, {
+	...metadata,
+	edit: function Edit() {
+		const blockProps = useBlockProps();
+		const { isLoading, product } = useProductDataContext();
 
-			if ( isLoading ) {
-				return <Spinner />;
-			}
-			return (
-				<div { ...blockProps }>
-					<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-selector-item-label">
-						{ product.name }
-					</div>
+		if ( isLoading || ! isProductResponseItem( product ) ) {
+			return <Spinner />;
+		}
+		return (
+			<div { ...blockProps }>
+				<div className="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item-label">
+					{ product.name }
 				</div>
-			);
-		},
-		icon: heading,
-		save: () => null,
-	} as unknown as BlockConfiguration );
-}
+			</div>
+		);
+	},
+	icon: heading,
+	save: () => null,
+} as unknown as BlockConfiguration );

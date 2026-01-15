@@ -9,6 +9,7 @@ import type {
 	CanMakePaymentCallback,
 	PaymentMethodConfigInstance,
 	PaymentMethodIcons,
+	CustomPlaceOrderButtonComponent,
 } from '@woocommerce/types';
 
 /**
@@ -37,6 +38,7 @@ export default class PaymentMethodConfig
 	public label: ReactNode;
 	public ariaLabel: string;
 	public placeOrderButtonLabel?: string;
+	public placeOrderButton?: CustomPlaceOrderButtonComponent;
 	public savedTokenComponent?: ReactNode | null;
 	public canMakePaymentFromConfig: CanMakePaymentCallback;
 
@@ -46,6 +48,7 @@ export default class PaymentMethodConfig
 		this.name = config.name;
 		this.label = config.label;
 		this.placeOrderButtonLabel = config.placeOrderButtonLabel;
+		this.placeOrderButton = config.placeOrderButton;
 		this.ariaLabel = config.ariaLabel;
 		this.content = config.content;
 		this.savedTokenComponent = config.savedTokenComponent;
@@ -113,6 +116,20 @@ export default class PaymentMethodConfig
 		) {
 			throw new TypeError(
 				'The placeOrderButtonLabel property for the payment method must be a string'
+			);
+		}
+		if (
+			config.placeOrderButton &&
+			typeof config.placeOrderButton !== 'function'
+		) {
+			throw new TypeError(
+				'The placeOrderButton property for the payment method must be a React component (function)'
+			);
+		}
+		if ( config.placeOrderButton && config.placeOrderButtonLabel ) {
+			// eslint-disable-next-line no-console
+			console.warn(
+				`Payment method "${ config.name }" provided both placeOrderButton and placeOrderButtonLabel. Using placeOrderButton.`
 			);
 		}
 		assertValidElementOrString( config.label, 'label' );

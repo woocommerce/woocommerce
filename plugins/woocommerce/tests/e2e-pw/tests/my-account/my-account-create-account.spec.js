@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, test } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
 
 const customerEmailAddress = `john.doe.${ Date.now() }@example.com`;
 

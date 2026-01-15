@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import type { ReactElement } from 'react';
 import type { Currency } from '@woocommerce/types';
 import { SITE_CURRENCY } from '@woocommerce/settings';
+import { decodeHtmlEntities } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -34,7 +35,12 @@ export interface FormattedMonetaryAmountProps
  */
 const currencyToNumberFormat = ( currency: Currency ) => {
 	const { prefix, suffix, thousandSeparator, decimalSeparator } = currency;
-	const hasDuplicateSeparator = thousandSeparator === decimalSeparator;
+	// Decode HTML entities in separators
+	const decodedThousandSeparator = decodeHtmlEntities( thousandSeparator );
+	const decodedDecimalSeparator = decodeHtmlEntities( decimalSeparator );
+
+	const hasDuplicateSeparator =
+		decodedThousandSeparator === decodedDecimalSeparator;
 	if ( hasDuplicateSeparator ) {
 		// eslint-disable-next-line no-console
 		console.warn(
@@ -42,11 +48,13 @@ const currencyToNumberFormat = ( currency: Currency ) => {
 		);
 	}
 	return {
-		thousandSeparator: hasDuplicateSeparator ? '' : thousandSeparator,
-		decimalSeparator,
+		thousandSeparator: hasDuplicateSeparator
+			? ''
+			: decodedThousandSeparator,
+		decimalSeparator: decodedDecimalSeparator,
 		fixedDecimalScale: true,
-		prefix,
-		suffix,
+		prefix: decodeHtmlEntities( prefix ),
+		suffix: decodeHtmlEntities( suffix ),
 		isNumericString: true,
 	};
 };

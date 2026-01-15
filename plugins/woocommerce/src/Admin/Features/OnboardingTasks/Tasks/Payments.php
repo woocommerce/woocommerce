@@ -39,7 +39,7 @@ class Payments extends Task {
 	 * @return string
 	 */
 	public function get_title() {
-		return __( 'Get paid', 'woocommerce' );
+		return __( 'Set up payments', 'woocommerce' );
 	}
 
 	/**
@@ -70,7 +70,13 @@ class Payments extends Task {
 	 */
 	public function is_complete() {
 		if ( null === $this->is_complete_result ) {
-			$this->is_complete_result = self::has_gateways();
+			if ( $this->is_woopayments_active() ) {
+				// If WooPayments is active, check if it is fully onboarded with a live account.
+				$this->is_complete_result = $this->is_woopayments_onboarded() && ! $this->has_woopayments_test_account();
+			} else {
+				// If WooPayments is not active, check if there are any enabled gateways.
+				$this->is_complete_result = self::has_gateways();
+			}
 		}
 
 		return $this->is_complete_result;
@@ -104,9 +110,37 @@ class Payments extends Task {
 	}
 
 	/**
+	 * Check if the task is in progress.
+	 *
+	 * @return bool
+	 */
+	public function is_in_progress() {
+		// If the task is already complete, it's not in progress.
+		if ( $this->is_complete() ) {
+			return false;
+		}
+
+		return ( $this->has_woopayments_live_account_in_progress() || $this->has_woopayments_test_account() );
+	}
+
+	/**
+	 * The task in progress label.
+	 *
+	 * @return string
+	 */
+	public function in_progress_label() {
+		// If WooPayments live account onboarding is in progress, show "Action needed" label.
+		if ( $this->has_woopayments_live_account_in_progress() ) {
+			return esc_html__( 'Action needed', 'woocommerce' );
+		}
+
+		return esc_html__( 'Test account', 'woocommerce' );
+	}
+
+	/**
 	 * The task action URL.
 	 *
-	 * Empty string means the task linking will be handled by the JS logic.
+	 * Empty string means the JS logic will handle the task linking.
 	 *
 	 * @return string
 	 */
@@ -196,7 +230,36 @@ class Payments extends Task {
 	}
 
 	/**
-	 * Check if WooPayments is onboarded and has a test account.
+	 * Check if WooPayments has a live account onboarding in progress.
+	 *
+	 * @return bool
+	 */
+	private function has_woopayments_live_account_in_progress() {
+		if ( $this->is_woopayments_onboarded() ) {
+			return false;
+		}
+
+		$woopayments_provider = $this->get_woopayments_provider();
+		// We should have the WooPayments provider, but if not, return false.
+		if ( ! $woopayments_provider ) {
+			return false;
+		}
+
+		// If we have a test account, we are not in live account onboarding.
+		if ( $this->has_woopayments_test_account() ) {
+			return false;
+		}
+
+		// Check the provider's state to determine if a live account onboarding is started.
+		if ( ! empty( $woopayments_provider['onboarding']['state']['started'] ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if WooPayments is onboarded and has a test [drive] account.
 	 *
 	 * @return bool
 	 */
@@ -211,8 +274,8 @@ class Payments extends Task {
 			return false;
 		}
 
-		// Check the provider's state to determine if a test account is in use.
-		if ( ! empty( $woopayments_provider['onboarding']['state']['test_mode'] ) ) {
+		// Check the provider's state to determine if a test [drive] account is in use.
+		if ( ! empty( $woopayments_provider['onboarding']['state']['test_drive_account'] ) ) {
 			return true;
 		}
 
@@ -290,7 +353,7 @@ class Payments extends Task {
 		$providers = $this->get_payments_providers();
 
 		foreach ( $providers as $provider ) {
-			// Check if the provider is enabled and is not WooPayments.
+			// Check if the provider is enabled and is not an offline payment method.
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['id'] ) &&
@@ -310,6 +373,11 @@ class Payments extends Task {
 	 */
 	private function get_payments_settings_country(): string {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
 			return $settings_payments_service->get_country();
@@ -328,9 +396,16 @@ class Payments extends Task {
 	 */
 	private function get_payments_providers(): array {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
+			// Get the raw list of payment providers, including suggestions, but remove shells.
+			// This way we prevent shell gateways that are (wrongly) reported as enabled from affecting the task completion.
+			return $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false, true );
 		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
 			return array();
@@ -344,6 +419,11 @@ class Payments extends Task {
 	 */
 	private function get_payments_extension_suggestions(): array {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
 			return $settings_payments_service->get_payment_extension_suggestions( $settings_payments_service->get_country() );
@@ -361,7 +441,7 @@ class Payments extends Task {
 	private function get_woopayments_provider(): ?array {
 		$providers = $this->get_payments_providers();
 		foreach ( $providers as $provider ) {
-			if ( ! empty( $provider['id'] ) && 'woocommerce_payments' === $provider['id'] ) {
+			if ( ! empty( $provider['id'] ) && PaymentsProviders\WooPayments\WooPaymentsService::GATEWAY_ID === $provider['id'] ) {
 				return $provider;
 			}
 		}

@@ -11,7 +11,7 @@ Custom code should be copied into your child theme's **functions.php** file.
 
 ## Note
 
-Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](/docs/block-development/cart-and-checkout-blocks/additional-checkout-fields).
+Some parts of this document only applies to the shortcode Checkout, for adding fields to the Checkout block, consult [the additional checkout fields documentation](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/additional-checkout-fields/).
 
 ## How Are Checkout Fields Loaded to WooCommerce?
 
@@ -305,7 +305,7 @@ function my_custom_checkout_field_display_admin_order_meta($order){
 
 It's alive!
 
-What do we do with the new field? Nothing. Because we defined the field in the `checkout_fields` array, the field is automatically processed and saved to the order post meta (in this case, \_shipping_phone). If you want to add validation rules, see the checkout class where there are additional hooks you can use.
+What do we do with the new field? Nothing. Because we defined the field in the `checkout_fields` array, the field is automatically processed and saved to the order post meta (in this case, `_shipping_phone`). If you want to add validation rules, see the checkout class where there are additional hooks you can use.
 
 ### Adding a Custom Special Field
 

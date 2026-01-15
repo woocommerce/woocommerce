@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import {
 	useBlockProps,
@@ -121,6 +121,11 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					.filter( ( { rating } ) => rating >= minimumRating )
 					.map( ( { rating, count }, index ) => ( {
 						label: <RatingStars key={ rating } stars={ rating } />,
+						ariaLabel: sprintf(
+							/* translators: %d: rating value. Example: Rated 4 out of 5. */
+							__( 'Rated %d out of 5', 'woocommerce' ),
+							rating
+						),
 						value: rating?.toString(),
 						selected: index === 0,
 						count,

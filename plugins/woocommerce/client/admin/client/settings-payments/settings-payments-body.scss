@@ -9,12 +9,12 @@ body.woocommerce-settings-payments-tab {
 	#wpcontent {
 		background-color: #fff;
 	}
+}
 
-	.woocommerce-layout .woocommerce-store-alerts {
-		margin-top: $gap-large;
-	}
+.settings-payments-offline__container {
+	margin: 0 -30px;
 
-	#wpbody.has-settings-layout {
-		margin-top: 60px !important;
+	.settings-layout {
+		margin: 0 48px 0;
 	}
 }

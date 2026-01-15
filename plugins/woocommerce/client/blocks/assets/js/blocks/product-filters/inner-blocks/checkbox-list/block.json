@@ -10,6 +10,7 @@
 	"ancestor": [
 		"woocommerce/product-filter-attribute",
 		"woocommerce/product-filter-status",
+		"woocommerce/product-filter-taxonomy",
 		"woocommerce/product-filter-rating"
 	],
 	"supports": {

@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Paragraph class
@@ -44,11 +45,11 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	);
 
 	/**
-	 * Settings controller instance
+	 * Instance of Rendering_Context class
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up the test
@@ -56,15 +57,16 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$this->paragraph_renderer  = new Text();
-		$this->settings_controller = $this->di_container->get( Settings_Controller::class );
+		$this->paragraph_renderer = new Text();
+		$theme_controller         = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context  = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
 	 * Test it renders content
 	 */
 	public function testItRendersContent(): void {
-		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $this->parsed_paragraph, $this->settings_controller );
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $this->parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( 'width:100%', $rendered );
 		$this->assertStringContainsString( 'Lorem Ipsum', $rendered );
 		$this->assertStringContainsString( 'font-size:16px;', $rendered );
@@ -83,7 +85,7 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_paragraph['attrs']['style']['spacing']['padding']['left']   = '40px';
 		$parsed_paragraph['attrs']['align']                                 = 'center';
 
-		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->settings_controller );
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( 'padding-top:10px;', $rendered );
 		$this->assertStringContainsString( 'padding-right:20px;', $rendered );
 		$this->assertStringContainsString( 'padding-bottom:30px;', $rendered );
@@ -106,7 +108,7 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_paragraph['innerHTML']    = $content;
 		$parsed_paragraph['innerContent'] = array( $content );
 
-		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->settings_controller );
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
 		$html     = new \WP_HTML_Tag_Processor( $rendered );
 		$html->next_tag( array( 'tag_name' => 'table' ) );
 		$table_style = $html->get_attribute( 'style' );
@@ -144,7 +146,7 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 			'fontSize'       => '20px',
 		);
 
-		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->settings_controller );
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
 		$this->assertStringContainsString( 'text-transform:uppercase;', $rendered );
 		$this->assertStringContainsString( 'letter-spacing:1px;', $rendered );
 		$this->assertStringContainsString( 'text-decoration:underline;', $rendered );
@@ -152,5 +154,96 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'font-weight:bold;', $rendered );
 		$this->assertStringContainsString( 'font-size:20px;', $rendered );
 		$this->assertStringContainsString( 'Lorem Ipsum', $rendered );
+	}
+
+	/**
+	 * Test it uses inherited color from email_attrs when no color is specified
+	 */
+	public function testItUsesInheritedColorFromEmailAttrs(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+
+		unset( $parsed_paragraph['attrs']['style']['color'] );
+		unset( $parsed_paragraph['attrs']['textColor'] );
+
+		$parsed_paragraph['email_attrs'] = array(
+			'color' => '#ff0000',
+		);
+
+		$rendered = $this->paragraph_renderer->render( '<p>Lorem Ipsum</p>', $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'color:#ff0000;', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-center class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignCenterClass(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_paragraph['attrs']['textAlign'] );
+		unset( $parsed_paragraph['attrs']['align'] );
+
+		$content                          = '<p class="has-text-align-center">Centered text</p>';
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:center;', $rendered );
+		$this->assertStringContainsString( 'align="center"', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-right class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignRightClass(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_paragraph['attrs']['textAlign'] );
+		unset( $parsed_paragraph['attrs']['align'] );
+
+		$content                          = '<p class="has-text-align-right">Right aligned text</p>';
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-left class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignLeftClass(): void {
+		$parsed_paragraph = $this->parsed_paragraph;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_paragraph['attrs']['textAlign'] );
+		unset( $parsed_paragraph['attrs']['align'] );
+
+		$content                          = '<p class="has-text-align-left">Left aligned text</p>';
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:left;', $rendered );
+		$this->assertStringContainsString( 'align="left"', $rendered );
+	}
+
+	/**
+	 * Test it prioritizes textAlign attribute over has-text-align-* class
+	 */
+	public function testItPrioritizesTextAlignAttributeOverClass(): void {
+		$parsed_paragraph                       = $this->parsed_paragraph;
+		$parsed_paragraph['attrs']['textAlign'] = 'right';
+		unset( $parsed_paragraph['attrs']['align'] );
+
+		$content                          = '<p class="has-text-align-center">Text with center class but right attribute</p>';
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		// Should use the attribute, not the class.
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+		$this->assertStringNotContainsString( 'text-align:center;', $rendered );
+		$this->assertStringNotContainsString( 'align="center"', $rendered );
 	}
 }

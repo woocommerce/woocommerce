@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Only fire the legacy woocommerce_admin_field_payment_gateways action for display purposes to maintain backward compatibility.

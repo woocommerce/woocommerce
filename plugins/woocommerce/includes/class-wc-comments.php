@@ -65,7 +65,7 @@ class WC_Comments {
 		// Count comments.
 		add_filter( 'wp_count_comments', array( __CLASS__, 'wp_count_comments' ), 10, 2 );
 
-		// Delete comments count cache whenever there is a new comment or a comment status changes.
+		// Actualize comments count cache whenever there is a new comment or a comment status changes.
 		add_action( 'wp_insert_comment', array( __CLASS__, 'increment_comments_count_cache_on_wp_insert_comment' ), 10, 2 );
 		add_action( 'transition_comment_status', array( __CLASS__, 'update_comments_count_cache_on_comment_status_change' ), 10, 3 );
 
@@ -259,8 +259,13 @@ class WC_Comments {
 	 * @param int $post_id Post ID.
 	 */
 	public static function clear_transients( $post_id ) {
-		if ( 'product' === get_post_type( $post_id ) ) {
-			$product = wc_get_product( $post_id );
+		$post_id = absint( $post_id );
+		if ( 0 === $post_id || 'product' !== get_post_type( $post_id ) ) {
+			return;
+		}
+
+		$product = wc_get_product( $post_id );
+		if ( $product instanceof WC_Product ) {
 			$product->set_rating_counts( self::get_rating_counts_for_product( $product ) );
 			$product->set_average_rating( self::get_average_rating_for_product( $product ) );
 			$product->set_review_count( self::get_review_count_for_product( $product ) );

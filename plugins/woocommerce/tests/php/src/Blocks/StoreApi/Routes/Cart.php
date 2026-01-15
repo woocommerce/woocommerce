@@ -614,6 +614,45 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * Test that cart GET endpoint sends Cache-Control headers.
+	 */
+	public function test_cart_get_endpoint_cache_control_headers() {
+		/** @var Spy_REST_Server $server */
+		$server = rest_get_server();
+
+		$server->serve_request( '/wc/store/cart' );
+
+		$this->assertArrayHasKey( 'Cache-Control', $server->sent_headers );
+		$this->assertStringContainsString( 'no-store', $server->sent_headers['Cache-Control'] );
+	}
+
+	/**
+	 * Test that cart endpoint returns fresh data.
+	 */
+	public function test_cart_get_endpoint_returns_fresh_data() {
+		wc_empty_cart();
+
+		/** @var Spy_REST_Server $server */
+		$server = rest_get_server();
+
+		$server->serve_request( '/wc/store/cart' );
+		$first_response = json_decode( $server->sent_body, true );
+		$this->assertEquals( 0, $first_response['items_count'] );
+		$this->assertEmpty( $first_response['items'] );
+
+		wc()->cart->add_to_cart( $this->products[0]->get_id(), 1 );
+
+		$server->serve_request( '/wc/store/cart' );
+		$second_response = json_decode( $server->sent_body, true );
+		$this->assertEquals( 1, $second_response['items_count'] );
+		$this->assertCount( 1, $second_response['items'] );
+		$this->assertEquals( $this->products[0]->get_id(), $second_response['items'][0]['id'] );
+
+		$this->assertArrayHasKey( 'Cache-Control', $server->sent_headers );
+		$this->assertStringContainsString( 'no-store', $server->sent_headers['Cache-Control'] );
+	}
+
+	/**
 	 * Test adding a variable product to cart returns proper variation data.
 	 */
 	public function test_add_variable_product_to_cart_returns_variation_data() {
@@ -816,6 +855,154 @@ class Cart extends ControllerTestCase {
 		$this->assertAPIResponse(
 			$request,
 			400
+		);
+	}
+
+	/**
+	 * Test adding item to cart with quantity 0 shows an error.
+	 */
+	public function test_add_item_with_zero_quantity_shows_error() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 0,
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400,
+			array(
+				'code' => 'woocommerce_rest_product_invalid_quantity',
+			)
+		);
+	}
+
+	/**
+	 * Test adding item to cart with quantity "0" as string shows an error.
+	 */
+	public function test_add_item_with_string_zero_quantity_shows_error() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => '0',
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400,
+			array(
+				'code' => 'woocommerce_rest_product_invalid_quantity',
+			)
+		);
+	}
+
+	/**
+	 * Test adding item to cart without quantity adds 1 item.
+	 */
+	public function test_add_item_without_quantity_defaults_to_one() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id' => $this->products[0]->get_id(),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'items_count' => 1, // Total number of items in cart (quantity sum).
+				'items'       => function ( $value ) {
+					// The callback function checks that:
+					// 1. There is exactly 1 unique product in the cart
+					// 2. The first (and only) product has a quantity of 1.
+					return 1 === count( $value ) && 1 === $value[0]['quantity'];
+				},
+			)
+		);
+
+		// Test adding the same item again without quantity to verify it adds another 1.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id' => $this->products[0]->get_id(),
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			201,
+			array(
+				'items_count' => 2, // Total quantity of all items (same product added twice).
+				'items'       => function ( $value ) {
+					// The callback function checks that:
+					// 1. There is still only 1 unique product in the cart
+					// 2. That product now has a quantity of 2 (1 + 1 from second add).
+					return 1 === count( $value ) && 2 === $value[0]['quantity'];
+				},
+			)
+		);
+	}
+
+	/**
+	 * Test adding item to cart with negative quantity shows an error.
+	 */
+	public function test_add_item_with_negative_quantity_shows_error() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => -1,
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400,
+			array(
+				'code' => 'woocommerce_rest_product_invalid_quantity',
+			)
+		);
+	}
+
+	/**
+	 * Test adding item to cart with negative quantity as string shows an error.
+	 */
+	public function test_add_item_with_string_negative_quantity_shows_error() {
+		wc_empty_cart();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => '-5',
+			)
+		);
+
+		$this->assertAPIResponse(
+			$request,
+			400,
+			array(
+				'code' => 'woocommerce_rest_product_invalid_quantity',
+			)
 		);
 	}
 }

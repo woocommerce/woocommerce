@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Monorepo: decouple core packages from deprecated E2E packages.

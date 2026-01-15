@@ -37,6 +37,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -62,7 +63,7 @@
 		"@babel/runtime": "7.25.7",
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
-		"@types/jest": "27.5.x",
+		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/wordpress__block-editor": "7.0.0",
@@ -74,8 +75,9 @@
 		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
-		"jest-cli": "27.5.x",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
 		"postcss": "8.4.x",
 		"postcss-loader": "4.3.x",
 		"react": "18.3.x",
@@ -147,7 +149,7 @@
 			"service": true
 		},
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -162,7 +164,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {

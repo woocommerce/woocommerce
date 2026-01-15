@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Set WC_Logger as delegate logger for the email editor

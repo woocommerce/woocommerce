@@ -1,8 +1,50 @@
 /**
  * External dependencies
  */
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator, Request, Response } from '@playwright/test';
 import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
+
+const wait = ( time: number ) =>
+	new Promise( ( resolve ) => setTimeout( resolve, time ) );
+
+/**
+ * Custom waitForFunction implementation that runs in Node.js context.
+ *
+ * Unlike page.waitForFunction() which executes in the browser context and can
+ * only access serializable values passed as arguments, this function runs in
+ * the Node.js context and has full access to closures and local variables. This
+ * allows us to directly reference variables without serialization limitations.
+ */
+async function waitForFunction(
+	predicateFunction: () => boolean,
+	timeout = 5000,
+	interval = 100
+) {
+	// Lint is too grabby in this case, this usage is fine
+	// eslint-disable-next-line @wordpress/no-unused-vars-before-return
+	const startTime = performance.now();
+	do {
+		if ( predicateFunction() ) {
+			return true;
+		}
+		await wait( interval );
+	} while ( performance.now() - startTime < timeout );
+
+	throw new Error(
+		`Timeout reached after ${ timeout }ms waiting for condition to be met.`
+	);
+}
+
+const STORE_API_CART_WRITE_REQUEST_URLS = [
+	'/cart/add-item',
+	'/batch',
+	'/cart/remove-item',
+	'/cart/update-item',
+	'/cart/apply-coupon/',
+	'/cart/remove-coupon/',
+	'/cart/update-customer',
+	'/cart/select-shipping-rate',
+];
 
 export class FrontendUtils {
 	page: Page;
@@ -21,15 +63,65 @@ export class FrontendUtils {
 		return this.page.locator( selector );
 	}
 
-	async addToCart( itemName = '' ) {
-		const cartResponsePromise = this.page.waitForResponse( ( response ) => {
+	/**
+	 * Start tracking cart-related requests and return a function to wait for completion
+	 */
+	private trackCartRequests( timeout = 5000 ) {
+		// key: request url, value: count of pending requests with this url
+		const pendingRequests = new Map< string, number >();
+
+		const requestHandler = ( request: Request ) => {
+			const url = request.url();
+			if (
+				STORE_API_CART_WRITE_REQUEST_URLS.some( ( cartUrl ) =>
+					url.includes( cartUrl )
+				)
+			) {
+				pendingRequests.set(
+					url,
+					( pendingRequests.get( url ) ?? 0 ) + 1
+				);
+			}
+		};
+
+		const responseHandler = ( response: Response ) => {
 			const url = response.url();
-			return (
-				url.includes( 'cart' ) ||
-				url.includes( 'add_to_cart' ) ||
-				url.includes( 'batch' )
-			);
-		} );
+			const pendingRequestCount = pendingRequests.get( url );
+
+			// means we're not dealing with cart request
+			if ( pendingRequestCount === undefined ) {
+				return;
+			}
+
+			if ( pendingRequestCount === 1 ) {
+				pendingRequests.delete( url );
+				return;
+			}
+
+			pendingRequests.set( url, pendingRequestCount - 1 );
+		};
+
+		this.page.on( 'request', requestHandler );
+		this.page.on( 'response', responseHandler );
+
+		return {
+			waitForCartRequests: async () => {
+				try {
+					await waitForFunction(
+						() => pendingRequests.size === 0,
+						timeout
+					);
+				} finally {
+					this.page.off( 'request', requestHandler );
+					this.page.off( 'response', responseHandler );
+				}
+			},
+		};
+	}
+
+	async addToCart( itemName = '' ) {
+		// Start tracking cart requests before the action
+		const { waitForCartRequests } = this.trackCartRequests();
 
 		if ( itemName !== '' ) {
 			// We can't use `getByRole()` here because the Add to Cart button
@@ -41,16 +133,9 @@ export class FrontendUtils {
 			await this.page.click( 'text=Add to cart' );
 		}
 
-		await cartResponsePromise;
-
-		/**
-		 * There's a race condition where the cart is not fully updated
-		 * immediately when adding multiple items one by one, even though the
-		 * response is received. This timeout ensures the cart is updated before
-		 * the next test step.
-		 */
-		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await this.page.waitForTimeout( 2000 );
+		// Wait for the cart request triggered by this action to complete
+		// We do it the complex way as there are no visual cues that we can rely on
+		await waitForCartRequests();
 	}
 
 	async goToCheckout() {
@@ -74,22 +159,42 @@ export class FrontendUtils {
 	}
 
 	async emptyCart() {
-		const cartResponse = await this.requestUtils.request.get(
-			'/wp-json/wc/store/cart'
+		// Navigate to cart page
+		await this.goToCart();
+
+		// Check if cart is already empty
+		const emptyCartMessage = this.page.getByText(
+			'Your cart is currently empty!'
 		);
-		const nonce = cartResponse.headers()?.nonce;
-		if ( ! nonce ) {
-			throw new Error( 'Could not get cart nonce.' );
+		if ( await emptyCartMessage.isVisible() ) {
+			return; // Cart is already empty
 		}
-		const res = await this.requestUtils.request.delete(
-			'/wp-json/wc/store/v1/cart/items',
-			{ headers: { nonce } }
-		);
-		if ( ! res.ok() ) {
-			throw new Error(
-				`Got an error response when trying to empty cart. Status code: ${ res.status() }`
-			);
+
+		// Track cart-related requests to wait for completion
+		const { waitForCartRequests } = this.trackCartRequests();
+
+		// Count initial remove buttons and remove all items
+		const removeButtons = this.page.getByLabel( /Remove .* from cart/ );
+		let itemCount = await removeButtons.count();
+
+		while ( itemCount > 0 ) {
+			// Click the first remove button
+			await removeButtons.first().click();
+
+			// Wait for the cart request to complete
+			await waitForCartRequests();
+
+			// Check if empty cart message is now visible
+			if ( await emptyCartMessage.isVisible() ) {
+				break; // Cart is now empty
+			}
+
+			// Update count for next iteration
+			itemCount = await removeButtons.count();
 		}
+
+		// Final verification that cart is empty
+		await emptyCartMessage.waitFor( { state: 'visible' } );
 	}
 
 	/**

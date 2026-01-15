@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -109,11 +108,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		public static function save() {
 			global $current_tab;
 
-			if ( Features::is_enabled( 'settings' ) ) {
-				check_admin_referer( 'wp_rest' );
-			} else {
-				check_admin_referer( 'woocommerce-settings' );
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( esc_html__( 'You do not have permission to save settings.', 'woocommerce' ), 403 );
 			}
+
+			check_admin_referer( 'woocommerce-settings' );
 
 			// Trigger actions.
 			do_action( 'woocommerce_settings_save_' . $current_tab );
@@ -295,6 +294,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['value'] = self::get_option( $value['id'], $value['default'] );
 				}
 
+				if ( ! is_null( $value['fixed_value'] ?? null ) ) {
+					$value['value'] = $value['fixed_value'];
+				}
+
 				// Custom attribute handling.
 				$custom_attributes = array();
 
@@ -335,6 +338,20 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
 						echo '</td></tr>';
+						break;
+
+					// Notice.
+					case 'notice':
+						$notice_type = $value['notice_type'] ?? 'info';
+						$notice_text = $value['text'] ?? '';
+
+						?>
+						</table>
+						<div class="notice notice-<?php echo esc_attr( $notice_type ); ?> inline">
+							<p><?php echo wp_kses_post( $notice_text ); ?></p>
+						</div>
+						<table class="form-table" role="presentation">
+						<?php
 						break;
 
 					// Section Ends.

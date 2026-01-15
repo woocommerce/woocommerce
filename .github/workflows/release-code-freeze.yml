@@ -1,125 +1,397 @@
-name: 'Release: Enforce Code Freeze'
+name: 'Release: Enforce Feature Freeze'
 on:
+  schedule:
+    - cron: '0 18 * * *' # Every day at 18h UTC
   workflow_dispatch:
 
-permissions: {}
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: release-feature-freeze
 
 env:
-    GIT_COMMITTER_NAME: 'WooCommerce Bot'
-    GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
-    GIT_AUTHOR_NAME: 'WooCommerce Bot'
-    GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
+  GIT_COMMITTER_NAME: 'WooCommerce Bot'
+  GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
+  GIT_AUTHOR_NAME: 'WooCommerce Bot'
+  GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
 jobs:
-  prepare-for-code-freeze:
+  check-feature-freeze-event:
+    name: Check for Feature Freeze events today
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      should-run: ${{ steps.check-feature-freeze-event.outputs.should-run }}
+    steps:
+      - name: Install node-ical
+        run: npm install node-ical
+      - name: Check for Feature Freeze events today
+        id: check-feature-freeze-event
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const shouldSkipCalendarCheck = '${{ github.event_name }}' !== 'schedule';
+            if (shouldSkipCalendarCheck) {
+              console.log('Skip calendar event check, since the workflow was triggered manually.');
+              core.setOutput('should-run', 'true');
+              return;
+            }
+
+            const ical = require('node-ical');
+
+            console.log('Checking for Feature Freeze events today...');
+
+            try {
+              const today = new Date();
+              const events = await ical.async.fromURL('https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics');
+              const dayEvents = Object.values(events)
+                .filter(event => event.type === 'VEVENT')
+                .filter(event => {
+                  if (!event.start) return false;
+                  return new Date(event.start).toDateString() === new Date(today).toDateString();
+                });
+              const ffEvent = dayEvents.find(event => {
+                if (!event.summary) return false;
+                const pattern = /^WooCommerce \d+\.\d+ Feature Freeze$/i;
+                return pattern.test(event.summary);
+              });
+              if (ffEvent) {
+                console.log(`Found Feature Freeze event: ${ffEvent.summary}`);
+                core.setOutput('should-run', 'true');
+              } else {
+                console.log('No Feature Freeze events found for today. Feature freeze will not proceed.');
+                core.setOutput('should-run', 'false');
+              }
+            } catch (error) {
+              core.setFailed(`Failed to fetch calendar events: ${error.message}`);
+            }
+
+  prepare-for-feature-freeze:
     name: Calculate versions and confirm repo is in a good state
-    runs-on: ubuntu-latest
+    needs: check-feature-freeze-event
+    if: ${{ needs.check-feature-freeze-event.outputs.should-run == 'true' }}
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
       nextReleaseVersion: ${{ steps.calculate-versions.outputs.nextReleaseVersion }}
-      nextTrunkVersion: ${{ steps.calculate-versions.outputs.nextTrunkVersion }}
+      nextTrunkMainVersion: ${{ steps.calculate-versions.outputs.nextTrunkMainVersion }}
     steps:
-      - name: Verify no PRs open by the github-actions bot are open
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const automatedPRs = await github.rest.search.issuesAndPullRequests({
-              q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open author:app/github-actions`,
-            });
+      # - name: Verify no PRs open by the github-actions bot are open
+      #   uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+      #   with:
+      #     script: |
+      #       const automatedPRs = await github.rest.search.issuesAndPullRequests({
+      #         q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open label:Release`,
+      #       });
 
-            if (automatedPRs.data.items.length > 0) {
-              core.setFailed('There are PRs by the github-actions bot that are still open. Please merge or close before proceeding.');
-              process.exit(1);
-            }
-      - name: Compute next release and dev cycle versions
-        id: calculate-versions
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const bumpMinorVersion = (v) => {
-              const [major, minor, patch] = v.split('.').map(Number);
-              return minor >= 9 ? `${major + 1}.0.0` : `${major}.${minor + 1}.0`
-            };
-
-            const currentRelease = await github.rest.repos.getLatestRelease({
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-
-            const currentVersion = currentRelease.data.tag_name.replace(/[^0-9.]+/, '');
-            const nextReleaseVersion = bumpMinorVersion(currentVersion);
-            const nextReleaseBranch = `release/${nextReleaseVersion.slice(0, -2)}`;
-            const nextTrunkVersion = bumpMinorVersion(nextReleaseVersion);
-
-            core.setOutput('nextReleaseVersion', nextReleaseVersion);
-            core.setOutput('nextReleaseBranch', nextReleaseBranch);
-            core.setOutput('nextTrunkVersion', nextTrunkVersion);
-
-  run-code-freeze:
-    name: Perform code freeze
-    runs-on: ubuntu-latest
-    needs: prepare-for-code-freeze
-    permissions:
-      contents: write
-      pull-requests: write
-    steps:
-      # Repo preparation to be able to use the monorepo-utils for the version bumps.
-      - name: Checkout trunk
-        uses: actions/checkout@v3
+      #       if (automatedPRs.data.items.length > 0) {
+      #         core.setFailed('There are PRs by the github-actions bot that are still open. Please merge or close before proceeding.');
+      #         process.exit(1);
+      #       }
+      - uses: actions/checkout@v4
         with:
           ref: trunk
-      - name: Setup PNPM
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
-      - name: Setup Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-            node-version-file: .nvmrc
-            cache: pnpm
-
-      - name: Install prerequisites
+          sparse-checkout: |
+            /plugins/woocommerce/woocommerce.php
+          sparse-checkout-cone-mode: false
+      - name: Fetch version from trunk
+        id: fetch-trunk-version
         run: |
-            pnpm install --filter monorepo-utils --ignore-scripts
-            # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
-            pnpm build
-        working-directory: tools/monorepo-utils
+          header_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+          echo "Trunk version is '$header_version'."
+          echo "trunk-version=$header_version" >> $GITHUB_OUTPUT
+      - name: Compute next release and dev cycle versions
+        id: calculate-versions
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const trunkVersion = `${{ steps.fetch-trunk-version.outputs.trunk-version }}`;
 
-      # Actual code freeze steps.
+            const m = trunkVersion.match( /^(\d+\.\d+)\.\d+(-dev)?$/ );
+            if ( ! m ) {
+                core.setFailed( `Trunk version number is incorrect: ${ trunkVersion }` );
+                return;
+            }
+
+            const trunkMainVersion = m[1]; // e.g. '10.4'
+            const nextReleaseVersion = `${ trunkMainVersion }.0`; // e.g. '10.4.0'
+            const nextReleaseBranch = `release/${ trunkMainVersion }`; // e.g. 'release/10.4'
+            const nextTrunkMainVersion = `${ ( Number( trunkMainVersion ) + 0.1 ).toFixed( 1 ) }`; // e.g. '10.5'
+
+            core.setOutput( 'nextReleaseVersion', nextReleaseVersion );
+            core.setOutput( 'nextReleaseBranch', nextReleaseBranch );
+            core.setOutput( 'nextTrunkMainVersion', nextTrunkMainVersion );
+
+  run-feature-freeze:
+    name: Perform feature freeze
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: prepare-for-feature-freeze
+    steps:
+      - name: Checkout trunk
+        uses: actions/checkout@v4
+        with:
+          ref: trunk
       - name: Push frozen branch to the repo
         run: |
           # Last opportunity to bail if branch already exists.
-          if [[ -n $(git ls-remote --heads origin ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}) ]]; then
-            echo "::error::Release branch already exists."
+          if [[ -n $(git ls-remote --heads origin ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}) ]]; then
+            echo "::error::Release branch '${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}' already exists."
             exit 1
           fi
 
           git checkout trunk
-          git checkout -b ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
-          git push origin ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
-      - name: Create next dev cycle milestone
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pnpm utils code-freeze milestone -o ${{ github.repository_owner }} -n ${{ github.event.repository.name}} -m ${{ needs.prepare-for-code-freeze.outputs.nextTrunkVersion }}
-      - name: Bump versions in frozen release branch for beta.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pnpm utils code-freeze version-bump ${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}-beta.1 -o ${{ github.repository_owner }} -n ${{ github.event.repository.name}} -b ${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}
-      - name: Bump versions in trunk for next dev cycle
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pnpm utils code-freeze version-bump ${{ needs.prepare-for-code-freeze.outputs.nextTrunkVersion }}-dev -o ${{ github.repository_owner }} -n ${{ github.event.repository.name}} -b trunk
+          git checkout -b ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
+          git push origin ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
+      - name: Create milestone for next dev cycle
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const trunkMilestone = '${{ needs.prepare-for-feature-freeze.outputs.nextTrunkMainVersion }}.0';
 
-      # Notify Slack.
+            try {
+              await github.rest.issues.createMilestone( {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: trunkMilestone,
+              } );
+            } catch ( e ) {
+              if ( e.response?.data?.errors?.some( ( err ) => 'already_exists' === err.code ) ) {
+                console.log( `Milestone ${ trunkMilestone } already exists.` );
+              } else {
+                throw e;
+              }
+            }
+
+  cleanup-milestones:
+    name: Clean up old and completed milestones
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [prepare-for-feature-freeze, run-feature-freeze]
+    steps:
+      - name: Close completed milestones
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const nextTrunkMainVersion = '${{ needs.prepare-for-feature-freeze.outputs.nextTrunkMainVersion }}'; // e.g. '10.5'
+            const minVersionToKeep     = Number( nextTrunkMainVersion ) - 0.2; // e.g. 10.3
+
+            const { data: latestMilestones } = await github.rest.issues.listMilestones( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 10,
+              sort: 'completeness',
+              direction: 'desc',
+            } );
+
+            // Filter out milestones that do not have any open issues and are older than the minimum version to keep.
+            // We want to keep milestone for at least the last 3 main versions (dev, frozen, stable).
+            const milestonesToClose = latestMilestones.filter(
+              milestone => 0 === milestone.open_issues && /^\d+\.\d+\.0$/.test( milestone.title ) && Number( milestone.title.slice( 0, -2 ) ) < minVersionToKeep
+            );
+
+            for ( const milestone of milestonesToClose ) {
+              await github.rest.issues.updateMilestone( {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                milestone_number: milestone.number,
+                state: 'closed',
+              } );
+
+              console.log( `Closed milestone ${milestone.title}` );
+            }
+
+  bump-version-in-trunk:
+    name: Bump version in trunk for next development cycle
+    uses: ./.github/workflows/release-bump-version.yml
+    needs: [prepare-for-feature-freeze, run-feature-freeze]
+    secrets: inherit
+    with:
+      branch: trunk
+      bump-type: dev
+
+  build-dev-release:
+    name: 'Build WooCommerce -dev release'
+    uses: ./.github/workflows/release-build-zip-file.yml
+    needs: [prepare-for-feature-freeze, run-feature-freeze]
+    with:
+      skip_verify: true
+      create_github_release: true
+      branch: ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}
+
+  publish-dev-release:
+    name: 'Publish -dev release'
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [prepare-for-feature-freeze, build-dev-release]
+    outputs:
+      release-zip: ${{ steps.publish-release.outputs.release-zip }}
+    steps:
+      - id: publish-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release edit '${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}-dev' \
+            --prerelease \
+            --latest=false \
+            --draft=false
+
+          echo "release-zip=https://github.com/${{ github.repository }}/releases/download/${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}-dev/woocommerce.zip" >> $GITHUB_OUTPUT
+
+  notify-slack:
+    name: Notify Slack
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [publish-dev-release, prepare-for-feature-freeze]
+    outputs:
+      message-ts: ${{ steps.notify-success.outputs.ts }}
+    steps:
       - name: Notify Slack on success
-        if: ${{ success() }}
-        uses: archive/github-actions-slack@v2.0.0
+        id: notify-success
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
           slack-text: |
-            :ice_cube: Code Freeze completed for `${{ needs.prepare-for-code-freeze.outputs.nextReleaseBranch }}` :checking:
-            You can raise a code freeze exception if you need something to be included in this release.
+            :ice_cube: *Feature Freeze completed for ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }} (`${{ needs.prepare-for-feature-freeze.outputs.nextReleaseBranch }}`)*
+
+            • To include any new fixes in this release, please follow the <https://developer.woocommerce.com/docs/contribution/releases/backporting|Backporting Guide>.
+            • <${{ needs.publish-dev-release.outputs.release-zip }}|Download WooCommerce ${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}-dev>.
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false
+      - name: Find open PRs in now frozen milestone
+        id: find-prs
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            // Find open PRs with milestone matching the next release version.
+            try {
+              const { data: prs } = await github.rest.search.issuesAndPullRequests( {
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open milestone:"${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}"`,
+                sort: 'created',
+                order: 'desc',
+                per_page: 11
+              } );
+
+              if ( 0 === prs.total_count ) {
+                core.setOutput( 'current-milestone-open-prs', '' );
+                core.setOutput( 'milestone-url', '' );
+                return;
+              }
+
+              // Get milestone URL.
+              const milestoneUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/milestone/${prs.items[0].milestone.number}`;
+              core.setOutput( 'milestone-url', milestoneUrl );
+
+              // Format PR list for Slack.
+              const prList = prs
+                .items
+                .slice( 0, prs.total_count <= 11 ? prs.total_count : 10 )
+                .map( pr => `• <${pr.html_url}|#${pr.number}>: ${pr.title}` )
+                .join( '\n' );
+
+              let message = prList;
+
+              // If there are more than 2 remaining PRs after displaying, add overflow message.
+              const remaining = prs.total_count <= 11 ? 0 : prs.total_count - 10;
+              if ( remaining > 0 ) {
+                message += `\n_... <${milestoneUrl}|and ${remaining} more>._`;
+              }
+
+              core.setOutput( 'current-milestone-open-prs', message );
+            } catch ( error ) {
+              console.error( `Error searching for PRs: ${error.message}` );
+              core.setOutput( 'current-milestone-open-prs', '' );
+            }
+      - name: Post PR list as threaded reply
+        if: steps.find-prs.outputs.current-milestone-open-prs != ''
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-text: |
+            *Currently open PRs in <${{ steps.find-prs.outputs.milestone-url }}|`${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}` milestone>:*
+
+            ${{ steps.find-prs.outputs.current-milestone-open-prs }}
+
+            Review these PRs to ensure the milestone is still valid or change it accordingly.
+          slack-optional-thread_ts: ${{ fromJson( steps.notify-success.outputs.slack-result ).response.message.ts }}
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false
+
+
+  trigger-webhook:
+    name: Trigger Release Webhook
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [publish-dev-release, prepare-for-feature-freeze]
+    steps:
+      - name: Trigger Feature Freeze Webhook
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const crypto = require('crypto');
+
+            const payload = {
+              action: 'feature-freeze',
+              version: '${{ needs.prepare-for-feature-freeze.outputs.nextReleaseVersion }}',
+              build_zip: '${{ needs.publish-dev-release.outputs.release-zip }}',
+              status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
+            };
+
+            console.log('Webhook payload:');
+            console.log(`  Version: ${payload.version}`);
+            console.log(`  Build ZIP: ${payload.build_zip}`);
+            console.log(`  Post Status: ${payload.status}`);
+
+            const requestBody = JSON.stringify({
+              payload
+            });
+
+            const hmac = crypto.createHmac('sha256', process.env.WPCOM_WEBHOOK_SECRET);
+            hmac.update(requestBody);
+            const signature = hmac.digest('hex');
+
+            try {
+              const response = await fetch(process.env.WPCOM_RELEASE_WEBHOOK_URL, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Hub-Signature-256': `sha256=${signature}`
+                },
+                body: requestBody
+              });
+
+              if (!response.ok) {
+                if (response.status === 409) {
+                  console.log('Webhook request failed: Duplicate post detected (409)');
+                } else if (response.status === 403) {
+                  console.log('Webhook request failed: Invalid secret (403)');
+                }
+                core.setFailed(`Webhook request failed with status ${response.status}`);
+              } else {
+                console.log('Webhook triggered successfully');
+              }
+            } catch (error) {
+              core.setFailed(`Webhook request failed: ${error.message}`);
+            }
+        env:
+          WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
+          WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+
+  notify-slack-on-failure:
+    name: Notify Slack on Failure
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, cleanup-milestones, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
+    if: always() && ((contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')))
+    steps:
+      - name: Notify Slack on failure
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-text: |
+            :x: Some steps in the Feature Freeze workflow failed. Please check the logs for details and re-run if needed.
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
           slack-optional-unfurl_links: false
           slack-optional-unfurl_media: false

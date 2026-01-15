@@ -3,7 +3,7 @@
  */
 import React from 'react';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -14,12 +14,22 @@ import './style.scss';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 
 export const FinishStep: React.FC = () => {
-	const { context, closeModal } = useOnboardingContext();
+	const { context, currentStep, closeModal, sessionEntryPoint } =
+		useOnboardingContext();
 
 	return (
 		<>
 			<WooPaymentsStepHeader onClose={ closeModal } />
 			<div className="settings-payments-onboarding-modal__step--content">
+				{ currentStep?.errors && currentStep.errors.length > 0 && (
+					<Notice
+						status="error"
+						isDismissible={ false }
+						className="settings-payments-onboarding-modal__step--content-finish-error"
+					>
+						<p>{ currentStep.errors[ 0 ].message }</p>
+					</Notice>
+				) }
 				<div className="settings-payments-onboarding-modal__step--content-finish">
 					<h1 className="settings-payments-onboarding-modal__step--content-finish-title">
 						{ __(
@@ -43,6 +53,7 @@ export const FinishStep: React.FC = () => {
 								{
 									step: 'finish',
 									action: 'go_to_payments_overview',
+									source: sessionEntryPoint,
 								}
 							);
 
@@ -69,6 +80,7 @@ export const FinishStep: React.FC = () => {
 								{
 									step: 'finish',
 									action: 'close_window',
+									source: sessionEntryPoint,
 								}
 							);
 

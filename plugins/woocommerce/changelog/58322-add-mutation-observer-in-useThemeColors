@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Improves `useThemeColors` to apply theme style changes in real-time using `MutationObserver`, eliminating the need to refresh the editor after switching styles.

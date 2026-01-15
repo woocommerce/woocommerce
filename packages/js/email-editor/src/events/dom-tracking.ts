@@ -1,13 +1,12 @@
 /**
  * External dependencies
  */
-import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { recordEvent } from '.';
+import { recordEvent, isEventTrackingEnabled } from '.';
 
 let EVENTS_TO_TRACK = [];
 
@@ -36,11 +35,7 @@ function trackMatchingEvents( event: Event ) {
 }
 
 export function initDomTracking() {
-	const isEventTrackingEnabled = applyFilters(
-		'woocommerce_email_editor_events_tracking_enabled',
-		false
-	);
-	if ( ! isEventTrackingEnabled ) {
+	if ( ! isEventTrackingEnabled() ) {
 		return;
 	}
 

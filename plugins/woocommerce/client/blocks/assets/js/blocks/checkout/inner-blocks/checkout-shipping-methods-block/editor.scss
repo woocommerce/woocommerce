@@ -2,10 +2,3 @@
 	.components-notice__content {
 	color: $black;
 }
-
-.wc-block-components-shipping-rates-control
-	label.wc-block-components-radio-control__option {
-	.is-small & {
-		padding: 0.875em 0.875em 0.875em em($gap-huge);
-	}
-}

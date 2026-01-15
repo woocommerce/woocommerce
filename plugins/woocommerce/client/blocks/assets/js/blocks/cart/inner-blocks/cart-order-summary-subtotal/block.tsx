@@ -3,10 +3,14 @@
  */
 import { Subtotal, TotalsWrapper } from '@woocommerce/blocks-components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useOrderSummaryLoadingState,
+} from '@woocommerce/base-context/hooks';
 
 const Block = ( { className = '' }: { className?: string } ) => {
 	const { cartTotals } = useStoreCart();
+	const { isLoading } = useOrderSummaryLoadingState();
 
 	// Hide if there are no other totals to show.
 	if (
@@ -21,7 +25,11 @@ const Block = ( { className = '' }: { className?: string } ) => {
 
 	return (
 		<TotalsWrapper className={ className }>
-			<Subtotal currency={ totalsCurrency } values={ cartTotals } />
+			<Subtotal
+				currency={ totalsCurrency }
+				values={ cartTotals }
+				showSkeleton={ isLoading }
+			/>
 		</TotalsWrapper>
 	);
 };

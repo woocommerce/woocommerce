@@ -644,22 +644,23 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 		$expected = array(
-			'id'           => $item->get_id(),
-			'name'         => 'Dummy Product',
-			'product_id'   => 0,
-			'variation_id' => 0,
-			'quantity'     => 10,
-			'tax_class'    => '',
-			'subtotal'     => '40.00',
-			'subtotal_tax' => '0.00',
-			'total'        => '40.00',
-			'total_tax'    => '0.00',
-			'taxes'        => array(),
-			'meta_data'    => array(),
-			'sku'          => null,
-			'price'        => 4,
-			'parent_name'  => null,
-			'image'        => array(
+			'id'               => $item->get_id(),
+			'name'             => 'Dummy Product',
+			'product_id'       => 0,
+			'variation_id'     => 0,
+			'quantity'         => 10,
+			'tax_class'        => '',
+			'subtotal'         => '40.00',
+			'subtotal_tax'     => '0.00',
+			'total'            => '40.00',
+			'total_tax'        => '0.00',
+			'taxes'            => array(),
+			'meta_data'        => array(),
+			'sku'              => null,
+			'global_unique_id' => null,
+			'price'            => 4,
+			'parent_name'      => null,
+			'image'            => array(
 				'id'  => 0,
 				'src' => '',
 			),
@@ -721,7 +722,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 				'order_has_coupon_before_request'          => false,
 				'expected_request_result'                  => array(
 					'code'    => 400,
-					'message' => 'Coupon &quot;not-existing-coupon&quot; does not exist!',
+					'message' => 'Coupon &quot;not-existing-coupon&quot; cannot be applied because it does not exist.',
 				),
 				'expected_order_coupon_code_after_request' => null,
 			),
@@ -738,7 +739,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 				'order_has_coupon_before_request'          => true,
 				'expected_request_result'                  => array(
 					'code'    => 400,
-					'message' => 'Coupon &quot;not-existing-coupon&quot; does not exist!',
+					'message' => 'Coupon &quot;not-existing-coupon&quot; cannot be applied because it does not exist.',
 				),
 				'expected_order_coupon_code_after_request' => 'fake-coupon',
 			),
@@ -1004,7 +1005,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_invalid_coupon', $data['code'] );
-		$this->assertEquals( 'Coupon &quot;NON_EXISTING_COUPON&quot; does not exist!', $data['message'] );
+		$this->assertEquals( 'Coupon &quot;non_existing_coupon&quot; cannot be applied because it does not exist.', $data['message'] );
 	}
 
 	/**
@@ -1161,7 +1162,7 @@ class WC_Tests_API_Orders extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$line_item_properties = $data['schema']['properties']['line_items']['items']['properties'];
-		$this->assertEquals( 16, count( $line_item_properties ) );
+		$this->assertEquals( 17, count( $line_item_properties ) );
 		$this->assertArrayHasKey( 'id', $line_item_properties );
 		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
 		$this->assertArrayHasKey( 'parent_name', $line_item_properties );

@@ -13,7 +13,7 @@ import {
 	offlinePaymentGatewaysStub,
 	suggestionsStub,
 	suggestionCategoriesStub,
-} from '../test-helpers/stub';
+} from './helpers/stub';
 
 const defaultState: PaymentsSettingsState = {
 	providers: [],

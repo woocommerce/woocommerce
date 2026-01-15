@@ -247,4 +247,29 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertTrue( true );
 		}
 	}
+
+	/**
+	 * Test wc_update_1040_cleanup_legacy_ptk_patterns_fetching removes the obsolete option and actions.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
+		// Set up the option that should be removed.
+		add_option( 'last_fetch_patterns_request', time() );
+		$this->assertNotFalse( get_option( 'last_fetch_patterns_request' ), 'Option should exist before update' );
+
+		// Schedule legacy actions that should be removed.
+		as_schedule_single_action( time(), 'fetch_patterns' );
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns' ), 'fetch_patterns action should exist before update' );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_1040_cleanup_legacy_ptk_patterns_fetching();
+
+		// Verify the option was removed.
+		$this->assertFalse( get_option( 'last_fetch_patterns_request' ), 'Option should be removed after update' );
+
+		// Verify the actions were removed.
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns' ), 'fetch_patterns action should be removed after update' );
+	}
 }

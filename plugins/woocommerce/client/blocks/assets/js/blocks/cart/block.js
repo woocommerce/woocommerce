@@ -2,9 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { useEffect } from '@wordpress/element';
-import LoadingMask from '@woocommerce/base-components/loading-mask';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import { translateJQueryEventToNative } from '@woocommerce/base-utils';
@@ -16,6 +14,7 @@ import {
 } from '@woocommerce/base-context';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
+import { reloadPage } from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
@@ -23,22 +22,17 @@ import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { CartBlockContext } from './context';
 import './style.scss';
 
-const reloadPage = () => void window.location.reload( true );
-
 const Cart = ( { children, attributes = {} } ) => {
-	const { cartIsLoading } = useStoreCart();
 	const { hasDarkControls } = attributes;
 
 	return (
-		<LoadingMask showSpinner={ true } isLoading={ cartIsLoading }>
-			<CartBlockContext.Provider
-				value={ {
-					hasDarkControls,
-				} }
-			>
-				{ children }
-			</CartBlockContext.Provider>
-		</LoadingMask>
+		<CartBlockContext.Provider
+			value={ {
+				hasDarkControls,
+			} }
+		>
+			{ children }
+		</CartBlockContext.Provider>
 	);
 };
 

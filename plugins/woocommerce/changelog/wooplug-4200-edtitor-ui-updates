@@ -1,5 +1,0 @@
-Significance: patch
-Type: enhancement
-Comment: We added inline CSS to the block email editor page to ensure preset CSS variables are set globaly
-
-

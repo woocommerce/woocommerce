@@ -44,7 +44,7 @@ $collection_title = __( 'Shop new arrivals', 'woocommerce' );
 		<div class="wp-block-buttons alignwide">
 			<!-- wp:button {"textAlign":"center"} -->
 			<div class="wp-block-button">
-				<a class="wp-block-button__link has-text-align-center wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>">
+				<a class="wp-block-button__link has-text-align-center wp-element-button" href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>">
 					<?php esc_html_e( 'Shop All', 'woocommerce' ); ?>
 				</a>
 			</div>

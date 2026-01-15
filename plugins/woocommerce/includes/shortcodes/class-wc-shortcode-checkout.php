@@ -11,6 +11,8 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 
 /**
@@ -195,11 +197,8 @@ class WC_Shortcode_Checkout {
 				);
 				WC()->customer->save();
 
-				$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
-				if ( count( $available_gateways ) ) {
-					current( $available_gateways )->set_current();
-				}
+				$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+				WC()->payment_gateways()->set_current_gateway( $available_gateways );
 
 				/**
 				 * Allows the text of the submit button on the Pay for Order page to be changed.
@@ -346,6 +345,12 @@ class WC_Shortcode_Checkout {
 		// Check cart has contents.
 		if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
 			return;
+		}
+
+		// Track checkout page loaded for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CheckoutEventTracker::class )
+				->track_checkout_page_loaded();
 		}
 
 		// Check cart contents for errors.

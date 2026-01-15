@@ -21,3 +21,11 @@ export const isExperimentalBlocksEnabled = (): boolean => {
 
 	return experimentalBlocksEnabled;
 };
+
+export const isExperimentalWcRestApiV4Enabled = (): boolean => {
+	const experimentalWcRestApiV4 = getSetting(
+		'experimentalWcRestApiV4',
+		false
+	);
+	return experimentalWcRestApiV4;
+};

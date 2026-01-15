@@ -76,7 +76,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -102,7 +102,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_onboarding_details( $country_code );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$request->set_param( 'location', $country_code );
 		$response = $this->server->dispatch( $request );
 
@@ -153,7 +153,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_onboarding_details( $country_code );
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -181,7 +181,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			->method( 'get_onboarding_details' );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$request->set_param( 'location', $location );
 		$response = $this->server->dispatch( $request );
 
@@ -203,7 +203,7 @@ class WooPaymentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			->willThrowException( new \Exception( 'Test exception' ) );
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.

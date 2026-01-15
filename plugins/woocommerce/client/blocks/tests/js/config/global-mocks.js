@@ -275,6 +275,36 @@ global.wcSettings = {
 			autocapitalize: 'characters',
 			index: 100,
 		},
+		'namespace/contact_field': {
+			label: 'Contact Field',
+			optionalLabel: 'Contact Field (optional)',
+			required: false,
+			hidden: false,
+			type: 'text',
+		},
+		'namespace/order_field': {
+			label: 'Order Field',
+			optionalLabel: 'Order Field (optional)',
+			required: false,
+			hidden: false,
+			type: 'text',
+		},
+	},
+	addressFieldsLocations: {
+		address: [
+			'first_name',
+			'last_name',
+			'company',
+			'address_1',
+			'address_2',
+			'city',
+			'state',
+			'postcode',
+			'phone',
+			'country',
+		],
+		contact: [ 'email', 'namespace/contact_field' ],
+		order: [ 'namespace/order_field' ],
 	},
 	checkoutData: {
 		order_id: 100,
@@ -309,7 +339,8 @@ global.__webpack_public_path__ = '';
 Object.defineProperty( window, 'matchMedia', {
 	writable: true,
 	value: jest.fn().mockImplementation( ( query ) => ( {
-		matches: false,
+		// Return true for prefers-reduced-motion queries to skip animations in tests
+		matches: /prefers-reduced-motion/.test( query ),
 		media: query,
 		onchange: null,
 		addListener: jest.fn(), // Deprecated
@@ -337,8 +368,3 @@ if ( ! window.DOMRect ) {
 jest.mock( 'client-zip', () => ( {
 	downloadZip: jest.fn(),
 } ) );
-
-/*
- * Enables `window.fetch()` in Jest tests.
- */
-require( 'jest-fetch-mock' ).enableMocks();

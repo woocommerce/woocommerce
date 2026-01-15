@@ -1,11 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { InnerBlocks } from '@wordpress/block-editor';
-import { cart } from '@woocommerce/icons';
-import { Icon } from '@wordpress/icons';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
 /**
  * Internal dependencies
@@ -14,35 +11,13 @@ import { Edit, Save } from './edit';
 import './style.scss';
 import { blockName, blockAttributes } from './attributes';
 import './inner-blocks';
+import { metadata } from './metadata';
 
 /**
  * Register and run the Cart block.
  */
-const settings = {
-	title: __( 'Cart', 'woocommerce' ),
-	apiVersion: 3,
-	icon: {
-		src: (
-			<Icon
-				icon={ cart }
-				className="wc-block-editor-components-block-icon"
-			/>
-		),
-	},
-	category: 'woocommerce',
-	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-	description: __( 'Shopping cart.', 'woocommerce' ),
-	supports: {
-		align: [ 'wide' ],
-		html: false,
-		multiple: false,
-	},
-	example: {
-		attributes: {
-			isPreview: true,
-		},
-		viewportWidth: 800,
-	},
+export const settings = {
+	...metadata,
 	attributes: blockAttributes,
 	edit: Edit,
 	save: Save,

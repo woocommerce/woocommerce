@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Update admin client build to bundle @wordpress/global-styles-engine
+
+

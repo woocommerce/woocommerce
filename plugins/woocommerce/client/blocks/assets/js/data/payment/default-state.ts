@@ -76,6 +76,8 @@ export interface PaymentState {
 	// Available payment methods are payment methods which have been validated and can make payment.
 	availablePaymentMethods: PlainPaymentMethods;
 	availableExpressPaymentMethods: PlainExpressPaymentMethods;
+	// Registered express payment methods are all express payment methods from the registry (before filtering).
+	registeredExpressPaymentMethods: PlainExpressPaymentMethods;
 	savedPaymentMethods:
 		| Record< string, SavedPaymentMethod[] >
 		| EmptyObjectType;
@@ -91,6 +93,7 @@ export const defaultPaymentState: PaymentState = {
 	activePaymentMethod: getDefaultPaymentMethod(),
 	availablePaymentMethods: {},
 	availableExpressPaymentMethods: {},
+	registeredExpressPaymentMethods: {},
 	savedPaymentMethods: getSetting<
 		Record< string, SavedPaymentMethod[] > | EmptyObjectType
 	>( 'customerPaymentMethods', {} ),

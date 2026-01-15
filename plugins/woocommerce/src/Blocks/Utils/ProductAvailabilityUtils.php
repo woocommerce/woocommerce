@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Blocks\Templates\ProductStockIndicator;
 use Automattic\WooCommerce\Enums\ProductType;
+
 /**
  * Utility functions for product availability.
  */
@@ -26,12 +27,16 @@ class ProductAvailabilityUtils {
 		}
 
 		$product_availability = $product->get_availability();
-		// If the product is a variable product and availability isn't controlled
-		// at the parent product level, check if any of its variations is in stock.
-		// We will show a custom availability message if all variations are out of stock.
-		if ( ! $product_availability && $product->get_type() === ProductType::VARIABLE ) {
-			if ( ! $product->has_available_variations() ) {
-				$product_availability['availability'] = __( 'This product is currently out of stock and unavailable.', 'woocommerce' );
+
+		// If the product is a variable product, make sure at least one of its
+		// variations is purchasable.
+		if (
+			isset( $product_availability['class'] ) &&
+			( 'in-stock' === $product_availability['class'] || 'available-on-backorder' === $product_availability['class'] ) &&
+			ProductType::VARIABLE === $product->get_type()
+		) {
+			if ( ! $product->has_purchasable_variations() ) {
+				$product_availability['availability'] = __( 'Out of stock', 'woocommerce' );
 				$product_availability['class']        = 'out-of-stock';
 			}
 		}

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Icon } from '@wordpress/components';
+import { Button, Icon, Notice } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useState, useEffect, useMemo, useRef } from '@wordpress/element';
@@ -14,7 +14,7 @@ import clsx from 'clsx';
  * Internal dependencies
  */
 import { useOnboardingContext } from '../../data/onboarding-context';
-import { PaymentMethodListItem } from '~/settings-payments/components/payment-method-list-item';
+import { PaymentMethodListItem } from './list-item';
 import {
 	combinePaymentMethodsState,
 	combineRequestMethods,
@@ -24,7 +24,7 @@ import {
 import './style.scss';
 
 export default function PaymentMethodsSelection() {
-	const { currentStep, navigateToNextStep, closeModal } =
+	const { currentStep, navigateToNextStep, closeModal, sessionEntryPoint } =
 		useOnboardingContext();
 	const [ isExpanded, setIsExpanded ] = useState( false );
 	const [ paymentMethodsState, setPaymentMethodsState ] = useState< {
@@ -37,6 +37,9 @@ export default function PaymentMethodsSelection() {
 	> | null >( null );
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
+	const [ loadingPaymentMethods, setLoadingPaymentMethods ] = useState< {
+		[ key: string ]: boolean;
+	} >( {} );
 
 	const contextPaymentMethodsState = currentStep?.context?.pms_state;
 	const contextPaymentMethods = currentStep?.context?.recommended_pms;
@@ -66,7 +69,7 @@ export default function PaymentMethodsSelection() {
 
 	// Calculate and store initial visibility *once* when data is ready
 	useEffect( () => {
-		// Only proceed if the map hasn't been populated yet
+		// Only proceed if the map has been populated.
 		if ( initialVisibilityMap !== null ) {
 			return;
 		}
@@ -113,58 +116,103 @@ export default function PaymentMethodsSelection() {
 		// Depend on the state map now
 	}, [ recommendedPaymentMethods, isExpanded, initialVisibilityMap ] );
 
-	const savePaymentMethodsState = ( state: Record< string, boolean > ) => {
-		// Update the local state
+	const savePaymentMethodsState = (
+		state: Record< string, boolean >,
+		changedMethodId?: string
+	): Promise< void > => {
+		const saveUrl = currentStep?.actions?.save?.href;
+
+		// Store the previous state for potential rollback
+		const previousState = { ...paymentMethodsState };
+
+		// Set loading state for the specific method if provided
+		if ( changedMethodId ) {
+			setLoadingPaymentMethods( ( prev ) => ( {
+				...prev,
+				[ changedMethodId ]: true,
+			} ) );
+		}
+
+		// Optimistically update the local state first
 		setPaymentMethodsState( state );
 
-		// Send the updated state to the server
-		const href = currentStep?.actions?.save?.href;
-		if ( href ) {
-			apiFetch( {
-				url: href,
+		if ( saveUrl ) {
+			// Send the updated state to the backend.
+			return apiFetch( {
+				url: saveUrl,
 				method: 'POST',
 				data: {
 					payment_methods: state,
+					source: sessionEntryPoint,
 				},
-			} );
+			} )
+				.then( () => {} )
+				.catch( () => {
+					// If the request fails, revert to the previous state
+					setPaymentMethodsState( previousState );
+				} )
+				.finally( () => {
+					// Clear loading state immediately if no API call is made
+					if ( changedMethodId ) {
+						setLoadingPaymentMethods( ( prev ) => ( {
+							...prev,
+							[ changedMethodId ]: false,
+						} ) );
+					}
+				} );
 		}
+
+		// Clear loading state immediately if no API call is made
+		if ( changedMethodId ) {
+			setLoadingPaymentMethods( ( prev ) => ( {
+				...prev,
+				[ changedMethodId ]: false,
+			} ) );
+		}
+
+		// Return a resolved promise since no API call was made.
+		return Promise.resolve();
 	};
 
 	// Check if overflow exists for Payment Methods list container.
 	const checkHasOverflow = () => {
-		const pmsContainer = scrollRef.current;
-
-		if ( pmsContainer ) {
-			// Compare scrollHeight and clientHeight to determine overflow.
-			setHasOverflow(
-				pmsContainer.scrollHeight > pmsContainer.clientHeight
-			);
-		}
+		// Delay the check slightly to ensure DOM is ready.
+		return setTimeout( () => {
+			const pmsContainer = scrollRef.current;
+			if ( pmsContainer ) {
+				// Compare scrollHeight and clientHeight to determine overflow
+				const hasScrollOverflow =
+					pmsContainer.scrollHeight > pmsContainer.clientHeight;
+				setHasOverflow( hasScrollOverflow );
+			}
+		}, 10 );
 	};
 
 	// Check for overflow on initial render and on window resize.
 	useEffect( () => {
-		// Use setTimeout to ensure the DOM is updated before checking for overflow.
-		const timeout = setTimeout( () => {
-			checkHasOverflow();
-		}, 0 ); // Runs after paint
+		let timeoutId = checkHasOverflow();
 
 		// Check for overflow on window resize.
-		window.addEventListener( 'resize', checkHasOverflow );
+		const handleResize = () => {
+			// Clear any existing timeout before creating a new one.
+			clearTimeout( timeoutId );
+			timeoutId = checkHasOverflow();
+		};
+		window.addEventListener( 'resize', handleResize );
 
 		return () => {
 			// Cleanup the timeout and event listener on unmount.
-			clearTimeout( timeout );
-			window.removeEventListener( 'resize', checkHasOverflow );
+			clearTimeout( timeoutId );
+			window.removeEventListener( 'resize', handleResize );
 		};
-	}, [] );
+	}, [ isExpanded, initialVisibilityMap ] );
 
 	return (
 		<div className="settings-payments-onboarding-modal__step--content">
-			<div className="woocommerce-layout__header woocommerce-recommended-payment-methods">
-				<div className="woocommerce-layout__header-wrapper">
-					<div className="woocommerce-layout__header-title-and-close">
-						<h1 className="components-truncate components-text woocommerce-layout__header-heading woocommerce-layout__header-left-align woocommerce-settings-payments-header__title">
+			<div className="woocommerce-recommended-payment-methods">
+				<div className="woocommerce-recommended-payment-methods__header">
+					<div className="woocommerce-recommended-payment-methods__header--title">
+						<h1 className="components-truncate components-text">
 							{ __(
 								'Choose your payment methods',
 								'woocommerce'
@@ -177,14 +225,22 @@ export default function PaymentMethodsSelection() {
 							<Icon icon={ close } />
 						</Button>
 					</div>
-
-					<div className="woocommerce-settings-payments-header__description">
+					<div className="woocommerce-recommended-payment-methods__header--description">
 						{ __(
 							"Select which payment methods you'd like to offer to your shoppers. You can update these at any time.",
 							'woocommerce'
 						) }
 					</div>
 				</div>
+				{ currentStep?.errors && currentStep.errors.length > 0 && (
+					<Notice
+						status="error"
+						isDismissible={ false }
+						className="woocommerce-recommended-payment-methods__error"
+					>
+						<p>{ currentStep.errors[ 0 ].message }</p>
+					</Notice>
+				) }
 				<div className="woocommerce-recommended-payment-methods__list">
 					<div
 						className="settings-payments-methods__container"
@@ -199,11 +255,10 @@ export default function PaymentMethodsSelection() {
 											paymentMethodsState
 										) }
 										setPaymentMethodsState={ ( state ) => {
-											// Update the local state
-											setPaymentMethodsState( state );
-
-											// Persist the state on the backend.
-											savePaymentMethodsState( state );
+											savePaymentMethodsState(
+												state,
+												method.id
+											);
 										} }
 										// Pass down the calculated initial visibility for this specific method from state
 										initialVisibilityStatus={
@@ -214,6 +269,11 @@ export default function PaymentMethodsSelection() {
 												: null
 										}
 										isExpanded={ isExpanded }
+										isLoading={
+											loadingPaymentMethods[
+												method.id
+											] ?? false
+										}
 										key={ method.id }
 									/>
 								)
@@ -233,16 +293,11 @@ export default function PaymentMethodsSelection() {
 													'unknown',
 												action: 'show_more',
 												hidden_count: hiddenCount,
+												source: sessionEntryPoint,
 											}
 										);
 
 										setIsExpanded( ! isExpanded );
-
-										// Check for overflow after expanding hidden payment methods.
-										// Use setTimeout to ensure the DOM is updated before checking for overflow.
-										setTimeout( () => {
-											checkHasOverflow();
-										}, 0 );
 									} }
 									tabIndex={ 0 }
 									aria-expanded={ isExpanded }
@@ -268,57 +323,111 @@ export default function PaymentMethodsSelection() {
 					<Button
 						className="components-button is-primary"
 						onClick={ () => {
-							const href = currentStep?.actions?.finish?.href;
-							if ( ! href ) {
+							const finishUrl =
+								currentStep?.actions?.finish?.href;
+							if ( ! finishUrl ) {
 								return;
 							}
 
 							// Persist the final state on the backend, just in case the user didn't change anything.
-							savePaymentMethodsState( paymentMethodsState );
 							setIsContinueButtonLoading( true );
+							// First save the payment methods state.
+							savePaymentMethodsState( paymentMethodsState )
+								.then( () => {
+									// Then mark the step as completed.
+									return apiFetch( {
+										url: finishUrl,
+										method: 'POST',
+										data: {
+											source: sessionEntryPoint,
+										},
+									} );
+								} )
+								.then( () => {
+									const displayedPaymentMethodsIds =
+										Object.keys(
+											initialVisibilityMap || {}
+										);
+									const paymentMethodsIds =
+										Object.keys( paymentMethodsState );
 
-							// Mark the step as completed.
-							apiFetch( {
-								url: href,
-								method: 'POST',
-							} ).then( () => {
-								recordEvent(
-									'wcpay_settings_payment_methods_continue',
-									{
+									const eventProps = {
+										// This is the entire list of payment methods that are available to the user,
+										// regardless of whether they are enabled or not, shown by default or hidden behind a Show more section.
 										displayed_payment_methods:
-											Object.keys(
-												paymentMethodsState
-											).join( ', ' ),
-										selected_payment_methods: Object.keys(
-											paymentMethodsState
-										)
-											.filter(
-												( paymentMethod ) =>
-													paymentMethodsState[
-														paymentMethod
-													]
-											)
-											.join( ', ' ),
-										deselected_payment_methods: Object.keys(
-											paymentMethodsState
-										)
-											.filter(
-												( paymentMethod ) =>
-													! paymentMethodsState[
-														paymentMethod
-													]
-											)
-											.join( ', ' ),
+											displayedPaymentMethodsIds.join(
+												', '
+											),
+										// This is the list of payment methods that were initially displayed to the user
+										// when the step became visible, regardless of whether they were enabled or not.
+										default_displayed_pms:
+											displayedPaymentMethodsIds
+												.filter(
+													( paymentMethod ) =>
+														initialVisibilityMap?.[
+															paymentMethod
+														] !== false
+												)
+												.join( ', ' ),
+										// This is the list of payment methods that were enabled by default
+										// when the step became visible, regardless of whether they ended up selected or not.
+										default_selected_pms:
+											recommendedPaymentMethods
+												.filter(
+													( paymentMethod ) =>
+														paymentMethod.enabled
+												)
+												.map( ( method ) => method.id )
+												.join( ', ' ),
+										// This is the list of payment methods that ended up enabled (either by user selection or default).
+										selected_payment_methods:
+											paymentMethodsIds
+												.filter(
+													( paymentMethod ) =>
+														paymentMethodsState[
+															paymentMethod
+														]
+												)
+												.join( ', ' ),
+										// This is the list of payment methods that ended up disabled (either by user selection or default).
+										deselected_payment_methods:
+											paymentMethodsIds
+												.filter(
+													( paymentMethod ) =>
+														! paymentMethodsState[
+															paymentMethod
+														]
+												)
+												.join( ', ' ),
 										business_country:
 											window.wcSettings?.admin
 												?.woocommerce_payments_nox_profile
 												?.business_country_code ??
 											'unknown',
-									}
-								);
-								setIsContinueButtonLoading( false );
-								navigateToNextStep();
-							} );
+										source: sessionEntryPoint,
+									};
+
+									recordPaymentsOnboardingEvent(
+										'woopayments_onboarding_modal_click',
+										{
+											step: currentStep?.id || 'unknown',
+											action: 'continue',
+											...eventProps,
+										}
+									);
+
+									// Legacy event
+									recordEvent(
+										'wcpay_settings_payment_methods_continue',
+										eventProps
+									);
+
+									setIsContinueButtonLoading( false );
+									navigateToNextStep();
+								} )
+								.catch( () => {
+									setIsContinueButtonLoading( false );
+								} );
 						} }
 						isBusy={ isContinueButtonLoading }
 						disabled={ isContinueButtonLoading }

@@ -1,39 +1,30 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
-
-import { Disabled } from '@wordpress/components';
-import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
-import { useProductDataContext } from '@woocommerce/shared-context';
 import {
 	BlockControls,
 	InspectorControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
  */
 import ToolbarProductTypeGroup from '../components/toolbar-type-product-selector-group';
 import { DowngradeNotice } from '../components/downgrade-notice';
+import { UpgradeProductImageGallery } from '../components/upgrade-product-image-gallery';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
-import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
+import { Skeleton } from './skeleton';
+import type { Attributes } from '../types';
 
-export type FeaturesKeys = 'isBlockifiedAddToCart';
-
-export type FeaturesProps = {
-	[ key in FeaturesKeys ]?: boolean;
-};
-
-export type UpdateFeaturesType = ( key: FeaturesKeys, value: boolean ) => void;
-
-const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
-	const { product } = useProductDataContext();
-
+const AddToCartOptionsEdit = (
+	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
+) => {
+	const { product } = useProduct( props.context?.postId );
 	const blockProps = useBlockProps();
 	const blockClientId = blockProps?.id;
 
@@ -51,7 +42,7 @@ const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 	}, [ blockClientId, registerListener, unregisterListener ] );
 
 	const productType =
-		product.id === 0 ? currentProductType?.slug : product.type;
+		product?.id === undefined ? currentProductType?.slug : product?.type;
 	const isCoreProductType =
 		productType &&
 		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
@@ -59,6 +50,7 @@ const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 	return (
 		<>
 			<InspectorControls>
+				<UpgradeProductImageGallery />
 				<DowngradeNotice blockClientId={ props?.clientId } />
 			</InspectorControls>
 			<BlockControls>
@@ -70,16 +62,11 @@ const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 				/>
 			) : (
 				<div { ...blockProps }>
-					<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-						<ProductShortDescriptionSkeleton />
-					</div>
-					<Disabled>
-						<button
-							className={ `alt wp-element-button ${ productType }_add_to_cart_button` }
-						>
-							{ __( 'Add to cart', 'woocommerce' ) }
-						</button>
-					</Disabled>
+					<Skeleton
+						buttonText={ product?.add_to_cart?.single_text }
+						productType={ productType }
+						isLoading={ false }
+					/>
 				</div>
 			) }
 		</>

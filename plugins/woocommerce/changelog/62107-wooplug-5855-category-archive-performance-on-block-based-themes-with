@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Optimize ProductImage block to avoid unnecessary gallery image calculations.

@@ -9,6 +9,7 @@ on:
       - '**/*.md'
       - '**/changelog.txt'
       - '.gitignore'
+      - '.coderabbit.yml'
       - 'CODEOWNERS'
       - '.github/**'
       - '!.github/workflows/ci.yml'
@@ -83,10 +84,10 @@ jobs:
           ref: ${{ inputs.refName != '' && inputs.refName || '' }}
 
       - name: Setup - pnpm
-        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: Setup - spawn linting and testing jobs
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         id: 'project-jobs'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -185,22 +186,7 @@ jobs:
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
-        env: ${{ matrix.testEnv.envVars }}
-        run: |
-          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
-          min=10
-          max=99
-          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
-          httpport="${randomized}80"
-          mysqlport="${randomized}36"
-
-          # provision the environment to propagate the randomized ports
-          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
-          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
-          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
-          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
-          
-          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+        run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
       - name: 'Determine BuildKite Analytics Message'
         env:
@@ -236,7 +222,7 @@ jobs:
           pattern: 'last-run__${{ strategy.job-index }}'
 
       - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && matrix.testType == 'e2e' && 20 ) || 360 }}
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 10 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
@@ -244,6 +230,8 @@ jobs:
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
+          PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
+          PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
         run: |
           lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
@@ -300,13 +288,6 @@ jobs:
           name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
           path: ${{ env.ARTIFACTS_PATH }}
 
-      - name: 'Upload flaky test reports'
-        uses: actions/upload-artifact@v4
-        with:
-          name: flaky-tests-${{ strategy.job-index }}
-          path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
-          if-no-files-found: ignore
-
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
     # Since we are dynamically generating a matrix for the project jobs, however, we can't
@@ -315,8 +296,11 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: ubuntu-latest
-    needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
-    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    needs: [ 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
+    # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
+    if: ${{ !cancelled() }}
+    outputs:
+      non_successful_jobs: ${{ steps.evaluation.outputs.non_successful_jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -326,6 +310,7 @@ jobs:
               .github/workflows/scripts
 
       - name: 'Evaluation'
+        id: evaluation
         env:
           REPOSITORY: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
@@ -345,6 +330,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
+    env:
+      NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -356,7 +343,7 @@ jobs:
               .github/workflows
 
       - name: 'Setup PNPM'
-        uses: 'pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d'
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: 'Send messages for failed jobs'
         env:
@@ -375,13 +362,19 @@ jobs:
               CHECKS_TYPE=""
           fi
 
+          # Parse non-successful jobs and create comma-separated list of job names
+          FAILED_JOBS=""
+          if [[ -n "${NON_SUCCESSFUL_JOBS}" ]]; then
+            FAILED_JOBS=$(echo "${NON_SUCCESSFUL_JOBS}" | jq -r '.[].name' | paste -sd "," -)
+          fi
+
           pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE build jobs matrix" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE linting" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
-          pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
+          pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json" --jobs-list "Failed:###$FAILED_JOBS"
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
-    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'report-flaky-tests']
+    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && ! github.event.pull_request.head.repo.fork ) ) && needs.project-jobs.outputs.report-jobs != '[]' }}
     strategy:
       fail-fast: false
@@ -405,7 +398,7 @@ jobs:
       - name: 'Publish report to dashboard'
         if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
         env:
-          GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+          GH_TOKEN: ${{ secrets.TEST_REPORTS_DISPATCH_WORKFLOW_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPORT_NAME: ${{ matrix.report }}
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
@@ -435,44 +428,35 @@ jobs:
             -f report_title="$REPORT_TITLE" \
             --repo woocommerce/woocommerce-test-reports
 
-  report-flaky-tests:
-    name: 'Create issues for flaky tests'
-    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
-    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'alert-on-failure']
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
+      - name: 'Add a link to test report in summary'
+        if: ${{ strategy.job-index == 0 }} # only add the link once
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
-          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
-          sparse-checkout: |
-              .github/actions/report-flaky-tests
+          script: |
+            const BASE_REPORT_URL = 'https://woocommerce.github.io/woocommerce-test-reports/#/';
+            function getReportUrl() {
+                if (context.eventName === 'pull_request') {
+                    return `${BASE_REPORT_URL}pr/${context.issue.number}`;
+                }
+                
+                if (context.eventName === 'push') {
+                    const shortSha = context.sha.substring(0, 7);
+                    if (context.ref === 'refs/heads/trunk') {
+                        return `${BASE_REPORT_URL}trunk/trunk-${shortSha}`;
+                    }
+                }
+                
+                return BASE_REPORT_URL;
+            }
 
-      - uses: 'actions/download-artifact@v4'
-        name: 'Download artifacts'
-        with:
-          pattern: flaky-tests*
-          path: flaky-tests
-          merge-multiple: true
+            const reportUrl = getReportUrl();
 
-      - name: 'Merge flaky tests reports'
-        run: |
-          downloadPath='${{ steps.download-artifact.outputs.download-path || './flaky-tests' }}'
-          # make dir so that next step doesn't fail if it doesn't exist 
-          mkdir -p $downloadPath
-          # any output means there are reports
-          echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
-
-      - name: 'Report flaky tests'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        uses: './.github/actions/report-flaky-tests'
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          label: 'metric: flaky e2e test'
+            await core.summary
+              .addHeading('Test Report', '2')
+              .addLink('See test reports', reportUrl)
+              .addBreak()
+              .addRaw('Note that it can take a few minutes for the reports to be generated and be available', true)
+              .write();
 
   validate-syncpack:
     name: 'Validate dependencies version'
@@ -508,6 +492,7 @@ jobs:
       ${{
         ! cancelled() && 
         github.event_name == 'pull_request' && 
+        github.event.pull_request.user.login != 'woocommercebot' && 
         github.event.pull_request.user.login != 'github-actions[bot]' && 
         needs.identify-jobs-to-run.outputs.needs-changelog-validation == 'true' && 
         ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) && 

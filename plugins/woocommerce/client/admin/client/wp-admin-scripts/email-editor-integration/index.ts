@@ -4,13 +4,12 @@
  * External dependencies
  */
 import { addFilter } from '@wordpress/hooks';
-import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import { initializeEditor } from '@woocommerce/email-editor';
 
 /**
  * Internal dependencies
  */
-import { wooContentPlaceholderBlock } from './blocks/woo-email-content';
 import { NAME_SPACE } from './constants';
 import { modifyTemplateSidebar } from './templates';
 import { modifySidebar } from './sidebar_settings';
@@ -37,7 +36,36 @@ addFilter(
 	() => true
 );
 
-registerBlockType( 'woo/email-content', wooContentPlaceholderBlock );
+/**
+ * Register default handler for creating coupons in WooCommerce.
+ * Uses the localized admin URL from PHP to support subdirectory installations.
+ * Integrators can override this filter to customize behavior (e.g., SPA routing).
+ */
+addFilter( 'woocommerce_email_editor_create_coupon_handler', NAME_SPACE, () => {
+	// Get the create coupon URL from localized data (provided by PHP)
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const editorStore = ( window as any ).wp?.data?.select(
+		'woocommerce/email-editor'
+	);
+	const urls = editorStore?.getUrls?.();
+	const createCouponUrl = urls?.createCoupon;
+
+	// Return the handler function
+	return () => {
+		if ( createCouponUrl ) {
+			// Use the localized URL from PHP (supports subdirectory installations)
+			window.open( createCouponUrl, '_blank' );
+		} else {
+			// Fallback: relative path (may not work in subdirectory installations)
+			window.open(
+				'/wp-admin/post-new.php?post_type=shop_coupon',
+				'_blank'
+			);
+		}
+	};
+} );
+
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
+initializeEditor( 'woocommerce-email-editor' );

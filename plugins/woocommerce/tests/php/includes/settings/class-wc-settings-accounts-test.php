@@ -70,6 +70,12 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_anonymize_completed_orders'       => 'relative_date_selector',
 		);
 
+		// The delayed account creation setting is conditionally shown based on checkout block configuration.
+		$is_block_theme = wp_is_block_theme();
+		if ( $is_block_theme ) {
+			$expected['woocommerce_enable_delayed_account_creation'] = 'checkbox';
+		}
+
 		$this->assertEquals( $expected, $setting_ids_and_types );
 	}
 

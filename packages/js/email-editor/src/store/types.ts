@@ -4,6 +4,13 @@
 import { EditorSettings, EditorColor } from '@wordpress/block-editor/index';
 import { BlockInstance } from '@wordpress/blocks/index';
 import { Post } from '@wordpress/core-data/build-types/entity-types/post';
+import type { WpTemplate } from '@wordpress/core-data';
+import type { GlobalStylesConfig } from '@wordpress/global-styles-engine';
+
+export interface EmailTemplate extends Omit< WpTemplate, 'title' > {
+	post_types: string[];
+	title: string;
+}
 
 export enum SendingPreviewStatus {
 	SUCCESS = 'success',
@@ -29,93 +36,19 @@ export type ExperimentalSettings = {
 	};
 };
 
-export type EmailEditorSettings = EditorSettings & ExperimentalSettings;
-
-export type EmailTheme = {
-	version?: number;
-	styles?: EmailStyles;
-	// Ref: https://github.com/WordPress/gutenberg/blob/38d0a4351105e6ba4b72c4dcb90985305aacf921/packages/block-editor/src/components/global-styles/hooks.js#L24C7-L24C21
-	settings?: {
-		appearanceTools?: boolean;
-		useRootPaddingAwareAlignments?: boolean;
-		background?: {
-			backgroundImage?: boolean;
-			backgroundRepeat?: boolean;
-			backgroundSize?: boolean;
-			backgroundPosition?: boolean;
-		};
-		border?: {
-			radius?: boolean;
-			width?: boolean;
-			style?: boolean;
-			color?: boolean;
-		};
-		shadow?: {
-			presets?: boolean;
-			defaultPresets?: boolean;
-		};
-		color?: {
-			background?: boolean;
-			button?: boolean;
-			caption?: boolean;
-			custom?: boolean;
-			customDuotone?: boolean;
-			customGradient?: boolean;
-			defaultDuotone?: boolean;
-			defaultGradients?: boolean;
-			defaultPalette?: boolean;
-			duotone?: boolean;
-			gradients?: {
-				default?: boolean;
-				theme?: boolean;
-				custom?: boolean;
-			};
-			heading?: boolean;
-			link?: boolean;
-			palette?: boolean;
-			text?: boolean;
-		};
-		dimensions?: {
-			aspectRatio?: boolean;
-			minHeight?: boolean;
-		};
-		layout?: {
-			contentSize?: string;
-			wideSize?: string;
-		};
-		spacing?: {
-			customSpacingSize?: number;
-			blockGap?: number;
-			margin?: boolean;
-			padding?: boolean;
-			spacingSizes?: number[];
-			spacingScale?: number;
-			units?: string[];
-		};
-		position?: {
-			fixed?: boolean;
-			sticky?: boolean;
-		};
-		typography?: {
-			customFontSize?: boolean;
-			defaultFontSizes?: boolean;
-			dropCap?: boolean;
-			fontFamilies?: boolean;
-			fontSizes?: boolean;
-			fontStyle?: boolean;
-			fontWeight?: boolean;
-			letterSpacing?: boolean;
-			lineHeight?: boolean;
-			textColumns?: boolean;
-			textDecoration?: boolean;
-			textTransform?: boolean;
-			writingMode?: boolean;
-		};
-		lightbox?: {
-			enabled?: boolean;
-			allowEditing?: boolean;
-		};
+export type EmailEditorSettings = EditorSettings &
+	ExperimentalSettings & {
+		isPreviewMode: boolean;
+		allowedIframeStyleHandles?: string[];
+		styles?: EmailBuiltStyles[];
 	};
+
+export type EmailTheme = Omit< GlobalStylesConfig, 'styles' > & {
+	styles: EmailStyles;
+};
+
+export type GlobalEmailStylesPost = EmailTheme & {
+	id: number;
 };
 
 export interface TypographyProperties {
@@ -174,6 +107,7 @@ export type EmailEditorUrls = {
 	back: string;
 	send?: string;
 	listings: string;
+	createCoupon?: string;
 };
 
 export type PersonalizationTag = {
@@ -182,12 +116,18 @@ export type PersonalizationTag = {
 	category: string;
 	attributes: string[];
 	valueToInsert: string;
+	postTypes: string[];
+};
+
+export type ContentValidation = {
+	validateContent: () => boolean;
 };
 
 export type State = {
-	postId: number | string; // Template use strings
-	editorSettings: EmailEditorSettings;
-	theme: EmailTheme;
+	postId?: number | string; // Template use strings
+	postType?: string;
+	editorSettings?: EmailEditorSettings;
+	theme?: EmailTheme;
 	styles: {
 		globalStylesPostId: number | null;
 	};
@@ -199,18 +139,7 @@ export type State = {
 		sendingPreviewStatus: SendingPreviewStatus | null;
 		errorMessage?: string;
 	};
-	personalizationTags: {
-		list: PersonalizationTag[];
-		isFetching: boolean;
-	};
-};
-
-export type EmailTemplate = {
-	id: string;
-	slug: string;
-	content: string;
-	title: string;
-	type: string;
+	contentValidation?: ContentValidation;
 };
 
 export type EmailTemplatePreview = Omit<
@@ -238,7 +167,7 @@ export type TemplatePreview = {
 	type: string;
 };
 
-export type TemplateCategory = 'recent' | 'basic';
+export type TemplateCategory = string;
 
 export type Feature =
 	| 'fullscreenMode'
@@ -269,4 +198,12 @@ export type PostWithPermissions = Post & {
 		delete: boolean;
 		update: boolean;
 	};
+};
+
+export type EmailEditorConfig = {
+	editorSettings: EmailEditorSettings;
+	theme: EmailTheme;
+	urls: EmailEditorUrls;
+	userEmail: string;
+	globalStylesPostId?: number | null;
 };

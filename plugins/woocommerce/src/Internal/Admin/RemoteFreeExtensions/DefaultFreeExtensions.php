@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -70,7 +69,6 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'google-listings-and-ads:alt' ),
-					self::get_plugin( 'multichannel-by-cedcommerce' ),
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
@@ -94,21 +92,6 @@ class DefaultFreeExtensions {
 				),
 			),
 		);
-
-		if ( Features::is_enabled( 'disable-core-profiler-fallback' ) ) {
-			$remote_variant_assignment = (int) get_option( 'woocommerce_remote_variant_assignment', 61 ); // 1-120
-			$should_rollout_to_users   = $remote_variant_assignment <= 60; // Rollout to 50% of users.
-
-			if ( $should_rollout_to_users ) {
-				// Remove the core-profiler bundle.
-				$bundles = array_filter(
-					$bundles,
-					function ( $bundle ) {
-						return 'obw/core-profiler' !== $bundle['key'];
-					}
-				);
-			}
-		}
 
 		$bundles = wp_json_encode( $bundles );
 		return json_decode( $bundles );
@@ -153,18 +136,6 @@ class DefaultFreeExtensions {
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			),
-			'multichannel-by-cedcommerce'   => array(
-				'name'             => __( 'Multichannel for WooCommerce', 'woocommerce' ),
-				'description'      => __( 'Sync your sales data across platforms and manage everything from a unified dashboard.', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/onboarding/multichannel.webp', WC_PLUGIN_FILE ),
-				'manage_url'       => 'admin.php?page=sales_channel',
-				'is_built_by_wc'   => false,
-				'install_external' => true,
-				'learn_more_link'  => 'https://woocommerce.com/products/multichannel-by-cedcommerce-ebay-amazon-walmart-etsy-integration/?utm_source=marketing_task&utm_medium=product',
-				'tags'             => array(
-					'marketplace',
-				),
-			),
 			'facebook-for-woocommerce'      => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
@@ -206,7 +177,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 1, 60 ), // 50% segment with klaviyo
+						'value'       => array( 1, 84 ), // 70% segment with klaviyo
 						'default'     => false,
 						'operation'   => 'range',
 					),
@@ -236,7 +207,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 61, 120 ), // 50% segment with mailpoet
+						'value'       => array( 85, 120 ), // 30% segment with mailpoet
 						'default'     => false,
 						'operation'   => 'range',
 					),
@@ -505,7 +476,8 @@ class DefaultFreeExtensions {
 	public static function with_core_profiler_fields( array $plugins ) {
 		$_plugins = array(
 			'woocommerce-payments'      => array(
-				'label'            => __( 'Get paid with WooPayments', 'woocommerce' ),
+				/* translators: %s: Payment provider name. */
+				'label'            => sprintf( __( 'Get paid with %s', 'woocommerce' ), 'WooPayments' ),
 				'image_url'        => self::get_woo_logo(),
 				'description'      => __( "Securely accept payments and manage payment activity straight from your store's dashboard", 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/woocommerce-payments?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',

@@ -2,7 +2,7 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/product-gallery",
-	"title": "Product Gallery (Beta)",
+	"title": "Product Gallery",
 	"description": "Showcase your products relevant images and media.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
@@ -18,7 +18,8 @@
 			"allowOrientation": true,
 			"allowEditing": true,
 			"allowJustification": false
-		}
+		},
+		"email": true
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],

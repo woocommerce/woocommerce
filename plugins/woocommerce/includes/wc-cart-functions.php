@@ -88,8 +88,33 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 
 	$product_id = null;
 	foreach ( $products as $product_id => $qty ) {
-		/* translators: %s: product name */
-		$titles[] = apply_filters( 'woocommerce_add_to_cart_qty_html', ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ), $product_id ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) ), $product_id );
+		/**
+		 * Filters the quantity HTML for the add to cart message.
+		 *
+		 * @since 2.6.1
+		 * @param string $qty_html The quantity HTML.
+		 * @param int    $product_id The product ID.
+		 */
+		$title = apply_filters( 'woocommerce_add_to_cart_qty_html', ( 1 !== $qty ? wc_stock_amount( $qty ) . ' &times; ' : '' ), $product_id );
+
+		/**
+		 * Filters the item name in quotes for the add to cart message.
+		 *
+		 * @since 2.6.1
+		 * @param string $item_name_in_quotes The item name in quotes.
+		 * @param int    $product_id The product ID.
+		 */
+		$title .= apply_filters(
+			'woocommerce_add_to_cart_item_name_in_quotes',
+			sprintf(
+				/* translators: %s: product name */
+				_x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ),
+				wp_strip_all_tags( get_the_title( $product_id ) )
+			),
+			$product_id
+		);
+
+		$titles[] = $title;
 		$count   += $qty;
 	}
 
@@ -232,8 +257,7 @@ function wc_cart_totals_shipping_html() {
 				'show_package_details'     => count( $packages ) > 1,
 				'show_shipping_calculator' => is_cart() && apply_filters( 'woocommerce_shipping_show_shipping_calculator', $first, $i, $package ),
 				'package_details'          => implode( ', ', $product_names ),
-				/* translators: %d: shipping package number */
-				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping packages', 'woocommerce' ), $i, $package ),
+				'package_name'             => $package['package_name'],
 				'index'                    => $i,
 				'chosen_method'            => $chosen_method,
 				'formatted_destination'    => WC()->countries->get_formatted_address( $package['destination'], ', ' ),
@@ -294,7 +318,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$discount_amount_html = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_amount_html, $coupon );
 	// translators: %s: coupon code.
-	$coupon_html = $discount_amount_html . ' <a role="button" aria-label="' . sprintf( esc_attr__( 'Remove %s coupon', 'woocommerce' ), $coupon->get_code() ) . '" href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$coupon_html = $discount_amount_html . ' <a role="button" aria-label="' . esc_attr( sprintf( __( 'Remove %s coupon', 'woocommerce' ), $coupon->get_code() ) ) . '" href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo wp_kses( apply_filters( 'woocommerce_cart_totals_coupon_html', $coupon_html, $coupon, $discount_amount_html ), array_replace_recursive( wp_kses_allowed_html( 'post' ), array( 'a' => array( 'data-coupon' => true ) ) ) ); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
 }
