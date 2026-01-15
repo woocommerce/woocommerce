@@ -19789,12 +19789,6 @@ parameters:
 			path: includes/class-wc-template-loader.php
 
 		-
-			message: '#^If condition is always false\.$#'
-			identifier: if.alwaysFalse
-			count: 1
-			path: includes/class-wc-template-loader.php
-
-		-
 			message: '#^Method WC_Template_Loader\:\:add_support_for_product_page_gallery\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19845,12 +19839,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$taxonomy of static method WC_Template_Loader\:\:taxonomy_has_block_template\(\) expects object, WP_Post\|WP_Post_Type\|WP_Term\|WP_User\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: includes/class-wc-template-loader.php
-
-		-
-			message: '#^Right side of \|\| is always false\.$#'
-			identifier: booleanOr.rightAlwaysFalse
 			count: 1
 			path: includes/class-wc-template-loader.php
 
@@ -38323,18 +38311,6 @@ parameters:
 			message: '#^Property WC_Shipping_Method\:\:\$enabled \(string\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 1
-			path: includes/wc-core-functions.php
-
-		-
-			message: '#^Right side of \|\| is always false\.$#'
-			identifier: booleanOr.rightAlwaysFalse
-			count: 1
-			path: includes/wc-core-functions.php
-
-		-
-			message: '#^Ternary operator condition is always false\.$#'
-			identifier: ternary.alwaysFalse
-			count: 2
 			path: includes/wc-core-functions.php
 
 		-
