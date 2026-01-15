@@ -23,6 +23,8 @@ use WP_Http;
  * tokens.
  *
  * @since 10.6.0
+ *
+ * @internal
  */
 class PushTokenRestController extends RestApiControllerBase {
 	/**
