@@ -27,6 +27,54 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Shopper → Notices', () => {
+	test( 'Shopper sees SSR error notice in mini cart when product goes out of stock', async ( {
+		page,
+		browser,
+		frontendUtils,
+	} ) => {
+		const productName = 'Limited Stock Product';
+
+		// Create a product with only 1 in stock.
+		const result = await wpCLI(
+			`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin --porcelain`
+		);
+		const productId = result.stdout.trim();
+
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( productName );
+
+		// Set product to out of stock while it's in cart.
+		await wpCLI(
+			`wc product update ${ productId } --stock_quantity=0 --stock_status=outofstock --user=admin`
+		);
+
+		// Get the current URL to revisit with JS disabled.
+		const currentUrl = page.url();
+
+		// Create a new context with JavaScript disabled to verify SSR output.
+		const noJsContext = await browser.newContext( {
+			javaScriptEnabled: false,
+		} );
+		const noJsPage = await noJsContext.newPage();
+
+		// Copy cookies to maintain cart session.
+		const cookies = await page.context().cookies();
+		await noJsContext.addCookies( cookies );
+
+		await noJsPage.goto( currentUrl );
+
+		// Verify error notice is rendered in SSR output (not client-side JS).
+		await expect(
+			noJsPage.locator( '.wc-block-components-notice-banner' )
+		).toBeVisible();
+		await expect(
+			noJsPage.getByText( /out of stock|not available/i )
+		).toBeVisible();
+
+		await noJsContext.close();
+	} );
+
 	test( 'Shopper can add item to cart, and will not see a notice in the mini cart', async ( {
 		page,
 		editor,
