@@ -9,8 +9,12 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use WC_REST_Unit_Test_Case;
@@ -80,6 +84,10 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $data['code'] );
 	}
 
 	/**
@@ -212,6 +220,92 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token for browser with invalid
+	 * JSON token.
+	 */
+	public function test_it_cannot_create_push_token_for_browser_with_invalid_json() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', 'not-valid-json' );
+		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token for browser with missing
+	 * required keys.
+	 */
+	public function test_it_cannot_create_push_token_for_browser_with_missing_keys() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$token = wp_json_encode(
+			array(
+				'endpoint' => 'https://example.com/push',
+				// Missing 'keys' array.
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token );
+		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token for browser with non-HTTPS
+	 * endpoint.
+	 */
+	public function test_it_cannot_create_push_token_for_browser_with_non_https_endpoint() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$token = wp_json_encode(
+			array(
+				'endpoint' => 'http://example.com/push',
+				'keys'     => array(
+					'auth'   => 'test-auth-key',
+					'p256dh' => 'test-p256dh-key',
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token );
+		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$response = $this->server->dispatch( $request );
 
@@ -468,6 +562,87 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 			PushToken::ORIGINS,
 			$schema['properties']['origin']['enum']
 		);
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error hides message for generic
+	 * Exception class.
+	 */
+	public function test_it_hides_internal_error_message_for_generic_exception() {
+		$controller = new PushTokenRestController();
+		$exception  = new Exception( 'Sensitive internal error details' );
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_internal_error', $result->get_error_code() );
+		$this->assertEquals( 'Internal server error', $result->get_error_message() );
+		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error exposes message for
+	 * PushTokenNotFoundException.
+	 */
+	public function test_it_exposes_message_for_push_token_not_found_exception() {
+		$controller = new PushTokenRestController();
+		$exception  = new PushTokenNotFoundException( 'Push token could not be found.' );
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_invalid_push_token', $result->get_error_code() );
+		$this->assertEquals( 'Push token could not be found.', $result->get_error_message() );
+		$this->assertEquals( WP_Http::NOT_FOUND, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error exposes message for
+	 * InvalidArgumentException.
+	 */
+	public function test_it_exposes_message_for_invalid_argument_exception() {
+		$controller = new PushTokenRestController();
+		$exception  = new InvalidArgumentException( 'Invalid argument provided.' );
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_invalid_argument', $result->get_error_code() );
+		$this->assertEquals( 'Invalid argument provided.', $result->get_error_message() );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error hides message for unknown
+	 * exception subclasses.
+	 */
+	public function test_it_hides_internal_error_message_for_unknown_exception_subclass() {
+		$controller = new PushTokenRestController();
+		// RuntimeException is a subclass of Exception but not in our mapping.
+		$exception = new RuntimeException( 'Sensitive runtime error details' );
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_internal_error', $result->get_error_code() );
+		$this->assertEquals( 'Internal server error', $result->get_error_message() );
+		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $result->get_error_data()['status'] );
 	}
 
 	/**

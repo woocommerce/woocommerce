@@ -78,10 +78,9 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response|WP_Error
+	 * @return void
 	 */
-	public function create( WP_REST_Request $request ) {
+	public function create(): void {
 		// Functionality to be added later.
 	}
 
@@ -92,6 +91,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @param string          $token The token string.
 	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return bool|WP_Error
 	 */
 	public function validate_token( string $token, WP_REST_Request $request ) {
@@ -113,7 +113,7 @@ class PushTokenRestController extends RestApiControllerBase {
 			$request->get_param( 'platform' ) === PushToken::PLATFORM_ANDROID
 			&& (
 				! preg_match( '/^[A-Za-z0-9=:\_\-\+\/]+$/', $token )
-				|| strlen( $token ) > 4096
+				|| strlen( $token ) > PushToken::MAX_TOKEN_LENGTH
 			)
 		) {
 			return new WP_Error(
@@ -137,7 +137,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				|| ! isset( $token_object['keys']['p256dh'] )
 				|| ! wp_http_validate_url( $endpoint )
 				|| ( wp_parse_url( $endpoint, PHP_URL_SCHEME ) !== 'https' )
-				|| strlen( $token ) > 4096
+				|| strlen( $token ) > PushToken::MAX_TOKEN_LENGTH
 			) {
 				return new WP_Error(
 					'rest_invalid_param',
@@ -161,6 +161,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @param string          $device_uuid The device UUID string.
 	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return bool|WP_Error
 	 */
 	public function validate_device_uuid( ?string $device_uuid, WP_REST_Request $request ) {
@@ -201,6 +202,8 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Get the schema for the POST endpoint.
 	 *
+	 * @since 10.6.0
+	 *
 	 * @return array[]
 	 */
 	public function get_schema(): array {
@@ -236,10 +239,15 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return bool|WP_Error
 	 */
 	public function authorize( WP_REST_Request $request ) {
-		if (
-			! get_current_user_id()
-			|| ! wc_get_container()->get( PushNotifications::class )->should_be_enabled()
-		) {
+		if ( ! get_current_user_id() ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_view',
+				__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
 			return false;
 		}
 
@@ -296,10 +304,11 @@ class PushTokenRestController extends RestApiControllerBase {
 			InvalidArgumentException::class   => WP_Http::BAD_REQUEST,
 		);
 
-		$slug   = $slugs[ $exception_class ] ?? 'rest_internal_error';
-		$status = $statuses[ $exception_class ] ?? WP_Http::INTERNAL_SERVER_ERROR;
+		$slug    = $slugs[ $exception_class ] ?? 'rest_internal_error';
+		$status  = $statuses[ $exception_class ] ?? WP_Http::INTERNAL_SERVER_ERROR;
+		$message = ! isset( $slugs[ $exception_class ] ) ? 'Internal server error' : $e->getMessage();
 
-		return new WP_Error( $slug, $e->getMessage(), array( 'status' => $status ) );
+		return new WP_Error( $slug, $message, array( 'status' => $status ) );
 	}
 
 	/**
