@@ -176,18 +176,11 @@ class POSProductVisibilitySyncTest extends \WC_Unit_Test_Case {
 		remove_action( 'woocommerce_update_product_variation', $callback );
 
 		// Verify save() was called for all variations.
-		$this->assertCount(
-			count( $variation_ids ),
+		$this->assertEquals(
+			$variation_ids,
 			$saved_variation_ids,
 			'save() should be called for each variation'
 		);
-		foreach ( $variation_ids as $variation_id ) {
-			$this->assertContains(
-				$variation_id,
-				$saved_variation_ids,
-				"Variation $variation_id should have been saved"
-			);
-		}
 	}
 
 	/**
