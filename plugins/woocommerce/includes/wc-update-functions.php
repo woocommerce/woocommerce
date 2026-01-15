@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
@@ -3124,4 +3125,108 @@ function wc_update_1030_add_comments_date_type_index() {
 		// Improve performance of the admin comments query when fetching the latest 25 comments while excluding reviews and internal notes.
 		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
 	}
+}
+
+/**
+ * Clean up the old last_fetch_patterns_request option and non-grouped actions after migration to using the `action_scheduler_ensure_recurring_actions` hook.
+ *
+ * In version 10.4.0, this functionality was replaced with Action Scheduler recurring actions.
+ *
+ * @return void
+ */
+function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
+	delete_option( 'last_fetch_patterns_request' );
+	as_unschedule_all_actions( 'fetch_patterns' );
+}
+
+/**
+ * Update brand permalink setting to take into account obsolete 'woocommerce_prepend_shop_page_to_urls' option, removed in WC 2.0.3.
+ * This migration ensures any installations that still have this old option set will have their brand permalink updated appropriately.
+ *
+ * @since 10.5.0
+ */
+function wc_update_1050_migrate_brand_permalink_setting() {
+	if ( 'yes' !== get_option( 'woocommerce_prepend_shop_page_to_urls' ) ) {
+		return;
+	}
+
+	$shop_page_id = wc_get_page_id( 'shop' );
+	$shop_slug    = ( $shop_page_id > 0 && get_post( $shop_page_id ) ) ? get_page_uri( $shop_page_id ) : 'shop';
+
+	if ( ! $shop_slug ) {
+		return;
+	}
+
+	$slug = trailingslashit( $shop_slug ) . __( 'brand', 'woocommerce' );
+	update_option( 'woocommerce_brand_permalink', $slug );
+}
+
+/**
+ * Autoload frequently used options for performance improvements (see https://github.com/woocommerce/woocommerce/issues/61855)
+ *
+ * `$autoload_options` are frequently used options that may already be in the db but with `autoload = off`.
+ * `$feature_options` are frequently used feature flag options that are not stored in the db.
+ *
+ * @return void
+ */
+function wc_update_1050_enable_autoload_options() {
+	global $wpdb;
+
+	$autoload_options = array(
+		// Page ID options with autoload `off` in the db.
+		'woocommerce_myaccount_page_id',
+		'woocommerce_cart_page_id',
+		'woocommerce_checkout_page_id',
+		'woocommerce_terms_page_id',
+		// Feature status options with autoload `off` in the db.
+		'woocommerce_show_marketplace_suggestions',
+		'woocommerce_enable_delayed_account_creation',
+		'wc_feature_woocommerce_brands_enabled',
+		'wc_connect_taxes_enabled',
+		'woocommerce_logs_logging_enabled',
+		'woocommerce_email_improvements_existing_store_enabled',
+		'woocommerce_custom_orders_table_data_sync_enabled',
+	);
+
+	$feature_options = array(
+		'fulfillments'         => 'woocommerce_feature_fulfillments_enabled',
+		'push_notifications'   => 'woocommerce_feature_push_notifications_enabled',
+		'agentic_checkout'     => 'woocommerce_feature_agentic_checkout_enabled',
+		'cart_checkout_blocks' => 'woocommerce_feature_cart_checkout_blocks_enabled',
+	);
+
+	$features_controller = wc_get_container()->get( FeaturesController::class );
+
+	foreach ( $feature_options as $key => $option ) {
+		if ( false === get_option( $option, false ) ) {
+			add_option( $option, wc_bool_to_string( $features_controller->feature_is_enabled( $key ) ), '', true );
+		} else {
+			$autoload_options[] = $option;
+		}
+	}
+
+	$placeholders = implode( ', ', array_fill( 0, count( $autoload_options ), '%s' ) );
+
+	$wpdb->query(
+		$wpdb->prepare(
+		// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"UPDATE {$wpdb->options} SET autoload = 'on' WHERE option_name IN ($placeholders)",
+			...$autoload_options
+		)
+	);
+}
+
+/**
+ * Remove deprecated marketplace feature option from the database.
+ *
+ * The marketplace feature flag was deprecated in 10.5.0 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('marketplace')
+ * returns the deprecated_value directly without reading from the database.
+ *
+ * @since 10.5.0
+ *
+ * @return void
+ */
+function wc_update_1050_remove_deprecated_marketplace_option(): void {
+	delete_option( 'woocommerce_feature_marketplace_enabled' );
 }

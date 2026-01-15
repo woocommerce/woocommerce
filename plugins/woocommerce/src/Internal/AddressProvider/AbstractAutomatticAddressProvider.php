@@ -60,6 +60,11 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 */
 	public function load_jwt() {
 
+		// If the address autocomplete is disabled, we don't load the JWT.
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) !== true ) {
+			return;
+		}
+
 		// If we already have a loaded, valid token, we return early.
 		if ( $this->jwt && is_string( $this->jwt ) && JsonWebToken::shallow_validate( $this->jwt ) ) {
 			return;
@@ -265,6 +270,11 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 * Enqueues the checkout script, checks if it's already registered or not so we don't duplicate, and prints out the JWT to the page to be consumed.
 	 */
 	public function load_scripts() {
+		// If the address autocomplete setting is disabled, don't load the scripts.
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) !== true ) {
+			return;
+		}
+
 		if ( ! is_checkout() ) {
 			return;
 		}

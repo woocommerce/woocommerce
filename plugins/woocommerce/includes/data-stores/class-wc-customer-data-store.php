@@ -616,4 +616,110 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 		return array_unique( $users_query->get_results() );
 	}
+
+	/**
+	 * Query customers ordered by allowed fields.
+	 *
+	 * @param array $args Query arguments.
+	 * @return object Object containing customers in the requested order, total, and max_num_pages.
+	 */
+	public function query_customers( array $args = array() ) {
+		global $wpdb;
+		$site_specific_key = rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
+
+		$defaults = array(
+			'order'    => 'asc',
+			'orderby'  => 'registered_date',
+			'per_page' => 10,
+			'page'     => 1,
+			'search'   => '',
+			'role'     => 'customer',
+			'include'  => array(),
+			'exclude'  => array(),
+		);
+
+		$args        = wp_parse_args( $args, $defaults );
+		$orderby_key = $args['orderby'];
+
+		// Set order parameter to asc/desc if somehow made it here without being caught earlier.
+		$args['order'] = strtolower( $args['order'] );
+		if ( ! in_array( $args['order'], array( 'asc', 'desc' ), true ) ) {
+			$args['order'] = 'asc';
+		}
+
+		$query_args = array(
+			'order'   => $args['order'],
+			'number'  => absint( $args['per_page'] ),
+			'exclude' => array_map( 'absint', (array) $args['exclude'] ),
+			'include' => array_map( 'absint', (array) $args['include'] ),
+		);
+
+		$query_args['offset'] = ( max( 1, intval( $args['page'] ) ) - 1 ) * $query_args['number'];
+
+		if ( ! empty( $args['search'] ) ) {
+			$search                       = sanitize_text_field( $args['search'] );
+			$query_args['search']         = $search;
+			$query_args['search_columns'] = array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' );
+		}
+
+		switch ( $orderby_key ) {
+			case 'ID':
+				$query_args['orderby'] = 'ID';
+				break;
+			case 'display_name':
+				$query_args['orderby'] = 'display_name';
+				break;
+			case 'wc_order_count':
+				$query_args['meta_key'] = 'wc_order_count_' . $site_specific_key; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'wc_money_spent':
+				$query_args['meta_key'] = 'wc_money_spent_' . $site_specific_key; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'wc_last_active':
+				$query_args['meta_key'] = 'wc_last_active'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'user_registered':
+			case 'registered_date':
+				$query_args['orderby'] = 'user_registered';
+				break;
+			default:
+				$query_args['orderby'] = 'user_registered';
+				break;
+		}
+
+		// Only add role filter if role is 'customer' (not 'all' or empty).
+		if ( 'customer' === $args['role'] ) {
+			$query_args['role'] = 'customer';
+		}
+
+		/**
+		 * Filter customer query args before execution.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param array $query_args Arguments for WP_User_Query.
+		 * @param array $args       Original method args.
+		 */
+		$query_args = apply_filters( 'woocommerce_customer_query_args', $query_args, $args );
+
+		// Ensure number is positive.
+		$query_args['number'] = absint( intval( $query_args['number'] ) <= 0 ? $defaults['per_page'] : $query_args['number'] );
+
+		$wp_user_query = new \WP_User_Query( $query_args );
+
+		$customers = array();
+		foreach ( $wp_user_query->get_results() as $user ) {
+			$customers[] = new \WC_Customer( $user->ID );
+		}
+
+		return (object) array(
+			'customers'     => $customers,
+			'total'         => $wp_user_query->total_users,
+			// Query args 'number' is always > 0 due to absint above.
+			'max_num_pages' => ceil( $wp_user_query->total_users / $query_args['number'] ),
+		);
+	}
 }

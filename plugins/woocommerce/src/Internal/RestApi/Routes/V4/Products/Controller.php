@@ -105,7 +105,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_suggested_products' ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_suggested_products' ),
+						array( 'endpoint_id' => 'get_suggested_products' )
+					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_suggested_products_collection_params(),
 				),
@@ -132,6 +135,59 @@ class Controller extends WC_REST_Products_V2_Controller {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+	}
+
+	/**
+	 * Override the get_item permissions so that published products which are
+	 * not password-protected are available to users without the
+	 * 'read_private_posts' capability but can edit posts.
+	 * This is required for the Product block in the editor, see:
+	 * https://github.com/woocommerce/woocommerce/pull/61470
+	 *
+	 * @param WP_REST_Request $request Request data.
+	 * @return bool|WP_Error
+	 */
+	public function get_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( $object && 0 !== $object->get_id() ) {
+			if ( 'product' !== $object->post_type && 'product_variation' !== $object->post_type ) {
+				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			}
+
+			$object_id        = $object->get_id();
+			$post_type_object = get_post_type_object( $object->post_type );
+			$permission       = false;
+
+			if ( $post_type_object instanceof \WP_Post_Type ) {
+				// These are the default permissions inherited from
+				// `WC_REST_Products_V2_Controller`.
+				$permission = current_user_can( $post_type_object->cap->read_private_posts, $object_id );
+
+				// We add an special case when the post is published, not
+				// password-protected and the user has post edit capabilities.
+				if ( ! $permission && 'publish' === $object->get_status() && ! post_password_required( $object_id ) ) {
+					$permission = current_user_can( 'edit_posts' ) && current_user_can( $post_type_object->cap->read, $object_id );
+				}
+			}
+
+			/**
+			* Filter the permission to view a product.
+			*
+			* @since 10.4.0
+			* @param bool $permission The permission to view a product.
+			* @param string $cap The capability to check.
+			* @param int $object_id The ID of the product.
+			* @param string $post_type The post type of the product.
+			*/
+			$permission = apply_filters( 'woocommerce_rest_check_permissions', $permission, 'read', $object_id, $object->post_type );
+
+			if ( ! $permission ) {
+				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -2171,7 +2227,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$exclude_ids = $request->get_param( 'exclude' );
 		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
 
-		$data_store                   = WC_Data_Store::load( 'product' );
+		$data_store = \WC_Data_Store::load( 'product' );
+		// @phpstan-ignore-next-line method.notFound
 		$this->suggested_products_ids = $data_store->get_related_products(
 			$categories,
 			$tags,

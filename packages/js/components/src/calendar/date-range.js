@@ -157,7 +157,9 @@ class DateRange extends Component {
 
 	setTnitialVisibleMonth( isDoubleCalendar, before ) {
 		return () => {
-			const visibleDate = before || moment();
+			const isValidMoment =
+				before && moment.isMoment( before ) && before.isValid();
+			const visibleDate = isValidMoment ? before : moment();
 			if ( isDoubleCalendar ) {
 				return visibleDate.clone().subtract( 1, 'month' );
 			}

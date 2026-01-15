@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove database option fetch for legacy coupon menu display preference.

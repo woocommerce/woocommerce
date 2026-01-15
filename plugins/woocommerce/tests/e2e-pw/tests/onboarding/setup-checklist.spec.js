@@ -68,7 +68,7 @@ test(
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 		await test.step( 'Load the WC Admin page.', async () => {
 			await expect(
-				page.getByText( 'Customize your store' )
+				page.getByRole( 'button', { name: 'Customize your store' } )
 			).toBeVisible();
 			await expect( page.getByText( 'Store management' ) ).toBeHidden();
 		} );
@@ -83,7 +83,7 @@ test(
 				.click();
 			await expect(
 				page.getByRole( 'heading', {
-					name: 'Start customizing your store',
+					name: 'Customize your store',
 				} )
 			).toBeHidden();
 			await expect( page.getByText( 'Store management' ) ).toBeVisible();
@@ -119,16 +119,15 @@ test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 	await test.step( 'Go to WC Home and make sure the total sales is visible', async () => {
 		await page
 			.getByRole( 'menuitem', { name: 'Total sales' } )
-			.waitFor( { state: 'visible' } );
+			.waitFor( { state: 'visible', timeout: 30000 } );
 	} );
 
 	await test.step( 'Go to the extensions tab and connect store', async () => {
 		const connectButton = page.getByRole( 'link', {
 			name: 'Connect',
 		} );
-		await page.goto(
-			'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
-		);
+
+		// Set up response waiter BEFORE navigation to avoid race condition
 		const waitForSubscriptionsResponse = page.waitForResponse(
 			( response ) =>
 				response
@@ -136,16 +135,24 @@ test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 					.includes( '/wp-json/wc/v3/marketplace/subscriptions' ) &&
 				response.status() === 200
 		);
+
+		await page.goto(
+			'wp-admin/admin.php?page=wc-admin&tab=my-subscriptions&path=%2Fextensions'
+		);
+
 		await expect(
 			page.getByText(
 				'Hundreds of vetted products and services. Unlimited potential.'
 			)
-		).toBeVisible();
+		).toBeVisible( { timeout: 30000 } );
 		await expect(
 			page.getByRole( 'button', { name: 'My Subscriptions' } )
 		).toBeVisible();
 		await expect( connectButton ).toBeVisible();
+
+		// Wait for the API response before checking button attributes
 		await waitForSubscriptionsResponse;
+
 		await expect( connectButton ).toHaveAttribute(
 			'href',
 			/my-subscriptions/
@@ -154,7 +161,10 @@ test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 	} );
 
 	await test.step( 'Check that we are sent to wp.com', async () => {
-		await expect( page.url() ).toContain( 'wordpress.com/log-in' );
+		// Use polling assertion for URL check since page.url() is not auto-retrying
+		await expect
+			.poll( () => page.url(), { timeout: 30000 } )
+			.toContain( 'wordpress.com/log-in' );
 		await expect(
 			page.getByRole( 'heading', {
 				name: 'Log in to Woo with WordPress.com',

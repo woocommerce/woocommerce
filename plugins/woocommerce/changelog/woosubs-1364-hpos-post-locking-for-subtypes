@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve order editor locking support for sub-types (like subscriptions) when using HPOS.

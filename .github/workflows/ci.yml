@@ -186,22 +186,7 @@ jobs:
       - name: 'Start Test Environment'
         id: 'prepare-test-environment'
         if: ${{ matrix.testEnv.shouldCreate }}
-        env: ${{ matrix.testEnv.envVars }}
-        run: |
-          # randomized wp-env ports to reduce the number of ports usage conflicts in the range of 1024 - 49151
-          min=10
-          max=99
-          randomized=$(( $RANDOM % ( $max - $min + 1 ) + $min ))
-          httpport="${randomized}80"
-          mysqlport="${randomized}36"
-
-          # provision the environment to propagate the randomized ports
-          echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
-          echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
-          # WP_BASE_URL is set only to satisfy blocks E2Es setup (setupRest).
-          echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
-          
-          WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
+        run: pnpm --filter="${{ matrix.projectName }}" ${{ matrix.testEnv.start }}
 
       - name: 'Determine BuildKite Analytics Message'
         env:
@@ -303,13 +288,6 @@ jobs:
           name: '${{ matrix.report.resultsBlobName }}__${{ strategy.job-index }}'
           path: ${{ env.ARTIFACTS_PATH }}
 
-      - name: 'Upload flaky test reports'
-        uses: actions/upload-artifact@v4
-        with:
-          name: flaky-tests-${{ strategy.job-index }}
-          path: ${{ env.ARTIFACTS_PATH }}/flaky-tests
-          if-no-files-found: ignore
-
   evaluate-project-jobs:
     # In order to add a required status check we need a consistent job that we can grab onto.
     # Since we are dynamically generating a matrix for the project jobs, however, we can't
@@ -396,7 +374,7 @@ jobs:
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
-    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'report-flaky-tests']
+    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && ! github.event.pull_request.head.repo.fork ) ) && needs.project-jobs.outputs.report-jobs != '[]' }}
     strategy:
       fail-fast: false
@@ -479,45 +457,6 @@ jobs:
               .addBreak()
               .addRaw('Note that it can take a few minutes for the reports to be generated and be available', true)
               .write();
-
-  report-flaky-tests:
-    name: 'Create issues for flaky tests'
-    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
-    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs', 'alert-on-failure']
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      issues: write
-
-    steps:
-      - uses: 'actions/checkout@v4'
-        name: 'Checkout'
-        with:
-          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
-          sparse-checkout: |
-              .github/actions/report-flaky-tests
-
-      - uses: 'actions/download-artifact@v4'
-        name: 'Download artifacts'
-        with:
-          pattern: flaky-tests*
-          path: flaky-tests
-          merge-multiple: true
-
-      - name: 'Merge flaky tests reports'
-        run: |
-          downloadPath='${{ steps.download-artifact.outputs.download-path || './flaky-tests' }}'
-          # make dir so that next step doesn't fail if it doesn't exist 
-          mkdir -p $downloadPath
-          # any output means there are reports
-          echo "FLAKY_REPORTS=$(ls -A $downloadPath | head -1)" >> $GITHUB_ENV
-
-      - name: 'Report flaky tests'
-        if: ${{ !!env.FLAKY_REPORTS }}
-        uses: './.github/actions/report-flaky-tests'
-        with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          label: 'metric: flaky e2e test'
 
   validate-syncpack:
     name: 'Validate dependencies version'

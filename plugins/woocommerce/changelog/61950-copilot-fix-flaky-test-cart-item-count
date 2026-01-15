@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix flaky mini-cart e2e test by handling page closure during localStorage cleanup

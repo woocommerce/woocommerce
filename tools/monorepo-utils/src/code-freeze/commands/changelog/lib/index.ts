@@ -14,6 +14,7 @@ import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
 import {
 	addLabelsToIssue,
+	addMilestoneToIssue,
 	createPullRequest,
 } from '../../../../core/github/repo';
 import { Options } from '../types';
@@ -170,7 +171,7 @@ export const updateReleaseBranchChangelogs = async (
 	tmpRepoPath: string,
 	releaseBranch: string
 ): Promise< { deletionCommitHash: string; prNumber: number } > => {
-	const { owner, name, version, commitDirectToBase } = options;
+	const { owner, name, version, commitDirectToBase, githubActor } = options;
 	const mainVersion = version.replace( /\.\d+(-.*)?$/, '' ); // For compatibility with Jetpack changelogger which expects X.Y as version.
 
 	try {
@@ -202,20 +203,43 @@ export const updateReleaseBranchChangelogs = async (
 
 		Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
 
-		execSync(
-			`pnpm --filter=@woocommerce/plugin-woocommerce changelog write --add-pr-num -n -vvv --use-version ${ mainVersion }`,
+		const changelogOutput = execSync(
+			`pnpm --filter=@woocommerce/plugin-woocommerce changelog write --add-pr-num -n --yes -vvv --use-version ${ mainVersion }`,
 			{
 				cwd: tmpRepoPath,
-				stdio: 'inherit',
+				encoding: 'utf-8',
 			}
 		);
+
+		const noEntriesWritten =
+			changelogOutput.includes( `No changes were found` ) ||
+			changelogOutput.includes(
+				`no changes with content for this write`
+			);
+
+		Logger.notice( `Changelog command output: ${ changelogOutput }` );
 		Logger.notice( `Committing deleted files in ${ tmpRepoPath }` );
 		//Checkout pnpm-lock.yaml to prevent issues in case of an out of date lockfile.
 		await git.checkout( 'pnpm-lock.yaml' );
 		await git.add( 'plugins/woocommerce/changelog/' );
-		await git.commit( `Delete changelog files from ${ version } release` );
-		const deletionCommitHash = await git.raw( [ 'rev-parse', 'HEAD' ] );
-		Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
+
+		// Check if any files were actually deleted.
+		const status = await git.status();
+		let deletionCommitHash = '';
+
+		if ( status.staged.length > 0 ) {
+			await git.commit(
+				`Delete changelog files from ${ version } release`
+			);
+			deletionCommitHash = (
+				await git.raw( [ 'rev-parse', 'HEAD' ] )
+			 ).trim();
+			Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
+		} else {
+			Logger.notice(
+				'No changelog files to delete, skipping deletion commit'
+			);
+		}
 
 		Logger.notice( `Updating readme.txt in ${ tmpRepoPath }` );
 		await updateReleaseChangelogs(
@@ -244,18 +268,22 @@ export const updateReleaseBranchChangelogs = async (
 				`Changelog update was committed directly to ${ releaseBranch }`
 			);
 			return {
-				deletionCommitHash: deletionCommitHash.trim(),
+				deletionCommitHash,
 				prNumber: -1,
 			};
 		}
 		Logger.notice( `Creating PR for ${ branch }` );
+		const warningMessage = noEntriesWritten
+			? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
+			: '';
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
 			title: `Release: Prepare the changelog for ${ version }`,
-			body: `This pull request was automatically generated to prepare the changelog for ${ version }`,
+			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -269,8 +297,20 @@ export const updateReleaseBranchChangelogs = async (
 			);
 		}
 
+		try {
+			await addMilestoneToIssue(
+				options,
+				pullRequest.number,
+				`${ mainVersion }.0`
+			);
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ mainVersion }.0" to PR ${ pullRequest.number }`
+			);
+		}
+
 		return {
-			deletionCommitHash: deletionCommitHash.trim(),
+			deletionCommitHash,
 			prNumber: pullRequest.number,
 		};
 	} catch ( e ) {
@@ -295,8 +335,17 @@ export const updateBranchChangelog = async (
 	releaseBranch: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
 ): Promise< number > => {
-	const { owner, name, version } = options;
+	const { owner, name, version, githubActor } = options;
 	const { deletionCommitHash, prNumber } = releaseBranchChanges;
+
+	// Skip if there were no changelog files to delete
+	if ( ! deletionCommitHash ) {
+		Logger.notice(
+			`No deletion commit hash found, skipping changelog deletion from ${ releaseBranch }`
+		);
+		return -1;
+	}
+
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
@@ -313,6 +362,18 @@ export const updateBranchChangelog = async (
 			'-b': null,
 			[ branch ]: null,
 		} );
+
+		// Read plugin file version in branch to determine milestone.
+		let milestone = '';
+		const pluginFile = readFileSync(
+			path.join( tmpRepoPath, 'plugins/woocommerce/woocommerce.php' ),
+			'utf8'
+		);
+		const m = pluginFile.match( /\*\s+Version:\s+(\d+\.\d+)\.\d+/ );
+
+		if ( m ) {
+			milestone = `${ m[ 1 ] }.0`;
+		}
 
 		try {
 			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
@@ -340,6 +401,7 @@ export const updateBranchChangelog = async (
 			}`,
 			head: branch,
 			base: releaseBranch,
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -350,6 +412,14 @@ export const updateBranchChangelog = async (
 		} catch {
 			Logger.warn(
 				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
+		}
+
+		try {
+			await addMilestoneToIssue( options, pullRequest.number, milestone );
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ milestone }" to PR ${ pullRequest.number }`
 			);
 		}
 

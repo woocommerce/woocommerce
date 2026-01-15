@@ -24,7 +24,7 @@
 }
 
 %with-resizable-box {
-	.components-resizable-box__container {
+	> .components-resizable-box__container {
 		position: absolute !important;
 		top: 0;
 		left: 0;
