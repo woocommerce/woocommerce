@@ -25,30 +25,7 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 		'core/columns',
 		{},
 		[
-			[
-				'core/column',
-				{},
-				[
-					[
-						'woocommerce/product-image',
-						{
-							// Keep the attribute as false explicitly because we're using the inner block template
-							// that includes the product-sale-badge block.
-							showSaleBadge: false,
-							isDescendentOfSingleProductBlock: true,
-							imageSizing: ImageSizing.SINGLE,
-						},
-						[
-							[
-								'woocommerce/product-sale-badge',
-								{
-									align: 'right',
-								},
-							],
-						],
-					],
-				],
-			],
+			[ 'core/column', {}, [ [ 'woocommerce/product-gallery' ] ] ],
 			[
 				'core/column',
 				{},
