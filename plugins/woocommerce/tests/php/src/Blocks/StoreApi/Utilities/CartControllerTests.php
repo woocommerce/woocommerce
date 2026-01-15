@@ -308,7 +308,7 @@ class CartControllerTests extends TestCase {
 
 		// Create mock for FraudProtectionController that returns enabled.
 		$mock_controller = $this->createMock( FraudProtectionController::class );
-		$mock_controller->method( 'feature_is_enabled' )->willReturn( true );
+		$mock_controller->method( 'should_track' )->willReturn( true );
 
 		// Replace container instances with mocks.
 		$container = wc_get_container();
@@ -353,7 +353,7 @@ class CartControllerTests extends TestCase {
 
 		// Create mock for FraudProtectionController that returns disabled.
 		$mock_controller = $this->createMock( FraudProtectionController::class );
-		$mock_controller->method( 'feature_is_enabled' )->willReturn( false );
+		$mock_controller->method( 'should_track' )->willReturn( false );
 
 		// Replace container instances with mocks.
 		$container = wc_get_container();
@@ -391,7 +391,7 @@ class CartControllerTests extends TestCase {
 
 		// Create mock for FraudProtectionController that returns enabled.
 		$mock_controller = $this->createMock( FraudProtectionController::class );
-		$mock_controller->method( 'feature_is_enabled' )->willReturn( true );
+		$mock_controller->method( 'should_track' )->willReturn( true );
 
 		// Replace container instances with mocks.
 		$container = wc_get_container();
