@@ -194,7 +194,7 @@ class POSProductVisibilitySyncTest extends \WC_Unit_Test_Case {
 
 		// Track if any variations have save() called.
 		// Make sure that `save` is never called.
-		$mock_callback = $this->createMock( WC_Product::class );
+		$mock_callback = $this->createMock( \WC_Product::class );
 		$mock_callback->expects( $this->never() )->method( 'save' );
 
 		// Try to set hidden again (no change).
