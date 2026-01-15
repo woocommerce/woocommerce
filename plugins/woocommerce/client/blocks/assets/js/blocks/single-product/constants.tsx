@@ -11,7 +11,6 @@ import type { InnerBlockTemplate } from '@wordpress/blocks';
  */
 import metadata from './block.json';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-query/variations/elements/product-title';
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const BLOCK_ICON = (
 	<Icon
