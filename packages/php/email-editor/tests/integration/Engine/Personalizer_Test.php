@@ -393,7 +393,37 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 			$result['arguments']
 		);
 
-		// Test case 10: Invalid token format.
+		// Test case 10: Token with embedded single quote in double-quoted value.
+		$result = $method->invoke( $this->personalizer, '[user/greeting title="What\'s up"]' );
+		/**
+		 * Typehint needed by PHPStan.
+		 *
+		 * @var array{token: string, arguments: array<string, string>} $result
+		 */
+		$this->assertSame( '[user/greeting]', $result['token'] );
+		$this->assertSame(
+			array(
+				'title' => "What's up",
+			),
+			$result['arguments']
+		);
+
+		// Test case 11: Token with embedded double quote in single-quoted value.
+		$result = $method->invoke( $this->personalizer, "[user/greeting title='Say \"hello\"']" );
+		/**
+		 * Typehint needed by PHPStan.
+		 *
+		 * @var array{token: string, arguments: array<string, string>} $result
+		 */
+		$this->assertSame( '[user/greeting]', $result['token'] );
+		$this->assertSame(
+			array(
+				'title' => 'Say "hello"',
+			),
+			$result['arguments']
+		);
+
+		// Test case 12: Invalid token format.
 		$result = $method->invoke( $this->personalizer, 'invalid-token' );
 		/**
 		 * Typehint needed by PHPStan.

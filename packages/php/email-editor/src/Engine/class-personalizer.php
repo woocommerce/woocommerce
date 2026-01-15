@@ -179,16 +179,25 @@ class Personalizer {
 			$attributes_string = $matches[2]; // The attributes part (e.g., 'default="subscriber"').
 
 			// Step 2: Extract attributes from the attribute string.
-			// Match both quoted values (url="foo") and unquoted values (url=foo).
+			// Match quoted values (double or single quotes separately to avoid mixing) and unquoted values.
 			// Unquoted values can occur when esc_url() strips quotes from personalization tags.
 			// For unquoted values with spaces, capture until the next key= pattern or closing bracket.
-			if ( preg_match_all( '/(\w+)=(?:["\']([^"\']*)["\']|([^\s\]]+(?:\s+(?!\w+=)[^\s\]]+)*))/', $attributes_string, $attribute_matches, PREG_SET_ORDER ) ) {
+			if ( preg_match_all( '/(\w+)=(?:"([^"]*)"|\'([^\']*)\'|([^\s\]]+(?:\s+(?!\w+=)[^\s\]]+)*))/', $attributes_string, $attribute_matches, PREG_SET_ORDER ) ) {
 				foreach ( $attribute_matches as $attribute ) {
-					// $attribute[2] is quoted value, $attribute[3] is unquoted value (may contain spaces).
+					// $attribute[2] is double-quoted value, $attribute[3] is single-quoted value,
+					// $attribute[4] is unquoted value (may contain spaces).
 					// Use null coalescing as only one of these will be populated depending on which pattern matched.
-					$quoted_value                         = $attribute[2] ?? '';
-					$unquoted_value                       = $attribute[3] ?? '';
-					$result['arguments'][ $attribute[1] ] = '' !== $quoted_value ? $quoted_value : $unquoted_value;
+					$double_quoted_value = $attribute[2] ?? '';
+					$single_quoted_value = $attribute[3] ?? '';
+					$unquoted_value      = $attribute[4] ?? '';
+
+					if ( '' !== $double_quoted_value ) {
+						$result['arguments'][ $attribute[1] ] = $double_quoted_value;
+					} elseif ( '' !== $single_quoted_value ) {
+						$result['arguments'][ $attribute[1] ] = $single_quoted_value;
+					} else {
+						$result['arguments'][ $attribute[1] ] = $unquoted_value;
+					}
 				}
 			}
 		}
