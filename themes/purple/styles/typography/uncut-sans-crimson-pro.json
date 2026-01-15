@@ -1,0 +1,68 @@
+{
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "\"Uncut Sans Variable\"",
+							"fontStyle": "normal",
+							"fontWeight": "300 700",
+							"src": [
+								"file:./assets/fonts/uncut-sans-variable/uncut-sans-variable-300-700-normal.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"Uncut Sans Variable\"",
+					"name": "Uncut Sans Variable",
+					"slug": "uncut-sans-variable"
+				},
+				{
+					"fontFace": [
+						{
+							"fontFamily": "\"Crimson Pro\"",
+							"fontStyle": "normal",
+							"fontWeight": "200 900",
+							"src": [
+								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-normal.ttf"
+							]
+						},
+						{
+							"fontFamily": "\"Crimson Pro\"",
+							"fontStyle": "italic",
+							"fontWeight": "200 900",
+							"src": [
+								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-italic.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"Crimson Pro\"",
+					"name": "Crimson Pro",
+					"slug": "crimson-pro"
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/site-title": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--crimson-pro)",
+					"fontSize": "var(--wp--preset--font-size--x-large)",
+					"fontStyle": "normal",
+					"fontWeight": "600",
+					"letterSpacing": "0rem",
+					"textTransform": "none"
+				}
+			}
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--uncut-sans-variable)",
+			"fontStyle": "normal",
+			"fontWeight": "300",
+			"lineHeight": "1.7"
+		}
+	},
+	"version": 3,
+	"title": "Uncut Sans + Crimson Pro"
+}
