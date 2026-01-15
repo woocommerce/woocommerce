@@ -8,6 +8,7 @@ import {
 	Disabled,
 	PanelBody,
 	SelectControl,
+	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -23,6 +24,8 @@ import { useThemeColors } from '../../../../shared/hooks/use-theme-colors';
 interface Attributes {
 	className?: string;
 	optionStyle?: 'pills' | 'dropdown';
+	autoselect: boolean;
+	disabledAttributesAction: 'disable' | 'hide';
 }
 
 function Pills( {
@@ -61,7 +64,8 @@ export default function AttributeOptionsEdit(
 	props: BlockEditProps< Attributes >
 ) {
 	const { attributes, setAttributes } = props;
-	const { className, optionStyle } = attributes;
+	const { className, optionStyle, autoselect, disabledAttributesAction } =
+		attributes;
 
 	const blockProps = useBlockProps( {
 		className,
@@ -119,6 +123,55 @@ export default function AttributeOptionsEdit(
 							label={ __( 'Dropdown', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
+				</PanelBody>
+				<PanelBody title={ __( 'Auto-select', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __(
+							'Auto-select when only one attribute is compatible',
+							'woocommerce'
+						) }
+						help={ __(
+							'This controls whether attributes will be auto-selected once upon loading the page and when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.',
+							'woocommerce'
+						) }
+						checked={ autoselect }
+						onChange={ () =>
+							setAttributes( { autoselect: ! autoselect } )
+						}
+						__nextHasNoMarginBottom
+					/>
+					<SelectControl
+						label={ __(
+							'Values in conflict with current selection',
+							'woocommerce'
+						) }
+						help={ __(
+							'This controls what to do with attribute values that conflict with the current selection.',
+							'woocommerce'
+						) }
+						value={ disabledAttributesAction }
+						options={ [
+							{
+								label: __( 'Hidden', 'woocommerce' ),
+								value: 'hide',
+							},
+							{
+								label: __(
+									'Grayed-out/crossed-out and disabled',
+									'woocommerce'
+								),
+								value: 'disable',
+							},
+						] }
+						onChange={ ( value ) =>
+							setAttributes( {
+								disabledAttributesAction: value as
+									| 'disable'
+									| 'hide',
+							} )
+						}
+						__nextHasNoMarginBottom
+					/>
 				</PanelBody>
 			</InspectorControls>
 
