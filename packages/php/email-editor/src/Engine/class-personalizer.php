@@ -182,6 +182,9 @@ class Personalizer {
 			// Match quoted values (double or single quotes separately to avoid mixing) and unquoted values.
 			// Unquoted values can occur when esc_url() strips quotes from personalization tags.
 			// For unquoted values with spaces, capture until the next key= pattern or closing bracket.
+			// The negative lookahead (?!\w+=) is critical for preventing ReDoS:
+			// it ensures the inner loop terminates as soon as the next key= pattern appears,
+			// preventing excessive backtracking despite the nested quantifiers.
 			if ( preg_match_all( '/(\w+)=(?:"([^"]*)"|\'([^\']*)\'|([^\s\]]+(?:\s+(?!\w+=)[^\s\]]+)*))/', $attributes_string, $attribute_matches, PREG_SET_ORDER ) ) {
 				foreach ( $attribute_matches as $attribute ) {
 					// $attribute[2] is double-quoted value, $attribute[3] is single-quoted value,
