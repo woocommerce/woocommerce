@@ -2,17 +2,19 @@
  * External dependencies
  */
 import {
+	createClient,
 	goToPageEditor,
 	insertBlockByShortcut,
 	publishPage,
-} from '@woocommerce/e2e-utils-playwright/src';
+	WP_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { fillPageTitle } from './editor';
-import ApiClient, { WP_API_PATH } from './api-client';
-import { ADMIN_STATE_PATH } from '../playwright.config';
+import playwrightConfig, { ADMIN_STATE_PATH } from '../playwright.config';
+import { admin } from '../test-data/data';
 
 export const BLOCKS_CHECKOUT_PAGE = {
 	name: 'blocks checkout',
@@ -35,7 +37,12 @@ export const CLASSIC_CART_PAGE = {
 };
 
 export async function pageExists( slug ) {
-	const pages = await ApiClient.getInstance().get(
+	const apiClient = createClient( playwrightConfig.use.baseURL, {
+		type: 'basic',
+		username: admin.username,
+		password: admin.password,
+	} );
+	const pages = await apiClient.get(
 		`${ WP_API_PATH }/pages?slug=${ slug }`,
 		{
 			data: {
@@ -49,7 +56,12 @@ export async function pageExists( slug ) {
 async function createShortcodePage( slug, title, shortcode ) {
 	if ( ! ( await pageExists( slug ) ) ) {
 		console.log( `Creating ${ title } page` );
-		const page = await ApiClient.getInstance()
+		const apiClient = createClient( playwrightConfig.use.baseURL, {
+			type: 'basic',
+			username: admin.username,
+			password: admin.password,
+		} );
+		const page = await apiClient
 			.post( `${ WP_API_PATH }/pages`, {
 				title,
 				content: {

@@ -16,7 +16,6 @@ import { decodeEntities } from '@wordpress/html-entities';
  * Internal dependencies
  */
 import { registerCommandWithTracking } from './register-command-with-tracking';
-import { useEditedPostType } from './use-edited-post-type';
 
 const registerWooCommerceSettingsCommand = ( { label, tab, origin } ) => {
 	registerCommandWithTracking( {
@@ -40,7 +39,12 @@ const registerWooCommerceSettingsCommand = ( { label, tab, origin } ) => {
 // Code adapted from the equivalent in Gutenberg:
 // https://github.com/WordPress/gutenberg/blob/8863b49b7e686f555e8b8adf70cc588c4feebfbf/packages/core-commands/src/site-editor-navigation-commands.js#L36C7-L36C44
 function useProductCommandLoader( { search } ) {
-	const { editedPostType } = useEditedPostType();
+	const { editedPostType } = useSelect( ( select ) => {
+		const editor = select( 'core/editor' );
+		return {
+			editedPostType: editor?.getCurrentPostType?.() ?? null,
+		};
+	} );
 	const origin = editedPostType ? editedPostType + '-editor' : null;
 	// Track searched values. We add a 300 ms delay to avoid tracking while typing.
 	const trackingSearchTimeout = useRef( null );
@@ -117,7 +121,12 @@ function useProductCommandLoader( { search } ) {
 }
 
 const WooCommerceCommands = () => {
-	const { editedPostType } = useEditedPostType();
+	const { editedPostType } = useSelect( ( select ) => {
+		const editor = select( 'core/editor' );
+		return {
+			editedPostType: editor?.getCurrentPostType?.() ?? null,
+		};
+	} );
 	const origin = editedPostType ? editedPostType + '-editor' : null;
 	const { isCommandPaletteOpen } = useSelect( ( select ) => {
 		const { isOpen } = select( commandsStore );

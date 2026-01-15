@@ -3,7 +3,7 @@
  */
 import { createElement, Component } from '@wordpress/element';
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Spinner - An indeterminate circular progress indicator.
@@ -11,7 +11,7 @@ import classnames from 'classnames';
 class Spinner extends Component {
 	render() {
 		const { className } = this.props;
-		const classes = classnames( 'woocommerce-spinner', className );
+		const classes = clsx( 'woocommerce-spinner', className );
 		return (
 			<svg
 				className={ classes }

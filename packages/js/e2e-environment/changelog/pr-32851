@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove default.json from e2e-enviroment default config as it is not needed.

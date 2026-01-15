@@ -37,38 +37,37 @@ class ProductGallery extends AbstractBlock {
 	 */
 	protected function render_dialog( $images ) {
 		$images_html = '';
-		foreach ( $images as $image ) {
+		foreach ( $images as $index => $image ) {
 			$id           = $image['id'];
 			$src          = $image['src'];
 			$srcset       = $image['srcset'];
 			$sizes        = $image['sizes'];
-			$images_html .= "<img tabindex='0' data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='lazy' decoding='async' />";
+			$alt          = $image['alt'];
+			$loading      = 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"';
+			$images_html .= "<img data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='{$loading}' decoding='async' alt='{$alt}' />";
 		}
 		ob_start();
 		?>
 			<dialog
-				data-wp-ref
 				data-wp-bind--open="context.isDialogOpen"
+				data-wp-bind--inert="!context.isDialogOpen"
 				data-wp-on--close="actions.closeDialog"
 				data-wp-on--keydown="actions.onDialogKeyDown"
 				data-wp-watch="callbacks.dialogStateChange"
 				class="wc-block-product-gallery-dialog"
 				role="dialog"
 				aria-modal="true"
-				tabindex="-1"
 				aria-label="Product Gallery">
-				<div class="wc-block-product-gallery-dialog__content">
+				<div class="wc-block-product-gallery-dialog__header">
 					<button class="wc-block-product-gallery-dialog__close-button" data-wp-on--click="actions.closeDialog" aria-label="<?php echo esc_attr__( 'Close dialog', 'woocommerce' ); ?>">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
 							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
 						</svg>
 					</button>
-					<div class="wc-block-product-gallery-dialog__images-container">
-						<div class="wc-block-product-gallery-dialog__images">
-							<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped by WooCommerce. ?>
-							<?php echo $images_html; ?>
-						</div>
-					</div>
+				</div>
+				<div class="wc-block-product-gallery-dialog__content">
+						<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped by WooCommerce. ?>
+						<?php echo $images_html; ?>
 				</div>
 			</dialog>
 		<?php
@@ -94,6 +93,8 @@ class ProductGallery extends AbstractBlock {
 
 			return $html;
 		}
+
+		return $gallery_html;
 	}
 
 	/**
@@ -113,13 +114,15 @@ class ProductGallery extends AbstractBlock {
 		}
 
 		$image_ids              = ProductGalleryUtils::get_all_image_ids( $product );
+		$number_of_images       = count( $image_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
-		$initial_image_id       = count( $image_ids ) > 0 ? $image_ids[0] : -1;
-		$classname_single_image = count( $image_ids ) < 2 ? 'is-single-product-gallery-image' : '';
+		$initial_image_id       = $number_of_images > 0 ? $image_ids[0] : -1;
+		$classname_single_image = $number_of_images < 2 ? 'is-single-product-gallery-image' : '';
 		$product_id             = strval( $product->get_id() );
-		$full_image_data        = ProductGalleryUtils::get_image_src_data( $image_ids, 'full' );
-		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $full_image_data ) );
+		$fullsize_image_data    = ProductGalleryUtils::get_image_src_data( $image_ids, 'full', $product->get_title() );
+		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_image_data ) );
 		$p                      = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
+		$html                   = $gallery_with_dialog;
 
 		if ( $p->next_tag() ) {
 			$p->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
@@ -127,28 +130,70 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'imageData'          => $image_ids,
-						'isDialogOpen'       => false,
-						'disableLeft'        => true,
-						'disableRight'       => false,
-						'isDragging'         => false,
-						'touchStartX'        => 0,
-						'touchCurrentX'      => 0,
-						'productId'          => $product_id,
-						'selectedImageId'    => $initial_image_id,
-						'thumbnailsOverflow' => [
+						'imageData'               => $image_ids,
+						'isDialogOpen'            => false,
+						'isDragging'              => false,
+						'touchStartX'             => 0,
+						'touchCurrentX'           => 0,
+						'productId'               => $product_id,
+						'selectedImageId'         => $initial_image_id,
+						'thumbnailsOverflow'      => [
 							'top'    => false,
 							'bottom' => false,
 							'left'   => false,
 							'right'  => false,
 						],
+						// Next/Previous Buttons block context.
+						'hideNextPreviousButtons' => $number_of_images <= 1,
+						'isDisabledPrevious'      => true,
+						'isDisabledNext'          => false,
+						'ariaLabelPrevious'       => __( 'Previous image', 'woocommerce' ),
+						'ariaLabelNext'           => __( 'Next image', 'woocommerce' ),
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+				$variations_data           = $product->get_available_variations();
+				$formatted_variations_data = array();
+				$has_variation_images      = false;
+				foreach ( $variations_data as $variation ) {
+					if (
+						empty( $variation['variation_id'] )
+						|| ! array_key_exists( 'image_id', $variation )
+					) {
+						continue;
+					}
+
+					$variation_image_id = (int) $variation['image_id'];
+					if ( $variation_image_id ) {
+						$has_variation_images = true;
+
+						$formatted_variations_data[ $variation['variation_id'] ] = array(
+							'image_id' => $variation_image_id,
+						);
+					}
+				}
+
+				if ( $has_variation_images ) {
+					wp_interactivity_config(
+						'woocommerce',
+						array(
+							'products' => array(
+								$product->get_id() => array(
+									'image_id'   => (int) $product->get_image_id(),
+									'variations' => $formatted_variations_data,
+								),
+							),
+						)
+					);
+
+					// Support legacy Add to Cart with Options block.
+					$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+					// Support blockified Add to Cart + Options block.
+					$p->set_attribute( 'data-wp-watch', 'callbacks.listenToProductDataChanges' );
+				}
 			}
 
 			$p->add_class( $classname );

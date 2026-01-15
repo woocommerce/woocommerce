@@ -2,9 +2,11 @@
 	"features": {
 		"activity-panels": true,
 		"analytics": true,
+		"analytics-scheduled-import": true,
 		"product-block-editor": true,
 		"product-data-views": false,
 		"experimental-blocks": true,
+		"experimental-iapi-mini-cart": true,
 		"experimental-iapi-runtime": false,
 		"coming-soon-newsletter-template": false,
 		"coupons": true,
@@ -23,9 +25,9 @@
 		"onboarding-tasks": true,
 		"pattern-toolkit-full-composability": true,
 		"payment-gateway-suggestions": true,
-		"point-of-sale": true,
 		"product-pre-publish-modal": false,
 		"product-custom-fields": true,
+		"products-catalog-api": true,
 		"printful": true,
 		"remote-inbox-notifications": true,
 		"remote-free-extensions": true,
@@ -41,8 +43,6 @@
 		"launch-your-store": true,
 		"product-editor-template-system": false,
 		"use-wp-horizon": false,
-		"add-to-cart-with-options-stepper-layout": true,
-		"blockified-add-to-cart": true,
-		"disable-core-profiler-fallback": true
+		"rest-api-v4": false
 	}
 }

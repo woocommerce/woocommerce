@@ -114,11 +114,6 @@ const restrictedImports = [
 		message:
 			'This Lodash method is not recommended. Please use native functionality instead. If using `memoize`, please use `memize` instead.',
 	},
-	{
-		name: 'classnames',
-		message:
-			"Please use `clsx` instead. It's a lighter and faster drop-in replacement for `classnames`.",
-	},
 ];
 
 const coreModules = [
@@ -131,12 +126,14 @@ const coreModules = [
 	'@woocommerce/blocks-components',
 	'@woocommerce/blocks-registry',
 	'@woocommerce/block-settings',
+	'@woocommerce/email-editor',
 	'@woocommerce/price-format',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',
 	'@woocommerce/shared-hocs',
 	'@woocommerce/stores/store-notices',
 	'@woocommerce/stores/woocommerce/cart',
+	'@woocommerce/stores/woocommerce/product-data',
 	'@woocommerce/tracks',
 	'@woocommerce/data',
 	'@woocommerce/customer-effort-score',
@@ -153,10 +150,8 @@ const coreModules = [
 	'@wordpress/url',
 	'@wordpress/wordcount',
 	'@woocommerce/blocks-test-utils',
-	'@woocommerce/e2e-utils',
 	'babel-jest',
 	'dotenv',
-	'jest-environment-puppeteer',
 	'lodash/kebabCase',
 	'lodash',
 	'prop-types',
@@ -188,7 +183,6 @@ module.exports = {
 		page: 'readonly',
 		browser: 'readonly',
 		context: 'readonly',
-		jestPuppeteer: 'readonly',
 	},
 	settings: {
 		jsdoc: { mode: 'typescript' },
@@ -255,7 +249,25 @@ module.exports = {
 			},
 		},
 		{
+			files: [
+				'assets/js/**/test/**/*.{js,jsx,ts,tsx}',
+				'assets/js/**/*.test.{js,jsx,ts,tsx}',
+			],
+			parser: '@typescript-eslint/parser',
+			plugins: [ 'jest', '@typescript-eslint' ],
+			extends: [ 'plugin:jest/recommended' ],
+			rules: {
+				'jest/no-mocks-import': 'off',
+				// With React Testing library, it is expected use expect() in the waitFor() function: https://testing-library.com/docs/dom-testing-library/api-async/
+				'jest/no-standalone-expect': 'off',
+			},
+		},
+		{
 			files: [ '*.ts', '*.tsx' ],
+			excludedFiles: [
+				'assets/js/**/test/**/*.{js,jsx,ts,tsx}',
+				'assets/js/**/*.test.{js,jsx,ts,tsx}',
+			],
 			parser: '@typescript-eslint/parser',
 			extends: [
 				'plugin:@woocommerce/eslint-plugin/recommended',

@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
 import { useCallback } from '@wordpress/element';
 import type { BlockEditProps } from '@wordpress/blocks';
+
+/**
+ * Internal dependencies
+ */
+import { addFilterForEmail } from '../../config-tools/filters';
 
 interface UrlAttributes {
 	url?: string;
@@ -33,7 +37,7 @@ const setUrlAttribute =
 	};
 
 function filterSetUrlAttribute(): void {
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/filter-set-url-attribute',
 		setUrlAttribute

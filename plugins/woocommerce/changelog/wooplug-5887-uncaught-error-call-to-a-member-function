@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal errors when retrieving orders with deleted products on Store API

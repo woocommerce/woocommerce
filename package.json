@@ -13,7 +13,7 @@
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"
 	},
@@ -26,6 +26,7 @@
 		"clean:build": "rimraf -g 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
+		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",
 		"sync-dependencies": "pnpm exec syncpack -- fix-mismatches",
 		"utils": "./tools/monorepo-utils/bin/run"
 	},
@@ -45,7 +46,7 @@
 		"css-loader": "6.11.x",
 		"glob": "^10.3.10",
 		"husky": "^9.0.11",
-		"jest": "27.5.x",
+		"jest": "29.5.x",
 		"lint-staged": "^12.5.0",
 		"mkdirp": "^1.0.4",
 		"moment": "^2.29.4",
@@ -75,7 +76,6 @@
 		},
 		"patchedDependencies": {
 			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch",
-			"@wordpress/env@10.17.0": "bin/patches/@wordpress__env@10.17.0.patch",
 			"@wordpress/data@10.0.2": "bin/patches/@wordpress__data@10.0.2.patch"
 		}
 	}

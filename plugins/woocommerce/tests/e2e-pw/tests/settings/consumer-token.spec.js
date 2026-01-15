@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { HTTPClientFactory } from '@woocommerce/api';
+import { createClient } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
@@ -43,10 +43,11 @@ test( 'admin can manage consumer keys', async ( { page } ) => {
 		).toBeVisible();
 	} );
 
-	const apiClient = HTTPClientFactory.build( playwrightConfig.use.baseURL )
-		.withOAuth( key, secret )
-		.withIndexPermalinks()
-		.create();
+	const apiClient = createClient( playwrightConfig.use.baseURL, {
+		type: 'oauth1',
+		consumerKey: key,
+		consumerSecret: secret,
+	} );
 
 	await test.step( 'can use the consumer key', async () => {
 		const createResponse = await apiClient.post(
@@ -54,7 +55,7 @@ test( 'admin can manage consumer keys', async ( { page } ) => {
 			testProduct
 		);
 
-		await expect( createResponse.statusCode ).toBe( 201 );
+		await expect( createResponse.status ).toBe( 201 );
 
 		testProduct.id = createResponse.data.id;
 
@@ -88,11 +89,17 @@ test( 'admin can manage consumer keys', async ( { page } ) => {
 
 		await expect(
 			apiClient.get( `/wc/v3/products/${ testProduct.id }` )
-		).rejects.toMatchObject( {
-			statusCode: 401,
-			data: {
-				message: 'Consumer key is invalid.',
-			},
-		} );
+		).rejects.toEqual(
+			expect.objectContaining( {
+				response: expect.objectContaining( {
+					status: 401,
+					data: expect.objectContaining( {
+						message: expect.stringContaining(
+							'Consumer key is invalid.'
+						),
+					} ),
+				} ),
+			} )
+		);
 	} );
 } );

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -176,13 +176,10 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 		page,
 		admin,
 		editor,
-		requestUtils,
 	} ) => {
 		/* Switch to the blockified Add to Cart + Options block to be able to test all hooks */
-		await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-		await requestUtils.setFeatureFlag( 'blockified-add-to-cart', true );
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
+			postId: `${ BLOCK_THEME_SLUG }//single-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -193,7 +190,7 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the Add to Cart + Options block',
+				name: 'Use the Add to Cart + Options block',
 			} )
 			.click();
 

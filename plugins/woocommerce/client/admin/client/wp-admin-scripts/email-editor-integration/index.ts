@@ -4,56 +4,21 @@
  * External dependencies
  */
 import { addFilter } from '@wordpress/hooks';
-import { registerBlockType } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import { initializeEditor } from '@woocommerce/email-editor';
 
 /**
  * Internal dependencies
  */
-import { wooContentPlaceholderBlock } from './blocks/woo-email-content';
 import { NAME_SPACE } from './constants';
 import { modifyTemplateSidebar } from './templates';
 import { modifySidebar } from './sidebar_settings';
+import { registerEmailValidationRules } from './email-validation';
 
 import './style.scss';
 
-// The type is copied from the email-editor package.
-// When the type was imported from the email-editor package, the build failed due to more than 50 type errors.
-type EmailContentValidationRule = {
-	id: string;
-	testContent: ( emailContent: string ) => boolean;
-	message: string;
-	actions: [];
-};
-
 addFilter( 'woocommerce_email_editor_send_button_label', NAME_SPACE, () =>
 	__( 'Save email', 'woocommerce' )
-);
-
-// Add email validation rule
-addFilter(
-	'woocommerce_email_editor_content_validation_rules',
-	NAME_SPACE,
-	( rules: EmailContentValidationRule[] ) => {
-		const emailValidationRule: EmailContentValidationRule = {
-			id: 'sender-email-validation',
-			testContent: () => {
-				const input = document.querySelector< HTMLInputElement >(
-					'input[name="from_email"]'
-				);
-				const email = input?.value;
-				if ( ! email ) return false;
-
-				return ! email || ! input?.checkValidity();
-			},
-			message: __(
-				'The "from" email address is invalid. Please enter a valid email address that will appear as the sender in outgoing WooCommerce emails.',
-				'woocommerce'
-			),
-			actions: [],
-		};
-		return [ ...( rules || [] ), emailValidationRule ];
-	}
 );
 
 addFilter(
@@ -62,6 +27,45 @@ addFilter(
 	() => 'https://woocommerce.com/document/email-faq/'
 );
 
-registerBlockType( 'woo/email-content', wooContentPlaceholderBlock );
+// Add filter to permanently delete emails.
+// This is used to delete email posts from the database instead of moving them to the trash.
+// The email posts can be recreated from the WooCommerce settings email listing page.
+addFilter(
+	'woocommerce_email_editor_trash_modal_should_permanently_delete',
+	NAME_SPACE,
+	() => true
+);
+
+/**
+ * Register default handler for creating coupons in WooCommerce.
+ * Uses the localized admin URL from PHP to support subdirectory installations.
+ * Integrators can override this filter to customize behavior (e.g., SPA routing).
+ */
+addFilter( 'woocommerce_email_editor_create_coupon_handler', NAME_SPACE, () => {
+	// Get the create coupon URL from localized data (provided by PHP)
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const editorStore = ( window as any ).wp?.data?.select(
+		'woocommerce/email-editor'
+	);
+	const urls = editorStore?.getUrls?.();
+	const createCouponUrl = urls?.createCoupon;
+
+	// Return the handler function
+	return () => {
+		if ( createCouponUrl ) {
+			// Use the localized URL from PHP (supports subdirectory installations)
+			window.open( createCouponUrl, '_blank' );
+		} else {
+			// Fallback: relative path (may not work in subdirectory installations)
+			window.open(
+				'/wp-admin/post-new.php?post_type=shop_coupon',
+				'_blank'
+			);
+		}
+	};
+} );
+
 modifySidebar();
 modifyTemplateSidebar();
+registerEmailValidationRules();
+initializeEditor( 'woocommerce-email-editor' );

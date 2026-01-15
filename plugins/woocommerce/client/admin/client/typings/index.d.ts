@@ -1,5 +1,3 @@
-declare module '@woocommerce/e2e-utils';
-declare module '@woocommerce/e2e-environment';
 declare module '@woocommerce/settings' {
 	export declare function getAdminLink( path: string ): string;
 	export declare function getSetting< T >(

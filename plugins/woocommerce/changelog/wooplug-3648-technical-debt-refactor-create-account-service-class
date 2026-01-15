@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Removed the customer new account template that blocks implemented in favour of the core template.

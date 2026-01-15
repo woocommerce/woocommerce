@@ -13,11 +13,11 @@ table.wc-block-cart-items {
 	width: 100%;
 
 	.wc-block-cart-items__header {
-		@include font-size(smaller);
+		@include font-regular-locked;
 		text-transform: uppercase;
 
 		.wc-block-cart-items__header-image {
-			width: 100px;
+			width: 80px;
 		}
 		.wc-block-cart-items__header-product {
 			visibility: hidden;
@@ -27,13 +27,13 @@ table.wc-block-cart-items {
 			text-align: right;
 		}
 		th {
-			font-weight: 700;
+			font-weight: 500;
 		}
 	}
 	.wc-block-cart-items__row {
 		.wc-block-cart-item__wrap > *,
 		.wc-block-components-quantity-selector {
-			margin-bottom: $gap-small;
+			margin-bottom: $gap-smaller * 1.25;
 		}
 
 		.wc-block-cart-item__wrap > *:last-child {
@@ -45,10 +45,14 @@ table.wc-block-cart-items {
 			margin: 0;
 		}
 		.wc-block-cart-item__prices {
-			line-height: 1.2;
+			@include font-regular-locked;
 		}
 
 		.wc-block-cart-item__quantity {
+			display: flex;
+			flex-direction: column;
+			align-items: start;
+
 			.wc-block-cart-item__remove-link {
 				@include link-button();
 				@include hover-effect();
@@ -56,15 +60,22 @@ table.wc-block-cart-items {
 
 				text-transform: none;
 				white-space: nowrap;
+				&[hidden] {
+					display: none;
+				}
 			}
 		}
 		.wc-block-components-product-name {
+			@include font-regular-locked;
 			display: block;
 			max-width: max-content;
 			line-height: 1.4;
+			&[hidden] {
+				display: none;
+			}
 		}
 		.wc-block-cart-item__total {
-			@include font-size(regular);
+			@include font-regular-locked;
 			text-align: right;
 			line-height: 1.8;
 		}
@@ -77,9 +88,7 @@ table.wc-block-cart-items {
 	}
 }
 
-.is-medium,
-.is-small,
-.is-mobile {
+@mixin cart-items-table-styles() {
 	table.wc-block-cart-items {
 		td {
 			padding: 0;
@@ -132,38 +141,59 @@ table.wc-block-cart-items {
 	}
 }
 
-.is-large.wc-block-cart {
-	margin-bottom: 3em;
-
-	.wc-block-cart-items {
-		border-spacing: 0;
-		border-bottom: 1px solid $universal-border-light;
-
-		th {
-			padding: $gap-smaller $gap $gap-smaller 0;
-			white-space: nowrap;
-		}
-		td {
-			border-top: 1px solid $universal-border-light;
-			padding: $gap-large 0 $gap-large $gap;
-			vertical-align: top;
-		}
-		th:last-child {
-			padding-right: $gap;
-		}
-		td:last-child {
-			padding-right: $gap;
-		}
+// Styles for the cart block; we are targeting the cart block because it has a progressive loading enabled
+// and we want to prevent content jumping before the is- classes are applied
+@include cart-checkout-below-large-container {
+	.wc-block-cart {
+		@include cart-items-table-styles();
 	}
+}
 
-	&.has-dark-controls {
+// Styles for the mini cart block which is not a container and still uses the `is-` classes
+.is-medium,
+.is-small,
+.is-mobile {
+	@include cart-items-table-styles();
+}
+
+@include cart-checkout-large-container {
+	.wc-block-cart__main {
 		.wc-block-cart-items {
-			border-color: $input-border-dark;
+			border-spacing: 0;
+			border-bottom: 1px solid $universal-border-light;
+
 			th {
-				color: $input-text-dark;
+				padding: $gap-smaller $gap $gap-small 0;
+				white-space: nowrap;
 			}
 			td {
+				border-top: 1px solid $universal-border-light;
+				padding: $gap * 1.25 0 $gap * 1.25 $gap;
+				vertical-align: top;
+			}
+			th:last-child {
+				padding-right: $gap;
+			}
+			td:last-child {
+				padding-right: $gap;
+			}
+		}
+	}
+}
+
+@include cart-checkout-large-container {
+	.wc-block-cart {
+		margin-bottom: 3em;
+
+		&.has-dark-controls {
+			.wc-block-cart-items {
 				border-color: $input-border-dark;
+				th {
+					color: $input-text-dark;
+				}
+				td {
+					border-color: $input-border-dark;
+				}
 			}
 		}
 	}

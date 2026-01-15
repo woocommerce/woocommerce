@@ -8,10 +8,13 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
 use WP_Block_Template;
+use WP_Block_Type_Registry;
 use WP_Post;
 
 /**
@@ -19,25 +22,11 @@ use WP_Post;
  */
 class Content_Renderer {
 	/**
-	 * Blocks registry
-	 *
-	 * @var Blocks_Registry
-	 */
-	private Blocks_Registry $blocks_registry;
-
-	/**
 	 * Process manager
 	 *
 	 * @var Process_Manager
 	 */
 	private Process_Manager $process_manager;
-
-	/**
-	 * Settings controller
-	 *
-	 * @var Settings_Controller
-	 */
-	private Settings_Controller $settings_controller;
 
 	/**
 	 * Theme controller
@@ -47,6 +36,13 @@ class Content_Renderer {
 	private Theme_Controller $theme_controller;
 
 	const CONTENT_STYLES_FILE = 'content.css';
+
+	/**
+	 * WordPress Block Type Registry.
+	 *
+	 * @var WP_Block_Type_Registry
+	 */
+	private WP_Block_Type_Registry $block_type_registry;
 
 	/**
 	 * CSS inliner
@@ -84,26 +80,46 @@ class Content_Renderer {
 	private $backup_query;
 
 	/**
+	 * Fallback renderer that is used when render_email_callback is not set for the rendered blockType.
+	 *
+	 * @var Fallback
+	 */
+	private Fallback $fallback_renderer;
+
+	/**
+	 * Logger instance.
+	 *
+	 * @var Email_Editor_Logger
+	 */
+	private Email_Editor_Logger $logger;
+
+	/**
+	 * Backup of the original core/post-content render callback.
+	 *
+	 * @var callable|null
+	 */
+	private $backup_post_content_callback;
+
+	/**
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager     $preprocess_manager Preprocess manager.
-	 * @param Blocks_Registry     $blocks_registry Blocks registry.
-	 * @param Settings_Controller $settings_controller Settings controller.
 	 * @param Css_Inliner         $css_inliner Css inliner.
 	 * @param Theme_Controller    $theme_controller Theme controller.
+	 * @param Email_Editor_Logger $logger Logger instance.
 	 */
 	public function __construct(
 		Process_Manager $preprocess_manager,
-		Blocks_Registry $blocks_registry,
-		Settings_Controller $settings_controller,
 		Css_Inliner $css_inliner,
-		Theme_Controller $theme_controller
+		Theme_Controller $theme_controller,
+		Email_Editor_Logger $logger
 	) {
 		$this->process_manager     = $preprocess_manager;
-		$this->blocks_registry     = $blocks_registry;
-		$this->settings_controller = $settings_controller;
 		$this->theme_controller    = $theme_controller;
 		$this->css_inliner         = $css_inliner;
+		$this->logger              = $logger;
+		$this->block_type_registry = WP_Block_Type_Registry::get_instance();
+		$this->fallback_renderer   = new Fallback();
 	}
 
 	/**
@@ -116,7 +132,18 @@ class Content_Renderer {
 		add_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		add_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
-		do_action( 'woocommerce_email_blocks_renderer_initialized', $this->blocks_registry );
+		// Swap core/post-content render callback for email rendering.
+		// This prevents issues with WordPress's static $seen_ids array when rendering
+		// multiple emails in a single request (e.g., MailPoet batch processing).
+		$post_content_type = $this->block_type_registry->get_registered( 'core/post-content' );
+		if ( $post_content_type ) {
+			// Save the original callback (may be null or WordPress's default).
+			$this->backup_post_content_callback = $post_content_type->render_callback;
+
+			// Replace with our stateless renderer.
+			$post_content_renderer              = new Post_Content();
+			$post_content_type->render_callback = array( $post_content_renderer, 'render_stateless' );
+		}
 	}
 
 	/**
@@ -163,11 +190,50 @@ class Content_Renderer {
 	 * @return string
 	 */
 	public function render_block( string $block_content, array $parsed_block ): string {
-		$renderer = $this->blocks_registry->get_block_renderer( $parsed_block['blockName'] );
-		if ( ! $renderer ) {
-			$renderer = $this->blocks_registry->get_fallback_renderer();
+		/**
+		 * Filter the email-specific context data passed to block renderers.
+		 *
+		 * This allows email sending systems to provide context data such as user ID,
+		 * email address, order information, etc., that can be used by blocks during rendering.
+		 *
+		 * Blocks that need cart product information can derive it from the user_id or recipient_email
+		 * using CartCheckoutUtils::get_cart_product_ids_for_user().
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $email_context {
+		 *     Email-specific context data.
+		 *
+		 *     @type int    $user_id         The ID of the user receiving the email.
+		 *     @type string $recipient_email The recipient's email address.
+		 *     @type int    $order_id        The order ID (for order-related emails).
+		 *     @type string $email_type      The type of email being rendered.
+		 * }
+		 */
+		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array() );
+
+		$context = new Rendering_Context( $this->theme_controller->get_theme(), $email_context );
+
+		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
+		try {
+			if ( $block_type && isset( $block_type->render_email_callback ) && is_callable( $block_type->render_email_callback ) ) {
+				return call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
+			}
+		} catch ( \Exception $error ) {
+			$this->logger->error(
+				'Error thrown while rendering block.',
+				array(
+					'exception'    => $error,
+					'block_name'   => $parsed_block['blockName'],
+					'parsed_block' => $parsed_block,
+					'message'      => $error->getMessage(),
+				)
+			);
+			// Returning the original content.
+			return $block_content;
 		}
-		return $renderer ? $renderer->render( $block_content, $parsed_block, $this->settings_controller ) : $block_content;
+
+		return $this->fallback_renderer->render( $block_content, $parsed_block, $context );
 	}
 
 	/**
@@ -185,7 +251,7 @@ class Content_Renderer {
 		$this->backup_template_content = $_wp_current_template_content;
 		$this->backup_template_id      = $_wp_current_template_id;
 		$this->backup_query            = $wp_query;
-		$this->backup_post             = $email_post;
+		$this->backup_post             = $post;
 
 		$_wp_current_template_id      = $template->id;
 		$_wp_current_template_content = $template->content;
@@ -198,10 +264,17 @@ class Content_Renderer {
 	 * so that we don't interfere with possible post rendering that might happen later.
 	 */
 	private function reset(): void {
-		$this->blocks_registry->remove_all_block_renderers();
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+
+		// Restore the original core/post-content render callback.
+		// Note: We always restore it, even if it was null originally.
+		$post_content_type = $this->block_type_registry->get_registered( 'core/post-content' );
+		if ( $post_content_type ) {
+			// @phpstan-ignore-next-line -- WordPress core allows null for render_callback despite type definition.
+			$post_content_type->render_callback = $this->backup_post_content_callback;
+		}
 
 		// Restore globals to their original values.
 		global $_wp_current_template_content, $_wp_current_template_id, $wp_query, $post;

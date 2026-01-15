@@ -38,8 +38,8 @@ require WC_ABSPATH . 'includes/wc-order-step-logger-functions.php';
 /**
  * Filters on data used in admin and frontend.
  */
-add_filter( 'woocommerce_coupon_code', 'html_entity_decode' );
 add_filter( 'woocommerce_coupon_code', 'wc_sanitize_coupon_code' );
+add_filter( 'woocommerce_coupon_code', 'wc_strtolower' );
 add_filter( 'woocommerce_stock_amount', 'intval' ); // Stock amounts are integers by default.
 add_filter( 'woocommerce_shipping_rate_label', 'sanitize_text_field' ); // Shipping rate label.
 add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
@@ -1016,9 +1016,13 @@ function wc_get_image_size( $image_size ) {
  * Queue some JavaScript code to be output in the footer.
  *
  * @param string $code Code.
+ *
+ * @deprecated 10.4.0 Use wp_add_inline_script() instead.
  */
 function wc_enqueue_js( $code ) {
 	global $wc_queued_js;
+
+	wc_deprecated_function( 'wc_enqueue_js', '10.4.0', 'wp_add_inline_script' );
 
 	if ( empty( $wc_queued_js ) ) {
 		$wc_queued_js = '';
@@ -1405,14 +1409,26 @@ function wc_get_user_agent() {
  * Generate a rand hash.
  *
  * @since  2.4.0
+ * @param  string $prefix Prefix for the hash.
+ * @param  ?int   $max_length Maximum length of the hash. Excludes the prefix.
  * @return string
  */
-function wc_rand_hash() {
-	if ( ! function_exists( 'openssl_random_pseudo_bytes' ) ) {
-		return sha1( wp_rand() );
+function wc_rand_hash( $prefix = '', $max_length = null ) {
+	try {
+		$random = bin2hex( random_bytes( 20 ) );
+	} catch ( Exception $e ) {
+		if ( function_exists( 'wp_fast_hash' ) ) {
+			$random = bin2hex( substr( wp_fast_hash( wp_rand() ), -20 ) );
+		} else {
+			$random = bin2hex( substr( sha1( wp_rand() ), -20 ) );
+		}
 	}
 
-	return bin2hex( openssl_random_pseudo_bytes( 20 ) ); // @codingStandardsIgnoreLine
+	if ( $max_length && $max_length > 0 ) {
+		$random = substr( $random, 0, $max_length );
+	}
+
+	return $prefix . $random;
 }
 
 /**
@@ -1643,8 +1659,10 @@ function wc_back_link( $label, $url ) {
  * @param string $url   URL of the page to return to.
  */
 function wc_back_header( $title, $label, $url ) {
+	$arrow = is_rtl() ? 'dashicons-arrow-right-alt2' : 'dashicons-arrow-left-alt2';
+
 	echo '<h2 class="wc-admin-header">';
-	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons dashicons-arrow-left-alt2"></span></a></small>';
+	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons ' . esc_attr( $arrow ) . '" aria-hidden="true"></span></a></small>';
 	echo esc_html( $title );
 	echo '</h2>';
 }

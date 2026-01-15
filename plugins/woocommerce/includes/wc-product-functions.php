@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -139,53 +140,10 @@ function wc_delete_product_transients( $post_id = 0 ) {
 
 	if ( $post_id > 0 ) {
 		// Transient names that include an ID - since they are dynamic they cannot be cleaned in bulk without the ID.
-		$post_transient_names = array(
-			'wc_product_children_',
-			'wc_var_prices_',
-			'wc_child_has_weight_',
-			'wc_child_has_dimensions_',
-		);
-
-		foreach ( $post_transient_names as $transient ) {
-			delete_transient( $transient . $post_id );
-		}
-
-		$is_cli = Constants::is_true( 'WP_CLI' );
-		if ( $is_cli ) {
-			wc_delete_related_product_transients( $post_id );
-		} else {
-			// Schedule the async deletion of related product transients.
-			// This should run async cause it also fetches all related products
-			// of the current product to be deleted which we can can't be sure how many there are.
-
-			// Add static cache here which is used to check if the transient is already scheduled.
-			// The cache exists ONLY on the current request to prevent searching the DB for every product.
-			static $scheduled = array();
-			$cache_key        = (int) $post_id;
-			$queue            = WC()->queue();
-
-			if ( ! isset( $scheduled[ $cache_key ] ) ) {
-				$existing                = $queue->get_next(
-					'wc_delete_related_product_transients_async',
-					array( 'post_id' => $post_id ),
-					'wc_delete_related_product_transients_group'
-				);
-				$scheduled[ $cache_key ] = null !== $existing;
-			}
-
-			if ( ! $scheduled[ $cache_key ] ) {
-				$queue->schedule_single(
-					time(),
-					'wc_delete_related_product_transients_async',
-					array( 'post_id' => $post_id ),
-					'wc_delete_related_product_transients_group'
-				);
-				$scheduled[ $cache_key ] = true;
-			}
-		}
+		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients( $post_id );
 	}
 
-	// Increments the transient version to invalidate cache.
+	// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
 	WC_Cache_Helper::get_transient_version( 'product', true );
 
 	do_action( 'woocommerce_delete_product_transients', $post_id );
@@ -196,9 +154,12 @@ function wc_delete_product_transients( $post_id = 0 ) {
  * This is necessary because changing one product affects all related products too.
  *
  * @since 9.8.0
+ * @deprecated 10.1.0 This function is deprecated and will be removed in a future version.
  * @param int $post_id The product ID updated/created.
  */
 function wc_delete_related_product_transients( $post_id ) {
+	wc_deprecated_function( 'wc_delete_related_product_transients', '10.1.0', 'This function is deprecated and will be removed in a future version.' );
+
 	if ( ! is_numeric( $post_id ) ) {
 		return;
 	}
@@ -238,7 +199,6 @@ function wc_delete_related_product_transients( $post_id ) {
 	);
 	_wc_delete_transients( $related_product_transients );
 }
-add_action( 'wc_delete_related_product_transients_async', 'wc_delete_related_product_transients' );
 
 /**
  * Function that returns an array containing the IDs of the products that are on sale.
@@ -311,19 +271,49 @@ function wc_product_post_type_link( $permalink, $post ) {
 	// Get the custom taxonomy terms in use by this post.
 	$terms = get_the_terms( $post->ID, 'product_cat' );
 
-	if ( ! empty( $terms ) ) {
-		$terms           = wp_list_sort(
-			$terms,
-			array(
-				'parent'  => 'DESC',
-				'term_id' => 'ASC',
-			)
-		);
-		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $terms[0], $terms, $post );
+	if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+		// Find the deepest category (most ancestors) for the permalink.
+		$deepest_term      = $terms[0];
+		$deepest_ancestors = $deepest_term->parent ? get_ancestors( $deepest_term->term_id, 'product_cat' ) : array();
+
+		foreach ( $terms as $term ) {
+			if ( $term->term_id === $deepest_term->term_id ) {
+				continue;
+			}
+			// Skip root categories - they can't be deeper than current.
+			if ( ! $term->parent ) {
+				continue;
+			}
+			$ancestors = get_ancestors( $term->term_id, 'product_cat' );
+			if ( count( $ancestors ) > count( $deepest_ancestors ) ) {
+				$deepest_ancestors = $ancestors;
+				$deepest_term      = $term;
+			}
+		}
+
+		/**
+		 * Filter the product category used for the product permalink.
+		 *
+		 * By default, the deepest category (most ancestors) is selected. Prior to 9.9.0,
+		 * categories were sorted by parent term ID descending, then term ID ascending.
+		 * This filter allows customization of which category is used in the product permalink.
+		 *
+		 * @since 2.4.0
+		 * @since 9.9.0 Selection algorithm changed to use deepest category instead of sort order.
+		 *
+		 * @param WP_Term   $deepest_term The selected category term object (deepest category since 9.9.0).
+		 * @param WP_Term[] $terms        All category terms assigned to the product.
+		 * @param WP_Post   $post         The product post object.
+		 */
+		$category_object = apply_filters( 'wc_product_post_type_link_product_cat', $deepest_term, $terms, $post );
+		$category_object = ! $category_object instanceof WP_Term ? $deepest_term : $category_object;
 		$product_cat     = $category_object->slug;
 
 		if ( $category_object->parent ) {
-			$ancestors = get_ancestors( $category_object->term_id, 'product_cat' );
+			// Reuse cached ancestors if the filter didn't change the category, otherwise fetch them.
+			$ancestors = ( $category_object->term_id === $deepest_term->term_id )
+				? $deepest_ancestors
+				: get_ancestors( $category_object->term_id, 'product_cat' );
 			foreach ( $ancestors as $ancestor ) {
 				$ancestor_object = get_term( $ancestor, 'product_cat' );
 				if ( apply_filters( 'woocommerce_product_post_type_link_parent_category_only', false ) ) {
@@ -357,7 +347,7 @@ function wc_product_post_type_link( $permalink, $post ) {
 		date_i18n( 'H', strtotime( $post->post_date ) ),
 		date_i18n( 'i', strtotime( $post->post_date ) ),
 		date_i18n( 's', strtotime( $post->post_date ) ),
-		$post->ID,
+		(string) $post->ID,
 		$product_cat,
 		$product_cat,
 	);
@@ -418,7 +408,7 @@ add_action( 'template_redirect', 'wc_product_canonical_redirect', 5 );
  * @return string
  */
 function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
-	$src               = WC()->plugin_url() . '/assets/images/placeholder.png';
+	$src               = WC()->plugin_url() . '/assets/images/placeholder.webp';
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
 
 	if ( ! empty( $placeholder_image ) ) {
@@ -527,9 +517,6 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 				}
 			}
 
-			// Cast to string once before using.
-			$value = (string) $value;
-
 			// Do not list attributes already part of the variation name.
 			if ( '' === $value || ( $skip_attributes_in_name && wc_is_attribute_in_product_name( $value, $variation_name ) ) ) {
 				continue;
@@ -542,7 +529,7 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 					$variation_list[] = '<dt>' . wc_attribute_label( $name, $product ) . ':</dt><dd>' . rawurldecode( $value ) . '</dd>';
 				}
 			} elseif ( $flat ) {
-				$variation_list[] = rawurldecode( $value );
+					$variation_list[] = rawurldecode( $value );
 			} else {
 				$variation_list[] = '<li>' . rawurldecode( $value ) . '</li>';
 			}
@@ -562,58 +549,273 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 }
 
 /**
+ * Schedule start/end sale actions for a product based on its sale dates.
+ *
+ * Uses Action Scheduler to fire events at the exact sale start/end times,
+ * rather than relying on the daily cron.
+ *
+ * @since 10.5.0
+ * @param WC_Product $product Product object.
+ * @return void
+ */
+function wc_schedule_product_sale_events( WC_Product $product ): void {
+	$product_id = $product->get_id();
+	$date_from  = $product->get_date_on_sale_from( 'edit' );
+	$date_to    = $product->get_date_on_sale_to( 'edit' );
+
+	if ( $date_from ) {
+		$start_ts = $date_from->getTimestamp();
+		if ( $start_ts > time() ) {
+			as_schedule_single_action( // @phpstan-ignore function.notFound
+				$start_ts,
+				'wc_product_start_scheduled_sale',
+				array( 'product_id' => $product_id ),
+				'woocommerce-sales'
+			);
+		}
+	}
+
+	if ( $date_to ) {
+		$end_ts = $date_to->getTimestamp();
+		if ( $end_ts > time() ) {
+			as_schedule_single_action( // @phpstan-ignore function.notFound
+				$end_ts,
+				'wc_product_end_scheduled_sale',
+				array( 'product_id' => $product_id ),
+				'woocommerce-sales'
+			);
+		}
+	}
+}
+
+/**
+ * Apply the expected sale state for a product.
+ *
+ * This is a shared helper used by both the per-product Action Scheduler
+ * callbacks and the daily cron safety net.
+ *
+ * @since 10.5.0
+ * @param WC_Product $product Product object.
+ * @param string     $mode    'start' or 'end'.
+ * @return void
+ */
+function wc_apply_sale_state_for_product( WC_Product $product, string $mode ): void {
+	$product_id = $product->get_id();
+
+	if ( 'start' === $mode ) {
+		$sale_price = $product->get_sale_price( 'edit' );
+		if ( $sale_price ) {
+			$product->set_price( $sale_price );
+			$product->save();
+
+			// Workaround: `_price` is not in `meta_key_to_props` mapping and only syncs
+			// when date/price props change in `handle_updated_props()`. Since we only
+			// changed `price` prop, we must update `_price` meta directly.
+			// See comment in `WC_Product_Data_Store_CPT::handle_updated_props()`.
+			update_post_meta( $product_id, '_price', $sale_price );
+		}
+	} elseif ( 'end' === $mode ) {
+		$regular_price = $product->get_regular_price( 'edit' );
+		$product->set_price( $regular_price );
+
+		$product->save();
+
+		// Workaround: see above.
+		update_post_meta( $product_id, '_price', $regular_price );
+	}
+
+	wc_delete_product_transients( $product_id );
+
+	// Sync parent variable product price range if this is a variation.
+	if ( $product->is_type( 'variation' ) ) {
+		$parent_id = $product->get_parent_id();
+		if ( $parent_id ) {
+			WC_Product_Variable::sync( $parent_id );
+		}
+	}
+}
+
+/**
+ * Handle scheduled sale start for a product.
+ *
+ * This is the Action Scheduler callback that fires at the exact sale start time.
+ *
+ * @since 10.5.0
+ * @param int $product_id Product ID.
+ * @return void
+ */
+function wc_handle_product_start_scheduled_sale( $product_id ): void {
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		return;
+	}
+
+	// Skip product types with derived prices.
+	if ( $product->is_type( array( 'variable', 'grouped' ) ) ) {
+		return;
+	}
+
+	// Verify sale should still start (dates/price might have changed since scheduling).
+	if ( ! $product->get_sale_price( 'edit' ) ) {
+		return;
+	}
+
+	$now       = time();
+	$date_from = $product->get_date_on_sale_from( 'edit' );
+	$date_to   = $product->get_date_on_sale_to( 'edit' );
+
+	if ( $date_from && $date_from->getTimestamp() > $now ) {
+		return;
+	}
+
+	if ( $date_to && $date_to->getTimestamp() < $now ) {
+		return;
+	}
+
+	if ( (float) $product->get_price( 'edit' ) === (float) $product->get_sale_price( 'edit' ) ) {
+		return;
+	}
+
+	wc_apply_sale_state_for_product( $product, 'start' );
+}
+add_action( 'wc_product_start_scheduled_sale', 'wc_handle_product_start_scheduled_sale' );
+
+/**
+ * Handle scheduled sale end for a product.
+ *
+ * This is the Action Scheduler callback that fires at the exact sale end time.
+ *
+ * @since 10.5.0
+ * @param int $product_id Product ID.
+ * @return void
+ */
+function wc_handle_product_end_scheduled_sale( $product_id ): void {
+	$product = wc_get_product( $product_id );
+	if ( ! $product ) {
+		return;
+	}
+
+	// Skip product types with derived prices.
+	if ( $product->is_type( array( 'variable', 'grouped' ) ) ) {
+		return;
+	}
+
+	$now     = time();
+	$date_to = $product->get_date_on_sale_to( 'edit' );
+
+	if ( $date_to && $date_to->getTimestamp() > $now ) {
+		return;
+	}
+
+	if ( (float) $product->get_price( 'edit' ) === (float) $product->get_regular_price( 'edit' ) ) {
+		return;
+	}
+
+	wc_apply_sale_state_for_product( $product, 'end' );
+}
+add_action( 'wc_product_end_scheduled_sale', 'wc_handle_product_end_scheduled_sale' );
+
+/**
+ * Schedule sale events when a product is saved with sale dates.
+ *
+ * @since 10.5.0
+ * @param int             $product_id Product ID.
+ * @param WC_Product|null $product    Product object (optional).
+ * @return void
+ */
+function wc_maybe_schedule_product_sale_events( $product_id, $product = null ): void {
+	if ( ! $product ) {
+		$product = wc_get_product( $product_id );
+		if ( ! $product ) {
+			return;
+		}
+	}
+
+	$product_id = $product->get_id();
+
+	// Always clear existing events first.
+	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ); // @phpstan-ignore function.notFound
+	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ); // @phpstan-ignore function.notFound
+
+	$date_from = $product->get_date_on_sale_from( 'edit' );
+	$date_to   = $product->get_date_on_sale_to( 'edit' );
+
+	if ( $date_from || $date_to ) {
+		wc_schedule_product_sale_events( $product );
+	}
+}
+add_action( 'woocommerce_update_product', 'wc_maybe_schedule_product_sale_events', 10, 2 );
+add_action( 'woocommerce_new_product', 'wc_maybe_schedule_product_sale_events', 10, 2 );
+
+/**
  * Function which handles the start and end of scheduled sales via cron.
+ *
+ * Previously, this daily cron was the only mechanism for starting/ending scheduled
+ * sales, which caused timing issues - sales could be "a day off" depending on when
+ * WP-Cron ran. Now, per-product Action Scheduler events fire at exact sale times.
+ *
+ * This function now acts as a safety net to:
+ * 1. Catch any products missed by the per-product Action Scheduler events
+ * 2. Handle products created before the AS events were introduced
+ *
+ * This function is kept for backwards compatibility. Extenders may hook into the
+ * `woocommerce_scheduled_sales` cron event or the before/after hooks fired within.
+ *
+ * Note: The before/after hooks (wc_before_products_starting_sales, etc.) only fire
+ * when this cron finds products to process. If per-product AS events handled sales
+ * on time, these hooks may not fire.
+ *
+ * @since 3.0.0
  */
 function wc_scheduled_sales() {
 	$data_store = WC_Data_Store::load( 'product' );
 
+	$product_util           = wc_get_container()->get( ProductUtil::class );
+	$must_refresh_transient = false;
+
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
+		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
+
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
 
 			if ( $product ) {
-				$sale_price = $product->get_sale_price();
-
-				if ( $sale_price ) {
-					$product->set_price( $sale_price );
-					$product->set_date_on_sale_from( '' );
-				} else {
-					$product->set_date_on_sale_to( '' );
-					$product->set_date_on_sale_from( '' );
-				}
-
-				$product->save();
+				wc_apply_sale_state_for_product( $product, 'start' );
+				// Note: wc_apply_sale_state_for_product() calls save(), which triggers
+				// woocommerce_update_product hook, which schedules the end AS event.
 			}
+
+			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
-
-		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
 	}
 
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
+		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
+
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
 
 			if ( $product ) {
-				$regular_price = $product->get_regular_price();
-				$product->set_price( $regular_price );
-				$product->set_sale_price( '' );
-				$product->set_date_on_sale_to( '' );
-				$product->set_date_on_sale_from( '' );
-				$product->save();
+				wc_apply_sale_state_for_product( $product, 'end' );
 			}
+
+			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
-
-		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
+	}
+
+	if ( $must_refresh_transient ) {
+		// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
+		WC_Cache_Helper::get_transient_version( 'product', true );
 	}
 }
 add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
@@ -887,7 +1089,7 @@ function wc_get_product_id_by_global_unique_id( $global_unique_id ) {
 }
 
 /**
- * Get attributes/data for an individual variation from the database and maintain it's integrity.
+ * Get attributes/data for an individual variation from the database and maintain its integrity.
  *
  * @since  2.4.0
  * @param  int $variation_id Variation ID.
@@ -1147,9 +1349,8 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 	$transient     = get_transient( $transient_name );
 	$related_posts = $transient && is_array( $transient ) && isset( $transient[ $query_args ] ) ? $transient[ $query_args ] : false;
 
-	// Query related posts if they are not cached
-	// Should happen only once per day due to transient expiration set to 1 DAY_IN_SECONDS, to avoid performance issues.
-	if ( false === $related_posts ) {
+	// We want to query related posts if they are not cached, or we don't have enough.
+	if ( false === $related_posts || count( $related_posts ) < $limit ) {
 
 		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_cat_terms', wc_get_product_term_ids( $product_id, 'product_cat' ), $product_id ) : array();
 		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
@@ -1323,12 +1524,33 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 	if ( $product->is_taxable() && wc_prices_include_tax() ) {
 		$order       = ArrayUtil::get_value_or_default( $args, 'order' );
 		$customer_id = $order ? $order->get_customer_id() : 0;
+		$tax_rates   = false;
+
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-		} else {
-			$customer  = $customer_id ? wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id ) : null;
+		} elseif ( $customer_id ) {
+			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
+		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
+			$tax_location = $order->get_taxable_location();
+			if ( is_array( $tax_location ) && isset( $tax_location['country'] ) ) {
+				$tax_rates = WC_Tax::find_rates(
+					array(
+						'country'   => $tax_location['country'],
+						'state'     => $tax_location['state'] ?? '',
+						'postcode'  => $tax_location['postcode'] ?? '',
+						'city'      => $tax_location['city'] ?? '',
+						'tax_class' => $product->get_tax_class(),
+					)
+				);
+			}
 		}
+
+		// Fallback if no tax rates were determined.
+		if ( false === $tax_rates ) {
+			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), null );
+		}
+
 		$remove_taxes = WC_Tax::calc_tax( $line_price, $tax_rates, true );
 		$return_price = $line_price - array_sum( $remove_taxes ); // Unrounded since we're dealing with tax inclusive prices. Matches logic in cart-totals class. @see adjust_non_base_location_price.
 	} else {

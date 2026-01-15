@@ -75,16 +75,14 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 				>
 					{ __( 'Order summary', 'woocommerce' ) }
 				</p>
-				{ ! isLarge && (
-					<>
-						<FormattedMonetaryAmount
-							currency={ totalsCurrency }
-							value={ totalPrice }
-						/>
-
-						<Icon icon={ isOpen ? chevronUp : chevronDown } />
-					</>
-				) }
+				<FormattedMonetaryAmount
+					currency={ totalsCurrency }
+					value={ totalPrice }
+					className="wc-block-components-checkout-order-summary__title-price"
+				/>
+				<span className="wc-block-components-checkout-order-summary__title-icon">
+					<Icon icon={ isOpen ? chevronUp : chevronDown } />
+				</span>
 			</div>
 			<div
 				className={ clsx(

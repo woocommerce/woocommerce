@@ -8,6 +8,7 @@ import {
 	Disabled,
 	PanelBody,
 	SelectControl,
+	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -22,7 +23,9 @@ import { useThemeColors } from '../../../../shared/hooks/use-theme-colors';
 
 interface Attributes {
 	className?: string;
-	style?: 'pills' | 'dropdown';
+	optionStyle?: 'pills' | 'dropdown';
+	autoselect: boolean;
+	disabledAttributesAction: 'disable' | 'hide';
 }
 
 function Pills( {
@@ -61,7 +64,8 @@ export default function AttributeOptionsEdit(
 	props: BlockEditProps< Attributes >
 ) {
 	const { attributes, setAttributes } = props;
-	const { className, style } = attributes;
+	const { className, optionStyle, autoselect, disabledAttributesAction } =
+		attributes;
 
 	const blockProps = useBlockProps( {
 		className,
@@ -72,9 +76,8 @@ export default function AttributeOptionsEdit(
 		'add-to-cart-with-options-variation-selector-attribute-options',
 		( { editorBackgroundColor, editorColor } ) => `
 			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
-				background-color: ${ editorColor };
-				color: ${ editorBackgroundColor };
-				border-color: ${ editorColor };
+				--pill-color: ${ editorBackgroundColor };
+				--pill-background-color: ${ editorColor };
 			}
 		`
 	);
@@ -82,7 +85,7 @@ export default function AttributeOptionsEdit(
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	if ( ! attribute ) return;
+	if ( ! attribute ) return null;
 
 	const options = attribute.terms.map( ( term, index ) => ( {
 		value: term.slug,
@@ -95,9 +98,17 @@ export default function AttributeOptionsEdit(
 			<InspectorControls>
 				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 					<ToggleGroupControl
-						value={ style }
-						onChange={ ( option: 'pills' | 'dropdown' ) => {
-							setAttributes( { style: option } );
+						label={ __( 'Style', 'woocommerce' ) }
+						value={ optionStyle ?? 'pills' }
+						onChange={ ( newOptionStyle ) => {
+							if (
+								newOptionStyle === 'pills' ||
+								newOptionStyle === 'dropdown'
+							) {
+								setAttributes( {
+									optionStyle: newOptionStyle,
+								} );
+							}
 						} }
 						isBlock
 						hideLabelFromVision
@@ -113,12 +124,59 @@ export default function AttributeOptionsEdit(
 						/>
 					</ToggleGroupControl>
 				</PanelBody>
+				<PanelBody title={ __( 'Auto-select', 'woocommerce' ) }>
+					<ToggleControl
+						label={ __(
+							'Auto-select when only one attribute is compatible',
+							'woocommerce'
+						) }
+						help={ __(
+							'This controls whether attributes will be auto-selected once upon loading the page and when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.',
+							'woocommerce'
+						) }
+						checked={ autoselect }
+						onChange={ () =>
+							setAttributes( { autoselect: ! autoselect } )
+						}
+						__nextHasNoMarginBottom
+					/>
+					<SelectControl
+						label={ __(
+							'Values in conflict with current selection',
+							'woocommerce'
+						) }
+						help={ __(
+							'This controls what to do with attribute values that conflict with the current selection.',
+							'woocommerce'
+						) }
+						value={ disabledAttributesAction }
+						options={ [
+							{
+								label: __( 'Hidden', 'woocommerce' ),
+								value: 'hide',
+							},
+							{
+								label: __(
+									'Grayed-out/crossed-out and disabled',
+									'woocommerce'
+								),
+								value: 'disable',
+							},
+						] }
+						onChange={ ( value ) =>
+							setAttributes( {
+								disabledAttributesAction: value as
+									| 'disable'
+									| 'hide',
+							} )
+						}
+						__nextHasNoMarginBottom
+					/>
+				</PanelBody>
 			</InspectorControls>
 
 			<Disabled>
-				{ style === 'pills' ? (
-					<Pills id={ attribute.taxonomy } options={ options } />
-				) : (
+				{ optionStyle === 'dropdown' ? (
 					<select
 						id={ attribute.taxonomy }
 						className="wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown"
@@ -129,6 +187,8 @@ export default function AttributeOptionsEdit(
 							</option>
 						) ) }
 					</select>
+				) : (
+					<Pills id={ attribute.taxonomy } options={ options } />
 				) }
 			</Disabled>
 		</div>

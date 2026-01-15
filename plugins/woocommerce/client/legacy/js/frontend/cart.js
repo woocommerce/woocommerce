@@ -423,6 +423,11 @@ jQuery( function ( $ ) {
 				this.item_remove_clicked
 			);
 			$( document ).on(
+				'keydown',
+				'.woocommerce-cart-form .product-remove > a',
+				this.on_keydown_remove_item
+			);
+			$( document ).on(
 				'click',
 				'.woocommerce-cart .restore-item',
 				this.item_restore_clicked
@@ -433,7 +438,7 @@ jQuery( function ( $ ) {
 				this.input_changed
 			);
 			$( document ).on(
-				'blur change input',
+				'change input',
 				'#coupon_code',
 				this.remove_coupon_error
 			);
@@ -661,6 +666,14 @@ jQuery( function ( $ ) {
 					).remove();
 					show_notice( response );
 					$( document.body ).trigger( 'removed_coupon', [ coupon ] );
+					$( '#coupon_code' )
+						.val('')
+						.removeClass('has-error')
+						.removeAttr('aria-invalid')
+						.removeAttr('aria-describedby')
+						.closest('.coupon')
+						.find('.coupon-error-notice')
+						.remove();
 					unblock( $wrapper );
 				},
 				complete: function () {
@@ -759,6 +772,20 @@ jQuery( function ( $ ) {
 					$( document.body ).trigger( 'item_removed_from_classic_cart');
 				},
 			} );
+		},
+
+		/**
+		 * Handle when pressing the Space key on the remove item link.
+		 * This is necessary because the link got the role="button" attribute
+		 * and needs to act like a button.
+		 *
+		 * @param {Object} evt The JQuery event
+		 */
+		on_keydown_remove_item: function ( event ) {
+			if ( event.key === ' ' ) {
+				event.preventDefault();
+				$( event.currentTarget ).trigger( 'click' );
+			}
 		},
 
 		/**

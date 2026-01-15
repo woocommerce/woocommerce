@@ -20,7 +20,7 @@ import {
 	getSortCodeLabel,
 	shouldDisplaySortCode,
 } from './utils';
-import { validateRequiredField, validateNumericField } from './validation';
+import { validateRequiredField } from './validation';
 import './bank-account-modal.scss';
 
 /**
@@ -79,9 +79,6 @@ export const BankAccountModal = ( {
 		const newErrors: Partial< Record< keyof BankAccount, string > > = {};
 
 		newErrors.account_name = validateRequiredField( formData.account_name );
-		newErrors.account_number =
-			validateRequiredField( formData.account_number ) ||
-			validateNumericField( formData.account_number );
 
 		if ( shouldDisplaySortCode( selectedCountry ) ) {
 			newErrors.sort_code = validateRequiredField( formData.sort_code );
@@ -170,9 +167,8 @@ export const BankAccountModal = ( {
 				/>
 
 				<TextControl
-					className={ 'bank-account-modal__field is-required' }
+					className={ 'bank-account-modal__field' }
 					label={ __( 'Account Number', 'woocommerce' ) }
-					required
 					value={ formData.account_number }
 					onChange={ ( value ) =>
 						updateField( 'account_number', value )

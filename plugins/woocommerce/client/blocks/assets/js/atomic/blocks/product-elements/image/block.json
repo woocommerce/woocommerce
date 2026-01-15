@@ -40,6 +40,7 @@
 			"aspectRatio": true,
 			"__experimentalSkipSerialization": true
 		},
+		"email": true,
 		"__experimentalSelector": ".wc-block-components-product-image"
 	},
 	"ancestor": [
@@ -48,7 +49,7 @@
 		"woocommerce/product-template",
 		"core/post-template"
 	],
-	"usesContext": [ "query", "queryId", "postId" ],
+	"usesContext": [ "imageId", "postId", "query", "queryId" ],
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,

@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
 
 /**
@@ -174,13 +175,7 @@ class Settings {
 			}
 		}
 
-		$user_controller = new \WP_REST_Users_Controller();
-		$request         = new \WP_REST_Request();
-		$request->set_query_params( array( 'context' => 'edit' ) );
-		$user_response     = $user_controller->get_current_item( $request );
-		$current_user_data = is_wp_error( $user_response ) ? (object) array() : $user_response->get_data();
-
-		$settings['currentUserData']      = $current_user_data;
+		$settings['currentUserData']      = WCAdminUser::get_user_data();
 		$settings['reviewsEnabled']       = get_option( 'woocommerce_enable_reviews' );
 		$settings['manageStock']          = get_option( 'woocommerce_manage_stock' );
 		$settings['commentModeration']    = get_option( 'comment_moderation' );
@@ -217,6 +212,7 @@ class Settings {
 			// We may have synced orders with a now-unregistered status.
 			// E.g. an extension that added statuses is now inactive or removed.
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
+			$settings['usesNewFullRefundData']     = OrderUtil::uses_new_full_refund_data();
 		}
 
 		// The separator used for attributes found in Variation titles.
@@ -245,6 +241,7 @@ class Settings {
 		$settings['connectNonce']                     = wp_create_nonce( 'connect' );
 		$settings['wcpay_welcome_page_connect_nonce'] = wp_create_nonce( 'wcpay-connect' );
 		$settings['email_preview_nonce']              = wp_create_nonce( 'email-preview-nonce' );
+		$settings['email_listing_nonce']              = wp_create_nonce( 'email-listing-nonce' );
 		$settings['wc_helper_nonces']                 = array(
 			'refresh' => wp_create_nonce( 'refresh' ),
 		);
@@ -351,6 +348,34 @@ class Settings {
 				'date_completed' => 'date_completed',
 			),
 		);
+
+		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
+			$settings[] = array(
+				'id'          => 'woocommerce_analytics_scheduled_import',
+				'option_key'  => 'woocommerce_analytics_scheduled_import',
+				'label'       => __( 'Updates', 'woocommerce' ),
+				'description' => __( 'Controls how analytics data is imported from orders.', 'woocommerce' ),
+				'type'        => 'radio',
+				'default'     => null, // Default to null so we can know if it's a new site or an existing site. New sites will have the option set.
+				'options'     => array(
+					'yes' => __( 'Scheduled (recommended)', 'woocommerce' ),
+					'no'  => __( 'Immediately', 'woocommerce' ),
+				),
+			);
+
+			// Add hidden setting for the import interval to display in the client side.
+			$import_interval = \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_import_interval();
+			$import_interval = absint( $import_interval );
+			// Format the import interval to a human-readable string.
+			$import_interval_string = human_time_diff( 0, $import_interval );
+			$settings[]             = array(
+				'id'         => 'woocommerce_analytics_import_interval',
+				'option_key' => 'woocommerce_analytics_import_interval',
+				'type'       => 'hidden',
+				'default'    => $import_interval_string,
+			);
+		}
+
 		return $settings;
 	}
 

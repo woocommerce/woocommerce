@@ -23,8 +23,27 @@ import { EmailStatus } from './email-status';
 const previewTextMaxLength = 150;
 const previewTextRecommendedLength = 80;
 
-// @ts-expect-error RichTextWithButton has default any type and is not exported yet.
-const SidebarSettings = ( { RichTextWithButton } ) => {
+type SidebarSettings = {
+	RichTextWithButton: React.ComponentType< {
+		attributeName: string;
+		attributeValue: string;
+		updateProperty: ( name: string, value: string | boolean ) => void;
+		label: string;
+		placeholder: string;
+		help?: React.ReactNode;
+	} >;
+	recordEvent: ( name: string, data?: Record< string, unknown > ) => void;
+	debouncedRecordEvent: (
+		name: string,
+		data?: Record< string, unknown >
+	) => void;
+};
+
+const SidebarSettings = ( {
+	RichTextWithButton,
+	recordEvent,
+	debouncedRecordEvent,
+}: SidebarSettings ) => {
 	const [ woocommerce_email_data ] = useEntityProp(
 		'postType',
 		'woo_email',
@@ -34,6 +53,10 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 	// Initialize toggle control state
 	const [ addBCC, setAddBCC ] = useState( !! woocommerce_email_data?.bcc );
 	const [ addCC, setAddCC ] = useState( !! woocommerce_email_data?.cc );
+
+	if ( ! woocommerce_email_data ) {
+		return null;
+	}
 
 	const updateWooMailProperty = ( name: string, value: string | boolean ) => {
 		const editedPost = select( coreDataStore ).getEditedEntityRecord(
@@ -138,6 +161,7 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
 							name="recipient"
+							data-testid="email_recipient"
 							value={ woocommerce_email_data.recipient }
 							onChange={ ( value ) => {
 								updateWooMailProperty( 'recipient', value );
@@ -162,6 +186,9 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 							if ( ! value ) {
 								updateWooMailProperty( 'cc', '' );
 							}
+							recordEvent( 'email_cc_toggle_clicked', {
+								isEnabled: value,
+							} );
 						} }
 					/>
 				</BaseControl>
@@ -172,9 +199,16 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 						<TextControl
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
+							data-testid="email_cc"
 							value={ woocommerce_email_data?.cc || '' }
 							onChange={ ( value ) => {
 								updateWooMailProperty( 'cc', value );
+								debouncedRecordEvent(
+									'email_cc_input_updated',
+									{
+										value,
+									}
+								);
 							} }
 							help={ __(
 								'Add recipients who will receive a copy of the email. Separate multiple addresses with commas.',
@@ -196,6 +230,9 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 							if ( ! value ) {
 								updateWooMailProperty( 'bcc', '' );
 							}
+							recordEvent( 'email_bcc_toggle_clicked', {
+								isEnabled: value,
+							} );
 						} }
 					/>
 				</BaseControl>
@@ -206,9 +243,16 @@ const SidebarSettings = ( { RichTextWithButton } ) => {
 						<TextControl
 							__nextHasNoMarginBottom
 							__next40pxDefaultSize
+							data-testid="email_bcc"
 							value={ woocommerce_email_data?.bcc || '' }
 							onChange={ ( value ) => {
 								updateWooMailProperty( 'bcc', value );
+								debouncedRecordEvent(
+									'email_bcc_input_updated',
+									{
+										value,
+									}
+								);
 							} }
 							help={ __(
 								'Add recipients who will receive a hidden copy of the email. Separate multiple addresses with commas.',
@@ -226,14 +270,20 @@ export function modifySidebar() {
 	addFilter(
 		'woocommerce_email_editor_setting_sidebar_email_status_component',
 		NAME_SPACE,
-		() => EmailStatus
+		( _originalComponent, tracking ) => {
+			return () => <EmailStatus recordEvent={ tracking.recordEvent } />;
+		}
 	);
 	addFilter(
 		'woocommerce_email_editor_setting_sidebar_extension_component',
 		NAME_SPACE,
-		( RichTextWithButton ) => {
+		( RichTextWithButton, tracking ) => {
 			return () => (
-				<SidebarSettings RichTextWithButton={ RichTextWithButton } />
+				<SidebarSettings
+					RichTextWithButton={ RichTextWithButton }
+					recordEvent={ tracking.recordEvent }
+					debouncedRecordEvent={ tracking.debouncedRecordEvent }
+				/>
 			);
 		}
 	);

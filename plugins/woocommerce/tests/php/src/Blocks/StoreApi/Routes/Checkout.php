@@ -12,6 +12,7 @@ use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\Blocks\Package;
@@ -33,6 +34,10 @@ class Checkout extends MockeryTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+
+		// Set jetpack_activation_source option to prevent "Cannot use bool as array" error
+		// in Jetpack Connection Manager's apply_activation_source_to_args method.
+		update_option( 'jetpack_activation_source', array( '', '' ) );
 
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
@@ -125,6 +130,10 @@ class Checkout extends MockeryTestCase {
 		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
 		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
 		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
+
+		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
+		delete_option( 'jetpack_activation_source' );
+		wc_get_container()->get( SessionClearanceManager::class )->reset_session();
 
 		update_option( 'woocommerce_ship_to_countries', 'all' );
 		update_option( 'woocommerce_allowed_countries', 'all' );
@@ -688,6 +697,7 @@ class Checkout extends MockeryTestCase {
 			function ( $locale ) {
 				$locale['FR']['state']['label']    = 'French state';
 				$locale['FR']['state']['required'] = true;
+				$locale['FR']['state']['hidden']   = false;
 				$locale['DE']['state']['label']    = 'German state';
 				$locale['DE']['state']['required'] = true;
 				return $locale;
@@ -1606,6 +1616,58 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * Test that payment methods are not saved to free orders.
+	 */
+	public function test_payment_method_is_cleared_for_free_order() {
+		// Create a simple product and add to cart.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '0' ); // Make the product free.
+		$product->save();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Verify that the cart total is 0 (free order).
+		$this->assertEquals( 0, WC()->cart->get_total( 'numeric' ), 'Cart total should be 0 for a free order' );
+
+		// Create an order via checkout route.
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'email'                       => 'test@test.com',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'shipping_address' => (object) array(
+					'first_name'                  => 'test',
+					'last_name'                   => 'test',
+					'address_1'                   => 'test',
+					'city'                        => 'test',
+					'state'                       => 'CA',
+					'postcode'                    => '12345',
+					'country'                     => 'FR',
+					'plugin-namespace/student-id' => '12345678',
+				),
+				'payment_method'   => '',
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$order_id = $response->get_data()['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		// Assert payment method is not saved.
+		$this->assertEquals( '', $order->get_payment_method(), 'Payment method should be cleared for free orders.' );
+	}
+
+	/**
 	 * Test that custom status is retained for non-free orders when the custom
 	 * status is not in the valid statuses for payment list.
 	 */
@@ -1734,5 +1796,54 @@ class Checkout extends MockeryTestCase {
 
 		// Order shouldn't stay in custom status, instead we let payment gateway set the correct status.
 		$this->assertEquals( 'on-hold', $order->get_status(), 'Order status should be controlled by the payment gateway, not remain custom.' );
+	}
+
+	/**
+	 * Test that checkout is blocked when fraud protection blocks the session.
+	 */
+	public function test_checkout_blocked_when_session_blocked() {
+		// Enable fraud protection and block the session.
+		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
+		wc_get_container()->get( SessionClearanceManager::class )->block_session();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'billing_address'  => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+					'email'      => 'testaccount@test.com',
+				),
+				'shipping_address' => (object) array(
+					'first_name' => 'test',
+					'last_name'  => 'test',
+					'company'    => '',
+					'address_1'  => 'test',
+					'address_2'  => '',
+					'city'       => 'test',
+					'state'      => '',
+					'postcode'   => 'cb241ab',
+					'country'    => 'GB',
+					'phone'      => '',
+				),
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status(), 'Should return 403 when session is blocked' );
+		$this->assertEquals( 'woocommerce_rest_checkout_error', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'unable to process this request online', $response->get_data()['message'] );
+		$this->assertStringContainsString( 'to complete your purchase', $response->get_data()['message'], 'Should use checkout-specific message' );
 	}
 }

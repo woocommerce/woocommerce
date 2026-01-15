@@ -1,10 +1,14 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as baseTest, expect } from '../../fixtures/fixtures';
 import { logIn } from '../../utils/login';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH } from '../../utils/api-client';
 
 const now = Date.now();
 const users = [

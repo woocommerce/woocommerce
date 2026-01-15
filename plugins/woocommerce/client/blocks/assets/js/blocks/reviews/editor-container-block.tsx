@@ -4,14 +4,13 @@
 import { __ } from '@wordpress/i18n';
 import { debounce } from '@woocommerce/base-utils';
 import { Placeholder } from '@wordpress/components';
-import { useBlockProps } from '@wordpress/block-editor';
 import { EditorContainerBlockProps } from '@woocommerce/blocks/reviews/types';
 
 /**
  * Internal dependencies
  */
 import EditorBlock from './editor-block';
-import { getBlockClassName, getSortArgs } from './utils.js';
+import { getSortArgs } from './utils.js';
 
 const EditorContainerBlock = ( {
 	attributes,
@@ -39,10 +38,6 @@ const EditorContainerBlock = ( {
 		! showReviewImage &&
 		! showProductName;
 
-	const blockProps = useBlockProps( {
-		className: getBlockClassName( attributes ),
-	} );
-
 	if ( isAllContentHidden ) {
 		return (
 			<Placeholder icon={ icon } label={ name }>
@@ -55,7 +50,7 @@ const EditorContainerBlock = ( {
 	}
 
 	return (
-		<div { ...blockProps }>
+		<>
 			<EditorBlock
 				attributes={ attributes }
 				categoryIds={ categoryIds }
@@ -68,7 +63,7 @@ const EditorContainerBlock = ( {
 				productId={ productId }
 				reviewsToDisplay={ reviewsOnPageLoad }
 			/>
-		</div>
+		</>
 	);
 };
 

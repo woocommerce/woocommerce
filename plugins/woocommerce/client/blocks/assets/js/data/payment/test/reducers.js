@@ -22,6 +22,7 @@ describe( 'paymentMethodDataReducer', () => {
 		},
 		availablePaymentMethods: {},
 		availableExpressPaymentMethods: {},
+		registeredExpressPaymentMethods: {},
 		paymentMethodData: {},
 		paymentMethodsInitialized: false,
 		expressPaymentMethodsInitialized: false,
@@ -48,6 +49,7 @@ describe( 'paymentMethodDataReducer', () => {
 			},
 			availablePaymentMethods: { 'my-new-method': { express: false } },
 			availableExpressPaymentMethods: {},
+			registeredExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -71,6 +73,7 @@ describe( 'paymentMethodDataReducer', () => {
 			},
 			availablePaymentMethods: { 'my-new-method': { express: false } },
 			availableExpressPaymentMethods: {},
+			registeredExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -95,6 +98,7 @@ describe( 'paymentMethodDataReducer', () => {
 			},
 			availablePaymentMethods: {},
 			availableExpressPaymentMethods: {},
+			registeredExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -124,6 +128,7 @@ describe( 'paymentMethodDataReducer', () => {
 			availableExpressPaymentMethods: {
 				'my-new-method': { express: true },
 			},
+			registeredExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -151,6 +156,7 @@ describe( 'paymentMethodDataReducer', () => {
 					name: 'My New Method',
 				},
 			},
+			registeredExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -175,6 +181,7 @@ describe( 'paymentMethodDataReducer', () => {
 			},
 			availablePaymentMethods: {},
 			availableExpressPaymentMethods: {},
+			registeredExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -204,6 +211,7 @@ describe( 'paymentMethodDataReducer', () => {
 					name: 'My Other Method',
 				},
 			},
+			registeredExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -236,6 +244,7 @@ describe( 'paymentMethodDataReducer', () => {
 					name: 'My Other Method',
 				},
 			},
+			registeredExpressPaymentMethods: {},
 			paymentMethodData: {},
 			paymentMethodsInitialized: false,
 			expressPaymentMethodsInitialized: false,
@@ -263,6 +272,64 @@ describe( 'paymentMethodDataReducer', () => {
 			reducer( originalState, {
 				type: ACTION_TYPES.SET_PAYMENT_RESULT,
 				data: mockResponse,
+			} )
+		).toEqual( expectedState );
+	} );
+
+	it( 'should handle SET_REGISTERED_EXPRESS_PAYMENT_METHODS', () => {
+		const mockRegisteredMethods = {
+			'stripe-express': {
+				name: 'stripe-express',
+				title: 'Stripe Express',
+				description: 'Pay with Stripe express checkout',
+				gatewayId: 'stripe',
+				supportsStyle: [ 'height', 'borderRadius' ],
+			},
+			'paypal-express': {
+				name: 'paypal-express',
+				title: 'PayPal Express',
+				description: 'Pay with PayPal express checkout',
+				gatewayId: 'paypal',
+				supportsStyle: [],
+			},
+		};
+
+		const expectedState = {
+			...originalState,
+			registeredExpressPaymentMethods: mockRegisteredMethods,
+		};
+
+		expect(
+			reducer( originalState, {
+				type: ACTION_TYPES.SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
+				paymentMethods: mockRegisteredMethods,
+			} )
+		).toEqual( expectedState );
+	} );
+
+	it( 'should handle SET_REGISTERED_EXPRESS_PAYMENT_METHODS with empty object', () => {
+		const stateWithRegisteredMethods = deepFreeze( {
+			...originalState,
+			registeredExpressPaymentMethods: {
+				'stripe-express': {
+					name: 'stripe-express',
+					title: 'Stripe Express',
+					description: 'Pay with Stripe express checkout',
+					gatewayId: 'stripe',
+					supportsStyle: [ 'height', 'borderRadius' ],
+				},
+			},
+		} );
+
+		const expectedState = {
+			...originalState,
+			registeredExpressPaymentMethods: {},
+		};
+
+		expect(
+			reducer( stateWithRegisteredMethods, {
+				type: ACTION_TYPES.SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
+				paymentMethods: {},
 			} )
 		).toEqual( expectedState );
 	} );

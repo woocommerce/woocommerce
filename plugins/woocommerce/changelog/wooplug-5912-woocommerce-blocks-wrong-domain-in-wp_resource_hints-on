@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update woocommerce_block_asset_resource_hints to work per-site, rather than across the network on multisite instances

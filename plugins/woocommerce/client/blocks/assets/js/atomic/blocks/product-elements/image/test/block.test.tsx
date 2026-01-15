@@ -19,6 +19,20 @@ jest.mock( '@woocommerce/base-hooks', () => ( {
 	} ) ),
 } ) );
 
+jest.mock( '@woocommerce/settings', () => {
+	const originalModule = jest.requireActual( '@woocommerce/settings' );
+	return {
+		...originalModule,
+		getSetting: jest.fn( ( key, defaultValue ) => {
+			if ( key === 'placeholderImgSrcFullSize' ) {
+				return 'placeholder-full-size.jpg';
+			}
+			// Use the original getSetting for other keys
+			return originalModule.getSetting( key, defaultValue );
+		} ),
+	};
+} );
+
 const productWithoutImages: ProductResponseItem = {
 	name: 'Test product',
 	id: 1,
@@ -187,9 +201,9 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 
 			const anchor = placeholderImage.closest( 'a' );
@@ -250,9 +264,9 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 
 			const anchor = placeholderImage.closest( 'a' );
@@ -278,9 +292,9 @@ describe( 'Product Image Block', () => {
 				</ProductDataContextProvider>
 			);
 
-			const placeholderImage = component.getByAltText( 'Test product' );
+			const placeholderImage = component.getByRole( 'presentation' );
 			expect( placeholderImage.getAttribute( 'src' ) ).toBe(
-				'placeholder.jpg'
+				'placeholder-full-size.jpg'
 			);
 			expect( placeholderImage.getAttribute( 'width' ) ).toBe( null );
 			expect( placeholderImage.getAttribute( 'height' ) ).toBe( null );

@@ -1,23 +1,33 @@
 /**
  * External dependencies
  */
-
+import { __ } from '@wordpress/i18n';
+import type { ComponentType } from 'react';
+import { useEffect, useState } from '@wordpress/element';
+import { info } from '@wordpress/icons';
+import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
+import ProductControl from '@woocommerce/editor-components/product-control';
 import {
 	ProductResponseItem,
 	ProductCategoryResponseItem,
 } from '@woocommerce/types';
-import { Placeholder, Icon, Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
-import ProductControl from '@woocommerce/editor-components/product-control';
-import type { ComponentType } from 'react';
+import {
+	Placeholder,
+	Icon,
+	Button,
+	__experimentalHStack as HStack,
+	__experimentalText as Text,
+} from '@wordpress/components';
+import { ErrorObject } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
  */
+
 import { BLOCK_NAMES } from './constants';
 import { EditorBlock, GenericBlockUIConfig } from './types';
-import { getClassPrefixFromName } from './utils';
+import { getClassPrefixFromName, getInvalidItemDescription } from './utils';
+import { useFeaturedItemStatus } from './use-featured-item-status';
 
 interface EditModeConfiguration extends GenericBlockUIConfig {
 	description: string;
@@ -26,7 +36,6 @@ interface EditModeConfiguration extends GenericBlockUIConfig {
 
 type EditModeRequiredAttributes = {
 	categoryId?: number;
-	editMode: boolean;
 	mediaId: number;
 	mediaSrc: string;
 	productId?: number;
@@ -34,9 +43,12 @@ type EditModeRequiredAttributes = {
 
 interface EditModeRequiredProps< T > {
 	attributes: EditModeRequiredAttributes & EditorBlock< T >[ 'attributes' ];
+	clientId: string;
 	debouncedSpeak: ( label: string ) => void;
 	setAttributes: ( attrs: Partial< EditModeRequiredAttributes > ) => void;
 	triggerUrlUpdate: () => void;
+	isLoading: boolean;
+	error?: ErrorObject | null;
 }
 
 type EditModeProps< T extends EditorBlock< T > > = T &
@@ -52,36 +64,92 @@ export const withEditMode =
 			name,
 			setAttributes,
 			triggerUrlUpdate = () => void null,
+			error,
 		} = props;
 
 		const className = getClassPrefixFromName( name );
+		const [ selectedOptions, setSelectedOptions ] = useState< {
+			productId?: number;
+			categoryId?: number;
+			mediaId: number;
+			mediaSrc: string;
+		} >();
+
+		const hasFeaturedItemId =
+			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
+			( name === BLOCK_NAMES.featuredCategory && attributes.categoryId );
+
+		// Only show edit mode for newly inserted blocks without existing selection
+		const [ editMode, setEditMode ] = useState< boolean >(
+			! hasFeaturedItemId
+		);
 
 		const onDone = () => {
-			setAttributes( { editMode: false } );
-			debouncedSpeak( editLabel );
+			if ( selectedOptions ) {
+				setAttributes( selectedOptions );
+				setEditMode( false );
+				debouncedSpeak( editLabel );
+			}
 		};
 
-		if ( attributes.editMode ) {
+		const itemId =
+			name === BLOCK_NAMES.featuredProduct
+				? attributes?.productId
+				: attributes?.categoryId;
+
+		const { status, isDeleted, isLoading } = useFeaturedItemStatus( {
+			itemId,
+			itemType: name,
+		} );
+
+		useEffect( () => {
+			if ( ! isLoading ) {
+				const currEditModeValue =
+					( name === BLOCK_NAMES.featuredProduct &&
+						status !== 'publish' ) ||
+					isDeleted;
+
+				if ( currEditModeValue ) {
+					setEditMode( currEditModeValue );
+				}
+			}
+		}, [ status, isDeleted, name, isLoading ] );
+
+		if ( editMode ) {
 			return (
 				<Placeholder
 					icon={ <Icon icon={ icon } /> }
 					label={ label }
 					className={ className }
 				>
-					{ description }
+					<HStack alignment="center">
+						{ isDeleted ? (
+							<Icon
+								icon={ info }
+								className="wc-blocks-featured-items__orange-info-icon"
+							/>
+						) : (
+							<Icon icon={ info } />
+						) }
+						<Text>
+							{ isDeleted
+								? getInvalidItemDescription( name )
+								: description }
+						</Text>
+					</HStack>
 					<div className={ `${ className }__selection` }>
 						{ name === BLOCK_NAMES.featuredCategory && (
 							<ProductCategoryControl
 								selected={
-									attributes.categoryId
-										? [ attributes.categoryId ]
+									selectedOptions?.categoryId
+										? [ selectedOptions.categoryId ]
 										: []
 								}
 								onChange={ (
 									value: ProductCategoryResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setAttributes( {
+									setSelectedOptions( {
 										categoryId: id,
 										mediaId: 0,
 										mediaSrc: '',
@@ -94,8 +162,8 @@ export const withEditMode =
 						{ name === BLOCK_NAMES.featuredProduct && (
 							<ProductControl
 								selected={
-									attributes.productId
-										? [ attributes.productId ]
+									selectedOptions?.productId
+										? [ selectedOptions.productId ]
 										: []
 								}
 								showVariations
@@ -103,7 +171,7 @@ export const withEditMode =
 									value: ProductResponseItem[] = []
 								) => {
 									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setAttributes( {
+									setSelectedOptions( {
 										productId: id,
 										mediaId: 0,
 										mediaSrc: '',
@@ -120,5 +188,12 @@ export const withEditMode =
 			);
 		}
 
-		return <Component { ...props } />;
+		return (
+			<Component
+				{ ...props }
+				isLoading={ isLoading }
+				error={ isLoading ? null : error }
+				useEditMode={ [ editMode, setEditMode ] }
+			/>
+		);
 	};

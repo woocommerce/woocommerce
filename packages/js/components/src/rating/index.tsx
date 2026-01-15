@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement } from '@wordpress/element';
 import StarIcon from 'gridicons/dist/star';
 
@@ -47,7 +47,7 @@ const Rating = ( {
 		return _stars;
 	};
 
-	const classes = classnames( 'woocommerce-rating', className );
+	const classes = clsx( 'woocommerce-rating', className );
 	const perStar = 100 / totalStars;
 	const outlineStyles = {
 		width: Math.round( perStar * rating ) + '%',

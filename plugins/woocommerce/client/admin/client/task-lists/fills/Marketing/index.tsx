@@ -254,7 +254,7 @@ const Marketing = ( { onComplete }: MarketingProps ) => {
 					) }
 					text={ __(
 						'Discover hand-picked extensions to grow your business in' +
-							' the official WooCommerce marketplace.',
+							' the WooCommerce marketplace.',
 						'woocommerce'
 					) }
 					buttonHref={ getAdminLink(

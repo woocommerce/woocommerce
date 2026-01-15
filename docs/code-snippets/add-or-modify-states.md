@@ -1,7 +1,9 @@
 ---
 post_title: Add or modify states
-tags: code-snippet
+
 ---
+
+# Add or modify states
 
 Add your own or modify shipping states in WooCommerce.
 

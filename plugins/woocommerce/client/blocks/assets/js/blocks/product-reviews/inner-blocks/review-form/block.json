@@ -13,6 +13,7 @@
 	},
 	"usesContext": [ "postId", "postType" ],
 	"supports": {
+		"interactivity": true,
 		"html": false,
 		"color": {
 			"gradients": true,
@@ -55,5 +56,8 @@
 		"attributes": {
 			"textAlign": "center"
 		}
-	}
+	},
+	"viewScriptModule": "woocommerce/product-review-form",
+	"style": "file:../woocommerce/product-review-form-style.css",
+	"editorStyle": "file:../woocommerce/product-review-form-editor.css"
 }

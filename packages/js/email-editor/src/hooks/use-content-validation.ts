@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { useCallback, useEffect } from '@wordpress/element';
-import { useSelect, subscribe } from '@wordpress/data';
+import { useSelect, subscribe, dispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { applyFilters, addFilter } from '@wordpress/hooks';
+import { applyFilters } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -21,7 +21,6 @@ import { useValidationNotices } from './use-validation-notices';
 const EMPTY_ARRAY = [];
 
 export type ContentValidationData = {
-	isInvalid: boolean;
 	validateContent: () => boolean;
 };
 
@@ -90,32 +89,30 @@ export const useContentValidation = (): ContentValidationData => {
 		hasValidationNotice,
 	] );
 
+	// Register the validation function with the store
 	useEffect( () => {
-		const filterHandler = async ( edits: Record< string, unknown > ) => {
-			const isValid = validateContent();
-			if ( ! isValid ) {
-				throw new Error();
-			}
-			return edits;
-		};
+		dispatch( emailEditorStore ).setContentValidation( {
+			validateContent,
+		} );
 
-		addFilter(
-			'editor.preSavePost',
-			'woocommerce/email-editor/validate-content',
-			filterHandler
-		);
+		return () => {
+			dispatch( emailEditorStore ).setContentValidation( undefined );
+		};
 	}, [ validateContent ] );
 
 	// Subscribe to updates so notices can be dismissed once resolved.
-	subscribe( () => {
-		if ( ! hasValidationNotice() ) {
-			return;
-		}
-		validateContent();
-	}, coreDataStore );
+	useEffect( () => {
+		const unsubscribe = subscribe( () => {
+			if ( ! hasValidationNotice() ) {
+				return;
+			}
+			validateContent();
+		}, coreDataStore );
+
+		return () => unsubscribe();
+	}, [ hasValidationNotice, validateContent ] );
 
 	return {
-		isInvalid: hasValidationNotice(),
 		validateContent,
 	};
 };

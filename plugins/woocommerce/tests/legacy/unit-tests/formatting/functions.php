@@ -365,6 +365,24 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Trim zeros and round.
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
 
+		// Use a null value.
+		$this->assertEquals( '', wc_format_decimal( null ) );
+
+		// DP of zero, null value.
+		$this->assertEquals( '', wc_format_decimal( null, 0 ) );
+
+		// DP of zero, zero value.
+		$this->assertEquals( '0', wc_format_decimal( '0', false ) );
+
+		// DP of two, zero value.
+		$this->assertEquals( '0.00', wc_format_decimal( '0', 2 ) );
+
+		// DP false, empty value.
+		$this->assertEquals( '', wc_format_decimal( '', false ) );
+
+		// DP of zero, empty value.
+		$this->assertEquals( '', wc_format_decimal( '', 0 ) );
+
 		update_option( 'woocommerce_price_num_decimals', '8' );
 
 		// Floats.
@@ -604,6 +622,9 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// Negative price.
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi>-<span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( -1.17 ) );
+
+		// Aria hidden option.
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi>-<span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( -1.17, array( 'aria-hidden' => true ) ) );
 
 		// Bogus prices.
 		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( null ) );
@@ -941,7 +962,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_price_range() {
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span> &ndash; <span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span>', wc_format_price_range( '10', '5' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span> <span aria-hidden="true">&ndash;</span> <span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span><span class="screen-reader-text">Price range: &#36;10.00 through &#36;5.00</span>', wc_format_price_range( '10', '5' ) );
 	}
 
 	/**

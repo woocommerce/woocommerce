@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\RemoteFreeExtensions;
 
 use Automattic\WooCommerce\Admin\Features\PaymentGatewaySuggestions\DefaultPaymentGateways;
-use Automattic\WooCommerce\Admin\Features\Features;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -70,7 +69,6 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'google-listings-and-ads:alt' ),
-					self::get_plugin( 'multichannel-by-cedcommerce' ),
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
@@ -85,7 +83,6 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'woocommerce-shipping' ),
 						self::get_plugin( 'jetpack' ),
 						self::get_plugin( 'pinterest-for-woocommerce' ),
-						self::get_plugin( 'kliken-ads-pixel-for-meta' ),
 						self::get_plugin( 'mailpoet' ),
 						self::get_plugin( 'klaviyo' ),
 						self::get_plugin( 'google-listings-and-ads' ),
@@ -95,21 +92,6 @@ class DefaultFreeExtensions {
 				),
 			),
 		);
-
-		if ( Features::is_enabled( 'disable-core-profiler-fallback' ) ) {
-			$remote_variant_assignment = (int) get_option( 'woocommerce_remote_variant_assignment', 61 ); // 1-120
-			$should_rollout_to_users   = $remote_variant_assignment <= 60; // Rollout to 50% of users.
-
-			if ( $should_rollout_to_users ) {
-				// Remove the core-profiler bundle.
-				$bundles = array_filter(
-					$bundles,
-					function ( $bundle ) {
-						return 'obw/core-profiler' !== $bundle['key'];
-					}
-				);
-			}
-		}
 
 		$bundles = wp_json_encode( $bundles );
 		return json_decode( $bundles );
@@ -154,18 +136,6 @@ class DefaultFreeExtensions {
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			),
-			'multichannel-by-cedcommerce'   => array(
-				'name'             => __( 'Multichannel for WooCommerce', 'woocommerce' ),
-				'description'      => __( 'Sync your sales data across platforms and manage everything from a unified dashboard.', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/onboarding/multichannel.webp', WC_PLUGIN_FILE ),
-				'manage_url'       => 'admin.php?page=sales_channel',
-				'is_built_by_wc'   => false,
-				'install_external' => true,
-				'learn_more_link'  => 'https://woocommerce.com/products/multichannel-by-cedcommerce-ebay-amazon-walmart-etsy-integration/?utm_source=marketing_task&utm_medium=product',
-				'tags'             => array(
-					'marketplace',
-				),
-			),
 			'facebook-for-woocommerce'      => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
@@ -187,15 +157,7 @@ class DefaultFreeExtensions {
 				'description'     => __( 'Get your products in front of Pinners searching for ideas and things to buy.', 'woocommerce' ),
 				'image_url'       => plugins_url( '/assets/images/onboarding/pinterest.png', WC_PLUGIN_FILE ),
 				'manage_url'      => 'admin.php?page=wc-admin&path=%2Fpinterest%2Flanding',
-				'is_visible'      => array(
-					array(
-						'type'        => 'option',
-						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 1, 60 ), // 50% segment
-						'default'     => false,
-						'operation'   => 'range',
-					),
-				),
+				'is_visible'      => true,
 				'is_built_by_wc'  => true,
 				'min_php_version' => '7.3',
 			),
@@ -215,28 +177,19 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 1, 60 ), // 50% segment with klaviyo
+						'value'       => array( 1, 84 ), // 70% segment with klaviyo
 						'default'     => false,
 						'operation'   => 'range',
 					),
 				),
 				'is_built_by_wc' => true,
 			),
-			// Shared 50% segment with pinterest-for-woocommerce.
 			'kliken-ads-pixel-for-meta'     => array(
 				'name'        => __( 'Meta Ads & Pixel for WooCommerce', 'woocommerce' ),
 				'description' => __( 'Sync your store catalog, set up pixel tracking, and run targeted ad campaigns.', 'woocommerce' ),
-				'image_url'   => plugins_url( '/assets/images/onboarding/kliken-ads-pixel-for-meta.svg', WC_PLUGIN_FILE ),
+				'image_url'   => plugins_url( '/assets/images/onboarding/kliken.svg', WC_PLUGIN_FILE ),
 				'manage_url'  => 'admin.php?page=kliken-ads-pixel-for-meta',
-				'is_visible'  => array(
-					array(
-						'type'        => 'option',
-						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 61, 120 ), // 50% segment
-						'default'     => false,
-						'operation'   => 'range',
-					),
-				),
+				'is_visible'  => false,
 			),
 			'mailchimp-for-woocommerce'     => array(
 				'name'           => __( 'Mailchimp', 'woocommerce' ),
@@ -254,7 +207,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 61, 120 ), // 50% segment with mailpoet
+						'value'       => array( 85, 120 ), // 30% segment with mailpoet
 						'default'     => false,
 						'operation'   => 'range',
 					),
@@ -523,7 +476,8 @@ class DefaultFreeExtensions {
 	public static function with_core_profiler_fields( array $plugins ) {
 		$_plugins = array(
 			'woocommerce-payments'      => array(
-				'label'            => __( 'Get paid with WooPayments', 'woocommerce' ),
+				/* translators: %s: Payment provider name. */
+				'label'            => sprintf( __( 'Get paid with %s', 'woocommerce' ), 'WooPayments' ),
 				'image_url'        => self::get_woo_logo(),
 				'description'      => __( "Securely accept payments and manage payment activity straight from your store's dashboard", 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/woocommerce-payments?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
@@ -538,9 +492,9 @@ class DefaultFreeExtensions {
 				'install_priority' => 3,
 			),
 			'jetpack'                   => array(
-				'label'            => __( 'Boost content creation with Jetpack AI Assistant', 'woocommerce' ),
+				'label'            => __( 'Protect your store and your shoppers with Jetpack', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-jetpack.svg', WC_PLUGIN_FILE ),
-				'description'      => __( 'Save time on content creation — unlock high-quality blog posts and pages using AI.', 'woocommerce' ),
+				'description'      => __( 'Keep your store online with full security and backups', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/jetpack?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 8,
 				'requires_jpc'     => true,
@@ -554,7 +508,7 @@ class DefaultFreeExtensions {
 			),
 			'kliken-ads-pixel-for-meta' => array(
 				'label'            => __( 'Grow your business with Facebook and Instagram', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/core-profiler/kliken-ads-pixel-for-meta.svg', WC_PLUGIN_FILE ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-kliken.svg', WC_PLUGIN_FILE ),
 				'description'      => __( 'Sync your store catalog, set up pixel tracking, and run targeted ad campaigns.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/meta-ads-and-pixel?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 2,

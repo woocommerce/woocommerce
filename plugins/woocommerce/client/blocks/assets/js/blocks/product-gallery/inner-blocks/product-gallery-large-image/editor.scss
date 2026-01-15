@@ -1,0 +1,42 @@
+.wc-block-product-gallery-large-image__inner-blocks {
+	.wp-block-woocommerce-product-image {
+		position: absolute;
+		top: -5px;
+		right: -5px;
+		bottom: -5px;
+		left: -5px;
+	}
+}
+
+
+// In Editor there's different HTML structure than in the frontend
+// due to usage of inner blocks template (we cannot have wrapper elements)
+// hence we need to use manually assign aspect ratios that are otherwise handled
+// in the frontend.
+:where(.wc-block-product-gallery-large-image) {
+	&:has(.wc-block-components-product-image--aspect-ratio-auto),
+	&:has(.wc-block-components-product-image--aspect-ratio-1) {
+		aspect-ratio: 1/1;
+	}
+
+	&:has(.wc-block-components-product-image--aspect-ratio-4-3) {
+		aspect-ratio: 4/3;
+	}
+
+	&:has(.wc-block-components-product-image--aspect-ratio-3-4) {
+		aspect-ratio: 3/4;
+	}
+
+	&:has(.wc-block-components-product-image--aspect-ratio-3-2) {
+		aspect-ratio: 3/2;
+	}
+	&:has(.wc-block-components-product-image--aspect-ratio-2-3) {
+		aspect-ratio: 2/3;
+	}
+	&:has(.wc-block-components-product-image--aspect-ratio-16-9) {
+		aspect-ratio: 16/9;
+	}
+	&:has(.wc-block-components-product-image--aspect-ratio-9-16) {
+		aspect-ratio: 9/16;
+	}
+}

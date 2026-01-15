@@ -271,13 +271,14 @@ export const PaymentGatewaySuggestions = ( { onComplete, query } ) => {
 				<TrackedLink
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to find additional payment providers.',
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find additional payment providers.',
 						'woocommerce'
 					) }
 					onClickCallback={ trackSeeMore }
 					targetUrl={ getAdminLink(
 						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=payment-gateways'
 					) }
+					linkType="wc-admin"
 				/>
 			}
 		></List>

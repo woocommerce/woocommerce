@@ -1,9 +1,9 @@
 {
 	"name": "@woocommerce/components",
-	"version": "12.3.0",
+	"version": "13.1.0",
 	"description": "UI components for WooCommerce.",
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"engines": {
 		"node": "^20.11.1"
 	},
@@ -41,6 +41,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint --ext=js,ts,tsx src --fix",
@@ -73,6 +74,7 @@
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/date": "workspace:*",
 		"@woocommerce/navigation": "workspace:*",
+		"@woocommerce/sanitize": "workspace:*",
 		"@wordpress/a11y": "wp-6.6",
 		"@wordpress/api-fetch": "wp-6.6",
 		"@wordpress/base-styles": "wp-6.6",
@@ -97,7 +99,7 @@
 		"@wordpress/url": "wp-6.6",
 		"@wordpress/viewport": "wp-6.6",
 		"canvas-confetti": "^1.9.2",
-		"classnames": "^2.3.2",
+		"clsx": "2.1.x",
 		"core-js": "^3.34.0",
 		"d3-axis": "^1.0.12",
 		"d3-format": "^1.4.5",
@@ -106,7 +108,6 @@
 		"d3-selection": "^1.4.2",
 		"d3-shape": "^1.3.7",
 		"d3-time-format": "^2.3.0",
-		"dompurify": "^2.5.7",
 		"downshift": "^6.1.12",
 		"emoji-flags": "^1.3.0",
 		"gridicons": "^3.4.2",
@@ -141,12 +142,11 @@
 		"@testing-library/react": "^16.x.x",
 		"@testing-library/user-event": "13.5.0",
 		"@types/canvas-confetti": "^1.6.4",
-		"@types/jest": "27.5.x",
+		"@types/jest": "29.5.x",
 		"@types/lodash": "^4.14.202",
 		"@types/prop-types": "^15.7.11",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/uuid": "^8.3.4",
-		"@types/wordpress__data": "6.0.0",
 		"@types/wordpress__media-utils": "3.0.0",
 		"@types/wordpress__viewport": "2.5.4",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -154,11 +154,11 @@
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/browserslist-config": "next",
-		"concurrently": "^7.6.0",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
-		"jest-cli": "27.5.x",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
 		"postcss": "8.4.x",
 		"postcss-loader": "4.3.x",
 		"qrcode.react": "^3.1.0",
@@ -226,7 +226,7 @@
 			"service": true
 		},
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -241,7 +241,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {
@@ -283,6 +283,10 @@
 				"node_modules/@woocommerce/navigation/build",
 				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",
+				"node_modules/@woocommerce/sanitize/build",
+				"node_modules/@woocommerce/sanitize/build-module",
+				"node_modules/@woocommerce/sanitize/build-style",
+				"node_modules/@woocommerce/sanitize/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

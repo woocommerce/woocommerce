@@ -230,14 +230,9 @@ class WC_Settings_Tracking {
 	 * @param string $hook Page hook.
 	 */
 	public function possibly_add_settings_tracking_scripts( $hook ) {
-		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.NonceVerification
-		if (
-			! isset( $_GET['page'] ) ||
-			'wc-settings' !== wp_unslash( $_GET['page'] )
-		) {
+		if ( ! is_wc_admin_settings_page() ) {
 			return;
 		}
-		// phpcs:enable
 
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'settings-tracking', false );
 	}

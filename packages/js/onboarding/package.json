@@ -3,7 +3,7 @@
 	"version": "3.6.0",
 	"description": "Onboarding utilities.",
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"engines": {
 		"node": "^20.11.1"
 	},
@@ -37,6 +37,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -64,7 +65,7 @@
 		"@wordpress/compose": "wp-6.6",
 		"@wordpress/element": "wp-6.6",
 		"@wordpress/i18n": "wp-6.6",
-		"classnames": "^2.3.2",
+		"clsx": "2.1.x",
 		"gridicons": "^3.4.2",
 		"react": "18.3.x",
 		"string-similarity": "4.0.4"
@@ -72,19 +73,18 @@
 	"devDependencies": {
 		"@babel/core": "7.25.7",
 		"@testing-library/react": "^16.x.x",
-		"@types/jest": "27.5.x",
+		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@types/string-similarity": "4.0.0",
-		"@types/wordpress__data": "6.0.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
-		"concurrently": "^7.6.0",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
-		"jest-cli": "27.5.x",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
 		"postcss": "8.4.x",
 		"postcss-loader": "4.3.x",
 		"rimraf": "5.0.5",
@@ -149,7 +149,7 @@
 			"service": true
 		},
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -164,7 +164,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {

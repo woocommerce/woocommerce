@@ -4,7 +4,7 @@
 	"description": "A tool to compare performance accross tow branches in WooCommerce Monorepo.",
 	"author": "Automattic",
 	"homepage": "https://github.com/woocommerce/woocommerce",
-	"license": "GPLv2",
+	"license": "GPL-2.0-or-later",
 	"repository": "woocommerce/woocommerce",
 	"scripts": {
 		"compare": "node -r ts-node/register index.js",
@@ -13,7 +13,7 @@
 	"dependencies": {
 		"@types/node": "20.x.x",
 		"@tsconfig/node16": "^1.0.4",
-		"@wordpress/env": "10.17.0",
+		"@wordpress/env": "10.32.0",
 		"commander": "9.5.0",
 		"chalk": "^4.1.2",
 		"inquirer": "^7.1.0",

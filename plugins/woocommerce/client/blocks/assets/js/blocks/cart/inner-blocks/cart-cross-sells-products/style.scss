@@ -1,12 +1,6 @@
 .wp-block-woocommerce-cart {
 	&.is-loading .wp-block-woocommerce-cart-cross-sells-block {
-		@include placeholder();
-		margin-top: 2em;
-		min-height: 15em;
-
-		h3 {
-			display: none;
-		}
+		display: none;
 	}
 
 	.wp-block-woocommerce-cart-cross-sells-block {

@@ -7,6 +7,7 @@ import {
 	TemplateCompiler,
 	BASE_URL,
 	wpCLI,
+	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
 const blockData = {
@@ -19,14 +20,52 @@ const blockData = {
 	},
 	urlSearchParamWhenFilterIsApplied: 'max_price=5',
 	endpointAPI: 'max_price=500',
-	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.png`,
+	placeholderUrl: `${ BASE_URL }/wp-content/plugins/woocommerce/assets/images/placeholder.webp`,
 };
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	templateCompiler: async ( { requestUtils }, use ) => {
-		const compiler = await requestUtils.createTemplateFromFile(
-			'archive-product_filters-with-product-collection'
-		);
+		// Retry the template creation to handle socket hang up errors
+		const maxRetries = 3;
+		let retryCount = 0;
+		let compiler;
+		let lastError;
+
+		while ( retryCount < maxRetries ) {
+			try {
+				compiler = await requestUtils.createTemplateFromFile(
+					'archive-product_filters-with-product-collection'
+				);
+				break; // Success, exit retry loop
+			} catch ( error ) {
+				lastError = error;
+				const errorMessage = error?.message || '';
+
+				// Only retry on network-related errors that are likely transient
+				const isRetriableError =
+					errorMessage.includes( 'socket hang up' ) ||
+					errorMessage.includes( 'ECONNRESET' ) ||
+					errorMessage.includes( 'ETIMEDOUT' ) ||
+					errorMessage.includes( 'ENOTFOUND' );
+
+				retryCount++;
+
+				if ( ! isRetriableError || retryCount >= maxRetries ) {
+					throw error;
+				}
+
+				// Exponential backoff: 200ms, 400ms, 800ms
+				const backoffDelay = Math.pow( 2, retryCount - 1 ) * 200;
+				await new Promise( ( resolve ) =>
+					setTimeout( resolve, backoffDelay )
+				);
+			}
+		}
+
+		if ( ! compiler ) {
+			throw lastError;
+		}
+
 		await use( compiler );
 	},
 } );
@@ -233,7 +272,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		);
 
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

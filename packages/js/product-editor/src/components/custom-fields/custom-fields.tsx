@@ -6,7 +6,7 @@ import { createElement, Fragment, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -116,7 +116,7 @@ export function CustomFields( {
 			) : (
 				<table
 					{ ...props }
-					className={ classNames(
+					className={ clsx(
 						'woocommerce-product-custom-fields__table',
 						className
 					) }

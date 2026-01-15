@@ -51,6 +51,9 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		);
 		wp_insert_post( $post_data );
 
+		// By default, disable Site active theme sync.
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
+
 		$this->theme_controller = $this->di_container->get( Theme_Controller::class );
 	}
 
@@ -128,8 +131,9 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItCanTranslateFontSizeSlug(): void {
 		$this->assertEquals( '13px', $this->theme_controller->translate_slug_to_font_size( 'small' ) );
 		$this->assertEquals( '16px', $this->theme_controller->translate_slug_to_font_size( 'medium' ) );
-		$this->assertEquals( '28px', $this->theme_controller->translate_slug_to_font_size( 'large' ) );
-		$this->assertEquals( '42px', $this->theme_controller->translate_slug_to_font_size( 'x-large' ) );
+		$this->assertEquals( '24px', $this->theme_controller->translate_slug_to_font_size( 'large' ) );
+		$this->assertEquals( '32px', $this->theme_controller->translate_slug_to_font_size( 'x-large' ) );
+		$this->assertEquals( '40px', $this->theme_controller->translate_slug_to_font_size( 'xx-large' ) );
 		$this->assertEquals( 'unknown', $this->theme_controller->translate_slug_to_font_size( 'unknown' ) );
 	}
 
@@ -137,6 +141,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test if the theme controller translates font family slug to font family name
 	 */
 	public function testItCanTranslateColorSlug(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
 		$this->assertEquals( '#000000', $this->theme_controller->translate_slug_to_color( 'black' ) );
 		$this->assertEquals( '#ffffff', $this->theme_controller->translate_slug_to_color( 'white' ) );
 		$this->assertEquals( '#abb8c3', $this->theme_controller->translate_slug_to_color( 'cyan-bluish-gray' ) );
@@ -176,6 +181,7 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test if the theme controller returns correct color palette
 	 */
 	public function testItLoadsColorPaletteFromSiteTheme(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
 		$settings = $this->theme_controller->get_settings();
 		$this->assertNotEmpty( $settings['color']['palette']['theme'] );
 	}

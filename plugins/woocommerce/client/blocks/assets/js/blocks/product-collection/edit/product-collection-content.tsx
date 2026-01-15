@@ -9,7 +9,7 @@ import {
 import { useInstanceId } from '@wordpress/compose';
 import { useEffect, useRef, useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 import fastDeepEqual from 'fast-deep-equal/es6';
 
 /**
@@ -88,9 +88,12 @@ const ProductCollectionContent = ( {
 	} );
 
 	const blockProps = useBlockProps();
-	const innerBlocksProps = useInnerBlocksProps( blockProps, {
-		template: INNER_BLOCKS_TEMPLATE,
-	} );
+	const innerBlocksProps = useInnerBlocksProps(
+		{},
+		{
+			template: INNER_BLOCKS_TEMPLATE,
+		}
+	);
 
 	const queryId = useQueryId(
 		clientId,
@@ -129,12 +132,16 @@ const ProductCollectionContent = ( {
 		};
 	}
 
+	const { __unstableMarkNextChangeAsNotPersistent } =
+		useDispatch( blockEditorStore );
+
 	/**
 	 * Because of issue https://github.com/WordPress/gutenberg/issues/7342,
 	 * We are using this workaround to set default attributes.
 	 */
 	useEffect(
 		() => {
+			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( defaultAttributesValue );
 			isInitialAttributesSet.current = true;
 		},

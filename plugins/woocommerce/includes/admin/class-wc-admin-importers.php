@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Integrations\WPPostsImporter;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,6 +37,12 @@ class WC_Admin_Importers {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_import', array( $this, 'do_ajax_product_import' ) );
 		add_action( 'in_admin_footer', array( $this, 'track_importer_exporter_view' ) );
+
+		/**
+		 * Register the WP Posts importer.
+		 */
+		$wp_posts_importer = wc_get_container()->get( WPPostsImporter::class );
+		$wp_posts_importer->register();
 
 		// Register WooCommerce importers.
 		$this->importers['product_importer'] = array(
@@ -132,7 +139,6 @@ class WC_Admin_Importers {
 	 */
 	public function register_importers() {
 		if ( Constants::is_defined( 'WP_LOAD_IMPORTERS' ) ) {
-			add_action( 'import_start', array( $this, 'post_importer_compatibility' ) );
 			register_importer( 'woocommerce_product_csv', __( 'WooCommerce products (CSV)', 'woocommerce' ), __( 'Import <strong>products</strong> to your store via a csv file.', 'woocommerce' ), array( $this, 'product_importer' ) );
 			register_importer( 'woocommerce_tax_rate_csv', __( 'WooCommerce tax rates (CSV)', 'woocommerce' ), __( 'Import <strong>tax rates</strong> to your store via a csv file.', 'woocommerce' ), array( $this, 'tax_rates_importer' ) );
 		}
@@ -167,7 +173,7 @@ class WC_Admin_Importers {
 	 * This code grabs the file before it is imported and ensures the taxonomies are created.
 	 */
 	public function post_importer_compatibility() {
-		global $wpdb;
+		wc_deprecated_function( 'post_importer_compatibility', '10.1.0', 'A new integration with the WP WXR importer now filters the posts during import and registers the taxonomies, instead of initializing them at the start of the import and having to re-parse the file.' );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		if ( empty( $_POST['import_id'] ) || ! class_exists( 'WXR_Parser' ) ) {

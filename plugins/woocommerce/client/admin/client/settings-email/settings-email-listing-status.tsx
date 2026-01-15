@@ -22,7 +22,7 @@ export const EMAIL_STATUSES = [
 	},
 	{
 		value: 'disabled',
-		label: __( 'Disabled', 'woocommerce' ),
+		label: __( 'Inactive', 'woocommerce' ),
 		icon: cancelCircleFilled,
 		description: __( 'Email would not be sent', 'woocommerce' ),
 	},

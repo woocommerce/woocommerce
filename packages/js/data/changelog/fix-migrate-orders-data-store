@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Migrate orders data store to register(storeDescriptor)

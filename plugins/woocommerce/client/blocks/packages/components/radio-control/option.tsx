@@ -17,7 +17,7 @@ const Option = ( {
 	disabled = false,
 	highlightChecked = false,
 	descriptionStackingDirection,
-}: RadioControlOptionProps ): JSX.Element => {
+}: RadioControlOptionProps ) => {
 	const {
 		value,
 		label,

@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -46,9 +50,20 @@ test.describe(
 			} );
 
 			await test.step( 'go to Linked Products', async () => {
-				await page
-					.getByRole( 'link', { name: 'Linked Products' } )
-					.click();
+				await expect( async () => {
+					await page
+						.getByRole( 'link', { name: 'Linked Products' } )
+						.click();
+
+					// Sometimes the click on link is too fast and the initial tab (General) is still visible
+					// so we need to wait make sure the upsell textbox is visible.
+					const upsellTextBoxLocator = page
+						.locator( 'p' )
+						.filter( { hasText: 'Upsells' } )
+						.getByRole( 'textbox' );
+
+					await expect( upsellTextBoxLocator ).toBeVisible();
+				} ).toPass();
 			} );
 		}
 

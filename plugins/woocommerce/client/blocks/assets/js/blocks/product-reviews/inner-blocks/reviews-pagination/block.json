@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-reviews-pagination",
 	"title": "Reviews Pagination",
 	"category": "woocommerce",
-	"ancestor": [ "woocommerce/blockified-product-reviews" ],
+	"ancestor": [ "woocommerce/product-reviews" ],
 	"allowedBlocks": [
 		"woocommerce/product-reviews-pagination-previous",
 		"woocommerce/product-reviews-pagination-numbers",

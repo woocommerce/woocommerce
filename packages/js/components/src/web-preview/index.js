@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { noop } from 'lodash';
 import PropTypes from 'prop-types';
@@ -39,7 +39,7 @@ class WebPreview extends Component {
 		const { className, loadingContent, src, title } = this.props;
 		const { isLoading } = this.state;
 
-		const classes = classnames( 'woocommerce-web-preview', className, {
+		const classes = clsx( 'woocommerce-web-preview', className, {
 			'is-loading': isLoading,
 		} );
 

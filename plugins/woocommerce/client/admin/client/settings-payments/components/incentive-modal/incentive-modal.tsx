@@ -12,8 +12,11 @@ import {
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement, useState } from '@wordpress/element';
 import { Link } from '@woocommerce/components';
-import { PaymentIncentive, PaymentProvider } from '@woocommerce/data';
-import { recordEvent } from '@woocommerce/tracks';
+import {
+	PaymentsProviderIncentive,
+	PaymentsProvider,
+	PaymentsEntity,
+} from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -21,17 +24,20 @@ import { recordEvent } from '@woocommerce/tracks';
 import './incentive-modal.scss';
 import { StatusBadge } from '~/settings-payments/components/status-badge';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
-import { isIncentiveDismissedInContext } from '~/settings-payments/utils';
+import {
+	isIncentiveDismissedInContext,
+	recordPaymentsEvent,
+} from '~/settings-payments/utils';
 
 interface IncentiveModalProps {
 	/**
 	 * Incentive data.
 	 */
-	incentive: PaymentIncentive;
+	incentive: PaymentsProviderIncentive;
 	/**
-	 * Payment provider.
+	 * Payments provider.
 	 */
-	provider: PaymentProvider;
+	provider: PaymentsProvider;
 	/**
 	 * Onboarding URL (if available).
 	 */
@@ -47,20 +53,26 @@ interface IncentiveModalProps {
 	 *
 	 * @param dismissHref Dismiss URL.
 	 * @param context     The context in which the incentive is dismissed. (e.g. whether it was in a modal or banner).
+	 * @param doNotTrack  Optional. If true, the dismissal should not be tracked.
 	 */
-	onDismiss: ( dismissUrl: string, context: string ) => void;
+	onDismiss: (
+		dismissUrl: string,
+		context: string,
+		doNotTrack?: boolean
+	) => void;
 	/**
-	 * Callback to setup the plugin.
+	 * Callback to set up the plugin.
 	 *
-	 * @param id            Extension ID.
-	 * @param slug          Extension slug.
-	 * @param onboardingUrl Onboarding URL (if available).
+	 * @param provider      Extension provider.
+	 * @param onboardingUrl Extension onboarding URL (if available).
+	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__incentive_modal').
 	 */
-	setupPlugin: (
-		id: string,
-		slug: string,
+	setUpPlugin: (
+		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 }
 
@@ -79,7 +91,7 @@ export const IncentiveModal = ( {
 	onboardingUrl,
 	onAccept,
 	onDismiss,
-	setupPlugin,
+	setUpPlugin,
 }: IncentiveModalProps ) => {
 	const [ isBusy, setIsBusy ] = useState( false );
 	const [ isOpen, setIsOpen ] = useState( true );
@@ -89,12 +101,13 @@ export const IncentiveModal = ( {
 
 	useEffect( () => {
 		// Record the event when the incentive is shown.
-		recordEvent( 'settings_payments_incentive_show', {
+		recordPaymentsEvent( 'incentive_show', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
+			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
 		} );
-	}, [ incentive.promo_id, provider.id ] );
+	}, [ incentive, provider ] );
 
 	/**
 	 * Closes the modal.
@@ -104,29 +117,32 @@ export const IncentiveModal = ( {
 	};
 
 	/**
-	 * Handles accepting the incentive.
+	 * Handles explicitly accepting the incentive via the modal CTA button.
+	 *
 	 * Triggers the onAccept callback, dismisses the incentive, closes the modal, and trigger plugin setup.
 	 */
 	const handleAccept = () => {
 		// Record the event when the user accepts the incentive.
-		recordEvent( 'settings_payments_incentive_accept', {
+		recordPaymentsEvent( 'incentive_accept', {
 			incentive_id: incentive.promo_id,
 			provider_id: provider.id,
+			suggestion_id: provider._suggestion_id ?? 'unknown',
 			display_context: context,
 		} );
 
 		// Accept the incentive and set up the plugin.
 		setIsBusy( true );
 		onAccept( incentive.promo_id );
-		onDismiss( incentive._links.dismiss.href, context ); // We also dismiss the incentive when it is accepted.
+		// We also dismiss the incentive when it is accepted.
+		onDismiss( incentive._links.dismiss.href, context, true );
 		handleClose(); // Close the modal.
-		setupPlugin(
-			provider.id,
-			provider.plugin.slug,
+		setUpPlugin(
+			provider,
 			onboardingUrl,
 			provider.plugin.status === 'not_installed'
 				? provider._links?.attach?.href ?? null
-				: null
+				: null,
+			'wc_settings_payments__incentive_modal'
 		);
 		setIsBusy( false );
 	};
@@ -136,14 +152,7 @@ export const IncentiveModal = ( {
 	 * Triggers the onDismiss callback and hides the modal.
 	 */
 	const handleDismiss = () => {
-		// Record the event when the user dismisses the incentive.
-		recordEvent( 'settings_payments_incentive_dismiss', {
-			incentive_id: incentive.promo_id,
-			provider_id: provider.id,
-			display_context: context,
-		} );
-
-		// Dimiss the incentive.
+		// Dismiss the incentive.
 		onDismiss( incentive._links.dismiss.href, context );
 		handleClose();
 	};

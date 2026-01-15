@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
-const templatePath = 'woocommerce/woocommerce//page-checkout';
+const templatePath = `${ BLOCK_THEME_SLUG }//page-checkout`;
 const templateType = 'wp_template';
 
 test.describe( 'Test the checkout template', () => {
@@ -15,12 +15,12 @@ test.describe( 'Test the checkout template', () => {
 			postId: templatePath,
 			postType: templateType,
 			canvas: 'edit',
+			showWelcomeGuide: false,
 		} );
-		await expect(
-			editor.canvas.getByRole( 'button', {
-				name: 'Place Order',
-			} )
-		).toBeVisible();
+		const block = editor.canvas.getByLabel( 'Block: Checkout', {
+			exact: true,
+		} );
+		await expect( block ).toBeVisible();
 	} );
 
 	test( 'Template can be accessed from the page editor', async ( {
@@ -28,7 +28,10 @@ test.describe( 'Test the checkout template', () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitSiteEditor( { postType: 'page' } );
+		await admin.visitSiteEditor( {
+			postType: 'page',
+			showWelcomeGuide: false,
+		} );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();
@@ -48,31 +51,6 @@ test.describe( 'Test the checkout template', () => {
 			editor.canvas.getByRole( 'button', {
 				name: 'Place Order',
 			} )
-		).toBeVisible();
-	} );
-} );
-
-test.describe( 'Test editing the checkout template', () => {
-	test( 'Merchant can transform shortcode block into blocks', async ( {
-		admin,
-		editor,
-	} ) => {
-		await admin.visitSiteEditor( {
-			postId: templatePath,
-			postType: templateType,
-			canvas: 'edit',
-		} );
-		await editor.setContent(
-			'<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->'
-		);
-		await editor.canvas
-			.locator( '.wp-block-woocommerce-classic-shortcode' )
-			.waitFor();
-		await editor.canvas
-			.getByRole( 'button', { name: 'Transform into blocks' } )
-			.click();
-		await expect(
-			editor.canvas.locator( 'button:has-text("Place order")' ).first()
 		).toBeVisible();
 	} );
 } );

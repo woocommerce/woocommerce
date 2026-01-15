@@ -11,16 +11,7 @@ import { ProductGalleryPage } from './product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-gallery',
-	title: 'Product Gallery (Beta)',
-	selectors: {
-		frontend: {},
-		editor: {
-			settings: {
-				cropImagesOption:
-					'.wc-block-product-gallery__crop-images .components-form-toggle__input',
-			},
-		},
-	},
+	title: 'Product Gallery',
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
 };
@@ -93,7 +84,7 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'with thumbnails', () => {
-		test( 'should have as first thumbnail, the same image that it is visible in the Large Image block', async ( {
+		test( 'should have as first thumbnail, the same image that it is visible in the product block', async ( {
 			page,
 			editor,
 			pageObject,
@@ -106,8 +97,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const viewerImageId = await pageObject.getViewerImageId();
 
 			const firstImageThumbnailId = await getThumbnailImageIdByNth(
 				0,
@@ -116,7 +106,7 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( visibleLargeImageId ).toBe( firstImageThumbnailId );
+			expect( viewerImageId ).toBe( firstImageThumbnailId );
 		} );
 
 		test( 'should change the image when the user click on a thumbnail image', async ( {
@@ -132,8 +122,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const viewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -142,7 +131,7 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( visibleLargeImageId ).not.toBe( secondImageThumbnailId );
+			expect( viewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await (
 				await pageObject.getThumbnailsBlock( {
@@ -154,10 +143,9 @@ test.describe( `${ blockData.name }`, () => {
 				.click();
 
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await pageObject.getVisibleLargeImageId();
+				const newViewerImageId = await pageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+				expect( newViewerImageId ).toBe( secondImageThumbnailId );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
@@ -176,8 +164,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const initialViewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -186,21 +173,19 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( initialVisibleLargeImageId ).not.toBe(
-				secondImageThumbnailId
-			);
+			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await pageObject.clickNextButton();
 
-			const nextImageId = await pageObject.getVisibleLargeImageId();
+			const nextImageId = await pageObject.getViewerImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
 			await pageObject.clickPreviousButton();
 
-			const previousImageId = await pageObject.getVisibleLargeImageId();
+			const previousImageId = await pageObject.getViewerImageId();
 
-			expect( previousImageId ).toBe( initialVisibleLargeImageId );
+			expect( previousImageId ).toBe( initialViewerImageId );
 		} );
 	} );
 
@@ -210,6 +195,8 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 			pageObject,
 		} ) => {
+			await page.setViewportSize( { width: 800, height: 800 } );
+
 			await pageObject.addProductGalleryBlock( { cleanContent: false } );
 
 			await editor.saveSiteEditorEntities( {
@@ -218,8 +205,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const initialViewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -228,37 +214,32 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( initialVisibleLargeImageId ).not.toBe(
-				secondImageThumbnailId
-			);
+			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await pageObject.clickNextButton();
 
-			const nextImageId = await pageObject.getVisibleLargeImageId();
+			const nextImageId = await pageObject.getViewerImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
-			const largeImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
-			await largeImageBlock.click();
+			await viewerBlock.click();
 
-			await expect( async () => {
-				const popUpSelectedImageId =
-					await pageObject.getActiveImageElementId( {
-						page,
-					} );
+			const dialogImage = page
+				.getByRole( 'dialog' )
+				.locator( `img[data-image-id='${ nextImageId }']` );
 
-				expect( popUpSelectedImageId ).toBe( nextImageId );
-			} ).toPass( { timeout: 1_000 } );
+			// The image should be in the viewport but it simply doesn't fit fully.
+			await expect( dialogImage ).toBeInViewport( { ratio: 0.7 } );
 
 			const closePopUpButton = page.locator(
 				'.wc-block-product-gallery-dialog__close-button'
 			);
 			await closePopUpButton.click();
 
-			const singleProductImageId =
-				await pageObject.getVisibleLargeImageId();
+			const singleProductImageId = await pageObject.getViewerImageId();
 
 			expect( singleProductImageId ).toBe( nextImageId );
 		} );
@@ -288,13 +269,13 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const mainImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
-			await mainImageBlock.click();
+			await viewerBlock.click();
 
 			await expect( page.locator( 'dialog' ) ).toBeVisible();
 		} );
@@ -315,11 +296,11 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
-			const mainImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
 
-			await mainImageBlock.click();
+			await viewerBlock.click();
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 		} );
@@ -358,7 +339,7 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 		} ) => {
 			await admin.createNewPost();
-			await editor.insertBlockUsingGlobalInserter( 'Single Product' );
+			await editor.insertBlockUsingGlobalInserter( 'Product' );
 			await editor.canvas.getByText( 'Album' ).click();
 			await editor.canvas.getByText( 'Done' ).click();
 			const singleProductBlock = await editor.getBlockByName(
@@ -377,44 +358,6 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test( 'should show (square) cropped main product images when crop option is enabled', async ( {
-		page,
-		editor,
-		pageObject,
-	} ) => {
-		await editor.openDocumentSettingsSidebar();
-		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-		await page
-			.locator( blockData.selectors.editor.settings.cropImagesOption )
-			.click();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await expect(
-			page.locator( blockData.selectors.editor.settings.cropImagesOption )
-		).toBeChecked();
-
-		await page.goto( blockData.productPage );
-
-		const image = await page
-			.locator(
-				'img.wc-block-woocommerce-product-gallery-large-image__image'
-			)
-			.first()
-			.boundingBox();
-
-		const height = image?.height as number;
-		const width = image?.width as number;
-
-		// Allow 1 pixel of difference.
-		expect(
-			width === height + 1 || width === height - 1 || width === height
-		).toBeTruthy();
-	} );
-
 	test( 'should persistently display the block when navigating back to the template without a page reload', async ( {
 		editor,
 		pageObject,
@@ -431,15 +374,67 @@ test.describe( `${ blockData.name }`, () => {
 
 		// Go back to the Custom Single Product template.
 		await page.getByLabel( 'Open Navigation' ).click();
+
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
 			.first()
 			.click();
 
 		const productGalleryBlock = editor.canvas.getByLabel(
-			'Block: Product Gallery (Beta)'
+			'Block: Product Gallery'
 		);
 
 		await expect( productGalleryBlock ).toBeVisible();
+	} );
+
+	test( 'block has opinionated layout on mobile', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( blockData.productPage );
+
+		await page.setViewportSize( {
+			height: 667,
+			width: 390, // iPhone 12 Pro
+		} );
+
+		const galleryBlock = page.locator( '.wc-block-product-gallery' );
+		const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+			page: 'frontend',
+		} );
+		const navigationArrowsBlock =
+			await pageObject.getNextPreviousButtonsBlock( {
+				page: 'frontend',
+			} );
+
+		// Verifying mobile layout
+		// - Navigation arrows are hidden
+		await expect( navigationArrowsBlock ).toBeHidden();
+
+		// - Thumbnails are below large image
+		const galleryDirection = await galleryBlock.evaluate( ( el ) =>
+			window.getComputedStyle( el ).getPropertyValue( 'flex-direction' )
+		);
+		expect( galleryDirection ).toBe( 'column' );
+		const thumbnailsOrder = await thumbnailsBlock.evaluate( ( el ) =>
+			window.getComputedStyle( el ).getPropertyValue( 'order' )
+		);
+		expect( thumbnailsOrder ).toBe( '1' );
+
+		// - Thumbnails container is horizontal
+		const thumbnailsDirection = await thumbnailsBlock
+			.locator( '.wc-block-product-gallery-thumbnails__scrollable' )
+			.evaluate( ( el ) =>
+				window
+					.getComputedStyle( el )
+					.getPropertyValue( 'flex-direction' )
+			);
+		expect( thumbnailsDirection ).toBe( 'row' );
 	} );
 } );

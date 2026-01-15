@@ -669,7 +669,7 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			->expects( $this->once() )
 			->method( 'error' )
 			->with(
-				'Invalid return value for woocommerce_address_providers, expected an array of class names.',
+				'Invalid return value for woocommerce_address_providers, expected an array of class names or instances.',
 				array( 'context' => 'address_provider_service' )
 			);
 
@@ -695,7 +695,7 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			->expects( $this->once() )
 			->method( 'error' )
 			->with(
-				'Invalid class name for address provider, expected a string.',
+				'Invalid address provider item "integer", expected a string class name or WC_Address_Provider instance.',
 				array( 'context' => 'address_provider_service' )
 			);
 
@@ -721,7 +721,7 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			->expects( $this->once() )
 			->method( 'error' )
 			->with(
-				'Invalid address provider class, class does not exist or is not a subclass of WC_Address_Provider: NonExistentClass',
+				'Invalid address provider item "string", expected a string class name or WC_Address_Provider instance.',
 				array( 'context' => 'address_provider_service' )
 			);
 
@@ -786,11 +786,11 @@ class AddressProviderControllerTest extends MockeryTestCase {
 			->method( 'error' )
 			->withConsecutive(
 				array(
-					'Invalid class name for address provider, expected a string.',
+					'Invalid address provider item "integer", expected a string class name or WC_Address_Provider instance.',
 					array( 'context' => 'address_provider_service' ),
 				),
 				array(
-					'Invalid address provider class, class does not exist or is not a subclass of WC_Address_Provider: NonExistentClass',
+					'Invalid address provider item "string", expected a string class name or WC_Address_Provider instance.',
 					array( 'context' => 'address_provider_service' ),
 				),
 				array(

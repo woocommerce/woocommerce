@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { tags, expect, test } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 let productId, couponId, orderId;
@@ -104,7 +108,7 @@ test.describe(
 					.filter( { hasText: couponCode } )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'cell', { name: 'Coupon(s)' } )
+				page.getByRole( 'cell', { name: 'Discount:', exact: true } )
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', { name: `- $${ couponAmount }.00` } )
@@ -128,7 +132,7 @@ test.describe(
 					.filter( { hasText: couponCode } )
 			).toBeVisible();
 			await expect(
-				page.getByRole( 'cell', { name: 'Coupon(s)' } )
+				page.getByRole( 'cell', { name: 'Discount:', exact: true } )
 			).toBeVisible();
 			await expect(
 				page.getByRole( 'cell', {

@@ -1,17 +1,21 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { addFilter } from '@wordpress/hooks';
-import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
+import {
+	getBlockSupport,
+	hasBlockSupport,
+	getBlockTypes,
+} from '@wordpress/blocks';
 import { Block } from '@wordpress/blocks/index';
 import { __ } from '@wordpress/i18n';
 import { justifyLeft, justifyCenter, justifyRight } from '@wordpress/icons';
 import {
 	Flex,
 	FlexItem,
-	PanelBody,
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOptionIcon as ToggleGroupControlOptionIcon,
 } from '@wordpress/components';
@@ -21,6 +25,11 @@ import {
 	// @ts-expect-error No types for this exist yet.
 	JustifyContentControl,
 } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { addFilterForEmail, updateBlockSettings } from '../config-tools';
 
 const layoutBlockSupportKey = '__experimentalEmailFlexLayout';
 
@@ -112,19 +121,39 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 		} );
 	};
 
+	const resetAll = () => {
+		const { justifyContent: _discarded, ...restLayout } =
+			attributes.layout || {};
+		setAttributes( {
+			layout: restLayout,
+		} );
+	};
+
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Layout', 'woocommerce' ) }>
-					<Flex>
-						<FlexItem>
-							<JustificationControls
-								justificationValue={ justifyContent }
-								onChange={ onJustificationChange }
-							/>
-						</FlexItem>
-					</Flex>
-				</PanelBody>
+				<ToolsPanel
+					label={ __( 'Layout', 'woocommerce' ) }
+					resetAll={ resetAll }
+				>
+					<ToolsPanelItem
+						isShownByDefault
+						onDeselect={ resetAll } // This attribute is usually used to reset the panel item value.
+						hasValue={ () =>
+							attributes.layout?.justifyContent || false
+						}
+						label={ __( 'Justification', 'woocommerce' ) }
+					>
+						<Flex>
+							<FlexItem>
+								<JustificationControls
+									justificationValue={ justifyContent }
+									onChange={ onJustificationChange }
+								/>
+							</FlexItem>
+						</Flex>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 			{ /* @ts-expect-error No types for this exist yet. */ }
 			<BlockControls group="block" __experimentalShareWithChildBlocks>
@@ -140,24 +169,21 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 
 /**
  * Filters registered block settings, extending attributes to include `layout`.
- *
- * @param {Object} settings Original block settings.
- *
- * @return {Object} Filtered block settings.
  */
-export function addAttribute( settings: Block ) {
-	if ( hasLayoutBlockSupport( settings.name ) ) {
-		return {
-			...settings,
-			attributes: {
-				...settings.attributes,
-				layout: {
-					type: 'object',
+export function addAttribute() {
+	getBlockTypes().forEach( ( blockType: Block ) => {
+		if ( hasLayoutBlockSupport( blockType.name ) ) {
+			updateBlockSettings( blockType.name, ( current ) => ( {
+				...current,
+				attributes: {
+					...current.attributes,
+					layout: {
+						type: 'object',
+					},
 				},
-			},
-		};
-	}
-	return settings;
+			} ) );
+		}
+	} );
 }
 
 /**
@@ -188,7 +214,7 @@ function BlockWithLayoutStyles( { block: BlockListBlock, props } ) {
 	const justify = ( layout?.justifyContent as string ) || 'left';
 	const justificationClass = `is-content-justification-${ justify }`;
 
-	const layoutClassNames = classnames( justificationClass, layoutClasses );
+	const layoutClassNames = clsx( justificationClass, layoutClasses );
 	return <BlockListBlock { ...props } className={ layoutClassNames } />;
 }
 
@@ -220,17 +246,13 @@ export const withLayoutStyles = createHigherOrderComponent(
 );
 
 export function initializeLayout() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/layout/addAttribute',
-		addAttribute
-	);
-	addFilter(
+	addAttribute();
+	addFilterForEmail(
 		'editor.BlockListBlock',
 		'woocommerce-email-editor/with-layout-styles',
 		withLayoutStyles
 	);
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/with-inspector-controls',
 		withLayoutControls

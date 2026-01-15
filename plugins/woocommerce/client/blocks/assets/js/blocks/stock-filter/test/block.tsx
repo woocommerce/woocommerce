@@ -1,23 +1,22 @@
 /**
  * External dependencies
  */
-import React from '@wordpress/element';
 import {
 	act,
 	cleanup,
 	render,
 	screen,
-	within,
 	waitFor,
+	within,
 } from '@testing-library/react';
-import { default as fetchMock } from 'jest-fetch-mock';
 import userEvent from '@testing-library/user-event';
+import { server } from '@woocommerce/test-utils/msw';
 
 /**
  * Internal dependencies
  */
-import Block from '../block';
 import { allSettings } from '../../../settings/shared/settings-init';
+import Block from '../block';
 import { Attributes } from '../types';
 
 const setWindowUrl = ( { url }: { url: string } ) => {
@@ -225,7 +224,7 @@ describe( 'Filter by Stock block', () => {
 	} );
 
 	afterEach( () => {
-		fetchMock.resetMocks();
+		server.resetHandlers();
 	} );
 
 	test( 'renders the stock filter block', async () => {

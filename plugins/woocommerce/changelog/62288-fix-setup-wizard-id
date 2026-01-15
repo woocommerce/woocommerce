@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Adds an ID for the setup wizard, avoiding a deprecation error under PHP 8.5.

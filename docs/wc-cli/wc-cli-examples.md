@@ -1,8 +1,11 @@
 ---
-post_title: WooCommerce CLI Examples
-menu_title: Examples
-tags: reference
+post_title: WooCommerce CLI examples
+sidebar_label: Examples
+sidebar_position: 3
+
 ---
+
+# WooCommerce CLI Examples
 
 Full documentation for every command is available using `--help`. Below are some example commands to show what the CLI can do.
 

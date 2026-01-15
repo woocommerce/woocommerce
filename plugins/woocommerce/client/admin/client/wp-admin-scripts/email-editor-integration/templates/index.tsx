@@ -13,12 +13,18 @@ function modifyTemplateSidebar() {
 	addFilter(
 		'woocommerce_email_editor_template_sections',
 		'my-plugin/template-settings',
-		( sections ) => [
+		( sections, tracking ) => [
 			...sections,
 			{
 				id: 'my-custom-section',
 				render: () => {
-					return <TemplateSenderPanel />;
+					return (
+						<TemplateSenderPanel
+							debouncedRecordEvent={
+								tracking.debouncedRecordEvent
+							}
+						/>
+					);
 				},
 			},
 		]

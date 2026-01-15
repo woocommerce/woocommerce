@@ -7,8 +7,8 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Admin\PageController;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestionIncentives;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestionIncentives;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -25,9 +25,9 @@ class WcPayWelcomePage {
 	/**
 	 * The suggestion incentives instance.
 	 *
-	 * @var PaymentExtensionSuggestionIncentives
+	 * @var PaymentsExtensionSuggestionIncentives
 	 */
-	private PaymentExtensionSuggestionIncentives $suggestion_incentives;
+	private PaymentsExtensionSuggestionIncentives $suggestion_incentives;
 
 	/**
 	 * Class instance.
@@ -51,7 +51,7 @@ class WcPayWelcomePage {
 	 * WCPayWelcomePage constructor.
 	 */
 	public function __construct() {
-		$this->suggestion_incentives = wc_get_container()->get( PaymentExtensionSuggestionIncentives::class );
+		$this->suggestion_incentives = wc_get_container()->get( PaymentsExtensionSuggestionIncentives::class );
 	}
 
 	/**
@@ -94,7 +94,7 @@ class WcPayWelcomePage {
 
 		return $this->suggestion_incentives->is_incentive_visible(
 			$incentive['id'],
-			PaymentExtensionSuggestions::WOOPAYMENTS,
+			PaymentsExtensionSuggestions::WOOPAYMENTS,
 			WC()->countries->get_base_country(),
 			$skip_wcpay_active
 		);
@@ -107,7 +107,7 @@ class WcPayWelcomePage {
 	 */
 	private function get_incentive(): ?array {
 		return $this->suggestion_incentives->get_incentive(
-			PaymentExtensionSuggestions::WOOPAYMENTS,
+			PaymentsExtensionSuggestions::WOOPAYMENTS,
 			WC()->countries->get_base_country(),
 			self::INCENTIVE_TYPE,
 			true
@@ -147,7 +147,7 @@ class WcPayWelcomePage {
 		 */
 		return $this->suggestion_incentives->is_incentive_dismissed(
 			$incentive['id'],
-			PaymentExtensionSuggestions::WOOPAYMENTS,
+			PaymentsExtensionSuggestions::WOOPAYMENTS,
 			'wc_payments_task'
 		);
 	}

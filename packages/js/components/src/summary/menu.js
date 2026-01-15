@@ -3,7 +3,7 @@
  */
 import { NavigableMenu } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { uniqueId } from 'lodash';
 import PropTypes from 'prop-types';
 import { createElement } from '@wordpress/element';
@@ -16,7 +16,7 @@ import { getHasItemsClass } from './utils';
 const Menu = ( { label, orientation, itemCount, items } ) => {
 	const instanceId = uniqueId( 'woocommerce-summary-helptext-' );
 	const hasItemsClass = getHasItemsClass( itemCount );
-	const classes = classnames( 'woocommerce-summary', {
+	const classes = clsx( 'woocommerce-summary', {
 		[ hasItemsClass ]: orientation === 'horizontal',
 	} );
 

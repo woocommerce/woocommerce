@@ -6,7 +6,16 @@ import { PanelRow, TextControl } from '@wordpress/components';
 import { useEntityProp } from '@wordpress/core-data';
 import { useCallback, useRef } from '@wordpress/element';
 
-function TemplateSenderPanel() {
+type TemplateSenderPanelProps = {
+	debouncedRecordEvent: (
+		name: string,
+		data?: Record< string, unknown >
+	) => void;
+};
+
+function TemplateSenderPanel( {
+	debouncedRecordEvent,
+}: TemplateSenderPanelProps ) {
 	const [ woocommerce_template_data, setWoocommerceTemplateData ] =
 		useEntityProp( 'postType', 'wp_template', 'woocommerce_data' );
 	const emailInputRef = useRef< HTMLInputElement >( null );
@@ -20,6 +29,7 @@ function TemplateSenderPanel() {
 					from_name: value,
 				},
 			} );
+			debouncedRecordEvent( 'email_from_name_input_updated', { value } );
 		},
 		[ woocommerce_template_data, setWoocommerceTemplateData ]
 	);
@@ -38,6 +48,9 @@ function TemplateSenderPanel() {
 				emailInputRef.current.checkValidity();
 				emailInputRef.current.reportValidity();
 			}
+			debouncedRecordEvent( 'email_from_address_input_updated', {
+				value,
+			} );
 		},
 		[ woocommerce_template_data, setWoocommerceTemplateData ]
 	);

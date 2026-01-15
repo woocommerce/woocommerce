@@ -31,6 +31,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		public function __construct() {
 			$this->id             = 'new_order';
 			$this->title          = __( 'New order', 'woocommerce' );
+			$this->email_group    = 'orders';
 			$this->template_html  = 'emails/admin-new-order.php';
 			$this->template_plain = 'emails/plain/admin-new-order.php';
 			$this->placeholders   = array(
@@ -55,11 +56,15 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Choose who gets notified when a new order is received.', 'woocommerce' )
+				? __( 'Receive an email notification every time a new order is placed', 'woocommerce' )
 				: __( 'New order emails are sent to chosen recipient(s) when a new order is received.', 'woocommerce' );
 
 			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->description = __( 'Notifies admins when a new order has been placed.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -70,7 +75,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		 */
 		public function get_default_subject() {
 			return $this->email_improvements_enabled
-				? __( '[{site_title}]: Cha-ching! You\'ve got a new order: #{order_number}', 'woocommerce' )
+				? __( '[{site_title}]: You\'ve got a new order: #{order_number}', 'woocommerce' )
 				: __( '[{site_title}]: New order #{order_number}', 'woocommerce' );
 		}
 
@@ -258,6 +263,9 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 

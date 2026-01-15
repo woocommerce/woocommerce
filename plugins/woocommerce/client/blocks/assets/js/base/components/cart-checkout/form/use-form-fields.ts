@@ -25,7 +25,7 @@ export const useFormFields = < T extends keyof FormFields >(
 	fieldKeys: T[],
 	// Default fields from settings.
 	defaultFields: FormFields,
-	// Form type, can be billing, shipping, contact, order, or calculator.
+	// Form type, can be billing, shipping, contact, order.
 	formType: FormType,
 	// Address country.
 	addressCountry = ''
@@ -72,10 +72,23 @@ export const useFormFields = < T extends keyof FormFields >(
 				}
 			}
 			if ( hasSchemaRules( defaultConfig, 'hidden' ) ) {
-				const schema = {
-					type: 'object',
-					properties: defaultConfig.hidden,
-				};
+				let schema = {};
+				if (
+					Object.keys( defaultConfig.hidden ).some(
+						( key ) =>
+							key === 'cart' ||
+							key === 'checkout' ||
+							key === 'customer'
+					)
+				) {
+					schema = {
+						type: 'object',
+						properties: defaultConfig.hidden,
+					};
+				} else {
+					schema = defaultConfig.hidden;
+				}
+
 				try {
 					const result = parser.validate( schema, data );
 					field.hidden = result;

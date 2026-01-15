@@ -590,4 +590,175 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, $new_data['prop2']['subprop2'] );
 		$this->assertEquals( 3, $new_data['prop2']['subprop3'] );
 	}
+
+	/**
+	 * Test that __clone() properly clones meta_data objects in duplicate mode (default).
+	 */
+	public function test_clone_meta_data_objects_duplicate_mode() {
+		$object = $this->create_test_post();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_meta_key_2', 'val2', true );
+		$object->save_meta_data();
+
+		// Clone the object (default CLONE_MODE_DUPLICATE).
+		$cloned_object = clone $object;
+
+		// Get meta data from both objects.
+		$original_meta = $object->get_meta_data();
+		$cloned_meta   = $cloned_object->get_meta_data();
+
+		// Verify that the meta data arrays have the same count.
+		$this->assertCount( count( $original_meta ), $cloned_meta );
+
+		// Verify that the meta data objects are different instances (not shared references).
+		foreach ( $original_meta as $index => $meta ) {
+			$this->assertNotSame( $meta, $cloned_meta[ $index ], 'Meta data objects should not be the same instance after cloning' );
+			$this->assertNull( $cloned_meta[ $index ]->id, 'Meta IDs should be null in duplicate mode (backward compatible behavior)' );
+			$this->assertEquals( $meta->key, $cloned_meta[ $index ]->key, 'Meta keys should match' );
+			$this->assertEquals( $meta->value, $cloned_meta[ $index ]->value, 'Meta values should match' );
+		}
+
+		// Modify cloned meta and verify original is unchanged.
+		$cloned_meta[0]->value = 'modified_value';
+		$original_meta_after   = $object->get_meta_data();
+		$this->assertNotEquals( 'modified_value', $original_meta_after[0]->value, 'Modifying cloned meta should not affect original' );
+	}
+
+	/**
+	 * Test that __clone() preserves meta IDs in cache mode.
+	 */
+	public function test_clone_meta_data_objects_cache_mode() {
+		$object = $this->create_test_post();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_meta_key_2', 'val2', true );
+		$object->save_meta_data();
+
+		// Get original meta IDs.
+		$original_meta      = $object->get_meta_data();
+		$original_meta_id_1 = $original_meta[0]->id;
+		$original_meta_id_2 = $original_meta[1]->id;
+
+		// Set cache mode before cloning.
+		$object->set_clone_mode( WC_Data::CLONE_MODE_CACHE );
+
+		// Clone the object.
+		$cloned_object = clone $object;
+
+		// Get meta data from cloned object.
+		$cloned_meta = $cloned_object->get_meta_data();
+
+		// Verify that meta IDs are preserved in cache mode.
+		$this->assertEquals( $original_meta_id_1, $cloned_meta[0]->id, 'Meta IDs should be preserved in cache mode' );
+		$this->assertEquals( $original_meta_id_2, $cloned_meta[1]->id, 'Meta IDs should be preserved in cache mode' );
+
+		// Verify keys and values are preserved.
+		$this->assertEquals( 'test_meta_key', $cloned_meta[0]->key );
+		$this->assertEquals( 'val1', $cloned_meta[0]->value );
+		$this->assertEquals( 'test_meta_key_2', $cloned_meta[1]->key );
+		$this->assertEquals( 'val2', $cloned_meta[1]->value );
+
+		// Verify clone mode persists on cloned object.
+		$this->assertEquals( WC_Data::CLONE_MODE_CACHE, $cloned_object->get_clone_mode(), 'Clone mode should persist to cloned object' );
+
+		// Modify cloned meta and verify original is unchanged.
+		$cloned_meta[0]->value = 'modified_value';
+		$original_meta_after   = $object->get_meta_data();
+		$this->assertNotEquals( 'modified_value', $original_meta_after[0]->value, 'Modifying cloned meta should not affect original' );
+	}
+
+	/**
+	 * Test setting clone mode with invalid values throws exception.
+	 */
+	public function test_set_clone_mode_validation() {
+		$object = $this->create_test_post();
+
+		// Valid modes should work.
+		$object->set_clone_mode( WC_Data::CLONE_MODE_DUPLICATE );
+		$this->assertEquals( WC_Data::CLONE_MODE_DUPLICATE, $object->get_clone_mode() );
+
+		$object->set_clone_mode( WC_Data::CLONE_MODE_CACHE );
+		$this->assertEquals( WC_Data::CLONE_MODE_CACHE, $object->get_clone_mode() );
+
+		// Invalid mode should throw exception.
+		$this->expectException( InvalidArgumentException::class );
+		$object->set_clone_mode( 'invalid_mode' );
+	}
+
+	/**
+	 * Test duplication workflow: clone (duplicate mode) + set_id(0) + save.
+	 */
+	public function test_duplication_workflow() {
+		$object    = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->save_meta_data();
+
+		// Get original meta ID.
+		$original_meta    = $object->get_meta_data();
+		$original_meta_id = $original_meta[0]->id;
+
+		// Clone the object (default CLONE_MODE_DUPLICATE).
+		$duplicate = clone $object;
+
+		// Verify cloned object has null meta IDs (duplicate mode).
+		$duplicate_meta = $duplicate->get_meta_data();
+		$this->assertNull( $duplicate_meta[0]->id, 'Cloned object meta IDs should be null in duplicate mode' );
+
+		// Set a new ID and save to create a duplicate.
+		$duplicate->set_id( 0 );
+		$duplicate->save();
+
+		// Verify the duplicate now has a different object ID.
+		$this->assertNotEquals( $object_id, $duplicate->get_id(), 'Duplicate should have different object ID' );
+
+		// Save meta data for the duplicate.
+		$duplicate->save_meta_data();
+
+		// Verify the duplicate's meta has a new ID.
+		$duplicate_meta_after = $duplicate->get_meta_data();
+		$this->assertNotEmpty( $duplicate_meta_after[0]->id, 'Duplicate meta should have an ID after save' );
+		$this->assertNotEquals( $original_meta_id, $duplicate_meta_after[0]->id, 'Duplicate meta should have different ID than original' );
+
+		// Verify original object's meta is unchanged.
+		$object->read_meta_data( true );
+		$original_meta_after = $object->get_meta_data();
+		$this->assertEquals( $original_meta_id, $original_meta_after[0]->id, 'Original meta ID should be unchanged' );
+		$this->assertEquals( 'val1', $original_meta_after[0]->value, 'Original meta value should be unchanged' );
+	}
+
+	/**
+	 * Test cache workflow: WordPress object cache double-clone scenario.
+	 */
+	public function test_cache_double_clone_workflow() {
+		$object = $this->create_test_post();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->save_meta_data();
+
+		// Get original meta ID.
+		$original_meta    = $object->get_meta_data();
+		$original_meta_id = $original_meta[0]->id;
+
+		// Set cache mode (what caching layer would do before wp_cache_set).
+		$object->set_clone_mode( WC_Data::CLONE_MODE_CACHE );
+
+		// First clone (simulates WordPress wp_cache_set cloning the object).
+		$cached_object = clone $object;
+
+		// Verify meta IDs preserved after first clone.
+		$cached_meta = $cached_object->get_meta_data();
+		$this->assertEquals( $original_meta_id, $cached_meta[0]->id, 'Meta ID should be preserved in first clone (cache set)' );
+		$this->assertEquals( WC_Data::CLONE_MODE_CACHE, $cached_object->get_clone_mode(), 'Clone mode should persist after first clone' );
+
+		// Second clone (simulates WordPress wp_cache_get cloning the cached object).
+		$retrieved_object = clone $cached_object;
+
+		// Verify meta IDs still preserved after second clone.
+		$retrieved_meta = $retrieved_object->get_meta_data();
+		$this->assertEquals( $original_meta_id, $retrieved_meta[0]->id, 'Meta ID should be preserved in second clone (cache get)' );
+		$this->assertEquals( WC_Data::CLONE_MODE_CACHE, $retrieved_object->get_clone_mode(), 'Clone mode should persist after second clone' );
+
+		// Cache layer would reset mode after retrieval.
+		$retrieved_object->set_clone_mode( WC_Data::CLONE_MODE_DUPLICATE );
+		$this->assertEquals( WC_Data::CLONE_MODE_DUPLICATE, $retrieved_object->get_clone_mode() );
+	}
 }

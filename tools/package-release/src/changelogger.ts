@@ -66,7 +66,7 @@ export const validateChangelogEntries = ( name: string ) => {
 export const writeChangelog = ( name: string, nextVersion?: string ) => {
 	try {
 		execSync(
-			`pnpm --filter="${ name }" changelog write --add-pr-num ${
+			`pnpm --filter="${ name }" changelog write --yes --add-pr-num ${
 				nextVersion ? '--use-version ' + nextVersion : ''
 			}`,
 			{
@@ -122,7 +122,7 @@ export const hasValidChangelogs = ( name: string ): boolean | void => {
 				return true;
 			}
 
-			const textAfterComment = /Comment:.*\n([\s\S]*)?/.exec( contents );
+			const textAfterComment = /Comment:.*\n([\s\S]*)/.exec( contents );
 
 			if ( textAfterComment ) {
 				// Return true if there is more than just whitespace.

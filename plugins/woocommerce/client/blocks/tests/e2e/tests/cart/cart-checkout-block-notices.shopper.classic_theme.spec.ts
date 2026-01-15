@@ -70,7 +70,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
-			page.getByText( 'Coupon code "TESTCOUPON" already applied!', {
+			page.getByText( 'Coupon code "testcoupon" already applied!', {
 				exact: true,
 			} )
 		).toBeVisible();
@@ -122,7 +122,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 
 		await expect(
 			page.getByText(
-				'CLASSIC ERROR NOTICE: Coupon code "TESTCOUPON" already applied!'
+				'CLASSIC ERROR NOTICE: Coupon code "testcoupon" already applied!'
 			)
 		).toBeVisible();
 
@@ -177,7 +177,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 
 		await expect(
 			page.getByText(
-				'BLOCK ERROR NOTICE: Coupon code "TESTCOUPON" already applied!'
+				'BLOCK ERROR NOTICE: Coupon code "testcoupon" already applied!'
 			)
 		).toBeVisible();
 
@@ -227,7 +227,7 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
-			page.getByText( 'Coupon code "TESTCOUPON" already applied!' )
+			page.getByText( 'Coupon code "testcoupon" already applied!' )
 		).toBeVisible();
 
 		// We're explicitly checking the CSS classes and that the SVG is hidden.
@@ -258,9 +258,12 @@ test.describe( 'Shopper → Notice Templates', () => {
 		await page.getByRole( 'button', { name: 'Apply coupon' } ).click();
 
 		await expect(
-			page.getByText( `Coupon "${ INVALID_COUPON }" does not exist!`, {
-				exact: true,
-			} )
+			page.getByText(
+				`Coupon "${ INVALID_COUPON }" cannot be applied because it does not exist.`,
+				{
+					exact: true,
+				}
+			)
 		).toBeVisible();
 
 		// We're explicitly checking the CSS classes of the block notices, and that the SVG is hidden.

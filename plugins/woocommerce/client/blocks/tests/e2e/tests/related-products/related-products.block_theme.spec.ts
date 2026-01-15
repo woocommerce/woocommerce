@@ -1,9 +1,14 @@
 /**
  * External dependencies
  */
-import { test, expect, BlockData } from '@woocommerce/e2e-utils';
+import {
+	test,
+	expect,
+	BlockData,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
-// Block is soft-depreacted meaning that it's hidden from the inserter.
+// Block is soft-deprecated, meaning that it's hidden from the inserter.
 const blockData: BlockData = {
 	name: 'Related Products',
 	slug: 'woocommerce/related-products',
@@ -34,7 +39,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//archive-product`,
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -57,7 +62,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//single-product`,
+			postId: `${ BLOCK_THEME_SLUG }//single-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

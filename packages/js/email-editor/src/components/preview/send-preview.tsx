@@ -15,6 +15,7 @@ import {
  */
 import { storeName } from '../../store/constants';
 import { SendPreviewEmail } from './send-preview-email';
+import { recordEvent } from '../../events';
 
 export function SendPreview() {
 	const { togglePreviewModal } = useDispatch( storeName );
@@ -24,6 +25,9 @@ export function SendPreview() {
 			<PluginPreviewMenuItem
 				icon={ external }
 				onClick={ () => {
+					recordEvent(
+						'header_preview_dropdown_send_test_email_selected'
+					);
 					togglePreviewModal( true );
 				} }
 			>

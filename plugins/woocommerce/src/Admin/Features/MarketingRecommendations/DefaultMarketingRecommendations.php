@@ -108,6 +108,27 @@ class DefaultMarketingRecommendations {
 				'tags'           => array(),
 			),
 			array(
+				'title'          => 'Blaze Ads',
+				'description'    => __(
+					'The quickest way to grow your business by advertising to over 100 million users across Tumblr and WordPress, starting at just \$5/day.',
+					'woocommerce'
+				),
+				'url'            => "https://woocommerce.com/products/blaze-ads/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => "{$icon_dir_url}/blaze.svg",
+				'product'        => 'blaze-ads',
+				'plugin'         => 'blaze-ads/blaze-ads.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(
+					$built_by_woocommerce,
+				),
+			),
+			array(
 				'title'          => 'Facebook for WooCommerce',
 				'description'    => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
 				'url'            => "https://woocommerce.com/products/facebook/{$utm_string}",
@@ -115,6 +136,22 @@ class DefaultMarketingRecommendations {
 				'icon'           => "{$icon_dir_url}/facebook.svg",
 				'product'        => 'facebook-for-woocommerce',
 				'plugin'         => 'facebook-for-woocommerce/facebook-for-woocommerce.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(),
+			),
+			array(
+				'title'          => 'Meta Ads and Pixel by Kliken',
+				'description'    => __( 'Automate Facebook & Instagram marketing with Kliken. Launch ads and schedule a month of posts in 5 minutes—first 5 free! Plans start at just $20/mo.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/meta-ads-and-pixel/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => "{$icon_dir_url}/kliken.svg",
+				'product'        => 'kliken-ads-pixel-for-meta',
+				'plugin'         => 'kliken-ads-pixel-for-meta/kliken-ads-pixel-for-meta.php',
 				'categories'     => array(
 					$marketing,
 				),

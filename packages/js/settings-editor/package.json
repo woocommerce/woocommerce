@@ -67,8 +67,8 @@
 		"@wordpress/preferences": "wp-6.6",
 		"@wordpress/router": "1.11.0",
 		"@wordpress/url": "wp-6.6",
-		"clsx": "^2.1.1",
-		"dompurify": "^2.5.7",
+		"clsx": "2.1.x",
+		"@woocommerce/sanitize": "workspace:*",
 		"prop-types": "^15.8.1",
 		"react-router-dom": "~6.3.0"
 	},
@@ -79,8 +79,7 @@
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
 		"@testing-library/user-event": "13.5.0",
-		"@types/dompurify": "^2.4.0",
-		"@types/jest": "27.5.x",
+		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@types/wordpress__block-editor": "11.5.16",
@@ -93,12 +92,12 @@
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/browserslist-config": "next",
-		"concurrently": "^7.6.0",
 		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
-		"jest-cli": "27.5.x",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
 		"mini-css-extract-plugin": "2.9.x",
 		"postcss": "8.4.x",
 		"postcss-loader": "4.3.x",
@@ -111,7 +110,7 @@
 		"webpack": "5.97.x",
 		"webpack-cli": "5.1.x",
 		"webpack-remove-empty-scripts": "1.0.x",
-		"webpack-rtl-plugin": "2.0.x",
+		"@automattic/webpack-rtl-plugin": "6.0.x",
 		"wireit": "0.14.12"
 	},
 	"scripts": {
@@ -121,6 +120,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -191,7 +191,7 @@
 			"service": true
 		},
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -206,7 +206,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {
@@ -247,6 +247,10 @@
 				"node_modules/@woocommerce/components/build-module",
 				"node_modules/@woocommerce/components/build-style",
 				"node_modules/@woocommerce/components/build-types",
+				"node_modules/@woocommerce/sanitize/build",
+				"node_modules/@woocommerce/sanitize/build-module",
+				"node_modules/@woocommerce/sanitize/build-style",
+				"node_modules/@woocommerce/sanitize/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

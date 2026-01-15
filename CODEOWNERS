@@ -15,3 +15,35 @@
 /*.* @woocommerce/flux
 /changelog.txt
 /pnpm-lock.yaml
+
+# Docs resources, which gets published to https://developer.woocommerce.com
+/docs/ @woocommerce/developer-advocacy
+
+# Interactivity API - public stores
+/plugins/woocommerce/client/blocks/assets/js/base/stores/ @woocommerce/billow
+/plugins/woocommerce/src/Blocks/Utils/BlocksSharedState.php @woocommerce/billow
+
+# Core cart and checkout related files
+/plugins/woocommerce/includes/class-wc-cart*.php @woocommerce/rubik
+/plugins/woocommerce/includes/class-wc-checkout*.php @woocommerce/rubik
+/plugins/woocommerce/includes/wc-cart-functions.php @woocommerce/rubik
+/plugins/woocommerce/includes/class-wc-session-handler.php @woocommerce/rubik
+
+# Store API related files
+/plugins/woocommerce/src/StoreApi/ @woocommerce/rubik
+
+# Cart Checkout Blocks
+/plugins/woocommerce/client/blocks/assets/js/blocks/cart @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/cart-checkout-shared @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/checkout @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/mini-cart @woocommerce/rubik
+/plugins/woocommerce/client/blocks/assets/js/blocks/order-confirmation @woocommerce/rubik
+/plugins/woocommerce/client/blocks/packages/checkout @woocommerce/rubik
+
+# Email Editor packages
+/packages/js/email-editor/ @woocommerce/ballade
+/packages/php/email-editor/ @woocommerce/ballade
+
+# Email Editor integrations
+/plugins/woocommerce/src/Internal/EmailEditor/ @woocommerce/ballade
+/plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/ @woocommerce/ballade

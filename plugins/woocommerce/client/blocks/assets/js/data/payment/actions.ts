@@ -151,6 +151,17 @@ export const __internalSetAvailableExpressPaymentMethods = (
 } );
 
 /**
+ * Set the registered express payment methods.
+ * Registered payment methods are all payment methods from the registry (before filtering).
+ */
+export const __internalSetRegisteredExpressPaymentMethods = (
+	paymentMethods: PlainExpressPaymentMethods
+) => ( {
+	type: ACTION_TYPES.SET_REGISTERED_EXPRESS_PAYMENT_METHODS,
+	paymentMethods,
+} );
+
+/**
  * Remove a payment method name from the available payment methods.
  * This is called when a payment method is removed from the registry.
  */

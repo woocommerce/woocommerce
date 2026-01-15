@@ -35,7 +35,9 @@ test.describe( 'Shopper → Translations', () => {
 		await frontendUtils.goToCart();
 
 		const totalsHeader = page
-			.getByRole( 'cell', { name: getTestTranslation( 'Total' ) } )
+			.getByRole( 'columnheader', {
+				name: getTestTranslation( 'Total' ),
+			} )
 			.locator( 'span' );
 		await expect( totalsHeader ).toBeVisible();
 
@@ -49,7 +51,7 @@ test.describe( 'Shopper → Translations', () => {
 
 		await expect(
 			page.getByRole( 'button', {
-				name: getTestTranslation( 'Add a coupon' ),
+				name: getTestTranslation( 'Add coupons' ),
 			} )
 		).toBeVisible();
 

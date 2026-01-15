@@ -102,11 +102,11 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `round` should return 1 when passing the boolean 'true'.
+	 * @testdox `round` should return 0 due to it not being numeric.
 	 */
 	public function test_round_when_passing_the_boolean_true() {
 		$actual   = NumberUtil::round( true );
-		$expected = 1;
+		$expected = 0;
 		$this->assertEquals( $expected, $actual );
 	}
 
@@ -149,6 +149,81 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 	public function test_array_sum( $arr, $expected ) {
 		$actual_sum = NumberUtil::array_sum( $arr );
 		$this->assertFloatEquals( $expected, $actual_sum );
+	}
+
+	/**
+	 * Data provider for test_normalize.
+	 *
+	 * @return array Test cases.
+	 */
+	public function data_provider_for_test_normalize(): array {
+		return array(
+			'integer value'                           => array( 123, 123, 0 ),
+			'float value'                             => array( 123.45, 123.45, 0 ),
+			'integer string'                          => array( '123', 123.0, 0 ),
+			'float string'                            => array( '123.45', 123.45, 0 ),
+			'negative integer string'                 => array( '-123', -123.0, 0 ),
+			'negative float string'                   => array( '-123.45', -123.45, 0 ),
+			'zero string'                             => array( '0', 0.0, 0 ),
+			'zero float string'                       => array( '0.0', 0.0, 0 ),
+			'non-numeric string with default'         => array( 'abc', 0, 0 ),
+			'null with default'                       => array( null, 0, 0 ),
+			'empty string with default'               => array( '', 0, 0 ),
+			'array with default'                      => array( array(), 0, 0 ),
+			'boolean false with default'              => array( false, 0, 0 ),
+			'non-numeric string with custom fallback' => array( 'abc', 42, 42 ),
+			'null with custom fallback'               => array( null, 42, 42 ),
+			'empty string with custom fallback'       => array( '', 42, 42 ),
+			'array with custom fallback'              => array( array(), 42, 42 ),
+			'boolean false with custom fallback'      => array( false, 42, 42 ),
+		);
+	}
+
+	/**
+	 * @testdox normalize should convert numeric values to proper numeric types and return fallback for non-numeric values.
+	 *
+	 * @dataProvider data_provider_for_test_normalize
+	 *
+	 * @param mixed $input The input value to normalize.
+	 * @param mixed $expected The expected result.
+	 * @param mixed $fallback The fallback value to use.
+	 */
+	public function test_normalize( $input, $expected, $fallback ) {
+		$actual = NumberUtil::normalize( $input, $fallback );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox normalize should return float for string inputs that are numeric.
+	 */
+	public function test_normalize_returns_float_for_numeric_strings() {
+		$actual = NumberUtil::normalize( '123' );
+		$this->assertIsFloat( $actual );
+		$this->assertEquals( 123.0, $actual );
+	}
+
+	/**
+	 * @testdox normalize should return original type for non-string numeric inputs.
+	 */
+	public function test_normalize_returns_original_type_for_numeric_inputs() {
+		$int_input   = 123;
+		$float_input = 123.45;
+
+		$int_result   = NumberUtil::normalize( $int_input );
+		$float_result = NumberUtil::normalize( $float_input );
+
+		$this->assertIsInt( $int_result );
+		$this->assertIsFloat( $float_result );
+		$this->assertEquals( $int_input, $int_result );
+		$this->assertEquals( $float_input, $float_result );
+	}
+
+	/**
+	 * @testdox normalize should use default fallback of 0 when no fallback is provided.
+	 */
+	public function test_normalize_uses_default_fallback() {
+		$actual = NumberUtil::normalize( 'abc' );
+		$this->assertEquals( 0, $actual );
 	}
 
 	/**

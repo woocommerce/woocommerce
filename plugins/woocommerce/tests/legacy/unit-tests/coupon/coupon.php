@@ -389,4 +389,57 @@ class WC_Tests_Coupon extends WC_Unit_Test_Case {
 		$this->assertEquals( 56.78, (float) $coupon->get_amount() );
 		$this->assertEquals( $expected_free_shipping, $coupon->get_free_shipping() );
 	}
+
+	/**
+	 * Test that setting an invalid date type on a coupon doesn't cause fatal errors.
+	 * This tests the fix for issue where non-string/numeric/DateTime values cause crashes.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/58700
+	 */
+	public function test_coupons_with_invalid_date_no_fatal_error() {
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'bad_date',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => 10,
+			)
+		);
+
+		// Test 1: Exact scenario from the bug report (REST API orders with coupon data).
+		// Before the fix, this would cause a fatal error: "TypeError: preg_match(): Argument #2 ($subject) must be of type string, object given".
+		$coupon->set_date_created( (object) array( 'abc' ) );
+		$this->assertTrue( true, 'Original bug scenario handled without fatal error' );
+
+		// Test 2: Test via set_props() method (how the bug actually occurs in REST API).
+		$coupon->set_props( array( 'date_created' => (object) array( 'malformed' ) ) );
+		$this->assertTrue( true, 'set_props with invalid date handled without fatal error' );
+
+		// Test 3: Test the exact coupon metadata scenario from debug.patch.
+		$malformed_coupon_meta = array(
+			'date_created' => (object) array( 'a' ),
+			'code'         => '0001',
+			'amount'       => 5,
+		);
+		$coupon->set_props( $malformed_coupon_meta );
+		$this->assertTrue( true, 'Exact debug.patch scenario handled without fatal error' );
+
+		// Test 4: Various other invalid types to ensure comprehensive coverage.
+		$invalid_types = array(
+			array( 'invalid', 'array' ),
+			true,
+			false,
+			new stdClass(),
+			(object) array( 'key' => 'value' ),
+			42.5,
+		);
+
+		foreach ( $invalid_types as $invalid_value ) {
+			$coupon->set_date_created( $invalid_value );
+			$coupon->set_date_modified( $invalid_value );
+			$coupon->set_date_expires( $invalid_value );
+		}
+
+		// If we get here, all invalid date types were handled without fatal errors.
+		$this->assertTrue( true, 'All invalid date types handled without fatal errors' );
+	}
 }

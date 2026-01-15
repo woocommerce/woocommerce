@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Dropdown } from '@wordpress/components';
 import PropTypes from 'prop-types';
 import { withViewportMatch } from '@wordpress/viewport';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -14,7 +14,8 @@ import classnames from 'classnames';
 import DatePickerContent from './content';
 import DropdownButton from '../dropdown-button';
 
-const shortDateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
+const shortDateFormatPlaceholder = __( 'MM/DD/YYYY', 'woocommerce' );
+const shortDateFormat = 'MM/DD/YYYY';
 
 /**
  * Select a range of dates or single dates.
@@ -34,6 +35,7 @@ class DateRangeFilterPicker extends Component {
 		if (
 			date &&
 			date._isAMomentObject &&
+			date.isValid() &&
 			typeof date.format === 'function'
 		) {
 			return date.format( format );
@@ -133,12 +135,9 @@ class DateRangeFilterPicker extends Component {
 		if ( ! popoverProps.placement ) {
 			popoverProps.placement = 'bottom';
 		}
-		const contentClasses = classnames(
-			'woocommerce-filters-date__content',
-			{
-				'is-mobile': isViewportMobile,
-			}
-		);
+		const contentClasses = clsx( 'woocommerce-filters-date__content', {
+			'is-mobile': isViewportMobile,
+		} );
 		return (
 			<div className="woocommerce-filters-filter">
 				<span className="woocommerce-filters-label">
@@ -173,6 +172,9 @@ class DateRangeFilterPicker extends Component {
 							afterError={ afterError }
 							beforeError={ beforeError }
 							shortDateFormat={ shortDateFormat }
+							shortDateFormatPlaceholder={
+								shortDateFormatPlaceholder
+							}
 						/>
 					) }
 				/>

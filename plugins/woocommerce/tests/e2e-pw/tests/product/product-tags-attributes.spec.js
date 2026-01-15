@@ -6,6 +6,8 @@ import {
 	goToPageEditor,
 	insertBlockByShortcut,
 	publishPage,
+	WC_API_PATH,
+	WP_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -13,7 +15,6 @@ import {
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH, WP_API_PATH } from '../../utils/api-client';
 import { fillPageTitle } from '../../utils/editor';
 
 const pageTitle = 'Product Showcase';

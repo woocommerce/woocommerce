@@ -6,7 +6,7 @@ import type { Editor } from '@woocommerce/e2e-utils';
 export const addTestingBlocks = async ( editor: Editor ) => {
 	// Add testing blocks
 	await editor.insertBlockUsingGlobalInserter( 'On Sale Products' );
-	await editor.insertBlockUsingGlobalInserter( 'Single Product' );
+	await editor.insertBlockUsingGlobalInserter( 'Product' );
 	await editor.canvas.getByText( 'Album' ).click();
 	await editor.canvas.getByText( 'Done' ).click();
 

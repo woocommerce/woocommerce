@@ -1,7 +1,9 @@
 ---
 post_title: Rename a country
-tags: code-snippet
+
 ---
+
+# Rename a country
 
 Rename a country in your countries list:
 

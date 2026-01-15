@@ -37,7 +37,7 @@ jobs:
           exclude="plugins/woocommerce/tests"
           version=$(pnpm analyzer major-minor "${{ github.event.pull_request.head.sha }}" "plugins/woocommerce/woocommerce.php" | tail -n 1)
           pnpm analyzer "${{ github.event.pull_request.head.sha }}" $version --base "${{ github.event.pull_request.base.sha }}" --outputStyle "github" --exclude $exclude
-      - uses: 'actions/github-script@v6'
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         name: 'Validate'
         with:
           script: |

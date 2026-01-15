@@ -130,13 +130,20 @@ const test = base.extend<
 		await use( page );
 
 		// Clear local storage after each test.
-		await page.evaluate( () => {
-			window.localStorage.clear();
-		} );
+		try {
+			await page.evaluate( () => {
+				window.localStorage.clear();
+			} );
+		} catch ( error ) {
+			// Ignore errors if page is already closed/navigated away
+			// eslint-disable-next-line no-console
+			console.log( 'Failed to clear localStorage:', error.message );
+		}
 
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
 
+		await wpCLI( `db reset --yes` );
 		// Reset the database to the initial state via snapshot import.
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
 	},

@@ -10,8 +10,11 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 import { Edit, Save } from './edit';
 import deprecated from './deprecated';
+import metadata from './block.json';
 
 registerBlockType( 'woocommerce/cart-order-summary-block', {
+	apiVersion: metadata.apiVersion,
+	title: metadata.title,
 	icon: {
 		src: (
 			<Icon

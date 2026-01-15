@@ -11,7 +11,12 @@ use WP_Upgrader;
  * @internal
  */
 class PTKPatternsStore {
-	const TRANSIENT_NAME = 'ptk_patterns';
+	const OPTION_NAME = 'ptk_patterns';
+
+	/**
+	 * Hook and action name used to trigger fetching patterns.
+	 */
+	const FETCH_PATTERNS_ACTION = 'fetch_patterns';
 
 	const CATEGORY_MAPPING = array(
 		'testimonials' => 'reviews',
@@ -46,9 +51,10 @@ class PTKPatternsStore {
 			add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 			add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
 			add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
+			add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
 
 			// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
-			add_action( 'fetch_patterns', array( $this, 'fetch_patterns' ) );
+			add_action( self::FETCH_PATTERNS_ACTION, array( $this, 'fetch_patterns' ) );
 		}
 	}
 
@@ -75,15 +81,29 @@ class PTKPatternsStore {
 	 */
 	private function schedule_fetch_patterns() {
 		if ( did_action( 'action_scheduler_init' ) ) {
-			$this->schedule_action_if_not_pending( 'fetch_patterns' );
+			$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
 		} else {
 			add_action(
 				'action_scheduler_init',
 				function () {
-					$this->schedule_action_if_not_pending( 'fetch_patterns' );
+					$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
 				}
 			);
 		}
+	}
+
+	/**
+	 * Ensure a recurring fetch patterns action is scheduled.
+	 * This is called by the `action_scheduler_ensure_recurring_actions` hook.
+	 *
+	 * @return void
+	 */
+	public function ensure_recurring_fetch_patterns_if_enabled() {
+		if ( ! $this->allowed_tracking_is_enabled() ) {
+			return;
+		}
+
+		$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
 	}
 
 	/**
@@ -93,17 +113,11 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		$last_request = get_transient( 'last_fetch_patterns_request' );
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( call_user_func( $has_scheduled_action, $action ) || false !== $last_request ) {
+		if ( as_has_scheduled_action( $action, array(), 'woocommerce' ) ) {
 			return;
 		}
 
-		as_schedule_single_action( time(), $action );
-		set_transient( 'last_fetch_patterns_request', time(), HOUR_IN_SECONDS );
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action, array(), 'woocommerce' );
 	}
 
 	/**
@@ -112,10 +126,10 @@ class PTKPatternsStore {
 	 * @return array
 	 */
 	public function get_patterns() {
-		$patterns = get_transient( self::TRANSIENT_NAME );
+		$patterns = get_option( self::OPTION_NAME );
 
-		// Only if the transient is not set, we schedule fetching the patterns from the PTK.
-		if ( false === $patterns ) {
+		// If the current data doesn't exist or is invalid, schedule fetching the patterns from the PTK.
+		if ( false === $patterns || ! $this->ptk_client->is_valid_schema( $patterns ) ) {
 			$this->schedule_fetch_patterns();
 			return array();
 		}
@@ -173,10 +187,28 @@ class PTKPatternsStore {
 	/**
 	 * Reset the cached patterns to fetch them again from the PTK.
 	 *
+	 * @since 10.4.1 Unscheduling is deferred if Action Scheduler hasn't initialized yet.
 	 * @return void
 	 */
 	public function flush_cached_patterns() {
-		delete_transient( self::TRANSIENT_NAME );
+		delete_option( self::OPTION_NAME );
+
+		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
+			return;
+		}
+
+		// Unschedule any existing fetch_patterns actions.
+		// Defer unscheduling until Action Scheduler is ready to avoid errors during early initialization.
+		if ( did_action( 'action_scheduler_init' ) ) {
+			as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
+		} else {
+			add_action(
+				'action_scheduler_init',
+				function () {
+					as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
+				}
+			);
+		}
 	}
 
 	/**
@@ -188,8 +220,6 @@ class PTKPatternsStore {
 		if ( ! $this->allowed_tracking_is_enabled() ) {
 			return;
 		}
-
-		$this->flush_cached_patterns();
 
 		$patterns = $this->ptk_client->fetch_patterns(
 			array(
@@ -209,6 +239,7 @@ class PTKPatternsStore {
 				),
 			)
 		);
+
 		if ( is_wp_error( $patterns ) ) {
 			wc_get_logger()->warning(
 				sprintf(
@@ -223,7 +254,7 @@ class PTKPatternsStore {
 		$patterns = $this->filter_patterns( $patterns );
 		$patterns = $this->map_categories( $patterns );
 
-		set_transient( self::TRANSIENT_NAME, $patterns );
+		update_option( self::OPTION_NAME, $patterns, false );
 	}
 
 	/**

@@ -8,7 +8,7 @@ import { useDispatch } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useEntityProp } from '@wordpress/core-data';
 import { closeSmall } from '@wordpress/icons';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import type { Product } from '@woocommerce/data';
 import { isInTheFuture } from '@wordpress/date';
 
@@ -139,7 +139,7 @@ export function PrepublishPanel( {
 	return (
 		<div
 			ref={ panelRef }
-			className={ classnames( 'woocommerce-product-publish-panel', {
+			className={ clsx( 'woocommerce-product-publish-panel', {
 				'is-published': isPublishedOrScheduled,
 			} ) }
 		>

@@ -10,6 +10,9 @@ use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
  * ProductGalleryThumbnails class.
  */
 class ProductGalleryThumbnails extends AbstractBlock {
+
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -18,28 +21,12 @@ class ProductGalleryThumbnails extends AbstractBlock {
 	protected $block_name = 'product-gallery-thumbnails';
 
 	/**
-	 * It isn't necessary register block assets because it is a server side block.
-	 */
-	protected function register_block_type_assets() {
-		return null;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return null
-	 */
-	protected function get_block_type_style() {
-		return null;
-	}
-
-	/**
 	 *  Register the context
 	 *
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'postId', 'mode', 'cropImages' ];
+		return array( 'postId' );
 	}
 
 	/**
@@ -68,20 +55,26 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			return '';
 		}
 
-		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, 'woocommerce_thumbnail' );
+		// We crop the images to square only if the aspect ratio is 1:1.
+		// Otherwise, we show the uncropped and use object-fit to crop them.
+		$image_size             = '1' === $attributes['aspectRatio'] ? 'woocommerce_thumbnail' : 'woocommerce_single';
+		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, $image_size );
+
 		// Don't show the thumbnails block if there is only one image.
 		if ( count( $product_gallery_images ) <= 1 ) {
 			return '';
 		}
 
-		$thumbnail_size   = str_replace( '%', '', $attributes['thumbnailSize'] ?? '25%' );
-		$thumbnails_class = 'wc-block-product-gallery-thumbnails--thumbnails-size-' . $thumbnail_size;
+		$thumbnail_size         = str_replace( '%', '', $attributes['thumbnailSize'] ?? '25%' );
+		$active_thumbnail_style = $attributes['activeThumbnailStyle'] ?? 'overlay';
+
+		$img_class = 'wc-block-product-gallery-thumbnails__thumbnail__image';
 
 		ob_start();
 		?>
 		<div
-			class="wc-block-product-gallery-thumbnails <?php echo esc_attr( $classes_and_styles['classes'] . ' ' . $thumbnails_class ); ?>"
-			style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
+			class="wc-block-product-gallery-thumbnails wc-block-product-gallery-thumbnails--active-<?php echo esc_attr( $active_thumbnail_style ); ?> <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
+			style="<?php echo '--wc-block-product-gallery-thumbnails-size:' . absint( $thumbnail_size ) . ';' . esc_attr( $classes_and_styles['styles'] ); ?>"
 			data-wp-interactive="woocommerce/product-gallery"
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-top="context.thumbnailsOverflow.top"
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-bottom="context.thumbnailsOverflow.bottom"
@@ -89,23 +82,28 @@ class ProductGalleryThumbnails extends AbstractBlock {
 			data-wp-class--wc-block-product-gallery-thumbnails--overflow-right="context.thumbnailsOverflow.right">
 			<div
 				class="wc-block-product-gallery-thumbnails__scrollable"
-				data-wp-init="actions.onScroll"
-				data-wp-on--scroll="actions.onScroll">
+				data-wp-init--init-resize-observer="callbacks.initResizeObserver"
+				data-wp-init--hide-ghost-overflow="callbacks.hideGhostOverflow"
+				data-wp-on--scroll="actions.onScroll"
+				role="listbox">
 				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
 					<div class="wc-block-product-gallery-thumbnails__thumbnail">
 						<img
-							class="wc-block-product-gallery-thumbnails__thumbnail__image <?php echo 0 === $index ? 'is-active' : ''; ?>"
+							class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
 							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
 							src="<?php echo esc_attr( $image['src'] ); ?>"
 							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
 							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
+							alt="<?php echo esc_attr( $image['alt'] ); ?>"
 							data-wp-on--click="actions.selectCurrentImage"
-							data-wp-on--keydown="actions.onThumbnailKeyDown"
-							data-wp-watch="callbacks.toggleActiveImageAttributes"
+							data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
+							data-wp-watch="callbacks.toggleActiveThumbnailAttributes"
 							decoding="async"
-							tabindex="0"
+							tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
 							draggable="false"
-							loading="lazy" />
+							loading="lazy"
+							role="option"
+							style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>" />
 					</div>
 				<?php endforeach; ?>
 			</div>

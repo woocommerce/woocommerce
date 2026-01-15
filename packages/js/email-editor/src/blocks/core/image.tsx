@@ -3,8 +3,13 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { addFilter } from '@wordpress/hooks';
-import { Block } from '@wordpress/blocks/index';
+import { BlockSupports } from '@wordpress/blocks';
+
+/**
+ * Internal dependencies
+ */
+import { updateBlockSettings } from '../../config-tools/block-config';
+import { addFilterForEmail } from '../../config-tools/filters';
 
 const imageEditCallback = createHigherOrderComponent(
 	( BlockEdit ) =>
@@ -33,28 +38,21 @@ const imageEditCallback = createHigherOrderComponent(
  * Because CSS property filter is not supported in almost 50% of email clients we have to disable it
  */
 function disableImageFilter() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/deactivate-image-filter',
-		( settings: Block, name ) => {
-			if ( name === 'core/image' ) {
-				return {
-					...settings,
-					supports: {
-						...settings.supports,
-						filter: {
-							duetone: false,
-						},
-					},
-				};
-			}
-			return settings;
-		}
-	);
+	updateBlockSettings( 'core/image', ( current ) => ( {
+		...current,
+		supports: {
+			...( current.supports || {} ),
+			filter: {
+				// @ts-expect-error filter is not supported in the types
+				...( ( current.supports as BlockSupports )?.filter || {} ),
+				duetone: false,
+			},
+		},
+	} ) );
 }
 
 function hideExpandOnClick() {
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/hide-expand-on-click',
 		imageEditCallback

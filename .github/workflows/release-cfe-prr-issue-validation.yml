@@ -8,13 +8,13 @@ permissions: {}
 jobs:
   prep:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved' || github.event.label.name == 'Rejected'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       pr_number: ${{ steps.extract-pr.outputs.PR_NUMBER }}
     steps:
       - name: Extract PR number from issue body
         id: extract-pr
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
             const body = context.payload.issue.body;
@@ -39,7 +39,7 @@ jobs:
 
   verify:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       release_number: ${{ steps.extract-release.outputs.RELEASE_NUMBER }}
     permissions:
@@ -52,7 +52,7 @@ jobs:
         env:
           PR_NUMBER: ${{ needs.prep.outputs.pr_number }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
             const issueUrl = context.payload.issue.html_url;
@@ -87,7 +87,7 @@ jobs:
 
               core.setOutput(
                   'SLACK_MESSAGE',
-                  `:x: *${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} was not processed:* target branch (\`${baseRefName}\`) is not a release branch. Source request: _<${issueUrl}|${issueTitle}>_.`
+                  `:x: *${labelName === 'code freeze exception' ? 'Feature Freeze Exception' : 'Point Release Request'} was not processed:* target branch (\`${baseRefName}\`) is not a release branch. Source request: _<${issueUrl}|${issueTitle}>_.`
               );
 
               core.setOutput(
@@ -108,7 +108,7 @@ jobs:
 
                 core.setOutput(
                   'SLACK_MESSAGE',
-                  `:x: *${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} was not processed:* target branch (\`${baseRefName}\`) does not exist. Source request: _<${issueUrl}|${issueTitle}>_.`
+                  `:x: *${labelName === 'code freeze exception' ? 'Feature Freeze Exception' : 'Point Release Request'} was not processed:* target branch (\`${baseRefName}\`) does not exist. Source request: _<${issueUrl}|${issueTitle}>_.`
                 );
 
                 core.setOutput(
@@ -127,7 +127,7 @@ jobs:
         if: ${{ steps.verify-pr.outputs.PR_BASE_REF != '' }}
         env:
           PR_BASE_REF: ${{ steps.verify-pr.outputs.PR_BASE_REF }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
             const issueUrl = context.payload.issue.html_url;
@@ -150,7 +150,7 @@ jobs:
 
               core.setOutput(
                 'SLACK_MESSAGE',
-                `:x: *${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release Request'} was not processed:* PR base (\`${baseRef}\`) is not a valid release branch. Source request: _<${issueUrl}|${issueTitle}>_.`
+                `:x: *${labelName === 'code freeze exception' ? 'Feature Freeze Exception' : 'Point Release Request'} was not processed:* PR base (\`${baseRef}\`) is not a valid release branch. Source request: _<${issueUrl}|${issueTitle}>_.`
               );
 
               core.setOutput(
@@ -160,7 +160,7 @@ jobs:
             }
 
       - name: Notify Slack
-        uses: archive/github-actions-slack@v2.0.0
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         if: ${{ failure() && (steps.verify-pr.outputs.SLACK_MESSAGE != '' || steps.extract-release.outputs.SLACK_MESSAGE != '') }}
         id: notify
         with:
@@ -189,7 +189,7 @@ jobs:
 
   apply-milestone:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request' || github.event.label.name == 'Approved' || github.event.label.name == 'Rejected'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     permissions:
       issues: write
     needs:
@@ -206,7 +206,7 @@ jobs:
 
   cfe-created:
     if: github.event.label.name == 'code freeze exception' || github.event.label.name == 'point release request'
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs:
       - verify
     permissions:
@@ -216,7 +216,7 @@ jobs:
     steps:
       - name: Set Slack Message
         id: set-message
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
             const event = context.payload;
@@ -225,15 +225,15 @@ jobs:
             const issueUrl = event.issue.html_url;
             const releaseNumber = process.env.RELEASE_NUMBER;
 
-            const slackMessage = `*${labelName === 'code freeze exception' ? ':ice_cube: Code Freeze Exception request' : ':release: Point Release Request'} (${releaseNumber})*: _<${issueUrl}|${issueTitle}>_`;
+            const slackMessage = `*${labelName === 'code freeze exception' ? ':ice_cube: Feature Freeze Exception request' : ':release: Point Release Request'} (${releaseNumber})*: _<${issueUrl}|${issueTitle}>_`;
 
-            const githubComment = `Your request for a ${labelName === 'code freeze exception' ? 'Code Freeze Exception' : 'Point Release'} targeting WC version **${releaseNumber}** has been successfully created and is pending approval from @woocommerce/flux.`;
+            const githubComment = `Your request for a ${labelName === 'code freeze exception' ? 'Feature Freeze Exception' : 'Point Release'} targeting WC version **${releaseNumber}** has been successfully created and is pending approval from the release lead.`;
 
             // Set the message as a core output
             core.setOutput('SLACK_MESSAGE', slackMessage);
             core.setOutput('GITHUB_COMMENT', githubComment);
       - name: Notify Slack
-        uses: archive/github-actions-slack@v2.0.0
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         id: notify
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
@@ -252,7 +252,7 @@ jobs:
 
   request-approved:
     if: ${{ github.event.label.name == 'Approved' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     permissions:
       pull-requests: write
       issues: write
@@ -279,7 +279,7 @@ jobs:
         run: |
           gh pr edit $PR_NUMBER --add-label "cherry pick to frozen release" --repo "$OWNER/$REPO"
 
-      - name: Comment issue has been approved
+      - name: Comment on PRR issue that it has been approved
         env:
           ISSUE_URL: ${{ github.event.issue.html_url }}
           GH_TOKEN: ${{ github.token }}
@@ -289,9 +289,26 @@ jobs:
 
           You are targeting your fix for WC version: **${RELEASE_NUMBER}**."
 
+      - name: Comment on pull request that request has been approved
+        env:
+          OWNER: ${{ github.event.repository.owner.login }}
+          REPO: ${{ github.event.repository.name }}
+          PR_NUMBER: ${{ needs.prep.outputs.pr_number }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_NUMBER: ${{ needs.verify.outputs.release_number }}
+        run: |
+          gh pr comment $PR_NUMBER --repo "$OWNER/$REPO" --body "✅ **Your Point Release Request has been approved!**
+
+          This PR is now approved for inclusion in WC version **${RELEASE_NUMBER}**.
+
+          **Next steps:**
+          - Ensure your PR is ready for review and merge
+          - Once approved by reviewers, merge this PR to the release branch
+          - Cherry-pick labels have been automatically added, please remove any that should not apply prior to merging."
+
       - name: Set Slack Message
         id: set-message
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
             const event = context.payload;
@@ -302,7 +319,7 @@ jobs:
             core.setOutput('SLACK_MESSAGE', message);
 
       - name: Notify Slack
-        uses: archive/github-actions-slack@v2.0.0
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         id: notify
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
@@ -314,7 +331,7 @@ jobs:
 
   request-rejected:
     if: ${{ github.event.label.name == 'Rejected' }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     permissions:
       issues: write
     steps:
@@ -327,7 +344,7 @@ jobs:
 
       - name: Set Slack Message
         id: set-message
-        uses: actions/github-script@v7
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
             const event = context.payload;
@@ -340,7 +357,7 @@ jobs:
 
 
       - name: Notify Slack
-        uses: archive/github-actions-slack@v2.0.0
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
         id: notify
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}

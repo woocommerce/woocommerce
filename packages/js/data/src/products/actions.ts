@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { apiFetch } from '@wordpress/data-controls';
-import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
+import { DispatchFromMap } from '../types';
 import TYPES from './action-types';
 import {
 	ReadOnlyProperties,

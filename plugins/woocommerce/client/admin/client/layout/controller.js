@@ -2,21 +2,17 @@
  * External dependencies
  */
 import { Suspense, lazy } from '@wordpress/element';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { parse, stringify } from 'qs';
 import { find, isEqual, last, omit } from 'lodash';
-import {
-	applyFilters,
-	addAction,
-	removeAction,
-	didFilter,
-} from '@wordpress/hooks';
+import { applyFilters } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import {
 	getNewPath,
 	getPersistedQuery,
 	getHistory,
 	getQueryExcludedScreens,
+	getQueryExcludedScreensUrlUpdate,
 	getScreenFromPath,
 	isWCAdmin,
 } from '@woocommerce/navigation';
@@ -25,9 +21,10 @@ import { Spinner } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import getReports from '../analytics/report/get-reports';
+import { useReports } from '../analytics/report/use-reports';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { isFeatureEnabled } from '~/utils/features';
+import { useFilterHook } from '~/utils/use-filter-hook';
 import { NoMatch } from './NoMatch';
 
 const ProductVariationPage = lazy( () =>
@@ -81,7 +78,7 @@ const LaunchStore = lazy( () =>
 
 export const PAGES_FILTER = 'woocommerce_admin_pages_list';
 
-export const getPages = () => {
+export const getPages = ( reports = [] ) => {
 	const pages = [];
 	const initialBreadcrumbs = [
 		[ '', getAdminSetting( 'woocommerceTranslation' ) ],
@@ -144,7 +141,7 @@ export const getPages = () => {
 			container: AnalyticsReport,
 			path: '/analytics/:report',
 			breadcrumbs: ( { match } ) => {
-				const report = find( getReports(), {
+				const report = find( reports, {
 					report: match.params.report,
 				} );
 				if ( ! report ) {
@@ -178,24 +175,22 @@ export const getPages = () => {
 		} );
 	}
 
-	if ( isFeatureEnabled( 'marketplace' ) ) {
-		pages.push( {
-			container: Marketplace,
-			layout: {
-				header: false,
-			},
-			path: '/extensions',
-			breadcrumbs: [
-				[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
-				__( 'Extensions', 'woocommerce' ),
-			],
-			wpOpenMenu: 'toplevel_page_woocommerce',
-			capability: 'manage_woocommerce',
-			navArgs: {
-				id: 'woocommerce-marketplace',
-			},
-		} );
-	}
+	pages.push( {
+		container: Marketplace,
+		layout: {
+			header: false,
+		},
+		path: '/extensions',
+		breadcrumbs: [
+			[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
+			__( 'Extensions', 'woocommerce' ),
+		],
+		wpOpenMenu: 'toplevel_page_woocommerce',
+		capability: 'manage_woocommerce',
+		navArgs: {
+			id: 'woocommerce-marketplace',
+		},
+	} );
 
 	if ( isFeatureEnabled( 'product_block_editor' ) ) {
 		const productPage = {
@@ -356,29 +351,10 @@ export const getPages = () => {
 };
 
 export function usePages() {
-	const [ pages, setPages ] = useState( getPages );
-
-	/*
-	 * Handler for new pages being added after the initial filter has been run,
-	 * so that if any routing pages are added later, they can still be rendered
-	 * instead of falling back to the `NoMatch` page.
-	 */
-	useEffect( () => {
-		const handleHookAdded = ( hookName ) => {
-			if ( hookName === PAGES_FILTER && didFilter( PAGES_FILTER ) > 0 ) {
-				setPages( getPages() );
-			}
-		};
-
-		const namespace = `woocommerce/woocommerce/watch_${ PAGES_FILTER }`;
-		addAction( 'hookAdded', namespace, handleHookAdded );
-
-		return () => {
-			removeAction( 'hookAdded', namespace );
-		};
-	}, [] );
-
-	return pages;
+	const reports = useReports();
+	return useFilterHook( PAGES_FILTER, () => getPages( reports ), [
+		reports,
+	] );
 }
 
 function usePrevious( value ) {
@@ -457,11 +433,17 @@ export const Controller = ( { ...props } ) => {
  * Update an anchor's link in sidebar to include persisted queries. Leave excluded screens
  * as is.
  *
- * @param {HTMLElement} item            - Sidebar anchor link.
- * @param {Object}      nextQuery       - A query object to be added to updated hrefs.
- * @param {Array}       excludedScreens - wc-admin screens to avoid updating.
+ * @param {HTMLElement} item                     - Sidebar anchor link.
+ * @param {Object}      nextQuery                - A query object to be added to updated hrefs.
+ * @param {Array}       excludedScreens          - wc-admin screens to avoid updating.
+ * @param {Array}       excludedScreensUrlUpdate - wc-admin screens to avoid updating URL.
  */
-export function updateLinkHref( item, nextQuery, excludedScreens ) {
+export function updateLinkHref(
+	item,
+	nextQuery,
+	excludedScreens,
+	excludedScreensUrlUpdate = []
+) {
 	if ( isWCAdmin( item.href ) ) {
 		const search = last( item.href.split( '?' ) );
 		const query = parse( search );
@@ -479,14 +461,19 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 		// Replace the href so you can see the url on hover.
 		item.href = href;
 
-		item.onclick = ( e ) => {
-			if ( e.ctrlKey || e.metaKey ) {
-				return;
-			}
+		const isExcludedScreenUrlUpdate =
+			excludedScreensUrlUpdate.includes( screen );
 
-			e.preventDefault();
-			getHistory().push( href );
-		};
+		if ( ! isExcludedScreenUrlUpdate ) {
+			item.onclick = ( e ) => {
+				if ( e.ctrlKey || e.metaKey ) {
+					return;
+				}
+
+				e.preventDefault();
+				getHistory().push( href );
+			};
+		}
 	}
 }
 
@@ -494,10 +481,16 @@ export function updateLinkHref( item, nextQuery, excludedScreens ) {
 window.wpNavMenuUrlUpdate = function ( query ) {
 	const nextQuery = getPersistedQuery( query );
 	const excludedScreens = getQueryExcludedScreens();
+	const excludedScreensUrlUpdate = getQueryExcludedScreensUrlUpdate();
 	const anchors = document.querySelectorAll( '#adminmenu a' );
 
 	Array.from( anchors ).forEach( ( item ) =>
-		updateLinkHref( item, nextQuery, excludedScreens )
+		updateLinkHref(
+			item,
+			nextQuery,
+			excludedScreens,
+			excludedScreensUrlUpdate
+		)
 	);
 };
 

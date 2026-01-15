@@ -12,7 +12,10 @@ import {
 	applyCheckoutFilter,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import { useStoreCart } from '@woocommerce/base-context/hooks';
+import {
+	useStoreCart,
+	useOrderSummaryLoadingState,
+} from '@woocommerce/base-context/hooks';
 import { getSetting } from '@woocommerce/settings';
 import {
 	CartResponseTotals,
@@ -20,6 +23,9 @@ import {
 	LooselyMustHave,
 } from '@woocommerce/types';
 import { formatPrice } from '@woocommerce/price-format';
+import { hasSelectedShippingRate } from '@woocommerce/base-utils';
+import { Skeleton } from '@woocommerce/base-components/skeleton';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 
 /**
  * Internal dependencies
@@ -27,10 +33,15 @@ import { formatPrice } from '@woocommerce/price-format';
 import './style.scss';
 
 export interface TotalsFooterItemProps {
+	className?: string;
 	/**
 	 * The currency object with which to display the item
 	 */
 	currency: Currency;
+	/**
+	 * Whether the totals are estimated e.g. in the cart.
+	 */
+	isEstimate?: boolean;
 	/**
 	 * An object containing the total price and the total tax
 	 *
@@ -38,7 +49,6 @@ export interface TotalsFooterItemProps {
 	 * convenience, but will use only these two properties.
 	 */
 	values: LooselyMustHave< CartResponseTotals, 'total_price' | 'total_tax' >;
-	className?: string;
 }
 
 /**
@@ -52,6 +62,7 @@ const TotalsFooterItem = ( {
 	currency,
 	values,
 	className,
+	isEstimate = false,
 }: TotalsFooterItemProps ): JSX.Element => {
 	const SHOW_TAXES =
 		getSetting< boolean >( 'taxesEnabled', true ) &&
@@ -67,10 +78,13 @@ const TotalsFooterItem = ( {
 	// We need to pluck out receiveCart.
 	// eslint-disable-next-line no-unused-vars
 	const { receiveCart, ...cart } = useStoreCart();
+	const { isLoading } = useOrderSummaryLoadingState();
 
 	const label = applyCheckoutFilter( {
 		filterName: 'totalLabel',
-		defaultValue: __( 'Total', 'woocommerce' ),
+		defaultValue: isEstimate
+			? __( 'Estimated total', 'woocommerce' )
+			: __( 'Total', 'woocommerce' ),
 		extensions: cart.extensions,
 		arg: { cart },
 	} );
@@ -113,6 +127,20 @@ const TotalsFooterItem = ( {
 			  )
 			: __( 'Including <TaxAmount/> in taxes', 'woocommerce' );
 
+	const hasSelectedRates = hasSelectedShippingRate( cart.shippingRates );
+	const cartNeedsShipping = cart.cartNeedsShipping;
+	const skeleton = (
+		<>
+			<span>{ __( 'Including', 'woocommerce' ) }</span>
+			<Skeleton
+				height="1em"
+				width="45px"
+				tag="span"
+				ariaMessage={ __( 'Loading price… ', 'woocommerce' ) }
+			/>
+		</>
+	);
+
 	return (
 		<TotalsItem
 			className={ clsx(
@@ -123,21 +151,38 @@ const TotalsFooterItem = ( {
 			label={ label }
 			value={ value }
 			description={
-				SHOW_TAXES &&
-				parsedTaxValue !== 0 && (
-					<p className="wc-block-components-totals-footer-item-tax">
-						{ createInterpolateElement( description, {
-							TaxAmount: (
-								<FormattedMonetaryAmount
-									className="wc-block-components-totals-footer-item-tax-value"
-									currency={ currency }
-									value={ parsedTaxValue }
-								/>
-							),
-						} ) }
-					</p>
-				)
+				<>
+					{ SHOW_TAXES && parsedTaxValue !== 0 && (
+						<p className="wc-block-components-totals-footer-item-tax">
+							<DelayedContentWithSkeleton
+								isLoading={ isLoading }
+								skeleton={ skeleton }
+							>
+								<>
+									{ createInterpolateElement( description, {
+										TaxAmount: (
+											<FormattedMonetaryAmount
+												className="wc-block-components-totals-footer-item-tax-value"
+												currency={ currency }
+												value={ parsedTaxValue }
+											/>
+										),
+									} ) }
+								</>
+							</DelayedContentWithSkeleton>
+						</p>
+					) }
+					{ isEstimate && ! hasSelectedRates && cartNeedsShipping && (
+						<p className="wc-block-components-totals-footer-item-shipping">
+							{ __(
+								'Shipping will be calculated at checkout',
+								'woocommerce'
+							) }
+						</p>
+					) }
+				</>
 			}
+			showSkeleton={ isLoading }
 		/>
 	);
 };
