@@ -519,7 +519,16 @@ final class WooCommerce {
 	private function define_tables() {
 		global $wpdb;
 
-		foreach ( self::DEFINED_TABLES as $name => $table ) {
+		// List of tables without prefixes.
+		$tables = array(
+			'payment_tokenmeta'      => 'woocommerce_payment_tokenmeta',
+			'order_itemmeta'         => 'woocommerce_order_itemmeta',
+			'wc_product_meta_lookup' => 'wc_product_meta_lookup',
+			'wc_tax_rate_classes'    => 'wc_tax_rate_classes',
+			'wc_reserved_stock'      => 'wc_reserved_stock',
+		);
+
+		foreach ( $tables as $name => $table ) {
 			$wpdb->$name = $wpdb->prefix . $table;
 			if ( ! in_array( $table, $wpdb->tables, true ) ) {
 				$wpdb->tables[] = $table;
