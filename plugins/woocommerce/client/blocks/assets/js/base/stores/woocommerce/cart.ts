@@ -309,6 +309,7 @@ const { state, actions } = store< Store >(
 				{ id, key, quantity, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
+				const a11yModulePromise = import( '@wordpress/a11y' );
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
@@ -402,7 +403,8 @@ const { state, actions } = store< Store >(
 						'woocommerce'
 					) as WooCommerceConfig;
 					if ( messages?.addedToCartText ) {
-						wp?.a11y?.speak( messages.addedToCartText, 'polite' );
+						const { speak } = yield a11yModulePromise;
+						speak( messages.addedToCartText, 'polite' );
 					}
 
 					// Dispatches the event to sync the @wordpress/data store.
@@ -421,6 +423,7 @@ const { state, actions } = store< Store >(
 				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
+				const a11yModulePromise = import( '@wordpress/a11y' );
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
@@ -557,10 +560,8 @@ const { state, actions } = store< Store >(
 							'woocommerce'
 						) as WooCommerceConfig;
 						if ( messages?.addedToCartText ) {
-							wp?.a11y?.speak(
-								messages.addedToCartText,
-								'polite'
-							);
+							const { speak } = yield a11yModulePromise;
+							speak( messages.addedToCartText, 'polite' );
 						}
 
 						// Dispatches the event to sync the @wordpress/data store.
@@ -598,7 +599,11 @@ const { state, actions } = store< Store >(
 				try {
 					const res: Response = yield fetch(
 						`${ state.restUrl }wc/store/v1/cart`,
-						{ headers: { 'Content-Type': 'application/json' } }
+						{
+							method: 'GET',
+							cache: 'no-store',
+							headers: { 'Content-Type': 'application/json' },
+						}
 					);
 					const json: Cart = yield res.json();
 

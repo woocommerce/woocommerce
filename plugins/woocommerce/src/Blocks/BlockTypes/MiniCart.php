@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Blocks\Utils\MiniCartUtils;
 use Automattic\WooCommerce\Blocks\Utils\BlockHooksTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use Automattic\Block_Delimiter;
 
 /**
@@ -24,7 +25,6 @@ use Automattic\Block_Delimiter;
  */
 class MiniCart extends AbstractBlock {
 	use BlockHooksTrait;
-	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -473,6 +473,14 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		/**
+		 * Do not render for logged-out users if the Coming Soon mode is enabled for store pages only.
+		 */
+		$coming_soon_helper = wc_get_container()->get( ComingSoonHelper::class );
+		if ( ! is_user_logged_in() && ! WC()->is_rest_api_request() && $coming_soon_helper->is_store_coming_soon() ) {
+			return '';
+		}
+
+		/**
 		 * In the cart and checkout pages, the block is either rendered hidden or removed.
 		 * It is not interactive, so it can fall back to the existing implementation.
 		 */
@@ -501,9 +509,10 @@ class MiniCart extends AbstractBlock {
 			wp_enqueue_script( $handle );
 		}
 
-		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
-		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
-		$this->placeholder_image( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+		BlocksSharedState::load_cart_state( $consent );
+		BlocksSharedState::load_store_config( $consent );
+		BlocksSharedState::load_placeholder_image( $consent );
 
 		$cart = $this->get_cart_instance();
 
@@ -569,7 +578,6 @@ class MiniCart extends AbstractBlock {
 				$this->get_full_block_name(),
 				array(
 					'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
-					'addToCartBehaviour'           => $attributes['addToCartBehaviour'],
 					'onCartClickBehaviour'         => $on_cart_click_behaviour,
 					'checkoutUrl'                  => wc_get_checkout_url(),
 					'buttonAriaLabelTemplate'      => $button_aria_label_template,
@@ -592,8 +600,13 @@ class MiniCart extends AbstractBlock {
 		
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
-				data-wp-init="callbacks.setupEventListeners"
+				data-wp-init="callbacks.setupJQueryEventBridge"
 				data-wp-init--refresh-cart-items="woocommerce::actions.refreshCartItems"
+				data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCartItems"
+				data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCartItems"
+				<?php if ( 'open_drawer' === $attributes['addToCartBehaviour'] ) : ?>
+				data-wp-on-document--wc-blocks_added_to_cart---open-drawer="actions.openDrawer"
+				<?php endif; ?>
 				data-wp-watch="callbacks.disableScrollingOnBody"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
@@ -601,7 +614,6 @@ class MiniCart extends AbstractBlock {
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
 				<button 
-					data-wp-init="callbacks.saveMiniCartButtonRef"
 					data-wp-on--click="actions.openDrawer"
 					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
@@ -914,7 +926,7 @@ class MiniCart extends AbstractBlock {
 
 		$translations = array_filter( $translations );
 
-		return implode( '', $translations );
+		return implode( "\n", $translations );
 	}
 
 	/**

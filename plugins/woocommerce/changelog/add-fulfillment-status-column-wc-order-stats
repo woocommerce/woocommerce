@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add fulfillment_status column to wc_order_stats table for new installations to enable order fulfillment tracking in analytics.

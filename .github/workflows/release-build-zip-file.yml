@@ -92,13 +92,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-            # No PRs by automated tools should remain open.
-            count=$( gh pr list --search "is:open label:Release" --limit 1 --json number | jq length )
-            if (( count > 0 )); then
-                echo "::error::Pre-build verification: there are release PRs still open."
-                exit 1
-            fi
-
             # Branch name must be 'release/*'.
             branch_name="${BRANCH#refs/heads/}"
             if  [[ $branch_name != release/* ]] ; then
@@ -128,11 +121,21 @@ jobs:
             fi
 
             # Stable version in release branch should match wporg.
+            svn_trunk_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/woocommerce.php -O /dev/stdout |  grep -oP '(?<=Version: )(.+)' | head -n1 )
             svn_stable_version=$( wget --quiet https://plugins.svn.wordpress.org/woocommerce/trunk/readme.txt -O /dev/stdout |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
-            branch_stable_version=$( cat checkout-branch/plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
-            if [[ $branch_stable_version != $svn_stable_version ]] ; then
+            
+            if [[ -z "$svn_trunk_version" || -z "$svn_stable_version" ]]; then
+                echo "::error::Pre-build verification: could not determine current version number or stable tag from SVN."
+                exit 1
+            fi
+
+            if php -r "exit( version_compare('$branch_plugin_version', '$svn_trunk_version', '>') ? 0 : 1 );"; then
+              branch_stable_version=$( cat checkout-branch/plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )            
+
+              if [[ $branch_stable_version != $svn_stable_version ]] ; then
                 echo "::error::Pre-build verification: stable version in release branch ($branch_stable_version) is not matching the one in SVN trunk ($svn_stable_version)."
                 exit 1
+              fi
             fi
 
             # No PRs against release branch should remain open.
@@ -147,6 +150,13 @@ jobs:
             count=$( gh pr list --search "is:open milestone:$milestone" --limit 1 --json number | jq length )
             if (( count > 0 )); then
                 echo "::error::Pre-build verification: there are PRs with milestone '$milestone' still open."
+                exit 1
+            fi
+
+            # Changelog section must have at least one entry.
+            changelog_section=$( awk '/^== Changelog ==$/,/^\[See changelog/' checkout-branch/plugins/woocommerce/readme.txt )
+            if ! echo "$changelog_section" | grep -qE '^\* '; then
+                echo "::error::Pre-build verification: changelog section in readme.txt has no entries. Please add at least one entry before releasing."
                 exit 1
             fi
 

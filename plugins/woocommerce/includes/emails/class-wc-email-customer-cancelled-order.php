@@ -32,7 +32,7 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 			$this->id             = 'customer_cancelled_order';
 			$this->customer_email = true;
 			$this->title          = __( 'Cancelled order', 'woocommerce' );
-			$this->email_group    = 'order-exceptions';
+			$this->email_group    = 'order-changes';
 			$this->template_html  = 'emails/customer-cancelled-order.php';
 			$this->template_plain = 'emails/plain/customer-cancelled-order.php';
 			$this->placeholders   = array(
@@ -52,6 +52,11 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 			$this->description = $this->email_improvements_enabled
 				? __( 'Send an email to customers notifying them when their order has been cancelled', 'woocommerce' )
 				: __( 'Cancelled order emails are sent to customers when their orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Order cancelled', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has been cancelled.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -220,6 +225,9 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 	}

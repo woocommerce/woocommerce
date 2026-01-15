@@ -115,6 +115,7 @@ jobs:
             core.setOutput( 'nextVersion', newVersion );
             core.setOutput( 'nextStable', newVersion.replace( /-(dev|(beta|rc)\.\d+)/, '' ) );
             core.setOutput( 'clearChangelog', '' === prerelease );
+            core.setOutput( 'prMilestone', `${ baseVersion }.0` );
 
       - name: Bump version in files
         env:
@@ -127,8 +128,9 @@ jobs:
           # Update version header in woocommerce.php.
           sed -i -E "s/Version: [0-9]+\.[0-9]+\.[0-9]+.*$/Version: $NEXT_VERSION/" woocommerce.php
 
+
           # Update changelog in readme.txt.
-          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+(\-[a-z]+(\.[0-9]+)*)? (.*) =/= $NEXT_VERSION \3 =/" readme.txt
+          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+(\-[a-z]+(\.[0-9]+)*)? (.*) =/= $NEXT_VERSION $(date +%Y)-XX-XX =/" readme.txt
 
           if [[ "$CLEAR_CHANGELOG" == "true" ]]; then
             perl -i -p0e 's/(== Changelog ==.*= \d+\.\d+\.\d+.*=\n)(.*)(\n\[See changelog for all versions\].*)/$1$3/igs' readme.txt
@@ -165,31 +167,39 @@ jobs:
             --message 'Bump version to ${{ steps.compute-new-version.outputs.nextVersion }}.'
           git push origin ${branch_name}
 
-          # Open PR.
+          # Determine reviewer (when running as a standalone workflow).
+          reviewer_arg=""
+          if [ "${{ contains( github.workflow_ref, 'release-bump-version.yml' ) }}" = "true" ]; then
+            reviewer_arg="--reviewer ${{ github.actor }}"
+          fi
+
+          # Check milestone exists.
+          milestone="${{ steps.compute-new-version.outputs.prMilestone }}"
+          milestone_arg=""
+          if [[ -n "$milestone" ]]; then
+            milestone_info=$(gh api repos/${{ github.repository }}/milestones --jq ".[] | select(.title==\"$milestone\")")
+
+            if [[ -n "$milestone_info" ]]; then
+              is_closed=$(echo "$milestone_info" | jq -r '.state=="closed"')
+              milestone_number=$(echo "$milestone_info" | jq -r '.number')
+
+              if [[ "$is_closed" == "true" ]]; then
+                echo "Milestone '$milestone' is closed, reopening it..."
+                gh api --method PATCH repos/${{ github.repository }}/milestones/"$milestone_number" -f state=open
+              fi
+
+              milestone_arg="--milestone $milestone"
+            fi
+          fi
+
+          # Create PR.
           gh pr create \
-            --title 'Bump WooCommerce version to ${{ steps.compute-new-version.outputs.nextVersion }}' \
-            --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
+            --title 'Bump WooCommerce version to `${{ steps.compute-new-version.outputs.nextVersion }}` on `${{ inputs.branch }}`' \
+            --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.'$'\n\n''<!-- [x] This Pull Request does not require a changelog -->' \
             --base ${{ inputs.branch }} \
             --head ${branch_name} \
-            --label Release
+            --label Release \
+            ${reviewer_arg} \
+            ${milestone_arg}
 
-      - name: Ensure milestone for dev version exists
-        if: ${{ inputs.bump-type == 'dev' }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const milestone = '${{ steps.compute-new-version.outputs.nextStable }}';
 
-            try {
-              await github.rest.issues.createMilestone({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: milestone,
-              });
-            } catch ( e ) {
-              if ( e.response.data.errors?.some( (err) => 'already_exists' === err.code ) ) {
-                console.log( `Milestone ${ milestone } already exists.` );
-              } else {
-                throw e;
-              }
-            }

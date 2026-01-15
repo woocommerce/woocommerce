@@ -302,8 +302,28 @@ class LegacyDataHandler {
 		}
 
 		$classname = $order_type['class_name'];
-		$order     = new $classname();
+		/** @var \WC_Order $order */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$order = new $classname();
 		$order->set_id( $order_id );
+
+		// Switch datastore if necessary.
+		$update_data_store_func = function ( $data_store ) {
+			/** @var \WC_Order $this */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			// Each order object contains a reference to its data store, but this reference is itself
+			// held inside of an instance of WC_Data_Store, so we create that first.
+			$data_store_wrapper = \WC_Data_Store::load( 'order' );
+
+			// Bind $data_store to our WC_Data_Store.
+			( function ( $data_store ) {
+				/** @var \WC_Data_Store $this */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				$this->current_class_name = (string) get_class( $data_store );
+				$this->instance           = $data_store;
+			} )->call( $data_store_wrapper, $data_store );
+
+			// Finally, update the $order object with our WC_Data_Store( $data_store ) instance.
+			$this->data_store = $data_store_wrapper;
+		};
+		$update_data_store_func->call( $order, $data_store );
 
 		// Read order (without triggering sync) -- we create our own callback instead of using `__return_false` to
 		// prevent `remove_filter()` from removing it in cases where it was already hooked by 3rd party code.
@@ -311,36 +331,12 @@ class LegacyDataHandler {
 
 		add_filter( 'woocommerce_hpos_enable_sync_on_read', $prevent_sync_on_read, 999 );
 		try {
-			$this->read_order_from_datastore( $order, $data_store );
+			$data_store->read( $order );
 		} finally {
 			remove_filter( 'woocommerce_hpos_enable_sync_on_read', $prevent_sync_on_read, 999 );
 		}
 
 		return $order;
-	}
-
-	/**
-	 * Reads an order from a datastore fully changing the instance of the datastore inside the order object.
-	 *
-	 * @since 10.4.0
-	 *
-	 * @param \WC_Abstract_Order &$order      The order object to read from the datastore.
-	 * @param object             &$data_store The datastore to read from.
-	 */
-	public function read_order_from_datastore( \WC_Abstract_Order &$order, &$data_store ) {
-		// Change the instance of the datastore inside the datastore object.
-		( function () use ( $data_store ) {
-			if ( $this->data_store instanceof \WC_Data_Store ) {
-				( function () use ( $data_store ) {
-					$this->current_class_name = get_class( $data_store );
-					$this->instance           = $data_store;
-				} )->call( $this->data_store );
-			} else {
-				$this->data_store = $data_store;
-			}
-		} )->call( $order );
-
-		$data_store->read( $order );
 	}
 
 	/**

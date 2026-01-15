@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Added validation for PayPal Standard purchase unit amount in create-order requests to prevent errors when order totals are invalid.
