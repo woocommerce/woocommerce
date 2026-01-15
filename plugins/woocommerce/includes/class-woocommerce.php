@@ -528,8 +528,10 @@ final class WooCommerce {
 		global $wpdb;
 
 		foreach ( self::DEFINED_TABLES as $name => $table ) {
-			$wpdb->$name    = $wpdb->prefix . $table;
-			$wpdb->tables[] = $table;
+			$wpdb->$name = $wpdb->prefix . $table;
+			if ( ! in_array( $table, $wpdb->tables, true ) ) {
+				$wpdb->tables[] = $table;
+			}
 		}
 	}
 
@@ -1151,11 +1153,7 @@ final class WooCommerce {
 	 * Set tablenames inside WPDB object.
 	 */
 	public function wpdb_table_fix() {
-		global $wpdb;
-
-		foreach ( self::DEFINED_TABLES as $name => $table ) {
-			$wpdb->$name = $wpdb->prefix . $table;
-		}
+		$this->define_tables();
 	}
 
 	/**
