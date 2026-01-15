@@ -80,6 +80,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 				LEFT JOIN {$wpdb->postmeta} low_stock_amount_meta ON posts.ID = low_stock_amount_meta.post_id AND low_stock_amount_meta.meta_key = '_low_stock_amount'
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status = 'publish'
 				AND wc_product_meta_lookup.stock_quantity IS NOT NULL
 				AND wc_product_meta_lookup.stock_status = 'instock'
 				AND (
@@ -119,6 +120,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
+				AND posts.post_status = 'publish'
 				AND wc_product_meta_lookup.stock_status = %s
 				",
 				$status
