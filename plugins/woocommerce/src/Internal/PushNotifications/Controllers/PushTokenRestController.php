@@ -137,8 +137,8 @@ class PushTokenRestController extends RestApiControllerBase {
 				|| ! $endpoint
 				|| ! isset( $token_object['keys']['auth'] )
 				|| ! isset( $token_object['keys']['p256dh'] )
-				|| ! wp_http_validate_url( $endpoint )
-				|| ( wp_parse_url( $endpoint, PHP_URL_SCHEME ) !== 'https' )
+				|| ! wp_http_validate_url( (string) $endpoint )
+				|| ( wp_parse_url( (string) $endpoint, PHP_URL_SCHEME ) !== 'https' )
 				|| strlen( $token ) > PushToken::MAX_TOKEN_LENGTH
 			) {
 				return new WP_Error(
