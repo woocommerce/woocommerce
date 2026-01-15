@@ -93,7 +93,7 @@ test.describe( 'Shortcode Checkout Custom Place Order Button', () => {
 
 			// Ensuring validation errors are shown.
 			await expect(
-				page.locator( '.woocommerce-invalid' )
+				page.locator( '.woocommerce-invalid' ).first()
 			).toBeVisible();
 
 			// Ensuring we're still on checkout (order not submitted).
