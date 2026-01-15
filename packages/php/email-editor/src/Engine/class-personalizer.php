@@ -18,6 +18,12 @@ use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalizatio
 class Personalizer {
 
 	/**
+	 * Regex pattern for matching personalization tag names (e.g., "woocommerce/store-url", "user-firstname").
+	 * Used in both tag detection and parsing.
+	 */
+	private const TAG_NAME_PATTERN = '[a-zA-Z0-9\-\/]+';
+
+	/**
 	 * Personalization tags registry.
 	 *
 	 * @var Personalization_Tags_Registry
@@ -130,7 +136,9 @@ class Personalizer {
 					continue;
 				}
 
-				if ( ! $href || ! preg_match( '/\[[a-z-\/]+\]/', urldecode( $href ), $matches ) ) {
+				// Decode both URL encoding (%XX) and HTML entities (&#039;) to handle various encoding scenarios.
+				$decoded_href = html_entity_decode( urldecode( $href ), ENT_QUOTES, 'UTF-8' );
+				if ( ! preg_match( '/\[' . self::TAG_NAME_PATTERN . '(?:\s+[^\]]+)?\]/', $decoded_href, $matches ) ) {
 					continue;
 				}
 
@@ -166,14 +174,21 @@ class Personalizer {
 		);
 
 		// Step 1: Separate the tag and attributes.
-		if ( preg_match( '/^\[([a-zA-Z0-9\-\/]+)\s*(.*?)\]$/', trim( $token ), $matches ) ) {
+		if ( preg_match( '/^\[(' . self::TAG_NAME_PATTERN . ')\s*(.*?)\]$/', trim( $token ), $matches ) ) {
 			$result['token']   = "[{$matches[1]}]"; // The tag part (e.g., "[mailpoet/subscriber-firstname]").
 			$attributes_string = $matches[2]; // The attributes part (e.g., 'default="subscriber"').
 
 			// Step 2: Extract attributes from the attribute string.
-			if ( preg_match_all( '/(\w+)=["\']([^"\']*)["\']/', $attributes_string, $attribute_matches, PREG_SET_ORDER ) ) {
+			// Match both quoted values (url="foo") and unquoted values (url=foo).
+			// Unquoted values can occur when esc_url() strips quotes from personalization tags.
+			// For unquoted values with spaces, capture until the next key= pattern or closing bracket.
+			if ( preg_match_all( '/(\w+)=(?:["\']([^"\']*)["\']|([^\s\]]+(?:\s+(?!\w+=)[^\s\]]+)*))/', $attributes_string, $attribute_matches, PREG_SET_ORDER ) ) {
 				foreach ( $attribute_matches as $attribute ) {
-					$result['arguments'][ $attribute[1] ] = $attribute[2];
+					// $attribute[2] is quoted value, $attribute[3] is unquoted value (may contain spaces).
+					// Use null coalescing as only one of these will be populated depending on which pattern matched.
+					$quoted_value                         = $attribute[2] ?? '';
+					$unquoted_value                       = $attribute[3] ?? '';
+					$result['arguments'][ $attribute[1] ] = '' !== $quoted_value ? $quoted_value : $unquoted_value;
 				}
 			}
 		}
