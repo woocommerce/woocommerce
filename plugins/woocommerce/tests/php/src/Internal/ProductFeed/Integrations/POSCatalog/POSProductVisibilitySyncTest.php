@@ -155,4 +155,63 @@ class POSProductVisibilitySyncTest extends \WC_Unit_Test_Case {
 		// No exception should be thrown - test passes if we reach this point.
 		$this->assertTrue( true );
 	}
+
+	/**
+	 * Test that variations are saved when POS visibility changes.
+	 */
+	public function test_variations_saved_when_visibility_changes(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+
+		// Track which variations have save() called.
+		$saved_variation_ids = array();
+		$callback            = function ( $variation_id ) use ( &$saved_variation_ids ) {
+			$saved_variation_ids[] = $variation_id;
+		};
+		add_action( 'woocommerce_update_product_variation', $callback );
+
+		// Change visibility to hidden.
+		$this->sut->set_product_pos_visibility( $product->get_id(), false );
+
+		remove_action( 'woocommerce_update_product_variation', $callback );
+
+		// Verify save() was called for all variations.
+		$this->assertCount(
+			count( $variation_ids ),
+			$saved_variation_ids,
+			'save() should be called for each variation'
+		);
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertContains(
+				$variation_id,
+				$saved_variation_ids,
+				"Variation $variation_id should have been saved"
+			);
+		}
+	}
+
+	/**
+	 * Test that no updates occur when visibility state hasn't changed.
+	 */
+	public function test_no_updates_when_visibility_unchanged(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		// Set product as hidden first.
+		$this->sut->set_product_pos_visibility( $product->get_id(), false );
+
+		// Track if any variations have save() called.
+		$save_called = false;
+		$callback    = function () use ( &$save_called ) {
+			$save_called = true;
+		};
+		add_action( 'woocommerce_update_product_variation', $callback );
+
+		// Try to set hidden again (no change).
+		$this->sut->set_product_pos_visibility( $product->get_id(), false );
+
+		remove_action( 'woocommerce_update_product_variation', $callback );
+
+		// Verify save() was NOT called (because state was already hidden).
+		$this->assertFalse( $save_called, 'save() should not be called when visibility is unchanged' );
+	}
 }

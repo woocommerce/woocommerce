@@ -49,6 +49,12 @@ class POSProductVisibilitySync {
 	 * @return void
 	 */
 	public function set_product_pos_visibility( int $product_id, bool $visible_in_pos ): void {
+		$is_currently_visible = ! has_term( 'pos-hidden', 'pos_product_visibility', $product_id );
+
+		if ( $is_currently_visible === $visible_in_pos ) {
+			return; // No change detected.
+		}
+
 		if ( $visible_in_pos ) {
 			wp_remove_object_terms( $product_id, 'pos-hidden', 'pos_product_visibility' );
 		} else {
@@ -77,6 +83,12 @@ class POSProductVisibilitySync {
 				wp_remove_object_terms( $variation_id, 'pos-hidden', 'pos_product_visibility' );
 			} else {
 				wp_set_object_terms( $variation_id, 'pos-hidden', 'pos_product_visibility' );
+			}
+
+			// Save variation to update date_modified.
+			$variation = wc_get_product( $variation_id );
+			if ( $variation ) {
+				$variation->save();
 			}
 		}
 	}
