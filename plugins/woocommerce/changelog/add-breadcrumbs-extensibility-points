@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Breadcrumbs: Set preferred term in core Breadcrumbs block to keep compatibility with Woo's block
