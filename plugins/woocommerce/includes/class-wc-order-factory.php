@@ -91,6 +91,8 @@ class WC_Order_Factory {
 			$order_ids = $uncached_order_ids;
 		}
 
+		_prime_post_caches( $original_order_sort, false );
+
 		// We separate order list by class, since their datastore might be different.
 		$order_list_by_class = array();
 		$order_id_classnames = self::get_class_names_for_order_ids( $order_ids );
