@@ -79045,12 +79045,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessions\:\:is_authorized\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessions\:\:requires_nonce\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -81163,6 +81157,12 @@ parameters:
 			path: src/StoreApi/StoreApi.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\Jetpack…'' and ''is_signed_with_blog…'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/StoreApi/Utilities/AgenticCheckoutUtils.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\AgenticCheckoutUtils\:\:add_items_to_cart\(\) has invalid return type Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\Errors\\Error\.$#'
 			identifier: class.notFound
 			count: 1
@@ -81189,12 +81189,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\AgenticCheckoutUtils\:\:get_agentic_commerce_gateway\(\) should return WC_Payment_Gateway\|null but returns class\-string\|object\.$#'
 			identifier: return.type
-			count: 1
-			path: src/StoreApi/Utilities/AgenticCheckoutUtils.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\AgenticCheckoutUtils\:\:is_authorized\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Utilities/AgenticCheckoutUtils.php
 

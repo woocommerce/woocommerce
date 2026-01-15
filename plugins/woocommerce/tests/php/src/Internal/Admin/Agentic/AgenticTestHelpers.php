@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
-use Automattic\Jetpack\Connection\REST_Authentication as JetpackRestAuthentication;
+use Automattic\Jetpack\Connection\Rest_Authentication as JetpackRestAuthentication;
 use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookManager;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use WC_Order;

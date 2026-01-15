@@ -338,10 +338,10 @@ class AgenticCheckoutUtils {
 	 */
 	public static function validate_jetpack_request() {
 		if (
-			class_exists( 'Automattic\Jetpack\Connection\REST_Authentication' ) &&
-			method_exists( 'Automattic\Jetpack\Connection\REST_Authentication', 'is_signed_with_blog_token' )
+			class_exists( 'Automattic\Jetpack\Connection\Rest_Authentication' ) &&
+			method_exists( 'Automattic\Jetpack\Connection\Rest_Authentication', 'is_signed_with_blog_token' )
 		) {
-			if ( \Automattic\Jetpack\Connection\REST_Authentication::is_signed_with_blog_token() ) {
+			if ( \Automattic\Jetpack\Connection\Rest_Authentication::is_signed_with_blog_token() ) {
 				return true;
 			}
 		}
