@@ -249,22 +249,22 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	/**
 	 * Get the files relevant to response caching.
 	 *
-	 * @param WP_REST_Request $request     The request object.
-	 * @param string|null     $endpoint_id Optional endpoint identifier.
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
 	 * @return array Array of file paths to track for cache invalidation.
 	 */
-	protected function get_files_relevant_to_response_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array {
+	protected function get_files_relevant_to_response_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		return array( 'i18n/currencies.php' );
 	}
 
 	/**
 	 * Whether the response cache should vary by user.
 	 *
-	 * @param WP_REST_Request $request     The request object.
-	 * @param string|null     $endpoint_id Optional endpoint identifier.
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
 	 * @return bool False since currency data doesn't vary by user.
 	 */
-	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool {
+	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		return false;
 	}
 
@@ -273,12 +273,12 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	 *
 	 * Currencies don't have entity IDs, cache invalidation is file-based.
 	 *
-	 * @param array           $response_data Response data.
-	 * @param WP_REST_Request $request       The request object.
-	 * @param string|null     $endpoint_id   Optional endpoint identifier.
+	 * @param array                                 $response_data Response data.
+	 * @param WP_REST_Request<array<string, mixed>> $request       The request object.
+	 * @param string|null                           $endpoint_id   Optional endpoint identifier.
 	 * @return array Empty array since currencies don't have entity IDs.
 	 */
-	protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array {
+	protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		return array();
 	}
 }
