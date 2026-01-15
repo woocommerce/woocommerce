@@ -471,6 +471,9 @@ final class WooCommerce {
 
 	/**
 	 * Define WC Constants.
+	 *
+	 * IMPORTANT: When adding new constants here, also add them to
+	 * php-stubs/wc-constants.php for PHPStan static analysis.
 	 */
 	private function define_constants() {
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );

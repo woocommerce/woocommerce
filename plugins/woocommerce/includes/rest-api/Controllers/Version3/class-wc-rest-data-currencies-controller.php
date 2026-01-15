@@ -8,6 +8,8 @@
  * @since   3.5.0
  */
 
+use Automattic\WooCommerce\Internal\Traits\RestApiCache;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -16,6 +18,8 @@ defined( 'ABSPATH' ) || exit;
  * @package WooCommerce\RestApi
  */
 class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
+
+	use RestApiCache;
 
 	/**
 	 * Endpoint namespace.
@@ -32,6 +36,13 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	protected $rest_base = 'data/currencies';
 
 	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->initialize_rest_api_cache();
+	}
+
+	/**
 	 * Register routes.
 	 */
 	public function register_routes() {
@@ -41,7 +52,7 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
+					'callback'            => $this->with_cache( array( $this, 'get_items' ) ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
@@ -65,7 +76,7 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
+					'callback'            => $this->with_cache( array( $this, 'get_item' ) ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'location' => array(
@@ -224,5 +235,50 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 		);
 
 		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Get the default entity type for response caching.
+	 *
+	 * @return string|null The entity type.
+	 */
+	protected function get_default_response_entity_type(): ?string {
+		return 'currency';
+	}
+
+	/**
+	 * Get the files relevant to response caching.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of file paths to track for cache invalidation.
+	 */
+	protected function get_files_relevant_to_response_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array( 'i18n/currencies.php' );
+	}
+
+	/**
+	 * Whether the response cache should vary by user.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return bool False since currency data doesn't vary by user.
+	 */
+	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return false;
+	}
+
+	/**
+	 * Extract entity IDs from response data.
+	 *
+	 * Currencies don't have entity IDs, cache invalidation is file-based.
+	 *
+	 * @param array                                 $response_data Response data.
+	 * @param WP_REST_Request<array<string, mixed>> $request       The request object.
+	 * @param string|null                           $endpoint_id   Optional endpoint identifier.
+	 * @return array Empty array since currencies don't have entity IDs.
+	 */
+	protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array();
 	}
 }
