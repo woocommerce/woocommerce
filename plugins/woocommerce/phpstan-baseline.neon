@@ -38332,12 +38332,6 @@ parameters:
 			path: includes/wc-core-functions.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between ''auto'' and 1 will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: includes/wc-core-functions.php
-
-		-
 			message: '#^Ternary operator condition is always false\.$#'
 			identifier: ternary.alwaysFalse
 			count: 2
