@@ -15895,12 +15895,6 @@ parameters:
 			path: includes/class-wc-order-factory.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_flip expects array\<int\|string\>, array\<int\<min, \-1\>\|int\<1, max\>\|true\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-factory.php
-
-		-
 			message: '#^Parameter \#1 \$order_id of static method WC_Order_Factory\:\:get_class_name_for_order_id\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
 			identifier: argument.type
 			count: 1
