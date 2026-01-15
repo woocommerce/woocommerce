@@ -27,6 +27,9 @@ class ReportsSync {
 		add_action( 'woocommerce_new_product', array( __CLASS__, 'clear_stock_count_cache' ) );
 		add_action( 'update_option_woocommerce_notify_low_stock_amount', array( __CLASS__, 'clear_stock_count_cache' ) );
 		add_action( 'update_option_woocommerce_notify_no_stock_amount', array( __CLASS__, 'clear_stock_count_cache' ) );
+		add_action( 'trashed_post', array( __CLASS__, 'clear_stock_count_cache' ) );
+		add_action( 'untrashed_post', array( __CLASS__, 'clear_stock_count_cache' ) );
+		add_action( 'delete_post', array( __CLASS__, 'clear_stock_count_cache' ) );
 	}
 
 	/**
