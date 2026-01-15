@@ -84,10 +84,10 @@ trait AgenticTestHelpers {
 		$manager_property->setValue( $rest_auth, $this->jetpack_manager_mock );
 
 		// Set up the $_GET parameters and $_SERVER to simulate a Jetpack-signed request.
-		$_GET['_for']                = 'jetpack';
-		$_GET['token']               = 'test_token';
-		$_GET['signature']           = 'test_signature';
-		$_SERVER['REQUEST_METHOD']   = 'POST';
+		$_GET['_for']              = 'jetpack';
+		$_GET['token']             = 'test_token';
+		$_GET['signature']         = 'test_signature';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
 
 		// Trigger the authentication.
 		$rest_auth->wp_rest_authenticate( '' );
