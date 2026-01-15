@@ -25,14 +25,15 @@ add_action(
 			 * Constructor.
 			 */
 			public function __construct() {
-				$this->id                 = 'test-custom-button';
-				$this->method_title       = 'Test Custom Button';
-				$this->method_description = 'Test payment method with custom place order button';
-				$this->title              = 'Test Custom Button Payment';
-				$this->description        = 'Test payment method for e2e testing custom place order button';
-				$this->has_fields         = false;
-				$this->supports           = array( 'products' );
-				$this->enabled            = 'yes';
+				$this->id                            = 'test-custom-button';
+				$this->method_title                  = 'Test Custom Button';
+				$this->method_description            = 'Test payment method with custom place order button';
+				$this->title                         = 'Test Custom Button Payment';
+				$this->description                   = 'Test payment method for e2e testing custom place order button';
+				$this->has_fields                    = false;
+				$this->supports                      = array( 'products' );
+				$this->enabled                       = 'yes';
+				$this->has_custom_place_order_button = true; // For shortcode checkout.
 			}
 
 			/**
@@ -94,9 +95,9 @@ add_action(
 				 * @return array
 				 */
 				public function get_payment_method_script_handles() {
-					wp_register_script( 'test-custom-button', '', array( 'wc-blocks-registry' ), '1.0.0', true );
-					wp_add_inline_script( 'test-custom-button', $this->get_inline_script() );
-					return array( 'test-custom-button' );
+					wp_register_script( 'test-custom-button-blocks', '', array( 'wc-blocks-registry' ), '1.0.0', true );
+					wp_add_inline_script( 'test-custom-button-blocks', $this->get_inline_script() );
+					return array( 'test-custom-button-blocks' );
 				}
 
 				/**
@@ -162,5 +163,65 @@ JS;
 				}
 			}
 		);
+	}
+);
+
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		if ( ! function_exists( 'is_checkout' ) || ! function_exists( 'is_wc_endpoint_url' ) ) {
+			return;
+		}
+
+		$is_shortcode_checkout = is_checkout() && ! has_block( 'woocommerce/checkout' );
+		$is_pay_for_order      = is_wc_endpoint_url( 'order-pay' );
+		$is_add_payment_method = function_exists( 'is_add_payment_method_page' ) && is_add_payment_method_page();
+
+		if ( ! $is_shortcode_checkout && ! $is_pay_for_order && ! $is_add_payment_method ) {
+			return;
+		}
+
+		wp_register_script(
+			'test-custom-button-shortcode',
+			'',
+			array( 'jquery', 'wc-custom-place-order-button' ),
+			'1.0.0',
+			true
+		);
+
+		$inline_script = <<<'JS'
+(function($) {
+	'use strict';
+
+	wc.customPlaceOrderButton.register('test-custom-button', {
+		render: function(container, api) {
+			var $button = $('<button>', {
+				type: 'button',
+				'data-testid': 'custom-place-order-button',
+				'class': 'button alt',
+				text: 'Custom Payment Button',
+			});
+
+			$button.on('click', function(e) {
+				e.preventDefault();
+
+				api.validate().then(function(result) {
+					if (result.hasError) {
+						return;
+					}
+
+					api.submit();
+				});
+			});
+
+			$(container).append($button);
+		},
+		cleanup: function() {},
+	});
+})(jQuery);
+JS;
+
+		wp_add_inline_script( 'test-custom-button-shortcode', $inline_script );
+		wp_enqueue_script( 'test-custom-button-shortcode' );
 	}
 );

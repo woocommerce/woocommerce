@@ -215,6 +215,12 @@
 			return;
 		}
 
+		if ( typeof gatewayId !== 'string' || ! gatewayId ) {
+			// Log validation errors to help gateway developers fix incorrect API usage.
+			// eslint-disable-next-line no-console
+			console.error( 'wc.customPlaceOrderButton.register: gatewayId must be a non-empty string' );
+			return;
+		}
 		if ( typeof config.render !== 'function' ) {
 			// Log validation errors to help gateway developers fix incorrect API usage.
 			// eslint-disable-next-line no-console
