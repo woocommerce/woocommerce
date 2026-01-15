@@ -162,6 +162,15 @@
 		},
 		{
 			"dependencies": [
+				"jest-fixed-jsdom"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.0.10"
+		},
+		{
+			"dependencies": [
 				"eslint"
 			],
 			"packages": [
@@ -320,7 +329,16 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.50.1"
+			"pinVersion": "^1.57.0"
+		},
+		{
+			"dependencies": [
+				"playwright-ctrf-json-reporter"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.0.27"
 		},
 		{
 			"dependencies": [
@@ -388,7 +406,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "10.17.0"
+			"pinVersion": "10.32.0"
 		},
 		{
 			"dependencies": [
@@ -435,6 +453,15 @@
 				"**"
 			],
 			"pinVersion": "next"
+		},
+		{
+			"dependencies": [
+				"@wordpress/global-styles-engine"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
 		},
 		{
 			"label": "@wordpress/* runtime-dependencies",
@@ -571,7 +598,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "27.5.x"
+			"pinVersion": "29.5.x"
 		},
 		{
 			"dependencies": [
@@ -607,7 +634,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^2.5.7"
+			"pinVersion": "^3.2.6"
 		},
 		{
 			"dependencies": [

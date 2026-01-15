@@ -27,8 +27,7 @@ wp_clear_scheduled_hook( 'wc_admin_daily' );
 wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
 
-// Clear Action Scheduler events.
-if ( function_exists( 'as_unschedule_all_actions' ) ) {
+if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized() && function_exists( 'as_unschedule_all_actions' ) ) {
 	as_unschedule_all_actions( 'woocommerce_scheduled_sales' );
 	as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
 	as_unschedule_all_actions( 'woocommerce_cleanup_sessions' );
@@ -50,6 +49,16 @@ if ( function_exists( 'as_unschedule_all_actions' ) ) {
 if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Load WooCommerce so we can access the container, install routines, etc, during uninstall.
 	require_once __DIR__ . '/includes/class-wc-install.php';
+
+	// Drop custom WordPress tables indexes. See \WC_Install::create_tables() for details.
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type';" );
+	if ( null !== $index_exists ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type;" );
+	}
+	$date_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type';" );
+	if ( null !== $date_type_index_exists ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_date_type;" );
+	}
 
 	// Roles + caps.
 	WC_Install::remove_roles();

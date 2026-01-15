@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add deprecated tag to wc_enqueue_js().

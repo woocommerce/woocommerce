@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix case typo in wc_format_decimal function.

@@ -1,0 +1,21 @@
+{
+	"rootDir": "./js",
+	"collectCoverageFrom": [
+		"js/**/*.js",
+		"!**/node_modules/**"
+	],
+	"moduleDirectories": [ "node_modules" ],
+	"preset": "@wordpress/jest-preset-default",
+	"testPathIgnorePatterns": [
+		"<rootDir>/build/",
+		"<rootDir>/node_modules/",
+		"<rootDir>/tests/"
+	],
+	"roots": [ "<rootDir>" ],
+	"transform": {
+		"^.+\\.(js|ts|tsx)$": "<rootDir>/../babel-transformer.js"
+	},
+	"verbose": true,
+	"cacheDirectory": "<rootDir>/../../node_modules/.cache/jest",
+	"testEnvironment": "jest-fixed-jsdom"
+}

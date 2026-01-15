@@ -9,11 +9,11 @@ import {
 import { __ } from '@wordpress/i18n';
 import { Icon, help as helpIcon } from '@wordpress/icons';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
-import { sanitizeHTML } from '../../utils/sanitize-html';
 
 export interface LabelProps {
 	label: string;
@@ -41,7 +41,9 @@ export const Label = ( {
 				{
 					label: (
 						<span
-							dangerouslySetInnerHTML={ sanitizeHTML( label ) }
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML( label ),
+							} }
 						></span>
 					),
 					note: (
@@ -93,7 +95,7 @@ export const Label = ( {
 
 	const spanAdditionalProps =
 		typeof labelElement === 'string'
-			? { dangerouslySetInnerHTML: sanitizeHTML( label ) }
+			? { dangerouslySetInnerHTML: { __html: sanitizeHTML( label ) } }
 			: {};
 
 	return (
@@ -107,7 +109,9 @@ export const Label = ( {
 				<Tooltip
 					text={
 						<span
-							dangerouslySetInnerHTML={ sanitizeHTML( tooltip ) }
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML( tooltip ),
+							} }
 						></span>
 					}
 					position="top center"

@@ -340,6 +340,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'cookies'     => array(),
 		);
 
+		/**
+		 * Filters the HTTP arguments for the webhook delivery.
+		 *
+		 * @since 3.3.0
+		 * @param array $http_args The HTTP arguments.
+		 * @param mixed $arg The first hook argument.
+		 * @param int   $webhook_id The webhook ID.
+		 * @return array The filtered HTTP arguments.
+		 */
 		$http_args = apply_filters( 'woocommerce_webhook_http_args', $http_args, $arg, $this->get_id() );
 
 		// Add custom headers.
@@ -606,7 +615,18 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			'body'       => 'webhook_id=' . $this->get_id(),
 		);
 
-		$test          = wp_safe_remote_post( $this->get_delivery_url(), $args );
+		/**
+		 * Filters the HTTP arguments for the webhook delivery ping.
+		 *
+		 * @since 3.3.0
+		 * @param array $args The HTTP arguments.
+		 * @param null  $arg The first hook argument. Null since this is a ping.
+		 * @param int   $webhook_id The webhook ID.
+		 * @return array The filtered HTTP arguments.
+		 */
+		$http_args = apply_filters( 'woocommerce_webhook_http_args', $args, null, $this->get_id() );
+
+		$test          = wp_safe_remote_post( $this->get_delivery_url(), $http_args );
 		$response_code = wp_remote_retrieve_response_code( $test );
 
 		if ( is_wp_error( $test ) ) {

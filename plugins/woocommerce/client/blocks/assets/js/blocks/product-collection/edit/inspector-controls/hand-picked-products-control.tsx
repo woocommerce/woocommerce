@@ -65,7 +65,7 @@ function useProducts(
 				  }
 				: {
 						// For a small catalog we fetch all the products.
-						per_page: 0,
+						per_page: 100,
 				  },
 		};
 		getProducts( query ).then( ( results ) => {
@@ -175,6 +175,8 @@ export const HandPickedProductsControlField = ( {
 
 	return (
 		<FormTokenField
+			__next40pxDefaultSize
+			__nextHasNoMarginBottom
 			displayTransform={ transformTokenIntoProductName }
 			label={ __( 'Hand-Picked', 'woocommerce' ) }
 			onChange={ onTokenChange }

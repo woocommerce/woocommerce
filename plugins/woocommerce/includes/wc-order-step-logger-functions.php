@@ -12,6 +12,10 @@ declare( strict_types=1 );
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Logging\OrderLogsDeletionProcessor;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Log an order-related message. This is not public API and should not be used by plugins or themes.
  *
@@ -24,13 +28,13 @@ defined( 'ABSPATH' ) || exit;
  * @since 9.9.0
  */
 function wc_log_order_step( string $message, ?array $context = null, bool $final_step = false, bool $first_step = false ): void {
+	static $logging_active;
+	static $order;
 
 	try {
 		if ( empty( $message ) ) {
 			return; // Nothing to log.
 		}
-
-		static $logging_active;
 
 		if ( $first_step ) {
 			$logging_active = true;
@@ -40,7 +44,7 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			return; // Whenever the method is called without a started logging session, it will be ignored.
 		}
 
-		static $logger, $order_uid, $order_uid_short, $store_url;
+		static $order_uid, $order_uid_short, $store_url;
 		static $steps = array(); // Static array to store the messages and validate against unique messages before clearing the log.
 
 		// Generate a static place order unique ID for logging purposes. When this is called multiple times in the same request,
@@ -55,15 +59,16 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 		$context['store_url'] = $store_url;
 
 		// Extract safe data from order object.
-		if ( isset( $context['order_object'] ) && $context['order_object'] instanceof WC_Order ) {
-			$context = array_merge( extract_order_safe_data( $context['order_object'] ), $context );
+		if ( ( $context['order_object'] ?? null ) instanceof WC_Order ) {
+			$order   = $context['order_object'];
+			$context = array_merge( extract_order_safe_data( $order ), $context );
 			unset( $context['order_object'] ); // This is super-important to avoid logging sensitive data.
+			$order->add_meta_data( '_debug_log_source', $context['source'], true );
+			$order->save();
 		}
 
-		if ( ! $logger ) {
-			// Use a static logger instance to avoid unnecessary instantiations.
-			$logger = new WC_Logger( null, WC_Log_Levels::DEBUG );
-		}
+		// Use the global logger instance which respects site's logging configuration.
+		$logger = wc_get_logger();
 
 		if ( ! is_null( error_get_last() ) ) {
 			$context['last_error'] = error_get_last();
@@ -72,12 +77,29 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 		$context['remote-logging'] = false; // forcing disable on remote logging.
 
 		$steps[] = $message;
-		// Logging the place order flow step. Log files are grouped per order to make is easier to navigate.
 		$logger->log( WC_Log_Levels::DEBUG, $message, $context );
 
-		// Clears the log if instructed and all steps are unique.
-		if ( $final_step && count( array_unique( $steps ) ) === count( $steps ) ) {
-			$logger->clear( $context['source'], true );
+		if ( $final_step ) {
+			// Clears the log if instructed and all steps are unique.
+			// We'll schedule the deletion for later in order to speed up the checkout process
+			// unless a custom (non-Woo core) orders data store is in use, because in that case there's
+			// no reliable way to query orders by meta key.
+			if ( $order && ( count( array_unique( $steps ) ) === count( $steps ) ) ) {
+				$order->delete_meta_data( '_debug_log_source' );
+				if ( OrderUtil::unknown_orders_data_store_in_use() ) {
+					$logger->clear( $context['source'] );
+					$order->save();
+				} else {
+					$order->add_meta_data( '_debug_log_source_pending_deletion', $context['source'], true );
+					$order->save();
+					wc_get_container()->get( BatchProcessingController::class )->enqueue_processor( OrderLogsDeletionProcessor::class );
+				}
+			}
+
+			// Prevent further logging for this request.
+			$order          = null;
+			$logging_active = false;
+			$steps          = array();
 		}
 	} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 		// Since this runs in a critical path, we need to catch any exceptions and ignore them.

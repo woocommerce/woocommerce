@@ -225,13 +225,8 @@ class Site_Style_Sync_Controller {
 	private function convert_color_styles( array $color_styles ): array {
 		$email_colors = array();
 
-		if ( isset( $color_styles['background'] ) ) {
-			$email_colors['background'] = $color_styles['background'];
-		}
-
-		if ( isset( $color_styles['text'] ) ) {
-			$email_colors['text'] = $color_styles['text'];
-		}
+		$this->resolve_and_assign( $color_styles, 'background', $email_colors );
+		$this->resolve_and_assign( $color_styles, 'text', $email_colors );
 
 		return $email_colors;
 	}
@@ -245,22 +240,14 @@ class Site_Style_Sync_Controller {
 	private function convert_typography_styles( array $typography_styles ): array {
 		$email_typography = array();
 
-		// Convert font family to email-safe alternative.
-		if ( isset( $typography_styles['fontFamily'] ) ) {
-			$email_typography['fontFamily'] = $this->convert_to_email_safe_font( $typography_styles['fontFamily'] );
-		}
+		// Handle special cases with processors.
+		$this->resolve_and_assign( $typography_styles, 'fontFamily', $email_typography, array( $this, 'convert_to_email_safe_font' ) );
+		$this->resolve_and_assign( $typography_styles, 'fontSize', $email_typography, array( $this, 'convert_to_px_size' ) );
 
-		// Convert font size to px if needed.
-		if ( isset( $typography_styles['fontSize'] ) ) {
-			$email_typography['fontSize'] = $this->convert_to_px_size( $typography_styles['fontSize'] );
-		}
-
-		// Preserve email-compatible typography properties.
+		// Handle compatible properties without processing.
 		$compatible_props = array( 'fontWeight', 'fontStyle', 'lineHeight', 'letterSpacing', 'textTransform', 'textDecoration' );
 		foreach ( $compatible_props as $prop ) {
-			if ( isset( $typography_styles[ $prop ] ) ) {
-				$email_typography[ $prop ] = $typography_styles[ $prop ];
-			}
+			$this->resolve_and_assign( $typography_styles, $prop, $email_typography );
 		}
 
 		return $email_typography;
@@ -275,15 +262,8 @@ class Site_Style_Sync_Controller {
 	private function convert_spacing_styles( array $spacing_styles ): array {
 		$email_spacing = array();
 
-		// Convert padding to px values.
-		if ( isset( $spacing_styles['padding'] ) ) {
-			$email_spacing['padding'] = $this->convert_spacing_values( $spacing_styles['padding'] );
-		}
-
-		// Convert blockGap to px if present.
-		if ( isset( $spacing_styles['blockGap'] ) ) {
-			$email_spacing['blockGap'] = $this->convert_to_px_size( $spacing_styles['blockGap'] );
-		}
+		$this->resolve_and_assign( $spacing_styles, 'padding', $email_spacing, array( $this, 'convert_spacing_values' ) );
+		$this->resolve_and_assign( $spacing_styles, 'blockGap', $email_spacing, array( $this, 'convert_to_px_size' ) );
 
 		// Note: We intentionally skip margin as it's not supported in email renderer.
 
@@ -336,6 +316,53 @@ class Site_Style_Sync_Controller {
 		}
 
 		return $email_element;
+	}
+
+	/**
+	 * Resolve and assign a single style property
+	 *
+	 * @param array         $styles     The source styles array.
+	 * @param string        $property   The property key to resolve.
+	 * @param array         $target     The target array to assign the value to.
+	 * @param callable|null $processor  Optional processor function for the resolved value.
+	 * @return bool True if the property was resolved and assigned, false otherwise.
+	 */
+	private function resolve_and_assign( array $styles, string $property, array &$target, ?callable $processor = null ): bool {
+		if ( ! isset( $styles[ $property ] ) ) {
+			return false;
+		}
+
+		$resolved = $this->resolve_style_value( $styles[ $property ] );
+		if ( ! $resolved ) {
+			return false;
+		}
+
+		$target[ $property ] = $processor ? $processor( $resolved ) : $resolved;
+		return true;
+	}
+
+	/**
+	 * Styles may contain references to other styles.
+	 * This function resolves the reference to the actual value.
+	 * https://make.wordpress.org/core/2022/10/11/reference-styles-values-in-theme-json/
+	 * It is not allowed to reference another reference so we don't need to check recursively.
+	 *
+	 * @param mixed $style_value Style value that might contain a reference.
+	 * @return mixed Resolved style value or null when the reference is not found.
+	 */
+	private function resolve_style_value( $style_value ) {
+		// Check if this is a reference array.
+		if ( is_array( $style_value ) && isset( $style_value['ref'] ) ) {
+			$ref = $style_value['ref'];
+			if ( ! is_string( $ref ) || empty( $ref ) ) {
+				return null;
+			}
+			$path = explode( '.', $ref );
+
+			return _wp_array_get( $this->get_site_theme()->get_data(), $path, null );
+		}
+
+		return $style_value;
 	}
 
 	/**

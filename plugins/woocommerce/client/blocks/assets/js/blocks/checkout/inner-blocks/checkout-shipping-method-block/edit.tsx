@@ -222,6 +222,7 @@ export const Edit = ( {
 						) }
 					</p>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __( 'Show icon', 'woocommerce' ) }
 						checked={ showIcon }
 						onChange={ () =>
@@ -231,6 +232,7 @@ export const Edit = ( {
 						}
 					/>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __( 'Show costs', 'woocommerce' ) }
 						checked={ showPrice }
 						onChange={ () =>

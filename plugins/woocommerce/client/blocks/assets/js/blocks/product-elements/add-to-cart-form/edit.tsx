@@ -3,10 +3,9 @@
  */
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
+import { MultiLineTextSkeleton } from '@woocommerce/base-components/skeleton/patterns/multi-line-text-skeleton';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled, Tooltip } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import { getSetting } from '@woocommerce/settings';
 
@@ -29,10 +28,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		className: `wc-block-add-to-cart-form ${ quantitySelectorStyleClass }`,
 	} );
 
-	const isSiteEditor = useSelect(
-		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
-		[]
-	);
+	const isSiteEditor = isSiteEditorPage();
 
 	const isBlockTheme = getSetting( 'isBlockTheme', false );
 	const buttonBlockClass = ! isBlockTheme ? 'wp-block-button' : '';
@@ -44,7 +40,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		<>
 			{ isBlockTheme && (
 				<InspectorControls>
-					<UpgradeNotice blockClientId={ props?.clientId } />
+					<UpgradeNotice blockClientId={ props.clientId } />
 				</InspectorControls>
 			) }
 			<AddToCartFormSettings
@@ -60,7 +56,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					position="bottom right"
 				>
 					<div className="wc-block-editor-add-to-cart-form-container">
-						<ProductShortDescriptionSkeleton isStatic={ true } />
+						<MultiLineTextSkeleton isStatic={ true } />
 						<Disabled>
 							{ props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Input && (
