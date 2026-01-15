@@ -16,14 +16,13 @@ import {
 	CLASSIC_CHECKOUT_PAGE,
 } from '../../utils/pages';
 import { wpCLI } from '../../utils/cli';
-import { installPluginThruWpCli } from '../../utils/plugin-utils';
 
 const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCheckoutPage();
 
-		// We're installing a custom plugin to test the functionality.
-		await installPluginThruWpCli( 'plugins/woocommerce/client/blocks/tests/e2e/plugins/custom-place-order-button-test.php' );
+		// Activating the custom place order button test plugin (mapped in .wp-env.json).
+		await wpCLI( 'wp plugin activate custom-place-order-button-test' );
 
 		// The custom plugin comes with a custom gateway - enabling it through CLI to simplify our lives.
 		await wpCLI(
