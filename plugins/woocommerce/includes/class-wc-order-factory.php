@@ -92,7 +92,7 @@ class WC_Order_Factory {
 			$order_ids = $uncached_order_ids;
 		}
 
-		_prime_post_caches( $original_order_sort, false );
+		_prime_post_caches( $original_order_sort, false, true );
 
 		// We separate order list by class, since their datastore might be different.
 		$order_list_by_class = array();
