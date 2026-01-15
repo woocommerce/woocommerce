@@ -1,0 +1,35 @@
+includes:
+	- phpstan-baseline.neon
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+
+parameters:
+	tmpDir: tmp
+	level: 8
+	phpVersion: 70400
+	paths:
+		- woocommerce.php
+		- src/
+		- includes/
+	excludePaths:
+		# Matches the prior test implementation; GeoIP relies on data files.
+		- includes/class-wc-geo-ip.php
+		- includes/react-admin/feature-config.php (?)
+	bootstrapFiles:
+		- vendor/autoload.php
+	scanDirectories:
+		- vendor/wordpress/abilities-api
+	scanFiles:
+		- php-stubs/wc-admin-feature-config.php
+		- php-stubs/wc-constants.php
+	treatPhpDocTypesAsCertain: false
+	dynamicConstantNames:
+		# WC_TAX_ROUNDING_MODE can be 1, 2 (ints) or 'auto' (string in tests).
+		# See tests/legacy/bootstrap.php and wc-core-functions.php:wc_get_tax_rounding_mode()
+		WC_TAX_ROUNDING_MODE: 1|2|'auto'
+		# WC_TEMPLATE_DEBUG_MODE can be overridden in wp-config.php
+		WC_TEMPLATE_DEBUG_MODE: bool
+	ignoreErrors:
+		- identifier: missingType.iterableValue
+	parallel:
+		maximumNumberOfProcesses: 4
+

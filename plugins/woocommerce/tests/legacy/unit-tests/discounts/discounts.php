@@ -1690,63 +1690,6 @@ class WC_Tests_Discounts extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that fixed cart discount coupons maintain their total amount when quantities change in admin orders.
-	 */
-	public function test_fixed_cart_discount_quantity_change_admin_order() {
-		$price = 20;
-		// Create a product with a price of $20.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( $price );
-		$product->save();
-
-		// Create a fixed cart discount coupon of $10.
-		$coupon = WC_Helper_Coupon::create_coupon();
-		$coupon->set_discount_type( 'fixed_cart' );
-		$coupon->set_amount( 10 );
-		$coupon->save();
-
-		// Create an order with our specific product and 1 item quantity.
-		$order = new WC_Order();
-		$order->set_status( 'processing' );
-		$order->save();
-		$order_item_id = $order->add_product( $product, 1 );
-
-		// Apply the coupon to the order.
-		$order->apply_coupon( $coupon->get_code() );
-		$order->calculate_totals();
-
-		// Verify initial discount amount is $10.
-		$coupons     = $order->get_items( 'coupon' );
-		$coupon_item = reset( $coupons );
-		$this->assertEquals( 10.0, $coupon_item->get_discount(), 'Initial discount should be $10' );
-
-		// Verify order total is $10 (original $20 - $10 discount).
-		$this->assertEquals( 10.0, $order->get_total(), 'Order total should be $10 after $10 discount' );
-
-		// Now change the quantity to 2 and save the order items.
-		$items = array(
-			'order_item_id'  => array( $order_item_id ),
-			'order_item_qty' => array( $order_item_id => 2 ),
-			'line_total'     => array( $order_item_id => 2 * $price ),
-			'line_subtotal'  => array( $order_item_id => 2 * $price ),
-		);
-
-		// Save the order items - this should trigger the coupon recalculation.
-		wc_save_order_items( $order->get_id(), $items );
-
-		// Reload the order to get updated data.
-		$order = wc_get_order( $order->get_id() );
-
-		// Verify the discount is still $10 (fixed cart discount should not increase with quantity).
-		$coupons     = $order->get_items( 'coupon' );
-		$coupon_item = reset( $coupons );
-		$this->assertEquals( 10.0, $coupon_item->get_discount(), 'Discount should remain $10 after quantity change' );
-
-		// Verify order total is $30 (original $40 - $10 discount).
-		$this->assertEquals( 30.0, $order->get_total(), 'Order total should be $30 after quantity change' );
-	}
-
-	/**
 	 * Test that manual discounts are preserved when no coupons are used in order.
 	 * This tests the logic in wc_save_order_items that only recalculates coupons when coupons exist.
 	 */

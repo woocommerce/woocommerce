@@ -19,6 +19,7 @@ use Exception;
 use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,6 +43,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @var array
 	 */
 	private static $backfilling_order_ids = array();
+
+	/**
+	 * Keep track of order IDs (as keys) that are being synced on read. This is used to prevent backfilling to posts of an order being updated
+	 * from posts.
+	 *
+	 * @var array
+	 */
+	private static $sync_on_read_order_ids = array();
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
@@ -101,6 +110,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_download_permissions_granted',
 		'_order_stock_reduced',
 		'_new_order_email_sent',
+		'_cogs_total_value',
 	);
 
 	/**
@@ -843,7 +853,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
 		$order    = wc_get_order( $order_id );
-		return $order->get_recorded_coupon_usage_counts();
+		return $order && $order->get_recorded_coupon_usage_counts();
 	}
 
 	/**
@@ -1354,6 +1364,10 @@ WHERE
 
 		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
 		if ( $data_sync_enabled ) {
+			// We prefer not syncing-on-read if we are inside a webhook delivery or importing orders, as those events are likely triggered after the order is written
+			// and we don't want to possibly create loops of sync-on-read.
+			$should_sync_on_read = ! doing_action( 'woocommerce_deliver_webhook_async' ) && ! doing_action( 'wc-admin_import_orders' );
+
 			/**
 			 * Allow opportunity to disable sync on read, while keeping sync on write enabled. This adds another step as a large shop progresses from full sync to no sync with HPOS authoritative.
 			 * This filter is only executed if data sync is enabled from settings in the first place as it's meant to be a step between full sync -> no sync, rather than be a control for enabling just the sync on read. Sync on read without sync on write is problematic as any update will reset on the next read, but sync on write without sync on read is fine.
@@ -1362,11 +1376,23 @@ WHERE
 			 *
 			 * @since 8.1.0
 			 */
-			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', $data_sync_enabled );
+			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', $should_sync_on_read );
 		}
 
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
-		$post_orders    = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
+
+		$post_orders = array();
+		if ( $data_sync_enabled ) {
+			global $wpdb;
+
+			// Exclude orders that do not exist in the posts table.
+			if ( $load_posts_for ) {
+				$order_ids_placeholder = implode( ', ', array_fill( 0, count( $load_posts_for ), '%d' ) );
+				$load_posts_for        = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID IN ( $order_ids_placeholder )", ...$load_posts_for ) ) ); // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			}
+
+			$post_orders = $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) );
+		}
 
 		$cogs_is_enabled = $this->cogs_is_enabled();
 
@@ -1380,7 +1406,7 @@ WHERE
 				$this->read_cogs_data( $order );
 			}
 
-			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
+			if ( $data_sync_enabled && isset( $post_orders[ $order_id ] ) && $this->should_sync_order( $order ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
@@ -1522,19 +1548,33 @@ WHERE
 	 * @param array $orders    List of orders mapped by $order_id.
 	 *
 	 * @return array List of posts.
+	 *
+	 * @throws \Exception If no CPT data store is found for an order.
 	 */
 	private function get_post_orders_for_ids( array $orders ): array {
 		$order_ids = array_keys( $orders );
-		// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 		foreach ( $order_ids as $order_id ) {
+			// Exclude orders where the CPT version is a placeholder post.
+			$post_type = get_post_type( $order_id );
+			if ( ! $post_type || DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+				unset( $orders[ $order_id ] );
+				continue;
+			}
+
+			// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
 		}
 
 		$cpt_stores       = array();
 		$cpt_store_orders = array();
 		foreach ( $orders as $order_id => $order ) {
-			$table_data_store     = $order->get_data_store();
-			$cpt_data_store       = $table_data_store->get_cpt_data_store_instance();
+			$table_data_store = $order->get_data_store();
+			$cpt_data_store   = $table_data_store->get_cpt_data_store_instance();
+
+			if ( ! $cpt_data_store ) {
+				throw new \Exception( sprintf( 'No CPT data store found for order %d.', absint( $order_id ) ) );
+			}
+
 			$cpt_store_class_name = get_class( $cpt_data_store );
 			if ( ! isset( $cpt_stores[ $cpt_store_class_name ] ) ) {
 				$cpt_stores[ $cpt_store_class_name ]       = $cpt_data_store;
@@ -1648,12 +1688,12 @@ WHERE
 			$new_diff      = ArrayUtil::deep_assoc_array_diff( $order1_values, $order2_values );
 			if ( ! empty( $new_diff ) && $sync ) {
 				if ( count( $order2_values ) > 1 ) {
-					$sync && $order1->delete_meta_data( $key );
+					$order1->delete_meta_data( $key );
 					foreach ( $order2_values as $post_order_value ) {
-						$sync && $order1->add_meta_data( $key, $post_order_value, false );
+						$order1->add_meta_data( $key, $post_order_value, false );
 					}
 				} else {
-					$sync && $order1->update_meta_data( $key, $order2_values[0] );
+					$order1->update_meta_data( $key, $order2_values[0] );
 				}
 				$diff[ $key ] = $new_diff;
 				unset( $order2_meta_by_key[ $key ] );
@@ -1682,12 +1722,24 @@ WHERE
 	 * @return void
 	 */
 	private function migrate_post_record( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ): void {
+		self::$sync_on_read_order_ids[ $order->get_id() ] = true;
+
 		$diff                 = $this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {
+			// Skip migrating cogs_total_value if the HPOS order has a valid value and the CPT order has 0.
+			// This prevents overwriting valid COGS data with recalculated zero values during sync-on-read.
+			if ( 'cogs_total_value' === $key && $order->has_cogs() && $this->cogs_is_enabled() ) {
+				$hpos_cogs = $order->get_cogs_total_value( 'edit' );
+				if ( 0.0 !== $hpos_cogs && 0.0 === (float) $value ) {
+					continue;
+				}
+			}
 			$this->set_order_prop( $order, $key, $value );
 		}
 		$this->persist_updates( $order, false );
+
+		unset( self::$sync_on_read_order_ids[ $order->get_id() ] );
 
 		/**
 		 * Fired when an HPOS order is updated from its corresponding post record on read due to a difference in the data.
@@ -2516,6 +2568,7 @@ FROM $order_meta_table
 					$order_id
 				)
 			);
+			clean_post_cache( $order_id );
 		} else {
 			// phpcs:disable WordPress.DB.SlowDBQuery
 			$wpdb->insert(
@@ -2841,7 +2894,11 @@ FROM $order_meta_table
 
 		// Fetch changes.
 		$changes = $order->get_changes();
-		$this->persist_updates( $order );
+
+		// Does not make much sense to backfill to posts an order being sync-on-read from posts.
+		$should_backfill = ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] );
+
+		$this->persist_updates( $order, $should_backfill );
 
 		// Update download permissions if necessary.
 		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
@@ -3094,6 +3151,20 @@ FROM $order_meta_table
 			}
 		}
 
+		// Handle fulfillment status filtering.
+		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
+			$query_vars['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
+		}
+
+		/**
+		 * Filter the query args before executing the query.
+		 *
+		 * @param array $query_vars The query vars.
+		 * @return array
+		 * @since 10.4.0
+		 */
+		$query_vars = apply_filters( 'woocommerce_orders_table_datastore_get_orders_query', $query_vars, $this );
+
 		try {
 			$query = new OrdersTableQuery( $query_vars );
 		} catch ( \Exception $e ) {
@@ -3273,6 +3344,7 @@ CREATE TABLE $meta_table (
 					array( '%d', '%s', '%s' )
 				);
 				wp_cache_delete( $object->get_id(), 'post_meta' );
+				/** @var \WC_Logger_Interface $logger */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID %d: "%s"', $object->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 			} else {
@@ -3370,6 +3442,7 @@ CREATE TABLE $meta_table (
 
 		$should_save =
 			$order->get_id() > 0
+			&& ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] )
 			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 

@@ -72,13 +72,34 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Hook into the add to cart button action.
+	 * Hook into the add to cart button action with a <select> element.
 	 *
-	 * Outputs a test message when the `woocommerce_before_add_to_cart_button` action is triggered.
-	 * Used for testing that hooks are properly called during add to cart.
+	 * Outputs a select element with an option.
+	 * Used for testing that hooks are properly called during add to cart and
+	 * fall back to a regular HTML form.
 	 */
 	public function hook_into_add_to_cart_button_action() {
-		echo 'Hook into add to cart button action';
+		echo '<select><option>Hook into add to cart button action</option></select>';
+	}
+
+	/**
+	 * Hook into the add to cart button action with a text element.
+	 *
+	 * Outputs a text element.
+	 * Used for testing that text output doesn't trigger a fall back to a
+	 * regular HTML form.
+	 */
+	public function hook_into_add_to_cart_button_action_text() {
+		echo '<p>Hook into add to cart button action</p>';
+	}
+
+	/**
+	 * Hook into the woocommerce_add_to_cart_form_action filter.
+	 *
+	 * Outputs an example URL to test the form action.
+	 */
+	public function hook_into_woocommerce_add_to_cart_form_action_filter() {
+		return 'https://example.com';
 	}
 
 	/**
@@ -232,33 +253,49 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 * @covers AddToCartWithOptions::render
 	 */
 	public function test_form_fallback() {
+		add_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'hook_into_woocommerce_add_to_cart_form_action_filter' ) );
 		global $product;
 		$product = new \WC_Product_Simple();
 		$product->set_regular_price( 10 );
 		$product_id = $product->save();
 
+		// Test when cart redirect is enabled.
 		update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringContainsString( 'action="' . $product->get_permalink() . '"', $markup, 'The form has an action that redirects to the product page when redirect after add is enabled.' );
+		$this->assertStringContainsString( 'action="https://example.com"', $markup, 'The form has an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter.' );
 		$this->assertStringNotContainsString( 'data-wp-on--submit', $markup, 'The form doesn\'t have an on submit event when redirect after add is enabled.' );
 
+		// Test when cart redirect is disabled.
 		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringNotContainsString( 'action="' . $product->get_permalink() . '"', $markup, 'The form doesn\'t have an action that redirects to the product page when redirect after add is disabled.' );
+		$this->assertStringNotContainsString( 'action="https://example.com"', $markup, 'The form doesn\'t have an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when redirect after add is disabled.' );
 		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The form has an on submit event when redirect after add is disabled.' );
 
+		// Test when an extension hooks into the form.
 		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringContainsString( 'action="' . $product->get_permalink() . '"', $markup, 'The form has an action that redirects to the product page when an extension hooks into the form.' );
+		$this->assertStringContainsString( 'action="https://example.com"', $markup, 'The form has an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when an extension hooks into the form.' );
 		$this->assertStringNotContainsString( 'data-wp-on--submit', $markup, 'The form doesn\'t have an on submit event when an extension hooks into the form.' );
 
 		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
+
+		// Test when an extension hooks into the form but not adding a form element.
+		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action_text' ) );
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringNotContainsString( 'action="https://example.com"', $markup, 'The form doesn\'t have an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when an extension hooks into the form but not adding a form element.' );
+		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The form has an on submit event when an extension hooks into the form but not adding a form element.' );
+
+		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action_text' ) );
+
+		remove_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'hook_into_woocommerce_add_to_cart_form_action_filter' ) );
 	}
 
 	/**
@@ -405,5 +442,39 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$markup,
 			'The Product Price block should be interactive when some variations have different prices.'
 		);
+	}
+
+	/**
+	 * Tests that the quantity selector and its steppers are hidden when
+	 * a filter sets min and max quantity to the same value for a product.
+	 */
+	public function test_quantity_selector_hidden_when_min_equals_max() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$product_id = $simple_product->save();
+
+		// Force min and max quantity to be the same via filter for this product only.
+		$filter = function ( $args, $product ) use ( $product_id ) {
+			if ( $product instanceof \WC_Product && $product->get_id() === $product_id ) {
+				$args['min_value'] = 3;
+				$args['max_value'] = 3;
+			}
+			return $args;
+		};
+
+		add_filter( 'woocommerce_quantity_input_args', $filter, 10, 2 );
+
+		try {
+			$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+			// Quantity selector block should not render at all.
+			$this->assertStringContainsString( 'wc-block-add-to-cart-with-options__quantity-selector--hidden', $markup, 'The Quantity Selector block is hidden when min equals max.' );
+
+			// Plus and minus stepper buttons should not be present.
+			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper is not rendered when min equals max.' );
+			$this->assertStringNotContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper is not rendered when min equals max.' );
+		} finally {
+			remove_filter( 'woocommerce_quantity_input_args', $filter, 10 );
+		}
 	}
 }

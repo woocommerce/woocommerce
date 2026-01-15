@@ -146,6 +146,24 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Returns all data for this object.
+	 *
+	 * @since  2.6.0
+	 * @return array
+	 */
+	public function get_data() {
+		$data = parent::get_data();
+		if ( '' === $data['minimum_amount'] ) {
+			$data['minimum_amount'] = '0';
+		}
+		if ( '' === $data['maximum_amount'] ) {
+			$data['maximum_amount'] = '0';
+		}
+		return $data;
+	}
+
+
+	/**
 	 * If the object has an ID, read using the data store.
 	 *
 	 * @since 3.4.1
@@ -400,20 +418,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_minimum_amount( $context = 'view' ) {
-		return $this->get_prop( 'minimum_amount', $context );
+		if ( 'edit' !== $context && $this->get_prop( 'minimum_amount', $context ) === '' ) {
+			return wc_format_decimal( 0 );
+		}
+		return wc_format_decimal( $this->get_prop( 'minimum_amount', $context ) );
 	}
 	/**
 	 * Get maximum spend amount.
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_maximum_amount( $context = 'view' ) {
-		return $this->get_prop( 'maximum_amount', $context );
+		if ( 'edit' !== $context && $this->get_prop( 'maximum_amount', $context ) === '' ) {
+			return wc_format_decimal( 0 );
+		}
+		return wc_format_decimal( $this->get_prop( 'maximum_amount', $context ) );
 	}
 
 	/**

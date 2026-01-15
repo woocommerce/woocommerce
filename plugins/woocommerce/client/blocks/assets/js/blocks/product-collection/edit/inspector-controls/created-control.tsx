@@ -50,6 +50,8 @@ const CreatedControl = ( props: QueryControlProps ) => {
 			<Flex direction="column" gap={ 3 }>
 				<FlexItem>
 					<ToggleGroupControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						label={ __( 'Created', 'woocommerce' ) }
 						isBlock
 						onChange={ ( value: ETimeFrameOperator ) => {

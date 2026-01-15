@@ -2,101 +2,137 @@
 /**
  * PayPal Notices Class
  *
+ * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Notices instead. This class will be removed in 11.0.0.
  * @package WooCommerce\Gateways
  */
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
 
 require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
 
 /**
  * Class WC_Gateway_Paypal_Notices.
+ *
+ * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Notices instead. This class will be removed in 11.0.0.
+ * @since 10.3.0
  */
 class WC_Gateway_Paypal_Notices {
+	/**
+	 * The delegated notices instance.
+	 *
+	 * @var PayPalNotices
+	 */
+	private $notices;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		add_action( 'admin_notices', array( $this, 'add_paypal_migration_notice' ) );
-
-		// Use admin_head to inject notice on payments settings page.
-		// This bypasses the suppress_admin_notices() function which removes all admin_notices hooks on the payments page.
-		// This is a workaround to avoid the notice being suppressed by the suppress_admin_notices() function.
-		add_action( 'admin_head', array( $this, 'add_paypal_migration_notice_on_payments_settings_page' ) );
+		$this->notices = new PayPalNotices();
 	}
 
 	/**
-	 * Add notice warning about the migration to PayPal Payments.
+	 * Add PayPal Standard notices.
 	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_notices() instead.
+	 * @since 10.4.0
 	 * @return void
 	 */
-	public function add_paypal_migration_notice() {
-		// Show only to users who can manage the site.
-		if ( ! current_user_can( 'manage_woocommerce' ) && ! current_user_can( 'manage_options' ) ) {
-			return;
-		}
+	public function add_paypal_notices() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_notices()' );
+		$this->notices->add_paypal_notices();
+	}
 
-		// Skip if the gateway is not available or the merchant is not eligible for migration.
-		if ( ! WC_Gateway_Paypal_Helper::is_paypal_gateway_available() || ! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ) {
-			return;
-		}
-
-		// Skip if the notice has been dismissed.
-		if ( $this->paypal_migration_notice_dismissed() ) {
-			return;
-		}
-
-		$doc_url     = 'https://woocommerce.com/document/woocommerce-paypal-payments/paypal-payments-upgrade-guide/';
-		$release_url = 'https://developer.woocommerce.com/release-calendar/';
-		$dismiss_url = wp_nonce_url(
-			add_query_arg( 'wc-hide-notice', 'paypal_migration' ),
-			'woocommerce_hide_notices_nonce',
-			'_wc_notice_nonce'
-		);
-		$message     = sprintf(
-			/* translators: 1: opening <a> tag, 2: closing </a> tag, 3: opening <a> tag, 4: closing </a> tag */
-			esc_html__( 'WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version %1$s10.3.0%2$s, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommend switching to %3$sPayPal Payments%4$s extension.', 'woocommerce' ),
-			'<a href="' . esc_url( $release_url ) . '" target="_blank" rel="noopener noreferrer">',
-			'</a>',
-			'<a href="' . esc_url( $doc_url ) . '" target="_blank" rel="noopener noreferrer">',
-			'</a>',
-		);
-
-		$notice_html = '<div class="notice notice-warning is-dismissible">'
-			. '<a class="woocommerce-message-close notice-dismiss" style="text-decoration: none;" href="' . esc_url( $dismiss_url ) . '"></a>'
-			. '<p>' . $message . '</p>'
-			. '</div>';
-
-		echo wp_kses_post( $notice_html );
+	/**
+	 * Add PayPal notices on the payments settings page.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_notices_on_payments_settings_page() instead.
+	 * @since 10.4.0
+	 * @return void
+	 */
+	public function add_paypal_notices_on_payments_settings_page() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_notices_on_payments_settings_page()' );
+		$this->notices->add_paypal_notices_on_payments_settings_page();
 	}
 
 	/**
 	 * Add notice warning about the migration to PayPal Payments on the Payments settings page.
 	 *
+	 * @deprecated 10.4.0 No longer used. Functionality is now handled by add_paypal_notices_on_payments_settings_page().
 	 * @return void
 	 */
 	public function add_paypal_migration_notice_on_payments_settings_page() {
-		global $current_tab, $current_section;
-		$is_payments_settings_page = 'woocommerce_page_wc-settings' === get_current_screen()->id && 'checkout' === $current_tab && empty( $current_section );
+		wc_deprecated_function( __METHOD__, '10.4.0', 'WC_Gateway_Paypal_Notices::add_paypal_notices_on_payments_settings_page' );
+		$this->add_paypal_notices_on_payments_settings_page();
+	}
 
-		// Only add the notice from this callback on the payments settings page.
-		if ( ! $is_payments_settings_page ) {
-			return;
-		}
-		$this->add_paypal_migration_notice();
+	/**
+	 * Add notice warning about the migration to PayPal Payments.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_migration_notice() instead.
+	 * @since 10.3.0
+	 * @return void
+	 */
+	public function add_paypal_migration_notice() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_migration_notice()' );
+		$this->notices->add_paypal_migration_notice();
 	}
 
 	/**
 	 * Check if the installation notice has been dismissed.
 	 *
+	 * @deprecated 10.4.0 No longer used. Functionality is now handled by is_notice_dismissed().
 	 * @return bool
 	 */
-	protected static function paypal_migration_notice_dismissed() {
-		return get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_notice', true );
+	protected static function paypal_migration_notice_dismissed(): bool {
+		wc_deprecated_function( __METHOD__, '10.4.0', 'WC_Gateway_Paypal_Notices::is_notice_dismissed' );
+		return (bool) get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_completed_notice', true );
+	}
+
+	/**
+	 * Set the flag indicating PayPal account restriction.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Notices::set_account_restriction_flag() instead.
+	 * @since 10.4.0
+	 * @return void
+	 */
+	public static function set_account_restriction_flag(): void {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::set_account_restriction_flag()' );
+		PayPalNotices::set_account_restriction_flag();
+	}
+
+	/**
+	 * Clear the flag indicating PayPal account restriction.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Notices::clear_account_restriction_flag() instead.
+	 * @since 10.4.0
+	 * @return void
+	 */
+	public static function clear_account_restriction_flag(): void {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::clear_account_restriction_flag()' );
+		PayPalNotices::clear_account_restriction_flag();
+	}
+
+	/**
+	 * Handle PayPal order response to manage account restriction notices.
+	 *
+	 * @deprecated 10.5.0 Use Automattic\WooCommerce\Gateways\PayPal\Notices::manage_account_restriction_flag_for_notice() instead.
+	 * @since 10.4.0
+	 * @param int|string $http_code     The HTTP status code from the PayPal API response.
+	 * @param array      $response_data The decoded response data from the PayPal API.
+	 * @param WC_Order   $order         The WooCommerce order object.
+	 * @return void
+	 */
+	public static function manage_account_restriction_flag_for_notice( $http_code, array $response_data, WC_Order $order ): void {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::manage_account_restriction_flag_for_notice()' );
+		PayPalNotices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
 	}
 }

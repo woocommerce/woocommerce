@@ -96,18 +96,68 @@ class Html_Processing_Helper {
 	}
 
 	/**
-	 * Sanitize color value to ensure it's a valid hex color or CSS variable.
+	 * Sanitize dimension value to ensure it's a valid CSS dimension.
+	 *
+	 * Supports numeric values (converted to px) and standard CSS units.
+	 *
+	 * @param mixed $value The dimension value to sanitize.
+	 * @return string Sanitized dimension value or empty string if invalid.
+	 */
+	public static function sanitize_dimension_value( $value ): string {
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '';
+		}
+
+		$value = (string) $value;
+
+		// If it's just a number, assume pixels.
+		if ( is_numeric( $value ) ) {
+			$value = $value . 'px';
+		}
+
+		// Use existing CSS value sanitization for security.
+		$sanitized_value = self::sanitize_css_value( $value );
+
+		// Additional validation for dimension-specific units.
+		if ( ! empty( $sanitized_value ) && preg_match( '/^(\d+(?:\.\d+)?)(px|em|rem|%|vh|vw|ex|ch|in|cm|mm|pt|pc)$/', $sanitized_value ) ) {
+			return $sanitized_value;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Sanitize color value to ensure it's a valid color format.
+	 *
+	 * Supports hex colors, rgb/rgba, hsl/hsla, named colors, and CSS variables.
 	 *
 	 * @param string $color The color value to sanitize.
-	 * @return string Sanitized color value.
+	 * @return string Sanitized color value or safe default if invalid.
 	 */
 	public static function sanitize_color( string $color ): string {
-		// Remove any whitespace and convert to lowercase.
-		$color = strtolower( trim( $color ) );
+		// Remove any whitespace.
+		$color = trim( $color );
 
-		// Check if it's a valid hex color (3 or 6 characters).
-		if ( preg_match( '/^#([a-f0-9]{3}){1,2}$/i', $color ) ) {
+		// Check if it's a valid hex color (#fff, #ffffff, #ffffffff).
+		if ( preg_match( '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $color ) ) {
+			return strtolower( $color );
+		}
+
+		// Check for rgb/rgba colors.
+		if ( preg_match( '/^rgba?\(\s*(25[0-5]|2[0-4]\d|1\d{2}|\d{1,2})\s*,\s*(25[0-5]|2[0-4]\d|1\d{2}|\d{1,2})\s*,\s*(25[0-5]|2[0-4]\d|1\d{2}|\d{1,2})\s*(?:,\s*(?:1(?:\.0+)?|0(?:\.\d+)?|\.\d+)\s*)?\)$/', $color ) ) {
 			return $color;
+		}
+
+		// Check for hsl/hsla colors.
+		if ( preg_match( '/^hsla?\(\s*(360|3[0-5]\d|[12]\d{2}|\d{1,2})\s*,\s*(100|[1-9]?\d)%\s*,\s*(100|[1-9]?\d)%\s*(?:,\s*(?:1(?:\.0+)?|0(?:\.\d+)?|\.\d+)\s*)?\)$/', $color ) ) {
+			return $color;
+		}
+
+		// Check for named colors and other valid CSS color values.
+		// We use a permissive approach: accept any string that doesn't contain dangerous characters
+		// and let the CSS engine handle the actual validation.
+		if ( preg_match( '/^[a-zA-Z][a-zA-Z0-9-]*$/', $color ) && ! preg_match( '/^(expression|javascript|vbscript|data|import|behavior|binding|filter|progid)/i', $color ) ) {
+			return strtolower( $color );
 		}
 
 		// Check if it's a CSS variable (var(--variable-name)).
@@ -167,6 +217,12 @@ class Html_Processing_Helper {
 	public static function validate_caption_attribute( \WP_HTML_Tag_Processor $html, string $attr_name ): void {
 		$attr_value = $html->get_attribute( $attr_name );
 		if ( null === $attr_value ) {
+			return;
+		}
+
+		// Block all event handler attributes (on*) - Critical security fix.
+		if ( str_starts_with( $attr_name, 'on' ) ) {
+			$html->remove_attribute( $attr_name );
 			return;
 		}
 
@@ -266,6 +322,18 @@ class Html_Processing_Helper {
 					$html->remove_attribute( $attr_name );
 				}
 				break;
+
+			default:
+				// Handle data-* attributes with strict validation.
+				if ( str_starts_with( $attr_name, 'data-' ) ) {
+					if ( ! preg_match( '/^[a-zA-Z0-9\-_]+$/', (string) $attr_value ) ) {
+						$html->remove_attribute( $attr_name );
+					}
+					break;
+				}
+				// Default deny policy: Remove any attribute not explicitly allowed.
+				$html->remove_attribute( $attr_name );
+				break;
 		}
 	}
 
@@ -306,6 +374,55 @@ class Html_Processing_Helper {
 			'letter-spacing',
 			'text-transform',
 		);
+	}
+
+	/**
+	 * Validate HTML container attributes for security before content extraction.
+	 * This method checks if a container element (like figcaption, span) has safe attributes.
+	 *
+	 * @param string $container_html Full container HTML (e.g., <figcaption class="...">content</figcaption>).
+	 * @return bool True if container attributes are safe, false otherwise.
+	 */
+	public static function validate_container_attributes( string $container_html ): bool {
+		// Use WP_HTML_Tag_Processor to validate container attributes.
+		$html = new \WP_HTML_Tag_Processor( $container_html );
+		if ( ! $html->next_tag() ) {
+			return false;
+		}
+
+		// Get all attributes and validate each one using our existing validation logic.
+		$attributes = $html->get_attribute_names_with_prefix( '' );
+		if ( is_array( $attributes ) ) {
+			foreach ( $attributes as $attr_name ) {
+				// Use the same validation logic as validate_caption_attribute for consistency.
+				$attr_value = $html->get_attribute( $attr_name );
+				if ( null === $attr_value ) {
+					continue;
+				}
+
+				// Block event handlers immediately.
+				if ( str_starts_with( $attr_name, 'on' ) ) {
+					return false;
+				}
+
+				// Apply the same validation rules as caption attributes.
+				// Create a temporary processor to test validation.
+				$escaped_value = htmlspecialchars( (string) $attr_value, ENT_QUOTES, 'UTF-8' );
+				$temp_html     = new \WP_HTML_Tag_Processor( '<span ' . $attr_name . '="' . $escaped_value . '">test</span>' );
+				if ( $temp_html->next_tag() ) {
+					$original_value = $temp_html->get_attribute( $attr_name );
+					self::validate_caption_attribute( $temp_html, $attr_name );
+					$validated_value = $temp_html->get_attribute( $attr_name );
+
+					// If attribute was removed during validation, container is unsafe.
+					if ( null !== $original_value && null === $validated_value ) {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -375,5 +492,122 @@ class Html_Processing_Helper {
 		}
 
 		return $final_html;
+	}
+
+	/**
+	 * Sanitize image HTML while preserving necessary attributes for email rendering.
+	 *
+	 * @param string $image_html Raw image HTML.
+	 * @return string Sanitized image HTML.
+	 */
+	public static function sanitize_image_html( string $image_html ): string {
+		// If no HTML tags, return as-is.
+		if ( false === strpos( $image_html, '<' ) ) {
+			return $image_html;
+		}
+
+		// Extract img tag using regex for reliable processing.
+		if ( ! preg_match( '/<img[^>]*>/i', $image_html, $matches ) ) {
+			return $image_html;
+		}
+
+		$img_tag              = $matches[0];
+		$sanitized_attributes = array();
+		$has_src              = false;
+
+		// Extract and sanitize individual attributes using WP_HTML_Tag_Processor for attribute processing.
+		$html = new \WP_HTML_Tag_Processor( $img_tag );
+		if ( $html->next_tag() ) {
+			$attributes = $html->get_attribute_names_with_prefix( '' );
+			if ( is_array( $attributes ) ) {
+				foreach ( $attributes as $attr_name ) {
+					$attr_value = $html->get_attribute( $attr_name );
+
+					// Sanitize specific attributes.
+					switch ( $attr_name ) {
+						case 'src':
+							// Sanitize image source URL.
+							$sanitized_src = esc_url( (string) $attr_value );
+							if ( ! empty( $sanitized_src ) ) {
+								$sanitized_attributes[] = $attr_name . '="' . $sanitized_src . '"';
+								$has_src                = true;
+							}
+							break;
+
+						case 'alt':
+						case 'width':
+						case 'height':
+							// Sanitize text attributes.
+							$sanitized_attributes[] = $attr_name . '="' . esc_attr( (string) $attr_value ) . '"';
+							break;
+
+						case 'class':
+							// Clean CSS classes.
+							$cleaned_classes = self::clean_css_classes( (string) $attr_value );
+							if ( ! empty( $cleaned_classes ) ) {
+								$sanitized_attributes[] = $attr_name . '="' . esc_attr( $cleaned_classes ) . '"';
+							}
+							break;
+
+						case 'style':
+							// Sanitize inline styles - only allow safe properties for email rendering.
+							$sanitized_styles = self::sanitize_image_styles( (string) $attr_value );
+							if ( ! empty( $sanitized_styles ) ) {
+								$sanitized_attributes[] = $attr_name . '="' . esc_attr( $sanitized_styles ) . '"';
+							}
+							break;
+					}
+				}
+			}
+		}
+
+		// If no valid src attribute, return empty string.
+		if ( ! $has_src ) {
+			return '';
+		}
+
+		// Rebuild the img tag with sanitized attributes.
+		if ( empty( $sanitized_attributes ) ) {
+			return '';
+		}
+
+		return '<img ' . implode( ' ', $sanitized_attributes ) . '>';
+	}
+
+	/**
+	 * Sanitize inline styles for image elements - only allow safe properties for email rendering.
+	 *
+	 * @param string $style_value Raw style value.
+	 * @return string Sanitized style value.
+	 */
+	private static function sanitize_image_styles( string $style_value ): string {
+		$sanitized_styles = array();
+		$style_parts      = explode( ';', $style_value );
+
+		foreach ( $style_parts as $style_part ) {
+			$style_part = trim( $style_part );
+			if ( empty( $style_part ) ) {
+				continue;
+			}
+
+			$property_parts = explode( ':', $style_part, 2 );
+			if ( count( $property_parts ) !== 2 ) {
+				continue;
+			}
+
+			$property = trim( strtolower( $property_parts[0] ) );
+			$value    = trim( $property_parts[1] );
+
+			// Allow safe CSS properties for images in email rendering.
+			$safe_properties = array( 'width', 'height', 'max-width', 'max-height', 'display', 'margin', 'padding', 'border', 'border-radius' );
+			if ( in_array( $property, $safe_properties, true ) ) {
+				$sanitized_value = self::sanitize_css_value( $value );
+				if ( ! empty( $sanitized_value ) ) {
+					$sanitized_styles[] = $property . ': ' . $sanitized_value;
+				}
+			}
+		}
+
+		return implode( '; ', $sanitized_styles );
 	}
 }

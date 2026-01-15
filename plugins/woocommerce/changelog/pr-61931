@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add HTTP headers to cached outputs in RestApiCache

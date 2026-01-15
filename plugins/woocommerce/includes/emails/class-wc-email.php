@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Pelago\Emogrifier\CssInliner;
-use Pelago\Emogrifier\HtmlProcessor\CssToAttributeConverter;
-use Pelago\Emogrifier\HtmlProcessor\HtmlPruner;
+use Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner;
+use Automattic\WooCommerce\Vendor\Pelago\Emogrifier\HtmlProcessor\CssToAttributeConverter;
+use Automattic\WooCommerce\Vendor\Pelago\Emogrifier\HtmlProcessor\HtmlPruner;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -93,6 +93,13 @@ class WC_Email extends WC_Settings_API {
 	 * @var string
 	 */
 	public $template_html;
+
+	/**
+	 * Initial email block template path.
+	 *
+	 * @var string
+	 */
+	public $template_block;
 
 	/**
 	 * Template path.
@@ -407,7 +414,7 @@ class WC_Email extends WC_Settings_API {
 		 * @since 6.8.0
 		 *
 		 * @param bool $default_value The default returned value.
-		 * @param WC_Email $this The WC_Email object.
+		 * @param WC_Email $email The WC_Email object.
 		 */
 		$switch_email_locale = apply_filters( 'woocommerce_allow_switching_email_locale', true, $this );
 
@@ -427,7 +434,7 @@ class WC_Email extends WC_Settings_API {
 		 * @since 6.8.0
 		 *
 		 * @param bool $default_value The default returned value.
-		 * @param WC_Email $this The WC_Email object.
+		 * @param WC_Email $email The WC_Email object.
 		 */
 		$restore_email_locale = apply_filters( 'woocommerce_allow_restoring_email_locale', true, $this );
 
@@ -446,8 +453,10 @@ class WC_Email extends WC_Settings_API {
 		$email_groups = array(
 			'accounts'         => __( 'Accounts', 'woocommerce' ),
 			'orders'           => __( 'Orders', 'woocommerce' ),
-			'order-processing' => __( 'Order processing', 'woocommerce' ),
-			'order-exceptions' => __( 'Order exceptions', 'woocommerce' ),
+			'order-processing' => __( 'Order updates', 'woocommerce' ),  // @deprecated Please use 'order-updates' instead. Will be removed in 10.5.0.
+			'order-updates'    => __( 'Order updates', 'woocommerce' ),
+			'order-exceptions' => __( 'Order changes', 'woocommerce' ),  // @deprecated Please use 'order-changes' instead. Will be removed in 10.5.0.
+			'order-changes'    => __( 'Order changes', 'woocommerce' ),
 			'payments'         => __( 'Payments', 'woocommerce' ),
 		);
 
@@ -668,12 +677,23 @@ class WC_Email extends WC_Settings_API {
 	public function get_headers() {
 		$header = 'Content-Type: ' . $this->get_content_type() . "\r\n";
 
+		// For order notification emails sent to admin, always use customer's billing email as reply-to.
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
 			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
 				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
 			}
-		} elseif ( $this->get_from_address() && $this->get_from_name() ) {
-			$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+		} else {
+			// Check if custom reply-to is enabled and configured for non-admin notification emails.
+			$reply_to_enabled = $this->get_reply_to_enabled();
+			$reply_to_address = $this->get_reply_to_address();
+			$reply_to_name    = $this->get_reply_to_name();
+
+			if ( $reply_to_enabled && ! empty( $reply_to_address ) && is_email( $reply_to_address ) ) {
+				$reply_to_name = ! empty( $reply_to_name ) ? $reply_to_name : $this->get_from_name();
+				$header       .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
+			} elseif ( $this->get_from_address() && $this->get_from_name() ) {
+				$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+			}
 		}
 
 		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
@@ -868,7 +888,7 @@ class WC_Email extends WC_Settings_API {
 			 *
 			 * @param callable $style_inline_callback The default email inline styling callback.
 			 * @param string|null $content Content that will receive inline styles.
-			 * @param WC_Email $this The WC_Email object.
+			 * @param WC_Email $email The WC_Email object.
 			 */
 			$style_inline_callback = apply_filters( 'woocommerce_mail_style_inline_callback', array( $this, 'apply_inline_style' ), $content, $this );
 
@@ -921,7 +941,7 @@ class WC_Email extends WC_Settings_API {
 				 * @since 4.1.0
 				 *
 				 * @param CssInliner $css_inliner CssInliner instance.
-				 * @param WC_Email $this WC_Email instance.
+				 * @param WC_Email $email WC_Email instance.
 				 */
 				do_action( 'woocommerce_emogrifier', $css_inliner, $this );
 
@@ -1005,7 +1025,17 @@ class WC_Email extends WC_Settings_API {
 	 * @return string
 	 */
 	public function get_from_name( $from_name = '' ) {
-		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name' ), $this, $from_name );
+		$default = get_bloginfo( 'name', 'display' );
+		/**
+		 * Filters the "from" name for outgoing emails.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param string|mixed $from_name        The from name.
+		 * @param WC_Email     $email            Email object.
+		 * @param string       $default_from_name Default from name.
+		 */
+		$from_name = apply_filters( 'woocommerce_email_from_name', get_option( 'woocommerce_email_from_name', $default ), $this, $from_name );
 		return wp_specialchars_decode( esc_html( $from_name ), ENT_QUOTES );
 	}
 
@@ -1018,6 +1048,61 @@ class WC_Email extends WC_Settings_API {
 	public function get_from_address( $from_email = '' ) {
 		$from_email = apply_filters( 'woocommerce_email_from_address', get_option( 'woocommerce_email_from_address' ), $this, $from_email );
 		return sanitize_email( $from_email );
+	}
+
+	/**
+	 * Check if reply-to is enabled for outgoing emails.
+	 *
+	 * @return bool
+	 */
+	public function get_reply_to_enabled() {
+		/**
+		 * Filter whether reply-to is enabled for emails.
+		 *
+		 * @since 10.4.0
+		 * @param bool     $enabled Whether reply-to is enabled.
+		 * @param WC_Email $email   WC_Email instance managing the email.
+		 */
+		$enabled = apply_filters( 'woocommerce_email_reply_to_enabled', 'yes' === get_option( 'woocommerce_email_reply_to_enabled', 'no' ), $this );
+		return (bool) $enabled;
+	}
+
+	/**
+	 * Get the reply-to name for outgoing emails.
+	 *
+	 * @param string $reply_to_name Default reply-to name.
+	 * @return string
+	 */
+	public function get_reply_to_name( $reply_to_name = '' ) {
+		/**
+		 * Filter the reply-to name for emails.
+		 *
+		 * @since 10.4.0
+		 * @param string   $reply_to_name Reply-to name.
+		 * @param WC_Email $email         WC_Email instance managing the email.
+		 * @param string   $default_name  Default reply-to name.
+		 */
+		$reply_to_name = apply_filters( 'woocommerce_email_reply_to_name', get_option( 'woocommerce_email_reply_to_name', '' ), $this, $reply_to_name );
+		return wp_specialchars_decode( sanitize_text_field( $reply_to_name ), ENT_QUOTES );
+	}
+
+	/**
+	 * Get the reply-to address for outgoing emails.
+	 *
+	 * @param string $reply_to_email Default reply-to email address.
+	 * @return string
+	 */
+	public function get_reply_to_address( $reply_to_email = '' ) {
+		/**
+		 * Filter the reply-to address for emails.
+		 *
+		 * @since 10.4.0
+		 * @param string   $reply_to_email Reply-to email address.
+		 * @param WC_Email $email          WC_Email instance managing the email.
+		 * @param string   $default_email  Default reply-to email address.
+		 */
+		$reply_to_email = apply_filters( 'woocommerce_email_reply_to_address', get_option( 'woocommerce_email_reply_to_address', '' ), $this, $reply_to_email );
+		return sanitize_email( $reply_to_email );
 	}
 
 	/**
@@ -1063,7 +1148,7 @@ class WC_Email extends WC_Settings_API {
 		 * @since 5.6.0
 		 * @param bool     $return Whether the email was sent successfully.
 		 * @param string   $id     Email ID.
-		 * @param WC_Email $this   WC_Email instance.
+		 * @param WC_Email $email  WC_Email instance.
 		 */
 		do_action( 'woocommerce_email_sent', $return, (string) $this->id, $this );
 
@@ -1122,6 +1207,9 @@ class WC_Email extends WC_Settings_API {
 			$this->form_fields['cc']  = $this->get_cc_field();
 			$this->form_fields['bcc'] = $this->get_bcc_field();
 		}
+		if ( $this->block_email_editor_enabled ) {
+			$this->form_fields['preheader'] = $this->get_preheader_field();
+		}
 	}
 
 	/**
@@ -1153,6 +1241,22 @@ class WC_Email extends WC_Settings_API {
 			/* translators: %s: admin email */
 			'description' => __( 'Enter Bcc recipients (comma-separated) for this email.', 'woocommerce' ),
 			'placeholder' => '',
+			'default'     => '',
+			'desc_tip'    => true,
+		);
+	}
+
+	/**
+	 * Get the preheader field definition.
+	 *
+	 * @return array
+	 */
+	protected function get_preheader_field() {
+		return array(
+			'title'       => __( 'Preheader', 'woocommerce' ),
+			'description' => __( 'Shown as a preview in the Inbox, next to the subject line. (Max 150 characters).', 'woocommerce' ),
+			'placeholder' => '',
+			'type'        => 'text',
 			'default'     => '',
 			'desc_tip'    => true,
 		);
@@ -1195,7 +1299,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Get template.
 	 *
-	 * @param  string $type Template type. Can be either 'template_html' or 'template_plain'.
+	 * @param  string $type Template type. Can be either 'template_html', 'template_plain' or 'template_block'.
 	 * @return string
 	 */
 	public function get_template( $type ) {
@@ -1205,6 +1309,8 @@ class WC_Email extends WC_Settings_API {
 			return $this->template_html;
 		} elseif ( 'template_plain' === $type ) {
 			return $this->template_plain;
+		} elseif ( 'template_block' === $type ) {
+			return $this->template_block;
 		}
 		return '';
 	}
@@ -1481,10 +1587,14 @@ class WC_Email extends WC_Settings_API {
 			</div>
 
 			<?php
-			wc_enqueue_js(
+			$handle = 'wc-admin-settings-email';
+			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, array( 'in_footer' => true ) );
+			wp_enqueue_script( $handle );
+			wp_add_inline_script(
+				$handle,
 				"jQuery( 'select.email_type' ).on( 'change', function() {
 
-					var val = jQuery( this ).val();
+					const val = jQuery( this ).val();
 
 					jQuery( '.template_plain, .template_html' ).show();
 
@@ -1498,14 +1608,14 @@ class WC_Email extends WC_Settings_API {
 
 				}).trigger( 'change' );
 
-				var view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
-				var hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
+				const view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
+				const hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
 
 				jQuery( 'a.toggle_editor' ).text( view ).on( 'click', function() {
-					var label = hide;
+					let label = hide;
 
 					if ( jQuery( this ).closest(' .template' ).find( '.editor' ).is(':visible') ) {
-						var label = view;
+						label = view;
 					}
 
 					jQuery( this ).text( label ).closest(' .template' ).find( '.editor' ).slideToggle();
@@ -1521,7 +1631,7 @@ class WC_Email extends WC_Settings_API {
 				});
 
 				jQuery( '.editor textarea' ).on( 'change', function() {
-					var name = jQuery( this ).attr( 'data-name' );
+					const name = jQuery( this ).attr( 'data-name' );
 
 					if ( name ) {
 						jQuery( this ).attr( 'name', name );

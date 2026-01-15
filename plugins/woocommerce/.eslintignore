@@ -1,9 +1,12 @@
 *.min.js
 
 /.wireit/**
+**/.wireit/**
 /assets/**
 /bin/composer/**
 /client/legacy/build/**
+/client/admin/build/**
+/client/blocks/build/**
 /client/legacy/js/accounting/**
 /client/legacy/js/flexslider/**
 /client/legacy/js/jquery-blockui/**

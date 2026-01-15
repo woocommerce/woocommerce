@@ -178,10 +178,6 @@ class SingleProduct extends AbstractBlock {
 			return '';
 		}
 
-		if ( ! $product->is_type( ProductType::VARIABLE ) ) {
-			return parent::render( $attributes, $content, $block );
-		}
-
 		$interactivity_context = array(
 			'productId'   => $product->get_id(),
 			'variationId' => null,

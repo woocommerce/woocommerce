@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Removes PanelBody and uses ToolsPanel for Order Confirmation Block

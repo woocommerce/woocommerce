@@ -6,8 +6,8 @@ import {
 	StrictMode,
 	createRoot,
 	useEffect,
-	useLayoutEffect,
 	useState,
+	useMemo,
 } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import { store as editorStore } from '@wordpress/editor';
@@ -21,7 +21,6 @@ import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
 import { createStore, storeName } from './store';
-import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 import {
 	initEventCollector,
@@ -35,6 +34,8 @@ import {
 	useFilterEditorContentStylesheets,
 } from './hooks';
 import { cleanupConfigurationChanges } from './config-tools';
+import { getEditorConfigFromWindow } from './store/settings';
+import { EmailEditorConfig } from './store/types';
 
 function Editor( {
 	postId,
@@ -67,16 +68,19 @@ function Editor( {
 	const stylesContentRef = useFilterEditorContentStylesheets();
 	const mergedContentRef = useMergeRefs( [ stylesContentRef, contentRef ] );
 
+	// Set allowed blockTypes and isPreviewMode to the editor settings.
+	const editorSettings = useMemo(
+		() => ( {
+			...settings,
+			allowedBlockTypes: getAllowedBlockNames(),
+			isPreviewMode: isPreview,
+		} ),
+		[ settings, isPreview ]
+	);
+
 	if ( ! isInitialized ) {
 		return null;
 	}
-
-	// Set allowed blockTypes and isPreviewMode to the editor settings.
-	const editorSettings = {
-		...settings,
-		allowedBlockTypes: getAllowedBlockNames(),
-		isPreviewMode: isPreview,
-	};
 
 	return (
 		<StrictMode>
@@ -96,10 +100,9 @@ function onInit() {
 	initDomTracking();
 	createStore();
 	initContentValidationMiddleware();
-	initializeLayout();
 	initBlocks();
-	initHooks();
 	initTextHooks();
+	initializeLayout();
 }
 
 export function initialize( elementId: string ) {
@@ -122,7 +125,13 @@ export function initialize( elementId: string ) {
 		'woocommerce_email_editor_wrap_editor_component',
 		Editor
 	) as typeof Editor;
+
 	onInit();
+
+	// Set configuration to store from window object for backward compatibility
+	const editorConfig = getEditorConfigFromWindow();
+	dispatch( storeName ).setEditorConfig( editorConfig );
+
 	const root = createRoot( container );
 	root.render(
 		<WrappedEditor
@@ -137,17 +146,23 @@ export function ExperimentalEmailEditor( {
 	postType,
 	isPreview = false,
 	contentRef = null,
+	config,
 }: {
 	postId: string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
+	config?: EmailEditorConfig;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
-	useLayoutEffect( () => {
+	useEffect( () => {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
+		// Set configuration to store from window object for backward compatibility
+		const editorConfig = config || getEditorConfigFromWindow();
 		onInit();
+
+		dispatch( storeName ).setEditorConfig( editorConfig );
 		setIsInitialized( true );
 		// Cleanup global editor settings
 		return () => {
@@ -159,7 +174,7 @@ export function ExperimentalEmailEditor( {
 				);
 			}
 		};
-	}, [] );
+	}, [ config ] );
 
 	const WrappedEditor = applyFilters(
 		'woocommerce_email_editor_wrap_editor_component',

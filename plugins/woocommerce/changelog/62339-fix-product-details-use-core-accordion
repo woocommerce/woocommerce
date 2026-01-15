@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use WordPress core Accordion block in Product Details block for WP 6.9+, with fallback for older versions.

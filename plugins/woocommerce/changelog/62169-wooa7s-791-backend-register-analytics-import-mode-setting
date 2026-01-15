@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add analytics import mode setting to Settings API

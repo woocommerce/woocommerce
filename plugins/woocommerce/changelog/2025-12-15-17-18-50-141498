@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure discount fees are included in the order subtotal calculation on the admin order view

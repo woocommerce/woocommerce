@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { createReduxStore, register } from '@wordpress/data';
-import { SelectFromMap } from '@automattic/data-stores';
 /**
  * Internal dependencies
  */
@@ -12,7 +11,7 @@ import * as actions from './actions';
 import * as resolvers from './resolvers';
 import reducer, { State } from './reducer';
 import controls from '../controls';
-import { WPDataSelectors } from '../types';
+import { SelectFromMap, WPDataSelectors } from '../types';
 import { getItemsType } from './selectors';
 import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';

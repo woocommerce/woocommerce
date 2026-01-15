@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
@@ -37,6 +38,23 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 */
 	protected function compile_css( ...$styles ): string {
 		return WP_Style_Engine::compile_css( array_merge( ...$styles ), '' );
+	}
+
+	/**
+	 * Extract inner content from a wrapper element.
+	 *
+	 * Removes the outer wrapper element (e.g., div) and returns only the inner HTML content.
+	 * This is useful when you need to strip the wrapper and use only the inner content.
+	 *
+	 * @param string $block_content Block content with wrapper element.
+	 * @param string $tag_name      Tag name of the wrapper element (default: 'div').
+	 * @return string Inner content without the wrapper element, or original content if wrapper not found.
+	 */
+	protected function get_inner_content( string $block_content, string $tag_name = 'div' ): string {
+		$dom_helper = new Dom_Document_Helper( $block_content );
+		$element    = $dom_helper->find_element( $tag_name );
+
+		return $element ? $dom_helper->get_element_inner_html( $element ) : $block_content;
 	}
 
 	/**

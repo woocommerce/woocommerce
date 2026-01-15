@@ -12,6 +12,22 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller as ShippingZoneMethodController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller as RefundsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as SettingsProductsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Controller as PaymentGatewaysController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Controller as GeneralSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Controller as EmailSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax\Controller as TaxSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Controller as EmailsSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Account\Controller as AccountSettingsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -43,8 +59,7 @@ class Server {
 		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				$this->controllers[ $namespace ][ $controller_name ] =
-					$container->has( $controller_class ) ?
+				$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
 					$container->get( $controller_class ) :
 					$legacy_proxy->get_instance_of( $controller_class );
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
@@ -58,22 +73,24 @@ class Server {
 	 * @return array List of Namespaces and Main controller classes.
 	 */
 	protected function get_rest_namespaces() {
+		$namespaces = array(
+			'wc/v1'        => wc_rest_should_load_namespace( 'wc/v1' ) ? $this->get_v1_controllers() : array(),
+			'wc/v2'        => wc_rest_should_load_namespace( 'wc/v2' ) ? $this->get_v2_controllers() : array(),
+			'wc/v3'        => wc_rest_should_load_namespace( 'wc/v3' ) ? $this->get_v3_controllers() : array(),
+			'wc-telemetry' => wc_rest_should_load_namespace( 'wc-telemetry' ) ? $this->get_telemetry_controllers() : array(),
+		);
+
+		if ( wc_rest_should_load_namespace( 'wc/v4' ) && Features::is_enabled( 'rest-api-v4' ) ) {
+			$namespaces['wc/v4'] = $this->get_v4_controllers();
+		}
+
 		/**
 		 * Filter the list of REST API controllers to load.
 		 *
 		 * @since 4.5.0
 		 * @param array $controllers List of $namespace => $controllers to load.
 		 */
-		return apply_filters(
-			'woocommerce_rest_api_get_rest_namespaces',
-			array(
-				'wc/v1'        => wc_rest_should_load_namespace( 'wc/v1' ) ? $this->get_v1_controllers() : array(),
-				'wc/v2'        => wc_rest_should_load_namespace( 'wc/v2' ) ? $this->get_v2_controllers() : array(),
-				'wc/v3'        => wc_rest_should_load_namespace( 'wc/v3' ) ? $this->get_v3_controllers() : array(),
-				'wc/v4'        => ( wc_rest_should_load_namespace( 'wc/v4' ) && ( class_exists( \Automattic\WooCommerce\Admin\Features\Features::class ) && Features::is_enabled( 'rest-api-v4' ) ) ) ? $this->get_v4_controllers() : array(),
-				'wc-telemetry' => wc_rest_should_load_namespace( 'wc-telemetry' ) ? $this->get_telemetry_controllers() : array(),
-			)
-		);
+		return apply_filters( 'woocommerce_rest_api_get_rest_namespaces', $namespaces );
 	}
 
 	/**
@@ -153,7 +170,7 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v3_controllers() {
-		return array(
+		$controllers = array(
 			'coupons'                  => 'WC_REST_Coupons_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_Controller',
 			'customers'                => 'WC_REST_Customers_Controller',
@@ -197,7 +214,16 @@ class Server {
 			'data-continents'          => 'WC_REST_Data_Continents_Controller',
 			'data-countries'           => 'WC_REST_Data_Countries_Controller',
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
+			'paypal-standard'          => 'WC_REST_Paypal_Standard_Controller',
+			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
+			'paypal-buttons'           => 'WC_REST_Paypal_Buttons_Controller',
 		);
+
+		if ( Features::is_enabled( 'products-catalog-api' ) ) {
+			$controllers['products-catalog'] = 'WC_REST_Products_Catalog_Controller';
+		}
+
+		return $controllers;
 	}
 
 	/**
@@ -207,10 +233,39 @@ class Server {
 	 */
 	protected function get_v4_controllers() {
 		return array(
-			'ping'         => 'WC_REST_Ping_V4_Controller',
-			'fulfillments' => 'WC_REST_Fulfillments_V4_Controller',
-			'products'     => 'WC_REST_Products_V4_Controller',
+			'fulfillments'              => FulfillmentsController::class,
+			'products'                  => ProductsController::class,
+			'customers'                 => CustomersController::class,
+			'order-notes'               => OrderNotesController::class,
+			'shipping-zones'            => ShippingZonesController::class,
+			'shipping-zone-method'      => ShippingZoneMethodController::class,
+			'orders'                    => OrdersController::class,
+			'refunds'                   => RefundsController::class,
+			'offline-payment-methods'   => OfflinePaymentMethodsController::class,
+			'settings-general'          => GeneralSettingsController::class,
+			'settings-email'            => EmailSettingsController::class,
+			'settings-emails'           => EmailsSettingsController::class,
+			'settings-products'         => SettingsProductsController::class,
+			'settings-payment-gateways' => PaymentGatewaysController::class,
+			'settings-tax'              => TaxSettingsController::class,
+			'settings-account'          => AccountSettingsController::class,
+			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
+			'settings'                  => 'WC_REST_Settings_V4_Controller',
 		);
+	}
+
+	/**
+	 * Get instance of a V4 controller.
+	 *
+	 * @param string $identifier Controller identifier.
+	 * @param string $route Route class name.
+	 * @return object The instance of the controller.
+	 */
+	protected function get_v4_controller( $identifier, $route ) {
+		if ( isset( $this->controllers['wc/v4'][ $identifier ] ) ) {
+			return $this->controllers['wc/v4'][ $identifier ];
+		}
+		return new $route();
 	}
 
 	/**

@@ -1,16 +1,14 @@
 .wc-block-components-panel.has-border {
-	@include with-translucent-border(1px 0);
+	border: 1px solid $universal-translucent-border-color;
+	border-width: 1px 0;
 
-	+ .wc-block-components-panel.has-border::after {
+	+ .wc-block-components-panel.has-border {
 		border-top-width: 0;
 	}
 }
 
 .wc-block-components-panel.has-border.no-top-border {
-	@include with-translucent-border(1px 0);
-	&::after {
-		border-top-width: 0;
-	}
+	border-top-width: 0;
 }
 
 .wc-block-components-panel__button {

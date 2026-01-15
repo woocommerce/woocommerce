@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.8.0
+ * @version 10.4.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -61,7 +61,7 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
  * Show user-defined additional content - this is set in each email's settings.
  */
 if ( $additional_content ) {
-	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td class="email-additional-content email-additional-content-aligned">' : '';
+	echo $email_improvements_enabled ? '<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr><td class="email-additional-content email-additional-content-aligned">' : '';
 	echo wp_kses_post( wpautop( wptexturize( $additional_content ) ) );
 	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }
