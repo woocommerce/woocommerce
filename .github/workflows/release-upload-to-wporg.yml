@@ -132,15 +132,29 @@ jobs:
           fi
 
           if php -r "die( version_compare( '$RELEASE_TAG', '$svn_plugin_version', '>' ) ? 0 : 1 );"; then
+            # Check that the stable tag in the release matches the stable tag in SVN.
+            svn_stable_version=$( svn cat "$SVN_URL/trunk/readme.txt" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            stable_tag_in_release=$(cat woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1)
+
+            if [[ -z "$svn_stable_version" || $svn_stable_version != $stable_tag_in_release ]]; then
+              echo "::error::Stable tag in SVN ($svn_stable_version) does not match release stable tag ($stable_tag_in_release)."
+              exit 1
+            fi
+
             echo "overwrite_trunk=1" >> "$GITHUB_OUTPUT"
           else
             echo "overwrite_trunk=0" >> "$GITHUB_OUTPUT"
           fi
 
+      - if: ${{ github.repository != 'woocommerce/woocommerce' }}
+        run: |
+          echo "::notice::This is not the 'woocommerce/woocommerce' repository. Commit to WordPress.org SVN will be skipped."
+
   commit:
     name: Commit release to WordPress.org
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     needs: [get-and-validate-release-asset]
+    if: ${{ github.repository == 'woocommerce/woocommerce' }}
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     env:
