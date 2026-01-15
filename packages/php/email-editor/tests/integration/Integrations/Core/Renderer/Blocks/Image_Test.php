@@ -372,4 +372,24 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'width="600"', $rendered );
 		$this->assertStringContainsString( 'width:600px;', $rendered );
 	}
+
+	/**
+	 * Test it preserves data-link-href attribute for personalization tags
+	 */
+	public function testItPreservesDataLinkHref(): void {
+		$image_content_with_data_link = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<a href="#" data-link-href="[trackable-link url=\'test\']">
+					<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style=""/>
+				</a>
+			</figure>
+		';
+		$parsed_image                 = $this->parsed_image;
+		$parsed_image['innerHTML']    = $image_content_with_data_link;
+
+		$rendered = $this->image_renderer->render( $image_content_with_data_link, $parsed_image, $this->rendering_context );
+
+		// Note: esc_attr() encodes single quotes as &#039;.
+		$this->assertStringContainsString( 'data-link-href="[trackable-link url=&#039;test&#039;]"', $rendered );
+	}
 }
