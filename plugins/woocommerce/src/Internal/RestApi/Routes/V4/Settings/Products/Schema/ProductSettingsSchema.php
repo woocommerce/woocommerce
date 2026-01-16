@@ -274,9 +274,39 @@ class ProductSettingsSchema extends AbstractSchema {
 
 				$product_types = wc_get_product_types();
 				return is_array( $product_types ) ? $product_types : array();
+			case 'woocommerce_shop_page_id':
+				return $this->get_page_options();
 		}
 
 		return array();
+	}
+
+	/**
+	 * Get options for page selection fields.
+	 *
+	 * @return array
+	 */
+	private function get_page_options(): array {
+		if ( ! function_exists( 'get_pages' ) ) {
+			return array();
+		}
+
+		$pages   = get_pages(
+			array(
+				'sort_column' => 'menu_order',
+				'sort_order'  => 'ASC',
+				'post_status' => array( 'publish', 'private', 'draft' ),
+			)
+		);
+		$options = array(
+			'' => __( 'Select a page…', 'woocommerce' ),
+		);
+
+		foreach ( $pages as $page ) {
+			$options[ (string) $page->ID ] = wp_strip_all_tags( $page->post_title );
+		}
+
+		return $options;
 	}
 
 	/**
@@ -289,6 +319,7 @@ class ProductSettingsSchema extends AbstractSchema {
 		$type_map = array(
 			'single_select_product' => 'select',
 			'multi_select_product'  => 'multiselect',
+			'single_select_page'    => 'select',
 		);
 
 		return $type_map[ $wc_type ] ?? $wc_type;

@@ -42,7 +42,10 @@ class ReactSettingsRegistry {
 				'restPath'       => '/wc/v4/settings/products',
 				'payloadPath'    => array( 'settings', 'products', 'general' ),
 				'supportedTypes' => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' ),
-				'typeMap'        => array(),
+				'typeMap'        => array(
+					'single_select_page'             => 'select',
+					'single_select_page_with_search' => 'select',
+				),
 			),
 		);
 	}
