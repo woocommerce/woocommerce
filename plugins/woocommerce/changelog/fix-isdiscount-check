@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix isDiscount check for order summary to fix display issues when product is discounted to 0

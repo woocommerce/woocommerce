@@ -1,12 +1,5 @@
 .wc-block-components-address-card {
-	@include font-regular-locked;
-	border: 1px solid $universal-border-light;
-	padding: $gap;
-	margin: 0;
-	border-radius: $universal-border-radius;
-	display: flex;
-	justify-content: flex-start;
-	align-items: flex-start;
+	@include card-styles();
 
 	.has-dark-controls & {
 		border-color: $input-border-dark;

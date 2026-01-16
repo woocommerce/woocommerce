@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add conditional checks to prevent the WooCommerce Accordion block from appearing in the block inserter on WordPress 6.9 and later.

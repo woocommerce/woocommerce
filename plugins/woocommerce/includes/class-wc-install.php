@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
@@ -310,6 +311,13 @@ class WC_Install {
 		),
 		'10.4.0' => array(
 			'wc_update_1040_add_idx_date_paid_status_parent',
+			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
+		),
+		'10.5.0' => array(
+			'wc_update_1050_migrate_brand_permalink_setting',
+			'wc_update_1050_enable_autoload_options',
+			'wc_update_1050_add_idx_user_email',
+			'wc_update_1050_remove_deprecated_marketplace_option',
 		),
 	);
 
@@ -348,8 +356,8 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
-		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
 		add_action( 'admin_init', array( __CLASS__, 'install_actions' ) );
@@ -1102,8 +1110,11 @@ class WC_Install {
 			foreach ( $subsections as $subsection ) {
 				foreach ( $section->get_settings( $subsection ) as $value ) {
 					if ( isset( $value['default'] ) && isset( $value['id'] ) ) {
-						$autoload = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
-						add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+						$autoload          = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
+						$skip_initial_save = isset( $value['skip_initial_save'] ) ? (bool) $value['skip_initial_save'] : false;
+						if ( ! $skip_initial_save ) {
+							add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+						}
 					}
 				}
 			}
@@ -1171,6 +1182,21 @@ class WC_Install {
 	 */
 	public static function enable_customer_stock_notifications_signups() {
 		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
+	}
+
+	/**
+	 * Set scheduled import mode as the default for new installations.
+	 *
+	 * Uses add_option() which only sets the option if it doesn't already exist.
+	 * This ensures existing installations are not affected.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return void
+	 */
+	public static function enable_analytics_scheduled_import(): void {
+		// add_option only sets if option doesn't exist, returns false if it already exists.
+		add_option( 'woocommerce_analytics_scheduled_import', 'yes' );
 	}
 
 	/**
@@ -1244,7 +1270,7 @@ class WC_Install {
 	private static function get_order_stats_table_schema( $collate ) {
 		global $wpdb;
 
-		$should_have_fulfillment_column = self::is_new_install();
+		$should_have_fulfillment_column = self::is_new_install() && FeaturesUtil::feature_is_enabled( 'fulfillments' );
 		if ( false === $should_have_fulfillment_column ) {
 			$should_have_fulfillment_column = OrdersStatsDataStore::has_fulfillment_status_column();
 		}
@@ -1811,7 +1837,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions (
   KEY download_order_key_product (product_id,order_id,order_key(16),download_id),
   KEY download_order_product (download_id,order_id,product_id),
   KEY order_id (order_id),
-  KEY user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires)
+  KEY user_order_remaining_expires (user_id,order_id,downloads_remaining,access_expires),
+  KEY idx_user_email (user_email(100))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_order_items (
   order_item_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2775,7 +2802,7 @@ $stock_notifications_table_schema;
 	 * @return string The content for the page
 	 */
 	private static function get_refunds_return_policy_page_content() {
-		return <<<EOT
+		return <<<'EOT'
 <!-- wp:paragraph -->
 <p><b>This is a sample page.</b></p>
 <!-- /wp:paragraph -->
@@ -2925,9 +2952,13 @@ EOT;
 	 * Refund and returns page.
 	 *
 	 * @since 5.6.0
+	 * @deprecated 10.5.0 No longer used.
+	 *
 	 * @return void
 	 */
 	public static function add_admin_note_after_page_created() {
+		wc_deprecated_function( 'WC_Install::add_admin_note_after_page_created', '10.5.0' );
+
 		if ( ! WC()->is_wc_admin_active() ) {
 			return;
 		}
@@ -2943,7 +2974,7 @@ EOT;
 
 	/**
 	 * When pages are created, we might want to take some action.
-	 * In this case we want to set an option when refund and returns
+	 * In this case we want to create an admin note when the refund and returns
 	 * page is created.
 	 *
 	 * @since 5.6.0
@@ -2953,8 +2984,11 @@ EOT;
 	 */
 	public static function page_created( $page_id, $page_data ) {
 		if ( 'refund_returns' === $page_data['post_name'] ) {
-			delete_option( 'woocommerce_refund_returns_page_created' );
-			add_option( 'woocommerce_refund_returns_page_created', $page_id, '', false );
+			if ( Constants::is_true( 'WC_INSTALLING' ) ) {
+				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'wc_notes_refund_returns_page_created', array( $page_id ), 'woocommerce', true );
+			} else {
+				WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+			}
 		}
 	}
 

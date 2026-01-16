@@ -692,7 +692,22 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		global $wpdb;
 
-		$table_name    = self::get_db_table_name();
+		$table_name = self::get_db_table_name();
+
+		// Check if the table exists.
+		$table_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				'SHOW TABLES LIKE %s',
+				$table_name
+			)
+		);
+
+		// If table still does not exist, return false without setting the option to allow for table to be created with the column.
+		if ( ! $table_exists ) {
+			return false;
+		}
+
 		$column_exists = $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
@@ -782,5 +797,34 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$customer_id
 			)
 		);
+	}
+
+	/**
+	 * Add fulfillment_status column to wc_order_stats table.
+	 *
+	 * @return bool|string True on success, error message string on failure.
+	 */
+	public static function add_fulfillment_status_column() {
+		if ( self::has_fulfillment_status_column() ) {
+			return true;
+		}
+
+		global $wpdb;
+
+		$result = $wpdb->query(
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			"ALTER TABLE {$wpdb->prefix}wc_order_stats
+			ADD COLUMN fulfillment_status VARCHAR(50) DEFAULT NULL,
+			ADD INDEX fulfillment_status (fulfillment_status)"
+		);
+
+		if ( false === $result ) {
+			return $wpdb->last_error ? $wpdb->last_error : __( 'Unknown database error occurred while adding fulfillment_status column.', 'woocommerce' );
+		}
+
+		// Update the option to indicate that the column has been added.
+		update_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'yes', false );
+
+		return true;
 	}
 }

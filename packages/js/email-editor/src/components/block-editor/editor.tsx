@@ -3,7 +3,7 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useMemo, useEffect } from '@wordpress/element';
-import { SlotFillProvider, Spinner } from '@wordpress/components';
+import { SlotFillProvider, ProgressBar } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 import { PluginArea } from '@wordpress/plugins';
@@ -109,12 +109,14 @@ export function InnerEditor( {
 					? 'post-only'
 					: 'template-locked',
 			supportsTemplateMode: true,
+			styles,
 		} ),
 		[
 			settings,
 			onNavigateToEntityRecord,
 			onNavigateToPreviousEntityRecord,
 			currentPost.postType,
+			styles,
 		]
 	);
 	const canRenderEditor =
@@ -126,7 +128,7 @@ export function InnerEditor( {
 	if ( ! canRenderEditor ) {
 		return (
 			<div className="spinner-container">
-				<Spinner style={ { width: '80px', height: '80px' } } />
+				<ProgressBar />
 			</div>
 		);
 	}
@@ -145,8 +147,8 @@ export function InnerEditor( {
 					postType={ currentPost.postType }
 					settings={ editorSettings }
 					templateId={ template && template.id }
-					styles={ styles }
 					contentRef={ contentRef }
+					styles={ styles } // This is needed for BC for Gutenberg below v22
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />

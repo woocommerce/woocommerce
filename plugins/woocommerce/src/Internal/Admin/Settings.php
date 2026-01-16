@@ -348,6 +348,34 @@ class Settings {
 				'date_completed' => 'date_completed',
 			),
 		);
+
+		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
+			$settings[] = array(
+				'id'          => 'woocommerce_analytics_scheduled_import',
+				'option_key'  => 'woocommerce_analytics_scheduled_import',
+				'label'       => __( 'Updates', 'woocommerce' ),
+				'description' => __( 'Controls how analytics data is imported from orders.', 'woocommerce' ),
+				'type'        => 'radio',
+				'default'     => null, // Default to null so we can know if it's a new site or an existing site. New sites will have the option set.
+				'options'     => array(
+					'yes' => __( 'Scheduled (recommended)', 'woocommerce' ),
+					'no'  => __( 'Immediately', 'woocommerce' ),
+				),
+			);
+
+			// Add hidden setting for the import interval to display in the client side.
+			$import_interval = \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_import_interval();
+			$import_interval = absint( $import_interval );
+			// Format the import interval to a human-readable string.
+			$import_interval_string = human_time_diff( 0, $import_interval );
+			$settings[]             = array(
+				'id'         => 'woocommerce_analytics_import_interval',
+				'option_key' => 'woocommerce_analytics_import_interval',
+				'type'       => 'hidden',
+				'default'    => $import_interval_string,
+			);
+		}
+
 		return $settings;
 	}
 

@@ -19,10 +19,11 @@ jobs:
       beta-2-release-date: ${{ steps.get-all-events-for-version.outputs.event-beta-2-date }}
       rc-1-release-date: ${{ steps.get-all-events-for-version.outputs.event-rc-1-date }}
       final-release-date: ${{ steps.get-all-events-for-version.outputs.event-final-date }}
+      team-name: ${{ steps.get-all-events-for-version.outputs.team-name }}
     steps:
       - name: Install node-ical
         run: npm install node-ical
-      - name: Check for code freeze events
+      - name: Check for feature freeze events
         id: check-code-freeze-8-weeks
         uses: actions/github-script@v7
         with:
@@ -63,14 +64,14 @@ jobs:
               if (eventsInRange.length > 0) {
                 const date = eventsInRange[0].start.toISOString();
                 const version = eventsInRange[0].summary.match(/\d+\.\d+/)[0];
-                console.log(`Found Code Freeze event: ${eventsInRange[0].summary}`);
+                console.log(`Found Feature Freeze event: ${eventsInRange[0].summary}`);
                 console.log(`Date: ${date}`);
                 console.log(`Version: ${version}`);
                 core.setOutput('should-trigger-webhook', 'true');
                 core.setOutput('version', version);
                 core.setOutput('feature-freeze-date', date);
               } else {
-                console.log(`No Code Freeze events found in the specified range.`);
+                console.log(`No Feature Freeze events found in the specified range.`);
                 core.setOutput('should-trigger-webhook', 'false');
               }
             } catch (error) {
@@ -100,6 +101,8 @@ jobs:
               .filter(event => event.type === 'VEVENT')
               .filter(event => event.summary && event.start);
 
+            let teamName = null;
+
             for (const [eventKey, eventTitle] of Object.entries(releaseEvents)) {
               const matchingEvent = calendarEvents.find(event => 
                 event.summary.trim() === eventTitle
@@ -108,8 +111,19 @@ jobs:
               const date = matchingEvent ? new Date(matchingEvent.start).toISOString().split('T')[0] : null;
               core.setOutput(`event-${eventKey}-date`, date);
               console.log(`Event: ${eventTitle}, Date: ${date}`);
-            }
 
+              // Extract team name from final release event description
+              if (eventKey === 'final' && matchingEvent && matchingEvent.description) {
+                const teamMatch = matchingEvent.description.match(/Team:\s*(.+)/i);
+                if (teamMatch && teamMatch[1]) {
+                  teamName = teamMatch[1].trim().toLowerCase().replace(/\s+/g, '-');
+                  console.log(`Team name from the event description: ${teamName}`);
+                }
+              }
+            }
+            
+            core.setOutput('team-name', teamName);
+            
   trigger-upcoming-code-freeze-events:
     name: Assign a release lead
     needs: check-upcoming-release-events
@@ -120,6 +134,7 @@ jobs:
       release-team: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-team }}
       release-lead: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead }}
       release-lead-google-login: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead-google-login }}
+      release-lead-slack-member-id: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead-slack-member-id }}
     steps:
       - uses: actions/github-script@v7
         id: trigger-upcoming-code-freeze-events
@@ -129,6 +144,7 @@ jobs:
 
             const payload = {
               action: 'release-assignment',
+              team: '${{ needs.check-upcoming-release-events.outputs.team-name }}',
               version: '${{ needs.check-upcoming-release-events.outputs.version }}',
               feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
               status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
@@ -175,12 +191,35 @@ jobs:
               core.setOutput('release-team', responseBody.release_team);
               core.setOutput('release-lead', responseBody.release_lead);
               core.setOutput('release-lead-google-login', responseBody.release_lead_google_login);
+              core.setOutput('release-lead-slack-member-id', responseBody.release_lead_slack_member_id);
               core.setOutput('post', responseBody.post);
             }
         env:
           ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
           WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
           WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}
+
+  send-slack-notification:
+    name: Send Slack notification
+    needs:
+      - trigger-upcoming-code-freeze-events
+      - check-upcoming-release-events
+    if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' && needs.trigger-upcoming-code-freeze-events.outputs.post != '' }}
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Send Slack notification
+        uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: |
+            :woo: *The WooCommerce ${{ needs.check-upcoming-release-events.outputs.version }} release is coming up!* :woo:
+
+            The team responsible for this release is *Team ${{ needs.check-upcoming-release-events.outputs.team-name }}*.
+            <@${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-slack-member-id }}>, make sure you choose a release DRI and update the release P2 accordingly.
+
+            :p2: <${{ needs.trigger-upcoming-code-freeze-events.outputs.post }}|Release P2 post>
 
   create-release-kickoff:
     name: Create Release Kickoff in Linear
@@ -226,7 +265,6 @@ jobs:
 
             const labels = await linearClient.issueLabels({
               filter: {
-                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
                 name: { eq: 'Release' }
               }
             });
@@ -346,10 +384,12 @@ jobs:
             const { parent, ...subIssues } = ${{ steps.process-kickoff-templates.outputs.processed-templates }};
 
             let parentIssue;
+            const labelId = '${{ steps.get-linear-data.outputs.releaseLabelId }}' || null;
+            const assigneeId = '${{ steps.process-kickoff-templates.outputs.userId }}' || null;
+
             try {
-              const assigneeId = '${{ steps.process-kickoff-templates.outputs.userId }}' || null;
               const stateId = '${{ steps.get-linear-data.outputs.inProgressStateId }}' || null;
-              const labelId = '${{ steps.get-linear-data.outputs.releaseLabelId }}' || null;
+
               const parentResult = await linearClient.createIssue({
                 teamId: '${{ secrets.LINEAR_TEAM_ID }}',
                 title: `${parent.title}`,
@@ -375,7 +415,8 @@ jobs:
                     description: subIssue.body,
                     parentId: parentIssue.id,
                     priority: 2,
-                    labelIds: ['${{ steps.get-linear-data.outputs.releaseLabelId }}']
+                    ...(labelId && { labelIds: [labelId] }),
+                    ...(assigneeId && { assigneeId })
                   });
                 } catch (error) {
                   console.log(`Failed to create sub-issue in Linear: ${error.message}`);

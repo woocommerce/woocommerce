@@ -62,6 +62,7 @@ const blocks = {
 	'category-description': {},
 	'category-title': {},
 	'coming-soon': {},
+	'coupon-code': {},
 	'customer-account': {},
 	'email-content': {},
 	'featured-category': {

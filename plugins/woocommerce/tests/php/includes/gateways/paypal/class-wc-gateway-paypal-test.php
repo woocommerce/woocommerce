@@ -6,6 +6,9 @@
  */
 
 declare(strict_types=1);
+
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+
 /**
  * Class WC_Gateway_Paypal_Test.
  */
@@ -30,7 +33,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->save();
 
-		$order->update_meta_data( '_paypal_status', 'pending' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, 'pending' );
 		$order->set_transaction_id( $this->transaction_id_26960 );
 		$order->set_payment_method( WC_Gateway_Paypal::ID );
 		$order->save();
@@ -57,7 +60,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order();
 		$order->save();
 
-		$order->update_meta_data( '_paypal_status', 'pending' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, 'pending' );
 		$order->set_transaction_id( $this->transaction_id_26960 );
 		$order->set_payment_method( WC_Gateway_Paypal::ID );
 		$order->save();
@@ -101,7 +104,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_capture_payment() {
 		$order = WC_Helper_Order::create_order();
-		$order->update_meta_data( '_paypal_status', 'pending' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, 'pending' );
 		$order->set_transaction_id( $this->transaction_id_26960 );
 		$order->set_payment_method( WC_Gateway_Paypal::ID );
 		$order->save();
@@ -114,7 +117,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'pre_http_request', array( $this, '__return_paypal_success' ) );
 
 		$order = wc_get_order( $order->get_id() );
-		$this->assertEquals( 'Completed', $order->get_meta( '_paypal_status' ) );
+		$this->assertEquals( 'Completed', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS ) );
 	}
 
 	/**
@@ -167,7 +170,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $order->get_meta( 'Payment type' ), WC_Gateway_Paypal::ID );
 		$this->assertEquals( $order->get_transaction_id(), $this->transaction_id_26960 );
-		$this->assertEquals( $order->get_meta( '_paypal_status' ), 'Completed' );
+		$this->assertEquals( $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS ), 'Completed' );
 	}
 
 	/**
@@ -222,5 +225,80 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 				$this->assertArrayHasKey( $key, $form_fields, "Legacy field '{$key}' should be present when Orders v2 is disabled" );
 			}
 		}
+	}
+
+	/**
+	 * Test that gateway is available when Orders v2 is disabled (legacy mode).
+	 */
+	public function test_is_available_with_legacy_mode() {
+		// Enable the gateway.
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'yes' ) );
+
+		// Mock Orders v2 to be disabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( false );
+
+		$this->assertTrue( $mock_gateway->is_available() );
+	}
+
+	/**
+	 * Test that gateway availability depends on email field value when Orders v2 is enabled.
+	 *
+	 * @dataProvider gateway_availability_data_provider_for_orders_v2
+	 *
+	 * @param string|null $email The email to set for the gateway.
+	 * @param bool        $expected_available Whether the gateway should be available.
+	 */
+	public function test_is_available_with_orders_v2( ?string $email, bool $expected_available ) {
+		$new_settings = array(
+			'enabled' => 'yes',
+		);
+
+		if ( null !== $email ) {
+			$new_settings['email'] = $email;
+		} else {
+			// Remove the email field from the settings to test the case where the email field is not set.
+			$current_settings = get_option( 'woocommerce_paypal_settings', array() );
+			unset( $current_settings['email'] );
+			$new_settings = array_merge( $new_settings, $current_settings );
+		}
+
+		update_option( 'woocommerce_paypal_settings', $new_settings );
+
+		// Mock Orders v2 to be enabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
+
+		$this->assertSame( $expected_available, $mock_gateway->is_available() );
+	}
+
+	/**
+	 * Data provider for payment gateway availability tests when Orders v2 is enabled.
+	 *
+	 * @return array Test cases with email values and expected paypal gateway availability.
+	 */
+	public function gateway_availability_data_provider_for_orders_v2() {
+		return array(
+			'email field is not set' => array(
+				'email'              => null,
+				'expected_available' => false,
+			),
+			'email is empty string'  => array(
+				'email'              => '',
+				'expected_available' => false,
+			),
+			'email is invalid'       => array(
+				'email'              => 'example@',
+				'expected_available' => false,
+			),
+			'email is valid'         => array(
+				'email'              => 'merchant@example.com',
+				'expected_available' => true,
+			),
+		);
 	}
 }

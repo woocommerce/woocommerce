@@ -1,11 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
-import { Disabled } from '@wordpress/components';
-import { MultiLineTextSkeleton } from '@woocommerce/base-components/skeleton/patterns/multi-line-text-skeleton';
 import {
 	BlockControls,
 	InspectorControls,
@@ -21,6 +18,7 @@ import { DowngradeNotice } from '../components/downgrade-notice';
 import { UpgradeProductImageGallery } from '../components/upgrade-product-image-gallery';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
+import { Skeleton } from './skeleton';
 import type { Attributes } from '../types';
 
 const AddToCartOptionsEdit = (
@@ -64,17 +62,11 @@ const AddToCartOptionsEdit = (
 				/>
 			) : (
 				<div { ...blockProps }>
-					<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-						<MultiLineTextSkeleton isStatic={ true } />
-					</div>
-					<Disabled>
-						<button
-							className={ `alt wp-element-button ${ productType }_add_to_cart_button` }
-						>
-							{ ( product && product.add_to_cart?.single_text ) ||
-								__( 'Add to cart', 'woocommerce' ) }
-						</button>
-					</Disabled>
+					<Skeleton
+						buttonText={ product?.add_to_cart?.single_text }
+						productType={ productType }
+						isLoading={ false }
+					/>
 				</div>
 			) }
 		</>

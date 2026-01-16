@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+- Includes a source parameter for requests to the `/update-check` and `/subscriptions` endpoints on WooCommerce.com if the request originates from the Refresh button on My Subscriptions - Fix source parameter for other requests to the `/subscriptions` endpoint originating from the My Subscriptions page

@@ -2,7 +2,12 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import { Editor, Admin, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	Editor,
+	Admin,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 class AddToCartWithOptionsPage {
 	private page: Page;
@@ -27,9 +32,16 @@ class AddToCartWithOptionsPage {
 
 	async switchProductType( productType: string ) {
 		await this.page.getByRole( 'tab', { name: 'Template' } ).click();
-		await this.page
-			.getByRole( 'button', { name: 'Product Type', exact: true } )
-			.click();
+		const productTypePanel = this.page.getByRole( 'button', {
+			name: 'Product Type',
+			exact: true,
+		} );
+		if (
+			( await productTypePanel.getAttribute( 'aria-expanded' ) ) !==
+			'true'
+		) {
+			await productTypePanel.click();
+		}
 		await this.page
 			.getByLabel( 'Type switcher' )
 			.selectOption( { label: productType } );
@@ -37,6 +49,12 @@ class AddToCartWithOptionsPage {
 		const addToCartWithOptionsBlock = await this.editor.getBlockByName(
 			this.BLOCK_SLUG
 		);
+
+		await addToCartWithOptionsBlock
+			.getByLabel( 'Loading the Add to Cart + Options template part' )
+			.waitFor( {
+				state: 'hidden',
+			} );
 
 		await addToCartWithOptionsBlock
 			.locator( '.components-spinner' )
@@ -70,13 +88,15 @@ class AddToCartWithOptionsPage {
 		const addToCartFormBlock = await this.editor.getBlockByName(
 			'woocommerce/add-to-cart-form'
 		);
-		await this.editor.selectBlocks( addToCartFormBlock );
+		if ( await addToCartFormBlock.isVisible() ) {
+			await this.editor.selectBlocks( addToCartFormBlock );
 
-		await this.page
-			.getByRole( 'button', {
-				name: 'Use the Add to Cart + Options block',
-			} )
-			.click();
+			await this.page
+				.getByRole( 'button', {
+					name: 'Use the Add to Cart + Options block',
+				} )
+				.click();
+		}
 	}
 
 	async updateSingleProductTemplate() {
@@ -113,6 +133,88 @@ class AddToCartWithOptionsPage {
 		await this.updateAddToCartWithOptionsBlock();
 
 		await this.editor.publishAndVisitPost();
+	}
+
+	async selectVariationSelectorOptionsBlockAttribute(
+		attributeName: string,
+		attributeValue: string,
+		optionStyle: 'Pills' | 'Dropdown'
+	) {
+		if ( optionStyle === 'Dropdown' ) {
+			await this.page
+				.getByLabel( attributeName )
+				.selectOption( attributeValue );
+			return;
+		}
+		if ( attributeValue !== '' ) {
+			await this.page
+				.getByLabel( attributeName )
+				.getByText( attributeValue )
+				.click();
+			return;
+		}
+		await this.page
+			.getByLabel( attributeName )
+			.locator( 'label:has(:checked)' )
+			.click();
+	}
+
+	async expectSelectedAttributes(
+		productAttributes: {
+			name: string;
+			options: string[];
+			variation: boolean;
+			visible: boolean;
+		}[],
+		expectedValues: Record< string, string | RegExp > = {},
+		optionStyle: 'Pills' | 'Dropdown'
+	) {
+		for ( let {
+			name: attributeName,
+			options: attributeValues,
+		} of productAttributes ) {
+			const attributeNameLocator = this.page.getByLabel( attributeName, {
+				exact: true,
+			} );
+			if ( optionStyle === 'Dropdown' ) {
+				let expectedValue: string | RegExp;
+				if (
+					attributeName in expectedValues &&
+					expectedValues[ attributeName ] !== ''
+				) {
+					expectedValue = expectedValues[ attributeName ];
+				} else {
+					expectedValue = '';
+				}
+				await expect( attributeNameLocator ).toHaveValue(
+					expectedValue
+				);
+				return;
+			}
+			if (
+				attributeName in expectedValues &&
+				expectedValues[ attributeName ] !== ''
+			) {
+				attributeValues = attributeValues.filter(
+					( item ) => item !== expectedValues[ attributeName ]
+				); // Omit attributeName
+				await expect(
+					attributeNameLocator.getByLabel(
+						expectedValues[ attributeName ],
+						{ exact: true }
+					)
+				).toBeChecked();
+			}
+			if ( attributeValues.length ) {
+				for ( const attributeValue of attributeValues ) {
+					await expect(
+						attributeNameLocator.getByLabel( attributeValue, {
+							exact: true,
+						} )
+					).not.toBeChecked();
+				}
+			}
+		}
 	}
 }
 

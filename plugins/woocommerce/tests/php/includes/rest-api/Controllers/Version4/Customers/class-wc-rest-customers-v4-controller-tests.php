@@ -518,47 +518,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test email filtering.
-	 */
-	public function test_email_filtering(): void {
-		$customer1 = $this->create_test_customer(
-			array(
-				'email'    => 'emailtest1@example.com',
-				'username' => 'emailtest1',
-			)
-		);
-
-		$customer2 = $this->create_test_customer(
-			array(
-				'email'    => 'emailtest2@example.com',
-				'username' => 'emailtest2',
-			)
-		);
-
-		// Test filtering by specific email - should find customer1 but not customer2.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
-		$request->set_param( 'email', 'emailtest1@example.com' );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$found_customer1 = false;
-		$found_customer2 = false;
-		foreach ( $response_data as $customer_data ) {
-			$this->assertEquals( 'emailtest1@example.com', $customer_data['email'], 'All returned customers should have the correct email' );
-			if ( $customer_data['id'] === $customer1->get_id() ) {
-				$found_customer1 = true;
-			}
-			if ( $customer_data['id'] === $customer2->get_id() ) {
-				$found_customer2 = true;
-			}
-		}
-		$this->assertTrue( $found_customer1, 'Should find customer with matching email' );
-		$this->assertFalse( $found_customer2, 'Should not find customer with non-matching email' );
-	}
-
-	/**
 	 * Test order by parameters.
 	 */
 	public function test_order_by(): void {
@@ -594,79 +553,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test include and exclude parameters.
-	 */
-	public function test_include_exclude_filtering(): void {
-		$customer1 = $this->create_test_customer();
-		$customer2 = $this->create_test_customer(
-			array(
-				'email'    => 'customer2@example.com',
-				'username' => 'customer2',
-			)
-		);
-		$customer3 = $this->create_test_customer(
-			array(
-				'email'    => 'customer3@example.com',
-				'username' => 'customer3',
-			)
-		);
-
-		// Test include parameter - should only return specified customers.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
-		$request->set_param( 'include', array( $customer1->get_id(), $customer3->get_id() ) );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$this->assertCount( 2, $response_data );
-
-		$found_customer1 = false;
-		$found_customer2 = false;
-		$found_customer3 = false;
-		foreach ( $response_data as $customer_data ) {
-			if ( $customer_data['id'] === $customer1->get_id() ) {
-				$found_customer1 = true;
-			}
-			if ( $customer_data['id'] === $customer2->get_id() ) {
-				$found_customer2 = true;
-			}
-			if ( $customer_data['id'] === $customer3->get_id() ) {
-				$found_customer3 = true;
-			}
-		}
-		$this->assertTrue( $found_customer1, 'Should find included customer1' );
-		$this->assertFalse( $found_customer2, 'Should not find excluded customer2' );
-		$this->assertTrue( $found_customer3, 'Should find included customer3' );
-
-		// Test exclude parameter - should exclude specified customers.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
-		$request->set_param( 'exclude', array( $customer2->get_id() ) );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$found_customer1 = false;
-		$found_customer2 = false;
-		$found_customer3 = false;
-		foreach ( $response_data as $customer_data ) {
-			if ( $customer_data['id'] === $customer1->get_id() ) {
-				$found_customer1 = true;
-			}
-			if ( $customer_data['id'] === $customer2->get_id() ) {
-				$found_customer2 = true;
-			}
-			if ( $customer_data['id'] === $customer3->get_id() ) {
-				$found_customer3 = true;
-			}
-		}
-		$this->assertTrue( $found_customer1, 'Should find non-excluded customer1' );
-		$this->assertFalse( $found_customer2, 'Should not find excluded customer2' );
-		$this->assertTrue( $found_customer3, 'Should find non-excluded customer3' );
-	}
-
-	/**
 	 * Test pagination.
 	 */
 	public function test_pagination(): void {
@@ -693,6 +579,13 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Should have at least 2 customers on first page.
 		$this->assertGreaterThanOrEqual( 2, count( $response_data ) );
 
+		// Verify pagination headers.
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'X-WP-Total', $headers, 'Response should include X-WP-Total header' );
+		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers, 'Response should include X-WP-TotalPages header' );
+		$this->assertEquals( 5, $headers['X-WP-Total'], 'Total should be 5 customers' );
+		$this->assertEquals( 3, $headers['X-WP-TotalPages'], 'Should have 3 pages with 2 per page' );
+
 		// Test second page.
 		$request->set_param( 'page', 2 );
 		$response = $this->server->dispatch( $request );
@@ -702,6 +595,162 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Should have customers on second page.
 		$this->assertGreaterThanOrEqual( 0, count( $response_data ) );
+
+		// Verify pagination headers on second page.
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'X-WP-Total', $headers, 'Response should include X-WP-Total header on page 2' );
+		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers, 'Response should include X-WP-TotalPages header on page 2' );
+		$this->assertEquals( 5, $headers['X-WP-Total'], 'Total should be 5 customers' );
+		$this->assertEquals( 3, $headers['X-WP-TotalPages'], 'Should have 3 pages with 2 per page' );
+	}
+
+	/**
+	 * Test edge case: invalid per_page values should fall back to default.
+	 */
+	public function test_invalid_per_page_values(): void {
+		// Create test customers.
+		for ( $i = 1; $i <= 12; $i++ ) {
+			$this->create_test_customer(
+				array(
+					'email'    => "perpage{$i}@example.com",
+					'username' => "perpage{$i}",
+				)
+			);
+		}
+
+		// Test with number = 0 should fall back to default (10).
+		// Use filter to inject invalid value into query args.
+		add_filter(
+			'woocommerce_customer_query_args',
+			function ( $query_args ) {
+				$query_args['number'] = 0;
+				return $query_args;
+			}
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should return default per_page (10), not 0.
+		$this->assertEquals( 10, count( $response_data ), 'number=0 should fall back to default (10)' );
+
+		// Remove filter for next test.
+		remove_all_filters( 'woocommerce_customer_query_args' );
+
+		// Test with number = -5 should fall back to default (10).
+		add_filter(
+			'woocommerce_customer_query_args',
+			function ( $query_args ) {
+				$query_args['number'] = -5;
+				return $query_args;
+			}
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should return default per_page (10), not 0.
+		$this->assertEquals( 10, count( $response_data ), 'number=-5 should fall back to default (10)' );
+
+		// Clean up filter.
+		remove_all_filters( 'woocommerce_customer_query_args' );
+	}
+
+	/**
+	 * Test that role=all returns users of all roles, not just customers.
+	 */
+	public function test_role_all_returns_all_roles(): void {
+		// Create a customer with a unique name.
+		$customer = $this->create_test_customer(
+			array(
+				'email'      => 'jonny.customer@example.com',
+				'username'   => 'jonny_customer',
+				'first_name' => 'Jonny',
+				'last_name'  => 'Customer',
+			)
+		);
+
+		// Create an admin user with a similar name.
+		$admin_id = wp_insert_user(
+			array(
+				'user_login' => 'jonny_admin',
+				'user_email' => 'jonny.admin@example.com',
+				'user_pass'  => 'password',
+				'first_name' => 'Jonny',
+				'last_name'  => 'Admin',
+				'role'       => 'administrator',
+			)
+		);
+
+		// Test with role=all and search for "jonny" - should return both.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'role', 'all' );
+		$request->set_param( 'search', 'jonny' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should return both the customer and the admin.
+		$this->assertCount( 2, $response_data, 'role=all should return both customer and admin users' );
+
+		$returned_ids = array_map(
+			function ( $user ) {
+				return $user['id'];
+			},
+			$response_data
+		);
+
+		$this->assertContains( $customer->get_id(), $returned_ids, 'Should include customer user' );
+		$this->assertContains( $admin_id, $returned_ids, 'Should include admin user' );
+
+		// Test with role=customer (default) - should only return customer.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'search', 'jonny' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should only return the customer.
+		$this->assertCount( 1, $response_data, 'role=customer should return only customer users' );
+		$this->assertEquals( $customer->get_id(), $response_data[0]['id'], 'Should be the customer user' );
+
+		// Clean up.
+		wp_delete_user( $admin_id );
+	}
+
+	/**
+	 * @testdox Customers without wc_last_active meta should return null for last_active fields.
+	 */
+	public function test_last_active_null_when_not_set(): void {
+		// Create a customer without setting wc_last_active meta.
+		$customer = $this->create_test_customer(
+			array(
+				'email'    => 'inactive@example.com',
+				'username' => 'inactive_customer',
+			)
+		);
+
+		// Verify the meta doesn't exist or is empty.
+		$this->assertEmpty( $customer->get_meta( 'wc_last_active' ) );
+
+		// Fetch via REST API.
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		// last_active and last_active_gmt should be null, not a current timestamp.
+		$this->assertNull( $data['last_active'], 'last_active should be null when wc_last_active meta is not set' );
+		$this->assertNull( $data['last_active_gmt'], 'last_active_gmt should be null when wc_last_active meta is not set' );
 	}
 
 	/**
@@ -950,8 +999,574 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'TS', $response_data['shipping']['state'] );
 		$this->assertEquals( '12345', $response_data['shipping']['postcode'] );
 		$this->assertEquals( 'US', $response_data['shipping']['country'] );
+	}
 
-		// Clean up.
-		$customer = new WC_Customer( $response_data['id'] );
+	/**
+	 * Test orderBy functionality with different sorting fields.
+	 */
+	public function test_orderby_functionality(): void {
+		// Create test customers with different registration dates.
+		$customer1 = $this->create_test_customer(
+			array(
+				'email'    => 'orderby1@example.com',
+				'username' => 'orderby1',
+			)
+		);
+
+		// Wait a moment to ensure different registration times.
+		sleep( 1 );
+
+		$customer2 = $this->create_test_customer(
+			array(
+				'email'    => 'orderby2@example.com',
+				'username' => 'orderby2',
+			)
+		);
+
+		// Test ordering by ID ascending.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'orderby', 'id' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		$this->assertLessThanOrEqual( $response_data[1]['id'], $response_data[0]['id'] );
+
+		// Test ordering by ID descending.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		$this->assertGreaterThanOrEqual( $response_data[1]['id'], $response_data[0]['id'] );
+
+		// Test ordering by registered_date ascending.
+		$request->set_param( 'orderby', 'registered_date' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		$this->assertLessThanOrEqual( strtotime( $response_data[1]['date_created'] ), strtotime( $response_data[0]['date_created'] ) );
+
+		// Test ordering by registered_date descending.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		$this->assertGreaterThanOrEqual( strtotime( $response_data[1]['date_created'] ), strtotime( $response_data[0]['date_created'] ) );
+	}
+
+	/**
+	 * Test orderBy with name sorting.
+	 */
+	public function test_orderby_name(): void {
+		// Create customers with different names.
+		$customer1 = $this->create_test_customer(
+			array(
+				'email'      => 'alpha@example.com',
+				'username'   => 'alpha',
+				'first_name' => 'Alpha',
+				'last_name'  => 'Customer',
+			)
+		);
+
+		$customer2 = $this->create_test_customer(
+			array(
+				'email'      => 'beta@example.com',
+				'username'   => 'beta',
+				'first_name' => 'Beta',
+				'last_name'  => 'Customer',
+			)
+		);
+
+		// Test ordering by name ascending.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'orderby', 'name' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		// Should be ordered by display name (first_name + last_name).
+		$this->assertLessThanOrEqual( $response_data[1]['first_name'], $response_data[0]['first_name'] );
+
+		// Test ordering by name descending.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		$this->assertGreaterThanOrEqual( $response_data[1]['first_name'], $response_data[0]['first_name'] );
+	}
+
+	/**
+	 * Test orderBy with orders_count sorting.
+	 */
+	public function test_orderby_orders_count(): void {
+		global $wpdb;
+		$site_specific_key = rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
+
+		// Create customers with different order counts.
+		$customer1 = $this->create_test_customer(
+			array(
+				'email'    => 'orders1@example.com',
+				'username' => 'orders1',
+			)
+		);
+		update_user_meta( $customer1->get_id(), 'wc_order_count_' . $site_specific_key, 5 );
+
+		$customer2 = $this->create_test_customer(
+			array(
+				'email'    => 'orders2@example.com',
+				'username' => 'orders2',
+			)
+		);
+		update_user_meta( $customer2->get_id(), 'wc_order_count_' . $site_specific_key, 2 );
+
+		$customer3 = $this->create_test_customer(
+			array(
+				'email'    => 'orders3@example.com',
+				'username' => 'orders3',
+			)
+		);
+		// customer3 has 0 orders (default value).
+
+		// Test ordering by orders_count ascending.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'orderby', 'order_count' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 3, $response_data );
+		// Customer3 should come first (0 orders), then customer2 (2 orders), then customer1 (5 orders).
+		$this->assertEquals( 0, $response_data[0]['orders_count'] );
+		$this->assertEquals( 2, $response_data[1]['orders_count'] );
+		$this->assertEquals( 5, $response_data[2]['orders_count'] );
+
+		// Test ordering by orders_count descending.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 3, $response_data );
+		// Customer1 should come first (5 orders), then customer2 (2 orders), then customer3 (0 orders).
+		$this->assertEquals( 5, $response_data[0]['orders_count'] );
+		$this->assertEquals( 2, $response_data[1]['orders_count'] );
+		$this->assertEquals( 0, $response_data[2]['orders_count'] );
+	}
+
+	/**
+	 * Test orderBy with total_spent sorting.
+	 */
+	public function test_orderby_total_spent(): void {
+		global $wpdb;
+		$site_specific_key = rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
+
+		// Create customers.
+		$customer1 = $this->create_test_customer(
+			array(
+				'email'    => 'spent1@example.com',
+				'username' => 'spent1',
+			)
+		);
+		update_user_meta( $customer1->get_id(), 'wc_money_spent_' . $site_specific_key, 300 );
+
+		$customer2 = $this->create_test_customer(
+			array(
+				'email'    => 'spent2@example.com',
+				'username' => 'spent2',
+			)
+		);
+		update_user_meta( $customer2->get_id(), 'wc_money_spent_' . $site_specific_key, 200 );
+
+		// Test ordering by total_spent ascending.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'orderby', 'total_spent' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		// Customer2 should come first (lower total), then customer1 (higher total).
+		$this->assertEquals( $response_data[0]['id'], $customer2->get_id() );
+		$this->assertEquals( $response_data[1]['id'], $customer1->get_id() );
+
+		// Test ordering by total_spent descending.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		// Customer1 should come first (higher total), then customer2 (lower total).
+		$this->assertEquals( $response_data[0]['id'], $customer1->get_id() );
+		$this->assertEquals( $response_data[1]['id'], $customer2->get_id() );
+	}
+
+	/**
+	 * Test orderBy with last_active sorting.
+	 */
+	public function test_orderby_last_active(): void {
+		// Create customers.
+		$customer1 = $this->create_test_customer(
+			array(
+				'email'    => 'active1@example.com',
+				'username' => 'active1',
+			)
+		);
+		update_user_meta( $customer1->get_id(), 'wc_last_active', time() - 3600 ); // 1 hour ago
+
+		$customer2 = $this->create_test_customer(
+			array(
+				'email'    => 'active2@example.com',
+				'username' => 'active2',
+			)
+		);
+		update_user_meta( $customer2->get_id(), 'wc_last_active', time() - 1800 ); // 30 minutes ago
+
+		// Test ordering by last_active ascending.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'orderby', 'last_active' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( 2, count( $response_data ) );
+		// Customer1 should come first (1 hour ago), then customer2 (30 minutes ago).
+		$this->assertEquals( $response_data[0]['id'], $customer1->get_id() );
+		$this->assertEquals( $response_data[1]['id'], $customer2->get_id() );
+
+		// Test ordering by last_active descending.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertCount( 2, $response_data );
+		// Customer2 should come first (30 minutes ago), then customer1 (1 hour ago).
+		$this->assertEquals( $response_data[0]['id'], $customer2->get_id() );
+		$this->assertEquals( $response_data[1]['id'], $customer1->get_id() );
+	}
+
+	/**
+	 * Test default ordering when no parameters are provided.
+	 */
+	public function test_default_ordering(): void {
+		// Create a few customers.
+		$this->create_test_customer(
+			array(
+				'email'    => 'default1@example.com',
+				'username' => 'default1',
+			)
+		);
+
+		$this->create_test_customer(
+			array(
+				'email'    => 'default2@example.com',
+				'username' => 'default2',
+			)
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertIsArray( $response_data );
+		$this->assertGreaterThanOrEqual( 2, count( $response_data ) );
+	}
+
+	/**
+	 * @testdox When orderby parameter is not provided, customers should be ordered by user_registered (registered_date) in ascending order by default
+	 */
+	public function test_orderby_defaults_to_user_registered(): void {
+		// Create customers with staggered registration times.
+		$customer1 = $this->create_test_customer(
+			array(
+				'email'    => 'orderbydefault1@example.com',
+				'username' => 'orderbydefault1',
+			)
+		);
+
+		// Wait to ensure different registration times.
+		sleep( 1 );
+
+		$customer2 = $this->create_test_customer(
+			array(
+				'email'    => 'orderbydefault2@example.com',
+				'username' => 'orderbydefault2',
+			)
+		);
+
+		sleep( 1 );
+
+		$customer3 = $this->create_test_customer(
+			array(
+				'email'    => 'orderbydefault3@example.com',
+				'username' => 'orderbydefault3',
+			)
+		);
+
+		// Make request without orderby parameter.
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Find our test customers in the results.
+		$test_customers = array();
+		foreach ( $response_data as $customer_data ) {
+			if ( in_array( $customer_data['id'], array( $customer1->get_id(), $customer2->get_id(), $customer3->get_id() ), true ) ) {
+				$test_customers[] = $customer_data;
+			}
+		}
+
+		$this->assertCount( 3, $test_customers, 'Should have found all 3 test customers' );
+
+		// Verify they are ordered by registration date (ascending by default).
+		// customer1 should come before customer2, customer2 before customer3.
+		$customer1_index = array_search( $customer1->get_id(), array_column( $test_customers, 'id' ), true );
+		$customer2_index = array_search( $customer2->get_id(), array_column( $test_customers, 'id' ), true );
+		$customer3_index = array_search( $customer3->get_id(), array_column( $test_customers, 'id' ), true );
+
+		$this->assertLessThan( $customer2_index, $customer1_index, 'Customer1 (registered first) should come before customer2' );
+		$this->assertLessThan( $customer3_index, $customer2_index, 'Customer2 (registered second) should come before customer3' );
+
+		// Verify the dates are in ascending order.
+		$date1 = strtotime( $test_customers[ $customer1_index ]['date_created'] );
+		$date2 = strtotime( $test_customers[ $customer2_index ]['date_created'] );
+		$date3 = strtotime( $test_customers[ $customer3_index ]['date_created'] );
+
+		$this->assertLessThanOrEqual( $date2, $date1, 'Customer1 registration date should be before or equal to customer2' );
+		$this->assertLessThanOrEqual( $date3, $date2, 'Customer2 registration date should be before or equal to customer3' );
+	}
+
+	/**
+	 * @testdox When orderby parameter is explicitly provided, customers should be ordered by that field
+	 */
+	public function test_orderby_is_applied_when_present(): void {
+		global $wpdb;
+		$site_specific_key = rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
+
+		// Create customers with different order counts.
+		$customer1 = $this->create_test_customer(
+			array(
+				'email'    => 'orderbypresent1@example.com',
+				'username' => 'orderbypresent1',
+			)
+		);
+		update_user_meta( $customer1->get_id(), 'wc_order_count_' . $site_specific_key, 10 );
+
+		sleep( 1 );
+
+		$customer2 = $this->create_test_customer(
+			array(
+				'email'    => 'orderbypresent2@example.com',
+				'username' => 'orderbypresent2',
+			)
+		);
+		update_user_meta( $customer2->get_id(), 'wc_order_count_' . $site_specific_key, 25 );
+
+		sleep( 1 );
+
+		$customer3 = $this->create_test_customer(
+			array(
+				'email'    => 'orderbypresent3@example.com',
+				'username' => 'orderbypresent3',
+			)
+		);
+		update_user_meta( $customer3->get_id(), 'wc_order_count_' . $site_specific_key, 5 );
+
+		// Test orderby=order_count with ascending order.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'orderby', 'order_count' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Find our test customers in the results.
+		$test_customers = array();
+		foreach ( $response_data as $customer_data ) {
+			if ( in_array( $customer_data['id'], array( $customer1->get_id(), $customer2->get_id(), $customer3->get_id() ), true ) ) {
+				$test_customers[] = $customer_data;
+			}
+		}
+
+		$this->assertCount( 3, $test_customers, 'Should have found all 3 test customers' );
+
+		// When ordered by order_count ascending: customer3 (5), customer1 (10), customer2 (25).
+		$this->assertEquals( 5, $test_customers[0]['orders_count'], 'First customer should have 5 orders' );
+		$this->assertEquals( 10, $test_customers[1]['orders_count'], 'Second customer should have 10 orders' );
+		$this->assertEquals( 25, $test_customers[2]['orders_count'], 'Third customer should have 25 orders' );
+
+		// Verify they are our expected customers.
+		$this->assertEquals( $customer3->get_id(), $test_customers[0]['id'], 'First should be customer3' );
+		$this->assertEquals( $customer1->get_id(), $test_customers[1]['id'], 'Second should be customer1' );
+		$this->assertEquals( $customer2->get_id(), $test_customers[2]['id'], 'Third should be customer2' );
+
+		// Test orderby=order_count with descending order.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Find our test customers in the results.
+		$test_customers = array();
+		foreach ( $response_data as $customer_data ) {
+			if ( in_array( $customer_data['id'], array( $customer1->get_id(), $customer2->get_id(), $customer3->get_id() ), true ) ) {
+				$test_customers[] = $customer_data;
+			}
+		}
+
+		$this->assertCount( 3, $test_customers, 'Should have found all 3 test customers' );
+
+		// When ordered by order_count descending: customer2 (25), customer1 (10), customer3 (5).
+		$this->assertEquals( 25, $test_customers[0]['orders_count'], 'First customer should have 25 orders' );
+		$this->assertEquals( 10, $test_customers[1]['orders_count'], 'Second customer should have 10 orders' );
+		$this->assertEquals( 5, $test_customers[2]['orders_count'], 'Third customer should have 5 orders' );
+
+		// Verify they are our expected customers.
+		$this->assertEquals( $customer2->get_id(), $test_customers[0]['id'], 'First should be customer2' );
+		$this->assertEquals( $customer1->get_id(), $test_customers[1]['id'], 'Second should be customer1' );
+		$this->assertEquals( $customer3->get_id(), $test_customers[2]['id'], 'Third should be customer3' );
+
+		// Test orderby=id to verify another orderby field works correctly.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'orderby', 'id' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Find our test customers in the results.
+		$test_customers = array();
+		foreach ( $response_data as $customer_data ) {
+			if ( in_array( $customer_data['id'], array( $customer1->get_id(), $customer2->get_id(), $customer3->get_id() ), true ) ) {
+				$test_customers[] = $customer_data;
+			}
+		}
+
+		$this->assertCount( 3, $test_customers, 'Should have found all 3 test customers' );
+
+		// When ordered by ID ascending, verify they are in ID order.
+		$ids        = array_column( $test_customers, 'id' );
+		$sorted_ids = $ids;
+		sort( $sorted_ids );
+		$this->assertEquals( $sorted_ids, $ids, 'Customers should be ordered by ID ascending' );
+	}
+
+	/**
+	 * @testdox When orderby parameter is set to registered_date, customers should be ordered by user_registered field
+	 */
+	public function test_orderby_registered_date_uses_user_registered(): void {
+		// Create customers with staggered registration times.
+		$customer1 = $this->create_test_customer(
+			array(
+				'email'    => 'registered1@example.com',
+				'username' => 'registered1',
+			)
+		);
+
+		sleep( 1 );
+
+		$customer2 = $this->create_test_customer(
+			array(
+				'email'    => 'registered2@example.com',
+				'username' => 'registered2',
+			)
+		);
+
+		sleep( 1 );
+
+		$customer3 = $this->create_test_customer(
+			array(
+				'email'    => 'registered3@example.com',
+				'username' => 'registered3',
+			)
+		);
+
+		// Test with orderby=registered_date.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'orderby', 'registered_date' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Find our test customers in the results.
+		$test_customers = array();
+		foreach ( $response_data as $customer_data ) {
+			if ( in_array( $customer_data['id'], array( $customer1->get_id(), $customer2->get_id(), $customer3->get_id() ), true ) ) {
+				$test_customers[] = $customer_data;
+			}
+		}
+
+		$this->assertCount( 3, $test_customers, 'Should have found all 3 test customers' );
+
+		// Verify they are ordered by registration date (ascending).
+		$customer1_index = array_search( $customer1->get_id(), array_column( $test_customers, 'id' ), true );
+		$customer2_index = array_search( $customer2->get_id(), array_column( $test_customers, 'id' ), true );
+		$customer3_index = array_search( $customer3->get_id(), array_column( $test_customers, 'id' ), true );
+
+		$this->assertLessThan( $customer2_index, $customer1_index, 'Customer1 should come before customer2' );
+		$this->assertLessThan( $customer3_index, $customer2_index, 'Customer2 should come before customer3' );
+
+		// Test with descending order.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Find our test customers in the results.
+		$test_customers = array();
+		foreach ( $response_data as $customer_data ) {
+			if ( in_array( $customer_data['id'], array( $customer1->get_id(), $customer2->get_id(), $customer3->get_id() ), true ) ) {
+				$test_customers[] = $customer_data;
+			}
+		}
+
+		$this->assertCount( 3, $test_customers, 'Should have found all 3 test customers' );
+
+		// Verify they are ordered by registration date (descending).
+		$customer1_index = array_search( $customer1->get_id(), array_column( $test_customers, 'id' ), true );
+		$customer2_index = array_search( $customer2->get_id(), array_column( $test_customers, 'id' ), true );
+		$customer3_index = array_search( $customer3->get_id(), array_column( $test_customers, 'id' ), true );
+
+		$this->assertGreaterThan( $customer2_index, $customer1_index, 'Customer1 should come after customer2' );
+		$this->assertGreaterThan( $customer3_index, $customer2_index, 'Customer2 should come after customer3' );
 	}
 }

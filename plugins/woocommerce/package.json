@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.4.0",
+	"version": "10.6.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -49,6 +49,8 @@
 		"lint:php:changes:branch": "composer run-script lint-branch",
 		"lint:php:changes:staged": "composer run-script lint-staged",
 		"lint:php:fix": "composer run-script phpcbf",
+		"phpstan": "composer run-script phpstan",
+		"phpstan:baseline": "composer run-script phpstan:baseline",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"makepot": "XDEBUG_MODE=off composer run-script makepot",
 		"test": "pnpm test:unit",
@@ -70,7 +72,7 @@
 		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm --filter='@woocommerce/block-library' test:e2e:legacy-mini-cart",
 		"test:php:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:php:env",
 		"test:env:start": "pnpm env:test",
-		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/gh-action-pr-requests.js",
+		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/main.js",
 		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
 		"test:perf:install-k6": "bash ./tests/performance/bin/install-k6.sh",
 		"test:php": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit -c ./phpunit.xml",
@@ -118,7 +120,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.4 WP: latest",
+					"name": "PHP: 8.5 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -137,18 +139,18 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.4-wp-latest"
+						"php-unit-php-8.5-wp-latest"
 					]
 				},
 				{
-					"name": "PHP: 8.4 WP: latest - Legacy MiniCart",
+					"name": "PHP: 8.5 WP: latest - Legacy MiniCart",
 					"testType": "unit:php",
 					"command": "test:php:legacy-mini-cart",
 					"shardingArguments": [
@@ -167,7 +169,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
@@ -405,7 +407,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PHP 8.4",
+					"name": "Core e2e tests - PHP 8.5",
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -424,17 +426,17 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4"
+							"phpVersion": "8.5"
 						}
 					},
 					"events": [
 						"pull_request",
 						"nightly-checks",
 						"release-checks",
-						"core-e2e-php-8.4"
+						"core-e2e-php-8.5"
 					],
 					"report": {
-						"resultsBlobName": "core-e2e-report-php-8.4",
+						"resultsBlobName": "core-e2e-report-php-8.5",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -578,7 +580,7 @@
 					}
 				},
 				{
-					"name": "PHP: 8.4 WP: latest (HPOS:off)",
+					"name": "PHP: 8.5 WP: latest (HPOS:off)",
 					"testType": "unit:php",
 					"command": "test:php:env:hpos-off",
 					"shardingArguments": [
@@ -597,14 +599,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.4-wp-latest-hpos-off"
+						"php-unit-php-8.5-wp-latest-hpos-off"
 					]
 				},
 				{
@@ -793,6 +795,9 @@
 						}
 					},
 					"events": [
+						"pull_request",
+						"nightly-checks",
+						"release-checks",
 						"blocks-e2e-wp-pre-release"
 					],
 					"report": {
@@ -877,7 +882,7 @@
 		"@babel/core": "7.25.7",
 		"@babel/preset-env": "7.25.7",
 		"@faker-js/faker": "^9.3.0",
-		"@playwright/test": "^1.50.1",
+		"@playwright/test": "^1.57.0",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
@@ -901,6 +906,7 @@
 		"eslint-plugin-playwright": "0.22.1",
 		"jest": "29.5.x",
 		"nodemon": "^3.0.2",
+		"playwright-ctrf-json-reporter": "0.0.27",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",

@@ -7,7 +7,10 @@ import {
 	getConfig,
 	getElement,
 } from '@wordpress/interactivity';
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+import {
+	SelectedAttributes,
+	VariationData,
+} from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
@@ -15,11 +18,11 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
  * Internal dependencies
  */
 import { getProductData } from '../frontend';
-import { dispatchChangeEvent } from '../quantity-selector/frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
+import type { NormalizedProductData } from '../types';
 import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
@@ -34,6 +37,7 @@ type Context = AddToCartWithOptionsStoreContext & {
 	selectedValue: string | null;
 	option: Option;
 	options: Option[];
+	autoselect: boolean;
 };
 
 // Set selected pill styles for proper contrast.
@@ -135,6 +139,40 @@ const isAttributeValueValid = ( {
 	} );
 };
 
+/**
+ * Return the product attributes and options.
+ */
+const getProductAttributesAndOptions = (
+	productObject: NormalizedProductData | null
+): Record< string, string[] > => {
+	if ( ! productObject?.variations ) {
+		return {};
+	}
+
+	const variations: VariationData[] = Object.values(
+		productObject.variations
+	);
+	const productAttributesAndOptions = {} as Record< string, string[] >;
+	variations.forEach( ( variation: VariationData ) => {
+		if ( ! variation?.attributes ) {
+			return;
+		}
+		Object.entries( variation.attributes ).forEach( ( [ key, value ] ) => {
+			if ( typeof key !== 'string' || typeof value !== 'string' ) {
+				return;
+			}
+			if ( ! Array.isArray( productAttributesAndOptions[ key ] ) ) {
+				productAttributesAndOptions[ key ] = [];
+			}
+			if ( ! productAttributesAndOptions[ key ].includes( value ) ) {
+				productAttributesAndOptions[ key ].push( value );
+			}
+		} );
+	} );
+
+	return productAttributesAndOptions;
+};
+
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
@@ -149,6 +187,10 @@ export type VariableProductAddToCartWithOptionsStore =
 			handleDropdownChange: (
 				event: ChangeEvent< HTMLSelectElement >
 			) => void;
+			autoselectAttributes: ( args: {
+				includedAttributes?: string[];
+				excludedAttributes?: string[];
+			} ) => void;
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
@@ -176,8 +218,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				return context.selectedAttributes;
 			},
 			get isOptionSelected() {
-				const { selectedValue, option } = getContext< Context >();
-				return selectedValue === option.value;
+				const { selectedAttributes, option, name } =
+					getContext< Context >();
+
+				return selectedAttributes.some( ( attrObject ) => {
+					return (
+						attrObject.attribute === name &&
+						attrObject.value === option.value
+					);
+				} );
 			},
 			get isOptionDisabled() {
 				const { name, option, selectedAttributes } =
@@ -232,21 +281,78 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 			},
 			handlePillClick() {
-				if ( state.isOptionDisabled ) {
-					return;
-				}
 				const context = getContext< Context >();
-				if ( context.selectedValue === context.option.value ) {
+
+				if ( state.isOptionSelected ) {
 					context.selectedValue = '';
 				} else {
 					context.selectedValue = context.option.value;
 				}
 				actions.setAttribute( context.name, context.selectedValue );
+				if ( context.selectedValue !== '' ) {
+					actions.autoselectAttributes( {
+						excludedAttributes: [ context.name ],
+					} );
+				}
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
+				if ( context.selectedValue !== '' ) {
+					actions.autoselectAttributes( {
+						excludedAttributes: [ context.name ],
+					} );
+				}
+			},
+			autoselectAttributes( {
+				includedAttributes = [],
+				excludedAttributes = [],
+			}: {
+				includedAttributes?: Array< string >;
+				excludedAttributes?: Array< string >;
+			} = {} ) {
+				const { autoselect, selectedAttributes } =
+					getContext< Context >();
+
+				if ( ! autoselect ) {
+					return;
+				}
+
+				const productObject: NormalizedProductData | null =
+					getProductData( productDataState.productId, [] );
+				if ( ! productObject ) {
+					return;
+				}
+				const productAttributesAndOptions: Record< string, string[] > =
+					getProductAttributesAndOptions( productObject );
+				Object.entries( productAttributesAndOptions ).forEach(
+					( [ attribute, options ] ) => {
+						if (
+							includedAttributes.length !== 0 &&
+							! includedAttributes.includes( attribute )
+						) {
+							return;
+						}
+						if (
+							excludedAttributes.length !== 0 &&
+							excludedAttributes.includes( attribute )
+						) {
+							return;
+						}
+						const validOptions = options.filter( ( option ) =>
+							isAttributeValueValid( {
+								attributeName: attribute,
+								attributeValue: option,
+								selectedAttributes,
+							} )
+						);
+						if ( validOptions.length === 1 ) {
+							const validOption = validOptions[ 0 ];
+							actions.setAttribute( attribute, validOption );
+						}
+					}
+				);
 			},
 		},
 		callbacks: {
@@ -256,6 +362,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
+				actions.autoselectAttributes( {
+					includedAttributes: [ context.name ],
+				} );
 			},
 			setSelectedVariationId: () => {
 				const { products } = getConfig( 'woocommerce' );
@@ -361,9 +470,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 							productDataState.productId,
 							newValue
 						);
-
-						ref.value = newValue.toString();
-						dispatchChangeEvent( ref );
 					}
 				}
 			},

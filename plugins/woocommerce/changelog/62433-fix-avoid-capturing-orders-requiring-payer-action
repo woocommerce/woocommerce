@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stores the PayPal Standard order status upon creation and skips capture when payer action is required.
