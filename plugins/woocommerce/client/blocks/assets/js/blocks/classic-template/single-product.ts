@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '@woocommerce/blocks/product-query/variations/elements/product-title';
 import {
 	INNER_BLOCKS_PRODUCT_TEMPLATE as productCollectionInnerBlocksTemplate,
@@ -37,7 +38,7 @@ const getBlockifiedTemplate = () =>
 						justifyContent: 'right',
 						width: '512px',
 					},
-					[ createBlock( 'woocommerce/product-image-gallery' ) ]
+					[ createBlock( 'woocommerce/product-gallery' ) ]
 				),
 				createBlock( 'core/column', {}, [
 					createBlock( 'core/post-title', {
@@ -51,7 +52,11 @@ const getBlockifiedTemplate = () =>
 					createBlock( 'woocommerce/product-summary', {
 						isDescendentOfSingleProductTemplate: true,
 					} ),
-					createBlock( 'woocommerce/add-to-cart-form' ),
+					createBlock(
+						getSetting( 'isBlockTheme', false )
+							? 'woocommerce/add-to-cart-with-options'
+							: 'woocommerce/add-to-cart-form'
+					),
 					createBlock( 'woocommerce/product-meta' ),
 				] ),
 			]
