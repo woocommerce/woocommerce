@@ -180,19 +180,17 @@ class ProductImage extends AbstractBlock {
 		/**
 		 * Filters the loading attribute for product images.
 		 *
-		 * @since 10.5.0
+		 * Allowed values are 'lazy', 'eager', and 'auto'. Any other value will result in default browser behavior.
 		 *
-		 * @param string      $loading_attr The loading attribute. Default 'lazy'.
-		 * @param \WC_Product $product      Product object.
-		 * @param int         $image_id     Target image ID.
-		 * @param array       $attributes   Parsed block attributes.
+		 * @since 10.6.0
+		 *
+		 * @param string $loading_attr The loading attribute. Default 'lazy'.
+		 * @param int    $image_id     Target image ID.
 		 */
 		$loading_attr = apply_filters(
 			'woocommerce_product_image_loading_attr',
 			'lazy',
-			$product,
 			$target_image_id,
-			$attributes
 		);
 
 		$loading_attr    = is_string( $loading_attr ) ? strtolower( trim( $loading_attr ) ) : '';
