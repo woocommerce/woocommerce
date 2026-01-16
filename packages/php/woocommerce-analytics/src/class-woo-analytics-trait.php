@@ -9,6 +9,7 @@ namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Block_Scanner;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
+use Automattic\Jetpack\Device_Detection;
 use WC_Order_Item;
 use WC_Order_Item_Product;
 use WC_Payment_Gateway;
@@ -268,7 +269,7 @@ trait Woo_Analytics_Trait {
 			'woo_version'    => WC()->version,
 			'wp_version'     => get_bloginfo( 'version' ),
 			'store_admin'    => in_array( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles, true ) ? 1 : 0,
-			'device'         => wp_is_mobile() ? 'mobile' : 'desktop',
+			'device'         => $this->get_device_type(),
 			'store_currency' => get_woocommerce_currency(),
 			'timezone'       => wp_timezone_string(),
 			'is_guest'       => ( $this->get_user_id() === null ) ? 1 : 0,
@@ -371,6 +372,25 @@ trait Woo_Analytics_Trait {
 			return $blogid . ':' . $userid;
 		}
 		return null;
+	}
+
+	/**
+	 * Get the device type for the current request.
+	 *
+	 * Uses Jetpack Device Detection to distinguish between mobile phones, tablets, and desktop devices.
+	 *
+	 * @return string 'mobile' for phones, 'tablet' for tablets, 'desktop' otherwise.
+	 */
+	protected function get_device_type() {
+		if ( Device_Detection::is_phone() ) {
+			return 'mobile';
+		}
+
+		if ( Device_Detection::is_tablet() ) {
+			return 'tablet';
+		}
+
+		return 'desktop';
 	}
 
 	/**

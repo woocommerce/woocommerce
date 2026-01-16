@@ -1,0 +1,4 @@
+Significance: minor
+Type: added
+
+Add tablet device detection to the 'device' event property, distinguishing between mobile, tablet, and desktop devices
