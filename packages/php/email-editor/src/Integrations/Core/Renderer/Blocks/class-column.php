@@ -109,6 +109,12 @@ class Column extends Abstract_Block_Renderer {
 
 		$inner_table = Table_Wrapper_Helper::render_table_wrapper( '{column_content}', $inner_table_attrs, $inner_cell_attrs );
 
+		// Apply padding-left from email_attrs (set by Spacing_Preprocessor for columns blockGap).
+		$padding_left = $parsed_block['email_attrs']['padding-left'] ?? null;
+		if ( $padding_left ) {
+			$wrapper_styles = Styles_Helper::extend_block_styles( $wrapper_styles, array( 'padding-left' => $padding_left ) );
+		}
+
 		// Create the outer td element (since this is meant to be used within a columns structure).
 		$wrapper_cell_attrs = array(
 			'class' => $wrapper_classname,

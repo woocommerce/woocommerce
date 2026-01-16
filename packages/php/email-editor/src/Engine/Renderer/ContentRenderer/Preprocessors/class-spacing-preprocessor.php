@@ -49,10 +49,70 @@ class Spacing_Preprocessor implements Preprocessor {
 				$block['email_attrs']['margin-top'] = $gap;
 			}
 
+			// Handle horizontal gap for columns: apply padding-left to column children (except the first).
+			if ( 'core/columns' === $parent_block_name && 0 !== $key && null !== $parent_block ) {
+				$columns_gap = $this->get_columns_block_gap( $parent_block );
+				if ( $columns_gap ) {
+					$block['email_attrs']['padding-left'] = $columns_gap;
+				}
+			}
+
 			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block );
 			$parsed_blocks[ $key ] = $block;
 		}
 
 		return $parsed_blocks;
+	}
+
+	/**
+	 * Extracts the horizontal blockGap from a columns block.
+	 *
+	 * @param array $columns_block The columns block.
+	 * @return string|null The horizontal gap value (e.g., "30px") or null if not set.
+	 */
+	private function get_columns_block_gap( array $columns_block ): ?string {
+		$block_gap = $columns_block['attrs']['style']['spacing']['blockGap'] ?? null;
+
+		// Columns block uses object format: { "top": "...", "left": "..." }.
+		// Only apply horizontal gap when explicitly set via "left".
+		if ( ! is_array( $block_gap ) || ! isset( $block_gap['left'] ) || ! is_string( $block_gap['left'] ) ) {
+			return null;
+		}
+
+		$gap_value = $block_gap['left'];
+
+		// Validate against potentially malicious values.
+		if ( preg_match( '/[<>"\']/', $gap_value ) ) {
+			return null;
+		}
+
+		// Resolve preset variables (e.g., "var:preset|spacing|30" → "30px").
+		return $this->resolve_preset_variable( $gap_value );
+	}
+
+	/**
+	 * Extracts numeric value from CSS preset variables (e.g., "var:preset|spacing|30" → "30px").
+	 *
+	 * @param string $value The value which may contain a preset variable.
+	 * @return string The numeric value with "px" unit, or original value if not a preset variable.
+	 */
+	private function resolve_preset_variable( string $value ): string {
+		// Check if this is a preset variable format: "var:preset|spacing|30".
+		if ( ! str_starts_with( $value, 'var:preset|' ) ) {
+			return $value;
+		}
+
+		// Extract the numeric value from the format "var:preset|spacing|30".
+		// Split by "|" and get the last part which should be the number.
+		$parts         = explode( '|', $value );
+		$numeric_value = end( $parts );
+
+		// If we got a valid numeric value, return it with "px" unit.
+		if ( is_numeric( $numeric_value ) ) {
+			return $numeric_value . 'px';
+		}
+
+		// If extraction failed, return original value.
+		return $value;
 	}
 }
