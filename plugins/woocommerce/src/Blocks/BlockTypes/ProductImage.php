@@ -177,11 +177,21 @@ class ProductImage extends AbstractBlock {
 
 		$alt_text = get_post_meta( $target_image_id, '_wp_attachment_image_alt', true );
 
+		/**
+		 * Filters the loading attribute for product images.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param string $loading_attr The loading attribute. Default 'lazy'.
+		 */
+		$loading_attr = apply_filters( 'woocommerce_product_image_loading_attr', 'lazy' );
+
 		$attr = array(
 			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
 			'data-testid'   => 'product-image',
 			'data-image-id' => $target_image_id,
 			'style'         => $image_style,
+			'loading'       => $loading_attr,
 		);
 
 		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
