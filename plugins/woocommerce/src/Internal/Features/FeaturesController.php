@@ -598,7 +598,7 @@ class FeaturesController {
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,
-				'disable_ui'                   => false,
+				'disable_ui'                   => true,
 				'is_experimental'              => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,

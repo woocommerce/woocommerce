@@ -13,6 +13,17 @@ use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Set jetpack_activation_source option to prevent "Cannot use bool as array" error
+		// in Jetpack Connection Manager's apply_activation_source_to_args method.
+		update_option( 'jetpack_activation_source', array( '', '' ) );
+	}
+
+	/**
 	 * Get a fresh controller instance with reset container.
 	 *
 	 * @return FraudProtectionController
@@ -165,6 +176,7 @@ class FraudProtectionControllerTest extends \WC_Unit_Test_Case {
 		// Clean up any filters or options.
 		remove_all_filters( 'woocommerce_logging_class' );
 		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
+		delete_option( 'jetpack_activation_source' );
 
 		// Remove any init hooks registered by the controller.
 		remove_all_actions( 'init' );
