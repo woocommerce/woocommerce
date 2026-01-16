@@ -45,6 +45,13 @@ const registry: ReactSettingsRegistryEntry[] = [
 		className: 'woocommerce-settings-products',
 		fieldTransformer: defaultFieldTransformer,
 	},
+	{
+		id: 'products.inventory',
+		dataPath: [ 'settings', 'products', 'inventory' ],
+		mountId: 'wc_settings_react_products_inventory',
+		className: 'woocommerce-settings-products',
+		fieldTransformer: defaultFieldTransformer,
+	},
 ];
 
 const ReactSettingsScreen = ( {

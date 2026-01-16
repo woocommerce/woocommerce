@@ -47,6 +47,15 @@ class ReactSettingsRegistry {
 					'single_select_page_with_search' => 'select',
 				),
 			),
+			'products.inventory' => array(
+				'tab'            => 'products',
+				'section'        => 'inventory',
+				'schema'         => ProductSettingsSchema::class,
+				'restPath'       => '/wc/v4/settings/products',
+				'payloadPath'    => array( 'settings', 'products', 'inventory' ),
+				'supportedTypes' => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' ),
+				'typeMap'        => array(),
+			),
 		);
 	}
 
