@@ -12,7 +12,7 @@ While this guide can be used as reference, keep in mind that version-specific in
 
 :::
 
-This page provides an overview of the steps required to build any WooCommerce release from the release branch. Review the flowchart to understand the overall process and the decision table. Step by step instructions are provided below.
+This page provides an overview of the steps required to build any WooCommerce release from the release branch. Review the flowchart to understand the overall process and the decision table. Step-by-step instructions are provided below.
 
 ## Overview
 
