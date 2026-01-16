@@ -1403,7 +1403,7 @@ WHERE
 			$this->init_order_record( $order, $order_id, $order_data );
 
 			if ( $order->has_cogs() && $cogs_is_enabled ) {
-				$this->read_cogs_data( $order );
+				$this->read_cogs_data( $order, $order_data->meta_data );
 			}
 
 			if ( $data_sync_enabled && isset( $post_orders[ $order_id ] ) && $this->should_sync_order( $order ) ) {
@@ -1416,10 +1416,12 @@ WHERE
 	/**
 	 * Read the Cost of Goods Sold value for a given order from the database, if available, and apply it to the order.
 	 *
-	 * @param \WC_Abstract_Order $order The order to get the COGS value for.
+	 * @param \WC_Abstract_Order $order     The order to get the COGS value for.
+	 * @param object[]           $meta_data The original meta-data fetched for the order.
 	 */
-	private function read_cogs_data( WC_Abstract_Order $order ) {
-		$cogs_value = (float) ( $order->get_meta_data()[ '_cogs_total_value' ] ?? 0 );
+	private function read_cogs_data( WC_Abstract_Order $order, array $meta_data ) {
+		$meta_entry = array_filter( $meta_data, fn( object $object ) => '_cogs_total_value' === $object->meta_key );
+		$cogs_value = [] === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
