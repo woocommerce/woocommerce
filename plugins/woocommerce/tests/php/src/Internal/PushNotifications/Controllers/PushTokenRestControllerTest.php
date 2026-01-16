@@ -127,7 +127,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertIsInt( $data['id'] );
 		$this->assertGreaterThan( 0, $data['id'] );
 
-		$this->assert_token_was_persisted(
+$this->assert_token_was_persisted(
 			$data['id'],
 			$this->user_id,
 			$token_value,
