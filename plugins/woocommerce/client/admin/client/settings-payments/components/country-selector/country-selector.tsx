@@ -40,6 +40,12 @@ const stateReducer = < ItemType extends Item >(
 	const { selectedItem } = state;
 
 	switch ( type ) {
+		case useSelect.stateChangeTypes.ToggleButtonBlur:
+			// Prevent menu from closing when focus moves to search input.
+			return {
+				...changes,
+				isOpen: state.isOpen,
+			};
 		case useSelect.stateChangeTypes.ItemClick:
 			return {
 				...changes,
@@ -112,6 +118,9 @@ export const CountrySelector = < ItemType extends Item >( {
 	children,
 }: ControlProps< ItemType > ): JSX.Element => {
 	const [ searchText, setSearchText ] = useState( '' );
+	const [ keyboardHighlightIndex, setKeyboardHighlightIndex ] = useState<
+		number | null
+	>( null );
 
 	// only run filter every 200ms even if the user is typing
 	const throttledApplySearchToItems = useThrottle(
@@ -144,11 +153,15 @@ export const CountrySelector = < ItemType extends Item >( {
 		highlightedIndex,
 		selectedItem,
 		closeMenu,
+		setHighlightedIndex,
+		selectItem,
 	} = useSelect< ItemType >( {
 		initialSelectedItem: value,
 		items: [ ...visibleItems ],
 		stateReducer,
 	} );
+
+	const applyButtonRef = useRef< HTMLButtonElement >( null );
 
 	const itemString = getOptionLabel( value.key, items );
 	const selectedValue = selectedItem ? selectedItem.key : '';
@@ -225,16 +238,6 @@ export const CountrySelector = < ItemType extends Item >( {
 		[ onChange, selectedValue, closeMenu ]
 	);
 
-	const onEnterApply = useCallback(
-		( event: React.KeyboardEvent< HTMLButtonElement > ) => {
-			event.stopPropagation();
-			if ( event.key === 'Enter' ) {
-				onChange( selectedValue );
-			}
-		},
-		[ onChange, selectedValue ]
-	);
-
 	const onClearClickedHandler = useCallback(
 		( e: React.MouseEvent< HTMLButtonElement > ) => {
 			e.preventDefault();
@@ -253,12 +256,98 @@ export const CountrySelector = < ItemType extends Item >( {
 		[ searchText, selectedItem ]
 	);
 
+	const onSearchKeyDown = useCallback(
+		( event: React.KeyboardEvent< HTMLInputElement > ) => {
+			const itemsArray = [ ...visibleItems ];
+			const itemCount = itemsArray.length;
+
+			switch ( event.key ) {
+				case 'ArrowDown':
+					event.preventDefault();
+					setKeyboardHighlightIndex( ( prev ) => {
+						const newIndex =
+							prev === null || prev === -1
+								? 0
+								: Math.min( prev + 1, itemCount - 1 );
+						// Scroll the item into view.
+						setTimeout( () => {
+							highlightSelectedCountry( newIndex );
+						}, 0 );
+						return newIndex;
+					} );
+					break;
+				case 'ArrowUp':
+					event.preventDefault();
+					setKeyboardHighlightIndex( ( prev ) => {
+						const newIndex =
+							prev === null || prev === -1
+								? itemCount - 1
+								: Math.max( prev - 1, 0 );
+						// Scroll the item into view.
+						setTimeout( () => {
+							highlightSelectedCountry( newIndex );
+						}, 0 );
+						return newIndex;
+					} );
+					break;
+				case 'Enter':
+					event.preventDefault();
+					// Use highlighted item if available, otherwise use current selection.
+					const itemToApply =
+						keyboardHighlightIndex !== null &&
+						keyboardHighlightIndex >= 0 &&
+						keyboardHighlightIndex < itemCount
+							? itemsArray[ keyboardHighlightIndex ]
+							: selectedItem;
+					if ( itemToApply ) {
+						onChange( itemToApply.key );
+					}
+					closeMenu();
+					break;
+				case 'Escape':
+					event.preventDefault();
+					closeMenu();
+					break;
+				case 'Tab':
+					// Allow default Tab behavior to move to Apply button.
+					break;
+				default:
+					break;
+			}
+		},
+		[
+			visibleItems,
+			keyboardHighlightIndex,
+			selectedItem,
+			onChange,
+			closeMenu,
+		]
+	);
+
 	useEffect( () => {
-		// Highlight the selected country when the menu is opened.
-		if ( isOpen && selectedItem !== null ) {
-			const selectedItemIndex =
-				Array.from( visibleItems ).indexOf( selectedItem );
-			highlightSelectedCountry( selectedItemIndex );
+		if ( isOpen ) {
+			// Focus the search input when the menu is opened.
+			// Use a small timeout to ensure the input is rendered.
+			setTimeout( () => {
+				searchRef.current?.focus();
+			}, 0 );
+
+			// Highlight the selected country when the menu is opened.
+			if ( selectedItem !== null ) {
+				const selectedItemIndex =
+					Array.from( visibleItems ).indexOf( selectedItem );
+				highlightSelectedCountry( selectedItemIndex );
+				// Set the highlighted index to the selected item.
+				if ( selectedItemIndex >= 0 ) {
+					setKeyboardHighlightIndex( selectedItemIndex );
+				}
+			} else {
+				// If no item is selected, highlight the first item.
+				setKeyboardHighlightIndex( 0 );
+			}
+		} else {
+			// Reset highlight when menu closes.
+			setKeyboardHighlightIndex( null );
 		}
 	}, [ isOpen ] );
 
@@ -279,7 +368,6 @@ export const CountrySelector = < ItemType extends Item >( {
 						{ placeholder: ! itemString }
 					),
 					name,
-					onKeyDown: onEnterApply,
 				} ) }
 			>
 				<span className="components-country-select-control__button-value">
@@ -305,12 +393,22 @@ export const CountrySelector = < ItemType extends Item >( {
 								onChange={ ( { target } ) =>
 									setSearchText( target.value )
 								}
-								tabIndex={ -1 }
+								onKeyDown={ onSearchKeyDown }
 								placeholder={ __( 'Search', 'woocommerce' ) }
+								aria-label={ __(
+									'Search countries',
+									'woocommerce'
+								) }
 							/>
 							<button
 								className="components-country-select-control__search--input-suffix"
 								onClick={ onClearClickedHandler }
+								tabIndex={ -1 }
+								aria-label={
+									isSearchClearable
+										? __( 'Clear search', 'woocommerce' )
+										: __( 'Search', 'woocommerce' )
+								}
 							>
 								{ getSearchSuffix( isSearchClearable ) }
 							</button>
@@ -327,7 +425,12 @@ export const CountrySelector = < ItemType extends Item >( {
 											'components-country-select-control__item',
 											{
 												'is-highlighted':
-													index === highlightedIndex,
+													keyboardHighlightIndex !==
+													null
+														? index ===
+															keyboardHighlightIndex
+														: index ===
+															highlightedIndex,
 											}
 										),
 										'data-index': index,
@@ -347,6 +450,7 @@ export const CountrySelector = < ItemType extends Item >( {
 						</div>
 						<div className="components-country-select-control__apply">
 							<button
+								ref={ applyButtonRef }
 								className="components-button is-primary"
 								onClick={ onApplyHandler }
 							>

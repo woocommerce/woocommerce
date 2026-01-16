@@ -79,6 +79,16 @@ export const StatusBadge = ( {
 		setPopoverVisible( false );
 	};
 
+	const handleKeyDown = ( event: React.KeyboardEvent ) => {
+		if ( event.key === 'Escape' && isPopoverVisible ) {
+			event.stopPropagation();
+			setPopoverVisible( false );
+			buttonRef.current?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			handleClick( event );
+		}
+	};
+
 	/**
 	 * Get the appropriate CSS class for the badge based on the status.
 	 */
@@ -137,11 +147,7 @@ export const StatusBadge = ( {
 					aria-label={ __( 'More information', 'woocommerce' ) }
 					ref={ buttonRef }
 					onClick={ handleClick }
-					onKeyDown={ ( event: React.KeyboardEvent ) => {
-						if ( event.key === 'Enter' || event.key === ' ' ) {
-							handleClick( event );
-						}
-					} }
+					onKeyDown={ handleKeyDown }
 				>
 					<Icon
 						className="woocommerce-status-badge-icon"

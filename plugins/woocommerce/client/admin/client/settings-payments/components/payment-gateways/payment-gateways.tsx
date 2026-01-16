@@ -131,6 +131,16 @@ export const PaymentGateways = ( {
 		setIsPopoverVisible( false );
 	};
 
+	const handleIndicatorKeyDown = ( event: React.KeyboardEvent ) => {
+		if ( event.key === 'Escape' && isPopoverVisible ) {
+			event.stopPropagation();
+			setIsPopoverVisible( false );
+			buttonRef.current?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			handleBusinessLocationIndicatorClick( event );
+		}
+	};
+
 	return (
 		<div className="settings-payment-gateways">
 			<div className="settings-payment-gateways__header">
@@ -187,16 +197,7 @@ export const PaymentGateways = ( {
 							role="button"
 							ref={ buttonRef }
 							onClick={ handleBusinessLocationIndicatorClick }
-							onKeyDown={ ( event ) => {
-								if (
-									event.key === 'Enter' ||
-									event.key === ' '
-								) {
-									handleBusinessLocationIndicatorClick(
-										event
-									);
-								}
-							} }
+							onKeyDown={ handleIndicatorKeyDown }
 						>
 							<div className="settings-payment-gateways__header-select-container--indicator-icon">
 								<InfoOutline />
