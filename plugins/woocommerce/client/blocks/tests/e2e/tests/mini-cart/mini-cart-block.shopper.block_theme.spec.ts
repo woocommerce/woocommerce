@@ -47,7 +47,7 @@ test.describe( 'Shopper → Notices', () => {
 
 		// Set product to out of stock while it's in cart.
 		await wpCLI(
-			`wc product update ${ productId } --stock_quantity=0 --stock_status=outofstock --user=admin`
+			`wc product update ${ productId } --stock_quantity=0 --in_stock=false --user=admin`
 		);
 
 		// Get the current URL to revisit with JS disabled.
