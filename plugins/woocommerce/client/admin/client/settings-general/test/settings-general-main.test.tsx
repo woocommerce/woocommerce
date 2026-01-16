@@ -7,7 +7,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
  * Internal dependencies
  */
 import { SettingsGeneralMain } from '../settings-general-main';
-import type { GeneralSettingsResponse } from '../hooks/use-general-settings';
+import type { ReactSettingsResponse } from '../../settings/types';
 
 // Mock dependencies.
 jest.mock( '@wordpress/dataviews', () => ( {
@@ -30,7 +30,7 @@ jest.mock( '@wordpress/dataviews', () => ( {
 	),
 } ) );
 
-const mockApiResponse: GeneralSettingsResponse = {
+const mockApiResponse: ReactSettingsResponse = {
 	id: 'general',
 	title: 'General',
 	description: 'General settings',
@@ -93,12 +93,12 @@ const mockApiResponse: GeneralSettingsResponse = {
 	},
 };
 
-const setPreloadedSettings = ( data?: GeneralSettingsResponse ) => {
+const setPreloadedSettings = ( data?: ReactSettingsResponse ) => {
 	( window as Window & {
 		wcSettings?: {
 			admin?: {
 				settings?: {
-					general?: GeneralSettingsResponse;
+					general?: ReactSettingsResponse;
 				};
 			};
 		};
