@@ -19,7 +19,6 @@ screen’s settings types are supported.
     - `tab`: the settings tab slug (e.g. `products`)
     - `section`: section slug (use `''` for the default section)
     - `schema`: schema class for transforming settings
-    - `restPath`: REST route used to build the request passed to the schema
     - `payloadPath`: where the transformed response is stored in `wcSettings`
     - `supportedTypes` and `typeMap`: the allowed types and type normalization
 
@@ -59,7 +58,6 @@ Server entry:
     'tab'            => 'products',
     'section'        => 'inventory',
     'schema'         => ProductSettingsSchema::class,
-    'restPath'       => '/wc/v4/settings/products',
     'payloadPath'    => array( 'settings', 'products', 'inventory' ),
     'supportedTypes' => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' ),
     'typeMap'        => array(),

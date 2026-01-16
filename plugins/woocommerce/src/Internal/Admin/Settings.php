@@ -300,8 +300,7 @@ class Settings {
 
 			$schema_class = $entry['schema'];
 			$schema       = new $schema_class();
-			$request      = new \WP_REST_Request( 'GET', $entry['restPath'] );
-			$response     = $schema->get_item_response( $settings_definitions, $request );
+			$response     = $schema->get_item_response( $settings_definitions, null );
 
 			$settings = $this->set_nested_settings_value( $settings, $entry['payloadPath'], $response );
 		}

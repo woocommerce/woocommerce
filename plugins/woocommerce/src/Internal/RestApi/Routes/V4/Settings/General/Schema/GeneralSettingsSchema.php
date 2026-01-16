@@ -138,11 +138,11 @@ class GeneralSettingsSchema extends AbstractSchema {
 	 * Get general settings data by transforming raw settings into REST API format.
 	 *
 	 * @param mixed           $item             Raw settings array.
-	 * @param WP_REST_Request $request          Request object.
+	 * @param WP_REST_Request|null $request     Request object.
 	 * @param array           $include_fields   Fields to include.
 	 * @return array
 	 */
-	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
+	public function get_item_response( $item, ?WP_REST_Request $request, array $include_fields = array() ): array {
 		$raw_settings = $item;
 
 		// Transform raw settings into grouped format based on title/sectionend markers.

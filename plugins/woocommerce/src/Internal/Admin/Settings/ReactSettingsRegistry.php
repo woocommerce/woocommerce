@@ -27,7 +27,6 @@ class ReactSettingsRegistry {
 				'tab'            => 'general',
 				'section'        => '',
 				'schema'         => GeneralSettingsSchema::class,
-				'restPath'       => '/wc/v4/settings/general',
 				'payloadPath'    => array( 'settings', 'general' ),
 				'supportedTypes' => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' ),
 				'typeMap'        => array(
@@ -39,7 +38,6 @@ class ReactSettingsRegistry {
 				'tab'            => 'products',
 				'section'        => '',
 				'schema'         => ProductSettingsSchema::class,
-				'restPath'       => '/wc/v4/settings/products',
 				'payloadPath'    => array( 'settings', 'products', 'general' ),
 				'supportedTypes' => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' ),
 				'typeMap'        => array(
@@ -51,7 +49,6 @@ class ReactSettingsRegistry {
 				'tab'            => 'products',
 				'section'        => 'inventory',
 				'schema'         => ProductSettingsSchema::class,
-				'restPath'       => '/wc/v4/settings/products',
 				'payloadPath'    => array( 'settings', 'products', 'inventory' ),
 				'supportedTypes' => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' ),
 				'typeMap'        => array(),
