@@ -223,6 +223,7 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 		}
 
 		.has-dark-controls & {
+			border-color: $input-border-dark;
 			background-color: $input-background-dark;
 
 			&:checked {
