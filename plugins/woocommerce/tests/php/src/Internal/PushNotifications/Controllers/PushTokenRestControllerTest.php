@@ -72,6 +72,219 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test it can create a push token for iOS.
+	 */
+	public function test_it_can_create_push_token_for_ios() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$token_value = str_repeat( 'a', 64 );
+		$device_uuid = 'test-device-uuid-123';
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token_value );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', $device_uuid );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertIsInt( $data['id'] );
+		$this->assertGreaterThan( 0, $data['id'] );
+
+		/**
+		 * Verify the token was actually persisted to the database.
+		 */
+		// Read the raw meta data directly to verify creation persisted.
+		global $wpdb;
+		$meta_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d",
+				$data['id']
+			),
+			ARRAY_A
+		);
+
+		$meta = array();
+
+		foreach ( $meta_rows as $row ) {
+			$meta[ $row['meta_key'] ] = $row['meta_value'];
+		}
+
+		$post = get_post( $data['id'] );
+
+		$this->assertEquals( $this->user_id, (int) $post->post_author );
+		$this->assertEquals( $token_value, $meta['token'] );
+		$this->assertEquals( PushToken::PLATFORM_APPLE, $meta['platform'] );
+		$this->assertEquals( $device_uuid, $meta['device_uuid'] );
+		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS, $meta['origin'] );
+	}
+
+	/**
+	 * @testdox Test it can create a push token for Android.
+	 */
+	public function test_it_can_create_push_token_for_android() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', 'test_android_token_123' );
+		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
+		$request->set_param( 'device_uuid', 'test-device-uuid-456' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertIsInt( $data['id'] );
+		$this->assertGreaterThan( 0, $data['id'] );
+	}
+
+	/**
+	 * @testdox Test it updates an existing push token by token value.
+	 */
+	public function test_it_updates_existing_token_by_token_value() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$token_value = str_repeat( 'a', 64 );
+
+		/**
+		 * Create initial token.
+		 */
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token_value );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'device-1' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$first_id = $response->get_data()['id'];
+
+		/**
+		 * Create again with the same token but different device UUID.
+		 */
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token_value );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'device-2' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$second_id = $response->get_data()['id'];
+
+		$this->assertEquals( $first_id, $second_id );
+
+		/**
+		 * Verify the token was updated in the database with the new device UUID.
+		 */
+		// Read the raw meta data directly to verify update persisted.
+		global $wpdb;
+		$meta_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d",
+				$first_id
+			),
+			ARRAY_A
+		);
+
+		$meta = array();
+		foreach ( $meta_rows as $row ) {
+			$meta[ $row['meta_key'] ] = $row['meta_value'];
+		}
+
+		$this->assertEquals( 'device-2', $meta['device_uuid'] );
+		$this->assertEquals( $token_value, $meta['token'] );
+		$this->assertEquals( PushToken::PLATFORM_APPLE, $meta['platform'] );
+		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS, $meta['origin'] );
+	}
+
+	/**
+	 * @testdox Test it updates an existing push token by device UUID.
+	 */
+	public function test_it_updates_existing_token_by_device_uuid() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$device_uuid = 'device-uuid-constant';
+		$new_token   = str_repeat( 'b', 64 );
+
+		/**
+		 * Create initial token.
+		 */
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', $device_uuid );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$first_id = $response->get_data()['id'];
+
+		/**
+		 * Create again with different token but same device UUID.
+		 */
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $new_token );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', $device_uuid );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$second_id = $response->get_data()['id'];
+
+		$this->assertEquals( $first_id, $second_id );
+
+		/**
+		 * Verify the token was updated in the database with the new token value.
+		 */
+		// Read the raw meta data directly to verify update persisted.
+		global $wpdb;
+		$meta_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d",
+				$first_id
+			),
+			ARRAY_A
+		);
+
+		$meta = array();
+		foreach ( $meta_rows as $row ) {
+			$meta[ $row['meta_key'] ] = $row['meta_value'];
+		}
+
+		$this->assertEquals( $new_token, $meta['token'] );
+		$this->assertEquals( $device_uuid, $meta['device_uuid'] );
+		$this->assertEquals( PushToken::PLATFORM_APPLE, $meta['platform'] );
+		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS, $meta['origin'] );
+	}
+
+	/**
 	 * @testdox Test it cannot create a push token without authentication.
 	 */
 	public function test_it_cannot_create_push_token_without_authentication() {
@@ -456,13 +669,136 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token when push notifications are
-	 * disabled.
+	 * @testdox Test it can delete a push token.
 	 */
-	public function test_it_cannot_create_push_token_when_push_notifications_disabled() {
+	public function test_it_can_delete_push_token() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		/**
+		 * Create a token first.
+		 */
+		$push_token = new PushToken();
+		$push_token->set_user_id( $this->user_id );
+		$push_token->set_token( str_repeat( 'a', 64 ) );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_device_uuid( 'device-to-delete' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+		$data_store->create( $push_token );
+		$token_id = $push_token->get_id();
+
+		/**
+		 * Delete the token.
+		 */
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $token_id );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::NO_CONTENT, $response->get_status() );
+
+		$this->assertNull( $response->get_data() );
+	}
+
+	/**
+	 * @testdox Test it can't delete a push token without being authenticated.
+	 */
+	public function test_it_cannot_delete_push_token_without_authentication() {
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Test it can't delete a push token without required role.
+	 */
+	public function test_it_cannot_delete_push_token_without_required_role() {
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Test it can't delete a push token that doesn't belong to the
+	 * authenticated user.
+	 */
+	public function test_it_cannot_delete_push_token_belonging_to_another_user() {
+		/**
+		 * Create a token for another shop manager.
+		 */
+		$other_user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+
+		$push_token = new PushToken();
+		$push_token->set_user_id( $other_user_id );
+		$push_token->set_token( str_repeat( 'a', 64 ) );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_device_uuid( 'device-other-user' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+		$data_store->create( $push_token );
+		$token_id = $push_token->get_id();
+
+		/**
+		 * Try to delete as a different user.
+		 */
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $token_id );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_push_token', $data['code'] );
+		$this->assertEquals( 'Push token could not be found.', $data['message'] );
+	}
+
+	/**
+	 * @testdox Test it gets 404 response trying to delete a push token that
+	 * doesn't exist.
+	 */
+	public function test_it_cannot_delete_push_token_that_does_not_exist() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/999999' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_push_token', $data['code'] );
+		$this->assertEquals( 'Push token could not be found.', $data['message'] );
+	}
+
+	/**
+	 * @testdox Test the create endpoint returns 404 when push notifications are
+	 * disabled, because routes are not registered.
+	 */
+	public function test_it_returns_not_found_for_create_when_push_notifications_disabled() {
 		wp_set_current_user( $this->user_id );
 
 		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		// Re-initialize the REST server to simulate application startup with
+		// push notifications disabled (routes not registered).
+		global $wp_rest_server;
+		$wp_rest_server = null;
+		$this->server   = rest_get_server();
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
 		$request->set_param( 'token', str_repeat( 'a', 64 ) );
@@ -472,7 +808,98 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Test the delete endpoint returns 404 when push notifications are
+	 * disabled, because routes are not registered.
+	 */
+	public function test_it_returns_not_found_for_delete_when_push_notifications_disabled() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		// Re-initialize the REST server to simulate application startup with
+		// push notifications disabled (routes not registered).
+		global $wp_rest_server;
+		$wp_rest_server = null;
+		$this->server   = rest_get_server();
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Test authorize returns false when push notifications are
+	 * disabled.
+	 */
+	public function test_authorize_returns_false_when_push_notifications_disabled() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+
+		$result = $controller->authorize( $request );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * @testdox Test authorize returns true when push notifications are enabled
+	 * and user has valid role.
+	 */
+	public function test_authorize_returns_true_when_enabled_and_valid_role() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+
+		$result = $controller->authorize( $request );
+
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @testdox Test authorize returns WP_Error when user is not logged in.
+	 */
+	public function test_authorize_returns_error_when_not_logged_in() {
+		wp_set_current_user( 0 );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+
+		$result = $controller->authorize( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Test authorize returns false when user has invalid role.
+	 */
+	public function test_authorize_returns_false_when_invalid_role() {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $subscriber_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+
+		$result = $controller->authorize( $request );
+
+		$this->assertFalse( $result );
+
+		wp_delete_user( $subscriber_id );
 	}
 
 	/**

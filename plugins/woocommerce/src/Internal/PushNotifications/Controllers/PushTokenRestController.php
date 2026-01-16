@@ -15,6 +15,7 @@ use InvalidArgumentException;
 use Exception;
 use WP_REST_Server;
 use WP_REST_Request;
+use WP_REST_Response;
 use WP_Error;
 use WP_Http;
 
@@ -73,6 +74,20 @@ class PushTokenRestController extends RestApiControllerBase {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->get_rest_api_namespace(),
+			$this->rest_base . '/(?P<id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
+					'args'                => $this->get_args( 'delete' ),
+					'permission_callback' => array( $this, 'authorize' ),
+					'schema'              => array( $this, 'get_schema' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -80,10 +95,60 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @return void
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function create(): void {
-		// Functionality to be added later.
+	public function create( WP_REST_Request $request ) {
+		$push_token = new PushToken();
+		$push_token->set_user_id( get_current_user_id() );
+		$push_token->set_token( $request->get_param( 'token' ) );
+		$push_token->set_platform( $request->get_param( 'platform' ) );
+		$push_token->set_device_uuid( $request->get_param( 'device_uuid' ) );
+		$push_token->set_origin( $request->get_param( 'origin' ) );
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		try {
+			$existing_token = clone $push_token;
+			$existing_token = $data_store->get_by_token_or_device_id( $existing_token );
+
+			if ( $existing_token ) {
+				$push_token->set_id( $existing_token->get_id() );
+				$data_store->update( $push_token );
+			} else {
+				$data_store->create( $push_token );
+			}
+		} catch ( Exception $e ) {
+			return $this->convert_exception_to_wp_error( $e );
+		}
+
+		return new WP_REST_Response(
+			array( 'id' => $push_token->get_id() ),
+			WP_Http::CREATED
+		);
+	}
+
+	/**
+	 * Deletes a push token record.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete( WP_REST_Request $request ) {
+		$push_token = new PushToken();
+		$push_token->set_id( (int) $request->get_param( 'id' ) );
+
+		try {
+			wc_get_container()->get( PushTokensDataStore::class )->delete( $push_token );
+		} catch ( Exception $e ) {
+			return $this->convert_exception_to_wp_error( $e );
+		}
+
+		return new WP_REST_Response( null, WP_Http::NO_CONTENT );
 	}
 
 	/**
