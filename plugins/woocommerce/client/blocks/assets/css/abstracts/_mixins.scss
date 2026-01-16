@@ -399,7 +399,7 @@ $fontSizes: (
 }
 
 @mixin card-styles() {
-	@include font-regular-locked;
+	@include font-small-locked;
 	border: 1px solid $universal-border-light;
 	padding: $gap;
 	margin: 0;
