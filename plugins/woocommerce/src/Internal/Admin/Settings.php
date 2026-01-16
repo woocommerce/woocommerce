@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Schema\GeneralSettingsSchema;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsRegistry;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -234,7 +234,7 @@ class Settings {
 			}
 		}
 
-		$settings = $this->add_general_settings_data( $settings );
+		$settings = $this->add_react_settings_data( $settings );
 		$settings = $this->get_custom_settings( $settings );
 		if ( PageController::is_embed_page() ) {
 			$settings['embedBreadcrumbs'] = wc_admin_get_breadcrumbs();
@@ -269,46 +269,44 @@ class Settings {
 	}
 
 	/**
-	 * Add general settings data for the React settings page.
+	 * Add React settings data for supported settings screens.
 	 *
 	 * @param array $settings Array of component settings.
 	 * @return array
 	 */
-	private function add_general_settings_data( array $settings ): array {
-		if ( ! $this->is_general_settings_page() ) {
+	private function add_react_settings_data( array $settings ): array {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'react-settings' ) ) {
 			return $settings;
 		}
 
-		$general_settings_instance = $this->get_general_settings_instance();
-		if ( ! $general_settings_instance ) {
-			return $settings;
+		$current_tab     = $this->get_current_settings_tab();
+		$current_section = $this->get_current_settings_section();
+
+		foreach ( ReactSettingsRegistry::get_entries() as $entry ) {
+			if ( $entry['tab'] !== $current_tab || $entry['section'] !== $current_section ) {
+				continue;
+			}
+
+			$settings_page_id = $entry['settingsPageId'] ?? $entry['tab'];
+			$settings_page    = $this->get_settings_page_instance( $settings_page_id );
+			if ( ! $settings_page ) {
+				continue;
+			}
+
+			$settings_definitions = $settings_page->get_settings_for_section( $entry['section'] );
+			if ( ! ReactSettingsRegistry::supports_settings_definitions( $settings_definitions, $entry['typeMap'], $entry['supportedTypes'] ) ) {
+				continue;
+			}
+
+			$schema_class = $entry['schema'];
+			$schema       = new $schema_class();
+			$request      = new \WP_REST_Request( 'GET', $entry['restPath'] );
+			$response     = $schema->get_item_response( $settings_definitions, $request );
+
+			$settings = $this->set_nested_settings_value( $settings, $entry['payloadPath'], $response );
 		}
-
-		$settings_definitions = $this->get_general_settings_definitions( $general_settings_instance );
-		$schema               = new GeneralSettingsSchema();
-		$request              = new \WP_REST_Request( 'GET', '/wc/v4/settings/general' );
-
-		if ( ! isset( $settings['settings'] ) || ! is_array( $settings['settings'] ) ) {
-			$settings['settings'] = array();
-		}
-
-		$settings['settings']['general'] = $schema->get_item_response( $settings_definitions, $request );
 
 		return $settings;
-	}
-
-	/**
-	 * Determine whether we are on the general settings tab.
-	 *
-	 * @return bool
-	 */
-	private function is_general_settings_page(): bool {
-		if ( ! PageController::is_settings_page() ) {
-			return false;
-		}
-
-		$tab = $this->get_current_settings_tab();
-		return 'general' === $tab;
 	}
 
 	/**
@@ -328,41 +326,71 @@ class Settings {
 	}
 
 	/**
-	 * Get the General settings instance if available.
+	 * Get the current settings section.
 	 *
-	 * @return WC_Settings_General|null
+	 * @return string
 	 */
-	private function get_general_settings_instance() {
+	private function get_current_settings_section(): string {
+		global $current_section;
+
+		if ( is_string( $current_section ) && '' !== $current_section ) {
+			return $current_section;
+		}
+
+		$section = isset( $_GET['section'] ) ? sanitize_title( wp_unslash( $_GET['section'] ) ) : '';
+		return $section;
+	}
+
+	/**
+	 * Get settings page instance by id.
+	 *
+	 * @param string $settings_page_id Settings page id.
+	 * @return WC_Settings_Page|null
+	 */
+	private function get_settings_page_instance( string $settings_page_id ) {
 		if ( class_exists( 'WC_Admin_Settings', false ) ) {
 			$setting_pages = \WC_Admin_Settings::get_settings_pages();
 			foreach ( $setting_pages as $setting_page ) {
-				if ( method_exists( $setting_page, 'get_id' ) && 'general' === $setting_page->get_id() ) {
+				if ( method_exists( $setting_page, 'get_id' ) && $settings_page_id === $setting_page->get_id() ) {
 					return $setting_page;
 				}
 			}
 		}
 
-		if ( class_exists( 'WC_Settings_General', false ) ) {
-			return new \WC_Settings_General();
+		$page_class_map = array(
+			'general'  => 'WC_Settings_General',
+			'products' => 'WC_Settings_Products',
+		);
+
+		if ( isset( $page_class_map[ $settings_page_id ] ) && class_exists( $page_class_map[ $settings_page_id ], false ) ) {
+			$page_class = $page_class_map[ $settings_page_id ];
+			return new $page_class();
 		}
 
 		return null;
 	}
 
 	/**
-	 * Get settings definitions for all General settings sections.
+	 * Set a nested settings value by path.
 	 *
-	 * @param WC_Settings_General $settings_instance General settings instance.
+	 * @param array $settings Settings array.
+	 * @param array $path Path segments.
+	 * @param mixed $value Value to set.
 	 * @return array
 	 */
-	private function get_general_settings_definitions( $settings_instance ): array {
-		$sections = $settings_instance->get_sections();
-		$settings = array();
-
-		foreach ( array_keys( $sections ) as $section ) {
-			$section_settings = $settings_instance->get_settings_for_section( $section );
-			$settings         = array_merge( $settings, $section_settings );
+	private function set_nested_settings_value( array $settings, array $path, $value ): array {
+		if ( empty( $path ) ) {
+			return $settings;
 		}
+
+		$current = &$settings;
+		foreach ( $path as $segment ) {
+			if ( ! isset( $current[ $segment ] ) || ! is_array( $current[ $segment ] ) ) {
+				$current[ $segment ] = array();
+			}
+			$current = &$current[ $segment ];
+		}
+		$current = $value;
 
 		return $settings;
 	}

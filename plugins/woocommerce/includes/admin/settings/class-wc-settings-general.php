@@ -5,7 +5,6 @@
  * @package WooCommerce\Admin
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 defined( 'ABSPATH' ) || exit;
@@ -397,95 +396,6 @@ class WC_Settings_General extends WC_Settings_Page {
 		</div>';
 	}
 
-	/**
-	 * Output settings with additional JS to hide preferred provider if autocomplete is disabled.
-	 *
-	 * @return void
-	 */
-	public function output() {
-		// Use React-based settings UI if feature flag is enabled.
-		if ( Features::is_enabled( 'general-settings-react' ) && $this->supports_react_settings() ) {
-			// Hide the default save button since React UI has its own.
-			$GLOBALS['hide_save_button'] = true;
-
-			// Slot for React-based settings UI.
-			echo '<div id="wc_general_settings_slotfill"> </div>';
-
-			$handle = 'wc-admin-settings-general';
-			wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
-			wp_enqueue_script( $handle );
-			wp_add_inline_script(
-				$handle,
-				"
-				const preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
-				const autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
-				let preferredProviderRow = null;
-				if ( preferredProviderInput ) {
-					preferredProviderRow = preferredProviderInput.closest( 'tr' );
-				}
-				if ( autocompleteEnabledInput && preferredProviderRow ) {
-					if ( ! autocompleteEnabledInput.checked ) {
-						preferredProviderRow.style.display = 'none';
-					}
-					autocompleteEnabledInput.addEventListener( 'change', function( e ) {
-						if ( e.target.checked ) {
-							preferredProviderRow.style.display = 'table-row';
-						} else {
-							preferredProviderRow.style.display = 'none';
-						}
-					} );
-				}
-				"
-			);
-			return;
-		}
-
-		// Fall back to default settings output.
-		parent::output();
-	}
-
-	/**
-	 * Check whether all settings use supported field types for the React UI.
-	 *
-	 * @return bool
-	 */
-	private function supports_react_settings(): bool {
-		$supported_types = array(
-			'text',
-			'number',
-			'select',
-			'multiselect',
-			'checkbox',
-			'radio',
-			'toggle',
-		);
-		$type_map = array(
-			'single_select_country'  => 'select',
-			'multi_select_countries' => 'multiselect',
-		);
-		$sections = $this->get_sections();
-
-		foreach ( array_keys( $sections ) as $section ) {
-			$section_settings = $this->get_settings_for_section( $section );
-			foreach ( $section_settings as $setting ) {
-				$type = $setting['type'] ?? '';
-				if ( '' === $type ) {
-					return false;
-				}
-
-				if ( in_array( $type, array( 'title', 'sectionend' ), true ) ) {
-					continue;
-				}
-
-				$normalized_type = $type_map[ $type ] ?? $type;
-				if ( ! in_array( $normalized_type, $supported_types, true ) ) {
-					return false;
-				}
-			}
-		}
-
-		return true;
-	}
 }
 
 return new WC_Settings_General();

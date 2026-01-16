@@ -9,6 +9,7 @@
 declare( strict_types = 1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsRegistry;
 
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -504,6 +505,18 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			}
 
 			global $current_section;
+
+		if ( Features::is_enabled( 'react-settings' ) ) {
+			$entry = ReactSettingsRegistry::get_entry_for_tab_section( $this->id, $current_section ?? '' );
+			if ( $entry ) {
+				$settings_definitions = $this->get_settings( $current_section );
+				if ( ReactSettingsRegistry::supports_settings_definitions( $settings_definitions, $entry['typeMap'], $entry['supportedTypes'] ) ) {
+					$GLOBALS['hide_save_button'] = true;
+					echo '<div id="' . esc_attr( ReactSettingsRegistry::get_mount_id( $entry ) ) . '"> </div>';
+					return;
+				}
+			}
+		}
 
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".
