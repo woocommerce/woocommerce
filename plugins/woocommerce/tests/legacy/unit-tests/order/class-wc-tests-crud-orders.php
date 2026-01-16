@@ -1000,6 +1000,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$this->assertFalse( $object->payment_complete() );
 		$object->save();
+		// Set created_via to indicate legitimate checkout session.
+		$object->set_created_via( 'checkout' );
+		$object->save();
 		$this->assertTrue( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
 		$this->assertEquals( '12345', $object->get_transaction_id() );
@@ -1013,6 +1016,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_payment_complete_error() {
 		$object = new WC_Order();
+		$object->save();
+		$object->set_created_via( 'checkout' );
 		$object->save();
 
 		add_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
@@ -1028,6 +1033,108 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Payment complete event failed', $note->content );
 
 		remove_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
+	}
+
+	/**
+	 * Test: payment_complete blocks orders without checkout evidence
+	 *
+	 * @since 8.9.4
+	 */
+	public function test_payment_complete_blocks_orders_without_checkout_evidence() {
+		$object = new WC_Order();
+		$object->save();
+		// Order has no created_via and no cart_hash - should be blocked.
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertFalse( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::PENDING, $object->get_status() );
+
+		// Verify order note was added.
+		$notes = wc_get_order_notes(
+			array(
+				'order_id' => $object->get_id(),
+			)
+		);
+		$blocked_note = null;
+		foreach ( $notes as $note ) {
+			if ( strpos( $note->content, 'Payment completion blocked' ) !== false ) {
+				$blocked_note = $note;
+				break;
+			}
+		}
+		$this->assertNotNull( $blocked_note, 'Order note about blocked payment should be added' );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via checkout
+	 *
+	 * @since 8.9.4
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_checkout() {
+		$object = new WC_Order();
+		$object->set_created_via( 'checkout' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via store-api
+	 *
+	 * @since 8.9.4
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_store_api() {
+		$object = new WC_Order();
+		$object->set_created_via( 'store-api' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with cart_hash
+	 *
+	 * @since 8.9.4
+	 */
+	public function test_payment_complete_allows_orders_with_cart_hash() {
+		$object = new WC_Order();
+		$object->set_cart_hash( 'test-cart-hash-123' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows bypass via filter
+	 *
+	 * @since 8.9.4
+	 */
+	public function test_payment_complete_allows_bypass_via_filter() {
+		$object = new WC_Order();
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		// Add filter to allow payment completion without checkout evidence.
+		add_filter(
+			'woocommerce_allow_payment_complete_without_checkout_evidence',
+			function( $allow, $order, $transaction_id ) use ( $object ) {
+				return $order->get_id() === $object->get_id();
+			},
+			10,
+			3
+		);
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+
+		remove_all_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence' );
 	}
 
 	/**

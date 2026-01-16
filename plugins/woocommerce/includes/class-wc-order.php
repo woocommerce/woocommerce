@@ -142,6 +142,58 @@ class WC_Order extends WC_Abstract_Order {
 		try {
 			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
 
+			$created_via = $this->get_created_via();
+			$cart_hash   = $this->get_cart_hash();
+			$has_checkout_evidence = false;
+
+			if ( in_array( $created_via, array( 'checkout', 'store-api' ), true ) ) {
+				$has_checkout_evidence = true;
+			}
+
+			if ( ! empty( $cart_hash ) ) {
+				$has_checkout_evidence = true;
+			}
+
+			/**
+			 * Allow payment completion for orders without checkout evidence.
+			 *
+			 * @param bool     $allow_payment_complete Whether to allow payment completion without checkout evidence.
+			 * @param WC_Order $this                  Order object.
+			 * @param string   $transaction_id         Transaction ID.
+			 * @since 8.9.4
+			 */
+			$allow_without_checkout_evidence = apply_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence', false, $this, $transaction_id );
+
+			if ( ! $has_checkout_evidence && ! $allow_without_checkout_evidence ) {
+				$logger = wc_get_logger();
+				$logger->warning(
+					sprintf(
+						'Payment completion blocked for order #%d: Order lacks evidence of legitimate checkout session (created_via: %s, cart_hash: %s)',
+						$this->get_id(),
+						$created_via ? $created_via : 'empty',
+						$cart_hash ? 'present' : 'empty'
+					),
+					array(
+						'order_id'    => $this->get_id(),
+						'created_via' => $created_via,
+						'cart_hash'   => $cart_hash ? 'present' : 'empty',
+						'payment_method' => $this->get_payment_method(),
+					)
+				);
+				$this->add_order_note(
+					sprintf(
+						/* translators: %1$s: created_via value, %2$s: cart_hash status */
+						__( 'Payment completion blocked: Order lacks evidence of legitimate checkout session (created_via: %1$s, cart_hash: %2$s). This may indicate a security issue.', 'woocommerce' ),
+						$created_via ? $created_via : __( 'empty', 'woocommerce' ),
+						$cart_hash ? __( 'present', 'woocommerce' ) : __( 'empty', 'woocommerce' )
+					),
+					false,
+					false,
+					array( 'note_group' => OrderNoteGroup::ERROR )
+				);
+				return false;
+			}
+
 			if ( WC()->session ) {
 				WC()->session->set( 'order_awaiting_payment', false );
 			}
