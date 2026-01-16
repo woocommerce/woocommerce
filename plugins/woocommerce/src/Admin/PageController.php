@@ -117,7 +117,7 @@ class PageController {
 		// @todo check for collision, but keep in mind that the current behavior is: the later call silently overwrites the earlier one.
 		if ( isset( $options['id'] ) ) {
 			$this->pages[ $options['id'] ] = $options;
-		}		
+		}
 	}
 
 	/**
