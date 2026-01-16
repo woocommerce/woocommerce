@@ -68,6 +68,8 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 			'tax_rate_class'    => '',
 		);
+
+		// Insert the tax rate.
 		$this->tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
 
 		// 3. Create Product ($110.50).
