@@ -1,0 +1,15 @@
+@import "~@wordpress/dataviews/build-style/style.css";
+
+// Add padding to two-columns layout cards
+.dataforms-layouts-two-columns__card {
+	&.components-card,
+	&.components-surface {
+		padding: 0;
+	}
+}
+
+.dataforms-layouts-two-columns__card-body {
+	&.components-card__body {
+		padding: 24px;
+	}
+}

@@ -17,6 +17,7 @@ import type {
 	RowConfigurations,
 } from './types';
 import { createChildrenWithRows } from './field-transformers';
+import './react-settings.scss';
 
 type ReactSettingsPageProps = {
 	className?: string;
