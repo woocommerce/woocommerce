@@ -182,17 +182,36 @@ class ProductImage extends AbstractBlock {
 		 *
 		 * @since 10.5.0
 		 *
-		 * @param string $loading_attr The loading attribute. Default 'lazy'.
+		 * @param string      $loading_attr The loading attribute. Default 'lazy'.
+		 * @param \WC_Product $product      Product object.
+		 * @param int         $image_id     Target image ID.
+		 * @param array       $attributes   Parsed block attributes.
 		 */
-		$loading_attr = apply_filters( 'woocommerce_product_image_loading_attr', 'lazy' );
+		$loading_attr = apply_filters(
+			'woocommerce_product_image_loading_attr',
+			'lazy',
+			$product,
+			$target_image_id,
+			$attributes
+		);
+
+		$loading_attr    = is_string( $loading_attr ) ? strtolower( trim( $loading_attr ) ) : '';
+		$allowed_loading = array( 'lazy', 'eager', 'auto' );
+
+		if ( ! in_array( $loading_attr, $allowed_loading, true ) ) {
+			$loading_attr = '';
+		}
 
 		$attr = array(
 			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
 			'data-testid'   => 'product-image',
 			'data-image-id' => $target_image_id,
 			'style'         => $image_style,
-			'loading'       => $loading_attr,
 		);
+
+		if ( ! empty( $loading_attr ) ) {
+			$attr['loading'] = $loading_attr;
+		}
 
 		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
 	}
