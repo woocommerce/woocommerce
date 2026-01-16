@@ -4,5 +4,6 @@
 	.wc-block-components-product-metadata__description > p,
 	.wc-block-components-product-metadata__variation-data {
 		margin: 0;
+		@include font-x-small-locked;
 	}
 }
