@@ -24,12 +24,14 @@ Perform all the steps below in order. When running _any_ GitHub workflow, ensure
 
 Keep the _[Release Troubleshooting & Recovery](/docs/contribution/releases/troubleshooting)_ guide handy, in case you encounter any issues.
 
+### Steps
+
 #### 1. Pre-build checks
+
 - [ ] Confirm [GitHub services](https://www.githubstatus.com/) are operational.
 - [ ] Verify no open issues or pull requests exist against the [release milestone](https://github.com/woocommerce/woocommerce/milestones/). Ping authors as needed to merge or close.
 - [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"](https://github.com/woocommerce/woocommerce/pulls?q=is:pr+label:%22cherry+pick+failed%22) that apply to this release that haven't been actioned.
 - [ ] Confirm the `Stable tag` value in the readme.txt on the release branch matches the one [on WordPress.org's `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).
-
 
 #### 2. Build the release package
 
@@ -40,7 +42,6 @@ Keep the _[Release Troubleshooting & Recovery](/docs/contribution/releases/troub
 - [ ] Run workflow **[Release: Build ZIP file](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml)** to build the asset and create the GitHub release: enter the release branch as _Release branch_ and check _Create GitHub release_.
 - [ ] Confirm that a draft release [was created in the repository](https://github.com/woocommerce/woocommerce/releases) with an attached `woocommerce.zip` asset.
 
-
 #### 3. Upload the release to WordPress.org
 
 - [ ] Run workflow **[Release: Upload release to WordPress.org](https://github.com/woocommerce/woocommerce/actions/workflows/release-upload-to-wporg.yml)**: enter the release version (`x.y.z`) as _Release tag to upload_ and make sure to check off the confirmation box.
@@ -48,27 +49,23 @@ Keep the _[Release Troubleshooting & Recovery](/docs/contribution/releases/troub
 - [ ] [Log into WordPress.org](https://wordpress.org/plugins/developers/releases/) using the credentials from the `WordPress.org "WooCommerce" user account` secret in the secret store and approve the release.
 - [ ] After a few minutes, confirm that the release package [is available for download](https://wordpress.org/plugins/woocommerce/advanced/).
 
-
 #### 4. Deploy to the staging environment
 
 :::caution
 This step only applies to `rc` or stable (`x.y.0`  onwards) releases.
 :::
 
-
 - [ ] Follow the [guide to deploy to the staging environment](https://wp.me/PCYsg-18BQ) and monitor for 4 hours (RC) or 2 hours (stable) after deploy.
 
-##### If a critical issue was detected while monitoring...
+##### If a critical issue was detected while monitoring
 
 - [ ] Request a revert in the staging environment.
 - [ ] Pause the release process and **do not continue with any steps on this issue**. Follow the procedure in the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/#deploy-serious-bug) instead.
-
 
 #### 5. Publish the release
 
 - [ ] **(Only for stable releases)** Run workflow **[Release: Update stable tag](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml)**: enter the release version (`x.y.z`) as _Version_ and make sure to check off the confirmation box.
 - [ ] Publish the [release draft](https://github.com/woocommerce/woocommerce/releases) that was previously created, as well as any other release drafts that might exist from previous attempts. **Ensure** that "Set as the latest release" is checked **only** for stable releases.
-
 
 #### 6. Post-release tasks
 
