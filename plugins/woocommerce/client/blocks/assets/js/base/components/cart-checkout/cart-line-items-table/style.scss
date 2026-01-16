@@ -56,7 +56,7 @@ table.wc-block-cart-items {
 			.wc-block-cart-item__remove-link {
 				@include link-button();
 				@include hover-effect();
-				@include font-size(smaller);
+				@include font-x-small-locked;
 
 				text-transform: none;
 				white-space: nowrap;
