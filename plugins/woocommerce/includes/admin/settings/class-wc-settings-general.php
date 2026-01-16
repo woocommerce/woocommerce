@@ -404,7 +404,7 @@ class WC_Settings_General extends WC_Settings_Page {
 	 */
 	public function output() {
 		// Use React-based settings UI if feature flag is enabled.
-		if ( Features::is_enabled( 'general-settings-react' ) ) {
+		if ( Features::is_enabled( 'general-settings-react' ) && $this->supports_react_settings() ) {
 			// Hide the default save button since React UI has its own.
 			$GLOBALS['hide_save_button'] = true;
 
@@ -442,6 +442,49 @@ class WC_Settings_General extends WC_Settings_Page {
 
 		// Fall back to default settings output.
 		parent::output();
+	}
+
+	/**
+	 * Check whether all settings use supported field types for the React UI.
+	 *
+	 * @return bool
+	 */
+	private function supports_react_settings(): bool {
+		$supported_types = array(
+			'text',
+			'number',
+			'select',
+			'multiselect',
+			'checkbox',
+			'radio',
+			'toggle',
+		);
+		$type_map = array(
+			'single_select_country'  => 'select',
+			'multi_select_countries' => 'multiselect',
+		);
+		$sections = $this->get_sections();
+
+		foreach ( array_keys( $sections ) as $section ) {
+			$section_settings = $this->get_settings_for_section( $section );
+			foreach ( $section_settings as $setting ) {
+				$type = $setting['type'] ?? '';
+				if ( '' === $type ) {
+					return false;
+				}
+
+				if ( in_array( $type, array( 'title', 'sectionend' ), true ) ) {
+					continue;
+				}
+
+				$normalized_type = $type_map[ $type ] ?? $type;
+				if ( ! in_array( $normalized_type, $supported_types, true ) ) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 }
 

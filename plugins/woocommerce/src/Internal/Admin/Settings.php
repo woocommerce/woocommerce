@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Schema\GeneralSettingsSchema;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -232,6 +233,8 @@ class Settings {
 				}
 			}
 		}
+
+		$settings = $this->add_general_settings_data( $settings );
 		$settings = $this->get_custom_settings( $settings );
 		if ( PageController::is_embed_page() ) {
 			$settings['embedBreadcrumbs'] = wc_admin_get_breadcrumbs();
@@ -261,6 +264,105 @@ class Settings {
 			}
 		}
 		$settings['gutenberg_version'] = $has_gutenberg ? $gutenberg_version : 0;
+
+		return $settings;
+	}
+
+	/**
+	 * Add general settings data for the React settings page.
+	 *
+	 * @param array $settings Array of component settings.
+	 * @return array
+	 */
+	private function add_general_settings_data( array $settings ): array {
+		if ( ! $this->is_general_settings_page() ) {
+			return $settings;
+		}
+
+		$general_settings_instance = $this->get_general_settings_instance();
+		if ( ! $general_settings_instance ) {
+			return $settings;
+		}
+
+		$settings_definitions = $this->get_general_settings_definitions( $general_settings_instance );
+		$schema               = new GeneralSettingsSchema();
+		$request              = new \WP_REST_Request( 'GET', '/wc/v4/settings/general' );
+
+		if ( ! isset( $settings['settings'] ) || ! is_array( $settings['settings'] ) ) {
+			$settings['settings'] = array();
+		}
+
+		$settings['settings']['general'] = $schema->get_item_response( $settings_definitions, $request );
+
+		return $settings;
+	}
+
+	/**
+	 * Determine whether we are on the general settings tab.
+	 *
+	 * @return bool
+	 */
+	private function is_general_settings_page(): bool {
+		if ( ! PageController::is_settings_page() ) {
+			return false;
+		}
+
+		$tab = $this->get_current_settings_tab();
+		return 'general' === $tab;
+	}
+
+	/**
+	 * Get the current settings tab.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_tab(): string {
+		global $current_tab;
+
+		if ( is_string( $current_tab ) && '' !== $current_tab ) {
+			return $current_tab;
+		}
+
+		$tab = isset( $_GET['tab'] ) ? sanitize_title( wp_unslash( $_GET['tab'] ) ) : 'general';
+		return '' !== $tab ? $tab : 'general';
+	}
+
+	/**
+	 * Get the General settings instance if available.
+	 *
+	 * @return WC_Settings_General|null
+	 */
+	private function get_general_settings_instance() {
+		if ( class_exists( 'WC_Admin_Settings', false ) ) {
+			$setting_pages = \WC_Admin_Settings::get_settings_pages();
+			foreach ( $setting_pages as $setting_page ) {
+				if ( method_exists( $setting_page, 'get_id' ) && 'general' === $setting_page->get_id() ) {
+					return $setting_page;
+				}
+			}
+		}
+
+		if ( class_exists( 'WC_Settings_General', false ) ) {
+			return new \WC_Settings_General();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get settings definitions for all General settings sections.
+	 *
+	 * @param WC_Settings_General $settings_instance General settings instance.
+	 * @return array
+	 */
+	private function get_general_settings_definitions( $settings_instance ): array {
+		$sections = $settings_instance->get_sections();
+		$settings = array();
+
+		foreach ( array_keys( $sections ) as $section ) {
+			$section_settings = $settings_instance->get_settings_for_section( $section );
+			$settings         = array_merge( $settings, $section_settings );
+		}
 
 		return $settings;
 	}
