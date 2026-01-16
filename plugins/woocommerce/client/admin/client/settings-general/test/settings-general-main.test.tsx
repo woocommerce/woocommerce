@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -11,7 +10,6 @@ import { SettingsGeneralMain } from '../settings-general-main';
 import type { GeneralSettingsResponse } from '../hooks/use-general-settings';
 
 // Mock dependencies.
-jest.mock( '@wordpress/api-fetch' );
 jest.mock( '@wordpress/dataviews', () => ( {
 	DataForm: ( {
 		data,
@@ -37,6 +35,7 @@ const mockApiResponse: GeneralSettingsResponse = {
 	title: 'General',
 	description: 'General settings',
 	values: {
+		test_field: 'Initial value',
 		woocommerce_store_address: '123 Main St',
 		woocommerce_currency: 'USD',
 		woocommerce_calc_taxes: false,
@@ -47,6 +46,12 @@ const mockApiResponse: GeneralSettingsResponse = {
 			description: 'This is where your business is located.',
 			order: 10,
 			fields: [
+				{
+					id: 'test_field',
+					label: 'Test field',
+					type: 'text',
+					desc: 'Test description',
+				},
 				{
 					id: 'woocommerce_store_address',
 					label: 'Address line 1',
@@ -88,27 +93,35 @@ const mockApiResponse: GeneralSettingsResponse = {
 	},
 };
 
+const setPreloadedSettings = ( data?: GeneralSettingsResponse ) => {
+	( window as Window & {
+		wcSettings?: {
+			admin?: {
+				settings?: {
+					general?: GeneralSettingsResponse;
+				};
+			};
+		};
+	} ).wcSettings = data
+		? { admin: { settings: { general: data } } }
+		: { admin: { settings: {} } };
+};
+
 describe( 'SettingsGeneralMain', () => {
 	beforeEach( () => {
-		jest.clearAllMocks();
+		setPreloadedSettings( mockApiResponse );
 	} );
 
 	describe( 'Basic Rendering', () => {
 		it( 'shows loading state initially', () => {
-			( apiFetch as jest.Mock ).mockImplementation(
-				() => new Promise( () => {} )
-			);
+			setPreloadedSettings();
 
 			render( <SettingsGeneralMain /> );
 
-			expect(
-				screen.getByText( 'Loading settings...' )
-			).toBeInTheDocument();
+			expect( screen.getByText( 'Loading settings' ) ).toBeInTheDocument();
 		} );
 
-		it( 'renders settings after successful API fetch', async () => {
-			( apiFetch as jest.Mock ).mockResolvedValue( mockApiResponse );
-
+		it( 'renders settings from preloaded data', async () => {
 			render( <SettingsGeneralMain /> );
 
 			await waitFor( () => {
@@ -123,12 +136,8 @@ describe( 'SettingsGeneralMain', () => {
 	} );
 
 	describe( 'Error Handling', () => {
-		it( 'displays error message when API fetch fails', async () => {
-			const errorMessage = 'Network error';
-			( apiFetch as jest.Mock ).mockRejectedValue(
-				new Error( errorMessage )
-			);
-
+		it( 'displays error message when preloaded data is missing', async () => {
+			setPreloadedSettings();
 			render( <SettingsGeneralMain /> );
 
 			await waitFor( () => {
@@ -139,37 +148,14 @@ describe( 'SettingsGeneralMain', () => {
 				).toBeInTheDocument();
 			} );
 
-			expect( screen.getByText( errorMessage ) ).toBeInTheDocument();
-		} );
-
-		it( 'displays error message when save fails', async () => {
-			( apiFetch as jest.Mock )
-				.mockResolvedValueOnce( mockApiResponse )
-				.mockRejectedValueOnce( new Error( 'Save failed' ) );
-
-			render( <SettingsGeneralMain /> );
-
-			await waitFor( () => {
-				expect( screen.getByText( 'Store Address' ) ).toBeInTheDocument();
-			} );
-
-			const saveButton = screen.getByText( 'Save changes' );
-			fireEvent.click( saveButton );
-
-			await waitFor( () => {
-				expect(
-					screen.getByText(
-						'Error saving settings. Please try again.'
-					)
-				).toBeInTheDocument();
-			} );
+			expect(
+				screen.getByText( 'General settings data is missing.' )
+			).toBeInTheDocument();
 		} );
 	} );
 
 	describe( 'Save Functionality', () => {
 		it( 'enables save button when form is dirty', async () => {
-			( apiFetch as jest.Mock ).mockResolvedValue( mockApiResponse );
-
 			render( <SettingsGeneralMain /> );
 
 			await waitFor( () => {
@@ -190,98 +176,27 @@ describe( 'SettingsGeneralMain', () => {
 			} );
 		} );
 
-		it( 'calls API with correct data on save', async () => {
-			( apiFetch as jest.Mock ).mockResolvedValue( mockApiResponse );
-
+		it( 'renders hidden inputs for form submission', async () => {
 			render( <SettingsGeneralMain /> );
 
 			await waitFor( () => {
 				expect( screen.getByText( 'Store Address' ) ).toBeInTheDocument();
 			} );
 
-			// Simulate form change.
 			const input = screen.getAllByTestId( 'mock-input' )[ 0 ];
 			fireEvent.change( input, { target: { value: '456 New St' } } );
 
-			const saveButton = screen.getByText( 'Save changes' );
-			fireEvent.click( saveButton );
-
 			await waitFor( () => {
-				expect( apiFetch ).toHaveBeenCalledWith(
-					expect.objectContaining( {
-						path: '/wc/v4/settings/general',
-						method: 'POST',
-						data: expect.objectContaining( {
-							values: expect.any( Object ),
-						} ),
-					} )
-				);
+				const hiddenInput = document.querySelector(
+					'input[name="test_field"]'
+				) as HTMLInputElement;
+				expect( hiddenInput.value ).toBe( '456 New St' );
 			} );
-		} );
-
-		it( 'shows success message after successful save', async () => {
-			( apiFetch as jest.Mock ).mockResolvedValue( mockApiResponse );
-
-			render( <SettingsGeneralMain /> );
-
-			await waitFor( () => {
-				expect( screen.getByText( 'Store Address' ) ).toBeInTheDocument();
-			} );
-
-			// Simulate form change.
-			const input = screen.getAllByTestId( 'mock-input' )[ 0 ];
-			fireEvent.change( input, { target: { value: '456 New St' } } );
-
-			const saveButton = screen.getByText( 'Save changes' );
-			fireEvent.click( saveButton );
-
-			await waitFor( () => {
-				expect(
-					screen.getByText( 'Settings saved successfully.' )
-				).toBeInTheDocument();
-			} );
-		} );
-
-		it( 'disables save button while saving', async () => {
-			( apiFetch as jest.Mock ).mockImplementation( ( options ) => {
-				if ( options.method === 'POST' ) {
-					return new Promise( ( resolve ) =>
-						setTimeout( () => resolve( mockApiResponse ), 100 )
-					);
-				}
-				return Promise.resolve( mockApiResponse );
-			} );
-
-			render( <SettingsGeneralMain /> );
-
-			await waitFor( () => {
-				expect( screen.getByText( 'Store Address' ) ).toBeInTheDocument();
-			} );
-
-			// Simulate form change.
-			const input = screen.getAllByTestId( 'mock-input' )[ 0 ];
-			fireEvent.change( input, { target: { value: '456 New St' } } );
-
-			const saveButton = screen.getByText(
-				'Save changes'
-			) as HTMLButtonElement;
-			fireEvent.click( saveButton );
-
-			await waitFor( () => {
-				expect( screen.getByText( 'Saving...' ) ).toBeInTheDocument();
-			} );
-
-			const savingButton = screen.getByText(
-				'Saving...'
-			) as HTMLButtonElement;
-			expect( savingButton.disabled ).toBe( true );
 		} );
 	} );
 
 	describe( 'Data Structure', () => {
 		it( 'renders all groups from API response', async () => {
-			( apiFetch as jest.Mock ).mockResolvedValue( mockApiResponse );
-
 			render( <SettingsGeneralMain /> );
 
 			await waitFor( () => {
@@ -302,7 +217,7 @@ describe( 'SettingsGeneralMain', () => {
 				groups: {},
 			};
 
-			( apiFetch as jest.Mock ).mockResolvedValue( emptyResponse );
+			setPreloadedSettings( emptyResponse );
 
 			render( <SettingsGeneralMain /> );
 
@@ -334,9 +249,7 @@ describe( 'SettingsGeneralMain', () => {
 				},
 			};
 
-			( apiFetch as jest.Mock ).mockResolvedValue(
-				responseWithoutDesc
-			);
+			setPreloadedSettings( responseWithoutDesc );
 
 			render( <SettingsGeneralMain /> );
 
@@ -353,9 +266,7 @@ describe( 'SettingsGeneralMain', () => {
 				},
 			};
 
-			( apiFetch as jest.Mock ).mockResolvedValue(
-				responseWithUndefined
-			);
+			setPreloadedSettings( responseWithUndefined );
 
 			render( <SettingsGeneralMain /> );
 

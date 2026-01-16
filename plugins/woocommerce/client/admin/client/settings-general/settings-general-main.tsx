@@ -84,14 +84,12 @@ const localTransformer = ( field: SettingsField ) => {
  * Uses WordPress DataForms for rendering settings.
  */
 export const SettingsGeneralMain = () => {
-	const { data, isLoading, error, updateSettings, isSaving, saveError } =
-		useGeneralSettings();
+	const { data, isLoading, error } = useGeneralSettings();
 
 	const [ formData, setFormData ] = useState< Record< string, unknown > >(
 		{}
 	);
 	const [ isDirty, setIsDirty ] = useState( false );
-	const [ saveSuccess, setSaveSuccess ] = useState( false );
 
 	// Initialize form data when API data loads.
 	useEffect( () => {
@@ -165,25 +163,11 @@ export const SettingsGeneralMain = () => {
 	const handleChange = ( newData: Record< string, unknown > ) => {
 		setFormData( { ...formData, ...newData } );
 		setIsDirty( true );
-		setSaveSuccess( false );
-	};
-
-	const handleSave = async () => {
-		try {
-			await updateSettings( formData );
-			setIsDirty( false );
-			setSaveSuccess( true );
-
-			// Hide success message after 3 seconds.
-			setTimeout( () => setSaveSuccess( false ), 3000 );
-		} catch ( err ) {
-			// Error is handled by the hook.
-		}
 	};
 
 	if ( isLoading ) {
 		return (
-			<div className="woocommerce-settings-general">
+			<div className="woocommerce-settings-general wc-settings-prevent-change-event">
 				<div className="woocommerce-settings-general__loading">
 					<Spinner />
 					<p>{ __( 'Loading settings', 'woocommerce' ) }</p>
@@ -194,7 +178,7 @@ export const SettingsGeneralMain = () => {
 
 	if ( error ) {
 		return (
-			<div className="woocommerce-settings-general">
+			<div className="woocommerce-settings-general wc-settings-prevent-change-event">
 				<Notice status="error" isDismissible={ false }>
 					{ __(
 						'Error loading settings. Please try refreshing the page.',
@@ -215,33 +199,12 @@ export const SettingsGeneralMain = () => {
 		return null;
 	}
 
+	const fieldsForSubmit = ( Object.values( data.groups ) as SettingsGroup[] )
+		.flatMap( ( group ) => group.fields )
+		.filter( ( field ) => field?.id );
+
 	return (
-		<div className="woocommerce-settings-general">
-			{ saveSuccess && (
-				<Notice
-					status="success"
-					isDismissible
-					onRemove={ () => setSaveSuccess( false ) }
-				>
-					{ __( 'Settings saved successfully.', 'woocommerce' ) }
-				</Notice>
-			) }
-
-			{ saveError && (
-				<Notice status="error" isDismissible={ false }>
-					{ __(
-						'Error saving settings. Please try again.',
-						'woocommerce'
-					) }
-					{ saveError.message && (
-						<p>
-							<strong>{ __( 'Error:', 'woocommerce' ) }</strong>{ ' ' }
-							{ saveError.message }
-						</p>
-					) }
-				</Notice>
-			) }
-
+		<div className="woocommerce-settings-general wc-settings-prevent-change-event">
 			<DataForm
 				data={ formData }
 				fields={ fields }
@@ -249,16 +212,50 @@ export const SettingsGeneralMain = () => {
 				onChange={ handleChange }
 			/>
 
+			{ fieldsForSubmit.map( ( field ) => {
+				const rawValue = formData[ field.id ];
+				if ( field.type === 'multiselect' ) {
+					let values: unknown[] = [];
+					if ( Array.isArray( rawValue ) ) {
+						values = rawValue;
+					} else if ( rawValue ) {
+						values = [ rawValue ];
+					}
+					return values.map( ( value, index ) => (
+						<input
+							key={ `${ field.id }-${ index }` }
+							type="hidden"
+							name={ `${ field.id }[]` }
+							value={ String( value ) }
+						/>
+					) );
+				}
+
+				let value = rawValue ?? '';
+				if ( field.type === 'checkbox' ) {
+					value =
+						rawValue === true || rawValue === 'yes' ? 'yes' : 'no';
+				}
+
+				return (
+					<input
+						key={ field.id }
+						type="hidden"
+						name={ field.id }
+						value={ String( value ) }
+					/>
+				);
+			} ) }
+
 			<div className="woocommerce-settings-general__actions">
 				<Button
 					variant="primary"
-					onClick={ handleSave }
-					disabled={ ! isDirty || isSaving }
-					isBusy={ isSaving }
+					type="submit"
+					name="save"
+					value="Save changes"
+					disabled={ ! isDirty }
 				>
-					{ isSaving
-						? __( 'Saving', 'woocommerce' )
-						: __( 'Save changes', 'woocommerce' ) }
+					{ __( 'Save changes', 'woocommerce' ) }
 				</Button>
 			</div>
 		</div>

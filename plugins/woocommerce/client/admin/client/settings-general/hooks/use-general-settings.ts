@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useState, useEffect } from '@wordpress/element';
-import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Type definitions for General Settings API response.
@@ -34,80 +33,56 @@ export interface UseGeneralSettingsReturn {
 	data: GeneralSettingsResponse | null;
 	isLoading: boolean;
 	error: Error | null;
-	refetch: () => Promise< void >;
-	updateSettings: ( values: Record< string, unknown > ) => Promise< void >;
-	isSaving: boolean;
-	saveError: Error | null;
+	refetch: () => void;
 }
 
 /**
- * Custom hook to fetch and manage General Settings from the WooCommerce V4 API.
+ * Custom hook to read General Settings from preloaded data.
  *
  * @return Object containing settings data, loading state, error state, and utility functions.
  */
 export const useGeneralSettings = (): UseGeneralSettingsReturn => {
+	const getPreloadedSettings = (): GeneralSettingsResponse | null => {
+		const windowWithSettings = window as Window & {
+			wcSettings?: {
+				admin?: {
+					settings?: {
+						general?: GeneralSettingsResponse;
+					};
+				};
+			};
+		};
+		return windowWithSettings.wcSettings?.admin?.settings?.general || null;
+	};
+
 	const [ data, setData ] = useState< GeneralSettingsResponse | null >(
-		null
+		getPreloadedSettings()
 	);
-	const [ isLoading, setIsLoading ] = useState( true );
+	const [ isLoading, setIsLoading ] = useState( ! data );
 	const [ error, setError ] = useState< Error | null >( null );
-	const [ isSaving, setIsSaving ] = useState( false );
-	const [ saveError, setSaveError ] = useState< Error | null >( null );
-	const GENERAL_SETTINGS_PATH = '/wc/v4/settings/general';
 
-	const fetchSettings = async () => {
-		try {
-			setIsLoading( true );
+	const refetch = () => {
+		const preloaded = getPreloadedSettings();
+		if ( preloaded ) {
+			setData( preloaded );
 			setError( null );
-
-			const response = await apiFetch< GeneralSettingsResponse >( {
-				path: GENERAL_SETTINGS_PATH,
-				method: 'GET',
-			} );
-
-			setData( response );
-		} catch ( err ) {
-			setError(
-				err instanceof Error ? err : new Error( 'Unknown error' )
-			);
-		} finally {
+			setIsLoading( false );
+		} else {
+			setError( new Error( 'General settings data is missing.' ) );
 			setIsLoading( false );
 		}
 	};
 
-	const updateSettings = async ( values: Record< string, unknown > ) => {
-		try {
-			setIsSaving( true );
-			setSaveError( null );
-
-			const response = await apiFetch< GeneralSettingsResponse >( {
-				path: GENERAL_SETTINGS_PATH,
-				method: 'POST',
-				data: { values },
-			} );
-
-			setData( response );
-		} catch ( err ) {
-			setSaveError(
-				err instanceof Error ? err : new Error( 'Unknown error' )
-			);
-			throw err;
-		} finally {
-			setIsSaving( false );
-		}
-	};
-
 	useEffect( () => {
-		fetchSettings();
+		if ( ! data ) {
+			refetch();
+		}
 	}, [] );
 
 	return {
 		data,
 		isLoading,
 		error,
-		refetch: fetchSettings,
-		updateSettings,
-		isSaving,
-		saveError,
+		refetch,
 	};
 };
