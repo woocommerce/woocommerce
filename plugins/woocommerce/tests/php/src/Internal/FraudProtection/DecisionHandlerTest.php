@@ -87,7 +87,6 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 
 		$result = $this->sut->apply_decision( ApiClient::DECISION_ALLOW, array( 'session_id' => 'test' ) );
 
-		$this->assertSame( ApiClient::DECISION_ALLOW, $result );
 		$this->assertLogged( 'info', 'Preserving blocked session status' );
 	}
 

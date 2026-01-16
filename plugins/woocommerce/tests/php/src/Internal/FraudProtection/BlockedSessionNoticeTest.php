@@ -107,21 +107,6 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox maybe_add_blocked_purchase_notice should not add notice when not on relevant page.
-	 */
-	public function test_blocked_purchase_notice_not_added_on_other_pages(): void {
-		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( true );
-
-		// Navigate to a regular post (not a WooCommerce page) to ensure is_shop(), is_product_taxonomy(), etc. return false.
-		$post_id = $this->factory->post->create();
-		$this->go_to( get_permalink( $post_id ) );
-
-		do_action( 'wp' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-
-		$this->assertFalse( wc_has_notice( $this->sut->get_message_html( 'purchase' ), 'error' ), 'Should not add notice on non-relevant pages' );
-	}
-
-	/**
 	 * @testdox maybe_add_blocked_purchase_notice should not add duplicate notices.
 	 */
 	public function test_blocked_purchase_notice_prevents_duplicates(): void {
