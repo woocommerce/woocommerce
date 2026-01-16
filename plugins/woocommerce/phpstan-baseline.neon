@@ -20785,12 +20785,6 @@ parameters:
 			path: includes/cli/class-wc-cli-update-command.php
 
 		-
-			message: '#^Cannot access property \$post_content on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/customizer/class-wc-shop-customizer.php
-
-		-
 			message: '#^Method WC_Shop_Customizer\:\:add_checkout_section\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
