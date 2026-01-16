@@ -88,7 +88,11 @@ class SessionClearanceManager {
 	}
 
 	/**
-	 * Mark the current session as blocked.
+	 * Mark the current session as blocked and empty the cart.
+	 *
+	 * Emptying the cart prevents express payment methods (e.g., PayPal) from
+	 * rendering on cart pages, as they are loaded via third-party SDKs that
+	 * don't respect WooCommerce's payment method filtering.
 	 *
 	 * @return void
 	 */
