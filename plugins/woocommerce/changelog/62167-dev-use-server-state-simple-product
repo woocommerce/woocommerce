@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add experimental wc_interactivity_api_load_product API for hydrating product state for iAPI powered blocks.

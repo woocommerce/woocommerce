@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Verify checkout page exists before adding customizer styles.

@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\BlockPatterns;
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
 use Automattic\WooCommerce\Blocks\BlockTypesController;
+use Automattic\WooCommerce\Blocks\DependencyDetection;
 use Automattic\WooCommerce\Blocks\Patterns\AIPatterns;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
@@ -134,6 +135,7 @@ class Bootstrap {
 		$this->container->get( CheckoutLink::class )->init();
 		$this->container->get( AssetDataRegistry::class );
 		$this->container->get( AssetsController::class );
+		$this->container->get( DependencyDetection::class );
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
@@ -220,6 +222,12 @@ class Bootstrap {
 			AssetsController::class,
 			function ( Container $container ) {
 				return new AssetsController( $container->get( AssetApi::class ) );
+			}
+		);
+		$this->container->register(
+			DependencyDetection::class,
+			function () {
+				return new DependencyDetection();
 			}
 		);
 		$this->container->register(
