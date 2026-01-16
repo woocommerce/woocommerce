@@ -38,7 +38,8 @@ test.describe( 'Shopper → Notices', () => {
 		const result = await wpCLI(
 			`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin --porcelain`
 		);
-		const productId = result.stdout.trim();
+		// Extract just the numeric ID from output (npm adds prefix lines to stdout).
+		const productId = result.stdout.match( /^\d+$/m )?.[ 0 ];
 
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
