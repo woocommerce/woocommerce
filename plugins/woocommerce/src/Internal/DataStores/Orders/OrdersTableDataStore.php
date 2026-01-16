@@ -1419,8 +1419,7 @@ WHERE
 	 * @param \WC_Abstract_Order $order The order to get the COGS value for.
 	 */
 	private function read_cogs_data( WC_Abstract_Order $order ) {
-		$meta_entry = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
-		$cogs_value = false === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
+		$cogs_value = (float) $order->get_meta( '_cogs_total_value' );
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
