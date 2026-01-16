@@ -1402,7 +1402,7 @@ WHERE
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
-			if ( $order->has_cogs() && $cogs_is_enabled ) {
+			if ( $cogs_is_enabled && $order->has_cogs() ) {
 				$this->read_cogs_data( $order, $order_data->meta_data );
 			}
 
