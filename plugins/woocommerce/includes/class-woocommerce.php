@@ -382,6 +382,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -471,6 +472,9 @@ final class WooCommerce {
 
 	/**
 	 * Define WC Constants.
+	 *
+	 * IMPORTANT: When adding new constants here, also add them to
+	 * php-stubs/wc-constants.php for PHPStan static analysis.
 	 */
 	private function define_constants() {
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );

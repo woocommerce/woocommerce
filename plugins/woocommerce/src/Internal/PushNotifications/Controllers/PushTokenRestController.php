@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use InvalidArgumentException;
 use Exception;
+use WP_REST_Server;
 use WP_REST_Request;
 use WP_Error;
 use WP_Http;
@@ -22,6 +23,8 @@ use WP_Http;
  * tokens.
  *
  * @since 10.6.0
+ *
+ * @internal
  */
 class PushTokenRestController extends RestApiControllerBase {
 	/**
@@ -57,8 +60,145 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return void
 	 */
 	public function register_routes(): void {
-		// Routes will be registered here, can't omit method due to parent class
-		// constraints.
+		register_rest_route(
+			$this->get_rest_api_namespace(),
+			$this->rest_base,
+			array(
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
+					'args'                => $this->get_args( 'create' ),
+					'permission_callback' => array( $this, 'authorize' ),
+					'schema'              => array( $this, 'get_schema' ),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Creates a push token record.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @return void
+	 */
+	public function create(): void {
+		// Functionality to be added later.
+	}
+
+	/**
+	 * Validates the token.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param string          $token The token string.
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool|WP_Error
+	 */
+	public function validate_token( string $token, WP_REST_Request $request ) {
+		if (
+			$request->get_param( 'platform' ) === PushToken::PLATFORM_APPLE
+			&& ! preg_match( '/^[A-Fa-f0-9]{64}$/', $token )
+		) {
+			return new WP_Error(
+				'rest_invalid_param',
+				'Invalid push token format.',
+				array(
+					'status' => WP_Http::BAD_REQUEST,
+					'param'  => 'token',
+				)
+			);
+		}
+
+		if (
+			$request->get_param( 'platform' ) === PushToken::PLATFORM_ANDROID
+			&& (
+				! preg_match( '/^[A-Za-z0-9=:\_\-\+\/]+$/', $token )
+				|| strlen( $token ) > PushToken::MAX_TOKEN_LENGTH
+			)
+		) {
+			return new WP_Error(
+				'rest_invalid_param',
+				'Invalid push token format.',
+				array(
+					'status' => WP_Http::BAD_REQUEST,
+					'param'  => 'token',
+				)
+			);
+		}
+
+		if ( $request->get_param( 'platform' ) === PushToken::PLATFORM_BROWSER ) {
+			$token_object = json_decode( $token, true );
+			$endpoint     = $token_object['endpoint'] ?? null;
+
+			if (
+				json_last_error()
+				|| ! $endpoint
+				|| ! isset( $token_object['keys']['auth'] )
+				|| ! isset( $token_object['keys']['p256dh'] )
+				|| ! wp_http_validate_url( (string) $endpoint )
+				|| ( wp_parse_url( (string) $endpoint, PHP_URL_SCHEME ) !== 'https' )
+				|| strlen( $token ) > PushToken::MAX_TOKEN_LENGTH
+			) {
+				return new WP_Error(
+					'rest_invalid_param',
+					'Invalid push token format.',
+					array(
+						'status' => WP_Http::BAD_REQUEST,
+						'param'  => 'token',
+					)
+				);
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validates the device UUID, which is required unless the token is for
+	 * a browser.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param string          $device_uuid The device UUID string.
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool|WP_Error
+	 */
+	public function validate_device_uuid( ?string $device_uuid, WP_REST_Request $request ) {
+		if (
+			! $device_uuid
+			&& $request->get_param( 'platform' ) !== PushToken::PLATFORM_BROWSER
+		) {
+			return new WP_Error(
+				'rest_missing_callback_param',
+				'Missing parameter(s): device_uuid.',
+				array(
+					'status' => WP_Http::BAD_REQUEST,
+					'param'  => 'device_uuid',
+				)
+			);
+		}
+
+		if (
+			$device_uuid
+			&& (
+				strlen( $device_uuid ) > 255
+				|| ! preg_match( '/^[A-Za-z0-9._:-]+$/', $device_uuid )
+			)
+		) {
+			return new WP_Error(
+				'rest_invalid_param',
+				'Invalid device_uuid format.',
+				array(
+					'status' => WP_Http::BAD_REQUEST,
+					'param'  => 'device_uuid',
+				)
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -101,10 +241,15 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return bool|WP_Error
 	 */
 	public function authorize( WP_REST_Request $request ) {
-		if (
-			! get_current_user_id()
-			|| ! wc_get_container()->get( PushNotifications::class )->should_be_enabled()
-		) {
+		if ( ! get_current_user_id() ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_view',
+				__( 'Sorry, you are not allowed to do that.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
 			return false;
 		}
 
@@ -161,10 +306,11 @@ class PushTokenRestController extends RestApiControllerBase {
 			InvalidArgumentException::class   => WP_Http::BAD_REQUEST,
 		);
 
-		$slug   = $slugs[ $exception_class ] ?? 'rest_internal_error';
-		$status = $statuses[ $exception_class ] ?? WP_Http::INTERNAL_SERVER_ERROR;
+		$slug    = $slugs[ $exception_class ] ?? 'rest_internal_error';
+		$status  = $statuses[ $exception_class ] ?? WP_Http::INTERNAL_SERVER_ERROR;
+		$message = ! isset( $slugs[ $exception_class ] ) ? 'Internal server error' : $e->getMessage();
 
-		return new WP_Error( $slug, $e->getMessage(), array( 'status' => $status ) );
+		return new WP_Error( $slug, $message, array( 'status' => $status ) );
 	}
 
 	/**
@@ -197,6 +343,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'default'           => '',
 				'type'              => 'string',
 				'context'           => array( 'create' ),
+				'validate_callback' => array( $this, 'validate_device_uuid' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'platform'    => array(
@@ -211,6 +358,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'type'              => 'string',
 				'required'          => true,
 				'context'           => array( 'create' ),
+				'validate_callback' => array( $this, 'validate_token' ),
 				'sanitize_callback' => 'wp_unslash',
 			),
 		);
