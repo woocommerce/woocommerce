@@ -122,8 +122,8 @@ class WC_Cart_Shipping_Rounding_Test extends WC_Unit_Test_Case {
 		);
 
 		// THE KEY ASSERTION.
-		// Bug behavior: Returns $136.19
-		// Fixed behavior: Returns $136.20
+		// Bug behavior: Returns $136.19.
+		// Fixed behavior: Returns $136.20.
 		$this->assertEquals(
 			'136.20',
 			wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ),
