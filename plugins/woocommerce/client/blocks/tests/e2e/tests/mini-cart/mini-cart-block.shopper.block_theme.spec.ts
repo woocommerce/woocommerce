@@ -66,11 +66,13 @@ test.describe( 'Shopper → Notices', () => {
 		await noJsPage.goto( currentUrl );
 
 		// Verify error notice is rendered in SSR output (not client-side JS).
+		// Use more specific locator to target the notice inside the mini-cart contents block.
+		const miniCartNotice = noJsPage.locator(
+			'.wp-block-woocommerce-filled-mini-cart-contents-block .wc-block-components-notice-banner'
+		);
+		await expect( miniCartNotice ).toBeVisible();
 		await expect(
-			noJsPage.locator( '.wc-block-components-notice-banner' )
-		).toBeVisible();
-		await expect(
-			noJsPage.getByText( /out of stock|not available/i )
+			miniCartNotice.getByText( /out of stock|not available/i )
 		).toBeVisible();
 
 		await noJsContext.close();
