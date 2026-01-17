@@ -115,6 +115,7 @@ export const OtherPaymentGateways = ( {
 			setCategoryIdWithPopoverVisible( '' );
 			buttonRefs.current[ categoryId ]?.focus();
 		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			event.preventDefault();
 			handleInfoIconClick( event, categoryId );
 		}
 	};

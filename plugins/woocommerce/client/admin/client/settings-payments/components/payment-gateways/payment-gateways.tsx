@@ -137,6 +137,7 @@ export const PaymentGateways = ( {
 			setIsPopoverVisible( false );
 			buttonRef.current?.focus();
 		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			event.preventDefault();
 			handleBusinessLocationIndicatorClick( event );
 		}
 	};
