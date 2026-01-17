@@ -290,7 +290,7 @@ export const CountrySelector = < ItemType extends Item >( {
 						return newIndex;
 					} );
 					break;
-				case 'Enter':
+				case 'Enter': {
 					event.preventDefault();
 					// Use highlighted item if available, otherwise use current selection.
 					const itemToApply =
@@ -304,6 +304,7 @@ export const CountrySelector = < ItemType extends Item >( {
 					}
 					closeMenu();
 					break;
+				}
 				case 'Escape':
 					event.preventDefault();
 					closeMenu();
