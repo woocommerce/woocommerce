@@ -533,8 +533,10 @@ final class WooCommerce {
 		);
 
 		foreach ( $tables as $name => $table ) {
-			$wpdb->$name    = $wpdb->prefix . $table;
-			$wpdb->tables[] = $table;
+			$wpdb->$name = $wpdb->prefix . $table;
+			if ( ! in_array( $table, $wpdb->tables, true ) ) {
+				$wpdb->tables[] = $table;
+			}
 		}
 	}
 
