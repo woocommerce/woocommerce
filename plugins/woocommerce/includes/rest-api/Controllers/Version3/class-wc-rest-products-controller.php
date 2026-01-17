@@ -469,6 +469,18 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
+		// Exclude products without stock management when filtering by stock quantity.
+		if ( isset( $request['stock_quantity'] ) || isset( $request['min_stock_quantity'] ) || isset( $request['max_stock_quantity'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args,
+				array(
+					'key'     => '_manage_stock',
+					'value'   => 'yes',
+					'compare' => '=',
+				)
+			);
+		}
+
 		// Include variable products if ANY variation matches stock filters.
 		if ( isset( $request['stock_quantity'] ) || isset( $request['min_stock_quantity'] ) || isset( $request['max_stock_quantity'] ) ) {
 			$parent_ids = $this->get_variable_product_ids_with_matching_variation_stock(
