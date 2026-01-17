@@ -215,7 +215,11 @@ export const PaymentGateways = ( {
 									shift={ true }
 									onFocusOutside={ handleFocusOutside }
 								>
-									<div className="components-popover__content-container">
+									{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+									<div
+										className="components-popover__content-container"
+										onKeyDown={ handleIndicatorKeyDown }
+									>
 										<p>
 											{ interpolateComponents( {
 												mixedString: __(
