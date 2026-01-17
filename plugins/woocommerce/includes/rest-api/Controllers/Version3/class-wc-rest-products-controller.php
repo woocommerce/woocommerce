@@ -1910,21 +1910,21 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$params['stock_quantity'] = array(
 			'description'       => __( 'Limit result set to products with specified stock quantity.', 'woocommerce' ),
 			'type'              => 'integer',
-			'sanitize_callback' => 'absint',
+			'sanitize_callback' => 'intval',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['min_stock_quantity'] = array(
 			'description'       => __( 'Limit result set to products with at least the specified stock quantity.', 'woocommerce' ),
 			'type'              => 'integer',
-			'sanitize_callback' => 'absint',
+			'sanitize_callback' => 'intval',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['max_stock_quantity'] = array(
 			'description'       => __( 'Limit result set to products with at most the specified stock quantity.', 'woocommerce' ),
 			'type'              => 'integer',
-			'sanitize_callback' => 'absint',
+			'sanitize_callback' => 'intval',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
