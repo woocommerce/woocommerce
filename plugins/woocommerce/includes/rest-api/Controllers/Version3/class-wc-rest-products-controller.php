@@ -443,6 +443,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
+		// Filter product by min_stock_quantity.
+		if ( isset( $request['min_stock_quantity'] ) ) {
+			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+				$args,
+				array(
+					'key'     => '_stock',
+					'value'   => $request['min_stock_quantity'],
+					'compare' => '>=',
+					'type'    => 'NUMERIC',
+				)
+			);
+		}
+
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
 			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
@@ -1883,6 +1896,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		$params['stock_quantity'] = array(
 			'description'       => __( 'Limit result set to products with specified stock quantity.', 'woocommerce' ),
+			'type'              => 'integer',
+			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['min_stock_quantity'] = array(
+			'description'       => __( 'Limit result set to products with at least the specified stock quantity.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
