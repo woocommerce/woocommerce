@@ -211,19 +211,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
-		// Validate stock quantity range: min must not exceed max.
-		if ( isset( $request['min_stock_quantity'] ) && isset( $request['max_stock_quantity'] ) ) {
-			if ( $request['min_stock_quantity'] > $request['max_stock_quantity'] ) {
-				return array(
-					new WP_Error(
-						'woocommerce_rest_invalid_stock_quantity_range',
-						__( 'Invalid stock quantity range: min_stock_quantity cannot be greater than max_stock_quantity.', 'woocommerce' ),
-						array( 'status' => 400 )
-					),
-				);
-			}
-		}
-
 		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
 
 		// Set post_status.
@@ -441,69 +428,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'value' => $request['stock_status'],
 				)
 			);
-		}
-
-		// Filter product by stock_quantity.
-		if ( isset( $request['stock_quantity'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'     => '_stock',
-					'value'   => $request['stock_quantity'],
-					'compare' => '=',
-					'type'    => 'NUMERIC',
-				)
-			);
-		}
-
-		// Filter product by min_stock_quantity.
-		if ( isset( $request['min_stock_quantity'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'     => '_stock',
-					'value'   => $request['min_stock_quantity'],
-					'compare' => '>=',
-					'type'    => 'NUMERIC',
-				)
-			);
-		}
-
-		// Filter product by max_stock_quantity.
-		if ( isset( $request['max_stock_quantity'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'     => '_stock',
-					'value'   => $request['max_stock_quantity'],
-					'compare' => '<=',
-					'type'    => 'NUMERIC',
-				)
-			);
-		}
-
-		// Exclude products without stock management when filtering by stock quantity.
-		if ( isset( $request['stock_quantity'] ) || isset( $request['min_stock_quantity'] ) || isset( $request['max_stock_quantity'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
-				$args,
-				array(
-					'key'     => '_manage_stock',
-					'value'   => 'yes',
-					'compare' => '=',
-				)
-			);
-		}
-
-		// Include variable products if ANY variation matches stock filters.
-		if ( isset( $request['stock_quantity'] ) || isset( $request['min_stock_quantity'] ) || isset( $request['max_stock_quantity'] ) ) {
-			$parent_ids = $this->get_variable_product_ids_with_matching_variation_stock(
-				isset( $request['stock_quantity'] ) ? $request['stock_quantity'] : null,
-				isset( $request['min_stock_quantity'] ) ? $request['min_stock_quantity'] : null,
-				isset( $request['max_stock_quantity'] ) ? $request['max_stock_quantity'] : null
-			);
-			if ( ! empty( $parent_ids ) ) {
-				$args['post__in'] = array_merge( $args['post__in'], $parent_ids );
-			}
 		}
 
 		// Filter by on sale products.
@@ -1944,24 +1868,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
-		$params['stock_quantity'] = array(
-			'description'       => __( 'Limit result set to products with specified stock quantity.', 'woocommerce' ),
-			'type'              => 'integer',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
-		$params['min_stock_quantity'] = array(
-			'description'       => __( 'Limit result set to products with at least the specified stock quantity.', 'woocommerce' ),
-			'type'              => 'integer',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
-		$params['max_stock_quantity'] = array(
-			'description'       => __( 'Limit result set to products with at most the specified stock quantity.', 'woocommerce' ),
-			'type'              => 'integer',
-			'validate_callback' => 'rest_validate_request_arg',
-		);
-
 		$params['search_sku'] = array(
 			'description'       => __( "Limit results to those with a SKU that partial matches a string. This argument takes precedence over 'sku'.", 'woocommerce' ),
 			'type'              => 'string',
@@ -2262,50 +2168,5 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$this->processed_attachment_ids_for_request = array();
 
 		return $response;
-	}
-
-	/**
-	 * Get variable product IDs that have at least one variation matching stock criteria.
-	 *
-	 * @since 9.8.0
-	 *
-	 * @param int|null $stock_quantity     Exact stock quantity to match.
-	 * @param int|null $min_stock_quantity Minimum stock quantity.
-	 * @param int|null $max_stock_quantity Maximum stock quantity.
-	 * @return array Array of parent product IDs.
-	 */
-	protected function get_variable_product_ids_with_matching_variation_stock( $stock_quantity, $min_stock_quantity, $max_stock_quantity ) {
-		global $wpdb;
-
-		$where_clauses = array();
-
-		if ( null !== $stock_quantity ) {
-			$where_clauses[] = $wpdb->prepare( 'lookup.stock_quantity = %d', $stock_quantity );
-		}
-
-		if ( null !== $min_stock_quantity ) {
-			$where_clauses[] = $wpdb->prepare( 'lookup.stock_quantity >= %d', $min_stock_quantity );
-		}
-
-		if ( null !== $max_stock_quantity ) {
-			$where_clauses[] = $wpdb->prepare( 'lookup.stock_quantity <= %d', $max_stock_quantity );
-		}
-
-		if ( empty( $where_clauses ) ) {
-			return array();
-		}
-
-		$where_sql = implode( ' AND ', $where_clauses );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $where_sql is already prepared above.
-		$query = "SELECT DISTINCT p.post_parent
-			FROM {$wpdb->posts} p
-			INNER JOIN {$wpdb->wc_product_meta_lookup} lookup ON p.ID = lookup.product_id
-			WHERE p.post_type = 'product_variation'
-			AND p.post_parent > 0
-			AND lookup.stock_quantity IS NOT NULL
-			AND {$where_sql}";
-
-		return array_map( 'absint', $wpdb->get_col( $query ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is built using $wpdb->prepare for dynamic parts.
 	}
 }

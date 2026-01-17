@@ -2126,4 +2126,78 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 403, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
 	}
+
+	/**
+	 * Test that filtering products with invalid stock quantity range returns an error.
+	 *
+	 * @return void
+	 */
+	public function test_products_filter_invalid_stock_quantity_range_returns_error() {
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 10,
+				'max_stock_quantity' => 5,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_stock_quantity_range', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Test that filtering products with valid stock quantity range works.
+	 *
+	 * @return void
+	 */
+	public function test_products_filter_valid_stock_quantity_range() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 7 );
+		$product->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 5,
+				'max_stock_quantity' => 10,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$products    = $response->get_data();
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test that filtering products with equal min and max stock quantity works.
+	 *
+	 * @return void
+	 */
+	public function test_products_filter_equal_min_max_stock_quantity() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 5 );
+		$product->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 5,
+				'max_stock_quantity' => 5,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$products    = $response->get_data();
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $product->get_id(), $product_ids );
+	}
 }
