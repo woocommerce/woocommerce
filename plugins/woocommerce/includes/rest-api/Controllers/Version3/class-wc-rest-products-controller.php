@@ -211,6 +211,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function prepare_objects_query( $request ) {
+		// Validate stock quantity range: min must not exceed max.
+		if ( isset( $request['min_stock_quantity'] ) && isset( $request['max_stock_quantity'] ) ) {
+			if ( $request['min_stock_quantity'] > $request['max_stock_quantity'] ) {
+				return array(
+					new WP_Error(
+						'woocommerce_rest_invalid_stock_quantity_range',
+						__( 'Invalid stock quantity range: min_stock_quantity cannot be greater than max_stock_quantity.', 'woocommerce' ),
+						array( 'status' => 400 )
+					),
+				);
+			}
+		}
+
 		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
 
 		// Set post_status.
@@ -1934,21 +1947,18 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$params['stock_quantity'] = array(
 			'description'       => __( 'Limit result set to products with specified stock quantity.', 'woocommerce' ),
 			'type'              => 'integer',
-			'sanitize_callback' => 'intval',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['min_stock_quantity'] = array(
 			'description'       => __( 'Limit result set to products with at least the specified stock quantity.', 'woocommerce' ),
 			'type'              => 'integer',
-			'sanitize_callback' => 'intval',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		$params['max_stock_quantity'] = array(
 			'description'       => __( 'Limit result set to products with at most the specified stock quantity.', 'woocommerce' ),
 			'type'              => 'integer',
-			'sanitize_callback' => 'intval',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
