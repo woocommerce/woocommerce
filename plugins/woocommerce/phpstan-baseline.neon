@@ -14281,20 +14281,8 @@ parameters:
 			path: includes/class-wc-download-handler.php
 
 		-
-			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/class-wc-download-handler.php
-
-		-
 			message: '#^Cannot call method get_file_download_path\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-download-handler.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
 			count: 1
 			path: includes/class-wc-download-handler.php
 
@@ -15261,12 +15249,6 @@ parameters:
 		-
 			message: '#^Class WC_Post_Types referenced with incorrect case\: WC_Post_types\.$#'
 			identifier: class.nameCase
-			count: 2
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
 			count: 2
 			path: includes/class-wc-install.php
 
@@ -16995,12 +16977,6 @@ parameters:
 		-
 			message: '#^Expected 4 @param tags, found 3\.$#'
 			identifier: paramTag.count
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Function as_next_scheduled_action not found\.$#'
-			identifier: function.notFound
 			count: 1
 			path: includes/class-wc-post-data.php
 
@@ -20200,24 +20176,6 @@ parameters:
 			message: '#^Cannot access an offset on list\<string\>\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Function as_next_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 6
 			path: includes/class-woocommerce.php
 
 		-
@@ -27151,48 +27109,6 @@ parameters:
 			path: includes/product-usage/class-wc-product-usage.php
 
 		-
-			message: '#^Function as_get_scheduled_actions not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_next_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_schedule_cron_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_unschedule_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
 			message: '#^Method WC_Action_Queue\:\:cancel\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -27303,12 +27219,6 @@ parameters:
 		-
 			message: '#^Call to static method update_db_version\(\) on an unknown class Installer\.$#'
 			identifier: class.notFound
-			count: 2
-			path: includes/react-admin/wc-admin-update-functions.php
-
-		-
-			message: '#^Function as_unschedule_action not found\.$#'
-			identifier: function.notFound
 			count: 2
 			path: includes/react-admin/wc-admin-update-functions.php
 
@@ -42286,12 +42196,6 @@ parameters:
 			path: includes/wc-update-functions.php
 
 		-
-			message: '#^Call to function method_exists\(\) with ''ActionScheduler…'' and ''mark_migration…'' will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
 			message: '#^Cannot access offset 0 on non\-empty\-array\|true\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -42330,12 +42234,6 @@ parameters:
 		-
 			message: '#^Cannot call method remove_cap\(\) on WP_Role\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
 			count: 1
 			path: includes/wc-update-functions.php
 
@@ -54988,12 +54886,6 @@ parameters:
 			path: src/Admin/PluginsHelper.php
 
 		-
-			message: '#^Call to method get_status\(\) on an unknown class ActionScheduler_DBStore\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/PluginsHelper.php
-
-		-
 			message: '#^Cannot access property \$download_link on array\|object\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -55008,12 +54900,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$version on array\|object\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Admin/PluginsHelper.php
-
-		-
-			message: '#^Instantiated class ActionScheduler_DBStore not found\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/PluginsHelper.php
 
@@ -55894,12 +55780,6 @@ parameters:
 			path: src/Admin/RemoteSpecs/RuleProcessors/StoredStateSetupForProducts.php
 
 		-
-			message: '#^Function as_enqueue_async_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Admin/RemoteSpecs/RuleProcessors/StoredStateSetupForProducts.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\RemoteSpecs\\RuleProcessors\\StoredStateSetupForProducts\:\:admin_init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -56218,12 +56098,6 @@ parameters:
 			path: src/Admin/ReportExporter.php
 
 		-
-			message: '#^Call to method get_schedule\(\) on an unknown class ActionScheduler_Action\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/ReportExporter.php
-
-		-
 			message: '#^Call to method schedule_single\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 2
@@ -56233,18 +56107,6 @@ parameters:
 			message: '#^Call to method search\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 2
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Call to static method store\(\) on an unknown class ActionScheduler\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/ReportExporter.php
 
 		-
@@ -56364,12 +56226,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, Automattic\\WooCommerce\\Admin\\Schedulers\\DateTime\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Parameter \$action of method Automattic\\WooCommerce\\Admin\\ReportExporter\:\:get_next_action_time\(\) has invalid type ActionScheduler_Action\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/ReportExporter.php
 
@@ -56718,12 +56574,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:set_pattern_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockPatterns.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockPatterns.php
 
@@ -61660,12 +61510,6 @@ parameters:
 			path: src/Blocks/Domain/Services/DraftOrders.php
 
 		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Blocks/Domain/Services/DraftOrders.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\DraftOrders\:\:assert_order_results\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -61704,12 +61548,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\DraftOrders\:\:unschedule_cronjobs\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/DraftOrders.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/Domain/Services/DraftOrders.php
 
@@ -61951,18 +61789,6 @@ parameters:
 			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
 			identifier: arguments.count
 			count: 3
-			path: src/Blocks/Patterns/PTKPatternsStore.php
-
-		-
-			message: '#^Function as_has_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Blocks/Patterns/PTKPatternsStore.php
-
-		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
 			path: src/Blocks/Patterns/PTKPatternsStore.php
 
 		-
@@ -62888,12 +62714,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: src/Caches/OrderCountCache.php
-
-		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:init\(\) has no return type specified\.$#'
@@ -67366,12 +67186,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
-			message: '#^Call to method get_schedule\(\) on an unknown class ActionScheduler_Action\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
 			message: '#^Call to method schedule_single\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 2
@@ -67381,18 +67195,6 @@ parameters:
 			message: '#^Call to method search\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 4
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Call to static method store\(\) on an unknown class ActionScheduler\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
@@ -67522,12 +67324,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
-			message: '#^Parameter \$action of method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:get_next_action_time\(\) has invalid type ActionScheduler_Action\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
 			message: '#^Parameter \$queue of method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:set_queue\(\) has invalid type Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 1
@@ -67576,18 +67372,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
 
 		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\OrdersScheduler\:\:get_items\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -67608,12 +67392,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\OrdersScheduler\:\:schedule_recurring_batch_processor\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
 
@@ -68752,30 +68530,6 @@ parameters:
 			path: src/Internal/BatchProcessing/BatchProcessingController.php
 
 		-
-			message: '#^Function as_has_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 2
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
-			count: 2
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 3
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
 			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Container\:\:get\(\) expects class\-string\<object\>, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -69871,12 +69625,6 @@ parameters:
 			message: '#^Filter callback return statement is missing\.$#'
 			identifier: return.missing
 			count: 3
-			path: src/Internal/DataStores/Orders/DataSynchronizer.php
-
-		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
 
 		-
@@ -71045,12 +70793,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DependencyManagement/RuntimeContainer.php
-
-		-
-			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/DownloadPermissionsAdjuster.php
 
 		-
 			message: '#^Call to method create_from_data\(\) on an unknown class Automattic\\WooCommerce\\Internal\\WC_Data_Store\.$#'
@@ -72967,12 +72709,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/CLIRunner.php
 
 		-
-			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
-
-		-
 			message: '#^Call to an undefined method object\:\:cancel_all\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -73139,12 +72875,6 @@ parameters:
 			identifier: property.onlyWritten
 			count: 1
 			path: src/Internal/ProductAttributesLookup/Filterer.php
-
-		-
-			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
 			message: '#^Call to an undefined method object\:\:schedule_single\(\)\.$#'
@@ -78093,24 +77823,6 @@ parameters:
 		-
 			message: '#^Expected 1 @param tags, found 2\.$#'
 			identifier: paramTag.count
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Function as_has_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Function as_unschedule_action not found\.$#'
-			identifier: function.notFound
 			count: 1
 			path: src/Internal/TransientFiles/TransientFilesEngine.php
 
