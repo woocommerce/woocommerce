@@ -165,6 +165,7 @@ export const StatusBadge = ( {
 							noArrow={ true }
 							shift={ true }
 							onFocusOutside={ handleFocusOutside }
+							onKeyDown={ handleKeyDown }
 						>
 							{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
 							<div

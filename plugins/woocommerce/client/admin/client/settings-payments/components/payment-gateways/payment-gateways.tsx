@@ -214,6 +214,7 @@ export const PaymentGateways = ( {
 									noArrow={ true }
 									shift={ true }
 									onFocusOutside={ handleFocusOutside }
+									onKeyDown={ handleIndicatorKeyDown }
 								>
 									{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
 									<div

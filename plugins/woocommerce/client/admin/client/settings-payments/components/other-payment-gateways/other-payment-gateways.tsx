@@ -252,6 +252,12 @@ export const OtherPaymentGateways = ( {
 											onFocusOutside={
 												handleFocusOutsidePopover
 											}
+											onKeyDown={ ( event ) =>
+												handleInfoIconKeyDown(
+													event,
+													category.id
+												)
+											}
 										>
 											{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
 											<div
