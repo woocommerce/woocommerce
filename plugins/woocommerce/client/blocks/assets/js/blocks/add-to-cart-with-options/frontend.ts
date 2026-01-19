@@ -11,6 +11,11 @@ import type {
 import '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import {
+	productsStore,
+	getQuantityConstraints as getQuantityConstraintsFromStore,
+} from '@woocommerce/stores/woocommerce/products';
+import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -21,7 +26,6 @@ import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 import type { NormalizedProductData, NormalizedVariationData } from './types';
-import type { ProductResponseItem } from '../../types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -70,27 +74,13 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
-const { state: productsStoreState } = store( 'woocommerce/products' );
-
 /**
- * Helper to extract quantity constraints from product data.
- * Supports both REST API format (new shared store) and config format (legacy).
+ * Helper to extract quantity constraints from legacy config product data.
  *
- * @param product Product data in either format
+ * @param product Product data in config format
  * @return Quantity constraints
  */
-const getQuantityConstraints = ( product: ProductResponseItem ) => {
-	// New format (REST API from shared store)
-	if ( product.add_to_cart ) {
-		const maximum = product.add_to_cart.maximum ?? Number.MAX_SAFE_INTEGER;
-		return {
-			min: product.add_to_cart.minimum ?? 1,
-			max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
-			step: product.add_to_cart.multiple_of ?? 1,
-		};
-	}
-
-	// Old format (config)
+const getQuantityConstraintsFromConfig = ( product: ProductData ) => {
 	return {
 		min: typeof product.min === 'number' ? product.min : 1,
 		max:
@@ -108,29 +98,25 @@ export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
 ): NormalizedProductData | NormalizedVariationData | null => {
-	// Try to get product from the new shared store first (for simple products)
-	try {
-		if ( productsStoreState?.products?.[ id ] ) {
-			const productFromStore = productsStoreState.products[ id ];
+	// Try to get product from the products store first (for simple products).
+	// This is the new approach using Store API format.
+	const productFromStore = productsStore.state.products[ id ];
+	if ( productFromStore ) {
+		const constraints = getQuantityConstraintsFromStore( productFromStore );
 
-			// Return REST API format directly with normalized constraints
-			const constraints = getQuantityConstraints( productFromStore );
-
-			return {
-				id,
-				type: productFromStore.type,
-				is_in_stock:
-					productFromStore.is_purchasable &&
-					productFromStore.is_in_stock,
-				sold_individually: productFromStore.sold_individually,
-				...constraints,
-			};
-		}
-	} catch ( error ) {
-		// If the store doesn't exist or there's an error, fall through to config
+		return {
+			id,
+			type: productFromStore.type,
+			is_in_stock:
+				productFromStore.is_purchasable &&
+				productFromStore.is_in_stock,
+			sold_individually: productFromStore.sold_individually,
+			...constraints,
+		};
 	}
 
-	// Fall back to existing config approach for variable/grouped products
+	// Fall back to existing config approach for variable/grouped products.
+	// This will be migrated to use the products store in future iterations.
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
 	if ( ! products || ! products[ id ] ) {
@@ -160,7 +146,7 @@ export const getProductData = (
 		}
 	}
 
-	const constraints = getQuantityConstraints( product );
+	const constraints = getQuantityConstraintsFromConfig( product );
 
 	return {
 		...product,
