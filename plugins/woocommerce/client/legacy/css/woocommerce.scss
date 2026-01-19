@@ -942,11 +942,12 @@ p.demo_store,
 	}
 
 	table.shop_table {
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 		margin: 0 -1px 24px 0;
 		text-align: left;
 		width: 100%;
 		border-collapse: separate;
+		border-spacing: 0;
 		border-radius: 5px;
 
 		th {
@@ -956,7 +957,7 @@ p.demo_store,
 		}
 
 		td {
-			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 			padding: 9px 12px;
 			vertical-align: middle;
 			line-height: 1.5em;
@@ -981,7 +982,7 @@ p.demo_store,
 		tfoot th,
 		tbody th {
 			font-weight: 700;
-			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 		}
 	}
 
