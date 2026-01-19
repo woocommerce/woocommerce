@@ -198,7 +198,8 @@ jobs:
               core.setOutput( 'assignee-id', '' );
             }
 
-      - name: Check specific tracking issue does not already exist
+      - name: Check if tracking issue already exists
+        id: check-existing
         uses: actions/github-script@v7
         with:
           script: |
@@ -221,13 +222,23 @@ jobs:
             } );
 
             if ( existingIssues.nodes.length > 0 ) {
-              core.setFailed( `Tracking issue '${ specificTitle }' already exists: ${ existingIssues.nodes[ 0 ].url }` );
+              const existingUrl = existingIssues.nodes[ 0 ].url;
+              console.log( `Tracking issue already exists: ${ existingUrl }` );
+              core.setOutput( 'issue-exists', 'true' );
+              core.setOutput( 'existing-url', existingUrl );
+
+              // Write to GitHub job summary.
+              await core.summary
+                .addRaw( `Linear tracking issue already exists: [${ specificTitle }](${ existingUrl })` )
+                .write();
               return;
             }
 
             console.log( 'No existing tracking issue found, proceeding with creation' );
+            core.setOutput( 'issue-exists', 'false' );
 
       - name: Process template and create Linear issue
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
         uses: actions/github-script@v7
         with:
           script: |

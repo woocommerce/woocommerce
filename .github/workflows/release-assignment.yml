@@ -3,6 +3,12 @@ on:
   schedule:
     - cron: '0 20 * * *' # Every day at 20h UTC (after Feature Freeze workflow)
   workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force processing'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -124,10 +130,55 @@ jobs:
 
             core.setOutput( 'team-name', teamName );
 
-  trigger-upcoming-code-freeze-events:
-    name: Assign a release lead
+  check-existing-tracking-issue:
+    name: Check if tracking issue already exists
     needs: check-upcoming-release-events
     if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      exists: ${{ steps.check-existing-issue.outputs.exists }}
+      issue-url: ${{ steps.check-existing-issue.outputs.issue-url }}
+    steps:
+      - name: Install linear-sdk
+        run: npm install @linear/sdk
+
+      - name: Check for existing release tracking issue
+        id: check-existing-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
+            const expectedTitle = `[${ releaseMainVersion }] Release tracking`;
+
+            console.log( `Checking for existing issue with title: "${ expectedTitle }"` );
+
+            const issues = await linearClient.issues( {
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                title: { eq: expectedTitle }
+              }
+            } );
+
+            if ( issues.nodes.length > 0 ) {
+              console.log( `Found existing release tracking issue: ${ issues.nodes[ 0 ].url }` );
+              core.setOutput( 'exists', 'true' );
+              core.setOutput( 'issue-url', issues.nodes[ 0 ].url );
+            } else {
+              console.log( 'No existing release tracking issue found' );
+              core.setOutput( 'exists', 'false' );
+            }
+
+  trigger-upcoming-code-freeze-events:
+    name: Assign a release lead
+    needs:
+      - check-upcoming-release-events
+      - check-existing-tracking-issue
+    if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' && ( inputs.force || needs.check-existing-tracking-issue.outputs.exists != 'true' ) }}
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
       post: ${{ steps.trigger-upcoming-code-freeze-events.outputs.post }}
@@ -228,12 +279,12 @@ jobs:
     needs:
       - trigger-upcoming-code-freeze-events
       - check-upcoming-release-events
-    if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
+      - check-existing-tracking-issue
+    if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' && ( inputs.force || needs.check-existing-tracking-issue.outputs.exists != 'true' ) }}
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
-      skipped: ${{ steps.check-existing-issue.outputs.exists }}
       sub-issues-matrix: ${{ steps.build-matrix.outputs.matrix }}
-      issue-url: ${{ steps.check-existing-issue.outputs.issue-url || steps.create-tracking-issue.outputs.issue-url }}
+      issue-url: ${{ needs.check-existing-tracking-issue.outputs.issue-url || steps.create-tracking-issue.outputs.issue-url }}
     steps:
       - name: Checkout repository (sparse)
         uses: actions/checkout@v4
@@ -302,39 +353,8 @@ jobs:
             core.setOutput( 'inProgressStateId', inProgressStateId );
             core.setOutput( 'organizationUrlKey', organization.urlKey );
 
-      - name: Check for existing release tracking issue
-        id: check-existing-issue
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-        with:
-          script: |
-            const { LinearClient } = require( '@linear/sdk' );
-            const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
-            } );
-
-            const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
-            const expectedTitle = `[${ releaseMainVersion }] Release tracking`;
-
-            console.log( `Checking for existing issue with title: "${ expectedTitle }"` );
-
-            const issues = await linearClient.issues( {
-              filter: {
-                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
-                title: { eq: expectedTitle }
-              }
-            } );
-
-            if ( issues.nodes.length > 0 ) {
-              console.log( `Found existing release tracking issue: ${ issues.nodes[ 0 ].url }` );
-              core.setOutput( 'exists', 'true' );
-              core.setOutput( 'issue-url', issues.nodes[ 0 ].url );
-            } else {
-              console.log( 'No existing release tracking issue found' );
-              core.setOutput( 'exists', 'false' );
-            }
-
       - name: Get Linear user from email
-        if: steps.check-existing-issue.outputs.exists != 'true'
+        if: ${{ needs.check-existing-tracking-issue.outputs.exists != 'true' }}
         id: get-linear-user
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
@@ -360,7 +380,7 @@ jobs:
             core.setOutput( 'assignee-display-name', displayName || '' );
 
       - name: Process template and create release tracking issue
-        if: steps.check-existing-issue.outputs.exists != 'true'
+        if: ${{ needs.check-existing-tracking-issue.outputs.exists != 'true' }}
         id: create-tracking-issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
@@ -453,7 +473,6 @@ jobs:
             }
 
       - name: Build sub-issues matrix
-        if: steps.check-existing-issue.outputs.exists != 'true'
         id: build-matrix
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
@@ -475,7 +494,6 @@ jobs:
     name: Create sub-issue for tracking ${{ matrix.version }} release
     needs:
       - create-parent-tracking-issue
-    if: ${{ needs.create-parent-tracking-issue.outputs.skipped != 'true' }}
     strategy:
       matrix: ${{ fromJSON(needs.create-parent-tracking-issue.outputs.sub-issues-matrix) }}
     uses: ./.github/workflows/release-create-tracking-issue.yml
