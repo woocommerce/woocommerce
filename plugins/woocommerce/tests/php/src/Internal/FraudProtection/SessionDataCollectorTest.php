@@ -42,12 +42,25 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 			wc_load_cart();
 		}
 
+		// Clear session data to ensure clean state for each test.
+		WC()->session->set( 'customer', array() );
+
 		$this->session_clearance_manager = new SessionClearanceManager();
 		$this->sut                       = new SessionDataCollector();
 		$this->sut->init( $this->session_clearance_manager );
 
 		// Disable taxes before adding products to cart.
 		update_option( 'woocommerce_calc_taxes', 'no' );
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		// Clear session data to ensure test isolation.
+		WC()->session->set( 'customer', array() );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -176,10 +189,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'session_id', $result['session'] );
 		// Session ID should be a string when session is available.
-		if ( isset( WC()->session ) ) {
-			$this->assertIsString( $result['session']['session_id'] );
-			$this->assertNotEmpty( $result['session']['session_id'] );
-		}
+		$this->assertIsString( $result['session']['session_id'] );
+		$this->assertNotEmpty( $result['session']['session_id'] );
 	}
 
 	/**
@@ -262,16 +273,14 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 
 		// Set customer data in session.
-		if ( isset( WC()->session ) ) {
-			WC()->session->set(
-				'customer',
-				array(
-					'first_name' => 'Jane',
-					'last_name'  => 'Smith',
-					'email'      => 'jane.smith@example.com',
-				)
-			);
-		}
+		WC()->session->set(
+			'customer',
+			array(
+				'first_name' => 'Jane',
+				'last_name'  => 'Smith',
+				'email'      => 'jane.smith@example.com',
+			)
+		);
 
 		// Nullify WC_Customer to force fallback to session.
 		$original_customer = WC()->customer;
@@ -283,11 +292,9 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		WC()->customer = $original_customer;
 
 		// Verify session data was used.
-		if ( isset( WC()->session ) ) {
-			$this->assertEquals( 'Jane', $result['customer']['first_name'] );
-			$this->assertEquals( 'Smith', $result['customer']['last_name'] );
-			$this->assertEquals( 'jane.smith@example.com', $result['customer']['billing_email'] );
-		}
+		$this->assertEquals( 'Jane', $result['customer']['first_name'] );
+		$this->assertEquals( 'Smith', $result['customer']['last_name'] );
+		$this->assertEquals( 'jane.smith@example.com', $result['customer']['billing_email'] );
 	}
 
 	/**
@@ -787,5 +794,155 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 
 		// No automatic data collection should have occurred.
 		// This is a design verification test - the class should not register hooks.
+	}
+
+	/**
+	 * Test billing address uses changes array for unsaved data.
+	 */
+	public function test_billing_address_uses_changes_array() {
+		// Setting these values automatically populates the changes array.
+		// This mimics what happens when a customer updates their address during checkout.
+		WC()->customer->set_billing_address_1( '456 New Street' );
+		WC()->customer->set_billing_city( 'New City' );
+		WC()->customer->set_billing_state( 'CA' );
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_billing_postcode( '67890' );
+
+		$result = $this->sut->collect();
+
+		$this->assertIsArray( $result['billing_address'] );
+		// Verify the values are collected correctly.
+		$this->assertArrayHasKey( 'address_1', $result['billing_address'] );
+		$this->assertSame( '456 New Street', $result['billing_address']['address_1'] );
+		$this->assertArrayHasKey( 'city', $result['billing_address'] );
+		$this->assertSame( 'New City', $result['billing_address']['city'] );
+		$this->assertArrayHasKey( 'postcode', $result['billing_address'] );
+		$this->assertSame( '67890', $result['billing_address']['postcode'] );
+		$this->assertArrayHasKey( 'state', $result['billing_address'] );
+		$this->assertSame( 'CA', $result['billing_address']['state'] );
+		$this->assertArrayHasKey( 'country', $result['billing_address'] );
+		$this->assertSame( 'US', $result['billing_address']['country'] );
+	}
+
+	/**
+	 * Test shipping address uses changes array for unsaved data.
+	 */
+	public function test_shipping_address_uses_changes_array() {
+		// Setting these values automatically populates the changes array.
+		// This mimics what happens when a customer updates their address during checkout.
+		WC()->customer->set_shipping_address_1( '101 Updated Blvd' );
+		WC()->customer->set_shipping_city( 'Updated City' );
+		WC()->customer->set_shipping_state( 'NY' );
+		WC()->customer->set_shipping_country( 'US' );
+		WC()->customer->set_shipping_postcode( '22222' );
+
+		$result = $this->sut->collect();
+
+		$this->assertIsArray( $result['shipping_address'] );
+		// Verify the values are collected correctly.
+		$this->assertArrayHasKey( 'address_1', $result['shipping_address'] );
+		$this->assertSame( '101 Updated Blvd', $result['shipping_address']['address_1'] );
+		$this->assertArrayHasKey( 'city', $result['shipping_address'] );
+		$this->assertSame( 'Updated City', $result['shipping_address']['city'] );
+		$this->assertArrayHasKey( 'postcode', $result['shipping_address'] );
+		$this->assertSame( '22222', $result['shipping_address']['postcode'] );
+		$this->assertArrayHasKey( 'state', $result['shipping_address'] );
+		$this->assertSame( 'NY', $result['shipping_address']['state'] );
+		$this->assertArrayHasKey( 'country', $result['shipping_address'] );
+		$this->assertSame( 'US', $result['shipping_address']['country'] );
+	}
+
+	/**
+	 * Test billing address collects data correctly.
+	 */
+	public function test_billing_address_collects_data_correctly() {
+		// Set billing address data.
+		WC()->customer->set_billing_address_1( '123 Test St' );
+		WC()->customer->set_billing_city( 'Test City' );
+
+		$result = $this->sut->collect();
+
+		$this->assertIsArray( $result['billing_address'] );
+		$this->assertArrayHasKey( 'address_1', $result['billing_address'] );
+		$this->assertSame( '123 Test St', $result['billing_address']['address_1'] );
+		$this->assertArrayHasKey( 'city', $result['billing_address'] );
+		$this->assertSame( 'Test City', $result['billing_address']['city'] );
+	}
+
+	/**
+	 * Test shipping address collects data correctly.
+	 */
+	public function test_shipping_address_collects_data_correctly() {
+		// Set shipping address data.
+		WC()->customer->set_shipping_address_1( '456 Ship St' );
+		WC()->customer->set_shipping_city( 'Ship City' );
+
+		$result = $this->sut->collect();
+
+		$this->assertIsArray( $result['shipping_address'] );
+		$this->assertArrayHasKey( 'address_1', $result['shipping_address'] );
+		$this->assertSame( '456 Ship St', $result['shipping_address']['address_1'] );
+		$this->assertArrayHasKey( 'city', $result['shipping_address'] );
+		$this->assertSame( 'Ship City', $result['shipping_address']['city'] );
+	}
+
+	/**
+	 * Test session data takes precedence for guest users.
+	 */
+	public function test_session_data_takes_precedence_for_billing() {
+		// Ensure no user is logged in.
+		wp_set_current_user( 0 );
+
+		// Set customer billing data.
+		WC()->customer->set_billing_address_1( 'Customer Address' );
+		WC()->customer->set_billing_city( 'Customer City' );
+
+		// Set session data (should take precedence for guest users).
+		WC()->session->set(
+			'customer',
+			array(
+				'address_1' => 'Session Address',
+				'city'      => 'Session City',
+			)
+		);
+
+		$result = $this->sut->collect();
+
+		$this->assertIsArray( $result['billing_address'] );
+		// Session data should be used.
+		$this->assertArrayHasKey( 'address_1', $result['billing_address'] );
+		$this->assertSame( 'Session Address', $result['billing_address']['address_1'] );
+		$this->assertArrayHasKey( 'city', $result['billing_address'] );
+		$this->assertSame( 'Session City', $result['billing_address']['city'] );
+	}
+
+	/**
+	 * Test session data takes precedence for shipping address.
+	 */
+	public function test_session_data_takes_precedence_for_shipping() {
+		// Ensure no user is logged in.
+		wp_set_current_user( 0 );
+
+		// Set customer shipping data.
+		WC()->customer->set_shipping_address_1( 'Customer Shipping' );
+		WC()->customer->set_shipping_city( 'Customer Ship City' );
+
+		// Set session data (should take precedence).
+		WC()->session->set(
+			'customer',
+			array(
+				'shipping_address_1' => 'Session Shipping',
+				'shipping_city'      => 'Session Ship City',
+			)
+		);
+
+		$result = $this->sut->collect();
+
+		$this->assertIsArray( $result['shipping_address'] );
+		// Session data should be used.
+		$this->assertArrayHasKey( 'address_1', $result['shipping_address'] );
+		$this->assertSame( 'Session Shipping', $result['shipping_address']['address_1'] );
+		$this->assertArrayHasKey( 'city', $result['shipping_address'] );
+		$this->assertSame( 'Session Ship City', $result['shipping_address']['city'] );
 	}
 }
