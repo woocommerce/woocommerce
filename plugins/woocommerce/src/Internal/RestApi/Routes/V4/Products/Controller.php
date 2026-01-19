@@ -674,12 +674,17 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Add stock quantity filters using the lookup table.
-		if ( null !== $this->min_stock_quantity ) {
-			$where .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_quantity >= %d', $this->min_stock_quantity );
-		}
+		if ( null !== $this->min_stock_quantity && null !== $this->max_stock_quantity && $this->min_stock_quantity === $this->max_stock_quantity ) {
+			// Exact match: use = instead of >= AND <=.
+			$where .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_quantity = %d', $this->min_stock_quantity );
+		} else {
+			if ( null !== $this->min_stock_quantity ) {
+				$where .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_quantity >= %d', $this->min_stock_quantity );
+			}
 
-		if ( null !== $this->max_stock_quantity ) {
-			$where .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_quantity <= %d', $this->max_stock_quantity );
+			if ( null !== $this->max_stock_quantity ) {
+				$where .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_quantity <= %d', $this->max_stock_quantity );
+			}
 		}
 
 		return $where;
