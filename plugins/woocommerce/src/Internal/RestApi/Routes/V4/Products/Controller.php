@@ -94,6 +94,20 @@ class Controller extends WC_REST_Products_V2_Controller {
 	private $processed_attachment_ids_for_request = array();
 
 	/**
+	 * Minimum stock quantity filter value.
+	 *
+	 * @var int|null
+	 */
+	private $min_stock_quantity = null;
+
+	/**
+	 * Maximum stock quantity filter value.
+	 *
+	 * @var int|null
+	 */
+	private $max_stock_quantity = null;
+
+	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
@@ -507,49 +521,21 @@ class Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
-		// Filter product by min_stock_quantity.
+		// Store stock quantity filters for use in query filters.
+		// Uses wc_product_meta_lookup table for better performance.
 		if ( isset( $request['min_stock_quantity'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				$args,
-				array(
-					'key'     => '_stock',
-					'value'   => $request['min_stock_quantity'],
-					'compare' => '>=',
-					'type'    => 'NUMERIC',
-				)
-			);
+			$this->min_stock_quantity = (int) $request['min_stock_quantity'];
 		}
 
-		// Filter product by max_stock_quantity.
 		if ( isset( $request['max_stock_quantity'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				$args,
-				array(
-					'key'     => '_stock',
-					'value'   => $request['max_stock_quantity'],
-					'compare' => '<=',
-					'type'    => 'NUMERIC',
-				)
-			);
-		}
-
-		// Exclude products without stock management when filtering by stock quantity.
-		if ( isset( $request['min_stock_quantity'] ) || isset( $request['max_stock_quantity'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				$args,
-				array(
-					'key'     => '_manage_stock',
-					'value'   => 'yes',
-					'compare' => '=',
-				)
-			);
+			$this->max_stock_quantity = (int) $request['max_stock_quantity'];
 		}
 
 		// Include variable products if ANY variation matches stock filters.
-		if ( isset( $request['min_stock_quantity'] ) || isset( $request['max_stock_quantity'] ) ) {
+		if ( null !== $this->min_stock_quantity || null !== $this->max_stock_quantity ) {
 			$parent_ids = $this->get_variable_product_ids_with_matching_variation_stock(
-				isset( $request['min_stock_quantity'] ) ? $request['min_stock_quantity'] : null,
-				isset( $request['max_stock_quantity'] ) ? $request['max_stock_quantity'] : null
+				$this->min_stock_quantity,
+				$this->max_stock_quantity
 			);
 			if ( ! empty( $parent_ids ) ) {
 				$args['post__in'] = array_merge( $args['post__in'], $parent_ids );
@@ -605,10 +591,11 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * @return array
 	 */
 	protected function get_objects( $query_args ) {
-		$add_search_criteria = $this->search_sku_arg_value || $this->search_name_or_sku_tokens || $this->search_fields_tokens;
+		$add_search_criteria    = $this->search_sku_arg_value || $this->search_name_or_sku_tokens || $this->search_fields_tokens;
+		$add_stock_quantity_filter = null !== $this->min_stock_quantity || null !== $this->max_stock_quantity;
 
-		// Add filters for search criteria in product postmeta via the lookup table.
-		if ( $add_search_criteria ) {
+		// Add filters for search criteria and stock quantity via the lookup table.
+		if ( $add_search_criteria || $add_stock_quantity_filter ) {
 			add_filter( 'posts_join', array( $this, 'add_search_criteria_to_wp_query_join' ) );
 			add_filter( 'posts_where', array( $this, 'add_search_criteria_to_wp_query_where' ) );
 		}
@@ -620,14 +607,16 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		$result = parent::get_objects( $query_args );
 
-		// Remove filters for search criteria in product postmeta via the lookup table.
-		if ( $add_search_criteria ) {
+		// Remove filters for search criteria and stock quantity via the lookup table.
+		if ( $add_search_criteria || $add_stock_quantity_filter ) {
 			remove_filter( 'posts_join', array( $this, 'add_search_criteria_to_wp_query_join' ) );
 			remove_filter( 'posts_where', array( $this, 'add_search_criteria_to_wp_query_where' ) );
 
 			$this->search_sku_arg_value      = '';
 			$this->search_name_or_sku_tokens = null;
 			$this->search_fields_tokens      = null;
+			$this->min_stock_quantity        = null;
+			$this->max_stock_quantity        = null;
 		}
 
 		// Remove filters for excluding product statuses.
@@ -641,7 +630,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Join `wc_product_meta_lookup` table when SKU search query is present.
+	 * Join `wc_product_meta_lookup` table when search or stock quantity filter is present.
 	 *
 	 * @param string $join Join clause used to search posts.
 	 * @return string
@@ -652,10 +641,13 @@ class Controller extends WC_REST_Products_V2_Controller {
 			return $join;
 		}
 
-		// Only join if we need meta table search.
+		$needs_stock_filter = null !== $this->min_stock_quantity || null !== $this->max_stock_quantity;
+
+		// Only join if we need meta table search or stock quantity filter.
 		if ( ! $this->search_fields_tokens &&
 			! $this->search_sku_arg_value &&
-			! ( $this->search_name_or_sku_tokens && wc_product_sku_enabled() ) ) {
+			! ( $this->search_name_or_sku_tokens && wc_product_sku_enabled() ) &&
+			! $needs_stock_filter ) {
 			return $join;
 		}
 
@@ -668,7 +660,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Add a where clause for matching the SKU field.
+	 * Add a where clause for matching the SKU field and stock quantity filters.
 	 *
 	 * @param string $where Where clause used to search posts.
 	 * @return string
@@ -691,6 +683,16 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$like_search = '%' . $wpdb->esc_like( $this->search_sku_arg_value ) . '%';
 			$where      .= ' AND ' . $wpdb->prepare( '(wc_product_meta_lookup.sku LIKE %s)', $like_search );
 		}
+
+		// Add stock quantity filters using the lookup table.
+		if ( null !== $this->min_stock_quantity ) {
+			$where .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_quantity >= %d', $this->min_stock_quantity );
+		}
+
+		if ( null !== $this->max_stock_quantity ) {
+			$where .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_quantity <= %d', $this->max_stock_quantity );
+		}
+
 		return $where;
 	}
 
