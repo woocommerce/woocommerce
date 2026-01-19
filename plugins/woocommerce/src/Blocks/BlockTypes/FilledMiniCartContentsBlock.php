@@ -43,14 +43,6 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 		$notices = BlocksSharedState::get_cart_error_notices( $consent );
 
-		// Set notices in interactivity state for SSR rendering of the data-wp-each directive.
-		wp_interactivity_state(
-			'woocommerce/store-notices',
-			array(
-				'notices' => $notices,
-			)
-		);
-
 		$context = wp_json_encode(
 			array(
 				'notices' => $notices,
@@ -79,7 +71,7 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 				class="wc-block-components-notices"
 				data-wp-interactive="woocommerce/store-notices"
 			><template
-					data-wp-each--notice="state.notices"
+					data-wp-each--notice="context.notices"
 					data-wp-each-key="context.notice.id"
 				>
 					<div
@@ -92,7 +84,7 @@ class FilledMiniCartContentsBlock extends AbstractInnerBlock {
 						data-wp-watch="callbacks.injectIcon"
 					>
 						<div class="wc-block-components-notice-banner__content">
-							<span data-wp-text="context.notice.notice" data-wp-init="callbacks.renderNoticeContent"></span>
+							<span data-wp-init="callbacks.renderNoticeContent"></span>
 						</div>
 						<button
 							data-wp-bind--hidden="!context.notice.dismissible"
