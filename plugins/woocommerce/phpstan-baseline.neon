@@ -40564,12 +40564,6 @@ parameters:
 			path: includes/wc-order-item-functions.php
 
 		-
-			message: '#^Call to an undefined method WC_Logger_Interface\:\:clear\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-step-logger-functions.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
