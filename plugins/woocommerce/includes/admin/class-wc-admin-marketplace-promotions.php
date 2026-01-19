@@ -363,7 +363,7 @@ class WC_Admin_Marketplace_Promotions {
 		$menu_item_text = preg_replace( '|<span class="update-plugins count-[\d]+">[A-z0-9 <>="-]+</span>|', '', $menu_item_text );
 
 		return $menu_item_text
-			. '<span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge">'
+			. '<span class="update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge">'
 			. esc_html( $bubble_text )
 			. '</span>';
 	}
