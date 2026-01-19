@@ -57,7 +57,7 @@
 		},
 		"autotagger": true,
 		"branch-alias": {
-			"dev-trunk": "0.13.x-dev"
+			"dev-trunk": "0.14.x-dev"
 		},
 		"textdomain": "woocommerce-analytics",
 		"version-constants": {

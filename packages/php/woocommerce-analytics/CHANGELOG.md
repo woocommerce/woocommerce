@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-01-19
+### Added
+- Add tablet device detection to the 'device' event property, distinguishing between mobile, tablet, and desktop devices. [#46631]
+
+### Changed
+- Update package dependencies. [#46647]
+
 ## [0.13.4] - 2026-01-12
 ### Changed
 - Update package dependencies. [#46456]
@@ -243,6 +250,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix namespace issue with WooCommerce class reference. [#35857]
 - General: bail early when WooCommerce is not active. [#36278]
 
+[0.14.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.4...v0.14.0
 [0.13.4]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.3...v0.13.4
 [0.13.3]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.2...v0.13.3
 [0.13.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.1...v0.13.2
