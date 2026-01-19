@@ -19,9 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Woo_Helper_Connection {
 	/**
-	 * Check if the Woo Update Manager plugin is active.
+	 * Get the notice for the connection URL mismatch.
 	 *
-	 * @return bool
+	 * @return string The notice for the connection URL mismatch.
 	 */
 	public static function get_connection_url_notice(): string {
 		$connection_data = WC_Helper::get_cached_connection_data();
@@ -43,6 +43,27 @@ class WC_Woo_Helper_Connection {
 			$home_url
 		);
 	}
+
+	/**
+	 * Get the notice for a deleted connection on WCCOM
+	 *
+	 * @return string The notice for a deleted connection on WCCOM.
+	 */
+	public static function get_deleted_connection_notice(): string {
+		$connection_data = WC_Helper::get_cached_connection_data();
+		if ( false === $connection_data || empty( $connection_data['maybe_deleted_connection'] ) ) {
+			return '';
+		}
+
+		$home_url = rtrim( home_url(), '/' );
+
+		return sprintf(
+			/* translators: 1: home URL */
+				__( 'There is no connection for <b>%1$s</b> on WooCommerce.com. The connection may have been deleted. To fix this, please reconnect your site to <b>WooCommerce.com</b> to ensure everything works correctly.', 'woocommerce' ),
+				$home_url
+			);
+	}
+
 
 	/**
 	 * Check if the site has and linked host-plan orders.
