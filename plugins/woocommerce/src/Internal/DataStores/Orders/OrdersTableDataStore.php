@@ -1420,8 +1420,8 @@ WHERE
 	 * @param object[]           $meta_data The original meta-data fetched for the order.
 	 */
 	private function read_cogs_data( WC_Abstract_Order $order, array $meta_data ) {
-		$meta_entry = array_filter( $meta_data, fn( object $object ) => '_cogs_total_value' === $object->meta_key );
-		$cogs_value = [] === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
+		$meta_entry = array_filter( $meta_data, fn( object $meta ) => '_cogs_total_value' === $meta->meta_key );
+		$cogs_value = array() === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
