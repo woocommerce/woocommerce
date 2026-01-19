@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\StockFilter;
 use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
 
 /**
  * QueryBuilder class.
@@ -652,6 +653,61 @@ class QueryBuilder {
 	}
 
 	/**
+	 * Return a query that filters products by taxonomy terms.
+	 *
+	 * @return array
+	 */
+	private function get_filter_by_taxonomy_query() {
+
+		$params_handler = new Params();
+
+		// Get all taxonomy parameters mapping.
+		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
+
+		if ( empty( $taxonomy_params ) ) {
+			return array();
+		}
+
+		$tax_queries = array();
+
+		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
+			$param_value = get_query_var( $param_key );
+
+			if ( empty( $param_value ) ) {
+				continue;
+			}
+
+			// Parse comma-separated values.
+			$term_slugs = array_map( 'sanitize_title', explode( ',', $param_value ) );
+
+			if ( empty( $term_slugs ) ) {
+				continue;
+			}
+
+			$tax_queries[] = array(
+				'taxonomy' => $taxonomy_slug,
+				'field'    => 'slug',
+				'terms'    => $term_slugs,
+				'operator' => 'IN',
+			);
+		}
+
+		if ( empty( $tax_queries ) ) {
+			return array();
+		}
+
+		return array(
+			// phpcs:ignore WordPress.DB.SlowDBQuery
+			'tax_query' => array(
+				array(
+					'relation' => 'AND',
+					...$tax_queries,
+				),
+			),
+		);
+	}
+
+	/**
 	 * Merge two array recursively but replace the non-array values instead of
 	 * merging them. The merging strategy:
 	 *
@@ -727,6 +783,7 @@ class QueryBuilder {
 			'attributes_filter'   => $this->get_filter_by_attributes_query(),
 			'stock_status_filter' => $this->get_filter_by_stock_status_query(),
 			'rating_filter'       => $this->get_filter_by_rating_query(),
+			'taxonomy_filter'     => $this->get_filter_by_taxonomy_query(),
 		);
 	}
 
