@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix intermittent blank shop page when WordPress resolves by `slug` instead of `page ID`.
