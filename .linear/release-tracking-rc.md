@@ -10,14 +10,15 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ----
 
-#### 1. Pre-build checks
+### 1. Pre-build checks
+
 - [ ] Confirm [GitHub services](https://www.githubstatus.com/) are operational.
 - [ ] Verify no open issues or pull requests exist against the [{release_milestone} milestone]({repository_url}/milestone/{release_milestone_number}). Ping authors as needed to merge or close.
 - [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"]({repository_url}/pulls?q=is:pr+label:%22cherry+pick+failed%22) that apply to this release that haven't been actioned.
 - [ ] Confirm the `Stable tag` value [in the readme.txt on the release branch]({repository_url}/blob/{release_branch}/plugins/woocommerce/readme.txt#L7) matches the one [on WordPress.org's `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).
 
 
-#### 2. Build the release package
+### 2. Build the release package
 
 - [ ] Run workflow **[Release: Bump version number]({repository_url}/actions/workflows/release-bump-version.yml)**: enter `{release_branch}` as _Release branch_ and `{release_type}` as _Type of version bump to perform_.
 - [ ] Review and merge the PR that was generated against the release branch. Check the [{release_milestone} milestone]({repository_url}/milestone/{release_milestone_number}).
@@ -27,7 +28,7 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 - [ ] Confirm that a draft `{release_version}` release [was created in the repository]({repository_url}/releases) with an attached `woocommerce.zip` asset.
 
 
-#### 3. Upload the release to WordPress.org
+### 3. Upload the release to WordPress.org
 
 - [ ] Run workflow **[Release: Upload release to WordPress.org]({repository_url}/actions/workflows/release-upload-to-wporg.yml)**: enter `{release_version}` as _Release tag to upload_ and make sure to check off the confirmation box.
 - [ ] Confirm that SVN tag `{release_version}` [exists on WordPress.org SVN](https://plugins.svn.wordpress.org/woocommerce/tags/{release_version}).
@@ -35,15 +36,16 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 - [ ] After a few minutes, confirm that [`{release_version}` is available for download](https://downloads.wordpress.org/plugin/woocommerce.{release_version}.zip).
 
 
-#### 4. Deploy to the staging environment
+### 4. Deploy to the staging environment
+
 - [ ] Follow the [guide to deploy to the staging environment](https://wp.me/PCYsg-18BQ) and monitor for at least {release_monitoring_time} hours after deploy.
 
-##### If a critical issue was detected while monitoring...
+**If a critical issue was detected while monitoring...**
 
 - [ ] Request a revert in the staging environment.
 - [ ] Pause the release process and **do not continue with any steps on this issue**. Follow the procedure in the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/#deploy-serious-bug) instead.
 
 
-#### 5. Publish the release
+### 5. Publish the release
 
 - [ ] Publish the `{release_version}` [release draft]({repository_url}/releases) that was previously created, as well as any other `{release_main_version}` drafts that might exist from previous attempts. **Do not** check "Set as the latest release".
