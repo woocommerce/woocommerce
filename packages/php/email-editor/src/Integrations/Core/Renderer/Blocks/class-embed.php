@@ -56,9 +56,13 @@ class Embed extends Abstract_Block_Renderer {
 	 * @var array
 	 */
 	private const VIDEO_PROVIDERS = array(
-		'youtube' => array(
+		'youtube'    => array(
 			'domains'  => array( 'youtube.com', 'youtu.be' ),
 			'base_url' => 'https://www.youtube.com/',
+		),
+		'videopress' => array(
+			'domains'  => array( 'videopress.com', 'video.wordpress.com' ),
+			'base_url' => 'https://videopress.com/',
 		),
 	);
 
@@ -322,6 +326,8 @@ class Embed extends Abstract_Block_Renderer {
 				return __( 'Listen on ReverbNation', 'woocommerce' );
 			case 'youtube':
 				return __( 'Watch on YouTube', 'woocommerce' );
+			case 'videopress':
+				return __( 'Watch on VideoPress', 'woocommerce' );
 			default:
 				return __( 'Listen to the audio', 'woocommerce' );
 		}
@@ -441,7 +447,7 @@ class Embed extends Abstract_Block_Renderer {
 	 */
 	private function render_video_embed( string $url, string $provider, array $parsed_block, Rendering_Context $rendering_context, string $block_content ): string {
 		// Try to get video thumbnail URL.
-		$poster_url = $this->get_video_thumbnail_url( $url, $provider );
+		$poster_url = $this->get_video_thumbnail_url( $url, $provider, $parsed_block );
 
 		// If no poster available, fall back to a simple link.
 		if ( empty( $poster_url ) ) {
@@ -483,10 +489,13 @@ class Embed extends Abstract_Block_Renderer {
 	 * @param string $provider Provider name.
 	 * @return string Thumbnail URL or empty string.
 	 */
-	private function get_video_thumbnail_url( string $url, string $provider ): string {
-		// Currently only YouTube supports thumbnail extraction.
+	private function get_video_thumbnail_url( string $url, string $provider, array $parsed_block = array() ): string {
 		if ( 'youtube' === $provider ) {
 			return $this->get_youtube_thumbnail( $url );
+		}
+
+		if ( 'videopress' === $provider ) {
+			return $this->get_videopress_thumbnail( $url, $parsed_block );
 		}
 
 		// For other providers, we don't have thumbnail extraction implemented.
@@ -515,5 +524,41 @@ class Embed extends Abstract_Block_Renderer {
 		// Return YouTube thumbnail URL.
 		// Using 0.jpg format as shown in the example.
 		return 'https://img.youtube.com/vi/' . $video_id . '/0.jpg';
+	}
+
+	/**
+	 * Extract VideoPress video thumbnail URL.
+	 * Uses WordPress oEmbed API to get thumbnail_url from the provider response.
+	 * Note: wp_oembed_get() returns HTML, so we use WP_oEmbed::get_data() to get the raw data object.
+	 *
+	 * @param string $url VideoPress video URL.
+	 * @param array  $parsed_block Parsed block (optional, for checking guid attribute).
+	 * @return string Thumbnail URL or empty string.
+	 */
+	private function get_videopress_thumbnail( string $url, array $parsed_block = array() ): string {
+		// Use WP_oEmbed::get_data() to get raw oEmbed data (not HTML).
+		// wp_oembed_get() returns HTML, but we need the data object with thumbnail_url.
+		$oembed = new \WP_oEmbed();
+		$oembed_data = $oembed->get_data( $url );
+
+		if ( ! is_object( $oembed_data ) && ! is_array( $oembed_data ) ) {
+			return '';
+		}
+
+		// Extract thumbnail_url from oEmbed response.
+		// Handle both object and array formats.
+		$thumbnail_url = '';
+		if ( is_object( $oembed_data ) && isset( $oembed_data->thumbnail_url ) ) {
+			$thumbnail_url = $oembed_data->thumbnail_url;
+		} elseif ( is_array( $oembed_data ) && isset( $oembed_data['thumbnail_url'] ) ) {
+			$thumbnail_url = $oembed_data['thumbnail_url'];
+		}
+
+		// Validate the thumbnail URL.
+		if ( ! empty( $thumbnail_url ) && $this->is_valid_url( $thumbnail_url ) ) {
+			return $thumbnail_url;
+		}
+
+		return '';
 	}
 }
