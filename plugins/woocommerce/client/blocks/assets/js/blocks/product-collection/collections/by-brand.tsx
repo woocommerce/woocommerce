@@ -21,10 +21,7 @@ const collection = {
 	name: CoreCollectionNames.BY_BRAND,
 	title: __( 'Products by Brand', 'woocommerce' ),
 	icon: <Icon icon={ store } />,
-	description: __(
-		'Display products from specific brands.',
-		'woocommerce'
-	),
+	description: __( 'Display products from specific brands.', 'woocommerce' ),
 	scope: [ 'inserter', 'block' ] as BlockVariationScope[],
 };
 
