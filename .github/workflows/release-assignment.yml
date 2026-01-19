@@ -205,6 +205,7 @@ jobs:
     needs:
       - trigger-upcoming-code-freeze-events
       - check-upcoming-release-events
+      - create-parent-tracking-issue
     if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' && needs.trigger-upcoming-code-freeze-events.outputs.post != '' }}
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
@@ -220,7 +221,7 @@ jobs:
             The team responsible for this release is *Team ${{ needs.check-upcoming-release-events.outputs.team-name }}*.
             <@${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-slack-member-id }}>, make sure you choose a release DRI and update the release P2 accordingly.
 
-            :p2: <${{ needs.trigger-upcoming-code-freeze-events.outputs.post }}|Release P2 post>
+            :p2: <${{ needs.trigger-upcoming-code-freeze-events.outputs.post }}|Release P2 post> | :linear-logo: <${{ needs.create-parent-tracking-issue.outputs.issue-url }}|Linear tracking issue>
 
   create-parent-tracking-issue:
     name: Create Parent Tracking Issue in Linear
@@ -232,6 +233,7 @@ jobs:
     outputs:
       skipped: ${{ steps.check-existing-issue.outputs.exists }}
       sub-issues-matrix: ${{ steps.build-matrix.outputs.matrix }}
+      issue-url: ${{ steps.check-existing-issue.outputs.issue-url || steps.create-tracking-issue.outputs.issue-url }}
     steps:
       - name: Checkout repository (sparse)
         uses: actions/checkout@v4
@@ -325,6 +327,7 @@ jobs:
             if ( issues.nodes.length > 0 ) {
               console.log( `Found existing release tracking issue: ${ issues.nodes[ 0 ].url }` );
               core.setOutput( 'exists', 'true' );
+              core.setOutput( 'issue-url', issues.nodes[ 0 ].url );
             } else {
               console.log( 'No existing release tracking issue found' );
               core.setOutput( 'exists', 'false' );
@@ -358,6 +361,7 @@ jobs:
 
       - name: Process template and create release tracking issue
         if: steps.check-existing-issue.outputs.exists != 'true'
+        id: create-tracking-issue
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         with:
           script: |
@@ -443,6 +447,7 @@ jobs:
 
               const parentIssue = await parentResult.issue;
               console.log( `Parent tracking issue created: ${ parentIssue.url }` );
+              core.setOutput( 'issue-url', parentIssue.url );
             } catch ( error ) {
               core.setFailed( `Failed to create parent Linear issue: ${ error.message }` );
             }
