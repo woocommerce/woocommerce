@@ -58,9 +58,9 @@ jobs:
             }
 
             const mainVersion = match[ 1 ];
-            const releaseType = match[ 3 ] || 'stable';
-            const templateFile = `.linear/release-tracking-${ releaseType }.md`;
-            const monitoringTime = releaseType === 'rc' ? '4' : ( releaseType === 'stable' ? '2' : '' );
+            const releaseType = match[ 3 ] || 'patch';
+            const templateFile = `.linear/release-kickoff-${ releaseType }.md`;
+            const monitoringTime = releaseType === 'rc' ? '4' : ( releaseType === 'patch' ? '2' : '' );
 
             const milestone = `${ mainVersion }.0`;
             const branch = `release/${ mainVersion }`;

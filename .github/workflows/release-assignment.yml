@@ -393,7 +393,7 @@ jobs:
             } );
 
             // Read template file.
-            const templatePath = '.linear/release-tracking.md';
+            const templatePath = '.linear/release-kickoff.md';
             let templateContent;
 
             try {
