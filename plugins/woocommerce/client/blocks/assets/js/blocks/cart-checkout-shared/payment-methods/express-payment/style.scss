@@ -79,13 +79,6 @@ $border-width: 1px;
 			pointer-events: none;
 			flex-grow: 1;
 		}
-
-		.has-dark-controls & {
-			&::before,
-			&::after {
-				border-color: $input-border-dark;
-			}
-		}
 	}
 
 	.wc-block-components-express-payment__title {
@@ -105,9 +98,6 @@ $border-width: 1px;
 		border-radius: 0 0 $universal-border-radius $universal-border-radius;
 		margin-top: calc($universal-border-radius + $border-width);
 		min-height: 48px;
-		.has-dark-controls & {
-			border-color: $input-border-dark;
-		}
 
 		> p {
 			margin-bottom: em($gap);
@@ -167,10 +157,6 @@ $border-width: 1px;
 		content: " ";
 		flex: 1;
 		border-bottom: 1px solid $universal-border-light;
-
-		.has-dark-controls & {
-			border-color: $input-border-dark;
-		}
 	}
 }
 @include cart-checkout-below-large-container {
