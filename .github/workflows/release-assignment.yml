@@ -1,7 +1,7 @@
 name: 'Release: Assignment'
 on:
   schedule:
-    - cron: '0 18 * * *' # Every day at 18h UTC
+    - cron: '0 20 * * *' # Every day at 20h UTC (after Feature Freeze workflow)
   workflow_dispatch:
 
 permissions:
