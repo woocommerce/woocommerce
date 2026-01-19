@@ -531,17 +531,6 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$this->max_stock_quantity = (int) $request['max_stock_quantity'];
 		}
 
-		// Include variable products if ANY variation matches stock filters.
-		if ( null !== $this->min_stock_quantity || null !== $this->max_stock_quantity ) {
-			$parent_ids = $this->get_variable_product_ids_with_matching_variation_stock(
-				$this->min_stock_quantity,
-				$this->max_stock_quantity
-			);
-			if ( ! empty( $parent_ids ) ) {
-				$args['post__in'] = array_merge( $args['post__in'], $parent_ids );
-			}
-		}
-
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
 			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
@@ -2373,45 +2362,5 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$this->processed_attachment_ids_for_request = array();
 
 		return $response;
-	}
-
-	/**
-	 * Get variable product IDs that have at least one variation matching stock criteria.
-	 *
-	 * @since 9.8.0
-	 *
-	 * @param int|null $min_stock_quantity Minimum stock quantity.
-	 * @param int|null $max_stock_quantity Maximum stock quantity.
-	 * @return array Array of parent product IDs.
-	 */
-	protected function get_variable_product_ids_with_matching_variation_stock( $min_stock_quantity, $max_stock_quantity ) {
-		global $wpdb;
-
-		$where_clauses = array();
-
-		if ( null !== $min_stock_quantity ) {
-			$where_clauses[] = $wpdb->prepare( 'lookup.stock_quantity >= %d', $min_stock_quantity );
-		}
-
-		if ( null !== $max_stock_quantity ) {
-			$where_clauses[] = $wpdb->prepare( 'lookup.stock_quantity <= %d', $max_stock_quantity );
-		}
-
-		if ( empty( $where_clauses ) ) {
-			return array();
-		}
-
-		$where_sql = implode( ' AND ', $where_clauses );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $where_sql is already prepared above.
-		$query = "SELECT DISTINCT p.post_parent
-			FROM {$wpdb->posts} p
-			INNER JOIN {$wpdb->wc_product_meta_lookup} lookup ON p.ID = lookup.product_id
-			WHERE p.post_type = 'product_variation'
-			AND p.post_parent > 0
-			AND lookup.stock_quantity IS NOT NULL
-			AND {$where_sql}";
-
-		return array_map( 'absint', $wpdb->get_col( $query ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is built using $wpdb->prepare for dynamic parts.
 	}
 }

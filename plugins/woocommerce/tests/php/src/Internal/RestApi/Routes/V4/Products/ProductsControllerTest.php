@@ -2200,4 +2200,45 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$product_ids = wp_list_pluck( $products, 'id' );
 		$this->assertContains( $product->get_id(), $product_ids );
 	}
+
+	/**
+	 * Test that stock quantity filter returns simple products even when variable products exist.
+	 *
+	 * This test ensures that the presence of variable products with matching variation stock
+	 * does not exclude simple products from the results.
+	 *
+	 * @return void
+	 */
+	public function test_products_filter_stock_quantity_includes_simple_products_with_variable_products_present() {
+		// Create a simple product with managed stock.
+		$simple_product = WC_Helper_Product::create_simple_product();
+		$simple_product->set_manage_stock( true );
+		$simple_product->set_stock_quantity( 7 );
+		$simple_product->save();
+
+		// Create a variable product with a variation that has managed stock.
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_ids    = $variable_product->get_children();
+		$variation        = wc_get_product( $variation_ids[0] );
+		$variation->set_manage_stock( true );
+		$variation->set_stock_quantity( 8 );
+		$variation->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 5,
+				'max_stock_quantity' => 10,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$products    = $response->get_data();
+		$product_ids = wp_list_pluck( $products, 'id' );
+
+		// Simple product with matching stock should be included.
+		$this->assertContains( $simple_product->get_id(), $product_ids, 'Simple product with stock_quantity=7 should be in results' );
+	}
 }
