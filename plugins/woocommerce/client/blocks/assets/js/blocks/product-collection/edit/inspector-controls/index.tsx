@@ -287,7 +287,7 @@ const CollectionSpecificControls = (
 		query: props.attributes.query,
 	};
 
-	const isByCategoryOrTagOrBrand =
+	const isByTaxonomy =
 		collection === CoreCollectionNames.BY_CATEGORY ||
 		collection === CoreCollectionNames.BY_TAG ||
 		collection === CoreCollectionNames.BY_BRAND;
@@ -316,9 +316,9 @@ const CollectionSpecificControls = (
 			}
 			{
 				/**
-				 * "Category, Tag, and Brand" collection-specific controls.
+				 * "By Taxonomy" collection-specific controls.
 				 */
-				isByCategoryOrTagOrBrand && (
+				isByTaxonomy && (
 					<PanelBody>
 						<TaxonomyControls
 							{ ...queryControlProps }
