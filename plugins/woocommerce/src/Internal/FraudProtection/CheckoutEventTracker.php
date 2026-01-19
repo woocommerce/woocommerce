@@ -247,4 +247,30 @@ class CheckoutEventTracker {
 
 		return $payment_data;
 	}
+
+	/**
+	 * Track successful order placement.
+	 *
+	 * Called when an order is successfully placed, with or without payment.
+	 * Works for both shortcode and Store API checkout flows.
+	 *
+	 * @internal
+	 *
+	 * @param int       $order_id The order ID.
+	 * @param \WC_Order $order    The order object.
+	 * @return void
+	 */
+	public function track_order_placed( int $order_id, \WC_Order $order ): void {
+		$customer_id = $order->get_customer_id();
+		$event_data  = array(
+			'order_id'       => $order_id,
+			'payment_method' => $order->get_payment_method(),
+			'total'          => (float) $order->get_total(),
+			'currency'       => $order->get_currency(),
+			'customer_id'    => $customer_id ? $customer_id : 'guest',
+			'status'         => $order->get_status(),
+		);
+
+		$this->dispatcher->dispatch_event( 'order_placed', $event_data );
+	}
 }

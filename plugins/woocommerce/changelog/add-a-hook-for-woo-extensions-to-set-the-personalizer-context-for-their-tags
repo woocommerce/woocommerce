@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add a hook enabling Woo extensions to set the Personalizer context for their personalization tags.
