@@ -20,7 +20,7 @@ This issue provides visibility on the progress of the release process of WooComm
 - Please read this issue carefully and familiarize yourself with the [release process documentation](https://developer.woocommerce.com/docs/contribution/releases/).
 - Join the release channels in Slack (`#woo-core-releases`, `#woo-core-releases-notifications`), where discussions happen and notifications are sent.
 - For every release in the cycle, there's a corresponding sub-issue. On the date of each release (see schedule above), open the relevant issue and follow the instructions in it.
-- Any additional point/patch releases after the first stable must be tracked as well. Create a new sub-issue for this patch release using [`.linear/release-tracking-stable.md`]({repository_url}/blob/trunk/.linear/release-tracking-stable.md) as template.
+- Any additional point/patch releases after the first stable must be tracked as well. Run the **[Release: Create Tracking Issue]({repository_url}/actions/workflows/release-create-tracking-issue.yml)** workflow with the version (e.g., `{release_main_version}.1`) to create the sub-issue.
 
 ##### Resources
 
