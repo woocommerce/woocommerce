@@ -133,30 +133,6 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 	}
 
 	/**
-	 * Primes options cache to reduce the number of SQLs towards options table.
-	 *
-	 * @param mixed[] $settings The settings to prefetch options for.
-	 * @return void
-	 */
-	private function prime_options_cache_for_settings( array $settings ): void {
-		$prefetch = array();
-		foreach ( $settings as $setting ) {
-			$option_key = $setting['option_key'];
-			if ( is_array( $option_key ) ) {
-				$prefetch[] = $option_key[0];
-			} elseif ( strstr( $option_key, '[' ) ) {
-				parse_str( $option_key, $option_array );
-				$prefetch[] = current( array_keys( $option_array ) );
-			} else {
-				$prefetch[] = $option_key;
-			}
-		}
-		if ( array() !== $prefetch ) {
-			wp_prime_option_caches( $prefetch );
-		}
-	}
-
-	/**
 	 * Returns a list of countries and states for use in the base location setting.
 	 *
 	 * @since  3.0.7
