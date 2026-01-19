@@ -138,7 +138,7 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 	 * @param mixed[] $settings The settings to prefetch options for.
 	 * @return void
 	 */
-	private function prime_options_cache_for_settings(array $settings ): void {
+	private function prime_options_cache_for_settings( array $settings ): void {
 		$prefetch = array();
 		foreach ( $settings as $setting ) {
 			$option_key = $setting['option_key'];
@@ -150,7 +150,6 @@ class WC_REST_Setting_Options_Controller extends WC_REST_Setting_Options_V2_Cont
 			} else {
 				$prefetch[] = $option_key;
 			}
-
 		}
 		if ( array() !== $prefetch ) {
 			wp_prime_option_caches( $prefetch );
