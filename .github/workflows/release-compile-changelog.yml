@@ -172,6 +172,8 @@ jobs:
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
           GITHUB_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
+          set -o pipefail
+
           # Log inputs to console.
           echo "Compiling changelog: version=$VERSION, branch=$SELECTED_BRANCH, append_changelog=${{ github.event.inputs.append_changelog }}, release_date=${{ github.event.inputs.release_date }}"
 
