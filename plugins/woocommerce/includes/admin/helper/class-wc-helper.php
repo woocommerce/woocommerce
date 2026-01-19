@@ -1803,7 +1803,12 @@ class WC_Helper {
 		);
 
 		$status = wp_remote_retrieve_response_code( $request );
+		$message = json_decode( wp_remote_retrieve_body( $request ), true )['message'];
+
 		if ( 200 !== $status ) {
+			if ( 'Connected site not found.' === $message || 'Invalid access token' === $message ) {
+				set_transient( self::CACHE_KEY_CONNECTION_DATA, array( 'maybe_deleted_connection' => true ), 1 * HOUR_IN_SECONDS );
+			}
 			return new WP_Error(
 				'invalid_response',
 				'Invalid response from WooCommerce.com',
@@ -2503,7 +2508,7 @@ class WC_Helper {
 	 * Flush connection data cache.
 	 */
 	public static function flush_connection_data_cache() {
-		delete_transient( '_woocommerce_helper_connection_data' );
+		delete_transient( self::CACHE_KEY_CONNECTION_DATA );
 	}
 
 	/**
