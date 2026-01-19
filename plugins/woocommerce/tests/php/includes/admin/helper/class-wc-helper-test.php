@@ -39,16 +39,14 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		set_transient( '_woocommerce_helper_subscriptions', 'corrupted_string_data', HOUR_IN_SECONDS );
 
 		// Mock API to prevent actual network call - return WP_Error to trigger empty array return.
-		add_filter(
-			'pre_http_request',
-			function () {
-				return new WP_Error( 'test', 'Mocked error' );
-			}
-		);
+		$http_mock = function () {
+			return new WP_Error( 'test', 'Mocked error' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
 
 		$result = WC_Helper::get_subscriptions();
 
-		remove_all_filters( 'pre_http_request' );
+		remove_filter( 'pre_http_request', $http_mock );
 
 		$this->assertIsArray( $result, 'Result should be an array even when transient was corrupted' );
 		$this->assertEmpty( $result, 'Result should be empty array on API error' );
@@ -118,16 +116,14 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		set_transient( '_woocommerce_helper_product_usage_notice_rules', 'corrupted_data', HOUR_IN_SECONDS );
 
 		// Mock API to return empty array.
-		add_filter(
-			'pre_http_request',
-			function () {
-				return new WP_Error( 'test', 'Mocked error' );
-			}
-		);
+		$http_mock = function () {
+			return new WP_Error( 'test', 'Mocked error' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
 
 		$result = WC_Helper::get_product_usage_notice_rules();
 
-		remove_all_filters( 'pre_http_request' );
+		remove_filter( 'pre_http_request', $http_mock );
 
 		$this->assertIsArray( $result, 'Result should be an array' );
 	}
@@ -139,19 +135,17 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		set_transient( '_woocommerce_helper_notices', 'corrupted_data', HOUR_IN_SECONDS );
 
 		// Mock API to return non-200 response.
-		add_filter(
-			'pre_http_request',
-			function () {
-				return array(
-					'response' => array( 'code' => 500 ),
-					'body'     => '',
-				);
-			}
-		);
+		$http_mock = function () {
+			return array(
+				'response' => array( 'code' => 500 ),
+				'body'     => '',
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
 
 		$result = WC_Helper::get_notices();
 
-		remove_all_filters( 'pre_http_request' );
+		remove_filter( 'pre_http_request', $http_mock );
 
 		$this->assertIsArray( $result, 'Result should be an array' );
 		$this->assertEmpty( $result, 'Result should be empty on API failure' );
@@ -164,16 +158,14 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		set_transient( '_woocommerce_helper_subscriptions', 'corrupted', HOUR_IN_SECONDS );
 
 		// Mock API to prevent network call.
-		add_filter(
-			'pre_http_request',
-			function () {
-				return new WP_Error( 'test', 'Mocked error' );
-			}
-		);
+		$http_mock = function () {
+			return new WP_Error( 'test', 'Mocked error' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
 
 		$result = WC_Helper::get_subscription_list_data();
 
-		remove_all_filters( 'pre_http_request' );
+		remove_filter( 'pre_http_request', $http_mock );
 
 		$this->assertIsArray( $result, 'Result should be an array even with corrupted subscriptions transient' );
 	}
@@ -185,19 +177,17 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		set_transient( '_woocommerce_helper_subscriptions', 'corrupted', HOUR_IN_SECONDS );
 
 		// Mock API to prevent network call.
-		add_filter(
-			'pre_http_request',
-			function () {
-				return new WP_Error( 'test', 'Mocked error' );
-			}
-		);
+		$http_mock = function () {
+			return new WP_Error( 'test', 'Mocked error' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
 
 		// Set up auth to avoid early return.
 		WC_Helper_Options::update( 'auth', array( 'site_id' => 12345 ) );
 
 		$result = WC_Helper::get_installed_subscriptions();
 
-		remove_all_filters( 'pre_http_request' );
+		remove_filter( 'pre_http_request', $http_mock );
 		WC_Helper_Options::update( 'auth', array() );
 
 		$this->assertIsArray( $result, 'Result should be an array' );
@@ -211,16 +201,14 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		set_transient( '_woocommerce_helper_subscriptions', 'corrupted', HOUR_IN_SECONDS );
 
 		// Mock API to prevent network call.
-		add_filter(
-			'pre_http_request',
-			function () {
-				return new WP_Error( 'test', 'Mocked error' );
-			}
-		);
+		$http_mock = function () {
+			return new WP_Error( 'test', 'Mocked error' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
 
 		$result = WC_Helper::get_subscription( 'some_product_key' );
 
-		remove_all_filters( 'pre_http_request' );
+		remove_filter( 'pre_http_request', $http_mock );
 
 		$this->assertFalse( $result, 'Result should be false when subscriptions are corrupted' );
 	}
@@ -232,16 +220,14 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		set_transient( '_woocommerce_helper_subscriptions', 'corrupted', HOUR_IN_SECONDS );
 
 		// Mock API to prevent network call.
-		add_filter(
-			'pre_http_request',
-			function () {
-				return new WP_Error( 'test', 'Mocked error' );
-			}
-		);
+		$http_mock = function () {
+			return new WP_Error( 'test', 'Mocked error' );
+		};
+		add_filter( 'pre_http_request', $http_mock );
 
 		$result = WC_Woo_Helper_Connection::has_host_plan_orders();
 
-		remove_all_filters( 'pre_http_request' );
+		remove_filter( 'pre_http_request', $http_mock );
 
 		$this->assertFalse( $result, 'Should return false when subscriptions are corrupted' );
 	}
