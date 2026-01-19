@@ -281,18 +281,28 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product->get_id() => array(
-							'type'              => $product->get_type(),
-							'is_in_stock'       => $product->is_in_stock(),
-							'sold_individually' => $product->is_sold_individually(),
+			// Load product data based on product type.
+			if ( ProductType::SIMPLE === $product_type ) {
+				// Simple products use the new shared store with full REST API data.
+				wc_interactivity_api_load_product(
+					'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+					$product->get_id()
+				);
+			} else {
+				// Variable/grouped products continue using config.
+				wp_interactivity_config(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'type'              => $product->get_type(),
+								'is_in_stock'       => $product->is_in_stock(),
+								'sold_individually' => $product->is_sold_individually(),
+							),
 						),
-					),
-				)
-			);
+					)
+				);
+			}
 
 			$context = array(
 				'quantity'         => array( $product->get_id() => $default_quantity ),

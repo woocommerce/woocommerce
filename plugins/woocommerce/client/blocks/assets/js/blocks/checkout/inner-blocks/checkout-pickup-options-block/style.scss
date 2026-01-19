@@ -73,7 +73,7 @@
 			gap: $gap-smallest;
 
 			.has-dark-controls & {
-				color: $gray-300;
+				color: currentColor;
 			}
 
 			.wc-block-editor-components-block-icon {
