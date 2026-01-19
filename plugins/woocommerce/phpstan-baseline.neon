@@ -70768,18 +70768,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot access offset 0 on stdClass\|true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot access property \$key on false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot access property \$meta_key on object\|true\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -70787,12 +70775,6 @@ parameters:
 
 		-
 			message: '#^Cannot access property \$meta_value on object\|true\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot access property \$value on false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -71161,19 +71143,7 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:delete_meta\(\) expects stdClass, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:update_meta\(\) expects stdClass, WC_Meta_Data given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:update_meta\(\) expects stdClass, false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -71475,12 +71445,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:get_current_class_name\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
-			message: '#^Cannot access offset 0 on stdClass\|true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
 
