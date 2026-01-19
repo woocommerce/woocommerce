@@ -71071,12 +71071,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$array_arg of function current expects array\|object, stdClass\|true given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$function of function call_user_func_array expects callable\(\)\: mixed, array\{Abstract_WC_Order_Data_Store_CPT, non\-falsy\-string\} given\.$#'
 			identifier: argument.type
 			count: 1
