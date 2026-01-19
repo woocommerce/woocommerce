@@ -70708,12 +70708,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^@param WC_Abstract_Order \$product does not accept actual type of parameter\: WC_Data\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Abstract_Order\.$#'
 			identifier: parameter.phpDocType
 			count: 4
@@ -70756,12 +70750,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data\:\:set_cogs_total_value\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:update_user_by_order_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -70799,12 +70787,6 @@ parameters:
 
 		-
 			message: '#^Cannot access property \$meta_key on object\|true\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot access property \$meta_value on false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
