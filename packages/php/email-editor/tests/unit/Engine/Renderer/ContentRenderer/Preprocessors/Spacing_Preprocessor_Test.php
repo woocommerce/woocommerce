@@ -167,9 +167,9 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test it resolves preset variables for columns blockGap
+	 * Test it passes preset variables through for columns blockGap (WP styles engine will handle transformation)
 	 */
-	public function testItResolvesPresetVariablesForColumnsBlockGap(): void {
+	public function testItPassesPresetVariablesThroughForColumnsBlockGap(): void {
 		$blocks = array(
 			array(
 				'blockName'   => 'core/columns',
@@ -200,8 +200,8 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result        = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 		$second_column = $result[0]['innerBlocks'][1];
 
-		// Should resolve "var:preset|spacing|40" to "40px".
-		$this->assertEquals( '40px', $second_column['email_attrs']['padding-left'] );
+		// Should pass through "var:preset|spacing|40" as-is. WP's styles engine will handle transformation.
+		$this->assertEquals( 'var:preset|spacing|40', $second_column['email_attrs']['padding-left'] );
 	}
 
 	/**

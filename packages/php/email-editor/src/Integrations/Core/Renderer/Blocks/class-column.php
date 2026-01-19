@@ -112,7 +112,8 @@ class Column extends Abstract_Block_Renderer {
 		// Apply padding-left from email_attrs (set by Spacing_Preprocessor for columns blockGap).
 		$padding_left = $parsed_block['email_attrs']['padding-left'] ?? null;
 		if ( $padding_left ) {
-			$wrapper_styles = Styles_Helper::extend_block_styles( $wrapper_styles, array( 'padding-left' => $padding_left ) );
+			$gap_padding_styles = wp_style_engine_get_styles( array( 'spacing' => array( 'padding' => array( 'left' => $padding_left ) ) ) );
+			$wrapper_styles     = Styles_Helper::extend_block_styles( $wrapper_styles, $gap_padding_styles['declarations'] ?? array() );
 		}
 
 		// Create the outer td element (since this is meant to be used within a columns structure).

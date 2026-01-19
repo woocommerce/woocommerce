@@ -68,7 +68,7 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * Extracts the horizontal blockGap from a columns block.
 	 *
 	 * @param array $columns_block The columns block.
-	 * @return string|null The horizontal gap value (e.g., "30px") or null if not set.
+	 * @return string|null The horizontal gap value (e.g., "30px" or "var:preset|spacing|30") or null if not set.
 	 */
 	private function get_columns_block_gap( array $columns_block ): ?string {
 		$block_gap = $columns_block['attrs']['style']['spacing']['blockGap'] ?? null;
@@ -86,33 +86,7 @@ class Spacing_Preprocessor implements Preprocessor {
 			return null;
 		}
 
-		// Resolve preset variables (e.g., "var:preset|spacing|30" → "30px").
-		return $this->resolve_preset_variable( $gap_value );
-	}
-
-	/**
-	 * Extracts numeric value from CSS preset variables (e.g., "var:preset|spacing|30" → "30px").
-	 *
-	 * @param string $value The value which may contain a preset variable.
-	 * @return string The numeric value with "px" unit, or original value if not a preset variable.
-	 */
-	private function resolve_preset_variable( string $value ): string {
-		// Check if this is a preset variable format: "var:preset|spacing|30".
-		if ( ! str_starts_with( $value, 'var:preset|' ) ) {
-			return $value;
-		}
-
-		// Extract the numeric value from the format "var:preset|spacing|30".
-		// Split by "|" and get the last part which should be the number.
-		$parts         = explode( '|', $value );
-		$numeric_value = end( $parts );
-
-		// If we got a valid numeric value, return it with "px" unit.
-		if ( is_numeric( $numeric_value ) ) {
-			return $numeric_value . 'px';
-		}
-
-		// If extraction failed, return original value.
-		return $value;
+		// Return the value as-is. WP's styles engine will handle transformation of preset variables.
+		return $gap_value;
 	}
 }
