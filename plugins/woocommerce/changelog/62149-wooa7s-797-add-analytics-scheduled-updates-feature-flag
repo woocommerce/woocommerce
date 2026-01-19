@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Add analytics-scheduled-import feature flag to control scheduled analytics imports feature
