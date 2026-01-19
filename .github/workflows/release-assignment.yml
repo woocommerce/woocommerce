@@ -373,11 +373,13 @@ jobs:
 
             const userId = users.nodes.length ? users.nodes[ 0 ].id : null;
             const displayName = users.nodes.length ? users.nodes[ 0 ].displayName : null;
+            const username = users.nodes.length ? users.nodes[ 0 ].username : null;
 
             console.log( `Found Linear user: ${ displayName } (${ userId })` );
 
             core.setOutput( 'assignee-id', userId || '' );
             core.setOutput( 'assignee-display-name', displayName || '' );
+            core.setOutput( 'assignee-username', username || '' );
 
       - name: Process template and create release tracking issue
         if: ${{ needs.check-existing-tracking-issue.outputs.exists != 'true' }}
@@ -409,9 +411,9 @@ jobs:
             const bodyTemplate = lines.slice( 1 ).join( '\n' ).trim();
 
             // Prepare placeholder values.
-            const displayName = '${{ steps.get-linear-user.outputs.assignee-display-name }}';
+            const username = '${{ steps.get-linear-user.outputs.assignee-username }}';
             const organizationUrlKey = '${{ steps.get-linear-data.outputs.organizationUrlKey }}';
-            const mention = displayName ? `https://linear.app/${ organizationUrlKey }/profiles/${ displayName }` : null;
+            const mention = username ? `https://linear.app/${ organizationUrlKey }/profiles/${ username }` : null;
 
             const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
             const releaseMilestone = `${ releaseMainVersion }.0`;
