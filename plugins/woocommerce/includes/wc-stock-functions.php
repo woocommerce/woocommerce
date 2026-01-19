@@ -531,21 +531,3 @@ function wc_get_low_stock_amount( WC_Product $product ) {
 
 	return (int) $low_stock_amount;
 }
-
-/**
- * Return default stock amount. (Default: 1)
- *
- * @since 10.5.0
- *
- * @return int
- */
-function wc_get_default_stock_amount(): int {
-	/**
-	 * Filters default stock amount. (Default: 1)
-	 *
-	 * @since 10.5.0
-	 *
-	 * @return int
-	 */
-	return (int) apply_filters( 'woocommerce_default_stock_amount', 1 );
-}
