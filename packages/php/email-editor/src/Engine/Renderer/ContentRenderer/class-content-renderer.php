@@ -12,6 +12,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
 use WP_Block_Template;
 use WP_Block_Type_Registry;
 use WP_Post;
@@ -93,6 +94,13 @@ class Content_Renderer {
 	private Email_Editor_Logger $logger;
 
 	/**
+	 * Backup of the original core/post-content render callback.
+	 *
+	 * @var callable|null
+	 */
+	private $backup_post_content_callback;
+
+	/**
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager     $preprocess_manager Preprocess manager.
@@ -123,6 +131,19 @@ class Content_Renderer {
 		add_filter( 'render_block', array( $this, 'render_block' ), 10, 2 );
 		add_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		add_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+
+		// Swap core/post-content render callback for email rendering.
+		// This prevents issues with WordPress's static $seen_ids array when rendering
+		// multiple emails in a single request (e.g., MailPoet batch processing).
+		$post_content_type = $this->block_type_registry->get_registered( 'core/post-content' );
+		if ( $post_content_type ) {
+			// Save the original callback (may be null or WordPress's default).
+			$this->backup_post_content_callback = $post_content_type->render_callback;
+
+			// Replace with our stateless renderer.
+			$post_content_renderer              = new Post_Content();
+			$post_content_type->render_callback = array( $post_content_renderer, 'render_stateless' );
+		}
 	}
 
 	/**
@@ -169,7 +190,29 @@ class Content_Renderer {
 	 * @return string
 	 */
 	public function render_block( string $block_content, array $parsed_block ): string {
-		$context = new Rendering_Context( $this->theme_controller->get_theme() );
+		/**
+		 * Filter the email-specific context data passed to block renderers.
+		 *
+		 * This allows email sending systems to provide context data such as user ID,
+		 * email address, order information, etc., that can be used by blocks during rendering.
+		 *
+		 * Blocks that need cart product information can derive it from the user_id or recipient_email
+		 * using CartCheckoutUtils::get_cart_product_ids_for_user().
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $email_context {
+		 *     Email-specific context data.
+		 *
+		 *     @type int    $user_id         The ID of the user receiving the email.
+		 *     @type string $recipient_email The recipient's email address.
+		 *     @type int    $order_id        The order ID (for order-related emails).
+		 *     @type string $email_type      The type of email being rendered.
+		 * }
+		 */
+		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array() );
+
+		$context = new Rendering_Context( $this->theme_controller->get_theme(), $email_context );
 
 		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
 		try {
@@ -208,7 +251,7 @@ class Content_Renderer {
 		$this->backup_template_content = $_wp_current_template_content;
 		$this->backup_template_id      = $_wp_current_template_id;
 		$this->backup_query            = $wp_query;
-		$this->backup_post             = $email_post;
+		$this->backup_post             = $post;
 
 		$_wp_current_template_id      = $template->id;
 		$_wp_current_template_content = $template->content;
@@ -224,6 +267,14 @@ class Content_Renderer {
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+
+		// Restore the original core/post-content render callback.
+		// Note: We always restore it, even if it was null originally.
+		$post_content_type = $this->block_type_registry->get_registered( 'core/post-content' );
+		if ( $post_content_type ) {
+			// @phpstan-ignore-next-line -- WordPress core allows null for render_callback despite type definition.
+			$post_content_type->render_callback = $this->backup_post_content_callback;
+		}
 
 		// Restore globals to their original values.
 		global $_wp_current_template_content, $_wp_current_template_id, $wp_query, $post;

@@ -14,19 +14,101 @@ import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
 import {
 	addLabelsToIssue,
+	addMilestoneToIssue,
 	createPullRequest,
 } from '../../../../core/github/repo';
 import { Options } from '../types';
 import { getToday } from '../../get-version/lib';
 
+const mergeChangelogEntries = (
+	readme: string,
+	nextLogTitle: string,
+	nextLogEntries: string[]
+): string => {
+	let updatedReadme = readme
+		.replace(
+			/^= \d+\.\d+\.\d+.* =\n\n\*\*WooCommerce\*\*\n\n/m,
+			nextLogTitle
+		)
+		.trim();
+
+	nextLogEntries.forEach( ( entry ) => {
+		const match = entry.match( /^\* (\w+)/ );
+		if ( ! match ) return;
+
+		const entryType = match[ 1 ];
+
+		// Find all existing entries of the same type
+		const typeRegex = new RegExp( `\\* ${ entryType }\\b.*`, 'gi' );
+		const matches = [ ...updatedReadme.matchAll( typeRegex ) ];
+
+		if ( matches.length > 0 ) {
+			// Find the last match and insert after it
+			const lastMatch = matches[ matches.length - 1 ];
+			const insertIndex = lastMatch.index + lastMatch[ 0 ].length;
+			updatedReadme =
+				updatedReadme.slice( 0, insertIndex ) +
+				'\n' +
+				entry +
+				updatedReadme.slice( insertIndex );
+		} else {
+			// No existing entries of this type, insert at the end, before the "See changelog" link
+			updatedReadme = updatedReadme.replace(
+				/\n+(\[See changelog for all versions\])/,
+				`\n${ entry }\n\n\n$1`
+			);
+		}
+	} );
+
+	return updatedReadme;
+};
+
+/**
+ * Processes the next changelog content and extracts the header and entries.
+ *
+ * @param {string} nextLog     The raw changelog content from NEXT_CHANGELOG.md
+ * @param {string} version     The version number for the changelog
+ * @param {string} releaseDate The release date for the changelog
+ * @return {Object}            An object containing the next log title and entries
+ */
+const processNextChangelog = (
+	nextLog: string,
+	version: string,
+	releaseDate: string
+) => {
+	let changelogEntries = nextLog
+		.replace(
+			/^= \d+\.\d+\.\d+(-.*?)? YYYY-mm-dd =\n\n\*\*WooCommerce\*\*/,
+			''
+		)
+		.trim();
+
+	// Convert PR number to markdown link.
+	changelogEntries = changelogEntries.replace(
+		/\[#(\d+)\](?!\()/g,
+		'[#$1](https://github.com/woocommerce/woocommerce/pull/$1)'
+	);
+
+	const entries = changelogEntries
+		.split( /\r?\n(?=\* )/ )
+		.filter( ( entry ) => entry.trim() );
+
+	return {
+		nextLogTitle: `= ${ version } ${ releaseDate } =\n\n**WooCommerce**\n\n`,
+		nextLogEntries: entries,
+	};
+};
+
 /**
  * Perform changelog adjustments after Jetpack Changelogger has run.
  *
+ * @param {string}  version         The original plugin version in the branch.
  * @param {string}  override        Time override.
  * @param {boolean} appendChangelog Whether to append the changelog or replace it.
  * @param {string}  tmpRepoPath     Path where the temporary repo is cloned.
  */
 const updateReleaseChangelogs = async (
+	version: string,
 	override: string,
 	appendChangelog: boolean,
 	tmpRepoPath: string
@@ -48,38 +130,30 @@ const updateReleaseChangelogs = async (
 	);
 
 	let readme = await readFile( readmeFile, 'utf-8' );
-	let nextLog = await readFile( nextLogFile, 'utf-8' );
+	const nextLog = await readFile( nextLogFile, 'utf-8' );
 
-	nextLog = nextLog.replace(
-		/= (\d+\.\d+\.\d+) YYYY-mm-dd =/,
-		`= $1 ${ releaseDate } =`
-	);
-
-	// Convert PR number to markdown link.
-	nextLog = nextLog.replace(
-		/\[#(\d+)\](?!\()/g,
-		'[#$1](https://github.com/woocommerce/woocommerce/pull/$1)'
+	const { nextLogTitle, nextLogEntries } = processNextChangelog(
+		nextLog,
+		version,
+		releaseDate
 	);
 
 	if ( appendChangelog ) {
-		// Append: Insert new changelog after "== Changelog ==" but before existing entries
-		const changelogEntries = nextLog
-			.replace(
-				/^= \d+\.\d+\.\d+ \d{4}-\d{2}-\d{2} =\n\n\*\*WooCommerce\*\*\n\n/,
-				''
-			)
-			.trim();
-		readme = readme.replace(
-			/\n+(\[See changelog for all versions\])/,
-			`\n${ changelogEntries }\n\n$1`
-		);
+		readme = mergeChangelogEntries( readme, nextLogTitle, nextLogEntries );
 	} else {
-		// Replace: Replace all existing changelog content with the new changelog
+		// Replace all existing changelog content with the new changelog
 		readme = readme.replace(
 			/== Changelog ==\n(.*?)\[See changelog for all versions\]/s,
-			`== Changelog ==\n\n${ nextLog }\n\n[See changelog for all versions]`
+			`== Changelog ==\n\n${ nextLogTitle }${ nextLogEntries.join(
+				'\n'
+			) }\n\n[See changelog for all versions]`
 		);
 	}
+
+	// Ensure there are exactly two empty lines between entries and 'See changelog for all versions'.
+	readme = readme
+		.trim()
+		.replace( /\n+(\[See changelog for all versions\])/, `\n\n\n$1` );
 
 	await writeFile( readmeFile, readme );
 };
@@ -97,7 +171,9 @@ export const updateReleaseBranchChangelogs = async (
 	tmpRepoPath: string,
 	releaseBranch: string
 ): Promise< { deletionCommitHash: string; prNumber: number } > => {
-	const { owner, name, version, commitDirectToBase } = options;
+	const { owner, name, version, commitDirectToBase, githubActor } = options;
+	const mainVersion = version.replace( /\.\d+(-.*)?$/, '' ); // For compatibility with Jetpack changelogger which expects X.Y as version.
+
 	try {
 		// Do a full checkout so that we can find the correct PR numbers for changelog entries.
 		await checkoutRemoteBranch( tmpRepoPath, releaseBranch, false );
@@ -127,23 +203,47 @@ export const updateReleaseBranchChangelogs = async (
 
 		Logger.notice( `Running the changelog script in ${ tmpRepoPath }` );
 
-		execSync(
-			`pnpm --filter=@woocommerce/plugin-woocommerce changelog write --add-pr-num -n -vvv --use-version ${ version }`,
+		const changelogOutput = execSync(
+			`pnpm --filter=@woocommerce/plugin-woocommerce changelog write --add-pr-num -n --yes -vvv --use-version ${ mainVersion }`,
 			{
 				cwd: tmpRepoPath,
-				stdio: 'inherit',
+				encoding: 'utf-8',
 			}
 		);
+
+		const noEntriesWritten =
+			changelogOutput.includes( `No changes were found` ) ||
+			changelogOutput.includes(
+				`no changes with content for this write`
+			);
+
+		Logger.notice( `Changelog command output: ${ changelogOutput }` );
 		Logger.notice( `Committing deleted files in ${ tmpRepoPath }` );
 		//Checkout pnpm-lock.yaml to prevent issues in case of an out of date lockfile.
 		await git.checkout( 'pnpm-lock.yaml' );
 		await git.add( 'plugins/woocommerce/changelog/' );
-		await git.commit( `Delete changelog files from ${ version } release` );
-		const deletionCommitHash = await git.raw( [ 'rev-parse', 'HEAD' ] );
-		Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
+
+		// Check if any files were actually deleted.
+		const status = await git.status();
+		let deletionCommitHash = '';
+
+		if ( status.staged.length > 0 ) {
+			await git.commit(
+				`Delete changelog files from ${ version } release`
+			);
+			deletionCommitHash = (
+				await git.raw( [ 'rev-parse', 'HEAD' ] )
+			 ).trim();
+			Logger.notice( `git deletion hash: ${ deletionCommitHash }` );
+		} else {
+			Logger.notice(
+				'No changelog files to delete, skipping deletion commit'
+			);
+		}
 
 		Logger.notice( `Updating readme.txt in ${ tmpRepoPath }` );
 		await updateReleaseChangelogs(
+			version,
 			options.override,
 			options.appendChangelog,
 			tmpRepoPath
@@ -168,18 +268,22 @@ export const updateReleaseBranchChangelogs = async (
 				`Changelog update was committed directly to ${ releaseBranch }`
 			);
 			return {
-				deletionCommitHash: deletionCommitHash.trim(),
+				deletionCommitHash,
 				prNumber: -1,
 			};
 		}
 		Logger.notice( `Creating PR for ${ branch }` );
+		const warningMessage = noEntriesWritten
+			? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
+			: '';
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
 			title: `Release: Prepare the changelog for ${ version }`,
-			body: `This pull request was automatically generated to prepare the changelog for ${ version }`,
+			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -193,8 +297,20 @@ export const updateReleaseBranchChangelogs = async (
 			);
 		}
 
+		try {
+			await addMilestoneToIssue(
+				options,
+				pullRequest.number,
+				`${ mainVersion }.0`
+			);
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ mainVersion }.0" to PR ${ pullRequest.number }`
+			);
+		}
+
 		return {
-			deletionCommitHash: deletionCommitHash.trim(),
+			deletionCommitHash,
 			prNumber: pullRequest.number,
 		};
 	} catch ( e ) {
@@ -219,8 +335,17 @@ export const updateBranchChangelog = async (
 	releaseBranch: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
 ): Promise< number > => {
-	const { owner, name, version } = options;
+	const { owner, name, version, githubActor } = options;
 	const { deletionCommitHash, prNumber } = releaseBranchChanges;
+
+	// Skip if there were no changelog files to delete
+	if ( ! deletionCommitHash ) {
+		Logger.notice(
+			`No deletion commit hash found, skipping changelog deletion from ${ releaseBranch }`
+		);
+		return -1;
+	}
+
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
@@ -237,6 +362,18 @@ export const updateBranchChangelog = async (
 			'-b': null,
 			[ branch ]: null,
 		} );
+
+		// Read plugin file version in branch to determine milestone.
+		let milestone = '';
+		const pluginFile = readFileSync(
+			path.join( tmpRepoPath, 'plugins/woocommerce/woocommerce.php' ),
+			'utf8'
+		);
+		const m = pluginFile.match( /\*\s+Version:\s+(\d+\.\d+)\.\d+/ );
+
+		if ( m ) {
+			milestone = `${ m[ 1 ] }.0`;
+		}
 
 		try {
 			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
@@ -264,6 +401,7 @@ export const updateBranchChangelog = async (
 			}`,
 			head: branch,
 			base: releaseBranch,
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -274,6 +412,14 @@ export const updateBranchChangelog = async (
 		} catch {
 			Logger.warn(
 				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
+		}
+
+		try {
+			await addMilestoneToIssue( options, pullRequest.number, milestone );
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ milestone }" to PR ${ pullRequest.number }`
 			);
 		}
 
@@ -382,21 +528,20 @@ function getTargetBranches(
 		.split( '.' )
 		.map( Number );
 
-	// Check if the target is greater than the trunk version
 	if (
-		targetMajor < currentMajor ||
-		( targetMajor === currentMajor && targetMinor <= currentMinor )
+		targetMajor > currentMajor ||
+		( targetMajor === currentMajor && targetMinor >= currentMinor )
 	) {
 		Logger.notice(
-			`Target version ${ targetVersion } is not greater than trunk version ${ trunkVersion }. Skipping intermediate branches generation.`
+			`Target version ${ targetVersion } is greater than or equal to trunk version ${ trunkVersion }. Skipping intermediate branches.`
 		);
 		return [];
 	}
 
 	const branches = [];
-	let version = getNextVersion( trunkVersion );
+	let version = getNextVersion( targetVersion );
 
-	while ( version !== targetVersion ) {
+	while ( version !== trunkVersion ) {
 		Logger.notice( `Adding intermediate branch for version ${ version }` );
 		branches.push( `release/${ version }` );
 		version = getNextVersion( version );
@@ -429,7 +574,7 @@ export const updateIntermediateBranches = async (
 		return;
 	}
 
-	const targetBranches = getTargetBranches( trunkVersion, options.version );
+	const targetBranches = getTargetBranches( options.version, trunkVersion );
 	Logger.notice(
 		`Target branches to update: ${ targetBranches.join( ', ' ) }`
 	);

@@ -11,6 +11,7 @@ $border-width: 1px;
 		margin: 0;
 		overflow: hidden;
 		text-align: center;
+		> div,
 		> li {
 			margin: 0;
 			width: 100%;
@@ -78,31 +79,25 @@ $border-width: 1px;
 			pointer-events: none;
 			flex-grow: 1;
 		}
-
-		.has-dark-controls & {
-			&::before,
-			&::after {
-				border-color: $input-border-dark;
-			}
-		}
 	}
 
-	.wc-block-components-title.wc-block-components-express-payment__title {
+	.wc-block-components-express-payment__title {
+		@include font-regular-locked;
+		@include reset-box;
+		word-break: break-word;
+		font-weight: 400;
+
 		flex-grow: 0;
 		transform: translateY(-50%);
-		font-size: 14px;
 	}
 
 	.wc-block-components-express-payment__content {
 		border: $border-width solid $universal-border-light;
 		border-top: 0;
-		padding: #{$gap-large - $universal-border-radius} $gap-large $gap-large;
+		padding: #{$gap-large - $universal-border-radius} $gap $gap;
 		border-radius: 0 0 $universal-border-radius $universal-border-radius;
 		margin-top: calc($universal-border-radius + $border-width);
 		min-height: 48px;
-		.has-dark-controls & {
-			border-color: $input-border-dark;
-		}
 
 		> p {
 			margin-bottom: em($gap);
@@ -127,6 +122,7 @@ $border-width: 1px;
 
 .wc-block-components-express-payment--cart {
 	.wc-block-components-express-payment__event-buttons {
+		> div,
 		> li {
 			padding-bottom: $gap-small;
 			text-align: center;
@@ -140,11 +136,13 @@ $border-width: 1px;
 }
 
 .wc-block-components-express-payment-continue-rule {
+	@include font-regular-locked;
+
 	display: flex;
 	align-items: center;
 	text-align: center;
-	margin: $gap-large 0;
-	font-size: 14px;
+	padding: 0;
+	margin: $gap 0 $gap-large;
 
 	&::before {
 		margin-right: 10px;
@@ -159,10 +157,6 @@ $border-width: 1px;
 		content: " ";
 		flex: 1;
 		border-bottom: 1px solid $universal-border-light;
-
-		.has-dark-controls & {
-			border-color: $input-border-dark;
-		}
 	}
 }
 @include cart-checkout-below-large-container {

@@ -30,7 +30,7 @@ See [@woocommerce/dependency-extraction-webpack-plugin](https://www.npmjs.com/pa
 | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------- |
 | [Actions](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/actions.md)  | Documentation covering action hooks on the server side.     |
 | [Filters](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/docs/third-party-developers/extensibility/hooks/filters.md) | Documentation covering filter hooks on the server side.     |
-| [Migrated Hooks](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/migrated-hooks/)                                                               | Documentation covering the migrated WooCommerce core hooks. |
+| [Migrated Hooks](/docs/block-development/reference/hooks/migrated-hooks/)                                                               | Documentation covering the migrated WooCommerce core hooks. |
 
 ## REST API
 

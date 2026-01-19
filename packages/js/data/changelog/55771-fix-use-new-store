@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Migrate PAYMENT_SETTINGS_STORE_NAME in @woocommerce/data to storeDescriptor object

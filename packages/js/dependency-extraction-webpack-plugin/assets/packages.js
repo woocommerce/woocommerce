@@ -20,6 +20,7 @@ module.exports = [
 	'@woocommerce/settings-editor',
 	'@woocommerce/tracks',
 	'@woocommerce/remote-logging',
+	'@woocommerce/sanitize',
 	// wc-blocks packages
 	'@woocommerce/blocks-checkout',
 	'@woocommerce/blocks-components',

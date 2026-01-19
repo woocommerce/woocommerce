@@ -224,6 +224,22 @@ class PlatformRegistryTest extends \WC_Unit_Test_Case {
 	 * Test get_platform_credential_fields returns expected fields for shopify.
 	 */
 	public function test_get_platform_credential_fields_shopify() {
+		add_filter(
+			'woocommerce_migrator_platforms',
+			function ( $platforms ) {
+				$platforms['shopify'] = array(
+					'name'        => 'Shopify',
+					'fetcher'     => 'TestFetcher',
+					'mapper'      => 'TestMapper',
+					'credentials' => array(
+						'shop_url'     => 'Enter shop URL (e.g., mystore.myshopify.com):',
+						'access_token' => 'Enter access token:',
+					),
+				);
+				return $platforms;
+			}
+		);
+
 		$registry = new PlatformRegistry();
 		$fields   = $registry->get_platform_credential_fields( 'shopify' );
 

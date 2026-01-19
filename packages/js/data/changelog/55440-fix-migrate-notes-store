@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrated notes data store to use register(storeDescriptor) pattern

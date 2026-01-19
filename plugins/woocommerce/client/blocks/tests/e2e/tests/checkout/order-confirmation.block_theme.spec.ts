@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect, guestFile } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	guestFile,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -30,7 +35,7 @@ test.describe( 'Shopper (logged-in) → Order Confirmation', () => {
 		await localPickupUtils.disableLocalPickup();
 
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//order-confirmation',
+			postId: `${ BLOCK_THEME_SLUG }//order-confirmation`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

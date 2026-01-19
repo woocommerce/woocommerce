@@ -9,10 +9,9 @@ import { checkoutStore } from '@woocommerce/block-data';
 import { ORDER_FORM_KEYS } from '@woocommerce/block-settings';
 import { Form } from '@woocommerce/base-components/cart-checkout';
 import Noninteractive from '@woocommerce/base-components/noninteractive';
-import type { FunctionComponent } from 'react';
 import type { OrderFormValues } from '@woocommerce/settings';
 
-const Block: FunctionComponent = () => {
+const Block = () => {
 	const { additionalFields } = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {

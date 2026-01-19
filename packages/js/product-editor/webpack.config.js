@@ -4,7 +4,48 @@
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const path = require( 'path' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
-const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
+const WebpackRTLPlugin = require( '@automattic/webpack-rtl-plugin' );
+
+/**
+ * Custom plugin to rename .rtl.css files to -rtl.css for WordPress compatibility
+ * This is needed because @automattic/webpack-rtl-plugin hardcodes the .rtl.css pattern
+ */
+class RTLFilenameFixPlugin {
+	apply( compiler ) {
+		compiler.hooks.afterEmit.tap( 'RTLFilenameFixPlugin', ( compilation ) => {
+			// This runs after assets are emitted, so we use file system operations
+			const fs = require( 'fs' );
+			const path = require( 'path' );
+			
+			compilation.entrypoints.forEach( ( entrypoint ) => {
+				entrypoint.chunks.forEach( ( chunk ) => {
+					chunk.files.forEach( ( filename ) => {
+						if ( filename.endsWith( '.rtl.css' ) ) {
+							const oldPath = path.join( compilation.outputOptions.path, filename );
+							const newPath = oldPath.replace( '.rtl.css', '-rtl.css' );
+							
+							if ( fs.existsSync( oldPath ) ) {
+								try {
+									// Copy to new filename
+									fs.copyFileSync( oldPath, newPath );
+									// Remove old file
+									fs.unlinkSync( oldPath );
+									
+									// Update compilation records
+									const newFilename = filename.replace( '.rtl.css', '-rtl.css' );
+									chunk.files.delete( filename );
+									chunk.files.add( newFilename );
+								} catch ( error ) {
+									console.warn( `RTL filename fix failed for ${filename}:`, error.message );
+								}
+							}
+						}
+					} );
+				} );
+			} );
+		} );
+	}
+}
 
 /**
  * Internal dependencies
@@ -55,12 +96,32 @@ module.exports = {
 		new WebpackRTLPlugin( {
 			test: /(?<!style)\.css$/,
 			filename: '[name]-rtl.css',
-			minify: NODE_ENV === 'development' ? false : { safe: true },
+			minify: NODE_ENV === 'development' ? false : {
+				preset: [
+					'default',
+					{
+						discardComments: {
+							removeAll: true, // Remove all comments
+						},
+						normalizeWhitespace: true, // Normalize whitespace
+					},
+				],
+			},
 		} ),
 		new WebpackRTLPlugin( {
 			test: /style\.css$/,
 			filename: '[name]/style-rtl.css',
-			minify: NODE_ENV === 'development' ? false : { safe: true },
+			minify: NODE_ENV === 'development' ? false : {
+				preset: [
+					'default',
+					{
+						discardComments: {
+							removeAll: true, // Remove all comments
+						},
+						normalizeWhitespace: true, // Normalize whitespace
+					},
+				],
+			},
 		} ),
 		new CopyWebpackPlugin( {
 			patterns: [
@@ -79,6 +140,7 @@ module.exports = {
 				},
 			],
 		} ),
+		new RTLFilenameFixPlugin(), // Convert .rtl.css to -rtl.css for WordPress compatibility
 		new StyleAssetPlugin(),
 	],
 };

@@ -117,8 +117,27 @@ class Controller extends GenericController {
 	 * Get analytics report data and endpoints.
 	 */
 	private function get_analytics_report_data() {
-		$request  = new \WP_REST_Request( 'GET', '/wc-analytics/reports' );
+		$request = new \WP_REST_Request( 'GET', '/wc-analytics/reports' );
+
+		/**
+		 * Performance hack to strip the `rel=self` link from the report response as it is built by the Reports/Controller
+		 * to avoid the expensive calls to WP_REST_Server::get_target_hints_for_link().
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 *
+		 * @return mixed
+		 */
+		$remove_self_link_from_prepared_internal_response = function ( $response ) {
+			if ( is_callable( array( $response, 'remove_link' ) ) ) {
+				$response->remove_link( 'self' );
+			}
+
+			return $response;
+		};
+
+		add_filter( 'woocommerce_rest_prepare_report', $remove_self_link_from_prepared_internal_response );
 		$response = rest_do_request( $request );
+		remove_filter( 'woocommerce_rest_prepare_report', $remove_self_link_from_prepared_internal_response );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Monorepo: consolidate @babel/* dependencies versions across the monorepo.

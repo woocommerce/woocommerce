@@ -25,11 +25,11 @@
 		"simple-git": "^3.21.0"
 	},
 	"devDependencies": {
-		"@types/jest": "27.5.x",
+		"@types/jest": "29.5.x",
 		"@types/node": "20.x.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
+		"jest": "29.5.x",
 		"ts-jest": "29.1.x",
 		"ts-node": "^10.9.2",
 		"tslib": "^2.6.2",

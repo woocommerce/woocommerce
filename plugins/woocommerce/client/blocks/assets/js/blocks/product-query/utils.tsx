@@ -90,8 +90,6 @@ export function isWooInheritQueryEnabled(
 export function useAllowedControls(
 	attributes: ProductQueryBlock[ 'attributes' ]
 ) {
-	const editSiteStore = useSelect( 'core/edit-site' );
-
 	const controls = useSelect(
 		( select ) =>
 			select( WP_BLOCKS_STORE ).getActiveBlockVariation(
@@ -101,7 +99,7 @@ export function useAllowedControls(
 		[ attributes ]
 	);
 
-	if ( ! isSiteEditorPage( editSiteStore ) ) {
+	if ( ! isSiteEditorPage() ) {
 		return controls.filter( ( control ) => control !== 'wooInherit' );
 	}
 

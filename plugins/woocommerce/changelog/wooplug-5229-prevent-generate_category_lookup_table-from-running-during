@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure recurring actions are registered and dependent classes are loaded as needed

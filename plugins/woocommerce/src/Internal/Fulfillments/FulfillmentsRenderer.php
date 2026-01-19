@@ -136,7 +136,7 @@ class FulfillmentsRenderer {
 	 * @param WC_Order $order The order object.
 	 */
 	private function render_order_fulfillment_status_column_row_data( WC_Order $order ) {
-		$order_fulfillment_status = $order->meta_exists( '_fulfillment_status' ) ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
+		$order_fulfillment_status = FulfillmentUtils::get_order_fulfillment_status( $order );
 
 		echo "<div class='fulfillment-status-wrapper'>";
 		$this->render_order_fulfillment_status_badge( $order, $order_fulfillment_status );
@@ -470,24 +470,12 @@ class FulfillmentsRenderer {
 
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
-				if ( ! isset( $args['meta_query'] ) ) {
-					$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				}
-				if ( 'no_fulfillments' === $fulfillment_status ) {
-					// If the status is 'no_fulfillments', we need to check for orders that have no fulfillments.
-					$args['meta_query'][] = array(
-						'relation' => 'OR',
-						array(
-							'key'     => '_fulfillment_status',
-							'compare' => 'NOT EXISTS',
-						),
-					);
-				} else {
-					$args['meta_query'][] = array(
-						'key'     => '_fulfillment_status',
-						'value'   => $fulfillment_status,
-						'compare' => '=',
-					);
+				$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $fulfillment_status );
+				if ( ! empty( $meta_query ) ) {
+					if ( ! isset( $args['meta_query'] ) ) {
+						$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					}
+					$args['meta_query'][] = $meta_query;
 				}
 			}
 		}
