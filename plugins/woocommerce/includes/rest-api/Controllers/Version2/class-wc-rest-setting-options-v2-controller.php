@@ -172,7 +172,7 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			return new WP_Error( 'rest_setting_setting_group_invalid', __( 'Invalid setting group.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$this->prefetch_options( $settings );
+		$this->prime_options_cache_for_settings( $settings );
 
 		$filtered_settings = array();
 		foreach ( $settings as $setting ) {
@@ -214,9 +214,8 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 	 * @param mixed[] $settings The settings to prefetch options for.
 	 * @return void
 	 */
-	private function prefetch_options( array $settings ): void {
-		/* prime options cache to reduce the number of SQLs */
-		$prefetch = [];
+	private function prime_options_cache_for_settings( array $settings ): void {
+		$prefetch = array();
 		foreach ( $settings as $setting ) {
 			$option_key = $setting['option_key'];
 			if ( is_array( $option_key ) ) {
@@ -230,7 +229,9 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 				}
 			}
 		}
-		wp_prime_option_caches( $prefetch );
+		if ( array() !== $prefetch ) {
+			wp_prime_option_caches( $prefetch );
+		}
 	}
 
 	/**
