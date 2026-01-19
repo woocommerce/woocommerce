@@ -219,14 +219,12 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 		foreach ( $settings as $setting ) {
 			$option_key = $setting['option_key'];
 			if ( is_array( $option_key ) ) {
-				$prefetch []= $option_key[0];
+				$prefetch[] = $option_key[0];
+			} elseif ( strstr( $option_key, '[' ) ) {
+				parse_str( $option_key, $option_array );
+				$prefetch[] = current( array_keys( $option_array ) );
 			} else {
-				if ( strstr( $option_key, '[' ) ) {
-					parse_str( $option_key, $option_array );
-					$prefetch []= current( array_keys( $option_array ) );
-				} else {
-					$prefetch []= $option_key;
-				}
+				$prefetch[] = $option_key;
 			}
 		}
 		if ( array() !== $prefetch ) {

@@ -272,7 +272,7 @@ class WC_Emails {
 		// Include email classes.
 		include_once __DIR__ . '/emails/class-wc-email.php';
 
-		$emails = array (
+		$emails = array(
 			'WC_Email_New_Order'                 => __DIR__ . '/emails/class-wc-email-new-order.php',
 			'WC_Email_Cancelled_Order'           => __DIR__ . '/emails/class-wc-email-cancelled-order.php',
 			'WC_Email_Customer_Cancelled_Order'  => __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php',
@@ -300,12 +300,12 @@ class WC_Emails {
 		// Preload the options which will be used when emails are getting initialized in the loop below (reduces the number of SQL-queries).
 		wp_prime_option_caches(
 			array_map(
-				fn( string $class ) => sprintf( 'woocommerce_%s_settings', strtolower( str_replace( 'WC_Email_', '', $class ) ) ),
+				fn( string $class_name ) => sprintf( 'woocommerce_%s_settings', strtolower( str_replace( 'WC_Email_', '', $class_name ) ) ),
 				array_keys( $emails )
 			)
 		);
 		foreach ( $emails as $class => $path ) {
-			$this->emails[$class] = include $path;
+			$this->emails[ $class ] = include $path;
 		}
 
 		/**
