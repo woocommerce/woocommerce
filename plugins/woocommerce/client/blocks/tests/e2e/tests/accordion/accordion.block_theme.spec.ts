@@ -59,11 +59,18 @@ test.describe( `${ blockData.slug } Block - Deprecation`, () => {
 		await admin.createNewPost();
 	} );
 
-	test( 'shows deprecation notice and converts all inner blocks to core accordion on upgrade', async ( {
+	test( 'shows deprecation notice and converts all inner blocks to core accordion on upgrade (WP 6.9+)', async ( {
 		editor,
 		frontendUtils,
 		page,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion < 6.9,
+			'This test requires WordPress 6.9 or later'
+		);
+
 		// Insert WooCommerce accordion block with inner blocks and content.
 		await editor.insertBlock( {
 			name: blockData.slug,
@@ -172,5 +179,28 @@ test.describe( `${ blockData.slug } Block - Deprecation`, () => {
 		// Verify accordion buttons are present.
 		const accordionButtons = accordionFrontend.getByRole( 'button' );
 		await expect( accordionButtons ).toHaveCount( itemCount );
+	} );
+
+	test( 'does not show deprecation notice in WordPress 6.8 or earlier', async ( {
+		editor,
+		wpCoreVersion,
+	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion >= 6.9,
+			'This test is only for WordPress 6.8 or earlier'
+		);
+
+		// Insert WooCommerce accordion block with inner blocks and content.
+		await editor.insertBlock( {
+			name: blockData.slug,
+			innerBlocks: accordionInnerBlocks,
+		} );
+
+		// Verify deprecation notice is NOT shown.
+		const deprecationNotice = editor.canvas.getByText(
+			'This version of the Accordion block is outdated. Upgrade to continue using.'
+		);
+		await expect( deprecationNotice ).toBeHidden();
 	} );
 } );
