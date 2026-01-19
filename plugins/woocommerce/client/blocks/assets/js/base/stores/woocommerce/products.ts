@@ -124,12 +124,9 @@ const storeResult = store< ProductsStore >(
 						const json = await response.json();
 
 						if ( isApiErrorResponse( response, json ) ) {
-							// eslint-disable-next-line no-console
-							console.error(
-								`Failed to load product ${ productId }:`,
-								( json as ApiErrorResponse ).message
+							throw new Error(
+								`Failed to load product ${ productId }: ${ ( json as ApiErrorResponse ).message }`
 							);
-							return null;
 						}
 
 						// Store the product.
@@ -137,13 +134,6 @@ const storeResult = store< ProductsStore >(
 							json as ProductResponseItem;
 
 						return json as ProductResponseItem;
-					} catch ( error ) {
-						// eslint-disable-next-line no-console
-						console.error(
-							`Error loading product ${ productId }:`,
-							error
-						);
-						return null;
 					} finally {
 						// Clean up the pending request.
 						pendingProductRequests.delete( productId );
