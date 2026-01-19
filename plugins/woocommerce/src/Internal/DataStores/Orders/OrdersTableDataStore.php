@@ -1416,8 +1416,8 @@ WHERE
 	/**
 	 * Read the Cost of Goods Sold value for a given order from the database, if available, and apply it to the order.
 	 *
-	 * @param \WC_Abstract_Order $order     The order to get the COGS value for.
-	 * @param object[]           $meta_data The original meta-data fetched for the order.
+	 * @param \WC_Abstract_Order                          $order     The order to get the COGS value for.
+	 * @param object{meta_key:string,meta_value:string}[] $meta_data The original meta-data fetched for the order.
 	 */
 	private function read_cogs_data( WC_Abstract_Order $order, array $meta_data ) {
 		$meta_entry = array_filter( $meta_data, fn( object $meta ) => '_cogs_total_value' === $meta->meta_key );
