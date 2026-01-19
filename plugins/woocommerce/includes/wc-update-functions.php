@@ -3232,17 +3232,18 @@ function wc_update_1050_remove_deprecated_marketplace_option(): void {
 }
 
 /**
- * Update the `woo_idx_comment_type` index to improve the performance of comment-related queries in the admin area.
+ * Add the `woo_idx_comment_approved_type` index to improve the performance of comment-related queries in the admin area.
  *
  * @since 10.6.0
  *
  * @return void
  */
-function wc_update_1060_update_woo_idx_comment_type_index(): void {
+function wc_update_1060_add_woo_idx_comment_approved_type_index(): void {
 	global $wpdb;
 
-	$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
-	if ( null !== $comment_type_index_exists ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type, ADD INDEX woo_idx_comment_type (comment_approved, comment_type, comment_post_ID)" );
+	$comment_approved_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_approved_type'" );
+	if ( null === $comment_approved_type_index_exists ) {
+		// Improve performance of the admin comments query when counting approved comments while excluding internal notes.
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_approved_type (comment_approved, comment_type, comment_post_ID)" );
 	}
 }

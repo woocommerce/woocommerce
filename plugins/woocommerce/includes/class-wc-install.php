@@ -320,7 +320,7 @@ class WC_Install {
 			'wc_update_1050_remove_deprecated_marketplace_option',
 		),
 		'10.6.0' => array(
-			'wc_update_1060_update_woo_idx_comment_type_index',
+			'wc_update_1060_add_woo_idx_comment_approved_type_index',
 		),
 	);
 
@@ -1725,14 +1725,21 @@ class WC_Install {
 
 		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
 		if ( null === $comment_type_index_exists ) {
-			// Improve performance of the admin comments query when counting approved comments while excluding internal notes.
-			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_approved, comment_type, comment_post_ID)" );
+			// Add an index to the field comment_type to improve the response time of the query
+			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 		}
 
 		$date_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
 		if ( null === $date_type_index_exists ) {
 			// Improve performance of the admin comments query when fetching the latest 25 comments while excluding reviews and internal notes.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
+		}
+
+		$comment_approved_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_approved_type'" );
+		if ( null === $comment_approved_type_index_exists ) {
+			// Improve performance of the admin comments query when counting approved comments while excluding internal notes.
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_approved_type (comment_approved, comment_type, comment_post_ID)" );
 		}
 
 		// Clear table caches.
