@@ -34,8 +34,8 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 		parent::tearDown();
 		$this->sut->reset();
 		global $wp_query, $post;
-		$wp_query = null;
-		$post     = null;
+		$wp_query = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$post     = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
@@ -52,16 +52,26 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 		);
 		update_option( 'woocommerce_myaccount_page_id', $my_account_page_id );
 
-		global $post, $wp;
-		$post = get_post( $my_account_page_id );
+		global $post, $wp, $wp_query;
+		$post = get_post( $my_account_page_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$wp                = new stdClass();
-		$wp->query_vars    = array( 'orders' => '' );
+		$wp             = new stdClass(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp->query_vars = array( 'orders' => '' );
+
+		$wp_query                 = new WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query->is_page        = true;
+		$wp_query->queried_object = $post;
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'is_wc_endpoint_url' => function() {
+				'is_wc_endpoint_url' => function () {
 					return true;
+				},
+				'is_page'            => function () {
+					return true;
+				},
+				'is_front_page'      => function () {
+					return false;
 				},
 			)
 		);
@@ -79,11 +89,8 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 
 		WC()->query = $mock_query;
 
-		$reflection = new ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'add_crumbs_page' );
-
 		$this->sut->add_crumb( 'Home', home_url() );
-		$method->invoke( $this->sut );
+		$this->sut->generate();
 
 		$breadcrumbs = $this->sut->get_breadcrumb();
 
@@ -111,16 +118,26 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 		);
 		update_option( 'woocommerce_myaccount_page_id', $my_account_page_id );
 
-		global $post, $wp;
-		$post = get_post( $my_account_page_id );
+		global $post, $wp, $wp_query;
+		$post = get_post( $my_account_page_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		$wp                = new stdClass();
-		$wp->query_vars    = array( 'edit-address' => 'billing' );
+		$wp             = new stdClass(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp->query_vars = array( 'edit-address' => 'billing' );
+
+		$wp_query                 = new WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query->is_page        = true;
+		$wp_query->queried_object = $post;
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'is_wc_endpoint_url' => function() {
+				'is_wc_endpoint_url' => function () {
 					return true;
+				},
+				'is_page'            => function () {
+					return true;
+				},
+				'is_front_page'      => function () {
+					return false;
 				},
 			)
 		);
@@ -138,11 +155,8 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 
 		WC()->query = $mock_query;
 
-		$reflection = new ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'add_crumbs_page' );
-
 		$this->sut->add_crumb( 'Home', home_url() );
-		$method->invoke( $this->sut );
+		$this->sut->generate();
 
 		$breadcrumbs = $this->sut->get_breadcrumb();
 
@@ -169,22 +183,29 @@ class WC_Breadcrumb_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		global $post;
-		$post = get_post( $page_id );
+		global $post, $wp_query;
+		$post = get_post( $page_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$wp_query                 = new WP_Query(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query->is_page        = true;
+		$wp_query->queried_object = $post;
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'is_wc_endpoint_url' => function() {
+				'is_wc_endpoint_url' => function () {
+					return false;
+				},
+				'is_page'            => function () {
+					return true;
+				},
+				'is_front_page'      => function () {
 					return false;
 				},
 			)
 		);
 
-		$reflection = new ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'add_crumbs_page' );
-
 		$this->sut->add_crumb( 'Home', home_url() );
-		$method->invoke( $this->sut );
+		$this->sut->generate();
 
 		$breadcrumbs = $this->sut->get_breadcrumb();
 
