@@ -497,7 +497,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 											FROM {$wpdb->posts} AS posts LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
 											WHERE postmeta.meta_key   = '_customer_user'
 											  AND postmeta.meta_value = '" . esc_sql( $customer_id ) . "'
-											  AND posts.post_type  = 'shop_order'
+											  AND posts.post_type     = 'shop_order'
 											  AND posts.post_status IN $statuses_sql
 								)
 								AND postmeta.meta_key = '_order_total'";
