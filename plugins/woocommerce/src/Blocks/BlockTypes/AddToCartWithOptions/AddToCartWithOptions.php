@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -62,17 +61,19 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected function enqueue_assets( $attributes, $content, $block ) {
 		$product_id = ( is_object( $block ) && property_exists( $block, 'context' ) && is_array( $block->context ) && array_key_exists( 'postId', $block->context ) ) ? $block->context['postId'] : null;
 
-		if ( isset( $product_id ) ) {
-			$rendered_product = wc_get_product( $product_id );
+		// if ( isset( $product_id ) ) {
+		// $rendered_product = wc_get_product( $product_id );
 
-			if ( $rendered_product instanceof \WC_Product ) {
-				$template_part_path = $this->get_template_part_path( $rendered_product->get_type() );
+		// if ( $rendered_product instanceof \WC_Product ) {
+		// $template_part_path = $this->get_template_part_path( $rendered_product->get_type() );
 
-				if ( is_string( $template_part_path ) && '' !== $template_part_path && file_exists( $template_part_path ) ) {
-					wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options' );
-				}
-			}
-		}
+		// if ( is_string( $template_part_path ) && '' !== $template_part_path && file_exists( $template_part_path ) ) {
+		// wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options' );
+		// }
+		// }
+		// }
+
+		wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options' );
 
 		parent::enqueue_assets( $attributes, $content, $block );
 	}

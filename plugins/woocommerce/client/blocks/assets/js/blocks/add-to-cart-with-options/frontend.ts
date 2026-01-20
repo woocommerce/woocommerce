@@ -71,6 +71,8 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
+console.log( 'Hello' );
+
 /**
  * Find the matching variation ID from a product's variations based on selected attributes.
  *
