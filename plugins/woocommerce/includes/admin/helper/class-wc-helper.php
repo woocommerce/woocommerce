@@ -1802,8 +1802,10 @@ class WC_Helper {
 			)
 		);
 
-		$status = wp_remote_retrieve_response_code( $request );
-		$message = json_decode( wp_remote_retrieve_body( $request ), true )['message'];
+		$status          = wp_remote_retrieve_response_code( $request );
+		$body            = json_decode( wp_remote_retrieve_body( $request ), true );
+		$connection_data = is_array( $body ) ? $body : array();
+		$message         = $connection_data['message'] ?? '';
 
 		if ( 200 !== $status ) {
 			if ( 'Connected site not found.' === $message || 'Invalid access token' === $message ) {
@@ -1815,8 +1817,6 @@ class WC_Helper {
 				array( 'status' => $status )
 			);
 		}
-
-		$connection_data = json_decode( wp_remote_retrieve_body( $request ), true );
 
 		$url = $connection_data['url'] ?? '';
 
