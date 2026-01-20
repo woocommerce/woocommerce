@@ -11739,7 +11739,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$link of method WC_Breadcrumb\:\:add_crumb\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 7
+			count: 6
 			path: includes/class-wc-breadcrumb.php
 
 		-
