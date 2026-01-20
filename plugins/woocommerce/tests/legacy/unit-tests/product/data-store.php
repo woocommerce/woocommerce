@@ -901,7 +901,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test searching products by global_unique_id (EAN/barcode).
+	 * @testdox Test searching products by global_unique_id (EAN/barcode).
 	 *
 	 * @return void
 	 */
@@ -949,7 +949,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test searching variations by global_unique_id.
+	 * @testdox Test searching variations by global_unique_id.
 	 *
 	 * @return void
 	 */
