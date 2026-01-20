@@ -67144,12 +67144,6 @@ parameters:
 			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
 
 		-
-			message: '#^Parameter \#1 \$comments of function update_comment_cache expects array\<WP_Comment\>, array\<int\|WP_Comment\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
-
-		-
 			message: '#^Parameter \#1 \$number of function number_format_i18n expects float, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -67183,12 +67177,6 @@ parameters:
 			message: '#^Parameter \#3 \$number of function _n expects int, int\|string given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
-
-		-
-			message: '#^Property WP_List_Table\:\:\$items \(array\) does not accept array\<int\|WP_Comment\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
 
 		-
