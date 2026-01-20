@@ -43,6 +43,11 @@ test.describe( 'Shopper → Notices', () => {
 			);
 			// Extract just the numeric ID from output (npm adds prefix lines to stdout).
 			const productId = result.stdout.match( /^\d+$/m )?.[ 0 ];
+			if ( ! productId ) {
+				throw new Error(
+					`Failed to extract product ID from wpCLI output: ${ result.stdout }`
+				);
+			}
 
 			await frontendUtils.emptyCart();
 			await frontendUtils.goToShop();
@@ -60,23 +65,26 @@ test.describe( 'Shopper → Notices', () => {
 			const noJsContext = await browser.newContext( {
 				javaScriptEnabled: false,
 			} );
-			const noJsPage = await noJsContext.newPage();
 
-			// Copy cookies to maintain cart session.
-			const cookies = await page.context().cookies();
-			await noJsContext.addCookies( cookies );
+			try {
+				const noJsPage = await noJsContext.newPage();
 
-			await noJsPage.goto( currentUrl );
+				// Copy cookies to maintain cart session.
+				const cookies = await page.context().cookies();
+				await noJsContext.addCookies( cookies );
 
-			// Verify error notice banner is rendered in SSR output (not client-side JS).
-			// Note: The notice text content contains HTML and is rendered client-side via
-			// data-wp-init callback, so we only verify the banner structure exists in SSR.
-			const miniCartNotice = noJsPage.locator(
-				'.wp-block-woocommerce-filled-mini-cart-contents-block .wc-block-components-notice-banner'
-			);
-			await expect( miniCartNotice ).toBeVisible();
+				await noJsPage.goto( currentUrl );
 
-			await noJsContext.close();
+				// Verify error notice banner is rendered in SSR output (not client-side JS).
+				// Note: The notice text content contains HTML and is rendered client-side via
+				// data-wp-init callback, so we only verify the banner structure exists in SSR.
+				const miniCartNotice = noJsPage.locator(
+					'.wp-block-woocommerce-filled-mini-cart-contents-block .wc-block-components-notice-banner'
+				);
+				await expect( miniCartNotice ).toBeVisible();
+			} finally {
+				await noJsContext.close();
+			}
 		} );
 	}
 
