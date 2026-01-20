@@ -334,6 +334,8 @@ class AgenticCheckoutUtils {
 	/**
 	 * Validate that the request is signed with Jetpack blog token.
 	 *
+	 * @since 10.6.0
+	 *
 	 * @return true|\WP_Error True if valid, WP_Error otherwise.
 	 */
 	public static function validate_jetpack_request() {
