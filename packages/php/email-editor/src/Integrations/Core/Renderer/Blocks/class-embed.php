@@ -447,7 +447,7 @@ class Embed extends Abstract_Block_Renderer {
 	 */
 	private function render_video_embed( string $url, string $provider, array $parsed_block, Rendering_Context $rendering_context, string $block_content ): string {
 		// Try to get video thumbnail URL.
-		$poster_url = $this->get_video_thumbnail_url( $url, $provider, $parsed_block );
+		$poster_url = $this->get_video_thumbnail_url( $url, $provider );
 
 		// If no poster available, fall back to a simple link.
 		if ( empty( $poster_url ) ) {
@@ -489,13 +489,13 @@ class Embed extends Abstract_Block_Renderer {
 	 * @param string $provider Provider name.
 	 * @return string Thumbnail URL or empty string.
 	 */
-	private function get_video_thumbnail_url( string $url, string $provider, array $parsed_block = array() ): string {
+	private function get_video_thumbnail_url( string $url, string $provider ): string {
 		if ( 'youtube' === $provider ) {
 			return $this->get_youtube_thumbnail( $url );
 		}
 
 		if ( 'videopress' === $provider ) {
-			return $this->get_videopress_thumbnail( $url, $parsed_block );
+			return $this->get_videopress_thumbnail( $url );
 		}
 
 		// For other providers, we don't have thumbnail extraction implemented.
@@ -532,27 +532,24 @@ class Embed extends Abstract_Block_Renderer {
 	 * Note: wp_oembed_get() returns HTML, so we use WP_oEmbed::get_data() to get the raw data object.
 	 *
 	 * @param string $url VideoPress video URL.
-	 * @param array  $parsed_block Parsed block (optional, for checking guid attribute).
 	 * @return string Thumbnail URL or empty string.
 	 */
-	private function get_videopress_thumbnail( string $url, array $parsed_block = array() ): string {
+	private function get_videopress_thumbnail( string $url ): string {
 		// Use WP_oEmbed::get_data() to get raw oEmbed data (not HTML).
-		// wp_oembed_get() returns HTML, but we need the data object with thumbnail_url.
-		$oembed = new \WP_oEmbed();
+		$oembed      = new \WP_oEmbed();
 		$oembed_data = $oembed->get_data( $url );
 
-		if ( ! is_object( $oembed_data ) && ! is_array( $oembed_data ) ) {
+		// get_data() returns object|false, so check for false or non-object.
+		if ( false === $oembed_data || ! is_object( $oembed_data ) ) {
 			return '';
 		}
 
 		// Extract thumbnail_url from oEmbed response.
-		// Handle both object and array formats.
-		$thumbnail_url = '';
-		if ( is_object( $oembed_data ) && isset( $oembed_data->thumbnail_url ) ) {
-			$thumbnail_url = $oembed_data->thumbnail_url;
-		} elseif ( is_array( $oembed_data ) && isset( $oembed_data['thumbnail_url'] ) ) {
-			$thumbnail_url = $oembed_data['thumbnail_url'];
+		if ( ! isset( $oembed_data->thumbnail_url ) ) {
+			return '';
 		}
+
+		$thumbnail_url = $oembed_data->thumbnail_url;
 
 		// Validate the thumbnail URL.
 		if ( ! empty( $thumbnail_url ) && $this->is_valid_url( $thumbnail_url ) ) {
