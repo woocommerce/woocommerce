@@ -153,8 +153,6 @@ export const CountrySelector = < ItemType extends Item >( {
 		highlightedIndex,
 		selectedItem,
 		closeMenu,
-		setHighlightedIndex,
-		selectItem,
 	} = useSelect< ItemType >( {
 		initialSelectedItem: value,
 		items: [ ...visibleItems ],
@@ -429,9 +427,9 @@ export const CountrySelector = < ItemType extends Item >( {
 													keyboardHighlightIndex !==
 													null
 														? index ===
-															keyboardHighlightIndex
+														  keyboardHighlightIndex
 														: index ===
-															highlightedIndex,
+														  highlightedIndex,
 											}
 										),
 										'data-index': index,

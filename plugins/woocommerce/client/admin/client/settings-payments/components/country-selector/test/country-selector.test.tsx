@@ -143,8 +143,9 @@ describe( 'CountrySelector', () => {
 			fireEvent.keyDown( searchInput, { key: 'ArrowUp' } ); // Back to US (0).
 
 			// US should be highlighted.
-			const usItem = screen
-				.getByRole( 'option', { name: 'United States' } );
+			const usItem = screen.getByRole( 'option', {
+				name: 'United States',
+			} );
 			expect( usItem ).toHaveClass( 'is-highlighted' );
 		} );
 
