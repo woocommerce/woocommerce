@@ -1,0 +1,165 @@
+{
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Jost",
+							"fontStyle": "italic",
+							"fontWeight": "100 900",
+							"src": [
+								"file:./assets/fonts/jost/jost-100-900-italic.ttf"
+							]
+						},
+						{
+							"fontFamily": "Jost",
+							"fontStyle": "normal",
+							"fontWeight": "100 900",
+							"src": [
+								"file:./assets/fonts/jost/jost-100-900-normal.ttf"
+							]
+						}
+					],
+					"fontFamily": "Jost",
+					"name": "Jost",
+					"slug": "jost"
+				}
+			],
+			"fontSizes": [
+				{
+					"fluid": {
+						"max": "0.8rem",
+						"min": "0.7rem"
+					},
+					"name": "Small",
+					"size": "0.875rem",
+					"slug": "small"
+				},
+				{
+					"name": "Medium",
+					"size": "0.94rem",
+					"slug": "medium"
+				},
+				{
+					"fluid": {
+						"max": "1.2rem",
+						"min": "1.1rem"
+					},
+					"name": "Large",
+					"size": "1.375rem",
+					"slug": "large"
+				},
+				{
+					"fluid": {
+						"max": "1.4rem",
+						"min": "1.2rem"
+					},
+					"name": "Extra Large",
+					"size": "1.75rem",
+					"slug": "x-large"
+				},
+				{
+					"fluid": {
+						"max": "1.7rem",
+						"min": "1.5rem"
+					},
+					"name": "2X Large",
+					"size": "2.125rem",
+					"slug": "xx-large"
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/post-title": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "600"
+				}
+			},
+			"core/site-title": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--x-large)",
+					"fontStyle": "normal",
+					"fontWeight": "600",
+					"letterSpacing": "0.1em"
+				}
+			},
+			"woocommerce/product-title": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "700"
+				}
+			}
+		},
+		"elements": {
+			"button": {
+				"typography": {
+					"letterSpacing": "0.1em",
+					"textTransform": "uppercase"
+				}
+			},
+			"caption": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"fontStyle": "normal",
+					"fontWeight": "300"
+				}
+			},
+			"h1": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "600"
+				}
+			},
+			"h2": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "600"
+				}
+			},
+			"h3": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "600"
+				}
+			},
+			"h4": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "600"
+				}
+			},
+			"h5": {
+				"typography": {
+					"fontSize": "var(--wp--preset--font-size--medium)",
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"h6": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "400",
+					"letterSpacing": "0.16em"
+				}
+			},
+			"heading": {
+				"typography": {
+					"letterSpacing": "0.1em",
+					"textTransform": "uppercase"
+				}
+			}
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--jost)",
+			"fontStyle": "normal",
+			"fontWeight": "300",
+			"letterSpacing": "0.02em"
+		}
+	},
+	"version": 3,
+	"title": "Jost"
+}
