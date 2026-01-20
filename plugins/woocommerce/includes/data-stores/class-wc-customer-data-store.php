@@ -507,18 +507,32 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					$customer_id
 				);
 			} else {
-				$sql = "SELECT SUM(postmeta.meta_value)
-						FROM {$wpdb->posts} AS posts
-								LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-								WHERE posts.ID IN (
-											SELECT posts.ID as order_id
-											FROM {$wpdb->posts} AS posts LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
-											WHERE postmeta.meta_key   = '_customer_user'
-											  AND postmeta.meta_value = '" . esc_sql( $customer_id ) . "'
-											  AND posts.post_type     = 'shop_order'
-											  AND posts.post_status IN $statuses_sql
-								)
-								AND postmeta.meta_key = '_order_total'";
+				$has_sql_modification_filter = has_filter( 'woocommerce_customer_get_total_spent_query' );
+				if ( $has_sql_modification_filter ) {
+					// For backward compatibility: external filters might rely onto the query structure,
+					$sql = "SELECT SUM(meta2.meta_value)
+					FROM {$wpdb->posts} as posts
+					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
+					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
+					WHERE   meta.meta_key       = '_customer_user'
+					AND     meta.meta_value     = '" . esc_sql( $customer_id ) . "'
+					AND     posts.post_type     = 'shop_order'
+					AND     posts.post_status   IN $statuses_sql
+					AND     meta2.meta_key      = '_order_total'";
+				} else {
+					$sql = "SELECT SUM(postmeta.meta_value)
+					FROM {$wpdb->posts} AS posts
+					LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+					WHERE posts.ID IN (
+								SELECT posts.ID as order_id
+								FROM {$wpdb->posts} AS posts LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+								WHERE postmeta.meta_key   = '_customer_user'
+								  AND postmeta.meta_value = '" . esc_sql( $customer_id ) . "'
+								  AND posts.post_type     = 'shop_order'
+								  AND posts.post_status IN $statuses_sql
+					)
+					AND postmeta.meta_key = '_order_total'";
+				}
 			}
 
 			/**
