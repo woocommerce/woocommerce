@@ -921,17 +921,100 @@ class QueryBuilder extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test merging filter queries specifically for Brands.
-	 * Scenario: ?brands=nike (Slug)
+	 * Tests that the by-brand collection handler works as expected.
 	 */
-	public function test_merging_filter_by_brands() {
-		// 1. Mock the filter mapping for Brands.
-		$this->block_instance->set_attributes_filter_query_args(
+	public function test_collection_by_brand() {
+		// Create test brands.
+		$nike_brand    = wp_create_term( 'Nike', 'product_brand' );
+		$nike_brand_id = $nike_brand['term_id'];
+
+		$adidas_brand    = wp_create_term( 'Adidas', 'product_brand' );
+		$adidas_brand_id = $adidas_brand['term_id'];
+
+		// Create test products.
+		$nike_shoes = WC_Helper_Product::create_simple_product();
+		$nike_shoes->set_name( 'Nike Shoes' );
+		$nike_shoes->save();
+
+		$nike_shirt = WC_Helper_Product::create_simple_product();
+		$nike_shirt->set_name( 'Nike Shirt' );
+		$nike_shirt->save();
+
+		$adidas_shoes = WC_Helper_Product::create_simple_product();
+		$adidas_shoes->set_name( 'Adidas Shoes' );
+		$adidas_shoes->save();
+
+		$unbranded_product = WC_Helper_Product::create_simple_product();
+		$unbranded_product->set_name( 'Unbranded Product' );
+		$unbranded_product->save();
+
+		// Assign products to brands.
+		wp_set_object_terms( $nike_shoes->get_id(), $nike_brand_id, 'product_brand' );
+		wp_set_object_terms( $nike_shirt->get_id(), $nike_brand_id, 'product_brand' );
+		wp_set_object_terms( $adidas_shoes->get_id(), $adidas_brand_id, 'product_brand' );
+		// unbranded_product has no brand.
+
+		// Test filtering by Nike brand - Frontend.
+		$merged_query = Utils::initialize_merged_query(
+			$this->block_instance,
+			null,
 			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_brand',
+						'terms'            => array( $nike_brand_id ),
+						'include_children' => false,
+					),
+				),
+			)
+		);
+
+		$query             = new WP_Query( $merged_query );
+		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		// Should return Nike shoes and Nike shirt.
+		$this->assertContains( $nike_shoes->get_id(), $found_product_ids );
+		$this->assertContains( $nike_shirt->get_id(), $found_product_ids );
+		$this->assertNotContains( $adidas_shoes->get_id(), $found_product_ids );
+		$this->assertNotContains( $unbranded_product->get_id(), $found_product_ids );
+
+		// Test filtering by Nike brand - Editor.
+		$args    = array(
+			'posts_per_page' => 10,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'tax_query'      => array(
 				array(
-					'filter'     => 'brands',
-					'query_type' => 'query_type_brand',
-					'taxonomy'   => 'product_brand',
+					'taxonomy'         => 'product_brand',
+					'terms'            => array( $nike_brand_id ),
+					'include_children' => false,
+				),
+			),
+		);
+		$request = Utils::build_request();
+
+		$updated_query    = $this->block_instance->update_rest_query_in_editor( $args, $request );
+		$editor_query     = new WP_Query( $updated_query );
+		$editor_found_ids = wp_list_pluck( $editor_query->posts, 'ID' );
+
+		// Should return Nike shoes and Nike shirt in editor as well.
+		$this->assertContains( $nike_shoes->get_id(), $editor_found_ids );
+		$this->assertContains( $nike_shirt->get_id(), $editor_found_ids );
+		$this->assertNotContains( $adidas_shoes->get_id(), $editor_found_ids );
+		$this->assertNotContains( $unbranded_product->get_id(), $editor_found_ids );
+
+		// Test filtering by Adidas brand - Frontend.
+		$merged_query_adidas = Utils::initialize_merged_query(
+			$this->block_instance,
+			null,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_brand',
+						'terms'            => array( $adidas_brand_id ),
+						'include_children' => false,
+					),
 				),
 			)
 		);
