@@ -25,7 +25,7 @@ class WC_Woo_Helper_Connection {
 	 */
 	public static function get_connection_url_notice(): string {
 		$connection_data = WC_Helper::get_cached_connection_data();
-		if ( false === $connection_data || false === $connection_data['alert_url_mismatch'] ) {
+		if ( false === $connection_data || ! empty( $connection_data['maybe_deleted_connection'] ) || false === ( $connection_data['alert_url_mismatch'] ?? false ) ) {
 			return '';
 		}
 
