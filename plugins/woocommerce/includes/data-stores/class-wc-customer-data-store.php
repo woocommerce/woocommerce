@@ -422,6 +422,16 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_order_count( &$customer ) {
 		$customer_id = $customer->get_id();
+		/**
+		 * Filters total orders count value for a given customer.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param mixed       The cached order scount (from user meta).
+		 * @param WC_Customer The customer to get the orders count for.
+		 *
+		 * @return mixed
+		 */
 		$count       = apply_filters(
 			'woocommerce_customer_get_order_count',
 			Users::get_site_user_meta( $customer_id, 'wc_order_count', true ),
@@ -469,6 +479,15 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_total_spent( &$customer ) {
 		$customer_id = $customer->get_id();
+		/**
+		 * Filters total spent value for a given customer.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param mixed       The cached total value (from user meta).
+		 * @param WC_Customer The customer to get the total spent for.
+		 * @return mixed
+		 */
 		$spent       = apply_filters(
 			'woocommerce_customer_get_total_spent',
 			Users::get_site_user_meta( $customer_id, 'wc_money_spent', true ),
@@ -503,16 +522,16 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 								AND postmeta.meta_key = '_order_total'";
 			}
 
-			//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			/**
 			 * Filters the SQL query used to get the combined total of all the orders from a given customer.
 			 *
-			 * @param string The SQL query to use.
+			 * @since 3.1.0
+			 *
+			 * @param string      The SQL query to use.
 			 * @param WC_Customer The customer to get the total spent for.
-			 * @return string The actual SQL query to use.
+			 * @return string     The actual SQL query to use.
 			 */
 			$sql = apply_filters( 'woocommerce_customer_get_total_spent_query', $sql, $customer );
-			//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 			$spent = $wpdb->get_var( $sql );
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
