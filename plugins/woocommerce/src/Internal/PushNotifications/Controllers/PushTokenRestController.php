@@ -100,16 +100,16 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function create( WP_REST_Request $request ) {
-		$push_token = new PushToken();
-		$push_token->set_user_id( get_current_user_id() );
-		$push_token->set_token( $request->get_param( 'token' ) );
-		$push_token->set_platform( $request->get_param( 'platform' ) );
-		$push_token->set_device_uuid( $request->get_param( 'device_uuid' ) );
-		$push_token->set_origin( $request->get_param( 'origin' ) );
-
-		$data_store = wc_get_container()->get( PushTokensDataStore::class );
-
 		try {
+			$push_token = new PushToken();
+			$push_token->set_user_id( get_current_user_id() );
+			$push_token->set_token( $request->get_param( 'token' ) );
+			$push_token->set_platform( $request->get_param( 'platform' ) );
+			$push_token->set_device_uuid( $request->get_param( 'device_uuid' ) );
+			$push_token->set_origin( $request->get_param( 'origin' ) );
+
+			$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
 			$existing_token = clone $push_token;
 			$existing_token = $data_store->get_by_token_or_device_id( $existing_token );
 
@@ -139,11 +139,22 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete( WP_REST_Request $request ) {
-		$push_token = new PushToken();
-		$push_token->set_id( (int) $request->get_param( 'id' ) );
-
 		try {
-			wc_get_container()->get( PushTokensDataStore::class )->delete( $push_token );
+			$push_token = new PushToken();
+			$push_token->set_id( (int) $request->get_param( 'id' ) );
+
+			$data_store = wc_get_container()->get( PushTokensDataStore::class );
+			$data_store->read( $push_token );
+
+			if ( $push_token->get_user_id() !== get_current_user_id() ) {
+				return new WP_Error(
+					'rest_invalid_push_token',
+					'Push token could not be found.',
+					array( 'status' => WP_Http::NOT_FOUND )
+				);
+			}
+
+			$data_store->delete( $push_token );
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
 		}
@@ -328,25 +339,6 @@ class PushTokenRestController extends RestApiControllerBase {
 			return false;
 		}
 
-		if ( $request->has_param( 'id' ) ) {
-			$push_token = new PushToken();
-			$push_token->set_id( (int) $request->get_param( 'id' ) );
-
-			try {
-				wc_get_container()->get( PushTokensDataStore::class )->read( $push_token );
-			} catch ( Exception $e ) {
-				return $this->convert_exception_to_wp_error( $e );
-			}
-
-			if ( $push_token->get_user_id() !== get_current_user_id() ) {
-				return new WP_Error(
-					'rest_invalid_push_token',
-					'Push token could not be found.',
-					array( 'status' => WP_Http::NOT_FOUND )
-				);
-			}
-		}
-
 		return true;
 	}
 
@@ -362,8 +354,8 @@ class PushTokenRestController extends RestApiControllerBase {
 		$exception_class = get_class( $e );
 
 		$slugs = array(
-			PushTokenNotFoundException::class => 'rest_invalid_push_token',
-			InvalidArgumentException::class   => 'rest_invalid_argument',
+			PushTokenNotFoundException::class => 'woocommerce_rest_invalid_push_token',
+			InvalidArgumentException::class   => 'woocommerce_rest_invalid_argument',
 		);
 
 		$statuses = array(
@@ -371,7 +363,7 @@ class PushTokenRestController extends RestApiControllerBase {
 			InvalidArgumentException::class   => WP_Http::BAD_REQUEST,
 		);
 
-		$slug    = $slugs[ $exception_class ] ?? 'rest_internal_error';
+		$slug    = $slugs[ $exception_class ] ?? 'woocommerce_rest_internal_error';
 		$status  = $statuses[ $exception_class ] ?? WP_Http::INTERNAL_SERVER_ERROR;
 		$message = ! isset( $slugs[ $exception_class ] ) ? 'Internal server error' : $e->getMessage();
 
