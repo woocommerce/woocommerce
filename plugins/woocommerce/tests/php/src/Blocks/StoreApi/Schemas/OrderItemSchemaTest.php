@@ -363,9 +363,9 @@ class OrderItemSchemaTest extends TestCase {
 		$global_attr = null;
 		$custom_attr = null;
 		foreach ( $result['variation'] as $attr ) {
-			if ( $attr['raw_attribute'] === 'attribute_pa_size' ) {
+			if ( 'attribute_pa_size' === $attr['raw_attribute'] ) {
 				$global_attr = $attr;
-			} elseif ( $attr['raw_attribute'] === 'attribute_color' ) {
+			} elseif ( 'attribute_color' === $attr['raw_attribute'] ) {
 				$custom_attr = $attr;
 			}
 		}
