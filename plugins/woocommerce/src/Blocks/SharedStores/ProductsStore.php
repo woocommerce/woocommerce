@@ -153,8 +153,9 @@ class ProductsStore {
 		}
 
 		// Re-key array by variation ID and merge into state.
+		// Use array_replace instead of array_merge to preserve numeric keys.
 		$keyed_variations         = array_column( $response['body'], null, 'id' );
-		self::$product_variations = array_merge( self::$product_variations, $keyed_variations );
+		self::$product_variations = array_replace( self::$product_variations, $keyed_variations );
 		self::register_state();
 
 		return $keyed_variations;

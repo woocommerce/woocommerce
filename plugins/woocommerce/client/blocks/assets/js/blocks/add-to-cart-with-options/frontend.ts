@@ -72,6 +72,17 @@ const { state: productDataState } = store< ProductDataStore >(
 );
 
 /**
+ * Normalize attribute name by stripping the 'attribute_' or 'attribute_pa_' prefix
+ * that WooCommerce adds for variation attributes.
+ *
+ * @param name The attribute name (e.g., 'attribute_color' or 'attribute_pa_color').
+ * @return The normalized name (e.g., 'color').
+ */
+const normalizeAttributeName = ( name: string ): string => {
+	return name.replace( /^attribute_(pa_)?/, '' );
+};
+
+/**
  * Find the matching variation ID from a product's variations based on selected attributes.
  *
  * @param product            The product in Store API format.
@@ -89,7 +100,8 @@ const findMatchingVariationId = (
 	const matchedVariation = product.variations.find( ( variation ) => {
 		return variation.attributes.every( ( attr ) => {
 			const selectedAttr = selectedAttributes.find(
-				( selected ) => selected.attribute === attr.name
+				( selected ) =>
+					normalizeAttributeName( selected.attribute ) === attr.name
 			);
 
 			// If variation attribute has empty value, it accepts "Any" value.

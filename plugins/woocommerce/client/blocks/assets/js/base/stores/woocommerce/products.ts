@@ -76,6 +76,7 @@ export type ProductsStore = {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+
 // Track in-flight requests to avoid duplicate fetches.
 const pendingProductRequests = new Map< number, Promise< ProductResponseItem | null > >();
 

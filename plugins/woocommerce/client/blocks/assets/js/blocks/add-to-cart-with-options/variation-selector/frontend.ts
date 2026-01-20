@@ -44,18 +44,39 @@ setStyles();
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
+
+/**
+ * Normalize attribute name by stripping the 'attribute_' or 'attribute_pa_' prefix
+ * that WooCommerce adds for variation attributes.
+ *
+ * @param name The attribute name (e.g., 'attribute_color' or 'attribute_pa_color').
+ * @return The normalized name (e.g., 'color').
+ */
+const normalizeAttributeName = ( name: string ): string => {
+	return name.replace( /^attribute_(pa_)?/, '' );
+};
+
 /**
  * Get the attribute value from a variation's attributes array.
  *
  * @param variation     The variation in Store API format.
- * @param attributeName The attribute name to find.
+ * @param attributeName The attribute name to find (may include 'attribute_' prefix).
  * @return The attribute value, or undefined if not found.
  */
 const getVariationAttributeValue = (
 	variation: ProductResponseItem[ 'variations' ][ number ],
 	attributeName: string
 ): string | undefined => {
-	const attr = variation.attributes.find( ( a ) => a.name === attributeName );
+	const normalizedName = normalizeAttributeName( attributeName );
+	const attr = variation.attributes.find(
+		( a ) => a.name === normalizedName
+	);
 	return attr?.value;
 };
 
@@ -213,12 +234,6 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 	};
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
-
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -295,6 +310,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			handlePillClick() {
 				const context = getContext< Context >();
+
 
 				if ( state.isOptionSelected ) {
 					context.selectedValue = '';
@@ -394,7 +410,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					( variation ) => {
 						return variation.attributes.every( ( attr ) => {
 							const selectedAttr = selectedAttributes.find(
-								( selected ) => selected.attribute === attr.name
+								( selected ) =>
+									normalizeAttributeName(
+										selected.attribute
+									) === attr.name
 							);
 							// Empty value means "Any" - matches any selection.
 							if ( attr.value === '' ) {
@@ -435,7 +454,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					( variation ) => {
 						return variation.attributes.every( ( attr ) => {
 							const selectedAttr = selectedAttributes.find(
-								( selected ) => selected.attribute === attr.name
+								( selected ) =>
+									normalizeAttributeName(
+										selected.attribute
+									) === attr.name
 							);
 							if ( attr.value === '' ) {
 								return (
