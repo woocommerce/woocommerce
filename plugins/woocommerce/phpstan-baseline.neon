@@ -21331,18 +21331,6 @@ parameters:
 			path: includes/data-stores/class-wc-customer-data-store.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Customer The customer to get the total spent for\.\)\: Unexpected token "The", expected variable at offset 177 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/data-stores/class-wc-customer-data-store.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(string The SQL query to use\.\)\: Unexpected token "The", expected variable at offset 130 on line 4$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/data-stores/class-wc-customer-data-store.php
-
-		-
 			message: '#^Parameter \#1 \$code of class WC_Data_Exception constructor expects string, int\|string given\.$#'
 			identifier: argument.type
 			count: 1

@@ -427,12 +427,12 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		 *
 		 * @since 4.9.0
 		 *
-		 * @param mixed       The cached order scount (from user meta).
-		 * @param WC_Customer The customer to get the orders count for.
+		 * @param mixed       $order_count The cached order scount (from user meta).
+		 * @param WC_Customer $customer    The customer to get the orders count for.
 		 *
 		 * @return mixed
 		 */
-		$count       = apply_filters(
+		$count = apply_filters(
 			'woocommerce_customer_get_order_count',
 			Users::get_site_user_meta( $customer_id, 'wc_order_count', true ),
 			$customer
@@ -484,11 +484,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		 *
 		 * @since 3.1.0
 		 *
-		 * @param mixed       The cached total value (from user meta).
-		 * @param WC_Customer The customer to get the total spent for.
+		 * @param mixed       $money_spent The cached total value (from user meta).
+		 * @param WC_Customer $customer    The customer to get the total spent for.
 		 * @return mixed
 		 */
-		$spent       = apply_filters(
+		$spent = apply_filters(
 			'woocommerce_customer_get_total_spent',
 			Users::get_site_user_meta( $customer_id, 'wc_money_spent', true ),
 			$customer
@@ -527,8 +527,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			 *
 			 * @since 3.1.0
 			 *
-			 * @param string      The SQL query to use.
-			 * @param WC_Customer The customer to get the total spent for.
+			 * @param string      $sql     The SQL query to use.
+			 * @param WC_Customer $custome The customer to get the total spent for.
 			 * @return string     The actual SQL query to use.
 			 */
 			$sql = apply_filters( 'woocommerce_customer_get_total_spent_query', $sql, $customer );
