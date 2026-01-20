@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix PHP warning in BlocksUtil::get_block_from_template_part when using classic themes like Storefront.
