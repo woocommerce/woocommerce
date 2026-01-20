@@ -17,12 +17,13 @@ store( 'woocommerce/catalog-sorting', {
 	},
 	actions: {
 		*handleSortChange(): Generator {
-			const context = getContext< CatalogSortingContext >();
 			const { ref } = getElement();
 
 			if ( ! ( ref instanceof HTMLSelectElement ) ) {
 				return;
 			}
+
+			const context = getContext< CatalogSortingContext >();
 
 			const newValue = ref.value;
 
@@ -32,7 +33,7 @@ store( 'woocommerce/catalog-sorting', {
 			// Build new URL with orderby parameter
 			const url = new URL( window.location.href );
 			url.searchParams.set( 'orderby', newValue );
-			url.searchParams.set( 'paged', '1' ); // Reset to page 1
+			url.searchParams.set( 'paged', '1' );
 
 			// Navigate using Interactivity Router
 			const routerModule = yield import(

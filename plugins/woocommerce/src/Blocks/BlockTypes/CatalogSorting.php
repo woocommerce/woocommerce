@@ -27,6 +27,11 @@ class CatalogSorting extends AbstractBlock {
 	 * @return string | void Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		// Check if we should display the sorting block.
+		if ( ! wc_get_loop_prop( 'is_paginated' ) || ! woocommerce_products_will_display() ) {
+			return;
+		}
+
 		// Get sorting options and current orderby value.
 		$catalog_orderby_options = $this->get_catalog_orderby_options( $attributes );
 		$orderby                 = $this->get_current_orderby();
@@ -41,7 +46,7 @@ class CatalogSorting extends AbstractBlock {
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'class'              => implode(
+				'class'               => implode(
 					' ',
 					array_filter(
 						[
@@ -50,9 +55,9 @@ class CatalogSorting extends AbstractBlock {
 						]
 					)
 				),
-				'style'              => esc_attr( $classes_and_styles['styles'] ?? '' ),
+				'style'               => esc_attr( $classes_and_styles['styles'] ?? '' ),
 				'data-wp-interactive' => 'woocommerce/catalog-sorting',
-				'data-wp-context'    => wp_json_encode(
+				'data-wp-context'     => wp_json_encode(
 					array(
 						'currentOrderBy' => $orderby,
 						'options'        => $catalog_orderby_options,
@@ -164,5 +169,4 @@ class CatalogSorting extends AbstractBlock {
 
 		return $default_orderby;
 	}
-
 }
