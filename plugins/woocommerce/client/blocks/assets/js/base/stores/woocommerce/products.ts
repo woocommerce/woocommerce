@@ -27,6 +27,11 @@ export type ProductsStoreState = {
 	 * These are in Store API format (ProductResponseItem).
 	 */
 	products: Record< number, ProductResponseItem >;
+	/**
+	 * Product variations keyed by variation ID.
+	 * These are in Store API format (ProductResponseItem).
+	 */
+	productVariations: Record< number, ProductResponseItem >;
 };
 
 /**
@@ -83,6 +88,7 @@ const pendingProductRequests = new Map< number, Promise< ProductResponseItem | n
  *
  * State structure:
  * - products: Record<productId, ProductResponseItem>
+ * - productVariations: Record<variationId, ProductResponseItem>
  */
 // We need to access the store result to use state inside actions.
 // TypeScript has trouble with the circular reference, so we use a
@@ -94,6 +100,7 @@ const storeResult = store< ProductsStore >(
 	{
 		state: {
 			products: {},
+			productVariations: {},
 		},
 		actions: {
 			*loadProduct( productId: number ) {
