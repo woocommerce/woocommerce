@@ -394,7 +394,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					"SELECT posts.ID
 				FROM {$wpdb->posts} AS posts
 				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-				WHERE meta.meta_key = '_customer_user'
+				WHERE meta.meta_key   = '_customer_user'
 				AND   meta.meta_value = '" . esc_sql( $customer_id ) . "'
 				AND   posts.post_type = 'shop_order'
 				AND   posts.post_status IN $order_statuses_sql
@@ -446,7 +446,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					"SELECT COUNT(*)
 				FROM {$wpdb->posts} as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-				WHERE   meta.meta_key = '_customer_user'
+				WHERE   meta.meta_key   = '_customer_user'
 				AND     posts.post_type = 'shop_order'
 				AND     posts.post_status IN $order_statuses_sql
 				AND     meta_value = '" . esc_sql( $customer_id ) . "'"
