@@ -82,7 +82,7 @@ $border-width: 1px;
 	}
 
 	.wc-block-components-express-payment__title {
-		@include font-regular-locked;
+		@include font-small-locked;
 		@include reset-box;
 		word-break: break-word;
 		font-weight: 400;
@@ -136,7 +136,7 @@ $border-width: 1px;
 }
 
 .wc-block-components-express-payment-continue-rule {
-	@include font-regular-locked;
+	@include font-small-locked;
 
 	display: flex;
 	align-items: center;
