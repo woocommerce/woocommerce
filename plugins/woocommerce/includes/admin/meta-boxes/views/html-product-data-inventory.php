@@ -67,11 +67,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 			echo '<div class="stock_fields show_if_simple show_if_variable">';
 
 			/**
-			 * Filters product default stock amount. Defaults 1
+			 * Filters product default stock amount.
 			 *
 			 * @since 10.6.0
 			 *
-			 * @return int
+			 * @param int $default_stock_amount Default stock amount. Default is 1.
 			 */
 			$default_stock_amount = apply_filters( 'woocommerce_product_stock_default_amount', 1 );
 
