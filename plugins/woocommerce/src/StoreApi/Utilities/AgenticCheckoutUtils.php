@@ -337,10 +337,7 @@ class AgenticCheckoutUtils {
 	 * @return true|\WP_Error True if valid, WP_Error otherwise.
 	 */
 	public static function validate_jetpack_request() {
-		if (
-			class_exists( 'Automattic\Jetpack\Connection\Rest_Authentication' ) &&
-			method_exists( 'Automattic\Jetpack\Connection\Rest_Authentication', 'is_signed_with_blog_token' )
-		) {
+		if ( class_exists( 'Automattic\Jetpack\Connection\Rest_Authentication' ) ) {
 			if ( \Automattic\Jetpack\Connection\Rest_Authentication::is_signed_with_blog_token() ) {
 				return true;
 			}

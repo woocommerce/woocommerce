@@ -81157,12 +81157,6 @@ parameters:
 			path: src/StoreApi/StoreApi.php
 
 		-
-			message: '#^Call to function method_exists\(\) with ''Automattic\\\\Jetpack…'' and ''is_signed_with_blog…'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/StoreApi/Utilities/AgenticCheckoutUtils.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\AgenticCheckoutUtils\:\:add_items_to_cart\(\) has invalid return type Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\Errors\\Error\.$#'
 			identifier: class.notFound
 			count: 1
