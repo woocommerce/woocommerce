@@ -219,8 +219,6 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
-console.log( 'add to cart with options' );
-
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -233,12 +231,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				return context.selectedAttributes;
 			},
 			get isOptionSelected() {
-				console.log( 'isOptionSelected' );
-
 				const { selectedAttributes, option, name } =
 					getContext< Context >();
-
-				console.log( selectedAttributes );
 
 				return selectedAttributes.some( ( attrObject ) => {
 					return (
@@ -301,8 +295,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			handlePillClick() {
 				const context = getContext< Context >();
-
-				console.log( 'handlePillClick' );
 
 				if ( state.isOptionSelected ) {
 					context.selectedValue = '';
