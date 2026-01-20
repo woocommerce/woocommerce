@@ -382,6 +382,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
+				// TODO: verify if a well performing index being used
 				$sql           = $wpdb->prepare(
 					'SELECT id FROM ' . OrdersTableDataStore::get_orders_table_name() . "
 					WHERE customer_id = %d
@@ -436,6 +437,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
+				// TODO: verify if a well performing index being used
+				// TODO: verify if `COUNT(1)` makes any difference
 				$sql   = $wpdb->prepare(
 					'SELECT COUNT(id) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
 					WHERE customer_id = %d
@@ -444,6 +447,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				);
 				$count = $wpdb->get_var( $sql );
 			} else {
+				// TODO: verify if `COUNT(1)` makes any difference
 				$count = $wpdb->get_var(
 					"SELECT COUNT(*)
 				FROM $wpdb->posts as posts
@@ -484,6 +488,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
+				// TODO: verify if a well performing index being used
 				$sql = $wpdb->prepare(
 					'SELECT SUM(total_amount) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
 					WHERE customer_id = %d
@@ -491,6 +496,20 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					$customer->get_id()
 				);
 			} else {
+				/* TODO: adopt the following SQL for better performance (meta-table bloat backfires on the double-join here)
+				EXPLAIN SELECT SQL_NO_CACHE SUM(meta_value)
+						FROM wp_posts
+								LEFT JOIN wp_postmeta ON wp_posts.ID = wp_postmeta.post_id
+								WHERE wp_posts.ID IN (
+											SELECT wp_posts.ID as order_id
+											FROM wp_posts LEFT JOIN wp_postmeta ON wp_posts.ID = wp_postmeta.post_id
+											WHERE meta_key   = '_customer_user'
+											  AND meta_value = '1'
+											  AND post_type  = 'shop_order'
+											  AND post_status IN ('wc-processing', 'wc-completed')
+								)
+								AND meta_key = '_order_total'
+				 */
 				$sql = "SELECT SUM(meta2.meta_value)
 					FROM $wpdb->posts as posts
 					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
