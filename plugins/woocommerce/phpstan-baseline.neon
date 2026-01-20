@@ -21325,12 +21325,6 @@ parameters:
 			path: includes/data-stores/class-wc-customer-data-store.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/data-stores/class-wc-customer-data-store.php
-
-		-
 			message: '#^Parameter \#1 \$code of class WC_Data_Exception constructor expects string, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
