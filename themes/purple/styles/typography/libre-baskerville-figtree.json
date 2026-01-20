@@ -1,0 +1,172 @@
+{
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "Figtree",
+							"fontStyle": "normal",
+							"fontWeight": "300 900",
+							"src": [
+								"file:./assets/fonts/figtree/figtree-300-900-normal.ttf"
+							]
+						},
+						{
+							"fontFamily": "Figtree",
+							"fontStyle": "italic",
+							"fontWeight": "300 900",
+							"src": [
+								"file:./assets/fonts/figtree/figtree-300-900-italic.ttf"
+							]
+						}
+					],
+					"fontFamily": "Figtree",
+					"name": "Figtree",
+					"slug": "figtree"
+				},
+				{
+					"fontFace": [
+						{
+							"fontFamily": "\"Libre Baskerville\"",
+							"fontStyle": "normal",
+							"fontWeight": "400 700",
+							"src": [
+								"file:./assets/fonts/libre-baskerville/libre-baskerville-400-700-normal.ttf"
+							]
+						},
+						{
+							"fontFamily": "\"Libre Baskerville\"",
+							"fontStyle": "italic",
+							"fontWeight": "400 700",
+							"src": [
+								"file:./assets/fonts/libre-baskerville/libre-baskerville-400-700-italic.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"Libre Baskerville\"",
+					"name": "Libre Baskerville",
+					"slug": "libre-baskerville"
+				}
+			],
+			"fontSizes": [
+				{
+					"fluid": {
+						"max": "0.875rem",
+						"min": "0.75rem"
+					},
+					"name": "Small",
+					"size": "0.875rem",
+					"slug": "small"
+				},
+				{
+					"name": "Medium",
+					"size": "0.96rem",
+					"slug": "medium"
+				},
+				{
+					"fluid": {
+						"max": "1.375rem",
+						"min": "1.125rem"
+					},
+					"name": "Large",
+					"size": "1.375rem",
+					"slug": "large"
+				},
+				{
+					"fluid": {
+						"max": "1.75rem",
+						"min": "1.375rem"
+					},
+					"name": "Extra Large",
+					"size": "1.75rem",
+					"slug": "x-large"
+				},
+				{
+					"fluid": {
+						"max": "2.125rem",
+						"min": "1.5rem"
+					},
+					"name": "2X Large",
+					"size": "2.125rem",
+					"slug": "xx-large"
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/site-title": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--figtree)",
+					"letterSpacing": "0.2em"
+				}
+			}
+		},
+		"elements": {
+			"button": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--figtree)",
+					"fontSize": "var(--wp--preset--font-size--small)",
+					"letterSpacing": "0.06em",
+					"textTransform": "uppercase"
+				}
+			},
+			"h1": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "400"
+				}
+			},
+			"h2": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "400"
+				}
+			},
+			"h3": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "400"
+				}
+			},
+			"h4": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"h5": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--figtree)",
+					"fontSize": "var(--wp--preset--font-size--medium)",
+					"fontStyle": "normal",
+					"fontWeight": "400",
+					"letterSpacing": "0.06em",
+					"textTransform": "uppercase"
+				}
+			},
+			"h6": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--figtree)",
+					"fontStyle": "normal",
+					"fontWeight": "400",
+					"letterSpacing": "0.06rem"
+				}
+			},
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--libre-baskerville)"
+				}
+			}
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--figtree)",
+			"fontStyle": "normal",
+			"fontWeight": "300",
+			"letterSpacing": "0.02em"
+		}
+	},
+	"version": 3,
+	"title": "Libre Baskerville + Figtree"
+}
