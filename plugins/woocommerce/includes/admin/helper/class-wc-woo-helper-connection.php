@@ -30,8 +30,8 @@ class WC_Woo_Helper_Connection {
 		}
 
 		$auth     = WC_Helper_Options::get( 'auth' );
-		$url      = esc_url( rtrim( $auth['url'], '/' ) );
-		$home_url = esc_url( rtrim( home_url(), '/' ) );
+		$url      = esc_html( rtrim( $auth['url'], '/' ) );
+		$home_url = esc_html( rtrim( home_url(), '/' ) );
 		if ( empty( $url ) || $home_url === $url ) {
 			return '';
 		}
@@ -57,7 +57,7 @@ class WC_Woo_Helper_Connection {
 			return '';
 		}
 
-		$home_url = esc_url( rtrim( home_url(), '/' ) );
+		$home_url = esc_html( rtrim( home_url(), '/' ) );
 
 		return sprintf(
 		/* translators: 1: home URL */
