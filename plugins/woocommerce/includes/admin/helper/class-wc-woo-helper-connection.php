@@ -59,10 +59,10 @@ class WC_Woo_Helper_Connection {
 		$home_url = rtrim( home_url(), '/' );
 
 		return sprintf(
-			/* translators: 1: home URL */
-				__( 'There is no connection for <b>%1$s</b> on WooCommerce.com. The connection may have been deleted. To fix this, please reconnect your site to <b>WooCommerce.com</b> to ensure everything works correctly.', 'woocommerce' ),
-				$home_url
-			);
+		/* translators: 1: home URL */
+			__( 'There is no connection for <b>%1$s</b> on WooCommerce.com. The connection may have been deleted. To fix this, please reconnect your site to <b>WooCommerce.com</b> to ensure everything works correctly.', 'woocommerce' ),
+			$home_url
+		);
 	}
 
 
