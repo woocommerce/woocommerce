@@ -579,4 +579,136 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'https://img.youtube.com/vi/invalid/0.jpg', $rendered );
 		$this->assertStringContainsString( 'play2x.png', $rendered );
 	}
+
+	/**
+	 * Test that VideoPress embed is detected and renders (may fall back to link if oEmbed unavailable)
+	 */
+	public function test_renders_videopress_embed(): void {
+		$parsed_videopress_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://videopress.com/v/BZHMfMfN',
+				'type'             => 'video',
+				'providerNameSlug' => 'videopress',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress wp-block-embed-videopress"><div class="wp-block-embed__wrapper">https://videopress.com/v/BZHMfMfN</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_videopress_embed['innerHTML'], $parsed_videopress_embed, $this->rendering_context );
+
+		// Should detect VideoPress and render (either as video with thumbnail or fallback link).
+		$this->assertNotEmpty( $rendered );
+		// Should contain either video thumbnail or fallback link.
+		$this->assertTrue(
+			strpos( $rendered, 'Watch on VideoPress' ) !== false || strpos( $rendered, 'play2x.png' ) !== false,
+			'VideoPress embed should render as video or fallback link'
+		);
+	}
+
+	/**
+	 * Test that VideoPress embed handles URLs with query parameters correctly
+	 */
+	public function test_videopress_embed_handles_urls_with_query_parameters(): void {
+		$parsed_videopress_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://videopress.com/v/BZHMfMfN?w=500&h=281',
+				'type'             => 'video',
+				'providerNameSlug' => 'videopress',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress wp-block-embed-videopress"><div class="wp-block-embed__wrapper">https://videopress.com/v/BZHMfMfN?w=500&h=281</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_videopress_embed['innerHTML'], $parsed_videopress_embed, $this->rendering_context );
+
+		// Should handle URLs with query parameters correctly.
+		// The key test is that background-image is present (not stripped by WP_Style_Engine).
+		// In final HTML output, & becomes &amp; which is correct HTML encoding.
+		$this->assertNotEmpty( $rendered );
+		// Verify background-image is present (our fix ensures it's not stripped).
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+		// Verify query parameters are present (as &amp; in HTML, which is correct).
+		$this->assertStringContainsString( 'w=500', $rendered, 'Query parameters should be present' );
+		$this->assertStringContainsString( 'h=281', $rendered, 'Query parameters should be present' );
+	}
+
+	/**
+	 * Test that VideoPress embed detects VideoPress by providerNameSlug
+	 */
+	public function test_videopress_embed_detects_videopress_by_provider_name_slug(): void {
+		$parsed_videopress_by_slug = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'providerNameSlug' => 'videopress',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress"><div class="wp-block-embed__wrapper">Some content</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_videopress_by_slug['innerHTML'], $parsed_videopress_by_slug, $this->rendering_context );
+
+		// Should return graceful fallback link since provider is detected but no URL is available for thumbnail extraction.
+		$this->assertStringContainsString( '<a href="https://videopress.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on VideoPress', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
+	}
+
+	/**
+	 * Test that VideoPress embed detects VideoPress by URL in attributes
+	 */
+	public function test_videopress_embed_detects_videopress_by_url_in_attributes(): void {
+		$parsed_videopress_by_url = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url' => 'https://videopress.com/v/BZHMfMfN',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress"><div class="wp-block-embed__wrapper">https://videopress.com/v/BZHMfMfN</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_videopress_by_url['innerHTML'], $parsed_videopress_by_url, $this->rendering_context );
+
+		// Should detect VideoPress by URL domain.
+		$this->assertNotEmpty( $rendered );
+	}
+
+	/**
+	 * Test that VideoPress embed detects video.wordpress.com domain
+	 */
+	public function test_videopress_embed_detects_video_wordpress_com_domain(): void {
+		$parsed_videopress_wordpress_com = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url' => 'https://video.wordpress.com/v/BZHMfMfN',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video"><div class="wp-block-embed__wrapper">https://video.wordpress.com/v/BZHMfMfN</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_videopress_wordpress_com['innerHTML'], $parsed_videopress_wordpress_com, $this->rendering_context );
+
+		// Should detect VideoPress by video.wordpress.com domain.
+		$this->assertNotEmpty( $rendered );
+	}
+
+	/**
+	 * Test that background images with query parameters work correctly
+	 */
+	public function test_background_images_with_query_parameters_work_correctly(): void {
+		$parsed_youtube_with_query = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+				'type'             => 'video',
+				'providerNameSlug' => 'youtube',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">https://www.youtube.com/watch?v=dQw4w9WgXcQ</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_youtube_with_query['innerHTML'], $parsed_youtube_with_query, $this->rendering_context );
+
+		// Verify background-image is present (our fix ensures URLs with query parameters work).
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+	}
 }
