@@ -30,7 +30,8 @@ class WC_Woo_Helper_Connection {
 		}
 
 		$auth     = WC_Helper_Options::get( 'auth' );
-		$url      = esc_html( rtrim( $auth['url'], '/' ) );
+		$url_raw  = is_array( $auth ) ? ( $auth['url'] ?? '' ) : '';
+		$url      = esc_html( rtrim( $url_raw, '/' ) );
 		$home_url = esc_html( rtrim( home_url(), '/' ) );
 		if ( empty( $url ) || $home_url === $url ) {
 			return '';
