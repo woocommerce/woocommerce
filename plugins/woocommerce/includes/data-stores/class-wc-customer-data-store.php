@@ -342,7 +342,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_last_order( &$customer ) {
 		// Try to fetch the last order placed by this customer.
-		$last_order_id       = Users::get_site_user_meta( $customer->get_id(), 'wc_last_order', true );
+		$customer_id         = $customer->get_id();
+		$last_order_id       = Users::get_site_user_meta( $customer_id, 'wc_last_order', true );
 		$last_customer_order = false;
 
 		if ( ! empty( $last_order_id ) ) {
@@ -353,7 +354,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		// empty string, for compatibility with the declared types of the following filter hook.
 		if (
 			! $last_customer_order instanceof WC_Order
-			|| intval( $last_customer_order->get_customer_id() ) !== intval( $customer->get_id() )
+			|| intval( $last_customer_order->get_customer_id() ) !== intval( $customer_id )
 		) {
 			$last_order_id = '';
 		}
@@ -385,7 +386,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				$sql           = $wpdb->prepare(
 					"SELECT id FROM %i WHERE customer_id = %d AND status IN $order_statuses_sql ORDER BY id DESC LIMIT 1",
 					OrdersTableDataStore::get_orders_table_name(),
-					$customer->get_id()
+					$customer_id
 				);
 				$last_order_id = $wpdb->get_var( $sql );
 			} else {
@@ -394,7 +395,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				FROM {$wpdb->posts} AS posts
 				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
 				WHERE meta.meta_key = '_customer_user'
-				AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
+				AND   meta.meta_value = '" . esc_sql( $customer_id ) . "'
 				AND   posts.post_type = 'shop_order'
 				AND   posts.post_status IN $order_statuses_sql
 				ORDER BY posts.ID DESC
@@ -402,7 +403,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				);
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			Users::update_site_user_meta( $customer->get_id(), 'wc_last_order', $last_order_id );
+			Users::update_site_user_meta( $customer_id, 'wc_last_order', $last_order_id );
 		}
 
 		if ( ! $last_order_id ) {
@@ -420,9 +421,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
-		$count = apply_filters(
+		$customer_id = $customer->get_id();
+		$count       = apply_filters(
 			'woocommerce_customer_get_order_count',
-			Users::get_site_user_meta( $customer->get_id(), 'wc_order_count', true ),
+			Users::get_site_user_meta( $customer_id, 'wc_order_count', true ),
 			$customer
 		);
 
@@ -436,7 +438,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				$sql   = $wpdb->prepare(
 					"SELECT COUNT(id) FROM %i WHERE customer_id = %d AND status IN $order_statuses_sql",
 					OrdersTableDataStore::get_orders_table_name(),
-					$customer->get_id()
+					$customer_id
 				);
 				$count = $wpdb->get_var( $sql );
 			} else {
@@ -447,12 +449,12 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				WHERE   meta.meta_key = '_customer_user'
 				AND     posts.post_type = 'shop_order'
 				AND     posts.post_status IN $order_statuses_sql
-				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'"
+				AND     meta_value = '" . esc_sql( $customer_id ) . "'"
 				);
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-			Users::update_site_user_meta( $customer->get_id(), 'wc_order_count', $count );
+			Users::update_site_user_meta( $customer_id, 'wc_order_count', $count );
 		}
 
 		return absint( $count );
@@ -466,9 +468,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
-		$spent = apply_filters(
+		$customer_id = $customer->get_id();
+		$spent       = apply_filters(
 			'woocommerce_customer_get_total_spent',
-			Users::get_site_user_meta( $customer->get_id(), 'wc_money_spent', true ),
+			Users::get_site_user_meta( $customer_id, 'wc_money_spent', true ),
 			$customer
 		);
 
@@ -483,7 +486,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				$sql = $wpdb->prepare(
 					"SELECT SUM(total_amount) FROM %i WHERE customer_id = %d AND status IN $statuses_sql",
 					OrdersTableDataStore::get_orders_table_name(),
-					$customer->get_id()
+					$customer_id
 				);
 			} else {
 				/* TODO: adopt the following SQL for better performance (meta-table bloat backfires on the double-join here)
@@ -505,7 +508,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
 					WHERE   meta.meta_key       = '_customer_user'
-					AND     meta.meta_value     = '" . esc_sql( $customer->get_id() ) . "'
+					AND     meta.meta_value     = '" . esc_sql( $customer_id ) . "'
 					AND     posts.post_type     = 'shop_order'
 					AND     posts.post_status   IN $statuses_sql
 					AND     meta2.meta_key      = '_order_total'";
@@ -528,7 +531,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			if ( ! $spent ) {
 				$spent = 0;
 			}
-			Users::update_site_user_meta( $customer->get_id(), 'wc_money_spent', $spent );
+			Users::update_site_user_meta( $customer_id, 'wc_money_spent', $spent );
 		}
 
 		return wc_format_decimal( $spent, 2 );
