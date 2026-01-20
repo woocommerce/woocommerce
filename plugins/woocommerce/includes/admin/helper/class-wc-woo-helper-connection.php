@@ -47,8 +47,9 @@ class WC_Woo_Helper_Connection {
 	/**
 	 * Get the notice for a deleted connection on WCCOM
 	 *
-	 * @since 10.6.0
 	 * @return string The notice for a deleted connection on WCCOM.
+	 *
+	 * @since 10.6.0
 	 */
 	public static function get_deleted_connection_notice(): string {
 		$connection_data = WC_Helper::get_cached_connection_data();
@@ -64,7 +65,6 @@ class WC_Woo_Helper_Connection {
 			$home_url
 		);
 	}
-
 
 	/**
 	 * Check if the site has and linked host-plan orders.
