@@ -1700,7 +1700,11 @@ class WC_Helper {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
-			return $data;
+			if ( is_array( $data ) ) {
+				return $data;
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		try {
@@ -1780,7 +1784,13 @@ class WC_Helper {
 	 * @return array|bool cached connection data or false connection data is not cached.
 	 */
 	public static function get_cached_connection_data() {
-		return get_transient( self::CACHE_KEY_CONNECTION_DATA );
+		$data = get_transient( self::CACHE_KEY_CONNECTION_DATA );
+		if ( false !== $data && ! is_array( $data ) ) {
+			// Cached data is corrupted, delete and return false to trigger fresh fetch.
+			delete_transient( self::CACHE_KEY_CONNECTION_DATA );
+			return false;
+		}
+		return $data;
 	}
 
 	/**
@@ -1836,7 +1846,11 @@ class WC_Helper {
 		$cache_key = '_woocommerce_helper_subscriptions';
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
-			return $data;
+			if ( is_array( $data ) ) {
+				return $data;
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		try {
@@ -2740,7 +2754,11 @@ class WC_Helper {
 		$cached_data = get_transient( $cache_key );
 
 		if ( false !== $cached_data ) {
-			return $cached_data;
+			if ( is_array( $cached_data ) ) {
+				return $cached_data;
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		// Fetch notice data for connected store.

@@ -2,10 +2,6 @@
 	border-top: 1px solid $universal-border-light;
 	padding: $gap 0;
 
-	.has-dark-controls & {
-		border-color: $input-border-dark;
-	}
-
 	// TotalWrappers like Discount and Fee are sometimes empty
 	// this prevents displaying the empty areas in Order Summary
 	&:empty,
@@ -35,10 +31,6 @@
 	.wc-block-components-totals-wrapper {
 		&:first-child {
 			border-top: 1px solid $universal-border-light;
-
-			.has-dark-controls & {
-				border-color: $input-border-dark;
-			}
 		}
 	}
 }

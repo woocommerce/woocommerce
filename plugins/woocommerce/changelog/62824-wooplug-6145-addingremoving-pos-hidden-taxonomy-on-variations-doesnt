@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix variation date_modified not updating when toggling POS visibility on variable products.
