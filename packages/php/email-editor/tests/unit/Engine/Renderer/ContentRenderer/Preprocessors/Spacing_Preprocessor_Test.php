@@ -205,9 +205,9 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test it does not add padding-left when columns has no blockGap.left
+	 * Test it adds default padding-left when columns has no blockGap.left
 	 */
-	public function testItDoesNotAddPaddingLeftWithoutBlockGapLeft(): void {
+	public function testItAddsDefaultPaddingLeftWithoutBlockGapLeft(): void {
 		$blocks = array(
 			array(
 				'blockName'   => 'core/columns',
@@ -239,8 +239,9 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result        = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 		$second_column = $result[0]['innerBlocks'][1];
 
-		// Should not have padding-left since blockGap.left is not set.
-		$this->assertArrayNotHasKey( 'padding-left', $second_column['email_attrs'] );
+		// Should have padding-left with default gap value since blockGap.left is not set.
+		$this->assertArrayHasKey( 'padding-left', $second_column['email_attrs'] );
+		$this->assertEquals( '10px', $second_column['email_attrs']['padding-left'] );
 	}
 
 	/**
