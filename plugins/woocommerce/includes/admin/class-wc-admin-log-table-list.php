@@ -331,8 +331,7 @@ class WC_Admin_Log_Table_List extends WP_List_Table {
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Not necessary.
 		$sources = $wpdb->get_col( $sql );
 
-		// Autoload this option so that the log handler doesn't have to run another query when checking the source list.
-		update_option( self::SOURCE_CACHE_OPTION_KEY, $sources, true );
+		update_option( self::SOURCE_CACHE_OPTION_KEY, $sources );
 
 		return $sources;
 	}

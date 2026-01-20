@@ -151,10 +151,19 @@ class Html2Text_Test extends \Email_Editor_Unit_Test {
 	 * Test invalid option throws exception
 	 */
 	public function test_invalid_option_throws_exception(): void {
-		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Invalid option provided for html2text conversion.' );
+		$previous_error_log = ini_get( 'error_log' );
+		ini_set( 'error_log', '/dev/null' ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- this is to prevent the error from outputting to the screen.
 
-		Html2Text::convert( '<p>Test</p>', array( 'invalid_option' => true ) );
+		try {
+			$this->expectException( \InvalidArgumentException::class );
+			$this->expectExceptionMessage( 'Invalid option provided for html2text conversion.' );
+
+			Html2Text::convert( '<p>Test</p>', array( 'invalid_option' => true ) );
+		} finally {
+			if ( false !== $previous_error_log ) {
+				ini_set( 'error_log', (string) $previous_error_log ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- restore the previous value.
+			}
+		}
 	}
 
 	/**

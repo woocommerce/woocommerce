@@ -63,7 +63,8 @@
 
 	.wc-blocks-components-select__label {
 		@include reset-typography();
-		@include font-small-locked;
+		font-size: 13px;
+		line-height: 1.4;
 		position: absolute;
 		top: $gap-smallest * 1.5;
 		left: $gap-smaller * 1.25;

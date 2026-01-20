@@ -1,6 +1,6 @@
 @mixin title {
 	@include reset-box();
-	@include font-large-locked;
+	@include font-medium-locked;
 	word-break: break-word;
 	font-weight: 500;
 }

@@ -1,8 +1,9 @@
 .wc-block-components-product-metadata {
-	@include font-regular-locked;
+	@include font-small-locked;
 
 	.wc-block-components-product-metadata__description > p,
 	.wc-block-components-product-metadata__variation-data {
 		margin: 0;
+		@include font-x-small-locked;
 	}
 }
