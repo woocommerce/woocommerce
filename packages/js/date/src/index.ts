@@ -176,7 +176,7 @@ export function getStoreTimeZoneMoment() {
 	const timeZone =
 		window.wcSettings?.timeZone || window.wcSettings?.admin?.timeZone;
 
-	if ( ! timeZone ) {
+	if ( typeof timeZone !== 'string' || timeZone.length === 0 ) {
 		return moment();
 	}
 
