@@ -57,6 +57,7 @@ export const Edit = ( {
 			<InspectorControls>
 				<PanelBody title={ __( 'Options', 'woocommerce' ) }>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __(
 							'Show a "Return to Cart" link',
 							'woocommerce'
@@ -75,6 +76,8 @@ export const Edit = ( {
 
 					{ showPrice && (
 						<TextControl
+							__next40pxDefaultSize
+							__nextHasNoMarginBottom
 							label={ __( 'Price separator', 'woocommerce' ) }
 							id="price-separator"
 							value={ attributes.priceSeparator }

@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\Traits\RestApiCache;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -24,6 +25,8 @@ defined( 'ABSPATH' ) || exit;
  * @extends WC_REST_CRUD_Controller
  */
 class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
+
+	use RestApiCache;
 
 	/**
 	 * Endpoint namespace.
@@ -58,6 +61,53 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	public function __construct() {
 		add_action( "woocommerce_rest_insert_{$this->post_type}_object", array( $this, 'clear_transients' ) );
+		$this->initialize_rest_api_cache();
+	}
+
+	/**
+	 * Get the default entity type for response caching.
+	 *
+	 * @return string|null The entity type.
+	 */
+	protected function get_default_response_entity_type(): ?string {
+		return 'product';
+	}
+
+	/**
+	 * Get data for ETag generation, excluding fields that change on each request.
+	 *
+	 * @param array                                 $data        Response data.
+	 * @param WP_REST_Request<array<string, mixed>> $request The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Cleaned data for ETag generation.
+	 */
+	protected function get_data_for_etag( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return $this->remove_related_ids_from_response_data( $data );
+	}
+
+	/**
+	 * Remove related_ids from response data for ETag calculation.
+	 *
+	 * The related_ids field contains a random sample of related products,
+	 * so it should not be used for ETag calculation.
+	 *
+	 * @param array $data Response data.
+	 * @return array Response data without related_ids.
+	 */
+	private function remove_related_ids_from_response_data( array $data ): array {
+		// Handle single product response.
+		if ( isset( $data['related_ids'] ) ) {
+			unset( $data['related_ids'] );
+		}
+
+		// Handle collection response (array of products).
+		foreach ( $data as $key => $item ) {
+			if ( is_array( $item ) && isset( $item['related_ids'] ) ) {
+				unset( $data[ $key ]['related_ids'] );
+			}
+		}
+
+		return $data;
 	}
 
 	/**
@@ -70,7 +120,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_items' ),
+						array( 'endpoint_id' => 'get_products' )
+					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
@@ -96,7 +149,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_item' ),
+						array( 'endpoint_id' => 'get_product' )
+					),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'context' => $this->get_context_param(
@@ -139,6 +195,24 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_batch_schema' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)/related',
+			array(
+				'args' => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_related_products' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+				),
 			)
 		);
 	}
@@ -614,8 +688,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$attributes[] = array(
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
-						'slug'   => $name,
-						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
+						'slug'   => rawurldecode( $name ),
+						'option' => $option_term && ! is_wp_error( $option_term ) ? rawurldecode( $option_term->name ) : rawurldecode( $attribute ),
 					);
 				} else {
 					$attributes[] = array(
@@ -665,6 +739,26 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function api_get_related_ids( $product, $context ) {
 		return array_map( 'absint', array_values( wc_get_related_products( $product->get_id() ) ) );
+	}
+
+	/**
+	 * Get related products for a specific product.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 *
+	 * @internal
+	 */
+	public function get_related_products( $request ) {
+		$product = $this->get_object( (int) $request['id'] );
+
+		if ( ! $product instanceof \WC_Product || 0 === $product->get_id() ) {
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$related_ids = $this->api_get_related_ids( $product, 'view' );
+
+		return rest_ensure_response( array( 'related_ids' => $related_ids ) );
 	}
 
 	/**
@@ -1537,7 +1631,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$_attribute = $attributes[ $attribute_name ];
 
 					if ( $_attribute['is_variation'] ) {
-						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+						$value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
 							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.

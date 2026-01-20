@@ -155,8 +155,7 @@ class Authentication {
 			FeaturesUtil::feature_is_enabled( 'rate_limit_checkout' )
 			&& $this->is_request_to_store_api()
 			&& preg_match( '#/wc/store(?:/v\d+)?/checkout#', $GLOBALS['wp']->query_vars['rest_route'] )
-			&& isset( $_SERVER['REQUEST_METHOD'] )
-			&& 'POST' === $_SERVER['REQUEST_METHOD']
+			&& $this->is_only_post_request()
 		) {
 			add_filter(
 				'woocommerce_store_api_rate_limit_options',
@@ -263,6 +262,31 @@ class Authentication {
 			return false;
 		}
 		return 0 === strpos( $GLOBALS['wp']->query_vars['rest_route'], '/wc/store/' );
+	}
+
+	/**
+	 * Returns true only for POST requests that are NOT overridden to another method
+	 * via the X-HTTP-Method-Override header (used by wp.apiFetch for PUT/DELETE).
+	 *
+	 * @see https://github.com/wordpress/gutenberg/blob/trunk/packages/api-fetch/src/middlewares/http-v1.ts#L21-L43
+	 *
+	 * @return bool
+	 */
+	private function is_only_post_request() {
+		// Check that REQUEST_METHOD is POST.
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== $_SERVER['REQUEST_METHOD'] ) {
+			return false;
+		}
+
+		// Check X-HTTP-Method-Override header if it exists and is not empty - it must also be POST.
+		if ( isset( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) ) {
+			$method_override = strtoupper( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ) ) );
+			if ( '' !== $method_override && 'POST' !== $method_override ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

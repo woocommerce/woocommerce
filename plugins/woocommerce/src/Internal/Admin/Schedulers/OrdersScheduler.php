@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataS
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Admin\Features\Features;
 
 /**
  * OrdersScheduler Class.
@@ -53,11 +54,25 @@ class OrdersScheduler extends ImportScheduler {
 	const LAST_PROCESSED_ORDER_ID_OPTION = 'woocommerce_admin_scheduler_last_processed_order_id';
 
 	/**
-	 * Option name for storing whether to enable immediate order import.
+	 * Option name for storing whether to enable scheduled order import.
 	 *
 	 * @var string
 	 */
-	const IMMEDIATE_IMPORT_OPTION = 'woocommerce_analytics_immediate_import';
+	const SCHEDULED_IMPORT_OPTION = 'woocommerce_analytics_scheduled_import';
+
+	/**
+	 * Default value for the scheduled import option.
+	 *
+	 * @var string
+	 */
+	const SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE = 'no';
+
+	/**
+	 * Action name for the order batch import.
+	 *
+	 * @var string
+	 */
+	const PROCESS_PENDING_ORDERS_BATCH_ACTION = 'process_pending_batch';
 
 	/**
 	 * Attach order lookup update hooks.
@@ -69,14 +84,23 @@ class OrdersScheduler extends ImportScheduler {
 		\Automattic\WooCommerce\Admin\Overrides\Order::add_filters();
 		\Automattic\WooCommerce\Admin\Overrides\OrderRefund::add_filters();
 
-		// Legacy behavior: Schedule import immediately on order create/update/delete.
-		add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
-		add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
-		add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
-		add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
+		if ( self::is_scheduled_import_enabled() ) {
+			// Schedule recurring batch processor.
+			add_action( 'action_scheduler_ensure_recurring_actions', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
+		} else {
+			// Schedule import immediately on order create/update/delete.
+			add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
+			add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
+			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
+			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
+		}
 
-		// Schedule recurring batch processor.
-		add_action( 'init', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
+		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
+			// Watch for changes to the scheduled import option.
+			add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
+			add_action( 'update_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_change' ), 10, 2 );
+			add_action( 'delete_option', array( __CLASS__, 'handle_scheduled_import_option_before_delete' ), 10, 1 );
+		}
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -110,7 +134,7 @@ class OrdersScheduler extends ImportScheduler {
 		return array_merge(
 			parent::get_scheduler_actions(),
 			array(
-				'process_pending_batch' => 'wc-admin_process_pending_orders_batch',
+				self::PROCESS_PENDING_ORDERS_BATCH_ACTION => 'wc-admin_process_pending_orders_batch',
 			)
 		);
 	}
@@ -125,7 +149,7 @@ class OrdersScheduler extends ImportScheduler {
 		return array_merge(
 			parent::get_batch_sizes(),
 			array(
-				'process_pending_batch' => 100,
+				self::PROCESS_PENDING_ORDERS_BATCH_ACTION => 100,
 			)
 		);
 	}
@@ -179,8 +203,8 @@ class OrdersScheduler extends ImportScheduler {
 			"SELECT COUNT(*) FROM {$wpdb->posts}
 			WHERE post_type IN ( 'shop_order', 'shop_order_refund' )
 			AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
-			{$where_clause}"
-		); // phpcs:ignore unprepared SQL ok.
+			{$where_clause}" // phpcs:ignore unprepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared SQL ok.
+		);
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -273,9 +297,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 	/**
 	 * Schedule this import if the post is an order or refund.
-	 * Note: This method is only called when immediate import is enabled
-	 * via the 'woocommerce_analytics_enable_immediate_import' filter.
-	 * Otherwise, orders are processed in batches periodically.
+	 * Note: This method is only called when scheduled import is disabled
+	 * (immediate mode). Otherwise, orders are processed in batches periodically.
 	 *
 	 * @param int $order_id Post ID.
 	 *
@@ -283,7 +306,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @returns int The order id
 	 */
 	public static function possibly_schedule_import( $order_id ) {
-		if ( ! self::is_immediate_import_enabled() ) {
+		if ( self::is_scheduled_import_enabled() ) {
 			return $order_id;
 		}
 
@@ -357,52 +380,88 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @internal
 	 */
 	public static function schedule_recurring_batch_processor() {
-		if ( self::is_immediate_import_enabled() ) {
-			// No need to schedule if immediate import is enabled.
-			if ( self::has_existing_jobs( 'process_pending_batch', array() ) ) {
-				$action_hook = self::get_action( 'process_pending_batch' );
-				as_unschedule_all_actions( $action_hook, array(), static::$group );
-			}
+		$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
+		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
+		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
+		if ( call_user_func( $has_scheduled_action, $action_hook ) ) {
 			return;
 		}
-		// Initialize last processed date if not set.
-		self::initialize_last_processed_date();
 
-		/**
-		 * Filters the interval for the recurring batch processor.
-		 *
-		 * @since 9.5.0
-		 * @param int $interval Interval in seconds. Default 12 hours.
-		 */
-		$interval = apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
+		$interval = self::get_import_interval();
 
-		$action_hook = self::get_action( 'process_pending_batch' );
+		as_schedule_recurring_action( time(), $interval, $action_hook, array(), static::$group, true );
+	}
 
-		// Schedule recurring action if not already scheduled.
-		if ( ! self::has_existing_jobs( 'process_pending_batch', array() ) ) {
-			self::queue()->schedule_recurring( time(), $interval, $action_hook, array(), static::$group );
+	/**
+	 * Handle changes to the scheduled import option.
+	 *
+	 * When switching from scheduled to immediate import,
+	 * we need to run a final catchup batch to ensure no orders are missed.
+	 *
+	 * When switching from immediate to scheduled import,
+	 * we need to reschedule the recurring batch processor.
+	 *
+	 * @internal
+	 * @param mixed $old_value The old value of the option.
+	 * @param mixed $new_value The new value of the option.
+	 * @return void
+	 */
+	public static function handle_scheduled_import_option_change( $old_value, $new_value ) {
+		// If switching from scheduled to immediate import.
+		if ( 'yes' === $old_value && 'no' === $new_value ) {
+			// Unschedule the recurring batch processor.
+			$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+			as_unschedule_all_actions( $action_hook, array(), static::$group );
+
+			// Schedule an immediate catchup batch to process all orders up to now.
+			// This ensures no orders are missed during the transition.
+			self::schedule_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION, array( null, null ) );
+		} elseif ( 'no' === $old_value && 'yes' === $new_value ) {
+			// Switching from immediate to scheduled import.
+			// Set the last processed order date to now with 1 minute buffer to ensure no orders are missed.
+			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', time() - MINUTE_IN_SECONDS ) );
+			update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
+
+			// Schedule the recurring batch processor.
+			self::schedule_recurring_batch_processor();
 		}
 	}
 
 	/**
-	 * Initialize the last processed date option if not set.
+	 * Handle addition of the scheduled import option.
 	 *
 	 * @internal
+	 * @param string $option_name The name of the option that was added.
+	 * @param string $value The value of the option that was added.
+	 *
+	 * @return void
 	 */
-	private static function initialize_last_processed_date() {
-		if ( false !== get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, false ) ) {
-			return; // Already initialized.
+	public static function handle_scheduled_import_option_added( $option_name, $value ) {
+		if ( self::SCHEDULED_IMPORT_OPTION !== $option_name ) {
+			return;
 		}
 
-		/**
-		 * Add buffer to ensure orders created or updated during plugin activation, upgrade, or prior to import are accounted for.
-		 * Buffer in seconds. 10 minutes.
-		 */
-		$buffer_seconds = 10 * MINUTE_IN_SECONDS;
-		$start_date     = gmdate( 'Y-m-d H:i:s', time() - $buffer_seconds );
+		self::handle_scheduled_import_option_change( self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE, $value );
+	}
 
-		update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, $start_date, false );
-		update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
+	/**
+	 * Handle deletion of the scheduled import option.
+	 *
+	 * @internal
+	 * @param string $option_name The name of the option that was deleted.
+	 *
+	 * @return void
+	 */
+	public static function handle_scheduled_import_option_before_delete( $option_name ) {
+		if ( self::SCHEDULED_IMPORT_OPTION !== $option_name ) {
+			return;
+		}
+
+		self::handle_scheduled_import_option_change(
+			get_option( self::SCHEDULED_IMPORT_OPTION, self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE ),
+			self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE,
+		);
 	}
 
 	/**
@@ -427,16 +486,18 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		}
 
 		// Load cursor position from options if not provided.
-		$cursor_date = $cursor_date ?? get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
-		$cursor_id   = $cursor_id ?? (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
+		// If the cursor date is not provided, use the last 24 hours as the default since `action_scheduler_ensure_recurring_actions` runs daily so 24 hours is enough.
+		$default_cursor_date = gmdate( 'Y-m-d H:i:s', strtotime( '-24 hours' ) );
+		$cursor_date         = $cursor_date ?? get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, $default_cursor_date );
+		$cursor_id           = $cursor_id ?? (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
 
 		// Validate cursor date.
 		if ( ! $cursor_date || ! strtotime( $cursor_date ) ) {
 			$logger->error( 'Invalid cursor date: ' . $cursor_date, $context );
-			$cursor_date = gmdate( 'Y-m-d H:i:s', 0 ); // Fallback to the earliest possible date.
+			$cursor_date = $default_cursor_date;
 		}
 
-		$batch_size = self::get_batch_size( 'process_pending_batch' );
+		$batch_size = self::get_batch_size( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
 
 		$logger->info(
 			sprintf( 'Starting batch import. Cursor: %s (ID: %d), batch size: %d', $cursor_date, $cursor_id, $batch_size ),
@@ -450,6 +511,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		if ( empty( $orders ) ) {
 			$logger->info( 'No orders to process', $context );
+			// Update the cursor position to the start time of the batch so that the next batch will start from that point.
+			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', (int) $start_time ), false );
+			update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
 			return;
 		}
 
@@ -498,6 +562,22 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				array( $cursor_date, $cursor_id )
 			);
 		}
+	}
+
+	/**
+	 * Get the import interval.
+	 *
+	 * @internal
+	 * @return int The import interval in seconds.
+	 */
+	public static function get_import_interval() {
+		/**
+		 * Filter the analytics import interval.
+		 *
+		 * @since 10.4.0
+		 * @param int $interval The import interval in seconds. Default is 12 hours.
+		 */
+		return apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
 	}
 
 	/**
@@ -622,13 +702,20 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Check if immediate import is enabled.
+	 * Check whether scheduled import is enabled.
+	 *
+	 * When the "analytics-scheduled-import" feature is disabled, only immediate
+	 * import is supported (returns false). When enabled, checks the option value.
 	 *
 	 * @internal
 	 * @return bool
 	 */
-	private static function is_immediate_import_enabled(): bool {
-		$enable_immediate_import = get_option( self::IMMEDIATE_IMPORT_OPTION, true );
-		return filter_var( $enable_immediate_import, FILTER_VALIDATE_BOOLEAN );
+	private static function is_scheduled_import_enabled(): bool {
+		if ( ! Features::is_enabled( 'analytics-scheduled-import' ) ) {
+			// If the feature is disabled, only immediate import is supported.
+			return false;
+		}
+
+		return 'yes' === get_option( self::SCHEDULED_IMPORT_OPTION, self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE );
 	}
 }

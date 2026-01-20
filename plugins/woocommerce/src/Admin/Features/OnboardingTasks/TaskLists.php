@@ -50,7 +50,6 @@ class TaskLists {
 		'Tax',
 		'Shipping',
 		'Marketing',
-		'Appearance',
 		'AdditionalPayments',
 		'ReviewShippingOptions',
 		'GetMobileApp',
@@ -111,8 +110,8 @@ class TaskLists {
 		$tasks = array(
 			'StoreDetails',
 			'Products',
-			'Appearance',
 			'Payments',
+			'CustomizeStore',
 			'Tax',
 			'Shipping',
 			'LaunchYourStore',
@@ -434,7 +433,7 @@ class TaskLists {
 
 		foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
 			if ( 0 === strpos( $menu_item[0], _x( 'Home', 'Admin menu name', 'woocommerce' ) ) ) {
-				$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge"><span class="count-' . esc_attr( $tasks_count ) . '">' . absint( $tasks_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$submenu['woocommerce'][ $key ][0] .= ' <span class="menu-counter remaining-tasks-badge woocommerce-task-list-remaining-tasks-badge"><span class="count-' . esc_attr( $tasks_count ) . '">' . absint( $tasks_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			}
 		}

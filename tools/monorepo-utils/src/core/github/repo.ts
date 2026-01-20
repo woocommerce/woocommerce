@@ -249,16 +249,54 @@ export const addLabelsToIssue = async (
 	);
 };
 
+export const addMilestoneToIssue = async (
+	options: {
+		owner?: string;
+		name?: string;
+	},
+	issueNumber: number,
+	milestoneName: string
+): Promise< void > => {
+	const { owner, name } = options;
+
+	// Try to find milestone by name.
+	const { data } = await octokitWithAuth().request(
+		'GET /repos/{owner}/{repo}/milestones',
+		{
+			owner,
+			repo: name,
+			state: 'all',
+			direction: 'desc',
+			per_page: 100,
+		}
+	);
+
+	const milestone = data.find( ( m ) => m.title === milestoneName );
+
+	if ( milestone ) {
+		await octokitWithAuth().request(
+			'PATCH /repos/{owner}/{repo}/issues/{issue_number}',
+			{
+				owner,
+				repo: name,
+				issue_number: issueNumber,
+				milestone: milestone.number,
+			}
+		);
+	}
+};
+
 /**
- * Create a pull request from branches on Github.
+ * Create a pull request from branches on GitHub.
  *
- * @param {Object} options       pull request options.
- * @param {string} options.head  branch name containing the changes you want to merge.
- * @param {string} options.base  branch name you want the changes pulled into.
- * @param {string} options.owner repository owner.
- * @param {string} options.name  repository name.
- * @param {string} options.title pull request title.
- * @param {string} options.body  pull request body.
+ * @param {Object}   options           pull request options.
+ * @param {string}   options.head      branch name containing the changes you want to merge.
+ * @param {string}   options.base      branch name you want the changes pulled into.
+ * @param {string}   options.owner     repository owner.
+ * @param {string}   options.name      repository name.
+ * @param {string}   options.title     pull request title.
+ * @param {string}   options.body      pull request body.
+ * @param {string[]} options.reviewers list of GitHub usernames to request a review from.
  * @return {Promise<object>}     pull request data.
  */
 export const createPullRequest = async ( options: {
@@ -268,8 +306,9 @@ export const createPullRequest = async ( options: {
 	name: string;
 	title: string;
 	body: string;
+	reviewers?: string[];
 } ): Promise< CreatePullRequestEndpointResponse[ 'data' ] > => {
-	const { head, base, owner, name, title, body } = options;
+	const { head, base, owner, name, title, body, reviewers } = options;
 	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
 		{
@@ -281,6 +320,22 @@ export const createPullRequest = async ( options: {
 			base,
 		}
 	);
+
+	const filteredReviewers = reviewers?.filter(
+		( reviewer ) => reviewer !== pullRequest.data.user.login
+	);
+
+	if ( filteredReviewers && filteredReviewers.length > 0 ) {
+		await octokitWithAuth().request(
+			'POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers',
+			{
+				owner,
+				repo: name,
+				pull_number: pullRequest.data.number,
+				reviewers: filteredReviewers,
+			}
+		);
+	}
 
 	return pullRequest.data;
 };

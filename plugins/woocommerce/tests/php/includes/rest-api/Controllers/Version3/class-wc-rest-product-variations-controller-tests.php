@@ -167,6 +167,125 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * Test that creating a variation with attributes containing special characters in their slug
+	 * properly saves the attributes.
+	 *
+	 * This test verifies the fix for issue #61791 where attributes with non-ASCII characters
+	 * (like Persian) were not saved when creating variations via the REST API.
+	 * @see https://github.com/woocommerce/woocommerce/issues/61791
+	 */
+	public function test_create_variation_with_persian_attribute_by_id() {
+		// Create a variable product with Persian attribute names.
+		$product         = WC_Helper_Product::create_variation_product();
+		$color_attribute = WC_Helper_Product::create_product_attribute_object( 'رنگ', array( 'blue', 'green' ) );
+		$product->set_attributes( array( $color_attribute ) );
+		$product->save();
+
+		// Create a variation via REST API.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_body_params(
+			array(
+				'regular_price'  => '0',
+				'sale_price'     => '0',
+				'manage_stock'   => true,
+				'stock_quantity' => 0,
+				'attributes'     => array(
+					array(
+						'id'     => $color_attribute->get_id(),
+						'option' => 'green',
+					),
+				),
+			)
+		);
+
+		$response  = $this->server->dispatch( $request );
+		$variation = $response->get_data();
+
+		// Verify the variation was created successfully.
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertNotEmpty( $variation['id'] );
+		$this->assertEquals( 'variation', $variation['type'] );
+		$this->assertEquals( $product->get_id(), $variation['parent_id'] );
+
+		// Verify the attribute is properly set.
+		$this->assertNotEmpty( $variation['attributes'], 'Attributes array should not be empty' );
+		$this->assertCount( 1, $variation['attributes'], 'Variation should have 1 attribute' );
+		$this->assertEquals( 'رنگ', $variation['attributes'][0]['name'], 'Variation should contain color attribute' );
+		$this->assertEquals( 'green', $variation['attributes'][0]['option'], 'Variation should contain color option green' );
+
+		// Verify the variation can be retrieved and has the attribute data.
+		$get_request         = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations/' . $variation['id'] );
+		$get_response        = $this->server->dispatch( $get_request );
+		$retrieved_variation = $get_response->get_data();
+
+		$this->assertEquals( 200, $get_response->get_status() );
+		$this->assertNotEmpty( $retrieved_variation['attributes'], 'Retrieved variation should have attributes' );
+		$this->assertCount( 1, $retrieved_variation['attributes'], 'Retrieved variation should have 1 attribute' );
+		$this->assertEquals( 'رنگ', $retrieved_variation['attributes'][0]['name'], 'Variation should contain color attribute' );
+		$this->assertEquals( 'pa_رنگ', $retrieved_variation['attributes'][0]['slug'], 'Variation should contain color attribute slug' );
+		$this->assertEquals( 'green', $retrieved_variation['attributes'][0]['option'], 'Variation should contain color option green' );
+	}
+
+	/**
+	 * Test that creating a variation with URL-encoded attribute option values
+	 * properly decodes and saves the attributes.
+	 *
+	 * This test verifies the fix for URL-encoded attribute options (e.g., special characters
+	 * like Persian/unicode) are properly decoded when sent via the REST API.
+	 */
+	public function test_create_variation_with_url_encoded_attribute_option() {
+		// Create a variable product with a Persian attribute name and options.
+		$product         = WC_Helper_Product::create_variation_product();
+		$color_attribute = WC_Helper_Product::create_product_attribute_object( 'رنگ', array( 'آبی', 'سبز' ) );
+		$product->set_attributes( array( $color_attribute ) );
+		$product->save();
+
+		// Create a variation via REST API with URL-encoded attribute option.
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_body_params(
+			array(
+				'regular_price'  => '0',
+				'sale_price'     => '0',
+				'manage_stock'   => true,
+				'stock_quantity' => 0,
+				'attributes'     => array(
+					array(
+						'id'     => $color_attribute->get_id(),
+						'option' => 'سبز', // URL-encoded Persian word for "green".
+					),
+				),
+			)
+		);
+
+		$response  = $this->server->dispatch( $request );
+		$variation = $response->get_data();
+
+		// Verify the variation was created successfully.
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertNotEmpty( $variation['id'] );
+		$this->assertEquals( 'variation', $variation['type'] );
+		$this->assertEquals( $product->get_id(), $variation['parent_id'] );
+
+		// Verify the attribute is properly set with decoded option.
+		$this->assertNotEmpty( $variation['attributes'], 'Attributes array should not be empty' );
+		$this->assertCount( 1, $variation['attributes'], 'Variation should have 1 attribute' );
+		$this->assertEquals( 'رنگ', $variation['attributes'][0]['name'], 'Variation should contain color attribute' );
+		$this->assertEquals( 'سبز', $variation['attributes'][0]['option'], 'Attribute option should be decoded from URL encoding' );
+
+		// Verify the variation can be retrieved and has the attribute data.
+		$get_request         = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations/' . $variation['id'] );
+		$get_response        = $this->server->dispatch( $get_request );
+		$retrieved_variation = $get_response->get_data();
+
+		$this->assertEquals( 200, $get_response->get_status() );
+		$this->assertNotEmpty( $retrieved_variation['attributes'], 'Retrieved variation should have attributes' );
+		$this->assertCount( 1, $retrieved_variation['attributes'], 'Retrieved variation should have 1 attribute' );
+		$this->assertEquals( 'رنگ', $retrieved_variation['attributes'][0]['name'], 'Variation should contain color attribute' );
+		$this->assertEquals( 'pa_رنگ', $retrieved_variation['attributes'][0]['slug'], 'Variation should contain color attribute slug' );
+		$this->assertEquals( 'سبز', $retrieved_variation['attributes'][0]['option'], 'Retrieved attribute option should be decoded' );
+	}
+
+	/**
 	 * Test that the products endpoint can filter by global_unique_id and also return matched variations.
 	 *
 	 * @return void
@@ -654,5 +773,71 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assertEmpty( $response->get_data() );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns only POS-visible variations when true.
+	 */
+	public function test_pos_products_only_true_returns_only_pos_visible_variations() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variations     = $parent_product->get_available_variations( 'objects' );
+
+		// Mark one variation as hidden from POS.
+		wp_set_object_terms( $variations[0]->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
+		$request->set_param( 'pos_products_only', true );
+
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotContains( $variations[0]->get_id(), $variation_ids );
+		$this->assertContains( $variations[1]->get_id(), $variation_ids );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns all variations when false.
+	 */
+	public function test_pos_products_only_false_returns_all_variations() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variations     = $parent_product->get_available_variations( 'objects' );
+
+		// Mark one variation as hidden from POS.
+		wp_set_object_terms( $variations[0]->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
+		$request->set_param( 'pos_products_only', false );
+
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertContains( $variations[0]->get_id(), $variation_ids );
+		$this->assertContains( $variations[1]->get_id(), $variation_ids );
+	}
+
+	/**
+	 * Test that omitting `pos_products_only` filter returns all variations regardless of POS visibility.
+	 */
+	public function test_pos_products_only_omitted_returns_all_variations() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variations     = $parent_product->get_available_variations( 'objects' );
+
+		// Mark one variation as hidden from POS.
+		wp_set_object_terms( $variations[0]->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
+		// Do not set pos_products_only parameter.
+
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertContains( $variations[0]->get_id(), $variation_ids );
+		$this->assertContains( $variations[1]->get_id(), $variation_ids );
 	}
 }

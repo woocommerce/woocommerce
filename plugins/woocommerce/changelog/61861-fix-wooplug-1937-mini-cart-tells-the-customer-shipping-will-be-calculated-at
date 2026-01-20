@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Mini-Cart footer to show only enabled calculation types (shipping, taxes, discounts) instead of always showing all three.

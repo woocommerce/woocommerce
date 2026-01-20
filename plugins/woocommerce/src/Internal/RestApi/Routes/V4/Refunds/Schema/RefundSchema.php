@@ -145,8 +145,29 @@ class RefundSchema extends AbstractSchema {
 				'readonly'    => true,
 			),
 			'refunded_by'      => array(
-				'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
-				'type'        => 'integer',
+				'description' => __( 'User who created the refund.', 'woocommerce' ),
+				'type'        => 'object',
+				'properties'  => array(
+					'id'           => array(
+						'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+						'readonly'    => true,
+					),
+					'display_name' => array(
+						'description' => __( 'Display name of the user who created the refund.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+						'readonly'    => true,
+					),
+					'avatar_url'   => array(
+						'description' => __( 'Avatar URL of the user who created the refund.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+						'readonly'    => true,
+						'format'      => 'uri',
+					),
+				),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
@@ -222,7 +243,7 @@ class RefundSchema extends AbstractSchema {
 							'validate_callback' => 'rest_validate_request_arg',
 						),
 						'refund_tax'   => array(
-							'description' => __( 'Taxes refunded for this item.', 'woocommerce' ),
+							'description' => __( 'Optional: Taxes refunded for this item. If not provided, tax will be automatically extracted from refund_total using the order\'s tax rates.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 							'default'     => array(),
@@ -303,9 +324,21 @@ class RefundSchema extends AbstractSchema {
 			'date_created_gmt' => wc_rest_prepare_date_response( $refund->get_date_created() ),
 			'amount'           => wc_format_decimal( $refund->get_amount(), $dp ),
 			'reason'           => $refund->get_reason(),
-			'refunded_by'      => $refund->get_refunded_by(),
 			'refunded_payment' => $refund->get_refunded_payment(),
 		);
+
+		if ( in_array( 'refunded_by', $include_fields, true ) ) {
+			$refunded_user = new \WP_User( $refund->get_refunded_by() );
+			if ( $refunded_user->exists() ) {
+				$data['refunded_by'] = array(
+					'id'           => $refunded_user->ID,
+					'display_name' => $refunded_user->display_name,
+					'avatar_url'   => get_avatar_url( $refunded_user ),
+				);
+			} else {
+				$data['refunded_by'] = null;
+			}
+		}
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			$data['line_items'] = array_merge(

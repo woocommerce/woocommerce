@@ -295,3 +295,15 @@ function wc_update_1040_add_idx_date_paid_status_parent() {
 		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_stats ADD INDEX idx_date_paid_status_parent (date_paid, status, parent_id)" );
 	}
 }
+
+/**
+ * Add an index to the woocommerce_downloadable_product_permissions table for (user_email) to improve anonymization/deletion performance.
+ */
+function wc_update_1050_add_idx_user_email() {
+	global $wpdb;
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE key_name = 'idx_user_email'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX idx_user_email (user_email(100))" );
+	}
+}

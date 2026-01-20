@@ -5,6 +5,8 @@
 
 	.wc-block-components-shipping-rates-control__no-results-notice {
 		margin: 0;
+		width: 100%;
+		box-sizing: border-box;
 	}
 
 	.wc-block-components-shipping-rates-control__no-shipping-address-message {
@@ -14,6 +16,8 @@
 		color: color-mix(in srgb, currentColor 66%, transparent);
 		text-align: center;
 		margin: 0;
+		width: 100%;
+		box-sizing: border-box;
 		border-radius: $universal-border-radius;
 	}
 }

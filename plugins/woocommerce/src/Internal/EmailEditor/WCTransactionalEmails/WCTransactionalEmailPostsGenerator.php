@@ -116,7 +116,7 @@ class WCTransactionalEmailPostsGenerator {
 	 * @return string The email template.
 	 */
 	public function get_email_template( $email ) {
-		$template_name = str_replace( 'plain', 'block', $email->template_plain );
+		$template_name = ! empty( $email->template_block ) ? $email->template_block : str_replace( 'plain', 'block', $email->template_plain );
 
 		try {
 			$template_html = wc_get_template_html(
@@ -126,6 +126,10 @@ class WCTransactionalEmailPostsGenerator {
 				$email->template_base ?? ''
 			);
 		} catch ( \Exception $e ) {
+			// wc_get_template_html() uses ob_start(), so we need to clean the output buffer if an exception is thrown.
+			if ( ob_get_level() > 0 ) {
+				ob_end_clean();
+			}
 			$template_html = '';
 		}
 
@@ -175,7 +179,11 @@ class WCTransactionalEmailPostsGenerator {
 			return false;
 		}
 
-		set_transient( $this->transient_name, Constants::get_constant( 'WC_VERSION' ), MONTH_IN_SECONDS );
+		set_transient( $this->transient_name, Constants::get_constant( 'WC_VERSION' ), WEEK_IN_SECONDS );
+
+		// Flush rewrite rules to ensure the new templates are loaded.
+		flush_rewrite_rules();
+
 		return true;
 	}
 
@@ -259,6 +267,19 @@ class WCTransactionalEmailPostsGenerator {
 				'_wp_page_template' => ( new WooEmailTemplate() )->get_slug(),
 			),
 		);
+
+		/**
+		 * Filter the email content post data before creating the post.
+		 *
+		 * Allows third-party integrators to modify the post data (title, content, meta, etc.)
+		 * before the email content post is created.
+		 *
+		 * @since 10.5.0
+		 * @param array     $post_data  The post data array to be used for wp_insert_post().
+		 * @param string    $email_type The email type identifier (e.g., 'customer_processing_order').
+		 * @param \WC_Email $email_data The WooCommerce email object.
+		 */
+		$post_data = apply_filters( 'woocommerce_email_content_post_data', $post_data, $email_type, $email_data );
 
 		$post_id = wp_insert_post( $post_data, true );
 

@@ -2,9 +2,16 @@
  * External dependencies
  */
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
+import {
+	Disabled,
+	ToggleControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -49,21 +56,36 @@ const Edit = ( {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Accessibility', 'woocommerce' ) }>
-					<ToggleControl
+				<ToolsPanel
+					label={ __( 'Accessibility', 'woocommerce' ) }
+					resetAll={ () => {
+						setAttributes( { useLabel: false } );
+					} }
+				>
+					<ToolsPanelItem
+						hasValue={ () => useLabel !== false }
 						label={ __( 'Show visual label', 'woocommerce' ) }
-						help={ __(
-							'Displays "Sort by" text before the dropdown menu to improve clarity and accessibility.',
-							'woocommerce'
-						) }
-						checked={ useLabel }
-						onChange={ ( isChecked ) =>
-							setAttributes( {
-								useLabel: isChecked,
-							} )
+						onDeselect={ () =>
+							setAttributes( { useLabel: false } )
 						}
-					/>
-				</PanelBody>
+						isShownByDefault
+					>
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __( 'Show visual label', 'woocommerce' ) }
+							help={ __(
+								'Displays "Sort by" text before the dropdown menu to improve clarity and accessibility.',
+								'woocommerce'
+							) }
+							checked={ useLabel }
+							onChange={ ( isChecked ) =>
+								setAttributes( {
+									useLabel: isChecked,
+								} )
+							}
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 			<div { ...blockProps }>
 				<Disabled>

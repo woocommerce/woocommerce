@@ -5,8 +5,8 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { select, useSelect, useDispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { store as editorStore } from '@wordpress/editor';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import {
 	useEffect,
 	useLayoutEffect,
@@ -85,7 +85,8 @@ const isInProductArchive = () => {
 	];
 
 	// @ts-expect-error getEditedPostSlug is not typed
-	const currentTemplateId = select( editorStore ).getEditedPostSlug();
+	const currentTemplateId =
+		select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Prevent rendering of CSS margins in email HTML output

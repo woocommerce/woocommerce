@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 // @ts-ignore No types for this exist yet.
 import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/sidebar-navigation-item';
@@ -17,19 +17,21 @@ import {
 } from '@wordpress/components';
 import { useOnboardingContext } from '~/settings-payments/onboarding/providers/woopayments/data/onboarding-context';
 import { recordEvent } from '@woocommerce/tracks';
+import type { TaskType } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
-import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
+import { SiteHub } from '~/customize-store/site-hub';
 import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
 import { WooPaymentsProviderOnboardingStep } from '~/settings-payments/onboarding/types';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
+import { getPaymentsTaskFromLysTasklist } from '../tasklist';
 
 export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 	const { wooPaymentsRecentlyActivated, isWooPaymentsActive } =
@@ -42,10 +44,42 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		isLoading,
 	} = useOnboardingContext();
 
-	const { context } = props;
-	const payments_task = context.tasklist?.tasks?.find(
-		( task ) => task.id === 'payments'
+	// Fetch payments task using getPaymentsTaskFromLysTasklist helper
+	const [ payments_task, setPaymentsTask ] = useState< TaskType | undefined >(
+		undefined
 	);
+
+	useEffect( () => {
+		let isMounted = true;
+
+		const fetchPaymentsTask = async () => {
+			try {
+				const task = await getPaymentsTaskFromLysTasklist();
+
+				// Only update state if component is still mounted.
+				if ( isMounted ) {
+					setPaymentsTask( task );
+				}
+			} catch ( error ) {
+				// Log the error for debugging purposes.
+				// eslint-disable-next-line no-console
+				console.error(
+					'PaymentsSidebar: Failed to fetch payments task:',
+					error
+				);
+
+				// Component remains in its default state (payments_task = undefined).
+				// This is a safe fallback as the UI handles undefined gracefully.
+			}
+		};
+
+		fetchPaymentsTask();
+
+		// Cleanup function to prevent state updates after unmount.
+		return () => {
+			isMounted = false;
+		};
+	}, [ isWooPaymentsActive, wooPaymentsRecentlyActivated ] ); // Refresh when WooPayments state changes.
 
 	const currentStepIndex = allSteps.findIndex(
 		( step ) => step.id === currentStep?.id
@@ -95,7 +129,10 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 				} );
 			} }
 		>
-			{ __( 'Set up WooPayments', 'woocommerce' ) }
+			{
+				/* translators: %s: Payment provider name (e.g., WooPayments) */
+				sprintf( __( 'Set up %s', 'woocommerce' ), 'WooPayments' )
+			}
 		</Button>
 	);
 
@@ -177,11 +214,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 							animate={ { opacity: 1, y: 0 } }
 							transition={ { duration: 0.7, delay: 0.2 } }
 						>
-							{ wooPaymentsRecentlyActivated && (
-								<InstallWooPaymentsStep
-									isStepComplete={ true }
-								/>
-							) }
+							<InstallWooPaymentsStep isStepComplete={ true } />
 							{ sortedSteps.map( ( step ) => {
 								return (
 									<SidebarNavigationItem

@@ -131,6 +131,11 @@ class WC_Admin_Duplicate_Product {
 	 * @return WC_Product The duplicate.
 	 */
 	public function product_duplicate( $product ) {
+		if ( ! $product instanceof WC_Product ) {
+			wc_doing_it_wrong( __METHOD__, 'product_duplicate() expects a WC_Product instance', '10.5.0' );
+			return new WC_Product();
+		}
+
 		/**
 		 * Filter to allow us to exclude meta keys from product duplication..
 		 *
@@ -157,7 +162,7 @@ class WC_Admin_Duplicate_Product {
 		$duplicate->set_name( sprintf( esc_html__( '%s (Copy)', 'woocommerce' ), $duplicate->get_name() ) );
 		$duplicate->set_total_sales( 0 );
 		if ( '' !== $product->get_sku( 'edit' ) ) {
-			$duplicate->set_sku( wc_product_generate_unique_sku( 0, $product->get_sku( 'edit' ) ) );
+			$this->generate_unique_sku( $duplicate );
 		}
 		if ( '' !== $product->get_global_unique_id( 'edit' ) ) {
 			$duplicate->set_global_unique_id( '' );
@@ -190,7 +195,14 @@ class WC_Admin_Duplicate_Product {
 		 */
 		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $product ) && $product->is_type( ProductType::VARIABLE ) ) {
 			foreach ( $product->get_children() as $child_id ) {
-				$child           = wc_get_product( $child_id );
+				$child = wc_get_product( $child_id );
+
+				if ( ! $child instanceof WC_Product ) {
+					wc_doing_it_wrong( __METHOD__, 'product_duplicate() expects product children to be WC_Product instances', '10.5.0' );
+					continue;
+				}
+
+				$child->read_meta_data();
 				$child_duplicate = clone $child;
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );
@@ -203,7 +215,7 @@ class WC_Admin_Duplicate_Product {
 				$this->generate_unique_slug( $child_duplicate );
 
 				if ( '' !== $child->get_sku( 'edit' ) ) {
-					$child_duplicate->set_sku( wc_product_generate_unique_sku( 0, $child->get_sku( 'edit' ) ) );
+					$this->generate_unique_sku( $child_duplicate );
 				}
 				if ( '' !== $child->get_global_unique_id( 'edit' ) ) {
 					$child_duplicate->set_global_unique_id( '' );
@@ -293,6 +305,98 @@ class WC_Admin_Duplicate_Product {
 		}
 
 		$product->set_slug( $root_slug . '-' . ( $max_suffix + 1 ) );
+	}
+
+	/**
+	 * Generates a unique sku for a given product.
+	 *
+	 * @param WC_Product $product The product to generate a sku for.
+	 * @return void
+	 * @since 10.5.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	private function generate_unique_sku( $product ) {
+		global $wpdb;
+
+		// We want to remove the suffix from the sku so that we can find the maximum suffix using this root sku.
+		// This will allow us to find the next-highest suffix that is unique. While this does not support gap
+		// filling, this shouldn't matter for our use-case.
+		$root_sku = preg_replace( '/-[0-9]+$/', '', $product->get_sku() );
+
+		// If the parent product has no SKU, don't do anything.
+		if ( ! $root_sku ) {
+			return;
+		}
+
+		$existing_skus = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT lookup.sku
+					FROM {$wpdb->posts} as posts
+					INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
+					WHERE posts.post_type IN ( 'product', 'product_variation' )
+					AND lookup.sku LIKE %s",
+				$wpdb->esc_like( $root_sku ) . '%'
+			)
+		);
+
+		// The sku is already unique!
+		if ( empty( $existing_skus ) ) {
+			$product->set_sku( $root_sku );
+			return;
+		}
+
+		// Find the maximum suffix so we can ensure uniqueness.
+		$max_suffix = 0;
+		foreach ( $existing_skus as $existing_sku ) {
+			// Pull a numerical suffix off the sku after the last hyphen.
+			$suffix = intval( substr( $existing_sku, strrpos( $existing_sku, '-', -1 ) + 1 ) );
+			if ( $suffix > $max_suffix ) {
+				$max_suffix = $suffix;
+			}
+		}
+
+		// We set a limit of SKUs to try in order to avoid infinite loops.
+		$limit      = $max_suffix + 100;
+		$product_id = $product->get_id();
+
+		while ( $max_suffix < $limit ) {
+			$new_sku = $root_sku . '-' . ( $max_suffix + 1 );
+
+			/**
+			 * Gives plugins an opportunity to verify SKU uniqueness themselves. Filter added to keep backwards
+			 * compatibility with `wc_product_has_unique_sku()`.
+			 * See: https://github.com/woocommerce/woocommerce/pull/62628
+			 *
+			 * @since 10.5.0
+			 *
+			 * @param bool|null $has_unique_sku Set to a boolean value to short-circuit the default SKU check.
+			 * @param int $product_id The ID of the current product.
+			 * @param string $sku The SKU to check for uniqueness.
+			 */
+			$pre_has_unique_sku = apply_filters( 'wc_product_pre_has_unique_sku', true, $product_id, $new_sku );
+
+			if ( $pre_has_unique_sku ) {
+				/**
+				 * Gives plugins an opportunity to verify SKU uniqueness themselves. Filter added to keep backwards
+				 * compatibility with `wc_product_has_unique_sku()`.
+				 * See: https://github.com/woocommerce/woocommerce/pull/62628
+				 *
+				 * @since 10.5.0
+				 *
+				 * @param bool|null $sku_found Set to a boolean value to short-circuit the default SKU check.
+				 * @param int $product_id The ID of the current product.
+				 * @param string $sku The SKU to check for uniqueness.
+				 */
+				$sku_found = apply_filters( 'wc_product_has_unique_sku', false, $product_id, $new_sku );
+
+				if ( ! $sku_found ) {
+					$product->set_sku( $new_sku );
+					return;
+				}
+			}
+			++$max_suffix;
+		}
 	}
 }
 

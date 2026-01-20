@@ -61,6 +61,7 @@ class PaymentsExtensionSuggestions {
 	const RAPYD             = 'rapyd';
 	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 	const VISA              = 'visa_as';
+	const NGENIUS           = 'ngenius';
 
 	/*
 	 * The extension types.
@@ -2582,13 +2583,13 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'ZA' => array(
-			self::PAYFAST => array(
+			self::PAYSTACK => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::PAYSTACK,
+			self::PAYFAST,
 			self::VISA,
 			self::PAYPAL_WALLET,
 		),
@@ -2711,6 +2712,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'KZ' => array(
@@ -2787,6 +2789,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'SD' => array(
@@ -2817,6 +2820,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'UZ' => array(
@@ -4142,6 +4146,26 @@ class PaymentsExtensionSuggestions {
 					array(
 						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=visa-acceptance-solutions',
+					),
+				),
+			),
+			self::NGENIUS           => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'N-Genius Online', 'woocommerce' ),
+				'description' => esc_html__( 'Power your business with N-Genius Online—smart, secure, and built for the future', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/ngenius.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'ngenius',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/ngenius/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/ngenius/',
 					),
 				),
 			),
