@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Update product attribute sanitization to use sanitize_html_class
