@@ -34,10 +34,53 @@ GNU General Public License for more details.
 
 == Fonts ==
 
+Crimson Pro
+License: Licensed under SIL Open Font License, 1.1 
+License URI: https://scripts.sil.org/OFL
+Source: https://fonts.google.com/specimen/Crimson+Pro
+
+Figtree
+License: Licensed under SIL Open Font License, 1.1 
+License URI: https://scripts.sil.org/OFL
+Source: https://fonts.google.com/specimen/Figtree
+
+Fraunces
+License: Licensed under SIL Open Font License, 1.1 
+License URI: https://scripts.sil.org/OFL
+Source: https://fonts.google.com/specimen/Fraunces
+
 Inter Font
 License: Licensed under SIL Open Font License, 1.1 
 License URI: https://scripts.sil.org/OFL
 Source: https://fonts.google.com/specimen/Inter
+
+Jost
+License: Licensed under SIL Open Font License, 1.1 
+License URI: https://scripts.sil.org/OFL
+Source: https://fonts.google.com/specimen/Jost
+
+Libre Baskerville
+License: Licensed under SIL Open Font License, 1.1 
+License URI: https://scripts.sil.org/OFL
+Source: https://fonts.google.com/specimen/Libre+Baskerville
+
+
+Source Serif 4
+License: Licensed under SIL Open Font License, 1.1 
+License URI: https://scripts.sil.org/OFL
+Source: https://fonts.google.com/specimen/Source+Serif+4
+
+SUSE Mono
+License: Licensed under SIL Open Font License, 1.1 
+License URI: https://scripts.sil.org/OFL
+Source: https://fonts.google.com/specimen/SUSE+Mono
+
+
+Uncut Sans
+License: Licensed under SIL Open Font License, 1.1 
+License URI: https://scripts.sil.org/OFL
+Source: https://uncut.wtf/sans-serif/uncut-sans.html
+
 
 == Images ==
 
