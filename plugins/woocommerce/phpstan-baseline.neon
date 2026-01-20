@@ -63340,40 +63340,10 @@ parameters:
 			path: src/Internal/Admin/ActivityPanels.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticCommerceIntegration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticCommerceIntegration\:\:admin_options\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticCommerceIntegration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticCommerceIntegration\:\:process_admin_options\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticCommerceIntegration.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticController\:\:on_init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Agentic/AgenticController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticSettingsPage\:\:save_settings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticSettingsPage.php
-
-		-
-			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Internal/Admin/Agentic/AgenticSettingsPage.php
 
 		-
 			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\.$#'
@@ -78775,12 +78745,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessions\:\:is_authorized\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessions\:\:requires_nonce\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -80919,12 +80883,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\AgenticCheckoutUtils\:\:get_agentic_commerce_gateway\(\) should return WC_Payment_Gateway\|null but returns class\-string\|object\.$#'
 			identifier: return.type
-			count: 1
-			path: src/StoreApi/Utilities/AgenticCheckoutUtils.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\AgenticCheckoutUtils\:\:is_authorized\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Utilities/AgenticCheckoutUtils.php
 
