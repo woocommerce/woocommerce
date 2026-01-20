@@ -47,6 +47,7 @@ class WC_Woo_Helper_Connection {
 	/**
 	 * Get the notice for a deleted connection on WCCOM
 	 *
+	 * @since 10.6.0
 	 * @return string The notice for a deleted connection on WCCOM.
 	 */
 	public static function get_deleted_connection_notice(): string {
