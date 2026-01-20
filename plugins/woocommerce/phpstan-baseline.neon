@@ -5341,12 +5341,6 @@ parameters:
 			path: includes/admin/helper/class-wc-woo-helper-connection.php
 
 		-
-			message: '#^PHPDoc tag @return with type bool is incompatible with native type string\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: includes/admin/helper/class-wc-woo-helper-connection.php
-
-		-
 			message: '#^PHPDoc tag @return with type int is incompatible with native type string\.$#'
 			identifier: return.phpDocType
 			count: 1
