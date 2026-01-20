@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add migration UI and conversion logic to upgrade WooCommerce Accordion blocks to the WordPress core Accordion block in WP 6.9+.
