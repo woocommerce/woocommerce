@@ -3902,9 +3902,23 @@ function wc_display_product_attributes( $product ) {
 			}
 		}
 
-		$product_attributes[ 'attribute_' . sanitize_html_class( sanitize_title( $attribute->get_name() ) ) ] = array(
-			'label' => wc_attribute_label( $attribute->get_name() ),
-			'value' => apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values ),
+		$attribute_key        = sanitize_html_class( sanitize_title( $attribute->get_name() ) );
+		$legacy_attribute_key = sanitize_title_with_dashes( $attribute->get_name() );
+		$css_classes          = "woocommerce-product-attributes-item--$attribute_key";
+
+		/**
+		 * Add legacy class for backwards compatibility if it differs from the current class.
+		 *
+		 * See details in https://github.com/woocommerce/woocommerce/issues/31086.
+		 */
+		if ( $legacy_attribute_key !== $attribute_key ) {
+			$css_classes .= " woocommerce-product-attributes-item--$legacy_attribute_key";
+		}
+
+		$product_attributes[ 'attribute_' . $attribute_key ] = array(
+			'label'       => wc_attribute_label( $attribute->get_name() ),
+			'value'       => apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values ),
+			'css_classes' => $css_classes,
 		);
 	}
 
