@@ -489,29 +489,18 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					$customer_id
 				);
 			} else {
-				/* TODO: adopt the following SQL for better performance (meta-table bloat backfires on the double-join here)
-				EXPLAIN SELECT SQL_NO_CACHE SUM(meta_value)
-						FROM wp_posts
-								LEFT JOIN wp_postmeta ON wp_posts.ID = wp_postmeta.post_id
-								WHERE wp_posts.ID IN (
-											SELECT wp_posts.ID as order_id
-											FROM wp_posts LEFT JOIN wp_postmeta ON wp_posts.ID = wp_postmeta.post_id
-											WHERE meta_key   = '_customer_user'
-											  AND meta_value = '1'
-											  AND post_type  = 'shop_order'
-											  AND post_status IN ('wc-processing', 'wc-completed')
+				$sql = "SELECT SUM(postmeta.meta_value)
+						FROM {$wpdb->posts} AS posts
+								LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+								WHERE posts.ID IN (
+											SELECT posts.ID as order_id
+											FROM {$wpdb->posts} AS posts LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+											WHERE postmeta.meta_key   = '_customer_user'
+											  AND postmeta.meta_value = '" . esc_sql( $customer_id ) . "'
+											  AND posts.post_type  = 'shop_order'
+											  AND posts.post_status IN $statuses_sql
 								)
-								AND meta_key = '_order_total'
-				 */
-				$sql = "SELECT SUM(meta2.meta_value)
-					FROM {$wpdb->posts} as posts
-					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
-					WHERE   meta.meta_key       = '_customer_user'
-					AND     meta.meta_value     = '" . esc_sql( $customer_id ) . "'
-					AND     posts.post_type     = 'shop_order'
-					AND     posts.post_status   IN $statuses_sql
-					AND     meta2.meta_key      = '_order_total'";
+								AND postmeta.meta_key = '_order_total'";
 			}
 
 			//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
