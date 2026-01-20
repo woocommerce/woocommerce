@@ -96,7 +96,7 @@ const EllipsisMenu = ( {
 		);
 	};
 
-	const handleMenuKeyDown = ( event: KeyboardEvent ) => {
+	const handleMenuKeyDown = ( event: globalThis.KeyboardEvent ) => {
 		// Prevent page scroll when navigating menu with arrow keys.
 		if ( event.key === 'ArrowUp' || event.key === 'ArrowDown' ) {
 			event.preventDefault();
