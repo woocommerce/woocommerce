@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Implement cache control headers for REST API responses

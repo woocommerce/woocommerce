@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1](https://github.com/woocommerce/email-editor/releases/tag/2.3.1) - 2026-01-16 
+
+-   Patch - Fix personalization tag attributes not being processed in email links [#62822]
+
 ## [2.3.0](https://github.com/woocommerce/email-editor/releases/tag/2.3.0) - 2026-01-05 
 
 -   Patch - Email Editor: prevent fatal type errors in Blocks_Width_Preprocessor [#62524]

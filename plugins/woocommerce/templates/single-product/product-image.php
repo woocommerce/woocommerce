@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.7.0
+ * @version 10.5.0
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
@@ -44,7 +44,10 @@ $wrapper_classes   = apply_filters(
 		if ( $post_thumbnail_id ) {
 			$html = wc_get_gallery_image_html( $post_thumbnail_id, true );
 		} else {
-			$wrapper_classname = $product->is_type( ProductType::VARIABLE ) && ! empty( $product->get_available_variations( 'image' ) ) ?
+			// Check for visible children with prices to determine if variation image swapping is possible.
+			// Using get_visible_children() + get_price() is more efficient than get_available_variations()
+			// as it uses cached IDs and synced price data rather than loading all variation objects.
+			$wrapper_classname = $product->is_type( ProductType::VARIABLE ) && ! empty( $product->get_visible_children() ) && '' !== $product->get_price() ?
 				'woocommerce-product-gallery__image woocommerce-product-gallery__image--placeholder' :
 				'woocommerce-product-gallery__image--placeholder';
 			$html              = sprintf( '<div class="%s">', esc_attr( $wrapper_classname ) );

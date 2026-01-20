@@ -39,6 +39,10 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// Set jetpack_activation_source option to prevent "Cannot use bool as array" error
+		// in Jetpack Connection Manager's apply_activation_source_to_args method.
+		update_option( 'jetpack_activation_source', array( '', '' ) );
+
 		// Enable the fraud protection feature.
 		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
 
@@ -121,6 +125,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 
 		// Clean up options.
 		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
+		delete_option( 'jetpack_activation_source' );
 
 		// Reset container.
 		wc_get_container()->reset_all_resolved();

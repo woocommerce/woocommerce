@@ -9,6 +9,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\Internal\FraudProtection\BlockedSessionNotice;
+use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 
@@ -581,6 +582,15 @@ class Checkout extends AbstractCartRoute {
 			),
 			true
 		);
+
+		// Track successful order placement (success or pending payment).
+		if ( in_array( $payment_result->get_status(), array( 'success', 'pending' ), true ) ) {
+			$container = wc_get_container();
+			if ( $container->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				$container->get( CheckoutEventTracker::class )
+					->track_order_placed( $this->order->get_id(), $this->order );
+			}
+		}
 
 		return $this->prepare_item_for_response(
 			(object) [
