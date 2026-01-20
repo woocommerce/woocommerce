@@ -438,7 +438,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
 				// TODO: verify if a well performing index being used
-				// TODO: verify if `COUNT(1)` makes any difference
 				$sql   = $wpdb->prepare(
 					'SELECT COUNT(id) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
 					WHERE customer_id = %d
@@ -447,7 +446,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				);
 				$count = $wpdb->get_var( $sql );
 			} else {
-				// TODO: verify if `COUNT(1)` makes any difference
 				$count = $wpdb->get_var(
 					"SELECT COUNT(*)
 				FROM $wpdb->posts as posts
