@@ -509,7 +509,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			} else {
 				$has_sql_modification_filter = has_filter( 'woocommerce_customer_get_total_spent_query' );
 				if ( $has_sql_modification_filter ) {
-					// For backward compatibility: external filters might rely onto the query structure,
+					// For backward compatibility: external filters might rely onto the query structure.
 					$sql = "SELECT SUM(meta2.meta_value)
 					FROM {$wpdb->posts} as posts
 					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
