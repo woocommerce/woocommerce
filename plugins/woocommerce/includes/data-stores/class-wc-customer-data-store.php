@@ -382,20 +382,16 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
-				// TODO: verify if a well performing index being used
 				$sql           = $wpdb->prepare(
-					'SELECT id FROM ' . OrdersTableDataStore::get_orders_table_name() . "
-					WHERE customer_id = %d
-					AND status in $order_statuses_sql
-					ORDER BY id DESC
-					LIMIT 1",
+					"SELECT id FROM %i WHERE customer_id = %d AND status IN $order_statuses_sql ORDER BY id DESC LIMIT 1",
+					OrdersTableDataStore::get_orders_table_name(),
 					$customer->get_id()
 				);
 				$last_order_id = $wpdb->get_var( $sql );
 			} else {
 				$last_order_id = $wpdb->get_var(
 					"SELECT posts.ID
-				FROM $wpdb->posts AS posts
+				FROM {$wpdb->posts} AS posts
 				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
 				WHERE meta.meta_key = '_customer_user'
 				AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
@@ -437,18 +433,16 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
-				// TODO: verify if a well performing index being used
 				$sql   = $wpdb->prepare(
-					'SELECT COUNT(id) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
-					WHERE customer_id = %d
-					AND status in $order_statuses_sql",
+					"SELECT COUNT(id) FROM %i WHERE customer_id = %d AND status IN $order_statuses_sql",
+					OrdersTableDataStore::get_orders_table_name(),
 					$customer->get_id()
 				);
 				$count = $wpdb->get_var( $sql );
 			} else {
 				$count = $wpdb->get_var(
 					"SELECT COUNT(*)
-				FROM $wpdb->posts as posts
+				FROM {$wpdb->posts} as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 				WHERE   meta.meta_key = '_customer_user'
 				AND     posts.post_type = 'shop_order'
@@ -486,11 +480,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
-				// TODO: verify if a well performing index being used
 				$sql = $wpdb->prepare(
-					'SELECT SUM(total_amount) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
-					WHERE customer_id = %d
-					AND status in $statuses_sql",
+					"SELECT SUM(total_amount) FROM %i WHERE customer_id = %d AND status IN $statuses_sql",
+					OrdersTableDataStore::get_orders_table_name(),
 					$customer->get_id()
 				);
 			} else {
@@ -509,7 +501,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 								AND meta_key = '_order_total'
 				 */
 				$sql = "SELECT SUM(meta2.meta_value)
-					FROM $wpdb->posts as posts
+					FROM {$wpdb->posts} as posts
 					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
 					WHERE   meta.meta_key       = '_customer_user'
