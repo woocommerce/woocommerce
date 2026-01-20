@@ -1,0 +1,147 @@
+{
+	"settings": {
+		"typography": {
+			"fontFamilies": [
+				{
+					"fontFace": [
+						{
+							"fontFamily": "\"Crimson Pro\"",
+							"fontStyle": "normal",
+							"fontWeight": "200 900",
+							"src": [
+								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-normal.ttf"
+							]
+						},
+						{
+							"fontFamily": "\"Crimson Pro\"",
+							"fontStyle": "italic",
+							"fontWeight": "200 900",
+							"src": [
+								"file:./assets/fonts/crimson-pro/crimson-pro-200-900-italic.ttf"
+							]
+						}
+					],
+					"fontFamily": "\"Crimson Pro\"",
+					"name": "Crimson Pro",
+					"slug": "crimson-pro"
+				}
+			],
+			"fontSizes": [
+				{
+					"fluid": {
+						"max": "0.875rem",
+						"min": "0.75rem"
+					},
+					"name": "Small",
+					"size": "0.875rem",
+					"slug": "small"
+				},
+				{
+					"name": "Medium",
+					"size": "1.06rem",
+					"slug": "medium"
+				},
+				{
+					"fluid": {
+						"max": "1.375rem",
+						"min": "1.125rem"
+					},
+					"name": "Large",
+					"size": "1.375rem",
+					"slug": "large"
+				},
+				{
+					"fluid": {
+						"max": "1.75rem",
+						"min": "1.375rem"
+					},
+					"name": "Extra Large",
+					"size": "1.75rem",
+					"slug": "x-large"
+				},
+				{
+					"fluid": {
+						"max": "2.125rem",
+						"min": "1.5rem"
+					},
+					"name": "2X Large",
+					"size": "2.125rem",
+					"slug": "xx-large"
+				}
+			]
+		}
+	},
+	"styles": {
+		"blocks": {
+			"core/post-title": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"core/site-title": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--crimson-pro)",
+					"fontSize": "var(--wp--preset--font-size--large)",
+					"fontStyle": "normal",
+					"fontWeight": "500",
+					"letterSpacing": "0.2em",
+					"textTransform": "uppercase"
+				}
+			}
+		},
+		"elements": {
+			"h1": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"h2": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"h3": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"h4": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"h5": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"h6": {
+				"typography": {
+					"fontStyle": "normal",
+					"fontWeight": "500"
+				}
+			},
+			"heading": {
+				"typography": {
+					"fontFamily": "var(--wp--preset--font-family--fraunces)"
+				}
+			}
+		},
+		"typography": {
+			"fontFamily": "var(--wp--preset--font-family--crimson-pro)",
+			"fontSize": "var(--wp--preset--font-size--medium)",
+			"fontStyle": "normal",
+			"fontWeight": "300",
+			"letterSpacing": "0.01em",
+			"lineHeight": "1.6"
+		}
+	},
+	"version": 3,
+	"title": "Crimson Pro"
+}
