@@ -5335,12 +5335,6 @@ parameters:
 			path: includes/admin/helper/class-wc-product-usage-notice.php
 
 		-
-			message: '#^Cannot access offset ''alert_url_mismatch'' on array\|true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/admin/helper/class-wc-woo-helper-connection.php
-
-		-
 			message: '#^PHPDoc tag @return with type int is incompatible with native type string\.$#'
 			identifier: return.phpDocType
 			count: 1
