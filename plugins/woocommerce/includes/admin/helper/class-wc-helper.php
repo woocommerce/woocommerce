@@ -1791,6 +1791,9 @@ class WC_Helper {
 	public static function fetch_helper_connection_info() {
 		$data = self::get_cached_connection_data();
 		if ( false !== $data ) {
+			if ( ! empty( $data['maybe_deleted_connection'] ) ) {
+				return new WP_Error( 'deleted_connection', 'Connection may have been deleted' );
+			}
 			return $data;
 		}
 
