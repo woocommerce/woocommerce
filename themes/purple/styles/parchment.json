@@ -1,0 +1,45 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#f1ede2",
+					"name": "Color 1",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#111111",
+					"name": "Color 2",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#36141d",
+					"name": "Color 3",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#47443d",
+					"name": "Color 4",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#fffbf0",
+					"name": "Color 5",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(17, 17, 17, 0.2)",
+					"name": "Color 6",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#001bcc",
+					"name": "Color 7",
+					"slug": "theme-7"
+				}
+			]
+		}
+	},
+	"version": 3,
+	"title": "Parchment"
+}
