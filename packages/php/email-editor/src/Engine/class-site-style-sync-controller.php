@@ -136,6 +136,19 @@ class Site_Style_Sync_Controller {
 			$this->site_theme->merge( WP_Theme_JSON_Resolver::get_theme_data() );
 			$this->site_theme->merge( WP_Theme_JSON_Resolver::get_user_data() );
 
+			/**
+			 * Filter the site theme data used for email style sync.
+			 *
+			 * This filter allows overriding the site theme used when syncing global styles
+			 * for the email editor. Useful for environments where theme data is not directly
+			 * accessible (e.g., wp.com Atomic and Jetpack sites).
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param WP_Theme_JSON $site_theme The site theme data.
+			 */
+			$this->site_theme = apply_filters( 'woocommerce_email_editor_site_theme', $this->site_theme );
+
 			if ( isset( $this->site_theme->get_raw_data()['styles'] ) ) {
 				$this->site_theme = WP_Theme_JSON::resolve_variables( $this->site_theme );
 			}
