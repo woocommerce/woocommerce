@@ -118,7 +118,6 @@ class BlocksSharedState {
 				'woocommerce',
 				array(
 					'cart'     => self::$blocks_shared_cart_state,
-					'nonce'    => wp_create_nonce( 'wc_store_api' ),
 					'noticeId' => '',
 					'restUrl'  => get_rest_url(),
 				)
