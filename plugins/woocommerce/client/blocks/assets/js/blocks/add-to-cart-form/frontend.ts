@@ -60,10 +60,19 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	inputElement.dispatchEvent( event );
 };
 
+// Note: this store is also used by the Add to Cart + Options block when
+// rendering third party product types that don't use block template parts.
 store( 'woocommerce/add-to-cart-form', {
-	state: {},
+	state: {
+		allowsIncrease: () => {
+			return true;
+		},
+		allowsDecrease: () => {
+			return true;
+		},
+	},
 	actions: {
-		addQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
+		increaseQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 			const inputData = getInputData( event );
 			if ( ! inputData ) {
 				return;
@@ -76,7 +85,7 @@ store( 'woocommerce/add-to-cart-form', {
 				dispatchChangeEvent( inputElement );
 			}
 		},
-		removeQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
+		decreaseQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 			const inputData = getInputData( event );
 			if ( ! inputData ) {
 				return;
