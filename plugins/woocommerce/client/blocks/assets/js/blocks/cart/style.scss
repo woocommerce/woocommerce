@@ -25,7 +25,7 @@
 	.wp-block-woocommerce-cart-order-summary-block {
 		border-bottom: 1px solid $universal-border-light;
 		margin-bottom: $gap;
-		@include font-regular-locked;
+		@include font-small-locked;
 
 		.wc-block-components-totals-item,
 		.wc-block-components-panel,
@@ -131,7 +131,7 @@
 
 		.wc-block-cart__totals-title {
 			@include text-heading();
-			@include font-regular-locked;
+			@include font-small-locked;
 			display: block;
 			font-weight: 500;
 			padding: $gap-smaller $gap $gap-smaller * 1.25 0;

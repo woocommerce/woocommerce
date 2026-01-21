@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix dashboard showing $0 revenue when browser timezone differs from store timezone
