@@ -138,6 +138,16 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'height="300"', $rendered );
 		$this->assertStringContainsString( 'height:300px;', $rendered );
 		$this->assertStringContainsString( 'width:400px;', $rendered );
+
+		// Verify alignment is also applied to the inner image cell for mobile responsiveness.
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag(
+			array(
+				'tag_name'   => 'td',
+				'class_name' => 'email-image-cell',
+			)
+		);
+		$this->assertEquals( 'center', $html->get_attribute( 'align' ) );
 	}
 
 	/**

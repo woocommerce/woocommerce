@@ -315,6 +315,7 @@ class Image extends Abstract_Block_Renderer {
 		$image_cell_attrs = array(
 			'class' => 'email-image-cell',
 			'style' => 'overflow: hidden;',
+			'align' => $align,
 		);
 
 		$image_content = '{image_content}';
