@@ -798,9 +798,16 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 						'settings' => array(
 							'color' => array(
 								'palette' => array(
+									'theme'  => array(
+										array(
+											'slug'  => 'theme-color',
+											'color' => '#00ff00',
+											'name'  => 'Theme Color',
+										),
+									),
 									'custom' => array(
 										array(
-											'slug'  => 'custom',
+											'slug'  => 'custom-color',
 											'color' => '#ff0000',
 											'name'  => 'Custom Color',
 										),
@@ -822,9 +829,19 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 
 		$synced_data = $this->controller->sync_site_styles();
 
+		// Find colors by slug.
+		$palette      = $synced_data['settings']['color']['palette'];
+		$theme_index  = array_search( 'theme-color', array_column( $palette, 'slug' ), true );
+		$custom_index = array_search( 'custom-color', array_column( $palette, 'slug' ), true );
+
 		// Verify filter was applied.
-		$this->assertEquals( '#ff0000', $synced_data['settings']['color']['palette'][0]['color'] );
-		$this->assertEquals( 'Custom Color', $synced_data['settings']['color']['palette'][0]['name'] );
+		$this->assertNotFalse( $theme_index, 'Theme color should exist in palette' );
+		$this->assertEquals( '#00ff00', $palette[ $theme_index ]['color'] );
+		$this->assertEquals( 'Theme Color', $palette[ $theme_index ]['name'] );
+
+		$this->assertNotFalse( $custom_index, 'Custom color should exist in palette' );
+		$this->assertEquals( '#ff0000', $palette[ $custom_index ]['color'] );
+		$this->assertEquals( 'Custom Color', $palette[ $custom_index ]['name'] );
 
 		// Clean up.
 		remove_all_filters( 'woocommerce_email_editor_site_theme' );
