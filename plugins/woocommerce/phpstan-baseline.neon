@@ -673,18 +673,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Constant WC_ROUNDING_PRECISION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Method WC_Abstract_Order\:\:add_order_item_totals_discount_row\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1177,12 +1165,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-payment-token.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-payment-token.php
-
-		-
 			message: '#^Method WC_Payment_Token\:\:set_default\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1239,12 +1221,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:update\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/abstracts/abstract-wc-product.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/abstracts/abstract-wc-product.php
 
@@ -2005,24 +1981,6 @@ parameters:
 			path: includes/admin/class-wc-admin-api-keys.php
 
 		-
-			message: '#^Constant WC_ADMIN_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
-			message: '#^Constant WC_ADMIN_DIST_JS_FOLDER not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 1
@@ -2509,30 +2467,6 @@ parameters:
 			path: includes/admin/class-wc-admin-duplicate-product.php
 
 		-
-			message: '#^Cannot call method get_global_unique_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot call method get_sku\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot call method read_meta_data\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Cannot clone non\-object variable \$child of type WC_Product\|false\|null\.$#'
-			identifier: clone.nonObject
-			count: 1
-			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
 			message: '#^Method WC_Admin_Duplicate_Product\:\:dupe_button\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2573,12 +2507,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/class-wc-admin-duplicate-product.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 3
-			path: includes/admin/class-wc-admin-exporters.php
 
 		-
 			message: '#^Method WC_Admin_Exporters\:\:add_to_menus\(\) has no return type specified\.$#'
@@ -2663,12 +2591,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/admin/class-wc-admin-help.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 3
-			path: includes/admin/class-wc-admin-importers.php
 
 		-
 			message: '#^Method WC_Admin_Importers\:\:add_to_menus\(\) has no return type specified\.$#'
@@ -3077,30 +2999,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/class-wc-admin-meta-boxes.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-notices.php
-
-		-
-			message: '#^Constant WC_NOTICE_MIN_PHP_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-notices.php
-
-		-
-			message: '#^Constant WC_NOTICE_MIN_WP_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-notices.php
-
-		-
-			message: '#^Constant WC_PHP_MIN_REQUIREMENTS_NOTICE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-notices.php
 
 		-
 			message: '#^Method WC_Admin_Notices\:\:add_custom_notice\(\) has no return type specified\.$#'
@@ -4333,12 +4231,6 @@ parameters:
 			path: includes/admin/class-wc-admin-taxonomies.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/class-wc-admin-taxonomies.php
-
-		-
 			message: '#^Method WC_Admin_Taxonomies\:\:add_category_fields\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4569,12 +4461,6 @@ parameters:
 		-
 			message: '#^Binary operation "\." between ''plugin\-install\.php…'' and array\|string results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/class-wc-admin.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/admin/class-wc-admin.php
 
@@ -5449,18 +5335,6 @@ parameters:
 			path: includes/admin/helper/class-wc-product-usage-notice.php
 
 		-
-			message: '#^Cannot access offset ''alert_url_mismatch'' on array\|true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/admin/helper/class-wc-woo-helper-connection.php
-
-		-
-			message: '#^PHPDoc tag @return with type bool is incompatible with native type string\.$#'
-			identifier: return.phpDocType
-			count: 1
-			path: includes/admin/helper/class-wc-woo-helper-connection.php
-
-		-
 			message: '#^PHPDoc tag @return with type int is incompatible with native type string\.$#'
 			identifier: return.phpDocType
 			count: 1
@@ -5505,12 +5379,6 @@ parameters:
 		-
 			message: '#^Binary operation "\." between string and non\-empty\-array\|non\-falsy\-string results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
 
@@ -7575,12 +7443,6 @@ parameters:
 		-
 			message: '#^Variable \$product_object might not be defined\.$#'
 			identifier: variable.undefined
-			count: 3
-			path: includes/admin/meta-boxes/views/html-product-data-advanced.php
-
-		-
-			message: '#^Variable \$product_object might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-product-data-attributes.php
 
@@ -7607,12 +7469,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-product-data-general.php
-
-		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/meta-boxes/views/html-product-data-inventory.php
 
 		-
 			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
@@ -7703,12 +7559,6 @@ parameters:
 			identifier: variable.undefined
 			count: 5
 			path: includes/admin/meta-boxes/views/html-product-data-shipping.php
-
-		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
-			count: 3
-			path: includes/admin/meta-boxes/views/html-product-data-variations.php
 
 		-
 			message: '#^Parameter \#1 \$json of function wc_esc_json expects string, string\|false given\.$#'
@@ -8833,12 +8683,6 @@ parameters:
 			path: includes/admin/reports/class-wc-report-taxes-by-date.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/settings/class-wc-settings-accounts.php
-
-		-
 			message: '#^Method WC_Settings_Accounts\:\:output\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8981,12 +8825,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/admin/settings/class-wc-settings-emails.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/settings/class-wc-settings-general.php
 
 		-
 			message: '#^Method WC_Settings_General\:\:color_picker\(\) has no return type specified\.$#'
@@ -9665,12 +9503,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/views/html-notice-custom.php
-
-		-
-			message: '#^Constant WC_PHP_MIN_REQUIREMENTS_NOTICE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/admin/views/html-notice-wp-php-minimum-requirements.php
 
 		-
 			message: '#^Variable \$msg might not be defined\.$#'
@@ -11895,7 +11727,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$link of method WC_Breadcrumb\:\:add_crumb\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
-			count: 7
+			count: 6
 			path: includes/class-wc-breadcrumb.php
 
 		-
@@ -12658,12 +12490,6 @@ parameters:
 			message: '#^Cannot call method get_attributes\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: includes/class-wc-cart.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 3
 			path: includes/class-wc-cart.php
 
 		-
@@ -14443,20 +14269,8 @@ parameters:
 			path: includes/class-wc-download-handler.php
 
 		-
-			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/class-wc-download-handler.php
-
-		-
 			message: '#^Cannot call method get_file_download_path\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-download-handler.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
 			count: 1
 			path: includes/class-wc-download-handler.php
 
@@ -15229,12 +15043,6 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 4
-			path: includes/class-wc-frontend-scripts.php
-
-		-
 			message: '#^Default value of the parameter \#5 \$in_footer \(array\<string, string\>\) of method WC_Frontend_Scripts\:\:enqueue_script\(\) is incompatible with type bool\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -15429,18 +15237,6 @@ parameters:
 		-
 			message: '#^Class WC_Post_Types referenced with incorrect case\: WC_Post_types\.$#'
 			identifier: class.nameCase
-			count: 2
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Constant WC_PLUGIN_BASENAME not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/class-wc-install.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
 			count: 2
 			path: includes/class-wc-install.php
 
@@ -15925,12 +15721,6 @@ parameters:
 			path: includes/class-wc-order-factory.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_flip expects array\<int\|string\>, array\<int\<min, \-1\>\|int\<1, max\>\|true\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-factory.php
-
-		-
 			message: '#^Parameter \#1 \$order_id of static method WC_Order_Factory\:\:get_class_name_for_order_id\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
 			identifier: argument.type
 			count: 1
@@ -16061,12 +15851,6 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: includes/class-wc-order-item-meta.php
-
-		-
-			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: includes/class-wc-order-item-product.php
 
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_downloads\(\)\.$#'
@@ -16203,12 +15987,6 @@ parameters:
 		-
 			message: '#^Method WC_Order_Item_Product\:\:set_variation_id\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order_Item_Product \$this  The order item product object\.\)\: Unexpected token "\$this", expected variable at offset 209 on line 7$#'
-			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order-item-product.php
 
@@ -17181,12 +16959,6 @@ parameters:
 		-
 			message: '#^Expected 4 @param tags, found 3\.$#'
 			identifier: paramTag.count
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Function as_next_scheduled_action not found\.$#'
-			identifier: function.notFound
 			count: 1
 			path: includes/class-wc-post-data.php
 
@@ -18373,12 +18145,6 @@ parameters:
 			path: includes/class-wc-regenerate-images.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/class-wc-regenerate-images.php
-
-		-
 			message: '#^Function remove_action invoked with 4 parameters, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -18730,18 +18496,6 @@ parameters:
 			message: '#^Constant COOKIEHASH not found\.$#'
 			identifier: constant.notFound
 			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Constant WC_SESSION_CACHE_GROUP not found\.$#'
-			identifier: constant.notFound
-			count: 6
 			path: includes/class-wc-session-handler.php
 
 		-
@@ -19993,12 +19747,6 @@ parameters:
 			path: includes/class-wc-template-loader.php
 
 		-
-			message: '#^Constant WC_TEMPLATE_DEBUG_MODE not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/class-wc-template-loader.php
-
-		-
 			message: '#^Method WC_Template_Loader\:\:add_support_for_product_page_gallery\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -20168,12 +19916,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Parameter \#1 \$block_name of static method Automattic\\WooCommerce\\Internal\\Utilities\\BlocksUtil\:\:get_blocks_from_widget_area\(\) expects array, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-tracker.php
@@ -20416,48 +20158,6 @@ parameters:
 			message: '#^Cannot access an offset on list\<string\>\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 143
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Constant WC_NOTICE_MIN_PHP_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Constant WC_NOTICE_MIN_WP_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Constant WC_PLUGIN_BASENAME not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Function as_next_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 6
 			path: includes/class-woocommerce.php
 
 		-
@@ -21013,12 +20713,6 @@ parameters:
 			path: includes/cli/class-wc-cli-update-command.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/cli/class-wc-cli-update-command.php
-
-		-
 			message: '#^Method WC_CLI_Update_Command\:\:register_commands\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -21029,24 +20723,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/cli/class-wc-cli-update-command.php
-
-		-
-			message: '#^Cannot access property \$post_content on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/customizer/class-wc-shop-customizer.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/customizer/class-wc-shop-customizer.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/customizer/class-wc-shop-customizer.php
 
 		-
 			message: '#^Method WC_Shop_Customizer\:\:add_checkout_section\(\) has no return type specified\.$#'
@@ -23809,12 +23485,6 @@ parameters:
 			path: includes/emails/class-wc-email.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/emails/class-wc-email.php
-
-		-
 			message: '#^Method WC_Email\:\:admin_actions\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -23957,12 +23627,6 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: includes/emails/class-wc-email.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/export/abstract-wc-csv-batch-exporter.php
 
 		-
 			message: '#^Method WC_CSV_Batch_Exporter\:\:export\(\) has no return type specified\.$#'
@@ -24124,12 +23788,6 @@ parameters:
 			message: '#^Cannot call method get_sku\(\) on int\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: includes/export/class-wc-product-csv-exporter.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
 			path: includes/export/class-wc-product-csv-exporter.php
 
 		-
@@ -24511,18 +24169,6 @@ parameters:
 			path: includes/gateways/cod/class-wc-gateway-cod.php
 
 		-
-			message: '#^Method WC_Gateway_Paypal_Buttons\:\:get_current_page_for_app_switch\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal-buttons.php
-
-		-
-			message: '#^Parameter \#1 \$post of function get_permalink expects int\|WP_Post, int\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal-buttons.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$ACK\.$#'
 			identifier: property.notFound
 			count: 1
@@ -24565,38 +24211,8 @@ parameters:
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
 		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:add_order_note\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_payment_method\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_transaction_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:set_transaction_id\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
 			message: '#^Cannot call method add_order_note\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
 
@@ -24662,30 +24278,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal\:\:can_refund_order\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal_Request\:\:capture_authorized_payment\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal_Request\:\:create_paypal_order\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal_Request\:\:get_request_url\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/class-wc-gateway-paypal.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method WC_Gateway_Paypal_API_Handler\:\:do_capture\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/class-wc-gateway-paypal.php
@@ -24997,20 +24589,8 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_amount\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
@@ -25033,61 +24613,13 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
-			message: '#^Method WC_Gateway_Paypal_Request\:\:get_paypal_order_custom_id\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
 			message: '#^Method WC_Gateway_Paypal_Request\:\:prepare_line_items\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
-			message: '#^Method WC_Gateway_Paypal_Request\:\:send_wpcom_proxy_request\(\) never returns array so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Request\:\:send_wpcom_proxy_request\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Request\:\:send_wpcom_proxy_request\(\) should return array\|null but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
 			message: '#^Parameter \#1 \$price of method WC_Gateway_Paypal_Request\:\:round\(\) expects float, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
-			message: '#^Parameter \#1 \$response of function wp_remote_retrieve_body expects array\|WP_Error, array\|null given\.$#'
-			identifier: argument.type
-			count: 5
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
-			message: '#^Parameter \#1 \$response of function wp_remote_retrieve_response_code expects array\|WP_Error, array\|null given\.$#'
-			identifier: argument.type
-			count: 5
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
-			message: '#^Parameter \#1 \$text of function esc_html expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
@@ -25099,12 +24631,6 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
 
 		-
-			message: '#^Parameter \#2 \$version of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
 			message: '#^Parameter \#3 \$amount of method WC_Gateway_Paypal_Request\:\:add_line_item\(\) expects float, string given\.$#'
 			identifier: argument.type
 			count: 4
@@ -25112,12 +24638,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
-
-		-
-			message: '#^Parameter \#4 \$body of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects array\|string\|null, string\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php
@@ -25165,134 +24685,14 @@ parameters:
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-response.php
 
 		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:get_transact_account_data\(\) should return array\|null but returns array\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:send_transact_api_request\(\) never returns array so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:send_transact_api_request\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:send_transact_api_request\(\) should return array\|null but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Transact_Account_Manager\:\:update_transact_account_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#1 \$cache_key of method WC_Gateway_Paypal_Transact_Account_Manager\:\:get_transact_account_from_cache\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#1 \$cache_key of method WC_Gateway_Paypal_Transact_Account_Manager\:\:update_transact_account_cache\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#1 \$response of function wp_remote_retrieve_body expects array\|WP_Error, array\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#1 \$response of function wp_remote_retrieve_response_code expects array\|WP_Error, array\|null given\.$#'
-			identifier: argument.type
-			count: 4
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#2 \$account_data of method WC_Gateway_Paypal_Transact_Account_Manager\:\:update_transact_account_cache\(\) expects array, array\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#2 \$account_data of method WC_Gateway_Paypal_Transact_Account_Manager\:\:update_transact_account_cache\(\) expects array, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#2 \$version of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Parameter \#4 \$body of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects array\|string\|null, string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-transact-account-manager.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_checkout_order_approved\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_payment_authorization_created\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_payment_capture_completed\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_payment_capture_pending\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
-			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_webhook\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
 			message: '#^Method WC_Gateway_Paypal_Webhook_Handler\:\:process_webhook\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
 			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
 
 		-
-			message: '#^Parameter \#2 \$action_url of method WC_Gateway_Paypal_Request\:\:authorize_or_capture_payment\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php
-
-		-
 			message: '#^Call to an undefined method object\:\:set_variation\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/import/abstract-wc-product-importer.php
 
@@ -25348,12 +24748,6 @@ parameters:
 			message: '#^Call to function is_wp_error\(\) with mixed will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 3
-			path: includes/import/class-wc-product-csv-importer.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
 			path: includes/import/class-wc-product-csv-importer.php
 
 		-
@@ -25480,12 +24874,6 @@ parameters:
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
 			count: 1
-			path: includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 2
 			path: includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation.php
 
 		-
@@ -27691,12 +27079,6 @@ parameters:
 			path: includes/payment-tokens/class-wc-payment-token-echeck.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/product-usage/class-wc-product-usage.php
-
-		-
 			message: '#^Method WC_Product_Usage\:\:includes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -27707,48 +27089,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/product-usage/class-wc-product-usage.php
-
-		-
-			message: '#^Function as_get_scheduled_actions not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_next_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_schedule_cron_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_unschedule_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: includes/queue/class-wc-action-queue.php
 
 		-
 			message: '#^Method WC_Action_Queue\:\:cancel\(\) has no return type specified\.$#'
@@ -27861,12 +27201,6 @@ parameters:
 		-
 			message: '#^Call to static method update_db_version\(\) on an unknown class Installer\.$#'
 			identifier: class.notFound
-			count: 2
-			path: includes/react-admin/wc-admin-update-functions.php
-
-		-
-			message: '#^Function as_unschedule_action not found\.$#'
-			identifier: function.notFound
 			count: 2
 			path: includes/react-admin/wc-admin-update-functions.php
 
@@ -29851,12 +29185,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
 
 		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
-
-		-
 			message: '#^Dead catch \- WC_REST_Exception is already caught above\.$#'
 			identifier: catch.alreadyCaught
 			count: 2
@@ -30088,12 +29416,6 @@ parameters:
 			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
-
-		-
-			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_options\(\) expects array, array\<mixed\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
 
 		-
@@ -31149,12 +30471,6 @@ parameters:
 		-
 			message: '#^Class WC_Order_Item referenced with incorrect case\: WC_Order_item\.$#'
 			identifier: class.nameCase
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
 
@@ -32221,12 +31537,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
 			message: '#^Method WC_REST_Products_V2_Controller\:\:batch_items\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -32398,12 +31708,6 @@ parameters:
 			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_options\(\) expects array, array\<mixed\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
@@ -33877,12 +33181,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller.php
-
-		-
 			message: '#^Method WC_REST_Orders_Controller\:\:calculate_coupons\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -33963,12 +33261,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:update_status\(\)\.$#'
 			identifier: method.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 2
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
 
@@ -34069,12 +33361,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 3
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-standard-controller.php
-
-		-
 			message: '#^Method WC_REST_Paypal_Standard_Controller\:\:process_shipping_callback\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -34095,12 +33381,6 @@ parameters:
 		-
 			message: '#^Class Automattic\\Jetpack\\Connection\\Rest_Authentication referenced with incorrect case\: Automattic\\Jetpack\\Connection\\REST_Authentication\.$#'
 			identifier: class.nameCase
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-webhooks-controller.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-webhooks-controller.php
 
@@ -35482,12 +34762,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
 		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
 			message: '#^Method WC_Product\:\:has_options\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -35647,12 +34921,6 @@ parameters:
 			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_options\(\) expects array, array\<mixed\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
 		-
@@ -36412,20 +35680,8 @@ parameters:
 			path: includes/rest-api/Package.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/rest-api/Package.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\RestApi\\Package\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/rest-api/Package.php
-
-		-
-			message: '#^PHPDoc tag @var for constant Automattic\\WooCommerce\\RestApi\\Package\:\:VERSION with type string is not subtype of value mixed\.$#'
-			identifier: classConstant.phpDocType
 			count: 1
 			path: includes/rest-api/Package.php
 
@@ -36556,12 +35812,6 @@ parameters:
 			path: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php
-
-		-
 			message: '#^Method WC_Shipping_Free_Shipping\:\:calculate_shipping\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -36618,12 +35868,6 @@ parameters:
 		-
 			message: '#^Binary operation "/" between non\-empty\-string and 100 results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: includes/shipping/legacy-flat-rate/class-wc-shipping-legacy-flat-rate.php
-
-		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: includes/shipping/legacy-flat-rate/class-wc-shipping-legacy-flat-rate.php
 
@@ -37480,12 +36724,6 @@ parameters:
 			path: includes/tracks/class-wc-site-tracking.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 12
-			path: includes/tracks/class-wc-site-tracking.php
-
-		-
 			message: '#^Method WC_Site_Tracking\:\:add_enable_tracking_function\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -37624,12 +36862,6 @@ parameters:
 			path: includes/tracks/class-wc-tracks.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/tracks/class-wc-tracks.php
-
-		-
 			message: '#^Method WC_Tracks\:\:track_woocommerce_allow_tracking_toggled\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -37736,12 +36968,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/tracks/events/class-wc-coupon-tracking.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/tracks/events/class-wc-coupons-tracking.php
 
 		-
 			message: '#^Method WC_Coupons_Tracking\:\:init\(\) has no return type specified\.$#'
@@ -38122,18 +37348,6 @@ parameters:
 			path: includes/tracks/events/class-wc-products-tracking.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/tracks/events/class-wc-products-tracking.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/tracks/events/class-wc-products-tracking.php
-
-		-
 			message: '#^Method WC_Products_Tracking\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -38252,12 +37466,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/tracks/events/class-wc-settings-tracking.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/tracks/events/class-wc-status-tracking.php
 
 		-
 			message: '#^Method WC_Status_Tracking\:\:init\(\) has no return type specified\.$#'
@@ -38530,12 +37738,6 @@ parameters:
 			path: includes/wc-attribute-functions.php
 
 		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/wc-attribute-functions.php
-
-		-
 			message: '#^Default value of the parameter \#2 \$product \(string\) of function wc_attribute_label\(\) is incompatible with type WC_Product\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -38767,36 +37969,6 @@ parameters:
 			message: '#^Constant COOKIEPATH not found\.$#'
 			identifier: constant.notFound
 			count: 1
-			path: includes/wc-core-functions.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 19
-			path: includes/wc-core-functions.php
-
-		-
-			message: '#^Constant WC_DISCOUNT_ROUNDING_MODE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/wc-core-functions.php
-
-		-
-			message: '#^Constant WC_ROUNDING_PRECISION not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: includes/wc-core-functions.php
-
-		-
-			message: '#^Constant WC_TAX_ROUNDING_MODE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/wc-core-functions.php
-
-		-
-			message: '#^Constant WC_TEMPLATE_DEBUG_MODE not found\.$#'
-			identifier: constant.notFound
-			count: 3
 			path: includes/wc-core-functions.php
 
 		-
@@ -40600,12 +39772,6 @@ parameters:
 			path: includes/wc-formatting-functions.php
 
 		-
-			message: '#^Constant WC_TAX_ROUNDING_MODE not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/wc-formatting-functions.php
-
-		-
 			message: '#^Function wc_format_decimal\(\) should return string but returns array\<string\>\|string\|null\.$#'
 			identifier: return.type
 			count: 1
@@ -41288,12 +40454,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: includes/wc-order-item-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Logger_Interface\:\:clear\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/wc-order-step-logger-functions.php
 
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_product_id\(\)\.$#'
@@ -43018,12 +42178,6 @@ parameters:
 			path: includes/wc-update-functions.php
 
 		-
-			message: '#^Call to function method_exists\(\) with ''ActionScheduler…'' and ''mark_migration…'' will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
 			message: '#^Cannot access offset 0 on non\-empty\-array\|true\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -43062,12 +42216,6 @@ parameters:
 		-
 			message: '#^Cannot call method remove_cap\(\) on WP_Role\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
 			count: 1
 			path: includes/wc-update-functions.php
 
@@ -43834,12 +42982,6 @@ parameters:
 			path: includes/wccom-site/class-wc-wccom-site.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 19
-			path: includes/wccom-site/class-wc-wccom-site.php
-
-		-
 			message: '#^Method WC_WCCOM_Site\:\:authenticate_wccom\(\) should return int\|false but returns WP_User\.$#'
 			identifier: return.type
 			count: 1
@@ -44362,12 +43504,6 @@ parameters:
 			path: includes/widgets/class-wc-widget-brand-nav.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/widgets/class-wc-widget-brand-nav.php
-
-		-
 			message: '#^Method WC_Widget_Brand_Nav\:\:filter_out_cats\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -44476,12 +43612,6 @@ parameters:
 			path: includes/widgets/class-wc-widget-layered-nav.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/widgets/class-wc-widget-layered-nav.php
-
-		-
 			message: '#^Method WC_Widget_Layered_Nav\:\:init_settings\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -44564,12 +43694,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: includes/widgets/class-wc-widget-price-filter.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: includes/widgets/class-wc-widget-product-categories.php
 
 		-
 			message: '#^Method WC_Widget_Product_Categories\:\:widget\(\) has no return type specified\.$#'
@@ -45018,12 +44142,6 @@ parameters:
 		-
 			message: '#^Call to method set_data\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Init.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Admin/API/Init.php
 
@@ -46360,12 +45478,6 @@ parameters:
 			path: src/Admin/API/OnboardingProfile.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Admin/API/OnboardingProfile.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\OnboardingProfile\:\:core_profiler_step_complete\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -46548,18 +45660,6 @@ parameters:
 		-
 			message: '#^Cannot call method set_status\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 4
-			path: src/Admin/API/OnboardingTasks.php
-
-		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Admin/API/OnboardingTasks.php
 
@@ -47308,12 +46408,6 @@ parameters:
 			path: src/Admin/API/Plugins.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 5
-			path: src/Admin/API/Plugins.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Plugins\:\:activate_plugins\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -47388,12 +46482,6 @@ parameters:
 		-
 			message: '#^Cannot access offset non\-falsy\-string on object\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
@@ -47479,12 +46567,6 @@ parameters:
 			message: '#^Access to offset ''slug'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 2
-			path: src/Admin/API/ProductAttributes.php
-
-		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
-			count: 1
 			path: src/Admin/API/ProductAttributes.php
 
 		-
@@ -53542,12 +52624,6 @@ parameters:
 			path: src/Admin/Features/Blueprint/RestApi.php
 
 		-
-			message: '#^Constant WC_ADMIN_APP not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Admin/Features/Features.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Features\:\:add_admin_body_classes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53590,7 +52666,7 @@ parameters:
 			path: src/Admin/Features/Features.php
 
 		-
-			message: '#^Parameter \#3 \$need_translation of static method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminAssets\:\:register_script\(\) expects bool, array\<int, mixed\> given\.$#'
+			message: '#^Parameter \#3 \$need_translation of static method Automattic\\WooCommerce\\Internal\\Admin\\WCAdminAssets\:\:register_script\(\) expects bool, array\<int, string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Admin/Features/Features.php
@@ -53672,12 +52748,6 @@ parameters:
 			identifier: isset.property
 			count: 1
 			path: src/Admin/Features/LaunchYourStore.php
-
-		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Admin/Features/MarketingRecommendations/DefaultMarketingRecommendations.php
 
 		-
 			message: '#^Argument of an invalid type array\|null supplied for foreach, only iterables are supported\.$#'
@@ -54328,12 +53398,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/Tasks/WooCommercePayments.php
 
 		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
-			count: 48
-			path: src/Admin/Features/PaymentGatewaySuggestions/DefaultPaymentGateways.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\PaymentGatewaySuggestions\\DefaultPaymentGateways\:\:get_default_recommendation_priority\(\) should return int but returns null\.$#'
 			identifier: return.type
 			count: 1
@@ -54516,12 +53580,6 @@ parameters:
 		-
 			message: '#^Class Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init referenced with incorrect case\: Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\INIT\.$#'
 			identifier: class.nameCase
-			count: 1
-			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
 
@@ -54856,18 +53914,6 @@ parameters:
 			path: src/Admin/Features/Settings/Init.php
 
 		-
-			message: '#^Constant WC_ADMIN_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Admin/Features/Settings/Init.php
-
-		-
-			message: '#^Constant WC_ADMIN_DIST_JS_FOLDER not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Admin/Features/Settings/Init.php
-
-		-
 			message: '#^Constant WPINC not found\.$#'
 			identifier: constant.notFound
 			count: 1
@@ -54991,12 +54037,6 @@ parameters:
 			message: '#^Cannot call method isSetupComplete\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: src/Admin/Marketing/InstalledExtensions.php
-
-		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
-			count: 16
 			path: src/Admin/Marketing/InstalledExtensions.php
 
 		-
@@ -55678,12 +54718,6 @@ parameters:
 			path: src/Admin/PageController.php
 
 		-
-			message: '#^Constant WC_ADMIN_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Admin/PageController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\PageController\:\:connect_page\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -55834,12 +54868,6 @@ parameters:
 			path: src/Admin/PluginsHelper.php
 
 		-
-			message: '#^Call to method get_status\(\) on an unknown class ActionScheduler_DBStore\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/PluginsHelper.php
-
-		-
 			message: '#^Cannot access property \$download_link on array\|object\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -55854,12 +54882,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$version on array\|object\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Admin/PluginsHelper.php
-
-		-
-			message: '#^Instantiated class ActionScheduler_DBStore not found\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/PluginsHelper.php
 
@@ -56227,12 +55249,6 @@ parameters:
 			message: '#^Call to method error\(\) on an unknown class Automattic\\WooCommerce\\Admin\\RemoteSpecs\\WC_Logger\.$#'
 			identifier: class.notFound
 			count: 6
-			path: src/Admin/RemoteSpecs/DataSourcePoller.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
 			path: src/Admin/RemoteSpecs/DataSourcePoller.php
 
 		-
@@ -56746,12 +55762,6 @@ parameters:
 			path: src/Admin/RemoteSpecs/RuleProcessors/StoredStateSetupForProducts.php
 
 		-
-			message: '#^Function as_enqueue_async_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Admin/RemoteSpecs/RuleProcessors/StoredStateSetupForProducts.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\RemoteSpecs\\RuleProcessors\\StoredStateSetupForProducts\:\:admin_init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -56932,12 +55942,6 @@ parameters:
 			path: src/Admin/RemoteSpecs/RuleProcessors/WCAdminActiveForRuleProcessor.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Admin/ReportCSVEmail.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\ReportCSVEmail\:\:init_form_fields\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -57000,12 +56004,6 @@ parameters:
 		-
 			message: '#^Cannot access offset mixed on array\|object\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Admin/ReportCSVExporter.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Admin/ReportCSVExporter.php
 
@@ -57082,12 +56080,6 @@ parameters:
 			path: src/Admin/ReportExporter.php
 
 		-
-			message: '#^Call to method get_schedule\(\) on an unknown class ActionScheduler_Action\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/ReportExporter.php
-
-		-
 			message: '#^Call to method schedule_single\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 2
@@ -57097,18 +56089,6 @@ parameters:
 			message: '#^Call to method search\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 2
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Call to static method store\(\) on an unknown class ActionScheduler\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Admin/ReportExporter.php
 
 		-
@@ -57228,12 +56208,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, Automattic\\WooCommerce\\Admin\\Schedulers\\DateTime\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/ReportExporter.php
-
-		-
-			message: '#^Parameter \$action of method Automattic\\WooCommerce\\Admin\\ReportExporter\:\:get_next_action_time\(\) has invalid type ActionScheduler_Action\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/ReportExporter.php
 
@@ -57574,12 +56548,6 @@ parameters:
 			path: src/Blocks/AssetsController.php
 
 		-
-			message: '#^Constant WOOCOMMERCE_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Blocks/BlockPatterns.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:load_pattern_content\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -57588,12 +56556,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockPatterns\:\:set_pattern_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockPatterns.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockPatterns.php
 
@@ -58186,12 +57148,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartForm.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -58222,18 +57178,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(mixed string\|boolean The template part path if it exists\)\: Unexpected token "string", expected variable at offset 121 on line 5$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
 			message: '#^Parameter \#1 \$amount of function wc_stock_amount expects float\|int, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -58255,12 +57199,6 @@ parameters:
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
 			identifier: argument.type
 			count: 4
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\AddToCartWithOptions\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
@@ -58406,18 +57344,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
-
-		-
-			message: '#^Cannot call method get_description\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on array\|WC_Product_Variation\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationDescription.php
 
 		-
 			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\VariationDescription\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
@@ -59932,12 +58858,6 @@ parameters:
 			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\PaymentMethodIcons\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -61300,12 +60220,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductPrice.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductPrice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -62242,12 +61156,6 @@ parameters:
 			path: src/Blocks/BlockTypesController.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Blocks/BlockTypesController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:delete_product_transients\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -62584,12 +61492,6 @@ parameters:
 			path: src/Blocks/Domain/Services/DraftOrders.php
 
 		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Blocks/Domain/Services/DraftOrders.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\DraftOrders\:\:assert_order_results\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -62628,12 +61530,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\DraftOrders\:\:unschedule_cronjobs\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Domain/Services/DraftOrders.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/Domain/Services/DraftOrders.php
 
@@ -62878,18 +61774,6 @@ parameters:
 			path: src/Blocks/Patterns/PTKPatternsStore.php
 
 		-
-			message: '#^Function as_has_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Blocks/Patterns/PTKPatternsStore.php
-
-		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Blocks/Patterns/PTKPatternsStore.php
-
-		-
 			message: '#^Parameter \#1 \$input of function array_filter expects array, list\<string\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -62948,12 +61832,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Blocks/Payments/Integrations/Cheque.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Blocks/Payments/Integrations/PayPal.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Payments\\Integrations\\PayPal\:\:initialize\(\) has no return type specified\.$#'
@@ -63820,12 +62698,6 @@ parameters:
 			path: src/Caches/OrderCountCache.php
 
 		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Caches/OrderCountCacheService.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCacheService\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -64276,6 +63148,78 @@ parameters:
 			path: src/Gateways/PayPal/AddressRequirements.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Buttons\:\:get_current_page_for_app_switch\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Gateways/PayPal/Buttons.php
+
+		-
+			message: '#^Parameter \#1 \$post of function get_permalink expects int\|WP_Post, int\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/Buttons.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Request\:\:send_wpcom_proxy_request\(\) never returns array so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Gateways/PayPal/Request.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\Request\:\:send_wpcom_proxy_request\(\) should return array\|WP_Error but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Gateways/PayPal/Request.php
+
+		-
+			message: '#^Parameter \#4 \$body of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects array\|string\|null, string\|false\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/Request.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:send_transact_api_request\(\) never returns array so it can be removed from the return type\.$#'
+			identifier: return.unusedType
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:send_transact_api_request\(\) should return array\|WP_Error but returns Automattic\\Jetpack\\Connection\\_WP_Remote_Response_Array\|WP_Error\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$cache_key with type string\|null is not subtype of native type string\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Parameter \#1 \$cache_key of method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:get_transact_account_from_cache\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Parameter \#1 \$cache_key of method Automattic\\WooCommerce\\Gateways\\PayPal\\TransactAccountManager\:\:update_transact_account_cache\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Parameter \#4 \$body of static method Automattic\\Jetpack\\Connection\\Client\:\:wpcom_json_api_request_as_blog\(\) expects array\|string\|null, string\|false\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Gateways/PayPal/TransactAccountManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Gateways\\PayPal\\WebhookHandler\:\:process_webhook\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Gateways/PayPal/WebhookHandler.php
+
+		-
 			message: '#^Access to an undefined property object\:\:\$payload\.$#'
 			identifier: property.notFound
 			count: 2
@@ -64378,40 +63322,10 @@ parameters:
 			path: src/Internal/Admin/ActivityPanels.php
 
 		-
-			message: '#^Action callback returns bool but should not return anything\.$#'
-			identifier: return.void
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticCommerceIntegration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticCommerceIntegration\:\:admin_options\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticCommerceIntegration.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticCommerceIntegration\:\:process_admin_options\(\) should return bool but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticCommerceIntegration.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticController\:\:on_init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Agentic/AgenticController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Agentic\\AgenticSettingsPage\:\:save_settings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Agentic/AgenticSettingsPage.php
-
-		-
-			message: '#^Parameter \#1 \$url of function esc_url expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Internal/Admin/Agentic/AgenticSettingsPage.php
 
 		-
 			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\.$#'
@@ -64984,12 +63898,6 @@ parameters:
 			path: src/Internal/Admin/CustomerEffortScoreTracks.php
 
 		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Internal/Admin/CustomerEffortScoreTracks.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\CustomerEffortScoreTracks\:\:add_script_track_product_categories\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65410,18 +64318,6 @@ parameters:
 			path: src/Internal/Admin/FeaturePlugin.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Internal/Admin/FeaturePlugin.php
-
-		-
-			message: '#^Constant WC_ADMIN_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 6
-			path: src/Internal/Admin/FeaturePlugin.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\FeaturePlugin\:\:define\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65464,6 +64360,42 @@ parameters:
 			path: src/Internal/Admin/FeaturePlugin.php
 
 		-
+			message: '#^Path in require_once\(\) "/includes/react\-admin/class\-experimental\-abtest\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: src/Internal/Admin/FeaturePlugin.php
+
+		-
+			message: '#^Path in require_once\(\) "/includes/react\-admin/core\-functions\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: src/Internal/Admin/FeaturePlugin.php
+
+		-
+			message: '#^Path in require_once\(\) "/includes/react\-admin/feature\-config\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: src/Internal/Admin/FeaturePlugin.php
+
+		-
+			message: '#^Path in require_once\(\) "/includes/react\-admin/page\-controller\-functions\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: src/Internal/Admin/FeaturePlugin.php
+
+		-
+			message: '#^Path in require_once\(\) "/includes/react\-admin/wc\-admin\-update\-functions\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: src/Internal/Admin/FeaturePlugin.php
+
+		-
+			message: '#^Path in require_once\(\) "/src/Admin/Notes/DeprecatedNotes\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: src/Internal/Admin/FeaturePlugin.php
+
+		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
 			count: 1
@@ -65478,18 +64410,6 @@ parameters:
 		-
 			message: '#^Call to function method_exists\(\) with ''WC_Admin_Menus'' and ''can_view…'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Homescreen.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Internal/Admin/Homescreen.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Internal/Admin/Homescreen.php
 
@@ -65544,18 +64464,6 @@ parameters:
 		-
 			message: '#^Call to static method get_active_plugins\(\) on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\Plugins\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Loader.php
-
-		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Internal/Admin/Loader.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Internal/Admin/Loader.php
 
@@ -66204,12 +65112,6 @@ parameters:
 		-
 			message: '#^Cannot call method set_status\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Notes/MarketingJetpack.php
-
-		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
@@ -66890,12 +65792,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Onboarding/OnboardingProfile.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Internal/Admin/Onboarding/OnboardingSetupWizard.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingSetupWizard\:\:add_loading_classes\(\) should return array but returns bool\|string\.$#'
@@ -68020,12 +66916,6 @@ parameters:
 			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
 
 		-
-			message: '#^Parameter \#1 \$comments of function update_comment_cache expects array\<WP_Comment\>, array\<int\|WP_Comment\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
-
-		-
 			message: '#^Parameter \#1 \$number of function number_format_i18n expects float, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -68059,12 +66949,6 @@ parameters:
 			message: '#^Parameter \#3 \$number of function _n expects int, int\|string given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
-
-		-
-			message: '#^Property WP_List_Table\:\:\$items \(array\) does not accept array\<int\|WP_Comment\>\|int\.$#'
-			identifier: assign.propertyType
-			count: 1
 			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
 
 		-
@@ -68254,12 +67138,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
-			message: '#^Call to method get_schedule\(\) on an unknown class ActionScheduler_Action\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
 			message: '#^Call to method schedule_single\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 2
@@ -68269,18 +67147,6 @@ parameters:
 			message: '#^Call to method search\(\) on an unknown class Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 4
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
-			message: '#^Call to static method store\(\) on an unknown class ActionScheduler\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
@@ -68410,12 +67276,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/ImportScheduler.php
 
 		-
-			message: '#^Parameter \$action of method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:get_next_action_time\(\) has invalid type ActionScheduler_Action\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/ImportScheduler.php
-
-		-
 			message: '#^Parameter \$queue of method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:set_queue\(\) has invalid type Automattic\\WooCommerce\\Admin\\Schedulers\\WC_Queue_Interface\.$#'
 			identifier: class.notFound
 			count: 1
@@ -68464,18 +67324,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
 
 		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\OrdersScheduler\:\:get_items\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -68500,12 +67348,6 @@ parameters:
 			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
 
 		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Schedulers/OrdersScheduler.php
-
-		-
 			message: '#^Argument of an invalid type array\|WP_Error supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 2
@@ -68514,18 +67356,6 @@ parameters:
 		-
 			message: '#^Cannot assign offset ''wcVersion'' to string\.$#'
 			identifier: offsetAssign.dimType
-			count: 1
-			path: src/Internal/Admin/Settings.php
-
-		-
-			message: '#^Constant WC_ADMIN_IMAGES_FOLDER_URL not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Internal/Admin/Settings.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Internal/Admin/Settings.php
 
@@ -69376,18 +68206,6 @@ parameters:
 			path: src/Internal/Admin/SystemStatusReport.php
 
 		-
-			message: '#^Constant WC_ADMIN_APP not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Internal/Admin/Translations.php
-
-		-
-			message: '#^Constant WC_ADMIN_DIST_JS_FOLDER not found\.$#'
-			identifier: constant.notFound
-			count: 4
-			path: src/Internal/Admin/Translations.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Translations\:\:build_and_save_translations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -69445,42 +68263,6 @@ parameters:
 			message: '#^Access to property \$ver on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\WP_Dependency\.$#'
 			identifier: class.notFound
 			count: 2
-			path: src/Internal/Admin/WCAdminAssets.php
-
-		-
-			message: '#^Constant WC_ADMIN_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 6
-			path: src/Internal/Admin/WCAdminAssets.php
-
-		-
-			message: '#^Constant WC_ADMIN_APP not found\.$#'
-			identifier: constant.notFound
-			count: 11
-			path: src/Internal/Admin/WCAdminAssets.php
-
-		-
-			message: '#^Constant WC_ADMIN_DIST_CSS_FOLDER not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Internal/Admin/WCAdminAssets.php
-
-		-
-			message: '#^Constant WC_ADMIN_DIST_JS_FOLDER not found\.$#'
-			identifier: constant.notFound
-			count: 5
-			path: src/Internal/Admin/WCAdminAssets.php
-
-		-
-			message: '#^Constant WC_ADMIN_PLUGIN_FILE not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Internal/Admin/WCAdminAssets.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
-			count: 1
 			path: src/Internal/Admin/WCAdminAssets.php
 
 		-
@@ -69557,6 +68339,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$haystack of function str_starts_with expects string\|null, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/Admin/WCAdminAssets.php
+
+		-
+			message: '#^Parameter \#3 \$args of function wc_caught_exception expects array, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/WCAdminAssets.php
@@ -69694,30 +68482,6 @@ parameters:
 			path: src/Internal/BatchProcessing/BatchProcessingController.php
 
 		-
-			message: '#^Function as_has_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 2
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
-			count: 2
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
-			message: '#^Function as_unschedule_all_actions not found\.$#'
-			identifier: function.notFound
-			count: 3
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, ''as_has_scheduled…''\|''as_next_scheduled…'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
 			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Container\:\:get\(\) expects class\-string\<object\>, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -69746,12 +68510,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: src/Internal/BatchProcessing/BatchProcessingController.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 5
-			path: src/Internal/Brands.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Brands\:\:init\(\) has no return type specified\.$#'
@@ -70822,12 +69580,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
 
 		-
-			message: '#^Function as_schedule_recurring_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/DataSynchronizer.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\DataSynchronizer\:\:cleanup_synchronization_state\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -70996,12 +69748,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^@param WC_Abstract_Order \$product does not accept actual type of parameter\: WC_Data\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Abstract_Order\.$#'
 			identifier: parameter.phpDocType
 			count: 4
@@ -71044,12 +69790,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data\:\:set_cogs_total_value\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:update_user_by_order_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -71074,37 +69814,13 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot access offset 0 on stdClass\|true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot access property \$key on false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot access property \$meta_key on object\|true\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot access property \$meta_value on false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot access property \$meta_value on object\|true\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot access property \$value on false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -71377,12 +70093,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$array_arg of function current expects array\|object, stdClass\|true given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$function of function call_user_func_array expects callable\(\)\: mixed, array\{Abstract_WC_Order_Data_Store_CPT, non\-falsy\-string\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -71479,19 +70189,7 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:delete_meta\(\) expects stdClass, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:update_meta\(\) expects stdClass, WC_Meta_Data given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:update_meta\(\) expects stdClass, false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -71797,12 +70495,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
 
 		-
-			message: '#^Cannot access offset 0 on stdClass\|true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableRefundDataStore\:\:create\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -71995,12 +70687,6 @@ parameters:
 			path: src/Internal/DependencyManagement/RuntimeContainer.php
 
 		-
-			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/DownloadPermissionsAdjuster.php
-
-		-
 			message: '#^Call to method create_from_data\(\) on an unknown class Automattic\\WooCommerce\\Internal\\WC_Data_Store\.$#'
 			identifier: class.notFound
 			count: 1
@@ -72169,18 +70855,6 @@ parameters:
 			path: src/Internal/EmailEditor/Package.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Internal/EmailEditor/PageRenderer.php
-
-		-
-			message: '#^Constant WC_ADMIN_DIST_JS_FOLDER not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Internal/EmailEditor/PageRenderer.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\PageRenderer\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -72345,12 +71019,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$id on string\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: src/Internal/Features/FeaturesController.php
-
-		-
-			message: '#^Constant WC_VERSION not found\.$#'
-			identifier: constant.notFound
 			count: 1
 			path: src/Internal/Features/FeaturesController.php
 
@@ -73285,18 +71953,6 @@ parameters:
 			path: src/Internal/Logging/RemoteLogger.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Internal/Logging/RemoteLogger.php
-
-		-
-			message: '#^Constant WC_PLUGIN_BASENAME not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Internal/Logging/RemoteLogger.php
-
-		-
 			message: '#^Constant WPINC not found\.$#'
 			identifier: constant.notFound
 			count: 3
@@ -73349,12 +72005,6 @@ parameters:
 			identifier: argument.type
 			count: 4
 			path: src/Internal/Logging/RemoteLogger.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Internal/Logging/SafeGlobalFunctionProxy.php
 
 		-
 			message: '#^Constant WPINC not found\.$#'
@@ -73951,12 +72601,6 @@ parameters:
 			path: src/Internal/ProductAttributesLookup/CLIRunner.php
 
 		-
-			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
-
-		-
 			message: '#^Call to an undefined method object\:\:cancel_all\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -74123,12 +72767,6 @@ parameters:
 			identifier: property.onlyWritten
 			count: 1
 			path: src/Internal/ProductAttributesLookup/Filterer.php
-
-		-
-			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
 
 		-
 			message: '#^Call to an undefined method object\:\:schedule_single\(\)\.$#'
@@ -74575,12 +73213,6 @@ parameters:
 			path: src/Internal/ProductDownloads/ApprovedDirectories/Synchronize.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\CacheController\:\:clear_filter_data_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/ProductFilters/CacheController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\CacheController\:\:clear_taxonomy_hierarchy_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -74695,82 +73327,16 @@ parameters:
 			path: src/Internal/ProductImage/MatchImageBySKU.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\DataStores\\PushTokensDataStore\:\:create\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
+			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_id\(\) expects int, int\|WP_Post given\.$#'
+			identifier: argument.type
+			count: 2
 			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\DataStores\\PushTokensDataStore\:\:read\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\DataStores\\PushTokensDataStore\:\:update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function delete_post_meta expects int, int\|null given\.$#'
+			message: '#^Parameter \#2 \$object_ids of function update_meta_cache expects array\<int\>\|string, array\<int\|WP_Post\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$postarr of function wp_insert_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{post_author\: int\|null, post_type\: ''push_token'', post_status\: ''private'', meta_input\: array\{platform\: string\|null, token\: string\|null, device_uuid\?\: string, origin\: string\|null\}\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$postarr of function wp_update_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{ID\: int\|null, post_author\: int\|null, post_type\: ''push_token'', post_status\: ''private'', meta_input\: array\{platform\: string\|null, token\: string\|null, device_uuid\?\: string, origin\: string\|null\}\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_device_uuid\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_id\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_origin\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_platform\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_token\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\PushNotifications\\Entities\\PushToken\:\:set_user_id\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/PushNotifications/Entities/PushToken.php
 
 		-
 			message: '#^@param string \$css does not accept actual type of parameter\: string\|false\.$#'
@@ -75937,12 +74503,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Orders/UpdateUtils.php
 
 		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Orders/UpdateUtils.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\UpdateUtils\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -76396,12 +74956,6 @@ parameters:
 			message: '#^Cannot call method set_virtual\(\) on object\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Constant WC_DELIMITER not found\.$#'
-			identifier: constant.notFound
-			count: 2
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
@@ -77075,12 +75629,6 @@ parameters:
 			identifier: property.onlyWritten
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Refunds/Schema/RefundSchema.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/Account/Controller.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\Account\\Controller\:\:get_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
@@ -79171,24 +77719,6 @@ parameters:
 			path: src/Internal/TransientFiles/TransientFilesEngine.php
 
 		-
-			message: '#^Function as_has_scheduled_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Function as_schedule_single_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
-			message: '#^Function as_unschedule_action not found\.$#'
-			identifier: function.notFound
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\TransientFiles\\TransientFilesEngine\:\:add_endpoint\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -79390,12 +77920,6 @@ parameters:
 			message: '#^@param bool \$display_notice does not accept actual type of parameter\: ''__return_true''\.$#'
 			identifier: parameter.phpDocType
 			count: 1
-			path: src/Internal/Utilities/PluginInstaller.php
-
-		-
-			message: '#^Constant WC_ABSPATH not found\.$#'
-			identifier: constant.notFound
-			count: 2
 			path: src/Internal/Utilities/PluginInstaller.php
 
 		-
@@ -80138,12 +78662,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessions\:\:get_route_post_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessions\:\:is_authorized\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
@@ -82291,12 +80809,6 @@ parameters:
 			path: src/StoreApi/Utilities/AgenticCheckoutUtils.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\AgenticCheckoutUtils\:\:is_authorized\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Utilities/AgenticCheckoutUtils.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\AgenticCheckoutUtils\:\:set_billing_address\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -83189,12 +81701,6 @@ parameters:
 			identifier: return.type
 			count: 1
 			path: src/Utilities/ArrayUtil.php
-
-		-
-			message: '#^Constant WC_ROUNDING_PRECISION not found\.$#'
-			identifier: constant.notFound
-			count: 1
-			path: src/Utilities/NumberUtil.php
 
 		-
 			message: '#^Parameter \#3 \$mode of function round expects 1\|2\|3\|4, int given\.$#'

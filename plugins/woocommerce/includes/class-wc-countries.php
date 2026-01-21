@@ -464,7 +464,7 @@ class WC_Countries {
 	 */
 	public function countries_using_vat() {
 		wc_deprecated_function( 'countries_using_vat', '4.0', 'WC_Countries::get_vat_countries' );
-		$countries = array( 'AE', 'AL', 'AR', 'AZ', 'BB', 'BH', 'BO', 'BS', 'BY', 'CL', 'CO', 'EC', 'EG', 'ET', 'FJ', 'GH', 'GM', 'GT', 'IL', 'IR', 'KN', 'KR', 'KZ', 'LK', 'MD', 'ME', 'MK', 'MN', 'MU', 'MX', 'NA', 'NG', 'NP', 'PS', 'PY', 'RS', 'RU', 'RW', 'SA', 'SV', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'ZA' );
+		$countries = array( 'AE', 'AL', 'AR', 'AZ', 'BB', 'BH', 'BO', 'BS', 'BY', 'CL', 'CO', 'EC', 'EG', 'ET', 'FJ', 'FO', 'GH', 'GM', 'GT', 'IL', 'IR', 'IS', 'KN', 'KR', 'KZ', 'LK', 'MD', 'ME', 'MK', 'MN', 'MU', 'MX', 'NA', 'NG', 'NP', 'PS', 'PY', 'RS', 'RU', 'RW', 'SA', 'SV', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'ZA' );
 
 		return apply_filters( 'woocommerce_countries_using_vat', $countries );
 	}
@@ -477,7 +477,7 @@ class WC_Countries {
 	 */
 	public function get_vat_countries() {
 		$eu_countries  = $this->get_european_union_countries();
-		$vat_countries = array( 'AE', 'AL', 'AR', 'AZ', 'BB', 'BH', 'BO', 'BS', 'BY', 'CL', 'CO', 'EC', 'EG', 'ET', 'FJ', 'GB', 'GH', 'GM', 'GT', 'IL', 'IM', 'IR', 'KN', 'KR', 'KZ', 'LK', 'MC', 'MD', 'ME', 'MK', 'MN', 'MU', 'MX', 'NA', 'NG', 'NO', 'NP', 'PS', 'PY', 'RS', 'RU', 'RW', 'SA', 'SV', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'XK', 'ZA' );
+		$vat_countries = array( 'AE', 'AL', 'AR', 'AZ', 'BB', 'BH', 'BO', 'BS', 'BY', 'CL', 'CO', 'EC', 'EG', 'ET', 'FJ', 'FO', 'GB', 'GH', 'GM', 'GT', 'IL', 'IM', 'IR', 'IS', 'KN', 'KR', 'KZ', 'LK', 'MC', 'MD', 'ME', 'MK', 'MN', 'MU', 'MX', 'NA', 'NG', 'NO', 'NP', 'PS', 'PY', 'RS', 'RU', 'RW', 'SA', 'SV', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'XK', 'ZA' );
 
 		return apply_filters( 'woocommerce_vat_countries', array_merge( $eu_countries, $vat_countries ) );
 	}
@@ -1733,10 +1733,19 @@ class WC_Countries {
 		// Prepend field keys.
 		$address_fields = array();
 
+		// Convert type prefix (e.g., 'billing_' or 'shipping_') to address type for autocomplete (e.g., 'billing' or 'shipping').
+		$address_type = rtrim( $type, '_' );
+
 		foreach ( $fields as $key => $value ) {
 			if ( 'state' === $key ) {
 				$value['country_field'] = $type . 'country';
 				$value['country']       = $country;
+			}
+			// Prefix autocomplete value with section and address type per HTML spec.
+			// Format: section-<name> [shipping|billing] <autofill-field>
+			// e.g., 'address-level1' becomes 'section-billing billing address-level1'.
+			if ( ! empty( $value['autocomplete'] ) ) {
+				$value['autocomplete'] = 'section-' . $address_type . ' ' . $address_type . ' ' . $value['autocomplete'];
 			}
 			$address_fields[ $type . $key ] = $value;
 		}
@@ -1750,7 +1759,7 @@ class WC_Countries {
 					'type'         => 'tel',
 					'class'        => array( 'form-row-wide' ),
 					'validate'     => array( 'phone' ),
-					'autocomplete' => 'tel',
+					'autocomplete' => 'section-' . $address_type . ' ' . $address_type . ' tel',
 					'priority'     => 100,
 				);
 			}
@@ -1760,7 +1769,7 @@ class WC_Countries {
 				'type'         => 'email',
 				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'email' ),
-				'autocomplete' => 'email',
+				'autocomplete' => 'section-' . $address_type . ' ' . $address_type . ' email',
 				'priority'     => 110,
 			);
 		}
