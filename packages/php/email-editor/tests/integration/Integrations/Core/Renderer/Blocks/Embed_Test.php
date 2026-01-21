@@ -581,9 +581,33 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that VideoPress embed is detected and renders (may fall back to link if oEmbed unavailable)
+	 * Test that VideoPress embed is detected and renders as video player
 	 */
 	public function test_renders_videopress_embed(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			// Intercept VideoPress oEmbed requests.
+			if ( strpos( $url, 'public-api.wordpress.com/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
 		$parsed_videopress_embed = array(
 			'blockName' => 'core/embed',
 			'attrs'     => array(
@@ -597,19 +621,43 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_videopress_embed['innerHTML'], $parsed_videopress_embed, $this->rendering_context );
 
-		// Should detect VideoPress and render (either as video with thumbnail or fallback link).
+		remove_filter( 'pre_http_request', $filter_callback, 10 );
+
+		// Should detect VideoPress and render as video with thumbnail.
 		$this->assertNotEmpty( $rendered );
-		// Should contain either video thumbnail or fallback link.
-		$this->assertTrue(
-			strpos( $rendered, 'Watch on VideoPress' ) !== false || strpos( $rendered, 'play2x.png' ) !== false,
-			'VideoPress embed should render as video or fallback link'
-		);
+		$this->assertStringContainsString( 'play2x.png', $rendered, 'VideoPress embed should render with play button' );
+		$this->assertStringContainsString( 'background-image', $rendered, 'VideoPress embed should have background image' );
 	}
 
 	/**
 	 * Test that VideoPress embed handles URLs with query parameters correctly
 	 */
 	public function test_videopress_embed_handles_urls_with_query_parameters(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		// Return a thumbnail URL with query parameters to test the URL encoding fix.
+		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg?w=500&h=281';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			// Intercept VideoPress oEmbed requests.
+			if ( strpos( $url, 'public-api.wordpress.com/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
 		$parsed_videopress_embed = array(
 			'blockName' => 'core/embed',
 			'attrs'     => array(
@@ -622,6 +670,8 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		$rendered = $this->embed_renderer->render( $parsed_videopress_embed['innerHTML'], $parsed_videopress_embed, $this->rendering_context );
+
+		remove_filter( 'pre_http_request', $filter_callback, 10 );
 
 		// Should handle URLs with query parameters correctly.
 		// The key test is that background-image is present (not stripped by WP_Style_Engine).
@@ -659,6 +709,29 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that VideoPress embed detects VideoPress by URL in attributes
 	 */
 	public function test_videopress_embed_detects_videopress_by_url_in_attributes(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			if ( strpos( $url, 'public-api.wordpress.com/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
 		$parsed_videopress_by_url = array(
 			'blockName' => 'core/embed',
 			'attrs'     => array(
@@ -669,14 +742,40 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_videopress_by_url['innerHTML'], $parsed_videopress_by_url, $this->rendering_context );
 
-		// Should detect VideoPress by URL domain.
+		remove_filter( 'pre_http_request', $filter_callback, 10 );
+
+		// Should detect VideoPress by URL domain and render with thumbnail.
 		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'background-image', $rendered, 'VideoPress embed should have background image' );
 	}
 
 	/**
 	 * Test that VideoPress embed detects video.wordpress.com domain
 	 */
 	public function test_videopress_embed_detects_video_wordpress_com_domain(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			if ( strpos( $url, 'public-api.wordpress.com/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
 		$parsed_videopress_wordpress_com = array(
 			'blockName' => 'core/embed',
 			'attrs'     => array(
@@ -687,8 +786,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_videopress_wordpress_com['innerHTML'], $parsed_videopress_wordpress_com, $this->rendering_context );
 
-		// Should detect VideoPress by video.wordpress.com domain.
+		remove_filter( 'pre_http_request', $filter_callback, 10 );
+
+		// Should detect VideoPress by video.wordpress.com domain and render with thumbnail.
 		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'background-image', $rendered, 'VideoPress embed should have background image' );
 	}
 
 	/**
