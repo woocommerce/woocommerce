@@ -74,6 +74,7 @@ class WC_Template_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $would_trigger_404, 'Order received endpoint should not trigger 404' );
 		$this->assertTrue( $is_order_received, 'is_order_received_page() should return true' );
 		$this->assertTrue( $is_wc_endpoint, 'is_wc_endpoint_url() should return true for order-received' );
+		$this->assertTrue( $is_checkout, 'is_checkout() should return true when on order-received page (same checkout page)' );
 	}
 
 	/**
