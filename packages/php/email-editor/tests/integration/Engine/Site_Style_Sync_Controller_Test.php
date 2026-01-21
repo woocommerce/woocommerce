@@ -785,6 +785,69 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
+	 * Test site theme filter is applied.
+	 */
+	public function test_site_theme_filter_is_applied(): void {
+		// Add filter to override site theme.
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			function ( $site_theme ) {
+				$new_site_theme = new WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									'theme'  => array(
+										array(
+											'slug'  => 'theme-color',
+											'color' => '#00ff00',
+											'name'  => 'Theme Color',
+										),
+									),
+									'custom' => array(
+										array(
+											'slug'  => 'custom-color',
+											'color' => '#ff0000',
+											'name'  => 'Custom Color',
+										),
+									),
+								),
+							),
+						),
+						'styles'   => array(),
+					),
+					'theme'
+				);
+
+				$site_theme->merge( $new_site_theme );
+				return $site_theme;
+			},
+			10,
+			1
+		);
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		// Find colors by slug.
+		$palette      = $synced_data['settings']['color']['palette'];
+		$theme_index  = array_search( 'theme-color', array_column( $palette, 'slug' ), true );
+		$custom_index = array_search( 'custom-color', array_column( $palette, 'slug' ), true );
+
+		// Verify filter was applied.
+		$this->assertNotFalse( $theme_index, 'Theme color should exist in palette' );
+		$this->assertEquals( '#00ff00', $palette[ $theme_index ]['color'] );
+		$this->assertEquals( 'Theme Color', $palette[ $theme_index ]['name'] );
+
+		$this->assertNotFalse( $custom_index, 'Custom color should exist in palette' );
+		$this->assertEquals( '#ff0000', $palette[ $custom_index ]['color'] );
+		$this->assertEquals( 'Custom Color', $palette[ $custom_index ]['name'] );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_email_editor_site_theme' );
+	}
+
+	/**
 	 * Test reference pointing to non-existing path should result in null.
 	 */
 	public function test_referenced_value_with_invalid_path_returns_null(): void {

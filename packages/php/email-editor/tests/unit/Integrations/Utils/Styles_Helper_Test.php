@@ -261,6 +261,50 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test it can unset unsupported props using variable depth paths.
+	 */
+	public function testItUnsetsUnsupportedPropsWithVariableDepthPaths(): void {
+		global $wp_filters, $__email_editor_last_wp_style_engine_get_styles_call;
+		$wp_filters = array();
+		$__email_editor_last_wp_style_engine_get_styles_call = null;
+
+		add_filter(
+			'woocommerce_email_editor_styles_unsupported_props',
+			function ( $unsupported_props ) {
+				$unsupported_props['padding-top'] = array( 'spacing', 'padding', 'top' );
+				return $unsupported_props;
+			}
+		);
+
+		$block_styles = array(
+			'spacing' => array(
+				'padding' => array(
+					'top'    => '12px',
+					'bottom' => '8px',
+				),
+				'margin'  => array(
+					'top' => '10px',
+				),
+			),
+		);
+
+		Styles_Helper::get_styles_from_block( $block_styles );
+
+		$this->assertIsArray( $__email_editor_last_wp_style_engine_get_styles_call );
+		$this->assertArrayHasKey( 'block_styles', $__email_editor_last_wp_style_engine_get_styles_call );
+		$passed_block_styles = $__email_editor_last_wp_style_engine_get_styles_call['block_styles'];
+
+		// Default behavior: margin is removed.
+		$this->assertArrayHasKey( 'spacing', $passed_block_styles );
+		$this->assertArrayNotHasKey( 'margin', $passed_block_styles['spacing'] );
+
+		// New behavior: deeper paths can be unset too.
+		$this->assertArrayHasKey( 'padding', $passed_block_styles['spacing'] );
+		$this->assertArrayNotHasKey( 'top', $passed_block_styles['spacing']['padding'] );
+		$this->assertSame( '8px', $passed_block_styles['spacing']['padding']['bottom'] );
+	}
+
+	/**
 	 * Test it extends block styles with CSS declarations.
 	 */
 	public function testItExtendsBlockStylesWithCssDeclarations(): void {

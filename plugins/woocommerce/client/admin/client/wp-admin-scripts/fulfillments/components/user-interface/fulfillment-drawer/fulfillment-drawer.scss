@@ -1,9 +1,9 @@
 .woocommerce-fulfillment-drawer {
 	position: fixed;
 	inset: 0;
-	top: 32px;
+	top: var(--wp-admin--admin-bar--height, 0px);
 	left: auto;
-	height: calc(100vh - 32px);
+	height: calc(100vh - var(--wp-admin--admin-bar--height, 0px));
 	z-index: 9999;
 	width: calc(27.7778vw + 1px);
 	min-width: 401px;
@@ -107,8 +107,6 @@
 
 @media screen and (max-width: 782px) {
 	.woocommerce-fulfillment-drawer {
-		top: 46px;
-		height: calc(100vh - 46px);
 		width: 100%;
 		min-width: 100%;
 		max-width: 100%;
@@ -118,7 +116,7 @@
 			max-width: 100%;
 		}
 		&__body {
-			height: calc(100% - 73px);
+			height: calc(100% - var(--wp-admin--admin-bar--height, 0px) - 27px);
 		}
 	}
 

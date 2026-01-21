@@ -1,6 +1,6 @@
 <?php
 /**
- * Title: Heading with three columns of content with link
+ * Title: Heading with Three Columns of Content and Link
  * Slug: woocommerce-blocks/heading-with-three-columns-of-content-with-link
  * Categories: WooCommerce, Services
  */

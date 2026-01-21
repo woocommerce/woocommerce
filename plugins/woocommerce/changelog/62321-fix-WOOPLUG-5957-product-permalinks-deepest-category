@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix product permalinks to use deepest category instead of highest parent term ID when product is assigned to multiple categories.

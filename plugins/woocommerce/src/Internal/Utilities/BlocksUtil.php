@@ -33,7 +33,7 @@ class BlocksUtil {
 	/**
 	 * Get all instances of the specified block from the widget area.
 	 *
-	 * @param array $block_name The name (id) of a block, e.g. `woocommerce/mini-cart`.
+	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/mini-cart`.
 	 * @return array Array of blocks as returned by parse_blocks().
 	 */
 	public static function get_blocks_from_widget_area( $block_name ) {
