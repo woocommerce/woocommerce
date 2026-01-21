@@ -635,13 +635,18 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$has_visible_quantity_input = Utils::has_visible_quantity_input( $form_html );
 			if ( $has_visible_quantity_input ) {
-				$product_name = $product->get_name();
-				$form_html    = Utils::add_quantity_steppers( $form_html, $product_name );
-				$form_html    = Utils::add_quantity_stepper_classes( $form_html );
+				$product_name                              = $product->get_name();
+				$form_html                                 = Utils::add_quantity_steppers( $form_html, $product_name );
+				$form_html                                 = Utils::add_quantity_stepper_classes( $form_html );
+				$wrapper_attributes['data-wp-interactive'] = 'woocommerce/add-to-cart-form';
 				wp_enqueue_script_module( 'woocommerce/add-to-cart-form' );
 			}
 
-			$form_html = sprintf( '<div %1$s data-wp-interactive="woocommerce/add-to-cart-form">%2$s</div>', get_block_wrapper_attributes( $wrapper_attributes ), $form_html );
+			$form_html = sprintf(
+				'<div %1$s>%2$s</div>',
+				get_block_wrapper_attributes( $wrapper_attributes ),
+				$form_html
+			);
 		}
 
 		$product = $previous_product;
