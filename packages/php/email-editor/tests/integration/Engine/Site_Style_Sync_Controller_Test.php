@@ -788,33 +788,32 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	 * Test site theme filter is applied.
 	 */
 	public function test_site_theme_filter_is_applied(): void {
-		$filter_applied = false;
-
-		// Create custom theme data.
-		$custom_theme_data = array(
-			'version'  => 3,
-			'settings' => array(
-				'color' => array(
-					'palette' => array(
-						'theme' => array(
-							array(
-								'slug'  => 'custom',
-								'color' => '#ff0000',
-								'name'  => 'Custom Color',
-							),
-						),
-					),
-				),
-			),
-			'styles'   => array(),
-		);
-
 		// Add filter to override site theme.
 		add_filter(
 			'woocommerce_email_editor_site_theme',
-			function ( $site_theme ) use ( &$filter_applied, $custom_theme_data ) {
-				$filter_applied = true;
-				return new WP_Theme_JSON( $custom_theme_data );
+			function ( $site_theme ) {
+				$new_site_theme = new WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									'theme' => array(
+										array(
+											'slug'  => 'custom',
+											'color' => '#ff0000',
+											'name'  => 'Custom Color',
+										),
+									),
+								),
+							),
+						),
+						'styles'   => array(),
+					),
+					'theme'
+				);
+
+				return $site_theme->merge( $new_site_theme );
 			},
 			10,
 			1
@@ -823,7 +822,6 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$synced_data = $this->controller->sync_site_styles();
 
 		// Verify filter was applied.
-		$this->assertTrue( $filter_applied );
 		$this->assertEquals( '#ff0000', $synced_data['settings']['color']['palette'][0]['color'] );
 		$this->assertEquals( 'Custom Color', $synced_data['settings']['color']['palette'][0]['name'] );
 
