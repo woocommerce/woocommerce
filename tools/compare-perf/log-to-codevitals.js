@@ -64,7 +64,7 @@ const data = JSON.stringify( {
 } );
 
 const options = {
-	hostname: 'codehealth.vercel.app',
+	hostname: 'codevitals.run',
 	port: 443,
 	path: '/api/log?token=' + token,
 	method: 'POST',
