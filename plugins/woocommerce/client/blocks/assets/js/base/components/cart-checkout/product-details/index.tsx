@@ -92,7 +92,9 @@ const ProductDetails = ( {
 								),
 							} }
 						/>
-						{ ! isLast && ' / ' }
+						{ ! isLast && (
+							<span aria-hidden="true"> / </span>
+						) }
 					</span>
 				);
 			} ) }
