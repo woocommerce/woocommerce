@@ -370,6 +370,8 @@ class WC_Products_Tracking {
 	/**
 	 * Tracks the event, allowing deferred/asynchronous event recording.
 	 *
+	 * @internal - backward compatibility is not guaranteed, don't use this method directly.
+	 *
 	 * @param string $event_name       The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
 	 * @param bool   $defer            Whether to publish the event synchronously.
@@ -381,7 +383,8 @@ class WC_Products_Tracking {
 				time(),
 				self::TRACK_PRODUCT_PUBLISHED_CALLBACK,
 				array( $event_name, $event_properties ),
-				'woocommerce'
+				'woocommerce',
+				true
 			);
 		} else {
 			WC_Tracks::record_event( $event_name, $event_properties );
