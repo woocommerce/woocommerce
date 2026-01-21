@@ -206,19 +206,14 @@ jobs:
           else
             # Capture conflicted files with their status codes
             CONFLICTED_STATUS=$(git status --porcelain | grep -E "^(DD|AU|UD|UA|DU|AA|UU)" || true)
+            echo "conf_status:$CONFLICTED_STATUS"
             
             if [[ -n "$CONFLICTED_STATUS" ]]; then
               echo "has_conflicts=true" >> $GITHUB_OUTPUT
               
-              # Extract file paths
-              CONFLICT_FILES=$(echo "$CONFLICTED_STATUS" | awk '{print $2}' | tr '\n' ',' | sed 's/,$//')
-              echo "conflict_files=$CONFLICT_FILES" >> $GITHUB_OUTPUT
+              echo "conflict_status=$(echo "$CONFLICTED_STATUS" | tr '\n' '|' | sed 's/|$//')" >> $GITHUB_OUTPUT
               
-              # Create detailed conflict information (status_code:filename)
-              CONFLICT_DETAILS=$(echo "$CONFLICTED_STATUS" | awk '{print $1":"$2}' | tr '\n' '|' | sed 's/|$//')
-              echo "conflict_details=$CONFLICT_DETAILS" >> $GITHUB_OUTPUT
-              
-              echo "Cherry-pick had conflicts - details: $CONFLICT_DETAILS"
+              echo "Cherry-pick had conflicts - details: $CONFLICTED_STATUS"
 
               # Add all files (both conflicted and resolved)
               git add .
@@ -264,18 +259,7 @@ jobs:
             const targetBranch = '${{ inputs.target_branch }}';
             const cherryPickBranch = '${{ needs.verify.outputs.cherry_pick_branch }}';
             const hasConflicts = '${{ steps.cherry-pick.outputs.has_conflicts }}' === 'true';
-            const conflictDetails = '${{ steps.cherry-pick.outputs.conflict_details }}';
-
-            // Map status codes to human-readable descriptions
-            const conflictTypeMap = {
-              'DD': 'deleted by both',
-              'UA': 'added by cherry-pick, does not exist in target branch',
-              'UD': 'deleted by cherry-pick, modified in target branch',
-              'AU': 'modified by cherry-pick, added in target branch',
-              'DU': 'modified by cherry-pick, deleted in target branch',
-              'AA': 'added by both with different content',
-              'UU': 'modified by both'
-            };
+            const conflictStatus = '${{ steps.cherry-pick.outputs.conflict_status }}';
 
             try {
               // Get original PR details
@@ -289,17 +273,30 @@ jobs:
               let prBody = `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n`;
 
               if (hasConflicts) {
-                prBody += `⚠️ **WARNING**: This cherry-pick contained conflicts that have not been resolved. Please review the changes carefully before merging!\n\n`;
+                prBody += `⚠️ **WARNING**: This cherry-pick contained conflicts that have not been resolved\n\n`;
+                prBody += `1. Review and resolve all conflicts\n`;
+                prBody += `2. Remove the \`cherry pick has conflicts\` label (required to merge)\n\n`;
                 
-                if (conflictDetails) {
-                  const conflicts = conflictDetails.split('|').filter(c => c.trim());
-                  prBody += `### Files with conflicts:\n\n`;
-                  
-                  conflicts.forEach(conflict => {
-                    const [statusCode, file] = conflict.split(':');
-                    const description = conflictTypeMap[statusCode] || 'unknown conflict type';
-                    prBody += `- \`${file}\` — *${description}*\n`;
-                  });
+                if (conflictStatus) {
+                  // Map status codes to human-readable descriptions
+                  const conflictTypeMap = {
+                    'DD': 'deleted by both',
+                    'UA': 'added by cherry-pick, does not exist in target branch',
+                    'UD': 'deleted by cherry-pick, modified in target branch',
+                    'AU': 'modified by cherry-pick, added in target branch',
+                    'DU': 'modified by cherry-pick, deleted in target branch',
+                    'AA': 'added by both with different content',
+                    'UU': 'modified by both'
+                  };
+                  prBody += `### Conflicted Files:\n`;
+                  const conflictLines = conflictStatus.split('|');
+                  for (const line of conflictLines) {
+                    const statusCode = line.slice(0, 2);
+                    const filePath = line.slice(3).trim();
+                    const conflictType = conflictTypeMap[statusCode] || 'unknown conflict type';
+                    prBody += `- \`${filePath}\` (${conflictType})\n`;
+                  }
+
                   prBody += `\n`;
                 }
               }
