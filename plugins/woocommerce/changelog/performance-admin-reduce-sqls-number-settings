@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+The number of SQL queries required to fetch settings on admin pages has been reduced to improve performance.

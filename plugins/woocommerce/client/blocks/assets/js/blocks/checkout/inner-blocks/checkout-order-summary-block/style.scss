@@ -2,7 +2,7 @@
 	border: 1px solid $universal-border-light;
 	border-radius: 5px;
 	box-sizing: border-box;
-	@include font-regular-locked;
+	@include font-small-locked;
 
 	&.checkout-order-summary-block-fill-wrapper {
 		.wc-block-components-order-summary {
@@ -29,7 +29,7 @@
 			margin: 0 0 $gap-smaller $gap;
 			flex-grow: 1;
 			font-weight: 500;
-			@include font-large-locked;
+			@include font-medium-locked;
 		}
 
 		.wc-block-components-checkout-order-summary__title-open-close {
