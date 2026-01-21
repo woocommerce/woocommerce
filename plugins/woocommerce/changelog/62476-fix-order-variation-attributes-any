@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Store API order endpoint returning empty values for "Any" variation attributes. Retrieves customer selections from order metadata to match cart endpoint behavior.
