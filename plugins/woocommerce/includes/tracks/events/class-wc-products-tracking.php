@@ -374,7 +374,7 @@ class WC_Products_Tracking {
 	 *
 	 * @param string $event_name       The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
-	 * @param bool   $defer            Whether to publish the event synchronously.
+	 * @param bool   $defer            Whether to defer the event publishing.
 	 * @return void
 	 */
 	public function track_product_published_maybe_defer( string $event_name, array $event_properties, bool $defer = false ): void {
