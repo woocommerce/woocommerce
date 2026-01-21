@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+The number of SQL queries on the orders pages (admin and my account) has been reduced to improve performance.
