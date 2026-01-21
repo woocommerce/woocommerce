@@ -1064,45 +1064,14 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * Test merging filter queries by Category Slug (e.g. ?categories=accessories).
 	 */
 	public function test_merging_filter_by_category_slug() {
-		// 1. Mock the filter mapping.
-		// We map the URL parameter 'categories' to the taxonomy 'product_cat'.
-		$this->block_instance->set_attributes_filter_query_args(
-			array(
-				array(
-					'filter'     => 'categories',
-					'query_type' => 'query_type_cat',
-					'taxonomy'   => 'product_cat',
-				),
-			)
-		);
-
-		// 2. Set the URL query variables.
-		// "accessories" is a slug (string), not an ID.
+		// Set the URL query variables.
 		set_query_var( 'categories', 'accessories' );
-		set_query_var( 'query_type_cat', 'or' );
 
-		// 3. Execute the query builder.
-		$merged_query = Utils::initialize_merged_query( $this->block_instance );
-		$tax_queries  = $merged_query['tax_query'];
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
 
-		// 4. Extract the 'AND' relation part.
-		$and_query = array();
-		foreach ( $tax_queries as $tax_query ) {
-			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
-				$and_query = $tax_query;
-			}
-		}
-
-		// Flatten to find the clause.
-		$filter_clauses = array();
-		foreach ( $and_query as $item ) {
-			if ( is_array( $item ) ) {
-				$filter_clauses[] = $item;
-			}
-		}
-
-		// 5. Assertions
-		// Since input is 'accessories' (string), we expect 'field' => 'slug'.
+		// Assertions.
 		$this->assertContainsEquals(
 			array(
 				'taxonomy' => 'product_cat',
@@ -1116,50 +1085,21 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		// Clean up.
 		set_query_var( 'categories', '' );
-		set_query_var( 'query_type_cat', '' );
 	}
 
 	/**
 	 * Test merging filter queries specifically for Tags.
-	 * Scenario: ?tags=tag-new (Slug) using inclusive logic (IN).
+	 * Scenario: ?tags=tag-new (Slug)
 	 */
 	public function test_merging_filter_by_tags() {
-		// 1. Mock the filter mapping for Tags.
-		$this->block_instance->set_attributes_filter_query_args(
-			array(
-				array(
-					'filter'     => 'tags',
-					'query_type' => 'query_type_tag',
-					'taxonomy'   => 'product_tag',
-				),
-			)
-		);
-
-		// 2. Set the URL query variables.
+		// Set the URL query variables.
 		set_query_var( 'tags', 'tag-new' );
-		set_query_var( 'query_type_tag', 'or' ); // Changed to 'or' to match Brands/Cats.
 
-		// 3. Execute the query builder.
-		$merged_query = Utils::initialize_merged_query( $this->block_instance );
-		$tax_queries  = $merged_query['tax_query'];
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
 
-		// 4. Extract the 'AND' container.
-		$and_query = array();
-		foreach ( $tax_queries as $tax_query ) {
-			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
-				$and_query = $tax_query;
-			}
-		}
-
-		// Flatten to find specific clauses.
-		$filter_clauses = array();
-		foreach ( $and_query as $item ) {
-			if ( is_array( $item ) ) {
-				$filter_clauses[] = $item;
-			}
-		}
-
-		// 5. Assertions
+		// Assertions.
 		$this->assertContainsEquals(
 			array(
 				'taxonomy' => 'product_tag',
@@ -1173,69 +1113,23 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		// Clean up.
 		set_query_var( 'tags', '' );
-		set_query_var( 'query_type_tag', '' );
 	}
 
 	/**
 	 * Test merging filter queries for Categories, Tags, and Brands simultaneously.
-	 * * Scenario:
-	 * - URL: ?categories=accessories&tags=tag-new&brands=nike
+	 * Scenario: ?categories=accessories&tags=tag-new&brands=nike
 	 */
 	public function test_merging_filter_by_all_taxonomies_together() {
-		// 1. Mock the filter mapping for all 3 taxonomies.
-		$this->block_instance->set_attributes_filter_query_args(
-			array(
-				array(
-					'filter'     => 'categories',
-					'query_type' => 'query_type_cat',
-					'taxonomy'   => 'product_cat',
-				),
-				array(
-					'filter'     => 'tags',
-					'query_type' => 'query_type_tag',
-					'taxonomy'   => 'product_tag',
-				),
-				array(
-					'filter'     => 'brands',
-					'query_type' => 'query_type_brand',
-					'taxonomy'   => 'product_brand',
-				),
-			)
-		);
-
-		// 2. Set the URL query variables (All using Slugs).
+		// Set the URL query variables.
 		set_query_var( 'categories', 'accessories' );
-		set_query_var( 'query_type_cat', 'or' );
-
 		set_query_var( 'tags', 'tag-new' );
-		set_query_var( 'query_type_tag', 'or' );
-
 		set_query_var( 'brands', 'nike' );
-		set_query_var( 'query_type_brand', 'or' );
 
-		// 3. Execute the query builder.
-		$merged_query = Utils::initialize_merged_query( $this->block_instance );
-		$tax_queries  = $merged_query['tax_query'];
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
 
-		// 4. Extract the 'AND' container.
-		// Even though individual filters use 'OR' (IN), the combination of different.
-		// taxonomies usually uses 'AND' (Must be in Category X AND Brand Y).
-		$and_query = array();
-		foreach ( $tax_queries as $tax_query ) {
-			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
-				$and_query = $tax_query;
-			}
-		}
-
-		// Flatten to find specific clauses.
-		$filter_clauses = array();
-		foreach ( $and_query as $item ) {
-			if ( is_array( $item ) ) {
-				$filter_clauses[] = $item;
-			}
-		}
-
-		// 5. Assertions.
+		// Assertions.
 		// Verify Category.
 		$this->assertContainsEquals(
 			array(
@@ -1274,10 +1168,66 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		// Clean up global state.
 		set_query_var( 'categories', '' );
-		set_query_var( 'query_type_cat', '' );
 		set_query_var( 'tags', '' );
-		set_query_var( 'query_type_tag', '' );
 		set_query_var( 'brands', '' );
-		set_query_var( 'query_type_brand', '' );
+	}
+
+	/**
+	 * Test that the strictly string-based filter logic works and SAFELY ignores arrays.
+	 * Matches logic: if ( ! is_string($param_value) ) continue;
+	 */
+	public function test_filter_strict_string_handling() {
+		// Scenario: Array Input (Should be IGNORED).
+		// ?categories[]=hats
+		set_query_var( 'categories', array( 'hats' ) );
+
+		// Execute.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$tax_queries    = $merged_query['tax_query'] ?? array();
+		$filter_clauses = $this->extract_filter_clauses( $tax_queries );
+
+		// Assertion: The array input should have been ignored.
+		$this->assertNotContainsEquals(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'hats' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should not contain product_cat tax query because array input should be ignored.'
+		);
+
+		// Clean up.
+		set_query_var( 'categories', '' );
+	}
+
+	/**
+	 * Helper to extract filter clauses from the tax_query array.
+	 *
+	 * @param array $tax_queries The tax_query array from the merged query.
+	 * @return array The extracted filter clauses.
+	 */
+	private function extract_filter_clauses( $tax_queries ) {
+		$and_query = array();
+		
+		// Find the 'AND' relation group where filters are stored.
+		foreach ( $tax_queries as $tax_query ) {
+			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
+				$and_query = $tax_query;
+				break;
+			}
+		}
+
+		$clauses = array();
+		if ( ! empty( $and_query ) ) {
+			foreach ( $and_query as $item ) {
+				if ( is_array( $item ) ) {
+					$clauses[] = $item;
+				}
+			}
+		}
+		
+		return $clauses;
 	}
 }

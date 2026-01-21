@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Blocks\BlockTypes\StockFilter;
 use WP_Query;
 use WC_Tax;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Internal\ProductFilters\Params;
 
 /**
  * QueryBuilder class.
@@ -659,9 +658,8 @@ class QueryBuilder {
 	 */
 	private function get_filter_by_taxonomy_query() {
 
-		$params_handler = new Params();
-
-		// Get all taxonomy parameters mapping.
+		$container       = wc_get_container();
+		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
 		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
 
 		if ( empty( $taxonomy_params ) ) {
@@ -673,12 +671,16 @@ class QueryBuilder {
 		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
 			$param_value = get_query_var( $param_key );
 
-			if ( empty( $param_value ) ) {
+			// Adding is_string check to avoid invalid query parameters for the taxonomy.
+			if ( ! is_string( $param_value ) || empty( $param_value ) ) {
 				continue;
 			}
 
-			// Parse comma-separated values.
-			$term_slugs = array_map( 'sanitize_title', explode( ',', $param_value ) );
+			// 1. Define $term_values by exploding the string
+			$term_values = explode( ',', $param_value );
+
+			// 2. Sanitize and filter (removes empty strings)
+			$term_slugs  = array_values( array_filter( array_map( 'sanitize_title', $term_values ) ) );
 
 			if ( empty( $term_slugs ) ) {
 				continue;
