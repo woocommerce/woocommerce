@@ -877,6 +877,30 @@ class FeaturesController {
 	}
 
 	/**
+	 * Check if a given feature is enabled, without triggering deprecation notices.
+	 *
+	 * This is used internally for compatibility checks to avoid flooding logs with deprecation notices
+	 * when iterating over all features. For deprecated features, it returns the deprecated_value directly.
+	 *
+	 * @param string $feature_id Unique feature id.
+	 * @return bool True if the feature is enabled, false otherwise.
+	 */
+	private function feature_is_enabled_without_deprecation_notice( string $feature_id ): bool {
+		$feature = $this->get_feature_definition( $feature_id );
+
+		if ( null === $feature ) {
+			return false;
+		}
+
+		// For deprecated features, return the deprecated_value without triggering notice.
+		if ( ! empty( $feature['deprecated_since'] ) ) {
+			return (bool) ( $feature['deprecated_value'] ?? false );
+		}
+
+		return $this->feature_is_enabled( $feature_id );
+	}
+
+	/**
 	 * Change the enabled/disabled status of a feature.
 	 *
 	 * @param string $feature_id Unique feature id.
@@ -1042,10 +1066,11 @@ class FeaturesController {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$features = $this->get_feature_definitions();
+
 		if ( $enabled_features_only ) {
 			$features = array_filter(
 				$features,
-				array( $this, 'feature_is_enabled' ),
+				fn( $feature_id ) => $this->feature_is_enabled_without_deprecation_notice( $feature_id ),
 				ARRAY_FILTER_USE_KEY
 			);
 		}
@@ -1583,7 +1608,7 @@ class FeaturesController {
 				$features_considered_incompatible = array_filter(
 					$this->plugin_util->get_items_considered_incompatible( $feature_id, $compatibility_info ),
 					$only_enabled_features ?
-						fn( $id ) => $this->feature_is_enabled( $id ) && ! $this->should_skip_compatibility_checks( $id ) :
+						fn( $id ) => $this->feature_is_enabled_without_deprecation_notice( $id ) && ! $this->should_skip_compatibility_checks( $id ) :
 						fn( $id ) => ! $this->should_skip_compatibility_checks( $id )
 				);
 				if ( in_array( $feature_id, $features_considered_incompatible, true ) ) {
