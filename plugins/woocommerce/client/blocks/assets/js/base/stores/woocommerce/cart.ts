@@ -701,7 +701,8 @@ const { state, actions } = store< Store >(
 	{ lock: true }
 );
 
-isNonceReady = Promise.resolve( actions.refreshCartItems() );
+// Async actions are typed as void for consumers, but are actually Promises internally.
+isNonceReady = actions.refreshCartItems() as unknown as Promise< void >;
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
