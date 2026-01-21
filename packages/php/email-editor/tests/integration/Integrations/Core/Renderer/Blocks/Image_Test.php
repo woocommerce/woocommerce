@@ -168,11 +168,12 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
 		$html     = new \WP_HTML_Tag_Processor( $rendered );
-		// Border is rendered on the wrapping table cell.
+		// Border is rendered on the dedicated border cell wrapper (not the outer image cell).
+		// This ensures borders stay tight around the image on mobile.
 		$html->next_tag(
 			array(
 				'tag_name'   => 'td',
-				'class_name' => 'email-image-cell',
+				'class_name' => 'email-image-border-cell',
 			)
 		);
 		$table_cell_style = $html->get_attribute( 'style' );
@@ -200,11 +201,11 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
 		$html     = new \WP_HTML_Tag_Processor( $rendered );
-		// Border is rendered on the wrapping table cell and the border classes are moved to the wrapping table cell.
+		// Border is rendered on the dedicated border cell wrapper and the border classes are moved there.
 		$html->next_tag(
 			array(
 				'tag_name'   => 'td',
-				'class_name' => 'email-image-cell',
+				'class_name' => 'email-image-border-cell',
 			)
 		);
 		$table_cell_class = $html->get_attribute( 'class' );
