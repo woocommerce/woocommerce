@@ -798,7 +798,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 						'settings' => array(
 							'color' => array(
 								'palette' => array(
-									'theme' => array(
+									'custom' => array(
 										array(
 											'slug'  => 'custom',
 											'color' => '#ff0000',
@@ -813,7 +813,8 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 					'theme'
 				);
 
-				return $site_theme->merge( $new_site_theme );
+				$site_theme->merge( $new_site_theme );
+				return $site_theme;
 			},
 			10,
 			1
