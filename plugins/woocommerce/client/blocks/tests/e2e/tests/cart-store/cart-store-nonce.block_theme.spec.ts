@@ -25,8 +25,8 @@ test.describe( 'Cart Store Nonce Handling', () => {
 		await frontendUtils.goToShop();
 		const cachedHtml = await page.content();
 
-		// 2. Wait for the nonce to expire.
-		await page.waitForTimeout( 4000 );
+		// 2. Wait for the nonce to expire (It takes half the time).
+		await page.waitForTimeout( 2500 );
 
 		// 3. Set up route interception to serve the "cached" shop page.
 		await page.route( '**/shop**', async ( route ) => {
