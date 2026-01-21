@@ -236,6 +236,7 @@ const doesCartItemMatchAttributes = (
 
 let pendingRefresh = false;
 let refreshTimeout = 3000;
+let isNonceReady: Promise< void > | null = null;
 
 function emitSyncEvent( {
 	quantityChanges,
@@ -256,8 +257,13 @@ function emitSyncEvent( {
 const { state, actions } = store< Store >(
 	'woocommerce',
 	{
+		state: {
+			nonce: '',
+		},
 		actions: {
 			*removeCartItem( key: string ) {
+				yield isNonceReady;
+
 				const previousCart = JSON.stringify( state.cart );
 
 				// optimistically update the cart
@@ -309,6 +315,8 @@ const { state, actions } = store< Store >(
 				{ id, key, quantity, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
+				yield isNonceReady;
+
 				const a11yModulePromise = import( '@wordpress/a11y' );
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
@@ -423,6 +431,8 @@ const { state, actions } = store< Store >(
 				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
+				yield isNonceReady;
+
 				const a11yModulePromise = import( '@wordpress/a11y' );
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
@@ -605,6 +615,10 @@ const { state, actions } = store< Store >(
 							headers: { 'Content-Type': 'application/json' },
 						}
 					);
+
+					// Extract fresh nonce from response headers.
+					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
+
 					const json: Cart = yield res.json();
 
 					// Checks if the response contains an error.
@@ -686,6 +700,8 @@ const { state, actions } = store< Store >(
 	},
 	{ lock: true }
 );
+
+isNonceReady = Promise.resolve( actions.refreshCartItems() );
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
