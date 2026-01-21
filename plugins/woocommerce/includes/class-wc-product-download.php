@@ -279,11 +279,11 @@ class WC_Product_Download implements ArrayAccess {
 	 * Set extra data by key.
 	 *
 	 * @since 10.6.0
-	 * @param string $key Extra data key.
-	 * @param mixed $value Extra data value.
+	 * @param string $key   Extra data key.
+	 * @param mixed  $value Extra data value.
 	 */
-	public function set_extra_data( string $key, $value ) {
-		$this->extra_data[$key] = $value;
+	public function set_extra_data( string $key, $value ): void {
+		$this->extra_data[ $key ] = $value;
 	}
 
 	/**
@@ -359,7 +359,7 @@ class WC_Product_Download implements ArrayAccess {
 	 * @return mixed
 	 */
 	public function get_extra_data( string $key ) {
-		return $this->extra_data[$key] ?? null;
+		return $this->extra_data[ $key ] ?? null;
 	}
 
 	/**
@@ -428,8 +428,8 @@ class WC_Product_Download implements ArrayAccess {
 				if ( is_callable( array( $this, "get_$offset" ) ) ) {
 					return $this->{"get_$offset"}();
 				}
-				if ( isset( $this->extra_data[$offset] ) ) {
-					return $this->extra_data[$offset];
+				if ( isset( $this->extra_data[ $offset ] ) ) {
+					return $this->extra_data[ $offset ];
 				}
 				break;
 		}
@@ -450,7 +450,7 @@ class WC_Product_Download implements ArrayAccess {
 					$this->{"set_$offset"}( $value );
 					break;
 				}
-				$this->extra_data[$offset] = $value;
+				$this->extra_data[ $offset ] = $value;
 				break;
 		}
 	}

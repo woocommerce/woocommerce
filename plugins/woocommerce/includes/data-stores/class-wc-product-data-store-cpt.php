@@ -655,7 +655,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				}
 				$download = new WC_Product_Download();
 				$download->set_id( $key );
-				$download->set_name( $meta_value['name'] ?: wc_get_filename_from_url( $meta_value['file'] ) );
+				$download->set_name( $meta_value['name'] ? $meta_value['name'] : wc_get_filename_from_url( $meta_value['file'] ) );
+
+				/**
+				 * Filter for the path of the downloadable file.
+				 *
+				 * @since 2.1.0
+				 *
+				 * @param string     $file    The file path.
+				 * @param WC_Product $product The product object.
+				 * @param string     $key     The download key.
+				 */
 				$download->set_file( apply_filters( 'woocommerce_file_download_path', $meta_value['file'], $product, $key ) );
 
 				/**
@@ -1034,7 +1044,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					$meta_values[ $attribute_key ] = array_merge(
 						$attribute->get_data(),
 						array(
-							'value'        => $value,
+							'value' => $value,
 						)
 					);
 				}
