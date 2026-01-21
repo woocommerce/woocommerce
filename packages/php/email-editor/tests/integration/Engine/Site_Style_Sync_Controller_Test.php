@@ -785,6 +785,53 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
+	 * Test site theme filter is applied.
+	 */
+	public function test_site_theme_filter_is_applied(): void {
+		$filter_applied = false;
+
+		// Create custom theme data.
+		$custom_theme_data = array(
+			'version'  => 3,
+			'settings' => array(
+				'color' => array(
+					'palette' => array(
+						'theme' => array(
+							array(
+								'slug'  => 'custom',
+								'color' => '#ff0000',
+								'name'  => 'Custom Color',
+							),
+						),
+					),
+				),
+			),
+			'styles'   => array(),
+		);
+
+		// Add filter to override site theme.
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			function ( $site_theme ) use ( &$filter_applied, $custom_theme_data ) {
+				$filter_applied = true;
+				return new WP_Theme_JSON( $custom_theme_data );
+			},
+			10,
+			1
+		);
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		// Verify filter was applied.
+		$this->assertTrue( $filter_applied );
+		$this->assertEquals( '#ff0000', $synced_data['settings']['color']['palette'][0]['color'] );
+		$this->assertEquals( 'Custom Color', $synced_data['settings']['color']['palette'][0]['name'] );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_email_editor_site_theme' );
+	}
+
+	/**
 	 * Test reference pointing to non-existing path should result in null.
 	 */
 	public function test_referenced_value_with_invalid_path_returns_null(): void {

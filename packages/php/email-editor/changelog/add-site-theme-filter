@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add woocommerce_email_editor_site_theme filter to allow overriding the site theme used when syncing global styles for the email editor.
