@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
+use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\Jetpack\Connection\Rest_Authentication as JetpackRestAuthentication;
 use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookManager;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use WC_Order;
@@ -12,6 +14,118 @@ use WC_Webhook;
  * Shared test helpers for Agentic tests.
  */
 trait AgenticTestHelpers {
+
+	/**
+	 * Mock for Jetpack Connection Manager.
+	 *
+	 * @var JetpackConnectionManager|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	protected $jetpack_manager_mock;
+
+	/**
+	 * Clear the Jetpack REST_Authentication singleton instance.
+	 *
+	 * This allows tests to reset the authentication state between test cases.
+	 */
+	protected function clear_jetpack_auth_singleton(): void {
+		if ( ! class_exists( JetpackRestAuthentication::class ) ) {
+			return;
+		}
+
+		$reflection_class  = new \ReflectionClass( JetpackRestAuthentication::class );
+		$instance_property = $reflection_class->getProperty( 'instance' );
+		$instance_property->setAccessible( true );
+		$instance_property->setValue( null, null );
+	}
+
+	/**
+	 * Set up Jetpack authentication to simulate a valid blog token request.
+	 *
+	 * This mocks the Jetpack Connection Manager's verify_xml_rpc_signature method
+	 * to return a successful blog token verification result.
+	 */
+	protected function mock_jetpack_blog_token_auth(): void {
+		if ( ! class_exists( JetpackRestAuthentication::class ) ) {
+			$this->markTestSkipped( 'Jetpack Connection package not available.' );
+			return;
+		}
+
+		// Clear any existing singleton.
+		$this->clear_jetpack_auth_singleton();
+
+		// Initialize the REST Authentication singleton.
+		$rest_auth = JetpackRestAuthentication::init();
+
+		// Create a mock for the Connection Manager.
+		$this->jetpack_manager_mock = $this->getMockBuilder( JetpackConnectionManager::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'verify_xml_rpc_signature', 'reset_saved_auth_state' ) )
+			->getMock();
+
+		// Configure the mock to return successful blog token verification.
+		$this->jetpack_manager_mock->expects( $this->any() )
+			->method( 'verify_xml_rpc_signature' )
+			->willReturn(
+				array(
+					'type'      => 'blog',
+					'token_key' => 'test_blog_token',
+					'user_id'   => 0,
+				)
+			);
+
+		$this->jetpack_manager_mock->expects( $this->any() )
+			->method( 'reset_saved_auth_state' )
+			->willReturn( null );
+
+		// Inject the mock into the REST Authentication instance using reflection.
+		$reflection_class = new \ReflectionClass( JetpackRestAuthentication::class );
+		$manager_property = $reflection_class->getProperty( 'connection_manager' );
+		$manager_property->setAccessible( true );
+		$manager_property->setValue( $rest_auth, $this->jetpack_manager_mock );
+
+		// Set up the $_GET parameters and $_SERVER to simulate a Jetpack-signed request.
+		$_GET['_for']              = 'jetpack';
+		$_GET['token']             = 'test_token';
+		$_GET['signature']         = 'test_signature';
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+
+		// Trigger the authentication.
+		$rest_auth->wp_rest_authenticate( '' );
+	}
+
+	/**
+	 * Set up Jetpack authentication to simulate a failed/missing authentication.
+	 *
+	 * This ensures that is_signed_with_blog_token() returns false.
+	 */
+	protected function mock_jetpack_auth_failure(): void {
+		if ( ! class_exists( JetpackRestAuthentication::class ) ) {
+			return;
+		}
+
+		// Clear any existing singleton - this ensures no authentication is set.
+		$this->clear_jetpack_auth_singleton();
+
+		// Clear Jetpack-related $_GET parameters.
+		unset( $_GET['_for'], $_GET['token'], $_GET['signature'] );
+	}
+
+	/**
+	 * Reset Jetpack authentication state after tests.
+	 *
+	 * Call this in tearDown() to ensure clean state between tests.
+	 */
+	protected function reset_jetpack_auth_state(): void {
+		if ( class_exists( JetpackRestAuthentication::class ) ) {
+			$this->clear_jetpack_auth_singleton();
+		}
+
+		// Clear Jetpack-related $_GET parameters.
+		unset( $_GET['_for'], $_GET['token'], $_GET['signature'] );
+
+		// Reset request method if it was set.
+		unset( $_SERVER['REQUEST_METHOD'] );
+	}
 	/**
 	 * Create an order with Agentic session ID.
 	 *
