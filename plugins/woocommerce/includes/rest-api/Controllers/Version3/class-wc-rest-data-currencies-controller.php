@@ -258,6 +258,20 @@ class WC_REST_Data_Currencies_Controller extends WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Get the hooks relevant to response caching.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of hook names to track for cache invalidation.
+	 */
+	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array(
+			'woocommerce_rest_prepare_data_currency',
+			'woocommerce_currencies',
+		);
+	}
+
+	/**
 	 * Whether the response cache should vary by user.
 	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
