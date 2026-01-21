@@ -30,7 +30,6 @@ if ( ! class_exists( 'WC_Email_Customer_Partially_Refunded_Order', false ) ) :
 	 * @class    WC_Email_Customer_Partially_Refunded_Order
 	 * @version  10.6.0
 	 * @package  WooCommerce\Classes\Emails
-	 * @extends  WC_Email_Customer_Refunded_Order
 	 */
 	class WC_Email_Customer_Partially_Refunded_Order extends WC_Email_Customer_Refunded_Order {
 
@@ -42,13 +41,13 @@ if ( ! class_exists( 'WC_Email_Customer_Partially_Refunded_Order', false ) ) :
 
 			$this->id             = 'customer_partially_refunded_order';
 			$this->title          = __( 'Partially refunded order', 'woocommerce' );
-			$this->description = __( 'Notifies customers when their order has been partially refunded.', 'woocommerce' );
+			$this->description    = __( 'Notifies customers when their order has been partially refunded.', 'woocommerce' );
 			$this->partial_refund = true;
 			$this->template_block = 'emails/block/customer_partially_refunded_order.php';
 
 			// Remove triggers for this email because they will be handled by the parent class.
-			remove_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
-			remove_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger_partial' ), 10, 2 );
+			remove_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10 );
+			remove_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger_partial' ), 10 );
 		}
 
 		/**
