@@ -8,7 +8,7 @@ import { test, expect, guestFile } from '@woocommerce/e2e-utils';
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
 
-test.describe( 'Cart Store Nonce Handling', () => {
+test.describe( 'Cart Store', () => {
 	test.use( { storageState: guestFile } );
 
 	test.beforeEach( async ( { requestUtils } ) => {
