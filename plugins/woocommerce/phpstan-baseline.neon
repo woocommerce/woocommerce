@@ -15721,12 +15721,6 @@ parameters:
 			path: includes/class-wc-order-factory.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_flip expects array\<int\|string\>, array\<int\<min, \-1\>\|int\<1, max\>\|true\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-order-factory.php
-
-		-
 			message: '#^Parameter \#1 \$order_id of static method WC_Order_Factory\:\:get_class_name_for_order_id\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
 			identifier: argument.type
 			count: 1
@@ -69754,12 +69748,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
 
 		-
-			message: '#^@param WC_Abstract_Order \$product does not accept actual type of parameter\: WC_Data\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Abstract_Order\.$#'
 			identifier: parameter.phpDocType
 			count: 4
@@ -69802,12 +69790,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Call to an undefined method WC_Data\:\:set_cogs_total_value\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:update_user_by_order_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -69832,37 +69814,13 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot access offset 0 on stdClass\|true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot access property \$key on false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot access property \$meta_key on object\|true\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Cannot access property \$meta_value on false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Cannot access property \$meta_value on object\|true\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot access property \$value on false\.$#'
 			identifier: property.nonObject
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -70135,12 +70093,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#1 \$array_arg of function current expects array\|object, stdClass\|true given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#1 \$function of function call_user_func_array expects callable\(\)\: mixed, array\{Abstract_WC_Order_Data_Store_CPT, non\-falsy\-string\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -70237,19 +70189,7 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:delete_meta\(\) expects stdClass, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:update_meta\(\) expects stdClass, WC_Meta_Data given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Parameter \#2 \$meta of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStoreMeta\:\:update_meta\(\) expects stdClass, false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
@@ -70551,12 +70491,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:get_current_class_name\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
-			message: '#^Cannot access offset 0 on stdClass\|true\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
 
