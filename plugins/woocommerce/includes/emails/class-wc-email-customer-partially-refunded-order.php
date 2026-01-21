@@ -43,7 +43,7 @@ if ( ! class_exists( 'WC_Email_Customer_Partially_Refunded_Order', false ) ) :
 			$this->title          = __( 'Partially refunded order', 'woocommerce' );
 			$this->description    = __( 'Notifies customers when their order has been partially refunded.', 'woocommerce' );
 			$this->partial_refund = true;
-			$this->template_block = 'emails/block/customer_partially_refunded_order.php';
+			$this->template_block = 'emails/block/customer-partially-refunded-order.php';
 
 			// Remove triggers for this email because they will be handled by the parent class.
 			remove_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10 );
