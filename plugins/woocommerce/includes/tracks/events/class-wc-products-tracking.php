@@ -42,7 +42,7 @@ class WC_Products_Tracking {
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_product_import_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_attribute_tracking_scripts' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'possibly_add_tag_tracking_scripts' ) );
-		add_action( self::TRACK_PRODUCT_PUBLISHED_CALLBACK, array( $this, 'track_product_published_maybe_defer'), 10, 3 );
+		add_action( self::TRACK_PRODUCT_PUBLISHED_CALLBACK, array( $this, 'track_product_published_maybe_defer' ), 10, 3 );
 	}
 
 	/**
