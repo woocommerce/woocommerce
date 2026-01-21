@@ -269,9 +269,9 @@ jobs:
             // Map status codes to human-readable descriptions
             const conflictTypeMap = {
               'DD': 'deleted by both',
-              'AU': 'added by cherry-pick, does not exist in target branch',
+              'UA': 'added by cherry-pick, does not exist in target branch',
               'UD': 'deleted by cherry-pick, modified in target branch',
-              'UA': 'modified by cherry-pick, added in target branch',
+              'AU': 'modified by cherry-pick, added in target branch',
               'DU': 'modified by cherry-pick, deleted in target branch',
               'AA': 'added by both with different content',
               'UU': 'modified by both'
