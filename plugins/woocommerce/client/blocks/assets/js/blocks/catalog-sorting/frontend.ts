@@ -1,45 +1,55 @@
 /**
  * External dependencies
  */
-import { store, getContext, getElement } from '@wordpress/interactivity';
+import { store, getConfig } from '@wordpress/interactivity';
 
-type CatalogSortingContext = {
-	currentOrderBy: string;
-	options: Record< string, string >;
-};
+const BLOCK_NAME = 'woocommerce/catalog-sorting';
 
-store( 'woocommerce/catalog-sorting', {
-	state: {
-		get currentOrderBy(): string {
-			const context = getContext< CatalogSortingContext >();
-			return context.currentOrderBy;
-		},
-	},
+const catalogSortingStore = {
 	actions: {
-		*handleSortChange(): Generator {
-			const { ref } = getElement();
+		/**
+		 * Prevent default form submission.
+		 */
+		preventSubmit: ( event: Event ) => {
+			event.preventDefault();
+		},
 
-			if ( ! ( ref instanceof HTMLSelectElement ) ) {
+		/**
+		 * Handle sort order change.
+		 */
+		*handleSortChange( event: Event ): Generator {
+			// Stop propagation to prevent jQuery handler from seeing the event.
+			event.stopPropagation();
+
+			const target = event.target as HTMLSelectElement;
+			const newOrderBy = target.value;
+
+			// Build URL with updated orderby parameter.
+			const config = getConfig( BLOCK_NAME );
+			const url = new URL( config.currentUrl, window.location.origin );
+
+			url.searchParams.set( 'orderby', newOrderBy );
+			url.searchParams.set( 'paged', '1' );
+
+			// Determine navigation strategy.
+			const sharedConfig = getConfig( 'woocommerce' );
+			const isBlockTheme = sharedConfig?.isBlockTheme || false;
+			const needsRefresh =
+				sharedConfig?.needsRefreshForInteractivityAPI || false;
+
+			// Classic themes or when refresh needed: full page reload.
+			if ( needsRefresh || ! isBlockTheme ) {
+				window.location.href = url.href;
 				return;
 			}
 
-			const context = getContext< CatalogSortingContext >();
+			// Block themes: client-side navigation.
+			const routerModule: typeof import('@wordpress/interactivity-router') =
+				yield import( '@wordpress/interactivity-router' );
 
-			const newValue = ref.value;
-
-			// Update context
-			context.currentOrderBy = newValue;
-
-			// Build new URL with orderby parameter
-			const url = new URL( window.location.href );
-			url.searchParams.set( 'orderby', newValue );
-			url.searchParams.set( 'paged', '1' );
-
-			// Navigate using Interactivity Router
-			const routerModule = yield import(
-				'@wordpress/interactivity-router'
-			);
 			yield routerModule.actions.navigate( url.href );
 		},
 	},
-} );
+};
+
+store( BLOCK_NAME, catalogSortingStore );
