@@ -49,10 +49,50 @@ class Spacing_Preprocessor implements Preprocessor {
 				$block['email_attrs']['margin-top'] = $gap;
 			}
 
+			// Handle horizontal gap for columns: apply padding-left to column children (except the first).
+			if ( 'core/columns' === $parent_block_name && 0 !== $key && null !== $parent_block ) {
+				$columns_gap = $this->get_columns_block_gap( $parent_block, $gap );
+				if ( $columns_gap ) {
+					$block['email_attrs']['padding-left'] = $columns_gap;
+				}
+			}
+
 			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block );
 			$parsed_blocks[ $key ] = $block;
 		}
 
 		return $parsed_blocks;
+	}
+
+	/**
+	 * Extracts the horizontal blockGap from a columns block.
+	 *
+	 * @param array  $columns_block The columns block.
+	 * @param string $default_gap Default gap value to use if blockGap is not set on the columns block.
+	 * @return string|null The horizontal gap value (e.g., "30px" or "var:preset|spacing|30") or null if not set.
+	 */
+	private function get_columns_block_gap( array $columns_block, string $default_gap = '' ): ?string {
+		$block_gap = $columns_block['attrs']['style']['spacing']['blockGap'] ?? null;
+
+		// Columns block uses object format: { "top": "...", "left": "..." }.
+		// If blockGap.left is explicitly set, use it.
+		if ( is_array( $block_gap ) && isset( $block_gap['left'] ) && is_string( $block_gap['left'] ) ) {
+			$gap_value = $block_gap['left'];
+
+			// Validate against potentially malicious values.
+			if ( preg_match( '/[<>"\']/', $gap_value ) ) {
+				return null;
+			}
+
+			// Return the value as-is. WP's styles engine will handle transformation of preset variables.
+			return $gap_value;
+		}
+
+		// If blockGap.left is not set, use the default gap value if provided.
+		if ( $default_gap ) {
+			return $default_gap;
+		}
+
+		return null;
 	}
 }
