@@ -62,23 +62,18 @@ const data = JSON.stringify( {
 	}, {} ),
 } );
 
-const url = 'https://codevitals.run/api/log?token=' + token;
-
-fetch( url, {
+fetch( 'https://codevitals.run/api/log?token=' + token, {
 	method: 'POST',
 	headers: {
 		'Content-Type': 'application/json',
 	},
 	body: data,
 } )
-	.then( async ( res ) => {
-		console.log( `url: ${ url.replace( /token=.*/, 'token=***' ) }` );
-		console.log( `statusCode: ${ res.status }` );
-		console.log( `statusMessage: ${ res.statusText }` );
-
-		const body = await res.text();
-		if ( body ) {
-			console.log( body );
+	.then( async ( response ) => {
+		console.log( `statusCode: ${ response.status }` );
+		const text = await response.text();
+		if ( text ) {
+			console.log( text );
 		}
 	} )
 	.catch( ( error ) => {
