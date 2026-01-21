@@ -2,7 +2,6 @@
 /* eslint-disable no-console */
 const fs = require( 'fs' );
 const path = require( 'path' );
-const https = require( 'https' );
 const [ token, branch, hash, baseHash, timestamp ] = process.argv.slice( 2 );
 
 const resultsFiles = [
@@ -63,30 +62,20 @@ const data = JSON.stringify( {
 	}, {} ),
 } );
 
-const options = {
-	hostname: 'codevitals.run',
-	port: 443,
-	path: '/api/log?token=' + token,
+fetch( 'https://codevitals.run/api/log?token=' + token, {
 	method: 'POST',
 	headers: {
 		'Content-Type': 'application/json',
-		'Content-Length': data.length,
 	},
-};
-
-const req = https.request( options, ( res ) => {
-	console.log( `hostname: ${ options.hostname }` );
-	console.log( `statusCode: ${ res.statusCode }` );
-	console.log( `statusMessage: ${ res.statusMessage }` );
-
-	res.on( 'data', ( d ) => {
-		process.stdout.write( d );
+	body: data,
+} )
+	.then( async ( response ) => {
+		console.log( `statusCode: ${ response.status }` );
+		const text = await response.text();
+		if ( text ) {
+			console.log( text );
+		}
+	} )
+	.catch( ( error ) => {
+		console.error( error );
 	} );
-} );
-
-req.on( 'error', ( error ) => {
-	console.error( error );
-} );
-
-req.write( data );
-req.end();
