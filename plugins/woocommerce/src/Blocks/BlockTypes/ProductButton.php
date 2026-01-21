@@ -224,7 +224,6 @@ class ProductButton extends AbstractBlock {
 
 		$div_directives = '
 			data-wp-interactive="woocommerce/product-button"
-			data-wp-init="actions.refreshCartItems"
 		';
 
 		$context_directives = wp_interactivity_data_wp_context( $context );
