@@ -273,4 +273,32 @@ class CheckoutEventTracker {
 
 		$this->dispatcher->dispatch_event( 'order_placed', $event_data );
 	}
+
+	/**
+	 * Track Pay for Order page load event.
+	 *
+	 * Triggers fraud protection event when the Pay for Order page is loaded.
+	 * Captures order context for fraud detection including order key enumeration
+	 * and velocity-based fraud detection.
+	 *
+	 * @param \WC_Order   $order              The order being paid for.
+	 * @param string|null $validation_failure Optional validation failure reason.
+	 * @return void
+	 *
+	 * @since 10.6.0
+	 */
+	public function track_pay_for_order_page_load( \WC_Order $order, ?string $validation_failure = null ): void {
+		$event_data = array(
+			'order_id'       => $order->get_id(),
+			'order_status'   => $order->get_status(),
+			'payment_method' => $order->get_payment_method(),
+			'total'          => (float) $order->get_total(),
+		);
+
+		if ( null !== $validation_failure ) {
+			$event_data['validation_failure'] = $validation_failure;
+		}
+
+		$this->dispatcher->dispatch_event( 'pay_for_order_page_loaded', $event_data );
+	}
 }

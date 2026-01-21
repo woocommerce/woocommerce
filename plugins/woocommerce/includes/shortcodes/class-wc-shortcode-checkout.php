@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Checkout\Helpers\PayForOrderValidationException;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
@@ -94,7 +95,7 @@ class WC_Shortcode_Checkout {
 
 				// Order or payment link is invalid.
 				if ( ! $order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
-					throw new Exception( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
+					throw new PayForOrderValidationException( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ), 'invalid_order_key' );
 				}
 
 				// Logged out customer does not have permission to pay for this order.
@@ -118,13 +119,13 @@ class WC_Shortcode_Checkout {
 
 				// Logged in customer trying to pay for someone else's order.
 				if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
-					throw new Exception( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ) );
+					throw new PayForOrderValidationException( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), 'permission_denied' );
 				}
 
 				// Does not need payment.
 				if ( ! $order->needs_payment() ) {
 					/* translators: %s: order status */
-					throw new Exception( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ) );
+					throw new PayForOrderValidationException( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ), 'order_already_paid' );
 				}
 
 				// Ensure order items are still stocked if paying for a failed order. Pending orders do not need this check because stock is held.
@@ -155,7 +156,7 @@ class WC_Shortcode_Checkout {
 
 								if ( ! apply_filters( 'woocommerce_pay_order_product_in_stock', $product->is_in_stock(), $product, $order ) ) {
 									/* translators: %s: product name */
-									throw new Exception( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
+									throw new PayForOrderValidationException( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ), 'product_out_of_stock' );
 								}
 
 								// We only need to check products managing stock, with a limited stock qty.
@@ -169,7 +170,7 @@ class WC_Shortcode_Checkout {
 
 								if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() >= ( $held_stock + $required_stock ) ), $product, $order ) ) {
 									/* translators: 1: product name 2: quantity in stock */
-									throw new Exception( sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
+									throw new PayForOrderValidationException( sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ), 'insufficient_stock' );
 								}
 							}
 						}
@@ -209,6 +210,12 @@ class WC_Shortcode_Checkout {
 				 */
 				$order_button_text = apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) );
 
+				// Track Pay for Order page load for fraud protection.
+				if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+					wc_get_container()->get( CheckoutEventTracker::class )
+						->track_pay_for_order_page_load( $order );
+				}
+
 				/**
 				 * Triggered right before the Pay for Order form, after validation of the order and customer.
 				 *
@@ -230,6 +237,12 @@ class WC_Shortcode_Checkout {
 				);
 
 			} catch ( Exception $e ) {
+				// Track validation failure for fraud protection.
+				if ( $e instanceof PayForOrderValidationException && isset( $order ) && $order instanceof \WC_Order && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+					wc_get_container()->get( CheckoutEventTracker::class )
+						->track_pay_for_order_page_load( $order, $e->getErrorCode() );
+				}
+
 				wc_print_notice( $e->getMessage(), 'error' );
 			}
 		} elseif ( $order_id ) {

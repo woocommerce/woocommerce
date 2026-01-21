@@ -516,4 +516,97 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		// Clean up.
 		$order->delete( true );
 	}
+
+	// ========================================
+	// Pay for Order Page Load Tests
+	// ========================================
+
+	/**
+	 * @testdox Should dispatch pay_for_order_page_loaded event with order data.
+	 */
+	public function test_track_pay_for_order_page_load_dispatches_event_with_order_data(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->mock_dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' )
+			->with(
+				$this->equalTo( 'pay_for_order_page_loaded' ),
+				$this->callback(
+					function ( $event_data ) use ( $order ) {
+						return isset( $event_data['order_id'] )
+							&& $order->get_id() === $event_data['order_id']
+							&& isset( $event_data['status'] )
+							&& isset( $event_data['payment_method'] )
+							&& isset( $event_data['total'] );
+					}
+				)
+			);
+
+		$this->sut->track_pay_for_order_page_load( $order );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Should include all required fields in event data.
+	 */
+	public function test_track_pay_for_order_includes_required_fields(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->set_payment_method( 'bacs' );
+		$order->save();
+
+		$captured_event_data = null;
+		$this->mock_dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' )
+			->willReturnCallback(
+				function ( $event_type, $event_data ) use ( &$captured_event_data ) {
+					$captured_event_data = $event_data;
+				}
+			);
+
+		$this->sut->track_pay_for_order_page_load( $order );
+
+		$this->assertEquals( $order->get_id(), $captured_event_data['order_id'] );
+		$this->assertEquals( 'pending', $captured_event_data['order_status'] );
+		$this->assertEquals( 'bacs', $captured_event_data['payment_method'] );
+		$this->assertIsFloat( $captured_event_data['total'] );
+		$this->assertEquals( (float) $order->get_total(), $captured_event_data['total'] );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Should track validation failures with clean tracking codes.
+	 */
+	public function test_track_pay_for_order_includes_validation_failures(): void {
+		$order = \WC_Helper_Order::create_order();
+		$failure_codes = array(
+			'invalid_order_key',
+			'permission_denied',
+			'order_already_paid',
+			'product_out_of_stock',
+			'insufficient_stock',
+		);
+		$captured_failures = array();
+
+		$this->mock_dispatcher
+			->expects( $this->exactly( count( $failure_codes ) ) )
+			->method( 'dispatch_event' )
+			->willReturnCallback(
+				function ( $event_type, $event_data ) use ( &$captured_failures ) {
+					$captured_failures[] = $event_data['validation_failure'] ?? null;
+				}
+			);
+
+		foreach ( $failure_codes as $failure_code ) {
+			$this->sut->track_pay_for_order_page_load( $order, $failure_code );
+		}
+
+		$this->assertEquals( $failure_codes, $captured_failures );
+
+		$order->delete( true );
+	}
 }
