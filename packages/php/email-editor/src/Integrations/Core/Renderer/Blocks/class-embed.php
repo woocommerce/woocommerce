@@ -529,23 +529,40 @@ class Embed extends Abstract_Block_Renderer {
 	/**
 	 * Extract VideoPress video thumbnail URL.
 	 * Uses WordPress oEmbed API to get thumbnail_url from the provider response.
-	 * Note: wp_oembed_get() returns HTML, so we use WP_oEmbed::get_data() to get the raw data object.
+	 * Results are cached using transients to avoid repeated HTTP requests.
 	 *
 	 * @param string $url VideoPress video URL.
 	 * @return string Thumbnail URL or empty string.
 	 */
 	private function get_videopress_thumbnail( string $url ): string {
+		// Generate a cache key based on the URL.
+		$cache_key = 'wc_email_vp_thumb_' . md5( $url );
+
+		// Check for cached thumbnail URL.
+		$cached_thumbnail = get_transient( $cache_key );
+		if ( false !== $cached_thumbnail ) {
+			// Return cached value (empty string means previous lookup failed).
+			return is_string( $cached_thumbnail ) ? $cached_thumbnail : '';
+		}
+
 		// Use WP_oEmbed::get_data() to get raw oEmbed data (not HTML).
 		$oembed      = new \WP_oEmbed();
 		$oembed_data = $oembed->get_data( $url );
 
+		// Default TTL matches WordPress oEmbed cache (1 day).
+		$cache_ttl = (int) apply_filters( 'oembed_ttl', DAY_IN_SECONDS, $url, array(), '' );
+
 		// get_data() returns object|false, so check for false or non-object.
 		if ( false === $oembed_data || ! is_object( $oembed_data ) ) {
+			// Cache empty result to avoid repeated failed lookups.
+			set_transient( $cache_key, '', $cache_ttl );
 			return '';
 		}
 
 		// Extract thumbnail_url from oEmbed response.
 		if ( ! isset( $oembed_data->thumbnail_url ) ) {
+			// Cache empty result.
+			set_transient( $cache_key, '', $cache_ttl );
 			return '';
 		}
 
@@ -553,9 +570,13 @@ class Embed extends Abstract_Block_Renderer {
 
 		// Validate the thumbnail URL.
 		if ( ! empty( $thumbnail_url ) && $this->is_valid_url( $thumbnail_url ) ) {
+			// Cache the valid thumbnail URL.
+			set_transient( $cache_key, $thumbnail_url, $cache_ttl );
 			return $thumbnail_url;
 		}
 
+		// Cache empty result for invalid URLs.
+		set_transient( $cache_key, '', $cache_ttl );
 		return '';
 	}
 }
