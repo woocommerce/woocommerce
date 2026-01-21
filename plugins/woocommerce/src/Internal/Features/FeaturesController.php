@@ -884,6 +884,8 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id Unique feature id.
 	 * @return bool True if the feature is enabled, false otherwise.
+	 *
+	 * @since 10.5.0
 	 */
 	private function feature_is_enabled_without_deprecation_notice( string $feature_id ): bool {
 		$feature = $this->get_feature_definition( $feature_id );
