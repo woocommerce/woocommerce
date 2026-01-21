@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add filter for modifying product attributes/downloads before reading & additional `extra_data` option
