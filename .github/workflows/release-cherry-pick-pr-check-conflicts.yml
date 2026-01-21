@@ -1,7 +1,9 @@
 name: 'Block merge if cherry-pick conflicts exist'
 
 on:
-  pull_request_target:
+  pull_request:
+    branches:
+      - 'cherry-pick-**'
     types:
       - opened
       - reopened
@@ -19,6 +21,7 @@ jobs:
   check-conflicts-label:
     name: Check for conflicts label
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'cherry pick has conflicts')
     permissions:
       pull-requests: read
       statuses: write
@@ -32,11 +35,11 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
-
+            
             const hasConflictsLabel = pr.labels.some(
               label => label.name === 'cherry pick has conflicts'
             );
-
+            
             if (hasConflictsLabel) {
               core.setFailed('❌ This PR has unresolved cherry-pick conflicts. Please resolve conflicts before merging.');
             } else {
