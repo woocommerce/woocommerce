@@ -1,5 +1,6 @@
 // Extra class added for specificity so styles are applied in the editor.
 .wc-block-components-product-details.wc-block-components-product-details {
+	@include font-x-small-locked;
 	list-style: none;
 	margin: 0.5em 0;
 	padding: 0;

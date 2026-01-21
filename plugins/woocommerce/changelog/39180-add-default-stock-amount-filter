@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Introduced a new filter `woocommerce_product_stock_default_amount` to allow change of the default stock amount.

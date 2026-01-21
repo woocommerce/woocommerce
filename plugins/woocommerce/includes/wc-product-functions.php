@@ -566,7 +566,7 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 	if ( $date_from ) {
 		$start_ts = $date_from->getTimestamp();
 		if ( $start_ts > time() ) {
-			as_schedule_single_action( // @phpstan-ignore function.notFound
+			as_schedule_single_action(
 				$start_ts,
 				'wc_product_start_scheduled_sale',
 				array( 'product_id' => $product_id ),
@@ -578,7 +578,7 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 	if ( $date_to ) {
 		$end_ts = $date_to->getTimestamp();
 		if ( $end_ts > time() ) {
-			as_schedule_single_action( // @phpstan-ignore function.notFound
+			as_schedule_single_action(
 				$end_ts,
 				'wc_product_end_scheduled_sale',
 				array( 'product_id' => $product_id ),
@@ -734,8 +734,8 @@ function wc_maybe_schedule_product_sale_events( $product_id, $product = null ): 
 	$product_id = $product->get_id();
 
 	// Always clear existing events first.
-	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ); // @phpstan-ignore function.notFound
-	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ); // @phpstan-ignore function.notFound
+	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
+	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
 
 	$date_from = $product->get_date_on_sale_from( 'edit' );
 	$date_to   = $product->get_date_on_sale_to( 'edit' );
