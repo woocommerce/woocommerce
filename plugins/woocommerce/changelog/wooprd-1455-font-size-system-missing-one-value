@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Bind some Cart/Checkout UI elements to block themes' "extra-small" font size for consistency.
