@@ -436,6 +436,40 @@ class Embed extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Validate that a URL's host matches the expected provider's domains.
+	 * This prevents SSRF when provider is set via user-controlled attributes.
+	 *
+	 * @param string $url      URL to validate.
+	 * @param string $provider Provider name.
+	 * @return bool True if URL host matches provider domains.
+	 */
+	private function url_matches_provider( string $url, string $provider ): bool {
+		if ( ! $this->is_valid_url( $url ) ) {
+			return false;
+		}
+
+		$parsed_url = wp_parse_url( $url );
+		if ( ! isset( $parsed_url['host'] ) ) {
+			return false;
+		}
+
+		$url_host = strtolower( $parsed_url['host'] );
+
+		// Get allowed domains for this provider.
+		$all_providers   = $this->get_all_provider_configs();
+		$allowed_domains = $all_providers[ $provider ]['domains'] ?? array();
+
+		foreach ( $allowed_domains as $allowed_domain ) {
+			$allowed_domain = strtolower( $allowed_domain );
+			if ( $url_host === $allowed_domain || str_ends_with( $url_host, '.' . $allowed_domain ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Render a video embed using the Video renderer.
 	 *
 	 * @param string            $url URL of the video.
@@ -446,6 +480,14 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Rendered video embed or fallback.
 	 */
 	private function render_video_embed( string $url, string $provider, array $parsed_block, Rendering_Context $rendering_context, string $block_content ): string {
+		// Validate URL matches the detected provider to prevent SSRF.
+		// Provider can come from user-controlled providerNameSlug attribute,
+		// so we must verify the URL actually belongs to that provider's domains.
+		if ( ! $this->url_matches_provider( $url, $provider ) ) {
+			$fallback_attr = $this->create_fallback_attributes( $url, $url );
+			return $this->render_link_fallback( $fallback_attr, $block_content, $parsed_block, $rendering_context );
+		}
+
 		// Try to get video thumbnail URL.
 		$poster_url = $this->get_video_thumbnail_url( $url, $provider );
 
@@ -531,9 +573,12 @@ class Embed extends Abstract_Block_Renderer {
 	 * Uses WordPress oEmbed API to get thumbnail_url from the provider response.
 	 * Results are cached using transients to avoid repeated HTTP requests.
 	 *
+	 * Note: URL validation against VideoPress domains is done in render_video_embed()
+	 * via url_matches_provider() before this method is called.
+	 *
 	 * @since 10.6.0
 	 *
-	 * @param string $url VideoPress video URL.
+	 * @param string $url VideoPress video URL (pre-validated by caller).
 	 * @return string Thumbnail URL or empty string.
 	 */
 	private function get_videopress_thumbnail( string $url ): string {
@@ -547,7 +592,9 @@ class Embed extends Abstract_Block_Renderer {
 			return is_string( $cached_thumbnail ) ? $cached_thumbnail : '';
 		}
 
-		// Use WP_oEmbed::get_data() to get raw oEmbed data (not HTML).
+		// Use WP_oEmbed::get_data() to fetch thumbnail from oEmbed endpoint.
+		// URL is pre-validated by render_video_embed() via url_matches_provider(),
+		// ensuring only VideoPress domains reach this point (SSRF mitigation).
 		$oembed      = new \WP_oEmbed();
 		$oembed_data = $oembed->get_data( $url );
 

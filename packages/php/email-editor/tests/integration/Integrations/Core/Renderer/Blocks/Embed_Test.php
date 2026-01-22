@@ -574,9 +574,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress wp-block-embed-videopress"><div class="wp-block-embed__wrapper">https://videopress.com/v/BZHMfMfN?w=500&h=281</div></figure>',
 		);
 
-		$rendered = $this->embed_renderer->render( $parsed_videopress_embed['innerHTML'], $parsed_videopress_embed, $this->rendering_context );
-
-		remove_filter( 'pre_http_request', $filter_callback, 10 );
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_videopress_embed['innerHTML'], $parsed_videopress_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
 
 		// Should detect VideoPress and render as video with thumbnail.
 		$this->assertNotEmpty( $rendered );
@@ -644,9 +646,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress"><div class="wp-block-embed__wrapper">https://videopress.com/v/BZHMfMfN</div></figure>',
 		);
 
-		$rendered = $this->embed_renderer->render( $parsed_videopress_by_url['innerHTML'], $parsed_videopress_by_url, $this->rendering_context );
-
-		remove_filter( 'pre_http_request', $filter_callback, 10 );
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_videopress_by_url['innerHTML'], $parsed_videopress_by_url, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
 
 		// Should detect VideoPress by URL domain and render with thumbnail.
 		$this->assertNotEmpty( $rendered );
@@ -688,13 +692,14 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 			'innerHTML' => '<figure class="wp-block-embed is-type-video"><div class="wp-block-embed__wrapper">https://video.wordpress.com/v/BZHMfMfN</div></figure>',
 		);
 
-		$rendered = $this->embed_renderer->render( $parsed_videopress_wordpress_com['innerHTML'], $parsed_videopress_wordpress_com, $this->rendering_context );
-
-		remove_filter( 'pre_http_request', $filter_callback, 10 );
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_videopress_wordpress_com['innerHTML'], $parsed_videopress_wordpress_com, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
 
 		// Should detect VideoPress by video.wordpress.com domain and render with thumbnail.
 		$this->assertNotEmpty( $rendered );
 		$this->assertStringContainsString( 'background-image', $rendered, 'VideoPress embed should have background image' );
 	}
-
 }
