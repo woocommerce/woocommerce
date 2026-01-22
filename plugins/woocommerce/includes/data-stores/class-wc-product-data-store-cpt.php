@@ -1042,10 +1042,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 					// Store in format WC uses in meta.
 					$meta_values[ $attribute_key ] = array_merge(
-						$attribute->get_data(),
+						$attribute->get_extra_data(),
 						array(
-							'value' => $value,
-						)
+							'name'         => $attribute->get_name(),
+							'value'        => $value,
+							'position'     => $attribute->get_position(),
+							'is_visible'   => $attribute->get_visible() ? 1 : 0,
+							'is_variation' => $attribute->get_variation() ? 1 : 0,
+							'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+						),
 					);
 				}
 			}
