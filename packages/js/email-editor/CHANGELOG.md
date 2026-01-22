@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.2) - 2026-01-22 
+
+-   Patch - Unify loading indicator with the site editor
+
 ## [1.5.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.1) - 2026-01-16 
 
 -   Patch - Fix buttons block layout controls initialization [#62708]
