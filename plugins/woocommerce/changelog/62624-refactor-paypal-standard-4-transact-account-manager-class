@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Deprecate WC_Gateway_Paypal_Transact_Account_Manager class in favor of Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager class.

@@ -443,10 +443,16 @@ export const removeItemFromCart =
 	};
 
 /**
- * Persists a quantity change the for specified cart item:
+ * Tracks AbortControllers per cart item for cancelling in-flight quantity requests.
+ */
+const quantityAbortControllers = new Map< string, AbortController >();
+
+/**
+ * Persists a quantity change for the specified cart item:
+ * - Aborts any in-flight request for the same item.
  * - Calls API to set quantity.
  * - If successful, yields action to update store.
- * - If error, yields action to store error.
+ * - If error (except AbortError), yields action to store error.
  *
  * @param {string} cartItemKey Cart item being updated.
  * @param {number} quantity    Specified (new) quantity.
@@ -462,6 +468,22 @@ export const changeCartItemQuantity =
 		if ( cartItem?.quantity === quantity ) {
 			return;
 		}
+
+		// Abort any existing in-flight request for this item.
+		const existingController = quantityAbortControllers.get( cartItemKey );
+		if ( existingController ) {
+			existingController.abort();
+		}
+
+		// Create new AbortController for this request.
+		const abortController =
+			typeof AbortController === 'undefined'
+				? null
+				: new AbortController();
+		if ( abortController ) {
+			quantityAbortControllers.set( cartItemKey, abortController );
+		}
+
 		try {
 			dispatch.itemIsPendingQuantity( cartItemKey );
 			const { response } = await apiFetchWithHeaders< {
@@ -474,18 +496,33 @@ export const changeCartItemQuantity =
 					quantity,
 				},
 				cache: 'no-store',
+				signal: abortController?.signal ?? null,
 			} );
+
 			dispatch.receiveCart( response );
 			return response;
 		} catch ( error ) {
+			// Don't treat aborted requests as errors - they were intentionally cancelled.
+			if (
+				error instanceof DOMException &&
+				error.name === 'AbortError'
+			) {
+				return;
+			}
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
 		} finally {
+			// Clean up controller if it's still the current one for this item.
+			if (
+				quantityAbortControllers.get( cartItemKey ) === abortController
+			) {
+				quantityAbortControllers.delete( cartItemKey );
+			}
 			dispatch.itemIsPendingQuantity( cartItemKey, false );
 		}
 	};
 
-// Facilitates aborting fetch requests.
+// Facilitates aborting fetch requests for shipping rate selection.
 let abortController: AbortController | null = null;
 
 /**

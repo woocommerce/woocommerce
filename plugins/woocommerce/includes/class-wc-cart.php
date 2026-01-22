@@ -12,6 +12,8 @@
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
@@ -1312,10 +1314,12 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 
+			$item_was_already_in_cart = false;
 			// If cart_item_key is set, the item is already in the cart.
 			if ( $cart_item_key ) {
 				$new_quantity = $quantity + $this->cart_contents[ $cart_item_key ]['quantity'];
 				$this->set_quantity( $cart_item_key, $new_quantity, false );
+				$item_was_already_in_cart = true;
 			} else {
 				$cart_item_key = $cart_id;
 
@@ -1342,6 +1346,12 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
+			// Track cart event for fraud protection (only for newly added items).
+			if ( ! $item_was_already_in_cart && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				wc_get_container()->get( CartEventTracker::class )
+					->track_cart_item_added( $cart_item_key, (int) $product_id, (int) $quantity, $variation_id );
+			}
+
 			return $cart_item_key;
 
 		} catch ( Exception $e ) {
@@ -1367,6 +1377,12 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
 
+			// Track cart event for fraud protection.
+			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				wc_get_container()->get( CartEventTracker::class )
+					->track_cart_item_removed( $cart_item_key, $this );
+			}
+
 			unset( $this->cart_contents[ $cart_item_key ] );
 
 			do_action( 'woocommerce_cart_item_removed', $cart_item_key, $this );
@@ -1389,6 +1405,12 @@ class WC_Cart extends WC_Legacy_Cart {
 			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
 
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
+
+			// Track cart event for fraud protection.
+			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				wc_get_container()->get( CartEventTracker::class )
+					->track_cart_item_restored( $cart_item_key, $this );
+			}
 
 			unset( $this->removed_cart_contents[ $cart_item_key ] );
 
@@ -1419,6 +1441,12 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
 
 		do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity, $this );
+
+		// Track cart event for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CartEventTracker::class )
+				->track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $this );
+		}
 
 		if ( $refresh_totals ) {
 			$this->calculate_totals();

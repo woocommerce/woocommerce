@@ -106,6 +106,7 @@ class WC_Helper_Admin {
 				$settings['wccomHelper']['subscription_missing_notice']  = PluginsHelper::get_missing_subscription_notice();
 				$settings['wccomHelper']['connection_url_notice']        = WC_Woo_Helper_Connection::get_connection_url_notice();
 				$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
+				$settings['wccomHelper']['maybe_deleted_connection']     = WC_Woo_Helper_Connection::get_deleted_connection_notice();
 			} else {
 				$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
 			}

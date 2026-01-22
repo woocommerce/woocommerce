@@ -11,11 +11,15 @@ import { getNewPath, getPersistedQuery } from '@woocommerce/navigation';
 export default class CategoryBreadcrumbs extends Component {
 	getCategoryAncestorIds( category, categories ) {
 		const ancestors = [];
-		let parent = category.parent;
+		let parent = category?.parent;
+
 		while ( parent ) {
+			const parentCategory = categories.get( parent );
+			if ( ! parentCategory ) break;
 			ancestors.unshift( parent );
-			parent = categories.get( parent ).parent;
+			parent = parentCategory.parent;
 		}
+
 		return ancestors;
 	}
 
