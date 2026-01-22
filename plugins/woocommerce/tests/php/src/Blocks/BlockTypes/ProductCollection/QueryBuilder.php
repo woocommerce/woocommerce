@@ -1208,7 +1208,8 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * @param array $tax_queries The tax_query array from the merged query.
 	 * @return array The extracted filter clauses.
 	 */
-	private function extract_filter_clauses( $tax_queries ) {
+	private function extract_filter_clauses( array $tax_queries ) {
+
 		$and_query = array();
 		
 		// Find the 'AND' relation group where filters are stored.
