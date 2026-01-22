@@ -3863,15 +3863,17 @@ function wc_display_product_attributes( $product ) {
 
 	if ( $display_dimensions && $product->has_weight() ) {
 		$product_attributes['weight'] = array(
-			'label' => __( 'Weight', 'woocommerce' ),
-			'value' => wc_format_weight( $product->get_weight() ),
+			'label'       => __( 'Weight', 'woocommerce' ),
+			'value'       => wc_format_weight( $product->get_weight() ),
+			'css_classes' => 'woocommerce-product-attributes-item--weight',
 		);
 	}
 
 	if ( $display_dimensions && $product->has_dimensions() ) {
 		$product_attributes['dimensions'] = array(
-			'label' => __( 'Dimensions', 'woocommerce' ),
-			'value' => wc_format_dimensions( $product->get_dimensions( false ) ),
+			'label'       => __( 'Dimensions', 'woocommerce' ),
+			'value'       => wc_format_dimensions( $product->get_dimensions( false ) ),
+			'css_classes' => 'woocommerce-product-attributes-item--dimensions',
 		);
 	}
 
