@@ -1038,7 +1038,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete blocks orders without checkout evidence
 	 *
-	 * @since 8.9.4
+	 * @since 10.6.0
 	 */
 	public function test_payment_complete_blocks_orders_without_checkout_evidence() {
 		$object = new WC_Order();
@@ -1069,7 +1069,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete allows orders with created_via checkout
 	 *
-	 * @since 8.9.4
+	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_checkout() {
 		$object = new WC_Order();
@@ -1084,7 +1084,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete allows orders with created_via store-api
 	 *
-	 * @since 8.9.4
+	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_store_api() {
 		$object = new WC_Order();
@@ -1099,7 +1099,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete allows orders with cart_hash
 	 *
-	 * @since 8.9.4
+	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_orders_with_cart_hash() {
 		$object = new WC_Order();
@@ -1114,7 +1114,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete allows bypass via filter
 	 *
-	 * @since 8.9.4
+	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_bypass_via_filter() {
 		$object = new WC_Order();
@@ -1135,6 +1135,34 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
 
 		remove_all_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence' );
+	}
+
+	/**
+	 * Test: payment_complete allows custom created_via values via filter
+	 *
+	 * @since 10.6.0
+	 */
+	public function test_payment_complete_allows_custom_created_via_via_filter() {
+		$object = new WC_Order();
+		$object->set_created_via( 'custom-integration' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		// Add filter to allow custom created_via value.
+		add_filter(
+			'woocommerce_payment_complete_allowed_created_via_values',
+			function( $allowed_values, $order ) {
+				$allowed_values[] = 'custom-integration';
+				return $allowed_values;
+			},
+			10,
+			2
+		);
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+
+		remove_all_filters( 'woocommerce_payment_complete_allowed_created_via_values' );
 	}
 
 	/**

@@ -146,7 +146,16 @@ class WC_Order extends WC_Abstract_Order {
 			$cart_hash   = $this->get_cart_hash();
 			$has_checkout_evidence = false;
 
-			if ( in_array( $created_via, array( 'checkout', 'store-api' ), true ) ) {
+			/**
+			 * Filter which created_via values are considered valid checkout evidence.
+			 *
+			 * @param array    $allowed_created_via_values Allowed created_via values.
+			 * @param WC_Order $this                      Order object.
+			 * @since 10.6.0
+			 */
+			$allowed_created_via_values = apply_filters( 'woocommerce_payment_complete_allowed_created_via_values', array( 'checkout', 'store-api' ), $this );
+
+			if ( ! empty( $created_via ) && in_array( $created_via, $allowed_created_via_values, true ) ) {
 				$has_checkout_evidence = true;
 			}
 
@@ -160,7 +169,7 @@ class WC_Order extends WC_Abstract_Order {
 			 * @param bool     $allow_payment_complete Whether to allow payment completion without checkout evidence.
 			 * @param WC_Order $this                  Order object.
 			 * @param string   $transaction_id         Transaction ID.
-			 * @since 8.9.4
+			 * @since 10.6.0
 			 */
 			$allow_without_checkout_evidence = apply_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence', false, $this, $transaction_id );
 
@@ -180,12 +189,15 @@ class WC_Order extends WC_Abstract_Order {
 						'payment_method' => $this->get_payment_method(),
 					)
 				);
+				$created_via_message = empty( $created_via ) ? __( 'No created_via reference', 'woocommerce' ) : sprintf( __( 'Unexpected created_via value: %s', 'woocommerce' ), $created_via );
+				$cart_hash_message   = empty( $cart_hash ) ? __( 'No cart_hash', 'woocommerce' ) : __( 'Cart hash present', 'woocommerce' );
+
 				$this->add_order_note(
 					sprintf(
-						/* translators: %1$s: created_via value, %2$s: cart_hash status */
-						__( 'Payment completion blocked: Order lacks evidence of legitimate checkout session (created_via: %1$s, cart_hash: %2$s). This may indicate a security issue.', 'woocommerce' ),
-						$created_via ? $created_via : __( 'empty', 'woocommerce' ),
-						$cart_hash ? __( 'present', 'woocommerce' ) : __( 'empty', 'woocommerce' )
+						/* translators: %1$s: created_via message, %2$s: cart_hash message */
+						__( 'Payment completion blocked: Order lacks evidence of legitimate checkout session (%1$s, %2$s). This may indicate a security issue.', 'woocommerce' ),
+						$created_via_message,
+						$cart_hash_message
 					),
 					false,
 					false,
