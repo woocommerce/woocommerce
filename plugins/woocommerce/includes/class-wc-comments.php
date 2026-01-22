@@ -329,7 +329,6 @@ class WC_Comments {
 	private static function is_comment_excluded_from_wp_comment_counts( $comment ) {
 		return in_array( $comment->comment_type, array( 'action_log', 'order_note', 'webhook_delivery' ), true )
 			|| get_post_type( $comment->comment_post_ID ) === 'product';
-		// Marker
 	}
 
 	/**

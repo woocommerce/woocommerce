@@ -148,6 +148,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_integrates_akismet_excluded_comment_types(): void {
 		$this->assertTrue( has_filter( 'akismet_excluded_comment_types' ) );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		$this->assertSame( array( 'order_note' ), apply_filters( 'akismet_excluded_comment_types', array() ) );
 	}
 }
