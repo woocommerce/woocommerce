@@ -25,7 +25,8 @@ test.describe( 'Cart Store', () => {
 		await frontendUtils.goToShop();
 		const cachedHtml = await page.content();
 
-		// 2. Wait for the nonce to expire.
+		// 2. Wait for the nonce to expire (intentional timeout - nonce has 2s lifetime).
+		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
 		await page.waitForTimeout( 2500 );
 
 		// 3. Set up route interception to serve the "cached" shop page.
