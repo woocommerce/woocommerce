@@ -678,10 +678,10 @@ class QueryBuilder {
 				continue;
 			}
 
-			// Define $term_values by exploding the string
+			// Define $term_values by exploding the string.
 			$term_values = explode( ',', $param_value );
 
-			// Sanitize and filter (removes empty strings)
+			// Sanitize and filter (removes empty strings).
 			$term_slugs = array_values( array_filter( array_map( 'sanitize_title', $term_values ) ) );
 
 			if ( empty( $term_slugs ) ) {
