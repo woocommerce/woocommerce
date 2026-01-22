@@ -270,10 +270,10 @@ jobs:
               let prBody = `This PR is a cherry-pick of #${prNumber} to \`${targetBranch}\`.\n\n`;
 
               if (hasConflicts) {
-                prBody += `⚠️ **WARNING**: This cherry-pick contained conflicts that have not been resolved\n\n`;
-                prBody += `1. Review and resolve all conflicts\n`;
-                prBody += `2. Remove the \`cherry pick has conflicts\` label (required to merge)\n\n`;
-                
+                prBody += `> [!WARNING]\n`;
+                prBody += `> This cherry-pick contained conflicts that have not been resolved\n`;
+                prBody += `> 1. Review and resolve all conflicts\n`;
+                prBody += `> 2. Remove the \`cherry pick has conflicts\` label (required to merge)\n`;
                 if (conflictStatus) {
                   // Map status codes to human-readable descriptions
                   const conflictTypeMap = {
@@ -285,17 +285,17 @@ jobs:
                     'AA': 'added by both with different content',
                     'UU': 'modified by both'
                   };
-                  prBody += `### Conflicted Files:\n`;
+                  prBody += `>\n`; // Empty blockquote line for spacing
+                  prBody += `> **Conflicted Files:**\n`;
                   const conflictLines = conflictStatus.split('|');
                   for (const line of conflictLines) {
                     const statusCode = line.slice(0, 2);
                     const filePath = line.slice(3).trim();
                     const conflictType = conflictTypeMap[statusCode] || 'unknown conflict type';
-                    prBody += `- \`${filePath}\` (${conflictType})\n`;
+                    prBody += `> - \`${filePath}\` (${conflictType})\n`;
                   }
-
-                  prBody += `\n`;
                 }
+                prBody += `\n`;
               }
 
               prBody += `## Original PR Description\n\n${originalPr.body || '*No description provided*'}`;
