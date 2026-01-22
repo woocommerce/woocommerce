@@ -55,8 +55,8 @@ function wc_admin_update_0230_rename_gross_total() {
  * Remove the note unsnoozing scheduled action.
  */
 function wc_admin_update_0251_remove_unsnooze_action() {
-	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' );
-	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' );
+	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' ); // @phpstan-ignore-line argument.type We want to use null. With null we clean any action with the given hook. Passing array would only clean actions with the given args.
+	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' ); // @phpstan-ignore-line argument.type
 }
 
 /**
