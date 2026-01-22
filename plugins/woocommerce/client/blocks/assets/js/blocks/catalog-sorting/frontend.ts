@@ -46,8 +46,7 @@ const catalogSortingStore = {
 			const newOrderBy = target.value;
 
 			// Build URL with updated orderby parameter.
-			const config = getConfig( BLOCK_NAME );
-			const url = new URL( config.currentUrl, window.location.origin );
+			const url = new URL( window.location.href );
 
 			url.searchParams.set( 'orderby', newOrderBy );
 			url.searchParams.set( 'paged', '1' );

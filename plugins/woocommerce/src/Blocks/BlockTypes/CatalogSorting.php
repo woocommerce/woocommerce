@@ -57,14 +57,6 @@ class CatalogSorting extends AbstractBlock {
 
 		$catalog_sorting = $processor->get_updated_html();
 
-		// Pass current URL to frontend.
-		wp_interactivity_config(
-			'woocommerce/catalog-sorting',
-			array(
-				'currentUrl' => add_query_arg( null, null ),
-			)
-		);
-
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
