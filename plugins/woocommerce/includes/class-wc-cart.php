@@ -1736,7 +1736,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
 			// If local pickup is enabled, shipping should be shown so that pickup locations are visible before address entry.
 			if ( LocalPickupUtils::is_local_pickup_enabled() ) {
-				return true;
+				/** This filter is documented below. */
+				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
 
 			if ( 'shortcode' === $this->cart_context ) {
