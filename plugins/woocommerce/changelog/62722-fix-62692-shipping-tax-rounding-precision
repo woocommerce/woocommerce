@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: Round percentage-based flat rate shipping fee to display decimals to prevent $0.01 rounding errors.

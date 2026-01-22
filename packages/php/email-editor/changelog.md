@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0](https://github.com/woocommerce/email-editor/releases/tag/2.4.0) - 2026-01-21 
+
+-   Minor - Add woocommerce_email_editor_site_theme filter to allow overriding the site theme used when syncing global styles for the email editor. [#62889]
+-   Minor - Email editor: Add support for horizontal blockGap settings on columns. [#62838]
+-   Minor - Prevent rendering of CSS margins in email HTML output [#62794]
+
 ## [2.3.1](https://github.com/woocommerce/email-editor/releases/tag/2.3.1) - 2026-01-16 
 
 -   Patch - Fix personalization tag attributes not being processed in email links [#62822]
@@ -34,7 +40,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 -   Patch - Fix core/post-content block rendering empty on second email in batch processing by overriding WordPress render callback with stateless version [#61546]
 -   Minor - Extend Rendering_Context with email-specific context support (user_id, order_id, recipient_email), add woocommerce_email_editor_rendering_email_context filter [#61546]
--   Major [ **BREAKING CHANGE** ] - ** BREAKING CHANGE ** Updated all PHP dependencies. [#61753]
+-   ** BREAKING CHANGE ** Updated all PHP dependencies. [#61753]
 
 ## [1.9.0](https://github.com/woocommerce/email-editor/releases/tag/1.9.0) - 2025-10-31 
 

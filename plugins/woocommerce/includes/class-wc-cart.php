@@ -12,8 +12,10 @@
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\FraudProtection\BlockedSessionNotice;
 use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
@@ -1063,6 +1065,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 		try {
+			// Block add-to-cart if session is blocked by fraud protection.
+			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+				&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+				throw new Exception(
+					wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' )
+				);
+			}
+
 			$product_id   = absint( $product_id );
 			$variation_id = absint( $variation_id );
 
@@ -1370,6 +1380,16 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function remove_cart_item( $cart_item_key ) {
+		// Block remove if session is blocked by fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+			wc_add_notice(
+				wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' ),
+				'error'
+			);
+			return false;
+		}
+
 		if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
 			$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
 
@@ -1434,6 +1454,16 @@ class WC_Cart extends WC_Legacy_Cart {
 			wc_do_deprecated_action( 'woocommerce_before_cart_item_quantity_zero', array( $cart_item_key, $this ), '3.7.0', 'woocommerce_remove_cart_item' );
 			// If we're setting qty to 0 we're removing the item from the cart.
 			return $this->remove_cart_item( $cart_item_key );
+		}
+
+		// Block quantity update if session is blocked by fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+			wc_add_notice(
+				wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' ),
+				'error'
+			);
+			return false;
 		}
 
 		// Update qty.
