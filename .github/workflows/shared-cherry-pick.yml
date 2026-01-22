@@ -47,7 +47,7 @@ jobs:
     name: Verify requirements
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     outputs:
       status: ${{ steps.aggregate-status.outputs.status }}
@@ -149,39 +149,36 @@ jobs:
               }
 
               // 4. Handle existing PR scenarios
-              const existingPr = prs[0];
-              const prState = existingPr.merged_at ? 'merged' : existingPr.state;
-              core.info(`Found existing PR #${existingPr.number} (state: ${prState})`);
+              const openPr = prs.find(pr => pr.state === 'open');
+              const mergedPr = prs.find(pr => pr.merged_at);
 
-              // Case 1: PR was already merged
-              if (existingPr.merged_at) {
+              // Case 1: There's an open PR
+              if (openPr) {
+                core.info(`Found open PR #${openPr.number}`);
                 core.setOutput('status', 'skipped');
-                core.setOutput('error_message', `A cherry-pick PR was already merged: #${existingPr.number}`);
+                core.setOutput('error_message', `An open cherry-pick PR already exists: #${openPr.number}`);
                 return;
               }
 
-              // Case 2: PR is currently open
-              if (existingPr.state === 'open') {
+              // Case 2: A PR was already merged
+              if (mergedPr) {
+                core.info(`Found merged PR #${mergedPr.number}`);
                 core.setOutput('status', 'skipped');
-                core.setOutput('error_message', `An open cherry-pick PR already exists: #${existingPr.number}`);
+                core.setOutput('error_message', `A cherry-pick PR was already merged: #${mergedPr.number}`);
                 return;
               }
 
-              // Case 3: PR is closed (not merged)
+              // Case 3: Only closed (not merged) PRs exist - delete branch and create fresh
               if (branchExists) {
-                // Branch still exists - reopen the PR
-                await github.rest.pulls.update({
+                await github.rest.git.deleteRef({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  pull_number: existingPr.number,
-                  state: 'open'
-                });
-                core.setOutput('status', 'skipped');
-                core.setOutput('error_message', `Cherry-pick PR was closed and has been reopened: #${existingPr.number}`);
-              } else {
-                core.info(`Closed PR #${existingPr.number} exists but branch deleted - will create fresh cherry-pick`);
-                core.setOutput('cherry_pick_branch', cherryPickBranch);
+                  ref: `heads/${cherryPickBranch}`
+                  });
+                core.info(`Found only closed PRs. Deleted branch '${cherryPickBranch}'.`);
               }
+              
+              core.setOutput('cherry_pick_branch', cherryPickBranch);
 
             } catch (error) {
               const errorMsg = error.status === 404
