@@ -122,7 +122,7 @@ class Renderer {
 			class="wp-block-woocommerce-product-collection"
 			data-wp-interactive="woocommerce/product-collection"
 			data-wp-router-region="<?php echo esc_attr( 'wc-product-collection-' . $query_id ); ?>"
-			data-wp-watch="callbacks.onMiniCartOpen"
+			data-wp-watch--mini-cart="callbacks.onMiniCartOpen"
 			data-product-reference-type="cart"
 		></div>
 		<?php
@@ -194,11 +194,12 @@ class Renderer {
 					);
 				}
 
+				// For cart-referencing collections, add callback to refresh on drawer open.
 				$query                  = $block['attrs']['query'] ?? array();
 				$product_reference_type = $query['productReferenceType'] ?? null;
 				if ( 'cart' === $product_reference_type ) {
 					$p->set_attribute( 'data-product-reference-type', 'cart' );
-					$p->set_attribute( 'data-wp-watch', 'callbacks.onMiniCartOpen' );
+					$p->set_attribute( 'data-wp-watch--mini-cart', 'callbacks.onMiniCartOpen' );
 				}
 			}
 

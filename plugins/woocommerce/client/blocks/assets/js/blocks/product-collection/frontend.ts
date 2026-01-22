@@ -306,34 +306,3 @@ const productCollectionStore = {
 store( 'woocommerce/product-collection', productCollectionStore, {
 	lock: true,
 } );
-
-/**
- * Set up prefetching when cart changes.
- * This pre-loads the updated page content so it's ready when the drawer opens,
- * eliminating jank caused by waiting for the network request.
- */
-const setupCartChangePrefetch = () => {
-	const prefetchPage = async () => {
-		// Only prefetch if there are cart-referencing Product Collections.
-		const collections = document.querySelectorAll(
-			'[data-product-reference-type="cart"]'
-		);
-		if ( collections.length === 0 ) {
-			return;
-		}
-
-		const { actions: routerActions } = await import(
-			'@wordpress/interactivity-router'
-		);
-
-		await routerActions.prefetch( window.location.href, { force: true } );
-	};
-
-	document.body.addEventListener( 'wc-blocks_added_to_cart', prefetchPage );
-	document.body.addEventListener(
-		'wc-blocks_removed_from_cart',
-		prefetchPage
-	);
-};
-
-setupCartChangePrefetch();

@@ -70,6 +70,9 @@ const scalePrice = ( {
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
+type CartItems = WooCommerce[ 'state' ][ 'cart' ][ 'items' ];
+let lastCartItemsRef: CartItems | undefined;
+
 type MiniCartContext = {
 	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
 };
@@ -98,6 +101,7 @@ export type MiniCart = {
 		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
+		onCartChange: () => void;
 	};
 };
 
@@ -382,6 +386,30 @@ store< MiniCart >(
 					const { ref } = getElement();
 					// Focus first element when the minicart is opened.
 					getFocusableElements( ref )[ 0 ]?.focus();
+				}
+			},
+
+			/**
+			 * Watches cart state and prefetches page when cart changes.
+			 * This ensures cross-sells content is ready when drawer opens.
+			 */
+			*onCartChange() {
+				const items = woocommerceState.cart?.items;
+
+				if ( lastCartItemsRef === undefined ) {
+					lastCartItemsRef = items;
+					return;
+				}
+
+				if ( items !== lastCartItemsRef ) {
+					lastCartItemsRef = items;
+
+					const { actions: routerActions } = yield import(
+						'@wordpress/interactivity-router'
+					);
+					yield routerActions.prefetch( window.location.href, {
+						force: true,
+					} );
 				}
 			},
 		},

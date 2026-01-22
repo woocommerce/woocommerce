@@ -19,7 +19,10 @@ import type {
 /**
  * Internal dependencies
  */
-import { triggerAddedToCartEvent } from './legacy-events';
+import {
+	triggerAddedToCartEvent,
+	triggerRemovedFromCartEvent,
+} from './legacy-events';
 
 export type WooCommerceConfig = {
 	products?: {
@@ -298,6 +301,7 @@ const { state, actions } = store< Store >(
 
 					state.cart = json;
 					emitSyncEvent( { quantityChanges } );
+					triggerRemovedFromCartEvent();
 				} catch ( error ) {
 					state.cart = JSON.parse( previousCart );
 
