@@ -148,10 +148,10 @@ const OrderSummaryItem = ( {
 	);
 
 	const productPriceScreenReaderFormat = applyCheckoutFilter( {
-		filterName: 'cartItemPrice',
+		filterName: 'cartItemScreenReaderPrice',
 		defaultValue: productPriceScreenReaderDefault,
 		extensions,
-		arg: { ...arg, context: 'summaryScreenReader' },
+		arg,
 		validation: productPriceScreenReaderValidation,
 	} );
 
