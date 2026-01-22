@@ -808,36 +808,15 @@ class FeaturesController {
 	 *
 	 * @since 10.5.0
 	 */
-	private function get_feature_definition( string $feature_id ): ?array {
+	public function get_feature_definition( string $feature_id ): ?array {
 		return $this->get_feature_definitions()[ $feature_id ] ?? null;
 	}
 
 	/**
-	 * Log usage of a deprecated feature.
-	 *
-	 * This method ensures logging only happens once per request to avoid spam.
-	 *
-	 * @param string $feature_id       The feature id being checked.
-	 * @param string $deprecated_since The version since which the feature is deprecated.
-	 *
-	 * @since 10.5.0
-	 */
-	private function log_deprecated_feature_usage( string $feature_id, string $deprecated_since ): void {
-		static $logged = array();
-
-		if ( isset( $logged[ $feature_id ] ) ) {
-			return;
-		}
-		$logged[ $feature_id ] = true;
-
-		wc_deprecated_function(
-			"FeaturesUtil::feature_is_enabled('{$feature_id}')",
-			$deprecated_since
-		);
-	}
-
-	/**
 	 * Check if a given feature is currently enabled.
+	 *
+	 * Note: This method does not log deprecation notices for deprecated features.
+	 * Deprecation logging is handled by FeaturesUtil::feature_is_enabled() which is the public API.
 	 *
 	 * @param  string $feature_id Unique feature id.
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
@@ -851,7 +830,6 @@ class FeaturesController {
 
 		// Handle deprecated features - return the backwards-compatible value.
 		if ( ! empty( $feature['deprecated_since'] ) ) {
-			$this->log_deprecated_feature_usage( $feature_id, $feature['deprecated_since'] );
 			return (bool) ( $feature['deprecated_value'] ?? false );
 		}
 
@@ -874,32 +852,6 @@ class FeaturesController {
 		$features = $this->get_feature_definitions();
 
 		return ! empty( $features[ $feature_id ]['enabled_by_default'] );
-	}
-
-	/**
-	 * Check if a given feature is enabled, without triggering deprecation notices.
-	 *
-	 * This is used internally for compatibility checks to avoid flooding logs with deprecation notices
-	 * when iterating over all features. For deprecated features, it returns the deprecated_value directly.
-	 *
-	 * @param string $feature_id Unique feature id.
-	 * @return bool True if the feature is enabled, false otherwise.
-	 *
-	 * @since 10.5.0
-	 */
-	private function feature_is_enabled_without_deprecation_notice( string $feature_id ): bool {
-		$feature = $this->get_feature_definition( $feature_id );
-
-		if ( null === $feature ) {
-			return false;
-		}
-
-		// For deprecated features, return the deprecated_value without triggering notice.
-		if ( ! empty( $feature['deprecated_since'] ) ) {
-			return (bool) ( $feature['deprecated_value'] ?? false );
-		}
-
-		return $this->feature_is_enabled( $feature_id );
 	}
 
 	/**
@@ -1072,7 +1024,7 @@ class FeaturesController {
 		if ( $enabled_features_only ) {
 			$features = array_filter(
 				$features,
-				fn( $feature_id ) => $this->feature_is_enabled_without_deprecation_notice( $feature_id ),
+				array( $this, 'feature_is_enabled' ),
 				ARRAY_FILTER_USE_KEY
 			);
 		}
@@ -1610,7 +1562,7 @@ class FeaturesController {
 				$features_considered_incompatible = array_filter(
 					$this->plugin_util->get_items_considered_incompatible( $feature_id, $compatibility_info ),
 					$only_enabled_features ?
-						fn( $id ) => $this->feature_is_enabled_without_deprecation_notice( $id ) && ! $this->should_skip_compatibility_checks( $id ) :
+						fn( $id ) => $this->feature_is_enabled( $id ) && ! $this->should_skip_compatibility_checks( $id ) :
 						fn( $id ) => ! $this->should_skip_compatibility_checks( $id )
 				);
 				if ( in_array( $feature_id, $features_considered_incompatible, true ) ) {
