@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
 /**
  * ProductsBySlug class.
@@ -70,7 +71,10 @@ class ProductsBySlug extends AbstractRoute {
 	}
 
 	/**
-	 * Get a single item.
+	 * Get a single item using the same query logic as the collection endpoint.
+	 *
+	 * This ensures that single product requests respect the same visibility
+	 * and stock status filtering as the collection endpoint.
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
@@ -79,49 +83,19 @@ class ProductsBySlug extends AbstractRoute {
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$slug = sanitize_title( $request['slug'] );
 
-		$object = $this->get_product_by_slug( $slug );
-		if ( ! $object ) {
-			$object = $this->get_product_variation_by_slug( $slug );
+		$collection_request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$collection_request->set_param( 'slug', $slug );
+		$collection_request->set_param( 'per_page', 1 );
+
+		$product_query = new ProductQuery();
+		$query_results = $product_query->get_objects( $collection_request );
+
+		if ( empty( $query_results['objects'] ) || ! $query_results['objects'][0] ) {
+			throw new RouteException( 'woocommerce_rest_product_invalid_slug', esc_html__( 'Invalid product slug.', 'woocommerce' ), 404 );
 		}
 
-		if ( ! $object || 0 === $object->get_id() ) {
-			throw new RouteException( 'woocommerce_rest_product_invalid_slug', __( 'Invalid product slug.', 'woocommerce' ), 404 );
-		}
+		$object = $query_results['objects'][0];
 
 		return rest_ensure_response( $this->schema->get_item_response( $object ) );
-	}
-
-	/**
-	 * Get a product  by slug.
-	 *
-	 * @param string $slug The slug of the product.
-	 */
-	public function get_product_by_slug( $slug ) {
-		return wc_get_product( get_page_by_path( $slug, OBJECT, 'product' ) );
-	}
-
-	/**
-	 * Get a product variation by slug.
-	 *
-	 * @param string $slug The slug of the product variation.
-	 */
-	private function get_product_variation_by_slug( $slug ) {
-		global $wpdb;
-
-		$result = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT ID, post_name, post_parent, post_type
-				FROM $wpdb->posts
-				WHERE post_name = %s
-				AND post_type = 'product_variation'",
-				$slug
-			)
-		);
-
-		if ( ! $result ) {
-			return null;
-		}
-
-		return wc_get_product( $result[0]->ID );
 	}
 }

@@ -39,6 +39,7 @@ class ProductQuery implements QueryClausesGenerator {
 			'post_status'         => ProductStatus::PUBLISH,
 			'date_query'          => array(),
 			'post_type'           => 'product',
+			'has_password'        => false, // Exclude password-protected products from Store API responses.
 		);
 
 		// If searching for a specific SKU or slug, allow any post type.
@@ -207,7 +208,12 @@ class ProductQuery implements QueryClausesGenerator {
 		$rating             = $request->get_param( 'rating' );
 		$visibility_options = wc_get_product_visibility_options();
 
-		if ( in_array( $catalog_visibility, array_keys( $visibility_options ), true ) ) {
+		// Determine query type for visibility filtering.
+		$is_direct_lookup = ! empty( $request['include'] ) || ! empty( $request['slug'] ) || ! empty( $request['sku'] );
+		$is_search_query  = ! empty( $request['search'] ) && '' !== $request->get_param( 'search' );
+
+		if ( $catalog_visibility && in_array( $catalog_visibility, array_keys( $visibility_options ), true ) ) {
+			// Explicit catalog_visibility param - use existing logic.
 			$exclude_from_catalog = CatalogVisibility::SEARCH === $catalog_visibility ? '' : 'exclude-from-catalog';
 			$exclude_from_search  = CatalogVisibility::CATALOG === $catalog_visibility ? '' : 'exclude-from-search';
 
@@ -217,6 +223,28 @@ class ProductQuery implements QueryClausesGenerator {
 				'terms'         => array( $exclude_from_catalog, $exclude_from_search ),
 				'operator'      => CatalogVisibility::HIDDEN === $catalog_visibility ? 'AND' : 'NOT IN',
 				'rating_filter' => true,
+			);
+			// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedElseif -- Intentionally empty for direct lookups.
+		} elseif ( $is_direct_lookup ) {
+			// Direct lookups (include, slug, sku) - no catalog visibility filtering.
+			// These queries are for specific product access, not catalog browsing.
+		} elseif ( $is_search_query ) {
+			// Search queries - exclude products hidden from search.
+			$args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => array( 'exclude-from-search' ),
+				'operator' => 'NOT IN',
+			);
+		} else {
+			// Default catalog view - exclude products hidden from catalog.
+			// This excludes products with 'exclude-from-catalog' visibility term,
+			// which includes both "Search results only" and "Hidden" products.
+			$args['tax_query'][] = array(
+				'taxonomy' => 'product_visibility',
+				'field'    => 'name',
+				'terms'    => array( 'exclude-from-catalog' ),
+				'operator' => 'NOT IN',
 			);
 		}
 

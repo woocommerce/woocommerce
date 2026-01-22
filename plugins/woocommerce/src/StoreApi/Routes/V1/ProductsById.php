@@ -70,17 +70,34 @@ class ProductsById extends AbstractRoute {
 	}
 
 	/**
-	 * Get a single item.
+	 * Get a single product by ID.
+	 *
+	 * Single product lookups bypass catalog visibility and stock filtering,
+	 * allowing product pages to display any published product regardless of
+	 * visibility settings. Only post status and password protection are enforced.
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$object = wc_get_product( (int) $request['id'] );
+		$product_id = (int) $request['id'];
+		$post       = get_post( $product_id );
+
+		// Check post exists and is published.
+		if ( ! $post || 'publish' !== $post->post_status ) {
+			throw new RouteException( 'woocommerce_rest_product_invalid_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 404 );
+		}
+
+		// Exclude password-protected products.
+		if ( ! empty( $post->post_password ) ) {
+			throw new RouteException( 'woocommerce_rest_product_invalid_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 404 );
+		}
+
+		$object = wc_get_product( $product_id );
 
 		if ( ! $object || 0 === $object->get_id() ) {
-			throw new RouteException( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_product_invalid_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 404 );
 		}
 
 		return rest_ensure_response( $this->schema->get_item_response( $object ) );
