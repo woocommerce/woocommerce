@@ -11,5 +11,8 @@ module.exports = {
 			'@wordpress/prettier-config@2.18.2',
 			'@wordpress/scripts',
 		],
+		customPackageJSON: {
+			files: [ '*.php', 'build', 'block.json' ],
+		},
 	},
 };
