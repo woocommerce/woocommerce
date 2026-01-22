@@ -3919,6 +3919,15 @@ function wc_display_product_attributes( $product ) {
 
 		$product_attributes[ 'attribute_' . $attribute_key ] = array(
 			'label'       => wc_attribute_label( $attribute->get_name() ),
+			/**
+			 * Filters the product attribute value for display.
+			 *
+			 * @since 3.6.0
+			 *
+			 * @param string $value     The attribute value.
+			 * @param array  $attribute An array of product attribute data.
+			 * @param array  $values    An array of attribute values.
+			 */
 			'value'       => apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values ),
 			'css_classes' => $css_classes,
 		);
