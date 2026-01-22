@@ -200,8 +200,6 @@ jobs:
           if git cherry-pick -m1 "$MERGE_COMMIT_SHA"; then
             # Success case
             echo "has_conflicts=false" >> $GITHUB_OUTPUT
-            echo "conflict_files=" >> $GITHUB_OUTPUT
-            echo "conflict_details=" >> $GITHUB_OUTPUT
             echo "Cherry-pick completed successfully"
           else
             # Capture conflicted files with their status codes
