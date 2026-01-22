@@ -1202,33 +1202,41 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['alt'] = $alt_text ? reset( $alt_text ) : '';
 
 		// Large version.
-		$full_size           = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
-		$src                 = wp_get_attachment_image_src( $attachment_id, $full_size );
-		$props['full_src']   = $src[0];
-		$props['full_src_w'] = $src[1];
-		$props['full_src_h'] = $src[2];
+		$full_size = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
+		$src       = wp_get_attachment_image_src( $attachment_id, $full_size );
+		if ( is_array( $src ) ) {
+			$props['full_src']   = $src[0];
+			$props['full_src_w'] = $src[1];
+			$props['full_src_h'] = $src[2];
+		}
 
 		// Gallery thumbnail.
-		$gallery_thumbnail                = wc_get_image_size( 'gallery_thumbnail' );
-		$gallery_thumbnail_size           = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
-		$src                              = wp_get_attachment_image_src( $attachment_id, $gallery_thumbnail_size );
-		$props['gallery_thumbnail_src']   = $src[0];
-		$props['gallery_thumbnail_src_w'] = $src[1];
-		$props['gallery_thumbnail_src_h'] = $src[2];
+		$gallery_thumbnail      = wc_get_image_size( 'gallery_thumbnail' );
+		$gallery_thumbnail_size = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+		$src                    = wp_get_attachment_image_src( $attachment_id, $gallery_thumbnail_size );
+		if ( is_array( $src ) ) {
+			$props['gallery_thumbnail_src']   = $src[0];
+			$props['gallery_thumbnail_src_w'] = $src[1];
+			$props['gallery_thumbnail_src_h'] = $src[2];
+		}
 
 		// Thumbnail version.
-		$thumbnail_size       = apply_filters( 'woocommerce_thumbnail_size', 'woocommerce_thumbnail' );
-		$src                  = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
-		$props['thumb_src']   = $src[0];
-		$props['thumb_src_w'] = $src[1];
-		$props['thumb_src_h'] = $src[2];
+		$thumbnail_size = apply_filters( 'woocommerce_thumbnail_size', 'woocommerce_thumbnail' );
+		$src            = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+		if ( is_array( $src ) ) {
+			$props['thumb_src']   = $src[0];
+			$props['thumb_src_w'] = $src[1];
+			$props['thumb_src_h'] = $src[2];
+		}
 
 		// Image source.
-		$image_size      = apply_filters( 'woocommerce_gallery_image_size', 'woocommerce_single' );
-		$src             = wp_get_attachment_image_src( $attachment_id, $image_size );
-		$props['src']    = $src[0];
-		$props['src_w']  = $src[1];
-		$props['src_h']  = $src[2];
+		$image_size = apply_filters( 'woocommerce_gallery_image_size', 'woocommerce_single' );
+		$src        = wp_get_attachment_image_src( $attachment_id, $image_size );
+		if ( is_array( $src ) ) {
+			$props['src']   = $src[0];
+			$props['src_w'] = $src[1];
+			$props['src_h'] = $src[2];
+		}
 		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, $image_size ) : false;
 		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, $image_size ) : false;
 	}
