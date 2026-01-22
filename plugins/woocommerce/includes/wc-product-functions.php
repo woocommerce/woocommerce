@@ -1202,6 +1202,16 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['alt'] = $alt_text ? reset( $alt_text ) : '';
 
 		// Large version.
+		/**
+		 * Filters the size for the product thumbnails large size.
+		 *
+		 * @param string $size Image size name.
+		 */
+		/**
+		 * Filters the size for the full gallery image.
+		 *
+		 * @param string $size Image size name.
+		 */
 		$full_size = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 		$src       = wp_get_attachment_image_src( $attachment_id, $full_size );
 		if ( is_array( $src ) ) {
@@ -1211,7 +1221,12 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		}
 
 		// Gallery thumbnail.
-		$gallery_thumbnail      = wc_get_image_size( 'gallery_thumbnail' );
+		$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+		/**
+		 * Filters the size for the gallery thumbnail.
+		 *
+		 * @param array $size Array containing width and height dimensions.
+		 */
 		$gallery_thumbnail_size = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
 		$src                    = wp_get_attachment_image_src( $attachment_id, $gallery_thumbnail_size );
 		if ( is_array( $src ) ) {
@@ -1221,6 +1236,11 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		}
 
 		// Thumbnail version.
+		/**
+		 * Filters the thumbnail size.
+		 *
+		 * @param string $size Image size name.
+		 */
 		$thumbnail_size = apply_filters( 'woocommerce_thumbnail_size', 'woocommerce_thumbnail' );
 		$src            = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
 		if ( is_array( $src ) ) {
@@ -1230,6 +1250,11 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		}
 
 		// Image source.
+		/**
+		 * Filters the size for the gallery image.
+		 *
+		 * @param string $size Image size name.
+		 */
 		$image_size = apply_filters( 'woocommerce_gallery_image_size', 'woocommerce_single' );
 		$src        = wp_get_attachment_image_src( $attachment_id, $image_size );
 		if ( is_array( $src ) ) {
