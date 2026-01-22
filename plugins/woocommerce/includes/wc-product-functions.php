@@ -1202,12 +1202,6 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$props['alt'] = $alt_text ? reset( $alt_text ) : '';
 
 		/**
-		 * Filters the size for the product thumbnails large size.
-		 *
-		 * @since 2.6.0
-		 * @param string $size Image size name.
-		 */
-		/**
 		 * Filters the size for the full gallery image.
 		 *
 		 * @since 2.6.0
