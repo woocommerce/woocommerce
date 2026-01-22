@@ -531,6 +531,8 @@ class Embed extends Abstract_Block_Renderer {
 	 * Uses WordPress oEmbed API to get thumbnail_url from the provider response.
 	 * Results are cached using transients to avoid repeated HTTP requests.
 	 *
+	 * @since 10.6.0
+	 *
 	 * @param string $url VideoPress video URL.
 	 * @return string Thumbnail URL or empty string.
 	 */
@@ -562,6 +564,8 @@ class Embed extends Abstract_Block_Renderer {
 		 * @param string $url     The embedded URL.
 		 * @param array  $attr    Attributes array.
 		 * @param string $post_id Post ID (empty string in email context).
+		 *
+		 * @since 10.6.0
 		 */
 		// Default TTL matches WordPress oEmbed cache (1 day).
 		$cache_ttl = (int) apply_filters( 'oembed_ttl', DAY_IN_SECONDS, $url, array(), '' );
