@@ -275,7 +275,7 @@ class Settings {
 	 * @return array
 	 */
 	private function add_react_settings_data( array $settings ): array {
-		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'react-settings' ) ) {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'modern-settings' ) ) {
 			return $settings;
 		}
 

@@ -509,7 +509,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		$settings_definitions = null;
 		$section_id           = $current_section ?? '';
 
-		if ( Features::is_enabled( 'react-settings' ) ) {
+		if ( Features::is_enabled( 'modern-settings' ) ) {
 			$settings_definitions = $this->get_settings( $section_id );
 			if ( is_array( $settings_definitions ) ) {
 				$tab = $this->id;

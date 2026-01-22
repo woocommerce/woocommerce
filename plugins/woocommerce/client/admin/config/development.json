@@ -15,7 +15,7 @@
 		"customer-effort-score-tracks": true,
 		"import-products-task": true,
 		"experimental-fashion-sample-products": true,
-		"react-settings": false,
+		"modern-settings": false,
 		"shipping-smart-defaults": true,
 		"shipping-setting-tour": true,
 		"homescreen": true,
