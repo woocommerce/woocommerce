@@ -2,6 +2,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import { createInterpolateElement } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
 import { Label } from '@woocommerce/blocks-components';
 import ProductPrice from '@woocommerce/base-components/product-price';
@@ -135,15 +136,13 @@ const OrderSummaryItem = ( {
 	} );
 
 	const productPriceScreenReaderDefault = sprintf(
-		/* translators: %1$d is the number of items, %2$s is the item name and %3$s is the total price including the currency symbol. */
+		/* translators: %1$d is the total price including the currency symbol. <quantity/> and <productName/> are placeholders and should not be translated. */
 		_n(
-			'Total price for %1$d %2$s item: %3$s',
-			'Total price for %1$d %2$s items: %3$s',
+			'Total price for <quantity/> <productName/> item: %1$s',
+			'Total price for <quantity/> <productName/> items: %1$s',
 			quantity,
 			'woocommerce'
 		),
-		quantity,
-		name,
 		formatPrice( subtotalPrice, totalsCurrency )
 	);
 
@@ -154,6 +153,13 @@ const OrderSummaryItem = ( {
 		arg,
 		validation: productPriceScreenReaderValidation,
 	} );
+
+	const ProductPriceScreenReaderOutput = () => {
+		return createInterpolateElement( productPriceScreenReaderFormat, {
+			quantity: <>{ quantity }</>,
+			productName: <>{ name }</>,
+		} );
+	};
 
 	const cartItemClassNameFilter = applyCheckoutFilter( {
 		filterName: 'cartItemClass',
@@ -226,7 +232,7 @@ const OrderSummaryItem = ( {
 				<ProductMetadata { ...productMetaProps } />
 			</div>
 			<span className="screen-reader-text">
-				{ productPriceScreenReaderFormat }
+				<ProductPriceScreenReaderOutput />
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"
