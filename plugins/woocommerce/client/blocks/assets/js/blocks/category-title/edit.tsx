@@ -202,11 +202,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 								isLink: DEFAULT_ATTRIBUTES.isLink,
 							} )
 						}
-						resetAllFilter={ () =>
-							setAttributes( {
-								isLink: DEFAULT_ATTRIBUTES.isLink,
-							} )
-						}
 						isShownByDefault
 					>
 						<ToggleControl
@@ -226,12 +221,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 									linkTarget !== DEFAULT_ATTRIBUTES.linkTarget
 								}
 								onDeselect={ () =>
-									setAttributes( {
-										linkTarget:
-											DEFAULT_ATTRIBUTES.linkTarget,
-									} )
-								}
-								resetAllFilter={ () =>
 									setAttributes( {
 										linkTarget:
 											DEFAULT_ATTRIBUTES.linkTarget,
@@ -259,11 +248,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 									rel !== DEFAULT_ATTRIBUTES.rel
 								}
 								onDeselect={ () =>
-									setAttributes( {
-										rel: DEFAULT_ATTRIBUTES.rel,
-									} )
-								}
-								resetAllFilter={ () =>
 									setAttributes( {
 										rel: DEFAULT_ATTRIBUTES.rel,
 									} )
