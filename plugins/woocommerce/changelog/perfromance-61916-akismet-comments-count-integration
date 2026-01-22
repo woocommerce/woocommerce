@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Integrate the `akismet_excluded_comment_types` hook from `Akismet::get_user_comments_approved()` to ensure order notes are excluded from the count.
