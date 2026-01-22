@@ -168,7 +168,7 @@ jobs:
                 return;
               }
 
-              // Case 3: Only closed (not merged) PRs exist - delete branch and create fresh
+              // Case 3: Only closed (not merged) PRs exist, we delete branch and create fresh PR
               if (branchExists) {
                 await github.rest.git.deleteRef({
                   owner: context.repo.owner,
