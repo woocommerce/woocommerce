@@ -1,14 +1,10 @@
 /**
- * External dependencies
- */
-import './settings-general-main.scss';
-
-/**
  * Internal dependencies
  */
 import { ReactSettingsPage } from '../settings/react-settings-page';
 import { useGeneralSettings } from './hooks/use-general-settings';
 import { fieldTransformer, rowConfigurations } from './react-settings-config';
+import './settings-general-main.scss';
 
 /**
  * Main component for the General Settings page.
