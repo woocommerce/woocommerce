@@ -113,7 +113,6 @@ class ReactSettingsSchema {
 			'single_select_page'             => 'select',
 			'single_select_page_with_search' => 'select',
 			'textarea'                       => 'text',
-			//'relative_date_selector'         => 'text',
 		);
 		/**
 		 * Filter the field type map for React settings.
