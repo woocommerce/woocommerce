@@ -250,6 +250,8 @@ jobs:
       - name: Create cherry-pick pull request
         id: create-pr
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          CONFLICT_STATUS: ${{ steps.cherry-pick.outputs.conflict_status }}
         with:
           github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -257,7 +259,6 @@ jobs:
             const targetBranch = '${{ inputs.target_branch }}';
             const cherryPickBranch = '${{ needs.verify.outputs.cherry_pick_branch }}';
             const hasConflicts = '${{ steps.cherry-pick.outputs.has_conflicts }}' === 'true';
-            const conflictStatus = '${{ steps.cherry-pick.outputs.conflict_status }}';
 
             try {
               // Get original PR details
@@ -277,7 +278,7 @@ jobs:
                 prBody += `> 2. Remove the \`cherry pick has conflicts\` label (required to merge)\n`;
 
                 // Parse JSON array of conflicts
-                const conflicts = JSON.parse(conflictStatus || '[]');
+                const conflicts = JSON.parse(process.env.CONFLICT_STATUS || '[]');
                 // Map status codes to human-readable descriptions
                 const conflictTypeMap = {
                   'DD': 'deleted by both',
