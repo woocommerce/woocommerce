@@ -549,6 +549,20 @@ class Embed extends Abstract_Block_Renderer {
 		$oembed      = new \WP_oEmbed();
 		$oembed_data = $oembed->get_data( $url );
 
+		/**
+		 * Filter the oEmbed cache time-to-live (TTL).
+		 *
+		 * This filter matches WordPress core's oembed_ttl filter signature:
+		 * - $ttl: Time to live in seconds (default: DAY_IN_SECONDS)
+		 * - $url: The URL being embedded
+		 * - $attr: Attributes array (empty in this context)
+		 * - $post_id: Post ID where embed is used (empty string here since email rendering is not post-specific)
+		 *
+		 * @param int    $ttl     Cache TTL in seconds.
+		 * @param string $url     The embedded URL.
+		 * @param array  $attr    Attributes array.
+		 * @param string $post_id Post ID (empty string in email context).
+		 */
 		// Default TTL matches WordPress oEmbed cache (1 day).
 		$cache_ttl = (int) apply_filters( 'oembed_ttl', DAY_IN_SECONDS, $url, array(), '' );
 
