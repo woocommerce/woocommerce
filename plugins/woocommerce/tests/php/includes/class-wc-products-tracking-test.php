@@ -124,7 +124,9 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_track_product_published_deferred_when_importing(): void {
 		$_POST['action'] = 'woocommerce_do_ajax_product_import';
-		$product         = new WC_Product_Simple();
+		$this->assertFalse( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce' ) );
+
+		$product = new WC_Product_Simple();
 		$product->set_name( 'New name' );
 		$product->set_status( ProductStatus::PUBLISH );
 		$product->save();
