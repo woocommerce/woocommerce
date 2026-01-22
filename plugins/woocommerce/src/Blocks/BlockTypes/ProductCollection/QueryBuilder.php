@@ -653,6 +653,8 @@ class QueryBuilder {
 
 	/**
 	 * Return a query that filters products by taxonomy terms.
+	 * 
+	 * @since 10.6.0
 	 *
 	 * @return array
 	 */
