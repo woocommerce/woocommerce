@@ -479,9 +479,9 @@ class Site_Style_Sync_Controller {
 	 */
 	private function convert_to_px_size( string $size, ?string $fallback = null ): string {
 		$converted = null;
-		// Replace clamp() with its average value.
+		// Replace clamp() with its minimum value. We use min because it's emails are most likely to be viewed on smaller screens.
 		if ( stripos( $size, 'clamp(' ) !== false ) {
-			$converted = Styles_Helper::clamp_to_static_px( $size, 'avg' );
+			$converted = Styles_Helper::clamp_to_static_px( $size, 'min' );
 			// If clamp_to_static_px returns the original value, it failed to convert.
 			if ( $converted === $size ) {
 				$converted = null;
