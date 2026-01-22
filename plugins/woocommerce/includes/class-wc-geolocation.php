@@ -158,7 +158,7 @@ class WC_Geolocation {
 		 * @param bool $api_fallback If true, uses geolocation APIs if the database file doesn't exist (can be slower).
 		 * @return string
 		 */
-		$country_code = apply_filters( 'woocommerce_geolocate_ip', '', $ip_address, $fallback, $api_fallback );
+		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
 		if ( '' !== $country_code ) {
 			return array(
@@ -184,7 +184,7 @@ class WC_Geolocation {
 		$geolocation = apply_filters(
 			'woocommerce_get_geolocation',
 			array(
-				'country'  => $country_code,
+				'country'  => $country_code ? $country_code : '',
 				'state'    => '',
 				'city'     => '',
 				'postcode' => '',
