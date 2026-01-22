@@ -1079,7 +1079,15 @@ class ListTable extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_cb( $item ) {
-		if ( ! $this->wp_post_type || ! current_user_can( $this->wp_post_type->cap->edit_post, $item->get_id() ) ) {
+		if (! $this->wp_post_type) {
+			return;
+		}
+
+		$capability = OrderUtil::custom_orders_table_usage_is_enabled()
+			? 'edit_shop_orders'
+			: $this->wp_post_type->cap->edit_post;
+
+		if (! current_user_can($capability, $item->get_id())) {
 			return;
 		}
 
