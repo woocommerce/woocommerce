@@ -204,7 +204,6 @@ jobs:
           else
             # Capture conflicted files with their status codes
             CONFLICTED_STATUS=$(git status --porcelain | grep -E "^(DD|AU|UD|UA|DU|AA|UU)" || true)
-            echo "conf_status:$CONFLICTED_STATUS"
             
             if [[ -n "$CONFLICTED_STATUS" ]]; then
               echo "has_conflicts=true" >> $GITHUB_OUTPUT
