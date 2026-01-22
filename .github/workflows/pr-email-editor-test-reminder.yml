@@ -1,0 +1,52 @@
+name: Email Editor Test Reminder
+
+on:
+    pull_request:
+        types: [opened, synchronize, reopened]
+
+concurrency:
+    group: email-editor-test-reminder-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+permissions:
+    pull-requests: write
+    contents: read
+
+jobs:
+    check-and-comment:
+        name: Check and add test reminder comment
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+              with:
+                  node-version-file: '.nvmrc'
+
+            - name: Check if PR touches email editor
+              id: check-email-editor
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+              with:
+                  script: |
+                      const { checkEmailEditorTestReminderComment } = require( './.github/workflows/scripts/check-email-editor-test-reminder-comment.js' );
+                      const result = await checkEmailEditorTestReminderComment( github, context, core );
+                      core.setOutput( 'touches-email-editor', result.touchesEmailEditor ? 'true' : 'false' );
+
+            - name: Create or update test reminder comment
+              if: steps.check-email-editor.outputs.touches-email-editor == 'true'
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+              with:
+                  script: |
+                      const { createOrUpdateTestReminderComment } = require( './.github/workflows/scripts/manage-email-editor-test-reminder-comment.js' );
+                      await createOrUpdateTestReminderComment( github, context, core );
+
+            - name: Delete test reminder comment
+              if: steps.check-email-editor.outputs.touches-email-editor == 'false'
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+              with:
+                  script: |
+                      const { deleteTestReminderComment } = require( './.github/workflows/scripts/manage-email-editor-test-reminder-comment.js' );
+                      await deleteTestReminderComment( github, context, core );
+

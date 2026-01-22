@@ -32,7 +32,7 @@ import { prepareTotalItems } from './utils';
 import { useShippingData } from '../shipping/use-shipping-data';
 
 /**
- * Returns am interface to use as payment method props.
+ * Returns an interface to use as payment method props.
  */
 export const usePaymentMethodInterface = (): PaymentMethodInterface => {
 	const {

@@ -707,7 +707,7 @@
 		var wc_order_lock = {
 			init: function() {
 				// Order screen.
-				this.$lock_dialog = $( '.woocommerce_page_wc-orders #post-lock-dialog.order-lock-dialog' );
+				this.$lock_dialog = $( '#post-lock-dialog.order-lock-dialog' );
 				if ( 0 !== this.$lock_dialog.length && 'undefined' !== typeof woocommerce_admin_meta_boxes ) {
 					// We do not want WP's lock to interfere.
 					$( document ).off( 'heartbeat-send.refresh-lock' );
@@ -718,7 +718,7 @@
 				}
 
 				// Orders list table.
-				this.$list_table = $( '.woocommerce_page_wc-orders table.wc-orders-list-table' );
+				this.$list_table = $( 'table.wc-orders-list-table' );
 				if ( 0 !== this.$list_table.length ) {
 					$( document ).on( 'heartbeat-send', this.send_orders_in_list );
 					$( document ).on( 'heartbeat-tick', this.check_orders_in_list );

@@ -177,6 +177,33 @@ function getStatusBadge(
 		};
 	}
 
+	if (
+		! subscription.autorenew &&
+		! subscription.lifetime &&
+		! subscription.expired
+	) {
+		return {
+			text: __( 'Auto-renew: off', 'woocommerce' ),
+			level: StatusLevel.Warning,
+			explanation: createInterpolateElement(
+				__(
+					'This subscription will not renew automatically. <enable>Enable auto-renew</enable> to ensure uninterrupted updates and support.',
+					'woocommerce'
+				),
+				{
+					enable: (
+						<a
+							href={ enableAutorenewalUrl( subscription ) }
+							rel="nofollow noopener noreferrer"
+						>
+							enable
+						</a>
+					),
+				}
+			),
+		};
+	}
+
 	return false;
 }
 
