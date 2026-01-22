@@ -9,7 +9,7 @@
 declare( strict_types = 1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsRegistry;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema;
 
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -506,24 +506,55 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 
 			global $current_section;
 
+		$settings_definitions = null;
+		$section_id           = $current_section ?? '';
+
 		if ( Features::is_enabled( 'react-settings' ) ) {
-			$entry = ReactSettingsRegistry::get_entry_for_tab_section( $this->id, $current_section ?? '' );
-			if ( $entry ) {
-				$settings_definitions = $this->get_settings( $current_section );
-				if ( ReactSettingsRegistry::supports_settings_definitions( $settings_definitions, $entry['typeMap'], $entry['supportedTypes'] ) ) {
-					$GLOBALS['hide_save_button'] = true;
-					echo '<div id="' . esc_attr( ReactSettingsRegistry::get_mount_id( $entry ) ) . '"> </div>';
-					return;
+			$settings_definitions = $this->get_settings( $section_id );
+			if ( is_array( $settings_definitions ) ) {
+				$tab = $this->id;
+				if ( ! ReactSettingsSchema::is_opted_out( $tab, $section_id, $settings_definitions, $this ) ) {
+					$unsupported_fields = ReactSettingsSchema::get_unsupported_fields(
+						$tab,
+						$section_id,
+						$settings_definitions,
+						$this
+					);
+
+					if ( empty( $unsupported_fields ) ) {
+						$GLOBALS['hide_save_button'] = true;
+						$mount_id                    = ReactSettingsSchema::get_mount_id( $tab, $section_id );
+						echo '<div id="' . esc_attr( $mount_id ) . '" data-wc-settings-react="1" data-wc-settings-tab="' . esc_attr( $tab ) . '" data-wc-settings-section="' . esc_attr( $section_id ) . '"> </div>';
+						return;
+					}
+
+					$this->log_react_settings_fallback( $tab, $section_id, $unsupported_fields );
 				}
 			}
 		}
 
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".
-			$settings = $this->get_settings( $current_section );
+			$settings = is_array( $settings_definitions ) ? $settings_definitions : $this->get_settings( $section_id );
 
 			WC_Admin_Settings::output_fields( $settings );
 		}
+
+	/**
+	 * Log a React settings fallback in the console.
+	 *
+	 * @param string $tab Tab id.
+	 * @param string $section Section id.
+	 * @param array  $unsupported_fields Unsupported fields list.
+	 */
+	protected function log_react_settings_fallback( string $tab, string $section, array $unsupported_fields ) {
+		$payload = array(
+			'tab'               => $tab,
+			'section'           => $section,
+			'unsupportedFields' => $unsupported_fields,
+		);
+		echo '<script>console.log(' . wp_json_encode( array( 'message' => 'WooCommerce settings fallback to legacy', 'details' => $payload ) ) . ');</script>';
+	}
 
 		/**
 		 * Save settings and trigger the 'woocommerce_update_options_'.id action.
