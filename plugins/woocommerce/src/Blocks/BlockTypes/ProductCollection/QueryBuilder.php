@@ -653,7 +653,7 @@ class QueryBuilder {
 
 	/**
 	 * Return a query that filters products by taxonomy terms.
-	 * 
+	 *
 	 * @since 10.6.0
 	 *
 	 * @return array
@@ -678,11 +678,11 @@ class QueryBuilder {
 				continue;
 			}
 
-			// 1. Define $term_values by exploding the string
+			// Define $term_values by exploding the string
 			$term_values = explode( ',', $param_value );
 
-			// 2. Sanitize and filter (removes empty strings)
-			$term_slugs  = array_values( array_filter( array_map( 'sanitize_title', $term_values ) ) );
+			// Sanitize and filter (removes empty strings)
+			$term_slugs = array_values( array_filter( array_map( 'sanitize_title', $term_values ) ) );
 
 			if ( empty( $term_slugs ) ) {
 				continue;
