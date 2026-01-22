@@ -17,11 +17,8 @@ export const productPriceValidation = ( value: string ) =>
 export const productPriceScreenReaderValidation = (
 	value: string
 ): true | never => {
-	if ( typeof value === 'string' && value.length > 0 ) {
-		return true;
-	}
-
-	throw Error(
-		'Returned value must be a non-empty string for product price screen reader format.'
+	return (
+		mustContain( value, '<quantity/>' ) &&
+		mustContain( value, '<productName/>' )
 	);
 };
