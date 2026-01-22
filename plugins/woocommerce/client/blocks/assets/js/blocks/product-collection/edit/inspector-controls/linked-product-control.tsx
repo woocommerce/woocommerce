@@ -212,13 +212,9 @@ const LinkedProductControl = ( {
 			const { productReference: toSave, ...rest } = query;
 			prevReference.current = toSave;
 
-			let referenceType: ProductCollectionQuery[ 'productReferenceType' ] =
-				null;
-			if ( isCartLocation || hasCartReference ) {
-				referenceType = 'cart';
-			} else if ( isOrderLocation || hasOrderReference ) {
-				referenceType = 'order';
-			}
+			// Only `cart` can't be inferred from location context.
+			const referenceType: ProductCollectionQuery[ 'productReferenceType' ] =
+				isCartLocation || hasCartReference ? 'cart' : null;
 
 			setAttributes( {
 				query: {

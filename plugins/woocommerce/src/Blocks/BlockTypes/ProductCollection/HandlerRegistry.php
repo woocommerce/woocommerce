@@ -233,11 +233,6 @@ class HandlerRegistry {
 							$cart_items
 						) );
 					}
-				} elseif ( 'order' === $reference_type ) {
-					$location = $collection_args['productCollectionLocation'] ?? array();
-					if ( isset( $location['sourceData']['orderId'] ) ) {
-						$product_references = $this->get_product_ids_from_order( $location['sourceData']['orderId'] );
-					}
 				} elseif ( empty( $product_references ) ) {
 					// Fall back to location-based inference (backward compatibility).
 					$location = $collection_args['productCollectionLocation'] ?? array();
@@ -347,12 +342,6 @@ class HandlerRegistry {
 							}
 						}
 						$product_references = array_unique( array_filter( $product_references ) );
-					}
-				} elseif ( 'order' === $reference_type ) {
-					$location = $collection_args['productCollectionLocation'] ?? array();
-
-					if ( isset( $location['sourceData']['orderId'] ) ) {
-						$product_references = $this->get_product_ids_from_order( $location['sourceData']['orderId'] );
 					}
 				} elseif ( empty( $product_references ) ) {
 					// Fall back to location-based inference (backward compatibility).
