@@ -1,12 +1,14 @@
 ---
-sidebar_label: Product Sale Badge block
+sidebar_label: On-Sale Badge block
 category_slug: product-sale-badge
-post_title: Product Sale Badge block
+post_title: On-Sale Badge block
 ---
 
-# Product Sale Badge block
+# On-Sale Badge block
 
-The Product Sale Badge block displays a "Sale" badge on products that are on sale.
+The On-Sale Badge block displays a "Sale" badge on products that are on sale.
+
+> **Note:** This block uses the slug `woocommerce/product-sale-badge`.
 
 ## `woocommerce_sale_badge_text`
 
@@ -77,7 +79,7 @@ function show_discount_percentage_badge( $sale_text, $product ) {
 
 | Aspect | `woocommerce_sale_badge_text` | `woocommerce_sale_flash` |
 | --- | --- | --- |
-| **Context** | Product Sale Badge block | Classic templates (`loop/sale-flash.php`, `single-product/sale-flash.php`) |
+| **Context** | On-Sale Badge block | Classic templates (`loop/sale-flash.php`, `single-product/sale-flash.php`) |
 | **Output** | Plain text | HTML markup |
 | **Parameters** | `$sale_text`, `$product` | `$html`, `$post`, `$product` |
 | **Default** | `'Sale'` | `'<span class="onsale">Sale!</span>'` |
