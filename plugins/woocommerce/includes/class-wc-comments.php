@@ -125,6 +125,8 @@ class WC_Comments {
 	/**
 	 * Exclude order comments from Akismet comments counting SQL queries for better performance.
 	 *
+	 * @since 10.6.0
+	 *
 	 * @param string[] $comment_types Excluded comments types.
 	 * @return string[]
 	 */
