@@ -9024,6 +9024,12 @@ body.woocommerce_page_wc-settings {
 		}
 	}
 
+	&.woocommerce-feature-enabled-modern-settings {
+		#mainform {
+			background: #fff;
+		}
+	}
+
 	.wrap {
 		padding: 0;
 	}
