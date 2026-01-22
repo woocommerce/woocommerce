@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsRegistry;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -282,28 +282,34 @@ class Settings {
 		$current_tab     = $this->get_current_settings_tab();
 		$current_section = $this->get_current_settings_section();
 
-		foreach ( ReactSettingsRegistry::get_entries() as $entry ) {
-			if ( $entry['tab'] !== $current_tab || $entry['section'] !== $current_section ) {
-				continue;
-			}
-
-			$settings_page_id = $entry['settingsPageId'] ?? $entry['tab'];
-			$settings_page    = $this->get_settings_page_instance( $settings_page_id );
-			if ( ! $settings_page ) {
-				continue;
-			}
-
-			$settings_definitions = $settings_page->get_settings_for_section( $entry['section'] );
-			if ( ! ReactSettingsRegistry::supports_settings_definitions( $settings_definitions, $entry['typeMap'], $entry['supportedTypes'] ) ) {
-				continue;
-			}
-
-			$schema_class = $entry['schema'];
-			$schema       = new $schema_class();
-			$response     = $schema->get_item_response( $settings_definitions, null );
-
-			$settings = $this->set_nested_settings_value( $settings, $entry['payloadPath'], $response );
+		$settings_page = $this->get_settings_page_instance( $current_tab );
+		if ( ! $settings_page ) {
+			return $settings;
 		}
+
+		$settings_definitions = $settings_page->get_settings_for_section( $current_section );
+		if ( ! is_array( $settings_definitions ) ) {
+			return $settings;
+		}
+
+		if ( ReactSettingsSchema::is_opted_out( $current_tab, $current_section, $settings_definitions, $settings_page ) ) {
+			return $settings;
+		}
+
+		$unsupported_fields = ReactSettingsSchema::get_unsupported_fields(
+			$current_tab,
+			$current_section,
+			$settings_definitions,
+			$settings_page
+		);
+
+		if ( ! empty( $unsupported_fields ) ) {
+			return $settings;
+		}
+
+		$response   = ReactSettingsSchema::build_response( $current_tab, $current_section, $settings_definitions, $settings_page );
+		$payload    = ReactSettingsSchema::get_payload_path( $current_tab, $current_section );
+		$settings   = $this->set_nested_settings_value( $settings, $payload, $response );
 
 		return $settings;
 	}
