@@ -1201,15 +1201,16 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$alt_text     = array_filter( $alt_text );
 		$props['alt'] = $alt_text ? reset( $alt_text ) : '';
 
-		// Large version.
 		/**
 		 * Filters the size for the product thumbnails large size.
 		 *
+		 * @since 2.6.0
 		 * @param string $size Image size name.
 		 */
 		/**
 		 * Filters the size for the full gallery image.
 		 *
+		 * @since 2.6.0
 		 * @param string $size Image size name.
 		 */
 		$full_size = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
@@ -1218,13 +1219,17 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 			$props['full_src']   = $src[0];
 			$props['full_src_w'] = $src[1];
 			$props['full_src_h'] = $src[2];
+		} else {
+			$props['full_src']   = null;
+			$props['full_src_w'] = null;
+			$props['full_src_h'] = null;
 		}
 
-		// Gallery thumbnail.
 		$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
 		/**
 		 * Filters the size for the gallery thumbnail.
 		 *
+		 * @since 2.6.0
 		 * @param array $size Array containing width and height dimensions.
 		 */
 		$gallery_thumbnail_size = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
@@ -1233,12 +1238,16 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 			$props['gallery_thumbnail_src']   = $src[0];
 			$props['gallery_thumbnail_src_w'] = $src[1];
 			$props['gallery_thumbnail_src_h'] = $src[2];
+		} else {
+			$props['gallery_thumbnail_src']   = null;
+			$props['gallery_thumbnail_src_w'] = null;
+			$props['gallery_thumbnail_src_h'] = null;
 		}
 
-		// Thumbnail version.
 		/**
 		 * Filters the thumbnail size.
 		 *
+		 * @since 2.6.0
 		 * @param string $size Image size name.
 		 */
 		$thumbnail_size = apply_filters( 'woocommerce_thumbnail_size', 'woocommerce_thumbnail' );
@@ -1247,12 +1256,17 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 			$props['thumb_src']   = $src[0];
 			$props['thumb_src_w'] = $src[1];
 			$props['thumb_src_h'] = $src[2];
+		} else {
+			$props['thumb_src']   = null;
+			$props['thumb_src_w'] = null;
+			$props['thumb_src_h'] = null;
 		}
 
 		// Image source.
 		/**
 		 * Filters the size for the gallery image.
 		 *
+		 * @since 2.6.0
 		 * @param string $size Image size name.
 		 */
 		$image_size = apply_filters( 'woocommerce_gallery_image_size', 'woocommerce_single' );
@@ -1261,6 +1275,10 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 			$props['src']   = $src[0];
 			$props['src_w'] = $src[1];
 			$props['src_h'] = $src[2];
+		} else {
+			$props['src']   = null;
+			$props['src_w'] = null;
+			$props['src_h'] = null;
 		}
 		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, $image_size ) : false;
 		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, $image_size ) : false;
