@@ -36,6 +36,13 @@ export const ReactSettingsPage = ( {
 	isLoading,
 	rowConfigurations = {},
 }: ReactSettingsPageProps ) => {
+	const wrapperClassName = [
+		'modern-woocommerce-settings',
+		className,
+		'wc-settings-prevent-change-event',
+	]
+		.filter( Boolean )
+		.join( ' ' );
 	const [ formData, setFormData ] = useState< Record< string, unknown > >(
 		{}
 	);
@@ -117,9 +124,7 @@ export const ReactSettingsPage = ( {
 
 	if ( isLoading ) {
 		return (
-			<div
-				className={ `${ className || '' } wc-settings-prevent-change-event`.trim() }
-			>
+			<div className={ wrapperClassName }>
 				<div className="woocommerce-settings-general__loading">
 					<Spinner />
 					<p>{ __( 'Loading settings', 'woocommerce' ) }</p>
@@ -130,9 +135,7 @@ export const ReactSettingsPage = ( {
 
 	if ( error ) {
 		return (
-			<div
-				className={ `${ className || '' } wc-settings-prevent-change-event`.trim() }
-			>
+			<div className={ wrapperClassName }>
 				<Notice status="error" isDismissible={ false }>
 					{ __(
 						'Error loading settings. Please try refreshing the page.',
@@ -158,9 +161,7 @@ export const ReactSettingsPage = ( {
 		.filter( ( field ) => field?.id );
 
 	return (
-		<div
-			className={ `${ className || '' } wc-settings-prevent-change-event`.trim() }
-		>
+		<div className={ wrapperClassName }>
 			<DataForm
 				data={ formData }
 				fields={ fields }

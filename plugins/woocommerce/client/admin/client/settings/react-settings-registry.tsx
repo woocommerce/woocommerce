@@ -14,6 +14,7 @@ import {
 	fieldTransformer as generalFieldTransformer,
 	rowConfigurations as generalRowConfigurations,
 } from '../settings-general/react-settings-config';
+import '../settings-general/settings-general-main.scss';
 
 type ReactSettingsRegistryEntry = {
 	id: string;
@@ -25,34 +26,44 @@ type ReactSettingsRegistryEntry = {
 	missingDataMessage?: string;
 };
 
+type ReactSettingsScreenOverrides = {
+	className?: string;
+	fieldTransformer?: FieldTransformer;
+	rowConfigurations?: RowConfigurations;
+	missingDataMessage?: string;
+};
+
 const defaultFieldTransformer: FieldTransformer = ( field ) =>
 	baseFieldTransformer( field ) as Record< string, unknown >;
 
-const registry: ReactSettingsRegistryEntry[] = [
-	{
-		id: 'general',
-		dataPath: [ 'settings', 'general' ],
-		mountId: 'wc_settings_react_general_default',
-		className: 'woocommerce-settings-general',
-		fieldTransformer: generalFieldTransformer,
-		rowConfigurations: generalRowConfigurations,
-		missingDataMessage: 'General settings data is missing.',
-	},
-	{
-		id: 'products.general',
-		dataPath: [ 'settings', 'products', 'general' ],
-		mountId: 'wc_settings_react_products_default',
-		className: 'woocommerce-settings-products',
-		fieldTransformer: defaultFieldTransformer,
-	},
-	{
-		id: 'products.inventory',
-		dataPath: [ 'settings', 'products', 'inventory' ],
-		mountId: 'wc_settings_react_products_inventory',
-		className: 'woocommerce-settings-products',
-		fieldTransformer: defaultFieldTransformer,
-	},
+const screenOverrides = new Map< string, ReactSettingsScreenOverrides >();
+
+const getScreenKey = ( tab: string, section: string ) =>
+	`${ tab }::${ section || 'default' }`;
+
+const buildDataPath = ( tab: string, section: string ) => [
+	'settings',
+	tab,
+	section || 'default',
 ];
+
+export const overrideReactSettingsScreen = (
+	tab: string,
+	section: string,
+	overrides: ReactSettingsScreenOverrides
+) => {
+	screenOverrides.set( getScreenKey( tab, section ), overrides );
+};
+
+const getOverridesForScreen = ( tab: string, section: string ) =>
+	screenOverrides.get( getScreenKey( tab, section ) ) || {};
+
+overrideReactSettingsScreen( 'general', '', {
+	className: 'woocommerce-settings-general',
+	fieldTransformer: generalFieldTransformer,
+	rowConfigurations: generalRowConfigurations,
+	missingDataMessage: 'General settings data is missing.',
+} );
 
 const ReactSettingsScreen = ( {
 	entry,
@@ -77,14 +88,39 @@ const ReactSettingsScreen = ( {
 };
 
 export const registerReactSettingsScreens = () => {
-	registry.forEach( ( entry ) => {
-		const rootElement = document.getElementById( entry.mountId );
-		if ( ! rootElement ) {
+	const elements = document.querySelectorAll< HTMLElement >(
+		'[data-wc-settings-react]'
+	);
+
+	elements.forEach( ( element ) => {
+		const tab = element.dataset.wcSettingsTab;
+		if ( ! tab ) {
 			return;
 		}
 
-		createRoot( rootElement ).render(
-			<ReactSettingsScreen entry={ entry } />
-		);
+		const section = element.dataset.wcSettingsSection || '';
+		const overrides = getOverridesForScreen( tab, section );
+		const entry: ReactSettingsRegistryEntry = {
+			id: getScreenKey( tab, section ),
+			dataPath: buildDataPath( tab, section ),
+			mountId: element.id,
+			className: overrides.className || `woocommerce-settings-${ tab }`,
+			fieldTransformer:
+				overrides.fieldTransformer || defaultFieldTransformer,
+			rowConfigurations: overrides.rowConfigurations,
+			missingDataMessage: overrides.missingDataMessage,
+		};
+
+		createRoot( element ).render( <ReactSettingsScreen entry={ entry } /> );
 	} );
 };
+
+const windowWithRegistry = window as Window & {
+	wcReactSettings?: {
+		overrideReactSettingsScreen?: typeof overrideReactSettingsScreen;
+	};
+};
+
+windowWithRegistry.wcReactSettings = windowWithRegistry.wcReactSettings || {};
+windowWithRegistry.wcReactSettings.overrideReactSettingsScreen =
+	overrideReactSettingsScreen;
