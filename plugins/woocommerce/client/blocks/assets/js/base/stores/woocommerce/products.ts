@@ -168,6 +168,26 @@ const { actions } = storeResult;
 const productsStore = { state, actions };
 
 /**
+ * Check if a product exists in state.
+ *
+ * @param productId The product ID.
+ * @return True if the product is in state.
+ */
+export const hasProduct = ( productId: number ): boolean => {
+	return productId in state.products;
+};
+
+/**
+ * Check if a product is currently being loaded.
+ *
+ * @param productId The product ID.
+ * @return True if a fetch is in flight for this product.
+ */
+export const isProductLoading = ( productId: number ): boolean => {
+	return pendingProductRequests.has( productId );
+};
+
+/**
  * Get a product from state by ID.
  * Returns null if the product is not loaded.
  *

@@ -85,6 +85,9 @@ const normalizeAttributeName = ( name: string ): string => {
 /**
  * Find the matching variation ID from a product's variations based on selected attributes.
  *
+ * Uses case-insensitive comparison since Store API returns labels (e.g., "Color")
+ * while PHP context uses slugs (e.g., "attribute_pa_color" → "color").
+ *
  * @param product            The product in Store API format.
  * @param selectedAttributes The selected attributes.
  * @return The matching variation ID, or null if no match.
@@ -99,9 +102,12 @@ const findMatchingVariationId = (
 
 	const matchedVariation = product.variations.find( ( variation ) => {
 		return variation.attributes.every( ( attr ) => {
+			const attrNameLower = attr.name.toLowerCase();
 			const selectedAttr = selectedAttributes.find(
 				( selected ) =>
-					normalizeAttributeName( selected.attribute ) === attr.name
+					normalizeAttributeName(
+						selected.attribute
+					).toLowerCase() === attrNameLower
 			);
 
 			// If variation attribute has empty value, it accepts "Any" value.
@@ -239,6 +245,13 @@ const { actions, state } = store<
 			},
 			get allowsAddingToCart(): boolean {
 				const { productData } = state;
+
+				// For grouped products, the button should always be visible.
+				// Its enabled/disabled state is controlled by isFormValid which
+				// checks whether any child products are selected.
+				if ( productData?.type === 'grouped' ) {
+					return true;
+				}
 
 				return productData?.is_in_stock ?? true;
 			},

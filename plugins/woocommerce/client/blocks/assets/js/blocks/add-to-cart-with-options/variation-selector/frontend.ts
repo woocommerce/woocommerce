@@ -50,7 +50,6 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
-
 /**
  * Normalize attribute name by stripping the 'attribute_' or 'attribute_pa_' prefix
  * that WooCommerce adds for variation attributes.
@@ -65,6 +64,10 @@ const normalizeAttributeName = ( name: string ): string => {
 /**
  * Get the attribute value from a variation's attributes array.
  *
+ * The Store API returns the attribute label (e.g., "Color") in the name field,
+ * while the PHP context uses the attribute slug (e.g., "attribute_pa_color").
+ * We do a case-insensitive comparison to match "color" with "Color".
+ *
  * @param variation     The variation in Store API format.
  * @param attributeName The attribute name to find (may include 'attribute_' prefix).
  * @return The attribute value, or undefined if not found.
@@ -73,11 +76,29 @@ const getVariationAttributeValue = (
 	variation: ProductResponseItem[ 'variations' ][ number ],
 	attributeName: string
 ): string | undefined => {
-	const normalizedName = normalizeAttributeName( attributeName );
+	const normalizedName =
+		normalizeAttributeName( attributeName ).toLowerCase();
 	const attr = variation.attributes.find(
-		( a ) => a.name === normalizedName
+		( a ) => a.name.toLowerCase() === normalizedName
 	);
 	return attr?.value;
+};
+
+/**
+ * Check if two attribute names match, using case-insensitive comparison.
+ *
+ * This handles the mismatch between Store API labels (e.g., "Color") and
+ * PHP context slugs (e.g., "attribute_pa_color").
+ *
+ * @param name1 First attribute name (may be label or slug format).
+ * @param name2 Second attribute name (may be label or slug format).
+ * @return True if the names match after normalization.
+ */
+const attributeNamesMatch = ( name1: string, name2: string ): boolean => {
+	return (
+		normalizeAttributeName( name1 ).toLowerCase() ===
+		normalizeAttributeName( name2 ).toLowerCase()
+	);
 };
 
 /**
@@ -111,7 +132,8 @@ const isAttributeValueValid = ( {
 	// valid, that's why we subtract one from the total number of attributes to
 	// match.
 	const isCurrentAttributeSelected = selectedAttributes.some(
-		( selectedAttribute ) => selectedAttribute.attribute === attributeName
+		( selectedAttribute ) =>
+			attributeNamesMatch( selectedAttribute.attribute, attributeName )
 	);
 	const attributesToMatch = isCurrentAttributeSelected
 		? selectedAttributes.length - 1
@@ -160,7 +182,10 @@ const isAttributeValueValid = ( {
 				// selection.
 				if ( availableVariationAttributeValue === '' ) {
 					if (
-						selectedAttribute.attribute !== attributeName ||
+						! attributeNamesMatch(
+							selectedAttribute.attribute,
+							attributeName
+						) ||
 						attributeValue === selectedAttribute.value
 					) {
 						return true;
@@ -251,7 +276,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				return selectedAttributes.some( ( attrObject ) => {
 					return (
-						attrObject.attribute === name &&
+						attributeNamesMatch( attrObject.attribute, name ) &&
 						attrObject.value === option.value
 					);
 				} );
@@ -276,7 +301,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
-						selectedAttribute.attribute === attribute
+						attributeNamesMatch(
+							selectedAttribute.attribute,
+							attribute
+						)
 				);
 
 				if ( value === '' ) {
@@ -302,7 +330,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
-						selectedAttribute.attribute === attribute
+						attributeNamesMatch(
+							selectedAttribute.attribute,
+							attribute
+						)
 				);
 				if ( index >= 0 ) {
 					selectedAttributes.splice( index, 1 );
@@ -310,7 +341,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			handlePillClick() {
 				const context = getContext< Context >();
-
 
 				if ( state.isOptionSelected ) {
 					context.selectedValue = '';
@@ -353,19 +383,30 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( ! product ) {
 					return;
 				}
+
+				// Normalize included/excluded attributes to lowercase for comparison
+				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
+				const normalizedIncluded = includedAttributes.map( ( attr ) =>
+					normalizeAttributeName( attr ).toLowerCase()
+				);
+				const normalizedExcluded = excludedAttributes.map( ( attr ) =>
+					normalizeAttributeName( attr ).toLowerCase()
+				);
+
 				const productAttributesAndOptions: Record< string, string[] > =
 					getProductAttributesAndOptions( product );
 				Object.entries( productAttributesAndOptions ).forEach(
 					( [ attribute, options ] ) => {
+						const attributeLower = attribute.toLowerCase();
 						if (
-							includedAttributes.length !== 0 &&
-							! includedAttributes.includes( attribute )
+							normalizedIncluded.length !== 0 &&
+							! normalizedIncluded.includes( attributeLower )
 						) {
 							return;
 						}
 						if (
-							excludedAttributes.length !== 0 &&
-							excludedAttributes.includes( attribute )
+							normalizedExcluded.length !== 0 &&
+							normalizedExcluded.includes( attributeLower )
 						) {
 							return;
 						}
@@ -378,7 +419,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						);
 						if ( validOptions.length === 1 ) {
 							const validOption = validOptions[ 0 ];
-							actions.setAttribute( attribute, validOption );
+							// Use the context's attribute name format for consistency.
+							// Find the matching context name by comparing normalized versions.
+							const contextName =
+								includedAttributes.find(
+									( attr ) =>
+										normalizeAttributeName(
+											attr
+										).toLowerCase() === attributeLower
+								) || attribute;
+							actions.setAttribute( contextName, validOption );
 						}
 					}
 				);
@@ -406,14 +456,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 
 				// Find matching variation ID from Store API format.
+				// Use case-insensitive comparison since Store API returns labels (e.g., "Color")
+				// while PHP context uses slugs (e.g., "attribute_pa_color" → "color").
 				const matchedVariation = product.variations.find(
 					( variation ) => {
 						return variation.attributes.every( ( attr ) => {
+							const attrNameLower = attr.name.toLowerCase();
 							const selectedAttr = selectedAttributes.find(
 								( selected ) =>
 									normalizeAttributeName(
 										selected.attribute
-									) === attr.name
+									).toLowerCase() === attrNameLower
 							);
 							// Empty value means "Any" - matches any selection.
 							if ( attr.value === '' ) {
@@ -450,14 +503,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 
 				// Find matching variation from Store API format.
+				// Use case-insensitive comparison since Store API returns labels (e.g., "Color")
+				// while PHP context uses slugs (e.g., "attribute_pa_color" → "color").
 				const matchedVariation = product.variations.find(
 					( variation ) => {
 						return variation.attributes.every( ( attr ) => {
+							const attrNameLower = attr.name.toLowerCase();
 							const selectedAttr = selectedAttributes.find(
 								( selected ) =>
 									normalizeAttributeName(
 										selected.attribute
-									) === attr.name
+									).toLowerCase() === attrNameLower
 							);
 							if ( attr.value === '' ) {
 								return (

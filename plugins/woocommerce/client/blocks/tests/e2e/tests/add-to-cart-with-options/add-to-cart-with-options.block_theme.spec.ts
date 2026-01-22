@@ -295,7 +295,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/logo-collection' );
+		await page.goto( '/product/logo-collection' );
 
 		const addToCartButton = page
 			.getByRole( 'button', { name: 'Add to cart' } )

@@ -25,6 +25,14 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options';
 
 	/**
+	 * The current product ID being rendered.
+	 * Used to pass context to inner blocks during template part rendering.
+	 *
+	 * @var int|null
+	 */
+	private $current_product_id = null;
+
+	/**
 	 * Get the template part path for a product type.
 	 *
 	 * @param string $product_type The product type.
@@ -128,6 +136,11 @@ class AddToCartWithOptions extends AbstractBlock {
 	public function set_is_descendant_of_add_to_cart_with_options_context( $context, $block ) {
 		if ( 'woocommerce/product-button' === $block['blockName'] ) {
 			$context['woocommerce/isDescendantOfAddToCartWithOptions'] = true;
+
+			// Pass the product ID to the button so it can access product data.
+			if ( $this->current_product_id ) {
+				$context['postId'] = $this->current_product_id;
+			}
 		}
 
 		return $context;
@@ -519,10 +532,12 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			// Because we are printing the template part using do_blocks, context from the outside is lost.
-			// This filter is used to add the isDescendantOfAddToCartWithOptions context back.
+			// This filter is used to add the isDescendantOfAddToCartWithOptions context and postId back.
+			$this->current_product_id = $product_id;
 			add_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ), 10, 2 );
 			$template_part_blocks = do_blocks( $template_part_contents );
 			remove_filter( 'render_block_context', array( $this, 'set_is_descendant_of_add_to_cart_with_options_context' ) );
+			$this->current_product_id = null;
 
 			$wrapper_attributes = array(
 				'class'                     => $classes,
