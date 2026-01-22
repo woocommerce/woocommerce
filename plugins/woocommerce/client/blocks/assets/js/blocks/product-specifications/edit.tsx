@@ -208,11 +208,6 @@ const Edit = ( {
 								showWeight: DEFAULT_ATTRIBUTES.showWeight,
 							} )
 						}
-						resetAllFilter={ () =>
-							setAttributes( {
-								showWeight: DEFAULT_ATTRIBUTES.showWeight,
-							} )
-						}
 						isShownByDefault
 					>
 						<ToggleControl
@@ -229,12 +224,6 @@ const Edit = ( {
 							showDimensions !== DEFAULT_ATTRIBUTES.showDimensions
 						}
 						onDeselect={ () =>
-							setAttributes( {
-								showDimensions:
-									DEFAULT_ATTRIBUTES.showDimensions,
-							} )
-						}
-						resetAllFilter={ () =>
 							setAttributes( {
 								showDimensions:
 									DEFAULT_ATTRIBUTES.showDimensions,
@@ -258,12 +247,6 @@ const Edit = ( {
 							showAttributes !== DEFAULT_ATTRIBUTES.showAttributes
 						}
 						onDeselect={ () =>
-							setAttributes( {
-								showAttributes:
-									DEFAULT_ATTRIBUTES.showAttributes,
-							} )
-						}
-						resetAllFilter={ () =>
 							setAttributes( {
 								showAttributes:
 									DEFAULT_ATTRIBUTES.showAttributes,
