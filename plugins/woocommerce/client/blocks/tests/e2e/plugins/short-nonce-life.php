@@ -8,15 +8,14 @@
  * @package woocommerce-blocks-test-short-nonce-life
  */
 
+declare( strict_types=1 );
+
 /**
- * Set nonce lifetime to 4 seconds.
- *
- * WordPress nonces are valid for one "tick" (nonce_life / 2), so with a 4 second
- * nonce_life, nonces will be valid for approximately 2 seconds.
- *
- * @return int The nonce lifetime in seconds.
+ * Set nonce lifetime to 2 seconds.
  */
-function wc_test_short_nonce_life() {
-	return 4;
-}
-add_filter( 'nonce_life', 'wc_test_short_nonce_life' );
+add_filter(
+	'nonce_life',
+	function () {
+		return 2;
+	}
+);
