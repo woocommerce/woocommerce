@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure correct files are included when building a zip using build-zip
