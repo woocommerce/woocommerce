@@ -1178,7 +1178,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 */
 	public function test_filter_strict_string_handling() {
 		// Scenario: Array Input (Should be IGNORED).
-		// ?categories[]=hats
+		// ?categories[]=hats.
 		set_query_var( 'categories', array( 'hats' ) );
 
 		// Execute.
@@ -1211,7 +1211,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	private function extract_filter_clauses( array $tax_queries ) {
 
 		$and_query = array();
-		
+
 		// Find the 'AND' relation group where filters are stored.
 		foreach ( $tax_queries as $tax_query ) {
 			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
@@ -1228,7 +1228,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 				}
 			}
 		}
-		
+
 		return $clauses;
 	}
 }
