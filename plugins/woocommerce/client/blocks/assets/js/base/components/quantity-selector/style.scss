@@ -22,7 +22,7 @@
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-components-quantity-selector__input {
-		@include font-regular-locked;
+		@include font-small-locked;
 		appearance: textfield;
 		background: transparent;
 		border: 0;
