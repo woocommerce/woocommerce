@@ -1,4 +1,0 @@
-Significance: minor
-Type: added
-
-Add woocommerce_analytics_auto_install_proxy_speed_module filter to control auto-installation of proxy speed module mu-plugin.
