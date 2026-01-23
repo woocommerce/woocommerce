@@ -102,102 +102,8 @@ jobs:
               }
             }
 
-      - name: Get GitHub milestone number
-        id: get-milestone
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const milestoneName = '${{ steps.parse-version.outputs.milestone }}';
-
-            const milestones = await github.rest.issues.listMilestones( {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'all',
-              per_page: 100
-            } );
-
-            const milestone = milestones.data.find( ( m ) => m.title === milestoneName );
-
-            if ( ! milestone ) {
-              core.setFailed( `Milestone '${ milestoneName }' does not exist` );
-              return;
-            }
-
-            console.log( `Found milestone '${ milestoneName }' with number: ${ milestone.number }` );
-            core.setOutput( 'milestone-number', milestone.number );
-
-      - name: Checkout repository (sparse)
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            .linear
-          sparse-checkout-cone-mode: false
-
       - name: Install linear-sdk
         run: npm install @linear/sdk@71.0.0
-
-      - name: Get Linear data
-        id: get-linear-data
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { LinearClient } = require( '@linear/sdk' );
-            const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
-            } );
-
-            const labels = await linearClient.issueLabels( {
-              filter: {
-                name: { eq: 'Release' }
-              }
-            } );
-
-            const releaseLabelId = labels.nodes.length > 0 ? labels.nodes[ 0 ].id : null;
-
-            console.log( releaseLabelId ? 'Found Release label' : 'Release label not found' );
-
-            core.setOutput( 'release-label-id', releaseLabelId || '' );
-
-      - name: Get parent tracking issue and extract assignee
-        id: get-parent-issue
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { LinearClient } = require( '@linear/sdk' );
-            const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
-            } );
-
-            const mainVersion = '${{ steps.parse-version.outputs.main-version }}';
-            const parentTitle = `[${ mainVersion }] Release tracking`;
-
-            console.log( `Looking for parent issue: "${ parentTitle }"` );
-
-            const parentIssues = await linearClient.issues( {
-              filter: {
-                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
-                title: { eq: parentTitle }
-              }
-            } );
-
-            if ( parentIssues.nodes.length === 0 ) {
-              core.setFailed( `Parent tracking issue '${ parentTitle }' does not exist in Linear` );
-              return;
-            }
-
-            const parentIssue = parentIssues.nodes[ 0 ];
-            console.log( 'Found parent issue' );
-
-            core.setOutput( 'parent-id', parentIssue.id );
-
-            const assignee = await parentIssue.assignee;
-            if ( assignee ) {
-              console.log( 'Parent issue has an assignee' );
-              core.setOutput( 'assignee-id', assignee.id );
-            } else {
-              console.log( 'Parent issue has no assignee' );
-              core.setOutput( 'assignee-id', '' );
-            }
 
       - name: Check if tracking issue already exists
         id: check-existing
@@ -238,6 +144,105 @@ jobs:
             console.log( 'No existing tracking issue found, proceeding with creation' );
             core.setOutput( 'issue-exists', 'false' );
 
+      - name: Get GitHub milestone number
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
+        id: get-milestone
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const milestoneName = '${{ steps.parse-version.outputs.milestone }}';
+
+            const milestones = await github.rest.issues.listMilestones( {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100
+            } );
+
+            const milestone = milestones.data.find( ( m ) => m.title === milestoneName );
+
+            if ( ! milestone ) {
+              core.setFailed( `Milestone '${ milestoneName }' does not exist` );
+              return;
+            }
+
+            console.log( `Found milestone '${ milestoneName }' with number: ${ milestone.number }` );
+            core.setOutput( 'milestone-number', milestone.number );
+
+      - name: Checkout repository (sparse)
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
+        uses: actions/checkout@v4
+        with:
+          path: repo
+          sparse-checkout: |
+            .linear
+          sparse-checkout-cone-mode: false
+
+      - name: Get Linear data
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
+        id: get-linear-data
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            const labels = await linearClient.issueLabels( {
+              filter: {
+                name: { eq: 'Release' }
+              }
+            } );
+
+            const releaseLabelId = labels.nodes.length > 0 ? labels.nodes[ 0 ].id : null;
+
+            console.log( releaseLabelId ? 'Found Release label' : 'Release label not found' );
+
+            core.setOutput( 'release-label-id', releaseLabelId || '' );
+
+      - name: Get parent tracking issue and extract assignee
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
+        id: get-parent-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            const mainVersion = '${{ steps.parse-version.outputs.main-version }}';
+            const parentTitle = `[${ mainVersion }] Release tracking`;
+
+            console.log( `Looking for parent issue: "${ parentTitle }"` );
+
+            const parentIssues = await linearClient.issues( {
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                title: { eq: parentTitle }
+              }
+            } );
+
+            if ( parentIssues.nodes.length === 0 ) {
+              core.setFailed( `Parent tracking issue '${ parentTitle }' does not exist in Linear` );
+              return;
+            }
+
+            const parentIssue = parentIssues.nodes[ 0 ];
+            console.log( 'Found parent issue' );
+
+            core.setOutput( 'parent-id', parentIssue.id );
+
+            const assignee = await parentIssue.assignee;
+            if ( assignee ) {
+              console.log( 'Parent issue has an assignee' );
+              core.setOutput( 'assignee-id', assignee.id );
+            } else {
+              console.log( 'Parent issue has no assignee' );
+              core.setOutput( 'assignee-id', '' );
+            }
+
       - name: Process template and create Linear issue
         if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
         uses: actions/github-script@v7
@@ -251,12 +256,12 @@ jobs:
             } );
 
             // Read template file.
-            const templateFile = '${{ steps.parse-version.outputs.template-file }}';
+            const templateFile = 'repo/${{ steps.parse-version.outputs.template-file }}';
             let templateContent;
             try {
               templateContent = fs.readFileSync( templateFile, 'utf8' );
             } catch ( error ) {
-              core.setFailed( `Failed to read template file '${ templateFile }': ${ error.message }` );
+              core.setFailed( `Failed to read template file: ${ error.message }` );
               return;
             }
 
