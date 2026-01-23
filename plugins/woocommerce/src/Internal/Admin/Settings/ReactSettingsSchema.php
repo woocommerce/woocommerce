@@ -112,7 +112,6 @@ class ReactSettingsSchema {
 			'multi_select_countries'         => 'multiselect',
 			'single_select_page'             => 'select',
 			'single_select_page_with_search' => 'select',
-			'textarea'                       => 'text',
 		);
 		/**
 		 * Filter the field type map for React settings.
