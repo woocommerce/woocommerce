@@ -460,7 +460,7 @@ class DefaultFreeExtensions {
 				'description'    => __( 'Reach an untapped audience on Snapchat and drive more sales.', 'woocommerce' ),
 				'image_url'      => plugins_url( '/assets/images/core-profiler/logo-snapchat.svg', WC_PLUGIN_FILE ),
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fsnapchat%2Fstart',
-				'is_built_by_wc' => false,
+				'is_built_by_wc' => true,
 				'is_visible'     => true,
 			),
 		);
