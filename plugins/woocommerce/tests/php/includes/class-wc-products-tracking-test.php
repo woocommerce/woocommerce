@@ -124,14 +124,14 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_track_product_published_deferred_when_importing(): void {
 		$_POST['action'] = 'woocommerce_do_ajax_product_import';
-		$this->assertFalse( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce' ) );
+		$this->assertFalse( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' ) );
 
 		$product = new WC_Product_Simple();
 		$product->set_name( 'New name' );
 		$product->set_status( ProductStatus::PUBLISH );
 		$product->save();
 
-		$this->assertTrue( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce' ) );
+		$this->assertTrue( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' ) );
 		as_unschedule_all_actions( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce' );
 	}
 }
