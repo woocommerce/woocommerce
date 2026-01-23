@@ -11,6 +11,10 @@ import {
 	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 import { useCustomDataContext } from '@woocommerce/shared-context';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
@@ -23,7 +27,7 @@ import { useThemeColors } from '../../../../shared/hooks/use-theme-colors';
 
 interface Attributes {
 	className?: string;
-	optionStyle?: 'pills' | 'dropdown';
+	optionStyle: 'pills' | 'dropdown';
 	autoselect: boolean;
 	disabledAttributesAction: 'disable' | 'hide';
 }
@@ -96,83 +100,104 @@ export default function AttributeOptionsEdit(
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
-					<ToggleGroupControl
+				<ToolsPanel
+					label={ __( 'Style', 'woocommerce' ) }
+					resetAll={ () => setAttributes( { optionStyle: 'pills' } ) }
+				>
+					<ToolsPanelItem
+						hasValue={ () => optionStyle !== 'pills' }
 						label={ __( 'Style', 'woocommerce' ) }
-						value={ optionStyle ?? 'pills' }
-						onChange={ ( newOptionStyle ) => {
-							if (
-								newOptionStyle === 'pills' ||
-								newOptionStyle === 'dropdown'
-							) {
-								setAttributes( {
-									optionStyle: newOptionStyle,
-								} );
-							}
-						} }
-						isBlock
-						hideLabelFromVision
-						size="__unstable-large"
+						isShownByDefault
 					>
-						<ToggleGroupControlOption
-							value="pills"
-							label={ __( 'Pills', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value="dropdown"
-							label={ __( 'Dropdown', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
-				</PanelBody>
-				<PanelBody title={ __( 'Auto-select', 'woocommerce' ) }>
-					<ToggleControl
+						<ToggleGroupControl
+							label={ __( 'Style', 'woocommerce' ) }
+							value={ optionStyle }
+							onChange={ ( newOptionStyle ) => {
+								if (
+									newOptionStyle === 'pills' ||
+									newOptionStyle === 'dropdown'
+								) {
+									setAttributes( {
+										optionStyle: newOptionStyle,
+									} );
+								}
+							} }
+							isBlock
+							hideLabelFromVision
+							size="__unstable-large"
+						>
+							<ToggleGroupControlOption
+								value="pills"
+								label={ __( 'Pills', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="dropdown"
+								label={ __( 'Dropdown', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					</ToolsPanelItem>
+				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'Auto-select', 'woocommerce' ) }
+					resetAll={ () => setAttributes( { autoselect: false } ) }
+				>
+					<ToolsPanelItem
 						label={ __(
 							'Auto-select when only one attribute is compatible',
 							'woocommerce'
 						) }
-						help={ __(
-							'This controls whether attributes will be auto-selected once upon loading the page and when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.',
-							'woocommerce'
-						) }
-						checked={ autoselect }
-						onChange={ () =>
-							setAttributes( { autoselect: ! autoselect } )
-						}
-						__nextHasNoMarginBottom
-					/>
-					<SelectControl
-						label={ __(
-							'Values in conflict with current selection',
-							'woocommerce'
-						) }
-						help={ __(
-							'This controls what to do with attribute values that conflict with the current selection.',
-							'woocommerce'
-						) }
-						value={ disabledAttributesAction }
-						options={ [
-							{
-								label: __( 'Hidden', 'woocommerce' ),
-								value: 'hide',
-							},
-							{
-								label: __(
-									'Grayed-out/crossed-out and disabled',
-									'woocommerce'
-								),
-								value: 'disable',
-							},
-						] }
-						onChange={ ( value ) =>
-							setAttributes( {
-								disabledAttributesAction: value as
-									| 'disable'
-									| 'hide',
-							} )
-						}
-						__nextHasNoMarginBottom
-					/>
-				</PanelBody>
+						hasValue={ () => autoselect }
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __(
+								'Auto-select when only one attribute is compatible',
+								'woocommerce'
+							) }
+							help={ __(
+								'This controls whether attributes will be auto-selected once upon loading the page and when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.',
+								'woocommerce'
+							) }
+							checked={ autoselect }
+							onChange={ () =>
+								setAttributes( { autoselect: ! autoselect } )
+							}
+							__nextHasNoMarginBottom
+						/>
+						<SelectControl
+							label={ __(
+								'Values in conflict with current selection',
+								'woocommerce'
+							) }
+							help={ __(
+								'This controls what to do with attribute values that conflict with the current selection.',
+								'woocommerce'
+							) }
+							value={ disabledAttributesAction }
+							options={ [
+								{
+									label: __( 'Hidden', 'woocommerce' ),
+									value: 'hide',
+								},
+								{
+									label: __(
+										'Grayed-out/crossed-out and disabled',
+										'woocommerce'
+									),
+									value: 'disable',
+								},
+							] }
+							onChange={ ( value ) =>
+								setAttributes( {
+									disabledAttributesAction: value as
+										| 'disable'
+										| 'hide',
+								} )
+							}
+							__nextHasNoMarginBottom
+						/>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 
 			<Disabled>

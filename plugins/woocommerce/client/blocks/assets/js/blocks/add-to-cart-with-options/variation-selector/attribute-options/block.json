@@ -10,7 +10,8 @@
 	"attributes": {
 		"optionStyle": {
 			"type": "string",
-			"enum": [ "pills", "dropdown" ]
+			"enum": [ "pills", "dropdown" ],
+			"default": "pills"
 		},
 		"autoselect": {
 			"type": "boolean",
