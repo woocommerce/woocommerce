@@ -22,7 +22,7 @@ jobs:
       team-name: ${{ steps.get-all-events-for-version.outputs.team-name }}
     steps:
       - name: Install node-ical
-        run: npm install node-ical
+        run: npm install node-ical@0.23.1 rrule-temporal@1.4.1
       - name: Check for feature freeze events
         id: check-code-freeze-8-weeks
         uses: actions/github-script@v7
