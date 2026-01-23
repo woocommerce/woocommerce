@@ -760,7 +760,7 @@ class WC_Download_Handler {
 					$user_id,
 					$user_ip_address,
 				),
-				'woocommerce-tracks',
+				'woocommerce',
 				true
 			);
 		} catch ( Exception $e ) {
