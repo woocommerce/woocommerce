@@ -336,4 +336,33 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertEquals( '12.34', get_post_meta( $product->get_id(), '_cogs_total_value', true ) );
 	}
+
+	/**
+	 * Test optimized updates toward postmeta with different input data types.
+	 */
+	public function test_stock_and_sales_updates_with_to_string_formatting_optimization(): void {
+		/** @var WC_Product_Data_Store_CPT $store */
+		$store = WC_Data_Store::load( 'product' );
+
+		$product = new WC_Product();
+		$product->set_stock_quantity( -1 );
+		$product->save();
+
+		$product_id = $product->get_id();
+		$this->assertSame( '-1',  get_post_meta( $product_id, '_stock' ) );
+
+		$store->update_product_stock( $product_id, null, 'set' );
+		$this->assertSame( '0',  get_post_meta( $product_id, '_stock' ) );
+		$store->update_product_stock( $product_id, 10, 'set' );
+		$this->assertSame( '10',  get_post_meta( $product_id, '_stock' ) );
+		$store->update_product_stock( $product_id, 20.0, 'set' );
+		$this->assertSame( '20.000000',  get_post_meta( $product_id, '_stock' ) );
+
+		$store->update_product_sales( $product_id, null, 'set' );
+		$this->assertSame( '0',  get_post_meta( $product_id, 'total_sales' ) );
+		$store->update_product_sales( $product_id, 10, 'set' );
+		$this->assertSame( '10',  get_post_meta( $product_id, 'total_sales' ) );
+		$store->update_product_sales( $product_id, 20.0, 'set' );
+		$this->assertSame( '20.000000',  get_post_meta( $product_id, 'total_sales' ) );
+	}
 }
