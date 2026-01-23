@@ -269,6 +269,19 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				return array();
 			}
 
+			// Add menu_order to flat terms for sorting.
+			if ( 'menu_order' === $orderby ) {
+				$terms = array_map(
+					function ( $term ) {
+						$term              = (array) $term;
+						$menu_order        = get_term_meta( $term['term_id'], 'order', true );
+						$term['menu_order'] = is_numeric( $menu_order ) ? (int) $menu_order : 0;
+						return (object) $term;
+					},
+					$terms
+				);
+			}
+
 			return $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
 		}
 
@@ -449,7 +462,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	}
 
 	/**
-	 * Sort terms by the specified criteria (name or count).
+	 * Sort terms by the specified criteria (name, count, or menu_order).
 	 *
 	 * @param array  $terms           Array of term objects to sort.
 	 * @param string $orderby         Sort field (name, count, menu_order).
@@ -470,6 +483,16 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 						$count_a    = $taxonomy_counts[ $a->term_id ] ?? 0;
 						$count_b    = $taxonomy_counts[ $b->term_id ] ?? 0;
 						$comparison = $count_a <=> $count_b;
+						break;
+
+					case 'menu_order':
+						$order_a    = $a->menu_order ?? 0;
+						$order_b    = $b->menu_order ?? 0;
+						$comparison = $order_a <=> $order_b;
+						// Secondary sort by name when menu_order is equal.
+						if ( 0 === $comparison ) {
+							$comparison = strcasecmp( $a->name, $b->name );
+						}
 						break;
 
 					case 'name':
