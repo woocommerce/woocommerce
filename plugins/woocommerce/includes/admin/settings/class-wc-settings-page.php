@@ -524,7 +524,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					if ( empty( $unsupported_fields ) ) {
 						$GLOBALS['hide_save_button'] = true;
 						$mount_id                    = ReactSettingsSchema::get_mount_id( $tab, $section_id );
-						echo '<div id="' . esc_attr( $mount_id ) . '" data-wc-settings-react="1" data-wc-settings-tab="' . esc_attr( $tab ) . '" data-wc-settings-section="' . esc_attr( $section_id ) . '"> </div>';
+						echo '<div id="' . esc_attr( $mount_id ) . '" data-wc-modern-settings="1" data-wc-settings-tab="' . esc_attr( $tab ) . '" data-wc-settings-section="' . esc_attr( $section_id ) . '"> </div>';
 						return;
 					}
 

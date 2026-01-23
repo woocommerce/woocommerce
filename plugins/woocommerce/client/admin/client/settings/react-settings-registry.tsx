@@ -93,7 +93,7 @@ const ReactSettingsScreen = ( {
 
 export const registerReactSettingsScreens = () => {
 	const elements = document.querySelectorAll< HTMLElement >(
-		'[data-wc-settings-react]'
+		'[data-wc-modern-settings]'
 	);
 
 	elements.forEach( ( element ) => {

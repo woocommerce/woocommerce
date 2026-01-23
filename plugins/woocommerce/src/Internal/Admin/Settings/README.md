@@ -54,7 +54,7 @@ add_filter(
 
 ## Client-side registry
 
-React mounts on DOM nodes marked with `data-wc-settings-react`. You can register per-screen overrides and custom field type transformers.
+React mounts on DOM nodes marked with `data-wc-modern-settings`. You can register per-screen overrides and custom field type transformers.
 
 ### Override a screen config
 
