@@ -1084,7 +1084,7 @@ class ListTable extends WP_List_Table {
 		}
 
 		$capability = OrderUtil::custom_orders_table_usage_is_enabled()
-			? 'edit_shop_orders'
+			? $this->wp_post_type->cap->edit_posts
 			: $this->wp_post_type->cap->edit_post;
 
 		if (! current_user_can($capability, $item->get_id())) {
