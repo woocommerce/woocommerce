@@ -14,8 +14,7 @@ import type { FieldTransformer, RowConfigurations } from './types';
 import {
 	fieldTransformer as generalFieldTransformer,
 	rowConfigurations as generalRowConfigurations,
-} from '../settings-general/react-settings-config';
-import '../settings-general/settings-general-main.scss';
+} from '../settings-general/config';
 
 type ReactSettingsRegistryEntry = {
 	id: string;
