@@ -35,142 +35,38 @@ export type ProductsStoreState = {
 };
 
 /**
- * API error response shape.
- */
-type ApiErrorResponse = {
-	code: string;
-	message: string;
-	data?: {
-		status: number;
-	};
-};
-
-/**
- * Check if response is an API error.
- */
-function isApiErrorResponse(
-	response: Response,
-	json: unknown
-): json is ApiErrorResponse {
-	return ! response.ok;
-}
-
-/**
- * Server state that may be hydrated.
- */
-type ServerState = Partial< ProductsStoreState >;
-
-/**
  * The products store type definition.
- * Action types are simplified - the actual implementations are generators
- * but the Interactivity API wraps them as async functions.
  */
 export type ProductsStore = {
-	state: ProductsStoreState & ServerState;
-	actions: {
-		loadProduct: ( productId: number ) => void;
-	};
+	state: ProductsStoreState;
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-// Track in-flight requests to avoid duplicate fetches.
-const pendingProductRequests = new Map<
-	number,
-	Promise< ProductResponseItem | null >
->();
-
 /**
  * The woocommerce/products store.
  *
  * This store manages product data in Store API format for use with the
- * Interactivity API. It supports both server-side hydration (via PHP
- * ProductsStore) and client-side loading.
+ * Interactivity API. Data is hydrated server-side via PHP ProductsStore.
  *
  * State structure:
  * - products: Record<productId, ProductResponseItem>
  * - productVariations: Record<variationId, ProductResponseItem>
  */
-// We need to access the store result to use state inside actions.
-// TypeScript has trouble with the circular reference, so we use a
-// two-step initialization pattern.
-// eslint-disable-next-line prefer-const
-let state: ProductsStore[ 'state' ];
-
-const storeResult = store< ProductsStore >(
+const productsStore = store< ProductsStore >(
 	'woocommerce/products',
 	{
 		state: {
 			products: {},
 			productVariations: {},
 		},
-		actions: {
-			*loadProduct( productId: number ) {
-				// Return from cache if already loaded (including SSR).
-				if ( state.products[ productId ] ) {
-					return state.products[ productId ];
-				}
-
-				// If there's already a request in flight for this product, wait for it.
-				const pendingRequest = pendingProductRequests.get( productId );
-				if ( pendingRequest ) {
-					return ( yield pendingRequest ) as ProductResponseItem | null;
-				}
-
-				// Create the fetch promise and track it.
-				const fetchPromise = ( async () => {
-					try {
-						const response = await fetch(
-							`/wp-json/wc/store/v1/products/${ productId }`,
-							{
-								method: 'GET',
-								headers: {
-									'Content-Type': 'application/json',
-								},
-							}
-						);
-
-						const json = await response.json();
-
-						if ( isApiErrorResponse( response, json ) ) {
-							throw new Error(
-								`Failed to load product ${ productId }: ${
-									( json as ApiErrorResponse ).message
-								}`
-							);
-						}
-
-						// Store the product.
-						state.products[ productId ] =
-							json as ProductResponseItem;
-
-						return json as ProductResponseItem;
-					} finally {
-						// Clean up the pending request.
-						pendingProductRequests.delete( productId );
-					}
-				} )();
-
-				pendingProductRequests.set( productId, fetchPromise );
-
-				return ( yield fetchPromise ) as ProductResponseItem | null;
-			},
-		},
 	},
 	{ lock: universalLock }
 );
 
-// Assign from store result after initialization.
-state = storeResult.state;
-const { actions } = storeResult;
-
-/**
- * Re-export the store with both state and actions for consumers
- * who want to access it as a single object.
- */
-const productsStore = { state, actions };
+const { state } = productsStore;
 
 /**
  * Check if a product exists in state.
@@ -180,16 +76,6 @@ const productsStore = { state, actions };
  */
 export const hasProduct = ( productId: number ): boolean => {
 	return productId in state.products;
-};
-
-/**
- * Check if a product is currently being loaded.
- *
- * @param productId The product ID.
- * @return True if a fetch is in flight for this product.
- */
-export const isProductLoading = ( productId: number ): boolean => {
-	return pendingProductRequests.has( productId );
 };
 
 /**
@@ -241,5 +127,5 @@ export const isPurchasable = (
 	return product.is_purchasable && product.is_in_stock;
 };
 
-export { state, actions, productsStore };
+export { state, productsStore };
 export default productsStore;
