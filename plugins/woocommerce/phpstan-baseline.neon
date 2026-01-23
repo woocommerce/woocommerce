@@ -77803,12 +77803,6 @@ parameters:
 			path: src/Internal/Utilities/ArrayUtil.php
 
 		-
-			message: '#^Cannot access property \$content on WP_Block_Template\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: src/Internal/Utilities/BlocksUtil.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_order_type\(\)\.$#'
 			identifier: method.notFound
 			count: 2

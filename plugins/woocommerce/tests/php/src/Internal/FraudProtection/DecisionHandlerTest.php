@@ -54,9 +54,13 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should apply allow decision and update session to allowed.
+	 * @testdox Should apply allow decision and update session to allowed when session is not blocked.
 	 */
 	public function test_apply_allow_decision(): void {
+		$this->session_manager
+			->method( 'is_session_blocked' )
+			->willReturn( false );
+
 		$this->session_manager
 			->expects( $this->once() )
 			->method( 'allow_session' );
@@ -64,6 +68,26 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 		$result = $this->sut->apply_decision( ApiClient::DECISION_ALLOW, array( 'session_id' => 'test' ) );
 
 		$this->assertSame( ApiClient::DECISION_ALLOW, $result );
+	}
+
+	/**
+	 * @testdox Should preserve blocked session status when allow decision is received.
+	 *
+	 * This prevents race conditions where emptying the cart during block_session
+	 * causes subsequent fraud checks to return "allow" (due to lower cart value).
+	 */
+	public function test_allow_decision_does_not_overwrite_blocked_session(): void {
+		$this->session_manager
+			->method( 'is_session_blocked' )
+			->willReturn( true );
+
+		$this->session_manager
+			->expects( $this->never() )
+			->method( 'allow_session' );
+
+		$result = $this->sut->apply_decision( ApiClient::DECISION_ALLOW, array( 'session_id' => 'test' ) );
+
+		$this->assertLogged( 'info', 'Preserving blocked session status' );
 	}
 
 	/**
@@ -84,6 +108,10 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_invalid_decision_defaults_to_allow(): void {
 		$this->session_manager
+			->method( 'is_session_blocked' )
+			->willReturn( false );
+
+		$this->session_manager
 			->expects( $this->once() )
 			->method( 'allow_session' );
 
@@ -103,6 +131,10 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 				return ApiClient::DECISION_ALLOW;
 			}
 		);
+
+		$this->session_manager
+			->method( 'is_session_blocked' )
+			->willReturn( false );
 
 		$this->session_manager
 			->expects( $this->once() )
