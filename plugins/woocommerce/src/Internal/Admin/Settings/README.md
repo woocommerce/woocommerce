@@ -1,43 +1,81 @@
 # React Settings Screens
 
-This document explains how to add a new settings screen to the React settings system.
+This document explains how the React settings system renders settings pages by default, how to opt out, and how to extend supported field types.
 
 ## Overview
 
-Adding a new screen requires changes on both the server and client:
+React settings render automatically for all WooCommerce settings pages when the `modern-settings` feature flag is enabled. Rendering falls back to legacy settings when unsupported field types are detected or when a page opts out.
 
-- **Server**: register the screen so settings are preloaded into `wcSettings`.
-- **Client**: register the screen so the React page mounts on the standard DOM ID.
+## Server-side hooks
 
-The React UI only renders when the `react-settings` feature flag is enabled and the
-screen’s settings types are supported.
+### Opt out a settings page
 
-## Server-side registry
+Use this filter to prevent React rendering for a specific tab/section:
 
-1. Add a new entry in `ReactSettingsRegistry::get_entries()`:
+```php
+add_filter(
+    'woocommerce_react_settings_opt_out',
+    function( $opt_out, $tab, $section, $settings, $settings_page ) {
+        if ( 'my_tab' === $tab && 'my_section' === $section ) {
+            return true;
+        }
+        return $opt_out;
+    },
+    10,
+    5
+);
+```
 
-    - `tab`: the settings tab slug (e.g. `products`)
-    - `section`: section slug (use `''` for the default section)
-    - `schema`: schema class for transforming settings
-    - `payloadPath`: where the transformed response is stored in `wcSettings`
-    - `supportedTypes` and `typeMap`: the allowed types and type normalization
+### Register supported field types and type mappings
 
-2. Ensure the schema supports any special field types:
+Use these filters to expand supported React field types or normalize custom WooCommerce field types:
 
-    - Normalize WooCommerce types to supported types in the schema.
-    - Provide options for select fields that are not defined in settings.
+```php
+add_filter(
+    'woocommerce_react_settings_supported_types',
+    function( $types, $tab, $section ) {
+        $types[] = 'hello_text';
+        return $types;
+    },
+    10,
+    3
+);
+
+add_filter(
+    'woocommerce_react_settings_type_map',
+    function( $map, $tab, $section ) {
+        $map['hello_text'] = 'hello_text';
+        return $map;
+    },
+    10,
+    3
+);
+```
 
 ## Client-side registry
 
-1. Add a new entry in `client/admin/client/settings/react-settings-registry.tsx`:
+React mounts on DOM nodes marked with `data-wc-settings-react`. You can register per-screen overrides and custom field type transformers.
 
-    - `dataPath`: path to the preloaded data (mirrors the server `payloadPath`)
-    - `mountId`: standard mount ID in the DOM
-    - `fieldTransformer`: field transformer for your screen
-    - `rowConfigurations`: optional layout config
+### Override a screen config
 
-2. If the screen needs custom layout or visibility rules, add a config file
-   similar to `settings-general/react-settings-config.ts`.
+```js
+window.wcReactSettings?.overrideScreen( 'general', '', {
+    fieldTransformer: ( field ) => ( { ...field } ),
+    rowConfigurations: {},
+} );
+```
+
+### Register a field type transformer
+
+```js
+window.wcReactSettings?.registerFieldTypeTransformer(
+    'hello_text',
+    ( setting, baseField ) => ( {
+        ...baseField,
+        type: 'text',
+    } )
+);
+```
 
 ## Mount ID format
 
@@ -48,30 +86,3 @@ wc_settings_react_{tab}_{section}
 ```
 
 Use `default` for the empty section, e.g. `wc_settings_react_products_default`.
-
-## Example: Products → Inventory
-
-Server entry:
-
-```php
-'products.inventory' => array(
-    'tab'            => 'products',
-    'section'        => 'inventory',
-    'schema'         => ProductSettingsSchema::class,
-    'payloadPath'    => array( 'settings', 'products', 'inventory' ),
-    'supportedTypes' => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' ),
-    'typeMap'        => array(),
-),
-```
-
-Client entry:
-
-```tsx
-{
-    id: 'products.inventory',
-    dataPath: [ 'settings', 'products', 'inventory' ],
-    mountId: 'wc_settings_react_products_inventory',
-    className: 'woocommerce-settings-products',
-    fieldTransformer: defaultFieldTransformer,
-},
-```
