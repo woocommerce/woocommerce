@@ -153,6 +153,7 @@ export const CountrySelector = < ItemType extends Item >( {
 		highlightedIndex,
 		selectedItem,
 		closeMenu,
+		selectItem,
 	} = useSelect< ItemType >( {
 		initialSelectedItem: value,
 		items: [ ...visibleItems ],
@@ -325,6 +326,12 @@ export const CountrySelector = < ItemType extends Item >( {
 
 	useEffect( () => {
 		if ( isOpen ) {
+			// Sync the selected item with the value prop when the menu opens.
+			// This ensures the correct country is selected after applying changes.
+			if ( selectedItem?.key !== value.key ) {
+				selectItem( value );
+			}
+
 			// Focus the search input when the menu is opened.
 			// Use a small timeout to ensure the input is rendered.
 			setTimeout( () => {
@@ -332,16 +339,15 @@ export const CountrySelector = < ItemType extends Item >( {
 			}, 0 );
 
 			// Highlight the selected country when the menu is opened.
-			if ( selectedItem !== null ) {
-				const selectedItemIndex =
-					Array.from( visibleItems ).indexOf( selectedItem );
-				highlightSelectedCountry( selectedItemIndex );
-				// Set the highlighted index to the selected item.
-				if ( selectedItemIndex >= 0 ) {
-					setKeyboardHighlightIndex( selectedItemIndex );
-				}
+			// Use value instead of selectedItem since we just synced it.
+			const valueIndex = Array.from( visibleItems ).findIndex(
+				( item ) => item.key === value.key
+			);
+			if ( valueIndex >= 0 ) {
+				highlightSelectedCountry( valueIndex );
+				setKeyboardHighlightIndex( valueIndex );
 			} else {
-				// If no item is selected, highlight the first item.
+				// If the value is not in the visible items, highlight the first item.
 				setKeyboardHighlightIndex( 0 );
 			}
 		} else {

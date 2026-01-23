@@ -182,6 +182,37 @@ export const WooPaymentsMethodsLogos = ( {
 		setPopoverVisible( false );
 	};
 
+	const handleKeyDown = ( event: React.KeyboardEvent ) => {
+		if ( event.key === 'Escape' && isPopoverVisible ) {
+			event.stopPropagation();
+			setPopoverVisible( false );
+			buttonRef.current?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			event.preventDefault();
+			handleClick( event );
+		}
+	};
+
+	// Handle Escape key globally when popover is open (for portal focus)
+	useEffect( () => {
+		if ( ! isPopoverVisible ) {
+			return;
+		}
+
+		const handleGlobalKeyDown = ( event: KeyboardEvent ) => {
+			if ( event.key === 'Escape' ) {
+				event.stopPropagation();
+				setPopoverVisible( false );
+				buttonRef.current?.focus();
+			}
+		};
+
+		document.addEventListener( 'keydown', handleGlobalKeyDown );
+		return () => {
+			document.removeEventListener( 'keydown', handleGlobalKeyDown );
+		};
+	}, [ isPopoverVisible ] );
+
 	// Reduce the total number of payment methods by one if the store is not eligible for WooPay.
 	const maxSupportedPaymentMethods = isWooPayEligible
 		? totalPaymentMethods
@@ -245,11 +276,7 @@ export const WooPaymentsMethodsLogos = ( {
 					tabIndex={ 0 }
 					ref={ buttonRef }
 					onClick={ handleClick }
-					onKeyDown={ ( event ) => {
-						if ( event.key === 'Enter' || event.key === ' ' ) {
-							handleClick( event );
-						}
-					} }
+					onKeyDown={ handleKeyDown }
 				>
 					+ { maxSupportedPaymentMethods - maxShownElements }
 					{ isPopoverVisible && (
@@ -262,6 +289,7 @@ export const WooPaymentsMethodsLogos = ( {
 							noArrow={ true }
 							shift={ true }
 							onFocusOutside={ handleFocusOutside }
+							onKeyDown={ handleKeyDown }
 						>
 							<div className="woocommerce-woopayments-payment-methods-logos">
 								{ hiddenPaymentMethods.map(

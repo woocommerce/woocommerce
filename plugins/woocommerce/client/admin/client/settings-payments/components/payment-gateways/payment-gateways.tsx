@@ -12,7 +12,7 @@ import {
 	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
 import { useDispatch } from '@wordpress/data';
-import { useMemo, useRef, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { Popover } from '@wordpress/components';
 import { Link } from '@woocommerce/components';
@@ -141,6 +141,26 @@ export const PaymentGateways = ( {
 			handleBusinessLocationIndicatorClick( event );
 		}
 	};
+
+	// Handle Escape key globally when popover is open (for portal focus)
+	useEffect( () => {
+		if ( ! isPopoverVisible ) {
+			return;
+		}
+
+		const handleGlobalKeyDown = ( event: KeyboardEvent ) => {
+			if ( event.key === 'Escape' ) {
+				event.stopPropagation();
+				setIsPopoverVisible( false );
+				buttonRef.current?.focus();
+			}
+		};
+
+		document.addEventListener( 'keydown', handleGlobalKeyDown );
+		return () => {
+			document.removeEventListener( 'keydown', handleGlobalKeyDown );
+		};
+	}, [ isPopoverVisible ] );
 
 	return (
 		<div className="settings-payment-gateways">

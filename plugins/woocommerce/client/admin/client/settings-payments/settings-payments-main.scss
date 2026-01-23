@@ -102,6 +102,21 @@
 				cursor: pointer;
 				padding-top: 8px;
 				margin-left: auto;
+				border-radius: 2px;
+
+				&:focus {
+					outline: 1.5px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -1.5px;
+				}
+
+				&:focus:not(:focus-visible) {
+					outline: none;
+				}
+
+				&:focus-visible {
+					outline: 1.5px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -1.5px;
+				}
 
 				&-icon {
 					border-left: 1px solid $gray-200;
