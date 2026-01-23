@@ -4,15 +4,13 @@
 @import '@wordpress/components/build-style/style.css';
 
 // Container padding to match settings-editor pattern
-.woocommerce-settings-general {
+.modern-woocommerce-settings {
 	padding-inline: 48px;
 
 	// Add padding to card fields
 	.dataforms-layouts-card__field {
 		&.components-card,
 		&.components-surface {
-			margin-bottom: 24px !important;
-
 			.components-card__body {
 				padding: 24px !important;
 				// Remove top padding since header already has bottom padding
