@@ -58,7 +58,10 @@ trait ProductLinksTrait {
 
 		$links['related'] = array(
 			'href'       => add_query_arg(
-				array( 'related' => $item->get_id() ),
+				array(
+					'related'  => $item->get_id(),
+					'per_page' => 5,
+				),
 				rest_url( $this->get_namespace() . '/products' )
 			),
 			'embeddable' => true,
