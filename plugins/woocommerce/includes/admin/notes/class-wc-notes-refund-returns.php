@@ -30,8 +30,9 @@ class WC_Notes_Refund_Returns {
 
 	/**
 	 * Add the note when WooCommerce is newly installed.
-	 * 
+	 *
 	 * @since 10.5.0
+	 * @return void
 	 */
 	public static function on_newly_installed() {
 		$page_id = get_option( 'woocommerce_refund_returns_page_id' );
