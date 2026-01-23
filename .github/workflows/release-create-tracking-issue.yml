@@ -154,7 +154,7 @@ jobs:
 
             const releaseLabelId = labels.nodes.length > 0 ? labels.nodes[ 0 ].id : null;
 
-            console.log( `Release label ID: ${ releaseLabelId }` );
+            console.log( releaseLabelId ? 'Found Release label' : 'Release label not found' );
 
             core.setOutput( 'release-label-id', releaseLabelId || '' );
 
@@ -186,13 +186,13 @@ jobs:
             }
 
             const parentIssue = parentIssues.nodes[ 0 ];
-            console.log( `Found parent issue: ${ parentIssue.url }` );
+            console.log( 'Found parent issue' );
 
             core.setOutput( 'parent-id', parentIssue.id );
 
             const assignee = await parentIssue.assignee;
             if ( assignee ) {
-              console.log( `Parent issue assignee: ${ assignee.displayName } (${ assignee.id })` );
+              console.log( 'Parent issue has an assignee' );
               core.setOutput( 'assignee-id', assignee.id );
             } else {
               console.log( 'Parent issue has no assignee' );
@@ -224,7 +224,7 @@ jobs:
 
             if ( existingIssues.nodes.length > 0 ) {
               const existingUrl = existingIssues.nodes[ 0 ].url;
-              console.log( `Tracking issue already exists: ${ existingUrl }` );
+              console.log( 'Tracking issue already exists' );
               core.setOutput( 'issue-exists', 'true' );
               core.setOutput( 'existing-url', existingUrl );
 
@@ -321,7 +321,7 @@ jobs:
               } );
 
               const issue = await result.issue;
-              console.log( `Successfully created tracking issue: ${ issue.url }` );
+              console.log( 'Successfully created tracking issue' );
 
               // Write to GitHub job summary.
               await core.summary

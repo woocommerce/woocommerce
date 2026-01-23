@@ -270,7 +270,7 @@ jobs:
             } );
 
             if ( issues.nodes.length > 0 ) {
-              console.log( `Found existing release tracking issue: ${ issues.nodes[ 0 ].url }` );
+              console.log( 'Found existing release tracking issue' );
               core.setOutput( 'exists', 'true' );
               core.setOutput( 'issue-url', issues.nodes[ 0 ].url );
             } else {
@@ -358,7 +358,7 @@ jobs:
             const displayName = users.nodes.length ? users.nodes[ 0 ].displayName : null;
             const username = users.nodes.length ? users.nodes[ 0 ].username : null;
 
-            console.log( `Found Linear user: ${ displayName } (${ userId })` );
+            console.log( userId ? 'Found Linear user for assignee' : 'No Linear user found for assignee' );
 
             core.setOutput( 'assignee-id', userId || '' );
             core.setOutput( 'assignee-display-name', displayName || '' );
@@ -451,7 +451,7 @@ jobs:
               } );
 
               const parentIssue = await parentResult.issue;
-              console.log( `Parent tracking issue created: ${ parentIssue.url }` );
+              console.log( 'Parent tracking issue created successfully' );
               core.setOutput( 'issue-url', parentIssue.url );
             } catch ( error ) {
               core.setFailed( `Failed to create parent Linear issue: ${ error.message }` );
