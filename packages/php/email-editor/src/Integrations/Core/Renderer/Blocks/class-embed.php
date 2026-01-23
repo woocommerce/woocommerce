@@ -576,8 +576,6 @@ class Embed extends Abstract_Block_Renderer {
 	 * Note: URL validation against VideoPress domains is done in render_video_embed()
 	 * via url_matches_provider() before this method is called.
 	 *
-	 * @since 10.6.0
-	 *
 	 * @param string $url VideoPress video URL (pre-validated by caller).
 	 * @return string Thumbnail URL or empty string.
 	 */
@@ -611,8 +609,6 @@ class Embed extends Abstract_Block_Renderer {
 		 * @param string $url     The embedded URL.
 		 * @param array  $attr    Attributes array.
 		 * @param string $post_id Post ID (empty string in email context).
-		 *
-		 * @since 10.6.0
 		 */
 		// Default TTL matches WordPress oEmbed cache (1 day).
 		$cache_ttl = (int) apply_filters( 'oembed_ttl', DAY_IN_SECONDS, $url, array(), '' );
