@@ -200,14 +200,6 @@ export const baseFieldTransformer = ( setting ) => {
 					);
 				},
 			};
-		default:
-			// Return a read-only text field for unsupported field types
-			// This prevents silent failures when rendering unsupported fields
-			return {
-				id: setting.id,
-				type: 'text',
-				Edit: () => <div>To be implemented: { setting.type }</div>,
-			};
 	}
 };
 
