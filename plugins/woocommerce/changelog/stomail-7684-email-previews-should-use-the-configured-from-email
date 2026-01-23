@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix email preview to use the configured WooCommerce "From" email address and name instead of WordPress defaults.
