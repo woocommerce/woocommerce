@@ -96,6 +96,7 @@ const pendingProductRequests = new Map<
 // We need to access the store result to use state inside actions.
 // TypeScript has trouble with the circular reference, so we use a
 // two-step initialization pattern.
+// eslint-disable-next-line prefer-const
 let state: ProductsStore[ 'state' ];
 
 const storeResult = store< ProductsStore >(
