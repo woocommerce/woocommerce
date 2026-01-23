@@ -105,7 +105,6 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			// Expose sortable taxonomies so the editor can show/hide "Menu order" option.
 			$this->asset_data_registry->add(
 				'sortableTaxonomies',
-				/** This filter is documented in includes/admin/class-wc-admin-assets.php */
 				apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) )
 			);
 		}
@@ -279,8 +278,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			if ( 'menu_order' === $orderby ) {
 				$terms = array_map(
 					function ( $term ) {
-						$term              = (array) $term;
-						$menu_order        = get_term_meta( $term['term_id'], 'order', true );
+						$term               = (array) $term;
+						$menu_order         = get_term_meta( $term['term_id'], 'order', true );
 						$term['menu_order'] = is_numeric( $menu_order ) ? (int) $menu_order : 0;
 						return (object) $term;
 					},

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { InspectorControls } from '@wordpress/block-editor';
+import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	SelectControl,
@@ -12,7 +13,6 @@ import {
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 import { getSetting } from '@woocommerce/settings';
-import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
