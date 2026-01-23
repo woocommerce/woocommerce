@@ -1891,6 +1891,9 @@ function wc_update_product_lookup_tables() {
 		}
 	}
 
+	// Marker: make conditional, based on review enabled setting
+	// When setting changes: gracefully cancel/spin-off the counters update.
+
 	// Rating counts are serialised so they have to be unserialised before populating the lookup table.
 	if ( $is_cli ) {
 		$rating_count_rows = $wpdb->get_results(
