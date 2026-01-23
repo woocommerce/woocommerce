@@ -105,6 +105,17 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			// Expose sortable taxonomies so the editor can show/hide "Menu order" option.
 			$this->asset_data_registry->add(
 				'sortableTaxonomies',
+				/**
+				 * Filters the list of taxonomies that support custom ordering. Filter was introduced long
+				 * ago is only documented in 10.6.0.
+				 *
+				 * First instance in plugins/woocommerce/includes/admin/class-wc-admin-assets.php.
+				 *
+				 * @since 1.0
+				 *
+				 * @param array $sortable_taxonomies List of taxonomy slugs that support custom ordering.
+				 * @return array List of taxonomy slugs that support custom ordering.
+				 */
 				apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) )
 			);
 		}

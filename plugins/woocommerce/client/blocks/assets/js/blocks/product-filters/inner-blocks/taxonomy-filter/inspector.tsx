@@ -4,6 +4,7 @@
 import { InspectorControls } from '@wordpress/block-editor';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 import {
 	SelectControl,
 	ToggleControl,
@@ -12,7 +13,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
