@@ -209,7 +209,7 @@ jobs:
 
   send-slack-notification:
     name: Send Slack notification
-    needs: [trigger-upcoming-code-freeze-events, check-upcoming-release-events, create-parent-tracking-issue]
+    needs: [trigger-upcoming-code-freeze-events, check-upcoming-release-events, create-parent-tracking-issue, create-sub-tracking-issues]
     if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
@@ -487,3 +487,19 @@ jobs:
     secrets:
       LINEAR_OAUTH_TOKEN: ${{ secrets.LINEAR_OAUTH_TOKEN }}
       LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+
+  notify-on-failure:
+    name: Notify on failure
+    needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, send-slack-notification, create-parent-tracking-issue, create-sub-tracking-issues]
+    if: ${{ failure() }}
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Send failure notification to Slack
+        uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: |
+            :x: Some steps in the Release Assignment workflow failed. Please check the logs for details and re-run if needed.
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
