@@ -30,6 +30,11 @@ export function sortFilterOptions(
 	options: FilterOptionItem[],
 	sortOrder: string
 ): FilterOptionItem[] {
+	// For menu_order, preserve the original order from the API
+	if ( sortOrder === 'menu_order-asc' ) {
+		return options;
+	}
+
 	return options.sort( ( a, b ) => {
 		switch ( sortOrder ) {
 			case 'name-asc':

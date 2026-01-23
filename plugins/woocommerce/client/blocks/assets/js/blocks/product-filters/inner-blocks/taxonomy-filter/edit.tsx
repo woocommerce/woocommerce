@@ -112,7 +112,7 @@ const Edit = ( props: EditProps ) => {
 			const selectArgs = {
 				per_page: 15,
 				hide_empty: hideEmpty,
-				orderby: 'name',
+				orderby: sortOrder === 'menu_order-asc' ? 'menu_order' : 'name',
 				order: 'asc',
 			};
 			return {
@@ -125,7 +125,7 @@ const Edit = ( props: EditProps ) => {
 				] ),
 			};
 		},
-		[ taxonomy, hideEmpty, isPreview ]
+		[ taxonomy, hideEmpty, isPreview, sortOrder ]
 	);
 
 	// Fetch taxonomy counts using the updated useCollectionData hook

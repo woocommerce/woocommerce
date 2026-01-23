@@ -60,6 +60,10 @@ export const TaxonomyFilterInspectorControls = ( {
 						value={ sortOrder }
 						options={ [
 							{
+								label: __( 'Menu order', 'woocommerce' ),
+								value: 'menu_order-asc',
+							},
+							{
 								label: __(
 									'Count (High to Low)',
 									'woocommerce'
