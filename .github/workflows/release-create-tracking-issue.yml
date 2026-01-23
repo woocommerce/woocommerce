@@ -133,7 +133,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Install linear-sdk
-        run: npm install @linear/sdk
+        run: npm install @linear/sdk@71.0.0
 
       - name: Get Linear data
         id: get-linear-data

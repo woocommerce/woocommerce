@@ -249,7 +249,7 @@ jobs:
           sparse-checkout-cone-mode: false
 
       - name: Install linear-sdk
-        run: npm install @linear/sdk
+        run: npm install @linear/sdk@71.0.0
 
       - name: Check for existing release tracking issue
         id: check-existing-issue
