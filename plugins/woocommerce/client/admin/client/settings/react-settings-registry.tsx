@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { createRoot } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -62,7 +63,10 @@ overrideReactSettingsScreen( 'general', '', {
 	className: 'woocommerce-settings-general',
 	fieldTransformer: generalFieldTransformer,
 	rowConfigurations: generalRowConfigurations,
-	missingDataMessage: 'General settings data is missing.',
+	missingDataMessage: __(
+		'General settings data is missing.',
+		'woocommerce'
+	),
 } );
 
 const ReactSettingsScreen = ( {
