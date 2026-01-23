@@ -251,6 +251,32 @@ class ProductQuery implements QueryClausesGenerator {
 			$args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore
 		}
 
+		// Filter by related products.
+		if ( ! empty( $request['related'] ) ) {
+			$related_to  = array_map( 'absint', $request['related'] );
+			$limit       = ! empty( $request['per_page'] ) ? (int) $request['per_page'] : -1;
+			$all_related = array();
+
+			foreach ( $related_to as $product_id ) {
+				// Exclude the source product IDs to avoid returning them in results.
+				$related = wc_get_related_products( $product_id, $limit, $related_to );
+				if ( ! empty( $related ) ) {
+					$all_related = array_merge( $all_related, $related );
+				}
+			}
+
+			$all_related = array_unique( $all_related );
+
+			if ( ! empty( $all_related ) ) {
+				$args['post__in'] = ! empty( $args['post__in'] )
+					? array_values( array_intersect( $args['post__in'], $all_related ) )
+					: array_values( $all_related );
+			} else {
+				// No related products found, return empty result.
+				$args['post__in'] = array( 0 );
+			}
+		}
+
 		return $args;
 	}
 
