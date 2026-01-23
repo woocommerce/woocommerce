@@ -56,16 +56,13 @@ trait ProductLinksTrait {
 			);
 		}
 
-		$related_ids = wc_get_related_products( $item->get_id() );
-		if ( ! empty( $related_ids ) ) {
-			$links['related'] = array(
-				'href'       => add_query_arg(
-					array( 'include' => implode( ',', $related_ids ) ),
-					rest_url( $this->get_namespace() . '/products' )
-				),
-				'embeddable' => true,
-			);
-		}
+		$links['related'] = array(
+			'href'       => add_query_arg(
+				array( 'related' => $item->get_id() ),
+				rest_url( $this->get_namespace() . '/products' )
+			),
+			'embeddable' => true,
+		);
 
 		return $links;
 	}

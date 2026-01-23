@@ -440,6 +440,16 @@ class Products extends AbstractRoute {
 			'sanitize_callback' => 'wp_parse_id_list',
 		);
 
+		$params['related'] = array(
+			'description'       => __( 'Limit result set to products related to specific IDs.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
+		);
+
 		return $params;
 	}
 }
