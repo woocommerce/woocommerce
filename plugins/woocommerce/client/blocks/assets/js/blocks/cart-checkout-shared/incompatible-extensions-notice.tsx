@@ -6,8 +6,6 @@ import { getSetting, CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
 
-type StoredDismissedNotice = { [ blockName: string ]: string[] };
-
 const areArraysEqual = ( a: string[], b: string[] ): boolean => {
 	if ( a.length !== b.length ) return false;
 	const unique = new Set( [ ...a, ...b ] );
@@ -44,18 +42,14 @@ interface Props {
 export const IncompatibleExtensionsFrontendNotice = ( {
 	block,
 }: Props ): JSX.Element | null => {
-	const [ dismissedNotices, setDismissedNotices ] = useLocalStorageState<
-		StoredDismissedNotice[]
-	>( 'wc-blocks_dismissed_incompatible_extensions_notices_frontend', [] );
+	const [ dismissedSlugs, setDismissedSlugs ] = useLocalStorageState<
+		string[]
+	>( 'wc-blocks_dismissed_incompatible_extensions_notices', [] );
 
 	const { extensions, slugs } = getIncompatibleExtensions();
 	const count = slugs.length;
 
-	const isDismissedAndUpToDate = dismissedNotices.some(
-		( notice ) =>
-			Object.keys( notice ).includes( block ) &&
-			areArraysEqual( notice[ block ], slugs )
-	);
+	const isDismissedAndUpToDate = areArraysEqual( dismissedSlugs, slugs );
 
 	const shouldShow =
 		CURRENT_USER_IS_ADMIN && count > 0 && ! isDismissedAndUpToDate;
@@ -65,11 +59,7 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	}
 
 	const dismissNotice = () => {
-		const updated = dismissedNotices.filter(
-			( notice ) => ! Object.keys( notice ).includes( block )
-		);
-		updated.push( { [ block ]: slugs } );
-		setDismissedNotices( updated );
+		setDismissedSlugs( slugs );
 	};
 
 	const extensionNames = Object.values( extensions );
