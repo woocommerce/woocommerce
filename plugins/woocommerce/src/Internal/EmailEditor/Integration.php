@@ -115,7 +115,7 @@ class Integration {
 		$this->editor_page_renderer    = $container->get( PageRenderer::class );
 		$this->template_api_controller = $container->get( TemplateApiController::class );
 		$this->email_api_controller    = $container->get( EmailApiController::class );
-		$this->wc_email_instance       = new \WC_Email();
+		$this->wc_email_instance       = \WC_Emails::instance()->get_emails()['WC_Email_New_Order']; // Using any email class to get the instance.
 	}
 
 	/**
