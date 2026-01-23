@@ -15411,7 +15411,7 @@ parameters:
 		-
 			message: '#^Function as_schedule_single_action not found\.$#'
 			identifier: function.notFound
-			count: 2
+			count: 1
 			path: includes/class-wc-install.php
 
 		-
