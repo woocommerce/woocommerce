@@ -52,6 +52,13 @@ class Integration {
 	private EmailApiController $email_api_controller;
 
 	/**
+	 * The WC_Email instance.
+	 *
+	 * @var \WC_Email
+	 */
+	private \WC_Email $wc_email_instance;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -108,6 +115,7 @@ class Integration {
 		$this->editor_page_renderer    = $container->get( PageRenderer::class );
 		$this->template_api_controller = $container->get( TemplateApiController::class );
 		$this->email_api_controller    = $container->get( EmailApiController::class );
+		$this->wc_email_instance       = new \WC_Email();
 	}
 
 	/**
@@ -380,19 +388,23 @@ class Integration {
 
 	/**
 	 * Action hook callback before sending the preview email via wp_mail
+	 *
+	 * @since 10.6.0
+	 * @return void
 	 */
 	public function send_preview_email_before_wp_mail() {
-		$wc_email = new \WC_Email();
-		add_filter( 'wp_mail_from', array( $wc_email, 'get_from_address' ) );
-		add_filter( 'wp_mail_from_name', array( $wc_email, 'get_from_name' ) );
+		add_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
 	}
 
 	/**
 	 * Action hook callback after sending the preview email via wp_mail.
+	 *
+	 * @since 10.6.0
+	 * @return void
 	 */
 	public function send_preview_email_after_wp_mail() {
-		$wc_email = new \WC_Email();
-		remove_filter( 'wp_mail_from', array( $wc_email, 'get_from_address' ) );
-		remove_filter( 'wp_mail_from_name', array( $wc_email, 'get_from_name' ) );
+		remove_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
 	}
 }
