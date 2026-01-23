@@ -174,7 +174,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 **WooCommerce**
 
-* Fix - Add conditional checks to prevent the WooCommerce Accordion block from appearing in the block inserter on WordPress 6.9 and later. [#62626](https://github.com/woocommerce/woocommerce/pull/62626)
+* Fix - Add conditional checks to prevent the WooCommerce Accordion block from appearing in the block inserter on WordPress 6.8 and later. [#62626](https://github.com/woocommerce/woocommerce/pull/62626)
 * Fix - Added validation for PayPal Standard purchase unit amount in create-order requests to prevent errors when order totals are invalid. [#62385](https://github.com/woocommerce/woocommerce/pull/62385)
 * Fix - Adds an ID for the setup wizard, avoiding a deprecation error under PHP 8.5. [#62288](https://github.com/woocommerce/woocommerce/pull/62288)
 * Fix - Add support for collectable shipping methods in local pickup functionality [#62623](https://github.com/woocommerce/woocommerce/pull/62623)
