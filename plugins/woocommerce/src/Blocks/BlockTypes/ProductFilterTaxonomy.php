@@ -102,6 +102,12 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'filterableProductTaxonomies', $this->get_taxonomies() );
+			// Expose sortable taxonomies so the editor can show/hide "Menu order" option.
+			$this->asset_data_registry->add(
+				'sortableTaxonomies',
+				/** This filter is documented in includes/admin/class-wc-admin-assets.php */
+				apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) )
+			);
 		}
 	}
 

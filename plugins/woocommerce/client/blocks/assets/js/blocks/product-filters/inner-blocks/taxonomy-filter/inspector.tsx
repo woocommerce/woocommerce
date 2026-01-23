@@ -11,6 +11,8 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
+import { getSetting } from '@woocommerce/settings';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -22,12 +24,53 @@ import {
 } from '../../components/display-style-switcher';
 import metadata from './block.json';
 
+// Get the list of taxonomies that support custom ordering (drag & drop in admin).
+const sortableTaxonomies = getSetting< string[] >( 'sortableTaxonomies', [
+	'product_cat',
+] );
+
 export const TaxonomyFilterInspectorControls = ( {
 	attributes,
 	setAttributes,
 	clientId,
 }: EditProps ) => {
-	const { showCounts, sortOrder, hideEmpty, displayStyle } = attributes;
+	const { showCounts, sortOrder, hideEmpty, displayStyle, taxonomy } =
+		attributes;
+
+	// Only show "Menu order" option for taxonomies that support custom ordering.
+	const sortOrderOptions = useMemo( () => {
+		const baseOptions = [
+			{
+				label: __( 'Count (High to Low)', 'woocommerce' ),
+				value: 'count-desc',
+			},
+			{
+				label: __( 'Count (Low to High)', 'woocommerce' ),
+				value: 'count-asc',
+			},
+			{
+				label: __( 'Name (A to Z)', 'woocommerce' ),
+				value: 'name-asc',
+			},
+			{
+				label: __( 'Name (Z to A)', 'woocommerce' ),
+				value: 'name-desc',
+			},
+		];
+
+		// Add "Menu order" option only for sortable taxonomies.
+		if ( sortableTaxonomies.includes( taxonomy ) ) {
+			return [
+				{
+					label: __( 'Menu order', 'woocommerce' ),
+					value: 'menu_order-asc',
+				},
+				...baseOptions,
+			];
+		}
+
+		return baseOptions;
+	}, [ taxonomy ] );
 
 	return (
 		<InspectorControls>
@@ -58,34 +101,7 @@ export const TaxonomyFilterInspectorControls = ( {
 					<SelectControl
 						label={ __( 'Sort Order', 'woocommerce' ) }
 						value={ sortOrder }
-						options={ [
-							{
-								label: __( 'Menu order', 'woocommerce' ),
-								value: 'menu_order-asc',
-							},
-							{
-								label: __(
-									'Count (High to Low)',
-									'woocommerce'
-								),
-								value: 'count-desc',
-							},
-							{
-								label: __(
-									'Count (Low to High)',
-									'woocommerce'
-								),
-								value: 'count-asc',
-							},
-							{
-								label: __( 'Name (A to Z)', 'woocommerce' ),
-								value: 'name-asc',
-							},
-							{
-								label: __( 'Name (Z to A)', 'woocommerce' ),
-								value: 'name-desc',
-							},
-						] }
+						options={ sortOrderOptions }
 						onChange={ ( value: string ) =>
 							setAttributes( { sortOrder: value } )
 						}
