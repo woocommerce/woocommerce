@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
+import { useCustomDataContext } from '@woocommerce/shared-context';
+import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { type BlockEditProps } from '@wordpress/blocks';
 import {
 	Disabled,
-	PanelBody,
 	SelectControl,
 	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
@@ -16,9 +18,6 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-import { useCustomDataContext } from '@woocommerce/shared-context';
-import type { ProductResponseAttributeItem } from '@woocommerce/types';
-import clsx from 'clsx';
 
 /**
  * Internal dependencies
