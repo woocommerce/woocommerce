@@ -241,6 +241,9 @@ class WC_Site_Tracking {
 	/**
 	 * When the tracking is getting disabled, unschedules all deferred tracks.
 	 *
+	 * @internal
+	 * @since 10.6.0
+	 *
 	 * @param string $new_option_value The new, unserialized option value.
 	 * @return string
 	 */

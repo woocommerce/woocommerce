@@ -25,7 +25,8 @@ class WC_Products_Tracking {
 	/**
 	 * Deferred Tracks callback.
 	 *
-	 * @internal - backward compatibility is not guaranteed, don't use this constant.
+	 * @internal
+	 * @since 10.6.0
 	 */
 	public const TRACK_PRODUCT_PUBLISHED_CALLBACK = 'track_product_published';
 
@@ -372,7 +373,8 @@ class WC_Products_Tracking {
 	/**
 	 * Tracks the event, allowing deferred/asynchronous event recording.
 	 *
-	 * @internal - backward compatibility is not guaranteed, don't use this method.
+	 * @internal
+	 * @since 10.6.0
 	 *
 	 * @param string $event_name       The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
