@@ -115,7 +115,15 @@ class Integration {
 		$this->editor_page_renderer    = $container->get( PageRenderer::class );
 		$this->template_api_controller = $container->get( TemplateApiController::class );
 		$this->email_api_controller    = $container->get( EmailApiController::class );
-		$this->wc_email_instance       = \WC_Emails::instance()->get_emails()['WC_Email_New_Order']; // Using any email class to get the instance.
+
+		// Using any email class to get the instance.
+		$registered_emails = \WC_Emails::instance()->get_emails();
+		if ( isset( $registered_emails['WC_Email_New_Order'] ) ) {
+			$this->wc_email_instance = $registered_emails['WC_Email_New_Order'];
+		} else {
+			$first_email_key         = array_key_first( $registered_emails );
+			$this->wc_email_instance = $registered_emails[ $first_email_key ];
+		}
 	}
 
 	/**
