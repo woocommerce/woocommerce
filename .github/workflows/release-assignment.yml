@@ -131,7 +131,7 @@ jobs:
 
   trigger-upcoming-code-freeze-events:
     name: Assign a release lead
-    needs: check-upcoming-release-events
+    needs: [check-upcoming-release-events]
     if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
@@ -209,10 +209,7 @@ jobs:
 
   send-slack-notification:
     name: Send Slack notification
-    needs:
-      - trigger-upcoming-code-freeze-events
-      - check-upcoming-release-events
-      - create-parent-tracking-issue
+    needs: [trigger-upcoming-code-freeze-events, check-upcoming-release-events, create-parent-tracking-issue]
     if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
@@ -232,9 +229,7 @@ jobs:
 
   create-parent-tracking-issue:
     name: Create Parent Tracking Issue in Linear
-    needs:
-      - trigger-upcoming-code-freeze-events
-      - check-upcoming-release-events
+    needs: [trigger-upcoming-code-freeze-events, check-upcoming-release-events]
     if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     outputs:
@@ -481,8 +476,7 @@ jobs:
 
   create-sub-tracking-issues:
     name: Create sub-issue for tracking ${{ matrix.version }} release
-    needs:
-      - create-parent-tracking-issue
+    needs: [create-parent-tracking-issue]
     strategy:
       matrix: ${{ fromJSON(needs.create-parent-tracking-issue.outputs.sub-issues-matrix) }}
     uses: ./.github/workflows/release-create-tracking-issue.yml
