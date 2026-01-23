@@ -186,7 +186,10 @@ export const baseFieldTransformer = ( setting ) => {
 					};
 				},
 			};
-		case 'multiselect':
+		case 'multiselect': {
+			const optionValues = parseOptions( setting.options ).map(
+				( option ) => option.value
+			);
 			return {
 				...baseField,
 				type: 'array',
@@ -194,9 +197,7 @@ export const baseFieldTransformer = ( setting ) => {
 				isValid: ( value ) => {
 					return (
 						Array.isArray( value ) &&
-						value.every( ( item ) =>
-							setting.options.includes( item )
-						)
+						value.every( ( item ) => optionValues.includes( item ) )
 					);
 				},
 			};
