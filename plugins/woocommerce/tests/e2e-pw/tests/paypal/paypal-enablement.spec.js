@@ -78,7 +78,7 @@ test.describe(
 
 			// Clean up by disabling PayPal again.
 			await test.step( 'Disable PayPal Standard', async () => {
-				const optionsButton = paypalDiv.getByRole( 'link', {
+				const optionsButton = paypalDiv.getByRole( 'button', {
 					name: 'Payment provider options',
 				} );
 				await expect( optionsButton ).toBeVisible();
