@@ -43,7 +43,7 @@ class FeaturesUtil {
 		$feature             = $features_controller->get_feature_definition( $feature_id );
 
 		// Log deprecation notice for deprecated features (only from the public API).
-		if ( null !== $feature && ! empty( $feature['deprecated_since'] ) ) {
+		if ( ! empty( $feature['deprecated_since'] ) ) {
 			self::log_deprecated_feature_usage( $feature_id, $feature['deprecated_since'] );
 		}
 
