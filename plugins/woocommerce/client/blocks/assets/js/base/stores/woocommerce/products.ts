@@ -69,27 +69,6 @@ const productsStore = store< ProductsStore >(
 const { state } = productsStore;
 
 /**
- * Check if a product exists in state.
- *
- * @param productId The product ID.
- * @return True if the product is in state.
- */
-export const hasProduct = ( productId: number ): boolean => {
-	return productId in state.products;
-};
-
-/**
- * Get a product from state by ID.
- * Returns null if the product is not loaded.
- *
- * @param productId The product ID.
- * @return The product or null.
- */
-export const getProduct = ( productId: number ): ProductResponseItem | null => {
-	return state.products[ productId ] ?? null;
-};
-
-/**
  * Extract quantity constraints from a product in Store API format.
  *
  * @param product The product in Store API format.
@@ -110,21 +89,6 @@ export const getQuantityConstraints = (
 		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
 		step: addToCart?.multiple_of ?? 1,
 	};
-};
-
-/**
- * Check if a product is purchasable (can be added to cart).
- *
- * @param product The product in Store API format.
- * @return True if purchasable.
- */
-export const isPurchasable = (
-	product: ProductResponseItem | null
-): boolean => {
-	if ( ! product ) {
-		return false;
-	}
-	return product.is_purchasable && product.is_in_stock;
 };
 
 export { state, productsStore };

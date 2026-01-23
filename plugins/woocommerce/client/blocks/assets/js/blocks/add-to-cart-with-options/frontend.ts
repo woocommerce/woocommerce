@@ -19,6 +19,7 @@ import type { ProductResponseItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
+import { findMatchingVariation } from '../../base/utils/variations/attribute-matching';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
@@ -72,57 +73,6 @@ const { state: productDataState } = store< ProductDataStore >(
 );
 
 /**
- * Normalize attribute name by stripping the 'attribute_' or 'attribute_pa_' prefix
- * that WooCommerce adds for variation attributes.
- *
- * @param name The attribute name (e.g., 'attribute_color' or 'attribute_pa_color').
- * @return The normalized name (e.g., 'color').
- */
-const normalizeAttributeName = ( name: string ): string => {
-	return name.replace( /^attribute_(pa_)?/, '' );
-};
-
-/**
- * Find the matching variation ID from a product's variations based on selected attributes.
- *
- * Uses case-insensitive comparison since Store API returns labels (e.g., "Color")
- * while PHP context uses slugs (e.g., "attribute_pa_color" → "color").
- *
- * @param product            The product in Store API format.
- * @param selectedAttributes The selected attributes.
- * @return The matching variation ID, or null if no match.
- */
-const findMatchingVariationId = (
-	product: ProductResponseItem,
-	selectedAttributes: SelectedAttributes[]
-): number | null => {
-	if ( ! product.variations?.length || ! selectedAttributes?.length ) {
-		return null;
-	}
-
-	const matchedVariation = product.variations.find( ( variation ) => {
-		return variation.attributes.every( ( attr ) => {
-			const attrNameLower = attr.name.toLowerCase();
-			const selectedAttr = selectedAttributes.find(
-				( selected ) =>
-					normalizeAttributeName(
-						selected.attribute
-					).toLowerCase() === attrNameLower
-			);
-
-			// If variation attribute has empty value, it accepts "Any" value.
-			if ( attr.value === '' ) {
-				return selectedAttr !== undefined && selectedAttr.value !== '';
-			}
-
-			return selectedAttr?.value === attr.value;
-		} );
-	} );
-
-	return matchedVariation?.id ?? null;
-};
-
-/**
  * Normalize a Store API product into the format expected by consumers.
  *
  * @param product The product in Store API format.
@@ -157,14 +107,14 @@ export const getProductData = (
 		productFromStore.type === 'variable' &&
 		selectedAttributes?.length > 0
 	) {
-		const variationId = findMatchingVariationId(
+		const matchedVariation = findMatchingVariation(
 			productFromStore,
 			selectedAttributes
 		);
 
-		if ( variationId ) {
+		if ( matchedVariation ) {
 			const variation =
-				productsStore.state.productVariations[ variationId ];
+				productsStore.state.productVariations[ matchedVariation.id ];
 			if ( variation ) {
 				return normalizeProductFromStore( variation );
 			}
