@@ -1,0 +1,35 @@
+{
+	"name": "@woocommerce/internal-ts-config",
+	"version": "1.0.0",
+	"description": "Shared TypeScript configuration and typings for the WooCommerce monorepo.",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^20.11.1"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/internal-ts-config/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git",
+		"directory": "packages/js/internal-ts-config"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"private": true,
+	"files": [
+		"tsconfig.json",
+		"tsconfig-cjs.json",
+		"typings"
+	],
+	"scripts": {
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet"
+	},
+	"devDependencies": {
+		"typescript": "5.7.x"
+	},
+	"peerDependencies": {
+		"@wordpress/data": "wp-6.6"
+	}
+}
