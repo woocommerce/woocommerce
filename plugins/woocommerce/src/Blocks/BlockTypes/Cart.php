@@ -263,7 +263,7 @@ class Cart extends AbstractBlock {
 					$declared_extensions['incompatible'],
 					function ( array $acc, $item ) use ( $all_plugins ) {
 						$plugin      = $all_plugins[ $item ] ?? null;
-						$plugin_id   = $plugin['TextDomain'] ?? dirname( $item, 2 );
+						$plugin_id   = $plugin['TextDomain'] ?? dirname( $item );
 						$plugin_name = $plugin['Name'] ?? $plugin_id;
 						$acc[]       = [
 							'id'    => $plugin_id,
