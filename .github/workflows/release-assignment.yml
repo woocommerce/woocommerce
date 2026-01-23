@@ -123,6 +123,10 @@ jobs:
               }
             }
 
+            if ( ! teamName ) {
+              core.setFailed( 'Team name not found in final release event description. Expected "Team: <name>" in event description.' );
+              return;
+            }
             core.setOutput( 'team-name', teamName );
 
   trigger-upcoming-code-freeze-events:
