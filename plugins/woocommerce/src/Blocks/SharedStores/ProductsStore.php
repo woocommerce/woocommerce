@@ -134,7 +134,7 @@ class ProductsStore {
 			fn( $id ) => 'include[]=' . $id,
 			$child_ids
 		);
-		$query_string = implode( '&', $include_params );
+		$query_string   = implode( '&', $include_params );
 
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
 
