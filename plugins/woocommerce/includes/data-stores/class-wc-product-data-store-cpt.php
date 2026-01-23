@@ -1664,8 +1664,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Generate SQL.
 		$sql = $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-			$stock_quantity,
+			"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+			is_float( $stock_quantity ) ? number_format( $stock_quantity, WC_ROUNDING_PRECISION, '.', '') : (int) $stock_quantity,
 			$product_id_with_stock
 		);
 
@@ -1704,8 +1704,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			// Generate SQL.
 			$sql = $wpdb->prepare(
-				"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-				$new_stock,
+				"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'", // string-format
+				is_float( $new_stock ) ? number_format( $new_stock, WC_ROUNDING_PRECISION, '.', '') : $new_stock,
 				$product_id_with_stock
 			);
 		} else {
@@ -1799,8 +1799,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'",
-						$quantity,
+						"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='total_sales'",
+						(int) $quantity,
 						$product_id
 					)
 				);
