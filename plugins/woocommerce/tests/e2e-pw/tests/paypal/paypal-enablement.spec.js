@@ -75,6 +75,28 @@ test.describe(
 
 			// Confirm the status label is present with any of the expected texts.
 			await expect( labelActive.or( labelTestAccount ) ).toBeVisible();
+
+			// Clean up by disabling PayPal again.
+			await test.step( 'Disable PayPal Standard', async () => {
+				const optionsButton = paypalDiv.getByRole( 'link', {
+					name: 'Payment provider options',
+				} );
+				await expect( optionsButton ).toBeVisible();
+
+				await optionsButton.click();
+
+				const disableButton = page.getByRole( 'button', {
+					name: 'Disable',
+				} );
+				await expect( disableButton ).toBeVisible();
+
+				await disableButton.click();
+
+				// Confirm the Enable button is present again.
+				await expect(
+					paypalDiv.getByRole( 'link', { name: 'Enable' } )
+				).toBeVisible();
+			} );
 		} );
 	}
 );
