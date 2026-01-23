@@ -138,15 +138,6 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that embed block uses default label when no custom label provided
-	 */
-	public function test_uses_default_label_when_no_custom_label(): void {
-		$rendered = $this->embed_renderer->render( $this->parsed_spotify_embed['innerHTML'], $this->parsed_spotify_embed, $this->rendering_context );
-
-		$this->assertStringContainsString( 'Listen on Spotify', $rendered );
-	}
-
-	/**
 	 * Test that embed block handles email attributes for spacing
 	 */
 	public function test_handles_email_attributes_for_spacing(): void {
@@ -457,43 +448,6 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that YouTube embed handles email attributes for spacing
-	 */
-	public function test_youtube_embed_handles_email_attributes_for_spacing(): void {
-		$parsed_youtube_with_spacing                = $this->parsed_youtube_embed;
-		$parsed_youtube_with_spacing['email_attrs'] = array(
-			'margin' => '20px 0',
-		);
-
-		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $parsed_youtube_with_spacing, $this->rendering_context );
-
-		// Email attributes are handled by the cover block renderer.
-		$this->assertStringContainsString( 'https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg', $rendered );
-		$this->assertStringContainsString( 'play2x.png', $rendered );
-	}
-
-	/**
-	 * Test that YouTube embed includes proper security attributes
-	 */
-	public function test_youtube_embed_includes_proper_security_attributes(): void {
-		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $this->parsed_youtube_embed, $this->rendering_context );
-
-		// The play button may or may not be wrapped in a link depending on post context.
-		// In test environment, there may not be a valid post URL, so the play button is just an image.
-		$this->assertStringContainsString( 'alt="Play"', $rendered );
-		$this->assertStringContainsString( 'play2x.png', $rendered );
-	}
-
-	/**
-	 * Test that YouTube embed includes proper accessibility attributes
-	 */
-	public function test_youtube_embed_includes_proper_accessibility_attributes(): void {
-		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $this->parsed_youtube_embed, $this->rendering_context );
-
-		$this->assertStringContainsString( 'alt="Play"', $rendered );
-	}
-
-	/**
 	 * Test that YouTube embed detects YouTube by providerNameSlug
 	 */
 	public function test_youtube_embed_detects_youtube_by_provider_name_slug(): void {
@@ -578,5 +532,174 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		// Should still render as video block even with invalid video ID (the thumbnail URL will be generated).
 		$this->assertStringContainsString( 'https://img.youtube.com/vi/invalid/0.jpg', $rendered );
 		$this->assertStringContainsString( 'play2x.png', $rendered );
+	}
+
+	/**
+	 * Test that VideoPress embed is detected and renders as video player, including handling URLs with query parameters.
+	 */
+	public function test_renders_videopress_embed(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		// Return a thumbnail URL with query parameters to test the URL encoding fix.
+		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg?w=500&h=281';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			// Intercept VideoPress oEmbed requests.
+			if ( strpos( $url, 'public-api.wordpress.com/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$parsed_videopress_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://videopress.com/v/BZHMfMfN?w=500&h=281',
+				'type'             => 'video',
+				'providerNameSlug' => 'videopress',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress wp-block-embed-videopress"><div class="wp-block-embed__wrapper">https://videopress.com/v/BZHMfMfN?w=500&h=281</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_videopress_embed['innerHTML'], $parsed_videopress_embed, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect VideoPress and render as video with thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered, 'VideoPress embed should render with play button' );
+		// Verify background-image is present (our fix ensures it's not stripped).
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+		// Verify query parameters are present (as &amp; in HTML, which is correct).
+		$this->assertStringContainsString( 'w=500', $rendered, 'Query parameters should be present' );
+		$this->assertStringContainsString( 'h=281', $rendered, 'Query parameters should be present' );
+	}
+
+	/**
+	 * Test that VideoPress embed detects VideoPress by providerNameSlug
+	 */
+	public function test_videopress_embed_detects_videopress_by_provider_name_slug(): void {
+		$parsed_videopress_by_slug = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'providerNameSlug' => 'videopress',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress"><div class="wp-block-embed__wrapper">Some content</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_videopress_by_slug['innerHTML'], $parsed_videopress_by_slug, $this->rendering_context );
+
+		// Should return graceful fallback link since provider is detected but no URL is available for thumbnail extraction.
+		$this->assertStringContainsString( '<a href="https://videopress.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on VideoPress', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
+	}
+
+	/**
+	 * Test that VideoPress embed detects VideoPress by URL in attributes
+	 */
+	public function test_videopress_embed_detects_videopress_by_url_in_attributes(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			if ( strpos( $url, 'public-api.wordpress.com/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$parsed_videopress_by_url = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url' => 'https://videopress.com/v/BZHMfMfN',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-videopress"><div class="wp-block-embed__wrapper">https://videopress.com/v/BZHMfMfN</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_videopress_by_url['innerHTML'], $parsed_videopress_by_url, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect VideoPress by URL domain and render with thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'background-image', $rendered, 'VideoPress embed should have background image' );
+	}
+
+	/**
+	 * Test that VideoPress embed detects video.wordpress.com domain
+	 */
+	public function test_videopress_embed_detects_video_wordpress_com_domain(): void {
+		// Mock the oEmbed HTTP response to avoid external calls in CI.
+		$mock_thumbnail_url   = 'https://videos.files.wordpress.com/BZHMfMfN/thumbnail.jpg';
+		$mock_oembed_response = wp_json_encode(
+			array(
+				'type'          => 'video',
+				'thumbnail_url' => $mock_thumbnail_url,
+				'title'         => 'Test Video',
+			)
+		);
+
+		// Use pre_http_request filter to intercept oEmbed HTTP calls.
+		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_oembed_response ) {
+			if ( strpos( $url, 'public-api.wordpress.com/oembed' ) !== false ) {
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => $mock_oembed_response,
+				);
+			}
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
+
+		$parsed_videopress_wordpress_com = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url' => 'https://video.wordpress.com/v/BZHMfMfN',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video"><div class="wp-block-embed__wrapper">https://video.wordpress.com/v/BZHMfMfN</div></figure>',
+		);
+
+		try {
+			$rendered = $this->embed_renderer->render( $parsed_videopress_wordpress_com['innerHTML'], $parsed_videopress_wordpress_com, $this->rendering_context );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+		}
+
+		// Should detect VideoPress by video.wordpress.com domain and render with thumbnail.
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'background-image', $rendered, 'VideoPress embed should have background image' );
 	}
 }

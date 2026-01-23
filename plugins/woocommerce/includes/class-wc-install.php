@@ -2990,11 +2990,17 @@ EOT;
 	 * @return void
 	 */
 	public static function page_created( $page_id, $page_data ) {
-		if ( 'refund_returns' === $page_data['post_name'] ) {
-			if ( Constants::is_true( 'WC_INSTALLING' ) ) {
-				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'wc_notes_refund_returns_page_created', array( $page_id ), 'woocommerce', true );
+		if ( Constants::is_true( 'WC_INSTALLING' ) ) {
+			return;
+		}
+
+		if ( 'refund_returns' === $page_data['post_name'] && class_exists( 'WC_Notes_Refund_Returns', false ) ) {
+			$callback = fn() => WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+
+			if ( did_action( 'init' ) ) {
+				$callback();
 			} else {
-				WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+				add_action( 'init', $callback );
 			}
 		}
 	}
