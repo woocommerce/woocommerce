@@ -221,6 +221,16 @@ class WC_Product_Attribute implements ArrayAccess {
 	*/
 
 	/**
+	 * Get all extra data.
+	 *
+	 * @since 10.6.0
+	 * @return array
+	 */
+	public function get_all_extra_data() {
+		return $this->extra_data;
+	}
+
+	/**
 	 * Get extra data by key.
 	 *
 	 * @since 10.6.0
