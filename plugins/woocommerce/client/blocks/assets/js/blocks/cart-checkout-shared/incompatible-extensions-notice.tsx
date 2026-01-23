@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useState, useEffect } from '@wordpress/element';
 import { getSetting, CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import { useLocalStorageState } from '@woocommerce/base-hooks';
@@ -49,8 +48,6 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 		StoredDismissedNotice[]
 	>( 'wc-blocks_dismissed_incompatible_extensions_notices_frontend', [] );
 
-	const [ isVisible, setIsVisible ] = useState( false );
-
 	const { extensions, slugs } = getIncompatibleExtensions();
 	const count = slugs.length;
 
@@ -63,11 +60,7 @@ export const IncompatibleExtensionsFrontendNotice = ( {
 	const shouldShow =
 		CURRENT_USER_IS_ADMIN && count > 0 && ! isDismissedAndUpToDate;
 
-	useEffect( () => {
-		setIsVisible( shouldShow );
-	}, [ shouldShow ] );
-
-	if ( ! isVisible ) {
+	if ( ! shouldShow ) {
 		return null;
 	}
 
