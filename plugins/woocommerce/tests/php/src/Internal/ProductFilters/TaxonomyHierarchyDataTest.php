@@ -243,7 +243,7 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should include menu_order field in tree structure with default value of 0.
+	 * Should include menu_order field in tree structure with default value of 0.
 	 */
 	public function test_tree_structure_includes_menu_order_default(): void {
 		$electronics_id = $this->create_test_term( 'Electronics' );
@@ -255,7 +255,7 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should include menu_order field from term meta when set.
+	 * Should include menu_order field from term meta when set.
 	 */
 	public function test_tree_structure_includes_menu_order_from_meta(): void {
 		$electronics_id = $this->create_test_term( 'Electronics' );
@@ -272,7 +272,7 @@ class TaxonomyHierarchyDataTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should handle non-numeric menu_order meta gracefully.
+	 * Should handle non-numeric menu_order meta gracefully.
 	 */
 	public function test_tree_structure_handles_invalid_menu_order_meta(): void {
 		$electronics_id = $this->create_test_term( 'Electronics' );
