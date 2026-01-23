@@ -1739,7 +1739,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				/**
 				 * This filter is documented below.
 				 *
-				 * @since 10.6.0
+				 * @since 2.7.0
 				 */
 				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
