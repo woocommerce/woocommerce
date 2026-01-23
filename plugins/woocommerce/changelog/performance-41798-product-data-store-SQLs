@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Products: performance tweaks for data store SQLs setting stock and total sales.
