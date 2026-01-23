@@ -76,9 +76,11 @@ export type ProductsStore = {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-
 // Track in-flight requests to avoid duplicate fetches.
-const pendingProductRequests = new Map< number, Promise< ProductResponseItem | null > >();
+const pendingProductRequests = new Map<
+	number,
+	Promise< ProductResponseItem | null >
+>();
 
 /**
  * The woocommerce/products store.
@@ -133,7 +135,9 @@ const storeResult = store< ProductsStore >(
 
 						if ( isApiErrorResponse( response, json ) ) {
 							throw new Error(
-								`Failed to load product ${ productId }: ${ ( json as ApiErrorResponse ).message }`
+								`Failed to load product ${ productId }: ${
+									( json as ApiErrorResponse ).message
+								}`
 							);
 						}
 
@@ -194,9 +198,7 @@ export const isProductLoading = ( productId: number ): boolean => {
  * @param productId The product ID.
  * @return The product or null.
  */
-export const getProduct = (
-	productId: number
-): ProductResponseItem | null => {
+export const getProduct = ( productId: number ): ProductResponseItem | null => {
 	return state.products[ productId ] ?? null;
 };
 
