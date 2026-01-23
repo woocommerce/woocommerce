@@ -35,6 +35,7 @@ on:
 
 permissions:
   contents: read
+  issues: read
 
 jobs:
   create-tracking-issue:
