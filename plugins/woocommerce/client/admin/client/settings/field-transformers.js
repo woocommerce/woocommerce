@@ -11,7 +11,7 @@ import { decodeEntities } from '@wordpress/html-entities';
  * @return {Array} An array of option objects with label, value, and optional description.
  */
 export const parseOptions = ( options ) => {
-	if ( !options ) {
+	if ( ! options ) {
 		return [];
 	}
 
@@ -32,7 +32,7 @@ export const parseOptions = ( options ) => {
 const fieldTypeTransformers = new Map();
 
 export const registerFieldTypeTransformer = ( type, transformer ) => {
-	if ( !type || typeof transformer !== 'function' ) {
+	if ( ! type || typeof transformer !== 'function' ) {
 		return;
 	}
 
@@ -53,7 +53,7 @@ export const getFieldTypeTransformer = ( type ) =>
 export const reorderGroupFields = ( fieldIds, groupId, orderConfig ) => {
 	// Check if this group has a custom field order defined
 	const desiredOrder = orderConfig[ groupId ];
-	if ( !desiredOrder ) {
+	if ( ! desiredOrder ) {
 		return fieldIds; // Return original order if no custom order is defined
 	}
 
@@ -101,7 +101,7 @@ export const createChildrenWithRows = ( fieldIds, rowConfigs ) => {
 				layout: { type: 'row' },
 				children: rowConfig.fields,
 			} );
-		} else if ( !rowFields.includes( fieldId ) ) {
+		} else if ( ! rowFields.includes( fieldId ) ) {
 			acc.push( { id: fieldId } );
 		}
 
