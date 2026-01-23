@@ -385,7 +385,7 @@ class WC_Products_Tracking {
 				time(),
 				self::TRACK_PRODUCT_PUBLISHED_CALLBACK,
 				array( $event_name, $event_properties ),
-				'woocommerce'
+				'woocommerce-tracks'
 			);
 		} else {
 			WC_Tracks::record_event( $event_name, $event_properties );
