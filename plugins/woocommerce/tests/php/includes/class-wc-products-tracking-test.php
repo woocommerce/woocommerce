@@ -132,6 +132,6 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$this->assertTrue( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' ) );
-		as_unschedule_all_actions( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce' );
+		as_unschedule_all_actions( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' );
 	}
 }
