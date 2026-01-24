@@ -64,6 +64,7 @@ final class BlockTypesController {
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
 		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		add_filter( 'block_core_breadcrumbs_post_type_settings', array( $this, 'set_product_breadcrumbs_preferred_taxonomy' ), 10, 3 );
+		add_filter( 'block_core_breadcrumbs_items', array( $this, 'apply_woocommerce_breadcrumb_filters' ), 10, 1 );
 	}
 
 	/**
@@ -730,5 +731,53 @@ final class BlockTypesController {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Apply WooCommerce breadcrumb filters to Core breadcrumbs block items.
+	 *
+	 * This bridges the Core breadcrumbs block with WooCommerce's legacy breadcrumb filters,
+	 * ensuring backward compatibility for sites that have customized breadcrumbs using
+	 * the `woocommerce_get_breadcrumb` filter.
+	 *
+	 * @param array $items Array of breadcrumb items from Core.
+	 * @return array Modified breadcrumb items.
+	 *
+	 * @internal
+	 */
+	public function apply_woocommerce_breadcrumb_filters( $items ) {
+		// Convert Core format to WooCommerce format.
+		// Core: array( 'url' => '...', 'label' => '...' )
+		// Woo: array( 'label', 'url' ).
+		$wc_crumbs = array_map(
+			function ( $item ) {
+				return array(
+					$item['label'] ?? '',
+					$item['url'] ?? '',
+				);
+			},
+			$items
+		);
+
+		/**
+		 * Filters the breadcrumb trail array.
+		 *
+		 * @since 2.3.0
+		 *
+		 * @param array         $crumbs The breadcrumb trail.
+		 * @param \WC_Breadcrumb|null $breadcrumb The breadcrumb object (null when called from Core block).
+		 */
+		$wc_crumbs = apply_filters( 'woocommerce_get_breadcrumb', $wc_crumbs, null );
+
+		// Convert back to Core format.
+		return array_map(
+			function ( $crumb ) {
+				return array(
+					'label' => $crumb[0] ?? '',
+					'url'   => $crumb[1] ?? '',
+				);
+			},
+			$wc_crumbs
+		);
 	}
 }

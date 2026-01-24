@@ -44,6 +44,7 @@ class Video extends Cover {
 
 	/**
 	 * Extract poster URL from block attributes.
+	 * Returns raw URL - escaping should happen at the final output context.
 	 *
 	 * @param array  $block_attrs Block attributes.
 	 * @param string $block_content Original block content (unused, kept for consistency).
@@ -51,8 +52,10 @@ class Video extends Cover {
 	 */
 	private function extract_poster_url( array $block_attrs, string $block_content ): string {
 		// Check for poster attribute.
+		// Use esc_url_raw() to sanitize without HTML entity encoding.
+		// Final escaping happens in Cover block based on output context.
 		if ( ! empty( $block_attrs['poster'] ) ) {
-			return esc_url( $block_attrs['poster'] );
+			return esc_url_raw( $block_attrs['poster'] );
 		}
 
 		return '';
