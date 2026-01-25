@@ -528,7 +528,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 						return;
 					}
 
-					$this->log_react_settings_fallback( $tab, $section_id, $unsupported_fields );
+					$this->log_legacy_settings_fallback( $tab, $section_id, $unsupported_fields );
 				}
 			}
 		}
@@ -540,21 +540,21 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			WC_Admin_Settings::output_fields( $settings );
 		}
 
-	/**
-	 * Log a React settings fallback in the console.
-	 *
-	 * @param string $tab Tab id.
-	 * @param string $section Section id.
-	 * @param array  $unsupported_fields Unsupported fields list.
-	 */
-	protected function log_react_settings_fallback( string $tab, string $section, array $unsupported_fields ) {
-		$payload = array(
-			'tab'               => $tab,
-			'section'           => $section,
-			'unsupportedFields' => $unsupported_fields,
-		);
-		echo '<script>console.log(' . wp_json_encode( array( 'message' => 'WooCommerce settings fallback to legacy', 'details' => $payload ) ) . ');</script>';
-	}
+		/**
+		 * Log a legacy settings fallback in the console to ease debugging.
+		 *
+		 * @param string $tab Tab id.
+		 * @param string $section Section id.
+		 * @param array  $unsupported_fields Unsupported fields list.
+		 */
+		protected function log_legacy_settings_fallback( string $tab, string $section, array $unsupported_fields ) {
+			$payload = array(
+				'tab'               => $tab,
+				'section'           => $section,
+				'unsupportedFields' => $unsupported_fields,
+			);
+			echo '<script>console.log(' . wp_json_encode( array( 'message' => 'WooCommerce settings fallback to legacy', 'details' => $payload ) ) . ');</script>';
+		}
 
 		/**
 		 * Save settings and trigger the 'woocommerce_update_options_'.id action.
