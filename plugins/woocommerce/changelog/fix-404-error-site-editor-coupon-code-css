@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Avoid Coupon Code trying to fetch an nonexistent stylesheet
+
+
