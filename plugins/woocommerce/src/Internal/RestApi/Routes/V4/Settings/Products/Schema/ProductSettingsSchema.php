@@ -140,11 +140,11 @@ class ProductSettingsSchema extends AbstractSchema {
 	 * Get product settings data by transforming WC_Settings_Products data into REST API format.
 	 *
 	 * @param mixed           $item             Settings products instance.
-	 * @param WP_REST_Request|null $request     Request object.
+	 * @param WP_REST_Request $request     Request object.
 	 * @param array           $include_fields   Fields to include.
 	 * @return array
 	 */
-	public function get_item_response( $item, ?WP_REST_Request $request, array $include_fields = array() ): array {
+	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
 		$raw_settings = $item;
 
 		// Transform raw settings into grouped format based on title/sectionend markers.
