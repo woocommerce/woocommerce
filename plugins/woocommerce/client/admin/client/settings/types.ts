@@ -2,11 +2,20 @@ export interface ReactSettingsField {
 	id: string;
 	label: string;
 	type: string;
-	options?:
-		| Record< string, string >
-		| Array< { label: string; value: string } >;
+	options?: ReactSettingsFieldOptions;
 	desc?: string;
 }
+
+export type ReactSettingsOptionItem = {
+	label: string;
+	value: string;
+	desc?: string;
+	description?: string;
+};
+
+export type ReactSettingsFieldOptions =
+	| Record< string, string >
+	| ReactSettingsOptionItem[];
 
 export interface ReactSettingsGroup {
 	title: string;

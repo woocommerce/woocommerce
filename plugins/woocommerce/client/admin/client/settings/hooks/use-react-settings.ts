@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -48,11 +48,14 @@ const getNestedValue = (
 const getPreloadedSettings = (
 	dataPath: string[]
 ): ReactSettingsResponse | null => {
-	const windowWithSettings = window as Window & {
-		wcSettings?: {
-			admin?: Record< string, unknown >;
-		};
-	};
+	const windowWithSettings =
+		typeof window === 'undefined'
+			? ( {} as Window )
+			: ( window as Window & {
+					wcSettings?: {
+						admin?: Record< string, unknown >;
+					};
+			  } );
 
 	return getNestedValue( windowWithSettings.wcSettings?.admin, dataPath );
 };
@@ -73,7 +76,7 @@ export const useReactSettings = (
 	const [ isLoading, setIsLoading ] = useState( ! data );
 	const [ error, setError ] = useState< Error | null >( null );
 
-	const refetch = () => {
+	const refetch = useCallback( () => {
 		const preloaded = getPreloadedSettings( dataPath );
 		if ( preloaded ) {
 			setData( preloaded );
@@ -86,13 +89,13 @@ export const useReactSettings = (
 			new Error( missingDataMessage || 'Settings data is missing.' )
 		);
 		setIsLoading( false );
-	};
+	}, [ dataPath, missingDataMessage ] );
 
 	useEffect( () => {
 		if ( ! data ) {
 			refetch();
 		}
-	}, [] );
+	}, [ data, refetch ] );
 
 	return {
 		data,
