@@ -2,7 +2,9 @@ export interface ReactSettingsField {
 	id: string;
 	label: string;
 	type: string;
-	options?: Record< string, string > | Array< { label: string; value: string } >;
+	options?:
+		| Record< string, string >
+		| Array< { label: string; value: string } >;
 	desc?: string;
 }
 
@@ -28,4 +30,6 @@ export type RowConfiguration = {
 
 export type RowConfigurations = Record< string, RowConfiguration[] >;
 
-export type FieldTransformer = ( field: ReactSettingsField ) => Record< string, unknown >;
+export type FieldTransformer = (
+	field: ReactSettingsField
+) => Record< string, unknown >;
