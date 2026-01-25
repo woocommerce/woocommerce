@@ -81,7 +81,7 @@ class Theme_Controller {
 		// Merge synced styles from current active theme.
 		if ( $this->site_style_sync_controller->is_sync_enabled() ) {
 			/** @var WP_Theme_JSON $site_theme */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
-			$site_theme = $this->site_style_sync_controller->get_theme();
+			$site_theme = $this->site_style_sync_controller->get_theme( $theme );
 			$theme->merge( $site_theme );
 		}
 

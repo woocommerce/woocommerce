@@ -32,11 +32,12 @@ class Image extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		$image_url       = $parsed_html['imageUrl'];
-		$image           = $parsed_html['image'];
-		$caption         = $parsed_html['caption'];
-		$class           = $parsed_html['class'];
-		$anchor_tag_href = $parsed_html['anchor_tag_href'];
+		$image_url             = $parsed_html['imageUrl'];
+		$image                 = $parsed_html['image'];
+		$caption               = $parsed_html['caption'];
+		$class                 = $parsed_html['class'];
+		$anchor_tag_href       = $parsed_html['anchor_tag_href'];
+		$anchor_data_link_href = $parsed_html['anchor_data_link_href'];
 
 		$parsed_block = $this->add_image_size_when_missing( $parsed_block, $image_url );
 		$image        = $this->add_image_dimensions( $image, $parsed_block );
@@ -44,7 +45,7 @@ class Image extends Abstract_Block_Renderer {
 		$image_with_wrapper = str_replace(
 			array( '{image_content}', '{caption_content}' ),
 			array( $image, $caption ),
-			$this->get_block_wrapper( $parsed_block, $rendering_context, $caption, $anchor_tag_href )
+			$this->get_block_wrapper( $parsed_block, $rendering_context, $caption, $anchor_tag_href, $anchor_data_link_href )
 		);
 
 		$image_with_wrapper = $this->apply_rounded_style( $image_with_wrapper, $parsed_block );
@@ -62,12 +63,12 @@ class Image extends Abstract_Block_Renderer {
 		// Because the isn't an attribute for definition of rounded style, we have to check the class name.
 		if ( isset( $parsed_block['attrs']['className'] ) && strpos( $parsed_block['attrs']['className'], 'is-style-rounded' ) !== false ) {
 			// If the image should be in a circle, we need to set the border-radius to 9999px to make it the same as is in the editor
-			// This style is applied to both wrapper and the image.
+			// This style is applied to both the border cell wrapper and the image.
 			$block_content = $this->remove_style_attribute_from_element(
 				$block_content,
 				array(
 					'tag_name'   => 'td',
-					'class_name' => 'email-image-cell',
+					'class_name' => 'email-image-border-cell',
 				),
 				'border-radius'
 			);
@@ -75,7 +76,7 @@ class Image extends Abstract_Block_Renderer {
 				$block_content,
 				array(
 					'tag_name'   => 'td',
-					'class_name' => 'email-image-cell',
+					'class_name' => 'email-image-border-cell',
 				),
 				'border-radius: 9999px;'
 			);
@@ -173,9 +174,11 @@ class Image extends Abstract_Block_Renderer {
 			$border_styles['border-style'] = 'solid';
 			$border_styles['box-sizing']   = 'border-box';
 		}
+		// Apply border to the dedicated border cell wrapper, not the outer image cell.
+		// This ensures borders stay tight around the image on mobile when the outer wrapper becomes 100% width.
 		$border_element_tag         = array(
 			'tag_name'   => 'td',
-			'class_name' => 'email-image-cell',
+			'class_name' => 'email-image-border-cell',
 		);
 		$content_with_border_styles = $this->add_style_to_element( $block_content, $border_element_tag, \WP_Style_Engine::compile_css( $border_styles, '' ) );
 		// Remove border styles from the image HTML tag.
@@ -255,8 +258,9 @@ class Image extends Abstract_Block_Renderer {
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @param string|null       $caption Caption.
 	 * @param string|null       $anchor_tag_href Anchor tag href.
+	 * @param string|null       $anchor_data_link_href Anchor data-link-href attribute for personalization tags.
 	 */
-	private function get_block_wrapper( array $parsed_block, Rendering_Context $rendering_context, ?string $caption, ?string $anchor_tag_href ): string {
+	private function get_block_wrapper( array $parsed_block, Rendering_Context $rendering_context, ?string $caption, ?string $anchor_tag_href, ?string $anchor_data_link_href = null ): string {
 		$styles = array(
 			'border-collapse' => 'collapse',
 			'border-spacing'  => '0px',
@@ -313,16 +317,37 @@ class Image extends Abstract_Block_Renderer {
 		$image_cell_attrs = array(
 			'class' => 'email-image-cell',
 			'style' => 'overflow: hidden;',
+			'align' => $align,
 		);
 
 		$image_content = '{image_content}';
 		if ( $anchor_tag_href ) {
-			$image_content = sprintf(
-				'<a href="%s" rel="noopener nofollow" target="_blank">%s</a>',
+			$data_link_attr = $anchor_data_link_href
+				? sprintf( ' data-link-href="%s"', esc_attr( $anchor_data_link_href ) )
+				: '';
+			$image_content  = sprintf(
+				'<a href="%s"%s rel="noopener nofollow" target="_blank">%s</a>',
 				esc_url( $anchor_tag_href ),
+				$data_link_attr,
 				'{image_content}'
 			);
 		}
+
+		// Wrap image in a border wrapper table that won't expand to 100% on mobile.
+		// This ensures borders stay tight around the image regardless of screen size.
+		$border_wrapper_styles = array(
+			'border-collapse' => 'separate',
+			'border-spacing'  => '0px',
+		);
+		$border_wrapper_attrs  = array(
+			'class' => 'email-image-border-wrapper',
+			'style' => \WP_Style_Engine::compile_css( $border_wrapper_styles, '' ),
+		);
+		$border_cell_attrs     = array(
+			'class' => 'email-image-border-cell',
+		);
+		$image_content         = Table_Wrapper_Helper::render_table_wrapper( $image_content, $border_wrapper_attrs, $border_cell_attrs );
+
 		$image_html    = Table_Wrapper_Helper::render_table_wrapper( $image_content, $image_table_attrs, $image_cell_attrs );
 		$inner_content = $image_html . $caption_html;
 
@@ -374,7 +399,7 @@ class Image extends Abstract_Block_Renderer {
 	 * Parse block content to get image URL, image HTML and caption HTML.
 	 *
 	 * @param string $block_content Block content.
-	 * @return array{imageUrl: string, image: string, caption: string, class: string, anchor_tag_href: string}|null
+	 * @return array{imageUrl: string, image: string, caption: string, class: string, anchor_tag_href: string, anchor_data_link_href: string}|null
 	 */
 	private function parse_block_content( string $block_content ): ?array {
 		// If block's image is not set, we don't need to parse the content.
@@ -401,15 +426,17 @@ class Image extends Abstract_Block_Renderer {
 		$figcaption_html = $figcaption ? $dom_helper->get_outer_html( $figcaption ) : '';
 		$figcaption_html = str_replace( array( '<figcaption', '</figcaption>' ), array( '<span', '</span>' ), $figcaption_html );
 
-		$anchor_tag      = $dom_helper->find_element( 'a' );
-		$anchor_tag_href = $anchor_tag ? $dom_helper->get_attribute_value( $anchor_tag, 'href' ) : '';
+		$anchor_tag            = $dom_helper->find_element( 'a' );
+		$anchor_tag_href       = $anchor_tag ? $dom_helper->get_attribute_value( $anchor_tag, 'href' ) : '';
+		$anchor_data_link_href = $anchor_tag ? $dom_helper->get_attribute_value( $anchor_tag, 'data-link-href' ) : '';
 
 		return array(
-			'imageUrl'        => $image_src ? $image_src : '',
-			'image'           => $this->cleanup_image_html( $image_html ),
-			'caption'         => $figcaption_html ? $figcaption_html : '',
-			'class'           => $image_class ? $image_class : '',
-			'anchor_tag_href' => $anchor_tag_href ? $anchor_tag_href : '',
+			'imageUrl'              => $image_src ? $image_src : '',
+			'image'                 => $this->cleanup_image_html( $image_html ),
+			'caption'               => $figcaption_html ? $figcaption_html : '',
+			'class'                 => $image_class ? $image_class : '',
+			'anchor_tag_href'       => $anchor_tag_href ? $anchor_tag_href : '',
+			'anchor_data_link_href' => $anchor_data_link_href ? $anchor_data_link_href : '',
 		);
 	}
 

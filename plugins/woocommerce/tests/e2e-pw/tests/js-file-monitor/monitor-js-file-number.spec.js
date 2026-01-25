@@ -18,7 +18,7 @@ const pageGroups = [
 			{
 				name: 'WC Dashboard',
 				url: 'wp-admin/admin.php?page=wc-admin',
-				expectedCount: 83,
+				expectedCount: 84,
 			},
 			{
 				name: 'Reports',

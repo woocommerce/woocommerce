@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Adds a woocommerce_shipping_tax_class filter to allow dynamically calculating the shipping tax class.

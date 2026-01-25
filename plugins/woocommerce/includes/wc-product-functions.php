@@ -566,7 +566,7 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 	if ( $date_from ) {
 		$start_ts = $date_from->getTimestamp();
 		if ( $start_ts > time() ) {
-			as_schedule_single_action( // @phpstan-ignore function.notFound
+			as_schedule_single_action(
 				$start_ts,
 				'wc_product_start_scheduled_sale',
 				array( 'product_id' => $product_id ),
@@ -578,7 +578,7 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 	if ( $date_to ) {
 		$end_ts = $date_to->getTimestamp();
 		if ( $end_ts > time() ) {
-			as_schedule_single_action( // @phpstan-ignore function.notFound
+			as_schedule_single_action(
 				$end_ts,
 				'wc_product_end_scheduled_sale',
 				array( 'product_id' => $product_id ),
@@ -734,8 +734,8 @@ function wc_maybe_schedule_product_sale_events( $product_id, $product = null ): 
 	$product_id = $product->get_id();
 
 	// Always clear existing events first.
-	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ); // @phpstan-ignore function.notFound
-	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ); // @phpstan-ignore function.notFound
+	as_unschedule_all_actions( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
+	as_unschedule_all_actions( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' );
 
 	$date_from = $product->get_date_on_sale_from( 'edit' );
 	$date_to   = $product->get_date_on_sale_to( 'edit' );
@@ -1201,34 +1201,58 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		$alt_text     = array_filter( $alt_text );
 		$props['alt'] = $alt_text ? reset( $alt_text ) : '';
 
-		// Large version.
+		/**
+		 * Filters the size for the full gallery image.
+		 *
+		 * @param string $size Image size name.
+		 *
+		 * @since 2.6.0
+		 */
 		$full_size           = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
 		$src                 = wp_get_attachment_image_src( $attachment_id, $full_size );
-		$props['full_src']   = $src[0];
-		$props['full_src_w'] = $src[1];
-		$props['full_src_h'] = $src[2];
+		$props['full_src']   = $src[0] ?? null;
+		$props['full_src_w'] = $src[1] ?? null;
+		$props['full_src_h'] = $src[2] ?? null;
 
-		// Gallery thumbnail.
-		$gallery_thumbnail                = wc_get_image_size( 'gallery_thumbnail' );
+		$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
+		/**
+		 * Filters the size for the gallery thumbnail.
+		 *
+		 * @param array $size Array containing width and height dimensions.
+		 *
+		 * @since 2.6.0
+		 */
 		$gallery_thumbnail_size           = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
 		$src                              = wp_get_attachment_image_src( $attachment_id, $gallery_thumbnail_size );
-		$props['gallery_thumbnail_src']   = $src[0];
-		$props['gallery_thumbnail_src_w'] = $src[1];
-		$props['gallery_thumbnail_src_h'] = $src[2];
+		$props['gallery_thumbnail_src']   = $src[0] ?? null;
+		$props['gallery_thumbnail_src_w'] = $src[1] ?? null;
+		$props['gallery_thumbnail_src_h'] = $src[2] ?? null;
 
-		// Thumbnail version.
+		/**
+		 * Filters the thumbnail size.
+		 *
+		 * @param string $size Image size name.
+		 *
+		 * @since 2.6.0
+		 */
 		$thumbnail_size       = apply_filters( 'woocommerce_thumbnail_size', 'woocommerce_thumbnail' );
 		$src                  = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
-		$props['thumb_src']   = $src[0];
-		$props['thumb_src_w'] = $src[1];
-		$props['thumb_src_h'] = $src[2];
+		$props['thumb_src']   = $src[0] ?? null;
+		$props['thumb_src_w'] = $src[1] ?? null;
+		$props['thumb_src_h'] = $src[2] ?? null;
 
-		// Image source.
+		/**
+		 * Filters the size for the gallery image.
+		 *
+		 * @param string $size Image size name.
+		 *
+		 * @since 2.6.0
+		 */
 		$image_size      = apply_filters( 'woocommerce_gallery_image_size', 'woocommerce_single' );
 		$src             = wp_get_attachment_image_src( $attachment_id, $image_size );
-		$props['src']    = $src[0];
-		$props['src_w']  = $src[1];
-		$props['src_h']  = $src[2];
+		$props['src']    = $src[0] ?? null;
+		$props['src_w']  = $src[1] ?? null;
+		$props['src_h']  = $src[2] ?? null;
 		$props['srcset'] = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $attachment_id, $image_size ) : false;
 		$props['sizes']  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $attachment_id, $image_size ) : false;
 	}

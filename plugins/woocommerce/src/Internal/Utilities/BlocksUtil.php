@@ -33,7 +33,7 @@ class BlocksUtil {
 	/**
 	 * Get all instances of the specified block from the widget area.
 	 *
-	 * @param array $block_name The name (id) of a block, e.g. `woocommerce/mini-cart`.
+	 * @param string $block_name The name (id) of a block, e.g. `woocommerce/mini-cart`.
 	 * @return array Array of blocks as returned by parse_blocks().
 	 */
 	public static function get_blocks_from_widget_area( $block_name ) {
@@ -65,7 +65,12 @@ class BlocksUtil {
 	 */
 	public static function get_block_from_template_part( $block_name, $template_part_slug ) {
 		$template = get_block_template( get_stylesheet() . '//' . $template_part_slug, 'wp_template_part' );
-		$blocks   = parse_blocks( $template->content );
+
+		if ( ! $template || null === $template->content ) {
+			return array();
+		}
+
+		$blocks = parse_blocks( $template->content );
 
 		$flatten_blocks = self::flatten_blocks( $blocks );
 

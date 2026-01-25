@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
  * Checkout class.
@@ -228,6 +230,12 @@ class Checkout extends AbstractBlock {
 			// Note: Currently the block only takes care of the main checkout form -- if an endpoint is set, refer to the
 			// legacy shortcode instead and do not render block.
 			return wp_is_block_theme() ? do_shortcode( '[woocommerce_checkout]' ) : '[woocommerce_checkout]';
+		}
+
+		// Track checkout page loaded for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CheckoutEventTracker::class )
+				->track_checkout_page_loaded();
 		}
 
 		// Dequeue the core scripts when rendering this block.
@@ -467,16 +475,21 @@ class Checkout extends AbstractBlock {
 
 		$is_block_editor = $this->is_block_editor();
 
-		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'localPickupLocations' ) ) {
+		if ( $is_block_editor ) {
 			$this->asset_data_registry->add(
 				'localPickupLocations',
-				array_map(
-					function ( $location ) {
-						$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
-						return $location;
-					},
-					get_option( 'pickup_location_pickup_locations', array() )
-				)
+				array_filter(
+					array_map(
+						function ( $location ) {
+							if ( ! wc_string_to_bool( $location['enabled'] ) ) {
+								return null;
+							}
+							$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
+							return $location;
+						},
+						LocalPickupUtils::get_local_pickup_method_locations()
+					)
+				),
 			);
 		}
 

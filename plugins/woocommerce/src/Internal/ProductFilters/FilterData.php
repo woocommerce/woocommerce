@@ -532,7 +532,7 @@ class FilterData {
 			'value'   => $value,
 		);
 
-		$result = set_transient( $key, $transient_value );
+		$result = set_transient( $key, $transient_value, DAY_IN_SECONDS );
 
 		return $result;
 	}

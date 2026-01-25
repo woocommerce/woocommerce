@@ -13,7 +13,7 @@ jobs:
       event-date: ${{ steps.find-feature-freeze-event.outputs.event-date }}
     steps:
       - name: Install node-ical
-        run: npm install node-ical
+        run: npm install node-ical@0.23.1 rrule-temporal@1.4.1
 
       - name: Check for Feature Freeze events in a week
         id: find-feature-freeze-event

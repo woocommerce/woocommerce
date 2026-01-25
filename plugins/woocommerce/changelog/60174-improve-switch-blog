@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Prevent duplicate table names from accumulating in $wpdb->tables during multisite blog switching.
