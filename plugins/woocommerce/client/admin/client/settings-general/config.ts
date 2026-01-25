@@ -38,6 +38,40 @@ export const rowConfigurations: RowConfigurations = {
 	],
 };
 
+const isAddressAutocompleteProviderVisible = (
+	item: Record< string, unknown >
+) =>
+	item.woocommerce_address_autocomplete_enabled === 'yes' ||
+	item.woocommerce_address_autocomplete_enabled === true;
+
+const isSpecificShipToCountriesVisible = (
+	item: Record< string, string | string[] >
+) => item.woocommerce_ship_to_countries === 'specific';
+
+const isAllExceptCountriesVisible = (
+	item: Record< string, string | string[] >
+) => item.woocommerce_allowed_countries === 'all_except';
+
+const isSpecificAllowedCountriesVisible = (
+	item: Record< string, string | string[] >
+) => item.woocommerce_allowed_countries === 'specific';
+
+const getMultiselectVisibility = ( fieldId: string ) => {
+	if ( fieldId === 'woocommerce_specific_ship_to_countries' ) {
+		return isSpecificShipToCountriesVisible;
+	}
+
+	if ( fieldId === 'woocommerce_all_except_countries' ) {
+		return isAllExceptCountriesVisible;
+	}
+
+	if ( fieldId === 'woocommerce_specific_allowed_countries' ) {
+		return isSpecificAllowedCountriesVisible;
+	}
+
+	return () => true;
+};
+
 export const fieldTransformer = ( field: ReactSettingsField ) => {
 	const baseField = baseFieldTransformer( field ) as Record<
 		string,
@@ -47,29 +81,14 @@ export const fieldTransformer = ( field: ReactSettingsField ) => {
 	if ( field.id === 'woocommerce_address_autocomplete_provider' ) {
 		return {
 			...baseField,
-			isVisible: ( item: Record< string, unknown > ) =>
-				item.woocommerce_address_autocomplete_enabled === 'yes' ||
-				item.woocommerce_address_autocomplete_enabled === true,
+			isVisible: isAddressAutocompleteProviderVisible,
 		};
 	}
 
 	if ( field.type === 'multiselect' ) {
 		return {
 			...baseField,
-			isVisible: ( item: Record< string, string | string[] > ) => {
-				if ( field.id === 'woocommerce_specific_ship_to_countries' ) {
-					return item.woocommerce_ship_to_countries === 'specific';
-				}
-
-				if ( field.id === 'woocommerce_all_except_countries' ) {
-					return item.woocommerce_allowed_countries === 'all_except';
-				}
-
-				if ( field.id === 'woocommerce_specific_allowed_countries' ) {
-					return item.woocommerce_allowed_countries === 'specific';
-				}
-				return true;
-			},
+			isVisible: getMultiselectVisibility( field.id ),
 		};
 	}
 
