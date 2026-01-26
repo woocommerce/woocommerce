@@ -88,7 +88,11 @@ class SessionClearanceManager {
 	}
 
 	/**
-	 * Mark the current session as blocked.
+	 * Mark the current session as blocked and empty the cart.
+	 *
+	 * Emptying the cart prevents express payment methods (e.g., PayPal) from
+	 * rendering on cart pages, as they are loaded via third-party SDKs that
+	 * don't respect WooCommerce's payment method filtering.
 	 *
 	 * @return void
 	 */
@@ -134,6 +138,7 @@ class SessionClearanceManager {
 		// Ensure session cookie is set so the session persists across page loads.
 		// This is important because fraud protection may set session status before
 		// any cart action triggers the cookie to be set.
+		// Skip cookie setting if headers have already been sent (e.g., in test environment).
 		if ( WC()->session instanceof \WC_Session_Handler ) {
 			WC()->session->set_customer_session_cookie( true );
 		}

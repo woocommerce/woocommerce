@@ -327,6 +327,16 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
+		// Filter by visibility in POS.
+		if ( true === $request['pos_products_only'] ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'pos_product_visibility',
+				'field'    => 'slug',
+				'terms'    => 'pos-hidden',
+				'operator' => 'NOT IN',
+			);
+		}
+
 		// Search parameter precedence: search_fields > search_name_or_sku > search_sku > sku.
 		$search_fields = $request['search_fields'] ?? array();
 		$search_arg    = trim( $request['search'] ?? '' );
@@ -1944,6 +1954,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'description'       => __( 'Limit result set to virtual products.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'rest_sanitize_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['pos_products_only'] = array(
+			'description'       => __( 'Limit result set to products visible in Point of Sale.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

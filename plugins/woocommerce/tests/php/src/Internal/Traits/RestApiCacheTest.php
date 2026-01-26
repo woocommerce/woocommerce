@@ -68,6 +68,12 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->version_generator = wc_get_container()->get( VersionStringGenerator::class );
 		$this->sut               = $this->create_test_controller();
 
+		// Set default allowed directories to include WC_ABSPATH and temp dir for file tracking tests.
+		$this->sut->allowed_directories = array( WC_ABSPATH, sys_get_temp_dir() );
+
+		// Disable file check caching by default so tests can modify files and expect immediate invalidation.
+		$this->sut->file_check_interval = 0;
+
 		$this->reset_rest_server();
 	}
 
@@ -960,6 +966,10 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 					'id'   => 90,
 					'name' => 'Product with Controller Hooks',
 				),
+				'with_controller_files'  => array(
+					'id'   => 91,
+					'name' => 'Product with Controller Files',
+				),
 				'standard'               => array(
 					'id'   => 10,
 					'name' => 'Standard Product',
@@ -982,10 +992,13 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			public $endpoint_vary_by_user  = array();
 			public $endpoint_ids           = array();
 			public $controller_hooks       = array();
+			public $controller_files       = array();
 			public $response_headers       = array();
 			public $custom_exclude_headers = array();
 			public $custom_include_headers = false;
 			public $endpoint_cache_config  = array();
+			public $allowed_directories    = null;
+			public $file_check_interval    = null;
 
 			public function __construct() {
 				$this->namespace = 'wc/v3';
@@ -1005,6 +1018,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->register_multi_method_route();
 				$this->register_cached_route( 'with_endpoint_hooks', array( 'relevant_hooks' => array( 'test_endpoint_hook_for_caching' ) ) );
 				$this->register_cached_route( 'with_controller_hooks' );
+				$this->register_cached_route( 'with_controller_files' );
 				$this->register_cached_route( 'standard' );
 				$this->register_custom_config_route( 'custom_endpoint_config' );
 				$this->register_custom_config_route( 'test_false_override' );
@@ -1090,6 +1104,24 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 			protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array {
 				return $this->controller_hooks;
+			}
+
+			protected function get_files_relevant_to_response_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array {
+				return $this->controller_files;
+			}
+
+			protected function get_allowed_directories_for_file_based_response_caching(): array {
+				if ( null !== $this->allowed_directories ) {
+					return $this->allowed_directories;
+				}
+				return parent::get_allowed_directories_for_file_based_response_caching();
+			}
+
+			protected function get_file_check_interval_for_response_caching(): int {
+				if ( null !== $this->file_check_interval ) {
+					return $this->file_check_interval;
+				}
+				return parent::get_file_check_interval_for_response_caching();
 			}
 
 			protected function get_response_headers_to_include_in_caching( WP_REST_Request $request, ?string $endpoint_id = null ) {
@@ -1210,52 +1242,28 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cache-Control header is "private" when user is logged in and vary_by_user is true.
+	 * @testdox Cache-Control header visibility is set correctly based on login status and vary_by_user setting.
+	 *
+	 * @testWith [true, "single_entity", "private"]
+	 *           [false, "single_entity", "public"]
+	 *           [true, "no_vary_by_user", "public"]
+	 *
+	 * @param bool   $logged_in           Whether user is logged in.
+	 * @param string $endpoint            The endpoint to query.
+	 * @param string $expected_visibility Expected Cache-Control visibility (public or private).
 	 */
-	public function test_cache_control_private_when_user_logged_in() {
+	public function test_cache_control_header_visibility( bool $logged_in, string $endpoint, string $expected_visibility ) {
 		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
-			array( 'is_user_logged_in' => fn() => true )
+			array( 'is_user_logged_in' => fn() => $logged_in )
 		);
 
-		$response = $this->query_endpoint( 'single_entity' );
+		$response = $this->query_endpoint( $endpoint );
 
 		$headers = $response->get_headers();
 		$this->assertArrayHasKey( 'Cache-Control', $headers );
-		$this->assertStringContainsString( 'private', $headers['Cache-Control'] );
+		$this->assertStringContainsString( $expected_visibility, $headers['Cache-Control'] );
 		$this->assertStringContainsString( 'must-revalidate', $headers['Cache-Control'] );
 		$this->assertStringContainsString( 'max-age=', $headers['Cache-Control'] );
-	}
-
-	/**
-	 * @testdox Cache-Control header is "public" when no user is logged in even with vary_by_user true.
-	 */
-	public function test_cache_control_public_when_no_user() {
-		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
-			array( 'is_user_logged_in' => fn() => false )
-		);
-
-		$response = $this->query_endpoint( 'single_entity' );
-
-		$headers = $response->get_headers();
-		$this->assertArrayHasKey( 'Cache-Control', $headers );
-		$this->assertStringContainsString( 'public', $headers['Cache-Control'] );
-		$this->assertStringContainsString( 'must-revalidate', $headers['Cache-Control'] );
-		$this->assertStringContainsString( 'max-age=', $headers['Cache-Control'] );
-	}
-
-	/**
-	 * @testdox Cache-Control header is "public" when vary_by_user is false regardless of login status.
-	 */
-	public function test_cache_control_public_when_vary_by_user_false() {
-		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
-			array( 'is_user_logged_in' => fn() => true )
-		);
-
-		$response = $this->query_endpoint( 'no_vary_by_user' );
-
-		$headers = $response->get_headers();
-		$this->assertArrayHasKey( 'Cache-Control', $headers );
-		$this->assertStringContainsString( 'public', $headers['Cache-Control'] );
 	}
 
 	/**
@@ -1604,5 +1612,691 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 		$has_filter = has_filter( 'rest_send_nocache_headers', array( $controller, 'handle_rest_send_nocache_headers' ) );
 		$this->assertFalse( $has_filter );
+	}
+
+	/**
+	 * @testdox Cache is invalidated when a controller-level tracked file is modified or deleted.
+	 *
+	 * @testWith ["modify"]
+	 *           ["delete"]
+	 *
+	 * @param string $action The action to perform on the file (modify or delete).
+	 */
+	public function test_cache_invalidated_when_controller_file_changes( string $action ) {
+		$test_file = $this->create_temp_test_file();
+
+		$this->sut->controller_files = array( $test_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+
+		$response2 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		if ( 'delete' === $action ) {
+			unlink( $test_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
+		} else {
+			touch( $test_file, time() + 10 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		}
+		clearstatcache( true, $test_file );
+
+		$response3 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response3, 'MISS', "Cache should be invalidated when tracked file is {$action}d" );
+
+		if ( 'modify' === $action ) {
+			unlink( $test_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
+		}
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Files hash is stored in cache when tracking files.
+	 */
+	public function test_files_hash_stored_in_cache() {
+		$test_file = $this->create_temp_test_file();
+
+		$this->sut->controller_files = array( $test_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys = $this->get_all_cache_keys();
+		$this->assertCount( 1, $cache_keys );
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayHasKey( 'files_hash', $cached_entry );
+		$this->assertNotEmpty( $cached_entry['files_hash'] );
+
+		unlink( $test_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Cache is invalidated when endpoint-level tracked files change.
+	 */
+	public function test_cache_invalidated_when_endpoint_files_change() {
+		$test_file = $this->create_temp_test_file();
+
+		$this->sut->endpoint_cache_config['custom_endpoint_config']['config'] = array(
+			'relevant_files' => array( $test_file ),
+		);
+		$this->sut->reinitialize_cache();
+		$this->reset_rest_server();
+
+		$response1 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$response2 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		touch( $test_file, time() + 10 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		clearstatcache( true, $test_file );
+
+		$response3 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHeader( $response3, 'MISS', 'Cache should be invalidated when endpoint-tracked file changes' );
+
+		unlink( $test_file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink
+	}
+
+	/**
+	 * @testdox Non-existent files are not tracked and do not prevent caching.
+	 */
+	public function test_non_existent_files_not_tracked() {
+		$non_existent_file = sys_get_temp_dir() . '/wc_test_non_existent_' . uniqid() . '.txt';
+
+		$this->sut->controller_files = array( $non_existent_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys = $this->get_all_cache_keys();
+		$this->assertCount( 1, $cache_keys );
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry, 'Files hash should not be stored when no files are tracked' );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Filter woocommerce_rest_api_cache_files_hash_data can modify file tracking data.
+	 */
+	public function test_filter_can_modify_files_hash_data() {
+		$test_file = $this->create_temp_test_file();
+
+		$this->sut->controller_files = array( $test_file );
+
+		$filter_called = false;
+		$filter        = function ( $files_data, $file_paths, $controller ) use ( &$filter_called, $test_file ) {
+			unset( $controller );
+			$filter_called = true;
+			$this->assertIsArray( $files_data );
+			$this->assertIsArray( $file_paths );
+			$this->assertContains( $test_file, $file_paths );
+			return array();
+		};
+		add_filter( 'woocommerce_rest_api_cache_files_hash_data', $filter, 10, 3 );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertTrue( $filter_called, 'Filter should have been called' );
+
+		$cache_keys = $this->get_all_cache_keys();
+		$cache_key  = $cache_keys[0];
+
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry, 'Filter cleared files data, so no hash should be stored' );
+
+		remove_filter( 'woocommerce_rest_api_cache_files_hash_data', $filter, 10 );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Test cleanup.
+		unlink( $test_file );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Relative file paths are resolved relative to the first allowed directory.
+	 */
+	public function test_relative_file_paths_resolved() {
+		$this->sut->controller_files = array( 'woocommerce.php' );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys = $this->get_all_cache_keys();
+		$cache_key  = $cache_keys[0];
+
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertArrayHasKey( 'files_hash', $cached_entry, 'Relative path should be resolved and tracked' );
+		$this->assertNotEmpty( $cached_entry['files_hash'] );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Filter woocommerce_rest_api_cache_allowed_file_directories can add directories.
+	 */
+	public function test_filter_can_add_allowed_directories() {
+		$this->sut->allowed_directories = array( WC_ABSPATH );
+
+		$test_file = $this->create_temp_test_file();
+
+		$this->sut->controller_files = array( $test_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cached_entry = wp_cache_get( $cache_keys[0], self::CACHE_GROUP );
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry, 'File should not be tracked without temp dir in allowed directories' );
+
+		$filter = function ( $directories, $controller ) {
+			unset( $controller );
+			$directories[] = sys_get_temp_dir();
+			return $directories;
+		};
+		add_filter( 'woocommerce_rest_api_cache_allowed_file_directories', $filter, 10, 2 );
+
+		wp_cache_delete( $cache_keys[0], self::CACHE_GROUP );
+
+		$response2 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response2, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cached_entry = wp_cache_get( $cache_keys[0], self::CACHE_GROUP );
+		$this->assertArrayHasKey( 'files_hash', $cached_entry, 'File should be tracked after adding temp dir via filter' );
+
+		remove_filter( 'woocommerce_rest_api_cache_allowed_file_directories', $filter, 10 );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Test cleanup.
+		unlink( $test_file );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Controller can override get_allowed_directories_for_file_based_response_caching.
+	 */
+	public function test_controller_can_override_allowed_directories() {
+		$test_file = $this->create_temp_test_file();
+
+		$this->sut->allowed_directories = array( WC_ABSPATH );
+		$this->sut->controller_files    = array( $test_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cached_entry = wp_cache_get( $cache_keys[0], self::CACHE_GROUP );
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry, 'File outside allowed directories should not be tracked' );
+
+		$this->sut->allowed_directories = array( WC_ABSPATH, sys_get_temp_dir() );
+
+		wp_cache_delete( $cache_keys[0], self::CACHE_GROUP );
+
+		$response2 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response2, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cached_entry = wp_cache_get( $cache_keys[0], self::CACHE_GROUP );
+		$this->assertArrayHasKey( 'files_hash', $cached_entry, 'File should be tracked when its directory is allowed' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Test cleanup.
+		unlink( $test_file );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File check results are cached for the configured interval.
+	 */
+	public function test_file_check_results_are_cached() {
+		$test_file = $this->create_temp_test_file();
+
+		$this->sut->controller_files    = array( $test_file );
+		$this->sut->file_check_interval = 600; // 10 minutes.
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$file_check_keys = array_filter(
+			$this->get_all_cache_keys(),
+			fn( $key ) => strpos( $key, 'wc_rest_file_check_' ) === 0
+		);
+		$this->assertCount( 1, $file_check_keys, 'File check cache entry should be created' );
+
+		// Modify the file - but since file check is cached, it won't be detected yet.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Test file modification.
+		touch( $test_file, time() + 10 );
+		clearstatcache( true, $test_file );
+
+		$response2 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response2, 'HIT', 'File change should not be detected while file check is cached' );
+
+		// Delete the file check cache to simulate interval expiration.
+		$file_check_key = array_values( $file_check_keys )[0];
+		wp_cache_delete( $file_check_key, self::CACHE_GROUP );
+
+		$response3 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response3, 'MISS', 'File change should be detected after file check cache expires' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Test cleanup.
+		unlink( $test_file );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File check caching can be disabled by returning 0 from get_file_check_interval_for_response_caching.
+	 */
+	public function test_file_check_caching_disabled_with_zero_interval() {
+		$test_file = $this->create_temp_test_file();
+
+		$this->sut->controller_files    = array( $test_file );
+		$this->sut->file_check_interval = 0; // Disabled.
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$file_check_keys = array_filter(
+			$this->get_all_cache_keys(),
+			fn( $key ) => strpos( $key, 'wc_rest_file_check_' ) === 0
+		);
+		$this->assertCount( 0, $file_check_keys, 'No file check cache entry should be created when interval is 0' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Test file modification.
+		touch( $test_file, time() + 10 );
+		clearstatcache( true, $test_file );
+
+		$response2 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response2, 'MISS', 'File change should be detected immediately when caching is disabled' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Test cleanup.
+		unlink( $test_file );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Multiple files can be tracked simultaneously.
+	 */
+	public function test_multiple_files_tracked() {
+		$test_file1 = $this->create_temp_test_file();
+		$test_file2 = $this->create_temp_test_file();
+
+		$this->sut->controller_files = array( $test_file1, $test_file2 );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys = $this->get_all_cache_keys();
+		$cache_key  = $cache_keys[0];
+
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertArrayHasKey( 'files_hash', $cached_entry );
+		$this->assertNotEmpty( $cached_entry['files_hash'] );
+
+		$response2 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch -- Test file modification.
+		touch( $test_file2, time() + 10 );
+		clearstatcache( true, $test_file2 );
+
+		$response3 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response3, 'MISS', 'Cache should be invalidated when any tracked file changes' );
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Test cleanup.
+		unlink( $test_file1 );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.unlink_unlink -- Test cleanup.
+		unlink( $test_file2 );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File path resolution failure (realpath returns false) is handled gracefully.
+	 */
+	public function test_file_path_resolution_failure_handled() {
+		$fake_file = '/some/nonexistent/path/file.txt';
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'realpath' => function ( $path ) use ( $fake_file ) {
+					// Return false for the fake file, real path for others.
+					return $path === $fake_file ? false : \realpath( $path );
+				},
+			)
+		);
+
+		$this->sut->controller_files = array( $fake_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		// No files_hash should be stored since file resolution failed.
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File access error (filemtime returns false) is handled gracefully.
+	 */
+	public function test_file_access_error_handled() {
+		$fake_file      = WC_ABSPATH . 'unreadable_file.txt';
+		$fake_file_real = WC_ABSPATH . 'unreadable_file_real.txt';
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'realpath'  => function ( $path ) use ( $fake_file, $fake_file_real ) {
+					if ( $path === $fake_file ) {
+						return $fake_file_real;
+					}
+					return \realpath( $path );
+				},
+				'filemtime' => function ( $path ) use ( $fake_file_real ) {
+					// Return false for the fake file (simulating access error).
+					return $path === $fake_file_real ? false : \filemtime( $path );
+				},
+			)
+		);
+
+		$this->sut->controller_files = array( $fake_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		// No files_hash should be stored since file access failed.
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Cache is invalidated when file becomes inaccessible after being cached.
+	 */
+	public function test_cache_invalidated_when_file_becomes_inaccessible() {
+		$fake_file       = WC_ABSPATH . 'accessible_file.txt';
+		$fake_file_real  = WC_ABSPATH . 'accessible_file_real.txt';
+		$file_accessible = true;
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'realpath'  => function ( $path ) use ( $fake_file, $fake_file_real, &$file_accessible ) {
+					if ( $path === $fake_file ) {
+						return $file_accessible ? $fake_file_real : false;
+					}
+					return \realpath( $path );
+				},
+				'filemtime' => function ( $path ) use ( $fake_file_real, &$file_accessible ) {
+					if ( $path === $fake_file_real ) {
+						return $file_accessible ? 1234567890 : false;
+					}
+					return \filemtime( $path );
+				},
+			)
+		);
+
+		$this->sut->controller_files = array( $fake_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cached_entry = wp_cache_get( $cache_keys[0], self::CACHE_GROUP );
+		$this->assertArrayHasKey( 'files_hash', $cached_entry );
+
+		$response2 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		$file_accessible = false;
+
+		$response3 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response3, 'MISS', 'Cache should be invalidated when file becomes inaccessible' );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File outside allowed directories is rejected.
+	 */
+	public function test_file_outside_allowed_directories_rejected() {
+		$outside_file      = '/etc/passwd';
+		$outside_file_real = '/etc/passwd';
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'realpath' => function ( $path ) use ( $outside_file, $outside_file_real ) {
+					if ( $path === $outside_file ) {
+						return $outside_file_real;
+					}
+					return \realpath( $path );
+				},
+			)
+		);
+
+		$this->sut->controller_files = array( $outside_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		// No files_hash should be stored since file is outside allowed directories.
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Files in directories with similar prefix names are correctly rejected (prefix collision prevention).
+	 */
+	public function test_directory_prefix_collision_prevented() {
+		// Simulate a directory structure where /var/www/htmlevil exists alongside /var/www/html.
+		// A file in /var/www/htmlevil should NOT be allowed when only /var/www/html is permitted.
+		$allowed_dir = '/var/www/html';
+		$evil_file   = '/var/www/htmlevil/malicious.php';
+
+		$this->sut->allowed_directories = array( $allowed_dir );
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'realpath' => function ( $path ) use ( $allowed_dir, $evil_file ) {
+					if ( $path === $allowed_dir || $path === $evil_file ) {
+						return $path;
+					}
+					return \realpath( $path );
+				},
+			)
+		);
+
+		$this->sut->controller_files = array( $evil_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayNotHasKey( 'files_hash', $cached_entry, 'File in /var/www/htmlevil should not be allowed when only /var/www/html is permitted' );
+
+		$this->sut->controller_files    = array();
+		$this->sut->allowed_directories = null;
+	}
+
+	/**
+	 * @testdox Cache is invalidated when file modification time changes (using mocked filemtime).
+	 */
+	public function test_cache_invalidated_when_mocked_file_mtime_changes() {
+		$fake_file      = WC_ABSPATH . 'tracked_file.txt';
+		$fake_file_real = WC_ABSPATH . 'tracked_file_real.txt';
+		$file_mtime     = 1234567890;
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'realpath'  => function ( $path ) use ( $fake_file, $fake_file_real ) {
+					if ( $path === $fake_file ) {
+						return $fake_file_real;
+					}
+					return \realpath( $path );
+				},
+				'filemtime' => function ( $path ) use ( $fake_file_real, &$file_mtime ) {
+					if ( $path === $fake_file_real ) {
+						return $file_mtime;
+					}
+					return \filemtime( $path );
+				},
+			)
+		);
+
+		$this->sut->controller_files = array( $fake_file );
+
+		$response1 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$response2 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		$file_mtime = 1234567999;
+
+		$response3 = $this->query_endpoint( 'with_controller_files' );
+		$this->assertCacheHeader( $response3, 'MISS', 'Cache should be invalidated when file mtime changes' );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File tracking warnings are suppressed by default to avoid log flooding.
+	 */
+	public function test_file_tracking_warnings_are_suppressed_by_default() {
+		wp_cache_flush_group( 'woocommerce_rest_api_cache_warnings' );
+
+		$warning_count = 0;
+		$logger_mock   = $this->createMock( \WC_Logger::class );
+		$logger_mock->expects( $this->any() )
+			->method( 'warning' )
+			->willReturnCallback(
+				function () use ( &$warning_count ) {
+					++$warning_count;
+				}
+			);
+
+		$this->register_legacy_proxy_function_mocks(
+			array( 'wc_get_logger' => fn() => $logger_mock )
+		);
+
+		// Use a file path in temp dir (which is in allowed_directories).
+		$non_existent_file           = sys_get_temp_dir() . '/wc_test_warning_' . uniqid() . '.txt';
+		$this->sut->controller_files = array( $non_existent_file );
+
+		// First request should log the warning.
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 1, $warning_count, 'First request should log the warning' );
+
+		// Subsequent request should NOT log the warning again (suppressed).
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 1, $warning_count, 'Second request should not log again (suppressed)' );
+
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 1, $warning_count, 'Third request should not log again (still suppressed)' );
+
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File tracking warnings are not suppressed when filter returns zero.
+	 */
+	public function test_file_tracking_warnings_not_suppressed_when_filter_returns_zero() {
+		wp_cache_flush_group( 'woocommerce_rest_api_cache_warnings' );
+
+		$warning_count = 0;
+		$logger_mock   = $this->createMock( \WC_Logger::class );
+		$logger_mock->expects( $this->any() )
+			->method( 'warning' )
+			->willReturnCallback(
+				function () use ( &$warning_count ) {
+					++$warning_count;
+				}
+			);
+
+		$this->register_legacy_proxy_function_mocks(
+			array( 'wc_get_logger' => fn() => $logger_mock )
+		);
+
+		// Disable warning suppression.
+		add_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', '__return_zero' );
+
+		// Use a file path in temp dir (which is in allowed_directories).
+		$non_existent_file           = sys_get_temp_dir() . '/wc_test_warning_' . uniqid() . '.txt';
+		$this->sut->controller_files = array( $non_existent_file );
+
+		// All three requests should log the warning.
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 1, $warning_count, 'First request should log the warning' );
+
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 2, $warning_count, 'Second request should log again (suppression disabled)' );
+
+		$this->query_endpoint( 'with_controller_files' );
+		$this->assertSame( 3, $warning_count, 'Third request should log again (suppression disabled)' );
+
+		remove_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', '__return_zero' );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox File tracking warning suppression filter receives correct parameters.
+	 */
+	public function test_file_tracking_warning_suppression_filter_receives_correct_parameters() {
+		wp_cache_flush_group( 'woocommerce_rest_api_cache_warnings' );
+
+		$filter_called   = false;
+		$received_params = array();
+
+		$filter = function ( $ttl, $file_path, $reason ) use ( &$filter_called, &$received_params ) {
+			$filter_called   = true;
+			$received_params = array(
+				'ttl'       => $ttl,
+				'file_path' => $file_path,
+				'reason'    => $reason,
+			);
+			return $ttl;
+		};
+
+		add_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', $filter, 10, 3 );
+
+		// Use a file path in temp dir (which is in allowed_directories).
+		$non_existent_file           = sys_get_temp_dir() . '/wc_test_warning_' . uniqid() . '.txt';
+		$this->sut->controller_files = array( $non_existent_file );
+
+		$this->query_endpoint( 'with_controller_files' );
+
+		$this->assertTrue( $filter_called, 'Filter should be called' );
+		$this->assertSame( HOUR_IN_SECONDS, $received_params['ttl'], 'Default TTL should be HOUR_IN_SECONDS' );
+		$this->assertSame( $non_existent_file, $received_params['file_path'], 'File path should be passed to filter' );
+		$this->assertNotEmpty( $received_params['reason'], 'Reason should be passed to filter' );
+
+		remove_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', $filter, 10 );
+		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * Create a temporary test file for file tracking tests.
+	 *
+	 * @return string Path to the created file.
+	 */
+	private function create_temp_test_file(): string {
+		$temp_file = sys_get_temp_dir() . '/wc_test_file_' . uniqid() . '.txt';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test file creation.
+		file_put_contents( $temp_file, 'test content' );
+		return $temp_file;
 	}
 }

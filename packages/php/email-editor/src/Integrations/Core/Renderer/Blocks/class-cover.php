@@ -83,10 +83,12 @@ class Cover extends Abstract_Block_Renderer {
 
 		// Add background image to table styles if present.
 		if ( ! empty( $background_image ) ) {
+			// Use esc_url_raw() for CSS context - esc_url() encodes & as &#038; which
+			// causes WP_Style_Engine::compile_css() to strip the background-image property.
 			$block_styles = Styles_Helper::extend_block_styles(
 				$block_styles,
 				array(
-					'background-image'    => 'url("' . esc_url( $background_image ) . '")',
+					'background-image'    => 'url("' . esc_url_raw( $background_image ) . '")',
 					'background-size'     => 'cover',
 					'background-position' => 'center',
 					'background-repeat'   => 'no-repeat',
@@ -127,6 +129,7 @@ class Cover extends Abstract_Block_Renderer {
 
 	/**
 	 * Extract background image from block attributes or HTML content.
+	 * Returns raw URL - escaping happens at final CSS output context.
 	 *
 	 * @param array  $block_attrs Block attributes.
 	 * @param string $block_content Original block content.
@@ -134,8 +137,9 @@ class Cover extends Abstract_Block_Renderer {
 	 */
 	private function extract_background_image( array $block_attrs, string $block_content ): string {
 		// First check block attributes for URL.
+		// Use esc_url_raw() to sanitize without HTML entity encoding.
 		if ( ! empty( $block_attrs['url'] ) ) {
-			return esc_url( $block_attrs['url'] );
+			return esc_url_raw( $block_attrs['url'] );
 		}
 
 		// Fallback: use HTML API to find background image src.
@@ -147,7 +151,7 @@ class Cover extends Abstract_Block_Renderer {
 			if ( is_string( $class_attr ) && false !== strpos( $class_attr, 'wp-block-cover__image-background' ) ) {
 				$src = $html->get_attribute( 'src' );
 				if ( is_string( $src ) ) {
-					return esc_url( $src );
+					return esc_url_raw( $src );
 				}
 			}
 		}
