@@ -88,6 +88,7 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'google-listings-and-ads' ),
 						self::get_plugin( 'woocommerce-services:tax' ),
 						self::get_plugin( 'tiktok-for-business' ),
+						self::get_plugin( 'snapchat-for-woocommerce' ),
 					)
 				),
 			),
@@ -454,6 +455,14 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => false,
 				'is_visible'     => false,
 			),
+			'snapchat-for-woocommerce'      => array(
+				'name'           => __( 'Snapchat Ads', 'woocommerce' ),
+				'description'    => __( 'Reach an untapped audience on Snapchat and drive more sales.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/core-profiler/logo-snapchat.svg', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fsnapchat%2Fstart',
+				'is_built_by_wc' => true,
+				'is_visible'     => true,
+			),
 		);
 
 		$plugin        = $plugins[ $slug ];
@@ -540,6 +549,13 @@ class DefaultFreeExtensions {
 				'description'      => __( 'Reach millions of active shoppers across Google with free product listings and ads.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/google-listings-and-ads?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 6,
+			),
+			'snapchat-for-woocommerce'  => array(
+				'label'            => __( 'Find New Customers with Snapchat Ads', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-snapchat.svg', WC_PLUGIN_FILE ),
+				'description'      => __( 'Reach an untapped audience on Snapchat and drive more sales.', 'woocommerce' ),
+				'learn_more_link'  => 'https://woocommerce.com/products/snapchat/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
+				'install_priority' => 1,
 			),
 			'woocommerce-services:tax'  => array(
 				'label'            => __( 'Get automated tax rates with WooCommerce Tax', 'woocommerce' ),
