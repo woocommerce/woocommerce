@@ -1,4 +1,4 @@
-Significance: minor
-Type: Performance, Tweak
+Significance: patch
+Type: Tweak
 
-Performance related refactor in MCPAdapterProvider
+Use wp_is_serving_rest_request() in MCPAdapterProvider instead of contants.
