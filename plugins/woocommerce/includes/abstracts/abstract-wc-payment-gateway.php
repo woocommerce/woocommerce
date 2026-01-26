@@ -48,7 +48,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * It does NOT affect security or functionality - the JS registration is what
 	 * actually enables the custom button.
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 * @var bool
 	 */
 	public $has_custom_place_order_button = false;

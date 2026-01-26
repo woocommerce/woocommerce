@@ -5,7 +5,7 @@
  * and add-payment-method pages. This module provides the core registration and
  * button management logic.
  *
- * @since 10.5.0
+ * @since 10.6.0
  */
 
 ( function ( $ ) {
