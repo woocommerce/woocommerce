@@ -348,6 +348,8 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$product->save();
 		$product_id = $product->get_id();
 
+		// TODO: make tests passing without modifications first.
+
 		$store->update_product_stock( $product_id, null, 'set' );
 		$this->assertSame( '0', get_post_meta( $product_id, '_stock', true ) );
 		$store->update_product_stock( $product_id, 10, 'set' );
