@@ -252,7 +252,7 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
 
-        $is_block_editor = $this->is_block_editor();
+		$is_block_editor = $this->is_block_editor();
 
 		// Check `current_user_can` so we can show notices about incompatible extensions in the front-end to admins too.
 		if ( ( $is_block_editor || current_user_can( 'manage_woocommerce' ) ) && ! $this->asset_data_registry->exists( 'incompatibleExtensions' ) ) {
