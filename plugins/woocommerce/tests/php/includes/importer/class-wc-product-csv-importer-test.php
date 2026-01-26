@@ -132,7 +132,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/import/abstract-wc-product-importer.php';
 
 		// Create a CSV importer instance to access protected methods.
-		$csv_file = dirname( __FILE__ ) . '/sample.csv';
+		$csv_file = __DIR__ . '/sample.csv';
 		$importer = new WC_Product_CSV_Importer( $csv_file );
 
 		// Create a variable product with non-ASCII attributes (Chinese characters).
@@ -151,7 +151,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 				'has_archives' => false,
 			)
 		);
-		$size_attr_id = wc_create_attribute(
+		$size_attr_id  = wc_create_attribute(
 			array(
 				'name'         => '尺寸',
 				'slug'         => 'chi-cun',
@@ -217,7 +217,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$method->invoke( $importer, $variation_attributes, $product );
 
 		// Reload product to get updated attributes.
-		$product = wc_get_product( $product->get_id() );
+		$product          = wc_get_product( $product->get_id() );
 		$attributes_after = $product->get_attributes();
 
 		// Verify attributes are now set to "Used for Variations".
