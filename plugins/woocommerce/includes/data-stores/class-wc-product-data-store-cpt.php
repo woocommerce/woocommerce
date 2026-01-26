@@ -1662,12 +1662,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function set_product_stock( $product_id_with_stock, $stock_quantity ) {
 		global $wpdb;
 
-		// Generate SQL.
-		$sql = $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
-			number_format( (float) $stock_quantity, WC_ROUNDING_PRECISION, '.', '' ),
-			$product_id_with_stock
-		);
+		// Generate SQL: in 10.6.0 we optimized the query, but for backward compatibility we also keep the original one.
+		if ( has_filter( 'woocommerce_update_product_stock_query' ) ) {
+			$sql = $wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+				$stock_quantity,
+				$product_id_with_stock
+			);
+		} else {
+			$sql = $wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+				number_format( (float) $stock_quantity, WC_ROUNDING_PRECISION, '.', '' ),
+				$product_id_with_stock
+			);
+		}
 
 		$sql = apply_filters( 'woocommerce_update_product_stock_query', $sql, $product_id_with_stock, $stock_quantity, 'set' );
 
@@ -1702,12 +1710,20 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( 'set' === $operation ) {
 			$new_stock = wc_stock_amount( $stock_quantity );
 
-			// Generate SQL.
-			$sql = $wpdb->prepare(
-				"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
-				number_format( (float) $new_stock, WC_ROUNDING_PRECISION, '.', '' ),
-				$product_id_with_stock
-			);
+			// Generate SQL: in 10.6.0 we optimized the query, but for backward compatibility we also keep the original one.
+			if ( has_filter( 'woocommerce_update_product_stock_query' ) ) {
+				$sql = $wpdb->prepare(
+					"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
+					$new_stock,
+					$product_id_with_stock
+				);
+			} else {
+				$sql = $wpdb->prepare(
+					"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+					number_format( (float) $new_stock, WC_ROUNDING_PRECISION, '.', '' ),
+					$product_id_with_stock
+				);
+			}
 		} else {
 			$current_stock = wc_stock_amount(
 				$wpdb->get_var(
