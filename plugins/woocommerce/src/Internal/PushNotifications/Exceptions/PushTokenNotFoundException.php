@@ -19,11 +19,8 @@ use WP_Http;
  */
 class PushTokenNotFoundException extends Exception {
 	/**
-	 * Constructor.
-	 *
-	 * @param string $message Optional. The exception message. Default 'Push token could not be found.'.
+	 * Default exception message.
+	 * @var string
 	 */
-	public function __construct( string $message = 'Push token could not be found.' ) {
-		parent::__construct( $message );
-	}
+	protected $message = 'Push token could not be found.';
 }

@@ -136,6 +136,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @throws PushTokenNotFoundException If token does not belong to authenticated user.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete( WP_REST_Request $request ) {
