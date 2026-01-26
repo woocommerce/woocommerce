@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add `woocommerce_blocks_checkout_address_tokens` and `woocommerce_blocks_checkout_name_tokens` filters to allow customizing address card formatting in Block Checkout.
