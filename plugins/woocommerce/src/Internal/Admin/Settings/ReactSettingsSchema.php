@@ -209,6 +209,39 @@ class ReactSettingsSchema {
 	}
 
 	/**
+	 * Check if a settings definition contains any renderable fields.
+	 *
+	 * @param string $tab Tab id.
+	 * @param string $section Section id.
+	 * @param array  $settings_definitions Settings definitions.
+	 * @param mixed  $settings_page Settings page instance.
+	 * @return bool
+	 * @since 10.6.0
+	 */
+	public static function has_renderable_fields( string $tab, string $section, array $settings_definitions, $settings_page ): bool {
+		$type_map        = self::get_type_map( $tab, $section, $settings_definitions, $settings_page );
+		$supported_types = self::get_supported_types( $tab, $section, $settings_definitions, $settings_page );
+
+		foreach ( $settings_definitions as $setting ) {
+			$type = $setting['type'] ?? '';
+			if ( '' === $type || in_array( $type, self::MARKER_TYPES, true ) ) {
+				continue;
+			}
+
+			if ( empty( $setting['id'] ) ) {
+				continue;
+			}
+
+			$normalized_type = $type_map[ $type ] ?? $type;
+			if ( in_array( $normalized_type, $supported_types, true ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Build a React settings response from legacy settings definitions.
 	 *
 	 * @param string $tab Tab id.
