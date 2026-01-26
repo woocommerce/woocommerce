@@ -92,10 +92,10 @@ export const useReactSettings = (
 	}, [ dataPath, missingDataMessage ] );
 
 	useEffect( () => {
-		if ( ! data ) {
+		if ( ! data && ! error && isLoading ) {
 			refetch();
 		}
-	}, [ data, refetch ] );
+	}, [ data, error, isLoading, refetch ] );
 
 	return {
 		data,
