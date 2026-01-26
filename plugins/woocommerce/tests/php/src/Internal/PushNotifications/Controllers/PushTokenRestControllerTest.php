@@ -9,8 +9,12 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use WC_REST_Unit_Test_Case;
@@ -42,11 +46,6 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	private $features_controller_mock;
 
 	/**
-	 * @var PushTokenRestController
-	 */
-	private $controller;
-
-	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -55,8 +54,9 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->set_up_features_controller_mock();
 		$this->reset_push_notifications_cache();
 
-		$this->controller = new PushTokenRestController();
-		$this->user_id    = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		( new PushTokenRestController() )->register_routes();
+
+		$this->user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 	}
 
 	/**
@@ -72,161 +72,465 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test authorize returns false when no user is logged in.
+	 * @testdox Test it cannot create a push token without authentication.
 	 */
-	public function test_authorize_returns_false_without_authentication() {
-		$this->mock_jetpack_connection_manager_is_connected( true );
-
+	public function test_it_cannot_create_push_token_without_authentication() {
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$result  = $this->controller->authorize( $request );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
-		$this->assertFalse( $result );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $data['code'] );
 	}
 
 	/**
-	 * @testdox Test authorize returns false when push notifications are disabled.
+	 * @testdox Test it cannot create a push token without required role.
 	 */
-	public function test_authorize_returns_false_when_push_notifications_disabled() {
-		wp_set_current_user( $this->user_id );
-
-		$this->mock_jetpack_connection_manager_is_connected( false );
-
-		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$result  = $this->controller->authorize( $request );
-
-		$this->assertFalse( $result );
-	}
-
-	/**
-	 * @testdox Test authorize returns false when user doesn't have required role.
-	 */
-	public function test_authorize_returns_false_without_required_role() {
+	public function test_it_cannot_create_push_token_without_required_role() {
 		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
 		wp_set_current_user( $customer_id );
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$result  = $this->controller->authorize( $request );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
-		$this->assertFalse( $result );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
 	}
 
 	/**
-	 * @testdox Test authorize returns true for shop_manager role.
+	 * @testdox Test it cannot create a push token for iOS if the token is not
+	 * in the correct format.
 	 */
-	public function test_authorize_returns_true_for_shop_manager() {
+	public function test_it_cannot_create_push_token_with_invalid_ios_token() {
 		wp_set_current_user( $this->user_id );
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$result  = $this->controller->authorize( $request );
+		$request->set_param( 'token', 'invalid-token' );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
-		$this->assertTrue( $result );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
 	}
 
 	/**
-	 * @testdox Test authorize returns true for administrator role.
+	 * @testdox Test it cannot create a push token for iOS with non-hex
+	 * characters.
 	 */
-	public function test_authorize_returns_true_for_administrator() {
-		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $admin_id );
+	public function test_it_cannot_create_push_token_for_ios_with_non_hex_characters() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		// Token with 'g' which is not a valid hex character.
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'g', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid-nonhex' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token for iOS with wrong length.
+	 */
+	public function test_it_cannot_create_push_token_for_ios_with_wrong_length() {
+		wp_set_current_user( $this->user_id );
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$result  = $this->controller->authorize( $request );
+		$request->set_param( 'token', str_repeat( 'a', 32 ) ); // Only 32 characters instead of 64.
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid-short' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
-		$this->assertTrue( $result );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
 	}
 
 	/**
-	 * @testdox Test authorize returns error when token ID doesn't exist.
+	 * @testdox Test it cannot create a push token for Android if the token is
+	 * not in the correct format.
 	 */
-	public function test_authorize_returns_error_when_token_not_found() {
+	public function test_it_cannot_create_push_token_with_invalid_android_token() {
 		wp_set_current_user( $this->user_id );
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
-		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/999999' );
-		$request->set_param( 'id', 999999 );
-		$result = $this->controller->authorize( $request );
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', 'invalid token with spaces' );
+		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
 
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'rest_invalid_push_token', $result->get_error_code() );
-		$this->assertEquals( WP_Http::NOT_FOUND, $result->get_error_data()['status'] );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
 	}
 
 	/**
-	 * @testdox Test authorize returns error when token belongs to another user.
+	 * @testdox Test it cannot create a push token for Android if the token is
+	 * too long.
 	 */
-	public function test_authorize_returns_error_when_token_belongs_to_another_user() {
-		/**
-		 * Create a token for another shop manager.
-		 */
-		$other_user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-
-		$push_token = new PushToken();
-		$push_token->set_user_id( $other_user_id );
-		$push_token->set_token( str_repeat( 'a', 64 ) );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
-		$push_token->set_device_uuid( 'device-other-user' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
-
-		$data_store = wc_get_container()->get( PushTokensDataStore::class );
-		$data_store->create( $push_token );
-		$token_id = $push_token->get_id();
-
-		/**
-		 * Try to authorize as a different user.
-		 */
+	public function test_it_cannot_create_push_token_with_android_token_that_is_too_long() {
 		wp_set_current_user( $this->user_id );
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
-		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $token_id );
-		$request->set_param( 'id', $token_id );
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 4097 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
 
-		$result = $this->controller->authorize( $request );
+		$response = $this->server->dispatch( $request );
 
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'rest_invalid_push_token', $result->get_error_code() );
-		$this->assertEquals( WP_Http::NOT_FOUND, $result->get_error_data()['status'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
 	}
 
 	/**
-	 * @testdox Test authorize returns true when token belongs to current user.
+	 * @testdox Test it cannot create a push token for browser with invalid
+	 * JSON token.
 	 */
-	public function test_authorize_returns_true_when_token_belongs_to_current_user() {
+	public function test_it_cannot_create_push_token_for_browser_with_invalid_json() {
 		wp_set_current_user( $this->user_id );
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
-		$push_token = new PushToken();
-		$push_token->set_user_id( $this->user_id );
-		$push_token->set_token( str_repeat( 'a', 64 ) );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
-		$push_token->set_device_uuid( 'device-current-user' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', 'not-valid-json' );
+		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
-		$data_store = wc_get_container()->get( PushTokensDataStore::class );
-		$data_store->create( $push_token );
-		$token_id = $push_token->get_id();
+		$response = $this->server->dispatch( $request );
 
-		$request = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $token_id );
-		$request->set_param( 'id', $token_id );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
 
-		$result = $this->controller->authorize( $request );
+		$data = $response->get_data();
 
-		$this->assertTrue( $result );
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token for browser with missing
+	 * required keys.
+	 */
+	public function test_it_cannot_create_push_token_for_browser_with_missing_keys() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$token = wp_json_encode(
+			array(
+				'endpoint' => 'https://example.com/push',
+				// Missing 'keys' array.
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token );
+		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token for browser with non-HTTPS
+	 * endpoint.
+	 */
+	public function test_it_cannot_create_push_token_for_browser_with_non_https_endpoint() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$token = wp_json_encode(
+			array(
+				'endpoint' => 'http://example.com/push',
+				'keys'     => array(
+					'auth'   => 'test-auth-key',
+					'p256dh' => 'test-p256dh-key',
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token );
+		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token without required token
+	 * parameter.
+	 */
+	public function test_it_cannot_create_push_token_with_a_missing_token() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token without required platform
+	 * parameter.
+	 */
+	public function test_it_cannot_create_push_token_with_a_missing_platform() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token without required device_uuid
+	 * parameter for non-browser platforms.
+	 */
+	public function test_it_cannot_create_push_token_for_non_browser_with_a_missing_device_uuid() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token with invalid platform value.
+	 */
+	public function test_it_cannot_create_push_token_with_invalid_platform() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', 'anything' );
+		$request->set_param( 'platform', 'windows' );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token without required origin
+	 * parameter.
+	 */
+	public function test_it_cannot_create_push_token_with_a_missing_origin() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token with invalid origin value.
+	 */
+	public function test_it_cannot_create_push_token_with_invalid_origin() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', 'anything' );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'development' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token when push notifications are
+	 * disabled.
+	 */
+	public function test_it_cannot_create_push_token_when_push_notifications_disabled() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid-123' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token with device_uuid exceeding
+	 * 255 characters.
+	 */
+	public function test_it_cannot_create_push_token_with_device_uuid_too_long() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', str_repeat( 'a', 256 ) );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token with device_uuid containing
+	 * invalid characters.
+	 */
+	public function test_it_cannot_create_push_token_with_device_uuid_invalid_characters() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'invalid device uuid with spaces' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'device_uuid', $data['message'] );
 	}
 
 	/**
 	 * @testdox Test the schema is correctly formatted.
 	 */
 	public function test_get_schema_returns_correct_structure() {
-		$schema = $this->controller->get_schema();
+		$controller = new PushTokenRestController();
+		$schema     = $controller->get_schema();
 
 		$this->assertArrayHasKey( 'title', $schema );
 		$this->assertArrayHasKey( 'properties', $schema );
@@ -258,6 +562,87 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 			PushToken::ORIGINS,
 			$schema['properties']['origin']['enum']
 		);
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error hides message for generic
+	 * Exception class.
+	 */
+	public function test_it_hides_internal_error_message_for_generic_exception() {
+		$controller = new PushTokenRestController();
+		$exception  = new Exception( 'Sensitive internal error details' );
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_internal_error', $result->get_error_code() );
+		$this->assertEquals( 'Internal server error', $result->get_error_message() );
+		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error exposes message for
+	 * PushTokenNotFoundException.
+	 */
+	public function test_it_exposes_message_for_push_token_not_found_exception() {
+		$controller = new PushTokenRestController();
+		$exception  = new PushTokenNotFoundException( 'Push token could not be found.' );
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_invalid_push_token', $result->get_error_code() );
+		$this->assertEquals( 'Push token could not be found.', $result->get_error_message() );
+		$this->assertEquals( WP_Http::NOT_FOUND, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error exposes message for
+	 * InvalidArgumentException.
+	 */
+	public function test_it_exposes_message_for_invalid_argument_exception() {
+		$controller = new PushTokenRestController();
+		$exception  = new InvalidArgumentException( 'Invalid argument provided.' );
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_invalid_argument', $result->get_error_code() );
+		$this->assertEquals( 'Invalid argument provided.', $result->get_error_message() );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error hides message for unknown
+	 * exception subclasses.
+	 */
+	public function test_it_hides_internal_error_message_for_unknown_exception_subclass() {
+		$controller = new PushTokenRestController();
+		// RuntimeException is a subclass of Exception but not in our mapping.
+		$exception = new RuntimeException( 'Sensitive runtime error details' );
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'rest_internal_error', $result->get_error_code() );
+		$this->assertEquals( 'Internal server error', $result->get_error_message() );
+		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $result->get_error_data()['status'] );
 	}
 
 	/**

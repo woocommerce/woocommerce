@@ -1,0 +1,4 @@
+Significance: patch
+Type: Tweak
+
+Use wp_is_serving_rest_request() in MCPAdapterProvider instead of contants.

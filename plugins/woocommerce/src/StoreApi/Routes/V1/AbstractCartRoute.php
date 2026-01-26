@@ -4,6 +4,9 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Internal\FraudProtection\BlockedSessionNotice;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
@@ -118,6 +121,18 @@ abstract class AbstractCartRoute extends AbstractRoute {
 
 		if ( is_wp_error( $nonce_check ) ) {
 			$response = $nonce_check;
+		}
+
+		// Block cart modifications if session is blocked by fraud protection.
+		if ( ! $response && $this->is_update_request( $request ) ) {
+			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+				&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+				$response = $this->get_route_error_response(
+					'woocommerce_rest_cart_error',
+					wc_get_container()->get( BlockedSessionNotice::class )->get_message_plaintext( 'purchase' ),
+					403
+				);
+			}
 		}
 
 		if ( ! $response ) {

@@ -155,4 +155,51 @@ class POSProductVisibilitySyncTest extends \WC_Unit_Test_Case {
 		// No exception should be thrown - test passes if we reach this point.
 		$this->assertTrue( true );
 	}
+
+	/**
+	 * Test that variations are saved when POS visibility changes.
+	 */
+	public function test_variations_saved_when_visibility_changes(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+
+		// Track which variations have save() called.
+		$saved_variation_ids = array();
+		$callback            = function ( $variation_id ) use ( &$saved_variation_ids ) {
+			$saved_variation_ids[] = $variation_id;
+		};
+		add_action( 'woocommerce_update_product_variation', $callback );
+
+		// Change visibility to hidden.
+		$this->sut->set_product_pos_visibility( $product->get_id(), false );
+
+		remove_action( 'woocommerce_update_product_variation', $callback );
+
+		// Verify save() was called for all variations.
+		$this->assertEquals(
+			$variation_ids,
+			$saved_variation_ids,
+			'save() should be called for each variation'
+		);
+	}
+
+	/**
+	 * Test that no updates occur when visibility state hasn't changed.
+	 */
+	public function test_no_updates_when_visibility_unchanged(): void {
+		$product = WC_Helper_Product::create_variation_product();
+
+		// Set product as hidden first.
+		$this->sut->set_product_pos_visibility( $product->get_id(), false );
+
+		// Track if any variations have save() called.
+		// Make sure that `save` is never called.
+		$mock_callback = $this->createMock( \WC_Product::class );
+		$mock_callback->expects( $this->never() )->method( 'save' );
+
+		// Try to set hidden again (no change).
+		add_action( 'woocommerce_update_product_variation', array( $mock_callback, 'save' ) );
+		$this->sut->set_product_pos_visibility( $product->get_id(), false );
+		remove_action( 'woocommerce_update_product_variation', array( $mock_callback, 'save' ) );
+	}
 }

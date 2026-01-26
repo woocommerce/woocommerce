@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add null-check to cart handler--prevents accessing cart if not initialized
