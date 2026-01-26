@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useMemo, useState, useEffect } from '@wordpress/element';
+import { Fragment, useMemo, useState, useEffect } from '@wordpress/element';
 import { Button, Notice, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { DataForm } from '@wordpress/dataviews';
@@ -63,7 +63,8 @@ export const ReactSettingsPage = ( {
 		}
 
 		// Select only fields from all groups and transform them.
-		const allFields = ( Object.values( data.groups ) as ReactSettingsGroup[] )
+		const groups = Object.values( data.groups ) as ReactSettingsGroup[];
+		const allFields = groups
 			.flatMap( ( group ) => group.fields )
 			.map( ( field ) => fieldTransformer( field ) );
 
@@ -156,7 +157,10 @@ export const ReactSettingsPage = ( {
 		return null;
 	}
 
-	const fieldsForSubmit = ( Object.values( data.groups ) as ReactSettingsGroup[] )
+	const groupsForSubmit = Object.values(
+		data.groups
+	) as ReactSettingsGroup[];
+	const fieldsForSubmit = groupsForSubmit
 		.flatMap( ( group ) => group.fields )
 		.filter( ( field ) => field?.id );
 
@@ -194,7 +198,8 @@ export const ReactSettingsPage = ( {
 
 				let value = rawValue ?? '';
 				if ( field.type === 'checkbox' ) {
-					value = rawValue === true || rawValue === 'yes' ? 'yes' : 'no';
+					value =
+						rawValue === true || rawValue === 'yes' ? 'yes' : 'no';
 				}
 
 				return (
