@@ -346,7 +346,7 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$callback = fn( string $sql ): string => $sql;
 
-		foreach ( [ true, false ] as $test_backward_compatibility ) {
+		foreach ( array( true, false ) as $test_backward_compatibility ) {
 			if ( $test_backward_compatibility ) {
 				add_filter( 'woocommerce_update_product_stock_query', $callback );
 			}
