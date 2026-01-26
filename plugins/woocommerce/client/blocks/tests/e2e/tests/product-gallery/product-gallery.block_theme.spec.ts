@@ -334,7 +334,7 @@ test.describe( `${ blockData.name }`, () => {
 			await expect( productGalleryBlockOption ).toBeHidden();
 		} );
 
-		test( 'should be visible on the post editor in Single Product block', async ( {
+		test( 'on the post editor, block should be in Single Product by default and is visible in inserter', async ( {
 			admin,
 			editor,
 		} ) => {
@@ -342,6 +342,10 @@ test.describe( `${ blockData.name }`, () => {
 			await editor.insertBlockUsingGlobalInserter( 'Product' );
 			await editor.canvas.getByText( 'Album' ).click();
 			await editor.canvas.getByText( 'Done' ).click();
+			// Block should be in Single Product by default.
+			await expect(
+				await editor.getBlockByName( blockData.name )
+			).toHaveCount( 1 );
 			const singleProductBlock = await editor.getBlockByName(
 				'woocommerce/single-product'
 			);
@@ -352,9 +356,10 @@ test.describe( `${ blockData.name }`, () => {
 				{ clientId: singleProductClientId }
 			);
 
+			// Block should be visible in inserter and hence can be inserted in Single Product block.
 			await expect(
 				await editor.getBlockByName( blockData.name )
-			).toHaveCount( 1 );
+			).toHaveCount( 2 );
 		} );
 	} );
 

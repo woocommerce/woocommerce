@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate page IDs returned by the `woocommerce_navigation_connect_page_options` filter before registering them

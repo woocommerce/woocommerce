@@ -234,6 +234,24 @@ class WC_Site_Tracking {
 				call_user_func( $tracker_init_method );
 			}
 		}
+
+		add_filter( 'pre_update_option_woocommerce_allow_tracking', array( __CLASS__, 'maybe_unschedule_deferred_tracks' ) );
+	}
+
+	/**
+	 * When the tracking is getting disabled, unschedules all deferred tracks.
+	 *
+	 * @internal
+	 * @since 10.6.0
+	 *
+	 * @param string $new_option_value The new, unserialized option value.
+	 * @return string
+	 */
+	public static function maybe_unschedule_deferred_tracks( $new_option_value ) {
+		if ( 'yes' !== $new_option_value ) {
+			as_unschedule_all_actions( '', array(), 'woocommerce-tracks' );
+		}
+		return $new_option_value;
 	}
 
 	/**

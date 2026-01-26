@@ -87,6 +87,18 @@ class HandlerRegistry {
 		);
 
 		$this->register_collection_handlers(
+			'woocommerce/product-collection/by-brand',
+			function ( $collection_args, $common_query_values, $query ) {
+				// For Products by Brand collection, if no brand is selected, we should return an empty result set.
+				if ( empty( $query['taxonomies_query'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+			}
+		);
+
+		$this->register_collection_handlers(
 			'woocommerce/product-collection/related',
 			function ( $collection_args ) {
 				// No products should be shown if no related product reference is set.

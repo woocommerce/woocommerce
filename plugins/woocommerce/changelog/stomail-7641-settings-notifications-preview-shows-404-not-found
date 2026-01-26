@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Ensure rewrite rules are updated whenever new block email templates are generated.

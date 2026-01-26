@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add dedicated email class and block template for partially refunded orders in the block email editor to ensure consistent visual styling across all transactional emails.
