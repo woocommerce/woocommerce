@@ -9,6 +9,7 @@ import {
 } from '@woocommerce/type-defs/cart';
 import { isObject, isString } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
+import { applyFilters } from '@wordpress/hooks';
 
 export const LOGIN_TO_CHECKOUT_URL = `${ LOGIN_URL }?redirect_to=${ encodeURIComponent(
 	window.location.href
@@ -66,7 +67,7 @@ export const formatAddress = (
 
 	const addressFormatWithoutName = format.replace( `${ nameFormat }\n`, '' );
 
-	const addressTokens = [
+	const defaultAddressTokens = [
 		[ '{company}', address?.company || '' ],
 		[ '{address_1}', address?.address_1 || '' ],
 		[ '{address_2}', address?.address_2 || '' ],
@@ -83,7 +84,13 @@ export const formatAddress = (
 		[ '{postcode_upper}', ( address?.postcode || '' ).toUpperCase() ],
 		[ '{country_upper}', getFormattedCountry( address ).toUpperCase() ],
 	];
-	const nameTokens = [
+	const addressTokens = applyFilters(
+		'woocommerce_blocks_checkout_address_tokens',
+		defaultAddressTokens,
+		address
+	) as [ string, string ][];
+
+	const defaultNameTokens = [
 		[
 			'{name}',
 			address?.first_name +
@@ -105,6 +112,11 @@ export const formatAddress = (
 		[ '{first_name_upper}', ( address?.first_name || '' ).toUpperCase() ],
 		[ '{last_name_upper}', ( address?.last_name || '' ).toUpperCase() ],
 	];
+	const nameTokens = applyFilters(
+		'woocommerce_blocks_checkout_name_tokens',
+		defaultNameTokens,
+		address
+	) as [ string, string ][];
 	let parsedName = nameFormat;
 
 	nameTokens.forEach( ( [ token, value ] ) => {
