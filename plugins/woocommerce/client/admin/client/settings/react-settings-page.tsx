@@ -178,14 +178,18 @@ export const ReactSettingsPage = ( {
 					} else if ( rawValue ) {
 						values = [ rawValue ];
 					}
-					return values.map( ( value, index ) => (
-						<input
-							key={ `${ field.id }-${ index }` }
-							type="hidden"
-							name={ `${ field.id }[]` }
-							value={ String( value ) }
-						/>
-					) );
+					return (
+						<Fragment key={ field.id }>
+							{ values.map( ( value, index ) => (
+								<input
+									key={ `${ field.id }-${ index }` }
+									type="hidden"
+									name={ `${ field.id }[]` }
+									value={ String( value ) }
+								/>
+							) ) }
+						</Fragment>
+					);
 				}
 
 				let value = rawValue ?? '';
