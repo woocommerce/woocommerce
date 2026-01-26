@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure there's no deprecation warning about deprecated feature flags when plugins are activated.
