@@ -47,8 +47,8 @@ jobs:
     name: Verify requirements
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
+      contents: write
+      pull-requests: write
     outputs:
       status: ${{ steps.aggregate-status.outputs.status }}
       error_message: ${{ steps.aggregate-status.outputs.error_message }}
@@ -110,7 +110,7 @@ jobs:
             const cherryPickBranch = `cherry-pick-PR${prNumber}-to-${targetBranch}`;
 
             try {
-              // Check target branch exists
+              // 1. Verify target branch exists
               await github.rest.repos.getBranch({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -118,31 +118,72 @@ jobs:
               });
               core.info(`Target branch '${targetBranch}' exists`);
 
-              // Check cherry-pick branch doesn't exist
+              // 2. Check if cherry-pick branch exists
+              let branchExists = false;
               try {
                 await github.rest.repos.getBranch({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   branch: cherryPickBranch
                 });
-                core.setOutput('error_message', `Branch '${cherryPickBranch}' already exists. Please delete it first.`);
-                core.setFailed(`Branch '${cherryPickBranch}' already exists.`);
-                return;
+                branchExists = true;
+                core.info(`Branch '${cherryPickBranch}' exists`);
               } catch (branchError) {
-                if (branchError.status !== 404) {
-                  core.setOutput('error_message', `Error checking cherry-pick branch: ${branchError.message}`);
-                  core.setFailed(`Error checking cherry-pick branch: ${branchError.message}`);
-                  return;
-                }
+                if (branchError.status !== 404) throw branchError;
+                core.info(`Branch '${cherryPickBranch}' does not exist (will be created)`);
               }
 
+              // 3. Check if a PR already exists for this cherry-pick
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: `${context.repo.owner}:${cherryPickBranch}`,
+                state: 'all'
+              });
+
+              if (prs.length === 0) {
+                // No existing PR - proceed with cherry-pick
+                core.info(`No existing PR found - ready to create cherry-pick`);
+                core.setOutput('cherry_pick_branch', cherryPickBranch);
+                return;
+              }
+
+              // 4. Handle existing PR scenarios
+              const openPr = prs.find(pr => pr.state === 'open');
+              const mergedPr = prs.find(pr => pr.merged_at);
+
+              // Case 1: There's an open PR
+              if (openPr) {
+                core.info(`Found open PR #${openPr.number}`);
+                core.setOutput('status', 'skipped');
+                core.setOutput('error_message', `An open cherry-pick PR already exists: #${openPr.number}`);
+                return;
+              }
+
+              // Case 2: A PR was already merged
+              if (mergedPr) {
+                core.info(`Found merged PR #${mergedPr.number}`);
+                core.setOutput('status', 'skipped');
+                core.setOutput('error_message', `A cherry-pick PR was already merged: #${mergedPr.number}`);
+                return;
+              }
+
+              // Case 3: Only closed (not merged) PRs exist, we delete branch and create fresh PR
+              if (branchExists) {
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${cherryPickBranch}`
+                  });
+                core.info(`Found only closed PRs. Deleted branch '${cherryPickBranch}'.`);
+              }
+              
               core.setOutput('cherry_pick_branch', cherryPickBranch);
-              core.info(`Cherry-pick branch '${cherryPickBranch}' is available`);
 
             } catch (error) {
               const errorMsg = error.status === 404
                 ? `Target branch '${targetBranch}' does not exist`
-                : `Error checking target branch: ${error.message}`;
+                : `Error during verification: ${error.message}`;
 
               core.setOutput('error_message', errorMsg);
               core.setFailed(errorMsg);
@@ -152,7 +193,10 @@ jobs:
         id: aggregate-status
         if: always()
         run: |
-          if [[ "${{ steps.check-pr.outcome }}" == "failure" ]]; then
+          if [[ "${{ steps.verify-branches.outputs.status }}" == "skipped" ]]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "error_message=${{ steps.verify-branches.outputs.error_message }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ steps.check-pr.outcome }}" == "failure" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
             echo "error_message=${{ steps.check-pr.outputs.error_message }}" >> $GITHUB_OUTPUT
           elif [[ "${{ steps.verify-branches.outcome }}" == "failure" ]]; then
@@ -191,6 +235,12 @@ jobs:
           MERGE_COMMIT_SHA="${{ needs.verify.outputs.merge_commit_sha }}"
           PR_NUMBER="${{ inputs.pr_number }}"
           TARGET_BRANCH="${{ inputs.target_branch }}"
+
+          # Check if branch already exists
+          if git ls-remote --heads origin "$CHERRY_PICK_BRANCH" | grep -q "$CHERRY_PICK_BRANCH"; then
+            echo "Branch $CHERRY_PICK_BRANCH already exists remotely. Skipping cherry-pick."
+            exit 0
+          fi
 
           # Create cherry-pick branch
           git checkout -b "$CHERRY_PICK_BRANCH"
@@ -401,7 +451,6 @@ jobs:
             echo "cherry_pick_pr_number=${{ steps.create-pr.outputs.pr_number }}" >> $GITHUB_OUTPUT
           fi
 
-
   aggregate-overall-status:
     name: Aggregate final status
     runs-on: ubuntu-latest
@@ -418,7 +467,11 @@ jobs:
           verify_status="${{ needs.verify.outputs.status }}"
           cherry_status="${{ needs.cherry-pick.outputs.status }}"
 
-          if [[ "$verify_status" != "success" ]]; then
+          if [[ "$verify_status" == "skipped" ]]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "error_message=${{ needs.verify.outputs.error_message }}" >> $GITHUB_OUTPUT
+            echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
+          elif [[ "$verify_status" != "success" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
             echo "error_message=${{ needs.verify.outputs.error_message }}" >> $GITHUB_OUTPUT
             echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
