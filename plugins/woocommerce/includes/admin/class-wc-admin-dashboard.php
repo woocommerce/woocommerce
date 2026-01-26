@@ -497,15 +497,11 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			/** @var \WP_Comment[] $comments */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			$comments = get_comments(
 				array(
-					'type'   => 'review',
-					'status' => 'approve',
-					'number' => 5,
+					'type'                      => 'review',
+					'status'                    => 'approve',
+					'number'                    => 5,
+					'update_comment_post_cache' => true,
 				)
-			);
-			_prime_post_caches(
-				array_map( static fn( \WP_Comment $comment ) => (int) $comment->comment_post_ID, $comments ),
-				false,
-				false
 			);
 			$comments = array_filter(
 				$comments,

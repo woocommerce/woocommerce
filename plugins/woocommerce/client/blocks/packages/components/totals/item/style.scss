@@ -11,6 +11,6 @@
 }
 
 .wc-block-components-totals-item__description {
-	@include font-size(small);
+	@include font-x-small-locked;
 	width: 100%;
 }
