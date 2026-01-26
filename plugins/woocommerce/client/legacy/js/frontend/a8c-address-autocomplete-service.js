@@ -308,7 +308,8 @@
 					try {
 						const startTime = performance.now();
 						const response = await fetch(
-							`${ searchUrl }?${ params.toString() }`
+							`${ searchUrl }?${ params.toString() }`,
+							{ referrerPolicy: 'origin-when-cross-origin' }
 						);
 						const endTime = performance.now();
 						requestDurations.push( endTime - startTime );
@@ -402,7 +403,8 @@
 					} );
 
 					const response = await fetch(
-						`${ selectUrl }?${ params.toString() }`
+						`${ selectUrl }?${ params.toString() }`,
+						{ referrerPolicy: 'origin-when-cross-origin' }
 					);
 
 					let data = await response.json();
