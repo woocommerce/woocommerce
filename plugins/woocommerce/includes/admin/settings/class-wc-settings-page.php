@@ -543,6 +543,8 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		/**
 		 * Log a legacy settings fallback in the console to ease debugging.
 		 *
+		 * @since 10.6.0
+		 *
 		 * @param string $tab Tab id.
 		 * @param string $section Section id.
 		 * @param array  $unsupported_fields Unsupported fields list.
