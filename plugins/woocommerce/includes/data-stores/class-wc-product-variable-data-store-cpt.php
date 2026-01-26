@@ -34,7 +34,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 */
 	protected function read_attributes( &$product ) {
-		$meta_attributes = get_post_meta( $product->get_id(), '_product_attributes', true );
+		$product_id      = $product->get_id();
+		$meta_attributes = get_post_meta( $product_id, '_product_attributes', true );
 
 		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
 			$attributes   = array();
@@ -54,19 +55,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
-					global $wpdb;
-
-					$old_slug      = 'attribute_' . $meta_attribute_key;
-					$new_slug      = 'attribute_' . sanitize_title( $meta_value['name'] );
-					$old_meta_rows = $wpdb->get_results( $wpdb->prepare( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s;", $old_slug ) ); // WPCS: db call ok, cache ok.
-
-					if ( $old_meta_rows ) {
-						foreach ( $old_meta_rows as $old_meta_row ) {
-							update_post_meta( $old_meta_row->post_id, $new_slug, $old_meta_row->meta_value );
+					$old_slug  = 'attribute_' . $meta_attribute_key;
+					$old_value = get_post_meta( $product_id, $old_slug, true );
+					if ( '' !== $old_value ) {
+						$new_slug = 'attribute_' . sanitize_title( $meta_value['name'] );
+						if ( $old_value !== get_post_meta( $product_id, $new_slug, true ) ) {
+							// TODO: deprecation/doing it wrong notice here.
+							update_post_meta( $product_id, $new_slug, $old_value );
+							$force_update = true;
 						}
 					}
-
-					$force_update = true;
 				}
 
 				// Check if is a taxonomy attribute.
@@ -75,7 +73,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						continue;
 					}
 					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
-					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
+					$options = wc_get_object_terms( $product_id, $meta_value['name'], 'term_id' );
 				} else {
 					$id      = 0;
 					$options = wc_get_text_attributes( $meta_value['value'] );
