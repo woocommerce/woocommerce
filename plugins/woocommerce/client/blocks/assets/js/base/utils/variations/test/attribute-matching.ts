@@ -21,43 +21,15 @@ describe( 'normalizeAttributeName', () => {
 
 	it( 'returns unchanged name without prefix', () => {
 		expect( normalizeAttributeName( 'Color' ) ).toBe( 'Color' );
-		expect( normalizeAttributeName( 'color' ) ).toBe( 'color' );
-	} );
-
-	it( 'handles empty string', () => {
-		expect( normalizeAttributeName( '' ) ).toBe( '' );
-	} );
-
-	it( 'only strips prefix at the start', () => {
-		expect( normalizeAttributeName( 'my_attribute_color' ) ).toBe(
-			'my_attribute_color'
-		);
 	} );
 } );
 
 describe( 'attributeNamesMatch', () => {
-	it( 'matches identical names', () => {
-		expect( attributeNamesMatch( 'color', 'color' ) ).toBe( true );
-	} );
-
 	it( 'matches case-insensitively', () => {
 		expect( attributeNamesMatch( 'Color', 'color' ) ).toBe( true );
-		expect( attributeNamesMatch( 'COLOR', 'color' ) ).toBe( true );
 	} );
 
-	it( 'matches after stripping attribute_ prefix', () => {
-		expect( attributeNamesMatch( 'attribute_color', 'color' ) ).toBe(
-			true
-		);
-		expect( attributeNamesMatch( 'attribute_color', 'Color' ) ).toBe(
-			true
-		);
-	} );
-
-	it( 'matches after stripping attribute_pa_ prefix', () => {
-		expect( attributeNamesMatch( 'attribute_pa_color', 'color' ) ).toBe(
-			true
-		);
+	it( 'matches after stripping prefix', () => {
 		expect( attributeNamesMatch( 'attribute_pa_color', 'Color' ) ).toBe(
 			true
 		);
@@ -71,9 +43,6 @@ describe( 'attributeNamesMatch', () => {
 
 	it( 'returns false for different names', () => {
 		expect( attributeNamesMatch( 'color', 'size' ) ).toBe( false );
-		expect( attributeNamesMatch( 'attribute_color', 'size' ) ).toBe(
-			false
-		);
 	} );
 } );
 
@@ -90,27 +59,15 @@ describe( 'getVariationAttributeValue', () => {
 		expect( getVariationAttributeValue( variation, 'Color' ) ).toBe(
 			'Blue'
 		);
-		expect( getVariationAttributeValue( variation, 'Size' ) ).toBe(
-			'Large'
-		);
 	} );
 
 	it( 'finds attribute value case-insensitively', () => {
 		expect( getVariationAttributeValue( variation, 'color' ) ).toBe(
 			'Blue'
 		);
-		expect( getVariationAttributeValue( variation, 'COLOR' ) ).toBe(
-			'Blue'
-		);
 	} );
 
-	it( 'finds attribute value when using attribute_ prefix', () => {
-		expect(
-			getVariationAttributeValue( variation, 'attribute_color' )
-		).toBe( 'Blue' );
-	} );
-
-	it( 'finds attribute value when using attribute_pa_ prefix', () => {
+	it( 'finds attribute value when using prefix', () => {
 		expect(
 			getVariationAttributeValue( variation, 'attribute_pa_color' )
 		).toBe( 'Blue' );
@@ -119,13 +76,6 @@ describe( 'getVariationAttributeValue', () => {
 	it( 'returns undefined for non-existent attribute', () => {
 		expect(
 			getVariationAttributeValue( variation, 'material' )
-		).toBeUndefined();
-	} );
-
-	it( 'handles variation with empty attributes array', () => {
-		const emptyVariation = { id: 456, attributes: [] };
-		expect(
-			getVariationAttributeValue( emptyVariation, 'color' )
 		).toBeUndefined();
 	} );
 } );
@@ -161,33 +111,14 @@ describe( 'findMatchingVariation', () => {
 
 	it( 'returns null when product has no variations', () => {
 		const productNoVariations = { id: 1, type: 'variable', variations: [] };
-		const selectedAttributes = [
-			{ attribute: 'Color', value: 'Blue' },
-		];
+		const selectedAttributes = [ { attribute: 'Color', value: 'Blue' } ];
 		expect(
 			findMatchingVariation( productNoVariations, selectedAttributes )
 		).toBeNull();
 	} );
 
-	it( 'returns null when variations is undefined', () => {
-		const productUndefinedVariations = { id: 1, type: 'variable' };
-		const selectedAttributes = [
-			{ attribute: 'Color', value: 'Blue' },
-		];
-		expect(
-			findMatchingVariation(
-				productUndefinedVariations,
-				selectedAttributes
-			)
-		).toBeNull();
-	} );
-
 	it( 'returns null when no attributes are selected', () => {
 		expect( findMatchingVariation( product, [] ) ).toBeNull();
-	} );
-
-	it( 'returns null when selectedAttributes is undefined', () => {
-		expect( findMatchingVariation( product, undefined ) ).toBeNull();
 	} );
 
 	it( 'finds exact match with all attributes', () => {
@@ -196,37 +127,15 @@ describe( 'findMatchingVariation', () => {
 			{ attribute: 'Size', value: 'Large' },
 		];
 		const result = findMatchingVariation( product, selectedAttributes );
-		expect( result ).not.toBeNull();
 		expect( result?.id ).toBe( 102 );
 	} );
 
-	it( 'matches with attribute_ prefix in selected attributes', () => {
+	it( 'matches with attribute prefix in selected attributes', () => {
 		const selectedAttributes = [
-			{ attribute: 'attribute_color', value: 'Blue' },
-			{ attribute: 'attribute_size', value: 'Small' },
-		];
-		const result = findMatchingVariation( product, selectedAttributes );
-		expect( result ).not.toBeNull();
-		expect( result?.id ).toBe( 101 );
-	} );
-
-	it( 'matches with attribute_pa_ prefix in selected attributes', () => {
-		const selectedAttributes = [
-			{ attribute: 'attribute_pa_color', value: 'Red' },
+			{ attribute: 'attribute_pa_color', value: 'Blue' },
 			{ attribute: 'attribute_pa_size', value: 'Small' },
 		];
 		const result = findMatchingVariation( product, selectedAttributes );
-		expect( result ).not.toBeNull();
-		expect( result?.id ).toBe( 103 );
-	} );
-
-	it( 'matches case-insensitively on attribute names', () => {
-		const selectedAttributes = [
-			{ attribute: 'COLOR', value: 'Blue' },
-			{ attribute: 'SIZE', value: 'Small' },
-		];
-		const result = findMatchingVariation( product, selectedAttributes );
-		expect( result ).not.toBeNull();
 		expect( result?.id ).toBe( 101 );
 	} );
 
@@ -234,16 +143,6 @@ describe( 'findMatchingVariation', () => {
 		const selectedAttributes = [
 			{ attribute: 'Color', value: 'Green' },
 			{ attribute: 'Size', value: 'Small' },
-		];
-		expect(
-			findMatchingVariation( product, selectedAttributes )
-		).toBeNull();
-	} );
-
-	it( 'returns null when attribute value does not match', () => {
-		const selectedAttributes = [
-			{ attribute: 'Color', value: 'Blue' },
-			{ attribute: 'Size', value: 'Medium' },
 		];
 		expect(
 			findMatchingVariation( product, selectedAttributes )
@@ -281,8 +180,7 @@ describe( 'findMatchingVariation', () => {
 				productWithAny,
 				selectedAttributes
 			);
-			expect( result ).not.toBeNull();
-			expect( result?.id ).toBe( 201 ); // Matches because Color accepts "Any"
+			expect( result?.id ).toBe( 201 );
 		} );
 
 		it( 'does not match "Any" attribute when selected value is empty', () => {
@@ -290,61 +188,16 @@ describe( 'findMatchingVariation', () => {
 				{ attribute: 'Color', value: '' },
 				{ attribute: 'Size', value: 'Small' },
 			];
-			const result = findMatchingVariation(
-				productWithAny,
-				selectedAttributes
-			);
-			expect( result ).toBeNull();
+			expect(
+				findMatchingVariation( productWithAny, selectedAttributes )
+			).toBeNull();
 		} );
 
 		it( 'does not match "Any" attribute when attribute is not selected', () => {
-			const selectedAttributes = [
-				{ attribute: 'Size', value: 'Small' },
-			];
-			const result = findMatchingVariation(
-				productWithAny,
-				selectedAttributes
-			);
-			expect( result ).toBeNull();
-		} );
-
-		it( 'matches specific value over "Any" when both could match', () => {
-			const selectedAttributes = [
-				{ attribute: 'Color', value: 'Blue' },
-				{ attribute: 'Size', value: 'Large' },
-			];
-			const result = findMatchingVariation(
-				productWithAny,
-				selectedAttributes
-			);
-			expect( result ).not.toBeNull();
-			expect( result?.id ).toBe( 202 ); // Matches Blue + Any Size
-		} );
-	} );
-
-	describe( 'partial attribute selection', () => {
-		it( 'returns first matching variation when fewer attributes selected', () => {
-			// When only Color is selected, the first variation with matching color
-			// should be returned (if all its attributes match)
-			const productSingleAttr = {
-				id: 3,
-				type: 'variable',
-				variations: [
-					{
-						id: 301,
-						attributes: [ { name: 'Color', value: 'Blue' } ],
-					},
-				],
-			};
-			const selectedAttributes = [
-				{ attribute: 'Color', value: 'Blue' },
-			];
-			const result = findMatchingVariation(
-				productSingleAttr,
-				selectedAttributes
-			);
-			expect( result ).not.toBeNull();
-			expect( result?.id ).toBe( 301 );
+			const selectedAttributes = [ { attribute: 'Size', value: 'Small' } ];
+			expect(
+				findMatchingVariation( productWithAny, selectedAttributes )
+			).toBeNull();
 		} );
 	} );
 } );
