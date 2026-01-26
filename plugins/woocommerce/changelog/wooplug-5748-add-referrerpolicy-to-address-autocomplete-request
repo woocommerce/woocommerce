@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add referrerPolicy to address autocomplete fetch requests to ensure Referer header is sent even with restrictive site policies.
