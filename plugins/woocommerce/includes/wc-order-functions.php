@@ -1118,6 +1118,10 @@ function wc_cancel_unpaid_orders() {
 		foreach ( $unpaid_orders as $unpaid_order ) {
 			$order = wc_get_order( $unpaid_order );
 
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+
 			/**
 			 * Filters whether an unpaid order should be automatically cancelled.
 			 *
