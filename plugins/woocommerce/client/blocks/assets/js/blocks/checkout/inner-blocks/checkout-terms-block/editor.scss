@@ -1,12 +1,12 @@
 .edit-post-visual-editor {
 	@include cart-checkout-small-container {
 		.wc-block-checkout__terms {
-			padding: 4px;
+			padding: 1px 4px;
 		}
 	}
 	@include cart-checkout-medium-container {
 		.wc-block-checkout__terms {
-			padding: 4px;
+			padding: 1px 4px;
 		}
 	}
 }
@@ -14,8 +14,8 @@
 // Adjust padding and margins in the editor to improve selected block outlines.
 .wc-block-checkout__terms {
 	margin: 0 0 $gap-larger 0;
-	padding-top: 4px;
-	padding-bottom: 4px;
+	padding-top: 1px;
+	padding-bottom: 1px;
 	display: flex;
 	align-items: flex-start;
 }
@@ -27,7 +27,7 @@
 .wc-block-checkout__terms_notice {
 	margin: 0;
 	.components-notice__content {
-		margin: 4px 0;
+		margin: 1px 0;
 	}
 	.components-notice__actions {
 		button {
