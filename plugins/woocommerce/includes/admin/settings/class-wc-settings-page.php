@@ -521,7 +521,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 						$this
 					);
 
-					if ( empty( $unsupported_fields ) ) {
+					if ( empty( $unsupported_fields ) && ReactSettingsSchema::has_renderable_fields( $tab, $section_id, $settings_definitions, $this ) ) {
 						$GLOBALS['hide_save_button'] = true;
 						$mount_id                    = ReactSettingsSchema::get_mount_id( $tab, $section_id );
 						echo '<div id="' . esc_attr( $mount_id ) . '" data-wc-modern-settings="1" data-wc-settings-tab="' . esc_attr( $tab ) . '" data-wc-settings-section="' . esc_attr( $section_id ) . '"> </div>';
