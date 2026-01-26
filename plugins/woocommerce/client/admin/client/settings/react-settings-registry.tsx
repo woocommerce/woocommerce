@@ -52,6 +52,21 @@ export const overrideReactSettingsScreen = (
 	section: string,
 	overrides: ReactSettingsScreenOverrides
 ) => {
+	if ( typeof tab !== 'string' || ! tab.trim() ) {
+		// eslint-disable-next-line no-console
+		console.warn( 'overrideReactSettingsScreen: tab must be a non-empty string' );
+		return;
+	}
+	if ( typeof section !== 'string' ) {
+		// eslint-disable-next-line no-console
+		console.warn( 'overrideReactSettingsScreen: section must be a string' );
+		return;
+	}
+	if ( ! overrides || typeof overrides !== 'object' ) {
+		// eslint-disable-next-line no-console
+		console.warn( 'overrideReactSettingsScreen: overrides must be an object' );
+		return;
+	}
 	screenOverrides.set( getScreenKey( tab, section ), overrides );
 };
 
