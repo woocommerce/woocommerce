@@ -288,7 +288,7 @@ class Settings {
 			return $settings;
 		}
 
-		$settings_definitions = $settings_page->get_settings_for_section( $current_section );
+		$settings_definitions = $settings_page->get_settings( $current_section );
 		if ( ! is_array( $settings_definitions ) ) {
 			return $settings;
 		}
