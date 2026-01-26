@@ -145,7 +145,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$color_attr_id = wc_create_attribute(
 			array(
 				'name'         => '颜色',
-				'slug'         => 'yan-se',
 				'type'         => 'select',
 				'order_by'     => 'menu_order',
 				'has_archives' => false,
@@ -154,7 +153,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$size_attr_id  = wc_create_attribute(
 			array(
 				'name'         => '尺寸',
-				'slug'         => 'chi-cun',
 				'type'         => 'select',
 				'order_by'     => 'menu_order',
 				'has_archives' => false,
@@ -162,8 +160,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		);
 
 		// Register taxonomies.
-		$color_taxonomy = wc_attribute_taxonomy_name( 'yan-se' );
-		$size_taxonomy  = wc_attribute_taxonomy_name( 'chi-cun' );
+		$color_taxonomy = wc_attribute_taxonomy_name_by_id( $color_attr_id );
+		$size_taxonomy  = wc_attribute_taxonomy_name_by_id( $size_attr_id );
 		register_taxonomy( $color_taxonomy, 'product' );
 		register_taxonomy( $size_taxonomy, 'product' );
 
