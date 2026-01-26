@@ -40168,12 +40168,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Cannot call method get_created_via\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Cannot call method get_download_expiry\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -40199,12 +40193,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_total_refunded\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method update_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/wc-order-functions.php
