@@ -194,7 +194,9 @@ describe( 'findMatchingVariation', () => {
 		} );
 
 		it( 'does not match "Any" attribute when attribute is not selected', () => {
-			const selectedAttributes = [ { attribute: 'Size', value: 'Small' } ];
+			const selectedAttributes = [
+				{ attribute: 'Size', value: 'Small' },
+			];
 			expect(
 				findMatchingVariation( productWithAny, selectedAttributes )
 			).toBeNull();
