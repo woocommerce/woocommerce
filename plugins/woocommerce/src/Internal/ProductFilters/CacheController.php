@@ -39,8 +39,12 @@ class CacheController implements RegisterHooksInterface {
 	 * Hook into actions and filters.
 	 */
 	public function register() {
-		add_action( 'woocommerce_after_product_object_save', array( $this, 'clear_filter_data_cache' ) );
-		add_action( 'woocommerce_delete_product_transients', array( $this, 'clear_filter_data_cache' ) );
+		if ( ! $this->need_cleanup() ) {
+			return;
+		}
+
+		add_action( 'woocommerce_after_product_object_save', array( $this, 'invalidate_filter_data_cache' ) );
+		add_action( 'woocommerce_delete_product_transients', array( $this, 'invalidate_filter_data_cache' ) );
 
 		// Clear taxonomy hierarchy cache when terms change.
 		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
@@ -51,7 +55,7 @@ class CacheController implements RegisterHooksInterface {
 	/**
 	 * Invalidate all cache under filter data group.
 	 */
-	public function clear_filter_data_cache() {
+	public function invalidate_filter_data_cache(): void {
 		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
@@ -68,5 +72,34 @@ class CacheController implements RegisterHooksInterface {
 		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 			$this->taxonomy_hierarchy_data->clear_cache( $taxonomy );
 		}
+	}
+
+	/**
+	 * Delete all filter data transients.
+	 */
+	public function delete_filter_data_transients(): void {
+		if ( ! $this->need_cleanup() ) {
+			return;
+		}
+
+		global $wpdb;
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				$wpdb->esc_like( '_transient_wc_filter_data_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_wc_filter_data_' ) . '%'
+			)
+		);
+	}
+
+	/**
+	 * Check if the filter data cache should be cleaned up.
+	 * If the cache group is not set, it means that the store is not using
+	 * the product filters and we don't need to register the hooks.
+	 *
+	 * @return bool
+	 */
+	public function need_cleanup() {
+		return ! empty( get_transient( self::CACHE_GROUP . '-transient-version' ) );
 	}
 }

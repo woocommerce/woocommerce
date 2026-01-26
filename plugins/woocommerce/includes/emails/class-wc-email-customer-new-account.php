@@ -70,6 +70,12 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 			$this->template_html  = 'emails/customer-new-account.php';
 			$this->template_plain = 'emails/plain/customer-new-account.php';
 			parent::__construct();
+
+			// Must be after parent's constructor which sets `block_email_editor_enabled` property.
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Account created', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their account has been created.', 'woocommerce' );
+			}
 		}
 
 		/**

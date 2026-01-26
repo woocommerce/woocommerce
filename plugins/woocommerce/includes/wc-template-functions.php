@@ -2840,10 +2840,18 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 		$thumbnail_id         = get_term_meta( $category->term_id, 'thumbnail_id', true );
 
 		if ( $thumbnail_id ) {
-			$image        = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
-			$image        = $image[0];
-			$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
-			$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+			$image_data = wp_get_attachment_image_src( $thumbnail_id, $small_thumbnail_size );
+
+			// Category image guard - fallback to placeholder.
+			if ( is_array( $image_data ) && isset( $image_data[0] ) ) {
+				$image        = $image_data[0];
+				$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
+				$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+			} else {
+				$image        = wc_placeholder_img_src();
+				$image_srcset = false;
+				$image_sizes  = false;
+			}
 		} else {
 			$image        = wc_placeholder_img_src();
 			$image_srcset = false;
@@ -3074,16 +3082,19 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$label_id        = $args['id'];
 		$sort            = $args['priority'] ? $args['priority'] : '';
 		$field_container = '<p class="form-row %1$s" id="%2$s" data-priority="' . esc_attr( $sort ) . '">%3$s</p>';
+		$is_hidden_field = false;
 
 		switch ( $args['type'] ) {
 			case 'country':
 				$countries = 'shipping_country' === $key ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
 
 				if ( 1 === count( $countries ) ) {
+					$country_code = current( array_keys( $countries ) );
+					$country_name = current( array_values( $countries ) );
 
-					$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
-
-					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" readonly="readonly" />';
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state country_to_state--single ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '">';
+					$field .= '<option value="' . esc_attr( $country_code ) . '" selected>' . esc_html( $country_name ) . '</option>';
+					$field .= '</select>';
 
 				} else {
 					$data_label = ! empty( $args['label'] ) ? 'data-label="' . esc_attr( $args['label'] ) . '"' : '';
@@ -3173,7 +3184,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'hidden':
-				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-hidden ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$field          .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-hidden ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$is_hidden_field = true;
 
 				break;
 			case 'select':
@@ -3214,7 +3226,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field_html = '';
 
 			if ( $args['label'] && 'checkbox' !== $args['type'] ) {
-				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $required_indicator . '</label>';
+				$maybe_for_attr = $is_hidden_field ? '' : ' for="' . esc_attr( $label_id ) . '"';
+				$field_html    .= '<label' . $maybe_for_attr . ' class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $required_indicator . '</label>';
 			}
 
 			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;

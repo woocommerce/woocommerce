@@ -1,5 +1,4 @@
 /* eslint-disable import/no-unresolved */
-/* eslint-disable no-shadow */
 /**
  * External dependencies
  */
@@ -12,9 +11,7 @@ import { randomIntBetween } from 'https://jslib.k6.io/k6-utils/1.1.0/index.js';
  */
 import {
 	base_url,
-	hpos_status,
 	admin_orders_base_url,
-	hpos_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
 	product_search_term,
@@ -28,16 +25,8 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
-// Change URL if HPOS is enabled and being used
-let admin_orders_base;
-let admin_search_assert;
-if ( hpos_status === true ) {
-	admin_orders_base = hpos_admin_orders_base_url;
-	admin_search_assert = 'tbody id="the-list"';
-} else {
-	admin_orders_base = `${ admin_orders_base_url }&post_status=all`;
-	admin_search_assert = 'Search results for:';
-}
+const admin_orders_base = `${ admin_orders_base_url }&post_status=all`;
+const admin_search_assert = 'Search results for:';
 
 export function ordersSearch() {
 	let response;
@@ -62,8 +51,8 @@ export function ordersSearch() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( `${ admin_search_assert }` ),
+			"body contains: 'Search results' subtitle": ( r ) =>
+				r.body.includes( `${ admin_search_assert }` ),
 		} );
 
 		response = http.get(
@@ -77,8 +66,8 @@ export function ordersSearch() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( `${ admin_search_assert }` ),
+			"body contains: 'Search results' subtitle": ( r ) =>
+				r.body.includes( `${ admin_search_assert }` ),
 		} );
 
 		response = http.get(
@@ -92,8 +81,8 @@ export function ordersSearch() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Search results' subtitle": ( response ) =>
-				response.body.includes( `${ admin_search_assert }` ),
+			"body contains: 'Search results' subtitle": ( r ) =>
+				r.body.includes( `${ admin_search_assert }` ),
 		} );
 	} );
 

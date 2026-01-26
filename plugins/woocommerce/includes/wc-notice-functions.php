@@ -79,6 +79,13 @@ function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
 		return;
 	}
 
+	// If this is called before the session is initialized, for example if a plugin includes this file incorrectly on
+	// the admin, skip doing anything to prevent errors.
+	if ( ! WC()->session ) {
+		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before the WooCommerce session is initialized, or places where there is no session, e.g. WordPress admin.', 'woocommerce' ), '10.5' );
+		return;
+	}
+
 	$notices = WC()->session->get( 'wc_notices', array() );
 
 	// Backward compatibility.

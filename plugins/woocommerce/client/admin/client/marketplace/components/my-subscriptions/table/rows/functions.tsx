@@ -177,6 +177,33 @@ function getStatusBadge(
 		};
 	}
 
+	if (
+		! subscription.autorenew &&
+		! subscription.lifetime &&
+		! subscription.expired
+	) {
+		return {
+			text: __( 'Auto-renew: off', 'woocommerce' ),
+			level: StatusLevel.Warning,
+			explanation: createInterpolateElement(
+				__(
+					'This subscription will not renew automatically. <enable>Enable auto-renew</enable> to ensure uninterrupted updates and support.',
+					'woocommerce'
+				),
+				{
+					enable: (
+						<a
+							href={ enableAutorenewalUrl( subscription ) }
+							rel="nofollow noopener noreferrer"
+						>
+							enable
+						</a>
+					),
+				}
+			),
+		};
+	}
+
 	return false;
 }
 
@@ -388,12 +415,14 @@ export function actions( subscription: Subscription ): TableRow {
 		actionButton = <RenewButton subscription={ subscription } />;
 	} else if (
 		subscription.local.installed === false &&
-		subscription.subscription_installed === false
+		subscription.subscription_installed === false &&
+		subscription.has_changelog === true
 	) {
 		actionButton = <Install subscription={ subscription } />;
 	} else if (
 		subscription.active === false &&
-		subscription.subscription_available === true
+		subscription.subscription_available === true &&
+		subscription.has_changelog === true
 	) {
 		actionButton = (
 			<ConnectButton subscription={ subscription } variant="link" />

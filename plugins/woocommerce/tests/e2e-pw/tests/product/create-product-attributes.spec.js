@@ -66,6 +66,16 @@ const test = baseTest.extend( {
  * @param {import('@playwright/test').Page} page
  */
 async function goToAttributesTab( page ) {
+	// There is the chance we might click on the 'Attributes' tab too early. To
+	// prevent that, we wait until the 'Variations' tab is hidden, which means
+	// the tabs have been updated.
+	// @see https://github.com/woocommerce/woocommerce/issues/53449.
+	await expect(
+		page
+			.locator( '.attribute_tab' )
+			.getByRole( 'link', { name: 'Variations' } )
+	).toBeHidden();
+
 	await test.step( 'Go to the "Attributes" tab.', async () => {
 		const attributesTab = page
 			.locator( '.attribute_tab' )
@@ -174,15 +184,6 @@ test( 'can add custom product attributes', async ( { page, product } ) => {
 			page.locator( '.notice-success', { name: 'Product updated' } )
 		).toBeVisible();
 	} );
-
-	// There is the chance we might click on the 'Attributes' tab too early. To
-	// prevent that, we wait until the 'Variations' tab is hidden, which means
-	// the tabs have been updated.
-	await expect(
-		page
-			.locator( '.attribute_tab' )
-			.getByRole( 'link', { name: 'Variations' } )
-	).toBeHidden();
 
 	await goToAttributesTab( page );
 

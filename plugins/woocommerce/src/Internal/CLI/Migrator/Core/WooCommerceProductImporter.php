@@ -492,6 +492,10 @@ class WooCommerceProductImporter {
 			$product->set_weight( $product_data['weight'] );
 		}
 
+		if ( ! empty( $product_data['tax_status'] ) ) {
+			$product->set_tax_status( $product_data['tax_status'] );
+		}
+
 		if ( ! empty( $product_data['metafields'] ) ) {
 			foreach ( $product_data['metafields'] as $key => $value ) {
 				if ( ! empty( $key ) ) {
@@ -697,7 +701,7 @@ class WooCommerceProductImporter {
 			$woo_attribute = new \WC_Product_Attribute();
 			$woo_attribute->set_name( $taxonomy_name );
 			$woo_attribute->set_id( $attribute_id );
-			$woo_attribute->set_options( $term_slugs );
+			$woo_attribute->set_options( $term_ids );
 			$woo_attribute->set_position( $attribute_info['position'] ?? 0 );
 			$woo_attribute->set_visible( $attribute_info['is_visible'] ?? true );
 			$woo_attribute->set_variation( $attribute_info['is_variation'] ?? true );
@@ -804,6 +808,10 @@ class WooCommerceProductImporter {
 			$variation->set_stock_status( $var_data['stock_status'] ?? 'instock' );
 
 			$variation->set_weight( $var_data['weight'] ?? '' );
+
+			if ( ! empty( $var_data['tax_status'] ) ) {
+				$variation->set_tax_status( $var_data['tax_status'] );
+			}
 
 			$image_original_id = $var_data['image_original_id'] ?? null;
 			if ( $image_original_id && isset( $this->migration_data['images_mapping'][ $image_original_id ] ) ) {

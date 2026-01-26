@@ -12,9 +12,7 @@ const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
 // block directory.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {
-		customDir: 'product-elements/add-to-cart-form',
-	},
+	'add-to-cart-form': {},
 	'add-to-cart-with-options': {},
 	'add-to-cart-with-options-quantity-selector': {
 		customDir: 'add-to-cart-with-options/quantity-selector',
@@ -59,7 +57,10 @@ const blocks = {
 	'attribute-filter': {},
 	breadcrumbs: {},
 	'catalog-sorting': {},
+	'category-description': {},
+	'category-title': {},
 	'coming-soon': {},
+	'coupon-code': {},
 	'customer-account': {},
 	'email-content': {},
 	'featured-category': {
@@ -346,6 +347,7 @@ const entries = {
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
 		priceFormat: './packages/prices/index.js',
 		wcTypes: './assets/js/types/index.ts',
+		wcEntities: './assets/js/entities/index.ts',
 	},
 	main: {
 		// Shared blocks code

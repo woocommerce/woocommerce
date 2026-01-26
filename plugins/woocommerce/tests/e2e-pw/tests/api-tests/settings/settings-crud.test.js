@@ -1042,7 +1042,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 							yes: 'Yes, I will enter prices inclusive of tax',
 							no: 'No, I will enter prices exclusive of tax',
 						},
-						tip: 'This option is important as it will affect how you input prices. Changing it will not update existing products.',
+						tip: 'This option is important as it will affect how you input prices. If you select "Yes", enter prices including your base location\'s tax rate, the baseline for tax calculations. Changing this option will not update existing products.',
 						value: 'no',
 					} ),
 				] )

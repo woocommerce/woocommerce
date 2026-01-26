@@ -14,14 +14,13 @@ import {
 } from '@woocommerce/base-context';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
+import { reloadPage } from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
  */
 import { CartBlockContext } from './context';
 import './style.scss';
-
-const reloadPage = () => void window.location.reload( true );
 
 const Cart = ( { children, attributes = {} } ) => {
 	const { hasDarkControls } = attributes;

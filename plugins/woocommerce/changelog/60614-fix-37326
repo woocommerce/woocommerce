@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Reduce the number of calls to `get_post_meta` in `WC_Product_Variation_Data_Store_CPT`.

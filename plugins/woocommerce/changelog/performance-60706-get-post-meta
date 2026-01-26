@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Reduce the number of calls to `get_post_meta` in order data stores

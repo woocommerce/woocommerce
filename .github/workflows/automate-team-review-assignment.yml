@@ -73,7 +73,7 @@ jobs:
               token: ${{ secrets.PR_ASSIGN_TOKEN }}
 
         - name: Assign reviewers for a teams PR
-          if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false }}
+          if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false && ! contains( github.event.pull_request.labels.*.name, 'Release' ) }}
           continue-on-error: ${{ ( github.event.pull_request.head.repo.fork && 'true' ) || 'false' }}
           uses: acq688/Request-Reviewer-For-Team-Action@fca1c60fd0504aef59bdc925f3902c8a2d8bce62 # v1.1
           with:

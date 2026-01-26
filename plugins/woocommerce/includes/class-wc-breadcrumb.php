@@ -204,7 +204,15 @@ class WC_Breadcrumb {
 			}
 		}
 
-		$this->add_crumb( get_the_title(), get_permalink() );
+		// On WC endpoints, get_the_title() returns the endpoint title (via wc_page_endpoint_title filter).
+		// Use post_title directly to avoid duplicates like "Orders / Orders" instead of "My Account / Orders".
+		$permalink = get_permalink();
+		if ( is_wc_endpoint_url() ) {
+			$this->add_crumb( $post->post_title, $permalink ? $permalink : '' );
+		} else {
+			$this->add_crumb( get_the_title(), $permalink ? $permalink : '' );
+		}
+
 		$this->endpoint_trail();
 	}
 
@@ -266,6 +274,10 @@ class WC_Breadcrumb {
 	protected function add_crumbs_category() {
 		$this_category = get_category( $GLOBALS['wp_query']->get_queried_object() );
 
+		if ( is_wp_error( $this_category ) || ! $this_category ) {
+			return;
+		}
+
 		if ( 0 !== intval( $this_category->parent ) ) {
 			$this->term_ancestors( $this_category->term_id, 'category' );
 		}
@@ -305,7 +317,9 @@ class WC_Breadcrumb {
 		$this_term = $GLOBALS['wp_query']->get_queried_object();
 		$taxonomy  = get_taxonomy( $this_term->taxonomy );
 
-		$this->add_crumb( $taxonomy->labels->name );
+		if ( 'product_brand' !== $this_term->taxonomy ) {
+			$this->add_crumb( $taxonomy->labels->name );
+		}
 
 		if ( 0 !== intval( $this_term->parent ) ) {
 			$this->term_ancestors( $this_term->term_id, $this_term->taxonomy );

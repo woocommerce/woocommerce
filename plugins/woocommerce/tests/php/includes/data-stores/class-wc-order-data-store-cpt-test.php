@@ -3,6 +3,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 
 //phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name.
 /**
@@ -11,6 +12,8 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  * @group order-query-tests
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
+	use CogsAwareUnitTestSuiteTrait;
+
 	/**
 	 * Store the COT state before the test.
 	 *
@@ -38,6 +41,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+		$this->disable_cogs_feature();
 		parent::tearDown();
 	}
 
@@ -819,5 +823,438 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		foreach ( $orders as $order ) {
 			$order->delete( true );
 		}
+	}
+
+	/**
+	 * Helper method to add a product with COGS value to an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param float    $cogs_value COGS value for the product.
+	 * @param int      $quantity Quantity of the product.
+	 */
+	private function add_product_with_cogs_to_order( WC_Order $order, float $cogs_value, int $quantity ) {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( $cogs_value );
+		$product->save();
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$item->set_quantity( $quantity );
+		$item->save();
+		$order->add_item( $item );
+	}
+
+	/**
+	 * Helper method to create a test data store with protected methods exposed as public.
+	 *
+	 * @return WC_Order_Data_Store_CPT Data store with public method overrides.
+	 */
+	private function get_test_data_store() {
+		// phpcs:disable Squiz.Commenting, Generic.CodeAnalysis.UselessOverridingMethod
+		return new class() extends WC_Order_Data_Store_CPT {
+			public function get_internal_meta_keys() {
+				return $this->internal_meta_keys;
+			}
+
+			public function update_order_meta_from_object( $order ) {
+				parent::update_order_meta_from_object( $order );
+			}
+		};
+		// phpcs:enable Squiz.Commenting, Generic.CodeAnalysis.UselessOverridingMethod
+	}
+
+	/**
+	 * @testDox Saving an order does not persist its Cost of Goods Sold total value if the feature is disabled.
+	 */
+	public function test_saving_order_does_not_save_cogs_value_if_cogs_disabled() {
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::set_cogs_total_value' );
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+	}
+
+	/**
+	 * @testDox Saving an order does not persist its Cost of Goods Sold total value if the feature is enabled but the order doesn't manage it.
+	 */
+	public function test_saving_order_does_not_save_cogs_value_if_order_has_no_cogs() {
+		$this->enable_cogs_feature();
+
+		// phpcs:disable Squiz.Commenting
+		$order = new class() extends WC_Order {
+			public function has_cogs(): bool {
+				return false;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+	}
+
+	/**
+	 * @testDox Saving an order persists its Cost of Goods Sold total value if the feature is enabled and the order manages it.
+	 */
+	public function test_saving_order_saves_cogs_value_if_not_zero_and_cogs_enabled() {
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		$this->assertEquals( 12.34, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		$order->set_cogs_total_value( 56.78 );
+		$order->save();
+
+		$this->assertEquals( 56.78, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		$order->set_cogs_total_value( 0 );
+		$order->save();
+
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+	}
+
+	/**
+	 * @testDox Loading an order reads its Cost of Goods Sold value from the database if the feature is enabled and the order manages it.
+	 *
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           [true, true]
+	 *           [false, false]
+	 *
+	 * @param bool $cogs_enabled True if the feature is enabled.
+	 * @param bool $order_has_cogs True if the order manages COGS.
+	 */
+	public function test_loading_order_loads_cogs_value_if_cogs_enabled( bool $cogs_enabled, bool $order_has_cogs ) {
+		if ( $cogs_enabled ) {
+			$this->enable_cogs_feature();
+		} elseif ( $order_has_cogs ) {
+			$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::get_cogs_total_value' );
+		}
+
+		$order = new WC_Order();
+		$order->save();
+
+		$saved_meta = get_post_meta( $order->get_id(), '_cogs_total_value', true );
+		if ( $saved_meta ) {
+			delete_post_meta( $order->get_id(), '_cogs_total_value' );
+		}
+
+		update_post_meta( $order->get_id(), '_cogs_total_value', '12.34' );
+
+		if ( $order_has_cogs ) {
+			$order2 = wc_get_order( $order->get_id() );
+		} else {
+			// phpcs:disable Squiz.Commenting
+			$order2 = new class($order->get_id()) extends WC_Order {
+				public function has_cogs(): bool {
+					return false;
+				}
+			};
+			// phpcs:enable Squiz.Commenting
+		}
+		$this->assertEquals( ( $cogs_enabled && $order_has_cogs ) ? 12.34 : 0, $order2->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox It's possible to modify the Cost of Goods Sold value that gets loaded from the database for an order using the 'woocommerce_load_order_cogs_value' filter.
+	 */
+	public function test_loaded_cogs_value_can_be_modified_via_filter() {
+		$received_filter_cogs_value = null;
+		$received_filter_item       = null;
+
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		add_filter(
+			'woocommerce_load_order_cogs_value',
+			function ( $cogs_value, $item ) use ( &$received_filter_cogs_value, &$received_filter_item ) {
+				$received_filter_cogs_value = $cogs_value;
+				$received_filter_item       = $item;
+				return 56.78;
+			},
+			10,
+			2
+		);
+
+		$order2 = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 12.34, $received_filter_cogs_value );
+		$this->assertSame( $order2, $received_filter_item );
+		$this->assertEquals( 56.78, $order2->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox It's possible to modify the Cost of Goods Sold value that gets persisted for an order using the 'woocommerce_save_order_cogs_value' filter, returning null suppresses the saving.
+	 *
+	 * @testWith [56.78, "56.78"]
+	 *           [null, "12.34"]
+	 *
+	 * @param mixed  $filter_return_value The value that the filter will return.
+	 * @param string $expected_saved_value The value that is expected to be persisted after the save attempt.
+	 */
+	public function test_saved_cogs_value_can_be_altered_via_filter_with_null_meaning_dont_save( $filter_return_value, string $expected_saved_value ) {
+		$received_filter_cogs_value = null;
+		$received_filter_item       = null;
+
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_cogs_total_value( 12.34 );
+		$order->save();
+
+		add_filter(
+			'woocommerce_save_order_cogs_value',
+			function ( $cogs_value, $item ) use ( &$received_filter_cogs_value, &$received_filter_item, $filter_return_value ) {
+				$received_filter_cogs_value = $cogs_value;
+				$received_filter_item       = $item;
+				return $filter_return_value;
+			},
+			10,
+			2
+		);
+
+		$order->set_cogs_total_value( 56.78 );
+		$order->save();
+
+		$this->assertEquals( 56.78, $received_filter_cogs_value );
+		$this->assertSame( $order, $received_filter_item );
+
+		$this->assertEquals( $expected_saved_value, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * @testDox COGS total value is correctly calculated and persisted when HPOS is disabled.
+	 */
+	public function test_cogs_total_value_calculated_and_persisted_with_cpt() {
+		$this->enable_cogs_feature();
+
+		$product1_cost  = 12.34;
+		$product1_qty   = 2;
+		$product2_cost  = 5.50;
+		$product2_qty   = 3;
+		$expected_total = ( $product1_cost * $product1_qty ) + ( $product2_cost * $product2_qty );
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product1_cost, $product1_qty );
+		$this->add_product_with_cogs_to_order( $order, $product2_cost, $product2_qty );
+
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		// Verify COGS is saved to database.
+		$this->assertEquals( $expected_total, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		// Verify COGS is loaded correctly when order is retrieved.
+		$loaded_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( $expected_total, $loaded_order->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox COGS total value is zero when order has no items with COGS.
+	 */
+	public function test_cogs_total_value_zero_when_no_cogs_items() {
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		// Verify no COGS meta is saved when value is zero.
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+
+		// Verify COGS value is zero when order is retrieved.
+		$loaded_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 0, $loaded_order->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox _cogs_total_value is included in internal meta keys to prevent it from showing as custom field.
+	 */
+	public function test_cogs_total_value_is_internal_meta() {
+		$data_store = $this->get_test_data_store();
+
+		$this->assertContains( '_cogs_total_value', $data_store->get_internal_meta_keys(), 'COGS total value should be in internal meta keys' );
+	}
+
+	/**
+	 * @testDox COGS value is synced via update_order_meta_from_object for compatibility mode.
+	 */
+	public function test_cogs_in_meta_key_to_props_for_sync() {
+		$this->enable_cogs_feature();
+
+		$product_cost  = 10.50;
+		$product_qty   = 2;
+		$initial_cogs  = $product_cost * $product_qty;
+		$modified_cogs = $initial_cogs * 2;
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product_cost, $product_qty );
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		$this->assertEquals( $initial_cogs, $order->get_cogs_total_value() );
+		$this->assertEquals( $initial_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		// Reload the order and modify COGS value to simulate HPOS order with different value.
+		$modified_order = wc_get_order( $order->get_id() );
+		$modified_order->set_cogs_total_value( $modified_cogs );
+
+		// Delete the post meta to simulate it not being synced yet.
+		delete_post_meta( $order->get_id(), '_cogs_total_value' );
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+
+		// Simulate what happens during compatibility mode backfill.
+		$data_store = $this->get_test_data_store();
+
+		// Call update_order_meta_from_object which should sync COGS.
+		$data_store->update_order_meta_from_object( $modified_order );
+
+		// Verify the COGS value was synced to the database.
+		$this->assertEquals( $modified_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		// Reload and verify.
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( $modified_cogs, $reloaded_order->get_cogs_total_value() );
+	}
+
+	/**
+	 * @testDox COGS value is synced during backfill via update_order_meta_from_object.
+	 */
+	public function test_cogs_synced_via_update_order_meta_from_object() {
+		$this->enable_cogs_feature();
+
+		$product_cost  = 15.75;
+		$product_qty   = 3;
+		$expected_cogs = $product_cost * $product_qty;
+
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product_cost, $product_qty );
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		$this->assertEquals( $expected_cogs, $order->get_cogs_total_value() );
+
+		// Verify it's in the database.
+		$this->assertEquals( $expected_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+
+		// Delete the COGS meta to simulate it not being synced yet.
+		delete_post_meta( $order->get_id(), '_cogs_total_value' );
+		$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_cogs_total_value' ) );
+
+		// Reload the order to get fresh state.
+		$fresh_order = wc_get_order( $order->get_id() );
+
+		// The fresh order will have 0 COGS since we deleted the meta.
+		// Set it to the expected value to simulate an HPOS order with COGS that needs to be synced.
+		$fresh_order->set_cogs_total_value( $expected_cogs );
+
+		// Create a test data store to access the protected method.
+		$data_store = $this->get_test_data_store();
+
+		// Call update_order_meta_from_object which should sync COGS.
+		$data_store->update_order_meta_from_object( $fresh_order );
+
+		// Verify COGS was synced.
+		$this->assertEquals( $expected_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
+	}
+
+	/**
+	 * @testDox Items without saved COGS metadata can calculate COGS from products.
+	 */
+	public function test_items_without_saved_cogs_calculate_from_product() {
+		$this->enable_cogs_feature();
+
+		$product_cost  = 15.00;
+		$product_qty   = 2;
+		$expected_cogs = $product_cost * $product_qty;
+
+		// Create an order with COGS and save it.
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product_cost, $product_qty );
+		$order->calculate_totals();
+		$order->save();
+
+		// Get the item and manually delete its _cogs_value metadata to simulate an item without saved COGS.
+		$items = $order->get_items();
+		$item  = reset( $items );
+		delete_metadata( 'order_item', $item->get_id(), '_cogs_value' );
+
+		// Reload the order.
+		$reloaded_order = wc_get_order( $order->get_id() );
+
+		// The item should not have a saved COGS value.
+		$reloaded_items = $reloaded_order->get_items();
+		$reloaded_item  = reset( $reloaded_items );
+
+		// When we call calculate_totals, it should calculate COGS from the product.
+		$reloaded_order->calculate_totals();
+
+		// Verify the COGS was calculated correctly.
+		$this->assertEquals( $expected_cogs, $reloaded_item->get_cogs_value(), 'Item without saved COGS should calculate from product' );
+		$this->assertEquals( $expected_cogs, $reloaded_order->get_cogs_total_value(), 'Order total should reflect calculated item COGS' );
+	}
+
+	/**
+	 * @testDox Refund items always recalculate COGS based on their negative quantity.
+	 */
+	public function test_refund_items_recalculate_cogs() {
+		$this->enable_cogs_feature();
+
+		$product_cost         = 20.00;
+		$product_qty          = 10;
+		$refund_qty           = 3;
+		$expected_order_cogs  = $product_cost * $product_qty;
+		$expected_refund_cogs = -( $product_cost * $refund_qty );
+
+		// Create a product with COGS and price.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $product_cost );
+		$product->set_cogs_value( $product_cost );
+		$product->save();
+
+		// Create an order with COGS.
+		$order = new WC_Order();
+		$order->add_product( $product, $product_qty );
+		$order->calculate_totals();
+		$order->save();
+
+		$this->assertEquals( $expected_order_cogs, $order->get_cogs_total_value() );
+
+		// Get the order item.
+		$order_items = array_values( $order->get_items( 'line_item' ) );
+		$order_item  = $order_items[0];
+
+		// Create a refund.
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $product_cost * $refund_qty,
+				'reason'     => 'testing',
+				'line_items' => array(
+					$order_item->get_id() => array(
+						'qty'          => $refund_qty,
+						'refund_total' => $product_cost * $refund_qty,
+					),
+				),
+			)
+		);
+
+		$this->assertNotInstanceOf( 'WP_Error', $refund, 'Refund creation should not return an error' );
+		$refund->save();
+
+		// Verify the refund has the correct COGS (negative value).
+		$this->assertEquals( $expected_refund_cogs, $refund->get_cogs_total_value(), 'Refund should have negative COGS' );
+
+		// Recalculate order totals and verify COGS is adjusted for the refund.
+		$order->calculate_totals();
+		$expected_final_cogs = $expected_order_cogs + $expected_refund_cogs;
+		$this->assertEquals( $expected_final_cogs, $order->get_cogs_total_value(), 'Order COGS should be reduced by refund amount' );
 	}
 }

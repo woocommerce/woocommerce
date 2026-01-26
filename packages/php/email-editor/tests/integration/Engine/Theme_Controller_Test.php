@@ -131,8 +131,9 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItCanTranslateFontSizeSlug(): void {
 		$this->assertEquals( '13px', $this->theme_controller->translate_slug_to_font_size( 'small' ) );
 		$this->assertEquals( '16px', $this->theme_controller->translate_slug_to_font_size( 'medium' ) );
-		$this->assertEquals( '28px', $this->theme_controller->translate_slug_to_font_size( 'large' ) );
-		$this->assertEquals( '42px', $this->theme_controller->translate_slug_to_font_size( 'x-large' ) );
+		$this->assertEquals( '24px', $this->theme_controller->translate_slug_to_font_size( 'large' ) );
+		$this->assertEquals( '32px', $this->theme_controller->translate_slug_to_font_size( 'x-large' ) );
+		$this->assertEquals( '40px', $this->theme_controller->translate_slug_to_font_size( 'xx-large' ) );
 		$this->assertEquals( 'unknown', $this->theme_controller->translate_slug_to_font_size( 'unknown' ) );
 	}
 

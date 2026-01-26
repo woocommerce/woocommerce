@@ -190,6 +190,8 @@ export enum CoreCollectionNames {
 	CROSS_SELLS = 'woocommerce/product-collection/cross-sells',
 	BY_CATEGORY = 'woocommerce/product-collection/by-category',
 	BY_TAG = 'woocommerce/product-collection/by-tag',
+	BY_BRAND = 'woocommerce/product-collection/by-brand',
+	CART_CONTENTS = 'woocommerce/product-collection/cart-contents',
 }
 
 export enum CoreFilterNames {

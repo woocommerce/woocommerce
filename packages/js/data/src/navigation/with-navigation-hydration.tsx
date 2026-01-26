@@ -4,7 +4,6 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { createElement, useEffect } from '@wordpress/element';
-import { SelectFromMap } from '@automattic/data-stores';
 import type { ComponentType } from 'react';
 import deprecated from '@wordpress/deprecated';
 
@@ -13,7 +12,7 @@ import deprecated from '@wordpress/deprecated';
  */
 import { STORE_NAME } from './constants';
 import { MenuItem } from './types';
-import { WPDataSelectors } from '../types';
+import { SelectFromMap, WPDataSelectors } from '../types';
 import * as selectors from './selectors';
 
 /**

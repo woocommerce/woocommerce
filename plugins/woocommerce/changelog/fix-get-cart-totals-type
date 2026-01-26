@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add string and int types to get_cart_contents_total method for strict_types envs

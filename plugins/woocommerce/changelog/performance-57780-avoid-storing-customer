@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Only store customer data in the session if it's not the default customer

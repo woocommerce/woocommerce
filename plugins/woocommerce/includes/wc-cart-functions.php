@@ -257,8 +257,7 @@ function wc_cart_totals_shipping_html() {
 				'show_package_details'     => count( $packages ) > 1,
 				'show_shipping_calculator' => is_cart() && apply_filters( 'woocommerce_shipping_show_shipping_calculator', $first, $i, $package ),
 				'package_details'          => implode( ', ', $product_names ),
-				/* translators: %d: shipping package number */
-				'package_name'             => apply_filters( 'woocommerce_shipping_package_name', ( ( $i + 1 ) > 1 ) ? sprintf( _x( 'Shipping %d', 'shipping packages', 'woocommerce' ), ( $i + 1 ) ) : _x( 'Shipping', 'shipping packages', 'woocommerce' ), $i, $package ),
+				'package_name'             => $package['package_name'],
 				'index'                    => $i,
 				'chosen_method'            => $chosen_method,
 				'formatted_destination'    => WC()->countries->get_formatted_address( $package['destination'], ', ' ),

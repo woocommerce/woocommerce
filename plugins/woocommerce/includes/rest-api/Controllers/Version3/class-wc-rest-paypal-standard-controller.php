@@ -186,6 +186,12 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 				}
 			}
 		}
+
+		// Re-apply shipping methods present on the order so totals are accurate.
+		$order_shipping_rate_id = $this->get_order_shipping_rate_id( $order );
+		if ( ! empty( $order_shipping_rate_id ) ) {
+			WC()->session->set( 'chosen_shipping_methods', array( $order_shipping_rate_id ) );
+		}
 	}
 
 	/**
@@ -246,7 +252,8 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 */
 	private function get_updated_shipping_options( $order, $selected_shipping_option ) {
 		WC()->cart->calculate_shipping();
-		$packages = WC()->shipping()->get_packages();
+		$packages               = WC()->shipping()->get_packages();
+		$order_shipping_rate_id = $this->get_order_shipping_rate_id( $order );
 
 		$has_selected_shipping_option = false;
 		$options                      = array();
@@ -258,7 +265,14 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 				}
 
 				$shipping_option_id = $rate->get_id();
-				$is_selected        = isset( $selected_shipping_option['id'] ) && $shipping_option_id === $selected_shipping_option['id'];
+				// If a selected shipping option is sent in the request, check if it matches the shipping option id.
+				// Otherwise, if the order has a shipping method, check if the rate id matches the shipping option id.
+				if ( isset( $selected_shipping_option['id'] ) ) {
+					$is_selected = $shipping_option_id === $selected_shipping_option['id'];
+				} else {
+					$is_selected = $shipping_option_id === $order_shipping_rate_id;
+				}
+
 				if ( $is_selected ) {
 					$has_selected_shipping_option = true;
 				}
@@ -281,6 +295,26 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		}
 
 		return $options;
+	}
+
+	/**
+	 * Get the shipping rate id from the order.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return string The shipping rate id.
+	 */
+	private function get_order_shipping_rate_id( $order ) {
+		$order_shipping_item = current( $order->get_items( 'shipping' ) ) ?? null;
+
+		if ( $order_shipping_item ) {
+			$method_id   = $order_shipping_item->get_method_id();
+			$instance_id = $order_shipping_item->get_instance_id();
+			$rate_id     = ( '' === $instance_id || null === $instance_id ) ? $method_id : "{$method_id}:{$instance_id}";
+
+			return $rate_id;
+		}
+
+		return '';
 	}
 
 	/**

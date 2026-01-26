@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Improve detection for invalid billing and shipping addresses in the checkout block

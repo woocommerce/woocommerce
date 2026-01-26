@@ -504,4 +504,47 @@ class CartCheckoutUtils {
 	public static function has_cart_page() {
 		return wc_get_page_permalink( 'cart', -1 ) !== -1;
 	}
+
+	/**
+	 * Get product IDs from a user's persistent cart.
+	 *
+	 * This method retrieves product IDs stored in the user's persistent cart meta.
+	 * It can be used for abandoned cart emails, cart-based product collections,
+	 * and other scenarios where cart products need to be retrieved for a user.
+	 *
+	 * @param int|null    $user_id    The user ID. If not provided, will attempt to look up by email.
+	 * @param string|null $user_email The user email. Used to lookup user if ID not provided.
+	 * @return array<int> Array of product IDs from the user's cart, or empty array if none found.
+	 */
+	public static function get_cart_product_ids_for_user( ?int $user_id, ?string $user_email ) {
+		if ( empty( $user_id ) && ! empty( $user_email ) ) {
+			$user = get_user_by( 'email', $user_email );
+			if ( $user ) {
+				$user_id = $user->ID;
+			}
+		}
+
+		if ( empty( $user_id ) ) {
+			return array();
+		}
+
+		$cart_meta = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+
+		if ( empty( $cart_meta ) || ! is_array( $cart_meta ) || empty( $cart_meta['cart'] ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array_map(
+						function ( $cart_item ) {
+							return isset( $cart_item['product_id'] ) ? intval( $cart_item['product_id'] ) : 0;
+						},
+						$cart_meta['cart']
+					)
+				)
+			)
+		);
+	}
 }

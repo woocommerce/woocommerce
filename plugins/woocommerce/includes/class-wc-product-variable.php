@@ -301,9 +301,28 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get an array of available variations for the current product.
 	 *
-	 * @param string $return Optional. The format to return the results in. Can be 'array' to return an array of variation data or 'objects' for the product objects. Default 'array'.
+	 * Important: The default 'array' return type is expensive for products with many variations.
+	 * It calls get_available_variation() for each variation, which processes HTML generation
+	 * (wc_get_stock_html, get_price_html), price calculations (wc_get_price_to_display),
+	 * image attachment lookups, and dimension/weight formatting - all passed through filters.
 	 *
-	 * @return array[]|WC_Product_Variation[]
+	 * Use 'objects' when you only need the WC_Product_Variation objects or a subset of the generated
+	 * output of ::get_available_variation(), avoiding unnecessary processing overhead.
+	 *
+	 * @since 2.4.0
+	 *
+	 * @param string $return Optional. The format to return the results in. Default 'array'.
+	 *                       - 'array': Returns fully processed variation data arrays. Each variation
+	 *                         is passed through get_available_variation() which generates HTML,
+	 *                         calculates display prices, and formats dimensions/weights. Use this
+	 *                         when you need the complete variation data for front-end display.
+	 *                       - 'objects': Returns WC_Product_Variation objects directly without
+	 *                         additional processing. Use this when you need to work with variation
+	 *                         objects and will call methods on them selectively.
+	 * @return array[]|WC_Product_Variation[] Array of variation data arrays or variation objects.
+	 *
+	 * @phpstan-param 'array'|'objects' $return
+	 * @phpstan-return ($return is 'array' ? array[] : WC_Product_Variation[])
 	 */
 	public function get_available_variations( $return = 'array' ) {
 		$variation_ids           = $this->get_children();

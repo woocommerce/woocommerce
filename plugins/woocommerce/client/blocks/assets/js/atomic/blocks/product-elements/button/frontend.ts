@@ -73,16 +73,22 @@ const productButtonStore = {
 
 			// Return the product quantity when the item is a non-variable product.
 			if ( products[ 0 ]?.type !== 'variation' ) {
-				return products[ 0 ]?.quantity || 0;
+				return products.reduce(
+					( acc, item ) => acc + item.quantity,
+					0
+				);
 			}
 
 			const selectedAttributes =
 				addToCartWithOptionsState?.selectedAttributes;
-			const selectedVariableProduct = products.find( ( item ) =>
+			const selectedVariableProducts = products.filter( ( item ) =>
 				doesCartItemMatchAttributes( item, selectedAttributes )
 			);
 
-			return selectedVariableProduct?.quantity || 0;
+			return selectedVariableProducts.reduce(
+				( acc, item ) => acc + item.quantity,
+				0
+			);
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();

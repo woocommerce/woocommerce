@@ -3,6 +3,8 @@
  * A class of utilities for dealing with orders.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
@@ -270,5 +272,15 @@ final class OrderUtil {
 			return 'no' === $uses_old_full_refund_data;
 		}
 		return version_compare( $db_version, '10.2.0', '>=' ) && 'no' === $uses_old_full_refund_data;
+	}
+
+	/**
+	 * Checks if the data store currently in use for orders is unknown (none of the ones managed by WooCommerce core).
+	 *
+	 * @return bool True if the data store currently in use for orders is neither the HPOS one nor the CPT one.
+	 */
+	public static function unknown_orders_data_store_in_use(): bool {
+		return ! self::custom_orders_table_usage_is_enabled() &&
+			( \WC_Order_Data_Store_CPT::class !== \WC_Data_Store::load( 'order' )->get_current_class_name() );
 	}
 }

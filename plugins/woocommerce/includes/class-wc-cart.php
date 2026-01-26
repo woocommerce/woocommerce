@@ -12,6 +12,10 @@
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\FraudProtection\BlockedSessionNotice;
+use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
@@ -1061,6 +1065,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 		try {
+			// Block add-to-cart if session is blocked by fraud protection.
+			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+				&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+				throw new Exception(
+					wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' )
+				);
+			}
+
 			$product_id   = absint( $product_id );
 			$variation_id = absint( $variation_id );
 
@@ -1312,10 +1324,12 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 			}
 
+			$item_was_already_in_cart = false;
 			// If cart_item_key is set, the item is already in the cart.
 			if ( $cart_item_key ) {
 				$new_quantity = $quantity + $this->cart_contents[ $cart_item_key ]['quantity'];
 				$this->set_quantity( $cart_item_key, $new_quantity, false );
+				$item_was_already_in_cart = true;
 			} else {
 				$cart_item_key = $cart_id;
 
@@ -1342,6 +1356,12 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
+			// Track cart event for fraud protection (only for newly added items).
+			if ( ! $item_was_already_in_cart && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				wc_get_container()->get( CartEventTracker::class )
+					->track_cart_item_added( $cart_item_key, (int) $product_id, (int) $quantity, $variation_id );
+			}
+
 			return $cart_item_key;
 
 		} catch ( Exception $e ) {
@@ -1360,12 +1380,28 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function remove_cart_item( $cart_item_key ) {
+		// Block remove if session is blocked by fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+			wc_add_notice(
+				wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' ),
+				'error'
+			);
+			return false;
+		}
+
 		if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
 			$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
 
 			unset( $this->removed_cart_contents[ $cart_item_key ]['data'] );
 
 			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
+
+			// Track cart event for fraud protection.
+			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				wc_get_container()->get( CartEventTracker::class )
+					->track_cart_item_removed( $cart_item_key, $this );
+			}
 
 			unset( $this->cart_contents[ $cart_item_key ] );
 
@@ -1389,6 +1425,12 @@ class WC_Cart extends WC_Legacy_Cart {
 			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
 
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
+
+			// Track cart event for fraud protection.
+			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				wc_get_container()->get( CartEventTracker::class )
+					->track_cart_item_restored( $cart_item_key, $this );
+			}
 
 			unset( $this->removed_cart_contents[ $cart_item_key ] );
 
@@ -1414,11 +1456,27 @@ class WC_Cart extends WC_Legacy_Cart {
 			return $this->remove_cart_item( $cart_item_key );
 		}
 
+		// Block quantity update if session is blocked by fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
+			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+			wc_add_notice(
+				wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' ),
+				'error'
+			);
+			return false;
+		}
+
 		// Update qty.
 		$old_quantity                                      = $this->cart_contents[ $cart_item_key ]['quantity'];
 		$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
 
 		do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity, $this );
+
+		// Track cart event for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CartEventTracker::class )
+				->track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $this );
+		}
 
 		if ( $refresh_totals ) {
 			$this->calculate_totals();
@@ -1579,7 +1637,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array of cart items
 	 */
 	public function get_shipping_packages() {
-		return apply_filters(
+		/**
+		 * Filters the shipping packages for the cart.
+		 *
+		 * @since 1.5.4
+		 * @param array $packages The shipping packages.
+		 * @return array The shipping packages.
+		 */
+		$shipping_packages = apply_filters(
 			'woocommerce_cart_shipping_packages',
 			array(
 				array(
@@ -1594,13 +1659,65 @@ class WC_Cart extends WC_Legacy_Cart {
 						'state'     => $this->get_customer()->get_shipping_state(),
 						'postcode'  => $this->get_customer()->get_shipping_postcode(),
 						'city'      => $this->get_customer()->get_shipping_city(),
-						'address'   => $this->get_customer()->get_shipping_address(),
-						'address_1' => $this->get_customer()->get_shipping_address(), // Provide both address and address_1 for backwards compatibility.
+						'address'   => $this->get_customer()->get_shipping_address(), // This is an alias of address_1, provided for backwards compatibility.
+						'address_1' => $this->get_customer()->get_shipping_address_1(),
 						'address_2' => $this->get_customer()->get_shipping_address_2(),
 					),
 					'cart_subtotal'   => $this->get_displayed_subtotal(),
 				),
 			)
+		);
+
+		// Return empty array if invalid object supplied by the filter or no packages.
+		if ( ! is_array( $shipping_packages ) || empty( $shipping_packages ) ) {
+			return array();
+		}
+
+		// Remove any invalid packages before adding package IDs.
+		$shipping_packages = array_filter(
+			$shipping_packages,
+			function ( $package ) {
+				return ! empty( $package ) && is_array( $package );
+			}
+		);
+
+		// Add package ID and package name to each package after the filter is applied.
+		$index = 1;
+		foreach ( $shipping_packages as $key => $package ) {
+			$shipping_packages[ $key ]['package_id']   = $package['package_id'] ?? $key;
+			$shipping_packages[ $key ]['package_name'] = $this->get_shipping_package_name( $shipping_packages[ $key ], $index );
+			++$index;
+		}
+
+		return $shipping_packages;
+	}
+
+	/**
+	 * Get the package name.
+	 *
+	 * @param array $package Shipping package data.
+	 * @param int   $index Package number.
+	 * @return string
+	 */
+	private function get_shipping_package_name( $package, $index ) {
+		/**
+		 * Filters the shipping package name.
+		 *
+		 * @since 4.3.0
+		 * @param string $shipping_package_name Shipping package name.
+		 * @param string $package_id Shipping package ID.
+		 * @param array $package Shipping package from WooCommerce.
+		 * @return string Shipping package name.
+		 */
+		return apply_filters(
+			'woocommerce_shipping_package_name',
+			sprintf(
+				/* translators: %d: shipping package number */
+				_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
+				$index
+			),
+			$package['package_id'],
+			$package
 		);
 	}
 
@@ -1647,6 +1764,16 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
+			// If local pickup is enabled, shipping should be shown so that pickup locations are visible before address entry.
+			if ( LocalPickupUtils::is_local_pickup_enabled() ) {
+				/**
+				 * This filter is documented below.
+				 *
+				 * @since 2.7.0
+				 */
+				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
+			}
+
 			if ( 'shortcode' === $this->cart_context ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
@@ -1686,11 +1813,6 @@ class WC_Cart extends WC_Legacy_Cart {
 					return false;
 				}
 			} else {
-				// If local pickup is enabled, shipping should be shown so that pickup locations are visible before address entry.
-				if ( LocalPickupUtils::is_local_pickup_enabled() ) {
-					return true;
-				}
-
 				$customer = $this->get_customer();
 
 				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {

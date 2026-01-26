@@ -15,6 +15,8 @@ export interface WithInjectedProductVariations {
 	expandedProduct: number | null;
 	variations: Record< number, ProductResponseItem[] >;
 	variationsLoading: boolean;
+	onLoadMoreVariations?: () => void;
+	totalVariations?: Record< number, number | null >;
 }
 
 export interface WithInjectedSearchedProducts {

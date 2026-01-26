@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Limit autocomplete suggestions to 5 and sanitize output in asset data registry

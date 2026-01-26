@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Don't recalculate coupons on order save, which can cause recalculation of totals and taxes when nothing changed

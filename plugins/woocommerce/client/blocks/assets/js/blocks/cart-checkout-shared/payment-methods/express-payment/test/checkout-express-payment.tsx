@@ -22,22 +22,16 @@ jest.mock( '@woocommerce/base-context', () => ( {
 	},
 } ) );
 
-jest.mock( '@woocommerce/blocks-components', () => ( {
-	Title: jest.fn( ( { children, className, headingLevel } ) => (
-		<div
-			data-testid="title"
-			className={ className }
-			data-heading-level={ headingLevel }
-		>
-			{ children }
-		</div>
-	) ),
-	StoreNoticesContainer: jest.fn( ( { context } ) => (
-		<div data-testid="notices" data-context={ context }>
-			Store Notices
-		</div>
-	) ),
-} ) );
+jest.mock( '@woocommerce/blocks-components', () => {
+	return {
+		...jest.requireActual( '@woocommerce/blocks-components' ),
+		StoreNoticesContainer: jest.fn( ( { context } ) => (
+			<div data-testid="notices" data-context={ context }>
+				Store Notices
+			</div>
+		) ),
+	};
+} );
 
 jest.mock( '@woocommerce/base-components/skeleton', () => ( {
 	Skeleton: jest.fn( ( { width, height, ariaMessage } ) => (
@@ -59,12 +53,20 @@ jest.mock( '../../express-payment-methods', () =>
 );
 
 jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
 	useSelect: jest.fn(),
 	dispatch: jest.fn(),
 } ) );
 
-jest.mock( '@woocommerce/settings', () => ( {
-	CURRENT_USER_IS_ADMIN: false,
+jest.mock( '@woocommerce/settings', () => {
+	return {
+		...jest.requireActual( '@woocommerce/settings' ),
+		CURRENT_USER_IS_ADMIN: false,
+	};
+} );
+
+jest.mock( '@wordpress/editor', () => ( {
+	store: {},
 } ) );
 
 const mockUseSelect = useSelect as jest.MockedFunction< typeof useSelect >;
@@ -375,13 +377,9 @@ describe( 'CheckoutExpressPayment', () => {
 
 			render( <CheckoutExpressPayment /> );
 
-			const titleContainer = screen.getByTestId( 'title' );
-			const titleSkeleton = screen.getAllByLabelText(
-				'Loading express payment area…'
-			);
-
-			expect( titleContainer ).toBeInTheDocument();
-			expect( titleSkeleton ).toHaveLength( 1 );
+			expect(
+				screen.getByLabelText( 'Loading express payment area…' )
+			).toBeInTheDocument();
 		} );
 
 		it( 'should render 1 skeleton button when calculating a partial update if express payment method is not active', () => {

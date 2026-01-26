@@ -453,6 +453,7 @@ class FulfillmentUtils {
 					'label' => $shipping_provider_instance->get_name(),
 					'icon'  => $shipping_provider_instance->get_icon(),
 					'value' => $shipping_provider_instance->get_key(),
+					'url'   => $shipping_provider_instance->get_tracking_url( '__PLACEHOLDER__' ),
 				);
 			}
 			if ( is_object( $shipping_provider ) && $shipping_provider instanceof AbstractShippingProvider ) {
@@ -460,6 +461,7 @@ class FulfillmentUtils {
 					'label' => $shipping_provider->get_name(),
 					'icon'  => $shipping_provider->get_icon(),
 					'value' => $shipping_provider->get_key(),
+					'url'   => $shipping_provider->get_tracking_url( '__PLACEHOLDER__' ),
 				);
 			}
 		}

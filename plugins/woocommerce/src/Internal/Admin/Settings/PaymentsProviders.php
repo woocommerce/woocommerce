@@ -35,6 +35,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Payment_Gateway;
 use WC_Gateway_BACS;
@@ -79,6 +80,17 @@ class PaymentsProviders {
 	public const CATEGORY_BNPL             = 'bnpl';
 	public const CATEGORY_CRYPTO           = 'crypto';
 	public const CATEGORY_PSP              = 'psp';
+
+	/*
+	 * The provider link types.
+	 *
+	 * These are hints for the UI to determine if and how to display the link.
+	 */
+	public const LINK_TYPE_SUPPORT = 'support';
+	public const LINK_TYPE_DOCS    = 'documentation';
+	public const LINK_TYPE_ABOUT   = 'about';
+	public const LINK_TYPE_TERMS   = 'terms';
+	public const LINK_TYPE_PRICING = 'pricing';
 
 	/**
 	 * The map of gateway IDs to their respective provider classes.
@@ -195,14 +207,23 @@ class PaymentsProviders {
 	private ExtensionSuggestions $extension_suggestions;
 
 	/**
+	 * The LegacyProxy instance.
+	 *
+	 * @var LegacyProxy
+	 */
+	private LegacyProxy $proxy;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
+	 * @param LegacyProxy          $proxy                         The LegacyProxy instance.
 	 *
 	 * @internal
 	 */
-	final public function init( ExtensionSuggestions $payment_extension_suggestions ): void {
+	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy ): void {
 		$this->extension_suggestions = $payment_extension_suggestions;
+		$this->proxy                 = $proxy;
 	}
 
 	/**
@@ -221,6 +242,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway objects list.
 	 */
 	public function get_payment_gateways( bool $for_display = true, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
 			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
@@ -285,6 +309,9 @@ class PaymentsProviders {
 	 * @return array The processed payment gateways list.
 	 */
 	public function remove_shell_payment_gateways( array $payment_gateways, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways, $country_code );
 		return array_filter(
 			$payment_gateways,
@@ -339,7 +366,7 @@ class PaymentsProviders {
 		/**
 		 * The provider class for the gateway.
 		 *
-		 * @var PaymentGateway|null $provider_class
+		 * @var class-string<PaymentGateway>|null $provider_class
 		 */
 		$provider_class = null;
 		if ( isset( $this->payment_gateways_providers_class_map[ $gateway_id ] ) ) {
@@ -359,16 +386,31 @@ class PaymentsProviders {
 			}
 		}
 
+		// Check that the provider class extends the PaymentGateway class.
+		if ( ! is_null( $provider_class ) && ! is_subclass_of( $provider_class, PaymentGateway::class ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: Gateway ID. */
+					esc_html__( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+					$gateway_id
+				),
+				'10.4.0'
+			);
+			// Return the generic provider as a fallback.
+			$provider_class = null;
+		}
+
 		// If the gateway ID is not mapped to a provider class, return the generic provider.
 		if ( is_null( $provider_class ) ) {
 			if ( ! isset( $this->instances['generic'] ) ) {
-				$this->instances['generic'] = new PaymentGateway();
+				$this->instances['generic'] = new PaymentGateway( $this->proxy );
 			}
 
 			return $this->instances['generic'];
 		}
 
-		$this->instances[ $gateway_id ] = new $provider_class();
+		$this->instances[ $gateway_id ] = new $provider_class( $this->proxy );
 
 		return $this->instances[ $gateway_id ];
 	}
@@ -389,23 +431,36 @@ class PaymentsProviders {
 		/**
 		 * The provider class for the payment extension suggestion (PES).
 		 *
-		 * @var PaymentGateway|null $provider_class
+		 * @var class-string<PaymentGateway>|null $provider_class
 		 */
 		$provider_class = null;
 		if ( isset( $this->payment_extension_suggestions_providers_class_map[ $pes_id ] ) ) {
-			$provider_class = $this->payment_extension_suggestions_providers_class_map[ $pes_id ];
+			if ( ! is_subclass_of( $this->payment_extension_suggestions_providers_class_map[ $pes_id ], PaymentGateway::class ) ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: Payment extension suggestion ID. */
+						esc_html__( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+						$pes_id
+					),
+					'10.4.0'
+				);
+				// Return the generic provider as a fallback.
+			} else {
+				$provider_class = $this->payment_extension_suggestions_providers_class_map[ $pes_id ];
+			}
 		}
 
 		// If the gateway ID is not mapped to a provider class, return the generic provider.
 		if ( is_null( $provider_class ) ) {
 			if ( ! isset( $this->instances['generic'] ) ) {
-				$this->instances['generic'] = new PaymentGateway();
+				$this->instances['generic'] = new PaymentGateway( $this->proxy );
 			}
 
 			return $this->instances['generic'];
 		}
 
-		$this->instances[ $pes_id ] = new $provider_class();
+		$this->instances[ $pes_id ] = new $provider_class( $this->proxy );
 
 		return $this->instances[ $pes_id ];
 	}
@@ -421,6 +476,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway details.
 	 */
 	public function get_payment_gateway_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		return $this->enhance_payment_gateway_details(
 			$this->get_payment_gateway_base_details( $payment_gateway, $payment_gateway_order, $country_code ),
 			$payment_gateway,
@@ -439,6 +497,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway base details.
 	 */
 	public function get_payment_gateway_base_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_details( $payment_gateway, $payment_gateway_order, $country_code );
@@ -526,6 +587,9 @@ class PaymentsProviders {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_extension_suggestions( string $location, string $context = '' ): array {
+		// Normalize the location to uppercase.
+		$location = strtoupper( $location );
+
 		$preferred_psp         = null;
 		$preferred_apm         = null;
 		$preferred_offline_psp = null;
@@ -606,10 +670,16 @@ class PaymentsProviders {
 			}
 
 			// If WooPayments or Stripe is active, we don't suggest other BNPLs.
+			// Note: Affirm is available in the UK even with WooPayments or Stripe active
+			// because Stripe does not support it there, yet.
 			if ( ExtensionSuggestions::TYPE_BNPL === $extension['_type'] &&
 				(
 					in_array( ExtensionSuggestions::STRIPE, $active_extensions, true ) ||
 					in_array( ExtensionSuggestions::WOOPAYMENTS, $active_extensions, true )
+				) &&
+				! (
+					ExtensionSuggestions::AFFIRM === $extension['id'] &&
+					'GB' === $location
 				)
 			) {
 				continue;
@@ -691,6 +761,9 @@ class PaymentsProviders {
 	 * @return ?array The payment extension suggestion details, or null if not found.
 	 */
 	public function get_extension_suggestion_by_plugin_slug( string $slug, string $country_code = '' ): ?array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$suggestion = $this->extension_suggestions->get_by_plugin_slug( $slug, $country_code, Payments::SUGGESTIONS_CONTEXT );
 		if ( ! is_null( $suggestion ) ) {
 			// Enhance the suggestion details.
@@ -1215,13 +1288,13 @@ class PaymentsProviders {
 				$gateway_details['image'] = $suggestion['image'];
 			}
 
-			if ( empty( $gateway_details['links'] ) ) {
+			if ( empty( $gateway_details['links'] ) && ! empty( $suggestion['links'] ) ) {
 				$gateway_details['links'] = $suggestion['links'];
 			}
-			if ( empty( $gateway_details['tags'] ) ) {
+			if ( empty( $gateway_details['tags'] ) && ! empty( $suggestion['tags'] ) ) {
 				$gateway_details['tags'] = $suggestion['tags'];
 			}
-			if ( empty( $gateway_details['plugin'] ) ) {
+			if ( empty( $gateway_details['plugin'] ) && ! empty( $suggestion['plugin'] ) ) {
 				$gateway_details['plugin'] = $suggestion['plugin'];
 			}
 			if ( empty( $gateway_details['_incentive'] ) && ! empty( $suggestion['_incentive'] ) ) {
@@ -1233,14 +1306,14 @@ class PaymentsProviders {
 		}
 
 		// Get the gateway's corresponding plugin details.
-		$plugin_data = PluginsHelper::get_plugin_data( $plugin_slug );
+		$plugin_data = $this->proxy->call_static( PluginsHelper::class, 'get_plugin_data', $plugin_slug );
 		if ( ! empty( $plugin_data ) ) {
 			// If there are no links, try to get them from the plugin data.
 			if ( empty( $gateway_details['links'] ) ) {
 				if ( is_array( $plugin_data ) && ! empty( $plugin_data['PluginURI'] ) ) {
 					$gateway_details['links'] = array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => self::LINK_TYPE_ABOUT,
 							'url'   => esc_url( $plugin_data['PluginURI'] ),
 						),
 					);
@@ -1250,7 +1323,7 @@ class PaymentsProviders {
 					// Fallback to constructing the WPORG plugin URI from the normalized plugin slug.
 					$gateway_details['links'] = array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => self::LINK_TYPE_ABOUT,
 							'url'   => 'https://wordpress.org/plugins/' . $normalized_plugin_slug,
 						),
 					);
@@ -1321,12 +1394,12 @@ class PaymentsProviders {
 			// This way we handle cases where there are multiple variations installed and one is active.
 			$found = false;
 			foreach ( $plugin_slug_variations as $plugin_slug ) {
-				if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
+				if ( $this->proxy->call_static( PluginsHelper::class, 'is_plugin_active', $plugin_slug ) ) {
 					$found                                    = true;
 					$extension_suggestion['plugin']['status'] = self::EXTENSION_ACTIVE;
 					// Make sure we put in the actual slug and file path that we found.
 					$extension_suggestion['plugin']['slug'] = $plugin_slug;
-					$extension_suggestion['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+					$extension_suggestion['plugin']['file'] = $this->proxy->call_static( PluginsHelper::class, 'get_plugin_path_from_slug', $plugin_slug );
 					// Sanity check.
 					if ( ! is_string( $extension_suggestion['plugin']['file'] ) ) {
 						$extension_suggestion['plugin']['file'] = '';
@@ -1339,11 +1412,11 @@ class PaymentsProviders {
 			}
 			if ( ! $found ) {
 				foreach ( $plugin_slug_variations as $plugin_slug ) {
-					if ( PluginsHelper::is_plugin_installed( $plugin_slug ) ) {
+					if ( $this->proxy->call_static( PluginsHelper::class, 'is_plugin_installed', $plugin_slug ) ) {
 						$extension_suggestion['plugin']['status'] = self::EXTENSION_INSTALLED;
 						// Make sure we put in the actual slug and file path that we found.
 						$extension_suggestion['plugin']['slug'] = $plugin_slug;
-						$extension_suggestion['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+						$extension_suggestion['plugin']['file'] = $this->proxy->call_static( PluginsHelper::class, 'get_plugin_path_from_slug', $plugin_slug );
 						// Sanity check.
 						if ( ! is_string( $extension_suggestion['plugin']['file'] ) ) {
 							$extension_suggestion['plugin']['file'] = '';

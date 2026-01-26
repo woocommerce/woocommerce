@@ -51,6 +51,10 @@ export const changelogCommand = new Command( 'changelog' )
 		'Append changelog to the existing one instead of replacing it.',
 		false
 	)
+	.option(
+		'-ga --github-actor <githubActor>',
+		'Github actor to use for the changelog.'
+	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options: Options ) => {
 		const { owner, name, version, branch, devRepoPath } = options;

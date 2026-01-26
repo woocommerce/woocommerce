@@ -9,6 +9,9 @@ import attributes from './fixtures/attributes';
 import tabs from './data/tabs';
 import { waitForGlobalAttributesLoaded } from './helpers/wait-for-global-attributes-loaded';
 import { expect, tags } from '../../../fixtures/fixtures';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
+
+skipTestsForDeprecatedFeature();
 
 const {
 	createVariableProduct,

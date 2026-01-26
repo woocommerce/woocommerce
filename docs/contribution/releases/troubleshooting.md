@@ -19,6 +19,13 @@ This page provides guidance for troubleshooting and recovering from issues that 
 
 ⚠️ _Do not re-run any workflows until you understand the cause of the failure._ Re-running without fixing the root issue can make things more complicated.
 
+### CI is failing on a release-related PR
+
+During the release process, you may encounter CI test failures on release-related PRs. These failures sometimes occur because test fixes were merged to trunk but not backported to the release branch before it was cut.
+
+1. **Identify the cause**: Check if the failing tests pass on trunk. If they do, the fix likely needs to be backported.
+2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
+3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel. The "Heart of Gold - Flux" team can assist with resolving CI issues that block release work.
 
 ### Something looks wrong in the final release ZIP. Can I start over? {#can-i-start-over-id}
 
@@ -39,31 +46,22 @@ If, after downloading and unzipping the generated artifact, something seems off 
 **Once you know which step failed,** re-run only that step as described in the [Building & Publishing guide](/docs/contribution/releases/building-and-publishing). Make sure to run skipped workflows in the correct order and double-check all configuration (version number, release type, etc.) before proceeding.
 
 
-### A serious bug was detected during internal checks / monitoring
+### A serious bug was detected during internal checks / monitoring {#deploy-serious-bug}
 
-If you find a serious bug during internal checks or monitoring **before** the release is marked stable on WordPress.org:
+For RC and stable releases, deploying to our staging environment and monitoring for errors is required before the release is made publicly available. If a serious bug is detected during this monitoring period, follow these steps:
 
-- Pause the release process immediately.
-- Coordinate with the relevant engineering team(s) to develop a fix. The fix should be shipped in a subsequent patch release.
-- Do not publish the draft GitHub release for this version, but also, **do not delete** the existing draft release or tag.
-- For more details on what to do with skipped versions, see [the section below](#version-skipped-id).
+1. **Request a revert** of the deploy in the staging environment.
+2. **Pause the release process** immediately and do not continue with any remaining steps in the tracking issue.
+3. **Update the tracking issue** to reflect that the release is blocked, including details about the bug.
+4. **Do not publish** any of the draft GitHub releases that were created, but also **do not delete** them. They will be published later along with the version that passes validation.
+5. **Coordinate with the relevant engineering team(s)** to develop a fix.
+6. **Involve Developer Advocacy** if the release schedule needs to be adjusted or communicated publicly ([read more on delays below](#release-delay)).
 
+#### How to proceed once the bug fix is merged into the release branch?
 
-### A version was skipped due to a bug. {#version-skipped-id}
-
-If a bug forces you to skip marking a version as stable on WordPress.org:
-
-- Notify the relevant engineering team(s) so they're aware and can provide an ETA for a fix.
-- Loop in **Dev Advocacy** so they can help with public communications.
-- If the bug is found on Monday and a fix won't be ready for Tuesday, work with Dev Advocacy to announce a delay. Read more [on delays below](#release-delay).
-
-On the Release mechanics side:
-
-- Merge any auto-generated PRs that should be merged, as if the release had been marked stable.
-- Do not delete any draft GitHub releases or tags for the problematic version.
-- After a fixed release is deployed and marked as stable:
-    - Publish all GitHub releases for any skipped versions, in order.
-    - Only mark the actual valid release as "latest release".
+1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`). Do not reuse the existing tracking issue.
+2. **Follow the release procedure as normal** for the new version.
+3. **Publish all draft releases** for the affected version series. Even if the prior version wasn't made publicly available, it must be published along with the valid version. Each version will have its own changelog section.
 
 ### A critical bug surfaced after the release was marked stable on WordPress.org
 

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Admin\Features\Features;
 
@@ -44,6 +45,7 @@ final class AssetsController {
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_style_dependencies' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_wc_entities' ), 100 );
 		add_filter( 'js_do_concat', array( $this, 'skip_boost_minification_for_cart_checkout' ), 10, 2 );
 
 		if ( Features::is_enabled( 'experimental-iapi-runtime' ) ) {
@@ -96,6 +98,7 @@ final class AssetsController {
 		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
 
 		$this->api->register_script( 'wc-types', $this->api->get_block_asset_build_path( 'wc-types' ), array(), false );
+		$this->api->register_script( 'wc-entities', 'assets/client/blocks/wc-entities.js', array(), false );
 		$this->api->register_script( 'wc-blocks-middleware', 'assets/client/blocks/wc-blocks-middleware.js', array(), false );
 		$this->api->register_script( 'wc-blocks-data-store', 'assets/client/blocks/wc-blocks-data.js', array( 'wc-blocks-middleware' ) );
 		$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), array(), false );
@@ -259,12 +262,12 @@ final class AssetsController {
 			return null;
 		}
 
-		$cache = get_site_transient( 'woocommerce_block_asset_resource_hints' );
+		$cache = get_transient( 'woocommerce_block_asset_resource_hints' );
 
 		$current_version = array(
-			'woocommerce' => WOOCOMMERCE_VERSION,
+			'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 			'wordpress'   => get_bloginfo( 'version' ),
-			'site_url'    => wp_guess_url(),
+			'site_url'    => site_url(),
 		);
 
 		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
@@ -285,14 +288,14 @@ final class AssetsController {
 		$updated = array(
 			'files'   => $cache ?? array(),
 			'version' => array(
-				'woocommerce' => WOOCOMMERCE_VERSION,
+				'woocommerce' => Constants::get_constant( 'WC_VERSION' ),
 				'wordpress'   => get_bloginfo( 'version' ),
-				'site_url'    => wp_guess_url(),
+				'site_url'    => site_url(),
 			),
 		);
 
 		$updated['files'][ $filename ] = $data;
-		set_site_transient( 'woocommerce_block_asset_resource_hints', $updated, WEEK_IN_SECONDS );
+		set_transient( 'woocommerce_block_asset_resource_hints', $updated, WEEK_IN_SECONDS );
 	}
 
 	/**
@@ -520,5 +523,12 @@ final class AssetsController {
 
 			}
 		}
+	}
+
+	/**
+	 * Enqueue the wc-entities script.
+	 */
+	public function enqueue_wc_entities() {
+		wp_enqueue_script( 'wc-entities' );
 	}
 }

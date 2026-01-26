@@ -28,7 +28,7 @@ export const RatePrice = ( {
 		? parseInt( maxRate.price, 10 ) + parseInt( maxRate.taxes, 10 )
 		: parseInt( maxRate.price, 10 );
 	const priceElement =
-		minRatePrice === 0 ? (
+		minRatePrice === 0 && maxRatePrice === 0 ? (
 			<em>{ __( 'free', 'woocommerce' ) }</em>
 		) : (
 			<FormattedMonetaryAmount
