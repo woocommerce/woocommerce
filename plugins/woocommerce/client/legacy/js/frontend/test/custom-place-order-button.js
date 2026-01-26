@@ -150,6 +150,24 @@ describe( 'Custom Place Order Button API', () => {
 				'wc.customPlaceOrderButton.register: gatewayId must be a non-empty string'
 			);
 
+			window.wc.customPlaceOrderButton.register( 'test-gateway', null );
+
+			expect( consoleSpy ).toHaveBeenLastCalledWith(
+				'wc.customPlaceOrderButton.register: config must be an object'
+			);
+
+			window.wc.customPlaceOrderButton.register( 'test-gateway', undefined );
+
+			expect( consoleSpy ).toHaveBeenLastCalledWith(
+				'wc.customPlaceOrderButton.register: config must be an object'
+			);
+
+			window.wc.customPlaceOrderButton.register( 'test-gateway', 'not-an-object' );
+
+			expect( consoleSpy ).toHaveBeenLastCalledWith(
+				'wc.customPlaceOrderButton.register: config must be an object'
+			);
+
 			consoleSpy.mockRestore();
 		} );
 
