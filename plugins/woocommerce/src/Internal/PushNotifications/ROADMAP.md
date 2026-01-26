@@ -134,7 +134,7 @@ This library will be in the `src/Internal` directory and is not intended to be u
   - Auth: user-identifying token
 
 - **Unregister token:**
-  - Endpoint: `DELETE /wp-json/wc-push-notifications/push-tokens`
+  - Endpoint: `DELETE /wp-json/wc-push-notifications/push-tokens/{id}`
   - Auth: user-identifying token
 
 - **Get notification preferences:**
