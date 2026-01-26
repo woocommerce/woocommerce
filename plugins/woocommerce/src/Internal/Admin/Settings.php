@@ -308,6 +308,11 @@ class Settings {
 			return $settings;
 		}
 
+		// If the settings page has no renderable fields, return the settings.
+		if ( ! ReactSettingsSchema::has_renderable_fields( $current_tab, $current_section, $settings_definitions, $settings_page ) ) {
+			return $settings;
+		}
+
 		$response   = ReactSettingsSchema::build_response( $current_tab, $current_section, $settings_definitions, $settings_page );
 		$payload    = ReactSettingsSchema::get_payload_path( $current_tab, $current_section );
 		$settings   = $this->set_nested_settings_value( $settings, $payload, $response );
