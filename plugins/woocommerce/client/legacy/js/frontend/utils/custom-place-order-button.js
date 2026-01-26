@@ -23,7 +23,7 @@
 		}
 		var style = document.createElement( 'style' );
 		style.id = styleId;
-		style.textContent = '.has-custom-place-order-button #place_order { display: none !important; }';
+		style.textContent = 'form.has-custom-place-order-button #place_order { display: none !important; }';
 		document.head.appendChild( style );
 	} )();
 
