@@ -32,6 +32,14 @@ jQuery( function ( $ ) {
 				return new Promise( function ( resolve ) {
 					var hasError = false;
 
+					// On a "normal" shortcode checkout page, the page validates this server-side only (not via validate_field).
+					// We do client-side validation here for a better UX with custom place order buttons.
+					// Clearing any stale invalid state before re-validating, to ensure a clean slate.
+					var $termsCheckbox = $form.find( 'input[name="terms"]:visible' );
+					if ( $termsCheckbox.length ) {
+						$termsCheckbox.closest( '.form-row' ).removeClass( 'woocommerce-invalid' );
+					}
+
 					// Trigger field-level validation (which adds `.woocommerce-invalid` to invalid fields)
 					$form.find( '.input-text, select, input:checkbox' ).trigger( 'validate' );
 
@@ -62,11 +70,11 @@ jQuery( function ( $ ) {
 						}
 					} );
 
-					// Check terms checkbox if visible and not checked
-					var $uncheckedTerms = $form.find( 'input[name="terms"]:visible:not(:checked)' );
-					if ( $uncheckedTerms.length ) {
+					// Check terms checkbox - this is our client-side validation for better UX
+					// (WC Core only validates terms server-side)
+					if ( $termsCheckbox.length && ! $termsCheckbox.is( ':checked' ) ) {
 						hasError = true;
-						$uncheckedTerms.closest( '.form-row' ).addClass( 'woocommerce-invalid' );
+						$termsCheckbox.closest( '.form-row' ).addClass( 'woocommerce-invalid' );
 					}
 
 					// Scroll to the first invalid field in DOM order
