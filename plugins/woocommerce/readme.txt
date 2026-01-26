@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.5.0-beta.2 2026-XX-XX =
+= 10.5.0-beta.2 2026-01-26 =
 
 **WooCommerce**
 
@@ -235,6 +235,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Update the email content block to display the correct information. [#62010](https://github.com/woocommerce/woocommerce/pull/62010)
 * Fix - Update woocommerce_block_asset_resource_hints to work per-site, rather than across the network on multisite instances [#62211](https://github.com/woocommerce/woocommerce/pull/62211)
 * Fix - Use WordPress core Accordion block in Product Details block for WP 6.9+, with fallback for older versions. [#62339](https://github.com/woocommerce/woocommerce/pull/62339)
+* Fix - Ensure there's no deprecation warning about deprecated feature flags when plugins are activated. [#62939](https://github.com/woocommerce/woocommerce/pull/62939)
+* Fix - Prevent PHP warnings when accessing templates without content [#62909](https://github.com/woocommerce/woocommerce/pull/62909)
 * Add - Add a basic RestApiCache trait [#61798](https://github.com/woocommerce/woocommerce/pull/61798)
 * Add - Add ability to hide products from Point of Sale. [#62534](https://github.com/woocommerce/woocommerce/pull/62534)
 * Add - Add analytics-scheduled-import feature flag to control scheduled analytics imports feature [#62149](https://github.com/woocommerce/woocommerce/pull/62149)

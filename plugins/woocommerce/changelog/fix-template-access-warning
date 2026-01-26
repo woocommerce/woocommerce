@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent PHP warnings when accessing templates without content
