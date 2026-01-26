@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Products: defer publishing the 'product_add_publish' Tracks-event when importing products.

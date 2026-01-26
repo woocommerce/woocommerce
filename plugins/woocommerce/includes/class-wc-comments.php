@@ -45,8 +45,9 @@ class WC_Comments {
 		add_action( 'wp_update_comment_count', array( __CLASS__, 'clear_transients' ) );
 
 		// Secure order notes.
-		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ), 10, 1 );
+		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_order_comments' ) );
 		add_filter( 'comment_feed_where', array( __CLASS__, 'exclude_order_comments_from_feed_where' ) );
+		add_filter( 'akismet_excluded_comment_types', array( __CLASS__, 'akismet_excluded_comment_types' ) );
 
 		// Secure webhook comments.
 		add_filter( 'comments_clauses', array( __CLASS__, 'exclude_webhook_comments' ), 10, 1 );
@@ -119,6 +120,19 @@ class WC_Comments {
 	public static function exclude_order_comments( $clauses ) {
 		$clauses['where'] .= ( trim( $clauses['where'] ) ? ' AND ' : '' ) . " comment_type != 'order_note' ";
 		return $clauses;
+	}
+
+	/**
+	 * Exclude order comments from Akismet comments counting SQL queries for better performance.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param string[] $comment_types Excluded comments types.
+	 * @return string[]
+	 */
+	public static function akismet_excluded_comment_types( $comment_types ): array {
+		$comment_types[] = 'order_note';
+		return $comment_types;
 	}
 
 	/**

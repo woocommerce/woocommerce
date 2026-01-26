@@ -1764,6 +1764,16 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' ) ) {
+			// If local pickup is enabled, shipping should be shown so that pickup locations are visible before address entry.
+			if ( LocalPickupUtils::is_local_pickup_enabled() ) {
+				/**
+				 * This filter is documented below.
+				 *
+				 * @since 2.7.0
+				 */
+				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
+			}
+
 			if ( 'shortcode' === $this->cart_context ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
@@ -1803,11 +1813,6 @@ class WC_Cart extends WC_Legacy_Cart {
 					return false;
 				}
 			} else {
-				// If local pickup is enabled, shipping should be shown so that pickup locations are visible before address entry.
-				if ( LocalPickupUtils::is_local_pickup_enabled() ) {
-					return true;
-				}
-
 				$customer = $this->get_customer();
 
 				if ( ! $customer instanceof \WC_Customer || ! $customer->has_full_shipping_address() ) {

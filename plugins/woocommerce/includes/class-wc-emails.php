@@ -308,6 +308,11 @@ class WC_Emails {
 			$this->emails[ $class ] = include $path;
 		}
 
+		// Enable custom partially refunded order email for the block email editor.
+		if ( FeaturesUtil::feature_is_enabled( 'block_email_editor' ) ) {
+			$this->emails['WC_Email_Customer_Partially_Refunded_Order'] = include __DIR__ . '/emails/class-wc-email-customer-partially-refunded-order.php';
+		}
+
 		/**
 		 * Filter the email classes.
 		 *

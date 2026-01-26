@@ -40552,24 +40552,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Cannot access offset 0 on array\{string, int, int, bool\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Cannot access offset 1 on array\{string, int, int, bool\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Cannot access offset 2 on array\{string, int, int, bool\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Cannot access property \$slug on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 2
