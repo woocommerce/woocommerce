@@ -379,7 +379,7 @@ export const baseFieldTransformer = (
 			);
 
 			const field = {
-				id: setting.id,
+				...baseField,
 				type: 'text',
 				Edit: UnsupportedFieldEdit,
 			};
