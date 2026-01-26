@@ -84,9 +84,9 @@ export const parseOptions = (
 
 					return {
 						label: decodeEntities( label ),
-						...( description
-							? { description: decodeEntities( description ) }
-							: {} ),
+						description: description
+							? decodeEntities( description )
+							: undefined,
 						value,
 					};
 				}
