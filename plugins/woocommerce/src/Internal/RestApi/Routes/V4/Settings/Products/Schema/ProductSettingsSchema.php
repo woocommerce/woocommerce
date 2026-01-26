@@ -285,6 +285,7 @@ class ProductSettingsSchema extends AbstractSchema {
 	 * Get options for page selection fields.
 	 *
 	 * @return array
+	 * @since 10.6.0
 	 */
 	private function get_page_options(): array {
 		if ( ! function_exists( 'get_pages' ) ) {
