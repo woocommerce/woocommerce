@@ -12,6 +12,8 @@ import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { CART_URL } from '@woocommerce/block-settings';
+import { useSelect } from '@wordpress/data';
+import { paymentStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -37,7 +39,18 @@ const Block = ( {
 	returnToCartButtonLabel,
 	priceSeparator,
 }: BlockAttributes ) => {
-	const { paymentMethodButtonLabel } = useCheckoutSubmit();
+	const { paymentMethodButtonLabel, paymentMethodPlaceOrderButton } =
+		useCheckoutSubmit();
+
+	const activeSavedToken = useSelect(
+		( select ) => select( paymentStore ).getActiveSavedToken(),
+		[]
+	);
+
+	// not showing the custom button when a saved token is selected - only when the payment method is selected from the list.
+	const CustomButtonComponent = activeSavedToken
+		? undefined
+		: paymentMethodPlaceOrderButton;
 
 	const label = applyCheckoutFilter( {
 		filterName: 'placeOrderButtonLabel',
@@ -71,6 +84,7 @@ const Block = ( {
 					</ReturnToCartButton>
 				) }
 				<PlaceOrderButton
+					CustomButtonComponent={ CustomButtonComponent }
 					label={ label }
 					fullWidth={ ! shouldShowReturnToCart }
 					showPrice={ showPrice }

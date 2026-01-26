@@ -1,0 +1,32 @@
+name: 'Block merge if cherry-pick conflicts exist'
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+      - ready_for_review
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  check-conflicts-label:
+    name: Check for conflicts label
+    runs-on: ubuntu-latest
+    if: |
+      startsWith(github.head_ref, 'cherry-pick-') &&
+      contains(github.event.pull_request.labels.*.name, 'cherry pick has conflicts')
+    permissions:
+      pull-requests: read
+      statuses: write
+    steps:
+      - name: Block merge due to conflicts
+        run: |
+          echo "❌ This PR has unresolved cherry-pick conflicts. Please resolve conflicts before merging."
+          exit 1

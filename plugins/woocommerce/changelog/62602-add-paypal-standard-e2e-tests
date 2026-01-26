@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Introduce end-to-end tests for PayPal Standard (enablement flow).
