@@ -1665,7 +1665,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		// Generate SQL.
 		$sql = $wpdb->prepare(
 			"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
-			is_float( $stock_quantity ) ? number_format( $stock_quantity, WC_ROUNDING_PRECISION, '.', '' ) : (int) $stock_quantity,
+			number_format( (float) $stock_quantity, WC_ROUNDING_PRECISION, '.', '' ),
 			$product_id_with_stock
 		);
 
