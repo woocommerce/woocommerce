@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix PHPStan errors in wc_get_product_attachment_props() by adding is_array() checks before accessing array offsets.

@@ -30,6 +30,7 @@ class WCTransactionalEmails {
 		'customer_on_hold_order',
 		'customer_processing_order',
 		'customer_refunded_order',
+		'customer_partially_refunded_order',
 		'customer_reset_password',
 		'failed_order',
 		'new_order',

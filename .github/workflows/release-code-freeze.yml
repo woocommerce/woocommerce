@@ -26,7 +26,7 @@ jobs:
       should-run: ${{ steps.check-feature-freeze-event.outputs.should-run }}
     steps:
       - name: Install node-ical
-        run: npm install node-ical
+        run: npm install node-ical@0.23.1 rrule-temporal@1.4.1
       - name: Check for Feature Freeze events today
         id: check-feature-freeze-event
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1

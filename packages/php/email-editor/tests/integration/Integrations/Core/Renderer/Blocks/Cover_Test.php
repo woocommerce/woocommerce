@@ -213,4 +213,21 @@ class Cover_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringNotContainsString( 'wp-block-cover__background', $rendered );
 		$this->assertStringNotContainsString( 'background-color:#4b74b2', $rendered );
 	}
+
+	/**
+	 * Test that background image URLs with query parameters work correctly
+	 */
+	public function test_background_image_urls_with_query_parameters_work_correctly(): void {
+		$parsed_cover                 = $this->parsed_cover;
+		$parsed_cover['attrs']['url'] = 'https://example.com/background.jpg?w=500&h=281';
+
+		$rendered = $this->cover_renderer->render( '', $parsed_cover, $this->rendering_context );
+
+		// Should contain background-image with query parameters.
+		// The key test is that background-image is present (not stripped by WP_Style_Engine).
+		$this->assertStringContainsString( 'background-image', $rendered, 'Background image should be present in CSS' );
+		// Verify query parameters are present.
+		$this->assertStringContainsString( 'w=500', $rendered, 'Query parameters should be present' );
+		$this->assertStringContainsString( 'h=281', $rendered, 'Query parameters should be present' );
+	}
 }
