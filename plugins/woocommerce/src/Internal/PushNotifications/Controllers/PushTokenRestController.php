@@ -147,11 +147,7 @@ class PushTokenRestController extends RestApiControllerBase {
 			$data_store->read( $push_token );
 
 			if ( $push_token->get_user_id() !== get_current_user_id() ) {
-				return new WP_Error(
-					'rest_invalid_push_token',
-					'Push token could not be found.',
-					array( 'status' => WP_Http::NOT_FOUND )
-				);
+				throw new PushTokenNotFoundException();
 			}
 
 			$data_store->delete( $push_token );
