@@ -75,11 +75,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 				echo wp_kses_post( $item->get_cogs_value_html() );
 
 				$refunded_cost = $order->get_cogs_refunded_for_item( $item_id );
-
-				if ( $refunded_cost ) {
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo '<small class="refunded">' . wc_price( $refunded_cost, $wc_price_arg ) . '</small>';
-				}
+				echo wp_kses_post( $item->get_cogs_refund_value_html( $refunded_cost, $wc_price_arg, $order ) );
 				?>
 			</div>
 		</td>

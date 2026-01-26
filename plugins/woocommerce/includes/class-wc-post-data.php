@@ -39,6 +39,7 @@ class WC_Post_Data {
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 		add_action( 'set_object_terms', array( __CLASS__, 'delete_product_query_transients' ) );
+		add_action( 'set_object_terms', array( __CLASS__, 'recount_terms_for_product_visibility_change' ), 10, 6 );
 		add_action( 'deleted_term_relationships', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
@@ -65,6 +66,20 @@ class WC_Post_Data {
 		add_action( 'added_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 		add_action( 'deleted_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
 		add_action( 'updated_order_item_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
+
+		// Product Variations - Attributes.
+		// Priority 50 to make sure this runs after WooCommerce attribute migrations.
+		add_action( 'woocommerce_attribute_updated', array( __CLASS__, 'handle_global_attribute_updated' ), 50, 3 );
+		add_action( 'woocommerce_attribute_deleted', array( __CLASS__, 'handle_global_attribute_updated' ), 10, 3 );
+		// Product Variations - Terms.
+		add_action( 'edited_term', array( __CLASS__, 'handle_attribute_term_updated' ), 10, 3 );
+		add_action( 'delete_term', array( __CLASS__, 'handle_attribute_term_deleted' ), 10, 4 );
+		// Product Variations - Parent Product Updates Attributes.
+		add_action( 'woocommerce_product_attributes_updated', array( __CLASS__, 'on_product_attributes_updated' ), 10, 1 );
+		// Product Variations - Action Scheduler.
+		add_action( 'wc_regenerate_product_variation_summaries', array( __CLASS__, 'regenerate_product_variation_summaries' ), 10, 1 );
+		add_action( 'wc_regenerate_attribute_variation_summaries', array( __CLASS__, 'regenerate_attribute_variation_summaries' ), 10, 1 );
+		add_action( 'wc_regenerate_term_variation_summaries', array( __CLASS__, 'regenerate_term_variation_summaries' ), 10, 2 );
 	}
 
 	/**
@@ -565,6 +580,50 @@ class WC_Post_Data {
 	}
 
 	/**
+	 * Recounts product terms when product visibility changes affect catalog display.
+	 *
+	 * @param int    $object_id   The object ID.
+	 * @param array  $terms       An array of object terms.
+	 * @param array  $tt_ids      An array of term taxonomy IDs.
+	 * @param string $taxonomy    Taxonomy slug.
+	 * @param bool   $append      Whether to append new terms to the old terms.
+	 * @param array  $old_tt_ids  The old array of term taxonomy IDs.
+	 *
+	 * @since 10.4.0
+	 */
+	public static function recount_terms_for_product_visibility_change( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		if ( 'product_visibility' !== $taxonomy ) {
+			return;
+		}
+
+		if ( $append ) {
+			$modified_tt_ids = $tt_ids;
+		} else {
+			$modified_tt_ids = array_merge( array_diff( $tt_ids, $old_tt_ids ), array_diff( $old_tt_ids, $tt_ids ) );
+		}
+
+		if ( empty( $modified_tt_ids ) ) {
+			return;
+		}
+
+		// Despite the name, wc_get_product_visibility_term_ids() actually returns an associative array with term_taxonomy_ids.
+		$visibility_tt_ids = wc_get_product_visibility_term_ids();
+
+		$tt_ids_modifying_term_counts = array();
+		if ( ! empty( $visibility_tt_ids['exclude-from-catalog'] ) ) {
+			$tt_ids_modifying_term_counts[] = $visibility_tt_ids['exclude-from-catalog'];
+		}
+
+		if ( ! empty( $visibility_tt_ids['outofstock'] ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$tt_ids_modifying_term_counts[] = $visibility_tt_ids['outofstock'];
+		}
+
+		if ( ! empty( array_intersect( $modified_tt_ids, $tt_ids_modifying_term_counts ) ) ) {
+			_wc_recount_terms_by_product( $object_id );
+		}
+	}
+
+	/**
 	 * Ensure statuses are correctly reassigned when restoring orders and products.
 	 *
 	 * @param string $new_status      The new status of the post being restored.
@@ -620,6 +679,385 @@ class WC_Post_Data {
 		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
 			self::delete_product_query_transients();
 		}
+	}
+
+	/**
+	 * Regenerates attribute summaries for a list of variations.
+	 *
+	 * @since 10.2.0
+	 * @param array $variation_ids Array of variation IDs.
+	 */
+	private static function regenerate_variation_summaries( $variation_ids ) {
+		if ( empty( $variation_ids ) ) {
+			return;
+		}
+
+		$variation_ids = array_unique( array_filter( array_map( 'intval', $variation_ids ) ) );
+
+		foreach ( $variation_ids as $variation_id ) {
+			self::regenerate_variation_attribute_summary( $variation_id );
+		}
+	}
+
+	/**
+	 * Regenerates the attribute summary for a single variation.
+	 *
+	 * @since 10.2.0
+	 * @param int $variation_id Variation ID.
+	 */
+	public static function regenerate_variation_attribute_summary( $variation_id ) {
+		global $wpdb;
+
+		$product = wc_get_product( $variation_id );
+		if ( ! $product || ! $product->is_type( 'variation' ) ) {
+			return;
+		}
+
+		$data_store = WC_Data_Store::load( 'product-variation' );
+		if ( $data_store->has_callable( 'get_attribute_summary' ) ) {
+			$new_summary     = $data_store->get_attribute_summary( $product );
+			$current_excerpt = get_post_field( 'post_excerpt', $variation_id );
+			if ( $new_summary === $current_excerpt ) {
+				return;
+			}
+
+			/**
+			* Update directly via $wpdb for performance: Avoid firing save_post hooks, loading full post objects,
+			* and creating revisions. This is safe here as we're only updating post_excerpt.
+			*/
+			$wpdb->update(
+				$wpdb->posts,
+				array( 'post_excerpt' => $new_summary ),
+				array( 'ID' => $variation_id )
+			);
+			clean_post_cache( $variation_id );
+			/**
+			* Fires after the attribute summary of a product variation has been updated.
+			*
+			* @since 10.2.0
+			* @param int $variation_id The ID of the product variation.
+			*/
+			do_action( 'woocommerce_updated_product_attribute_summary', $variation_id );
+		}
+	}
+
+	/**
+	 * Gets the threshold for synchronous regeneration of variation summaries.
+	 *
+	 * @since 10.2.0
+	 * @return int
+	 */
+	public static function get_variation_summaries_sync_threshold() {
+		/**
+		 * Filters the threshold for synchronous regeneration of variation attribute summaries.
+		 * If the number of variations affected by an update is below this threshold, the summaries
+		 * are regenerated synchronously. Otherwise, the regeneration is scheduled asynchronously.
+		 *
+		 * @since 10.2.0
+		 * @param int $threshold The default threshold value (50).
+		 * @return int The filtered threshold value.
+		 */
+		return absint( apply_filters( 'woocommerce_regenerate_variation_summaries_sync_threshold', 50 ) );
+	}
+
+	/**
+	 * Handles updates to a global attribute by triggering variation summary regeneration.
+	 *
+	 * @since 10.2.0
+	 * @param int    $attribute_id Attribute ID.
+	 * @param string $attribute    Attribute name.
+	 * @param string $old_slug     Old attribute slug.
+	 */
+	public static function handle_global_attribute_updated( $attribute_id, $attribute, $old_slug ) {
+		// We use this trigger for both updates and deletions of global attributes.
+		// They pass different parameters to $old_slug - deleted attributes include the "pa_" prefix, while updated attributes do not.
+		// Remove it if existing for consistency.
+		if ( strpos( $old_slug, 'pa_' ) === 0 ) {
+			$old_slug = substr( $old_slug, 3 );
+		}
+		$taxonomy  = 'pa_' . $old_slug;
+		$threshold = self::get_variation_summaries_sync_threshold();
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		$args = array(
+			'post_type'      => 'product_variation',
+			'post_status'    => 'any',
+			'posts_per_page' => $threshold + 1,
+			'fields'         => 'ids',
+			'meta_query'     => array(
+				array(
+					'key'     => 'attribute_' . $taxonomy,
+					'compare' => 'EXISTS',
+				),
+			),
+		);
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+
+		$variation_ids = get_posts( $args );
+
+		if ( empty( $variation_ids ) ) {
+			return;
+		}
+
+		if ( count( $variation_ids ) <= $threshold ) {
+			// Update variation summaries that used this product attribute, but
+			// wait until shutdown. This will allow WooC to carry out post_meta migrations
+			// if the slug of the attribute changed.
+			add_action(
+				'shutdown',
+				function () use ( $variation_ids ) {
+					self::regenerate_variation_summaries( $variation_ids );
+				}
+			);
+		} else {
+			$new_slug     = ! empty( $attribute['attribute_name'] ) ? $attribute['attribute_name'] : $old_slug;
+			$new_taxonomy = 'pa_' . $new_slug;
+
+			self::schedule_variation_summary_regeneration(
+				'wc_regenerate_attribute_variation_summaries',
+				array( $new_taxonomy ),
+				'Taxonomy: ' . $taxonomy . ', Attribute ID: ' . $attribute_id
+			);
+		}
+	}
+
+	/**
+	 * Regenerates variation summaries for all variations using a specific attribute taxonomy.
+	 *
+	 * @since 10.2.0
+	 * @param string $taxonomy Attribute taxonomy.
+	 */
+	public static function regenerate_attribute_variation_summaries( $taxonomy ) {
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		$variation_ids = get_posts(
+			array(
+				'post_type'   => 'product_variation',
+				'numberposts' => -1,
+				'fields'      => 'ids',
+				'meta_query'  => array(
+					array(
+						'key'     => 'attribute_' . $taxonomy,
+						'compare' => 'EXISTS',
+					),
+				),
+			)
+		);
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		self::regenerate_variation_summaries( $variation_ids );
+	}
+
+	/**
+	 * Handles regeneration of variation summaries when a variable product's attributes are updated.
+	 *
+	 * @since 10.2.0
+	 * @param WC_Product $product The variable product whose attributes were updated.
+	 */
+	public static function on_product_attributes_updated( $product ) {
+		if ( $product->is_type( 'variable' ) ) {
+			global $wpdb;
+			$threshold     = self::get_variation_summaries_sync_threshold();
+			$variation_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT ID
+					FROM {$wpdb->posts}
+					WHERE post_parent = %d
+					AND post_type = %s
+					LIMIT %d
+					",
+					$product->get_id(),
+					'product_variation',
+					$threshold + 1
+				)
+			);
+
+			if ( empty( $variation_ids ) ) {
+				return;
+			}
+
+			if ( count( $variation_ids ) <= $threshold ) {
+				// If the number of variations is below the threshold, regenerate summaries synchronously.
+				$variation_ids = $product->get_children();
+				self::regenerate_variation_summaries( $variation_ids );
+			} else {
+				self::schedule_variation_summary_regeneration(
+					'wc_regenerate_product_variation_summaries',
+					array( $product->get_id() ),
+					'Product ID: ' . $product->get_id()
+				);
+			}
+		}
+	}
+
+	/**
+	 * Regenerates variation summaries for all variations of a variable product.
+	 *
+	 * @since 10.2.0
+	 * @param int $product_id Variable product ID.
+	 */
+	public static function regenerate_product_variation_summaries( $product_id ) {
+		$product = wc_get_product( $product_id );
+		if ( ! $product || ! $product->is_type( 'variable' ) ) {
+			return;
+		}
+
+		$variation_ids = $product->get_children();
+		self::regenerate_variation_summaries( $variation_ids );
+	}
+
+	/**
+	 * Hook called after a term is updated to handle updates for product variations.
+	 *
+	 * @param int    $term_id  Term ID.
+	 * @param int    $tt_id    Term taxonomy ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 */
+	public static function handle_attribute_term_updated( $term_id, $tt_id, $taxonomy ) {
+		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
+			return;
+		}
+
+		$new_term = get_term( $term_id, $taxonomy );
+		if ( is_wp_error( $new_term ) || ! $new_term ) {
+			return;
+		}
+
+		$meta_key = 'attribute_' . $taxonomy;
+		global $wpdb;
+
+		$threshold     = self::get_variation_summaries_sync_threshold();
+		$variation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT pm.post_id
+				FROM $wpdb->postmeta pm
+				INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
+				WHERE pm.meta_key = %s
+				AND pm.meta_value = %s
+				AND p.post_type = 'product_variation'
+				LIMIT %d
+				",
+				$meta_key,
+				$new_term->slug,
+				$threshold + 1
+			)
+		);
+		if ( empty( $variation_ids ) ) {
+			return;
+		}
+
+		if ( count( $variation_ids ) <= $threshold ) {
+			// If the number of variations is below the threshold, regenerate summaries synchronously.
+			self::regenerate_variation_summaries( $variation_ids );
+		} else {
+			self::schedule_variation_summary_regeneration(
+				'wc_regenerate_term_variation_summaries',
+				array( $taxonomy, $new_term->slug ),
+				'Taxonomy: ' . $taxonomy . ', Term ID: ' . $term_id
+			);
+		}
+	}
+
+	/**
+	 * Hook called after a term is deleted to handle updates for product variations.
+	 *
+	 * @param int     $term_id  Term ID.
+	 * @param int     $tt_id    Term taxonomy ID.
+	 * @param string  $taxonomy Taxonomy slug.
+	 * @param WP_Term $deleted_term Copy of the already-deleted term.
+	 */
+	public static function handle_attribute_term_deleted( $term_id, $tt_id, $taxonomy, $deleted_term ) {
+		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
+			return;
+		}
+
+		$meta_key = 'attribute_' . $taxonomy;
+		global $wpdb;
+		$threshold     = self::get_variation_summaries_sync_threshold();
+		$variation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT pm.post_id
+				FROM $wpdb->postmeta pm
+				INNER JOIN $wpdb->posts p ON pm.post_id = p.ID
+				WHERE pm.meta_key = %s
+				AND pm.meta_value = %s
+				AND p.post_type = 'product_variation'
+				LIMIT %d
+				",
+				$meta_key,
+				$deleted_term->slug,
+				$threshold + 1
+			)
+		);
+
+		if ( empty( $variation_ids ) ) {
+			return;
+		}
+
+		if ( count( $variation_ids ) <= $threshold ) {
+			// If the number of variations is below the threshold, regenerate summaries synchronously.
+			self::regenerate_variation_summaries( $variation_ids );
+		} else {
+			self::schedule_variation_summary_regeneration(
+				'wc_regenerate_term_variation_summaries',
+				array( $taxonomy, $deleted_term->slug ),
+				'Taxonomy: ' . $taxonomy . ', Term ID: ' . $term_id
+			);
+		}
+	}
+
+	/**
+	 * Schedule an asynchronous action to regenerate product variation summaries.
+	 *
+	 * This method uses the WooCommerce Action Scheduler to queue a single regeneration action
+	 * for product variation summaries. It first checks whether an identical action with the
+	 * given arguments is already scheduled to avoid duplicate jobs. If the Action Scheduler
+	 * is not available, a warning is logged instead.
+	 *
+	 * @param string $action_name     The name/identifier of the scheduled action (hook name).
+	 * @param array  $args            Arguments to pass to the scheduled action callback.
+	 * @param string $warning_message Message to log when the Action Scheduler is unavailable.
+	 * @param string $group           Optional. The Action Scheduler group to associate with
+	 *                                the scheduled action. Default 'woocommerce'.
+	 *
+	 * @return void
+	 */
+	private static function schedule_variation_summary_regeneration( $action_name, $args, $warning_message, $group = 'woocommerce' ) {
+		if ( function_exists( 'as_schedule_single_action' ) ) {
+			// Prevent duplicate scheduling of the action.
+			$when = as_next_scheduled_action( $action_name, $args, $group );
+			if ( ! $when ) {
+				as_schedule_single_action( time() + 1, $action_name, $args, $group );
+			}
+		} else {
+			wc_get_logger()->warning(
+				'Action Scheduler unavailable for product variation summary regeneration. ' . $warning_message,
+				array( 'source' => 'woocommerce-variations' )
+			);
+		}
+	}
+
+	/**
+	 * Regenerates variation summaries for all variations using a specific term.
+	 *
+	 * @since 10.2.0
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param string $term_slug Term slug.
+	 */
+	public static function regenerate_term_variation_summaries( $taxonomy, $term_slug ) {
+		global $wpdb;
+
+		$variation_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT pm.post_id FROM {$wpdb->postmeta} pm
+				INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
+				WHERE pm.meta_key = %s
+				AND pm.meta_value = %s
+				AND p.post_type = %s",
+				'attribute_' . $taxonomy,
+				$term_slug,
+				'product_variation'
+			)
+		);
+
+		self::regenerate_variation_summaries( $variation_ids );
 	}
 }
 

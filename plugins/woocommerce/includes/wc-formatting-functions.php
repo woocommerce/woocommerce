@@ -288,6 +288,10 @@ function wc_format_refund_total( $amount ) {
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$number = $number ?? '';
 
+	if ( '' === $number ) {
+		return '';
+	}
+
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
@@ -641,7 +645,7 @@ function wc_price( $price, $args = array() ) {
 	if ( $args['in_span'] ) {
 		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], '<span class="woocommerce-Price-currencySymbol">' . get_woocommerce_currency_symbol( $args['currency'] ) . '</span>', $price );
 		$aria_hidden     = $args['aria-hidden'] ? ' aria-hidden="true"' : '';
-		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi class="woocommerce-Price-bidi">' . $formatted_price . '</bdi></span>';
+		$return          = '<span class="woocommerce-Price-amount amount"' . $aria_hidden . '><bdi>' . $formatted_price . '</bdi></span>';
 	} else {
 		$formatted_price = ( $negative ? '-' : '' ) . sprintf( $args['price_format'], get_woocommerce_currency_symbol( $args['currency'] ), $price );
 		$return          = $formatted_price;
@@ -1362,7 +1366,7 @@ function wc_format_sale_price( $regular_price, $sale_price ) {
 	$price .= '</span>';
 
 	// Add the sale price.
-	$price .= '<ins class="woocommerce-Price-salePrice" aria-hidden="true">' . $formatted_sale_price . '</ins>';
+	$price .= '<ins aria-hidden="true">' . $formatted_sale_price . '</ins>';
 
 	// For accessibility (a11y) we'll also display that information to screen readers.
 	$price .= '<span class="screen-reader-text">';

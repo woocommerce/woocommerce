@@ -614,6 +614,45 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * Test that cart GET endpoint sends Cache-Control headers.
+	 */
+	public function test_cart_get_endpoint_cache_control_headers() {
+		/** @var Spy_REST_Server $server */
+		$server = rest_get_server();
+
+		$server->serve_request( '/wc/store/cart' );
+
+		$this->assertArrayHasKey( 'Cache-Control', $server->sent_headers );
+		$this->assertStringContainsString( 'no-store', $server->sent_headers['Cache-Control'] );
+	}
+
+	/**
+	 * Test that cart endpoint returns fresh data.
+	 */
+	public function test_cart_get_endpoint_returns_fresh_data() {
+		wc_empty_cart();
+
+		/** @var Spy_REST_Server $server */
+		$server = rest_get_server();
+
+		$server->serve_request( '/wc/store/cart' );
+		$first_response = json_decode( $server->sent_body, true );
+		$this->assertEquals( 0, $first_response['items_count'] );
+		$this->assertEmpty( $first_response['items'] );
+
+		wc()->cart->add_to_cart( $this->products[0]->get_id(), 1 );
+
+		$server->serve_request( '/wc/store/cart' );
+		$second_response = json_decode( $server->sent_body, true );
+		$this->assertEquals( 1, $second_response['items_count'] );
+		$this->assertCount( 1, $second_response['items'] );
+		$this->assertEquals( $this->products[0]->get_id(), $second_response['items'][0]['id'] );
+
+		$this->assertArrayHasKey( 'Cache-Control', $server->sent_headers );
+		$this->assertStringContainsString( 'no-store', $server->sent_headers['Cache-Control'] );
+	}
+
+	/**
 	 * Test adding a variable product to cart returns proper variation data.
 	 */
 	public function test_add_variable_product_to_cart_returns_variation_data() {

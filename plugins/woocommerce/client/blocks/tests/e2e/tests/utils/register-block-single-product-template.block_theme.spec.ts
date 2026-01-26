@@ -1,12 +1,10 @@
 /**
  * External dependencies
  */
-import { test, expect, Editor } from '@woocommerce/e2e-utils';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
+import type { Editor, Admin } from '@woocommerce/e2e-utils';
 
-const insertSingleProductBlock = async (
-	blockName: string,
-	editor: Editor
-) => {
+const insertSingleProductBlock = async ( editor: Editor ) => {
 	await editor.insertBlock( { name: 'woocommerce/single-product' } );
 	await editor.canvas.getByText( 'Album' ).click();
 	await editor.canvas.getByText( 'Done' ).click();
@@ -24,7 +22,7 @@ const insertInSingleProductTemplate = async (
 	admin: Admin
 ) => {
 	await admin.visitSiteEditor( {
-		postId: `woocommerce/woocommerce//single-product`,
+		postId: `${ BLOCK_THEME_SLUG }//single-product`,
 		postType: 'wp_template',
 		canvas: 'edit',
 	} );
@@ -49,7 +47,6 @@ test.describe( 'registerProductBlockType registers', () => {
 
 		await test.step( 'Available in post within Single Product block', async () => {
 			const singleProductClientId = await insertSingleProductBlock(
-				blockName,
 				editor
 			);
 			// One from the global inserter, one from the single product block
@@ -80,7 +77,7 @@ test.describe( 'registerProductBlockType registers', () => {
 		await test.step( 'Blocks not available in non-product template', async () => {
 			// Visit site editor with a non-product template
 			await admin.visitSiteEditor( {
-				postId: 'woocommerce/woocommerce//coming-soon',
+				postId: `${ BLOCK_THEME_SLUG }//coming-soon`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -175,7 +172,7 @@ test.describe( 'registerProductBlockType registers', () => {
 
 		await test.step( 'Unavailable in post, also within Single Product block', async () => {
 			await admin.createNewPost();
-			await insertSingleProductBlock( blockName, editor );
+			await insertSingleProductBlock( editor );
 
 			await editor.canvas
 				.getByRole( 'button', { name: 'Add block' } )

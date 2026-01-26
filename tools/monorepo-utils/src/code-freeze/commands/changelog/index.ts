@@ -38,7 +38,7 @@ export const changelogCommand = new Command( 'changelog' )
 		false
 	)
 	.option(
-		'-o, --override <override>',
+		'-t, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now').",
 		'now'
 	)
@@ -50,6 +50,10 @@ export const changelogCommand = new Command( 'changelog' )
 		'-a, --append-changelog',
 		'Append changelog to the existing one instead of replacing it.',
 		false
+	)
+	.option(
+		'-ga --github-actor <githubActor>',
+		'Github actor to use for the changelog.'
 	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options: Options ) => {
@@ -82,7 +86,8 @@ export const changelogCommand = new Command( 'changelog' )
 			} );
 		}
 
-		const releaseBranch = branch || `release/${ version }`;
+		const releaseBranch =
+			branch || `release/${ version.replace( /\.\d+(-.*)?$/, '' ) }`;
 
 		// Update the release branch.
 		const releaseBranchChanges = await updateReleaseBranchChangelogs(

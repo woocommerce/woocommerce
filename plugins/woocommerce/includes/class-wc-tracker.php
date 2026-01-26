@@ -12,6 +12,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\{ FeaturesUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
@@ -183,6 +184,9 @@ class WC_Tracker {
 		$data['categories'] = self::get_category_counts();
 		$data['brands']     = self::get_brands_counts();
 
+		// Migrator CLI statistics.
+		$data['migrator'] = self::get_migrator_data();
+
 		// Get order snapshot.
 		$data['order_snapshot'] = self::get_order_snapshot();
 
@@ -234,6 +238,9 @@ class WC_Tracker {
 		// Store email usage.
 		$data['store_emails'] = self::get_store_emails();
 
+		// Address autocomplete usage.
+		$data['address_autocomplete'] = self::get_address_autocomplete_info();
+
 		/**
 		 * Filter the data that's sent with the tracker.
 		 *
@@ -244,6 +251,53 @@ class WC_Tracker {
 		// Total seconds taken to generate snapshot (including filtered data).
 		$data['snapshot_generation_time'] = microtime( true ) - $start_time;
 
+		return $data;
+	}
+
+	/**
+	 * Get address autocomplete info.
+	 *
+	 * @return array Address autocomplete info.
+	 */
+	public static function get_address_autocomplete_info() {
+		$data = array(
+			'enabled'            => ( 'yes' === wc_bool_to_string( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) ) ? 'yes' : 'no',
+			'providers'          => array(),
+			'preferred_provider' => '',
+		);
+
+		if ( ! class_exists( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class ) ) {
+			// The option could still be set even if the class doesn't exist (e.g. if set manually in the DB).
+			$data['enabled'] = 'no';
+			return $data;
+		}
+
+		$autocomplete_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class );
+		$autocomplete_controller->init();
+
+		// Get all registered providers.
+		$providers = $autocomplete_controller->get_providers();
+		if ( is_array( $providers ) ) {
+			foreach ( $providers as $provider ) {
+				if ( ! ( $provider instanceof WC_Address_Provider ) ) {
+					continue;
+				}
+				$data['providers'][] = $provider->id;
+			}
+		}
+
+		if ( empty( $data['providers'] ) ) {
+			// If there are no providers, the feature is effectively disabled.
+			$data['enabled'] = 'no';
+			return $data;
+		}
+
+		if ( 'no' === $data['enabled'] ) {
+			// If the feature is disabled, no need to go further, but we will still track which providers are available.
+			return $data;
+		}
+
+		$data['preferred_provider'] = $autocomplete_controller->get_preferred_provider();
 		return $data;
 	}
 
@@ -920,6 +974,24 @@ class WC_Tracker {
 	}
 
 	/**
+	 * Get migrator CLI statistics.
+	 *
+	 * @return array
+	 */
+	private static function get_migrator_data() {
+		if ( ! class_exists( MigratorTracker::class ) ) {
+			return array();
+		}
+
+		try {
+			$tracker = wc_get_container()->get( MigratorTracker::class );
+			return $tracker->get_data();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
+	}
+
+	/**
 	 * Get a list of all active payment gateways.
 	 *
 	 * @return array
@@ -984,7 +1056,7 @@ class WC_Tracker {
 	 */
 	private static function get_all_woocommerce_options_values() {
 		return array(
-			'version'                               => WC()->version,
+			'version'                               => WC()->stable_version(),
 			'currency'                              => get_woocommerce_currency(),
 			'base_location'                         => WC()->countries->get_base_country(),
 			'base_state'                            => WC()->countries->get_base_state(),

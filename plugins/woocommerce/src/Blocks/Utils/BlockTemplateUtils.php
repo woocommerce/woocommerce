@@ -1,4 +1,6 @@
 <?php
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use WP_Block_Patterns_Registry;
@@ -512,30 +514,6 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Checks if we can fall back to an `archive-product` template stored on the db for a given slug.
-	 *
-	 * @param string $template_slug Slug to check for fallbacks.
-	 * @param array  $db_templates Templates that have already been found on the db.
-	 * @return boolean
-	 */
-	public static function template_is_eligible_for_fallback_from_db( $template_slug, $db_templates ) {
-		$registered_template = self::get_template( $template_slug );
-
-		if ( $registered_template && isset( $registered_template->fallback_template ) ) {
-			$array_filter = array_filter(
-				$db_templates,
-				function ( $template ) use ( $registered_template ) {
-					return isset( $registered_template->fallback_template ) && $registered_template->fallback_template === $template->slug;
-				}
-			);
-
-			return count( $array_filter ) > 0;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Gets the `archive-product` fallback template stored on the db for a given slug.
 	 *
 	 * @param string $template_slug Slug to check for fallbacks.
@@ -557,91 +535,37 @@ class BlockTemplateUtils {
 	}
 
 	/**
-	 * Checks if we can fall back to the `archive-product` file template for a given slug in the current theme.
-	 *
-	 * `taxonomy-product_cat`, `taxonomy-product_tag`, `taxonomy-attribute` templates can
-	 *  generally use the `archive-product` as a fallback if there are no specific overrides.
-	 *
-	 * @param string $template_slug Slug to check for fallbacks.
-	 * @return boolean
-	 */
-	public static function template_is_eligible_for_fallback_from_theme( $template_slug ) {
-		$registered_template = self::get_template( $template_slug );
-
-		return $registered_template && isset( $registered_template->fallback_template )
-			&& ! self::theme_has_template( $template_slug )
-			&& self::theme_has_template( $registered_template->fallback_template );
-	}
-
-	/**
-	 * Sets the `has_theme_file` to `true` for templates with fallbacks
-	 *
-	 * There are cases (such as tags, categories and attributes) in which fallback templates
-	 * can be used; so, while *technically* the theme doesn't have a specific file
-	 * for them, it is important that we tell Gutenberg that we do, in fact,
-	 * have a theme file (i.e. the fallback one).
-	 *
-	 * **Note:** this function changes the array that has been passed.
-	 *
-	 * It returns `true` if anything was changed, `false` otherwise.
-	 *
-	 * @param array  $query_result Array of template objects.
-	 * @param object $template A specific template object which could have a fallback.
-	 *
-	 * @return boolean
-	 */
-	public static function set_has_theme_file_if_fallback_is_available( $query_result, $template ) {
-		foreach ( $query_result as &$query_result_template ) {
-			if (
-				$query_result_template->slug === $template->slug
-				&& $query_result_template->theme === $template->theme
-			) {
-				if ( self::template_is_eligible_for_fallback_from_theme( $template->slug ) ) {
-					$query_result_template->has_theme_file = true;
-				}
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Removes templates that were added to a theme's block-templates directory, but already had a customised version saved in the database.
+	 * Removes templates from the theme or WooCommerce which have the same slug
+	 * as template saved in the database with the `woocommerce/woocommerce` theme.
+	 * Before WC migrated to the Template Registration API from WordPress, templates
+	 * were saved in the database with the `woocommerce/woocommerce` theme instead
+	 * of the theme's slug.
 	 *
 	 * @param \WP_Block_Template[]|\stdClass[] $templates List of templates to run the filter on.
 	 *
 	 * @return array List of templates with duplicates removed. The customised alternative is preferred over the theme default.
 	 */
-	public static function remove_theme_templates_with_custom_alternative( $templates ) {
+	public static function remove_templates_with_custom_alternative( $templates ) {
 
 		// Get the slugs of all templates that have been customised and saved in the database.
-		$customised_template_slugs = array_map(
-			function ( $template ) {
-				return $template->slug;
-			},
-			array_values(
-				array_filter(
-					$templates,
-					function ( $template ) {
-						// This template has been customised and saved as a post.
-						return 'custom' === $template->source;
-					}
-				)
-			)
+		$customised_template_slugs = array_column(
+			array_filter(
+				$templates,
+				function ( $template ) {
+					// This template has been customised and saved as a post.
+					return 'custom' === $template->source && ( self::PLUGIN_SLUG === $template->theme || self::DEPRECATED_PLUGIN_SLUG === $template->theme );
+				}
+			),
+			'slug'
 		);
 
-		// Remove theme (i.e. filesystem) templates that have the same slug as a customised one. We don't need to check
-		// for `woocommerce` in $template->source here because woocommerce templates won't have been added to $templates
-		// if a saved version was found in the db. This only affects saved templates that were saved BEFORE a theme
-		// template with the same slug was added.
+		// Remove theme and WC templates that have the same slug as a customised one.
 		return array_values(
 			array_filter(
 				$templates,
 				function ( $template ) use ( $customised_template_slugs ) {
 					// This template has been customised and saved as a post, so return it.
-					return ! ( 'theme' === $template->source && in_array( $template->slug, $customised_template_slugs, true ) );
+					return ! ( 'custom' !== $template->source && in_array( $template->slug, $customised_template_slugs, true ) );
 				}
 			)
 		);
@@ -652,34 +576,37 @@ class BlockTemplateUtils {
 	 * WooCommerce default template when there is a customized template based on the theme template.
 	 *
 	 * @param \WP_Block_Template[]|\stdClass[] $templates  List of templates to run the filter on.
-	 * @param string                           $theme_slug Slug of the theme currently active.
 	 *
 	 * @return array Filtered list of templates with only relevant templates available.
 	 */
-	public static function remove_duplicate_customized_templates( $templates, $theme_slug ) {
-		$filtered_templates = array_filter(
+	public static function remove_duplicate_customized_templates( $templates ) {
+		$theme_slug = get_stylesheet();
+
+		$customized_theme_template_slugs = array_column(
+			array_filter(
+				$templates,
+				function ( $template ) use ( $theme_slug ) {
+					// This template has been customised and saved as a post.
+					return 'custom' === $template->source && $theme_slug === $template->theme;
+				}
+			),
+			'slug'
+		);
+
+		return array_filter(
 			$templates,
-			function ( $template ) use ( $templates, $theme_slug ) {
+			function ( $template ) use ( $theme_slug, $customized_theme_template_slugs ) {
 				if ( $template->theme === $theme_slug ) {
 					// This is a customized template based on the theme template, so it should be returned.
 					return true;
 				}
-				// This is a template customized from the WooCommerce default template.
-				// Only return it if there isn't a customized version of the theme template.
-				$is_there_a_customized_theme_template = array_filter(
-					$templates,
-					function ( $theme_template ) use ( $template, $theme_slug ) {
-						return $theme_template->slug === $template->slug && $theme_template->theme === $theme_slug;
-					}
-				);
-				if ( $is_there_a_customized_theme_template ) {
-					return false;
+				// Customized from the WooCommerce default template: keep only if there is no customized theme template with same slug.
+				if ( 'custom' === $template->source ) {
+					return ! in_array( $template->slug, $customized_theme_template_slugs, true );
 				}
 				return true;
-			},
+			}
 		);
-
-		return $filtered_templates;
 	}
 
 	/**
@@ -784,7 +711,7 @@ class BlockTemplateUtils {
 	 * @param array  $slugs An array of slugs to retrieve templates for.
 	 * @param string $template_type wp_template or wp_template_part.
 	 *
-	 * @return int[]|\WP_Post[] An array of found templates.
+	 * @return \WP_Block_Template[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
 		$check_query_args = array(

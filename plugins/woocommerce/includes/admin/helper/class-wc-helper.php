@@ -7,7 +7,6 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\PluginsHelper;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Admin\Notes\Note;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -814,7 +813,6 @@ class WC_Helper {
 		if (
 			( 'woocommerce_page_wc-addons' === $current_screen->id ||
 			'woocommerce_page_wc-admin' === $current_screen->id ) &&
-			FeaturesUtil::feature_is_enabled( 'marketplace' ) &&
 			(
 				false === empty( $redirect_admin_url ) ||
 				false === empty( $install_product_key )
@@ -1141,6 +1139,7 @@ class WC_Helper {
 	 * Activate helper subscription.
 	 *
 	 * @throws Exception If the subscription could not be activated or found.
+	 * @throws WC_Data_Exception If the activation fails with error details.
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if activated, false otherwise.
 	 */
@@ -1172,11 +1171,21 @@ class WC_Helper {
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
-			throw new Exception( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) );
+
+			// Include HTTP status code and any extra data from the API response in the exception so callers can surface it.
+			$status_code = function_exists( 'wp_remote_retrieve_response_code' ) ? (int) wp_remote_retrieve_response_code( $activation_response ) : (int) ( $body['data']['status'] ?? 400 );
+			$error_data  = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
+			throw new WC_Data_Exception(
+				esc_html( $body['code'] ?? 'unknown_error' ),
+				isset( $body['message'] ) ? esc_html( $body['message'] ) : esc_html__( 'Unknown error', 'woocommerce' ),
+				(int) $status_code,
+				function_exists( 'map_deep' ) ? map_deep( $error_data, 'esc_html' ) : array_map( 'esc_html', $error_data ),
+			);
 		}
 
 		self::_flush_subscriptions_cache();
 		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 
 		return $activated;
 	}
@@ -1300,6 +1309,8 @@ class WC_Helper {
 		}
 
 		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+		self::flush_product_usage_notice_rules_cache();
 
 		return $deactivated;
 	}
@@ -1689,7 +1700,11 @@ class WC_Helper {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
-			return $data;
+			if ( is_array( $data ) ) {
+				return $data;
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		try {
@@ -1769,7 +1784,13 @@ class WC_Helper {
 	 * @return array|bool cached connection data or false connection data is not cached.
 	 */
 	public static function get_cached_connection_data() {
-		return get_transient( self::CACHE_KEY_CONNECTION_DATA );
+		$data = get_transient( self::CACHE_KEY_CONNECTION_DATA );
+		if ( false !== $data && ! is_array( $data ) ) {
+			// Cached data is corrupted, delete and return false to trigger fresh fetch.
+			delete_transient( self::CACHE_KEY_CONNECTION_DATA );
+			return false;
+		}
+		return $data;
 	}
 
 	/**
@@ -1780,6 +1801,9 @@ class WC_Helper {
 	public static function fetch_helper_connection_info() {
 		$data = self::get_cached_connection_data();
 		if ( false !== $data ) {
+			if ( ! empty( $data['maybe_deleted_connection'] ) ) {
+				return new WP_Error( 'deleted_connection', 'Connection may have been deleted' );
+			}
 			return $data;
 		}
 
@@ -1791,16 +1815,21 @@ class WC_Helper {
 			)
 		);
 
-		$status = wp_remote_retrieve_response_code( $request );
+		$status          = wp_remote_retrieve_response_code( $request );
+		$body            = json_decode( wp_remote_retrieve_body( $request ), true );
+		$connection_data = is_array( $body ) ? $body : array();
+		$message         = $connection_data['message'] ?? '';
+
 		if ( 200 !== $status ) {
+			if ( 'Connected site not found.' === $message || 'Invalid access token' === $message ) {
+				set_transient( self::CACHE_KEY_CONNECTION_DATA, array( 'maybe_deleted_connection' => true ), 1 * HOUR_IN_SECONDS );
+			}
 			return new WP_Error(
 				'invalid_response',
 				'Invalid response from WooCommerce.com',
 				array( 'status' => $status )
 			);
 		}
-
-		$connection_data = json_decode( wp_remote_retrieve_body( $request ), true );
 
 		$url = $connection_data['url'] ?? '';
 
@@ -1825,21 +1854,27 @@ class WC_Helper {
 		$cache_key = '_woocommerce_helper_subscriptions';
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
-			return $data;
+			if ( is_array( $data ) ) {
+				return $data;
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			$source      = '';
-			if ( stripos( $request_uri, 'wc-addons' ) ) :
+			if ( false !== stripos( $request_uri, 'wc/v3/marketplace/refresh' ) ) :
+				$source = 'refresh-button';
+			elseif ( false !== stripos( $request_uri, 'my-subscriptions' ) ) :
 				$source = 'my-subscriptions';
-			elseif ( stripos( $request_uri, 'plugins.php' ) ) :
+			elseif ( false !== stripos( $request_uri, 'plugins.php' ) ) :
 				$source = 'plugins';
-			elseif ( stripos( $request_uri, 'wc-admin' ) ) :
+			elseif ( false !== stripos( $request_uri, 'wc-admin' ) ) :
 				$source = 'inbox-notes';
-			elseif ( stripos( $request_uri, 'admin-ajax.php' ) ) :
+			elseif ( false !== stripos( $request_uri, 'admin-ajax.php' ) ) :
 				$source = 'heartbeat-api';
-			elseif ( stripos( $request_uri, 'installer' ) ) :
+			elseif ( false !== stripos( $request_uri, 'installer' ) ) :
 				$source = 'wccom-site-installer';
 			elseif ( defined( 'WP_CLI' ) && WP_CLI ) :
 				$source = 'wc-cli';
@@ -2490,7 +2525,7 @@ class WC_Helper {
 	 * Flush connection data cache.
 	 */
 	public static function flush_connection_data_cache() {
-		delete_transient( '_woocommerce_helper_connection_data' );
+		delete_transient( self::CACHE_KEY_CONNECTION_DATA );
 	}
 
 	/**
@@ -2727,7 +2762,11 @@ class WC_Helper {
 		$cached_data = get_transient( $cache_key );
 
 		if ( false !== $cached_data ) {
-			return $cached_data;
+			if ( is_array( $cached_data ) ) {
+				return $cached_data;
+			}
+			// Cached data is corrupted, delete and fetch fresh.
+			delete_transient( $cache_key );
 		}
 
 		// Fetch notice data for connected store.

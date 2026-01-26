@@ -11,7 +11,6 @@ import { useState } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import './modals.scss';
 import {
 	getWooPaymentsSetupLiveAccountLink,
 	recordPaymentsEvent,

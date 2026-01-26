@@ -25,13 +25,11 @@ jest.mock( '@woocommerce/settings', () => {
 				return [
 					{
 						name: 'product_cat',
-						label: 'Product Categories',
-						labels: { singular_name: 'Category' },
+						label: 'Category',
 					},
 					{
 						name: 'product_tag',
-						label: 'Product Tags',
-						labels: { singular_name: 'Tag' },
+						label: 'Tag',
 					},
 				];
 			}
@@ -103,23 +101,21 @@ describe( 'Taxonomy Filter block', () => {
 
 		test( 'should display taxonomy filter when taxonomy is selected', async () => {
 			await setup( { taxonomy: 'product_cat' } );
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 
 			const block = within(
-				screen.getByLabelText( /Block: Product Categories Filter/i )
+				screen.getByLabelText( /Block: Category Filter/i )
 			);
 
 			// Should display the taxonomy label as heading
-			expect(
-				block.getByText( /Product Categories/i )
-			).toBeInTheDocument();
+			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
 		} );
 	} );
 
 	describe( 'Inspector controls', () => {
 		beforeEach( async () => {
 			await setup( { taxonomy: 'product_cat' } );
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 		} );
 
 		test( 'should show product counts toggle', () => {
@@ -132,10 +128,10 @@ describe( 'Taxonomy Filter block', () => {
 		} );
 
 		test( 'should allow toggling product counts', async () => {
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 
 			const block = within(
-				screen.getByLabelText( /Block: Product Categories Filter/i )
+				screen.getByLabelText( /Block: Category Filter/i )
 			);
 
 			// expect the list doesn't have count indicators initially
@@ -161,7 +157,7 @@ describe( 'Taxonomy Filter block', () => {
 	describe( 'Advanced controls', () => {
 		beforeEach( async () => {
 			await setup( { taxonomy: 'product_cat' } );
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 		} );
 
 		test( 'should show sort order control when enabled', () => {
@@ -222,16 +218,14 @@ describe( 'Taxonomy Filter block', () => {
 				sortOrder: 'name-asc',
 				hideEmpty: false,
 			} );
-			await selectBlock( /Block: Product Categories Filter/i );
+			await selectBlock( /Block: Category Filter/i );
 
 			const block = within(
-				screen.getByLabelText( /Block: Product Categories Filter/i )
+				screen.getByLabelText( /Block: Category Filter/i )
 			);
 
 			// Should display the heading
-			expect(
-				block.getByText( /Product Categories/i )
-			).toBeInTheDocument();
+			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
 
 			// Check that all controls reflect the set attributes
 			expect(
@@ -254,14 +248,14 @@ describe( 'Taxonomy Filter block', () => {
 				taxonomy: 'product_tag',
 				showCounts: true,
 			} );
-			await selectBlock( /Block: Product Tags Filter/i );
+			await selectBlock( /Block: Tag Filter/i );
 
 			const block = within(
-				screen.getByLabelText( /Block: Product Tags Filter/i )
+				screen.getByLabelText( /Block: Tag Filter/i )
 			);
 
 			// Should display the taxonomy label as heading
-			expect( block.getByText( /Product Tags/i ) ).toBeInTheDocument();
+			expect( block.getByText( /Tag/i ) ).toBeInTheDocument();
 
 			// Should show count indicators since showCounts is true
 			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(

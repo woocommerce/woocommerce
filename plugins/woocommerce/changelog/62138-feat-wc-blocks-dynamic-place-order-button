@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+feat: allow payment methods to render a custom "Place order" button on block-based checkout.

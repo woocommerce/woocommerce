@@ -23,6 +23,12 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
+jest.mock( '@woocommerce/utils', () => {
+	return {
+		isSiteEditorPage: jest.fn().mockReturnValue( true ),
+	};
+} );
+
 describe( 'setDefaultPaymentMethod', () => {
 	afterEach( () => {
 		jest.resetAllMocks();

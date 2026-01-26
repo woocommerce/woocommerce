@@ -12,6 +12,9 @@ import { updateProduct } from '../../../utils/product-block-editor';
 import { clickOnTab } from '../../../utils/simple-products';
 import attributesData from './fixtures/attributes';
 import { waitForGlobalAttributesLoaded } from './helpers/wait-for-global-attributes-loaded';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
+
+skipTestsForDeprecatedFeature();
 
 async function waitForAttributeList( page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.

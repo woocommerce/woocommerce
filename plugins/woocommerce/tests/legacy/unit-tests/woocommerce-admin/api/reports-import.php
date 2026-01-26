@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Admin\ReportsSync;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore;
 
 /**
  * Reports Import REST API Test Class
@@ -46,6 +47,8 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
+		// This namespace may be lazy loaded, so we make a discovery request to trigger loading for this test.
+		$this->server->dispatch( new WP_REST_Request( 'GET', '/' ) );
 		$routes = $this->server->get_routes();
 
 		$this->assertArrayHasKey( $this->endpoint, $routes );
@@ -143,6 +146,8 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 		$order_2->set_status( OrderStatus::PROCESSING );
 		$order_2->save();
 
+		// Remove the update_registered_customer action to avoid updating the customer when calling wp_update_user.
+		remove_action( 'profile_update', array( DataStore::class, 'update_registered_customer' ) );
 		// Compare against name to make sure previously imported customer was skipped.
 		wp_update_user(
 			array(
@@ -150,6 +155,7 @@ class WC_Admin_Tests_API_Reports_Import extends WC_REST_Unit_Test_Case {
 				'first_name' => 'Changed',
 			)
 		);
+		add_action( 'profile_update', array( DataStore::class, 'update_registered_customer' ) );
 
 		// Delete scheduled actions to avoid default order processing.
 		WC_Helper_Queue::cancel_all_pending();

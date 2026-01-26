@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Decode shipping rate names to correct display of special characters on Block Cart and Checkout

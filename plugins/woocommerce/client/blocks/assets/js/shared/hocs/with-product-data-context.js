@@ -10,15 +10,30 @@ import {
 const getProductById = ( products, id ) =>
 	products.find( ( product ) => product.id === id );
 
+const getProductId = ( isDescendentOfQueryLoop, productId, postId ) => {
+	// Keep for backwards compatibility of Products (Beta) block.
+	if ( isDescendentOfQueryLoop ) {
+		return postId;
+	}
+
+	return productId || postId;
+};
+
 /**
  * Loads the product from the API and adds to the context provider.
  *
  * @param {Object} props Component props.
  */
 const OriginalComponentWithContext = ( props ) => {
-	const { productId, OriginalComponent, postId, product } = props;
+	const {
+		productId,
+		OriginalComponent,
+		postId,
+		product,
+		isDescendentOfQueryLoop,
+	} = props;
 
-	const id = props?.isDescendentOfQueryLoop ? postId : productId;
+	const id = getProductId( isDescendentOfQueryLoop, productId, postId );
 
 	const { products, productsLoading } = useStoreProducts( {
 		include: id,

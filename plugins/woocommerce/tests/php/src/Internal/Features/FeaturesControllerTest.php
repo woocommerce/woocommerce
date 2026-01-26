@@ -74,24 +74,28 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	public function register_dummy_features( $features_controller ) {
 		$features = array(
 			'mature1'       => array(
-				'name'            => 'Mature feature 1',
-				'description'     => 'The mature feature number 1',
-				'is_experimental' => false,
+				'name'                         => 'Mature feature 1',
+				'description'                  => 'The mature feature number 1',
+				'is_experimental'              => false,
+				'default_plugin_compatibility' => 'compatible',
 			),
 			'mature2'       => array(
-				'name'            => 'Mature feature 2',
-				'description'     => 'The mature feature number 2',
-				'is_experimental' => false,
+				'name'                         => 'Mature feature 2',
+				'description'                  => 'The mature feature number 2',
+				'is_experimental'              => false,
+				'default_plugin_compatibility' => 'compatible',
 			),
 			'experimental1' => array(
-				'name'            => 'Experimental feature 1',
-				'description'     => 'The experimental feature number 1',
-				'is_experimental' => true,
+				'name'                         => 'Experimental feature 1',
+				'description'                  => 'The experimental feature number 1',
+				'is_experimental'              => true,
+				'default_plugin_compatibility' => 'compatible',
 			),
 			'experimental2' => array(
-				'name'            => 'Experimental feature 2',
-				'description'     => 'The experimental feature number 2',
-				'is_experimental' => true,
+				'name'                         => 'Experimental feature 2',
+				'description'                  => 'The experimental feature number 2',
+				'is_experimental'              => true,
+				'default_plugin_compatibility' => 'compatible',
 			),
 		);
 
@@ -547,34 +551,40 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'mature1'       => array(
-						'name'            => 'Mature feature 1',
-						'description'     => 'The mature feature number 1',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 1',
+						'description'                  => 'The mature feature number 1',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'mature2'       => array(
-						'name'            => 'Mature feature 2',
-						'description'     => 'The mature feature number 2',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 2',
+						'description'                  => 'The mature feature number 2',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'mature3'       => array(
-						'name'            => 'Mature feature 3',
-						'description'     => 'The mature feature number 3',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 3',
+						'description'                  => 'The mature feature number 3',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental1' => array(
-						'name'            => 'Experimental feature 1',
-						'description'     => 'The experimental feature number 1',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 1',
+						'description'                  => 'The experimental feature number 1',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental2' => array(
-						'name'            => 'Experimental feature 2',
-						'description'     => 'The experimental feature number 2',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 2',
+						'description'                  => 'The experimental feature number 2',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental3' => array(
-						'name'            => 'Experimental feature 3',
-						'description'     => 'The experimental feature number 3',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 3',
+						'description'                  => 'The experimental feature number 3',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 
@@ -608,6 +618,225 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			'uncertain'    => array( 'mature3' ),
 		);
 		$this->assertEquals( $expected, $result );
+	}
+
+	/**
+	 * @testdox Deprecated features are included in 'get_compatible_features_for_plugin' results.
+	 */
+	public function test_deprecated_features_included_in_get_compatible_features_for_plugin() {
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function ( $features_controller ) {
+				$features = array(
+					'active_feature'     => array(
+						'name'                         => 'Active feature',
+						'description'                  => 'An active feature',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
+					),
+					'deprecated_feature' => array(
+						'name'                         => 'Deprecated feature',
+						'description'                  => 'A deprecated feature',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
+						'deprecated_since'             => '10.5.0',
+						'deprecated_value'             => true,
+					),
+				);
+
+				$this->reset_features_list( $features_controller, $features );
+			},
+			20
+		);
+
+		$this->sut = new FeaturesController();
+		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+		$this->simulate_inside_before_woocommerce_init_hook();
+
+		$this->sut->declare_compatibility( 'active_feature', 'the_plugin', true );
+		$this->sut->declare_compatibility( 'deprecated_feature', 'the_plugin', true );
+		$this->reset_legacy_proxy_mocks();
+		$this->simulate_after_woocommerce_init_hook();
+
+		// Test without enabled_features_only - all features should appear.
+		$result = $this->sut->get_compatible_features_for_plugin( 'the_plugin', false );
+
+		// Both features should appear in compatible list.
+		$this->assertContains( 'active_feature', $result['compatible'] );
+		$this->assertContains( 'deprecated_feature', $result['compatible'] );
+	}
+
+	/**
+	 * @testdox Deprecated features with deprecated_value=true are included when filtering by enabled features.
+	 */
+	public function test_deprecated_features_with_true_value_included_when_filtering_enabled_features() {
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function ( $features_controller ) {
+				$features = array(
+					'active_feature'              => array(
+						'name'                         => 'Active feature',
+						'description'                  => 'An active feature',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
+					),
+					'deprecated_enabled_feature'  => array(
+						'name'                         => 'Deprecated enabled feature',
+						'description'                  => 'A deprecated feature with true value',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
+						'deprecated_since'             => '10.5.0',
+						'deprecated_value'             => true,
+					),
+					'deprecated_disabled_feature' => array(
+						'name'                         => 'Deprecated disabled feature',
+						'description'                  => 'A deprecated feature with false value',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
+						'deprecated_since'             => '10.5.0',
+						'deprecated_value'             => false,
+					),
+				);
+
+				$this->reset_features_list( $features_controller, $features );
+			},
+			20
+		);
+
+		$this->sut = new FeaturesController();
+		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $this->fake_plugin_util );
+		$this->simulate_inside_before_woocommerce_init_hook();
+
+		$this->sut->declare_compatibility( 'active_feature', 'the_plugin', true );
+		$this->sut->declare_compatibility( 'deprecated_enabled_feature', 'the_plugin', true );
+		$this->sut->declare_compatibility( 'deprecated_disabled_feature', 'the_plugin', true );
+		$this->reset_legacy_proxy_mocks();
+		$this->simulate_after_woocommerce_init_hook();
+
+		update_option( 'woocommerce_feature_active_feature_enabled', 'yes' );
+
+		// Test with enabled_features_only = true.
+		$result = $this->sut->get_compatible_features_for_plugin( 'the_plugin', true );
+
+		// Active and deprecated_enabled features should appear (deprecated_value=true).
+		$this->assertContains( 'active_feature', $result['compatible'] );
+		$this->assertContains( 'deprecated_enabled_feature', $result['compatible'] );
+		// Deprecated with deprecated_value=false should NOT appear.
+		$this->assertNotContains( 'deprecated_disabled_feature', $result['compatible'] );
+		$this->assertNotContains( 'deprecated_disabled_feature', $result['incompatible'] );
+		$this->assertNotContains( 'deprecated_disabled_feature', $result['uncertain'] );
+	}
+
+	/**
+	 * @testdox Deprecated features can be checked in 'get_incompatible_plugins' without triggering deprecation notices.
+	 */
+	public function test_deprecated_features_in_get_incompatible_plugins_without_notices() {
+		add_action(
+			'woocommerce_register_feature_definitions',
+			function ( $features_controller ) {
+				$features = array(
+					'active_feature'              => array(
+						'name'                         => 'Active feature',
+						'description'                  => 'An active feature',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'incompatible',
+					),
+					'deprecated_enabled_feature'  => array(
+						'name'                         => 'Deprecated enabled feature',
+						'description'                  => 'A deprecated feature that is considered enabled',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'incompatible',
+						'deprecated_since'             => '10.5.0',
+						'deprecated_value'             => true,
+					),
+					'deprecated_disabled_feature' => array(
+						'name'                         => 'Deprecated disabled feature',
+						'description'                  => 'A deprecated feature that is considered disabled',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'incompatible',
+						'deprecated_since'             => '10.5.0',
+						'deprecated_value'             => false,
+					),
+				);
+
+				$this->reset_features_list( $features_controller, $features );
+			},
+			20
+		);
+
+		// phpcs:disable Squiz.Commenting
+		$fake_plugin_util = new class() extends PluginUtil {
+			private $active_plugins;
+
+			public function __construct() {
+			}
+
+			public function set_active_plugins( $plugins ) {
+				$this->active_plugins = $plugins;
+			}
+
+			public function get_woocommerce_aware_plugins( bool $active_only = false ): array {
+				return $this->active_plugins;
+			}
+
+			public function is_woocommerce_aware_plugin( $plugin ): bool {
+				return in_array( $plugin, $this->active_plugins, true );
+			}
+
+			public function get_plugins_excluded_from_compatibility_ui() {
+				return array();
+			}
+
+			public function get_wp_plugin_id( $plugin_file ) {
+				return $plugin_file;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		// Set private $proxy via reflection.
+		$parent_reflection = new \ReflectionClass( PluginUtil::class );
+		$proxy_prop        = $parent_reflection->getProperty( 'proxy' );
+		$proxy_prop->setAccessible( true );
+		$proxy_prop->setValue( $fake_plugin_util, wc_get_container()->get( LegacyProxy::class ) );
+
+		$this->sut = new FeaturesController();
+		$this->sut->init( wc_get_container()->get( LegacyProxy::class ), $fake_plugin_util );
+		$this->simulate_inside_before_woocommerce_init_hook();
+
+		$fake_plugin_util->set_active_plugins( array( 'test_plugin' ) );
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_plugin_active' => function ( $plugin ) {
+					unset( $plugin );
+					return true;
+				},
+			)
+		);
+
+		$this->reset_legacy_proxy_mocks();
+		$this->simulate_after_woocommerce_init_hook();
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'is_plugin_active' => function ( $plugin ) {
+					unset( $plugin );
+					return true;
+				},
+			)
+		);
+
+		update_option( 'woocommerce_feature_active_feature_enabled', 'yes' );
+
+		$incompatible_plugins = function () {
+			return $this->get_incompatible_plugins( 'all', array( 'test_plugin' => array() ) );
+		};
+		$result               = $incompatible_plugins->call( $this->sut );
+
+		// The method should complete without triggering deprecation notices.
+		// Deprecated features with deprecated_value=true are still included in checks.
+		// Deprecated features with deprecated_value=false are excluded from enabled-only checks.
+		$this->assertIsArray( $result );
 	}
 
 	/**
@@ -890,15 +1119,17 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => true,
-						'enabled_by_default' => false,
+						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'              => true,
+						'enabled_by_default'           => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'cart_checkout_blocks' => array(
-						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-						'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
-						'is_experimental' => false,
-						'disable_ui'      => true,
+						'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'is_experimental'              => false,
+						'disable_ui'                   => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 
@@ -988,17 +1219,18 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => false,
-						'enabled_by_default' => false,
-						'option_key'         => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-						'plugins_are_incompatible_by_default' => true,
+						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'              => false,
+						'enabled_by_default'           => false,
+						'option_key'                   => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+						'default_plugin_compatibility' => 'incompatible',
 					),
 					'cart_checkout_blocks' => array(
-						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-						'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
-						'is_experimental' => false,
-						'disable_ui'      => true,
+						'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'is_experimental'              => false,
+						'disable_ui'                   => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 

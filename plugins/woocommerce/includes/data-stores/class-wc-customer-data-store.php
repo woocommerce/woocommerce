@@ -342,7 +342,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_last_order( &$customer ) {
 		// Try to fetch the last order placed by this customer.
-		$last_order_id       = Users::get_site_user_meta( $customer->get_id(), 'wc_last_order', true );
+		$customer_id         = $customer->get_id();
+		$last_order_id       = Users::get_site_user_meta( $customer_id, 'wc_last_order', true );
 		$last_customer_order = false;
 
 		if ( ! empty( $last_order_id ) ) {
@@ -353,7 +354,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		// empty string, for compatibility with the declared types of the following filter hook.
 		if (
 			! $last_customer_order instanceof WC_Order
-			|| intval( $last_customer_order->get_customer_id() ) !== intval( $customer->get_id() )
+			|| intval( $last_customer_order->get_customer_id() ) !== intval( $customer_id )
 		) {
 			$last_order_id = '';
 		}
@@ -383,21 +384,18 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
 				$sql           = $wpdb->prepare(
-					'SELECT id FROM ' . OrdersTableDataStore::get_orders_table_name() . "
-					WHERE customer_id = %d
-					AND status in $order_statuses_sql
-					ORDER BY id DESC
-					LIMIT 1",
-					$customer->get_id()
+					"SELECT id FROM %i WHERE customer_id = %d AND status IN $order_statuses_sql ORDER BY id DESC LIMIT 1",
+					OrdersTableDataStore::get_orders_table_name(),
+					$customer_id
 				);
 				$last_order_id = $wpdb->get_var( $sql );
 			} else {
 				$last_order_id = $wpdb->get_var(
 					"SELECT posts.ID
-				FROM $wpdb->posts AS posts
+				FROM {$wpdb->posts} AS posts
 				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
-				WHERE meta.meta_key = '_customer_user'
-				AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
+				WHERE meta.meta_key   = '_customer_user'
+				AND   meta.meta_value = '" . esc_sql( $customer_id ) . "'
 				AND   posts.post_type = 'shop_order'
 				AND   posts.post_status IN $order_statuses_sql
 				ORDER BY posts.ID DESC
@@ -405,7 +403,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				);
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			Users::update_site_user_meta( $customer->get_id(), 'wc_last_order', $last_order_id );
+			Users::update_site_user_meta( $customer_id, 'wc_last_order', $last_order_id );
 		}
 
 		if ( ! $last_order_id ) {
@@ -423,9 +421,19 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
+		$customer_id = $customer->get_id();
+		/**
+		 * Filters total orders count value for a given customer.
+		 *
+		 * @since 4.9.0
+		 *
+		 * @param mixed       $order_count The cached order count (from user meta).
+		 * @param WC_Customer $customer    The customer to get the orders count for.
+		 * @return mixed      The actual value to use.
+		 */
 		$count = apply_filters(
 			'woocommerce_customer_get_order_count',
-			Users::get_site_user_meta( $customer->get_id(), 'wc_order_count', true ),
+			Users::get_site_user_meta( $customer_id, 'wc_order_count', true ),
 			$customer
 		);
 
@@ -437,26 +445,25 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
 				$sql   = $wpdb->prepare(
-					'SELECT COUNT(id) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
-					WHERE customer_id = %d
-					AND status in $order_statuses_sql",
-					$customer->get_id()
+					"SELECT COUNT(id) FROM %i WHERE customer_id = %d AND status IN $order_statuses_sql",
+					OrdersTableDataStore::get_orders_table_name(),
+					$customer_id
 				);
 				$count = $wpdb->get_var( $sql );
 			} else {
 				$count = $wpdb->get_var(
 					"SELECT COUNT(*)
-				FROM $wpdb->posts as posts
+				FROM {$wpdb->posts} as posts
 				LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
-				WHERE   meta.meta_key = '_customer_user'
+				WHERE   meta.meta_key   = '_customer_user'
 				AND     posts.post_type = 'shop_order'
 				AND     posts.post_status IN $order_statuses_sql
-				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'"
+				AND     meta_value = '" . esc_sql( $customer_id ) . "'"
 				);
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-			Users::update_site_user_meta( $customer->get_id(), 'wc_order_count', $count );
+			Users::update_site_user_meta( $customer_id, 'wc_order_count', $count );
 		}
 
 		return absint( $count );
@@ -470,9 +477,19 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
+		$customer_id = $customer->get_id();
+		/**
+		 * Filters total spent value for a given customer.
+		 *
+		 * @since 3.1.0
+		 *
+		 * @param mixed       $money_spent The cached money spent value (from user meta).
+		 * @param WC_Customer $customer    The customer to get the total spent for.
+		 * @return mixed      The actual value to use.
+		 */
 		$spent = apply_filters(
 			'woocommerce_customer_get_total_spent',
-			Users::get_site_user_meta( $customer->get_id(), 'wc_money_spent', true ),
+			Users::get_site_user_meta( $customer_id, 'wc_money_spent', true ),
 			$customer
 		);
 
@@ -485,33 +502,49 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			//phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			if ( $this->is_cot_in_use() ) {
 				$sql = $wpdb->prepare(
-					'SELECT SUM(total_amount) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
-					WHERE customer_id = %d
-					AND status in $statuses_sql",
-					$customer->get_id()
+					"SELECT SUM(total_amount) FROM %i WHERE customer_id = %d AND status IN $statuses_sql",
+					OrdersTableDataStore::get_orders_table_name(),
+					$customer_id
 				);
 			} else {
-				$sql = "SELECT SUM(meta2.meta_value)
-					FROM $wpdb->posts as posts
+				$has_sql_modification_filter = has_filter( 'woocommerce_customer_get_total_spent_query' );
+				if ( $has_sql_modification_filter ) {
+					// For backward compatibility: external filters might rely onto the query structure.
+					$sql = "SELECT SUM(meta2.meta_value)
+					FROM {$wpdb->posts} as posts
 					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
 					WHERE   meta.meta_key       = '_customer_user'
-					AND     meta.meta_value     = '" . esc_sql( $customer->get_id() ) . "'
+					AND     meta.meta_value     = '" . esc_sql( $customer_id ) . "'
 					AND     posts.post_type     = 'shop_order'
 					AND     posts.post_status   IN $statuses_sql
 					AND     meta2.meta_key      = '_order_total'";
+				} else {
+					$sql = "SELECT SUM(postmeta.meta_value)
+					FROM {$wpdb->posts} AS posts
+					LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+					WHERE posts.ID IN (
+								SELECT posts.ID as order_id
+								FROM {$wpdb->posts} AS posts LEFT JOIN {$wpdb->postmeta} AS postmeta ON posts.ID = postmeta.post_id
+								WHERE postmeta.meta_key   = '_customer_user'
+								  AND postmeta.meta_value = '" . esc_sql( $customer_id ) . "'
+								  AND posts.post_type     = 'shop_order'
+								  AND posts.post_status IN $statuses_sql
+					)
+					AND postmeta.meta_key = '_order_total'";
+				}
 			}
 
-			//phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			/**
 			 * Filters the SQL query used to get the combined total of all the orders from a given customer.
 			 *
-			 * @param string The SQL query to use.
-			 * @param WC_Customer The customer to get the total spent for.
-			 * @return string The actual SQL query to use.
+			 * @since 3.1.0
+			 *
+			 * @param string      $sql      The SQL query to use.
+			 * @param WC_Customer $customer The customer to get the total spent for.
+			 * @return string     The actual SQL query to use.
 			 */
 			$sql = apply_filters( 'woocommerce_customer_get_total_spent_query', $sql, $customer );
-			//phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 			$spent = $wpdb->get_var( $sql );
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -519,7 +552,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			if ( ! $spent ) {
 				$spent = 0;
 			}
-			Users::update_site_user_meta( $customer->get_id(), 'wc_money_spent', $spent );
+			Users::update_site_user_meta( $customer_id, 'wc_money_spent', $spent );
 		}
 
 		return wc_format_decimal( $spent, 2 );
@@ -593,11 +626,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Get all user ids who have `billing_email` set to any of the email passed in array.
 	 *
+	 * @deprecated since 10.3.0 and not used by WooCommerce core anymore.
+	 *
 	 * @param array $emails List of emails to check against.
 	 *
 	 * @return array
 	 */
 	public function get_user_ids_for_billing_email( $emails ) {
+		wc_deprecated_function( __METHOD__, '10.3.0' );
 		$emails      = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 		$users_query = new WP_User_Query(
 			array(
@@ -612,5 +648,111 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			)
 		);
 		return array_unique( $users_query->get_results() );
+	}
+
+	/**
+	 * Query customers ordered by allowed fields.
+	 *
+	 * @param array $args Query arguments.
+	 * @return object Object containing customers in the requested order, total, and max_num_pages.
+	 */
+	public function query_customers( array $args = array() ) {
+		global $wpdb;
+		$site_specific_key = rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
+
+		$defaults = array(
+			'order'    => 'asc',
+			'orderby'  => 'registered_date',
+			'per_page' => 10,
+			'page'     => 1,
+			'search'   => '',
+			'role'     => 'customer',
+			'include'  => array(),
+			'exclude'  => array(),
+		);
+
+		$args        = wp_parse_args( $args, $defaults );
+		$orderby_key = $args['orderby'];
+
+		// Set order parameter to asc/desc if somehow made it here without being caught earlier.
+		$args['order'] = strtolower( $args['order'] );
+		if ( ! in_array( $args['order'], array( 'asc', 'desc' ), true ) ) {
+			$args['order'] = 'asc';
+		}
+
+		$query_args = array(
+			'order'   => $args['order'],
+			'number'  => absint( $args['per_page'] ),
+			'exclude' => array_map( 'absint', (array) $args['exclude'] ),
+			'include' => array_map( 'absint', (array) $args['include'] ),
+		);
+
+		$query_args['offset'] = ( max( 1, intval( $args['page'] ) ) - 1 ) * $query_args['number'];
+
+		if ( ! empty( $args['search'] ) ) {
+			$search                       = sanitize_text_field( $args['search'] );
+			$query_args['search']         = $search;
+			$query_args['search_columns'] = array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' );
+		}
+
+		switch ( $orderby_key ) {
+			case 'ID':
+				$query_args['orderby'] = 'ID';
+				break;
+			case 'display_name':
+				$query_args['orderby'] = 'display_name';
+				break;
+			case 'wc_order_count':
+				$query_args['meta_key'] = 'wc_order_count_' . $site_specific_key; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'wc_money_spent':
+				$query_args['meta_key'] = 'wc_money_spent_' . $site_specific_key; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'wc_last_active':
+				$query_args['meta_key'] = 'wc_last_active'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'user_registered':
+			case 'registered_date':
+				$query_args['orderby'] = 'user_registered';
+				break;
+			default:
+				$query_args['orderby'] = 'user_registered';
+				break;
+		}
+
+		// Only add role filter if role is 'customer' (not 'all' or empty).
+		if ( 'customer' === $args['role'] ) {
+			$query_args['role'] = 'customer';
+		}
+
+		/**
+		 * Filter customer query args before execution.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param array $query_args Arguments for WP_User_Query.
+		 * @param array $args       Original method args.
+		 */
+		$query_args = apply_filters( 'woocommerce_customer_query_args', $query_args, $args );
+
+		// Ensure number is positive.
+		$query_args['number'] = absint( intval( $query_args['number'] ) <= 0 ? $defaults['per_page'] : $query_args['number'] );
+
+		$wp_user_query = new \WP_User_Query( $query_args );
+
+		$customers = array();
+		foreach ( $wp_user_query->get_results() as $user ) {
+			$customers[] = new \WC_Customer( $user->ID );
+		}
+
+		return (object) array(
+			'customers'     => $customers,
+			'total'         => $wp_user_query->total_users,
+			// Query args 'number' is always > 0 due to absint above.
+			'max_num_pages' => ceil( $wp_user_query->total_users / $query_args['number'] ),
+		);
 	}
 }

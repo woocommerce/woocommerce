@@ -83,23 +83,6 @@ class CredentialManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test clearing credentials for a platform.
-	 */
-	public function test_clear_credentials() {
-		$platform    = 'test_platform';
-		$credentials = array( 'api_key' => 'test_key' );
-
-		// Store credentials.
-		$this->credential_manager->save_credentials( $platform, $credentials );
-		$this->assertTrue( $this->credential_manager->has_credentials( $platform ) );
-
-		// Clear credentials.
-		$this->credential_manager->delete_credentials( $platform );
-		$this->assertFalse( $this->credential_manager->has_credentials( $platform ) );
-		$this->assertNull( $this->credential_manager->get_credentials( $platform ) );
-	}
-
-	/**
 	 * Test deleting credentials for a platform.
 	 */
 	public function test_delete_credentials() {
@@ -116,20 +99,7 @@ class CredentialManagerTest extends \WC_Unit_Test_Case {
 		$this->assertNull( $this->credential_manager->get_credentials( $platform ) );
 	}
 
-	/**
-	 * Test prompting for credentials (mock behavior).
-	 */
-	public function test_prompt_for_credentials() {
-		$fields = array(
-			'shop_url'     => 'Enter shop URL:',
-			'access_token' => 'Enter access token:',
-		);
 
-		// Since prompt_for_credentials uses STDIN, we can't really test it in unit tests.
-		// But we can verify the method exists and is callable.
-		$this->assertTrue( method_exists( $this->credential_manager, 'prompt_for_credentials' ) );
-		$this->assertTrue( is_callable( array( $this->credential_manager, 'prompt_for_credentials' ) ) );
-	}
 
 	/**
 	 * Test that credentials are stored securely in WordPress options.
@@ -161,10 +131,36 @@ class CredentialManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the setup_credentials method exists and is callable.
+	 * Test handling malformed JSON in stored credentials.
 	 */
-	public function test_setup_credentials_method_exists() {
-		$this->assertTrue( method_exists( $this->credential_manager, 'setup_credentials' ) );
-		$this->assertTrue( is_callable( array( $this->credential_manager, 'setup_credentials' ) ) );
+	public function test_malformed_json_credentials_handling() {
+		$platform    = 'test_platform';
+		$option_name = 'wc_migrator_credentials_' . $platform;
+
+		// Store malformed JSON directly in the option.
+		update_option( $option_name, 'invalid-json{' );
+
+		// Should return null for malformed JSON.
+		$result = $this->credential_manager->get_credentials( $platform );
+		$this->assertNull( $result );
+
+		// has_credentials should return false for malformed JSON.
+		$this->assertFalse( $this->credential_manager->has_credentials( $platform ) );
+	}
+
+	/**
+	 * Test credential keys with special characters.
+	 */
+	public function test_credentials_with_special_characters() {
+		$platform    = 'test-platform_123';
+		$credentials = array(
+			'api_key' => 'test-key_with-special.chars',
+			'secret'  => 'secret@#$%^&*()value',
+		);
+
+		$this->credential_manager->save_credentials( $platform, $credentials );
+		$retrieved = $this->credential_manager->get_credentials( $platform );
+
+		$this->assertEquals( $credentials, $retrieved );
 	}
 }

@@ -28,6 +28,13 @@ class Site_Style_Sync_Controller {
 	private ?WP_Theme_JSON $site_theme = null;
 
 	/**
+	 * Base theme data for fallback lookups
+	 *
+	 * @var array|null
+	 */
+	private ?array $base_theme_data = null;
+
+	/**
 	 * Email-safe fonts
 	 *
 	 * @var array
@@ -56,9 +63,13 @@ class Site_Style_Sync_Controller {
 	/**
 	 * Sync site styles to email theme format
 	 *
+	 * @param WP_Theme_JSON|null $base_theme Base theme for fallback values. If null, no fallbacks are used.
 	 * @return array Email-compatible theme data.
 	 */
-	public function sync_site_styles(): array {
+	public function sync_site_styles( ?WP_Theme_JSON $base_theme = null ): array {
+		// Store base theme data for fallback lookups.
+		$this->base_theme_data = $base_theme ? $base_theme->get_data() : null;
+
 		$site_theme = $this->get_site_theme();
 		$site_data  = $site_theme->get_data();
 
@@ -82,14 +93,15 @@ class Site_Style_Sync_Controller {
 	/**
 	 * Getter for site theme.
 	 *
+	 * @param WP_Theme_JSON|null $base_theme Base theme for fallback values. If null, no fallbacks are used.
 	 * @return ?WP_Theme_JSON Synced site theme.
 	 */
-	public function get_theme(): ?WP_Theme_JSON {
+	public function get_theme( ?WP_Theme_JSON $base_theme = null ): ?WP_Theme_JSON {
 		if ( ! $this->is_sync_enabled() ) {
 			return null;
 		}
 
-		$synced_data = $this->sync_site_styles();
+		$synced_data = $this->sync_site_styles( $base_theme );
 
 		if ( empty( $synced_data ) || ! isset( $synced_data['version'] ) ) {
 			return null;
@@ -135,6 +147,19 @@ class Site_Style_Sync_Controller {
 			$this->site_theme = new WP_Theme_JSON();
 			$this->site_theme->merge( WP_Theme_JSON_Resolver::get_theme_data() );
 			$this->site_theme->merge( WP_Theme_JSON_Resolver::get_user_data() );
+
+			/**
+			 * Filter the site theme data used for email style sync.
+			 *
+			 * This filter allows overriding the site theme used when syncing global styles
+			 * for the email editor. Useful for environments where theme data is not directly
+			 * accessible (e.g., wp.com Atomic and Jetpack sites).
+			 *
+			 * @since 2.3.0
+			 *
+			 * @param WP_Theme_JSON $site_theme The site theme data.
+			 */
+			$this->site_theme = apply_filters( 'woocommerce_email_editor_site_theme', $this->site_theme );
 
 			if ( isset( $this->site_theme->get_raw_data()['styles'] ) ) {
 				$this->site_theme = WP_Theme_JSON::resolve_variables( $this->site_theme );
@@ -225,13 +250,8 @@ class Site_Style_Sync_Controller {
 	private function convert_color_styles( array $color_styles ): array {
 		$email_colors = array();
 
-		if ( isset( $color_styles['background'] ) ) {
-			$email_colors['background'] = $color_styles['background'];
-		}
-
-		if ( isset( $color_styles['text'] ) ) {
-			$email_colors['text'] = $color_styles['text'];
-		}
+		$this->resolve_and_assign( $color_styles, 'background', $email_colors );
+		$this->resolve_and_assign( $color_styles, 'text', $email_colors );
 
 		return $email_colors;
 	}
@@ -239,28 +259,36 @@ class Site_Style_Sync_Controller {
 	/**
 	 * Convert site typography styles to email format
 	 *
-	 * @param array $typography_styles Site typography styles.
+	 * @param array  $typography_styles Site typography styles.
+	 * @param string $element Optional element name for context-aware fallbacks.
 	 * @return array Email-compatible typography styles.
 	 */
-	private function convert_typography_styles( array $typography_styles ): array {
+	private function convert_typography_styles( array $typography_styles, string $element = '' ): array {
 		$email_typography = array();
 
-		// Convert font family to email-safe alternative.
-		if ( isset( $typography_styles['fontFamily'] ) ) {
-			$email_typography['fontFamily'] = $this->convert_to_email_safe_font( $typography_styles['fontFamily'] );
-		}
+		// Handle special cases with processors.
+		$this->resolve_and_assign( $typography_styles, 'fontFamily', $email_typography, array( $this, 'convert_to_email_safe_font' ) );
+		$this->resolve_and_assign(
+			$typography_styles,
+			'fontSize',
+			$email_typography,
+			function ( $value ) use ( $element ) {
+				// Try element-specific fallback first, then global fallback.
+				$fallback = null;
+				if ( $element ) {
+					$fallback = $this->get_base_theme_value( array( 'styles', 'elements', $element, 'typography', 'fontSize' ) );
+				}
+				if ( ! $fallback ) {
+					$fallback = $this->get_base_theme_value( array( 'styles', 'typography', 'fontSize' ) );
+				}
+				return $this->convert_to_px_size( $value, $fallback );
+			}
+		);
 
-		// Convert font size to px if needed.
-		if ( isset( $typography_styles['fontSize'] ) ) {
-			$email_typography['fontSize'] = $this->convert_to_px_size( $typography_styles['fontSize'] );
-		}
-
-		// Preserve email-compatible typography properties.
+		// Handle compatible properties without processing.
 		$compatible_props = array( 'fontWeight', 'fontStyle', 'lineHeight', 'letterSpacing', 'textTransform', 'textDecoration' );
 		foreach ( $compatible_props as $prop ) {
-			if ( isset( $typography_styles[ $prop ] ) ) {
-				$email_typography[ $prop ] = $typography_styles[ $prop ];
-			}
+			$this->resolve_and_assign( $typography_styles, $prop, $email_typography );
 		}
 
 		return $email_typography;
@@ -275,15 +303,23 @@ class Site_Style_Sync_Controller {
 	private function convert_spacing_styles( array $spacing_styles ): array {
 		$email_spacing = array();
 
-		// Convert padding to px values.
-		if ( isset( $spacing_styles['padding'] ) ) {
-			$email_spacing['padding'] = $this->convert_spacing_values( $spacing_styles['padding'] );
-		}
-
-		// Convert blockGap to px if present.
-		if ( isset( $spacing_styles['blockGap'] ) ) {
-			$email_spacing['blockGap'] = $this->convert_to_px_size( $spacing_styles['blockGap'] );
-		}
+		$this->resolve_and_assign(
+			$spacing_styles,
+			'padding',
+			$email_spacing,
+			function ( $value ) {
+				return $this->convert_spacing_values( $value, array( 'styles', 'spacing', 'padding' ) );
+			}
+		);
+		$this->resolve_and_assign(
+			$spacing_styles,
+			'blockGap',
+			$email_spacing,
+			function ( $value ) {
+				$fallback = $this->get_base_theme_value( array( 'styles', 'spacing', 'blockGap' ) );
+				return $this->convert_to_px_size( $value, $fallback );
+			}
+		);
 
 		// Note: We intentionally skip margin as it's not supported in email renderer.
 
@@ -304,7 +340,7 @@ class Site_Style_Sync_Controller {
 
 		foreach ( $supported_elements as $element ) {
 			if ( isset( $element_styles[ $element ] ) ) {
-				$email_elements[ $element ] = $this->convert_element_style( $element_styles[ $element ] );
+				$email_elements[ $element ] = $this->convert_element_style( $element_styles[ $element ], $element );
 			}
 		}
 
@@ -314,15 +350,16 @@ class Site_Style_Sync_Controller {
 	/**
 	 * Convert individual element style to email format
 	 *
-	 * @param array $element_style Site element style.
+	 * @param array  $element_style Site element style.
+	 * @param string $element_name Element name (e.g., 'h1', 'h2', 'button').
 	 * @return array Email-compatible element style.
 	 */
-	private function convert_element_style( array $element_style ): array {
+	private function convert_element_style( array $element_style, string $element_name = '' ): array {
 		$email_element = array();
 
 		// Convert typography if present.
 		if ( isset( $element_style['typography'] ) ) {
-			$email_element['typography'] = $this->convert_typography_styles( $element_style['typography'] );
+			$email_element['typography'] = $this->convert_typography_styles( $element_style['typography'], $element_name );
 		}
 
 		// Convert color if present.
@@ -336,6 +373,53 @@ class Site_Style_Sync_Controller {
 		}
 
 		return $email_element;
+	}
+
+	/**
+	 * Resolve and assign a single style property
+	 *
+	 * @param array         $styles     The source styles array.
+	 * @param string        $property   The property key to resolve.
+	 * @param array         $target     The target array to assign the value to.
+	 * @param callable|null $processor  Optional processor function for the resolved value.
+	 * @return bool True if the property was resolved and assigned, false otherwise.
+	 */
+	private function resolve_and_assign( array $styles, string $property, array &$target, ?callable $processor = null ): bool {
+		if ( ! isset( $styles[ $property ] ) ) {
+			return false;
+		}
+
+		$resolved = $this->resolve_style_value( $styles[ $property ] );
+		if ( ! $resolved ) {
+			return false;
+		}
+
+		$target[ $property ] = $processor ? $processor( $resolved ) : $resolved;
+		return true;
+	}
+
+	/**
+	 * Styles may contain references to other styles.
+	 * This function resolves the reference to the actual value.
+	 * https://make.wordpress.org/core/2022/10/11/reference-styles-values-in-theme-json/
+	 * It is not allowed to reference another reference so we don't need to check recursively.
+	 *
+	 * @param mixed $style_value Style value that might contain a reference.
+	 * @return mixed Resolved style value or null when the reference is not found.
+	 */
+	private function resolve_style_value( $style_value ) {
+		// Check if this is a reference array.
+		if ( is_array( $style_value ) && isset( $style_value['ref'] ) ) {
+			$ref = $style_value['ref'];
+			if ( ! is_string( $ref ) || empty( $ref ) ) {
+				return null;
+			}
+			$path = explode( '.', $ref );
+
+			return _wp_array_get( $this->get_site_theme()->get_data(), $path, null );
+		}
+
+		return $style_value;
 	}
 
 	/**
@@ -387,44 +471,82 @@ class Site_Style_Sync_Controller {
 	}
 
 	/**
-	 * Convert size value to px format.
+	 * Convert size value to px format with optional fallback
 	 *
-	 * @param string $size Original size value.
+	 * @param string      $size Original size value.
+	 * @param string|null $fallback Fallback value to use if conversion fails.
 	 * @return string Size in px format.
 	 */
-	private function convert_to_px_size( string $size ): string {
-		// Replace clamp() with its average value.
+	private function convert_to_px_size( string $size, ?string $fallback = null ): string {
+		$converted = null;
+		// Replace clamp() with its minimum value. We use min because it's emails are most likely to be viewed on smaller screens.
 		if ( stripos( $size, 'clamp(' ) !== false ) {
-			return Styles_Helper::clamp_to_static_px( $size, 'avg' ) ?? $size;
+			$converted = Styles_Helper::clamp_to_static_px( $size, 'min' );
+			// If clamp_to_static_px returns the original value, it failed to convert.
+			if ( $converted === $size ) {
+				$converted = null;
+			}
 		}
-		return Styles_Helper::convert_to_px( $size, false ) ?? $size; // Fallback to original value if conversion fails.
+
+		// Try standard conversion.
+		if ( is_null( $converted ) ) {
+			$converted = Styles_Helper::convert_to_px( $size, false );
+		}
+
+		// If all conversions failed, use fallback if provided.
+		if ( is_null( $converted ) && $fallback ) {
+			return $fallback;
+		}
+
+		// Return converted value or original if conversion failed.
+		return $converted ?? $size;
 	}
 
 	/**
 	 * Convert spacing values to px format.
 	 *
 	 * @param string|array $spacing_values Original spacing values.
+	 * @param array        $base_path Base path for fallback lookup (e.g., ['styles', 'spacing', 'padding']).
 	 * @return string|array Spacing values in px format.
 	 */
-	private function convert_spacing_values( $spacing_values ) {
+	private function convert_spacing_values( $spacing_values, array $base_path ) {
 		if ( ! is_string( $spacing_values ) && ! is_array( $spacing_values ) ) {
 			return $spacing_values;
 		}
 
 		if ( is_string( $spacing_values ) ) {
-			return $this->convert_to_px_size( $spacing_values );
+			$fallback = $this->get_base_theme_value( $base_path );
+			return $this->convert_to_px_size( $spacing_values, $fallback );
 		}
 
 		$px_values = array();
 
 		foreach ( $spacing_values as $side => $value ) {
 			if ( is_string( $value ) ) {
-				$px_values[ $side ] = $this->convert_to_px_size( $value );
+				// Build path for side-specific fallback (e.g., ['styles', 'spacing', 'padding', 'top']).
+				$side_path          = array_merge( $base_path, array( $side ) );
+				$fallback           = $this->get_base_theme_value( $side_path );
+				$px_values[ $side ] = $this->convert_to_px_size( $value, $fallback );
 			} else {
 				$px_values[ $side ] = $value;
 			}
 		}
 
 		return $px_values;
+	}
+
+	/**
+	 * Get value from base theme by path
+	 *
+	 * @param array $path Path array for _wp_array_get (e.g., ['styles', 'typography', 'fontSize']).
+	 * @return string|null Value from base theme or null if not found.
+	 */
+	private function get_base_theme_value( array $path ): ?string {
+		if ( ! $this->base_theme_data ) {
+			return null;
+		}
+
+		$value = _wp_array_get( $this->base_theme_data, $path );
+		return is_string( $value ) ? $value : null;
 	}
 }

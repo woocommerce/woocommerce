@@ -10,6 +10,24 @@ defined( 'ABSPATH' ) || exit;
 
 $locales = include 'currency-info.php';
 
+// Bulgaria transitions from BGN to EUR on 2026-01-01 00:00:00 UTC.
+$bg_uses_euro = ( time() >= strtotime( '2026-01-01 00:00:00 UTC' ) );
+$bg_currency  = $bg_uses_euro ? array(
+	'currency_code' => 'EUR',
+	'name'          => 'Euro',
+	'singular'      => 'euro',
+	'plural'        => 'euros',
+	'short_symbol'  => '€',
+	'locales'       => $locales['EUR'],
+) : array(
+	'currency_code' => 'BGN',
+	'name'          => 'Bulgarian lev',
+	'singular'      => 'Bulgarian lev',
+	'plural'        => 'Bulgarian leva',
+	'short_symbol'  => null,
+	'locales'       => $locales['BGN'],
+);
+
 return array(
 	'AD' => array(
 		'currency_code'  => 'EUR',
@@ -331,21 +349,18 @@ return array(
 		'short_symbol'   => null,
 		'locales'        => $locales['XOF'],
 	),
-	'BG' => array(
-		'currency_code'  => 'BGN',
-		'currency_pos'   => 'right_space',
-		'thousand_sep'   => ' ',
-		'decimal_sep'    => ',',
-		'num_decimals'   => 2,
-		'weight_unit'    => 'kg',
-		'dimension_unit' => 'cm',
-		'direction'      => 'ltr',
-		'default_locale' => 'bg_BG',
-		'name'           => 'Bulgarian lev',
-		'singular'       => 'Bulgarian lev',
-		'plural'         => 'Bulgarian leva',
-		'short_symbol'   => null,
-		'locales'        => $locales['BGN'],
+	'BG' => array_merge(
+		array(
+			'currency_pos'   => 'right_space',
+			'thousand_sep'   => ' ',
+			'decimal_sep'    => ',',
+			'num_decimals'   => 2,
+			'weight_unit'    => 'kg',
+			'dimension_unit' => 'cm',
+			'direction'      => 'ltr',
+			'default_locale' => 'bg_BG',
+		),
+		$bg_currency
 	),
 	'BH' => array(
 		'currency_code'  => 'BHD',

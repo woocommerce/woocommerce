@@ -116,7 +116,7 @@ class ProductGallery extends \WP_UnitTestCase {
 		// Check that the gallery wrapper is rendered.
 		$this->assertStringContainsString( 'wc-block-product-gallery', $markup );
 
-		// Check that the large image block is rendered.
+		// Check that the viewer block is rendered.
 		$this->assertStringContainsString( 'wc-block-product-gallery-large-image', $markup );
 
 		// Check that the thumbnails block is rendered.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect } from '@woocommerce/e2e-utils';
+import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -145,7 +145,7 @@ test.describe( 'Product Collection: Product Picker', () => {
 			editor,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//single-product`,
+				postId: `${ BLOCK_THEME_SLUG }//single-product`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -168,7 +168,7 @@ test.describe( 'Product Collection: Product Picker', () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//page-cart`,
+			postId: `${ BLOCK_THEME_SLUG }//page-cart`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -190,7 +190,7 @@ test.describe( 'Product Collection: Product Picker', () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//order-confirmation`,
+			postId: `${ BLOCK_THEME_SLUG }//order-confirmation`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

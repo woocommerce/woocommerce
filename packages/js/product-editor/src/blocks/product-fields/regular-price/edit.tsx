@@ -12,6 +12,7 @@ import {
 	BaseControl,
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
@@ -19,7 +20,6 @@ import {
 import { Label } from '../../../components/label/label';
 import { useValidation } from '../../../contexts/validation-context';
 import { useCurrencyInputProps } from '../../../hooks/use-currency-input-props';
-import { sanitizeHTML } from '../../../utils/sanitize-html';
 import type { ProductEditorBlockEditProps } from '../../../types';
 import type { SalePriceBlockAttributes } from './types';
 
@@ -47,7 +47,11 @@ export function Edit( {
 
 	function renderHelp() {
 		if ( help ) {
-			return <span dangerouslySetInnerHTML={ sanitizeHTML( help ) } />;
+			return (
+				<span
+					dangerouslySetInnerHTML={ { __html: sanitizeHTML( help ) } }
+				/>
+			);
 		}
 	}
 

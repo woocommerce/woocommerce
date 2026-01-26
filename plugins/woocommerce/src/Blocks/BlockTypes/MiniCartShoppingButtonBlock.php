@@ -40,7 +40,7 @@ class MiniCartShoppingButtonBlock extends AbstractInnerBlock {
 	 */
 	protected function render_experimental_iapi_markup( $attributes, $content, $block ) {
 		ob_start();
-		$shop_url                     = get_permalink( wc_get_page_id( 'shop' ) );
+		$shop_url                     = wc_get_page_permalink( 'shop' );
 		$default_start_shopping_label = __( 'Start shopping', 'woocommerce' );
 		$start_shopping_label         = $attributes['startShoppingButtonLabel'] ? $attributes['startShoppingButtonLabel'] : $default_start_shopping_label;
 		$wrapper_attributes           = get_block_wrapper_attributes( array( 'class' => 'wc-block-components-button wp-element-button wc-block-mini-cart__shopping-button' ) );

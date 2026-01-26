@@ -18,8 +18,8 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
  */
 class Columns extends Abstract_Block_Renderer {
 	/**
-	 * Override this method to disable spacing (block gap) for columns.
-	 * Spacing is applied on wrapping columns block. Columns are rendered side by side so no spacer is needed.
+	 * Renders the block content.
+	 * BlockGap spacing is handled by Spacing_Preprocessor which sets padding-left on column children.
 	 *
 	 * @param string            $block_content Block content.
 	 * @param array             $parsed_block Parsed block.
@@ -27,14 +27,9 @@ class Columns extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$content = '';
-		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
-			$content .= render_block( $block );
-		}
-
 		return str_replace(
 			'{columns_content}',
-			$content,
+			$this->get_inner_content( $block_content ),
 			$this->getBlockWrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}

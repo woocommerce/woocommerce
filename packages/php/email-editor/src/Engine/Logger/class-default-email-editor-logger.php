@@ -36,7 +36,17 @@ class Default_Email_Editor_Logger implements Email_Editor_Logger_Interface {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->log_file = defined( 'WP_DEBUG_LOG' ) && WP_DEBUG_LOG ? WP_CONTENT_DIR . '/debug.log' : '';
+		if ( defined( 'WP_DEBUG_LOG' ) ) {
+			if ( true === WP_DEBUG_LOG ) {
+				$this->log_file = WP_CONTENT_DIR . '/debug.log';
+			} elseif ( is_string( WP_DEBUG_LOG ) && ! empty( WP_DEBUG_LOG ) ) {
+				$this->log_file = WP_DEBUG_LOG;
+			} else {
+				$this->log_file = '';
+			}
+		} else {
+			$this->log_file = '';
+		}
 	}
 
 	/**

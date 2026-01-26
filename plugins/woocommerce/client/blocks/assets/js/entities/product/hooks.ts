@@ -14,7 +14,7 @@ export const useProduct = ( postId: number | string | undefined ) => {
 		( select ) => {
 			if ( ! postId ) {
 				return {
-					product: null,
+					product: undefined,
 					isResolving: false,
 				};
 			}

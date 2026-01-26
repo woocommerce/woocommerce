@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add PlatformRegistry service to CLI Migrator with dependency injection integration

@@ -101,3 +101,13 @@
 .force-hidden {
 	display: none !important;
 }
+
+/* Align Site Logo right in flow layouts (uses float + physical margins) */
+.is-layout-flow .wp-block-site-logo.alignright,
+.block-editor-block-list__layout .wp-block-site-logo.alignright,
+.is-layout-constrained .wp-block-site-logo.alignright,
+.wp-block-group .wp-block-site-logo.alignright {
+	float: right;
+	margin-left: auto;
+	margin-right: 0;
+}

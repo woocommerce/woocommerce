@@ -79,7 +79,8 @@
 		"anchor": true,
 		"html": false,
 		"__experimentalLayout": true,
-		"interactivity": true
+		"interactivity": true,
+		"email": true
 	},
 	"editorStyle": "file:../woocommerce/product-collection-editor.css",
 	"style": "file:../woocommerce/product-collection-style.css"

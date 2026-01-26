@@ -71,6 +71,7 @@ class WC_Settings_General_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_price_decimal_sep'            => 'text',
 			'woocommerce_price_num_decimals'           => 'number',
 			'pricing_options'                          => array( 'title', 'sectionend' ),
+			'taxes_and_coupons_options'                => array( 'title', 'sectionend' ),
 		);
 
 		$this->assertEquals( $expected, $setting_ids_and_types );

@@ -37,14 +37,9 @@ class Column extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$content = '';
-		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
-			$content .= render_block( $block );
-		}
-
 		return str_replace(
 			'{column_content}',
-			$content,
+			$this->get_inner_content( $block_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
@@ -113,6 +108,13 @@ class Column extends Abstract_Block_Renderer {
 		);
 
 		$inner_table = Table_Wrapper_Helper::render_table_wrapper( '{column_content}', $inner_table_attrs, $inner_cell_attrs );
+
+		// Apply padding-left from email_attrs (set by Spacing_Preprocessor for columns blockGap).
+		$padding_left = $parsed_block['email_attrs']['padding-left'] ?? null;
+		if ( $padding_left ) {
+			$gap_padding_styles = wp_style_engine_get_styles( array( 'spacing' => array( 'padding' => array( 'left' => $padding_left ) ) ) );
+			$wrapper_styles     = Styles_Helper::extend_block_styles( $wrapper_styles, $gap_padding_styles['declarations'] ?? array() );
+		}
 
 		// Create the outer td element (since this is meant to be used within a columns structure).
 		$wrapper_cell_attrs = array(

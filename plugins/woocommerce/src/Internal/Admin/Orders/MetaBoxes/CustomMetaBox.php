@@ -122,7 +122,7 @@ class CustomMetaBox {
 			 *
 			 * @param int $limit Number of custom fields to retrieve. Default 30.
 			 */
-			$limit = apply_filters( 'postmeta_form_limit', 30 );
+			$limit = (int) apply_filters( 'postmeta_form_limit', 30 );
 			$keys  = wc_get_container()->get( OrdersTableDataStoreMeta::class )->get_meta_keys( $limit );
 		}
 

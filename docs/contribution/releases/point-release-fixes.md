@@ -1,6 +1,7 @@
 ---
 post_title: Point Release Requests in WooCommerce
-sidebar_label: Point Releases
+sidebar_label: Point Release Requests
+sidebar_position: 4
 ---
 
 # Point Release Requests in WooCommerce

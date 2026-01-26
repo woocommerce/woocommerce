@@ -23,6 +23,7 @@ jobs:
       next_branch: ${{ steps.get-branches.outputs.next_branch }}
       pr_number: ${{ steps.set-vars.outputs.pr_number }}
       milestone: ${{ steps.set-vars.outputs.milestone }}
+      should_cherry_pick: ${{ steps.check-cherry-pick.outputs.should_cherry_pick }}
     steps:
       - name: debug
         run: |
@@ -36,6 +37,25 @@ jobs:
         run: |
           echo "pr_number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
           echo "milestone=${{ github.event.pull_request.milestone.title }}" >> $GITHUB_OUTPUT
+
+      # Check if cherry-pick should proceed.
+      # Behavior can be overridden using a hidden comment in HTML. By default, cherry-pick is disabled for PRs with the 'Release' label.
+      - name: Check if cherry-pick should proceed
+        id: check-cherry-pick
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const body  = context.payload.pull_request.body || '';
+
+            // Check for override comment first (takes precedence over everything)
+            // Format: <!-- cherry-pick-milestoned-prs: yes --> or <!-- cherry-pick-milestoned-prs: no -->
+            const match = body.match(/^<!--\s*cherry-pick-milestoned-prs:\s*(yes|no)\s*-->$/m);
+            if ( match ) {
+              core.setOutput( 'should_cherry_pick', match[1] === 'yes' ? 'true' : 'false' );
+              return;
+            }
+
+            core.setOutput( 'should_cherry_pick', ${{ ! contains(github.event.pull_request.labels.*.name, 'Release') }} ? 'true' : 'false' );
 
       # Extract base version from milestone (e.g., 9.9 from 9.9.0)
       - name: Extract version from milestone
@@ -93,11 +113,11 @@ jobs:
 
             core.setOutput('milestoned_branch', milestonedExists ? milestonedBranch : '');
             core.setOutput('next_branch', nextExists ? nextBranch : '');
-  
+
   # Cherry-pick to milestoned branch
   cherry-pick-milestoned:
     needs: prepare
-    if: needs.prepare.outputs.milestoned_branch != ''
+    if: needs.prepare.outputs.milestoned_branch != '' && needs.prepare.outputs.should_cherry_pick == 'true'
     uses: ./.github/workflows/shared-cherry-pick.yml
     with:
       pr_number: ${{ needs.prepare.outputs.pr_number }}
@@ -107,7 +127,7 @@ jobs:
   # Cherry-pick to next branch
   cherry-pick-next:
     needs: prepare
-    if: needs.prepare.outputs.next_branch != ''
+    if: needs.prepare.outputs.next_branch != '' && needs.prepare.outputs.should_cherry_pick == 'true'
     uses: ./.github/workflows/shared-cherry-pick.yml
     with:
       pr_number: ${{ needs.prepare.outputs.pr_number }}
@@ -167,7 +187,7 @@ jobs:
               issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
               body
             });
-      
+
       # Notify Slack about successful cherry-pick to milestoned branch
       - name: Notify Slack on success
         if: always()
@@ -237,7 +257,7 @@ jobs:
               issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
               body
             });
-      
+
       # Notify Slack about successful cherry-pick to next branch
       - name: Notify Slack on success
         if: always()
@@ -299,7 +319,7 @@ jobs:
             const targetBranch = process.env.TARGET_BRANCH;
             const workflowLink = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
 
-            const body = 
+            const body =
               (merger ? merger + ' ' : '') +
               '❌ **Cherry-pick to `' + targetBranch + '` failed.**\n\n' +
               '**Error:** ' + errorMsg + '\n\n' +
@@ -329,8 +349,8 @@ jobs:
           slack-optional-unfurl_links: false
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
           slack-text: |
-            :warning: *Cherry pick from `trunk` to `${{ env.TARGET_BRANCH }}` <${{ env.WORKFLOW_RUN_URL }}|failed>*  
-            Please resolve before releasing.  
+            :warning: *Cherry pick from `trunk` to `${{ env.TARGET_BRANCH }}` <${{ env.WORKFLOW_RUN_URL }}|failed>*
+            Please resolve before releasing.
             Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
 
   # Handle failed cherry-pick to next branch
@@ -379,7 +399,7 @@ jobs:
             const targetBranch = process.env.TARGET_BRANCH;
             const workflowLink = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.GITHUB_RUN_ID}`;
 
-            const body = 
+            const body =
               (merger ? merger + ' ' : '') +
               '❌ **Cherry-pick to `' + targetBranch + '` failed.**\n\n' +
               '**Error:** ' + errorMsg + '\n\n' +
@@ -409,6 +429,6 @@ jobs:
           slack-optional-unfurl_links: false
           slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
           slack-text: |
-            :warning: *Cherry pick from `trunk` to `${{ env.TARGET_BRANCH }}` <${{ env.WORKFLOW_RUN_URL }}|failed>*  
-            Please resolve before releasing.  
+            :warning: *Cherry pick from `trunk` to `${{ env.TARGET_BRANCH }}` <${{ env.WORKFLOW_RUN_URL }}|failed>*
+            Please resolve before releasing.
             Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.

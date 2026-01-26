@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix most-popular number items getting sliced down to 4 items after switching tab

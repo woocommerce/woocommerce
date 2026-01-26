@@ -52,11 +52,11 @@ const ProductCategoriesBlock = ( {
 	setAttributes,
 	name,
 }: ProductCategoriesBlockProps ) => {
-	const editSiteStore = useSelect( ( select ) => select( 'core/edit-site' ) );
-	const editWidgetStore = useSelect( ( select ) =>
-		select( 'core/edit-widgets' )
+	const editWidgetStore = useSelect(
+		( select ) => select( 'core/edit-widgets' ),
+		[]
 	);
-	const isSiteEditor = isSiteEditorPage( editSiteStore );
+	const isSiteEditor = isSiteEditorPage();
 	const isWidgetEditor = isWidgetEditorPage( editWidgetStore );
 	const getInspectorControls = () => {
 		const {

@@ -40,7 +40,7 @@ const BLOCK_LIBRARY_DIR = path.resolve( BLOCK_LIBRARY_ROOT_DIR, 'assets/js' );
  */
 const BLOCK_LIBRARY_DOCS_FILE = path.resolve(
 	ROOT_DIR,
-	'docs/block-development/block-references.md'
+	'docs/block-development/reference/block-references.md'
 );
 
 /**

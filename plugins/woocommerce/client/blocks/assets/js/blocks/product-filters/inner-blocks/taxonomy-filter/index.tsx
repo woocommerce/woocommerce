@@ -44,7 +44,7 @@ registerBlockType( metadata, {
 					`Enable customers to filter the product collection by selecting one or more %s terms.`,
 					'woocommerce'
 				),
-				item.labels.singular_name || item.label
+				item.label
 			),
 			attributes: {
 				taxonomy: item.name,
