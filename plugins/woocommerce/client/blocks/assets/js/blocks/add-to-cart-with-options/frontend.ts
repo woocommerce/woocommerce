@@ -118,6 +118,9 @@ export const getProductData = (
 			if ( variation ) {
 				return normalizeProductFromStore( variation );
 			}
+			// Variation was matched but its data isn't in the store.
+			// Return null to prevent using stale parent product data.
+			return null;
 		}
 	}
 

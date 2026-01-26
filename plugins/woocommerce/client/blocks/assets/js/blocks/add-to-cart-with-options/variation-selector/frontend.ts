@@ -458,7 +458,20 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					productsStore.state.productVariations[
 						matchedVariation.id
 					];
-				if ( variationData && ! variationData.is_in_stock ) {
+
+				if ( ! variationData ) {
+					// Variation data not loaded - can't verify stock status.
+					// Treat as unavailable to prevent adding potentially
+					// out-of-stock items.
+					actions.addError( {
+						code: 'variableProductOutOfStock',
+						message: errorMessages?.variableProductOutOfStock || '',
+						group: 'variable-product',
+					} );
+					return;
+				}
+
+				if ( ! variationData.is_in_stock ) {
 					actions.addError( {
 						code: 'variableProductOutOfStock',
 						message: errorMessages?.variableProductOutOfStock || '',
