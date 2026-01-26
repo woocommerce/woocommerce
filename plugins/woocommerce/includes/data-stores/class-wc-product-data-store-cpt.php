@@ -1800,7 +1800,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$wpdb->query(
 					$wpdb->prepare(
 						"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='total_sales'",
-						(int) $quantity,
+						number_format( (float) $quantity, WC_ROUNDING_PRECISION, '.', '' ),
 						$product_id
 					)
 				);
