@@ -382,9 +382,29 @@ class ReactSettingsSchema {
 			? $setting['options']
 			: array();
 
-		if ( empty( $options ) && 'multi_select_countries' === ( $setting['type'] ?? '' ) ) {
-			if ( function_exists( 'WC' ) ) {
+		if ( empty( $options ) ) {
+			$type = $setting['type'] ?? '';
+
+			if ( 'multi_select_countries' === $type && function_exists( 'WC' ) ) {
 				$options = WC()->countries->get_countries();
+			}
+
+			if ( 'single_select_country' === $type && function_exists( 'WC' ) ) {
+				$countries = WC()->countries->get_countries();
+				$states    = WC()->countries->get_states();
+
+				foreach ( $countries as $country_code => $country_name ) {
+					$country_states = $states[ $country_code ] ?? array();
+
+					if ( empty( $country_states ) ) {
+						$options[ $country_code ] = $country_name;
+						continue;
+					}
+
+					foreach ( $country_states as $state_code => $state_name ) {
+						$options[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
+					}
+				}
 			}
 		}
 
