@@ -1,8 +1,7 @@
 name: Backwards Compatibility PR Review
 
 on:
-  pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+  workflow_dispatch:
 
 concurrency:
   group: bc-review-${{ github.event.pull_request.number }}
