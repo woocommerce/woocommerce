@@ -460,14 +460,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					];
 
 				if ( ! variationData ) {
-					// Variation data not loaded - can't verify stock status.
-					// Treat as unavailable to prevent adding potentially
-					// out-of-stock items.
-					actions.addError( {
-						code: 'variableProductOutOfStock',
-						message: errorMessages?.variableProductOutOfStock || '',
-						group: 'variable-product',
-					} );
+					// Variation data not loaded - this is a data consistency issue.
+					// Return early; getProductData already returns null for this case,
+					// which prevents add-to-cart from proceeding.
 					return;
 				}
 
