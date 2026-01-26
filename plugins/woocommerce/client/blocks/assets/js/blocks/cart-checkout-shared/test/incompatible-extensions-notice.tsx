@@ -168,13 +168,13 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			await user.click( screen.getByTestId( 'dismiss-button' ) );
 
 			expect( mockSetDismissedNotices ).toHaveBeenCalledWith( [
-				{ 'woocommerce/checkout': [ 'test-plugin' ] },
+				'test-plugin',
 			] );
 		} );
 
 		it( 'should not render when already dismissed with same extensions', () => {
 			mockUseLocalStorageState.mockReturnValue( [
-				[ { 'woocommerce/checkout': [ 'test-plugin' ] } ],
+				[ 'test-plugin' ],
 				mockSetDismissedNotices,
 			] );
 
@@ -191,7 +191,7 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 				{ id: 'new-plugin', title: 'New Plugin' },
 			] );
 			mockUseLocalStorageState.mockReturnValue( [
-				[ { 'woocommerce/checkout': [ 'test-plugin' ] } ],
+				[ 'test-plugin' ],
 				mockSetDismissedNotices,
 			] );
 
@@ -202,17 +202,17 @@ describe( 'IncompatibleExtensionsFrontendNotice', () => {
 			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
 		} );
 
-		it( 'should render for cart when only checkout was dismissed', () => {
+		it( 'should not render for cart when notice is dismissed (shared dismissal)', () => {
 			mockUseLocalStorageState.mockReturnValue( [
-				[ { 'woocommerce/checkout': [ 'test-plugin' ] } ],
+				[ 'test-plugin' ],
 				mockSetDismissedNotices,
 			] );
 
-			render(
+			const { container } = render(
 				<IncompatibleExtensionsFrontendNotice block="woocommerce/cart" />
 			);
 
-			expect( screen.getByTestId( 'notice-banner' ) ).toBeInTheDocument();
+			expect( container ).toBeEmptyDOMElement();
 		} );
 	} );
 } );
