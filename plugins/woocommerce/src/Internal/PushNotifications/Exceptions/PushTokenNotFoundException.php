@@ -20,6 +20,7 @@ use WP_Http;
 class PushTokenNotFoundException extends Exception {
 	/**
 	 * Default exception message.
+	 *
 	 * @var string
 	 */
 	protected $message = 'Push token could not be found.';
