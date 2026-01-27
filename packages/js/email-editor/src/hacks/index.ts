@@ -10,10 +10,12 @@
  * Internal dependencies
  */
 import { modifyTemplateActions } from './modify-template-actions';
+import { modifyMoveToTrashAction } from './move-to-trash';
 
 /**
  * Initialize all hacks.
  */
 export function initHacks() {
+	modifyMoveToTrashAction();
 	modifyTemplateActions();
 }
