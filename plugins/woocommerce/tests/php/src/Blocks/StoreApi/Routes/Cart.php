@@ -636,10 +636,11 @@ class Cart extends ControllerTestCase {
 			$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/cart';
 			$_SERVER['HTTP_CART_TOKEN']              = $token;
 
-			/**
-			 * Fires parse_request so Store API context is captured before session selection.
-			 */
+			// Fires parse_request so Store API context is captured before session selection.
+			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			/** This action is documented in wp-include/parse.php */
 			do_action( 'parse_request', $GLOBALS['wp'] );
+			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 			WC()->session = null;
 			WC()->cart    = null;
