@@ -14,7 +14,7 @@ GET /products/reviews?orderby=rating&order=desc
 | Attribute     | Type    | Required | Description                                                                                         |
 | :------------ | :------ | :------: | :-------------------------------------------------------------------------------------------------- |
 | `page`        | integer |    no    | Current page of the collection.                                                                     |
-| `per_page`    | integer |    no    | Maximum number of items to be returned in result set. Defaults to no limit if left blank.           |
+| `per_page`    | integer |    no    | Maximum number of items to be returned in result set.                                               |
 | `offset`      | integer |    no    | Offset the result set by a specific number of items.                                                |
 | `order`       | string  |    no    | Order sort attribute ascending or descending. Allowed values: `asc`, `desc`                         |
 | `orderby`     | string  |    no    | Sort collection by object attribute. Allowed values : `date`, `date_gmt`, `id`, `rating`, `product` |
