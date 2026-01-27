@@ -15,8 +15,8 @@ test.describe(
 				waitUntil: 'networkidle0',
 			} );
 
-			const adminMenu = page.locator( '#adminmenu' );
-			await adminMenu
+			await page
+				.locator( '#adminmenu' )
 				.getByRole( 'link', { name: 'WooCommerce', exact: true } )
 				.click();
 
@@ -33,9 +33,8 @@ test.describe(
 		async function openPayments( page ) {
 			await openWCSettings( page );
 
-			const navTabWrapper = page.locator( '.woo-nav-tab-wrapper' );
-
-			await navTabWrapper
+			await page
+				.locator( '.woo-nav-tab-wrapper' )
 				.getByRole( 'link', {
 					name: 'Payments',
 					exact: true,
@@ -60,14 +59,11 @@ test.describe(
 			const paypalDiv = await waitForPayPalToLoad( page );
 
 			await test.step( 'Enable PayPal Standard', async () => {
-				// Confirm the Enable button is present.
-				const enableButton = paypalDiv.getByRole( 'link', {
-					name: 'Enable',
-				} );
-				await expect( enableButton ).toBeVisible();
-
-				// Click the Enable button.
-				await enableButton.click();
+				await paypalDiv
+					.getByRole( 'link', {
+						name: 'Enable',
+					} )
+					.click();
 			} );
 
 			const labelActive = paypalDiv.getByText( 'Active' );
@@ -78,19 +74,17 @@ test.describe(
 
 			// Clean up by disabling PayPal again.
 			await test.step( 'Disable PayPal Standard', async () => {
-				const optionsButton = paypalDiv.getByRole( 'button', {
-					name: 'Payment provider options',
-				} );
-				await expect( optionsButton ).toBeVisible();
+				await paypalDiv
+					.getByRole( 'button', {
+						name: 'Payment provider options',
+					} )
+					.click();
 
-				await optionsButton.click();
-
-				const disableButton = page.getByRole( 'button', {
-					name: 'Disable',
-				} );
-				await expect( disableButton ).toBeVisible();
-
-				await disableButton.click();
+				await page
+					.getByRole( 'button', {
+						name: 'Disable',
+					} )
+					.click();
 
 				// Confirm the Enable button is present again.
 				await expect(
