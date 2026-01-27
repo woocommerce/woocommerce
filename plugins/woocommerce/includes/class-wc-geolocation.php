@@ -160,7 +160,7 @@ class WC_Geolocation {
 		 */
 		$country_code = apply_filters( 'woocommerce_geolocate_ip', false, $ip_address, $fallback, $api_fallback );
 
-		if ( '' !== $country_code ) {
+		if ( false !== $country_code ) {
 			return array(
 				'country'  => $country_code,
 				'state'    => '',
