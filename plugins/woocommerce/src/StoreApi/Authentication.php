@@ -73,15 +73,15 @@ class Authentication {
 			$rest_route = null;
 			if ( isset( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
 				$rest_route = sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
-			} elseif ( isset( $_SERVER['REST_ROUTE'] ) ) {
-				$rest_route = sanitize_text_field( wp_unslash( $_SERVER['REST_ROUTE'] ) );
 			}
+
 			$rest_route  = is_string( $rest_route ) ? rawurldecode( $rest_route ) : '';
 			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
 			self::$is_store_api_request = (
-				'' !== $rest_route && 0 === strpos( $rest_route, '/wc/store/' )
-			) || ( '' !== $request_uri && false !== strpos( $request_uri, '/wp-json/wc/store/' ) );
+				( '' !== $rest_route && 0 === strpos( $rest_route, '/wc/store/' ) ) ||
+				( '' !== $request_uri && false !== strpos( $request_uri, '/wp-json/wc/store/' ) )
+			);
 		}
 
 		if ( false === self::$is_store_api_request ) {
