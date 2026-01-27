@@ -23,8 +23,8 @@ test.describe(
 				waitUntil: 'networkidle0',
 			} );
 
-			const adminMenu = page.locator( '#adminmenu' );
-			await adminMenu
+			await page
+				.locator( '#adminmenu' )
 				.getByRole( 'link', { name: 'WooCommerce', exact: true } )
 				.click();
 
@@ -41,9 +41,8 @@ test.describe(
 		async function openPayments( page ) {
 			await openWCSettings( page );
 
-			const navTabWrapper = page.locator( '.woo-nav-tab-wrapper' );
-
-			await navTabWrapper
+			await page
+				.locator( '.woo-nav-tab-wrapper' )
 				.getByRole( 'link', {
 					name: 'Payments',
 					exact: true,
