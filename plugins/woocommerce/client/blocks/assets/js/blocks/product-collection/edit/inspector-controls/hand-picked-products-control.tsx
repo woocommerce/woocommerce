@@ -109,6 +109,7 @@ export const HandPickedProductsControlField = ( {
 		} );
 	}, [ selectedProductIds, productsMap ] );
 
+	// Updates the query attribute when invalid products are filtered out
 	useEffect( () => {
 		if ( validSelectedProductIds.length !== selectedProductIds.length ) {
 			setQueryAttribute( {
