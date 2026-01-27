@@ -711,50 +711,43 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * Tests `read_attributes` for handling metas migration due to sanitize_title BC breaks.
 	 */
 	public function test_read_attributes_addresses_bc_break_in_sanitize(): void {
-		global $wpdb;
-
 		$store = new class() extends WC_Product_Variable_Data_Store_CPT {
 			public function proxy_read_attributes( WC_Product $product ): void {
 				$this->read_attributes( $product );
 			}
 		};
 
+		$product = new WC_Product();
+		$product->save();
+
+		$product_id     = $product->get_id();
 		$attribute_name = 'Size/Style';
 		$old_slug       = 'attribute_' . $attribute_name;
 		$new_slug       = 'attribute_' . sanitize_title( $attribute_name );
 
-		$product = new WC_Product();
-		$product->save();
-
-		$wpdb->query(
-			$wpdb->prepare(
-				"INSERT INTO {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_product_attributes'",
-				serialize( [
-					'Size/Style' => [
-						'name'         => $attribute_name,
-						'value'        => '...',
-						'is_variation' => 1,
-
-					]
-				] ),
-				$product->get_id()
+		update_post_meta( $product_id, $old_slug, '...' );
+		update_post_meta( $product_id, '_product_attributes', array(
+			'Size/Style' => array(
+				'name'         => $attribute_name,
+				'value'        => '...',
+				'is_variation' => 1,
 			)
-		);
+		) );
 
 		$counter  = 0;
-		$callback = function( ?int $meta_id, int $object_id, string $meta_key, string $meta_value ) use ( $new_slug, &$counter ) {
-				$counter += (int) ( $new_slug === $meta_key && '...' === $meta_value );
+		$callback = function( ?bool $check, int $object_id, string $meta_key, $meta_value ) use ( $new_slug, &$counter ) {
+			$counter += (int) ( $new_slug === $meta_key && '...' === $meta_value );
+			return $check;
 		};
-		add_action( 'update_postmeta', $callback, 10, 4 );
+		add_action( 'update_post_metadata', $callback, 10, 4 );
 
 		// Initial attribute meta migration.
 		$store->proxy_read_attributes( $product );
 		$this->assertSame( 1, $counter );
-
 		// Once the migration complete, no consequent updates attempted.
 		$store->proxy_read_attributes( $product );
 		$this->assertSame( 1, $counter );
 
-		remove_action( 'update_postmeta', $callback );
+		remove_action( 'update_post_metadata', $callback );
 	}
 }
