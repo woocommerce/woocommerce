@@ -59,8 +59,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
 					$old_slug  = 'attribute_' . $meta_attribute_key;
 					$old_value = get_post_meta( $product_id, $old_slug, true );
-					$new_slug  = 'attribute_' . sanitize_title( $meta_value['name'] );
-					if ( '' !== $old_value && get_post_meta( $product_id, $new_slug, true ) !== $old_value ) {
+					if ( '' !== $old_value ) {
+						$new_slug = 'attribute_' . sanitize_title( $meta_value['name'] );
 						update_post_meta( $product_id, $new_slug, $old_value );
 						$force_update = true;
 					}
