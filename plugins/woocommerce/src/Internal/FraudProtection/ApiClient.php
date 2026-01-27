@@ -74,15 +74,21 @@ class ApiClient {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param string               $event_type Type of event being sent (e.g., 'cart_updated', 'checkout_started').
-	 * @param array<string, mixed> $event_data Event data to send to the endpoint.
+	 * @param string               $event_type   Type of event being sent (e.g., 'cart_updated', 'checkout_started').
+	 * @param array<string, mixed> $event_data   Event data to send to the endpoint.
+	 * @param array                $prior_events Optional array of prior events queued in session.
 	 * @return string Decision: "allow" or "block".
 	 */
-	public function send_event( string $event_type, array $event_data ): string {
+	public function send_event( string $event_type, array $event_data, array $prior_events = array() ): string {
 		$payload = array_merge(
 			array( 'event_type' => $event_type ),
 			array_filter( $event_data, fn( $value ) => null !== $value )
 		);
+
+		// Include prior events if provided (typically with checkout events).
+		if ( ! empty( $prior_events ) ) {
+			$payload['prior_events'] = $prior_events;
+		}
 
 		FraudProtectionController::log(
 			'info',

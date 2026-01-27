@@ -81,7 +81,7 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test payment method added event tracking.
 	 *
-	 * @testdox Should track payment method added event.
+	 * @testdox Should track payment method added event (queued for checkout).
 	 */
 	public function test_handle_payment_method_added(): void {
 
@@ -97,22 +97,14 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token->set_user_id( $user_id );
 		$token->save();
 
-		// Verify that the event was sent to the API with correct payload.
+		// Verify that the event was queued in session (not sent immediately).
+		// Events are aggregated and only sent with checkout event.
 		$this->assertLogged(
-			'info',
-			'Sending fraud protection event: payment_method_added',
+			'debug',
+			'Event queued in session: payment_method_added',
 			array(
-				'source'  => 'woo-fraud-protection',
-				'payload' => array(
-					'event_type' => 'payment_method_added',
-					'event_data' => array(
-						'action'     => 'added',
-						'token_id'   => $token->get_id(),
-						'gateway_id' => 'stripe',
-						'card_type'  => 'visa',
-						'card_last4' => '4242',
-					),
-				),
+				'source'     => 'woo-fraud-protection',
+				'event_type' => 'payment_method_added',
 			)
 		);
 	}

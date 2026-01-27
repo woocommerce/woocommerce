@@ -54,6 +54,16 @@ class SessionClearanceManager {
 	private const BLACKBOX_SESSION_KEY = '_fraud_protection_blackbox_session_id';
 
 	/**
+	 * Session key for storing the event queue.
+	 */
+	private const EVENT_QUEUE_KEY = '_fraud_protection_event_queue';
+
+	/**
+	 * Maximum number of events to store in the queue to prevent session bloat.
+	 */
+	private const MAX_EVENT_QUEUE_SIZE = 50;
+
+	/**
 	 * Check if the current session is allowed.
 	 *
 	 * @return bool True if session is allowed, false otherwise.
@@ -205,6 +215,62 @@ class SessionClearanceManager {
 			return null;
 		}
 		return WC()->session->get( self::BLACKBOX_SESSION_KEY );
+	}
+
+	/**
+	 * Add an event to the queue.
+	 *
+	 * Events are stored in the session until checkout, when they are all sent
+	 * together with the checkout event. Each event is timestamped when queued.
+	 *
+	 * @param string $event_type The type of event being queued.
+	 * @param array  $event_data The collected event data.
+	 * @return void
+	 */
+	public function queue_event( string $event_type, array $event_data ): void {
+		if ( ! $this->is_session_available() ) {
+			return;
+		}
+
+		$queue   = $this->get_event_queue();
+		$queue[] = array(
+			'event_type' => $event_type,
+			'timestamp'  => gmdate( 'c' ),
+			'event_data' => $event_data,
+		);
+
+		// Limit queue size to prevent session bloat - keep most recent events.
+		if ( count( $queue ) > self::MAX_EVENT_QUEUE_SIZE ) {
+			$queue = array_slice( $queue, -self::MAX_EVENT_QUEUE_SIZE );
+		}
+
+		WC()->session->set( self::EVENT_QUEUE_KEY, $queue );
+	}
+
+	/**
+	 * Get all queued events.
+	 *
+	 * @return array Array of queued events, each with event_type, timestamp, and event_data.
+	 */
+	public function get_event_queue(): array {
+		if ( ! $this->is_session_available() ) {
+			return array();
+		}
+		return WC()->session->get( self::EVENT_QUEUE_KEY, array() );
+	}
+
+	/**
+	 * Clear the event queue.
+	 *
+	 * Should be called after successfully sending events to the API.
+	 *
+	 * @return void
+	 */
+	public function clear_event_queue(): void {
+		if ( ! $this->is_session_available() ) {
+			return;
+		}
+		WC()->session->set( self::EVENT_QUEUE_KEY, array() );
 	}
 
 	/**

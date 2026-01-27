@@ -480,4 +480,86 @@ class ApiClientTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'email', $decoded_body, 'Should filter out null email' );
 		$this->assertArrayNotHasKey( 'billing_name', $decoded_body, 'Should filter out null billing_name' );
 	}
+
+	/**
+	 * @testdox Send Event should include prior_events in payload when provided.
+	 */
+	public function test_send_event_includes_prior_events_in_payload(): void {
+		$captured_request_body = null;
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$captured_request_body ) {
+				$captured_request_body = $args['body'];
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode( array( 'decision' => 'allow' ) ),
+				);
+			},
+			10,
+			2
+		);
+
+		$event_data = array(
+			'session' => array( 'session_id' => 'test-session' ),
+		);
+
+		$prior_events = array(
+			array(
+				'event_type' => 'cart_item_added',
+				'timestamp'  => '2024-01-27T10:00:00+00:00',
+				'event_data' => array( 'product_id' => 123 ),
+			),
+			array(
+				'event_type' => 'checkout_update',
+				'timestamp'  => '2024-01-27T10:01:00+00:00',
+				'event_data' => array( 'email' => 'test@example.com' ),
+			),
+		);
+
+		$this->sut->send_event( 'checkout', $event_data, $prior_events );
+
+		$this->assertNotNull( $captured_request_body, 'Request body should be captured' );
+
+		$decoded_body = json_decode( $captured_request_body, true );
+		$this->assertArrayHasKey( 'event_type', $decoded_body );
+		$this->assertEquals( 'checkout', $decoded_body['event_type'] );
+		$this->assertArrayHasKey( 'prior_events', $decoded_body );
+		$this->assertCount( 2, $decoded_body['prior_events'] );
+		$this->assertEquals( 'cart_item_added', $decoded_body['prior_events'][0]['event_type'] );
+		$this->assertEquals( 'checkout_update', $decoded_body['prior_events'][1]['event_type'] );
+	}
+
+	/**
+	 * @testdox Send Event should not include prior_events key when array is empty.
+	 */
+	public function test_send_event_excludes_prior_events_when_empty(): void {
+		$captured_request_body = null;
+
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args ) use ( &$captured_request_body ) {
+				$captured_request_body = $args['body'];
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode( array( 'decision' => 'allow' ) ),
+				);
+			},
+			10,
+			2
+		);
+
+		$event_data = array(
+			'session' => array( 'session_id' => 'test-session' ),
+		);
+
+		// Pass empty prior_events array.
+		$this->sut->send_event( 'checkout', $event_data, array() );
+
+		$this->assertNotNull( $captured_request_body, 'Request body should be captured' );
+
+		$decoded_body = json_decode( $captured_request_body, true );
+		$this->assertArrayHasKey( 'event_type', $decoded_body );
+		$this->assertArrayNotHasKey( 'prior_events', $decoded_body, 'Should not include prior_events when empty' );
+	}
 }

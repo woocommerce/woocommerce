@@ -11,8 +11,8 @@ namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\ApiClient;
 use Automattic\WooCommerce\Internal\FraudProtection\DecisionHandler;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 
 /**
@@ -44,18 +44,18 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 	private $decision_handler_mock;
 
 	/**
-	 * Mock fraud protection controller.
-	 *
-	 * @var FraudProtectionController|\PHPUnit\Framework\MockObject\MockObject
-	 */
-	private $controller_mock;
-
-	/**
 	 * Mock session data collector.
 	 *
 	 * @var SessionDataCollector|\PHPUnit\Framework\MockObject\MockObject
 	 */
 	private $data_collector_mock;
+
+	/**
+	 * Mock session clearance manager.
+	 *
+	 * @var SessionClearanceManager|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $session_manager_mock;
 
 	/**
 	 * Runs before each test.
@@ -66,82 +66,35 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 		// Create mocks.
 		$this->api_client_mock       = $this->createMock( ApiClient::class );
 		$this->decision_handler_mock = $this->createMock( DecisionHandler::class );
-		$this->controller_mock       = $this->createMock( FraudProtectionController::class );
 		$this->data_collector_mock   = $this->createMock( SessionDataCollector::class );
-
-		// By default, feature is enabled.
-		$this->controller_mock->method( 'feature_is_enabled' )->willReturn( true );
+		$this->session_manager_mock  = $this->createMock( SessionClearanceManager::class );
 
 		// Create dispatcher and inject mocks.
 		$this->sut = new FraudProtectionDispatcher();
 		$this->sut->init(
 			$this->api_client_mock,
 			$this->decision_handler_mock,
-			$this->controller_mock,
-			$this->data_collector_mock
+			$this->data_collector_mock,
+			$this->session_manager_mock
 		);
 	}
 
 	/**
-	 * Test that dispatch_event collects session data and sends event to API and applies decision.
+	 * Test that non-checkout events are queued in session, not sent to API.
 	 */
-	public function test_dispatch_event_sends_to_api_and_applies_decision(): void {
-		$event_type = 'test_event';
+	public function test_non_checkout_events_are_queued_in_session(): void {
+		$event_type = 'cart_item_added';
 		$event_data = array(
-			'action'     => 'test_action',
+			'action'     => 'item_added',
 			'product_id' => 123,
 		);
 
 		$collected_data = array(
 			'session'    => array( 'session_id' => 'test-session-123' ),
-			'action'     => 'test_action',
+			'action'     => 'item_added',
 			'product_id' => 123,
 		);
 
-		// Expect data collector to be called with event type and event data.
-		$this->data_collector_mock
-			->expects( $this->once() )
-			->method( 'collect' )
-			->with( $event_type, $event_data )
-			->willReturn( $collected_data );
-
-		// Expect API client to be called with the collected data.
-		$this->api_client_mock
-			->expects( $this->once() )
-			->method( 'send_event' )
-			->with(
-				$this->equalTo( $event_type ),
-				$this->callback(
-					function ( $data ) use ( $collected_data ) {
-						// Verify the payload structure.
-						$this->assertArrayHasKey( 'session', $data );
-						$this->assertEquals( 'test-session-123', $data['session']['session_id'] );
-						$this->assertEquals( 'test_action', $data['action'] );
-						$this->assertEquals( 123, $data['product_id'] );
-						return true;
-					}
-				)
-			)
-			->willReturn( ApiClient::DECISION_ALLOW );
-
-		// Expect decision handler to be called with the decision and collected data.
-		$this->decision_handler_mock
-			->expects( $this->once() )
-			->method( 'apply_decision' )
-			->with( ApiClient::DECISION_ALLOW, $collected_data );
-
-		// Call dispatch_event with event data.
-		$this->sut->dispatch_event( $event_type, $event_data );
-	}
-
-	/**
-	 * Test that dispatch_event handles data without session gracefully.
-	 */
-	public function test_dispatch_event_handles_missing_session_data(): void {
-		$event_type     = 'test_event';
-		$event_data     = array( 'invalid' => 'data_without_session' );
-		$collected_data = array( 'invalid' => 'data_without_session' );
-
 		// Expect data collector to be called.
 		$this->data_collector_mock
 			->expects( $this->once() )
@@ -149,138 +102,128 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 			->with( $event_type, $event_data )
 			->willReturn( $collected_data );
 
-		// Expect API client to be called with the collected data.
+		// Expect event to be queued in session.
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'queue_event' )
+			->with( $event_type, $collected_data );
+
+		// API should NOT be called for non-checkout events.
 		$this->api_client_mock
-			->expects( $this->once() )
-			->method( 'send_event' )
-			->with(
-				$this->equalTo( $event_type ),
-				$this->callback(
-					function ( $data ) {
-						// Verify the payload has the invalid key.
-						$this->assertArrayHasKey( 'invalid', $data );
-						$this->assertEquals( 'data_without_session', $data['invalid'] );
-						// Session key should not exist or be empty.
-						$this->assertFalse( isset( $data['session']['session_id'] ) || ! empty( $data['session']['session_id'] ) );
-						return true;
-					}
-				)
-			)
-			->willReturn( ApiClient::DECISION_ALLOW );
+			->expects( $this->never() )
+			->method( 'send_event' );
 
-		// Expect decision handler to be called with collected data.
+		// Decision handler should NOT be called for non-checkout events.
 		$this->decision_handler_mock
-			->expects( $this->once() )
-			->method( 'apply_decision' )
-			->with( ApiClient::DECISION_ALLOW, $collected_data );
+			->expects( $this->never() )
+			->method( 'apply_decision' );
 
-		// Call dispatch_event - should handle gracefully.
 		$this->sut->dispatch_event( $event_type, $event_data );
 	}
 
 	/**
-	 * Test that dispatch_event respects block decisions.
+	 * Test that checkout event sends to API with prior events and applies decision.
 	 */
-	public function test_dispatch_event_applies_block_decision(): void {
-		$event_type = 'cart_item_added';
+	public function test_checkout_event_sends_to_api_with_prior_events(): void {
 		$event_data = array(
-			'action'     => 'item_added',
-			'product_id' => 456,
+			'order_id' => 456,
 		);
 
 		$collected_data = array(
-			'session'    => array( 'session_id' => 'test' ),
-			'action'     => 'item_added',
-			'product_id' => 456,
+			'session'  => array( 'session_id' => 'test-session-123' ),
+			'order_id' => 456,
+		);
+
+		$prior_events = array(
+			array(
+				'event_type' => 'cart_item_added',
+				'timestamp'  => '2024-01-27T10:00:00+00:00',
+				'event_data' => array( 'product_id' => 123 ),
+			),
 		);
 
 		// Expect data collector to be called.
 		$this->data_collector_mock
 			->expects( $this->once() )
 			->method( 'collect' )
-			->with( $event_type, $event_data )
+			->with( 'checkout', $event_data )
 			->willReturn( $collected_data );
 
-		// API returns block decision.
+		// Expect prior events to be retrieved from session.
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'get_event_queue' )
+			->willReturn( $prior_events );
+
+		// Expect API client to be called with checkout event and prior events.
 		$this->api_client_mock
 			->expects( $this->once() )
 			->method( 'send_event' )
-			->with(
-				$this->equalTo( $event_type ),
-				$this->callback(
-					function ( $data ) {
-						// Verify the payload structure for cart event.
-						$this->assertArrayHasKey( 'session', $data );
-						$this->assertEquals( 'test', $data['session']['session_id'] );
-						$this->assertEquals( 'item_added', $data['action'] );
-						$this->assertEquals( 456, $data['product_id'] );
-						return true;
-					}
-				)
-			)
+			->with( 'checkout', $collected_data, $prior_events )
+			->willReturn( ApiClient::DECISION_ALLOW );
+
+		// Expect queue to be cleared after successful send.
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'clear_event_queue' );
+
+		// Expect decision handler to be called with the decision.
+		$this->decision_handler_mock
+			->expects( $this->once() )
+			->method( 'apply_decision' )
+			->with( ApiClient::DECISION_ALLOW, $collected_data );
+
+		$this->sut->dispatch_event( 'checkout', $event_data );
+	}
+
+	/**
+	 * Test that checkout event applies block decision.
+	 */
+	public function test_checkout_event_applies_block_decision(): void {
+		$collected_data = array(
+			'session' => array( 'session_id' => 'test' ),
+		);
+
+		$this->data_collector_mock
+			->expects( $this->once() )
+			->method( 'collect' )
+			->willReturn( $collected_data );
+
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'get_event_queue' )
+			->willReturn( array() );
+
+		$this->api_client_mock
+			->expects( $this->once() )
+			->method( 'send_event' )
 			->willReturn( ApiClient::DECISION_BLOCK );
 
-		// Expect decision handler to be called with block decision and collected data.
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'clear_event_queue' );
+
 		$this->decision_handler_mock
 			->expects( $this->once() )
 			->method( 'apply_decision' )
 			->with( ApiClient::DECISION_BLOCK, $collected_data );
 
-		// Call dispatch_event.
-		$this->sut->dispatch_event( $event_type, $event_data );
+		$this->sut->dispatch_event( 'checkout', array() );
 	}
 
 	/**
-	 * Test that dispatch_event doesn't send events when feature is disabled.
+	 * Test that filter is applied to event data before queueing.
 	 */
-	public function test_dispatch_event_skips_when_feature_disabled(): void {
-		// Create fresh API and decision handler mocks that should never be called.
-		$api_client_mock = $this->createMock( ApiClient::class );
-		$api_client_mock->expects( $this->never() )->method( 'send_event' );
-
-		$decision_handler_mock = $this->createMock( DecisionHandler::class );
-		$decision_handler_mock->expects( $this->never() )->method( 'apply_decision' );
-
-		// Create data collector mock that should never be called.
-		$data_collector_mock = $this->createMock( SessionDataCollector::class );
-		$data_collector_mock->expects( $this->never() )->method( 'collect' );
-
-		// Create controller mock with feature disabled.
-		$controller_mock = $this->createMock( FraudProtectionController::class );
-		$controller_mock->expects( $this->once() )
-			->method( 'feature_is_enabled' )
-			->willReturn( false );
-
-		// Create new dispatcher with feature disabled.
-		$sut = new FraudProtectionDispatcher();
-		$sut->init( $api_client_mock, $decision_handler_mock, $controller_mock, $data_collector_mock );
-
-		$event_type = 'test_event';
-		$event_data = array( 'product_id' => 123 );
-
-		// Call dispatch_event - should bail early without calling data collector, API or decision handler.
-		$sut->dispatch_event( $event_type, $event_data );
-	}
-
-	/**
-	 * Test that dispatch_event applies filter to collected data.
-	 */
-	public function test_dispatch_event_applies_filter_to_data(): void {
-		$event_type = 'test_event';
-		$event_data = array(
-			'foo' => 'bar',
-		);
-
+	public function test_filter_is_applied_before_queueing(): void {
+		$event_type     = 'cart_item_added';
 		$collected_data = array(
 			'session' => array( 'session_id' => 'test' ),
 			'foo'     => 'bar',
 		);
 
-		// Expect data collector to be called.
 		$this->data_collector_mock
 			->expects( $this->once() )
 			->method( 'collect' )
-			->with( $event_type, $event_data )
 			->willReturn( $collected_data );
 
 		// Add a filter that modifies the data.
@@ -295,35 +238,122 @@ class FraudProtectionDispatcherTest extends \WC_Unit_Test_Case {
 			2
 		);
 
-		// Expect API client to receive the filtered data.
-		$this->api_client_mock
+		// Expect session manager to receive the filtered data.
+		$this->session_manager_mock
 			->expects( $this->once() )
-			->method( 'send_event' )
+			->method( 'queue_event' )
 			->with(
-				$this->equalTo( $event_type ),
+				$event_type,
 				$this->callback(
 					function ( $data ) {
-						// Verify the original data is preserved.
-						$this->assertArrayHasKey( 'session', $data );
-						$this->assertEquals( 'test', $data['session']['session_id'] );
-						$this->assertEquals( 'bar', $data['foo'] );
-						// Verify the filter added the 'filtered' key.
 						$this->assertArrayHasKey( 'filtered', $data );
 						$this->assertTrue( $data['filtered'] );
 						return true;
 					}
 				)
+			);
+
+		$this->sut->dispatch_event( $event_type, array( 'foo' => 'bar' ) );
+
+		// Clean up filter.
+		remove_all_filters( 'woocommerce_fraud_protection_event_data' );
+	}
+
+	/**
+	 * Test that filter is applied to checkout event data before sending.
+	 */
+	public function test_filter_is_applied_to_checkout_before_sending(): void {
+		$collected_data = array(
+			'session' => array( 'session_id' => 'test' ),
+			'foo'     => 'bar',
+		);
+
+		$this->data_collector_mock
+			->expects( $this->once() )
+			->method( 'collect' )
+			->willReturn( $collected_data );
+
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'get_event_queue' )
+			->willReturn( array() );
+
+		// Add a filter that modifies the data.
+		add_filter(
+			'woocommerce_fraud_protection_event_data',
+			function ( $data, $type ) {
+				$this->assertEquals( 'checkout', $type );
+				$data['filtered'] = true;
+				return $data;
+			},
+			10,
+			2
+		);
+
+		// Expect API client to receive the filtered data.
+		$this->api_client_mock
+			->expects( $this->once() )
+			->method( 'send_event' )
+			->with(
+				'checkout',
+				$this->callback(
+					function ( $data ) {
+						$this->assertArrayHasKey( 'filtered', $data );
+						$this->assertTrue( $data['filtered'] );
+						return true;
+					}
+				),
+				$this->anything()
 			)
 			->willReturn( ApiClient::DECISION_ALLOW );
+
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'clear_event_queue' );
 
 		$this->decision_handler_mock
 			->expects( $this->once() )
 			->method( 'apply_decision' );
 
-		// Call dispatch_event.
-		$this->sut->dispatch_event( $event_type, $event_data );
+		$this->sut->dispatch_event( 'checkout', array( 'foo' => 'bar' ) );
 
 		// Clean up filter.
 		remove_all_filters( 'woocommerce_fraud_protection_event_data' );
+	}
+
+	/**
+	 * Test that checkout event sends empty prior_events array when no events queued.
+	 */
+	public function test_checkout_sends_empty_prior_events_when_none_queued(): void {
+		$collected_data = array(
+			'session' => array( 'session_id' => 'test' ),
+		);
+
+		$this->data_collector_mock
+			->expects( $this->once() )
+			->method( 'collect' )
+			->willReturn( $collected_data );
+
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'get_event_queue' )
+			->willReturn( array() );
+
+		// Expect API client to be called with empty prior_events array.
+		$this->api_client_mock
+			->expects( $this->once() )
+			->method( 'send_event' )
+			->with( 'checkout', $collected_data, array() )
+			->willReturn( ApiClient::DECISION_ALLOW );
+
+		$this->session_manager_mock
+			->expects( $this->once() )
+			->method( 'clear_event_queue' );
+
+		$this->decision_handler_mock
+			->expects( $this->once() )
+			->method( 'apply_decision' );
+
+		$this->sut->dispatch_event( 'checkout', array() );
 	}
 }

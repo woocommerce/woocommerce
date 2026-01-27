@@ -196,4 +196,114 @@ class SessionClearanceManagerTest extends \WC_Unit_Test_Case {
 		$this->sut->allow_session();
 		$this->assertTrue( $this->sut->should_render_payment_methods() );
 	}
+
+	/**
+	 * Test queue_event adds event to session.
+	 */
+	public function test_queue_event_adds_event_to_session() {
+		$event_type = 'cart_item_added';
+		$event_data = array(
+			'session'    => array( 'session_id' => 'test-123' ),
+			'product_id' => 456,
+		);
+
+		$this->sut->queue_event( $event_type, $event_data );
+
+		$queue = $this->sut->get_event_queue();
+		$this->assertCount( 1, $queue );
+		$this->assertEquals( $event_type, $queue[0]['event_type'] );
+		$this->assertEquals( $event_data, $queue[0]['event_data'] );
+		$this->assertArrayHasKey( 'timestamp', $queue[0] );
+	}
+
+	/**
+	 * Test queue_event includes ISO 8601 timestamp.
+	 */
+	public function test_queue_event_includes_timestamp() {
+		$this->sut->queue_event( 'cart_item_added', array( 'product_id' => 123 ) );
+
+		$queue     = $this->sut->get_event_queue();
+		$timestamp = $queue[0]['timestamp'];
+
+		// Verify timestamp is in ISO 8601 format (e.g., 2024-01-27T10:00:00+00:00).
+		$parsed = \DateTime::createFromFormat( \DateTime::ATOM, $timestamp );
+		$this->assertNotFalse( $parsed, 'Timestamp should be in ISO 8601 format' );
+	}
+
+	/**
+	 * Test get_event_queue returns empty array when no events queued.
+	 */
+	public function test_get_event_queue_returns_empty_array_when_no_events() {
+		$queue = $this->sut->get_event_queue();
+		$this->assertIsArray( $queue );
+		$this->assertEmpty( $queue );
+	}
+
+	/**
+	 * Test get_event_queue returns all queued events in order.
+	 */
+	public function test_get_event_queue_returns_all_events_in_order() {
+		$this->sut->queue_event( 'cart_item_added', array( 'product_id' => 1 ) );
+		$this->sut->queue_event( 'cart_item_updated', array( 'product_id' => 2 ) );
+		$this->sut->queue_event( 'checkout_page_loaded', array() );
+
+		$queue = $this->sut->get_event_queue();
+		$this->assertCount( 3, $queue );
+		$this->assertEquals( 'cart_item_added', $queue[0]['event_type'] );
+		$this->assertEquals( 'cart_item_updated', $queue[1]['event_type'] );
+		$this->assertEquals( 'checkout_page_loaded', $queue[2]['event_type'] );
+	}
+
+	/**
+	 * Test clear_event_queue empties the queue.
+	 */
+	public function test_clear_event_queue_empties_queue() {
+		// Add some events.
+		$this->sut->queue_event( 'cart_item_added', array( 'product_id' => 1 ) );
+		$this->sut->queue_event( 'cart_item_updated', array( 'product_id' => 2 ) );
+
+		$this->assertCount( 2, $this->sut->get_event_queue() );
+
+		// Clear the queue.
+		$this->sut->clear_event_queue();
+
+		$this->assertEmpty( $this->sut->get_event_queue() );
+	}
+
+	/**
+	 * Test event queue limits to max size to prevent session bloat.
+	 */
+	public function test_event_queue_limits_to_max_size() {
+		// Queue more than the limit (50 events).
+		for ( $i = 1; $i <= 60; $i++ ) {
+			$this->sut->queue_event( 'cart_item_added', array( 'product_id' => $i ) );
+		}
+
+		$queue = $this->sut->get_event_queue();
+
+		// Should be limited to 50 events.
+		$this->assertCount( 50, $queue );
+
+		// Should keep the most recent events (11-60).
+		$first_event = $queue[0];
+		$this->assertEquals( 11, $first_event['event_data']['product_id'] );
+
+		$last_event = $queue[49];
+		$this->assertEquals( 60, $last_event['event_data']['product_id'] );
+	}
+
+	/**
+	 * Test event queue persists across multiple SessionClearanceManager instances.
+	 */
+	public function test_event_queue_persists_across_instances() {
+		// Queue event with first instance.
+		$this->sut->queue_event( 'cart_item_added', array( 'product_id' => 123 ) );
+
+		// Create new instance and verify event is still there.
+		$new_instance = new SessionClearanceManager();
+		$queue        = $new_instance->get_event_queue();
+
+		$this->assertCount( 1, $queue );
+		$this->assertEquals( 'cart_item_added', $queue[0]['event_type'] );
+	}
 }

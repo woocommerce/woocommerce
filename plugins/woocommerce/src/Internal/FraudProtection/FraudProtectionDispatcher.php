@@ -36,13 +36,6 @@ class FraudProtectionDispatcher {
 	private DecisionHandler $decision_handler;
 
 	/**
-	 * Fraud protection controller instance.
-	 *
-	 * @var FraudProtectionController
-	 */
-	private FraudProtectionController $fraud_protection_controller;
-
-	/**
 	 * Session data collector instance.
 	 *
 	 * @var SessionDataCollector
@@ -50,74 +43,60 @@ class FraudProtectionDispatcher {
 	private SessionDataCollector $data_collector;
 
 	/**
+	 * Session clearance manager instance.
+	 *
+	 * @var SessionClearanceManager
+	 */
+	private SessionClearanceManager $session_manager;
+
+	/**
 	 * Initialize with dependencies.
+	 *
+	 * Note: FraudProtectionController is NOT injected here to avoid circular dependency.
+	 * It is fetched lazily in dispatch_event() via get_fraud_protection_controller().
 	 *
 	 * @internal
 	 *
-	 * @param ApiClient                 $api_client                  The API client instance.
-	 * @param DecisionHandler           $decision_handler            The decision handler instance.
-	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
-	 * @param SessionDataCollector      $data_collector              The session data collector instance.
+	 * @param ApiClient               $api_client       The API client instance.
+	 * @param DecisionHandler         $decision_handler The decision handler instance.
+	 * @param SessionDataCollector    $data_collector   The session data collector instance.
+	 * @param SessionClearanceManager $session_manager  The session clearance manager instance.
 	 */
 	final public function init(
 		ApiClient $api_client,
 		DecisionHandler $decision_handler,
-		FraudProtectionController $fraud_protection_controller,
-		SessionDataCollector $data_collector
+		SessionDataCollector $data_collector,
+		SessionClearanceManager $session_manager
 	): void {
-		$this->api_client                  = $api_client;
-		$this->decision_handler            = $decision_handler;
-		$this->fraud_protection_controller = $fraud_protection_controller;
-		$this->data_collector              = $data_collector;
+		$this->api_client       = $api_client;
+		$this->decision_handler = $decision_handler;
+		$this->data_collector   = $data_collector;
+		$this->session_manager  = $session_manager;
 	}
 
 	/**
 	 * Dispatch fraud protection event.
 	 *
-	 * This method collects session data and dispatches it to the fraud protection service.
-	 * It orchestrates the following flow:
-	 * 1. Check if feature is enabled (fail-open if not)
-	 * 2. Collect comprehensive session data via SessionDataCollector
-	 * 3. Apply extension data filter to allow custom data
-	 * 4. Send event to API and get decision
-	 * 5. Apply decision via DecisionHandler
+	 * This method collects session data and either queues it for later or sends it
+	 * to the fraud protection service immediately, depending on the event type.
+	 *
+	 * Event flow:
+	 * - Non-checkout events: Collected and queued in session (no API call)
+	 * - Checkout events: Collected, combined with queued events, sent to API
 	 *
 	 * The method implements graceful degradation - any errors during tracking
 	 * will be logged but will not break the functionality.
 	 *
-	 * @param string $event_type Event type identifier (e.g., 'cart_item_added').
+	 * Note: This method assumes the fraud protection feature is already enabled.
+	 * The feature check is done by FraudProtectionController before registering
+	 * event trackers that call this dispatcher.
+	 *
+	 * @param string $event_type Event type identifier (e.g., 'cart_item_added', 'checkout').
 	 * @param array  $event_data Optional event-specific data to include with session data.
 	 * @return void
 	 */
 	public function dispatch_event( string $event_type, array $event_data = array() ): void {
 		try {
-			// PoC: Only process 'checkout' events from Blackbox integration.
-			// Skip other events to avoid interference with session status.
-			if ( 'checkout' !== $event_type ) {
-				FraudProtectionController::log(
-					'debug',
-					sprintf(
-						'Fraud protection event skipped (PoC - only checkout events processed): %s',
-						$event_type
-					),
-					array( 'event_type' => $event_type )
-				);
-				return;
-			}
-
-			// Check if feature is enabled - fail-open if not.
-			if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
-				FraudProtectionController::log(
-					'debug',
-					sprintf(
-						'Fraud protection event not dispatched (feature disabled): %s',
-						$event_type
-					),
-					array( 'event_type' => $event_type )
-				);
-				return;
-			}
-
 			// Collect comprehensive session data.
 			$collected_data = $this->data_collector->collect( $event_type, $event_data );
 
@@ -137,11 +116,20 @@ class FraudProtectionDispatcher {
 			 */
 			$collected_data = apply_filters( 'woocommerce_fraud_protection_event_data', $collected_data, $event_type );
 
-			// Send event to API and get decision.
-			$decision = $this->api_client->send_event( $event_type, $collected_data );
+			// For checkout events: send all queued events + this one to the API.
+			if ( 'checkout' === $event_type ) {
+				$this->send_checkout_with_events( $collected_data );
+				return;
+			}
 
-			// Apply decision via DecisionHandler.
-			$this->decision_handler->apply_decision( $decision, $collected_data );
+			// For other events: queue in session for later sending with checkout.
+			$this->session_manager->queue_event( $event_type, $collected_data );
+
+			FraudProtectionController::log(
+				'debug',
+				sprintf( 'Event queued in session: %s', $event_type ),
+				array( 'event_type' => $event_type )
+			);
 		} catch ( \Exception $e ) {
 			// Gracefully handle errors - fraud protection should never break functionality.
 			FraudProtectionController::log(
@@ -157,5 +145,34 @@ class FraudProtectionDispatcher {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Send checkout event with all previously queued events.
+	 *
+	 * This method retrieves all queued events from the session, sends them
+	 * along with the checkout event to the API, and clears the queue.
+	 *
+	 * @param array $checkout_data The collected checkout event data.
+	 * @return void
+	 */
+	private function send_checkout_with_events( array $checkout_data ): void {
+		// Get all queued events from the session.
+		$prior_events = $this->session_manager->get_event_queue();
+
+		FraudProtectionController::log(
+			'debug',
+			sprintf( 'Sending checkout event with %d prior events', count( $prior_events ) ),
+			array( 'prior_events_count' => count( $prior_events ) )
+		);
+
+		// Send event to API with prior events and get decision.
+		$decision = $this->api_client->send_event( 'checkout', $checkout_data, $prior_events );
+
+		// Clear the event queue after successful send.
+		$this->session_manager->clear_event_queue();
+
+		// Apply decision via DecisionHandler.
+		$this->decision_handler->apply_decision( $decision, $checkout_data );
 	}
 }
