@@ -60,7 +60,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$old_slug  = 'attribute_' . $meta_attribute_key;
 					$old_value = get_post_meta( $product_id, $old_slug, true );
 					$new_slug  = 'attribute_' . sanitize_title( $meta_value['name'] );
-					if ( '' !== $old_value && $old_value !== get_post_meta( $product_id, $new_slug, true ) ) {
+					if ( '' !== $old_value && get_post_meta( $product_id, $new_slug, true ) !== $old_value) {
 						update_post_meta( $product_id, $new_slug, $old_value );
 						$force_update = true;
 					}
