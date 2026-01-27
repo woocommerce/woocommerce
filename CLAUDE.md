@@ -116,6 +116,18 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 - Never create standalone functions (always use class methods)
 - Tests require Docker environment
 
+## Interactivity API Stores
+
+All WooCommerce Interactivity API stores are **private by design**:
+
+- Stores use `lock: true` indicating they are not intended for extension
+- Removing or changing store state/selectors is **not a breaking change**
+- No backwards compatibility is required for store internals
+- If a store needs to be extensible in the future, it will be split into private (internal) and public (API) stores
+- General stores (namespace `woocommerce`) may become public eventually, but currently all are locked
+
+Reference: [WordPress Interactivity API - Private Stores](https://developer.wordpress.org/block-editor/reference-guides/interactivity-api/api-reference#private-stores)
+
 ## Quick Reference
 
 ### Most Common Commands
