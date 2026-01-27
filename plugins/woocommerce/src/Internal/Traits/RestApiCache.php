@@ -184,6 +184,8 @@ trait RestApiCache {
 	/**
 	 * Initialize the trait.
 	 * This MUST be called from the controller's constructor.
+	 *
+	 * @since 10.5.0
 	 */
 	protected function initialize_rest_api_cache(): void {
 		$features_controller = wc_get_container()->get( FeaturesController::class );
@@ -205,6 +207,8 @@ trait RestApiCache {
 	 * Wrap an endpoint callback declaration with caching logic.
 	 * Usage: `'callback' => $this->with_cache( array( $this, 'endpoint_callback_method' ) )`
 	 *        `'callback' => $this->with_cache( array( $this, 'endpoint_callback_method' ), [ 'entity_type' => 'product' ] )`
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param callable $callback The original endpoint callback.
 	 * @param array    $config   Caching configuration:
@@ -504,6 +508,8 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('entity_type' key).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return string|null Entity type (e.g., 'product', 'order'), or null if no controller-wide default.
 	 */
 	protected function get_default_response_entity_type(): ?string {
@@ -515,6 +521,8 @@ trait RestApiCache {
 	 *
 	 * Override in classes to exclude fields that change on each request
 	 * (e.g., random recommendations, timestamps).
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param array                                 $data        Response data.
 	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
@@ -535,6 +543,8 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('vary_by_user' key).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
 	 *
@@ -549,6 +559,8 @@ trait RestApiCache {
 	 *
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('cache_ttl' key).
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
@@ -569,6 +581,8 @@ trait RestApiCache {
 	 *
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('relevant_hooks' key).
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     Request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
@@ -670,6 +684,8 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('include_headers' key).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     Request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
 	 *
@@ -691,6 +707,8 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('exclude_headers' key).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     Request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
 	 *
@@ -708,6 +726,8 @@ trait RestApiCache {
 	 * - An array of arrays each having an 'id' field (collection)
 	 *
 	 * Controllers can override this method to customize entity ID extraction.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param array                                 $response_data Response data.
 	 * @param WP_REST_Request<array<string, mixed>> $request       The request object.
@@ -848,6 +868,8 @@ trait RestApiCache {
 
 	/**
 	 * Get cache key information that uniquely identifies a request.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request      The request object.
 	 * @param bool                                  $vary_by_user Whether to include user ID in cache key.
