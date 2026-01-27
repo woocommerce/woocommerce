@@ -712,6 +712,12 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_read_attributes_addresses_bc_break_in_sanitize(): void {
 		$store = new class() extends WC_Product_Variable_Data_Store_CPT {
+			/**
+			 * Makes read_attributes available for direct calls.
+			 *
+			 * @param WC_Product $product Product object.
+			 * @return void
+			 */
 			public function proxy_read_attributes( WC_Product $product ): void {
 				$this->read_attributes( $product );
 			}
