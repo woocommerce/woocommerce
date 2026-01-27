@@ -162,7 +162,7 @@ class Checkout extends AbstractCartRoute {
 			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
 			$response = $this->get_route_error_response(
 				'woocommerce_rest_checkout_error',
-				wc_get_container()->get( BlockedSessionNotice::class )->get_message_plaintext( 'checkout' ),
+				wc_get_container()->get( BlockedSessionNotice::class )->get_message_plaintext( 'purchase' ),
 				403
 			);
 		}

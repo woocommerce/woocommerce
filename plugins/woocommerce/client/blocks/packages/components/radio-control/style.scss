@@ -175,12 +175,12 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 
 .wc-block-components-radio-control__label,
 .wc-block-components-radio-control__secondary-label {
-	@include font-regular-locked;
+	@include font-small-locked;
 }
 
 .wc-block-components-radio-control__description,
 .wc-block-components-radio-control__secondary-description {
-	@include font-regular-locked;
+	@include font-small-locked;
 }
 
 // Extra class for specificity.

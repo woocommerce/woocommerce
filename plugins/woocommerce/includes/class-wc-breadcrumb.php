@@ -204,7 +204,15 @@ class WC_Breadcrumb {
 			}
 		}
 
-		$this->add_crumb( get_the_title(), get_permalink() );
+		// On WC endpoints, get_the_title() returns the endpoint title (via wc_page_endpoint_title filter).
+		// Use post_title directly to avoid duplicates like "Orders / Orders" instead of "My Account / Orders".
+		$permalink = get_permalink();
+		if ( is_wc_endpoint_url() ) {
+			$this->add_crumb( $post->post_title, $permalink ? $permalink : '' );
+		} else {
+			$this->add_crumb( get_the_title(), $permalink ? $permalink : '' );
+		}
+
 		$this->endpoint_trail();
 	}
 
