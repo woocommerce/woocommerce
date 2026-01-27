@@ -170,7 +170,7 @@ This library will be in the `src/Internal` directory and is not intended to be u
    - It will authorize the request based on a temporarily stored token with an expiry (instead of a transient or nonce, in order to support multi-server/loadbalanced sites)
    - It will set appropriate timeouts to ensure the async process can't be stuck 'processing', and use database locks to ensure that notifications for the order/review can only be processed once.
 
-4. **Get update notification preferences endpoint:**
+4. ** Add get notification preferences endpoint:**
    - This will be used to get the notification preferences for the logged in user for each notification type and each of their devices
    - Available for admins and shop managers
    - Will allow access via WP Admin and via the app
