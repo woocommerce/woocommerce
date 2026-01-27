@@ -326,7 +326,10 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 			$query_result = $this->get_terms_for_product( $prepared_args, $request );
 			$total_terms  = $this->total_terms;
 		} else {
-			$query_result = get_terms( $taxonomy, $prepared_args );
+			// Use WP_Term_Query directly to bypass wc_change_term_counts filter,
+			// ensuring REST API returns actual term counts for admin use.
+			$term_query   = new WP_Term_Query( array_merge( $prepared_args, array( 'taxonomy' => $taxonomy ) ) );
+			$query_result = $term_query->get_terms();
 
 			$count_args = $prepared_args;
 			unset( $count_args['number'] );
@@ -462,10 +465,21 @@ abstract class WC_REST_Terms_Controller extends WC_REST_Controller {
 	 */
 	public function get_item( $request ) {
 		$taxonomy = $this->get_taxonomy( $request );
-		$term     = get_term( (int) $request['id'], $taxonomy );
 
-		if ( is_wp_error( $term ) ) {
-			return $term;
+		// Use WP_Term_Query directly to bypass wc_change_term_count filter,
+		// ensuring REST API returns actual term counts for admin use.
+		$term_query = new WP_Term_Query(
+			array(
+				'taxonomy'   => $taxonomy,
+				'include'    => array( (int) $request['id'] ),
+				'hide_empty' => false,
+			)
+		);
+		$terms      = $term_query->get_terms();
+		$term       = ! empty( $terms ) ? $terms[0] : null;
+
+		if ( ! $term ) {
+			return new WP_Error( 'woocommerce_rest_term_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
 		$response = $this->prepare_item_for_response( $term, $request );
