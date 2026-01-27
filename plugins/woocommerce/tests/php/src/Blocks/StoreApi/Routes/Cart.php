@@ -626,26 +626,43 @@ class Cart extends ControllerTestCase {
 		WC()->session->set_customer_session_cookie( true );
 		WC()->session->save_data();
 
-		// Simulate a Store API request with Cart-Token before session/cart init.
-		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/cart';
-		$_SERVER['HTTP_CART_TOKEN']              = $token;
+		$original_rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
+		$original_cart_token = $_SERVER['HTTP_CART_TOKEN'] ?? null;
 
-		do_action( 'parse_request', $GLOBALS['wp'] );
+		try {
+			// Simulate a Store API request with Cart-Token before session/cart init.
+			$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/cart';
+			$_SERVER['HTTP_CART_TOKEN']              = $token;
 
-		WC()->session = null;
-		WC()->cart    = null;
+			do_action( 'parse_request', $GLOBALS['wp'] );
 
-		WC()->initialize_session();
-		WC()->initialize_cart();
+			WC()->session = null;
+			WC()->cart    = null;
 
-		if ( isset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ) ) {
-			$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 0;
+			WC()->initialize_session();
+			WC()->initialize_cart();
+
+			if ( isset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ) ) {
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 0;
+			}
+
+			WC()->cart->get_cart();
+
+			$this->assertInstanceOf( SessionHandler::class, WC()->session );
+			$this->assertEquals( 3, WC()->cart->get_cart_contents_count() );
+		} finally {
+			if ( null === $original_rest_route ) {
+				unset( $GLOBALS['wp']->query_vars['rest_route'] );
+			} else {
+				$GLOBALS['wp']->query_vars['rest_route'] = $original_rest_route;
+			}
+
+			if ( null === $original_cart_token ) {
+				unset( $_SERVER['HTTP_CART_TOKEN'] );
+			} else {
+				$_SERVER['HTTP_CART_TOKEN'] = $original_cart_token;
+			}
 		}
-
-		WC()->cart->get_cart();
-
-		$this->assertInstanceOf( SessionHandler::class, WC()->session );
-		$this->assertEquals( 3, WC()->cart->get_cart_contents_count() );
 	}
 
 	/**

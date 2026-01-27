@@ -13,6 +13,7 @@ class Authentication {
 	/**
 	 * Track whether current request targets the Store API.
 	 *
+	 * @since 10.6.0
 	 * @var bool|null
 	 */
 	private static $is_store_api_request = null;
@@ -49,6 +50,7 @@ class Authentication {
 	/**
 	 * Capture Store API request context early in the request lifecycle.
 	 *
+	 * @since 10.6.0
 	 * @param \WP $wp WP instance.
 	 */
 	public function capture_store_api_request_context( $wp ): void {
@@ -62,13 +64,30 @@ class Authentication {
 	/**
 	 * Use the Store API session handler when a valid Cart-Token is present.
 	 *
+	 * @since 10.6.0
 	 * @param string $handler Session handler class name.
 	 * @return string
 	 */
 	public function maybe_use_store_api_session_handler( $handler ): string {
+		if ( null === self::$is_store_api_request ) {
+			$rest_route = null;
+			if ( isset( $_GET['rest_route'] ) ) {
+				$rest_route = $_GET['rest_route'];
+			} elseif ( isset( $_SERVER['REST_ROUTE'] ) ) {
+				$rest_route = $_SERVER['REST_ROUTE'];
+			}
+			$rest_route = is_string( $rest_route ) ? rawurldecode( $rest_route ) : '';
+			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? (string) $_SERVER['REQUEST_URI'] : '';
+
+			self::$is_store_api_request = (
+				'' !== $rest_route && 0 === strpos( $rest_route, '/wc/store/' )
+			) || ( '' !== $request_uri && false !== strpos( $request_uri, '/wp-json/wc/store/' ) );
+		}
+
 		if ( false === self::$is_store_api_request ) {
 			return $handler;
 		}
+
 		$cart_token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
 		$cart_token = is_string( $cart_token ) ? $cart_token : '';
 		if ( $cart_token && CartTokenUtils::validate_cart_token( $cart_token ) ) {
