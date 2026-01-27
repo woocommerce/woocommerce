@@ -22,7 +22,7 @@ jobs:
       team-name: ${{ steps.get-all-events-for-version.outputs.team-name }}
     steps:
       - name: Install node-ical
-        run: npm install node-ical
+        run: npm install node-ical@0.23.1 rrule-temporal@1.4.1
       - name: Check for feature freeze events
         id: check-code-freeze-8-weeks
         uses: actions/github-script@v7
@@ -188,11 +188,12 @@ jobs:
               console.log('Successfully triggered upcoming release notification webhook');
 
               const responseBody = await response.json();
-              core.setOutput('release-team', responseBody.release_team);
-              core.setOutput('release-lead', responseBody.release_lead);
-              core.setOutput('release-lead-google-login', responseBody.release_lead_google_login);
-              core.setOutput('release-lead-slack-member-id', responseBody.release_lead_slack_member_id);
-              core.setOutput('post', responseBody.post);
+
+              core.setOutput('release-team', responseBody.data.release_team);
+              core.setOutput('release-lead', responseBody.data.release_lead);
+              core.setOutput('release-lead-google-login', responseBody.data.release_lead_google_login);
+              core.setOutput('release-lead-slack-member-id', responseBody.data.release_lead_slack_member_id);
+              core.setOutput('post', responseBody.data.post.view_url);
             }
         env:
           ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
