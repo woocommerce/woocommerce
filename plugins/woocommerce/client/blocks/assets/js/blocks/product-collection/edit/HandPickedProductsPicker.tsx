@@ -60,8 +60,6 @@ const HandPickedProductsPicker = ( props: HandPickedProductsPickerProps ) => {
 							const ids = value.map( ( { id }: { id: number } ) =>
 								String( id )
 							);
-							// Use setQueryAttribute to avoid stale closure issues
-							// It reads the current query from props at call time
 							setQueryAttribute( props, {
 								woocommerceHandPickedProducts: ids,
 							} );
