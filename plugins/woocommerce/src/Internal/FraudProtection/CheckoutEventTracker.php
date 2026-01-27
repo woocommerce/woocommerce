@@ -77,7 +77,6 @@ class CheckoutEventTracker {
 	 * @return void
 	 */
 	public function track_shortcode_checkout_field_update(): void {
-
 		$this->dispatcher->dispatch_event( 'checkout_update', array() );
 	}
 

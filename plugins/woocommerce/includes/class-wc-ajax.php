@@ -438,6 +438,12 @@ class WC_AJAX {
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_totals();
 
+		// Track checkout field update for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CheckoutEventTracker::class )
+				->track_shortcode_checkout_field_update();
+		}
+
 		// Get order review fragment.
 		ob_start();
 		woocommerce_order_review();
@@ -457,12 +463,6 @@ class WC_AJAX {
 		}
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
-
-		// Track checkout field update for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-			wc_get_container()->get( CheckoutEventTracker::class )
-				->track_shortcode_checkout_field_update();
-		}
 
 		wp_send_json(
 			array(
