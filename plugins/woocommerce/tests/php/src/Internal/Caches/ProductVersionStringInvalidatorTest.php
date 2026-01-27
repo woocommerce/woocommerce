@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\VersionStringGenerator;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * Tests for the ProductVersionStringInvalidator class.
@@ -55,13 +54,11 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * @return ProductVersionStringInvalidator The initialized invalidator.
 	 */
 	private function get_invalidator_with_hooks_enabled(): ProductVersionStringInvalidator {
-		$features_controller = $this->createMock( FeaturesController::class );
-
 		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
 
 		$invalidator = new ProductVersionStringInvalidator();
-		$invalidator->init( $features_controller );
+		$invalidator->init();
 
 		return $invalidator;
 	}
@@ -98,13 +95,11 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * @testdox Hooks are not registered when feature is disabled.
 	 */
 	public function test_hooks_not_registered_when_feature_disabled() {
-		$features_controller = $this->createMock( FeaturesController::class );
-
 		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'no' );
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'yes' );
 
 		$invalidator = new ProductVersionStringInvalidator();
-		$invalidator->init( $features_controller );
+		$invalidator->init();
 
 		$this->assertFalse( has_action( 'save_post_product', array( $invalidator, 'handle_save_post_product' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_new_product', array( $invalidator, 'handle_woocommerce_new_product' ) ) );
@@ -115,13 +110,11 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * @testdox Hooks are not registered when backend caching setting is disabled.
 	 */
 	public function test_hooks_not_registered_when_backend_caching_disabled() {
-		$features_controller = $this->createMock( FeaturesController::class );
-
 		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
 		update_option( 'woocommerce_rest_api_enable_backend_caching', 'no' );
 
 		$invalidator = new ProductVersionStringInvalidator();
-		$invalidator->init( $features_controller );
+		$invalidator->init();
 
 		$this->assertFalse( has_action( 'save_post_product', array( $invalidator, 'handle_save_post_product' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_new_product', array( $invalidator, 'handle_woocommerce_new_product' ) ) );
@@ -132,13 +125,11 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	 * @testdox Hooks are not registered when backend caching setting is not set (defaults to no).
 	 */
 	public function test_hooks_not_registered_when_backend_caching_not_set() {
-		$features_controller = $this->createMock( FeaturesController::class );
-
 		update_option( 'woocommerce_feature_rest_api_caching_enabled', 'yes' );
 		delete_option( 'woocommerce_rest_api_enable_backend_caching' );
 
 		$invalidator = new ProductVersionStringInvalidator();
-		$invalidator->init( $features_controller );
+		$invalidator->init();
 
 		$this->assertFalse( has_action( 'save_post_product', array( $invalidator, 'handle_save_post_product' ) ) );
 		$this->assertFalse( has_action( 'woocommerce_new_product', array( $invalidator, 'handle_woocommerce_new_product' ) ) );
@@ -731,37 +722,6 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox invalidate_products_list() deletes the list_products version string from cache.
-	 */
-	public function test_invalidate_products_list_deletes_list_version_string() {
-		$this->version_generator->generate_version( 'list_products' );
-
-		$version_before = $this->version_generator->get_version( 'list_products', false );
-		$this->assertNotNull( $version_before, 'Version string should exist before invalidation' );
-
-		$this->sut->invalidate_products_list();
-
-		$version_after = $this->version_generator->get_version( 'list_products', false );
-		$this->assertNull( $version_after, 'Version string should be deleted after invalidation' );
-	}
-
-	/**
-	 * @testdox invalidate_variations_list() deletes the list_product_variations_{product_id} version string from cache.
-	 */
-	public function test_invalidate_variations_list_deletes_variations_list_version_string() {
-		$product_id = 123;
-		$this->version_generator->generate_version( "list_product_variations_{$product_id}" );
-
-		$version_before = $this->version_generator->get_version( "list_product_variations_{$product_id}", false );
-		$this->assertNotNull( $version_before, 'Version string should exist before invalidation' );
-
-		$this->sut->invalidate_variations_list( $product_id );
-
-		$version_after = $this->version_generator->get_version( "list_product_variations_{$product_id}", false );
-		$this->assertNull( $version_after, 'Version string should be deleted after invalidation' );
-	}
-
-	/**
 	 * @testdox transition_post_status hook is registered when feature is enabled.
 	 */
 	public function test_transition_post_status_hook_registered() {
@@ -959,6 +919,60 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$variations_list_after = $this->version_generator->get_version( "list_product_variations_{$parent_id}", false );
 		$this->assertNull( $variations_list_after, 'Variations list version string should be deleted when variation is deleted' );
 
+		$products_list_after = $this->version_generator->get_version( 'list_products', false );
+		$this->assertNotNull( $products_list_after, 'Products list version string should NOT be deleted when variation is deleted' );
+	}
+
+	/**
+	 * @testdox Permanently deleting a product via WordPress (wp_delete_post) invalidates the products list version string.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $trash_first Whether to trash the product before permanently deleting it.
+	 */
+	public function test_wp_delete_post_invalidates_products_list( bool $trash_first ) {
+		$this->get_invalidator_with_hooks_enabled();
+
+		$product    = \WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		if ( $trash_first ) {
+			wp_trash_post( $product_id );
+		}
+
+		$this->version_generator->generate_version( 'list_products' );
+		$version_before = $this->version_generator->get_version( 'list_products', false );
+		$this->assertNotNull( $version_before, 'List version string should exist before deletion' );
+
+		wp_delete_post( $product_id, true );
+
+		$version_after = $this->version_generator->get_version( 'list_products', false );
+		$this->assertNull( $version_after, 'List version string should be deleted after permanent deletion via wp_delete_post' );
+	}
+
+	/**
+	 * @testdox Permanently deleting a variation via WordPress (wp_delete_post) invalidates the variations list version string.
+	 */
+	public function test_wp_delete_post_on_variation_invalidates_variations_list() {
+		$this->get_invalidator_with_hooks_enabled();
+
+		$parent_product = \WC_Helper_Product::create_variation_product();
+		$parent_id      = $parent_product->get_id();
+		$variations     = $parent_product->get_children();
+		$variation_id   = $variations[0];
+
+		$this->version_generator->generate_version( "list_product_variations_{$parent_id}" );
+		$this->version_generator->generate_version( 'list_products' );
+
+		$variations_list_before = $this->version_generator->get_version( "list_product_variations_{$parent_id}", false );
+		$this->assertNotNull( $variations_list_before, 'Variations list version string should exist before deletion' );
+
+		wp_delete_post( $variation_id, true );
+
+		$variations_list_after = $this->version_generator->get_version( "list_product_variations_{$parent_id}", false );
+		$this->assertNull( $variations_list_after, 'Variations list version string should be deleted after variation permanent deletion via wp_delete_post' );
+
+		// Products list should NOT be invalidated when a variation is deleted.
 		$products_list_after = $this->version_generator->get_version( 'list_products', false );
 		$this->assertNotNull( $products_list_after, 'Products list version string should NOT be deleted when variation is deleted' );
 	}

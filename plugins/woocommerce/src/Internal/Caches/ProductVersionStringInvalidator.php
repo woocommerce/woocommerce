@@ -145,10 +145,13 @@ class ProductVersionStringInvalidator {
 		}
 
 		if ( 'product_variation' === $post->post_type ) {
-			$this->invalidate_variation_and_parent( $post_id, (int) $post->post_parent );
+			$parent_id = (int) $post->post_parent;
+			$this->invalidate_variation_and_parent( $post_id, $parent_id );
+			$this->invalidate_variations_list( $parent_id );
 			$this->invalidate_variation_parent_cache( $post_id );
 		} elseif ( 'product' === $post->post_type ) {
 			$this->invalidate( $post_id );
+			$this->invalidate_products_list();
 		}
 	}
 
@@ -520,7 +523,7 @@ class ProductVersionStringInvalidator {
 		$cached    = wp_cache_get( $cache_key, 'woocommerce' );
 
 		if ( false !== $cached ) {
-			return $cached ?: null;
+			return $cached ? $cached : null;
 		}
 
 		if ( $this->is_using_cpt_data_store() ) {
@@ -529,7 +532,7 @@ class ProductVersionStringInvalidator {
 		} else {
 			$variation = wc_get_product( $variation_id );
 			$parent_id = $variation ? (int) $variation->get_parent_id() : null;
-			$parent_id = $parent_id ?: null;
+			$parent_id = $parent_id ? $parent_id : null;
 		}
 
 		// Cache the result (store 0 for null to distinguish from cache miss).
@@ -698,10 +701,8 @@ class ProductVersionStringInvalidator {
 	 * as these operations affect collection/list endpoints.
 	 *
 	 * @return void
-	 *
-	 * @since 10.6.0
 	 */
-	public function invalidate_products_list(): void {
+	private function invalidate_products_list(): void {
 		wc_get_container()->get( VersionStringGenerator::class )->delete_version( 'list_products' );
 	}
 
@@ -714,10 +715,8 @@ class ProductVersionStringInvalidator {
 	 * @param int|null $product_id The parent product ID, or null/0 to skip invalidation.
 	 *
 	 * @return void
-	 *
-	 * @since 10.6.0
 	 */
-	public function invalidate_variations_list( ?int $product_id ): void {
+	private function invalidate_variations_list( ?int $product_id ): void {
 		if ( $product_id ) {
 			wc_get_container()->get( VersionStringGenerator::class )->delete_version( "list_product_variations_{$product_id}" );
 		}
