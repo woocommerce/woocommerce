@@ -808,36 +808,15 @@ class FeaturesController {
 	 *
 	 * @since 10.5.0
 	 */
-	private function get_feature_definition( string $feature_id ): ?array {
+	public function get_feature_definition( string $feature_id ): ?array {
 		return $this->get_feature_definitions()[ $feature_id ] ?? null;
 	}
 
 	/**
-	 * Log usage of a deprecated feature.
-	 *
-	 * This method ensures logging only happens once per request to avoid spam.
-	 *
-	 * @param string $feature_id       The feature id being checked.
-	 * @param string $deprecated_since The version since which the feature is deprecated.
-	 *
-	 * @since 10.5.0
-	 */
-	private function log_deprecated_feature_usage( string $feature_id, string $deprecated_since ): void {
-		static $logged = array();
-
-		if ( isset( $logged[ $feature_id ] ) ) {
-			return;
-		}
-		$logged[ $feature_id ] = true;
-
-		wc_deprecated_function(
-			"FeaturesUtil::feature_is_enabled('{$feature_id}')",
-			$deprecated_since
-		);
-	}
-
-	/**
 	 * Check if a given feature is currently enabled.
+	 *
+	 * Note: This method does not log deprecation notices for deprecated features.
+	 * Deprecation logging is handled by FeaturesUtil::feature_is_enabled() which is the public API.
 	 *
 	 * @param  string $feature_id Unique feature id.
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
@@ -851,7 +830,6 @@ class FeaturesController {
 
 		// Handle deprecated features - return the backwards-compatible value.
 		if ( ! empty( $feature['deprecated_since'] ) ) {
-			$this->log_deprecated_feature_usage( $feature_id, $feature['deprecated_since'] );
 			return (bool) ( $feature['deprecated_value'] ?? false );
 		}
 
@@ -1042,6 +1020,7 @@ class FeaturesController {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$features = $this->get_feature_definitions();
+
 		if ( $enabled_features_only ) {
 			$features = array_filter(
 				$features,
