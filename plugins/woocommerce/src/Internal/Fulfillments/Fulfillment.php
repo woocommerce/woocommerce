@@ -58,7 +58,7 @@ class Fulfillment extends \WC_Data {
 	 * @return int Fulfillment ID.
 	 */
 	public function get_id(): int {
-		return $this->data['fulfillment_id'] ?? 0;
+		return $this->data['id'] ?? 0;
 	}
 
 	/**
@@ -67,8 +67,8 @@ class Fulfillment extends \WC_Data {
 	 * @param int $id Fulfillment ID.
 	 */
 	public function set_id( $id ): void {
-		$this->data['fulfillment_id'] = is_numeric( $id ) ? absint( $id ) : 0;
-		parent::set_id( $this->data['fulfillment_id'] );
+		$this->data['id'] = is_numeric( $id ) ? absint( $id ) : 0;
+		parent::set_id( $this->data['id'] );
 	}
 
 	/**

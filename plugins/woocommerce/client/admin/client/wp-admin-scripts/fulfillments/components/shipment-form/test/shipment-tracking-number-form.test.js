@@ -76,12 +76,10 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
 		apiFetch.mockResolvedValueOnce( {
-			tracking_number_details: {
-				tracking_number: '1Z12345E0291980793',
-				shipping_provider: 'ups',
-				tracking_url:
-					'https://www.ups.com/track?tracknum=1Z12345E0291980793',
-			},
+			tracking_number: '1Z12345E0291980793',
+			shipping_provider: 'ups',
+			tracking_url:
+				'https://www.ups.com/track?tracknum=1Z12345E0291980793',
 		} );
 		render( <ShipmentTrackingNumberForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
@@ -107,7 +105,7 @@ describe( 'ShipmentTrackingNumberForm', () => {
 	it( 'shows error message on invalid lookup', async () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
-		apiFetch.mockResolvedValueOnce( { tracking_number_details: [] } );
+		apiFetch.mockResolvedValueOnce( {} );
 		render( <ShipmentTrackingNumberForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
 		fireEvent.change( input, { target: { value: 'invalid' } } );
@@ -134,12 +132,10 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
 		apiFetch.mockResolvedValueOnce( {
-			tracking_number_details: {
-				tracking_number: '1Z12345E0291980793',
-				shipping_provider: 'ups',
-				tracking_url:
-					'https://www.ups.com/track?tracknum=1Z12345E0291980793',
-			},
+			tracking_number: '1Z12345E0291980793',
+			shipping_provider: 'ups',
+			tracking_url:
+				'https://www.ups.com/track?tracknum=1Z12345E0291980793',
 		} );
 		render( <ShipmentTrackingNumberForm /> );
 		const input = screen.getByPlaceholderText( 'Enter tracking number' );
@@ -185,15 +181,12 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
 		apiFetch.mockResolvedValueOnce( {
-			tracking_number_details: {
-				tracking_number: '1234567890123456',
-				shipping_provider: 'ups',
-				tracking_url:
-					'https://www.ups.com/track?tracknum=1234567890123456',
-				possibilities: {
-					ups: { url: 'https://ups.com', ambiguity_score: 70 },
-					fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
-				},
+			tracking_number: '1234567890123456',
+			shipping_provider: 'ups',
+			tracking_url: 'https://www.ups.com/track?tracknum=1234567890123456',
+			possibilities: {
+				ups: { url: 'https://ups.com', ambiguity_score: 70 },
+				fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
 			},
 		} );
 
@@ -218,15 +211,12 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
 		apiFetch.mockResolvedValueOnce( {
-			tracking_number_details: {
-				tracking_number: 'AB123456789US',
-				shipping_provider: 'ups',
-				tracking_url:
-					'https://www.ups.com/track?tracknum=AB123456789US',
-				possibilities: {
-					ups: { url: 'https://ups.com', ambiguity_score: 90 },
-					fedex: { url: 'https://fedex.com', ambiguity_score: 88 },
-				},
+			tracking_number: 'AB123456789US',
+			shipping_provider: 'ups',
+			tracking_url: 'https://www.ups.com/track?tracknum=AB123456789US',
+			possibilities: {
+				ups: { url: 'https://ups.com', ambiguity_score: 90 },
+				fedex: { url: 'https://fedex.com', ambiguity_score: 88 },
 			},
 		} );
 
@@ -251,14 +241,12 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
 		apiFetch.mockResolvedValueOnce( {
-			tracking_number_details: {
-				tracking_number: '123456789012',
-				shipping_provider: 'ups',
-				tracking_url: 'https://www.ups.com/track?tracknum=123456789012',
-				possibilities: {
-					ups: { url: 'https://ups.com', ambiguity_score: 90 },
-					fedex: { url: 'https://fedex.com', ambiguity_score: 60 },
-				},
+			tracking_number: '123456789012',
+			shipping_provider: 'ups',
+			tracking_url: 'https://www.ups.com/track?tracknum=123456789012',
+			possibilities: {
+				ups: { url: 'https://ups.com', ambiguity_score: 90 },
+				fedex: { url: 'https://fedex.com', ambiguity_score: 60 },
 			},
 		} );
 
@@ -285,15 +273,12 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		mockContext.trackingNumber = '';
 		mockContext.shipmentProvider = '';
 		apiFetch.mockResolvedValueOnce( {
-			tracking_number_details: {
-				tracking_number: '1234567890123456',
-				shipping_provider: 'ups',
-				tracking_url:
-					'https://www.ups.com/track?tracknum=1234567890123456',
-				possibilities: {
-					ups: { url: 'https://ups.com', ambiguity_score: 70 },
-					fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
-				},
+			tracking_number: '1234567890123456',
+			shipping_provider: 'ups',
+			tracking_url: 'https://www.ups.com/track?tracknum=1234567890123456',
+			possibilities: {
+				ups: { url: 'https://ups.com', ambiguity_score: 70 },
+				fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
 			},
 		} );
 
@@ -324,15 +309,12 @@ describe( 'ShipmentTrackingNumberForm', () => {
 
 		// First lookup with ambiguous results
 		apiFetch.mockResolvedValueOnce( {
-			tracking_number_details: {
-				tracking_number: '1234567890123456',
-				shipping_provider: 'ups',
-				tracking_url:
-					'https://www.ups.com/track?tracknum=1234567890123456',
-				possibilities: {
-					ups: { url: 'https://ups.com', ambiguity_score: 70 },
-					fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
-				},
+			tracking_number: '1234567890123456',
+			shipping_provider: 'ups',
+			tracking_url: 'https://www.ups.com/track?tracknum=1234567890123456',
+			possibilities: {
+				ups: { url: 'https://ups.com', ambiguity_score: 70 },
+				fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
 			},
 		} );
 
@@ -352,14 +334,12 @@ describe( 'ShipmentTrackingNumberForm', () => {
 
 		// Second lookup with clear results
 		apiFetch.mockResolvedValueOnce( {
-			tracking_number_details: {
-				tracking_number: '123456789012',
-				shipping_provider: 'ups',
-				tracking_url: 'https://www.ups.com/track?tracknum=123456789012',
-				possibilities: {
-					ups: { url: 'https://ups.com', ambiguity_score: 90 },
-					fedex: { url: 'https://fedex.com', ambiguity_score: 60 },
-				},
+			tracking_number: '123456789012',
+			shipping_provider: 'ups',
+			tracking_url: 'https://www.ups.com/track?tracknum=123456789012',
+			possibilities: {
+				ups: { url: 'https://ups.com', ambiguity_score: 90 },
+				fedex: { url: 'https://fedex.com', ambiguity_score: 60 },
 			},
 		} );
 

@@ -70,6 +70,7 @@ export type RecommendedPaymentMethod = {
 };
 
 export type PaymentsProviderOnboardingState = {
+	supported: boolean;
 	started: boolean;
 	completed: boolean;
 	test_mode: boolean;
@@ -108,6 +109,9 @@ export type PaymentsProvider = PaymentsEntity & {
 	links?: PaymentsProviderLink[];
 	onboarding?: {
 		state?: PaymentsProviderOnboardingState;
+		messages?: {
+			not_supported?: string; // Message to display to the user when onboarding is not supported.
+		};
 		_links?: {
 			onboard?: LinkData; // For gateways, this is used to start the onboarding flow.
 			reset?: LinkData; // For gateways, this is used to reset the account/onboarding.
@@ -127,6 +131,9 @@ export type PaymentGatewayProvider = PaymentsProvider & {
 	state: PaymentsProviderState;
 	onboarding: {
 		state: PaymentsProviderOnboardingState;
+		messages: {
+			not_supported?: string; // Message to display to the user when onboarding is not supported.
+		};
 		_links: {
 			onboard: LinkData;
 			reset: LinkData;

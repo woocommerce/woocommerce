@@ -1,5 +1,7 @@
 name: 'Maintenance: Bump Action Scheduler version'
 on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight UTC
   workflow_dispatch:
     inputs:
       version:
@@ -8,9 +10,12 @@ on:
         default: ''
 
 jobs:
-  bump-version:
-    name: Bump Action Scheduler version
+  check-version:
+    name: Check Action Scheduler version
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-as-version.outputs.version }}
+      should-update: ${{ steps.check-version.outputs.should-update }}
     steps:
     - name: Fetch Action Scheduler version
       id: get-as-version
@@ -34,52 +39,117 @@ jobs:
       uses: actions/checkout@v4
       with:
         ref: trunk
-    - name: Set up dev environment
+    - name: Check if version bump is needed
+      id: check-version
       run: |
         cd plugins/woocommerce
+        current_version=$(jq -r '.require["woocommerce/action-scheduler"]' composer.json)
+        target_version="${{ steps.get-as-version.outputs.version }}"
 
-        # Install dev packages. Required for changelogger use.
-        composer install --quiet
+        echo "Current Action Scheduler version: $current_version"
+        echo "Target Action Scheduler version: $target_version"
 
+        if [ "$current_version" = "$target_version" ]; then
+          echo "Action Scheduler is already at version $target_version. No update needed."
+          echo "should-update=false" >> $GITHUB_OUTPUT
+        else
+          echo "Action Scheduler needs to be updated from $current_version to $target_version."
+          echo "should-update=true" >> $GITHUB_OUTPUT
+        fi
+
+  bump-version:
+    name: Bump Action Scheduler version
+    needs: check-version
+    if: needs.check-version.outputs.should-update == 'true'
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out trunk
+      uses: actions/checkout@v4
+      with:
+        ref: trunk
+    - name: Set up dev environment
+      run: |
         # Configure Git.
         git config --global user.name "github-actions[bot]"
         git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+        # Configure token for Composer.
+        composer config --global github-oauth.github.com "${{ secrets.GITHUB_TOKEN }}"
+
+        # Install dev packages. Required for changelogger use.
+        cd plugins/woocommerce
+        composer install --quiet
     - name: Bump Action Scheduler requirement
+      id: create-pr
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        # Fetch all branches from origin.
+        git fetch origin
+
+        # Branch name hardcoded to avoid conflicts.
+        branch_name="update-action-scheduler-via-automation"
+
+        # Delete local branch if it exists and create fresh from trunk.
+        git branch -D "$branch_name" 2>/dev/null || true
+        git checkout -b "$branch_name" origin/trunk
+
         cd plugins/woocommerce
 
         # Update A-S version.
-        jq --tab -r ".require[\"woocommerce/action-scheduler\"] |= \"${{ steps.get-as-version.outputs.version }}\"" composer.json > composer.json.new
+        jq --tab -r ".require[\"woocommerce/action-scheduler\"] |= \"${{ needs.check-version.outputs.version }}\"" composer.json > composer.json.new
         mv composer.json.new composer.json
 
         if git diff --quiet; then
-          echo "::error::No changes to commit."
-          exit 1
+          echo "No changes to commit."
+          exit 0
         fi
 
         composer update woocommerce/action-scheduler --no-scripts
 
-        branch_name="update/action-scheduler-${{ steps.get-as-version.outputs.version }}"
-        git checkout -b ${branch_name}
-
+        rm -f changelog/update-action-scheduler-via-automation
         composer exec -- changelogger add \
           --significance minor \
           --type update \
-          --entry "Update the Action Scheduler package to version ${{ steps.get-as-version.outputs.version }}." \
+          --entry "Update the Action Scheduler package to version ${{ needs.check-version.outputs.version }}." \
           --no-interaction
 
-        # Push changes.
+        # Commit changes.
         git add composer.lock composer.json changelog/
         git commit \
-          --message "Update Action Scheduler to '${{ steps.get-as-version.outputs.version }}'."
-        git push origin ${branch_name}
+          --message "Update Action Scheduler to '${{ needs.check-version.outputs.version }}'."
 
-        # Open PR.
-        gh pr create \
-          --title 'Bump Action Scheduler version to ${{ steps.get-as-version.outputs.version }}' \
-          --body 'This PR updates the Action Scheduler package requirement for WooCommerce core.' \
-          --base trunk \
-          --head ${branch_name} \
-          --reviewer "${{ github.actor }}"
+        # Push only if remote branch doesn't exist or differs from our changes.
+        if ! git ls-remote --exit-code --heads origin "$branch_name" >/dev/null 2>&1 || ! git diff --quiet HEAD origin/"$branch_name"; then
+          echo "Pushing changes to remote branch."
+          git push --force origin "$branch_name"
+        else
+          echo "No changes compared to remote branch. Skipping push."
+        fi
+
+        # Prepare PR content.
+        pr_title="Bump Action Scheduler version to ${{ needs.check-version.outputs.version }}"
+        pr_body="This PR updates the Action Scheduler package requirement for WooCommerce core."
+
+        # Check if PR already exists.
+        pr_number=$(gh pr list --head "$branch_name" --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+        if [[ -n "$pr_number" ]]; then
+          echo "PR #$pr_number already exists. Updating title, body, and milestone."
+
+          gh pr edit "$pr_number" \
+            --title "$pr_title" \
+            --body "$pr_body"
+        else
+          # Get WooCommerce version for milestone from trunk.
+          milestone=$( git show origin/trunk:plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+\(-dev\)\?$/.0/' )
+
+          echo "Creating new PR."
+          gh pr create \
+            --title "$pr_title" \
+            --body "$pr_body" \
+            --base trunk \
+            --head "$branch_name" \
+            --label 'Release' \
+            --milestone "$milestone"
+        fi

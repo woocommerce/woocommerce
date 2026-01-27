@@ -71,7 +71,7 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it renders quote content
 	 */
 	public function testItRendersQuoteContent(): void {
-		$rendered = $this->quote_renderer->render( '', $this->parsed_quote, $this->rendering_context );
+		$rendered = $this->quote_renderer->render( '<p>Quote content</p>', $this->parsed_quote, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'Quote content', $rendered );
 	}

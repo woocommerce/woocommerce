@@ -1071,6 +1071,7 @@ add_action( 'wp_login', 'wc_maybe_store_user_agent', 10, 2 );
  */
 function wc_user_logged_in( $user_login, $user ) {
 	wc_update_user_last_active( $user->ID );
+	update_user_meta( $user->ID, '_woocommerce_load_saved_cart_after_login', 1 );
 }
 add_action( 'wp_login', 'wc_user_logged_in', 10, 2 );
 
@@ -1097,7 +1098,7 @@ function wc_update_user_last_active( $user_id ) {
 	if ( ! $user_id ) {
 		return;
 	}
-	update_user_meta( $user_id, 'wc_last_active', (string) strtotime( gmdate( 'Y-m-d', time() ) ) );
+	update_user_meta( $user_id, 'wc_last_active', (string) time() );
 }
 
 /**

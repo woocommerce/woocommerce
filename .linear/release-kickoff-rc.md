@@ -5,6 +5,7 @@ This issue tracks the progress of a single WooCommerce core plugin release itera
 ## Version being released {RELEASE_VERSION}-RC.{RC_PATCH_VERSION}
 
 The following details are copied from the official [Building and Publishing guide](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/). Please check it to make sure these instructions haven't become out of date.
+Check the [Release Troubleshooting & Recovery](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/) page for any issues you may encounter.
 
 ## Pre-Checks
 

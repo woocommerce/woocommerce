@@ -323,6 +323,41 @@ const store = select( checkoutStore );
 const prefersCollection = store.prefersCollection();
 ```
 
+### getRegisteredAutocompleteProviders
+
+Returns a list of registered address autocomplete provider IDs.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   _addressAutocompleteProviders_ `string[]`: A list of registered address autocomplete provider IDs.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( checkoutStore );
+const addressAutocompleteProviders = store.getRegisteredAutocompleteProviders();
+```
+
+### getActiveAutocompleteProvider
+
+Returns the active address autocomplete provider for a given address type.
+
+#### _Parameters_
+
+-   _type_ `'billing' | 'shipping'`: The address type.
+
+#### _Returns_ <!-- omit in toc -->
+
+-   _activeAddressAutocompleteProvider_ `string`: The currently active address autocomplete provider for the passed address type.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = select( checkoutStore );
+const activeBillingProvider = store.getActiveAutocompleteProvider( 'billing' );
+```
+
+
 ## Actions
 
 ### setPrefersCollection
@@ -368,4 +403,35 @@ Set the shipping address to editing state or collapsed state. Note that if the a
 ```js
 const store = dispatch( checkoutStore );
 store.setEditingShippingAddress( true );
+```
+
+### addAddressAutocompleteProvider
+
+Adds an address autocomplete provider 
+
+#### _Parameters_ <!-- omit in toc -->
+
+-   _providerId_ `string`: The provider's name. Note, providers should be registered with `wc.addressAutocomplete.registerAddressAutocompleteProvider`.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = dispatch( checkoutStore );
+store.addAddressAutocompleteProvider( 'my-address-provider' );
+```
+
+### setActiveAddressAutocompleteProvider
+
+Adds an address autocomplete provider 
+
+#### _Parameters_ <!-- omit in toc -->
+
+-   _providerId_ `string`: Sets the active autocomplete provider's id. Note, providers should be registered with `wc.addressAutocomplete.registerAddressAutocompleteProvider`.
+-   _addressType_ `'billing' | 'shipping'`: Which address type this is the active provider for. Since billing and shipping can be in different countries, there may be a different provider for each country.
+
+#### _Example_ <!-- omit in toc -->
+
+```js
+const store = dispatch( checkoutStore );
+store.setActiveAddressAutocompleteProvider( 'my-address-provider', 'billing' );
 ```

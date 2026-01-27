@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-CI: added a missing dev-dependency for passing tests in updated CI environment.

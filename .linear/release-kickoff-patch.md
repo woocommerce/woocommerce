@@ -1,10 +1,11 @@
 # WooCommerce {RELEASE_VERSION}.{PATCH_VERSION}
 
-This issue tracks the progress of the a single WooCommerce core plugin release iteration that covers the publishing of a single patch version. Patch version in this context refers to `z` in a version following `x.y.z` where `z` can be any of `0-99`, `0-rc.[0-99]`, or `0-beta.[0-99]`.
+This issue tracks the progress of a single WooCommerce core plugin release iteration that covers the publishing of a single patch version. "Patch version" in this context refers to `z` in a version following `x.y.z` where `z` can be any of `0-99`, `0-rc.[0-99]`, or `0-beta.[0-99]`.
 
 ## Version being released {RELEASE_VERSION}.{PATCH_VERSION}
 
 The following details are copied from the official [Building and Publishing guide](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/). Please check it to make sure these instructions haven't become out of date.
+Check the [Release Troubleshooting & Recovery](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/) page for any issues you may encounter.
 
 ## Pre-Checks
 
@@ -75,6 +76,10 @@ The following details are copied from the official [Building and Publishing guid
     - If releasing a dev, beta, or RC, check "Set as a pre-release."
     - If the version was marked as stable in Step 1 above, check "Set as the latest release."
     - If the version was not marked as stable in Step 1 above, do not set as the latest release.
+
+### Step 3: Merge follow-up PRs
+
+- [ ] **Action:** Merge the "Update changelog.txt after {RELEASE_VERSION}.{PATCH_VERSION}" PR that is automatically created once the release tag is published on GitHub.
 
 ## Post Release Monitoring
 

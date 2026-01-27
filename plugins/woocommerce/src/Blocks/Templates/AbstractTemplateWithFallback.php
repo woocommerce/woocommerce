@@ -49,7 +49,14 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	}
 
 	/**
-	 * Render the block template.
+	 * This method is hooked to WordPress' 'template_redirect' action and allows
+	 * template classes to:
+	 * 1. Decide when block templates should be rendered based on the context.
+	 * 2. Execute specific logic, such as managing the compatibility layer for
+	 *    legacy template support.
+	 *
+	 * Child classes must implement this method to define their template
+	 * rendering conditions and any additional template-specific behavior.
 	 */
 	abstract public function render_block_template();
 }

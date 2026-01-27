@@ -103,6 +103,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		'downloadable'       => false,
 		'category_ids'       => array(),
 		'tag_ids'            => array(),
+		'brand_ids'          => array(),
 		'shipping_class_id'  => 0,
 		'downloads'          => array(),
 		'image_id'           => '',
@@ -608,6 +609,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function get_tag_ids( $context = 'view' ) {
 		return $this->get_prop( 'tag_ids', $context );
+	}
+
+	/**
+	 * Get brand ids.
+	 *
+	 * @since 10.3.0
+	 * @param  string $context What the value is for. Valid values are view and edit.
+	 * @return array
+	 */
+	public function get_brand_ids( $context = 'view' ) {
+		return $this->get_prop( 'brand_ids', $context );
 	}
 
 	/**
@@ -1226,6 +1238,16 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 */
 	public function set_tag_ids( $term_ids ) {
 		$this->set_prop( 'tag_ids', array_unique( array_map( 'intval', $term_ids ) ) );
+	}
+
+	/**
+	 * Set the product brands.
+	 *
+	 * @since 10.3.0
+	 * @param array $term_ids List of terms IDs.
+	 */
+	public function set_brand_ids( $term_ids ) {
+		$this->set_prop( 'brand_ids', array_unique( array_map( 'intval', $term_ids ) ) );
 	}
 
 	/**

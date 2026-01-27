@@ -27,8 +27,6 @@ import {
 import {
 	NavigableToolbar,
 	store as blockEditorStore,
-	// @ts-expect-error ToolSelector exists in WordPress components.
-	ToolSelector,
 	BlockToolbar,
 } from '@wordpress/block-editor';
 
@@ -57,40 +55,34 @@ export function HeaderToolbar( {
 		useState( true );
 	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
-	const {
-		isInserterEnabled,
-		isTextModeEnabled,
-		hasBlockSelection,
-		hasFixedToolbar,
-	} = useSelect( ( select ) => {
-		const {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			hasInserterItems,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			getBlockRootClientId,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			getBlockSelectionEnd,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			__unstableGetEditorMode: getEditorMode,
-			// @ts-expect-error These selectors are available in the block data store.
-			getBlockSelectionStart,
-		} = select( blockEditorStore );
-		const { get: getPreference } = select( preferencesStore );
+	const { isInserterEnabled, hasBlockSelection, hasFixedToolbar } = useSelect(
+		( select ) => {
+			const {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore These selectors are available in the block data store.
+				hasInserterItems,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore These selectors are available in the block data store.
+				getBlockRootClientId,
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore These selectors are available in the block data store.
+				getBlockSelectionEnd,
+				// @ts-expect-error These selectors are available in the block data store.
+				getBlockSelectionStart,
+			} = select( blockEditorStore );
+			const { get: getPreference } = select( preferencesStore );
 
-		return {
-			isTextModeEnabled: getEditorMode() === 'text',
-			isInserterEnabled: hasInserterItems(
-				getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
-					undefined
-			),
-			hasBlockSelection: !! getBlockSelectionStart(),
-			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
-		};
-	}, [] );
+			return {
+				isInserterEnabled: hasInserterItems(
+					getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
+						undefined
+				),
+				hasBlockSelection: !! getBlockSelectionStart(),
+				hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
+			};
+		},
+		[]
+	);
 
 	const toggleInserter = useCallback(
 		() => setIsInserterOpened( ! isInserterOpened ),
@@ -136,14 +128,6 @@ export function HeaderToolbar( {
 							aria-expanded={ isInserterOpened }
 							showTooltip
 						/>
-						{ isLargeViewport && (
-							<ToolbarItem
-								as={ ToolSelector }
-								// @ts-expect-error the prop size is passed to the ToolSelector component
-								disabled={ isTextModeEnabled }
-								size="compact"
-							/>
-						) }
 						{ /* @ts-expect-error the prop size is passed to the EditorHistoryUndo component */ }
 						<ToolbarItem as={ EditorHistoryUndo } size="compact" />
 						{ /* @ts-expect-error the prop size is passed to the EditorHistoryRedo component */ }

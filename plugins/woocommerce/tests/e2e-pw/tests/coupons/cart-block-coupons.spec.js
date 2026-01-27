@@ -194,7 +194,7 @@ test.describe(
 					).toBeVisible();
 					await expect(
 						page.locator(
-							'.wc-block-components-totals-discount .wc-block-components-totals-item__value'
+							'.wc-block-components-totals-discount > .wc-block-components-totals-item__value'
 						)
 					).toHaveText( discounts[ i ] );
 					await expect(

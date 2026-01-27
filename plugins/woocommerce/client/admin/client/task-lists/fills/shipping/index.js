@@ -39,7 +39,6 @@ import {
 } from './shipping-providers/partners';
 import { TermsOfService } from '~/task-lists/components/terms-of-service';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
 
 export class Shipping extends Component {
 	constructor( props ) {
@@ -666,18 +665,10 @@ export class Shipping extends Component {
 						'woocommerce'
 					) }
 					eventName="tasklist_shipping_visit_marketplace_click"
-					targetUrl={
-						isFeatureEnabled( 'marketplace' )
-							? getAdminLink(
-									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-							  )
-							: 'https://woocommerce.com/product-category/woocommerce-extensions/shipping-delivery-and-fulfillment/'
-					}
-					linkType={
-						isFeatureEnabled( 'marketplace' )
-							? 'wc-admin'
-							: 'external'
-					}
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+					) }
+					linkType="wc-admin"
 				/>
 			</div>
 		);

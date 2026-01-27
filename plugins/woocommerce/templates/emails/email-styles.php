@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 9.9.0
+ * @version 10.5.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -280,6 +280,10 @@ body {
 	font-weight: normal;
 	padding-bottom: 5px;
 	padding-top: 5px;
+}
+
+#body_content .email-order-details .order-totals .includes_tax {
+	display: block;
 }
 
 #body_content .email-order-details .order-totals-total th {

@@ -57,9 +57,7 @@ class WC_Brands {
 
 		add_filter( 'post_type_link', array( $this, 'post_type_link' ), 11, 2 );
 
-		if ( 'yes' === get_option( 'wc_brands_show_description' ) ) {
-			add_action( 'woocommerce_archive_description', array( $this, 'brand_description' ) );
-		}
+		add_action( 'woocommerce_archive_description', array( $this, 'brand_description' ) );
 
 		add_filter( 'woocommerce_product_query_tax_query', array( $this, 'update_product_query_tax_query' ), 10, 1 );
 
@@ -100,15 +98,28 @@ class WC_Brands {
 
 		$product_terms = get_the_terms( $product_id, 'product_brand' );
 
-		if ( $product_terms ) {
-			$product_brands = array();
-
-			foreach ( $product_terms as $term ) {
-				$product_brands[ $term->term_id ] = $term->parent;
-			}
-
-			_wc_term_recount( $product_brands, get_taxonomy( 'product_brand' ), false, false );
+		if ( ! $product_terms ) {
+			return;
 		}
+
+		if ( wp_defer_term_counting() ) {
+			// When deferring term counts, we're using the built in handling of `wp_update_term_count()` to deal with the deferring
+			// and, though, this will cause both the standard and stock based counts to be rerun, it is still more efficient
+			// in cases where deferred term counting was warranted.
+			$product_terms = get_the_terms( $product_id, 'product_brand' );
+			if ( is_array( $product_terms ) ) {
+				wp_update_term_count( array_column( $product_terms, 'term_taxonomy_id' ), 'product_brand' );
+			}
+			return;
+		}
+
+		$product_brands = array();
+
+		foreach ( $product_terms as $term ) {
+			$product_brands[ $term->term_id ] = $term->parent;
+		}
+
+		_wc_term_recount( $product_brands, get_taxonomy( 'product_brand' ), false, false );
 	}
 
 	/**
@@ -224,25 +235,74 @@ class WC_Brands {
 	 * Enqueues styles.
 	 */
 	public function styles() {
+		if ( ! $this->should_load_brands_styles() ) {
+			return;
+		}
+
 		$version = Constants::get_constant( 'WC_VERSION' );
 		wp_enqueue_style( 'brands-styles', WC()->plugin_url() . '/assets/css/brands.css', array(), $version );
+	}
+
+	/**
+	 * Determines if brands styles should be loaded on the current page.
+	 *
+	 * @since 10.4.0
+	 * @return bool
+	 */
+	private function should_load_brands_styles() {
+		global $post;
+
+		// Should load on brand taxonomy archive pages.
+		if ( is_tax( 'product_brand' ) ) {
+			return true;
+		}
+
+		// Should load on single product pages that have brands assigned.
+		if ( is_singular( 'product' ) && has_term( '', 'product_brand' ) ) {
+			return true;
+		}
+
+		// Check if any brand shortcodes are present in the content.
+		if ( $post && ! empty( $post->post_content ) ) {
+			$brand_shortcodes = array(
+				'brand_products',
+				'product_brand',
+				'product_brand_list',
+				'product_brand_thumbnails',
+				'product_brand_thumbnails_description',
+			);
+
+			foreach ( $brand_shortcodes as $shortcode ) {
+				if ( has_shortcode( $post->post_content, $shortcode ) ) {
+					return true;
+				}
+			}
+		}
+
+		// Check if any brand widgets are active.
+		if ( is_active_widget( false, false, 'wc_brands_brand_description' ) ||
+			is_active_widget( false, false, 'woocommerce_brand_nav' ) ||
+			is_active_widget( false, false, 'wc_brands_brand_thumbnails' ) ) {
+			return true;
+		}
+
+		/**
+		 * Filter whether brands styles should be loaded.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool $should_load Whether to load brands styles.
+		 */
+		return apply_filters( 'woocommerce_should_load_brands_styles', false );
 	}
 
 	/**
 	 * Initializes brand taxonomy.
 	 */
 	public static function init_taxonomy() {
-		$shop_page_id = wc_get_page_id( 'shop' );
+		// Get the custom brand permalink slug, or use the default translatable slug.
+		$slug = get_option( 'woocommerce_brand_permalink', '' );
 
-		$base_slug     = $shop_page_id > 0 && get_page( $shop_page_id ) ? get_page_uri( $shop_page_id ) : 'shop';
-		$category_base = get_option( 'woocommerce_prepend_shop_page_to_urls' ) === 'yes' ? trailingslashit( $base_slug ) : '';
-
-		$slug = $category_base . __( 'brand', 'woocommerce' );
-		if ( '' === $category_base ) {
-			$slug = get_option( 'woocommerce_brand_permalink', '' );
-		}
-
-		// Can't provide transatable string as get_option default.
 		if ( '' === $slug ) {
 			$slug = __( 'brand', 'woocommerce' );
 		}
@@ -276,6 +336,7 @@ class WC_Brands {
 						'add_new_item'      => __( 'Add New Brand', 'woocommerce' ),
 						'new_item_name'     => __( 'New Brand Name', 'woocommerce' ),
 						'not_found'         => __( 'No Brands Found', 'woocommerce' ),
+						'no_terms'          => __( 'No brands', 'woocommerce' ),
 						'back_to_items'     => __( '&larr; Go to Brands', 'woocommerce' ),
 					),
 
@@ -358,6 +419,10 @@ class WC_Brands {
 	 * Displays brand description.
 	 */
 	public function brand_description() {
+		if ( 'yes' !== get_option( 'wc_brands_show_description' ) ) {
+			return;
+		}
+
 		if ( ! is_tax( 'product_brand' ) ) {
 			return;
 		}
@@ -431,10 +496,14 @@ class WC_Brands {
 
 		if ( ! empty( $brands ) && is_array( $brands ) ) {
 			// Can only return one brand, so pick the first.
+			$brand_thumbnail = wc_get_brand_thumbnail_url( $brands[0]->term_id, 'full' );
 			$markup['brand'] = array(
 				'@type' => 'Brand',
 				'name'  => $brands[0]->name,
 			);
+			if ( $brand_thumbnail ) {
+				$markup['brand']['logo'] = $brand_thumbnail;
+			}
 		}
 
 		return $markup;

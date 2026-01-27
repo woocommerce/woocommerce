@@ -312,6 +312,21 @@ const billingFirstNameErrorId =
 	store.getValidationErrorId( 'billing-first-name' );
 ```
 
+### getValidationErrors
+
+Returns all validation errors in the store.
+
+#### _Returns_ 
+
+-   `Record<string, FieldValidationStatus>`: All validation errors where keys are error IDs and values are FieldValidationStatus objects containing _message_ `string` and _hidden_ `boolean`.
+
+#### _Example_ 
+
+```js
+const store = select( validationStore );
+const allValidationErrors = store.getValidationErrors();
+```
+
 ### hasValidationErrors
 
 Returns true if validation errors occurred, and false otherwise.

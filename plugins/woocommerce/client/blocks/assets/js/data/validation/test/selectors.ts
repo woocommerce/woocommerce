@@ -9,6 +9,7 @@ import { FieldValidationStatus } from '@woocommerce/types';
 import {
 	getValidationErrorId,
 	getValidationError,
+	getValidationErrors,
 	hasValidationErrors,
 } from '../selectors';
 
@@ -54,5 +55,34 @@ describe( 'Validation selectors', () => {
 		const stateWithNoErrorsCheckResult =
 			hasValidationErrors( stateWithNoErrors );
 		expect( stateWithNoErrorsCheckResult ).toEqual( false );
+	} );
+
+	it( 'Gets all validation errors', () => {
+		const state: Record< string, FieldValidationStatus > = {
+			billing_first_name: {
+				message: 'First name is required',
+				hidden: false,
+			},
+			billing_last_name: {
+				message: 'Last name is required',
+				hidden: true,
+			},
+			shipping_city: {
+				message: 'City is required',
+				hidden: false,
+			},
+		};
+		const allValidationErrors = getValidationErrors( state );
+		expect( allValidationErrors ).toEqual( state );
+		expect( allValidationErrors ).toHaveProperty( 'billing_first_name' );
+		expect( allValidationErrors ).toHaveProperty( 'billing_last_name' );
+		expect( allValidationErrors ).toHaveProperty( 'shipping_city' );
+	} );
+
+	it( 'Gets empty object when no validation errors exist', () => {
+		const state: Record< string, FieldValidationStatus > = {};
+		const allValidationErrors = getValidationErrors( state );
+		expect( allValidationErrors ).toEqual( {} );
+		expect( Object.keys( allValidationErrors ) ).toHaveLength( 0 );
 	} );
 } );

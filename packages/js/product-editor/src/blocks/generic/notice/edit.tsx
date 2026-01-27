@@ -3,6 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
@@ -10,7 +11,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { ProductEditorBlockEditProps } from '../../../types';
 import { NoticeBlockAttributes } from './types';
 import { Notice } from '../../../components/notice';
-import { sanitizeHTML } from '../../../utils/sanitize-html';
 
 export function Edit( {
 	attributes,
@@ -22,9 +22,9 @@ export function Edit( {
 			<Notice
 				content={
 					<div
-						dangerouslySetInnerHTML={ sanitizeHTML(
-							attributes.message
-						) }
+						dangerouslySetInnerHTML={ {
+							__html: sanitizeHTML( attributes.message ),
+						} }
 					></div>
 				}
 			></Notice>

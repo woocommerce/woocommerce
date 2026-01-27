@@ -2,9 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
 
 /**
  * SingleProductTemplate class.
@@ -12,7 +10,6 @@ use Automattic\WooCommerce\Blocks\Utils\ProductDataUtils;
  * @internal
  */
 class SingleProductTemplate extends AbstractTemplate {
-	use BlocksSharedState;
 
 	/**
 	 * The slug of the template.
@@ -48,7 +45,7 @@ class SingleProductTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 * Run template-specific logic when the query matches this template.
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
@@ -142,9 +139,6 @@ class SingleProductTemplate extends AbstractTemplate {
 			},
 			$query_result
 		);
-
-		// Let's make sure we only run the filter once.
-		remove_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 11 );
 
 		return $query_result;
 	}

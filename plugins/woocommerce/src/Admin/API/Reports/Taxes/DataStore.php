@@ -85,7 +85,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->report_columns = array(
 			'tax_rate_id'  => "{$table_name}.tax_rate_id",
 			'name'         => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
-			'tax_rate'     => "CAST({$wpdb->prefix}woocommerce_order_itemmeta.meta_value AS DECIMAL(7,4)) as tax_rate",
+			'tax_rate'     => 'CAST(itemmeta_rate_percent.meta_value AS DECIMAL(7,4)) as tax_rate',
 			'country'      => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
 			'state'        => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
 			'priority'     => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-1) as priority",
@@ -118,7 +118,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = 'tax'" );
-		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta ON {$wpdb->prefix}woocommerce_order_itemmeta.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND {$wpdb->prefix}woocommerce_order_itemmeta.meta_key = 'rate_percent'" );
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta_rate_id ON itemmeta_rate_id.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND itemmeta_rate_id.meta_key = 'rate_id'" );
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta_rate_percent ON itemmeta_rate_percent.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND itemmeta_rate_percent.meta_key = 'rate_percent'" );
 	}
 
 	/**
@@ -138,6 +139,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_status_filter = $this->get_status_subquery( $query_args );
 		$this->add_from_sql_params( $query_args, $order_status_filter );
 
+		$this->subquery->add_sql_clause( 'where', "AND itemmeta_rate_id.meta_value = {$order_tax_lookup_table}.tax_rate_id" );
 		if ( isset( $query_args['taxes'] ) && ! empty( $query_args['taxes'] ) ) {
 			$allowed_taxes = self::get_filtered_ids( $query_args, 'taxes' );
 			$this->subquery->add_sql_clause( 'where', "AND {$order_tax_lookup_table}.tax_rate_id IN ({$allowed_taxes})" );
@@ -343,6 +345,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->subquery->add_sql_clause( 'select', self::get_db_table_name() . '.tax_rate_id' );
 		$this->subquery->add_sql_clause( 'from', self::get_db_table_name() );
 		$this->subquery->add_sql_clause( 'group_by', self::get_db_table_name() . '.tax_rate_id' );
-		$this->subquery->add_sql_clause( 'group_by', ", {$wpdb->prefix}woocommerce_order_items.order_item_name, {$wpdb->prefix}woocommerce_order_itemmeta.meta_value" );
+		$this->subquery->add_sql_clause( 'group_by', ", {$wpdb->prefix}woocommerce_order_items.order_item_name, itemmeta_rate_percent.meta_value" );
 	}
 }

@@ -10,6 +10,8 @@ use Automattic\WooCommerce\StoreApi\Exceptions\OutOfStockException;
 use Automattic\WooCommerce\StoreApi\Exceptions\PartialOutOfStockException;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Exceptions\TooManyInCartException;
+use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\NoticeHandler;
@@ -222,6 +224,12 @@ class CartController {
 			$request['variation'],
 			$request['cart_item_data']
 		);
+
+		// Track cart event for fraud protection.
+		if ( $product instanceof \WC_Product && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CartEventTracker::class )
+				->track_cart_item_added( $cart_id, $this->get_product_id( $product ), (int) $request_quantity, $this->get_variation_id( $product ) );
+		}
 
 		return $cart_id;
 	}
@@ -905,58 +913,12 @@ class CartController {
 
 		$packages = $cart->get_shipping_packages();
 
-		// Return early if invalid object supplied by the filter or no packages.
-		if ( ! is_array( $packages ) || empty( $packages ) ) {
+		// Return early if no packages.
+		if ( empty( $packages ) ) {
 			return [];
 		}
 
-		// Add extra package data to array.
-		$packages = array_map(
-			function ( $key, $package, $index ) {
-				$package['package_id']   = isset( $package['package_id'] ) ? $package['package_id'] : $key;
-				$package['package_name'] = isset( $package['package_name'] ) ? $package['package_name'] : $this->get_package_name( $package, $index );
-				return $package;
-			},
-			array_keys( $packages ),
-			$packages,
-			range( 1, count( $packages ) )
-		);
-
 		return $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
-	}
-
-	/**
-	 * Creates a name for a package.
-	 *
-	 * @param array $package Shipping package from WooCommerce.
-	 * @param int   $index Package number.
-	 * @return string
-	 */
-	protected function get_package_name( $package, $index ) {
-		/**
-		 * Filters the shipping package name.
-		 *
-		 * @since 4.3.0
-		 *
-		 * @internal Matches filter name in WooCommerce core.
-		 *
-		 * @param string $shipping_package_name Shipping package name.
-		 * @param string $package_id Shipping package ID.
-		 * @param array $package Shipping package from WooCommerce.
-		 * @return string Shipping package name.
-		 */
-		return apply_filters(
-			'woocommerce_shipping_package_name',
-			$index > 1 ?
-				sprintf(
-					/* translators: %d: shipping package number */
-					_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
-					$index
-				) :
-				_x( 'Shipment 1', 'shipping packages', 'woocommerce' ),
-			$package['package_id'],
-			$package
-		);
 	}
 
 	/**
@@ -1201,6 +1163,19 @@ class CartController {
 	}
 
 	/**
+	 * Get product name, hiding it for draft and private products.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return string
+	 */
+	protected function get_product_name( \WC_Product $product ) {
+		if ( $product->get_status() === ProductStatus::DRAFT || $product->get_status() === ProductStatus::PRIVATE ) {
+			return '';
+		}
+		return $product->get_name();
+	}
+
+	/**
 	 * Default exception thrown when an item cannot be added to the cart.
 	 *
 	 * @throws RouteException Exception with code woocommerce_rest_product_not_purchasable.
@@ -1208,13 +1183,21 @@ class CartController {
 	 * @param \WC_Product $product Product object associated with the cart item.
 	 */
 	protected function throw_default_product_exception( \WC_Product $product ) {
+		$product_name = $this->get_product_name( $product );
+
+		if ( empty( $product_name ) ) {
+			$message = __( 'This item is not available for purchase.', 'woocommerce' );
+		} else {
+			$message = sprintf(
+				/* translators: %s: product name */
+				__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
+				$product_name
+			);
+		}
+
 		throw new RouteException(
 			'woocommerce_rest_product_not_purchasable',
-			sprintf(
-				/* translators: %s: product name */
-				esc_html__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
-				$product->get_name()
-			),
+			esc_html( $message ),
 			400
 		);
 	}

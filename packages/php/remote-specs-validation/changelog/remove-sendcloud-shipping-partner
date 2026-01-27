@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove Sendcloud from test mock data since we don't support it anymore

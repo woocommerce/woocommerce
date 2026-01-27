@@ -134,6 +134,7 @@ test.describe( 'WooCommerce Email Editor Tracking Selectors', () => {
 		await page
 			.frameLocator( 'iframe[name="editor-canvas"]' )
 			.locator( '.wp-block-heading' )
+			.first()
 			.click();
 		await expect(
 			editorLocator.locator( '.editor-collapsible-block-toolbar__toggle' )

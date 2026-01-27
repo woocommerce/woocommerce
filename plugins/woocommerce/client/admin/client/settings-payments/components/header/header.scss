@@ -21,38 +21,6 @@
 		flex-basis: 100%;
 	}
 
-	&:has(.woocommerce-settings-payments-header__title) {
-		padding: $gap-large 2 * $gap-large;
-
-		.woocommerce-layout__header-heading {
-			height: initial;
-			padding: 0;
-		}
-
-		.woocommerce-layout__header-wrapper {
-			min-height: 40px;
-			gap: $gap-smaller;
-		}
-
-		.woocommerce-settings-payments__back-button {
-			+ .woocommerce-layout__header-heading {
-				font-size: 16px;
-				font-style: normal;
-				font-weight: 600;
-				line-height: 24px;
-				flex-basis: 50%;
-			}
-		}
-
-		@media screen and ( max-width: $break-xlarge ) {
-			padding: $gap-large;
-		}
-
-		@media screen and ( max-width: $break-medium ) {
-			padding: $gap-large $gap;
-		}
-	}
-
 	&:has(.woocommerce-settings-payments-header__description) {
 		.woocommerce-layout__header-heading,
 		.woocommerce-settings-payments-header__title,

@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Product Filters: Add hierarchical category support to product taxonomy filtering - when filtering by parent categories, products from child categories are now included in results.

@@ -192,6 +192,6 @@ class CartItemSchema extends ItemSchema {
 		if ( array_key_exists( '__experimental_woocommerce_blocks_hidden', $item_data_element ) ) {
 			$item_data_element['hidden'] = $item_data_element['__experimental_woocommerce_blocks_hidden'];
 		}
-		return array_map( 'wp_strip_all_tags', $item_data_element );
+		return array_map( 'wp_kses_post', $item_data_element );
 	}
 }

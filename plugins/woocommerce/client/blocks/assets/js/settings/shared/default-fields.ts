@@ -128,7 +128,8 @@ export type AddressFormValues = Pick< FormValues, keyof AddressForm >;
 export type ContactFormValues = Pick< FormValues, keyof ContactForm >;
 export type OrderFormValues = Pick< FormValues, keyof OrderForm >;
 
-export type FormType = 'billing' | 'shipping' | 'contact' | 'order';
+export type AddressFormType = 'billing' | 'shipping';
+export type FormType = AddressFormType | 'contact' | 'order';
 
 export type ShippingAddress = AddressFormValues;
 export interface BillingAddress extends AddressFormValues {

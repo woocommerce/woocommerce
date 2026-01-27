@@ -46,11 +46,25 @@ class WCTransactionalEmailPostsGeneratorTest extends \WC_Unit_Test_Case {
 	 * Test that init doesn't run if transient exists.
 	 */
 	public function testInitDoesNotRunIfTransientExists(): void {
-		set_transient( 'wc_email_editor_initial_templates_generated', WOOCOMMERCE_VERSION, MONTH_IN_SECONDS );
+		set_transient( 'wc_email_editor_initial_templates_generated', WOOCOMMERCE_VERSION, WEEK_IN_SECONDS );
 
 		$result = $this->email_generator->initialize();
 
 		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that get_email_template prioritizes template_block property.
+	 */
+	public function testGetEmailTemplatePrioritizesTemplateBlockProperty(): void {
+		$email                 = $this->createMock( \WC_Email::class );
+		$email->template_plain = 'emails/plain/customer-note.php';
+		$email->template_block = 'emails/block/customer-processing-order.php';
+
+		$template = $this->email_generator->get_email_template( $email );
+
+		$this->assertStringContainsString( 'Thank you for your order', $template );
+		$this->assertStringNotContainsString( 'A note has been added to your order', $template );
 	}
 
 	/**

@@ -52,7 +52,6 @@ require 'options/rest-api.php';
 require 'tools/delete-all-products.php';
 require 'tools/disable-wc-email.php';
 require 'tools/trigger-update-callbacks.php';
-require 'tools/reset-cys.php';
 require 'tools/set-block-template-logging-threshold.php';
 require 'tools/set-coming-soon-mode.php';
 require 'tools/fake-woo-payments-gateway.php';

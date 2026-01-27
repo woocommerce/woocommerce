@@ -472,25 +472,23 @@ class WC_Data_Store_WP {
 						'compare' => '<=',
 					);
 			}
-		} else {
-			if ( '...' !== $operator ) {
+		} elseif ( '...' !== $operator ) {
 				$wp_query_args['meta_query'][] = array(
 					'key'     => $key,
 					'value'   => $dates[0]->getTimestamp(),
 					'compare' => $operator,
 				);
-			} else {
-				$wp_query_args['meta_query'][] = array(
-					'key'     => $key,
-					'value'   => $dates[0]->getTimestamp(),
-					'compare' => '>=',
-				);
-				$wp_query_args['meta_query'][] = array(
-					'key'     => $key,
-					'value'   => $dates[1]->getTimestamp(),
-					'compare' => '<=',
-				);
-			}
+		} else {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => $key,
+				'value'   => $dates[0]->getTimestamp(),
+				'compare' => '>=',
+			);
+			$wp_query_args['meta_query'][] = array(
+				'key'     => $key,
+				'value'   => $dates[1]->getTimestamp(),
+				'compare' => '<=',
+			);
 		}
 
 		return $wp_query_args;

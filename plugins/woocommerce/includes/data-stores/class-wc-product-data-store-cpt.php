@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
@@ -486,6 +487,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$set_props['category_ids']      = $this->get_term_ids( $product, 'product_cat' );
 		$set_props['tag_ids']           = $this->get_term_ids( $product, 'product_tag' );
+		$set_props['brand_ids']         = $this->get_term_ids( $product, 'product_brand' );
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 
@@ -919,11 +921,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		}
+		if ( $force || array_key_exists( 'brand_ids', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), $product->get_brand_ids( 'edit' ), 'product_brand', false );
+		}
 		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 		}
-
-		_wc_recount_terms_by_product( $product->get_id() );
 	}
 
 	/**
@@ -1099,6 +1102,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 		WC_Cache_Helper::invalidate_attribute_count( array_keys( $product->get_attributes() ) );
 		WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_id() );
+
+		// Clear product object cache last, as operations above may call wc_get_product() and re-cache.
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+			$product_cache = wc_get_container()->get( ProductCache::class );
+			$product_cache->remove( $product->get_id() );
+
+			// Also clear parent's cache if this is a variation, as operations above may have cached
+			// the parent with stale children data.
+			$parent_id = $product->get_parent_id( 'edit' );
+			if ( $parent_id ) {
+				$product_cache->remove( $parent_id );
+			}
+		}
 	}
 
 	/*
@@ -1648,8 +1664,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Generate SQL.
 		$sql = $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-			$stock_quantity,
+			"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+			number_format( (float) $stock_quantity, WC_ROUNDING_PRECISION, '.', '' ),
 			$product_id_with_stock
 		);
 
@@ -1688,8 +1704,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			// Generate SQL.
 			$sql = $wpdb->prepare(
-				"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-				$new_stock,
+				"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+				number_format( (float) $new_stock, WC_ROUNDING_PRECISION, '.', '' ),
 				$product_id_with_stock
 			);
 		} else {
@@ -1783,8 +1799,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'",
-						$quantity,
+						"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='total_sales'",
+						number_format( (float) $quantity, WC_ROUNDING_PRECISION, '.', '' ),
 						$product_id
 					)
 				);
@@ -1941,13 +1957,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 				// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- an array of placeholders is a valid arg.
 				$term_query = $wpdb->prepare(
-					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s )',
-					array_fill( 0, 4, $like )
+					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) OR ( wc_product_meta_lookup.global_unique_id LIKE %s )',
+					array_fill( 0, 5, $like )
 				);
 
 				// Variations should also search the parent's meta table for fallback fields.
 				if ( $include_variations ) {
 					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s )", $like );
+					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.global_unique_id = '' AND parent_wc_product_meta_lookup.global_unique_id LIKE %s )", $like );
 				}
 
 				$term_group_query[] = "( {$term_query} )";

@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\CLI\Migrator\Core\ProductsController;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\PlatformRegistry;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\WooCommerceProductImporter;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
 
 /**
  * ProductsController business logic tests.
@@ -46,7 +47,8 @@ class ProductsControllerTest extends \WC_Unit_Test_Case {
 		$this->products_controller->init(
 			$this->createMock( CredentialManager::class ),
 			$this->createMock( PlatformRegistry::class ),
-			$this->createMock( WooCommerceProductImporter::class )
+			$this->createMock( WooCommerceProductImporter::class ),
+			$this->createMock( MigratorTracker::class )
 		);
 	}
 

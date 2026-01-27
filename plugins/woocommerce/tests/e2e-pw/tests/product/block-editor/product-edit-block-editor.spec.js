@@ -8,6 +8,9 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { test as baseTest } from '../../../fixtures/block-editor-fixtures';
 import { expect, tags } from '../../../fixtures/fixtures';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
+
+skipTestsForDeprecatedFeature();
 
 const test = baseTest.extend( {
 	product: async ( { restApi }, use ) => {

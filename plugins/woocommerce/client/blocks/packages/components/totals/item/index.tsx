@@ -61,7 +61,7 @@ const TotalsItem = ( {
 				{ label }
 			</span>
 			<DelayedContentWithSkeleton
-				isLoading={ ! value || showSkeleton }
+				isLoading={ showSkeleton }
 				skeleton={
 					<>
 						<Skeleton

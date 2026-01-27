@@ -34,6 +34,38 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Ensure that customer data is only set in the session if it is not the default customer data.
+	 */
+	public function test_customer_data_is_set_in_session_if_is_not_the_default_customer_data() {
+		$customer = new WC_Customer();
+		$customer->set_billing_email( 'email@woocommerce.com' );
+
+		$session_data = new WC_Customer_Data_Store_Session();
+		$session_data->save_to_session( $customer );
+
+		$customer_from_session = WC()->session->get( 'customer' );
+		$this->assertNotEmpty( $customer_from_session );
+		$this->assertEquals( 'email@woocommerce.com', $customer_from_session['email'] );
+	}
+
+	/**
+	 * Ensure that customer data is not set in the session if it is the default customer data.
+	 */
+	public function test_customer_data_is_not_set_in_session_if_is_the_default_customer_data() {
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+
+		$customer   = $this->get_default_customer();
+		$data_store = new WC_Customer_Data_Store_Session();
+		$data_store->save_to_session( $customer );
+		WC()->session->save_data();
+
+		$session_data = WC()->session->get_session_data();
+
+		$this->assertArrayNotHasKey( 'customer', $session_data );
+	}
+
+	/**
 	 * Customer objects with a mixture of billing and shipping addresses.
 	 *
 	 * Each inner dataset is organized as follows:
@@ -102,7 +134,7 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 		};
 
 		return array(
-			'has_billing_address_only' => array(
+			'has_billing_address_only'              => array(
 				$cust1_closure,
 				true,
 				true,
@@ -112,7 +144,7 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 				false,
 				false,
 			),
-			'separate_billing_state_same_country' => array(
+			'separate_billing_state_same_country'   => array(
 				$cust3_closure,
 				false,
 				true,
@@ -123,5 +155,21 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 				true,
 			),
 		);
+	}
+
+	/**
+	 * Get a customer with the default location.
+	 *
+	 * @return WC_Customer
+	 */
+	private function get_default_customer(): WC_Customer {
+		$location = wc_get_customer_default_location();
+
+		$customer = new WC_Customer();
+		$customer->set_shipping_country( $location['country'] );
+		$customer->set_shipping_state( $location['state'] );
+		$customer->set_billing_country( $location['country'] );
+		$customer->set_billing_state( $location['state'] );
+		return $customer;
 	}
 }

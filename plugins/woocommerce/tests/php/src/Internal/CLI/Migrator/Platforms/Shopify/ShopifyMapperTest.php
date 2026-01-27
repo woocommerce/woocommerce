@@ -528,6 +528,75 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test tax status mapping for simple products.
+	 */
+	public function test_tax_status_mapping_simple_product() {
+		// Test non-taxable simple product.
+		$non_taxable_product                                    = $this->create_simple_shopify_product();
+		$non_taxable_product->variants->edges[0]->node->taxable = false;
+
+		$result = $this->mapper->map_product_data( $non_taxable_product );
+
+		$this->assertEquals( 'none', $result['tax_status'] );
+
+		// Test taxable simple product.
+		$taxable_product                                    = $this->create_simple_shopify_product();
+		$taxable_product->variants->edges[0]->node->taxable = true;
+
+		$result = $this->mapper->map_product_data( $taxable_product );
+
+		$this->assertEquals( 'taxable', $result['tax_status'] );
+	}
+
+	/**
+	 * Test tax status mapping for variable products.
+	 */
+	public function test_tax_status_mapping_variable_product() {
+		$variable_product = $this->create_variable_shopify_product();
+
+		// Set first variation as non-taxable, second as taxable.
+		$variable_product->variants->edges[0]->node->taxable = false;
+		$variable_product->variants->edges[1]->node->taxable = true;
+
+		$result = $this->mapper->map_product_data( $variable_product );
+
+		$this->assertTrue( $result['is_variable'] );
+		$this->assertCount( 2, $result['variations'] );
+
+		// Check first variation is not taxable.
+		$this->assertEquals( 'none', $result['variations'][0]['tax_status'] );
+
+		// Check second variation is taxable.
+		$this->assertEquals( 'taxable', $result['variations'][1]['tax_status'] );
+	}
+
+	/**
+	 * Test tax status mapping when taxable field is missing (backwards compatibility).
+	 */
+	public function test_tax_status_mapping_missing_field() {
+		// Test simple product without taxable field.
+		$simple_product = $this->create_simple_shopify_product();
+		// Intentionally don't set taxable field.
+
+		$result = $this->mapper->map_product_data( $simple_product );
+
+		// Should not have tax_status key when taxable field is missing.
+		$this->assertArrayNotHasKey( 'tax_status', $result );
+
+		// Test variable product without taxable field.
+		$variable_product = $this->create_variable_shopify_product();
+		// Intentionally don't set taxable field on variants.
+
+		$result = $this->mapper->map_product_data( $variable_product );
+
+		$this->assertTrue( $result['is_variable'] );
+		// Variations should not have tax_status key when taxable field is missing.
+		foreach ( $result['variations'] as $variation ) {
+			$this->assertArrayNotHasKey( 'tax_status', $variation );
+		}
+	}
+
+	/**
 	 * Create a simple Shopify product object for testing.
 	 *
 	 * @return object Shopify product object.

@@ -67,6 +67,10 @@ const handlers = [
 		return HttpResponse.json( {} );
 	} ),
 
+	http.get( '/wp/v2/types', () => {
+		return HttpResponse.json( {} );
+	} ),
+
 	http.get( '/wc/store/v1/products/:id', () => {
 		return HttpResponse.json( {
 			id: 123,
@@ -110,7 +114,7 @@ async function setup( attributes = {} ) {
 		...attributes,
 	} );
 
-	const largeImageBlock = createBlock(
+	const viewerBlock = createBlock(
 		'woocommerce/product-gallery-large-image',
 		{},
 		[
@@ -132,7 +136,7 @@ async function setup( attributes = {} ) {
 			hoverZoom: true,
 			fullScreenOnClick: true,
 		},
-		[ thumbnailsBlock, largeImageBlock ]
+		[ thumbnailsBlock, viewerBlock ]
 	);
 
 	const singleProductBlock = [
@@ -170,13 +174,13 @@ describe( 'Product Gallery Block', () => {
 		expect( layout ).toHaveClass( 'is-horizontal' );
 		expect( layout ).toHaveClass( 'is-nowrap' );
 
-		// Check for large image block and its inner blocks
-		const largeImageBlock = screen.getByRole( 'document', {
-			name: /Block: Large Image/i,
+		// Check for viewer block and its inner blocks
+		const viewerBlock = screen.getByRole( 'document', {
+			name: /Block: Viewer/i,
 		} );
-		expect( largeImageBlock ).toBeInTheDocument();
+		expect( viewerBlock ).toBeInTheDocument();
 
-		// Check inner blocks of large image
+		// Check inner blocks of viewer
 		expect(
 			screen.getByRole( 'document', { name: /Block: Product Image/i } )
 		).toBeInTheDocument();
@@ -202,10 +206,10 @@ describe( 'Product Gallery Block', () => {
 		expect( productImage ).toHaveAttribute( 'alt', 'Test 1' );
 	} );
 
-	it( 'should ensure thumbnail height matches large image height with custom aspect ratio', async () => {
+	it( 'should ensure thumbnail height matches viewer height with custom aspect ratio', async () => {
 		await setup( { aspectRatio: '16/9' } );
 
-		// Get the large image
+		// Get the viewer
 		const productImage = screen.getByTestId( 'product-image' );
 		expect( productImage ).toBeInTheDocument();
 
@@ -224,10 +228,10 @@ describe( 'Product Gallery Block', () => {
 		expect( thumbnailsBlock ).toBeInTheDocument();
 
 		// Get the heights
-		const largeImageHeight = productImage.getBoundingClientRect().height;
+		const viewerHeight = productImage.getBoundingClientRect().height;
 		const thumbnailHeight = thumbnailsBlock.getBoundingClientRect().height;
 
 		// Check that the heights match
-		expect( thumbnailHeight ).toBe( largeImageHeight );
+		expect( thumbnailHeight ).toBe( viewerHeight );
 	} );
 } );

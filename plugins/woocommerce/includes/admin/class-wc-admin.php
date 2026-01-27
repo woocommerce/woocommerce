@@ -37,7 +37,6 @@ class WC_Admin {
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
-		add_action( 'admin_init', array( $this, 'preview_email_editor_dummy_content' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
@@ -268,44 +267,6 @@ class WC_Admin {
 	}
 
 	/**
-	 * Preview email editor placeholder dummy content.
-	 */
-	public function preview_email_editor_dummy_content() {
-		$message = '';
-		if ( ! isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
-			return;
-		}
-
-		if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'preview-mail' ) ) {
-			die( 'Security check' );
-		}
-
-		/**
-		 * Email preview instance for rendering dummy content.
-		 *
-		 * @var EmailPreview $email_preview - email preview instance
-		 */
-		$email_preview = wc_get_container()->get( EmailPreview::class );
-
-		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
-		if ( isset( $_GET['type'] ) ) {
-			$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
-		}
-
-		try {
-			$message = $email_preview->generate_placeholder_content( $type_param );
-		} catch ( \Exception $e ) {
-			// Catch other potential errors during content generation.
-			wp_die( esc_html__( 'There was an error rendering the email preview.', 'woocommerce' ), 404 );
-		}
-
-		// Print the placeholder content.
-		// phpcs:ignore WordPress.Security.EscapeOutput
-		echo $message;
-		exit;
-	}
-
-	/**
 	 * Change the admin footer text on WooCommerce admin pages.
 	 *
 	 * @since 2.3
@@ -337,12 +298,36 @@ class WC_Admin {
 					sprintf( '<strong>%s</strong>', esc_html__( 'WooCommerce', 'woocommerce' ) ),
 					'<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" aria-label="' . esc_attr__( 'five star', 'woocommerce' ) . '" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
 				);
-				wc_enqueue_js(
-					"jQuery( 'a.wc-rating-link' ).on( 'click', function() {
-						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );
-						jQuery( this ).parent().text( jQuery( this ).data( 'rated' ) );
-					});"
-				);
+
+				$script = "
+		            (function() {
+		                'use strict';
+		                var ratingLink = document.querySelector('a.wc-rating-link');
+		                if (ratingLink) {
+		                    ratingLink.addEventListener('click', function(e) {
+		                        var link = e.currentTarget;
+		                        var formData = new FormData();
+		                        formData.append('action', 'woocommerce_rated');
+		                        
+		                        fetch('" . esc_js( WC()->ajax_url() ) . "', {
+		                            method: 'POST',
+		                            body: formData,
+		                            credentials: 'same-origin'
+		                        });
+		                        
+		                        var parent = link.parentElement;
+		                        if (parent) {
+		                            parent.textContent = link.getAttribute('data-rated');
+		                        }
+		                    });
+		                }
+		            })();
+		            ";
+
+				$handle = 'wc-admin-footer-rating';
+				wp_register_script( $handle, '', array(), WC_VERSION, true );
+				wp_enqueue_script( $handle );
+				wp_add_inline_script( $handle, $script );
 			} else {
 				$footer_text = __( 'Thank you for selling with WooCommerce.', 'woocommerce' );
 			}
@@ -354,7 +339,7 @@ class WC_Admin {
 	/**
 	 * Update the footer version text.
 	 *
-	 * @since $VID:$
+	 * @since 10.2.0
 	 *
 	 * @param string $version The current version string.
 	 * @return string

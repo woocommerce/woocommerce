@@ -83,7 +83,7 @@ export class ProductGalleryPage {
 		}
 	}
 
-	async getMainImageBlock( { page }: { page: 'frontend' | 'editor' } ) {
+	async getViewerBlock( { page }: { page: 'frontend' | 'editor' } ) {
 		const blockName = 'woocommerce/product-gallery-large-image';
 		if ( page === 'frontend' ) {
 			return (
@@ -97,13 +97,13 @@ export class ProductGalleryPage {
 
 	// Playwright doesn't have a locator for "carousel" images as all of them
 	// are visible from its POV. So we need to use a custom function to get the visible image id.
-	async getVisibleLargeImageId() {
-		const largeImageBlockLocator = await this.getMainImageBlock( {
+	async getViewerImageId() {
+		const viewerBlockLocator = await this.getViewerBlock( {
 			page: 'frontend',
 		} );
 
 		// Find the scrollable container
-		const container = await largeImageBlockLocator
+		const container = await viewerBlockLocator
 			.locator( '.wc-block-product-gallery-large-image__container' )
 			.elementHandle();
 		if ( ! container ) {
@@ -111,7 +111,7 @@ export class ProductGalleryPage {
 		}
 
 		// Get all images inside the container
-		const images = await largeImageBlockLocator
+		const images = await viewerBlockLocator
 			.locator( 'img' )
 			.elementHandles();
 

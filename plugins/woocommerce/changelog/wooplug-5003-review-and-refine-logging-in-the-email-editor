@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Add custom log level threshold for Email Editor logging set to `WC_Log_Levels::WARNING` as default.

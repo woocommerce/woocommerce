@@ -5,7 +5,7 @@ post_title: HPOS order querying APIs
 
 # HPOS order querying APIs
 
-With the introduction of HPOS, we've enhanced the querying functionality in WC. Now, in addition to the well-known [existing APIs](https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query), we're adding a few features that would make it easier to create complex queries on orders or their properties, including the ability to query custom order metadata.
+With the introduction of HPOS, we've enhanced the querying functionality in WC. Now, in addition to the well-known [existing APIs](/docs/extensions/core-concepts/wc-get-orders), we're adding a few features that would make it easier to create complex queries on orders or their properties, including the ability to query custom order metadata.
 
 All the new query types are implemented as additional query arguments that can be passed to `wc_get_orders()` and are heavily inspired by similar functionality in WordPress' own `WP_Query`. As regular query arguments, they can be combined with other arguments to produce complex queries that, until now, would have required writing custom code and SQL.
 

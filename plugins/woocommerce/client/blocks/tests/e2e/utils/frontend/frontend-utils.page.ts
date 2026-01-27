@@ -159,22 +159,42 @@ export class FrontendUtils {
 	}
 
 	async emptyCart() {
-		const cartResponse = await this.requestUtils.request.get(
-			'/wp-json/wc/store/cart'
+		// Navigate to cart page
+		await this.goToCart();
+
+		// Check if cart is already empty
+		const emptyCartMessage = this.page.getByText(
+			'Your cart is currently empty!'
 		);
-		const nonce = cartResponse.headers()?.nonce;
-		if ( ! nonce ) {
-			throw new Error( 'Could not get cart nonce.' );
+		if ( await emptyCartMessage.isVisible() ) {
+			return; // Cart is already empty
 		}
-		const res = await this.requestUtils.request.delete(
-			'/wp-json/wc/store/v1/cart/items',
-			{ headers: { nonce } }
-		);
-		if ( ! res.ok() ) {
-			throw new Error(
-				`Got an error response when trying to empty cart. Status code: ${ res.status() }`
-			);
+
+		// Track cart-related requests to wait for completion
+		const { waitForCartRequests } = this.trackCartRequests();
+
+		// Count initial remove buttons and remove all items
+		const removeButtons = this.page.getByLabel( /Remove .* from cart/ );
+		let itemCount = await removeButtons.count();
+
+		while ( itemCount > 0 ) {
+			// Click the first remove button
+			await removeButtons.first().click();
+
+			// Wait for the cart request to complete
+			await waitForCartRequests();
+
+			// Check if empty cart message is now visible
+			if ( await emptyCartMessage.isVisible() ) {
+				break; // Cart is now empty
+			}
+
+			// Update count for next iteration
+			itemCount = await removeButtons.count();
 		}
+
+		// Final verification that cart is empty
+		await emptyCartMessage.waitFor( { state: 'visible' } );
 	}
 
 	/**

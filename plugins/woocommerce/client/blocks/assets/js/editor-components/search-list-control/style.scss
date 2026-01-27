@@ -306,4 +306,18 @@
 	li:last-child .woocommerce-search-list__item {
 		border-bottom: none;
 	}
+
+	.woocommerce-search-list__item-load-more {
+		border: none;
+		color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+		cursor: pointer;
+		padding-left: calc($gap * 2 + 24px);
+		width: 100%;
+
+		@media screen and (max-width: 782px) {
+			box-sizing: content-box;
+			height: 25px;
+			padding-left: calc($gap * 2 + 33px);
+		}
+	}
 }

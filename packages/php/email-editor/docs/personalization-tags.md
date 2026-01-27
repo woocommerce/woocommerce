@@ -85,13 +85,13 @@ Personalization Tags use HTML comment syntax with a specific format: `<!--[token
 
 ```html
 <p>
-    Hello
-    <!--[customer/first-name]-->, your order
-    <!--[order/number]-->
-    was placed on
-    <!--[my-plugin/formatted-date date="order_date" format="F j, Y"]-->
-    and is currently
-    <!--[order/status]-->. Thank you for your purchase!
+	Hello
+	<!--[customer/first-name]-->, your order
+	<!--[order/number]-->
+	was placed on
+	<!--[my-plugin/formatted-date date="order_date" format="F j, Y"]-->
+	and is currently
+	<!--[order/status]-->. Thank you for your purchase!
 </p>
 ```
 
@@ -122,6 +122,7 @@ The central registry for managing personalization tags.
 **Key Methods:**
 
 -   `register(Personalization_Tag $tag)`: Register a new tag
+-   `unregister(string|Personalization_Tag $token_or_tag)`: Unregister a tag by token or tag instance
 -   `get_by_token(string $token)`: Retrieve a tag by its token
 -   `get_all()`: Get all registered tags
 -   `initialize()`: Initialize the registry and load all providers
@@ -141,7 +142,7 @@ $registry->initialize();
 
 
 // Register a custom tag
-$registry->register( new Personalization_Tag(
+$tag = new Personalization_Tag(
     'Custom Field',
     'my-plugin/custom-field',
     'Customer',
@@ -151,7 +152,14 @@ $registry->register( new Personalization_Tag(
     array(),
     null,
     array( 'my-post-type' )
-));
+);
+$registry->register( $tag );
+
+// Unregister a tag by token string
+$registry->unregister( '[my-plugin/custom-field]' );
+
+// Or unregister by passing the tag instance
+$registry->unregister( $tag );
 ```
 
 ### Personalization_Tag
@@ -177,6 +185,7 @@ new Personalization_Tag(
 -   `get_name()`: Get the display name
 -   `get_token()`: Get the token
 -   `get_category()`: Get the category
+-   `get_callback()`: Get the callback function
 -   `execute_callback($context, $args)`: Execute the callback function
 -   `get_attributes()`: Get default attributes
 -   `get_value_to_insert()`: Get the value to insert in UI
@@ -270,8 +279,8 @@ $registry->register(
 
 ```html
 <p>
-    Order placed on:
-    <!--[my-plugin/formatted-date date="2024-01-15" format="F j, Y"]-->
+	Order placed on:
+	<!--[my-plugin/formatted-date date="2024-01-15" format="F j, Y"]-->
 </p>
 ```
 

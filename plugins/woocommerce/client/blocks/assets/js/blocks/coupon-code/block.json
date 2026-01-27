@@ -1,0 +1,38 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/coupon-code",
+	"version": "1.0.0",
+	"title": "Coupon Code",
+	"category": "woocommerce",
+	"description": "Include a coupon code to entice customers to make a purchase.",
+	"supports": {
+		"email": true,
+		"html": false,
+		"align": true,
+		"color": {
+			"text": true,
+			"background": true
+		},
+		"typography": {
+			"fontSize": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
+		}
+	},
+	"attributes": {
+		"couponCode": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"textdomain": "woocommerce"
+}

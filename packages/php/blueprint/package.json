@@ -3,6 +3,7 @@
 	"description": "WooCommerce Blueprint package",
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:php": "composer run-script phpcbf",
@@ -15,7 +16,7 @@
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
-		"@wordpress/env": "10.17.0"
+		"@wordpress/env": "10.32.0"
 	},
 	"config": {
 		"ci": {
