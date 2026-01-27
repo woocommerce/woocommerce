@@ -313,9 +313,9 @@ class Settings {
 			return $settings;
 		}
 
-		$response   = ReactSettingsSchema::build_response( $current_tab, $current_section, $settings_definitions, $settings_page );
-		$payload    = ReactSettingsSchema::get_payload_path( $current_tab, $current_section );
-		$settings   = $this->set_nested_settings_value( $settings, $payload, $response );
+		$response = ReactSettingsSchema::build_response( $current_tab, $current_section, $settings_definitions, $settings_page );
+		$payload  = ReactSettingsSchema::get_payload_path( $current_tab, $current_section );
+		$settings = $this->set_nested_settings_value( $settings, $payload, $response );
 
 		return $settings;
 	}
