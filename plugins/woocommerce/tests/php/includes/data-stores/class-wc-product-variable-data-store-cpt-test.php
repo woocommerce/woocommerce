@@ -740,13 +740,13 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 					'name'         => $attribute_name,
 					'value'        => '...',
 					'is_variation' => 1,
-				)
+				),
 			)
 		);
 
 		$attribute_meta_update_counter = 0;
 		$root_cause_update_counter     = 0;
-		$callback = function( ?bool $check, int $object_id, string $meta_key, $meta_value ) use ( $new_slug, &$attribute_meta_update_counter, &$root_cause_update_counter ) {
+		$callback                      = function ( ?bool $check, int $object_id, string $meta_key, $meta_value ) use ( $new_slug, &$attribute_meta_update_counter, &$root_cause_update_counter ) {
 			$root_cause_update_counter     += (int) ( isset( $meta_value['size-style'] ) && ! isset( $meta_value['Size/Style'] ) );
 			$attribute_meta_update_counter += (int) ( $new_slug === $meta_key && '...' === $meta_value );
 			return $check;
