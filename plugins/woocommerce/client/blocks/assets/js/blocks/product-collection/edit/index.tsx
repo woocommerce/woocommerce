@@ -20,6 +20,7 @@ import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import { useProductCollectionUIState } from '../utils';
 import ProductPicker from './ProductPicker';
+import HandPickedProductsPicker from './HandPickedProductsPicker';
 import { useTracksLocation } from '../tracks-utils';
 import { useRegisterEmailCollections } from '../hooks/use-register-email-collections';
 
@@ -87,6 +88,8 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 						isDeletedProductReference={ true }
 					/>
 				);
+			case ProductCollectionUIStatesInEditor.HAND_PICKED_PRODUCTS_PICKER:
+				return <HandPickedProductsPicker { ...props } />;
 			case ProductCollectionUIStatesInEditor.VALID:
 			case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
 				return (

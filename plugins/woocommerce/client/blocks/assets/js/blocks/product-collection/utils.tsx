@@ -34,6 +34,7 @@ import {
 	PreviewState,
 	SetPreviewState,
 	ProductCollectionUIStatesInEditor,
+	CoreCollectionNames,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -265,7 +266,29 @@ export const useProductCollectionUIState = ( {
 		}
 
 		/**
-		 * Case 3: Preview mode - based on `usesReference` value
+		 * Case 3: Hand-picked products picker
+		 * Show the product picker when the Hand-Picked collection is selected
+		 * and either:
+		 * - The picker hasn't been dismissed yet (user is still selecting), OR
+		 * - No products have been selected (show picker again if all removed)
+		 */
+		const isHandPickedCollection =
+			attributes.collection === CoreCollectionNames.HAND_PICKED;
+		const hasHandPickedProducts =
+			( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) >
+			0;
+		const isPickerDismissed =
+			attributes.__privateHandPickedProductsPickerDismissed === true;
+		if (
+			isCollectionSelected &&
+			isHandPickedCollection &&
+			( ! isPickerDismissed || ! hasHandPickedProducts )
+		) {
+			return ProductCollectionUIStatesInEditor.HAND_PICKED_PRODUCTS_PICKER;
+		}
+
+		/**
+		 * Case 4: Preview mode - based on `usesReference` value
 		 */
 		if ( isInRequiredLocation ) {
 			/**
@@ -310,6 +333,8 @@ export const useProductCollectionUIState = ( {
 		product,
 		hasInnerBlocks,
 		attributes.query?.productReference,
+		attributes.query?.woocommerceHandPickedProducts,
+		attributes.__privateHandPickedProductsPickerDismissed,
 	] );
 
 	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };
