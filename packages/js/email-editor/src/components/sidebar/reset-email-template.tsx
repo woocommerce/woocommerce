@@ -140,7 +140,7 @@ const getResetEmailTemplateAction = () => {
 
 									// Parse blocks from the original template content
 									const blocks = parse(
-										fileTemplate.content.raw
+										fileTemplate.content?.raw || ''
 									);
 
 									// Follow Gutenberg's two-call pattern to properly handle undo state

@@ -201,7 +201,7 @@ export type PostWithPermissions = Post & {
 	source?: 'custom' | 'theme' | 'plugin';
 	origin?: string;
 	plugin?: string;
-	has_theme_file?: Record< string, string >;
+	has_theme_file?: boolean;
 };
 
 export type EmailEditorConfig = {

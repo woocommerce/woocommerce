@@ -82,7 +82,7 @@ test.describe( 'WooCommerce Email Editor Reset Template', () => {
 		await editorFrame.locator( 'p' ).last().click();
 
 		// Clear existing text and type new text
-		await page.keyboard.press( 'Meta+A' ); // Select all (Cmd+A on Mac)
+		await page.keyboard.press( 'ControlOrMeta+A' ); // Select all
 		await page.keyboard.type( uniqueText );
 
 		// Save the customization
