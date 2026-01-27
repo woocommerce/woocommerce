@@ -11,6 +11,7 @@ import {
 	withSyncEvent,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/store-notices';
 import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
@@ -34,7 +35,6 @@ const { currency, placeholderImgSrc } = getConfig(
 	'woocommerce'
 ) as WooCommerceConfig;
 const {
-	addToCartBehaviour,
 	onCartClickBehaviour,
 	checkoutUrl,
 	displayCartPriceIncludingTax,
@@ -95,7 +95,7 @@ type MiniCart = {
 		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
 	};
 	callbacks: {
-		setupEventListeners: () => void;
+		setupJQueryEventBridge: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
 	};
@@ -307,56 +307,26 @@ store< MiniCart >(
 		},
 
 		callbacks: {
-			*setupEventListeners() {
-				// eslint-disable-next-line @typescript-eslint/no-empty-function
-				const noop = () => {};
-				let removeJQueryAddedToCartEvent = noop;
-				let removeJQueryRemovedFromCartEvent = noop;
-				if ( 'jQuery' in window ) {
-					// Make it so we can read jQuery events triggered by WC Core elements.
-					removeJQueryAddedToCartEvent = translateJQueryEventToNative(
+			*setupJQueryEventBridge() {
+				if ( ! ( 'jQuery' in window ) ) {
+					return;
+				}
+
+				// Make it so we can read jQuery events triggered by WC Core elements.
+				const removeJQueryAddedToCartEvent =
+					translateJQueryEventToNative(
 						'added_to_cart',
 						'wc-blocks_added_to_cart'
 					);
-					removeJQueryRemovedFromCartEvent =
-						translateJQueryEventToNative(
-							'removed_from_cart',
-							'wc-blocks_removed_from_cart'
-						);
-				}
-				document.body.addEventListener(
-					'wc-blocks_added_to_cart',
-					actions.refreshCartItems
-				);
-				document.body.addEventListener(
-					'wc-blocks_removed_from_cart',
-					actions.refreshCartItems
-				);
-
-				if ( addToCartBehaviour === 'open_drawer' ) {
-					document.body.addEventListener(
-						'wc-blocks_added_to_cart',
-						miniCartActions.openDrawer
+				const removeJQueryRemovedFromCartEvent =
+					translateJQueryEventToNative(
+						'removed_from_cart',
+						'wc-blocks_removed_from_cart'
 					);
-				}
 
 				return () => {
-					document.body.removeEventListener(
-						'wc-blocks_added_to_cart',
-						actions.refreshCartItems
-					);
-					document.body.removeEventListener(
-						'wc-blocks_removed_from_cart',
-						actions.refreshCartItems
-					);
-					document.body.removeEventListener(
-						'wc-blocks_added_to_cart',
-						miniCartActions.openDrawer
-					);
-					if ( 'jQuery' in window ) {
-						removeJQueryAddedToCartEvent();
-						removeJQueryRemovedFromCartEvent();
-					}
+					removeJQueryAddedToCartEvent();
+					removeJQueryRemovedFromCartEvent();
 				};
 			},
 

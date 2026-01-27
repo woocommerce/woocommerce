@@ -297,6 +297,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once $this->tests_dir . '/framework/traits/trait-wc-rest-api-complex-meta.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/SerializingCacheTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
 	}
 
 	/**

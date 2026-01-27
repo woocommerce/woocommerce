@@ -34,10 +34,12 @@ const FeaturedProductsControl = ( props: QueryControlProps ) => {
 			resetAllFilter={ deselectCallback }
 		>
 			<BaseControl
+				__nextHasNoMarginBottom
 				id="product-collection-featured-products-control"
 				label={ __( 'Featured', 'woocommerce' ) }
 			>
 				<ToggleControl
+					__nextHasNoMarginBottom
 					label={ __( 'Show only featured products', 'woocommerce' ) }
 					checked={ query.featured || false }
 					onChange={ ( featured ) => {

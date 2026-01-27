@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
@@ -1101,6 +1102,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 		WC_Cache_Helper::invalidate_attribute_count( array_keys( $product->get_attributes() ) );
 		WC_Cache_Helper::invalidate_cache_group( 'product_' . $product->get_id() );
+
+		// Clear product object cache last, as operations above may call wc_get_product() and re-cache.
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' ) ) {
+			$product_cache = wc_get_container()->get( ProductCache::class );
+			$product_cache->remove( $product->get_id() );
+
+			// Also clear parent's cache if this is a variation, as operations above may have cached
+			// the parent with stale children data.
+			$parent_id = $product->get_parent_id( 'edit' );
+			if ( $parent_id ) {
+				$product_cache->remove( $parent_id );
+			}
+		}
 	}
 
 	/*

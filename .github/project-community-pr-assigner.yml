@@ -1,116 +1,116 @@
 # See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
 
 "*":
-  - Flux
+  - team: flux
 
 ".github/**/*":
-  - Flux
+  - team: flux
 
 "bin/*":
-  - Flux
+  - team: flux
 
 "docs/**/*":
-  - Developer Advocacy
+  - team: developer-advocacy
 
 "packages/js/api/**/*":
-  - Flux
+  - team: flux
 
 "packages/js/components/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/csv-export/**/*":
-  - SomewhereWarm
+  - team: somewherewarm
 
 "packages/js/currency/**/*":
-  - Rubik
+  - team: rubik
 
 "packages/js/customer-effort-score/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/data/**/*":
-  - Ventures
+  - team: ventures
 
 "packages/js/date/**/*":
-  - Rubik
+  - team: rubik
 
 "packages/js/dependency-extraction-webpack-plugin/**/*":
-  - Flux
+  - team: flux
 
 "packages/js/eslint-plugin/**/*":
-  - Flux
+  - team: flux
 
 "packages/js/experimental/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/explat/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/navigation/**/*":
-  - SomewhereWarm
+  - team: somewherewarm
 
 "packages/js/number/**/*":
-  - Rubik
+  - team: rubik
 
 "packages/js/onboarding/**/*":
-  - Rubik
+  - team: rubik
 
 "packages/js/product-editor/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "packages/js/tracks/**/*":
-  - Flux
+  - team: flux
 
 "packages/js/email-editor/**/*":
-  - Ballade
+  - team: ballade
 
 "packages/php/email-editor/**/*":
-  - Ballade
+  - team: ballade
 
 "plugins/woocommerce/**/*":
-  - Flux
+  - team: flux
 
 "plugins/woocommerce/templates/**/*":
-  - Rubik
-  - Kirigami
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce/templates/emails/**/*":
-  - Ballade
+  - team: ballade
 
 "plugins/woocommerce/src/Admin/**/*":
-  - team: Kirigami
+  - team: woo-fse
 
 "plugins/woocommerce/src/Blocks/**/*":
-  - Rubik
-  - Kirigami
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce/src/Internal/Admin/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "plugins/woocommerce/src/StoreApi/**/*":
-  - Rubik
-  - Kirigami
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce/client/admin/**/*":
-  - Kirigami
+  - team: woo-fse
 
 "plugins/woocommerce/client/blocks/**/*":
-  - Rubik
-  - Kirigami
+  - team: rubik
+  - team: woo-fse
 
 "plugins/woocommerce-beta-tester/**/*":
-  - Flux
+  - team: flux
 
 "plugins/woocommerce/src/Internal/EmailEditor/**/*":
-  - Ballade
+  - team: ballade
 
 "plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/**/*":
-  - Ballade
+  - team: ballade
 
 "tools/**/*":
-  - Flux
+  - team: flux
 
 '**/composer.json':
-  - Flux
+  - team: flux
 
 '**/package.json':
-  - Flux
+  - team: flux

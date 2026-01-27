@@ -61,6 +61,18 @@ class BlockUtils {
 		}
 
 		await singleProductBlock.getByText( 'Done' ).click();
+
+		// Switch to the non-blockified Add to Cart with Options block
+		const addToCartWithOptionsBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options'
+		);
+		await this.editor.selectBlocks( addToCartWithOptionsBlock );
+
+		await this.page
+			.getByRole( 'button', {
+				name: 'Switch back',
+			} )
+			.click();
 	}
 
 	async enableStepperMode() {
@@ -295,7 +307,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			await editor.publishAndVisitPost();
 
 			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity ` );
+			const plusButton = page.getByLabel( `Increase quantity` );
 
 			await expect( minusButton ).toBeHidden();
 			await expect( plusButton ).toBeHidden();
@@ -319,7 +331,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			await editor.publishAndVisitPost();
 
 			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity ` );
+			const plusButton = page.getByLabel( `Increase quantity` );
 
 			await expect( minusButton ).toBeHidden();
 			await expect( plusButton ).toBeHidden();

@@ -44,7 +44,7 @@ class AsyncGenerator {
 	 *
 	 * @var int
 	 */
-	const FEED_EXPIRY = 24 * HOUR_IN_SECONDS;
+	const FEED_EXPIRY = 20 * HOUR_IN_SECONDS;
 
 	/**
 	 * Possible states of generation.
@@ -108,7 +108,7 @@ class AsyncGenerator {
 		}
 
 		// Clear all previous actions to avoid race conditions.
-		as_unschedule_all_actions( self::FEED_GENERATION_ACTION, array( $option_key ), 'woo-product-feed' ); // @phpstan-ignore function.notFound
+		as_unschedule_all_actions( self::FEED_GENERATION_ACTION, array( $option_key ), 'woo-product-feed' );
 
 		$status = array(
 			'scheduled_at' => time(),
@@ -126,7 +126,6 @@ class AsyncGenerator {
 		);
 
 		// Start an immediate async action to generate the feed.
-		// @phpstan-ignore-next-line function.notFound -- Action Scheduler.
 		as_enqueue_async_action(
 			self::FEED_GENERATION_ACTION,
 			array( $option_key ),
@@ -200,7 +199,6 @@ class AsyncGenerator {
 			update_option( $option_key, $status );
 
 			// Schedule another action to delete the file after the expiry time.
-			// @phpstan-ignore-next-line function.notFound -- Action Scheduler.
 			as_schedule_single_action(
 				time() + self::FEED_EXPIRY,
 				self::FEED_DELETION_ACTION,
@@ -334,15 +332,26 @@ class AsyncGenerator {
 	 * @return bool         True if the status is valid, false otherwise.
 	 */
 	private function validate_status( array $status ): bool {
-		// Validate the state.
 		/**
 		 * For completed jobs, make sure the file still exists. Regenerate otherwise.
 		 *
 		 * The file should typically get deleted at the same time as the status is cleared.
 		 * However, something else could cause the file to disappear in the meantime (ex. manual delete).
+		 *
+		 * Also, if the cleanup job failed, the feed might appear as complete, but be expired.
 		 */
-		if ( self::STATE_COMPLETED === $status['state'] && ! file_exists( $status['path'] ) ) {
-			return false;
+		if ( self::STATE_COMPLETED === $status['state'] ) {
+			if ( ! file_exists( $status['path'] ) ) {
+				return false;
+			}
+
+			if ( ! isset( $status['completed_at'] ) ) {
+				return false;
+			}
+
+			if ( $status['completed_at'] + self::FEED_EXPIRY < time() ) {
+				return false;
+			}
 		}
 
 		/**

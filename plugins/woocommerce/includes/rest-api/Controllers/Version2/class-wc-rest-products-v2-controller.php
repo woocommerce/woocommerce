@@ -74,6 +74,23 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Get the hooks relevant to response caching.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of hook names to track for cache invalidation.
+	 */
+	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array(
+			'woocommerce_rest_prepare_product_object',
+			'woocommerce_product_type_query',
+			'woocommerce_product_class',
+			'woocommerce_short_description',
+			'woocommerce_rest_product_object_query',
+		);
+	}
+
+	/**
 	 * Get data for ETag generation, excluding fields that change on each request.
 	 *
 	 * @param array                                 $data        Response data.
@@ -689,7 +706,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 						'id'     => wc_attribute_taxonomy_id_by_name( $name ),
 						'name'   => $this->get_attribute_taxonomy_name( $name, $_product ),
 						'slug'   => rawurldecode( $name ),
-						'option' => $option_term && ! is_wp_error( $option_term ) ? $option_term->name : $attribute,
+						'option' => $option_term && ! is_wp_error( $option_term ) ? rawurldecode( $option_term->name ) : rawurldecode( $attribute ),
 					);
 				} else {
 					$attributes[] = array(
@@ -1631,7 +1648,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$_attribute = $attributes[ $attribute_name ];
 
 					if ( $_attribute['is_variation'] ) {
-						$value = isset( $attribute['option'] ) ? wc_clean( stripslashes( $attribute['option'] ) ) : '';
+						$value = isset( $attribute['option'] ) ? wc_clean( rawurldecode( stripslashes( $attribute['option'] ) ) ) : '';
 
 						if ( ! empty( $_attribute['is_taxonomy'] ) ) {
 							// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
