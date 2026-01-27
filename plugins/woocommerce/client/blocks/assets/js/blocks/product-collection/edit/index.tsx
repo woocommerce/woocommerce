@@ -40,10 +40,25 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const [ isHandPickedPickerActive, setIsHandPickedPickerActive ] =
 		useState( false );
 
+	// Track if the taxonomy picker is active.
+	// This allows multi-select before clicking "Done".
+	const [ isTaxonomyPickerActive, setIsTaxonomyPickerActive ] =
+		useState( false );
+
 	const isHandPickedCollection =
 		attributes.collection === CoreCollectionNames.HAND_PICKED;
 	const hasHandPickedProducts =
 		( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) > 0;
+
+	const isTaxonomyCollection =
+		attributes.collection === CoreCollectionNames.BY_CATEGORY ||
+		attributes.collection === CoreCollectionNames.BY_TAG ||
+		attributes.collection === CoreCollectionNames.BY_BRAND;
+
+	const taxonomySlug = getTaxonomySlugForCollection( attributes.collection );
+	const hasSelectedTerms = taxonomySlug
+		? ( attributes.query?.taxQuery?.[ taxonomySlug ]?.length ?? 0 ) > 0
+		: false;
 
 	// Activate the picker when Hand-Picked collection is selected with no products
 	useEffect( () => {
@@ -51,6 +66,13 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			setIsHandPickedPickerActive( true );
 		}
 	}, [ isHandPickedCollection, hasHandPickedProducts ] );
+
+	// Activate the picker when a taxonomy collection is selected with no terms
+	useEffect( () => {
+		if ( isTaxonomyCollection && ! hasSelectedTerms ) {
+			setIsTaxonomyPickerActive( true );
+		}
+	}, [ isTaxonomyCollection, hasSelectedTerms ] );
 
 	const hasInnerBlocks = useSelect(
 		( select ) =>
@@ -99,6 +121,17 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 			);
 		}
 
+		// Show the taxonomy picker if it's active (local state).
+		// This allows multi-select before clicking "Done".
+		if ( isTaxonomyCollection && isTaxonomyPickerActive ) {
+			return (
+				<TaxonomyPicker
+					{ ...props }
+					onDone={ () => setIsTaxonomyPickerActive( false ) }
+				/>
+			);
+		}
+
 		switch ( productCollectionUIStateInEditor ) {
 			case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
 				return (
@@ -128,6 +161,15 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					<MultiProductPicker
 						{ ...props }
 						onDone={ () => setIsHandPickedPickerActive( false ) }
+					/>
+				);
+			case ProductCollectionUIStatesInEditor.TAXONOMY_PICKER:
+				// This case is hit when no taxonomy terms are selected
+				// and the picker was previously dismissed but terms were removed
+				return (
+					<TaxonomyPicker
+						{ ...props }
+						onDone={ () => setIsTaxonomyPickerActive( false ) }
 					/>
 				);
 			case ProductCollectionUIStatesInEditor.VALID:

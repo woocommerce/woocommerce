@@ -174,6 +174,25 @@ const ProductCollectionInspectorControls = (
 				)
 			}
 
+			{
+				/**
+				 * "By Taxonomy" collection-specific control.
+				 * Placed at the top for easy access when editing taxonomy selection.
+				 * Only rendered when ProductCollectionContent is shown (not during picker).
+				 */
+				( collection === CoreCollectionNames.BY_CATEGORY ||
+					collection === CoreCollectionNames.BY_TAG ||
+					collection === CoreCollectionNames.BY_BRAND ) && (
+					<PanelBody>
+						<TaxonomyControls
+							{ ...queryControlProps }
+							collection={ collection }
+							renderMode="standalone"
+						/>
+					</PanelBody>
+				)
+			}
+
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
@@ -304,11 +323,6 @@ const CollectionSpecificControls = (
 		query: attributes.query,
 	};
 
-	const isByTaxonomy =
-		collection === CoreCollectionNames.BY_CATEGORY ||
-		collection === CoreCollectionNames.BY_TAG ||
-		collection === CoreCollectionNames.BY_BRAND;
-
 	return (
 		<InspectorControls>
 			{
@@ -317,20 +331,6 @@ const CollectionSpecificControls = (
 				 */
 				collection === CoreCollectionNames.RELATED && (
 					<RelatedByControl { ...queryControlProps } />
-				)
-			}
-			{
-				/**
-				 * "By Taxonomy" collection-specific controls.
-				 */
-				isByTaxonomy && (
-					<PanelBody>
-						<TaxonomyControls
-							{ ...queryControlProps }
-							collection={ collection }
-							renderMode="standalone"
-						/>
-					</PanelBody>
 				)
 			}
 		</InspectorControls>
