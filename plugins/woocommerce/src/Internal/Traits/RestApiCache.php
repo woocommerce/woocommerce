@@ -1027,6 +1027,7 @@ trait RestApiCache {
 			return '';
 		}
 
+		ksort( $version_data );
 		$json = wp_json_encode( $version_data );
 		return md5( false === $json ? '' : $json );
 	}
