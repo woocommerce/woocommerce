@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { ElementType } from 'react';
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
@@ -159,6 +160,21 @@ const ProductCollectionInspectorControls = (
 				location={ props.location }
 			/>
 
+			{
+				/**
+				 * "Hand-Picked" collection-specific control.
+				 * Placed at the top for easy access when editing product selection.
+				 * Only rendered when ProductCollectionContent is shown (not during picker).
+				 */
+				collection === CoreCollectionNames.HAND_PICKED && (
+					<PanelBody>
+						<HandPickedProductsControlField
+							{ ...queryControlProps }
+						/>
+					</PanelBody>
+				)
+			}
+
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
@@ -265,12 +281,14 @@ const isProductCollection = ( blockName: string ) =>
 const CollectionSpecificControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
-	const { collection } = props.attributes;
+	const { attributes, context } = props;
+	const { collection } = attributes;
+
 	const setQueryAttributeBind = useMemo(
 		() => setQueryAttribute.bind( null, props ),
 		[ props ]
 	);
-	const tracksLocation = useTracksLocation( props.context.templateSlug );
+	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) => {
 		return recordEvent(
 			'blocks_product_collection_inspector_control_clicked',
@@ -284,7 +302,7 @@ const CollectionSpecificControls = (
 	const queryControlProps = {
 		setQueryAttribute: setQueryAttributeBind,
 		trackInteraction,
-		query: props.attributes.query,
+		query: attributes.query,
 	};
 
 	const isByTaxonomy =
@@ -292,29 +310,8 @@ const CollectionSpecificControls = (
 		collection === CoreCollectionNames.BY_TAG ||
 		collection === CoreCollectionNames.BY_BRAND;
 
-	// Show the HandPickedProductsControlField only when products are already selected
-	// (i.e., the picker has been used and closed). This avoids interference
-	// between the picker and the inspector control's product fetching/validation.
-	const hasHandPickedProducts =
-		( props.attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) >
-		0;
-
 	return (
 		<InspectorControls>
-			{
-				/**
-				 * "Hand-Picked" collection-specific controls.
-				 * Only shown when products are already selected.
-				 */
-				collection === CoreCollectionNames.HAND_PICKED &&
-					hasHandPickedProducts && (
-						<PanelBody>
-							<HandPickedProductsControlField
-								{ ...queryControlProps }
-							/>
-						</PanelBody>
-					)
-			}
 			{
 				/**
 				 * "Related Products" collection-specific controls.

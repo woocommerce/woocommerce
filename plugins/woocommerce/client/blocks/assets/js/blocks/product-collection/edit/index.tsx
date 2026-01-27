@@ -40,13 +40,12 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const [ isHandPickedPickerActive, setIsHandPickedPickerActive ] =
 		useState( false );
 
-	// Activate the picker when the Hand-Picked collection is first selected
-	// and there are no products yet.
 	const isHandPickedCollection =
 		attributes.collection === CoreCollectionNames.HAND_PICKED;
 	const hasHandPickedProducts =
 		( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) > 0;
 
+	// Activate the picker when Hand-Picked collection is selected with no products
 	useEffect( () => {
 		if ( isHandPickedCollection && ! hasHandPickedProducts ) {
 			setIsHandPickedPickerActive( true );
@@ -86,8 +85,11 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	};
 
 	const renderComponent = () => {
-		// Show the hand-picked products picker if it's active (local state)
-		// This allows multi-select before clicking "Done"
+		// Show the hand-picked products picker if it's active (local state).
+		// This allows multi-select before clicking "Done".
+		// The inspector controls (HandPickedProductsControlField) are inside
+		// ProductCollectionContent, so they're automatically hidden while
+		// the picker is shown.
 		if ( isHandPickedCollection && isHandPickedPickerActive ) {
 			return (
 				<HandPickedProductsPicker
