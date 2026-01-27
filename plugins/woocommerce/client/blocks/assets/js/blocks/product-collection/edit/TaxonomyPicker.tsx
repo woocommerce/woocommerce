@@ -7,6 +7,7 @@ import { Placeholder, Button } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
+import ProductBrandControl from '@woocommerce/editor-components/product-brand-control';
 
 /**
  * Internal dependencies
@@ -15,7 +16,6 @@ import type { ProductCollectionEditComponentProps } from '../types';
 import { CoreCollectionNames } from '../types';
 import { getCollectionByName } from '../collections';
 import { setQueryAttribute } from '../utils';
-import TaxonomyControls from './inspector-controls/taxonomy-controls';
 
 interface TaxonomyPickerProps extends ProductCollectionEditComponentProps {
 	onDone: () => void;
@@ -138,16 +138,15 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 					/>
 				);
 			case CoreCollectionNames.BY_BRAND:
-				// For brands, use the generic TaxonomyControls
 				return (
-					<TaxonomyControls
-						query={ attributes.query }
-						setQueryAttribute={ ( queryUpdate ) => {
-							setQueryAttribute( props, queryUpdate );
+					<ProductBrandControl
+						selected={ selectedTermIds }
+						onChange={ ( value = [] ) => {
+							const ids = value.map( ( item ) =>
+								Number( item.id )
+							);
+							handleTermChange( ids );
 						} }
-						trackInteraction={ () => {} }
-						collection={ attributes.collection }
-						renderMode="standalone"
 					/>
 				);
 			default:
