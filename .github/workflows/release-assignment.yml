@@ -188,11 +188,12 @@ jobs:
               console.log('Successfully triggered upcoming release notification webhook');
 
               const responseBody = await response.json();
-              core.setOutput('release-team', responseBody.release_team);
-              core.setOutput('release-lead', responseBody.release_lead);
-              core.setOutput('release-lead-google-login', responseBody.release_lead_google_login);
-              core.setOutput('release-lead-slack-member-id', responseBody.release_lead_slack_member_id);
-              core.setOutput('post', responseBody.post);
+
+              core.setOutput('release-team', responseBody.data.release_team);
+              core.setOutput('release-lead', responseBody.data.release_lead);
+              core.setOutput('release-lead-google-login', responseBody.data.release_lead_google_login);
+              core.setOutput('release-lead-slack-member-id', responseBody.data.release_lead_slack_member_id);
+              core.setOutput('post', responseBody.data.post.view_url);
             }
         env:
           ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
