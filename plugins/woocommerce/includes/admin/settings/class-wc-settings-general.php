@@ -431,7 +431,6 @@ class WC_Settings_General extends WC_Settings_Page {
 			"
 		);
 	}
-
 }
 
 return new WC_Settings_General();

@@ -2,6 +2,7 @@
 /**
  * React settings schema helpers.
  */
+
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
@@ -85,6 +86,8 @@ class ReactSettingsSchema {
 		/**
 		 * Filter whether the settings page should opt out of React rendering.
 		 *
+		 * @since 10.6.0
+		 *
 		 * @param bool   $opt_out Whether to opt out of React rendering.
 		 * @param string $tab Tab id.
 		 * @param string $section Section id.
@@ -115,6 +118,8 @@ class ReactSettingsSchema {
 		$default_types = array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' );
 		/**
 		 * Filter supported React settings field types.
+		 *
+		 * @since 10.6.0
 		 *
 		 * @param array  $supported_types Supported normalized field types.
 		 * @param string $tab Tab id.
@@ -154,6 +159,8 @@ class ReactSettingsSchema {
 		);
 		/**
 		 * Filter the field type map for React settings.
+		 *
+		 * @since 10.6.0
 		 *
 		 * @param array  $type_map Map of WooCommerce field types to normalized types.
 		 * @param string $tab Tab id.
@@ -275,7 +282,7 @@ class ReactSettingsSchema {
 					'order'       => isset( $setting['order'] ) ? (int) $setting['order'] : $group_index,
 					'fields'      => array(),
 				);
-				$group_index++;
+				++$group_index;
 				continue;
 			}
 
@@ -304,7 +311,7 @@ class ReactSettingsSchema {
 			$field = self::transform_setting_to_field( $tab, $section, $setting, $settings_page );
 			if ( $field ) {
 				$current_group['fields'][] = $field;
-				$values[ $field['id'] ]     = self::get_field_value( $setting, $field['type'] );
+				$values[ $field['id'] ]    = self::get_field_value( $setting, $field['type'] );
 			}
 		}
 
@@ -432,7 +439,7 @@ class ReactSettingsSchema {
 		if ( empty( $setting['id'] ) ) {
 			return self::normalize_value( $default, $type );
 		}
-		$value   = \WC_Admin_Settings::get_option( $setting['id'], $default );
+		$value = \WC_Admin_Settings::get_option( $setting['id'], $default );
 		return self::normalize_value( $value, $type );
 	}
 
@@ -579,7 +586,7 @@ class ReactSettingsSchema {
 			if ( $key !== $expected ) {
 				return false;
 			}
-			$expected++;
+			++$expected;
 		}
 
 		return true;

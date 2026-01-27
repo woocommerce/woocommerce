@@ -145,6 +145,9 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	 */
 	public function test_build_response_builds_groups_and_values() {
 		$settings_page = new class() {
+			/**
+			 * @return string
+			 */
 			public function get_label() {
 				return 'General';
 			}
