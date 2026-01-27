@@ -65,17 +65,11 @@ class BlocksUtil {
 	 */
 	public static function get_block_from_template_part( $block_name, $template_part_slug ) {
 		$template = get_block_template( get_stylesheet() . '//' . $template_part_slug, 'wp_template_part' );
-<<<<<<< Updated upstream
 
 		if ( ! $template || null === $template->content ) {
 			return array();
 		}
 
-=======
-		if ( ! $template || empty( $template->content ) ) {
-			return array();
-		}
->>>>>>> Stashed changes
 		$blocks = parse_blocks( $template->content );
 
 		$flatten_blocks = self::flatten_blocks( $blocks );
