@@ -16,7 +16,7 @@ class Authentication {
 	 * @since 10.6.0
 	 * @var bool|null
 	 */
-	private static $is_store_api_request = null;
+	private $is_store_api_request = null;
 	/**
 	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
@@ -55,10 +55,10 @@ class Authentication {
 	 */
 	public function capture_store_api_request_context( $wp ): void {
 		if ( is_object( $wp ) && isset( $wp->query_vars['rest_route'] ) ) {
-			self::$is_store_api_request = 0 === strpos( (string) $wp->query_vars['rest_route'], '/wc/store/' );
+			$this->is_store_api_request = 0 === strpos( (string) $wp->query_vars['rest_route'], '/wc/store/' );
 			return;
 		}
-		self::$is_store_api_request = false;
+		$this->is_store_api_request = false;
 	}
 
 	/**
@@ -69,7 +69,7 @@ class Authentication {
 	 * @return string
 	 */
 	public function maybe_use_store_api_session_handler( $handler ): string {
-		if ( null === self::$is_store_api_request ) {
+		if ( null === $this->is_store_api_request ) {
 			$rest_route = null;
 			if ( isset( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
 				$rest_route = sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
@@ -78,13 +78,13 @@ class Authentication {
 			$rest_route  = is_string( $rest_route ) ? rawurldecode( $rest_route ) : '';
 			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
 
-			self::$is_store_api_request = (
+			$this->is_store_api_request = (
 				( '' !== $rest_route && 0 === strpos( $rest_route, '/wc/store/' ) ) ||
 				( '' !== $request_uri && false !== strpos( $request_uri, '/wp-json/wc/store/' ) )
 			);
 		}
 
-		if ( false === self::$is_store_api_request ) {
+		if ( false === $this->is_store_api_request ) {
 			return $handler;
 		}
 
