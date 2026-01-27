@@ -627,13 +627,18 @@ class Cart extends ControllerTestCase {
 		WC()->session->save_data();
 
 		$original_rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
-		$original_cart_token = $_SERVER['HTTP_CART_TOKEN'] ?? null;
+		$original_cart_token = isset( $_SERVER['HTTP_CART_TOKEN'] )
+			? wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- test cleanup only.
+			: null;
 
 		try {
 			// Simulate a Store API request with Cart-Token before session/cart init.
 			$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/cart';
 			$_SERVER['HTTP_CART_TOKEN']              = $token;
 
+			/**
+			 * Fires parse_request so Store API context is captured before session selection.
+			 */
 			do_action( 'parse_request', $GLOBALS['wp'] );
 
 			WC()->session = null;
@@ -642,11 +647,7 @@ class Cart extends ControllerTestCase {
 			WC()->initialize_session();
 			WC()->initialize_cart();
 
-			if ( isset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ) ) {
-				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 0;
-			}
-
-			WC()->cart->get_cart();
+			WC()->cart->get_cart_from_session();
 
 			$this->assertInstanceOf( SessionHandler::class, WC()->session );
 			$this->assertEquals( 3, WC()->cart->get_cart_contents_count() );
@@ -677,12 +678,12 @@ class Cart extends ControllerTestCase {
 		WC()->session->save_data();
 
 		// Preserve globals.
-		$old_get    = $_GET;
+		$old_get    = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test context.
 		$old_server = $_SERVER;
 
-		$_GET['rest_route']      = '/wc/store/v1/cart';
-		$_SERVER['REQUEST_URI']  = '/?rest_route=/wc/store/v1/cart';
-		$_SERVER['QUERY_STRING'] = 'rest_route=/wc/store/v1/cart';
+		$_GET['rest_route']         = '/wc/store/v1/cart';
+		$_SERVER['REQUEST_URI']     = '/?rest_route=/wc/store/v1/cart';
+		$_SERVER['QUERY_STRING']    = 'rest_route=/wc/store/v1/cart';
 		$_SERVER['HTTP_CART_TOKEN'] = $token;
 
 		$GLOBALS['wp']->parse_request();
@@ -693,11 +694,7 @@ class Cart extends ControllerTestCase {
 		WC()->initialize_session();
 		WC()->initialize_cart();
 
-		if ( isset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ) ) {
-			$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 0;
-		}
-
-		WC()->cart->get_cart();
+		WC()->cart->get_cart_from_session();
 
 		$this->assertInstanceOf( SessionHandler::class, WC()->session );
 		$this->assertEquals( 3, WC()->cart->get_cart_contents_count() );
@@ -715,12 +712,12 @@ class Cart extends ControllerTestCase {
 		$token       = CartTokenUtils::get_cart_token( $customer_id );
 
 		// Preserve globals.
-		$old_get    = $_GET;
+		$old_get    = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test context.
 		$old_server = $_SERVER;
 
-		$_GET['rest_route']      = '/wp/v2/posts';
-		$_SERVER['REQUEST_URI']  = '/?rest_route=/wp/v2/posts';
-		$_SERVER['QUERY_STRING'] = 'rest_route=/wp/v2/posts';
+		$_GET['rest_route']         = '/wp/v2/posts';
+		$_SERVER['REQUEST_URI']     = '/?rest_route=/wp/v2/posts';
+		$_SERVER['QUERY_STRING']    = 'rest_route=/wp/v2/posts';
 		$_SERVER['HTTP_CART_TOKEN'] = $token;
 
 		$GLOBALS['wp']->parse_request();
