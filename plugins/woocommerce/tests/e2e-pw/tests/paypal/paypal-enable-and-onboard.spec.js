@@ -3,6 +3,7 @@
  */
 import { expect, tags, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { setFilterValue } from '../../utils/filters';
 
 async function waitForPayPalToLoad( page ) {
 	const paypalDiv = page.locator( '#paypal' );
@@ -86,6 +87,23 @@ test.describe(
 					name: 'Manage',
 				} )
 				.click();
+
+			await setFilterValue( page, 'pre_option_jetpack_options', {
+				id: 12345,
+			} );
+
+			await setFilterValue( page, 'pre_option_jetpack_private_options', {
+				blog_token: 'IAM.AJETPACKBLOGTOKEN',
+			} );
+
+			// await setFilterValue( page, 'pre_http_request', {
+			// 	response: {
+			// 		code: 200,
+			// 	},
+			// 	body: {
+			// 		public_id: 'test_public_id',
+			// 	},
+			// } );
 
 			await test.step( 'Update the title field', async () => {
 				await page
