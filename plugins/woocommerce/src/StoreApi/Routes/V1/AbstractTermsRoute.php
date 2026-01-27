@@ -134,7 +134,12 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 		}
 
 		$objects = get_terms( $prepared_args );
-		$return  = [];
+
+		if ( is_wp_error( $objects ) ) {
+			return rest_ensure_response( [] );
+		}
+
+		$return = [];
 
 		foreach ( $objects as $object ) {
 			$data     = $this->prepare_item_for_response( $object, $request );
