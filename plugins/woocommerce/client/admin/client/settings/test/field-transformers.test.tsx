@@ -49,9 +49,10 @@ describe( 'field transformers', () => {
 	} );
 
 	it( 'creates row group children for configured fields', () => {
-		const children = createChildrenWithRows( [ 'a', 'b', 'c' ], [
-			{ id: 'row1', fields: [ 'a', 'b' ] },
-		] );
+		const children = createChildrenWithRows(
+			[ 'a', 'b', 'c' ],
+			[ { id: 'row1', fields: [ 'a', 'b' ] } ]
+		);
 
 		expect( children ).toEqual( [
 			{
@@ -84,9 +85,7 @@ describe( 'field transformers', () => {
 			value: boolean;
 		} ) => Record< string, unknown >;
 
-		expect( getValue( { item: { checkbox_field: 'yes' } } ) ).toBe(
-			true
-		);
+		expect( getValue( { item: { checkbox_field: 'yes' } } ) ).toBe( true );
 		expect( setValue( { item: {}, value: true } ) ).toEqual( {
 			checkbox_field: 'yes',
 		} );
@@ -113,9 +112,9 @@ describe( 'field transformers', () => {
 		registerFieldTypeTransformer(
 			'custom_transformer_test',
 			( setting, baseField ) => ( {
-			...baseField,
-			type: 'text',
-			Edit: () => <div>{ setting.label }</div>,
+				...baseField,
+				type: 'text',
+				Edit: () => <div>{ setting.label }</div>,
 			} )
 		);
 
