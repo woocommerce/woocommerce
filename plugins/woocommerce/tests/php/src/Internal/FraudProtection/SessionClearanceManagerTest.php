@@ -42,7 +42,8 @@ class SessionClearanceManagerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'pending', SessionClearanceManager::STATUS_PENDING );
 		$this->assertEquals( 'allowed', SessionClearanceManager::STATUS_ALLOWED );
 		$this->assertEquals( 'blocked', SessionClearanceManager::STATUS_BLOCKED );
-		$this->assertEquals( SessionClearanceManager::STATUS_ALLOWED, SessionClearanceManager::DEFAULT_STATUS );
+		// Default status is PENDING for Blackbox integration (payment methods hidden until verified).
+		$this->assertEquals( SessionClearanceManager::STATUS_PENDING, SessionClearanceManager::DEFAULT_STATUS );
 	}
 
 	/**
@@ -141,5 +142,58 @@ class SessionClearanceManagerTest extends \WC_Unit_Test_Case {
 
 		// Should return default status for invalid values.
 		$this->assertEquals( SessionClearanceManager::DEFAULT_STATUS, $this->sut->get_session_status() );
+	}
+
+	/**
+	 * Test should_render_payment_methods returns true only for allowed status.
+	 */
+	public function test_should_render_payment_methods_returns_true_only_for_allowed() {
+		// Default (pending) - should NOT render.
+		$this->assertFalse( $this->sut->should_render_payment_methods() );
+
+		// Allowed - should render.
+		$this->sut->allow_session();
+		$this->assertTrue( $this->sut->should_render_payment_methods() );
+
+		// Pending - should NOT render.
+		$this->sut->challenge_session();
+		$this->assertFalse( $this->sut->should_render_payment_methods() );
+
+		// Blocked - should NOT render.
+		$this->sut->block_session();
+		$this->assertFalse( $this->sut->should_render_payment_methods() );
+	}
+
+	/**
+	 * Test set_blackbox_session_id and get_blackbox_session_id.
+	 */
+	public function test_blackbox_session_id_storage() {
+		// Initially null.
+		$this->assertNull( $this->sut->get_blackbox_session_id() );
+
+		// Set and retrieve.
+		$session_id = 'bb_test_session_123';
+		$this->sut->set_blackbox_session_id( $session_id );
+		$this->assertEquals( $session_id, $this->sut->get_blackbox_session_id() );
+
+		// Can update to new value.
+		$new_session_id = 'bb_test_session_456';
+		$this->sut->set_blackbox_session_id( $new_session_id );
+		$this->assertEquals( $new_session_id, $this->sut->get_blackbox_session_id() );
+	}
+
+	/**
+	 * Test that default status (PENDING) means payment methods are not rendered.
+	 */
+	public function test_default_pending_status_hides_payment_methods() {
+		// Fresh session should default to PENDING.
+		$this->assertEquals( SessionClearanceManager::STATUS_PENDING, $this->sut->get_session_status() );
+
+		// Payment methods should not render for PENDING status.
+		$this->assertFalse( $this->sut->should_render_payment_methods() );
+
+		// After verification (allow), payment methods should render.
+		$this->sut->allow_session();
+		$this->assertTrue( $this->sut->should_render_payment_methods() );
 	}
 }

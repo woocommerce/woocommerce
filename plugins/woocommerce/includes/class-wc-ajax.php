@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
+use Automattic\WooCommerce\Internal\FraudProtection\BlackboxIntegration;
 use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
 use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -381,6 +382,25 @@ class WC_AJAX {
 		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
 			wc_get_container()->get( CheckoutEventTracker::class )
 				->track_shortcode_checkout_field_update( isset( $_POST['post_data'] ) ? wp_unslash( $_POST['post_data'] ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			// Process Blackbox session ID for fraud protection.
+			// Only call handler if blackbox_session_id was explicitly provided in the request.
+			// Even empty string triggers verify (fail-open), but we don't verify on regular
+			// update_checkout calls that don't include the blackbox_session_id field.
+			$blackbox_session_id = null;
+			if ( isset( $_POST['blackbox_session_id'] ) ) {
+				$blackbox_session_id = sanitize_text_field( wp_unslash( $_POST['blackbox_session_id'] ) );
+			} elseif ( isset( $_POST['post_data'] ) ) {
+				parse_str( wp_unslash( $_POST['post_data'] ), $post_data ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				if ( array_key_exists( 'blackbox_session_id', $post_data ) ) {
+					$blackbox_session_id = sanitize_text_field( $post_data['blackbox_session_id'] );
+				}
+			}
+
+			if ( null !== $blackbox_session_id ) {
+				wc_get_container()->get( BlackboxIntegration::class )
+					->handle_shortcode_session_id( $blackbox_session_id );
+			}
 		}
 
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );

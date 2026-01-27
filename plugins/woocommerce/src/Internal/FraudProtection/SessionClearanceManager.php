@@ -44,8 +44,14 @@ class SessionClearanceManager {
 
 	/**
 	 * Default session status.
+	 * PENDING means payment methods are hidden until verified.
 	 */
-	public const DEFAULT_STATUS = self::STATUS_ALLOWED;
+	public const DEFAULT_STATUS = self::STATUS_PENDING;
+
+	/**
+	 * Session key for storing Blackbox session ID.
+	 */
+	private const BLACKBOX_SESSION_KEY = '_fraud_protection_blackbox_session_id';
 
 	/**
 	 * Check if the current session is allowed.
@@ -65,6 +71,29 @@ class SessionClearanceManager {
 	public function is_session_blocked(): bool {
 		$status = $this->get_session_status();
 		return self::STATUS_BLOCKED === $status;
+	}
+
+	/**
+	 * Check if the current session is pending verification.
+	 *
+	 * @return bool True if session is pending, false otherwise.
+	 */
+	public function is_session_pending(): bool {
+		$status = $this->get_session_status();
+		return self::STATUS_PENDING === $status;
+	}
+
+	/**
+	 * Check if payment methods should be rendered.
+	 *
+	 * Payment methods should only be shown when the session is explicitly
+	 * ALLOWED. PENDING and BLOCKED sessions should not see payment methods.
+	 *
+	 * @return bool True if payment methods should be rendered, false otherwise.
+	 */
+	public function should_render_payment_methods(): bool {
+		$status = $this->get_session_status();
+		return self::STATUS_ALLOWED === $status;
 	}
 
 	/**
@@ -151,6 +180,31 @@ class SessionClearanceManager {
 	 */
 	public function reset_session(): void {
 		$this->set_session_status( self::DEFAULT_STATUS );
+	}
+
+	/**
+	 * Store the Blackbox session ID.
+	 *
+	 * @param string $session_id The Blackbox session ID.
+	 * @return void
+	 */
+	public function set_blackbox_session_id( string $session_id ): void {
+		if ( ! $this->is_session_available() ) {
+			return;
+		}
+		WC()->session->set( self::BLACKBOX_SESSION_KEY, $session_id );
+	}
+
+	/**
+	 * Get the stored Blackbox session ID.
+	 *
+	 * @return string|null The Blackbox session ID, or null if not set.
+	 */
+	public function get_blackbox_session_id(): ?string {
+		if ( ! $this->is_session_available() ) {
+			return null;
+		}
+		return WC()->session->get( self::BLACKBOX_SESSION_KEY );
 	}
 
 	/**

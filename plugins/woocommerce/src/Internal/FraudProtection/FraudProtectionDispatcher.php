@@ -91,6 +91,20 @@ class FraudProtectionDispatcher {
 	 */
 	public function dispatch_event( string $event_type, array $event_data = array() ): void {
 		try {
+			// PoC: Only process 'checkout' events from Blackbox integration.
+			// Skip other events to avoid interference with session status.
+			if ( 'checkout' !== $event_type ) {
+				FraudProtectionController::log(
+					'debug',
+					sprintf(
+						'Fraud protection event skipped (PoC - only checkout events processed): %s',
+						$event_type
+					),
+					array( 'event_type' => $event_type )
+				);
+				return;
+			}
+
 			// Check if feature is enabled - fail-open if not.
 			if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
 				FraudProtectionController::log(

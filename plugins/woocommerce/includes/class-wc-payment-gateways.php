@@ -394,9 +394,10 @@ All at %6$s
 	 * @return array The available payment gateways.
 	 */
 	public function get_available_payment_gateways() {
-		// Early return if fraud protection blocks session.
+		// Early return if fraud protection should not render payment methods.
+		// This includes both BLOCKED and PENDING sessions - only ALLOWED sessions see payment methods.
 		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
-			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
+			&& ! wc_get_container()->get( SessionClearanceManager::class )->should_render_payment_methods() ) {
 			return array();
 		}
 

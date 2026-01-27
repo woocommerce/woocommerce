@@ -75,6 +75,9 @@ class FraudProtectionController implements RegisterHooksInterface {
 		}
 
 		$this->blocked_session_notice->register();
+
+		// Register Blackbox integration - fetched from container to avoid circular dependency.
+		wc_get_container()->get( BlackboxIntegration::class )->register();
 	}
 
 	/**
