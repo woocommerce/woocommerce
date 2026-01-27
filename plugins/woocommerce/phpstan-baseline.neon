@@ -57118,18 +57118,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\AddToCartWithOptions\:\:enqueue_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\AddToCartWithOptions\:\:is_child_product_purchasable\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\AddToCartWithOptions\:\:render_interactivity_notices_region\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1

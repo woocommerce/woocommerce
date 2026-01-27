@@ -82,8 +82,9 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * @param array $attributes  Any attributes that currently are available from the block.
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
+	 * @return void
 	 */
-	protected function enqueue_data( array $attributes = array() ) {
+	protected function enqueue_data( array $attributes = array() ): void {
 		parent::enqueue_data( $attributes );
 
 		if ( is_admin() ) {
@@ -148,26 +149,6 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Check if a child product is purchasable.
-	 *
-	 * @param \WC_Product $product The product to check.
-	 * @return bool True if the product is purchasable, false otherwise.
-	 */
-	private function is_child_product_purchasable( \WC_Product $product ) {
-		// Skip variable products.
-		if ( $product->is_type( ProductType::VARIABLE ) ) {
-			return false;
-		}
-
-		// Skip grouped products.
-		if ( $product->is_type( ProductType::GROUPED ) ) {
-			return false;
-		}
-
-		return $product->is_purchasable() && $product->is_in_stock();
 	}
 
 	/**
