@@ -99,6 +99,16 @@ export const HandPickedProductsControlField = ( {
 	);
 	const handleSearch = useDebounce( setSearchQuery, 250 );
 
+	// Check if all selected products have been loaded into productsMap.
+	// This prevents premature validation that could remove valid products
+	// that just haven't been fetched yet.
+	const allSelectedProductsLoaded = useMemo( () => {
+		if ( ! productsLoaded || ! selectedProductIds?.length ) return false;
+		return selectedProductIds.every( ( id ) =>
+			productsMap.has( Number( id ) )
+		);
+	}, [ productsLoaded, selectedProductIds, productsMap ] );
+
 	// Filter out any selected product IDs that no longer exist
 	const validSelectedProductIds = useMemo( () => {
 		if ( ! selectedProductIds?.length || ! productsMap.size )
@@ -109,14 +119,22 @@ export const HandPickedProductsControlField = ( {
 		} );
 	}, [ selectedProductIds, productsMap ] );
 
-	// Updates the query attribute when invalid products are filtered out
+	// Updates the query attribute when invalid products are filtered out.
+	// Only run validation when all selected products have been loaded,
+	// to avoid removing valid products that are still being fetched.
 	useEffect( () => {
+		if ( ! allSelectedProductsLoaded ) return;
 		if ( validSelectedProductIds.length !== selectedProductIds.length ) {
 			setQueryAttribute( {
 				woocommerceHandPickedProducts: validSelectedProductIds,
 			} );
 		}
-	}, [ validSelectedProductIds, selectedProductIds, setQueryAttribute ] );
+	}, [
+		allSelectedProductsLoaded,
+		validSelectedProductIds,
+		selectedProductIds,
+		setQueryAttribute,
+	] );
 
 	const onTokenChange = useCallback(
 		( values: string[] ) => {

@@ -292,19 +292,28 @@ const CollectionSpecificControls = (
 		collection === CoreCollectionNames.BY_TAG ||
 		collection === CoreCollectionNames.BY_BRAND;
 
+	// Show the HandPickedProductsControlField only when products are already selected
+	// (i.e., the picker has been used and closed). This avoids interference
+	// between the picker and the inspector control's product fetching/validation.
+	const hasHandPickedProducts =
+		( props.attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) >
+		0;
+
 	return (
 		<InspectorControls>
 			{
 				/**
 				 * "Hand-Picked" collection-specific controls.
+				 * Only shown when products are already selected.
 				 */
-				collection === CoreCollectionNames.HAND_PICKED && (
-					<PanelBody>
-						<HandPickedProductsControlField
-							{ ...queryControlProps }
-						/>
-					</PanelBody>
-				)
+				collection === CoreCollectionNames.HAND_PICKED &&
+					hasHandPickedProducts && (
+						<PanelBody>
+							<HandPickedProductsControlField
+								{ ...queryControlProps }
+							/>
+						</PanelBody>
+					)
 			}
 			{
 				/**

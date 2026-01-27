@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { useGetLocation } from '@woocommerce/blocks/product-template/utils';
 import { Spinner, Flex } from '@wordpress/components';
@@ -11,6 +11,7 @@ import { Spinner, Flex } from '@wordpress/components';
  * Internal dependencies
  */
 import {
+	CoreCollectionNames,
 	ProductCollectionContentProps,
 	ProductCollectionEditComponentProps,
 	ProductCollectionUIStatesInEditor,
@@ -33,6 +34,25 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	useRegisterEmailCollections();
 
 	const [ isSelectionModalOpen, setIsSelectionModalOpen ] = useState( false );
+
+	// Track if the hand-picked products picker is active.
+	// This allows multi-select before clicking "Done".
+	const [ isHandPickedPickerActive, setIsHandPickedPickerActive ] =
+		useState( false );
+
+	// Activate the picker when the Hand-Picked collection is first selected
+	// and there are no products yet.
+	const isHandPickedCollection =
+		attributes.collection === CoreCollectionNames.HAND_PICKED;
+	const hasHandPickedProducts =
+		( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) > 0;
+
+	useEffect( () => {
+		if ( isHandPickedCollection && ! hasHandPickedProducts ) {
+			setIsHandPickedPickerActive( true );
+		}
+	}, [ isHandPickedCollection, hasHandPickedProducts ] );
+
 	const hasInnerBlocks = useSelect(
 		( select ) =>
 			!! select( blockEditorStore ).getBlocks( clientId ).length,
@@ -66,6 +86,17 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	};
 
 	const renderComponent = () => {
+		// Show the hand-picked products picker if it's active (local state)
+		// This allows multi-select before clicking "Done"
+		if ( isHandPickedCollection && isHandPickedPickerActive ) {
+			return (
+				<HandPickedProductsPicker
+					{ ...props }
+					onDone={ () => setIsHandPickedPickerActive( false ) }
+				/>
+			);
+		}
+
 		switch ( productCollectionUIStateInEditor ) {
 			case ProductCollectionUIStatesInEditor.COLLECTION_PICKER:
 				return (
@@ -89,7 +120,14 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 					/>
 				);
 			case ProductCollectionUIStatesInEditor.HAND_PICKED_PRODUCTS_PICKER:
-				return <HandPickedProductsPicker { ...props } />;
+				// This case is hit when no products are selected
+				// and the picker was previously dismissed but products were removed
+				return (
+					<HandPickedProductsPicker
+						{ ...props }
+						onDone={ () => setIsHandPickedPickerActive( false ) }
+					/>
+				);
 			case ProductCollectionUIStatesInEditor.VALID:
 			case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
 				return (

@@ -43,8 +43,6 @@ export interface ProductCollectionAttributes {
 	filterable: boolean;
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	__privatePreviewState?: PreviewState;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__privateHandPickedProductsPickerDismissed?: boolean;
 }
 
 export enum LayoutOptions {

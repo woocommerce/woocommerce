@@ -200,6 +200,16 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	.woocommerce-search-list__search {
 		margin: 0;
 	}
+
+	.wc-blocks-product-collection__editor-product-picker-info {
+		display: flex;
+		align-items: center;
+		gap: $gap-small;
+	}
+
+	.wc-blocks-product-collection__editor-product-picker-selection {
+		width: 100%;
+	}
 }
 
 // Product to Show Radio Control

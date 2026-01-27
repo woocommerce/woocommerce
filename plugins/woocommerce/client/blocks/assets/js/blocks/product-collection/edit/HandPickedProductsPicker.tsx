@@ -4,16 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, info } from '@wordpress/icons';
 import ProductsControl from '@woocommerce/editor-components/products-control';
-import {
-	Placeholder,
-	Button,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalHStack as HStack,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalVStack as VStack,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalText as Text,
-} from '@wordpress/components';
+import { Placeholder, Button } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 
 /**
@@ -21,28 +12,25 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 import type { ProductCollectionEditComponentProps } from '../types';
 import { getCollectionByName } from '../collections';
+import { setQueryAttribute } from '../utils';
 
-const HandPickedProductsPicker = ( {
-	attributes,
-	setAttributes,
-}: ProductCollectionEditComponentProps ) => {
+interface HandPickedProductsPickerProps
+	extends ProductCollectionEditComponentProps {
+	onDone: () => void;
+}
+
+const HandPickedProductsPicker = ( props: HandPickedProductsPickerProps ) => {
+	const { attributes, onDone } = props;
 	const blockProps = useBlockProps();
 
 	const collection = getCollectionByName( attributes.collection );
 
-	// Convert string IDs to numbers for ProductsControl
+	// Convert string IDs to numbers for ProductsControl.
 	const selectedProductIds = (
 		attributes.query?.woocommerceHandPickedProducts || []
 	).map( Number );
 
 	const hasSelectedProducts = selectedProductIds.length > 0;
-
-	const handleDone = () => {
-		setAttributes( {
-			// eslint-disable-next-line @typescript-eslint/naming-convention
-			__privateHandPickedProductsPickerDismissed: true,
-		} );
-	};
 
 	if ( ! collection ) {
 		return null;
@@ -51,40 +39,40 @@ const HandPickedProductsPicker = ( {
 	return (
 		<div { ...blockProps }>
 			<Placeholder className="wc-blocks-product-collection__editor-product-picker">
-				<VStack spacing={ 4 }>
-					<HStack alignment="center">
-						{ /* @ts-expect-error Icon types are incomplete */ }
-						<Icon
-							icon={ info }
-							className="wc-blocks-product-collection__info-icon"
-						/>
-						<Text>
-							{ __(
-								'Select specific products to recommend to customers.',
-								'woocommerce'
-							) }
-						</Text>
-					</HStack>
+				<div className="wc-blocks-product-collection__editor-product-picker-info">
+					{ /* @ts-expect-error Icon types are incomplete */ }
+					<Icon
+						icon={ info }
+						className="wc-blocks-product-collection__info-icon"
+					/>
+					<span>
+						{ __(
+							'Select products to display in this collection.',
+							'woocommerce'
+						) }
+					</span>
+				</div>
+				<div className="wc-blocks-product-collection__editor-product-picker-selection">
+					{ /* @ts-expect-error Props provided by withSearchedProducts HOC */ }
 					<ProductsControl
 						selected={ selectedProductIds }
-						onChange={ ( value: { id: number }[] = [] ) => {
-							const ids = value.map( ( { id } ) => String( id ) );
-							setAttributes( {
-								query: {
-									...attributes.query,
-									woocommerceHandPickedProducts: ids,
-								},
+						onChange={ ( value = [] ) => {
+							const ids = value.map( ( { id }: { id: number } ) =>
+								String( id )
+							);
+							// Use setQueryAttribute to avoid stale closure issues
+							// It reads the current query from props at call time
+							setQueryAttribute( props, {
+								woocommerceHandPickedProducts: ids,
 							} );
 						} }
 					/>
 					{ hasSelectedProducts && (
-						<HStack justify="flex-end">
-							<Button variant="primary" onClick={ handleDone }>
-								{ __( 'Done', 'woocommerce' ) }
-							</Button>
-						</HStack>
+						<Button variant="primary" onClick={ onDone }>
+							{ __( 'Done', 'woocommerce' ) }
+						</Button>
 					) }
-				</VStack>
+				</div>
 			</Placeholder>
 		</div>
 	);

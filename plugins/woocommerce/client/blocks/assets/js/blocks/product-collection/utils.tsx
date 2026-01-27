@@ -268,21 +268,18 @@ export const useProductCollectionUIState = ( {
 		/**
 		 * Case 3: Hand-picked products picker
 		 * Show the product picker when the Hand-Picked collection is selected
-		 * and either:
-		 * - The picker hasn't been dismissed yet (user is still selecting), OR
-		 * - No products have been selected (show picker again if all removed)
+		 * but no products have been chosen yet.
 		 */
 		const isHandPickedCollection =
 			attributes.collection === CoreCollectionNames.HAND_PICKED;
 		const hasHandPickedProducts =
 			( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) >
 			0;
-		const isPickerDismissed =
-			attributes.__privateHandPickedProductsPickerDismissed === true;
+
 		if (
 			isCollectionSelected &&
 			isHandPickedCollection &&
-			( ! isPickerDismissed || ! hasHandPickedProducts )
+			! hasHandPickedProducts
 		) {
 			return ProductCollectionUIStatesInEditor.HAND_PICKED_PRODUCTS_PICKER;
 		}
@@ -334,7 +331,6 @@ export const useProductCollectionUIState = ( {
 		hasInnerBlocks,
 		attributes.query?.productReference,
 		attributes.query?.woocommerceHandPickedProducts,
-		attributes.__privateHandPickedProductsPickerDismissed,
 	] );
 
 	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };
