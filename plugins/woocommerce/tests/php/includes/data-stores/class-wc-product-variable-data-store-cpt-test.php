@@ -734,19 +734,23 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			)
 		) );
 
-		$counter  = 0;
-		$callback = function( ?bool $check, int $object_id, string $meta_key, $meta_value ) use ( $new_slug, &$counter ) {
-			$counter += (int) ( $new_slug === $meta_key && '...' === $meta_value );
+		$attribute_meta_update_counter = 0;
+		$root_cause_update_counter     = 0;
+		$callback = function( ?bool $check, int $object_id, string $meta_key, $meta_value ) use ( $new_slug, &$attribute_meta_update_counter, &$root_cause_update_counter ) {
+			$root_cause_update_counter     += (int) ( isset( $meta_value['size-style'] ) && ! isset( $meta_value['Size/Style'] ) );
+			$attribute_meta_update_counter += (int) ( $new_slug === $meta_key && '...' === $meta_value );
 			return $check;
 		};
 		add_action( 'update_post_metadata', $callback, 10, 4 );
 
 		// Initial attribute meta migration.
 		$store->proxy_read_attributes( $product );
-		$this->assertSame( 1, $counter );
+		$this->assertSame( 1, $attribute_meta_update_counter );
+		$this->assertSame( 1, $root_cause_update_counter );
 		// Once the migration complete, no consequent updates attempted.
 		$store->proxy_read_attributes( $product );
-		$this->assertSame( 1, $counter );
+		$this->assertSame( 1, $attribute_meta_update_counter );
+		$this->assertSame( 1, $root_cause_update_counter );
 
 		remove_action( 'update_post_metadata', $callback );
 	}
