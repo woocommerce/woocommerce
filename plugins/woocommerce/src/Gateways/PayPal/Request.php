@@ -636,9 +636,11 @@ class Request {
 			),
 			true
 		) ) {
+			$shipping_callback_token = $this->generate_shipping_callback_token( $order );
+
 			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
-				'callback_url'    => $this->normalize_url_for_paypal( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
+				'callback_url'    => $this->normalize_url_for_paypal( rest_url( 'wc/v3/paypal-standard/update-shipping' . '?token=' . $shipping_callback_token ) ),
 			);
 		}
 
@@ -905,6 +907,25 @@ class Request {
 				'country_code'   => strtoupper( $country ),
 			),
 		);
+	}
+
+	/**
+	 * Generate and store a shipping callback token for the order.
+	 * The token is stored in a transient and can be validated later.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return string The generated token.
+	 */
+	private function generate_shipping_callback_token( WC_Order $order ): string {
+		$token = bin2hex( random_bytes( 32 ) );
+		
+		$transient_key = PayPalConstants::SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX . $order->get_id();
+		
+		// Store the token with order ID for validation.
+		// This allows us to verify the token belongs to the correct order.
+		set_transient( $transient_key, $token, PayPalConstants::SHIPPING_CALLBACK_TOKEN_EXPIRATION );
+		
+		return $token;
 	}
 
 	/**
