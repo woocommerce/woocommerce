@@ -7,7 +7,9 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+use Automattic\WooCommerce\StoreApi\Authentication;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Spy_REST_Server;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -611,6 +613,111 @@ class Cart extends ControllerTestCase {
 				'@' . wp_salt()
 			)
 		);
+	}
+
+	/**
+	 * Test Store API uses SessionHandler when Cart-Token is present before cart load.
+	 */
+	public function test_store_api_uses_session_handler_for_cart_token() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Persist the current session to storage.
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+
+		// Simulate a Store API request with Cart-Token before session/cart init.
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/cart';
+		$_SERVER['HTTP_CART_TOKEN']              = $token;
+
+		do_action( 'parse_request', $GLOBALS['wp'] );
+
+		WC()->session = null;
+		WC()->cart    = null;
+
+		WC()->initialize_session();
+		WC()->initialize_cart();
+
+		if ( isset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ) ) {
+			$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 0;
+		}
+
+		WC()->cart->get_cart();
+
+		$this->assertInstanceOf( SessionHandler::class, WC()->session );
+		$this->assertEquals( 3, WC()->cart->get_cart_contents_count() );
+	}
+
+	/**
+	 * Test Store API context is set via parse_request for rest_route requests.
+	 */
+	public function test_rest_route_parse_request_sets_store_api_context() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Persist the current session to storage.
+		WC()->session->set_customer_session_cookie( true );
+		WC()->session->save_data();
+
+		// Preserve globals.
+		$old_get    = $_GET;
+		$old_server = $_SERVER;
+
+		$_GET['rest_route']      = '/wc/store/v1/cart';
+		$_SERVER['REQUEST_URI']  = '/?rest_route=/wc/store/v1/cart';
+		$_SERVER['QUERY_STRING'] = 'rest_route=/wc/store/v1/cart';
+		$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+		$GLOBALS['wp']->parse_request();
+
+		WC()->session = null;
+		WC()->cart    = null;
+
+		WC()->initialize_session();
+		WC()->initialize_cart();
+
+		if ( isset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ) ) {
+			$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 0;
+		}
+
+		WC()->cart->get_cart();
+
+		$this->assertInstanceOf( SessionHandler::class, WC()->session );
+		$this->assertEquals( 3, WC()->cart->get_cart_contents_count() );
+
+		// Restore globals.
+		$_GET    = $old_get;
+		$_SERVER = $old_server;
+	}
+
+	/**
+	 * Test non-Store API routes do not switch to Store API session handler.
+	 */
+	public function test_non_store_api_route_does_not_use_store_api_session_handler() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Preserve globals.
+		$old_get    = $_GET;
+		$old_server = $_SERVER;
+
+		$_GET['rest_route']      = '/wp/v2/posts';
+		$_SERVER['REQUEST_URI']  = '/?rest_route=/wp/v2/posts';
+		$_SERVER['QUERY_STRING'] = 'rest_route=/wp/v2/posts';
+		$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+		$GLOBALS['wp']->parse_request();
+
+		WC()->session = null;
+		WC()->cart    = null;
+
+		WC()->initialize_session();
+
+		$this->assertInstanceOf( \WC_Session_Handler::class, WC()->session );
+
+		// Restore globals.
+		$_GET    = $old_get;
+		$_SERVER = $old_server;
 	}
 
 	/**

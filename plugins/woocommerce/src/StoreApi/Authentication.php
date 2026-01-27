@@ -11,6 +11,12 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class Authentication {
 	/**
+	 * Track whether current request targets the Store API.
+	 *
+	 * @var bool|null
+	 */
+	private static $is_store_api_request = null;
+	/**
 	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
@@ -38,6 +44,36 @@ class Authentication {
 		$allowed_headers[] = 'Cart-Token';
 		$allowed_headers[] = 'Nonce';
 		return $allowed_headers;
+	}
+
+	/**
+	 * Capture Store API request context early in the request lifecycle.
+	 *
+	 * @param \WP $wp WP instance.
+	 */
+	public function capture_store_api_request_context( $wp ) {
+		if ( is_object( $wp ) && isset( $wp->query_vars['rest_route'] ) ) {
+			self::$is_store_api_request = 0 === strpos( (string) $wp->query_vars['rest_route'], '/wc/store/' );
+			return;
+		}
+		self::$is_store_api_request = false;
+	}
+
+	/**
+	 * Use the Store API session handler when a valid Cart-Token is present.
+	 *
+	 * @param string $handler Session handler class name.
+	 * @return string
+	 */
+	public function maybe_use_store_api_session_handler( $handler ) {
+		if ( false === self::$is_store_api_request ) {
+			return $handler;
+		}
+		$cart_token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
+		if ( $cart_token && CartTokenUtils::validate_cart_token( $cart_token ) ) {
+			return SessionHandler::class;
+		}
+		return $handler;
 	}
 
 	/**

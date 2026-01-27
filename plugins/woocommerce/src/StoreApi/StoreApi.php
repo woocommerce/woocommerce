@@ -20,6 +20,16 @@ final class StoreApi {
 	 * Init and hook in Store API functionality.
 	 */
 	public function init() {
+		$authentication = self::container()->get( Authentication::class );
+
+		add_action(
+			'parse_request',
+			array( $authentication, 'capture_store_api_request_context' ),
+			0,
+			1
+		);
+		add_filter( 'woocommerce_session_handler', array( $authentication, 'maybe_use_store_api_session_handler' ), 0 );
+
 		add_action(
 			'rest_api_init',
 			function () {
