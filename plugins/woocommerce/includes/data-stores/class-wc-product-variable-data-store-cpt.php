@@ -53,17 +53,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					(array) $meta_attribute_value
 				);
 
-				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
+				// Maintain data integrity: WordPress 4.9 changed sanitization functions, and we update the values here so variations function correctly.
+				// As per 2026, we are refactoring the updates into product-level: BC-focused (not all-in on-spot migration), optimized for performance.
+				// Use-case: `_product_attributes` has data populated on WordPress pre-4.8 and containing symbols affected by the breaking changes.
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
 					$old_slug  = 'attribute_' . $meta_attribute_key;
 					$old_value = get_post_meta( $product_id, $old_slug, true );
-					if ( '' !== $old_value ) {
-						$new_slug = 'attribute_' . sanitize_title( $meta_value['name'] );
-						if ( $old_value !== get_post_meta( $product_id, $new_slug, true ) ) {
-							// TODO: deprecation/doing it wrong notice here.
-							update_post_meta( $product_id, $new_slug, $old_value );
-							$force_update = true;
-						}
+					$new_slug  = 'attribute_' . sanitize_title( $meta_value['name'] );
+					if ( '' !== $old_value && $old_value !== get_post_meta( $product_id, $new_slug, true ) ) {
+						update_post_meta( $product_id, $new_slug, $old_value );
+						$force_update = true;
 					}
 				}
 
