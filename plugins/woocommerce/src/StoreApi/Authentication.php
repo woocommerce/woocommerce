@@ -71,16 +71,20 @@ class Authentication {
 	public function maybe_use_store_api_session_handler( $handler ): string {
 		if ( null === $this->is_store_api_request ) {
 			$rest_route = null;
-			if ( isset( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
-				$rest_route = sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
+			if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
+				$rest_route = esc_url_raw( wp_unslash( $_GET['rest_route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
 			}
 
 			$rest_route  = is_string( $rest_route ) ? rawurldecode( $rest_route ) : '';
-			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+			$request_uri = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] )
+				? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+				: '';
+			$rest_prefix = rest_get_url_prefix();
+			$rest_path   = $rest_prefix ? '/' . $rest_prefix . '/wc/store/' : '';
 
 			$this->is_store_api_request = (
 				( '' !== $rest_route && 0 === strpos( $rest_route, '/wc/store/' ) ) ||
-				( '' !== $request_uri && false !== strpos( $request_uri, '/wp-json/wc/store/' ) )
+				( '' !== $rest_path && '' !== $request_uri && false !== strpos( $request_uri, $rest_path ) )
 			);
 		}
 
