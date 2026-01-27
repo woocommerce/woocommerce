@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 
@@ -129,11 +130,33 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 
 		// Compare PayPal order IDs.
 		$paypal_order_id_from_order_meta = $order->get_meta( '_paypal_order_id', true );
-		if ( $paypal_order_id !== $paypal_order_id_from_order_meta ) {
+		if ( empty( $paypal_order_id_from_order_meta ) || $paypal_order_id !== $paypal_order_id_from_order_meta ) {
 			WC_Gateway_Paypal::log(
 				'PayPal order ID mismatch. Order ID: ' . $order->get_id() .
 				'. PayPal order ID (request): ' . $paypal_order_id .
 				'. PayPal order ID (order meta): ' . $paypal_order_id_from_order_meta
+			);
+			$response = $this->get_update_shipping_error_response();
+			return new WP_REST_Response( $response, 422 );
+		}
+
+		// Validate that the order is in a valid state for shipping updates.
+		// Only draft or pending orders should accept shipping updates.
+		if ( ! in_array( $order->get_status(), array( OrderStatus::CHECKOUT_DRAFT, OrderStatus::PENDING ), true ) ) {
+			WC_Gateway_Paypal::log(
+				'Order is not in a valid state for shipping updates. Order ID: ' . $order->get_id() .
+				'. Order status: ' . $order->get_status()
+			);
+			$response = $this->get_update_shipping_error_response();
+			return new WP_REST_Response( $response, 422 );
+		}
+
+		// Validate that the order does not have a transaction ID.
+		$transaction_id = $order->get_transaction_id();
+		if ( ! empty ( $transaction_id ) ) {
+			WC_Gateway_Paypal::log(
+				'Order already has a transaction ID, cannot update shipping. Order ID: ' . $order->get_id() .
+				'. Transaction ID: ' . $transaction_id
 			);
 			$response = $this->get_update_shipping_error_response();
 			return new WP_REST_Response( $response, 422 );
