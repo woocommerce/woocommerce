@@ -3,6 +3,8 @@
  * Exceptions for Pay for Order validation.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Checkout\Helpers;
 
 defined( 'ABSPATH' ) || exit;

@@ -582,15 +582,15 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 	 * @testdox Should track validation failures with clean tracking codes.
 	 */
 	public function test_track_pay_for_order_includes_validation_failures(): void {
-		$order = \WC_Helper_Order::create_order();
-		$failure_codes = array(
+		$order             = \WC_Helper_Order::create_order();
+		$captured_failures = array();
+		$failure_codes     = array(
 			'invalid_order_key',
 			'permission_denied',
 			'order_already_paid',
 			'product_out_of_stock',
 			'insufficient_stock',
 		);
-		$captured_failures = array();
 
 		$this->mock_dispatcher
 			->expects( $this->exactly( count( $failure_codes ) ) )

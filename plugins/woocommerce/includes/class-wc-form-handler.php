@@ -506,7 +506,7 @@ class WC_Form_Handler {
 					$order->payment_complete();
 
 					// Track successful order payment.
-					if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+					if ( $order instanceof \WC_Order && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
 						wc_get_container()->get( CheckoutEventTracker::class )
 							->track_order_placed( $order_id, $order );
 					}

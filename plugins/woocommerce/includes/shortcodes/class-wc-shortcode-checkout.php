@@ -78,8 +78,8 @@ class WC_Shortcode_Checkout {
 	/**
 	 * Show the pay page.
 	 *
-	 * @throws Exception When validate fails.
 	 * @param int $order_id Order ID.
+	 * @throws PayForOrderValidationException When order validation fails.
 	 */
 	private static function order_pay( $order_id ) {
 
@@ -211,7 +211,7 @@ class WC_Shortcode_Checkout {
 				$order_button_text = apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) );
 
 				// Track Pay for Order page load for fraud protection.
-				if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+				if ( $order instanceof \WC_Order && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
 					wc_get_container()->get( CheckoutEventTracker::class )
 						->track_pay_for_order_page_load( $order );
 				}
