@@ -13,6 +13,9 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-helper.php';
 }
@@ -59,9 +62,41 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'process_shipping_callback' ),
-				'permission_callback' => '__return_true',
+				'permission_callback' => array( $this, 'validate_shipping_callback_request' ),
 			)
 		);
+	}
+
+	/**
+	 * Validate the shipping callback request.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return bool True if the request is valid, false otherwise.
+	 */
+	public function validate_shipping_callback_request( WP_REST_Request $request ) {
+		$token = $request->get_param( 'token' );
+		if ( empty( $token ) ) {
+			return false;
+		}
+
+		$purchase_units = $request->get_param( 'purchase_units' );
+		if ( empty( $purchase_units ) || empty( $purchase_units[0]['custom_id'] ) ) {
+			return false;
+		}
+
+		$order = PayPalHelper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] );
+		if ( ! $order ) {
+			return false;
+		}
+
+		$order_id        = $order->get_id();
+		$transient_key   = PayPalConstants::SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX . $order_id;
+		$transient_value = get_transient( $transient_key );
+		if ( empty( $transient_value ) || $token !== $transient_value ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
