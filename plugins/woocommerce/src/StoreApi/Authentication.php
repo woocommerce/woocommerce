@@ -51,7 +51,7 @@ class Authentication {
 	 *
 	 * @param \WP $wp WP instance.
 	 */
-	public function capture_store_api_request_context( $wp ) {
+	public function capture_store_api_request_context( $wp ): void {
 		if ( is_object( $wp ) && isset( $wp->query_vars['rest_route'] ) ) {
 			self::$is_store_api_request = 0 === strpos( (string) $wp->query_vars['rest_route'], '/wc/store/' );
 			return;
@@ -65,11 +65,12 @@ class Authentication {
 	 * @param string $handler Session handler class name.
 	 * @return string
 	 */
-	public function maybe_use_store_api_session_handler( $handler ) {
+	public function maybe_use_store_api_session_handler( $handler ): string {
 		if ( false === self::$is_store_api_request ) {
 			return $handler;
 		}
 		$cart_token = wc_clean( wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ?? '' ) );
+		$cart_token = is_string( $cart_token ) ? $cart_token : '';
 		if ( $cart_token && CartTokenUtils::validate_cart_token( $cart_token ) ) {
 			return SessionHandler::class;
 		}

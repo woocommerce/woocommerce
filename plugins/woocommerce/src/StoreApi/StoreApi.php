@@ -20,6 +20,7 @@ final class StoreApi {
 	 * Init and hook in Store API functionality.
 	 */
 	public function init() {
+		/** @var Authentication $authentication */
 		$authentication = self::container()->get( Authentication::class );
 
 		add_action(
