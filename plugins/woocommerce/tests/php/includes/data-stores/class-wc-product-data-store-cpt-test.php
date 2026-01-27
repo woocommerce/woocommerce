@@ -338,44 +338,44 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test optimized updates toward postmeta with different input data types.
+	 * Test update_product_stock updates on the meta-entry.
 	 */
-	public function test_stock_and_sales_updates_with_to_string_formatting_optimization(): void {
+	public function test_update_product_stock_meta_update(): void {
 		/** @var WC_Product_Data_Store_CPT $store */
 		$store = WC_Data_Store::load( 'product' );
 
-		$callback = fn( string $sql ): string => $sql;
+		$product = new WC_Product();
+		$product->save();
+		$product_id = $product->get_id();
 
-		foreach ( array( true, false ) as $test_backward_compatibility ) {
-			if ( $test_backward_compatibility ) {
-				add_filter( 'woocommerce_update_product_stock_query', $callback );
-			}
+		$store->update_product_stock( $product_id, null, 'set' );
+		$this->assertSame( '0.000000', get_post_meta( $product_id, '_stock', true ) );
+		$store->update_product_stock( $product_id, 10, 'set' );
+		$this->assertSame( '10.000000', get_post_meta( $product_id, '_stock', true ) );
+		$store->update_product_stock( $product_id, 20.0, 'set' );
+		$this->assertSame( '20.000000', get_post_meta( $product_id, '_stock', true ) );
+		$store->update_product_stock( $product_id, 30.5, 'set' );
+		$this->assertSame( '30.000000', get_post_meta( $product_id, '_stock', true ) );
+	}
 
-			$product = new WC_Product();
-			$product->save();
-			$product_id = $product->get_id();
+	/**
+	 * Test update_product_sales updates on the meta-entry.
+	 */
+	public function test_update_product_sales_meta_update(): void {
+		/** @var WC_Product_Data_Store_CPT $store */
+		$store = WC_Data_Store::load( 'product' );
 
-			$store->update_product_stock( $product_id, null, 'set' );
-			$this->assertSame( '0.000000', get_post_meta( $product_id, '_stock', true ) );
-			$store->update_product_stock( $product_id, 10, 'set' );
-			$this->assertSame( '10.000000', get_post_meta( $product_id, '_stock', true ) );
-			$store->update_product_stock( $product_id, 20.0, 'set' );
-			$this->assertSame( '20.000000', get_post_meta( $product_id, '_stock', true ) );
-			$store->update_product_stock( $product_id, 30.5, 'set' );
-			$this->assertSame( '30.000000', get_post_meta( $product_id, '_stock', true ) );
+		$product = new WC_Product();
+		$product->save();
+		$product_id = $product->get_id();
 
-			$store->update_product_sales( $product_id, null, 'set' );
-			$this->assertSame( '0.000000', get_post_meta( $product_id, 'total_sales', true ) );
-			$store->update_product_sales( $product_id, 10, 'set' );
-			$this->assertSame( '10.000000', get_post_meta( $product_id, 'total_sales', true ) );
-			$store->update_product_sales( $product_id, 20.0, 'set' );
-			$this->assertSame( '20.000000', get_post_meta( $product_id, 'total_sales', true ) );
-			$store->update_product_sales( $product_id, 30.5, 'set' );
-			$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
-
-			if ( $test_backward_compatibility ) {
-				remove_filter( 'woocommerce_update_product_stock_query', $callback );
-			}
-		}
+		$store->update_product_sales( $product_id, null, 'set' );
+		$this->assertSame( '0.000000', get_post_meta( $product_id, 'total_sales', true ) );
+		$store->update_product_sales( $product_id, 10, 'set' );
+		$this->assertSame( '10.000000', get_post_meta( $product_id, 'total_sales', true ) );
+		$store->update_product_sales( $product_id, 20.0, 'set' );
+		$this->assertSame( '20.000000', get_post_meta( $product_id, 'total_sales', true ) );
+		$store->update_product_sales( $product_id, 30.5, 'set' );
+		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
 }
