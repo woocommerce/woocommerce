@@ -8,6 +8,8 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -483,6 +485,15 @@ class WC_Form_Handler {
 
 								$result = apply_filters( 'woocommerce_payment_successful_result', $result, $order_id );
 
+								// Track successful order payment.
+								if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+									$fp_order = wc_get_order( $order_id );
+									if ( $fp_order instanceof \WC_Order ) {
+										wc_get_container()->get( CheckoutEventTracker::class )
+											->track_order_placed( $order_id, $fp_order );
+									}
+								}
+
 								wp_redirect( $result['redirect'] ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 								exit;
 							}
@@ -493,6 +504,13 @@ class WC_Form_Handler {
 				} else {
 					// No payment was required for order.
 					$order->payment_complete();
+
+					// Track successful order payment.
+					if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+						wc_get_container()->get( CheckoutEventTracker::class )
+							->track_order_placed( $order_id, $order );
+					}
+
 					wp_safe_redirect( $order->get_checkout_order_received_url() );
 					exit;
 				}
