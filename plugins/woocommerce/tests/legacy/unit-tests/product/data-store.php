@@ -984,7 +984,32 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$this->assertContains( $variable_product->get_id(), $results );
 		$this->assertNotContains( $variation2->get_id(), $results );
 	}
-	
+
+	/**
+	 * @testdox Test that products with NULL global_unique_id do not interfere with search results.
+	 *
+	 * @return void
+	 */
+	public function test_search_products_by_global_unique_id_with_null_value() {
+		$product_with_id = new WC_Product();
+		$product_with_id->set_regular_price( 42 );
+		$product_with_id->set_name( 'Product With ID' );
+		$product_with_id->set_global_unique_id( '5555555555555' );
+		$product_with_id->save();
+
+		$product_null_id = new WC_Product();
+		$product_null_id->set_regular_price( 42 );
+		$product_null_id->set_name( 'Product Null ID' );
+		$product_null_id->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		// Search should find only the product with the matching global_unique_id.
+		$results = $data_store->search_products( '5555555555555', '', true, true );
+		$this->assertContains( $product_with_id->get_id(), $results );
+		$this->assertNotContains( $product_null_id->get_id(), $results );
+	}
+
 	/**
 	 * Test WC_Product_Data_Store_CPT::create_all_product_variations
 	 */
