@@ -626,8 +626,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
 			return new WP_Error(
-				/* translators: %s: post type */
 				"woocommerce_rest_user_cannot_delete_{$this->post_type}",
+				/* translators: %s: post type */
 				sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ),
 				array(
 					'status' => rest_authorization_required_code(),
@@ -646,8 +646,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
 				return new WP_Error(
-					/* translators: %s: post type */
 					'woocommerce_rest_trash_not_supported',
+					/* translators: %s: post type */
 					sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ),
 					array(
 						'status' => 501,
@@ -659,8 +659,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			if ( is_callable( array( $object, 'get_status' ) ) ) {
 				if ( 'trash' === $object->get_status() ) {
 					return new WP_Error(
-						/* translators: %s: post type */
 						'woocommerce_rest_already_trashed',
+						/* translators: %s: post type */
 						sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ),
 						array(
 							'status' => 410,
@@ -675,8 +675,8 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 
 		if ( ! $result ) {
 			return new WP_Error(
-				/* translators: %s: post type */
 				'woocommerce_rest_cannot_delete',
+				/* translators: %s: post type */
 				sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ),
 				array(
 					'status' => 500,
