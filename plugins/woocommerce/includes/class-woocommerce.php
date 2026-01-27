@@ -1547,6 +1547,9 @@ final class WooCommerce {
 
 		// Schedule daily sales event at midnight tomorrow.
 		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $offset_hours );
+		if ( false === $scheduled_sales_time ) {
+			$scheduled_sales_time = strtotime( '00:00 tomorrow' );
+		}
 
 		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
 
@@ -1565,7 +1568,13 @@ final class WooCommerce {
 		}
 
 		$tomorrow_3am = strtotime( 'tomorrow 03:00 am ' . $offset_hours );
+		if ( false === $tomorrow_3am ) {
+			$tomorrow_3am = strtotime( 'tomorrow 03:00 am' );
+		}
 		$tomorrow_6am = strtotime( 'tomorrow 06:00 am ' . $offset_hours );
+		if ( false === $tomorrow_6am ) {
+			$tomorrow_6am = strtotime( 'tomorrow 06:00 am' );
+		}
 
 		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules

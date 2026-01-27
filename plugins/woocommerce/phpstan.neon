@@ -18,6 +18,7 @@ parameters:
 		- vendor/autoload.php
 	scanDirectories:
 		- vendor/wordpress/abilities-api
+		- packages/action-scheduler
 	scanFiles:
 		- php-stubs/wc-admin-feature-config.php
 		- php-stubs/wc-constants.php

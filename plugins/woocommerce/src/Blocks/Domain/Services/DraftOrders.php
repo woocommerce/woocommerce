@@ -79,7 +79,10 @@ class DraftOrders {
 	protected function maybe_create_cronjobs() {
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
 		if ( false === call_user_func( $has_scheduled_action, self::DRAFT_CLEANUP_EVENT_HOOK ) ) {
-			as_schedule_recurring_action( strtotime( 'midnight tonight' ), DAY_IN_SECONDS, self::DRAFT_CLEANUP_EVENT_HOOK );
+			$midnight_tonight = strtotime( 'midnight tonight' );
+			if ( false !== $midnight_tonight ) {
+				as_schedule_recurring_action( $midnight_tonight, DAY_IN_SECONDS, self::DRAFT_CLEANUP_EVENT_HOOK );
+			}
 		}
 	}
 

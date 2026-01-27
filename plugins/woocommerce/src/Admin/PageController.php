@@ -117,7 +117,11 @@ class PageController {
 		$options = apply_filters( 'woocommerce_navigation_connect_page_options', $options );
 
 		// @todo check for null ID, or collision.
-		$this->pages[ $options['id'] ] = $options;
+		$id = $options['id'] ?? null;
+
+		if ( is_string( $id ) && '' !== $id ) {
+			$this->pages[ $id ] = $options;
+		}
 	}
 
 	/**

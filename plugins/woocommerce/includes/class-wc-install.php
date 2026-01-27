@@ -319,6 +319,9 @@ class WC_Install {
 			'wc_update_1050_add_idx_user_email',
 			'wc_update_1050_remove_deprecated_marketplace_option',
 		),
+		'10.6.0' => array(
+			'wc_update_1060_add_woo_idx_comment_approved_type_index',
+		),
 	);
 
 	/**
@@ -1720,19 +1723,23 @@ class WC_Install {
 
 		$db_delta_result = dbDelta( self::get_schema() );
 
-		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
-
-		if ( is_null( $comment_type_index_exists ) ) {
+		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
+		if ( null === $comment_type_index_exists ) {
 			// Add an index to the field comment_type to improve the response time of the query
 			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
 		}
 
 		$date_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
-
-		if ( is_null( $date_type_index_exists ) ) {
+		if ( null === $date_type_index_exists ) {
 			// Improve performance of the admin comments query when fetching the latest 25 comments while excluding reviews and internal notes.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
+		}
+
+		$comment_approved_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_approved_type'" );
+		if ( null === $comment_approved_type_index_exists ) {
+			// Improve performance of the admin comments query when counting approved comments while excluding internal notes.
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_approved_type (comment_approved, comment_type, comment_post_ID)" );
 		}
 
 		// Clear table caches.
@@ -2983,11 +2990,17 @@ EOT;
 	 * @return void
 	 */
 	public static function page_created( $page_id, $page_data ) {
-		if ( 'refund_returns' === $page_data['post_name'] ) {
-			if ( Constants::is_true( 'WC_INSTALLING' ) ) {
-				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'wc_notes_refund_returns_page_created', array( $page_id ), 'woocommerce', true );
+		if ( Constants::is_true( 'WC_INSTALLING' ) ) {
+			return;
+		}
+
+		if ( 'refund_returns' === $page_data['post_name'] && class_exists( 'WC_Notes_Refund_Returns', false ) ) {
+			$callback = fn() => WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+
+			if ( did_action( 'init' ) ) {
+				$callback();
 			} else {
-				WC_Notes_Refund_Returns::possibly_add_note( $page_id );
+				add_action( 'init', $callback );
 			}
 		}
 	}
