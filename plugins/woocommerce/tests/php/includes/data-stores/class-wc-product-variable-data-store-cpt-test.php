@@ -732,13 +732,17 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$new_slug       = 'attribute_' . sanitize_title( $attribute_name );
 
 		update_post_meta( $product_id, $old_slug, '...' );
-		update_post_meta( $product_id, '_product_attributes', array(
-			'Size/Style' => array(
-				'name'         => $attribute_name,
-				'value'        => '...',
-				'is_variation' => 1,
+		update_post_meta(
+			$product_id,
+			'_product_attributes',
+			array(
+				'Size/Style' => array(
+					'name'         => $attribute_name,
+					'value'        => '...',
+					'is_variation' => 1,
+				)
 			)
-		) );
+		);
 
 		$attribute_meta_update_counter = 0;
 		$root_cause_update_counter     = 0;
