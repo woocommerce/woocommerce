@@ -728,10 +728,8 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$product_id     = $product->get_id();
 		$attribute_name = 'Size/Style';
-		$old_slug       = 'attribute_' . $attribute_name;
-		$new_slug       = 'attribute_' . sanitize_title( $attribute_name );
 
-		update_post_meta( $product_id, $old_slug, '...' );
+		update_post_meta( $product_id, 'attribute_' . $attribute_name, '...' );
 		update_post_meta(
 			$product_id,
 			'_product_attributes',
@@ -746,9 +744,9 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$attribute_meta_update_counter = 0;
 		$root_cause_update_counter     = 0;
-		$callback                      = function ( ?bool $check, int $object_id, string $meta_key, $meta_value ) use ( $new_slug, &$attribute_meta_update_counter, &$root_cause_update_counter ) {
-			$root_cause_update_counter     += (int) ( isset( $meta_value['size-style'] ) && ! isset( $meta_value['Size/Style'] ) );
-			$attribute_meta_update_counter += (int) ( $new_slug === $meta_key && '...' === $meta_value );
+		$callback                      = function ( ?bool $check, int $object_id, string $meta_key, $meta_value ) use ( &$attribute_meta_update_counter, &$root_cause_update_counter ) {
+			$root_cause_update_counter     += (int) ( '_product_attributes' === $meta_key && isset( $meta_value['size-style'] ) && ! isset( $meta_value['Size/Style'] ) );
+			$attribute_meta_update_counter += (int) ( 'attribute_size-style' === $meta_key && '...' === $meta_value );
 			return $check;
 		};
 		add_action( 'update_post_metadata', $callback, 10, 4 );
