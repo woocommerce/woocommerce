@@ -117,13 +117,17 @@ class ProductGalleryUtils {
 
 		try {
 			if ( $product->is_type( 'variable' ) ) {
+				/** @var int[] $variations */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$variations = $product->get_children();
-				foreach ( $variations as $variation_id ) {
-					$variation = wc_get_product( $variation_id );
-					if ( $variation ) {
-						$variation_image_id = $variation->get_image_id();
-						if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
-							$variation_image_ids[] = strval( $variation_image_id );
+				if ( ! empty( $variations ) ) {
+					_prime_post_caches( $variations );
+					foreach ( $variations as $variation_id ) {
+						$variation = wc_get_product( $variation_id );
+						if ( $variation ) {
+							$variation_image_id = $variation->get_image_id();
+							if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
+								$variation_image_ids[] = strval( $variation_image_id );
+							}
 						}
 					}
 				}
