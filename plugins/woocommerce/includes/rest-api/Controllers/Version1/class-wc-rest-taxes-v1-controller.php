@@ -55,7 +55,13 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => $this->with_cache( array( $this, 'get_items' ) ),
+					'callback'            => $this->with_cache(
+						array( $this, 'get_items' ),
+						array(
+							'endpoint_id'              => 'get_tax_rates',
+							'relevant_version_strings' => array( 'list_tax_rates' ),
+						)
+					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),

@@ -238,4 +238,46 @@ class TaxRateVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 			'Deleted handler should invalidate version string'
 		);
 	}
+
+	/**
+	 * @testdox Creating a new tax rate invalidates the list version string.
+	 */
+	public function test_tax_rate_creation_invalidates_list_version_string() {
+		$this->version_generator->generate_version( 'list_tax_rates' );
+		$version_before = $this->version_generator->get_version( 'list_tax_rates', false );
+		$this->assertNotNull( $version_before, 'List version string should exist before creation' );
+
+		$this->sut->handle_woocommerce_tax_rate_added( 456 );
+
+		$version_after = $this->version_generator->get_version( 'list_tax_rates', false );
+		$this->assertNull( $version_after, 'List version string should be deleted after tax rate added' );
+	}
+
+	/**
+	 * @testdox Updating a tax rate invalidates the list version string.
+	 */
+	public function test_tax_rate_update_invalidates_list_version_string() {
+		$this->version_generator->generate_version( 'list_tax_rates' );
+		$version_before = $this->version_generator->get_version( 'list_tax_rates', false );
+		$this->assertNotNull( $version_before, 'List version string should exist before update' );
+
+		$this->sut->handle_woocommerce_tax_rate_updated( 789 );
+
+		$version_after = $this->version_generator->get_version( 'list_tax_rates', false );
+		$this->assertNull( $version_after, 'List version string should be deleted after tax rate updated' );
+	}
+
+	/**
+	 * @testdox Deleting a tax rate invalidates the list version string.
+	 */
+	public function test_tax_rate_deletion_invalidates_list_version_string() {
+		$this->version_generator->generate_version( 'list_tax_rates' );
+		$version_before = $this->version_generator->get_version( 'list_tax_rates', false );
+		$this->assertNotNull( $version_before, 'List version string should exist before deletion' );
+
+		$this->sut->handle_woocommerce_tax_rate_deleted( 101 );
+
+		$version_after = $this->version_generator->get_version( 'list_tax_rates', false );
+		$this->assertNull( $version_after, 'List version string should be deleted after tax rate deleted' );
+	}
 }

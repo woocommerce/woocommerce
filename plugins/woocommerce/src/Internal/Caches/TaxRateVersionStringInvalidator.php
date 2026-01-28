@@ -67,6 +67,7 @@ class TaxRateVersionStringInvalidator {
 	 */
 	public function handle_woocommerce_tax_rate_added( $tax_rate_id ): void {
 		$this->invalidate( (int) $tax_rate_id );
+		$this->invalidate_tax_rates_list();
 	}
 
 	/**
@@ -82,6 +83,7 @@ class TaxRateVersionStringInvalidator {
 	 */
 	public function handle_woocommerce_tax_rate_updated( $tax_rate_id ): void {
 		$this->invalidate( (int) $tax_rate_id );
+		$this->invalidate_tax_rates_list();
 	}
 
 	/**
@@ -97,6 +99,19 @@ class TaxRateVersionStringInvalidator {
 	 */
 	public function handle_woocommerce_tax_rate_deleted( $tax_rate_id ): void {
 		$this->invalidate( (int) $tax_rate_id );
+		$this->invalidate_tax_rates_list();
+	}
+
+	/**
+	 * Invalidate the tax rates list version string.
+	 *
+	 * Called when tax rates are added, updated, or deleted,
+	 * as these operations affect collection/list endpoints.
+	 *
+	 * @return void
+	 */
+	private function invalidate_tax_rates_list(): void {
+		wc_get_container()->get( VersionStringGenerator::class )->delete_version( 'list_tax_rates' );
 	}
 
 	/**
