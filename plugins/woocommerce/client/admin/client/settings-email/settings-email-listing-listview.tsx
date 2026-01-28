@@ -141,7 +141,6 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 						);
 					}
 				},
-				isPrimary: true,
 			},
 			{
 				id: 'test',
@@ -156,8 +155,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				id: 'change-status',
 				label: ( items: EmailType[] ) =>
 					items[ 0 ].status === 'enabled'
-						? __( 'Disable email', 'woocommerce' )
-						: __( 'Enable email', 'woocommerce' ),
+						? __( 'Deactivate email', 'woocommerce' )
+						: __( 'Activate email', 'woocommerce' ),
 				supportsBulk: false,
 				isEligible: ( item: EmailType ) =>
 					item.status === 'enabled' || item.status === 'disabled',
