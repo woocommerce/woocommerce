@@ -1,15 +1,34 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { setOption } = require( '../../utils/options' );
-const { getWooEmails } = require( '../../utils/email' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect, request } from '@playwright/test';
 
-const setFeatureFlag = async ( baseURL, value ) =>
+/**
+ * Internal dependencies
+ */
+import { setOption } from '../../utils/options';
+import { getWooEmails } from '../../utils/email';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+const setFeatureFlag = async (
+	baseURL: string,
+	value: string
+): Promise< void > => {
 	await setOption(
 		request,
 		baseURL,
 		'woocommerce_feature_block_email_editor_enabled',
 		value
 	);
+};
+
+interface WooEmail {
+	id: number;
+}
+
+interface WooEmailsResponse {
+	data: WooEmail[];
+}
 
 /**
  * The purpose of this test is to alert us if the selectors that are used to track telemetry events in the email editor are changed.
@@ -20,18 +39,18 @@ test.describe( 'WooCommerce Email Editor Tracking Selectors', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await setFeatureFlag( baseURL, 'no' );
+		await setFeatureFlag( baseURL as string, 'no' );
 	} );
 
 	test( 'Check selectors for tracking events', async ( {
 		page,
 		baseURL,
 	} ) => {
-		await setFeatureFlag( baseURL, 'yes' );
+		await setFeatureFlag( baseURL as string, 'yes' );
 
 		// Navigate to WooCommerce Email Settings page to generate email posts
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
-		const emails = await getWooEmails();
+		const emails: WooEmailsResponse = await getWooEmails();
 
 		await page.goto(
 			`wp-admin/post.php?post=${ emails.data[ 0 ].id }&action=edit`

@@ -3,7 +3,9 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
+// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import { Locator } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -14,36 +16,52 @@ import { admin } from '../../test-data/data';
 import { expectEmail, expectEmailContent } from '../../utils/email';
 import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
 
-const test = baseTest.extend( {
+interface OrderBilling {
+	email: string;
+}
+
+interface Order {
+	id: number;
+	billing: OrderBilling;
+}
+
+const test = baseTest.extend< { order: Order } >( {
 	storageState: ADMIN_STATE_PATH,
 	order: async ( { restApi }, use ) => {
-		let order;
+		let order: Order;
 
 		await restApi
 			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 				billing: { email: faker.internet.exampleEmail() },
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: Order } ) => {
 				order = response.data;
 			} )
-			.catch( ( error ) => {
+			.catch( ( error: Error ) => {
 				console.error( error );
 			} );
 
-		await use( order );
+		await use( order! );
 
-		await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/orders/${ order!.id }`, {
 			force: true,
 		} );
 	},
 } );
 
 test.beforeEach( async ( { baseURL } ) => {
-	await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+	await setFeatureEmailImprovementsFlag( baseURL as string, 'no' );
 } );
 
-[
+interface EmailTestCase {
+	status: string;
+	role: string;
+	subject: string;
+	content: string;
+}
+
+const emailTestCases: EmailTestCase[] = [
 	{
 		status: 'processing',
 		role: 'customer',
@@ -68,38 +86,42 @@ test.beforeEach( async ( { baseURL } ) => {
 		subject: 'Order #ORDER_ID has been cancelled',
 		content: 'Thanks for reading',
 	},
-].forEach( ( { role, status, subject, content } ) => {
+];
+
+emailTestCases.forEach( ( { role, status, subject, content } ) => {
 	test( `${ role } receives email for ${ status } order`, async ( {
 		page,
 		restApi,
 		order,
 	} ) => {
 		// Inject the order id into the expected subject and make it a regex
-		subject = new RegExp( subject.replace( 'ORDER_ID', `${ order.id }` ) );
+		const subjectRegex = new RegExp(
+			subject.replace( 'ORDER_ID', `${ order.id }` )
+		);
 
 		await restApi
 			.put( `${ WC_API_PATH }/orders/${ order.id }`, {
 				status,
 			} )
-			.catch( ( error ) => {
+			.catch( ( error: Error ) => {
 				console.error( error );
 			} );
 
-		let orderStatus;
+		let orderStatus: string;
 		await restApi
 			.get( `${ WC_API_PATH }/orders/${ order.id }` )
-			.then( ( response ) => {
+			.then( ( response: { data: { status: string } } ) => {
 				orderStatus = response.data.status;
 			} );
 
-		await expect( orderStatus ).toEqual( status );
+		await expect( orderStatus! ).toEqual( status );
 
-		let emailRow;
+		let emailRow: Locator;
 		await test.step( 'check the email exists', async () => {
 			emailRow = await expectEmail(
 				page,
 				role === 'customer' ? order.billing.email : admin.email,
-				subject
+				subjectRegex
 			);
 		} );
 
@@ -109,7 +131,7 @@ test.beforeEach( async ( { baseURL } ) => {
 			await expectEmailContent(
 				page,
 				role === 'customer' ? order.billing.email : admin.email,
-				subject,
+				subjectRegex,
 				content
 			);
 		} );

@@ -2,7 +2,13 @@
  * Tabs (groups) define the main menu (header) of the product edit page.
  * Each tab has a name and a note text that is displayed below the tab name.
  */
-const tabs = [
+
+interface Tab {
+	name: string;
+	noteText: string;
+}
+
+const tabs: Tab[] = [
 	{
 		name: 'General',
 		noteText:
@@ -20,4 +26,4 @@ const tabs = [
 	},
 ];
 
-module.exports = tabs;
+export default tabs;

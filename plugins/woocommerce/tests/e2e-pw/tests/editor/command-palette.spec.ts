@@ -1,10 +1,12 @@
 /**
  * External dependencies
  */
+// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import {
 	disableWelcomeModal,
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
+import { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -16,7 +18,21 @@ import { expect, test as baseTest } from '../../fixtures/fixtures';
 const macOS = process.platform === 'darwin';
 const cmdKeyCombo = macOS ? 'Meta+k' : 'Control+k';
 
-const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
+interface Product {
+	id: number;
+	name: string;
+	type: string;
+}
+
+interface ClickOnCommandPaletteOptionParams {
+	page: Page;
+	optionName: string;
+}
+
+const clickOnCommandPaletteOption = async ( {
+	page,
+	optionName,
+}: ClickOnCommandPaletteOptionParams ): Promise< void > => {
 	// Press `Ctrl` + `K` to open the command palette.
 	await page.keyboard.press( cmdKeyCombo );
 
@@ -36,10 +52,10 @@ const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
 	option.click();
 };
 
-const test = baseTest.extend( {
+const test = baseTest.extend< { product: Product } >( {
 	storageState: ADMIN_STATE_PATH,
 	product: async ( { restApi }, use ) => {
-		let product = {
+		let product: Product = {
 			id: 0,
 			name: `Product ${ Date.now() }`,
 			type: 'simple',
@@ -47,7 +63,7 @@ const test = baseTest.extend( {
 
 		await restApi
 			.post( `${ WC_API_PATH }/products`, product )
-			.then( ( response ) => {
+			.then( ( response: { data: Product } ) => {
 				product = response.data;
 			} );
 

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { request } from '@playwright/test';
+// @ts-expect-error -- @woocommerce/e2e-utils-playwright is not typed
 import { createClient, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -13,11 +14,13 @@ import { admin } from '../../../test-data/data';
 /**
  * Set the feature flag for email improvements feature.
  *
- * @param {string} baseURL The base URL.
- * @param {string} value   The value to set ('yes' or 'no').
- * @return {Promise<void>}
+ * @param baseURL The base URL.
+ * @param value   The value to set ('yes' or 'no').
  */
-export const setEmailEditorFeatureFlag = async ( baseURL, value ) => {
+export const setEmailEditorFeatureFlag = async (
+	baseURL: string,
+	value: string
+): Promise< void > => {
 	await setOption(
 		request,
 		baseURL,
@@ -29,29 +32,29 @@ export const setEmailEditorFeatureFlag = async ( baseURL, value ) => {
 /**
  * Enable the email editor feature.
  *
- * @param {string} baseURL The base URL.
- * @return {Promise<void>}
+ * @param baseURL The base URL.
  */
-export const enableEmailEditor = async ( baseURL ) =>
+export const enableEmailEditor = async ( baseURL: string ): Promise< void > =>
 	setEmailEditorFeatureFlag( baseURL, 'yes' );
 
 /**
  * Disable the email editor feature.
  *
- * @param {string} baseURL The base URL.
- * @return {Promise<void>}
+ * @param baseURL The base URL.
  */
-export const disableEmailEditor = async ( baseURL ) =>
+export const disableEmailEditor = async ( baseURL: string ): Promise< void > =>
 	setEmailEditorFeatureFlag( baseURL, 'no' );
 
 /**
  * Delete an email post.
  *
- * @param {string} baseURL The base URL.
- * @param {string} pageId  The page ID.
- * @return {Promise<void>}
+ * @param baseURL The base URL.
+ * @param pageId  The page ID.
  */
-export const deleteEmailPost = async ( baseURL, pageId ) => {
+export const deleteEmailPost = async (
+	baseURL: string,
+	pageId: string
+): Promise< void > => {
 	console.log( 'Deleting email post', { pageId } );
 
 	const apiClient = createClient( baseURL, {
@@ -76,9 +79,12 @@ export const deleteEmailPost = async ( baseURL, pageId ) => {
  *
  * This will reset the email by deleting the option saved in the DB retuning it back to the default state.
  *
- * @param {string} baseURL The base URL.
- * @param {string} emailId The transactional email ID.
- * @return {Promise<void>}
+ * @param baseURL The base URL.
+ * @param emailId The transactional email ID.
  */
-export const resetWCTransactionalEmail = async ( baseURL, emailId ) =>
-	deleteOption( request, baseURL, `woocommerce_${ emailId }_settings` );
+export const resetWCTransactionalEmail = async (
+	baseURL: string,
+	emailId: string
+): Promise< void > => {
+	await deleteOption( request, baseURL, `woocommerce_${ emailId }_settings` );
+};

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -9,11 +10,37 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const test = baseTest.extend( {
+interface BillingAddress {
+	first_name: string;
+	last_name: string;
+	company: string;
+	country: string;
+	address_1: string;
+	address_2?: string;
+	city: string;
+	state: string;
+	postcode: string;
+	phone: string;
+	email: string;
+}
+
+interface CustomerData {
+	first_name: string;
+	last_name: string;
+	username: string;
+	email: string;
+	billing: BillingAddress;
+}
+
+interface Customer extends CustomerData {
+	id: number;
+}
+
+const test = baseTest.extend<{ customers: Customer[] }>( {
 	storageState: ADMIN_STATE_PATH,
 	customers: async ( { restApi }, use ) => {
 		const now = Date.now();
-		const customerData = {
+		const customerData: Record<string, CustomerData> = {
 			walterWhite: {
 				first_name: 'Walter',
 				last_name: 'White',
@@ -71,12 +98,12 @@ const test = baseTest.extend( {
 			},
 		};
 
-		const customers = [];
+		const customers: Customer[] = [];
 
 		for ( const customer of Object.values( customerData ) ) {
 			await restApi
 				.post( `${ WC_API_PATH }/customers`, customer )
-				.then( ( response ) => {
+				.then( ( response: { data: Customer } ) => {
 					customers.push( response.data );
 				} );
 		}

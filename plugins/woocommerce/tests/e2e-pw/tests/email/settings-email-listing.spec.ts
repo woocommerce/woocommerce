@@ -1,31 +1,47 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { setOption } = require( '../../utils/options' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect, request } from '@playwright/test';
 
-const setFeatureFlag = async ( baseURL, name, value ) =>
+/**
+ * Internal dependencies
+ */
+import { setOption } from '../../utils/options';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+const setFeatureFlag = async (
+	baseURL: string,
+	name: string,
+	value: string
+): Promise< void > => {
 	await setOption( request, baseURL, name, value );
+};
 
-const setBlockEmailEditorFeatureFlag = async ( baseURL, value ) =>
+const setBlockEmailEditorFeatureFlag = async (
+	baseURL: string,
+	value: string
+): Promise< void > => {
 	await setFeatureFlag(
 		baseURL,
 		'woocommerce_feature_block_email_editor_enabled',
 		value
 	);
+};
 
 test.describe( 'WooCommerce Email Settings List View', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await setBlockEmailEditorFeatureFlag( baseURL, 'no' );
+		await setBlockEmailEditorFeatureFlag( baseURL as string, 'no' );
 	} );
 
 	test( 'Email settings list view renders correctly and allows to edit email status and search', async ( {
 		page,
 		baseURL,
 	} ) => {
-		await setBlockEmailEditorFeatureFlag( baseURL, 'yes' );
+		await setBlockEmailEditorFeatureFlag( baseURL as string, 'yes' );
 		await setFeatureFlag(
-			baseURL,
+			baseURL as string,
 			'woocommerce_feature_point_of_sale_enabled',
 			'no'
 		);

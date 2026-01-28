@@ -3,7 +3,9 @@
 /**
  * External dependencies
  */
+// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import { Locator } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -14,28 +16,33 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expectEmail, expectEmailContent } from '../../utils/email';
 import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
 
-const test = baseTest.extend( {
+interface User {
+	id: number;
+	email: string;
+}
+
+const test = baseTest.extend< { user: User } >( {
 	storageState: ADMIN_STATE_PATH,
 	user: async ( { restApi }, use ) => {
-		let user;
+		let user: User;
 		await restApi
 			.post( `${ WC_API_PATH }/customers`, getFakeCustomer() )
-			.then( ( response ) => {
+			.then( ( response: { data: User } ) => {
 				user = response.data;
 			} );
-		await use( user );
-		await restApi.delete( `${ WC_API_PATH }/customers/${ user.id }`, {
+		await use( user! );
+		await restApi.delete( `${ WC_API_PATH }/customers/${ user!.id }`, {
 			force: true,
 		} );
 	},
 } );
 
 test.beforeEach( async ( { baseURL } ) => {
-	await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+	await setFeatureEmailImprovementsFlag( baseURL as string, 'no' );
 } );
 
 test.skip(
-	process.env.IS_MULTISITE,
+	process.env.IS_MULTISITE === 'true',
 	'Test not working on a multisite setup, see https://github.com/woocommerce/woocommerce/issues/55082'
 );
 
@@ -43,7 +50,7 @@ test( 'New customer should receive an email with login details', async ( {
 	page,
 	user,
 } ) => {
-	let emailRow;
+	let emailRow: Locator;
 	await test.step( 'check the email exists', async () => {
 		emailRow = await expectEmail(
 			page,
@@ -89,7 +96,7 @@ test( 'Customer should receive an email when initiating a password reset', async
 		).toBeVisible();
 	} );
 
-	let emailRow;
+	let emailRow: Locator;
 	await test.step( 'check the email exists', async () => {
 		emailRow = await expectEmail(
 			page,
@@ -123,7 +130,7 @@ test( 'Customer should receive an email when password reset initiated from admin
 			.click();
 	} );
 
-	let emailRow;
+	let emailRow: Locator;
 	await test.step( 'check the email exists', async () => {
 		emailRow = await expectEmail( page, user.email, /Password Reset/ );
 	} );

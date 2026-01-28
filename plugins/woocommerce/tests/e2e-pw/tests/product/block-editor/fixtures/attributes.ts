@@ -3,7 +3,18 @@
  * These attributes represent the attributes
  * that the user can assign to a product.
  */
-const attributes = [
+
+interface AttributeTerm {
+	name: string;
+	slug: string;
+}
+
+interface Attribute {
+	name: string;
+	terms: AttributeTerm[];
+}
+
+const attributes: Attribute[] = [
 	{
 		name: 'Color',
 		terms: [
@@ -32,4 +43,4 @@ const attributes = [
 	},
 ];
 
-module.exports = attributes;
+export default attributes;

@@ -1,13 +1,20 @@
 /**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
+import { tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-
-const pickImageFromLibrary = async ( page, imageName ) => {
+const pickImageFromLibrary = async (
+	page: Page,
+	imageName: string
+): Promise< void > => {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
 	await page.getByLabel( imageName ).first().click();
 	await page.getByRole( 'button', { name: 'Select', exact: true } ).click();
@@ -19,22 +26,22 @@ test.describe( 'WooCommerce Email Settings', () => {
 	const storeName = 'WooCommerce Core E2E Test Suite';
 
 	test.afterAll( async ( { baseURL } ) => {
-		await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+		await setFeatureEmailImprovementsFlag( baseURL as string, 'no' );
 	} );
 
 	test( 'See email preview', async ( { page, baseURL } ) => {
-		await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+		await setFeatureEmailImprovementsFlag( baseURL as string, 'no' );
 		const emailPreviewElement =
 			'#wc_settings_email_preview_slotfill iframe';
 		const emailSubjectElement = '.wc-settings-email-preview-header-subject';
-		const hasIframe = async () => {
+		const hasIframe = async (): Promise< boolean > => {
 			return ( await page.locator( emailPreviewElement ).count() ) > 0;
 		};
-		const iframeContains = async ( text ) => {
+		const iframeContains = async ( text: string ): Promise< ReturnType< typeof page.frameLocator >[ 'getByText' ] extends ( ...args: infer A ) => infer R ? R : never > => {
 			const iframe = page.frameLocator( emailPreviewElement );
 			return iframe.getByText( text );
 		};
-		const getSubject = async () => {
+		const getSubject = async (): Promise< string | null > => {
 			return await page.locator( emailSubjectElement ).textContent();
 		};
 
@@ -68,14 +75,14 @@ test.describe( 'WooCommerce Email Settings', () => {
 		'Email sender options live change in email preview',
 		{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 		async ( { page, baseURL } ) => {
-			await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+			await setFeatureEmailImprovementsFlag( baseURL as string, 'no' );
 			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 			const fromNameElement = '#woocommerce_email_from_name';
 			const fromAddressElement = '#woocommerce_email_from_address';
 			const senderElement = '.wc-settings-email-preview-header-sender';
 
-			const getSender = async () => {
+			const getSender = async (): Promise< string | null > => {
 				return await page.locator( senderElement ).textContent();
 			};
 
@@ -112,13 +119,15 @@ test.describe( 'WooCommerce Email Settings', () => {
 		'Live preview when changing email settings',
 		{ tag: tags.SKIP_ON_EXTERNAL_ENV },
 		async ( { page, baseURL } ) => {
-			await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+			await setFeatureEmailImprovementsFlag( baseURL as string, 'no' );
 			await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 			// Wait for the iframe content to load
 			const iframeSelector = '#wc_settings_email_preview_slotfill iframe';
 
-			const iframeContainsHtml = async ( code ) => {
+			const iframeContainsHtml = async (
+				code: string
+			): Promise< boolean > => {
 				const iframe = page.frameLocator( iframeSelector );
 				const content = await iframe.locator( 'html' ).innerHTML();
 				return content.includes( code );
@@ -131,17 +140,17 @@ test.describe( 'WooCommerce Email Settings', () => {
 			await page.fill( `#${ baseColorId }`, baseColorValue );
 
 			await page.evaluate(
-				async ( args ) => {
-					const input = document.getElementById( args.baseColorId );
+				async ( args: { baseColorId: string; iframeSelector: string } ) => {
+					const input = document.getElementById( args.baseColorId ) as HTMLInputElement;
 					// Blur the input to trigger value change event
 					input.blur();
 
 					const iframe = document.querySelector(
 						args.iframeSelector
-					);
+					) as HTMLIFrameElement;
 
 					// Wait for the transient to be saved
-					await new Promise( ( resolve ) => {
+					await new Promise< void >( ( resolve ) => {
 						input.addEventListener(
 							'transient-saved',
 							() => resolve(),
@@ -150,7 +159,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 					} );
 
 					// Wait for the iframe with email preview to reload
-					return new Promise( ( resolve ) => {
+					return new Promise< void >( ( resolve ) => {
 						iframe.addEventListener( 'load', () => resolve(), {
 							once: true,
 						} );
@@ -173,7 +182,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 	);
 
 	test( 'Send email preview', async ( { page, baseURL } ) => {
-		await setFeatureEmailImprovementsFlag( baseURL, 'no' );
+		await setFeatureEmailImprovementsFlag( baseURL as string, 'no' );
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 		// Click the "Send a test email" button
@@ -213,16 +222,16 @@ test.describe( 'WooCommerce Email Settings', () => {
 				'#wc_settings_email_preview_slotfill iframe';
 			const emailSubjectElement =
 				'.wc-settings-email-preview-header-subject';
-			const hasIframe = async () => {
+			const hasIframe = async (): Promise< boolean > => {
 				return (
 					( await page.locator( emailPreviewElement ).count() ) > 0
 				);
 			};
-			const iframeContains = async ( text ) => {
+			const iframeContains = async ( text: string ): Promise< ReturnType< typeof page.frameLocator >[ 'getByText' ] extends ( ...args: infer A ) => infer R ? R : never > => {
 				const iframe = page.frameLocator( emailPreviewElement );
 				return iframe.getByText( text );
 			};
-			const getSubject = async () => {
+			const getSubject = async (): Promise< string | null > => {
 				return await page.locator( emailSubjectElement ).textContent();
 			};
 
@@ -250,11 +259,11 @@ test.describe( 'WooCommerce Email Settings', () => {
 			const subjectId = 'woocommerce_customer_processing_order_subject';
 
 			await page.fill( `#${ subjectId }`, newSubject );
-			await page.evaluate( async ( inputId ) => {
-				const input = document.getElementById( inputId );
+			await page.evaluate( async ( inputId: string ) => {
+				const input = document.getElementById( inputId ) as HTMLInputElement;
 				input.blur();
 
-				await new Promise( ( resolve ) => {
+				await new Promise< void >( ( resolve ) => {
 					input.addEventListener(
 						'transient-saved',
 						() => resolve(),
@@ -262,7 +271,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 					);
 				} );
 
-				return new Promise( ( resolve ) => {
+				return new Promise< void >( ( resolve ) => {
 					input.addEventListener(
 						'subject-updated',
 						() => resolve(),
@@ -274,11 +283,11 @@ test.describe( 'WooCommerce Email Settings', () => {
 
 			// Reset the subject to default value
 			await page.fill( `#${ subjectId }`, '' );
-			await page.evaluate( async ( inputId ) => {
-				const input = document.getElementById( inputId );
+			await page.evaluate( async ( inputId: string ) => {
+				const input = document.getElementById( inputId ) as HTMLInputElement;
 				input.blur();
 
-				return await new Promise( ( resolve ) => {
+				return await new Promise< void >( ( resolve ) => {
 					input.addEventListener(
 						'transient-saved',
 						() => resolve(),
@@ -394,7 +403,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 	} ) => {
 		const resetButtonElement = '.wc-settings-email-color-palette-buttons';
 
-		await setFeatureEmailImprovementsFlag( baseURL, 'yes' );
+		await setFeatureEmailImprovementsFlag( baseURL as string, 'yes' );
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
 
 		await expect( page.locator( resetButtonElement ) ).toBeVisible();

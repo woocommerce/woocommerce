@@ -11,11 +11,13 @@ import { setOption, deleteOption } from '../../../utils/options';
 /**
  * Set the feature flag for email improvements feature.
  *
- * @param {string} baseURL The base URL.
- * @param {string} value   The value to set ('yes' or 'no').
- * @return {Promise<void>}
+ * @param baseURL The base URL.
+ * @param value   The value to set ('yes' or 'no').
  */
-export const setFeatureEmailImprovementsFlag = async ( baseURL, value ) => {
+export const setFeatureEmailImprovementsFlag = async (
+	baseURL: string,
+	value: string
+): Promise< void > => {
 	await setOption(
 		request,
 		baseURL,
