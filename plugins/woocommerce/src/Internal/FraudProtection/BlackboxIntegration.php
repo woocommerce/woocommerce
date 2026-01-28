@@ -181,8 +181,8 @@ class BlackboxIntegration {
 			return;
 		}
 
-		if ( is_checkout() || is_wc_endpoint_url( 'order-pay' ) || is_add_payment_method_page() ) {
-			$checkout_type = is_add_payment_method_page() ? 'add-payment-method' : 'shortcode';
+		if ( is_checkout() || is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'add-payment-method' ) ) {
+			$checkout_type = is_wc_endpoint_url( 'add-payment-method' ) ? 'add-payment-method' : 'shortcode';
 			$this->enqueue_blackbox_scripts( $checkout_type );
 		}
 	}
