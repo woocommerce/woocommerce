@@ -2120,7 +2120,7 @@ function wc_update_400_increase_size_of_column() {
 function wc_update_400_reset_action_scheduler_migration_status() {
 	if (
 		class_exists( 'ActionScheduler_DataController' ) &&
-		method_exists( 'ActionScheduler_DataController', 'mark_migration_incomplete' )
+		method_exists( 'ActionScheduler_DataController', 'mark_migration_incomplete' ) // @phpstan-ignore function.alreadyNarrowedType
 	) {
 		\ActionScheduler_DataController::mark_migration_incomplete();
 	}
@@ -3190,7 +3190,6 @@ function wc_update_1050_enable_autoload_options() {
 
 	$feature_options = array(
 		'fulfillments'         => 'woocommerce_feature_fulfillments_enabled',
-		'marketplace'          => 'woocommerce_feature_marketplace_enabled',
 		'push_notifications'   => 'woocommerce_feature_push_notifications_enabled',
 		'agentic_checkout'     => 'woocommerce_feature_agentic_checkout_enabled',
 		'cart_checkout_blocks' => 'woocommerce_feature_cart_checkout_blocks_enabled',
@@ -3215,4 +3214,36 @@ function wc_update_1050_enable_autoload_options() {
 			...$autoload_options
 		)
 	);
+}
+
+/**
+ * Remove deprecated marketplace feature option from the database.
+ *
+ * The marketplace feature flag was deprecated in 10.5.0 and is now always enabled.
+ * The option is no longer needed as FeaturesUtil::feature_is_enabled('marketplace')
+ * returns the deprecated_value directly without reading from the database.
+ *
+ * @since 10.5.0
+ *
+ * @return void
+ */
+function wc_update_1050_remove_deprecated_marketplace_option(): void {
+	delete_option( 'woocommerce_feature_marketplace_enabled' );
+}
+
+/**
+ * Add the `woo_idx_comment_approved_type` index to improve the performance of comment-related queries in the admin area.
+ *
+ * @since 10.6.0
+ *
+ * @return void
+ */
+function wc_update_1060_add_woo_idx_comment_approved_type_index(): void {
+	global $wpdb;
+
+	$comment_approved_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_approved_type'" );
+	if ( null === $comment_approved_type_index_exists ) {
+		// Improve performance of the admin comments query when counting approved comments while excluding internal notes.
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_approved_type (comment_approved, comment_type, comment_post_ID)" );
+	}
 }

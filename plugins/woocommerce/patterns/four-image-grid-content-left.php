@@ -1,7 +1,7 @@
 <?php
 /**
  * Title: Four Image Grid Content Left
- * Slug: woocommerce-blocks/form-image-grid-content-left
+ * Slug: woocommerce-blocks/four-image-grid-content-left
  * Categories: WooCommerce, About
  */
 declare(strict_types=1);

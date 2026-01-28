@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix warning when rendering subcategory thumbnails if the thumbnail attachment lookup fails.

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add REST API backend caching and cache control headers configuration
