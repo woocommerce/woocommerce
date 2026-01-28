@@ -1,18 +1,21 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- No types available for this package yet
 import {
 	WC_ADMIN_API_PATH,
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
+import type { Page, Browser } from '@playwright/test';
 
 /**
  * Internal dependencies
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import type { RestApiClient } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const test = baseTest.extend( {
+const test = baseTest.extend< object, { restApi: RestApiClient } >( {
 	storageState: ADMIN_STATE_PATH,
 
 	page: async ( { page, restApi }, use ) => {
@@ -35,225 +38,239 @@ const test = baseTest.extend( {
 	},
 } );
 
-let categoryIds, productIds, orderIds, setupPage;
+let categoryIds: number[];
+let productIds: number[];
+let orderIds: number[];
+let setupPage: Page;
 
-test.beforeAll( async ( { browser, restApi } ) => {
-	// create a couple of product categories
-	await restApi
-		.post( `${ WC_API_PATH }/products/categories/batch`, {
-			create: [ { name: 'Easy' }, { name: 'Complicated' } ],
-		} )
-		.then( ( response ) => {
-			categoryIds = response.data.create.map(
-				( category ) => category.id
-			);
-		} );
+test.beforeAll(
+	async ( {
+		browser,
+		restApi,
+	}: {
+		browser: Browser;
+		restApi: RestApiClient;
+	} ) => {
+		// create a couple of product categories
+		await restApi
+			.post( `${ WC_API_PATH }/products/categories/batch`, {
+				create: [ { name: 'Easy' }, { name: 'Complicated' } ],
+			} )
+			.then( ( response ) => {
+				categoryIds = (
+					response.data as { create: Array< { id: number } > }
+				).create.map( ( category ) => category.id );
+			} );
 
-	// create a number of products to be used in orders
-	const productsArray = [];
-	const ordersArray = [];
-	const variationIds = [];
+		// create a number of products to be used in orders
+		const productsArray: Array< Record< string, unknown > > = [];
+		const ordersArray: Array< Record< string, unknown > > = [];
+		const variationIds: number[] = [];
 
-	// 3 simple products
-	for ( let i = 1; i < 4; i++ ) {
+		// 3 simple products
+		for ( let i = 1; i < 4; i++ ) {
+			productsArray.push( {
+				name: `Product ${ i }`,
+				type: 'simple',
+				regular_price: `${ i }0.99`,
+				categories: [ { id: categoryIds[ 0 ] } ],
+			} );
+		}
+		// one variable product
 		productsArray.push( {
-			name: `Product ${ i }`,
-			type: 'simple',
-			regular_price: `${ i }0.99`,
-			categories: [ { id: categoryIds[ 0 ] } ],
+			name: 'Variable Product',
+			type: 'variable',
+			categories: [ { id: categoryIds[ 1 ] } ],
+			attributes: [
+				{
+					name: 'Colour',
+					options: [ 'Red', 'Blue', 'Orange', 'Green' ],
+					visible: true,
+					variation: true,
+				},
+			],
 		} );
-	}
-	// one variable product
-	productsArray.push( {
-		name: 'Variable Product',
-		type: 'variable',
-		categories: [ { id: categoryIds[ 1 ] } ],
-		attributes: [
+		const variations = [
 			{
-				name: 'Colour',
-				options: [ 'Red', 'Blue', 'Orange', 'Green' ],
-				visible: true,
-				variation: true,
+				regular_price: '5.00',
+				attributes: [
+					{
+						name: 'Colour',
+						option: 'Red',
+					},
+				],
 			},
-		],
-	} );
-	const variations = [
-		{
-			regular_price: '5.00',
-			attributes: [
-				{
-					name: 'Colour',
-					option: 'Red',
-				},
-			],
-		},
-		{
-			regular_price: '6.00',
-			attributes: [
-				{
-					name: 'Colour',
-					option: 'Blue',
-				},
-			],
-		},
-		{
-			regular_price: '7.00',
-			attributes: [
-				{
-					name: 'Colour',
-					option: 'Orange',
-				},
-			],
-		},
-		{
-			regular_price: '8.00',
-			attributes: [
-				{
-					name: 'Colour',
-					option: 'Green',
-				},
-			],
-		},
-	];
-	await restApi
-		.post( `${ WC_API_PATH }/products/batch`, {
-			create: productsArray,
-		} )
-		.then( ( response ) => {
-			productIds = response.data.create.map( ( item ) => item.id );
-		} );
-	// set up the variations on the variable product
-	for ( const key in variations ) {
+			{
+				regular_price: '6.00',
+				attributes: [
+					{
+						name: 'Colour',
+						option: 'Blue',
+					},
+				],
+			},
+			{
+				regular_price: '7.00',
+				attributes: [
+					{
+						name: 'Colour',
+						option: 'Orange',
+					},
+				],
+			},
+			{
+				regular_price: '8.00',
+				attributes: [
+					{
+						name: 'Colour',
+						option: 'Green',
+					},
+				],
+			},
+		];
+		await restApi
+			.post( `${ WC_API_PATH }/products/batch`, {
+				create: productsArray,
+			} )
+			.then( ( response ) => {
+				productIds = (
+					response.data as { create: Array< { id: number } > }
+				).create.map( ( item ) => item.id );
+			} );
+		// set up the variations on the variable product
+		for ( const key in variations ) {
+			await restApi
+				.post(
+					`${ WC_API_PATH }/products/${
+						productIds[ productIds.length - 1 ]
+					}/variations`,
+					variations[ key ] as Record< string, unknown >
+				)
+				.then( ( response ) => {
+					variationIds.push(
+						( response.data as { id: number } ).id
+					);
+				} );
+		}
+
+		// set up 10 orders
+		for ( let i = 0; i < 10; i++ ) {
+			ordersArray.push( {
+				status: 'completed',
+				line_items: [
+					{
+						product_id: productIds[ 0 ],
+						quantity: 5,
+					},
+					{
+						product_id: productIds[ 1 ],
+						quantity: 2,
+					},
+					{
+						product_id: productIds[ 3 ],
+						variation_id: variationIds[ 1 ],
+						quantity: 3,
+					},
+					{
+						product_id: productIds[ 3 ],
+						variation_id: variationIds[ 3 ],
+						quantity: 1,
+					},
+				],
+			} );
+		}
+		// create the orders
+		await restApi
+			.post( `${ WC_API_PATH }/orders/batch`, {
+				create: ordersArray,
+			} )
+			.then( ( response ) => {
+				orderIds = (
+					response.data as { create: Array< { id: number } > }
+				).create.map( ( order ) => order.id );
+			} );
+
+		// Reset Analytics Settings to their default values.
+		// Reset 'Excluded statuses' to default values.
 		await restApi
 			.post(
-				`${ WC_API_PATH }/products/${
-					productIds[ productIds.length - 1 ]
-				}/variations`,
-				variations[ key ]
+				'wc-analytics/settings/wc_admin/woocommerce_excluded_report_order_statuses',
+				{
+					value: [ 'pending', 'cancelled', 'failed' ],
+				}
 			)
 			.then( ( response ) => {
-				variationIds.push( response.data.id );
+				expect(
+					( response.data as { value: string[] } ).value
+				).toEqual( [ 'pending', 'cancelled', 'failed' ] );
+			} )
+			.catch( ( error: Error ) => {
+				throw new Error(
+					`Error occurred while resetting 'Excluded statuses' to defaults.\n${ JSON.stringify(
+						error,
+						null,
+						2
+					) }`
+				);
 			} );
+
+		// Reset 'Actionable statuses' to default values.
+		await restApi
+			.post(
+				'wc-analytics/settings/wc_admin/woocommerce_actionable_order_statuses',
+				{
+					value: [ 'processing', 'on-hold' ],
+				}
+			)
+			.then( ( response ) => {
+				expect(
+					( response.data as { value: string[] } ).value
+				).toEqual( [ 'processing', 'on-hold' ] );
+			} )
+			.catch( ( error: Error ) => {
+				throw new Error(
+					`Error occurred while resetting 'Actionable statuses' to defaults.\n${ JSON.stringify(
+						error,
+						null,
+						2
+					) }`
+				);
+			} );
+
+		// Reset 'Default date range' to default values.
+		await restApi
+			.post(
+				'wc-analytics/settings/wc_admin/woocommerce_default_date_range',
+				{
+					value: 'period=month&compare=previous_year',
+				}
+			)
+			.then( ( response ) => {
+				// '&' is encoded as '&amp;' in the response.
+				expect(
+					( response.data as { value: string } ).value
+				).toEqual( 'period=month&amp;compare=previous_year' );
+			} )
+			.catch( ( error: Error ) => {
+				throw new Error(
+					`Error occurred while resetting 'Default date range' to defaults.\n${ JSON.stringify(
+						error,
+						null,
+						2
+					) }`
+				);
+			} );
+
+		// process the Action Scheduler tasks
+		setupPage = await browser.newPage();
+		// eslint-disable-next-line playwright/no-wait-for-timeout
+		await setupPage.waitForTimeout( 5000 );
+		await setupPage.goto( '?process-waiting-actions' );
+		await setupPage.close();
 	}
+);
 
-	// set up 10 orders
-	for ( let i = 0; i < 10; i++ ) {
-		ordersArray.push( {
-			status: 'completed',
-			line_items: [
-				{
-					product_id: productIds[ 0 ],
-					quantity: 5,
-				},
-				{
-					product_id: productIds[ 1 ],
-					quantity: 2,
-				},
-				{
-					product_id: productIds[ 3 ],
-					variation_id: variationIds[ 1 ],
-					quantity: 3,
-				},
-				{
-					product_id: productIds[ 3 ],
-					variation_id: variationIds[ 3 ],
-					quantity: 1,
-				},
-			],
-		} );
-	}
-	// create the orders
-	await restApi
-		.post( `${ WC_API_PATH }/orders/batch`, {
-			create: ordersArray,
-		} )
-		.then( ( response ) => {
-			orderIds = response.data.create.map( ( order ) => order.id );
-		} );
-
-	// Reset Analytics Settings to their default values.
-	// Reset 'Excluded statuses' to default values.
-	await restApi
-		.post(
-			'wc-analytics/settings/wc_admin/woocommerce_excluded_report_order_statuses',
-			{
-				value: [ 'pending', 'cancelled', 'failed' ],
-			}
-		)
-		.then( ( response ) => {
-			expect( response.data.value ).toEqual( [
-				'pending',
-				'cancelled',
-				'failed',
-			] );
-		} )
-		.catch( ( error ) => {
-			throw new Error(
-				`Error occurred while resetting 'Excluded statuses' to defaults.\n${ JSON.stringify(
-					error,
-					null,
-					2
-				) }`
-			);
-		} );
-
-	// Reset 'Actionable statuses' to default values.
-	await restApi
-		.post(
-			'wc-analytics/settings/wc_admin/woocommerce_actionable_order_statuses',
-			{
-				value: [ 'processing', 'on-hold' ],
-			}
-		)
-		.then( ( response ) => {
-			expect( response.data.value ).toEqual( [
-				'processing',
-				'on-hold',
-			] );
-		} )
-		.catch( ( error ) => {
-			throw new Error(
-				`Error occurred while resetting 'Actionable statuses' to defaults.\n${ JSON.stringify(
-					error,
-					null,
-					2
-				) }`
-			);
-		} );
-
-	// Reset 'Default date range' to default values.
-	await restApi
-		.post(
-			'wc-analytics/settings/wc_admin/woocommerce_default_date_range',
-			{
-				value: 'period=month&compare=previous_year',
-			}
-		)
-		.then( ( response ) => {
-			// '&' is encoded as '&amp;' in the response.
-			expect( response.data.value ).toEqual(
-				'period=month&amp;compare=previous_year'
-			);
-		} )
-		.catch( ( error ) => {
-			throw new Error(
-				`Error occurred while resetting 'Default date range' to defaults.\n${ JSON.stringify(
-					error,
-					null,
-					2
-				) }`
-			);
-		} );
-
-	// process the Action Scheduler tasks
-	setupPage = await browser.newPage();
-	// eslint-disable-next-line playwright/no-wait-for-timeout
-	await setupPage.waitForTimeout( 5000 );
-	await setupPage.goto( '?process-waiting-actions' );
-	await setupPage.close();
-} );
-
-test.afterAll( async ( { restApi } ) => {
+test.afterAll( async ( { restApi }: { restApi: RestApiClient } ) => {
 	// delete the categories
 	await restApi.post( `${ WC_API_PATH }/products/categories/batch`, {
 		delete: categoryIds,

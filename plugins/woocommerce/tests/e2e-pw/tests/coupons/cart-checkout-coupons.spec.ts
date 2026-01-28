@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- No types available for this package yet
 import {
 	addAProductToCart,
 	WC_API_PATH,
@@ -44,8 +45,8 @@ test.describe(
 	'Cart & Checkout applying coupons',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 	() => {
-		let firstProductId;
-		const couponBatchId = [];
+		let firstProductId: number;
+		const couponBatchId: number[] = [];
 
 		test.beforeAll( async ( { restApi } ) => {
 			// Make sure the classic cart and checkout pages exist
@@ -72,7 +73,7 @@ test.describe(
 					type: 'simple',
 					regular_price: '20.00',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					firstProductId = response.data.id;
 				} );
 			// add coupons
@@ -80,11 +81,19 @@ test.describe(
 				.post( `${ WC_API_PATH }/coupons/batch`, {
 					create: coupons,
 				} )
-				.then( ( response ) => {
-					for ( let i = 0; i < response.data.create.length; i++ ) {
-						couponBatchId.push( response.data.create[ i ].id );
+				.then(
+					( response: {
+						data: { create: Array< { id: number } > };
+					} ) => {
+						for (
+							let i = 0;
+							i < response.data.create.length;
+							i++
+						) {
+							couponBatchId.push( response.data.create[ i ].id );
+						}
 					}
-				} );
+				);
 		} );
 
 		test.beforeEach( async ( { context } ) => {

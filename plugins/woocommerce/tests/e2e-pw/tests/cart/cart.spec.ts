@@ -1,10 +1,12 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- @woocommerce/e2e-utils-playwright is not typed
 import {
 	addAProductToCart,
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -15,14 +17,28 @@ import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
 import { checkCartContent } from '../../utils/cart';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
 
+interface Product {
+	id: number;
+	name: string;
+	price: string;
+}
+
+interface Tax {
+	id: number;
+	rate: string;
+}
+
 const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
-function isClassicCart( page ) {
+function isClassicCart( page: Page ): boolean {
 	return page.url().includes( CLASSIC_CART_PAGE.slug );
 }
 
 /* region fixtures */
-const test = baseTest.extend( {
+const test = baseTest.extend< {
+	products: Product[];
+	tax: Tax;
+} >( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCartPage();
 
@@ -75,7 +91,7 @@ const test = baseTest.extend( {
 		}
 	},
 	products: async ( { restApi }, use ) => {
-		const products = [];
+		const products: Product[] = [];
 
 		// Using dec: 0 to avoid small rounding issues
 		for ( let i = 0; i < 2; i++ ) {
@@ -85,7 +101,7 @@ const test = baseTest.extend( {
 					manage_stock: true,
 					stock_quantity: 3,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: Product } ) => {
 					products.push( response.data );
 				} );
 		}
@@ -99,7 +115,7 @@ const test = baseTest.extend( {
 		}
 	},
 	tax: async ( { restApi }, use ) => {
-		let tax;
+		let tax: Tax;
 		await restApi
 			.post( `${ WC_API_PATH }/taxes`, {
 				country: 'US',
@@ -110,13 +126,13 @@ const test = baseTest.extend( {
 				name: 'US Tax',
 				shipping: false,
 			} )
-			.then( ( r ) => {
+			.then( ( r: { data: Tax } ) => {
 				tax = r.data;
 			} );
 
-		await use( tax );
+		await use( tax! );
 
-		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax!.id }`, {
 			force: true,
 		} );
 	},

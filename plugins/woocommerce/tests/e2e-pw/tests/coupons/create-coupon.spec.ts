@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- No types available for this package yet
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -39,10 +40,14 @@ const couponData = {
 	},
 };
 
-const test = baseTest.extend( {
+interface Coupon {
+	id?: string;
+}
+
+const test = baseTest.extend< { coupon: Coupon } >( {
 	storageState: ADMIN_STATE_PATH,
 	coupon: async ( { restApi }, use ) => {
-		const coupon = {};
+		const coupon: Coupon = {};
 		await use( coupon );
 		await restApi.delete( `${ WC_API_PATH }/coupons/${ coupon.id }`, {
 			force: true,
@@ -62,23 +67,46 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				);
 				await page
 					.getByLabel( 'Coupon code' )
-					.fill( couponData[ couponType ].code );
+					.fill(
+						couponData[ couponType as keyof typeof couponData ].code
+					);
 				await page
 					.getByPlaceholder( 'Description (optional)' )
-					.fill( couponData[ couponType ].description );
+					.fill(
+						couponData[ couponType as keyof typeof couponData ]
+							.description
+					);
 				await page
 					.getByPlaceholder( '0' )
-					.fill( couponData[ couponType ].amount );
+					.fill(
+						couponData[ couponType as keyof typeof couponData ]
+							.amount
+					);
 
 				// set expiry date if it was provided
-				if ( couponData[ couponType ].expiryDate ) {
+				if (
+					'expiryDate' in
+					couponData[ couponType as keyof typeof couponData ]
+				) {
 					await page
 						.getByPlaceholder( 'yyyy-mm-dd' )
-						.fill( couponData[ couponType ].expiryDate );
+						.fill(
+							(
+								couponData[
+									couponType as keyof typeof couponData
+								] as { expiryDate: string }
+							).expiryDate
+						);
 				}
 
 				// be explicit about whether free shipping is allowed
-				if ( couponData[ couponType ].freeShipping ) {
+				if (
+					'freeShipping' in
+						couponData[ couponType as keyof typeof couponData ] &&
+					( couponData[ couponType as keyof typeof couponData ] as {
+						freeShipping: boolean;
+					} ).freeShipping
+				) {
 					await page.getByLabel( 'Allow free shipping' ).check();
 				} else {
 					await page.getByLabel( 'Allow free shipping' ).uncheck();
@@ -96,7 +124,8 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				await expect(
 					page.getByText( 'Coupon updated.' )
 				).toBeVisible();
-				coupon.id = page.url().match( /(?<=post=)\d+/ )[ 0 ];
+				const match = page.url().match( /(?<=post=)\d+/ );
+				coupon.id = match ? match[ 0 ] : undefined;
 				expect( coupon.id ).toBeDefined();
 			} );
 
@@ -105,40 +134,64 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				await page.goto( 'wp-admin/edit.php?post_type=shop_coupon' );
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType ].code,
+						name: couponData[ couponType as keyof typeof couponData ]
+							.code,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType ].description,
+						name: couponData[ couponType as keyof typeof couponData ]
+							.description,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType ].amount,
+						name: couponData[ couponType as keyof typeof couponData ]
+							.amount,
 						exact: true,
 					} )
 				).toBeVisible();
 			} );
 
 			// check expiry date if it was set
-			if ( couponData[ couponType ].expiryDate ) {
+			if (
+				'expiryDate' in
+				couponData[ couponType as keyof typeof couponData ]
+			) {
 				await test.step( 'verify coupon expiry date', async () => {
 					await page
-						.getByText( couponData[ couponType ].code )
+						.getByText(
+							couponData[ couponType as keyof typeof couponData ]
+								.code
+						)
 						.last()
 						.click();
 					await expect(
 						page.getByPlaceholder( 'yyyy-mm-dd' )
-					).toHaveValue( couponData[ couponType ].expiryDate );
+					).toHaveValue(
+						(
+							couponData[
+								couponType as keyof typeof couponData
+							] as { expiryDate: string }
+						).expiryDate
+					);
 				} );
 			}
 
 			// if it was a free shipping coupon check that
-			if ( couponData[ couponType ].freeShipping ) {
+			if (
+				'freeShipping' in
+					couponData[ couponType as keyof typeof couponData ] &&
+				( couponData[ couponType as keyof typeof couponData ] as {
+					freeShipping: boolean;
+				} ).freeShipping
+			) {
 				await test.step( 'verify free shipping', async () => {
 					await page
-						.getByText( couponData[ couponType ].code )
+						.getByText(
+							couponData[ couponType as keyof typeof couponData ]
+								.code
+						)
 						.last()
 						.click();
 					await expect(

@@ -1,13 +1,13 @@
 /**
  * Internal dependencies
  */
-const { test, expect } = require( '@playwright/test' );
-const { CUSTOMER_STATE_PATH } = require( '../../playwright.config' );
+import { test, expect } from '@playwright/test';
+import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 
 test.describe( 'Customer-role users are blocked from accessing the WP Dashboard.', () => {
 	test.use( { storageState: CUSTOMER_STATE_PATH } );
 
-	const dashboardScreens = {
+	const dashboardScreens: Record< string, string > = {
 		'WP Admin home': 'wp-admin',
 		'WP Admin profile page': 'wp-admin/profile.php',
 		'WP Admin using ajax query param': 'wp-admin?wc-ajax=1',

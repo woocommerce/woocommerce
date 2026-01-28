@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- No types available for this package yet
 import {
 	addAProductToCart,
 	WC_API_PATH,
@@ -36,7 +37,7 @@ const customerBilling = {
 	email: 'john.doe.merchant.test@example.com',
 };
 
-let productId, orderId, limitedCouponId;
+let productId: number, orderId: number, limitedCouponId: number;
 
 const test = baseTest.extend( {
 	page: async ( { page }, use ) => {
@@ -50,7 +51,7 @@ test.describe(
 	'Cart Block Applying Coupons',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		const couponBatchId = [];
+		const couponBatchId: number[] = [];
 
 		test.beforeAll( async ( { restApi } ) => {
 			// make sure the currency is USD
@@ -68,7 +69,7 @@ test.describe(
 					regular_price: singleProductFullPrice,
 					sale_price: singleProductSalePrice,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productId = response.data.id;
 				} );
 			// add coupons
@@ -76,11 +77,19 @@ test.describe(
 				.post( `${ WC_API_PATH }/coupons/batch`, {
 					create: coupons,
 				} )
-				.then( ( response ) => {
-					for ( let i = 0; i < response.data.create.length; i++ ) {
-						couponBatchId.push( response.data.create[ i ].id );
+				.then(
+					( response: {
+						data: { create: Array< { id: number } > };
+					} ) => {
+						for (
+							let i = 0;
+							i < response.data.create.length;
+							i++
+						) {
+							couponBatchId.push( response.data.create[ i ].id );
+						}
 					}
-				} );
+				);
 			// add limited coupon
 			await restApi
 				.post( `${ WC_API_PATH }/coupons`, {
@@ -90,7 +99,7 @@ test.describe(
 					usage_limit: 1,
 					usage_count: 1,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					limitedCouponId = response.data.id;
 				} );
 			// add order with applied limited coupon
@@ -104,7 +113,7 @@ test.describe(
 						},
 					],
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId = response.data.id;
 				} );
 		} );

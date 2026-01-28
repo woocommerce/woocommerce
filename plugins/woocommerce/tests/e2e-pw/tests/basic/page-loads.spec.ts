@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- @woocommerce/e2e-utils-playwright is not typed
 import {
 	WC_API_PATH,
 	WC_ADMIN_API_PATH,
@@ -13,8 +14,21 @@ import { test, expect } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
+interface SubPage {
+	name: string;
+	heading: string;
+	element: string;
+	text: string | RegExp;
+}
+
+interface WcPage {
+	name: string;
+	url: string;
+	subpages: SubPage[];
+}
+
 // a representation of the menu structure for WC
-const wcPages = [
+const wcPages: WcPage[] = [
 	{
 		name: 'WooCommerce',
 		url: 'wp-admin/admin.php?page=wc-admin',
@@ -187,7 +201,7 @@ const wcPages = [
 ];
 
 const product = getFakeProduct();
-let orderId;
+let orderId: number;
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -205,10 +219,10 @@ test.beforeAll( async ( { restApi } ) => {
 	// create a simple product
 	await restApi
 		.post( `${ WC_API_PATH }/products`, product )
-		.then( ( r ) => {
+		.then( ( r: { data: { id: number } } ) => {
 			product.id = r.data.id;
 		} )
-		.catch( ( e ) => {
+		.catch( ( e: { data?: unknown } ) => {
 			console.error(
 				`Failed to create product ${
 					e.data ? JSON.stringify( e.data ) : ''
@@ -227,10 +241,10 @@ test.beforeAll( async ( { restApi } ) => {
 				},
 			],
 		} )
-		.then( ( r ) => {
+		.then( ( r: { data: { id: number } } ) => {
 			orderId = r.data.id;
 		} )
-		.catch( ( e ) => {
+		.catch( ( e: { data?: unknown } ) => {
 			console.error(
 				`Failed to create order ${
 					e.data ? JSON.stringify( e.data ) : ''
@@ -245,7 +259,7 @@ test.afterAll( async ( { restApi } ) => {
 		.delete( `${ WC_API_PATH }/orders/${ orderId }`, {
 			force: true,
 		} )
-		.catch( ( e ) => {
+		.catch( ( e: { data?: unknown } ) => {
 			console.error(
 				`Failed to delete order ${
 					e.data ? JSON.stringify( e.data ) : ''
@@ -257,7 +271,7 @@ test.afterAll( async ( { restApi } ) => {
 		.delete( `${ WC_API_PATH }/products/${ product.id }`, {
 			force: true,
 		} )
-		.catch( ( e ) => {
+		.catch( ( e: { data?: unknown } ) => {
 			console.error(
 				`Failed to delete product ${
 					e.data ? JSON.stringify( e.data ) : ''

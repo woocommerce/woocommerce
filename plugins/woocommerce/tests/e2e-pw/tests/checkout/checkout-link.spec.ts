@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -14,9 +15,22 @@ import {
 } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 
-const test = baseTest.extend( {
+interface Product {
+	id: number;
+	name: string;
+}
+
+interface Coupon {
+	id: number;
+	code: string;
+}
+
+const test = baseTest.extend< {
+	products: Product[];
+	coupon: Coupon;
+} >( {
 	products: async ( { restApi }, use ) => {
-		const products = [];
+		const products: Product[] = [];
 
 		// Using dec: 0 to avoid small rounding issues
 		for ( let i = 0; i < 2; i++ ) {
@@ -25,7 +39,7 @@ const test = baseTest.extend( {
 					`${ WC_API_PATH }/products`,
 					getFakeProduct( { dec: 0 } )
 				)
-				.then( ( response ) => {
+				.then( ( response: { data: Product } ) => {
 					products.push( response.data );
 				} );
 		}
@@ -40,21 +54,21 @@ const test = baseTest.extend( {
 		}
 	},
 	coupon: async ( { restApi }, use ) => {
-		let coupon;
+		let coupon: Coupon;
 		await restApi
 			.post( `${ WC_API_PATH }/coupons`, {
 				code: 'E2ECOUPON',
 				discount_type: 'percent',
 				amount: '10',
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: Coupon } ) => {
 				coupon = response.data;
 			} );
 
-		await use( coupon );
+		await use( coupon! );
 
 		// Clean up coupon
-		await restApi.delete( `${ WC_API_PATH }/coupons/${ coupon.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/coupons/${ coupon!.id }`, {
 			force: true,
 		} );
 	},

@@ -1,51 +1,55 @@
-const { test, expect, request, Page, Locator } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const { setOption } = require( '../../utils/options' );
+import { test, expect, request } from '@playwright/test';
+import type {
+	Page,
+	Locator,
+	Browser,
+	Response,
+	APIResponse,
+} from '@playwright/test';
+import { admin } from '../../test-data/data';
+import { tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { setOption } from '../../utils/options';
 
-const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];
+const EXPECTED_SECTION_HEADERS: string[] = [
+	'Performance',
+	'Charts',
+	'Leaderboards',
+];
 
-/**
- * @type {number}
- */
-let userId;
-/**
- * @type {Locator}
- */
-let headings_sections;
-/**
- * @type {Locator}
- */
-let heading_performance;
-/**
- * @type {Locator}
- */
-let buttons_ellipsis;
-/**
- * @type {Locator}
- */
-let menuitem_moveUp;
-/**
- * @type {Locator}
- */
-let menuitem_moveDown;
-/**
- * @type {Page}
- */
-let page;
+let userId: number;
+let headings_sections: Locator;
+let heading_performance: Locator;
+let buttons_ellipsis: Locator;
+let menuitem_moveUp: Locator;
+let menuitem_moveDown: Locator;
+let page: Page;
 
-const base64String = Buffer.from(
+const base64String: string = Buffer.from(
 	`${ admin.username }:${ admin.password }`
 ).toString( 'base64' );
 
-const headers = {
+const headers: { Authorization: string; cookie: string } = {
 	Authorization: `Basic ${ base64String }`,
 	cookie: '',
 };
 
-const hidePerformanceSection = async () => {
-	const response =
+interface DashboardSection {
+	key: string;
+	isVisible: boolean;
+}
+
+interface WooCommerceMeta {
+	dashboard_sections: string;
+}
+
+interface UserResponse {
+	id: number;
+	woocommerce_meta: WooCommerceMeta;
+}
+
+const hidePerformanceSection = async (): Promise< void > => {
+	const response: APIResponse =
 		await test.step( `Send POST request to hide Performance section`, async () => {
 			const pageRequest = page.request;
 			const url = `./wp-json/wp/v2/users/${ userId }`;
@@ -72,18 +76,18 @@ const hidePerformanceSection = async () => {
 	} );
 
 	await test.step( `Inspect the response payload to verify that Performance section was successfully hidden`, async () => {
-		const { woocommerce_meta } = await response.json();
+		const { woocommerce_meta }: UserResponse = await response.json();
 		const { dashboard_sections } = woocommerce_meta;
-		const sections = JSON.parse( dashboard_sections );
+		const sections: DashboardSection[] = JSON.parse( dashboard_sections );
 		const performanceSection = sections.find(
 			( { key } ) => key === 'store-performance'
 		);
-		expect( performanceSection.isVisible ).toBeFalsy();
+		expect( performanceSection?.isVisible ).toBeFalsy();
 	} );
 };
 
-const resetSections = async () => {
-	const response =
+const resetSections = async (): Promise< void > => {
+	const response: APIResponse =
 		await test.step( `Send POST request to reset all sections`, async () => {
 			const pageRequest = page.request;
 			const url = `./wp-json/wp/v2/users/${ userId }`;
@@ -107,7 +111,7 @@ const resetSections = async () => {
 	} );
 
 	await test.step( `Verify that sections were reset`, async () => {
-		const { woocommerce_meta } = await response.json();
+		const { woocommerce_meta }: UserResponse = await response.json();
 		const { dashboard_sections } = woocommerce_meta;
 
 		expect( dashboard_sections ).toHaveLength( 0 );
@@ -120,7 +124,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { browser } ) => {
+		test.beforeAll( async ( { browser }: { browser: Browser } ) => {
 			page = await browser.newPage();
 
 			await test.step( `Send GET request to get the current user id`, async () => {
@@ -135,7 +139,7 @@ test.describe(
 						headers,
 					}
 				);
-				const { id } = await response.json();
+				const { id }: { id: number } = await response.json();
 
 				userId = id;
 			} );
@@ -217,10 +221,10 @@ test.describe(
 				} );
 
 				test( 'should allow a user to move a section down', async () => {
-					const firstSection = await headings_sections
+					const firstSection: string = await headings_sections
 						.first()
 						.innerText();
-					const secondSection = await headings_sections
+					const secondSection: string = await headings_sections
 						.nth( 1 )
 						.innerText();
 
@@ -228,7 +232,7 @@ test.describe(
 						await buttons_ellipsis.first().click();
 						await menuitem_moveDown.click();
 						await page.waitForResponse(
-							( response ) =>
+							( response: Response ) =>
 								response.url().includes( '/users' ) &&
 								response.ok()
 						);
@@ -246,10 +250,10 @@ test.describe(
 				} );
 
 				test( 'should allow a user to move a section up', async () => {
-					const firstSection = await headings_sections
+					const firstSection: string = await headings_sections
 						.first()
 						.innerText();
-					const secondSection = await headings_sections
+					const secondSection: string = await headings_sections
 						.nth( 1 )
 						.innerText();
 
@@ -257,7 +261,7 @@ test.describe(
 						await buttons_ellipsis.nth( 1 ).click();
 						await menuitem_moveUp.click();
 						await page.waitForResponse(
-							( response ) =>
+							( response: Response ) =>
 								response.url().includes( '/users' ) &&
 								response.ok()
 						);
@@ -286,7 +290,7 @@ test.describe(
 					.getByRole( 'menuitem', { name: 'Remove section' } )
 					.click();
 				await page.waitForResponse(
-					( response ) =>
+					( response: Response ) =>
 						response.url().includes( '/users' ) && response.ok()
 				);
 			} );
@@ -298,14 +302,14 @@ test.describe(
 		} );
 
 		test( 'should allow a user to add a section back in', async () => {
-			await hidePerformanceSection( page );
+			await hidePerformanceSection();
 			await page.reload();
 
 			await test.step( `Add the Performance section back in.`, async () => {
 				await page.getByTitle( 'Add more sections' ).click();
 				await page.getByTitle( 'Add Performance section' ).click();
 				await page.waitForResponse(
-					( response ) =>
+					( response: Response ) =>
 						response.url().includes( '/users' ) && response.ok()
 				);
 			} );
@@ -323,7 +327,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { browser } ) => {
+		test.beforeAll( async ( { browser }: { browser: Browser } ) => {
 			page = await browser.newPage();
 		} );
 
@@ -341,6 +345,8 @@ test.describe(
 
 		test( 'should show manual update trigger in scheduled mode', async ( {
 			baseURL,
+		}: {
+			baseURL: string;
 		} ) => {
 			// Set to scheduled mode
 			await setOption(
@@ -363,7 +369,7 @@ test.describe(
 
 			// Click "Update now" button
 			const responsePromise = page.waitForResponse(
-				( response ) =>
+				( response: Response ) =>
 					response
 						.url()
 						.includes( '/wc-analytics/imports/trigger' ) &&
@@ -385,6 +391,8 @@ test.describe(
 
 		test( 'should hide manual update trigger in immediate mode', async ( {
 			baseURL,
+		}: {
+			baseURL: string;
 		} ) => {
 			// Set to immediate mode
 			await setOption(

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- No types available for this package yet
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -86,10 +87,24 @@ const couponData = {
 	},
 };
 
-const test = baseTest.extend( {
+interface Coupon {
+	id?: string;
+}
+
+interface Product {
+	id?: number;
+	name?: string;
+}
+
+interface Brand {
+	id?: number;
+	name?: string;
+}
+
+const test = baseTest.extend< { coupon: Coupon; product: Product; brand: Brand } >( {
 	storageState: ADMIN_STATE_PATH,
 	coupon: async ( { restApi }, use ) => {
-		const coupon = {};
+		const coupon: Coupon = {};
 		await use( coupon );
 		await restApi.delete( `${ WC_API_PATH }/coupons/${ coupon.id }`, {
 			force: true,
@@ -97,7 +112,7 @@ const test = baseTest.extend( {
 	},
 
 	product: async ( { restApi }, use ) => {
-		let product = {};
+		let product: Product = {};
 		const productName = `Product ${ Date.now() }`;
 
 		await restApi
@@ -105,7 +120,7 @@ const test = baseTest.extend( {
 				name: productName,
 				regular_price: '100',
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number; name: string } } ) => {
 				product = response.data;
 			} );
 
@@ -118,13 +133,13 @@ const test = baseTest.extend( {
 	},
 
 	brand: async ( { restApi }, use ) => {
-		let brand = {};
+		let brand: Brand = {};
 
 		await restApi
 			.post( `${ WC_API_PATH }/products/brands`, {
 				name: couponData.excludeProductBrands.excludeProductBrands[ 0 ],
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number; name: string } } ) => {
 				brand = response.data;
 			} );
 
@@ -153,13 +168,21 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 				);
 				await page
 					.getByLabel( 'Coupon code' )
-					.fill( couponData[ couponType ].code );
+					.fill(
+						couponData[ couponType as keyof typeof couponData ].code
+					);
 				await page
 					.getByPlaceholder( 'Description (optional)' )
-					.fill( couponData[ couponType ].description );
+					.fill(
+						couponData[ couponType as keyof typeof couponData ]
+							.description
+					);
 				await page
 					.getByPlaceholder( '0' )
-					.fill( couponData[ couponType ].amount );
+					.fill(
+						couponData[ couponType as keyof typeof couponData ]
+							.amount
+					);
 				await expect( page.getByText( 'Move to Trash' ) ).toBeVisible();
 			} );
 
@@ -174,7 +197,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await page
 						.getByPlaceholder( 'No minimum' )
-						.fill( couponData[ couponType ].minSpend );
+						.fill(
+							(
+								couponData[
+									couponType as keyof typeof couponData
+								] as { minSpend: string }
+							).minSpend
+						);
 				} );
 			}
 			// set maximum spend
@@ -187,7 +216,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await page
 						.getByPlaceholder( 'No maximum' )
-						.fill( couponData[ couponType ].maxSpend );
+						.fill(
+							(
+								couponData[
+									couponType as keyof typeof couponData
+								] as { maxSpend: string }
+							).maxSpend
+						);
 				} );
 			}
 			// set individual use
@@ -255,7 +290,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await page
 						.getByPlaceholder( 'No brands' )
-						.pressSequentially( brand.name );
+						.pressSequentially( brand.name! );
 					await page
 						.getByRole( 'option', {
 							name: brand.name,
@@ -274,7 +309,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 					await page
 						.getByPlaceholder( 'Search for a product…' )
 						.first()
-						.pressSequentially( product.name );
+						.pressSequentially( product.name! );
 					await page
 						.getByRole( 'option', { name: product.name } )
 						.click();
@@ -291,7 +326,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 					await page
 						.getByPlaceholder( 'Search for a product…' )
 						.last()
-						.pressSequentially( product.name );
+						.pressSequentially( product.name! );
 					await page
 						.getByRole( 'option', { name: product.name } )
 						.click();
@@ -307,7 +342,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await page
 						.getByPlaceholder( 'No restrictions' )
-						.fill( couponData[ couponType ].allowedEmails[ 0 ] );
+						.fill(
+							(
+								couponData[
+									couponType as keyof typeof couponData
+								] as { allowedEmails: string[] }
+							).allowedEmails[ 0 ]
+						);
 				} );
 			}
 			// set usage limit
@@ -318,7 +359,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await page
 						.getByLabel( 'Usage limit per coupon' )
-						.fill( couponData[ couponType ].usageLimit );
+						.fill(
+							(
+								couponData[
+									couponType as keyof typeof couponData
+								] as { usageLimit: string }
+							).usageLimit
+						);
 				} );
 			}
 			// set usage limit per user
@@ -329,7 +376,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await page
 						.getByLabel( 'Usage limit per user' )
-						.fill( couponData[ couponType ].usageLimitPerUser );
+						.fill(
+							(
+								couponData[
+									couponType as keyof typeof couponData
+								] as { usageLimitPerUser: string }
+							).usageLimitPerUser
+						);
 				} );
 			}
 
@@ -341,7 +394,8 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 				await expect(
 					page.getByText( 'Coupon updated.' )
 				).toBeVisible();
-				coupon.id = page.url().match( /(?<=post=)\d+/ )[ 0 ];
+				const match = page.url().match( /(?<=post=)\d+/ );
+				coupon.id = match ? match[ 0 ] : undefined;
 				expect( coupon.id ).toBeDefined();
 			} );
 
@@ -350,24 +404,28 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 				await page.goto( 'wp-admin/edit.php?post_type=shop_coupon' );
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType ].code,
+						name: couponData[ couponType as keyof typeof couponData ]
+							.code,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType ].description,
+						name: couponData[ couponType as keyof typeof couponData ]
+							.description,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType ].amount,
+						name: couponData[ couponType as keyof typeof couponData ]
+							.amount,
 						exact: true,
 					} )
 				).toBeVisible();
 
 				await page
 					.getByRole( 'link', {
-						name: couponData[ couponType ].code,
+						name: couponData[ couponType as keyof typeof couponData ]
+							.code,
 					} )
 					.first()
 					.click();
@@ -384,7 +442,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await expect(
 						page.getByPlaceholder( 'No minimum' )
-					).toHaveValue( couponData[ couponType ].minSpend );
+					).toHaveValue(
+						(
+							couponData[
+								couponType as keyof typeof couponData
+							] as { minSpend: string }
+						).minSpend
+					);
 				} );
 			}
 
@@ -398,7 +462,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await expect(
 						page.getByPlaceholder( 'No maximum' )
-					).toHaveValue( couponData[ couponType ].maxSpend );
+					).toHaveValue(
+						(
+							couponData[
+								couponType as keyof typeof couponData
+							] as { maxSpend: string }
+						).maxSpend
+					);
 				} );
 			}
 
@@ -501,7 +571,11 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 					await expect(
 						page.getByPlaceholder( 'No restrictions' )
 					).toHaveValue(
-						couponData[ couponType ].allowedEmails[ 0 ]
+						(
+							couponData[
+								couponType as keyof typeof couponData
+							] as { allowedEmails: string[] }
+						).allowedEmails[ 0 ]
 					);
 				} );
 			}
@@ -514,7 +588,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await expect(
 						page.getByLabel( 'Usage limit per coupon' )
-					).toHaveValue( couponData[ couponType ].usageLimit );
+					).toHaveValue(
+						(
+							couponData[
+								couponType as keyof typeof couponData
+							] as { usageLimit: string }
+						).usageLimit
+					);
 				} );
 			}
 
@@ -526,7 +606,13 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 						.click();
 					await expect(
 						page.getByLabel( 'Usage limit per user' )
-					).toHaveValue( couponData[ couponType ].usageLimitPerUser );
+					).toHaveValue(
+						(
+							couponData[
+								couponType as keyof typeof couponData
+							] as { usageLimitPerUser: string }
+						).usageLimitPerUser
+					);
 				} );
 			}
 		} );

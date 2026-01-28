@@ -1,6 +1,6 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+import { test, expect } from '@playwright/test';
+import { tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe( 'WooCommerce Home', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );

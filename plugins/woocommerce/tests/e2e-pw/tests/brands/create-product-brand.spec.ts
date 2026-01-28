@@ -1,5 +1,12 @@
-const { test, expect } = require( '@playwright/test' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -21,11 +28,11 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	};
 
 	const createBrandIfNotExist = async (
-		name,
-		slug,
-		parentBrand,
-		description,
-		thumbnailFileName
+		name: string,
+		slug: string,
+		parentBrand: string,
+		description: string,
+		thumbnailFileName: string
 	) => {
 		// Create "WooCommerce" brand if it does not exist.
 		const cellVisible = await page
@@ -78,10 +85,22 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 * After a brand is edited, you will be redirected to the Brands page.
 	 */
 	const editBrand = async (
-		currentName,
-		{ name, slug, parentBrand, description, thumbnailFileName }
+		currentName: string,
+		{
+			name,
+			slug,
+			parentBrand,
+			description,
+			thumbnailFileName,
+		}: {
+			name: string;
+			slug: string;
+			parentBrand: string;
+			description: string;
+			thumbnailFileName: string;
+		}
 	) => {
-		await page.getByLabel( `“${ currentName }” (Edit)` ).click();
+		await page.getByLabel( `"${ currentName }" (Edit)` ).click();
 		await page.getByLabel( 'Name' ).fill( name );
 		await page.getByLabel( 'Slug' ).fill( slug );
 		await page
@@ -120,8 +139,8 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 *
 	 * After a brand is deleted, you will be redirected to the Brands page.
 	 */
-	const deleteBrand = async ( name ) => {
-		await page.getByLabel( `“${ name }” (Edit)` ).click();
+	const deleteBrand = async ( name: string ) => {
+		await page.getByLabel( `"${ name }" (Edit)` ).click();
 
 		// After clicking the "Delete" button, there will be a confirmation dialog.
 		page.once( 'dialog', ( dialog ) => {

@@ -1,12 +1,10 @@
-const { test, expect, request, Page } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { setOption, deleteOption } = require( '../../utils/options' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+import { test, expect, request } from '@playwright/test';
+import type { Page, Browser } from '@playwright/test';
+import { tags } from '../../fixtures/fixtures';
+import { setOption, deleteOption } from '../../utils/options';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-/**
- * @type {Page}
- */
-let page;
+let page: Page;
 
 test.describe(
 	'Analytics Settings - Scheduled Import',
@@ -14,7 +12,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeAll( async ( { browser } ) => {
+		test.beforeAll( async ( { browser }: { browser: Browser } ) => {
 			page = await browser.newPage();
 		} );
 
@@ -32,6 +30,8 @@ test.describe(
 
 		test( 'should show Immediate mode by default when option is not set', async ( {
 			baseURL,
+		}: {
+			baseURL: string;
 		} ) => {
 			// Delete the option to simulate a new installation
 			await deleteOption(
@@ -53,6 +53,8 @@ test.describe(
 
 		test( 'should switch from scheduled to immediate mode with confirmation modal - cancel flow', async ( {
 			baseURL,
+		}: {
+			baseURL: string;
 		} ) => {
 			// Set to scheduled mode
 			await setOption(
@@ -102,6 +104,8 @@ test.describe(
 
 		test( 'should switch from scheduled to immediate mode with confirmation modal - confirm flow', async ( {
 			baseURL,
+		}: {
+			baseURL: string;
 		} ) => {
 			// Set to scheduled mode
 			await setOption(
@@ -146,6 +150,8 @@ test.describe(
 
 		test( 'should switch from immediate to scheduled mode without confirmation modal', async ( {
 			baseURL,
+		}: {
+			baseURL: string;
 		} ) => {
 			// Set to immediate mode
 			await setOption(

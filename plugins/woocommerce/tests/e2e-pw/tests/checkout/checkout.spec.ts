@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+// @ts-expect-error -- @woocommerce/e2e-utils-playwright is not typed
 import {
 	addAProductToCart,
 	fillBillingCheckoutBlocks,
@@ -8,6 +9,7 @@ import {
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
 import { faker } from '@faker-js/faker';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -23,17 +25,65 @@ import { updateIfNeeded, resetValue } from '../../utils/settings';
 
 //todo handle other countries and states than the default (US, CA) when filling the addresses
 
+interface Product {
+	id: number;
+	name: string;
+	price: string;
+}
+
+interface Tax {
+	id: number;
+	rate: string;
+}
+
+interface Customer {
+	id: number;
+	email: string;
+	password: string;
+	first_name: string;
+	last_name: string;
+	billing: {
+		first_name: string;
+		last_name: string;
+		address_1: string;
+		city: string;
+		postcode: string;
+		phone: string;
+		email: string;
+	};
+	shipping: {
+		country: string;
+		state: string;
+		city: string;
+	};
+}
+
+interface BillingData {
+	first_name: string;
+	last_name: string;
+	address_1: string;
+	city: string;
+	postcode: string;
+	phone: string;
+	email: string;
+}
+
 const checkoutPages = [
 	{ name: 'blocks checkout', slug: 'checkout' },
 	CLASSIC_CHECKOUT_PAGE,
 ];
 
 /* region helpers */
-function isClassicCheckout( page ) {
+function isClassicCheckout( page: Page ): boolean {
 	return page.url().includes( CLASSIC_CHECKOUT_PAGE.slug );
 }
 
-async function checkOrderDetails( page, product, qty, tax ) {
+async function checkOrderDetails(
+	page: Page,
+	product: Product,
+	qty: number,
+	tax: Tax
+) {
 	const expectedTotalPrice = (
 		parseFloat( product.price ) *
 		qty *
@@ -68,18 +118,18 @@ async function checkOrderDetails( page, product, qty, tax ) {
 }
 
 async function addProductToCartAndProceedToCheckout(
-	pageSlug,
-	page,
-	product,
-	qty,
-	tax
+	pageSlug: string,
+	page: Page,
+	product: Product,
+	qty: number,
+	tax: Tax
 ) {
 	await addAProductToCart( page, product.id, qty );
 	await page.goto( pageSlug );
 	await checkOrderDetails( page, product, qty, tax );
 }
 
-async function placeOrder( page ) {
+async function placeOrder( page: Page ) {
 	if ( ! isClassicCheckout( page ) ) {
 		await page.getByLabel( 'Add a note to your order' ).check();
 		// this helps with flakiness on clicking the Place order button
@@ -95,7 +145,11 @@ async function placeOrder( page ) {
 	).toBeVisible();
 }
 
-async function fillBillingDetails( page, data, createAccount ) {
+async function fillBillingDetails(
+	page: Page,
+	data: BillingData,
+	createAccount: boolean
+) {
 	if ( isClassicCheckout( page ) ) {
 		await page
 			.getByRole( 'textbox', { name: 'First name' } )
@@ -146,7 +200,11 @@ async function fillBillingDetails( page, data, createAccount ) {
 /* endregion */
 
 /* region fixtures */
-const test = baseTest.extend( {
+const test = baseTest.extend< {
+	product: Product;
+	tax: Tax;
+	customer: Customer;
+} >( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCheckoutPage();
 
@@ -219,23 +277,23 @@ const test = baseTest.extend( {
 		}
 	},
 	product: async ( { restApi }, use ) => {
-		let product;
+		let product: Product;
 
 		// Using dec: 0 to avoid small rounding issues
 		await restApi
 			.post( `${ WC_API_PATH }/products`, getFakeProduct( { dec: 0 } ) )
-			.then( ( response ) => {
+			.then( ( response: { data: Product } ) => {
 				product = response.data;
 			} );
 
-		await use( product );
+		await use( product! );
 
 		// await restApi.delete( `${ WC_API_PATH }/products/${ product.id }`, {
 		// 	force: true,
 		// } );
 	},
 	tax: async ( { restApi }, use ) => {
-		let tax;
+		let tax: Tax;
 		await restApi
 			.post( `${ WC_API_PATH }/taxes`, {
 				country: 'US',
@@ -246,38 +304,38 @@ const test = baseTest.extend( {
 				name: 'US Tax',
 				shipping: false,
 			} )
-			.then( ( r ) => {
+			.then( ( r: { data: Tax } ) => {
 				tax = r.data;
 			} );
 
-		await use( tax );
+		await use( tax! );
 
-		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax!.id }`, {
 			force: true,
 		} );
 	},
 	customer: async ( { restApi }, use ) => {
 		const customerData = getFakeCustomer();
-		let customer;
+		let customer: Customer;
 
 		await restApi
 			.post( `${ WC_API_PATH }/customers`, customerData )
-			.then( ( response ) => {
+			.then( ( response: { data: Customer } ) => {
 				customer = response.data;
 				customer.password = customerData.password;
 			} );
 
 		// add a shipping zone and method for the customer
-		let shippingZoneId;
+		let shippingZoneId: number;
 		await restApi
 			.post( `${ WC_API_PATH }/shipping/zones`, {
 				name: `Free Shipping ${ customerData.shipping.city }`,
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number } } ) => {
 				shippingZoneId = response.data.id;
 			} );
 		await restApi.put(
-			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/locations`,
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId! }/locations`,
 			[
 				{
 					code: `${ customerData.shipping.country }:${ customerData.shipping.state }`,
@@ -286,19 +344,19 @@ const test = baseTest.extend( {
 			]
 		);
 		await restApi.post(
-			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }/methods`,
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId! }/methods`,
 			{
 				method_id: 'free_shipping',
 			}
 		);
 
-		await use( customer );
+		await use( customer! );
 
-		await restApi.delete( `${ WC_API_PATH }/customers/${ customer.id }`, {
+		await restApi.delete( `${ WC_API_PATH }/customers/${ customer!.id }`, {
 			force: true,
 		} );
 		await restApi.delete(
-			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId }`,
+			`${ WC_API_PATH }/shipping/zones/${ shippingZoneId! }`,
 			{
 				force: true,
 			}
@@ -471,7 +529,7 @@ checkoutPages.forEach( ( { name, slug } ) => {
 				tax
 			);
 
-			const billingAddress = {
+			const billingAddress: BillingData = {
 				first_name: customer.first_name,
 				last_name: customer.last_name,
 				address_1: faker.location.streetAddress(),
