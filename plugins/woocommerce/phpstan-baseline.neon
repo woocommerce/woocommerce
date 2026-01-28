@@ -57310,12 +57310,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelector.php
 
 		-
-			message: '#^Anonymous function has an unused use \$attribute_terms\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelectorAttribute.php
-
-		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 4

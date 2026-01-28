@@ -331,13 +331,13 @@ jobs:
                 const conflicts = JSON.parse(process.env.CONFLICT_STATUS || '[]');
                 // Map status codes to human-readable descriptions
                 const conflictTypeMap = {
-                  'DD': 'deleted by both',
-                  'UA': 'added by cherry-pick, does not exist in target branch',
-                  'UD': 'deleted by cherry-pick, modified in target branch',
-                  'AU': 'modified by cherry-pick, added in target branch',
-                  'DU': 'modified by cherry-pick, deleted in target branch',
-                  'AA': 'added by both with different content',
-                  'UU': 'modified by both'
+                  'DD': `deleted in both this backport and \`${targetBranch}\``,
+                  'UA': `new file in this backport, does not exist in \`${targetBranch}\``,
+                  'UD': `deleted in this backport, modified in \`${targetBranch}\``,
+                  'AU': `modified in this backport, added in \`${targetBranch}\``,
+                  'DU': `modified in this backport, deleted in \`${targetBranch}\``,
+                  'AA': `added in both this backport and \`${targetBranch}\` with different content`,
+                  'UU': `modified in both this backport and \`${targetBranch}\``
                 };
                 prBody += `>\n`; // Empty blockquote line for spacing
                 prBody += `> **Conflicted Files:**\n`;
