@@ -31,7 +31,6 @@ async function getTaxonomiesMissingParents(
 				.getEntityRecords( 'taxonomy', taxonomyName, {
 					include: missingParentIds,
 				} )
-				// @ts-expect-error TODO react-18-upgrade: getEntityRecords type is not correctly typed yet
 				.then( ( parentTaxonomies: Taxonomy[] ) => {
 					return getTaxonomiesMissingParents(
 						[ ...parentTaxonomies, ...taxonomies ],
@@ -61,7 +60,6 @@ const useTaxonomySearch = (
 		setIsSearching( true );
 		let taxonomies: Taxonomy[] = [];
 		try {
-			// @ts-expect-error TODO react-18-upgrade: getEntityRecords type is not correctly typed yet
 			taxonomies = await resolveSelect( 'core' ).getEntityRecords(
 				'taxonomy',
 				taxonomyName,

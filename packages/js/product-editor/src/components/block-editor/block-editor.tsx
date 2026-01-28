@@ -108,7 +108,6 @@ export function BlockEditor( {
 	}, [] );
 
 	useEffect( () => {
-		// @ts-expect-error Type definitions are missing
 		const { registerShortcut } = dispatch( keyboardShortcutsStore );
 		if ( registerShortcut ) {
 			registerShortcut( {
@@ -282,7 +281,7 @@ export function BlockEditor( {
 
 			const blockInstances = synchronizeBlocksWithTemplate(
 				[],
-				// @ts-expect-error Type definitions are missing
+				// @ts-expect-error layoutTemplate is not typed - it's a custom entity from useEntityRecord
 				layoutTemplate.blockTemplates
 			);
 
@@ -294,7 +293,6 @@ export function BlockEditor( {
 
 			onChange( editorTemplate, {} );
 
-			// @ts-expect-error Type definitions are missing
 			dispatch( 'core/editor' ).updateEditorSettings( {
 				...settings,
 				productTemplate,

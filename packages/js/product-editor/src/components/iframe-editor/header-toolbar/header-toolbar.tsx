@@ -67,7 +67,8 @@ export function HeaderToolbar( {
 				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore These selectors are available in the block data store.
 				getBlockSelectionEnd,
-				// @ts-expect-error These selectors are available in the block data store.
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-ignore These selectors are available in the block data store.
 				getBlockSelectionStart,
 			} = select( blockEditorStore );
 			const { get: getPreference } = select( preferencesStore );

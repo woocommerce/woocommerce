@@ -27,7 +27,6 @@ export function BlockFill( {
 			const { getBlockParentsByBlockName } =
 				select( 'core/block-editor' );
 
-			// @ts-expect-error Selector is not typed
 			const [ closestParentClientId ] = getBlockParentsByBlockName(
 				clientId,
 				slotContainerBlockName,

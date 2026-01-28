@@ -47,7 +47,6 @@ export function VariationSwitcherFooter( {
 				return {
 					previousVariation:
 						previousVariationId !== null &&
-						// @ts-expect-error Selector is not typed
 						getEntityRecord(
 							'postType',
 							'product_variation',
@@ -55,7 +54,6 @@ export function VariationSwitcherFooter( {
 						),
 					nextVariation:
 						nextVariationId !== null &&
-						// @ts-expect-error Selector is not typed
 						getEntityRecord(
 							'postType',
 							'product_variation',

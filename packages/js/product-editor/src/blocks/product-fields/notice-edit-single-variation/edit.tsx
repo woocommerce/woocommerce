@@ -40,13 +40,11 @@ export function Edit( {
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( coreStore );
 
-			// @ts-expect-error getEditedEntityRecord of coreStore is not typed
 			const { name }: Product = getEditedEntityRecord(
 				'postType',
 				'product',
 				parentId
 			);
-			// @ts-expect-error hasFinishedResolution of coreStore is not typed
 			const isResolutionFinished = ! hasFinishedResolution(
 				'getEditedEntityRecord',
 				[ 'postType', 'product', parentId ]

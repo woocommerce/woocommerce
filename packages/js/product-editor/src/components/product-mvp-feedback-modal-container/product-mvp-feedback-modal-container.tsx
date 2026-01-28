@@ -24,7 +24,6 @@ export const ProductMVPFeedbackModalContainer = ( {
 	const { isProductMVPModalVisible } = useSelect( ( select ) => {
 		const { isProductMVPFeedbackModalVisible } = select( STORE_KEY );
 		return {
-			// @ts-expect-error Selector is not typed
 			isProductMVPModalVisible: isProductMVPFeedbackModalVisible(),
 		};
 	}, [] );

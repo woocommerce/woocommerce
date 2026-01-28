@@ -1,11 +1,13 @@
 {
-	"extends": "../tsconfig-cjs",
+	"extends": "@woocommerce/internal-ts-config/tsconfig-cjs.json",
 	"compilerOptions": {
+		"rootDir": "src",
 		"outDir": "build",
 		"noCheck": false,
 		"resolveJsonModule": true,
 		"typeRoots": [
 			"./typings",
+			"./node_modules/@woocommerce/internal-ts-config/typings",
 			"./node_modules/@types"
 		]
 	},

@@ -165,7 +165,6 @@ export function IframeEditor( {
 		useDispatch( blockEditorStore );
 
 	const parentEditorSettings = useSelect( ( select ) => {
-		// @ts-expect-error Selector is not typed
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 

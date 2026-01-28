@@ -67,8 +67,7 @@ export function Header( {
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
 			return productId !== -1
-				? // @ts-expect-error getEntityRecord is not typed correctly.
-				  getEntityRecord( 'postType', productType, productId )
+				? getEntityRecord( 'postType', productType, productId )
 				: null;
 		},
 		[ productType, productId ]
