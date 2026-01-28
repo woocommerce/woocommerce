@@ -64,11 +64,13 @@ const MultiProductPicker = ( props: MultiProductPickerProps ) => {
 							} );
 						} }
 					/>
-					{ hasSelectedProducts && (
-						<Button variant="primary" onClick={ onDone }>
-							{ __( 'Done', 'woocommerce' ) }
-						</Button>
-					) }
+					<Button
+						variant="primary"
+						onClick={ onDone }
+						disabled={ ! hasSelectedProducts }
+					>
+						{ __( 'Done', 'woocommerce' ) }
+					</Button>
 				</div>
 			</Placeholder>
 		</div>
