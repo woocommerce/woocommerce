@@ -7,32 +7,19 @@
  */
 
 declare module '@wordpress/data' {
-	/**
-	 * ============================================================================
-	 * RE-EXPORT RUNTIME VALUES (functions, objects, components)
-	 * ============================================================================
-	 * These import the actual runtime implementations from @wordpress/data
-	 */
-
-	// Components
 	export { default as withSelect } from '@wordpress/data/build-types/components/with-select';
 	export { default as withDispatch } from '@wordpress/data/build-types/components/with-dispatch';
 	export { default as withRegistry } from '@wordpress/data/build-types/components/with-registry';
-	// useDispatch and useSelect overridden below
+
 	export { RegistryProvider, RegistryConsumer, useRegistry } from '@wordpress/data/build-types/components/registry-provider';
 	export { AsyncModeProvider } from '@wordpress/data/build-types/components/async-mode-provider';
 
-	// Core functions
 	export { createRegistry } from '@wordpress/data/build-types/registry';
 	export { createSelector } from '@wordpress/data/build-types/create-selector';
 	export { controls } from '@wordpress/data/build-types/controls';
 	export { default as createReduxStore } from '@wordpress/data/build-types/redux-store';
 	export { createRegistrySelector, createRegistryControl } from '@wordpress/data/build-types/factory';
 
-	// Store interaction - we'll define custom type signatures below
-	// (Runtime comes from @wordpress/data, but we override the types)
-
-	// Other exports
 	export const combineReducers: import('@wordpress/data/build-types/types').combineReducers;
 	export const subscribe: Function;
 	export const registerGenericStore: Function;
@@ -42,18 +29,27 @@ declare module '@wordpress/data' {
 	export const plugins: any;
 
 	/**
-	 * ============================================================================
-	 * IMPORT BASE TYPES WE'LL EXTEND
-	 * ============================================================================
+	 * These are the base types we intend to extend.
 	 */
-
 	import type {
 		StoreDescriptor as OriginalStoreDescriptor,
 		AnyConfig as OriginalAnyConfig,
 		ReduxStoreConfig as OriginalReduxStoreConfig,
 		ActionCreator as OriginalActionCreator,
 		Selector as OriginalSelector,
+		SelectorWithCustomCurrySignature,
 	} from '@wordpress/data/build-types/types';
+
+	/**
+	 * CurriedState - removes the first argument (state) from a selector.
+	 * If the selector has a CurriedSignature property, use that instead.
+	 * (Copied from @wordpress/data since it's not exported)
+	 */
+	type CurriedState<F> = F extends SelectorWithCustomCurrySignature
+		? F['CurriedSignature']
+		: F extends (state: any, ...args: infer P) => infer R
+			? (...args: P) => R
+			: F;
 
 	import * as MetadataActions from '@wordpress/data/build-types/redux-store/metadata/actions';
 	import * as MetadataSelectors from '@wordpress/data/build-types/redux-store/metadata/selectors';
@@ -64,16 +60,6 @@ declare module '@wordpress/data' {
 	type OriginalMapOf<T> = {
 		[name: string]: T;
 	};
-
-	type OriginalCurriedState<F> = F extends (state: any, ...args: infer P) => infer R
-		? (...args: P) => R
-		: F;
-
-	/**
-	 * ============================================================================
-	 * CUSTOM TYPE DEFINITIONS WITH GENERATOR SUPPORT
-	 * ============================================================================
-	 */
 
 	/**
 	 * Extract the return type from a Generator function.
@@ -202,7 +188,11 @@ declare module '@wordpress/data' {
 	 */
 	export type ActionCreatorsOf<Config extends AnyConfig> =
 		Config extends ReduxStoreConfig<any, infer ActionCreators, any>
-			? PromisifiedActionCreators<ActionCreators & TypedMetadataActions<Config>>
+			? keyof ActionCreators extends never
+				// If action creators are empty (e.g., store typed as `any`), fall back to `any`
+				// to allow module augmentations from @types/wordpress__* packages to work
+				? any
+				: PromisifiedActionCreators<ActionCreators & TypedMetadataActions<Config>>
 			: never;
 
 	/**
@@ -210,20 +200,72 @@ declare module '@wordpress/data' {
 	 */
 	export type ConfigOf<S> = S extends StoreDescriptor<infer C> ? C : never;
 
-	export type CurriedSelectorsOf<S> = S extends StoreDescriptor<ReduxStoreConfig<any, any, infer Selectors>> ? {
-		[key in keyof Selectors]: CurriedState<Selectors[key]>;
-	} & TypedMetadataSelectors<ConfigOf<S>> : never;
+	export type CurriedSelectorsOf<S> = S extends StoreDescriptor<ReduxStoreConfig<any, any, infer Selectors>>
+		? keyof Selectors extends never
+			// If selectors are empty (e.g., store typed as `any`), fall back to `any`
+			// to allow module augmentations from @types/wordpress__* packages to work
+			? any
+			: {
+				[key in keyof Selectors]: CurriedState<Selectors[key]>;
+			} & TypedMetadataSelectors<ConfigOf<S>> // Already curried, no CurriedState needed
+		: never;
 
 	/**
-	 * PromiseifySelectors for resolveSelect
+	 * Helper to remove first argument (state) from a selector
 	 */
-	export type PromiseifySelectors<Selectors> = {
-		[SelectorFunction in keyof Selectors]: Selectors[SelectorFunction] extends (
-			...args: infer SelectorArgs
-		) => infer SelectorReturnType
-			? (...args: SelectorArgs) => Promise<SelectorReturnType>
-			: never;
-	};
+	type RemoveFirstArgument<F> = F extends (state: any, ...args: infer P) => infer R
+		? (...args: P) => R
+		: F;
+
+	/**
+	 * Helper to curry and promisify a selector
+	 *
+	 * CURRENT STATE (Gutenberg < 22.4):
+	 * - Generic type parameters cannot be preserved through this transformation
+	 * - TypeScript's `infer` keyword loses generic type information
+	 * - Example: `getEntityRecord<Settings>()` becomes `Promise<unknown>`
+	 * - Workaround: Use type assertions like `await resolveSelect(store).getEntityRecord() as Settings`
+	 *
+	 * FUTURE STATE (Gutenberg >= 22.4 with PR #73973):
+	 * - Selectors will have a `PromiseCurriedSignature` property that preserves generics
+	 * - This type is ready to use it once available
+	 * - Example: `resolveSelect(store).getEntityRecord<Settings>('root', 'site')` → `Promise<Settings>`
+	 *
+	 * The type checks for PromiseCurriedSignature first, then falls back to transformation.
+	 */
+	type CurriedAndPromisifiedSelector<F> = F extends SelectorWithCustomCurrySignature & {
+		PromiseCurriedSignature: infer S;
+	}
+		? S // Use PromiseCurriedSignature directly - preserves generics!
+		: F extends SelectorWithCustomCurrySignature
+		? F['CurriedSignature'] extends (...args: any[]) => infer Ret
+			? (...args: Parameters<F['CurriedSignature']>) => Promise<Ret>
+			: never
+		: RemoveFirstArgument<F> extends (...args: any[]) => infer Ret
+		? (...args: Parameters<RemoveFirstArgument<F>>) => Promise<Ret>
+		: never;
+
+	/**
+	 * Helper to promisify metadata selectors while preserving optional parameters
+	 */
+	type PromisifyMetadataSelector<F> = F extends (...args: any[]) => infer Ret
+		? (...args: Parameters<F>) => Promise<Ret>
+		: never;
+
+	/**
+	 * Curried and promisified selectors for resolveSelect
+	 */
+	export type CurriedAndPromisifiedSelectorsOf<S> = S extends StoreDescriptor<ReduxStoreConfig<any, any, infer Selectors>>
+		? keyof Selectors extends never
+			// If selectors are empty (e.g., store typed as `any`), fall back to `any`
+			// to allow module augmentations from @types/wordpress__* packages to work
+			? any
+			: {
+				[key in keyof Selectors]: CurriedAndPromisifiedSelector<Selectors[key]>;
+			} & {
+				[key in keyof TypedMetadataSelectors<ConfigOf<S>>]: PromisifyMetadataSelector<TypedMetadataSelectors<ConfigOf<S>>[key]>;
+			}
+		: never;
 
 	/**
 	 * Override dispatch() to use our custom ActionCreatorsOf type
@@ -237,8 +279,7 @@ declare module '@wordpress/data' {
 	): any;
 
 	/**
-	 * Override select() to use our custom CurriedSelectorsOf type
-	 * Multiple overloads for better type inference in different contexts
+	 * Override select() to use our custom CurriedSelectorsOf type.
 	 */
 	export function select<T extends StoreDescriptor<AnyConfig>>(
 		storeDescriptor: T
@@ -248,12 +289,11 @@ declare module '@wordpress/data' {
 	): any;
 
 	/**
-	 * Override resolveSelect to use our custom types
-	 * Multiple overloads for better type inference in different contexts
+	 * Override resolveSelect to use our custom types.
 	 */
 	export function resolveSelect<T extends StoreDescriptor<AnyConfig>>(
 		storeDescriptor: T
-	): PromiseifySelectors<CurriedSelectorsOf<T>>;
+	): CurriedAndPromisifiedSelectorsOf<T>;
 	export function resolveSelect(
 		storeDescriptor: string
 	): any;
@@ -264,13 +304,7 @@ declare module '@wordpress/data' {
 	export const suspendSelect: typeof resolveSelect;
 
 	/**
-	 * ============================================================================
-	 * OVERRIDE REACT HOOKS
-	 * ============================================================================
-	 */
-
-	/**
-	 * Helper types for hooks
+	 * Helper types for React hooks.
 	 */
 	type DispatchFunction = <T extends StoreDescriptor<AnyConfig>>(
 		storeDescriptor: string | T
@@ -301,35 +335,27 @@ declare module '@wordpress/data' {
 			? CurriedSelectorsOf<F>
 			: never;
 
-	/**
-	 * Override useDispatch hook
-	 */
 	export function useDispatch<StoreNameOrDescriptor extends string | StoreDescriptor<any> | undefined>(
 		storeNameOrDescriptor?: StoreNameOrDescriptor
 	): UseDispatchReturn<StoreNameOrDescriptor>;
 
-	/**
-	 * Override useSelect hook
-	 */
 	export function useSelect<F extends MapSelect | StoreDescriptor<any>>(
 		mapSelect: F,
 		deps?: any[]
 	): UseSelectReturn<F>;
 
-	/**
-	 * useSuspenseSelect (similar to useSelect but suspends)
-	 */
 	export const useSuspenseSelect: typeof useSelect;
 
-	/**
-	 * Re-export types
-	 * We use type aliases to properly export the imported types
-	 */
 	export type StoreDescriptor<Config extends AnyConfig = AnyConfig> = OriginalStoreDescriptor<Config>;
 	export type AnyConfig = OriginalAnyConfig;
 	export type ReduxStoreConfig<State, ActionCreators extends MapOf<ActionCreator>, Selectors> = OriginalReduxStoreConfig<State, ActionCreators, Selectors>;
 	export type MapOf<T> = OriginalMapOf<T>;
 	export type ActionCreator = OriginalActionCreator;
-	export type CurriedState<F> = OriginalCurriedState<F>;
+	export { CurriedState };
 	export type Selector = OriginalSelector;
+
+	export interface SelectorWithCustomCurrySignature {
+		CurriedSignature: Function;
+		PromiseCurriedSignature?: Function;
+	}
 }
