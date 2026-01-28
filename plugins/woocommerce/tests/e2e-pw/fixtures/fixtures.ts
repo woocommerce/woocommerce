@@ -167,6 +167,11 @@ export const expect = baseExpect;
 export const request = baseRequest;
 
 /**
+ * Empty storage state for guest (unauthenticated) users.
+ */
+export const guestFile = { cookies: [], origins: [] };
+
+/**
  * Test tags for categorizing and filtering tests.
  */
 export const tags = {
