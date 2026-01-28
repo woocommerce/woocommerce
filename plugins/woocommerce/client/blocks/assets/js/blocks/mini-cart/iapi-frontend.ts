@@ -20,7 +20,7 @@ import type {
 /**
  * Internal dependencies
  */
-import setStyles from './utils/set-styles';
+import setStyles, { reapplyStyles } from './utils/set-styles';
 import {
 	formatPriceWithCurrency,
 	normalizeCurrencyResponse,
@@ -39,7 +39,14 @@ const {
 	checkoutUrl,
 	displayCartPriceIncludingTax,
 	buttonAriaLabelTemplate,
-} = getConfig( 'woocommerce/mini-cart' );
+	productCountVisibility,
+} = getConfig( 'woocommerce/mini-cart' ) as {
+	onCartClickBehaviour: string;
+	checkoutUrl: string;
+	displayCartPriceIncludingTax: boolean;
+	buttonAriaLabelTemplate: string;
+	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
+};
 const {
 	reduceQuantityLabel,
 	increaseQuantityLabel,
@@ -69,10 +76,6 @@ const scalePrice = ( {
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
-type MiniCartContext = {
-	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
-};
-
 type MiniCart = {
 	state: {
 		isOpen: boolean;
@@ -94,6 +97,7 @@ type MiniCart = {
 		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
 	};
 	callbacks: {
+		reapplyBadgeStyles: () => void;
 		setupJQueryEventBridge: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
@@ -216,8 +220,6 @@ store< MiniCart >(
 
 			get badgeIsVisible(): boolean {
 				const cartHasItems = miniCartState.totalItemsInCart > 0;
-				const { productCountVisibility } =
-					getContext< MiniCartContext >();
 
 				return (
 					productCountVisibility === 'always' ||
@@ -306,6 +308,16 @@ store< MiniCart >(
 		},
 
 		callbacks: {
+			/**
+			 * Re-applies badge styles by re-injecting the stylesheet. During iAPI
+			 * navigation, stylesheet rules may stop being applied correctly. This
+			 * callback forces the browser to re-process the stylesheet by removing
+			 * and re-adding it to the DOM.
+			 */
+			reapplyBadgeStyles() {
+				reapplyStyles();
+			},
+
 			*setupJQueryEventBridge() {
 				if ( ! ( 'jQuery' in window ) ) {
 					return;
