@@ -4,8 +4,6 @@
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
-import { EditorBlock } from '@woocommerce/types';
-import { addFilter } from '@wordpress/hooks';
 import { useIsEmailEditor } from '@woocommerce/email-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { CesFeedbackButton } from '@woocommerce/editor-components/ces-feedback-button';
@@ -21,7 +19,6 @@ import {
 import metadata from '../../block.json';
 import { useTracksLocation } from '../../tracks-utils';
 import {
-	ProductCollectionEditComponentProps,
 	ProductCollectionContentProps,
 	CoreFilterNames,
 	FilterName,
@@ -293,6 +290,3 @@ const ProductCollectionInspectorControls = (
 };
 
 export default ProductCollectionInspectorControls;
-
-const isProductCollection = ( blockName: string ) =>
-	blockName === metadata.name;
