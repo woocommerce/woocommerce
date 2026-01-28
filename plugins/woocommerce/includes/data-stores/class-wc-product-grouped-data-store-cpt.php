@@ -73,6 +73,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 		$product_id   = $product->get_id();
 		$child_prices = array();
 
+		/** @var int[] $child_ids */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 		$child_ids = $product->get_children( 'edit' );
 		if ( array() !== $child_ids ) {
 			_prime_post_caches( $child_ids );
