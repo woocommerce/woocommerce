@@ -9,7 +9,7 @@ import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type {
 	ProductResponseItem,
 	ProductResponseVariationsItem,
-} from '../../../types';
+} from '@woocommerce/types';
 
 /**
  * Normalize attribute name by stripping the 'attribute_' or 'attribute_pa_' prefix
