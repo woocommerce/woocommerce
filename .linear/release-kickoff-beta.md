@@ -13,7 +13,7 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 ### 1. Pre-build checks
 
 - [ ] Confirm [GitHub services](https://www.githubstatus.com/) are operational.
-- [ ] Verify no open issues or pull requests exist against the [{release_milestone} milestone]({repository_url}/milestone/{release_milestone_number}). Ping authors as needed to merge or close.
+- [ ] Verify no open issues or pull requests exist against the [{release_milestone} milestone]({repository_url}/issues?q=is:open+milestone:{release_milestone}). Ping authors as needed to merge or close.
 - [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"]({repository_url}/pulls?q=is:pr+label:%22cherry+pick+failed%22) that apply to this release that haven't been actioned.
 - [ ] Confirm the `Stable tag` value [in the readme.txt on the release branch]({repository_url}/blob/{release_branch}/plugins/woocommerce/readme.txt#L7) matches the one [on WordPress.org's `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).
 
@@ -21,9 +21,9 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 ### 2. Build the release package
 
 - [ ] Run workflow **[Release: Bump version number]({repository_url}/actions/workflows/release-bump-version.yml)**: enter `{release_branch}` as _Release branch_ and `{release_type}` as _Type of version bump to perform_.
-- [ ] Review and merge the PR that was generated against the release branch. Check the [{release_milestone} milestone]({repository_url}/milestone/{release_milestone_number}).
+- [ ] Review and merge the PR that was generated against the release branch. Check the [{release_milestone} milestone]({repository_url}/issues?q=is:open+milestone:{release_milestone}).
 - [ ] Run workflow **[Release: Compile changelog]({repository_url}/actions/workflows/release-compile-changelog.yml)**: enter `{release_main_version}` as _Version_ and leave _Release date_ empty, except when building the package ahead of schedule.
-- [ ] Review and merge the PRs that were generated: one against `trunk` and another one against the release branch. Both should be under the [{release_milestone} milestone]({repository_url}/milestone/{release_milestone_number}).
+- [ ] Review and merge the PRs that were generated: one against `trunk` and another one against the release branch. Both should be under the [{release_milestone} milestone]({repository_url}/issues?q=is:open+milestone:{release_milestone}).
 - [ ] Run workflow **[Release: Build ZIP file]({repository_url}/actions/workflows/release-build-zip-file.yml)** to build the asset and create the GitHub release: enter `{release_branch}` as _Release branch_ and check _Create GitHub release_.
 - [ ] Confirm that a draft `{release_version}` release [was created in the repository]({repository_url}/releases) with an attached `woocommerce.zip` asset.
 

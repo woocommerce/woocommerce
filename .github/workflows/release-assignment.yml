@@ -278,31 +278,6 @@ jobs:
               core.setOutput( 'exists', 'false' );
             }
 
-      - name: Get GitHub milestone number
-        if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
-        id: get-milestone-number
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const milestoneName = '${{ needs.check-upcoming-release-events.outputs.version }}.0';
-
-            const milestones = await github.rest.issues.listMilestones( {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'all',
-              per_page: 100
-            } );
-
-            const milestone = milestones.data.find( ( m ) => m.title === milestoneName );
-
-            if ( ! milestone ) {
-              core.setFailed( `Milestone "${ milestoneName }" not found` );
-              return;
-            }
-            console.log( `Found milestone "${ milestoneName }" with number: ${ milestone.number }` );
-            core.setOutput( 'milestone-number', milestone.number );
-
       - name: Get Linear data
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
         id: get-linear-data
@@ -401,7 +376,6 @@ jobs:
             const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
             const releaseMilestone = `${ releaseMainVersion }.0`;
             const releaseBranch = `release/${ releaseMainVersion }`;
-            const milestoneNumber = '${{ steps.get-milestone-number.outputs.milestone-number }}' || '';
 
             const featureFreezeDate = '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}';
 
@@ -410,7 +384,6 @@ jobs:
               '{repository_url}': repositoryUrl,
               '{release_main_version}': releaseMainVersion,
               '{release_milestone}': releaseMilestone,
-              '{release_milestone_number}': milestoneNumber,
               '{release_branch}': releaseBranch,
               '{release_version}': releaseMilestone,
               '{release_date}': '',

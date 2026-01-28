@@ -3,7 +3,7 @@
 This issue provides visibility on the progress of the release process of WooCommerce core **{release_main_version}**.
 
 - **Main version being released:** `{release_main_version}`
-- **Milestone:** [{release_milestone}]({repository_url}/milestone/{release_milestone_number})
+- **Milestone:** [{release_milestone}]({repository_url}/issues?q=is:open+milestone:{release_milestone})
 - **Release branch:** [`{release_branch}`]({repository_url}/tree/{release_branch})
 - **Release lead:** {lead_user} ({lead_team})
 - **Relevant dates:** ([release calendar](https://developer.woocommerce.com/release-calendar/))
