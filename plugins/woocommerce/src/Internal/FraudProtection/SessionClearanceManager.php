@@ -101,14 +101,37 @@ class SessionClearanceManager {
 	/**
 	 * Check if payment methods should be rendered.
 	 *
-	 * Payment methods should only be shown when the session is explicitly
-	 * ALLOWED. PENDING and BLOCKED sessions should not see payment methods.
+	 * Payment methods are shown when:
+	 * - Session is ALLOWED (verified safe)
+	 * - Session is PENDING on my-account pages (except add-payment-method)
+	 *
+	 * The second case ensures account navigation shows "Payment methods" link
+	 * and the payment-methods listing page shows saved cards, while the
+	 * add-payment-method page still requires verification before showing
+	 * the payment form.
 	 *
 	 * @return bool True if payment methods should be rendered, false otherwise.
 	 */
 	public function should_render_payment_methods(): bool {
 		$status = $this->get_session_status();
-		return self::STATUS_ALLOWED === $status;
+
+		// ALLOWED sessions can always see payment methods.
+		if ( self::STATUS_ALLOWED === $status ) {
+			return true;
+		}
+
+		// PENDING sessions can see payment methods on my-account pages,
+		// EXCEPT for add-payment-method which requires verification first.
+		// This ensures the "Payment methods" link shows in the account navigation,
+		// and saved payment methods are visible on the payment-methods listing page.
+		if ( self::STATUS_PENDING === $status
+			&& is_account_page()
+			&& ! is_wc_endpoint_url( 'add-payment-method' ) ) {
+			return true;
+		}
+
+		// BLOCKED, or PENDING on checkout/order-pay/add-payment-method: hide payment methods.
+		return false;
 	}
 
 	/**
