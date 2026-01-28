@@ -20,8 +20,8 @@ import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import { useProductCollectionUIState } from '../utils';
-import SingleProductPicker from './SingleProductPicker';
-import MultiProductPicker from './MultiProductPicker';
+import SingleProductPicker from './single-product-picker';
+import MultiProductPicker from './multi-product-picker';
 import { useTracksLocation } from '../tracks-utils';
 import { useRegisterEmailCollections } from '../hooks/use-register-email-collections';
 
