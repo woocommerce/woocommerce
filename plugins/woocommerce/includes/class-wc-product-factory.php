@@ -41,7 +41,7 @@ class WC_Product_Factory {
 				return $product;
 			}
 		}
-		_prime_post_caches( [ $product_id ] );
+		_prime_post_caches( array( $product_id ) );
 
 		$product_type = self::get_product_type( $product_id );
 
