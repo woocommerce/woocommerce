@@ -122,8 +122,9 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 					<ProductTagControl
 						selected={ selectedTermIds }
 						onChange={ ( value = [] ) => {
-							const ids = value.map( ( item ) =>
-								Number( item.id )
+							const ids = value.map(
+								( { id }: { id: number | string } ) =>
+									Number( id )
 							);
 							handleTermChange( ids );
 						} }
