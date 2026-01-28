@@ -147,13 +147,15 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 				label={ collectionData.title }
 			>
 				{ getDescriptionForCollection( attributes.collection ) }
-				<div className="wc-blocks-product-collection__editor-taxonomy-picker-selection">
+				<div className="wc-block-editor-product-collection__taxonomy-picker-selection">
 					{ renderTaxonomyControl() }
-					{ hasSelectedTerms && (
-						<Button variant="primary" onClick={ onDone }>
-							{ __( 'Done', 'woocommerce' ) }
-						</Button>
-					) }
+					<Button
+						variant="primary"
+						onClick={ onDone }
+						disabled={ ! hasSelectedTerms }
+					>
+						{ __( 'Done', 'woocommerce' ) }
+					</Button>
 				</div>
 			</Placeholder>
 		</div>

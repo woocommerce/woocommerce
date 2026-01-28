@@ -22,6 +22,9 @@ import CollectionSelectionModal from './collection-selection-modal';
 import { useProductCollectionUIState } from '../utils';
 import SingleProductPicker from './single-product-picker';
 import MultiProductPicker from './multi-product-picker';
+import TaxonomyPicker, {
+	getTaxonomySlugForCollection,
+} from './taxonomy-picker';
 import { useTracksLocation } from '../tracks-utils';
 import { useRegisterEmailCollections } from '../hooks/use-register-email-collections';
 
@@ -110,10 +113,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		if ( isPickerActive ) {
 			if ( isHandPickedCollection ) {
 				return (
-					<HandPickedProductsPicker
-						{ ...props }
-						onDone={ dismissPicker }
-					/>
+					<MultiProductPicker { ...props } onDone={ dismissPicker } />
 				);
 			}
 			if ( isTaxonomyCollection ) {
