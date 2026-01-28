@@ -35,15 +35,10 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 
 	const [ isSelectionModalOpen, setIsSelectionModalOpen ] = useState( false );
 
-	// Track if the hand-picked products picker is active.
+	// Track if the collection-specific picker is active (Hand-Picked or Taxonomy).
 	// This allows multi-select before clicking "Done".
-	const [ isHandPickedPickerActive, setIsHandPickedPickerActive ] =
-		useState( false );
-
-	// Track if the taxonomy picker is active.
-	// This allows multi-select before clicking "Done".
-	const [ isTaxonomyPickerActive, setIsTaxonomyPickerActive ] =
-		useState( false );
+	// Only one picker can be active at a time since collections are mutually exclusive.
+	const [ isPickerActive, setIsPickerActive ] = useState( false );
 
 	const isHandPickedCollection =
 		attributes.collection === CoreCollectionNames.HAND_PICKED;
@@ -59,19 +54,21 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		? ( attributes.query?.taxQuery?.[ taxonomySlug ]?.length ?? 0 ) > 0
 		: false;
 
-	// Activate the picker when Hand-Picked collection is selected with no products
+	// Activate the picker when a collection needs initial selection
 	useEffect( () => {
 		if ( isHandPickedCollection && ! hasHandPickedProducts ) {
-			setIsHandPickedPickerActive( true );
+			setIsPickerActive( true );
+		} else if ( isTaxonomyCollection && ! hasSelectedTerms ) {
+			setIsPickerActive( true );
 		}
-	}, [ isHandPickedCollection, hasHandPickedProducts ] );
+	}, [
+		isHandPickedCollection,
+		hasHandPickedProducts,
+		isTaxonomyCollection,
+		hasSelectedTerms,
+	] );
 
-	// Activate the picker when a taxonomy collection is selected with no terms
-	useEffect( () => {
-		if ( isTaxonomyCollection && ! hasSelectedTerms ) {
-			setIsTaxonomyPickerActive( true );
-		}
-	}, [ isTaxonomyCollection, hasSelectedTerms ] );
+	const dismissPicker = () => setIsPickerActive( false );
 
 	const hasInnerBlocks = useSelect(
 		( select ) =>
@@ -106,29 +103,22 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	};
 
 	const renderComponent = () => {
-		// Show the hand-picked products picker if it's active (local state).
+		// Show the collection-specific picker if it's active (local state).
 		// This allows multi-select before clicking "Done".
-		// The inspector controls (HandPickedProductsControlField) are inside
-		// ProductCollectionContent, so they're automatically hidden while
-		// the picker is shown.
-		if ( isHandPickedCollection && isHandPickedPickerActive ) {
-			return (
-				<MultiProductPicker
-					{ ...props }
-					onDone={ () => setIsHandPickedPickerActive( false ) }
-				/>
-			);
-		}
-
-		// Show the taxonomy picker if it's active (local state).
-		// This allows multi-select before clicking "Done".
-		if ( isTaxonomyCollection && isTaxonomyPickerActive ) {
-			return (
-				<TaxonomyPicker
-					{ ...props }
-					onDone={ () => setIsTaxonomyPickerActive( false ) }
-				/>
-			);
+		// The inspector controls are inside ProductCollectionContent,
+		// so they're automatically hidden while the picker is shown.
+		if ( isPickerActive ) {
+			if ( isHandPickedCollection ) {
+				return (
+					<HandPickedProductsPicker
+						{ ...props }
+						onDone={ dismissPicker }
+					/>
+				);
+			}
+			if ( isTaxonomyCollection ) {
+				return <TaxonomyPicker { ...props } onDone={ dismissPicker } />;
+			}
 		}
 
 		switch ( productCollectionUIStateInEditor ) {
@@ -157,20 +147,12 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				// This case is hit when no products are selected
 				// and the picker was previously dismissed but products were removed
 				return (
-					<MultiProductPicker
-						{ ...props }
-						onDone={ () => setIsHandPickedPickerActive( false ) }
-					/>
+					<MultiProductPicker { ...props } onDone={ dismissPicker } />
 				);
 			case ProductCollectionUIStatesInEditor.TAXONOMY_PICKER:
 				// This case is hit when no taxonomy terms are selected
 				// and the picker was previously dismissed but terms were removed
-				return (
-					<TaxonomyPicker
-						{ ...props }
-						onDone={ () => setIsTaxonomyPickerActive( false ) }
-					/>
-				);
+				return <TaxonomyPicker { ...props } onDone={ dismissPicker } />;
 			case ProductCollectionUIStatesInEditor.VALID:
 			case ProductCollectionUIStatesInEditor.VALID_WITH_PREVIEW:
 				return (
