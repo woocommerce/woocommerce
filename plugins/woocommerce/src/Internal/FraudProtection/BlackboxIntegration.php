@@ -78,6 +78,10 @@ class BlackboxIntegration {
 		// Enqueue scripts on checkout and add-payment-method pages.
 		add_action( 'wp_enqueue_scripts', array( $this, 'maybe_enqueue_scripts' ) );
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'enqueue_blocks_data' ) );
+
+		// Reset session clearance for blocks checkout BEFORE cart data is hydrated.
+		// This ensures payment methods are hidden until verification completes.
+		add_action( 'woocommerce_blocks_enqueue_checkout_block_scripts_before', array( $this->session_manager, 'reset_expired_session_clearance' ) );
 	}
 
 	/**
@@ -176,12 +180,16 @@ class BlackboxIntegration {
 	 * @return void
 	 */
 	public function maybe_enqueue_scripts(): void {
-		// Skip if this is a Blocks checkout page - handled by enqueue_blocks_data().
+		// Skip if this is a Blocks checkout page - handled via woocommerce_blocks_enqueue_checkout_block_scripts_before.
 		if ( is_checkout() && has_block( 'woocommerce/checkout' ) ) {
 			return;
 		}
 
 		if ( is_checkout() || is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'add-payment-method' ) ) {
+			// Reset clearance to hide payment methods until verification completes.
+			// Skips reset if recently verified (prevents infinite loop on add-payment-method reload).
+			$this->session_manager->reset_expired_session_clearance();
+
 			$checkout_type = is_wc_endpoint_url( 'add-payment-method' ) ? 'add-payment-method' : 'shortcode';
 			$this->enqueue_blackbox_scripts( $checkout_type );
 		}
@@ -227,11 +235,6 @@ class BlackboxIntegration {
 			array( 'in_footer' => true )
 		);
 
-		// Check if session was verified recently (to prevent infinite reload on add-payment-method).
-		// This uses a timestamp-based check: if verification happened within 10 seconds,
-		// we know this is a post-reload page load and should skip re-verification.
-		$recently_verified = $this->session_manager->was_verified_recently( 10 );
-
 		wp_localize_script(
 			'wc-fraud-protection-checkout',
 			'wcFraudProtection',
@@ -241,7 +244,7 @@ class BlackboxIntegration {
 				'timeoutMs'         => 5000,
 				'ajaxUrl'           => \WC_AJAX::get_endpoint( 'fraud_protection_verify' ),
 				'nonce'             => wp_create_nonce( 'fraud-protection-verify' ),
-				'recentlyVerified'  => $recently_verified,
+				'isSessionVerified' => ! $this->session_manager->is_session_pending(), // true = ALLOWED or BLOCKED.
 			)
 		);
 	}

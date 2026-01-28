@@ -127,15 +127,12 @@
 	};
 
 	const initialize = async () => {
-		// For add-payment-method: skip entirely if verified recently.
-		// No need to call Blackbox.init() if we're not going to verify.
-		if (
-			config.checkoutType === 'add-payment-method' &&
-			config.recentlyVerified
-		) {
+		// Skip if session is already verified (ALLOWED or BLOCKED).
+		// Only PENDING sessions need verification.
+		if ( config.isSessionVerified ) {
 			// eslint-disable-next-line no-console
 			console.log(
-				'[FraudProtection] Recently verified, skipping initialization'
+				'[FraudProtection] Session already verified, skipping initialization'
 			);
 			return;
 		}

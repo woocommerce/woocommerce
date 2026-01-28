@@ -235,6 +235,27 @@ class SessionClearanceManager {
 	}
 
 	/**
+	 * Reset session clearance to pending if currently allowed and not recently verified.
+	 *
+	 * Used when entering checkout/add-payment-method to ensure payment methods are
+	 * hidden until the current visit's verification completes. This prevents a flash
+	 * of payment methods if the session was previously ALLOWED but gets BLOCKED on
+	 * re-verification.
+	 *
+	 * Skips reset if:
+	 * - Session is PENDING (already awaiting verification)
+	 * - Session is BLOCKED (should not be unblocked without explicit allow)
+	 * - Session was verified recently (prevents unnecessary re-verification)
+	 *
+	 * @return void
+	 */
+	public function reset_expired_session_clearance(): void {
+		if ( self::STATUS_ALLOWED === $this->get_session_status() && ! $this->was_verified_recently() ) {
+			$this->set_session_status( self::STATUS_PENDING );
+		}
+	}
+
+	/**
 	 * Check if session was verified recently.
 	 *
 	 * Used to prevent infinite reload loops on add-payment-method page.
