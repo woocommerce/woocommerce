@@ -128,9 +128,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		// Set admin user to allow term creation.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
-		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
-		require_once $bootstrap->plugin_dir . '/includes/import/abstract-wc-product-importer.php';
-
 		// Create a CSV importer instance to access protected methods.
 		$csv_file = __DIR__ . '/sample.csv';
 		$importer = new WC_Product_CSV_Importer( $csv_file );
