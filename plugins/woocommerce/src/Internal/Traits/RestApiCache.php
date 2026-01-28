@@ -74,6 +74,9 @@ use WP_REST_Response;
  *                         // Paths can be absolute or relative to the first directory from
  *                         // get_allowed_directories_for_file_based_response_caching() (WC_ABSPATH by default).
  *                         'relevant_files'  => array( 'data/config.json', '/absolute/path/to/file.php' ),
+ *                         // Optional array, defaults to the controller's get_version_strings_relevant_to_caching().
+ *                         // Version string IDs to track; cache is invalidated when any version string changes.
+ *                         'relevant_version_strings' => array( 'list_products' ),
  *                         // Optional bool, defaults to the controller's response_cache_vary_by_user().
  *                         'vary_by_user'    => true,
  *                         // Optional array, defaults to the controller's get_response_headers_to_include_in_caching().
@@ -94,6 +97,7 @@ use WP_REST_Response;
  * - response_cache_vary_by_user(): Whether cache should be user-specific.
  * - get_hooks_relevant_to_caching(): Hook names to track for cache invalidation.
  * - get_files_relevant_to_response_caching(): File paths to track for cache invalidation.
+ * - get_version_strings_relevant_to_caching(): Version string IDs to track for cache invalidation.
  * - get_allowed_directories_for_file_based_response_caching(): Directories allowed for file tracking.
  * - get_file_check_interval_for_response_caching(): How long to cache file modification checks (default 10 minutes).
  * - get_ttl_for_cached_response(): TTL for cached outputs in seconds.
@@ -106,6 +110,8 @@ use WP_REST_Response;
  *   (if the `get_hooks_relevant_to_caching()` call result or the 'relevant_hooks' array isn't empty).
  * - Tracked files change or are deleted
  *   (if the `get_files_relevant_to_response_caching()` call result or the 'relevant_files' array isn't empty).
+ * - Relevant version strings change or are deleted
+ *   (if the `get_version_strings_relevant_to_caching()` call result or the 'relevant_version_strings' array isn't empty).
  * - Cached response TTL expires.
  *
  * NOTE: This caching mechanism uses the WordPress cache (wp_cache_* functions).
@@ -178,6 +184,8 @@ trait RestApiCache {
 	/**
 	 * Initialize the trait.
 	 * This MUST be called from the controller's constructor.
+	 *
+	 * @since 10.5.0
 	 */
 	protected function initialize_rest_api_cache(): void {
 		$features_controller = wc_get_container()->get( FeaturesController::class );
@@ -200,6 +208,8 @@ trait RestApiCache {
 	 * Usage: `'callback' => $this->with_cache( array( $this, 'endpoint_callback_method' ) )`
 	 *        `'callback' => $this->with_cache( array( $this, 'endpoint_callback_method' ), [ 'entity_type' => 'product' ] )`
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param callable $callback The original endpoint callback.
 	 * @param array    $config   Caching configuration:
 	 *                           - entity_type: string (falls back to get_default_response_entity_type()).
@@ -208,6 +218,7 @@ trait RestApiCache {
 	 *                           - cache_ttl: int (defaults to get_ttl_for_cached_response()).
 	 *                           - relevant_hooks: array (defaults to get_hooks_relevant_to_caching()).
 	 *                           - relevant_files: array (defaults to get_files_relevant_to_response_caching()).
+	 *                           - relevant_version_strings: array (defaults to get_version_strings_relevant_to_caching()).
 	 *                           - include_headers: array|false (defaults to get_response_headers_to_include_in_caching()).
 	 *                           - exclude_headers: array (defaults to get_response_headers_to_exclude_from_caching()).
 	 * @return callable Wrapped callback.
@@ -329,15 +340,16 @@ trait RestApiCache {
 		}
 
 		return array(
-			'endpoint_id'     => $endpoint_id,
-			'entity_type'     => $entity_type,
-			'vary_by_user'    => $vary_by_user,
-			'cache_ttl'       => $config['cache_ttl'] ?? $this->get_ttl_for_cached_response( $request, $endpoint_id ),
-			'relevant_hooks'  => $config['relevant_hooks'] ?? $this->get_hooks_relevant_to_caching( $request, $endpoint_id ),
-			'relevant_files'  => $config['relevant_files'] ?? $this->get_files_relevant_to_response_caching( $request, $endpoint_id ),
-			'include_headers' => $include_headers,
-			'exclude_headers' => $config['exclude_headers'] ?? $this->get_response_headers_to_exclude_from_caching( $request, $endpoint_id ),
-			'cache_key'       => $this->get_key_for_cached_response( $request, $entity_type, $vary_by_user, $endpoint_id ),
+			'endpoint_id'              => $endpoint_id,
+			'entity_type'              => $entity_type,
+			'vary_by_user'             => $vary_by_user,
+			'cache_ttl'                => $config['cache_ttl'] ?? $this->get_ttl_for_cached_response( $request, $endpoint_id ),
+			'relevant_hooks'           => $config['relevant_hooks'] ?? $this->get_hooks_relevant_to_caching( $request, $endpoint_id ),
+			'relevant_files'           => $config['relevant_files'] ?? $this->get_files_relevant_to_response_caching( $request, $endpoint_id ),
+			'relevant_version_strings' => $config['relevant_version_strings'] ?? $this->get_version_strings_relevant_to_caching( $request, $endpoint_id ),
+			'include_headers'          => $include_headers,
+			'exclude_headers'          => $config['exclude_headers'] ?? $this->get_response_headers_to_exclude_from_caching( $request, $endpoint_id ),
+			'cache_key'                => $this->get_key_for_cached_response( $request, $entity_type, $vary_by_user, $endpoint_id ),
 		);
 	}
 
@@ -385,16 +397,16 @@ trait RestApiCache {
 			$etag      = '"' . md5( $cached_config['cache_key'] . wp_json_encode( $etag_data ) ) . '"';
 
 			$this->store_cached_response(
-				$cached_config['cache_key'],
-				$data,
-				$status,
-				$cached_config['entity_type'],
-				$entity_ids,
-				$cached_config['cache_ttl'],
-				$cached_config['relevant_hooks'],
-				$cached_config['relevant_files'],
-				$cacheable_headers,
-				$etag
+				array_merge(
+					$cached_config,
+					array(
+						'data'        => $data,
+						'status_code' => $status,
+						'entity_ids'  => $entity_ids,
+						'headers'     => $cacheable_headers,
+						'etag'        => $etag,
+					)
+				)
 			);
 
 			$cached = true;
@@ -496,6 +508,8 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('entity_type' key).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @return string|null Entity type (e.g., 'product', 'order'), or null if no controller-wide default.
 	 */
 	protected function get_default_response_entity_type(): ?string {
@@ -507,6 +521,8 @@ trait RestApiCache {
 	 *
 	 * Override in classes to exclude fields that change on each request
 	 * (e.g., random recommendations, timestamps).
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param array                                 $data        Response data.
 	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
@@ -527,6 +543,8 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('vary_by_user' key).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
 	 *
@@ -541,6 +559,8 @@ trait RestApiCache {
 	 *
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('cache_ttl' key).
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
@@ -561,6 +581,8 @@ trait RestApiCache {
 	 *
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('relevant_hooks' key).
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     Request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
@@ -592,6 +614,30 @@ trait RestApiCache {
 	 * @return array Array of file paths to track.
 	 */
 	protected function get_files_relevant_to_response_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array();
+	}
+
+	/**
+	 * Get the identifiers of version strings that affect the response.
+	 *
+	 * All returned version strings will be tracked for changes: whenever a response is cached,
+	 * each version string's current value is recorded, and if any has changed or disappeared
+	 * when the cached response is retrieved, the cache entry will be invalidated.
+	 *
+	 * This is useful for collection endpoints where entities outside the current page
+	 * could affect the response (e.g., a deleted entity shifts pagination).
+	 *
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('relevant_version_strings' key).
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     Request object.
+	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
+	 *
+	 * @return array Array of version string identifiers to track.
+	 */
+	protected function get_version_strings_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed, Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		return array();
 	}
 
@@ -638,6 +684,8 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('include_headers' key).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     Request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
 	 *
@@ -659,6 +707,8 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('exclude_headers' key).
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request     Request object.
 	 * @param string|null                           $endpoint_id Optional friendly identifier for the endpoint.
 	 *
@@ -676,6 +726,8 @@ trait RestApiCache {
 	 * - An array of arrays each having an 'id' field (collection)
 	 *
 	 * Controllers can override this method to customize entity ID extraction.
+	 *
+	 * @since 10.5.0
 	 *
 	 * @param array                                 $response_data Response data.
 	 * @param WP_REST_Request<array<string, mixed>> $request       The request object.
@@ -817,6 +869,8 @@ trait RestApiCache {
 	/**
 	 * Get cache key information that uniquely identifies a request.
 	 *
+	 * @since 10.5.0
+	 *
 	 * @param WP_REST_Request<array<string, mixed>> $request      The request object.
 	 * @param bool                                  $vary_by_user Whether to include user ID in cache key.
 	 * @param string|null                           $endpoint_id  Optional friendly identifier for the endpoint.
@@ -924,6 +978,57 @@ trait RestApiCache {
 		);
 
 		$json = wp_json_encode( $cache_hash_data );
+		return md5( false === $json ? '' : $json );
+	}
+
+	/**
+	 * Generate a hash based on the current values of the relevant version strings.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param array $version_string_ids Array of version string identifiers to track.
+	 *
+	 * @return string Version strings hash, or empty string if no version strings could be tracked.
+	 */
+	private function generate_version_strings_hash( array $version_string_ids ): string {
+		if ( empty( $version_string_ids ) || is_null( $this->version_string_generator ) ) {
+			return '';
+		}
+
+		$version_data = array();
+		foreach ( $version_string_ids as $id ) {
+			$version = $this->version_string_generator->get_version( $id );
+			if ( $version ) {
+				$version_data[ $id ] = $version;
+			}
+		}
+
+		if ( empty( $version_data ) ) {
+			return '';
+		}
+
+		/**
+		 * Filter the version strings data used for REST API response cache invalidation.
+		 *
+		 * @since 10.6.0
+		 *
+		 * @param array  $version_data       Array mapping version string IDs to their current values.
+		 * @param array  $version_string_ids Original version string identifiers passed to the method.
+		 * @param object $controller         Controller instance.
+		 */
+		$version_data = apply_filters(
+			'woocommerce_rest_api_cache_version_strings_hash_data',
+			$version_data,
+			$version_string_ids,
+			$this
+		);
+
+		if ( empty( $version_data ) ) {
+			return '';
+		}
+
+		ksort( $version_data );
+		$json = wp_json_encode( $version_data );
 		return md5( false === $json ? '' : $json );
 	}
 
@@ -1265,6 +1370,18 @@ trait RestApiCache {
 			}
 		}
 
+		// Validate version strings hash if version strings are being tracked.
+		$relevant_version_strings = $cached_config['relevant_version_strings'];
+		if ( ! empty( $relevant_version_strings ) ) {
+			$cached_version_strings_hash  = $cached['version_strings_hash'] ?? '';
+			$current_version_strings_hash = $this->generate_version_strings_hash( $relevant_version_strings );
+
+			if ( $current_version_strings_hash !== $cached_version_strings_hash ) {
+				wp_cache_delete( $cache_key, self::$cache_group );
+				return null;
+			}
+		}
+
 		if ( ! is_null( $this->version_string_generator ) ) {
 			foreach ( $cached['entity_versions'] as $entity_id => $cached_version ) {
 				$version_id      = "{$entity_type}_{$entity_id}";
@@ -1330,22 +1447,34 @@ trait RestApiCache {
 	/**
 	 * Store a response in cache.
 	 *
-	 * @param string $cache_key      The cache key.
-	 * @param mixed  $data           The response data to cache.
-	 * @param int    $status_code    The HTTP status code of the response.
-	 * @param string $entity_type    The entity type.
-	 * @param array  $entity_ids     Array of entity IDs in the response.
-	 * @param int    $cache_ttl      Cache TTL in seconds.
-	 * @param array  $relevant_hooks Hook names to track for invalidation.
-	 * @param array  $relevant_files File paths to track for invalidation.
-	 * @param array  $headers        Response headers to cache.
-	 * @param string $etag           ETag for the response.
+	 * @param array $args {
+	 *     Arguments for storing the cached response.
+	 *
+	 *     @type string $cache_key                The cache key.
+	 *     @type mixed  $data                     The response data to cache.
+	 *     @type int    $status_code              The HTTP status code of the response.
+	 *     @type string $entity_type              The entity type.
+	 *     @type array  $entity_ids               Array of entity IDs in the response.
+	 *     @type int    $cache_ttl                Cache TTL in seconds.
+	 *     @type array  $relevant_hooks           Hook names to track for invalidation.
+	 *     @type array  $relevant_files           File paths to track for invalidation.
+	 *     @type array  $relevant_version_strings Version string IDs to track for invalidation.
+	 *     @type array  $headers                  Response headers to cache.
+	 *     @type string $etag                     ETag for the response.
+	 * }
 	 */
-	private function store_cached_response( string $cache_key, $data, int $status_code, string $entity_type, array $entity_ids, int $cache_ttl, array $relevant_hooks, array $relevant_files, array $headers = array(), string $etag = '' ): void {
+	private function store_cached_response( array $args ): void {
+		$status_code              = $args['status_code'];
+		$relevant_hooks           = $args['relevant_hooks'];
+		$relevant_files           = $args['relevant_files'];
+		$relevant_version_strings = $args['relevant_version_strings'];
+		$headers                  = $args['headers'] ?? array();
+		$etag                     = $args['etag'] ?? '';
+
 		$entity_versions = array();
 		if ( ! is_null( $this->version_string_generator ) ) {
-			foreach ( $entity_ids as $entity_id ) {
-				$version_id = "{$entity_type}_{$entity_id}";
+			foreach ( $args['entity_ids'] as $entity_id ) {
+				$version_id = "{$args['entity_type']}_{$entity_id}";
 				$version    = $this->version_string_generator->get_version( $version_id );
 				if ( $version ) {
 					$entity_versions[ $entity_id ] = $version;
@@ -1355,7 +1484,7 @@ trait RestApiCache {
 
 		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
 		$cache_data   = array(
-			'data'            => $data,
+			'data'            => $args['data'],
 			'entity_versions' => $entity_versions,
 			'created_at'      => $legacy_proxy->call_function( 'time' ),
 		);
@@ -1375,6 +1504,13 @@ trait RestApiCache {
 			}
 		}
 
+		if ( ! empty( $relevant_version_strings ) ) {
+			$version_strings_hash = $this->generate_version_strings_hash( $relevant_version_strings );
+			if ( ! empty( $version_strings_hash ) ) {
+				$cache_data['version_strings_hash'] = $version_strings_hash;
+			}
+		}
+
 		if ( ! empty( $headers ) ) {
 			$cache_data['headers'] = $headers;
 		}
@@ -1383,7 +1519,7 @@ trait RestApiCache {
 			$cache_data['etag'] = $etag;
 		}
 
-		wp_cache_set( $cache_key, $cache_data, self::$cache_group, $cache_ttl );
+		wp_cache_set( $args['cache_key'], $cache_data, self::$cache_group, $args['cache_ttl'] );
 	}
 
 	/**

@@ -17581,18 +17581,6 @@ parameters:
 			path: includes/class-wc-product-factory.php
 
 		-
-			message: '#^Parameter \#1 \$product_id of static method WC_Product_Factory\:\:get_product_classname\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-product-factory.php
-
-		-
-			message: '#^Parameter \#1 \$product_id of static method WC_Product_Factory\:\:get_product_type\(\) expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-product-factory.php
-
-		-
 			message: '#^Parameter \#2 \$product_type of static method WC_Product_Factory\:\:get_product_classname\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
