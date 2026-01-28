@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add support for array of slugs in REST API terms controller slug parameter. The slug parameter now accepts both a single string and an array of strings, matching WordPress core WP_Term_Query capabilities.
