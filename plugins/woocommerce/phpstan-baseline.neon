@@ -21997,12 +21997,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
-			message: '#^Cannot call method get_attributes\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Product_Data_Store_CPT\:\:clear_caches\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
