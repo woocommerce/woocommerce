@@ -35,6 +35,14 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->user['shop_manager'] = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 		$this->user['customer']     = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		// Manually load and instantiate POS email classes to register their filters.
+		// This is needed because WC_Emails may have been initialized before POS email classes were loaded.
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-completed-order.php';
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-refunded-order.php';
+		new \WC_Email_Customer_POS_Completed_Order();
+		new \WC_Email_Customer_POS_Refunded_Order();
 	}
 
 	/**
@@ -57,6 +65,23 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 						'qty' => 1,
 					),
 				),
+			)
+		);
+	}
+
+	/**
+	 * Create a full refund for an order.
+	 *
+	 * @param \WC_Order $order The order to create a refund for.
+	 *
+	 * @return void
+	 * @throws \Exception Throws Exception if refund creation fails.
+	 */
+	private function do_full_refund( \WC_Order $order ): void {
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => $order->get_total(),
 			)
 		);
 	}
@@ -120,6 +145,23 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				),
 			),
 		);
+		yield 'pos partially refunded order' => array(
+			'shop_manager',
+			array(
+				'created_via'    => 'pos-rest-api',
+				'partial_refund' => true,
+			),
+			array(
+				'status' => 200,
+				'data'   => array(
+					'customer_completed_order',
+					'customer_pos_completed_order',
+					'customer_refunded_order',
+					'customer_pos_refunded_order',
+					'customer_invoice',
+				),
+			),
+		);
 		yield 'fully refunded order' => array(
 			'shop_manager',
 			array(
@@ -129,6 +171,23 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'status' => 200,
 				'data'   => array(
 					'customer_refunded_order',
+					'customer_invoice',
+				),
+			),
+		);
+		yield 'pos fully refunded order' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'refunded',
+				'full_refund' => true,
+			),
+			array(
+				'status' => 200,
+				'data'   => array(
+					'customer_pos_completed_order',
+					'customer_refunded_order',
+					'customer_pos_refunded_order',
 					'customer_invoice',
 				),
 			),
@@ -151,6 +210,8 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			'billing_email'  => 'customer@example.org',
 			'status'         => 'completed',
 			'partial_refund' => false,
+			'full_refund'    => false,
+			'created_via'    => null,
 		);
 		$order_props    = wp_parse_args( $order_props, $order_defaults );
 
@@ -159,8 +220,15 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$order = WC_Helper_Order::create_order();
 			$this->do_partial_refund( $order );
 		}
+		if ( true === $order_props['full_refund'] ) {
+			$order = WC_Helper_Order::create_order();
+			$this->do_full_refund( $order );
+		}
 
 		$order->set_billing_email( $order_props['billing_email'] );
+		if ( ! is_null( $order_props['created_via'] ) ) {
+			$order->set_created_via( $order_props['created_via'] );
+		}
 		$order->set_status( $order_props['status'] );
 		$order->save();
 
@@ -302,6 +370,24 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				),
 			),
 		);
+		yield 'pos refunded order' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'refunded',
+				'full_refund' => true,
+			),
+			array(
+				'template_id' => 'customer_pos_refunded_order',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+				),
+			),
+		);
 	}
 
 	/**
@@ -321,6 +407,8 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			'billing_email'  => 'customer@example.org',
 			'status'         => 'completed',
 			'partial_refund' => false,
+			'full_refund'    => false,
+			'created_via'    => null,
 		);
 		$order_props    = wp_parse_args( $order_props, $order_defaults );
 
@@ -336,8 +424,15 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$order = WC_Helper_Order::create_order();
 			$this->do_partial_refund( $order );
 		}
+		if ( true === $order_props['full_refund'] ) {
+			$order = WC_Helper_Order::create_order();
+			$this->do_full_refund( $order );
+		}
 
 		$order->set_billing_email( $order_props['billing_email'] );
+		if ( ! is_null( $order_props['created_via'] ) ) {
+			$order->set_created_via( $order_props['created_via'] );
+		}
 		$order->set_status( $order_props['status'] );
 		$order->save();
 

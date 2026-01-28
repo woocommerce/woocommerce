@@ -57,6 +57,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 				'{order_number}' => '',
 			);
 
+			$this->enable_email_template_for_pos_orders();
+
 			// Call parent constructor.
 			parent::__construct();
 
@@ -487,6 +489,41 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		private function register_refund_email_triggers() {
 			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'trigger_full' ), 10, 2 );
 			add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'trigger_partial' ), 10, 2 );
+		}
+
+		/**
+		 * Enable POS refunded email template for REST API order valid templates.
+		 *
+		 * @return void
+		 */
+		private function enable_email_template_for_pos_orders(): void {
+			add_filter( 'woocommerce_rest_order_actions_email_valid_template_classes', array( $this, 'add_to_valid_template_classes' ), 10, 2 );
+		}
+
+		/**
+		 * Add this email template to the list of valid templates for refunded POS orders.
+		 *
+		 * @param array    $valid_template_classes Array of valid template class names.
+		 * @param WC_Order $order                  The order.
+		 * @return array Modified array of valid template class names.
+		 */
+		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
+			if ( ! $order || ! PointOfSaleOrderUtil::is_pos_order( $order ) || ! $this->order_has_refunds( $order ) ) {
+				return $valid_template_classes;
+			}
+
+			$valid_template_classes[] = get_class( $this );
+			return $valid_template_classes;
+		}
+
+		/**
+		 * Check whether an order has any refunds.
+		 *
+		 * @param WC_Order $order Order object.
+		 * @return bool
+		 */
+		private function order_has_refunds( $order ) {
+			return count( $order->get_refunds() ) > 0;
 		}
 
 		/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow POS refunded order emails to be sent via REST order actions.
