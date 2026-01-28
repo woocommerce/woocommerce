@@ -1293,18 +1293,57 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Parse short info JSON into an array of coupon properties without validation.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param string $info                   JSON string as returned by 'get_short_info'.
+	 * @param bool   $return_defaults_on_error If true (default), return default values when JSON is malformed.
+	 *                                         If false, throw an exception.
+	 * @return array {
+	 *     Parsed coupon properties.
+	 *
+	 *     @type int    $id            Coupon ID.
+	 *     @type string $code          Coupon code.
+	 *     @type string $discount_type Discount type ('fixed_cart', 'percent', etc.).
+	 *     @type float  $amount        Discount amount.
+	 *     @type bool   $free_shipping Whether free shipping is enabled.
+	 * }
+	 * @throws \InvalidArgumentException If JSON is malformed and $return_defaults_on_error is false.
+	 */
+	public static function parse_short_info( string $info, bool $return_defaults_on_error = true ): array {
+		$data = json_decode( $info, true );
+
+		if ( ! is_array( $data ) ) {
+			if ( $return_defaults_on_error ) {
+				$data = array();
+			} else {
+				throw new \InvalidArgumentException( __( 'Invalid coupon short info JSON.', 'woocommerce' ) );
+			}
+		}
+
+		return array(
+			'id'            => $data[0] ?? 0,
+			'code'          => $data[1] ?? '',
+			'discount_type' => $data[2] ?? 'fixed_cart',
+			'amount'        => (float) ( $data[3] ?? 0 ),
+			'free_shipping' => $data[4] ?? false,
+		);
+	}
+
+	/**
 	 * Sets the coupon parameters from a reapply information set generated with 'get_short_info'.
 	 *
 	 * @param string $info JSON string with reapply information as returned by 'get_short_info'.
 	 */
 	public function set_short_info( string $info ) {
-		$info = json_decode( $info, true );
+		$data = self::parse_short_info( $info );
 
-		$this->set_id( $info[0] ?? 0 );
-		$this->set_code( $info[1] ?? '' );
-		$this->set_discount_type_core( $info[2] ?? 'fixed_cart', false );
-		$this->set_amount( $info[3] ?? 0 );
-		$this->set_free_shipping( $info[4] ?? false );
+		$this->set_id( $data['id'] );
+		$this->set_code( $data['code'] );
+		$this->set_discount_type_core( $data['discount_type'], false );
+		$this->set_amount( $data['amount'] );
+		$this->set_free_shipping( $data['free_shipping'] );
 	}
 
 	/**

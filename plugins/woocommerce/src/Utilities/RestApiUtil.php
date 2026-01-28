@@ -2,10 +2,57 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
+use WC_Coupon;
+use WC_Order_Item_Coupon;
+
 /**
  * Utility methods related to the REST API.
  */
 class RestApiUtil {
+
+	/**
+	 * Extract coupon display data from an order item for REST API responses.
+	 *
+	 * @param WC_Order_Item_Coupon $order_item The coupon order item.
+	 * @return array {
+	 *     Coupon display data.
+	 *
+	 *     @type string $discount_type  Discount type ('fixed_cart', 'percent', etc.).
+	 *     @type float  $nominal_amount The nominal discount amount.
+	 *     @type bool   $free_shipping  Whether free shipping is enabled.
+	 * }
+	 * 
+	 * @internal Do not call this function directly. Backward compatibility is not guaranteed.
+	 */
+	public static function get_coupon_data_for_response( WC_Order_Item_Coupon $order_item ): array {
+		$coupon_info = $order_item->get_meta( 'coupon_info', true );
+		if ( $coupon_info ) {
+			$parsed = WC_Coupon::parse_short_info( $coupon_info );
+
+			return array(
+				'discount_type'  => $parsed['discount_type'],
+				'nominal_amount' => $parsed['amount'],
+				'free_shipping'  => $parsed['free_shipping'],
+			);
+		}
+
+		$coupon_meta = $order_item->get_meta( 'coupon_data', true );
+		if ( $coupon_meta ) {
+			$coupon_meta = (array) $coupon_meta;
+
+			return array(
+				'discount_type'  => $coupon_meta['discount_type'] ?? 'fixed_cart',
+				'nominal_amount' => (float) ( $coupon_meta['amount'] ?? 0 ),
+				'free_shipping'  => $coupon_meta['free_shipping'] ?? false,
+			);
+		}
+
+		return array(
+			'discount_type'  => 'fixed_cart',
+			'nominal_amount' => 0.0,
+			'free_shipping'  => false,
+		);
+	}
 
 	/**
 	 * Get data from a WooCommerce API endpoint.

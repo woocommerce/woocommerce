@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name, can't change without breaking backward compat.
@@ -294,21 +295,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add additional applied coupon information.
 		if ( $item instanceof WC_Order_Item_Coupon ) {
-			$temp_coupon = new WC_Coupon();
-			$coupon_info = $item->get_meta( 'coupon_info', true );
-			if ( $coupon_info ) {
-				$temp_coupon->set_short_info( $coupon_info );
-			} else {
-				$coupon_meta = $item->get_meta( 'coupon_data', true );
-				if ( $coupon_meta ) {
-					$temp_coupon->set_props( (array) $coupon_meta );
-
-				}
-			}
-
-			$data['discount_type']  = $temp_coupon->get_discount_type();
-			$data['nominal_amount'] = (float) $temp_coupon->get_amount();
-			$data['free_shipping']  = $temp_coupon->get_free_shipping();
+			$coupon_data            = RestApiUtil::get_coupon_data_for_response( $item );
+			$data['discount_type']  = $coupon_data['discount_type'];
+			$data['nominal_amount'] = $coupon_data['nominal_amount'];
+			$data['free_shipping']  = $coupon_data['free_shipping'];
 		}
 
 		$data['meta_data'] = array_map(
