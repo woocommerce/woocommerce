@@ -506,6 +506,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param array    $valid_template_classes Array of valid template class names.
 		 * @param WC_Order $order                  The order.
 		 * @return array Modified array of valid template class names.
+		 *
+		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
 			if ( ! $order || ! PointOfSaleOrderUtil::is_pos_order( $order ) || ! $this->order_has_refunds( $order ) ) {
@@ -523,7 +525,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return bool
 		 */
 		private function order_has_refunds( $order ) {
-			return count( $order->get_refunds() ) > 0;
+			return 0 < count( $order->get_refunds() );
 		}
 
 		/**
