@@ -40168,12 +40168,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Cannot call method get_created_via\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Cannot call method get_download_expiry\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -40199,12 +40193,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_total_refunded\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method update_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/wc-order-functions.php
@@ -40549,24 +40537,6 @@ parameters:
 			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Cannot access offset 0 on array\{string, int, int, bool\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Cannot access offset 1 on array\{string, int, int, bool\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Cannot access offset 2 on array\{string, int, int, bool\}\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
 			path: includes/wc-product-functions.php
 
 		-
@@ -57338,12 +57308,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelector.php
-
-		-
-			message: '#^Anonymous function has an unused use \$attribute_terms\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelectorAttribute.php
 
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'

@@ -853,13 +853,6 @@ const { state: cartItemState } = store(
 				return `${ name }:${ value }`;
 			},
 
-			get itemDataHasMultipleAttributes(): boolean {
-				const { dataProperty } = getContext< {
-					dataProperty: DataProperty;
-				} >();
-				return cartItemState.cartItem[ dataProperty ]?.length > 1;
-			},
-
 			get shouldHideProductDetails(): boolean {
 				const { dataProperty } = getContext< {
 					dataProperty: DataProperty;
@@ -867,18 +860,35 @@ const { state: cartItemState } = store(
 				return cartItemState.cartItem[ dataProperty ].length === 0;
 			},
 
-			get shouldHideSingleProductDetails(): boolean {
-				return (
-					cartItemState.shouldHideProductDetails ||
-					cartItemState.itemDataHasMultipleAttributes
-				);
-			},
+			get isLastCartItemDataAttr(): boolean {
+				const { itemData, dataProperty } = getContext< {
+					itemData: ItemData;
+					dataProperty: DataProperty;
+				} >();
 
-			get shouldHideMultipleProductDetails(): boolean {
-				return (
-					cartItemState.shouldHideProductDetails ||
-					! cartItemState.itemDataHasMultipleAttributes
+				const items = cartItemState.cartItem[ dataProperty ];
+				if ( ! items || items.length === 0 ) {
+					return true;
+				}
+
+				// Filter out hidden items
+				const visibleItems = items.filter(
+					( item: ItemData ) =>
+						! (
+							item.hidden === true ||
+							item.hidden === 'true' ||
+							item.hidden === '1' ||
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							( item.hidden as any ) === 1
+						)
 				);
+
+				if ( visibleItems.length === 0 ) {
+					return true;
+				}
+
+				const lastItem = visibleItems[ visibleItems.length - 1 ];
+				return itemData === lastItem;
 			},
 		},
 
