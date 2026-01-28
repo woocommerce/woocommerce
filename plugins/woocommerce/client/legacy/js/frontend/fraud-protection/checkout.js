@@ -127,6 +127,19 @@
 	};
 
 	const initialize = async () => {
+		// For add-payment-method: skip entirely if verified recently.
+		// No need to call Blackbox.init() if we're not going to verify.
+		if (
+			config.checkoutType === 'add-payment-method' &&
+			config.recentlyVerified
+		) {
+			// eslint-disable-next-line no-console
+			console.log(
+				'[FraudProtection] Recently verified, skipping initialization'
+			);
+			return;
+		}
+
 		let sessionId = '';
 
 		// Try to get session_id from Blackbox
@@ -170,16 +183,7 @@
 				triggerShortcodeUpdate( sessionId );
 				break;
 			case 'add-payment-method':
-				// Skip if verified recently (prevents infinite reload loop after verification).
-				// Uses timestamp-based check: if verification happened within 10 seconds, skip.
-				if ( config.recentlyVerified ) {
-					// eslint-disable-next-line no-console
-					console.log(
-						'[FraudProtection] Recently verified, skipping verification'
-					);
-				} else {
-					await verifyAndReload( sessionId );
-				}
+				await verifyAndReload( sessionId );
 				break;
 		}
 	};
