@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Tracks events being rejected when array properties are passed by automatically converting arrays to valid formats

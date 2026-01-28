@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
-use Automattic\WooCommerce\Blocks\Utils\VariationDataUtils;
 use WP_Block;
 
 /**
@@ -57,31 +56,18 @@ class VariationSelectorAttribute extends AbstractBlock {
 	private function get_product_row( $attribute_name, $product_attribute_terms, $block ): string {
 		global $product;
 
-		$attribute_terms = $this->get_terms( $attribute_name, $product_attribute_terms );
-
-		if ( VariationDataUtils::should_lazy_load_variations( $product ) ) {
-			// In lazy mode, we only need attributes for filtering - avoid loading full variation data.
-			$available_variations = $product->get_available_variations( 'objects' );
-			$product_variations   = array_map(
-				function ( $variation ) {
-					return array(
-						'attributes' => $variation->get_variation_attributes(),
-					);
-				},
-				$available_variations
-			);
-		} else {
-			$product_variations = $product->get_available_variations();
-		}
+		$attribute_terms    = $this->get_terms( $attribute_name, $product_attribute_terms );
+		$product_variations = $product->get_available_variations( 'objects' );
 
 		// Filter out terms which are not available in any product variation.
 		$attribute_terms = array_filter(
 			$attribute_terms,
-			function ( $term ) use ( $product_variations, $attribute_name, $attribute_terms ) {
-				foreach ( $product_variations as $product_variation ) {
+			function ( $term ) use ( $product_variations, $attribute_name ) {
+				foreach ( $product_variations as $variation ) {
+					$attributes = $variation->get_variation_attributes();
 					if (
-						$term['value'] === $product_variation['attributes'][ wc_variation_attribute_name( $attribute_name ) ] ||
-						'' === $product_variation['attributes'][ wc_variation_attribute_name( $attribute_name ) ]
+						$term['value'] === $attributes[ wc_variation_attribute_name( $attribute_name ) ] ||
+						'' === $attributes[ wc_variation_attribute_name( $attribute_name ) ]
 					) {
 						return true;
 					}

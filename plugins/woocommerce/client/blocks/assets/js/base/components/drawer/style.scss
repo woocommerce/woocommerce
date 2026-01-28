@@ -151,13 +151,6 @@ $drawer-animation-duration: 0.3s;
 }
 
 .admin-bar .wc-block-components-drawer__content {
-	margin-top: 46px;
-	height: calc(100dvh - 46px);
-}
-
-@media only screen and (min-width: 783px) {
-	.admin-bar .wc-block-components-drawer__content {
-		margin-top: 32px;
-		height: calc(100dvh - 32px);
-	}
+	margin-top: var(--wp-admin--admin-bar--height, 0px);
+	height: calc(100dvh - var(--wp-admin--admin-bar--height, 0px));
 }

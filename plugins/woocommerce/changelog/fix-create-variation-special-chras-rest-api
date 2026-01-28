@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed REST API handling of attribute names containing special characters when creating product variations

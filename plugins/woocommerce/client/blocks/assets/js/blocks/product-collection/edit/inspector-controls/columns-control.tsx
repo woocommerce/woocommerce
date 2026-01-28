@@ -62,6 +62,7 @@ const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 			>
 				<RangeControl
 					__next40pxDefaultSize
+					__nextHasNoMarginBottom
 					label={ columnsLabel }
 					onChange={ onColumnsChange }
 					value={ columns }
@@ -78,6 +79,7 @@ const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 				onDeselect={ onPanelDeselect }
 			>
 				<ToggleControl
+					__nextHasNoMarginBottom
 					checked={ !! shrinkColumns }
 					label={ toggleLabel }
 					help={ toggleHelp }

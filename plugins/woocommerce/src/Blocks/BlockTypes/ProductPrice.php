@@ -99,15 +99,17 @@ class ProductPrice extends AbstractBlock {
 			$context_directive      = '';
 
 			if ( $is_interactive ) {
-				// phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				// phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
 				/** @var \WC_Product_Variable $product */
 				$use_lazy_load = VariationDataUtils::should_lazy_load_variations( $product );
 
 				if ( $use_lazy_load ) {
 					// Lazy load mode: Only check if prices vary, don't pre-load variation data.
-					$has_variation_price_html = $this->has_price_variations( $product );
+					// Check if variation prices differ (replicates logic from WC_Product_Variable::get_available_variation).
+					$prices_vary = $product->get_variation_sale_price( 'min' ) !== $product->get_variation_sale_price( 'max' )
+						|| $product->get_variation_regular_price( 'min' ) !== $product->get_variation_regular_price( 'max' );
 
-					if ( $has_variation_price_html ) {
+					if ( $prices_vary ) {
 						wp_interactivity_config(
 							'woocommerce',
 							array(
@@ -131,27 +133,45 @@ class ProductPrice extends AbstractBlock {
 						$is_interactive = false;
 					}
 				} else {
-					// Original behavior: Pre-load all variation price data.
-					$variations_data           = $product->get_available_variations();
+					// Non-lazy mode: Pre-load all variation price data using objects.
+					// Check if variation prices differ (replicates logic from WC_Product_Variable::get_available_variation).
+					$prices_vary = $product->get_variation_sale_price( 'min' ) !== $product->get_variation_sale_price( 'max' )
+						|| $product->get_variation_regular_price( 'min' ) !== $product->get_variation_regular_price( 'max' );
+
 					$formatted_variations_data = array();
-					$has_variation_price_html  = false;
-					foreach ( $variations_data as $variation ) {
-						if (
-							empty( $variation['variation_id'] )
-							|| ! array_key_exists( 'price_html', $variation )
-							|| '' === $variation['price_html']
-						) {
-							continue;
+
+					if ( $prices_vary ) {
+						$variations_data = $product->get_available_variations( 'objects' );
+
+						foreach ( $variations_data as $variation ) {
+							/**
+							 * Filter whether to show variation price.
+							 * Replicates the filter from WC_Product_Variable::get_available_variation().
+							 *
+							 * @since 2.4.0
+							 *
+							 * @param bool                  $show_price Whether to show the price.
+							 * @param \WC_Product_Variable  $product    The variable product.
+							 * @param \WC_Product_Variation $variation  The variation.
+							 */
+							$show_variation_price = apply_filters(
+								'woocommerce_show_variation_price',
+								true,
+								$product,
+								$variation
+							);
+
+							if ( ! $show_variation_price ) {
+								continue;
+							}
+
+							$formatted_variations_data[ $variation->get_id() ] = array(
+								'price_html' => '<span class="price">' . $variation->get_price_html() . '</span>',
+							);
 						}
-						// Core behavior: when all variation prices are identical, Core returns '' for variation['price_html'].
-						// Therefore, the presence of any non-empty price_html implies price differences and warrants interactivity.
-						$has_variation_price_html                                = true;
-						$formatted_variations_data[ $variation['variation_id'] ] = array(
-							'price_html' => $variation['price_html'],
-						);
 					}
 
-					if ( ! $has_variation_price_html ) {
+					if ( empty( $formatted_variations_data ) ) {
 						$is_interactive = false;
 					} else {
 						wp_interactivity_config(

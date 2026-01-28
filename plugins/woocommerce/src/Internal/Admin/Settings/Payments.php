@@ -78,7 +78,7 @@ class Payments {
 	public function get_payment_providers( string $location, bool $for_display = true, bool $remove_shells = false ): array {
 		$payment_gateways = $this->providers->get_payment_gateways( $for_display );
 		if ( ! $for_display && $remove_shells ) {
-			$payment_gateways = $this->providers->remove_shell_payment_gateways( $payment_gateways );
+			$payment_gateways = $this->providers->remove_shell_payment_gateways( $payment_gateways, $location );
 		}
 
 		$providers_order_map = $this->providers->get_order_map();

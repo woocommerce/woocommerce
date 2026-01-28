@@ -167,20 +167,13 @@ class ProductGallery extends AbstractBlock {
 					// We just need to set the parent image_id and enable interactivity.
 					$has_variation_images = true;
 				} else {
-					$variations_data = $product->get_available_variations();
+					$variations_data = $product->get_available_variations( 'objects' );
 					foreach ( $variations_data as $variation ) {
-						if (
-							empty( $variation['variation_id'] )
-							|| ! array_key_exists( 'image_id', $variation )
-						) {
-							continue;
-						}
-
-						$variation_image_id = (int) $variation['image_id'];
+						$variation_image_id = (int) $variation->get_image_id();
 						if ( $variation_image_id && $variation_image_id !== $parent_image_id ) {
 							$has_variation_images = true;
 
-							$formatted_variations_data[ $variation['variation_id'] ] = array(
+							$formatted_variations_data[ $variation->get_id() ] = array(
 								'image_id' => $variation_image_id,
 							);
 						}
