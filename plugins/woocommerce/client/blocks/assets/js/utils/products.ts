@@ -46,35 +46,6 @@ export const convertProductCategoryResponseItemToSearchItem = (
 	};
 };
 
-export interface ProductBrandResponseItem {
-	id: number;
-	name: string;
-	slug: string;
-	description: string;
-	parent: number;
-	count: number;
-}
-
-/**
- * Converts a Product Brand object into a shape compatible with the `SearchListControl`
- */
-export const convertProductBrandResponseItemToSearchItem = (
-	brand: ProductBrandResponseItem
-): SearchListItem< ProductBrandResponseItem > => {
-	const { id, name, parent, count } = brand;
-
-	return {
-		id,
-		name,
-		parent,
-		count,
-		breadcrumbs: [],
-		children: [],
-		details: brand,
-		value: brand.slug,
-	};
-};
-
 /**
  * Get the src of the first image attached to a product (the featured image).
  */

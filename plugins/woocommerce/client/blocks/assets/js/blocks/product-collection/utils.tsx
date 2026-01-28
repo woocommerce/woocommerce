@@ -285,21 +285,18 @@ export const useProductCollectionUIState = ( {
 		}
 
 		/**
-		 * Case 4: Taxonomy picker for BY_CATEGORY, BY_TAG, BY_BRAND collections
+		 * Case 4: Taxonomy picker for BY_CATEGORY, BY_TAG collections
 		 * Show the picker when no taxonomy terms are selected.
 		 */
 		const isTaxonomyCollection =
 			attributes.collection === CoreCollectionNames.BY_CATEGORY ||
-			attributes.collection === CoreCollectionNames.BY_TAG ||
-			attributes.collection === CoreCollectionNames.BY_BRAND;
+			attributes.collection === CoreCollectionNames.BY_TAG;
 
 		if ( isCollectionSelected && isTaxonomyCollection ) {
 			const taxonomySlug =
 				attributes.collection === CoreCollectionNames.BY_CATEGORY
 					? 'product_cat'
-					: attributes.collection === CoreCollectionNames.BY_TAG
-					? 'product_tag'
-					: 'product_brand';
+					: 'product_tag';
 
 			const selectedTermIds =
 				attributes.query?.taxQuery?.[ taxonomySlug ] || [];

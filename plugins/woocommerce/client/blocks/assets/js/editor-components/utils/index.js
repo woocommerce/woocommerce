@@ -181,56 +181,6 @@ export const getCategories = ( queryArgs ) => {
 };
 
 /**
- * Get product brand query requests for the Store API.
- *
- * @param {Object} request          A query object with the list of selected brands and search term.
- * @param {Array}  request.selected Currently selected brands.
- * @param {string} request.search   Search string.
- */
-const getProductBrandsRequests = ( { selected = [], search } ) => {
-	const requests = [
-		addQueryArgs( `wc/store/v1/products/brands`, {
-			per_page: 100,
-			orderby: 'name',
-			order: 'asc',
-			search,
-		} ),
-	];
-
-	// If we have selected brands, fetch them separately to ensure they're included.
-	if ( selected.length ) {
-		requests.push(
-			addQueryArgs( `wc/store/v1/products/brands`, {
-				include: selected,
-			} )
-		);
-	}
-
-	return requests;
-};
-
-/**
- * Get a promise that resolves to a list of brands from the Store API.
- *
- * @param {Object} props          A query object with the list of selected brands and search term.
- * @param {Array}  props.selected
- * @param {string} props.search
- */
-export const getProductBrands = ( { selected = [], search } ) => {
-	const requests = getProductBrandsRequests( { selected, search } );
-
-	return Promise.all( requests.map( ( path ) => apiFetch( { path } ) ) ).then(
-		( data ) => [
-			...new Map(
-				data.flatMap( ( brands ) =>
-					brands.map( ( item ) => [ item.id, item ] )
-				)
-			).values(),
-		]
-	);
-};
-
-/**
  * Get a promise that resolves to a category object from the API.
  *
  * @param {number} categoryId Id of the product to retrieve.

@@ -7,7 +7,6 @@ import { Placeholder, Button } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
-import ProductBrandControl from '@woocommerce/editor-components/product-brand-control';
 
 /**
  * Internal dependencies
@@ -32,8 +31,6 @@ export const getTaxonomySlugForCollection = (
 			return 'product_cat';
 		case CoreCollectionNames.BY_TAG:
 			return 'product_tag';
-		case CoreCollectionNames.BY_BRAND:
-			return 'product_brand';
 		default:
 			return null;
 	}
@@ -54,11 +51,6 @@ const getDescriptionForCollection = (
 		case CoreCollectionNames.BY_TAG:
 			return __(
 				'Display a grid of products from your selected tags.',
-				'woocommerce'
-			);
-		case CoreCollectionNames.BY_BRAND:
-			return __(
-				'Display a grid of products from your selected brands.',
 				'woocommerce'
 			);
 		default:
@@ -128,18 +120,6 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 			case CoreCollectionNames.BY_TAG:
 				return (
 					<ProductTagControl
-						selected={ selectedTermIds }
-						onChange={ ( value = [] ) => {
-							const ids = value.map( ( item ) =>
-								Number( item.id )
-							);
-							handleTermChange( ids );
-						} }
-					/>
-				);
-			case CoreCollectionNames.BY_BRAND:
-				return (
-					<ProductBrandControl
 						selected={ selectedTermIds }
 						onChange={ ( value = [] ) => {
 							const ids = value.map( ( item ) =>

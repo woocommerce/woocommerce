@@ -181,8 +181,7 @@ const ProductCollectionInspectorControls = (
 				 * Only rendered when ProductCollectionContent is shown (not during picker).
 				 */
 				( collection === CoreCollectionNames.BY_CATEGORY ||
-					collection === CoreCollectionNames.BY_TAG ||
-					collection === CoreCollectionNames.BY_BRAND ) && (
+					collection === CoreCollectionNames.BY_TAG ) && (
 					<PanelBody>
 						<TaxonomyControls
 							{ ...queryControlProps }

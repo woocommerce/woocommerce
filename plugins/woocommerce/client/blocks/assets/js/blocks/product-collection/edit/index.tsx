@@ -52,8 +52,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 
 	const isTaxonomyCollection =
 		attributes.collection === CoreCollectionNames.BY_CATEGORY ||
-		attributes.collection === CoreCollectionNames.BY_TAG ||
-		attributes.collection === CoreCollectionNames.BY_BRAND;
+		attributes.collection === CoreCollectionNames.BY_TAG;
 
 	const taxonomySlug = getTaxonomySlugForCollection( attributes.collection );
 	const hasSelectedTerms = taxonomySlug
