@@ -2269,9 +2269,8 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 		$related_product_ids = wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() );
 		if ( ! empty( $related_product_ids ) ) {
 			_prime_post_caches( $related_product_ids );
-			// Get visible related products then sort them at random.
+			// Get visible related products then sort them at random, then handle orderby.
 			$related_products = array_filter( array_map( 'wc_get_product', $related_product_ids ), 'wc_products_array_filter_visible' );
-			// Handle orderby.
 			$related_products = wc_products_array_orderby( $related_products, $args['orderby'], $args['order'] );
 		}
 		$args['related_products'] = $related_products;
