@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Products: consolidate cache priming calls within product data stores.
