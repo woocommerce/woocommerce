@@ -52,11 +52,11 @@ const ProductPicker = (
 
 	return (
 		<div { ...blockProps }>
-			<Placeholder className="wc-blocks-product-collection__editor-product-picker">
+			<Placeholder className="wc-block-editor-product-collection__product-picker">
 				<HStack alignment="center">
 					<Icon
 						icon={ info }
-						className="wc-blocks-product-collection__info-icon"
+						className="wc-block-editor-product-collection__info-icon"
 					/>
 					<Text>{ infoText }</Text>
 				</HStack>

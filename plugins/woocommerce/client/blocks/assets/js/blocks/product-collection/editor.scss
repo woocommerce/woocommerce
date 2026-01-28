@@ -192,8 +192,8 @@ $max-button-width: calc(100% / #{$max-button-columns});
 }
 
 // Editor Product Picker
-.wc-blocks-product-collection__editor-product-picker {
-	.wc-blocks-product-collection__info-icon {
+.wc-block-editor-product-collection__product-picker {
+	.wc-block-editor-product-collection__info-icon {
 		fill: var(--wp--preset--color--luminous-vivid-orange, #e26f56);
 	}
 
@@ -201,15 +201,20 @@ $max-button-width: calc(100% / #{$max-button-columns});
 		margin: 0;
 	}
 
-	.wc-blocks-product-collection__editor-product-picker-info {
+	.wc-block-editor-product-collection__product-picker-info {
 		display: flex;
 		align-items: center;
 		gap: $gap-small;
 	}
 
-	.wc-blocks-product-collection__editor-product-picker-selection {
+	.wc-block-editor-product-collection__product-picker-selection {
 		width: 100%;
 	}
+}
+
+// Editor Taxonomy Picker
+.wc-block-editor-product-collection__taxonomy-picker-selection {
+	width: 100%;
 }
 
 // Product to Show Radio Control

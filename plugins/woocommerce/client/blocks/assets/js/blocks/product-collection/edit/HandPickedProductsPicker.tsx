@@ -38,12 +38,12 @@ const HandPickedProductsPicker = ( props: HandPickedProductsPickerProps ) => {
 
 	return (
 		<div { ...blockProps }>
-			<Placeholder className="wc-blocks-product-collection__editor-product-picker">
-				<div className="wc-blocks-product-collection__editor-product-picker-info">
+			<Placeholder className="wc-block-editor-product-collection__product-picker">
+				<div className="wc-block-editor-product-collection__product-picker-info">
 					{ /* @ts-expect-error Icon types are incomplete */ }
 					<Icon
 						icon={ info }
-						className="wc-blocks-product-collection__info-icon"
+						className="wc-block-editor-product-collection__info-icon"
 					/>
 					<span>
 						{ __(
@@ -52,7 +52,7 @@ const HandPickedProductsPicker = ( props: HandPickedProductsPickerProps ) => {
 						) }
 					</span>
 				</div>
-				<div className="wc-blocks-product-collection__editor-product-picker-selection">
+				<div className="wc-block-editor-product-collection__product-picker-selection">
 					{ /* @ts-expect-error Props provided by withSearchedProducts HOC */ }
 					<ProductsControl
 						selected={ selectedProductIds }
