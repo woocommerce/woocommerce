@@ -59,8 +59,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		// translators: %s is the name of the product in cart.
 		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
 
-		// translators: Discount savings label, e.g., "Save $5". %s is the discount amount.
-		$save_format             = _x( 'Save %s', 'Discount savings', 'woocommerce' );
+		/* translators: %s is the discount amount. */
+		$save_format             = __( 'Save %s', 'woocommerce' );
 		$cart_item_discount_span = '<span data-wp-text="state.cartItemDiscount" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"></span>';
 		$cart_item_save_badge    = sprintf( $save_format, $cart_item_discount_span );
 		$line_item_discount_span = '<span data-wp-text="state.lineItemDiscount" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"></span>';
