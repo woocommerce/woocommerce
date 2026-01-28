@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.4.0
+ * @version 10.6.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -29,7 +29,7 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
  * @since 10.6.0
  * @param bool $display_section_divider Whether to display the section divider. Default true.
  */
-$display_section_divider   = apply_filters( 'woocommerce_email_body_display_section_divider', true );
+$display_section_divider   = (bool) apply_filters( 'woocommerce_email_body_display_section_divider', true );
 $heading_class             = $email_improvements_enabled ? 'email-order-detail-heading' : '';
 $order_table_class         = $email_improvements_enabled ? 'email-order-details' : '';
 $order_total_text_align    = $email_improvements_enabled ? 'right' : 'left';
