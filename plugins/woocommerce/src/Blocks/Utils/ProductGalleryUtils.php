@@ -118,16 +118,16 @@ class ProductGalleryUtils {
 		try {
 			if ( $product->is_type( 'variable' ) ) {
 				$variations = $product->get_children();
-					foreach ( $variations as $variation_id ) {
-						$variation = wc_get_product( $variation_id );
-						if ( $variation ) {
-							$variation_image_id = $variation->get_image_id();
-							if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
-								$variation_image_ids[] = strval( $variation_image_id );
-							}
+				foreach ( $variations as $variation_id ) {
+					$variation = wc_get_product( $variation_id );
+					if ( $variation ) {
+						$variation_image_id = $variation->get_image_id();
+						if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
+							$variation_image_ids[] = strval( $variation_image_id );
 						}
 					}
 				}
+			}
 		} catch ( \Exception $e ) {
 			// Log the error but continue execution.
 			error_log( 'Error getting product variation image IDs: ' . $e->getMessage() );
