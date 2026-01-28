@@ -510,7 +510,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( ! $order || ! PointOfSaleOrderUtil::is_pos_order( $order ) || ! $this->order_has_refunds( $order ) ) {
+			if ( ! PointOfSaleOrderUtil::is_pos_order( $order ) || ! $this->order_has_refunds( $order ) ) {
 				return $valid_template_classes;
 			}
 
