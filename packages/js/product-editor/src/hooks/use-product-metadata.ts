@@ -32,11 +32,11 @@ function useProductMetadata( options?: Options ) {
 			// @ts-ignore
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( 'core' );
-			const { meta_data: metadata }: Product = getEditedEntityRecord(
+			const { meta_data: metadata } = getEditedEntityRecord(
 				'postType',
 				postType,
 				id
-			);
+			) as unknown as Product;
 			const isResolutionFinished = hasFinishedResolution(
 				'getEditedEntityRecord',
 				[ 'postType', postType, id ]

@@ -26,18 +26,17 @@ async function getTaxonomiesMissingParents(
 		}
 	} );
 	if ( missingParentIds.length > 0 ) {
-		return (
-			resolveSelect( 'core' )
-				.getEntityRecords( 'taxonomy', taxonomyName, {
-					include: missingParentIds,
-				} )
-				.then( ( parentTaxonomies: Taxonomy[] ) => {
-					return getTaxonomiesMissingParents(
-						[ ...parentTaxonomies, ...taxonomies ],
-						taxonomyName
-					);
-				} )
-		);
+		const parentTaxonomies = await resolveSelect(
+			'core'
+		).getEntityRecords< Taxonomy >( 'taxonomy', taxonomyName, {
+			include: missingParentIds,
+		} );
+		if ( parentTaxonomies ) {
+			return getTaxonomiesMissingParents(
+				[ ...parentTaxonomies, ...taxonomies ],
+				taxonomyName
+			);
+		}
 	}
 	return taxonomies;
 }
@@ -60,19 +59,20 @@ const useTaxonomySearch = (
 		setIsSearching( true );
 		let taxonomies: Taxonomy[] = [];
 		try {
-			taxonomies = await resolveSelect( 'core' ).getEntityRecords(
-				'taxonomy',
-				taxonomyName,
-				{
-					per_page: PAGINATION_SIZE,
-					search: escapeHTML( search ),
+			const results = await resolveSelect(
+				'core'
+			).getEntityRecords< Taxonomy >( 'taxonomy', taxonomyName, {
+				per_page: PAGINATION_SIZE,
+				search: escapeHTML( search ),
+			} );
+			if ( results ) {
+				taxonomies = results;
+				if ( options?.fetchParents ) {
+					taxonomies = await getTaxonomiesMissingParents(
+						taxonomies,
+						taxonomyName
+					);
 				}
-			);
-			if ( options?.fetchParents ) {
-				taxonomies = await getTaxonomiesMissingParents(
-					taxonomies,
-					taxonomyName
-				);
 			}
 		} finally {
 			setIsSearching( false );
