@@ -201,7 +201,7 @@ jobs:
               core.setOutput( 'release-lead', responseBody.data.release_lead );
               core.setOutput( 'release-lead-google-login', responseBody.data.release_lead_google_login );
               core.setOutput( 'release-lead-slack-member-id', responseBody.data.release_lead_slack_member_id );
-              core.setOutput( 'post', responseBody.data.post .view_url);
+              core.setOutput( 'post', responseBody.data.post.view_url );
             }
         env:
           ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
