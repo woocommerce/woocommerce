@@ -284,7 +284,7 @@ jobs:
             git push origin "$UPDATE_BRANCH"
 
             # Determine milestone from woocommerce.php version.
-            milestone=$( cat ./plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+\(-dev\)\?$/.0/' )
+            milestone=$( cat ./plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed -E 's/^([0-9]+\.[0-9]+)\.[0-9]+.*$/\1.0/' )
             echo "Using milestone: '$milestone'."
 
             pr_url=$(gh pr create \
