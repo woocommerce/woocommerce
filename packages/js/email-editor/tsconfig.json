@@ -1,5 +1,5 @@
 {
-	"extends": "../tsconfig",
+	"extends": "@woocommerce/internal-ts-config/tsconfig.json",
 	"compilerOptions": {
 		"rootDir": "src",
 		"outDir": "build-module",
@@ -27,7 +27,11 @@
 		"noImplicitReturns": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"typeRoots": [ "./node_modules/@types" ]
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@woocommerce/internal-ts-config/typings",
+			"./node_modules/@types"
+		]
 	},
 	"include": [
 		"typings/**/*",
