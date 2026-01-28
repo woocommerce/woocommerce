@@ -302,8 +302,7 @@ const { actions, state } = store<
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
 				// Get variations from the products store.
-				const productFromStore =
-					productsState.products[ productId ];
+				const productFromStore = productsState.products[ productId ];
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
 

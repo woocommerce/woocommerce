@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { store } from '@wordpress/interactivity';
-
-/**
- * Internal dependencies
- */
 import type { ProductResponseItem } from '@woocommerce/types';
 
 /**

@@ -462,9 +462,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				// Check stock status from productVariations store.
 				const variationData =
-					productsState.productVariations[
-						matchedVariation.id
-					];
+					productsState.productVariations[ matchedVariation.id ];
 
 				if ( ! variationData ) {
 					// Variation data not loaded - this is a data consistency issue.

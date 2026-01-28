@@ -2,10 +2,6 @@
  * External dependencies
  */
 import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
-
-/**
- * Internal dependencies
- */
 import type {
 	ProductResponseItem,
 	ProductResponseVariationsItem,
