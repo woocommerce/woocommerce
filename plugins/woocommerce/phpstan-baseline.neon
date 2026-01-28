@@ -22183,12 +22183,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/data-stores/class-wc-product-grouped-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Product\:\:get_children\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -22251,12 +22245,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Product\:\:set_visible_children\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
 
