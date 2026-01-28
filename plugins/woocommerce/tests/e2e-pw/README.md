@@ -40,6 +40,13 @@ Start in the repository root folder:
 - `pnpm env:start` (starts the `wp-env` based local environment)
 - `pnpm test:e2e` (runs all the tests in headless mode)
 
+> [!NOTE]
+> The test support files depend on the built version of the `@woocommerce/e2e-utils-playwright` package.
+> If you make changes to this package, you must rebuild it for the changes to take effect:
+> ```bash
+> pnpm --filter='@woocommerce/e2e-utils-playwright' build
+> ```
+
 To re-create the environment for a fresh state:
 
 `pnpm env:restart` (resets and restarts the local environment)
