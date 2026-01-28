@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import ProductControl from '@woocommerce/editor-components/product-control';
 import { SelectedOption } from '@woocommerce/block-hocs';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
-import { useState, useRef } from '@wordpress/element';
+import { useState, useRef, useEffect } from '@wordpress/element';
 import type { WooCommerceBlockLocation } from '@woocommerce/blocks/product-template/utils';
 import { type ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { decodeEntities } from '@wordpress/html-entities';
@@ -187,6 +187,20 @@ const LinkedProductControl = ( {
 	const showSpecificProductSelector = showRadioControl
 		? radioControlState === PRODUCT_REFERENCE_TYPE.SPECIFIC_PRODUCT
 		: ! isEmpty( productReference );
+
+	// Sync initial radio state to attributes on mount.
+	// The UI shows "From current product/cart" selected based on location context.
+	useEffect( () => {
+		if ( ! showRadioControl ) return;
+		if ( query.productReferenceType !== undefined ) return;
+
+		setAttributes( {
+			query: {
+				...query,
+				productReferenceType: isCartLocation || hasCartReference ? 'cart' : null,
+			},
+		} );
+	}, [] );
 
 	const showLinkedProductControl =
 		( showRadioControl || showSpecificProductSelector ) &&
