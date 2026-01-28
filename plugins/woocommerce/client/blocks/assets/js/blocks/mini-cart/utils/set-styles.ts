@@ -17,6 +17,33 @@ function getClosestColor(
 	return getClosestColor( element.parentElement, colorType );
 }
 
+let badgeStyleSheet: CSSStyleSheet | null = null;
+
+let storedBadgeTextColor: string | null = null;
+let storedBadgeBackgroundColor: string | null = null;
+
+/**
+ * This is needed because after iAPI navigation, stylesheet rules may
+ * stop being applied correctly.
+ */
+export function reapplyStyles(): void {
+	if ( ! badgeStyleSheet || ! storedBadgeTextColor ) {
+		return;
+	}
+
+	while ( badgeStyleSheet.cssRules.length > 0 ) {
+		badgeStyleSheet.deleteRule( 0 );
+	}
+
+	badgeStyleSheet.insertRule(
+		`span:where(.wc-block-mini-cart__badge) {
+			background-color: ${ storedBadgeBackgroundColor };
+			color: ${ storedBadgeTextColor };
+		}`,
+		0
+	);
+}
+
 function setStyles() {
 	/**
 	 * Get the background color of the body then set it as the background color
@@ -25,33 +52,39 @@ function setStyles() {
 	 * We only set the background color, instead of the whole background. As
 	 * we only provide the option to customize the background color.
 	 */
-	const style = document.createElement( 'style' );
 	const backgroundColor = getComputedStyle( document.body ).backgroundColor;
 	// For simplicity, we only consider the background color of the first Mini-Cart button.
 	const firstMiniCartButton = document.querySelector(
 		'.wc-block-mini-cart__button'
 	);
-	const badgeTextColor =
+	storedBadgeTextColor =
 		getClosestColor( firstMiniCartButton, 'backgroundColor' ) || '#fff';
-	const badgeBackgroundColor =
+	storedBadgeBackgroundColor =
 		getClosestColor( firstMiniCartButton, 'color' ) || '#000';
 
-	// We use :where here to reduce specificity so customized colors and theme
-	// CSS take priority.
-	// We need to set `div` and `span` in the selector so it has more specificity than the CSS.
-	style.appendChild(
+	const contentsStyle = document.createElement( 'style' );
+	contentsStyle.appendChild(
 		document.createTextNode(
 			`div:where(.wp-block-woocommerce-mini-cart-contents) {
 				background-color: ${ backgroundColor };
-			}
-			span:where(.wc-block-mini-cart__badge) {
-				background-color: ${ badgeBackgroundColor };
-				color: ${ badgeTextColor };
 			}`
 		)
 	);
+	document.head.appendChild( contentsStyle );
 
-	document.head.appendChild( style );
+	badgeStyleSheet = new CSSStyleSheet();
+	badgeStyleSheet.insertRule(
+		`span:where(.wc-block-mini-cart__badge) {
+			background-color: ${ storedBadgeBackgroundColor };
+			color: ${ storedBadgeTextColor };
+		}`,
+		0
+	);
+
+	document.adoptedStyleSheets = [
+		...document.adoptedStyleSheets,
+		badgeStyleSheet,
+	];
 }
 
 export default setStyles;
