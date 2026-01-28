@@ -10,7 +10,8 @@ import {
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import { productsStore } from '@woocommerce/stores/woocommerce/products';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
@@ -56,6 +57,12 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
 /**
  * Check if the attribute value is valid given the other selected attributes and
  * the available variations.
@@ -94,7 +101,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const product = productsStore.state.products[ productDataState.productId ];
+	const product = productsState.products[ productDataState.productId ];
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -334,7 +341,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const product =
-					productsStore.state.products[ productDataState.productId ];
+					productsState.products[ productDataState.productId ];
 				if ( ! product ) {
 					return;
 				}
@@ -402,7 +409,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			setSelectedVariationId: () => {
 				const product =
-					productsStore.state.products[ productDataState.productId ];
+					productsState.products[ productDataState.productId ];
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -428,7 +435,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				actions.clearErrors( 'variable-product' );
 
 				const product =
-					productsStore.state.products[ productDataState.productId ];
+					productsState.products[ productDataState.productId ];
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -455,7 +462,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				// Check stock status from productVariations store.
 				const variationData =
-					productsStore.state.productVariations[
+					productsState.productVariations[
 						matchedVariation.id
 					];
 

@@ -7,12 +7,10 @@ import type {
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import {
-	productsStore,
-	getQuantityConstraints as getQuantityConstraintsFromStore,
-} from '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
@@ -37,6 +35,38 @@ export type AddToCartError = {
 	code: string;
 	group: string;
 	message: string;
+};
+
+/**
+ * Quantity constraints normalized from the Store API format.
+ */
+type QuantityConstraints = {
+	min: number;
+	max: number;
+	step: number;
+};
+
+/**
+ * Extract quantity constraints from a product in Store API format.
+ *
+ * @param product The product in Store API format.
+ * @return Normalized quantity constraints.
+ */
+const getQuantityConstraints = (
+	product: ProductResponseItem | null
+): QuantityConstraints => {
+	if ( ! product ) {
+		return { min: 1, max: Number.MAX_SAFE_INTEGER, step: 1 };
+	}
+
+	const addToCart = product.add_to_cart;
+	const maximum = addToCart?.maximum ?? 0;
+
+	return {
+		min: addToCart?.minimum ?? 1,
+		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
+		step: addToCart?.multiple_of ?? 1,
+	};
 };
 
 /**
@@ -72,6 +102,12 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
 /**
  * Normalize a Store API product into the format expected by consumers.
  *
@@ -81,7 +117,7 @@ const { state: productDataState } = store< ProductDataStore >(
 const normalizeProductFromStore = (
 	product: ProductResponseItem
 ): NormalizedProductData | NormalizedVariationData => {
-	const constraints = getQuantityConstraintsFromStore( product );
+	const constraints = getQuantityConstraints( product );
 
 	return {
 		id: product.id,
@@ -96,7 +132,7 @@ export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
 ): NormalizedProductData | NormalizedVariationData | null => {
-	const productFromStore = productsStore.state.products[ id ];
+	const productFromStore = productsState.products[ id ];
 
 	if ( ! productFromStore ) {
 		return null;
@@ -114,7 +150,7 @@ export const getProductData = (
 
 		if ( matchedVariation ) {
 			const variation =
-				productsStore.state.productVariations[ matchedVariation.id ];
+				productsState.productVariations[ matchedVariation.id ];
 			if ( variation ) {
 				return normalizeProductFromStore( variation );
 			}
@@ -267,7 +303,7 @@ const { actions, state } = store<
 
 				// Get variations from the products store.
 				const productFromStore =
-					productsStore.state.products[ productId ];
+					productsState.products[ productId ];
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
 
