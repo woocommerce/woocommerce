@@ -67,7 +67,7 @@ title
 title "Running tests with environment: '$envName'"
 title
 
-configFile="$SCRIPT_PATH/envs/$envName/playwright.config.js"
+configFile="$SCRIPT_PATH/envs/$envName/playwright.config.ts"
 echo "Using config file: $configFile"
 echo "Arguments: $*"
 title

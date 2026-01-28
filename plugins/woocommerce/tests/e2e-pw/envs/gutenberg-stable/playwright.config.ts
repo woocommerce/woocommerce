@@ -1,0 +1,19 @@
+import type { PlaywrightTestConfig } from '@playwright/test';
+import baseConfig, { setupProjects } from '../../playwright.config';
+import { tags } from '../../fixtures/fixtures';
+
+process.env.USE_WP_ENV = 'true';
+
+const config: PlaywrightTestConfig = {
+	...baseConfig,
+	projects: [
+		...setupProjects,
+		{
+			name: 'Gutenberg',
+			grep: new RegExp( tags.GUTENBERG ),
+			dependencies: [ 'site setup' ],
+		},
+	],
+};
+
+export default config;
