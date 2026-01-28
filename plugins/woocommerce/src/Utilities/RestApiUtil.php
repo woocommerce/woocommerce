@@ -21,7 +21,7 @@ class RestApiUtil {
 	 *     @type float  $nominal_amount The nominal discount amount.
 	 *     @type bool   $free_shipping  Whether free shipping is enabled.
 	 * }
-	 * 
+	 *
 	 * @internal Do not call this function directly. Backward compatibility is not guaranteed.
 	 */
 	public static function get_coupon_data_for_response( WC_Order_Item_Coupon $order_item ): array {

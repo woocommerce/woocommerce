@@ -1318,7 +1318,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			if ( $return_defaults_on_error ) {
 				$data = array();
 			} else {
-				throw new \InvalidArgumentException( __( 'Invalid coupon short info JSON.', 'woocommerce' ) );
+				throw new \InvalidArgumentException( esc_html__( 'Invalid coupon short info JSON.', 'woocommerce' ) );
 			}
 		}
 
