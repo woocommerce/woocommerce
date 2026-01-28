@@ -117,10 +117,7 @@ class ProductGalleryUtils {
 
 		try {
 			if ( $product->is_type( 'variable' ) ) {
-				/** @var int[] $variations */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$variations = $product->get_children();
-				if ( ! empty( $variations ) ) {
-					_prime_post_caches( $variations );
 					foreach ( $variations as $variation_id ) {
 						$variation = wc_get_product( $variation_id );
 						if ( $variation ) {
@@ -131,7 +128,6 @@ class ProductGalleryUtils {
 						}
 					}
 				}
-			}
 		} catch ( \Exception $e ) {
 			// Log the error but continue execution.
 			error_log( 'Error getting product variation image IDs: ' . $e->getMessage() );

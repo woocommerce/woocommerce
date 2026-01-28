@@ -2265,11 +2265,16 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		// Get visible related products then sort them at random.
-		$args['related_products'] = array_filter( array_map( 'wc_get_product', wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() ) ), 'wc_products_array_filter_visible' );
-
-		// Handle orderby.
-		$args['related_products'] = wc_products_array_orderby( $args['related_products'], $args['orderby'], $args['order'] );
+		$related_products    = array();
+		$related_product_ids = wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() );
+		if ( ! empty( $related_product_ids ) ) {
+			_prime_post_caches( $related_product_ids );
+			// Get visible related products then sort them at random.
+			$related_products = array_filter( array_map( 'wc_get_product', $related_product_ids ), 'wc_products_array_filter_visible' );
+			// Handle orderby.
+			$related_products = wc_products_array_orderby( $related_products, $args['orderby'], $args['order'] );
+		}
+		$args['related_products'] = $related_products;
 
 		// Set global loop values.
 		wc_set_loop_prop( 'name', 'related' );
@@ -2319,9 +2324,14 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		 */
 		$limit = intval( apply_filters( 'woocommerce_upsells_total', $args['posts_per_page'] ?? $limit ) );
 
-		// Get visible upsells then sort them at random, then limit result set.
-		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
-		$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
+		$upsells    = array();
+		$upsell_ids = $product->get_upsell_ids();
+		if ( ! empty( $upsell_ids ) ) {
+			_prime_post_caches( $upsell_ids );
+			// Get visible upsells then sort them at random, then limit result set.
+			$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $upsell_ids ), 'wc_products_array_filter_visible' ), $orderby, $order );
+			$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
+		}
 
 		wc_get_template(
 			'single-product/up-sells.php',
