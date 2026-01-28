@@ -14,12 +14,11 @@ import type { ProductCollectionEditComponentProps } from '../types';
 import { getCollectionByName } from '../collections';
 import { setQueryAttribute } from '../utils';
 
-interface HandPickedProductsPickerProps
-	extends ProductCollectionEditComponentProps {
+interface MultiProductPickerProps extends ProductCollectionEditComponentProps {
 	onDone: () => void;
 }
 
-const HandPickedProductsPicker = ( props: HandPickedProductsPickerProps ) => {
+const MultiProductPicker = ( props: MultiProductPickerProps ) => {
 	const { attributes, onDone } = props;
 	const blockProps = useBlockProps();
 
@@ -76,4 +75,4 @@ const HandPickedProductsPicker = ( props: HandPickedProductsPickerProps ) => {
 	);
 };
 
-export default HandPickedProductsPicker;
+export default MultiProductPicker;

@@ -19,7 +19,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 import type { ProductCollectionEditComponentProps } from '../types';
 import { getCollectionByName } from '../collections';
 
-const ProductPicker = (
+const SingleProductPicker = (
 	props: ProductCollectionEditComponentProps & {
 		isDeletedProductReference: boolean;
 	}
@@ -84,4 +84,4 @@ const ProductPicker = (
 	);
 };
 
-export default ProductPicker;
+export default SingleProductPicker;

@@ -20,8 +20,8 @@ import ProductCollectionPlaceholder from './product-collection-placeholder';
 import ProductCollectionContent from './product-collection-content';
 import CollectionSelectionModal from './collection-selection-modal';
 import { useProductCollectionUIState } from '../utils';
-import ProductPicker from './ProductPicker';
-import HandPickedProductsPicker from './HandPickedProductsPicker';
+import SingleProductPicker from './SingleProductPicker';
+import MultiProductPicker from './MultiProductPicker';
 import { useTracksLocation } from '../tracks-utils';
 import { useRegisterEmailCollections } from '../hooks/use-register-email-collections';
 
@@ -92,7 +92,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 		// the picker is shown.
 		if ( isHandPickedCollection && isHandPickedPickerActive ) {
 			return (
-				<HandPickedProductsPicker
+				<MultiProductPicker
 					{ ...props }
 					onDone={ () => setIsHandPickedPickerActive( false ) }
 				/>
@@ -109,14 +109,14 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				);
 			case ProductCollectionUIStatesInEditor.PRODUCT_REFERENCE_PICKER:
 				return (
-					<ProductPicker
+					<SingleProductPicker
 						{ ...props }
 						isDeletedProductReference={ false }
 					/>
 				);
 			case ProductCollectionUIStatesInEditor.DELETED_PRODUCT_REFERENCE:
 				return (
-					<ProductPicker
+					<SingleProductPicker
 						{ ...props }
 						isDeletedProductReference={ true }
 					/>
@@ -125,7 +125,7 @@ const Edit = ( props: ProductCollectionEditComponentProps ) => {
 				// This case is hit when no products are selected
 				// and the picker was previously dismissed but products were removed
 				return (
-					<HandPickedProductsPicker
+					<MultiProductPicker
 						{ ...props }
 						onDone={ () => setIsHandPickedPickerActive( false ) }
 					/>
