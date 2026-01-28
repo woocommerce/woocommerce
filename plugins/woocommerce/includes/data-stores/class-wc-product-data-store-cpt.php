@@ -1664,8 +1664,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Generate SQL.
 		$sql = $wpdb->prepare(
-			"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-			$stock_quantity,
+			"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+			number_format( (float) $stock_quantity, WC_ROUNDING_PRECISION, '.', '' ),
 			$product_id_with_stock
 		);
 
@@ -1704,8 +1704,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			// Generate SQL.
 			$sql = $wpdb->prepare(
-				"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='_stock'",
-				$new_stock,
+				"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='_stock'",
+				number_format( (float) $new_stock, WC_ROUNDING_PRECISION, '.', '' ),
 				$product_id_with_stock
 			);
 		} else {
@@ -1799,8 +1799,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 				$wpdb->query(
 					$wpdb->prepare(
-						"UPDATE {$wpdb->postmeta} SET meta_value = %f WHERE post_id = %d AND meta_key='total_sales'",
-						$quantity,
+						"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE post_id = %d AND meta_key='total_sales'",
+						number_format( (float) $quantity, WC_ROUNDING_PRECISION, '.', '' ),
 						$product_id
 					)
 				);
@@ -1957,13 +1957,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 				// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- an array of placeholders is a valid arg.
 				$term_query = $wpdb->prepare(
-					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s )',
-					array_fill( 0, 4, $like )
+					'( posts.post_title LIKE %s ) OR ( posts.post_excerpt LIKE %s ) OR ( posts.post_content LIKE %s ) OR ( wc_product_meta_lookup.sku LIKE %s ) OR ( wc_product_meta_lookup.global_unique_id LIKE %s )',
+					array_fill( 0, 5, $like )
 				);
 
 				// Variations should also search the parent's meta table for fallback fields.
 				if ( $include_variations ) {
 					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.sku = '' AND parent_wc_product_meta_lookup.sku LIKE %s )", $like );
+					$term_query .= $wpdb->prepare( " OR ( wc_product_meta_lookup.global_unique_id = '' AND parent_wc_product_meta_lookup.global_unique_id LIKE %s )", $like );
 				}
 
 				$term_group_query[] = "( {$term_query} )";
