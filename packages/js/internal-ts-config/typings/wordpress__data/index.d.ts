@@ -268,32 +268,52 @@ declare module '@wordpress/data' {
 		: never;
 
 	/**
-	 * Override dispatch() to use our custom ActionCreatorsOf type
-	 * Multiple overloads for better type inference in different contexts
+	 * Override dispatch() to use our custom ActionCreatorsOf type.
+	 * Supports three modes:
+	 * 1. StoreDescriptor → full typing
+	 * 2. Registered string (in StoreRegistry) → full typing
+	 * 3. Unknown string → `any` fallback
 	 */
 	export function dispatch<T extends StoreDescriptor<AnyConfig>>(
 		storeDescriptor: T
 	): T extends StoreDescriptor<infer Config extends AnyConfig> ? ActionCreatorsOf<Config> : any;
+	export function dispatch<K extends keyof StoreRegistry>(
+		storeDescriptor: K
+	): ActionCreatorsOf<ConfigOf<StoreRegistry[K]>>;
 	export function dispatch(
 		storeDescriptor: string
 	): any;
 
 	/**
 	 * Override select() to use our custom CurriedSelectorsOf type.
+	 * Supports three modes:
+	 * 1. StoreDescriptor → full typing
+	 * 2. Registered string (in StoreRegistry) → full typing
+	 * 3. Unknown string → `any` fallback
 	 */
 	export function select<T extends StoreDescriptor<AnyConfig>>(
 		storeDescriptor: T
 	): CurriedSelectorsOf<T>;
+	export function select<K extends keyof StoreRegistry>(
+		storeDescriptor: K
+	): CurriedSelectorsOf<StoreRegistry[K]>;
 	export function select(
 		storeDescriptor: string
 	): any;
 
 	/**
-	 * Override resolveSelect to use our custom types.
+	 * Override resolveSelect() to use our custom types.
+	 * Supports three modes:
+	 * 1. StoreDescriptor → full typing
+	 * 2. Registered string (in StoreRegistry) → full typing
+	 * 3. Unknown string → `any` fallback
 	 */
 	export function resolveSelect<T extends StoreDescriptor<AnyConfig>>(
 		storeDescriptor: T
 	): CurriedAndPromisifiedSelectorsOf<T>;
+	export function resolveSelect<K extends keyof StoreRegistry>(
+		storeDescriptor: K
+	): CurriedAndPromisifiedSelectorsOf<StoreRegistry[K]>;
 	export function resolveSelect(
 		storeDescriptor: string
 	): any;
@@ -311,11 +331,12 @@ declare module '@wordpress/data' {
 	) => T extends StoreDescriptor<infer Config extends AnyConfig> ? ActionCreatorsOf<Config> : any;
 
 	/**
-	 * Type for the select function parameter in useSelect callbacks
-	 * Using a more explicit interface to help TypeScript resolve overloads
+	 * Type for the select function parameter in useSelect callbacks.
+	 * Supports StoreDescriptor, registered strings, and unknown strings.
 	 */
 	interface SelectFunction {
 		<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedSelectorsOf<T>;
+		<K extends keyof StoreRegistry>(storeDescriptor: K): CurriedSelectorsOf<StoreRegistry[K]>;
 		(storeDescriptor: string): any;
 	}
 
