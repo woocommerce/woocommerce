@@ -159,6 +159,15 @@ export default function MySubscriptions(): JSX.Element {
 					</Notice>
 				) }
 
+			{ wccomSettings?.maybe_deleted_connection && (
+				<Notice
+					id={ 'woo-deleted-connection-notice' }
+					description={ wccomSettings?.maybe_deleted_connection }
+					isDismissible={ false }
+					variant="error"
+				/>
+			) }
+
 			<div className="woocommerce-marketplace__my-subscriptions">
 				<InstallModal />
 				<section className="woocommerce-marketplace__my-subscriptions__notices">

@@ -13,6 +13,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
@@ -21,6 +22,20 @@ use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTrans
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+// Require the deprecated classes for backward compatibility.
+// This will be removed in 11.0.0.
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
 }
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
@@ -211,7 +226,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for PayPal order responses to manage account restriction notices.
 				add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
 
-				$buttons = new WC_Gateway_Paypal_Buttons( $this );
+				$buttons = new PayPalButtons( $this );
 				if ( $buttons->is_enabled() && ! $this->needs_setup() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
@@ -248,7 +263,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
+		$paypal_order_id = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID );
 		if ( empty( $paypal_order_id ) ) {
 			return;
 		}
@@ -263,7 +278,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 * Once an attempt is made (meta exists), we skip to prevent repeated API calls on page reloads.
 		 * The webhook handler will always update the addresses.
 		 */
-		$addresses_update_attempted = $order->meta_exists( '_paypal_addresses_updated' );
+		$addresses_update_attempted = $order->meta_exists( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED );
 		if ( $addresses_update_attempted ) {
 			return;
 		}
@@ -276,7 +291,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
-			$order->update_meta_data( '_paypal_addresses_updated', 'no' );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'no' );
 			$order->save();
 		}
 	}
@@ -380,7 +395,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			self::$log->clear( self::ID );
+			if ( self::$log instanceof WC_Logger ) {
+				self::$log->clear( self::ID );
+			}
 		}
 
 		// Trigger Transact onboarding when settings are saved.
@@ -713,7 +730,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If the order is authorized via legacy API, the '_paypal_status' meta will be 'pending'.
-		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
+		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true );
 
 		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
 			$paypal_request = new PayPalRequest( $this );
@@ -721,7 +738,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		if ( 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
@@ -740,7 +757,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					case 'Completed':
 						/* translators: 1: Amount, 2: Authorization ID, 3: Transaction ID */
 						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						$order->update_meta_data( '_paypal_status', $result->PAYMENTSTATUS );
+						$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $result->PAYMENTSTATUS );
 						$order->set_transaction_id( $result->TRANSACTIONID );
 						$order->save();
 						break;
@@ -783,7 +800,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
-		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$buttons           = new PayPalButtons( $this );
 		$options           = $buttons->get_common_options();
 
 		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
@@ -824,7 +841,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function add_paypal_sdk_attributes( $attrs ) {
 		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
-			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$buttons   = new PayPalButtons( $this );
 			$page_type = $buttons->get_page_type();
 
 			$attrs['data-page-type']              = $page_type;

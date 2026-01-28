@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add instanceof/is_callable checks to the `clear` method of `WC_Logger`

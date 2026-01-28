@@ -54,6 +54,45 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	}
 
 	/**
+	 * Get the hooks relevant to response caching.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of hook names to track for cache invalidation.
+	 */
+	protected function get_hooks_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		return array(
+			'woocommerce_rest_prepare_product_variation_object',
+			'woocommerce_product_type_query',
+			'woocommerce_product_class',
+			'woocommerce_short_description',
+			'woocommerce_rest_product_variation_object_query',
+		);
+	}
+
+	/**
+	 * Get the version strings relevant to response caching.
+	 *
+	 * For the variations collection endpoint (get_variations), this returns the
+	 * list_product_variations_{product_id} version string which is invalidated when
+	 * variations for that product are created, deleted, or change status.
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request     The request object.
+	 * @param string|null                           $endpoint_id Optional endpoint identifier.
+	 * @return array Array of version string IDs to track for cache invalidation.
+	 */
+	protected function get_version_strings_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		if ( 'get_variations' === $endpoint_id ) {
+			$product_id = $request->get_param( 'product_id' );
+			if ( $product_id ) {
+				return array( "list_product_variations_{$product_id}" );
+			}
+		}
+
+		return array();
+	}
+
+	/**
 	 * Register the routes for products.
 	 */
 	public function register_routes() {
@@ -587,8 +626,10 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $object->get_id() ) ) {
 			return new WP_Error(
+				"woocommerce_rest_user_cannot_delete_{$this->post_type}",
 				/* translators: %s: post type */
-				"woocommerce_rest_user_cannot_delete_{$this->post_type}", sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ), array(
+				sprintf( __( 'Sorry, you are not allowed to delete %s.', 'woocommerce' ), $this->post_type ),
+				array(
 					'status' => rest_authorization_required_code(),
 				)
 			);
@@ -605,8 +646,10 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			// If we don't support trashing for this type, error out.
 			if ( ! $supports_trash ) {
 				return new WP_Error(
+					'woocommerce_rest_trash_not_supported',
 					/* translators: %s: post type */
-					'woocommerce_rest_trash_not_supported', sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ), array(
+					sprintf( __( 'The %s does not support trashing.', 'woocommerce' ), $this->post_type ),
+					array(
 						'status' => 501,
 					)
 				);
@@ -616,8 +659,10 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 			if ( is_callable( array( $object, 'get_status' ) ) ) {
 				if ( 'trash' === $object->get_status() ) {
 					return new WP_Error(
+						'woocommerce_rest_already_trashed',
 						/* translators: %s: post type */
-						'woocommerce_rest_already_trashed', sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ), array(
+						sprintf( __( 'The %s has already been deleted.', 'woocommerce' ), $this->post_type ),
+						array(
 							'status' => 410,
 						)
 					);
@@ -630,8 +675,10 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 
 		if ( ! $result ) {
 			return new WP_Error(
+				'woocommerce_rest_cannot_delete',
 				/* translators: %s: post type */
-				'woocommerce_rest_cannot_delete', sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ), array(
+				sprintf( __( 'The %s cannot be deleted.', 'woocommerce' ), $this->post_type ),
+				array(
 					'status' => 500,
 				)
 			);

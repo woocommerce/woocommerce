@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Customer data store: Optimize SQL queries to retrieve user-specific order statistics, including order count, last order, and total amount spent.

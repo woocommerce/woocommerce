@@ -57,6 +57,16 @@ class PaymentResult {
 	}
 
 	/**
+	 * Get payment status.
+	 *
+	 * @since 10.5.0
+	 * @return string Current payment status.
+	 */
+	public function get_status(): string {
+		return $this->status;
+	}
+
+	/**
 	 * Set payment status.
 	 *
 	 * @throws \Exception When an invalid status is provided.

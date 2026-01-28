@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WC_Geolocation::geolocate_ip() doesn't use fallback if MaxMind integration is disabled.
