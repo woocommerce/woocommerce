@@ -31,6 +31,14 @@ import { translateJQueryEventToNative } from '../../base/stores/woocommerce/lega
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+type MiniCartConfig = {
+	onCartClickBehaviour: string;
+	checkoutUrl: string;
+	displayCartPriceIncludingTax: boolean;
+	buttonAriaLabelTemplate: string;
+	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
+};
+
 const { currency, placeholderImgSrc } = getConfig(
 	'woocommerce'
 ) as WooCommerceConfig;
@@ -40,13 +48,7 @@ const {
 	displayCartPriceIncludingTax,
 	buttonAriaLabelTemplate,
 	productCountVisibility,
-} = getConfig( 'woocommerce/mini-cart' ) as {
-	onCartClickBehaviour: string;
-	checkoutUrl: string;
-	displayCartPriceIncludingTax: boolean;
-	buttonAriaLabelTemplate: string;
-	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
-};
+} = getConfig( 'woocommerce/mini-cart' ) as MiniCartConfig;
 const {
 	reduceQuantityLabel,
 	increaseQuantityLabel,
