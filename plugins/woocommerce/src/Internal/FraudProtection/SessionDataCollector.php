@@ -138,14 +138,15 @@ class SessionDataCollector {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @return array Session data array with 6 keys.
+	 * @return array Session data array with 7 keys.
 	 */
 	private function get_session_data(): array {
 		try {
-			$session_id = $this->session_clearance_manager->get_session_id();
-			$ip_address = $this->get_ip_address();
-			$email      = $this->get_email();
-			$user_agent = $this->get_user_agent();
+			$session_id          = $this->session_clearance_manager->get_session_id();
+			$blackbox_session_id = $this->session_clearance_manager->get_blackbox_session_id();
+			$ip_address          = $this->get_ip_address();
+			$email               = $this->get_email();
+			$user_agent          = $this->get_user_agent();
 
 			/**
 			 * $is_user_session is flag that we have a real browser session vs API-based interaction.
@@ -154,22 +155,24 @@ class SessionDataCollector {
 			$is_user_session = 'no-session' !== $session_id;
 
 			return array(
-				'session_id'      => $session_id,
-				'ip_address'      => $ip_address,
-				'email'           => $email,
-				'ja3_hash'        => null,
-				'user_agent'      => $user_agent,
-				'is_user_session' => $is_user_session,
+				'session_id'          => $session_id,
+				'blackbox_session_id' => $blackbox_session_id,
+				'ip_address'          => $ip_address,
+				'email'               => $email,
+				'ja3_hash'            => null,
+				'user_agent'          => $user_agent,
+				'is_user_session'     => $is_user_session,
 			);
 		} catch ( \Exception $e ) {
 			// Graceful degradation - return structure with null values.
 			return array(
-				'session_id'      => null,
-				'ip_address'      => null,
-				'email'           => null,
-				'ja3_hash'        => null,
-				'user_agent'      => null,
-				'is_user_session' => false,
+				'session_id'          => null,
+				'blackbox_session_id' => null,
+				'ip_address'          => null,
+				'email'               => null,
+				'ja3_hash'            => null,
+				'user_agent'          => null,
+				'is_user_session'     => false,
 			);
 		}
 	}

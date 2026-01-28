@@ -73,13 +73,12 @@ class BlackboxIntegrationTest extends WC_Unit_Test_Case {
 			->method( 'set_blackbox_session_id' )
 			->with( $session_id );
 
+		// blackbox_session_id is now included in session data via SessionDataCollector,
+		// so dispatch_event is called with an empty array.
 		$this->dispatcher
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
-			->with(
-				'checkout',
-				array( 'blackbox_session_id' => $session_id )
-			);
+			->with( 'checkout' );
 
 		$this->sut->process_blackbox_session( $session_id );
 
@@ -122,10 +121,7 @@ class BlackboxIntegrationTest extends WC_Unit_Test_Case {
 		$this->dispatcher
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
-			->with(
-				'checkout',
-				array( 'blackbox_session_id' => '' )
-			);
+			->with( 'checkout' );
 
 		$this->sut->process_blackbox_session( '' );
 
@@ -149,10 +145,7 @@ class BlackboxIntegrationTest extends WC_Unit_Test_Case {
 		$this->dispatcher
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
-			->with(
-				'checkout',
-				array( 'blackbox_session_id' => $session_id )
-			);
+			->with( 'checkout' );
 
 		$this->sut->handle_blocks_session_id(
 			array( 'blackbox_session_id' => $session_id )
@@ -174,10 +167,7 @@ class BlackboxIntegrationTest extends WC_Unit_Test_Case {
 		$this->dispatcher
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
-			->with(
-				'checkout',
-				array( 'blackbox_session_id' => '' )
-			);
+			->with( 'checkout' );
 
 		$this->sut->handle_blocks_session_id( array() );
 	}
@@ -199,10 +189,7 @@ class BlackboxIntegrationTest extends WC_Unit_Test_Case {
 		$this->dispatcher
 			->expects( $this->once() )
 			->method( 'dispatch_event' )
-			->with(
-				'checkout',
-				array( 'blackbox_session_id' => $session_id )
-			);
+			->with( 'checkout' );
 
 		$this->sut->handle_shortcode_session_id( $session_id );
 	}
@@ -221,18 +208,22 @@ class BlackboxIntegrationTest extends WC_Unit_Test_Case {
 			->method( 'get_session_id' )
 			->willReturn( 'wc_session_456' );
 
-		$this->dispatcher
+		// Verify that the session_id is sanitized when stored (no HTML tags).
+		$this->session_manager
 			->expects( $this->once() )
-			->method( 'dispatch_event' )
+			->method( 'set_blackbox_session_id' )
 			->with(
-				'checkout',
 				$this->callback(
-					function ( $data ) {
-						// Session ID should be sanitized (no HTML tags).
-						return ! str_contains( $data['blackbox_session_id'], '<script>' );
+					function ( $session_id ) {
+						return ! str_contains( $session_id, '<script>' );
 					}
 				)
 			);
+
+		$this->dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' )
+			->with( 'checkout' );
 
 		$this->sut->handle_shortcode_session_id( $malicious_input );
 	}

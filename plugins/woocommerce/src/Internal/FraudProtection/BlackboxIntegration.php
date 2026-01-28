@@ -156,19 +156,15 @@ class BlackboxIntegration {
 			)
 		);
 
-		// Store the blackbox session ID (even if empty).
+		// Store the blackbox session ID in the WC session.
+		// SessionDataCollector will include it in the 'session' data when collecting event data.
 		if ( ! empty( $session_id ) ) {
 			$this->session_manager->set_blackbox_session_id( $session_id );
 		}
 
-		// Always dispatch checkout event to WPCOM - let server-side decide.
-		// Even without session_id, Blackbox may have other signals.
-		$this->dispatcher->dispatch_event(
-			'checkout',
-			array(
-				'blackbox_session_id' => $session_id,
-			)
-		);
+		// Dispatch checkout event to WPCOM - let server-side decide.
+		// The blackbox_session_id is included in session data via SessionDataCollector.
+		$this->dispatcher->dispatch_event( 'checkout' );
 	}
 
 	/**
