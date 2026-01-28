@@ -104,7 +104,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		</tbody>
 	</table>
 	<?php if ( $display_section_divider ) : ?>
-		<hr style="border: 0; border-top: 1px solid #1E1E1E33; margin: 20px 0;">
+		<hr style="border: 0; border-top: 1px solid #1E1E1E; border-top-color: rgba(30, 30, 30, 0.2); margin: 20px 0;">
 	<?php endif; ?>
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
 		<?php
@@ -143,7 +143,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 	</table>
 	<?php if ( $order->get_customer_note() && $email_improvements_enabled ) { ?>
 		<?php if ( $display_section_divider ) : ?>
-			<hr style="border: 0; border-top: 1px solid #1E1E1E33; margin: 20px 0;">
+			<hr style="border: 0; border-top: 1px solid #1E1E1E; border-top-color: rgba(30, 30, 30, 0.2); margin: 20px 0;">
 		<?php endif; ?>
 		<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1" role="presentation">
 			<tr class="order-customer-note">

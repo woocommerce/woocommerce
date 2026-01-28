@@ -36,7 +36,7 @@ $display_section_divider = (bool) apply_filters( 'woocommerce_email_body_display
 
 ?>
 <?php if ( $display_section_divider ) : ?>
-	<hr style="border: 0; border-top: 1px solid #1E1E1E33; margin: 20px 0;">
+	<hr style="border: 0; border-top: 1px solid #1E1E1E; border-top-color: rgba(30, 30, 30, 0.2); margin: 20px 0;">
 <?php endif; ?>
 <table id="addresses" cellspacing="0" cellpadding="0" style="width: 100%; vertical-align: top; margin-bottom: <?php echo $email_improvements_enabled ? '0' : '40px'; ?>; padding:0;" border="0" role="presentation">
 	<tr>
