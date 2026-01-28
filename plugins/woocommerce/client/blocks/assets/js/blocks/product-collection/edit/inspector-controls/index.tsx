@@ -150,6 +150,39 @@ const ProductCollectionInspectorControls = (
 		query,
 	};
 
+	/**
+	 * Renders the collection-specific control based on the collection type.
+	 * These controls are placed at the top for easy access when editing.
+	 */
+	const renderCollectionSpecificControl = () => {
+		switch ( collection ) {
+			case CoreCollectionNames.HAND_PICKED:
+				return (
+					<PanelBody>
+						<HandPickedProductsControlField
+							{ ...queryControlProps }
+						/>
+					</PanelBody>
+				);
+			case CoreCollectionNames.BY_CATEGORY:
+			case CoreCollectionNames.BY_TAG:
+			case CoreCollectionNames.BY_BRAND:
+				return (
+					<PanelBody>
+						<TaxonomyControls
+							{ ...queryControlProps }
+							collection={ collection }
+							renderMode="standalone"
+						/>
+					</PanelBody>
+				);
+			case CoreCollectionNames.RELATED:
+				return <RelatedByControl { ...queryControlProps } />;
+			default:
+				return null;
+		}
+	};
+
 	return (
 		<InspectorControls>
 			<LinkedProductControl
@@ -159,49 +192,7 @@ const ProductCollectionInspectorControls = (
 				location={ props.location }
 			/>
 
-			{
-				/**
-				 * "Hand-Picked" collection-specific control.
-				 * Placed at the top for easy access when editing product selection.
-				 * Only rendered when ProductCollectionContent is shown (not during picker).
-				 */
-				collection === CoreCollectionNames.HAND_PICKED && (
-					<PanelBody>
-						<HandPickedProductsControlField
-							{ ...queryControlProps }
-						/>
-					</PanelBody>
-				)
-			}
-
-			{
-				/**
-				 * "By Taxonomy" collection-specific control.
-				 * Placed at the top for easy access when editing taxonomy selection.
-				 * Only rendered when ProductCollectionContent is shown (not during picker).
-				 */
-				( collection === CoreCollectionNames.BY_CATEGORY ||
-					collection === CoreCollectionNames.BY_TAG ||
-					collection === CoreCollectionNames.BY_BRAND ) && (
-					<PanelBody>
-						<TaxonomyControls
-							{ ...queryControlProps }
-							collection={ collection }
-							renderMode="standalone"
-						/>
-					</PanelBody>
-				)
-			}
-
-			{
-				/**
-				 * "Related Products" collection-specific control.
-				 * Placed at the top for easy access when editing related products criteria.
-				 */
-				collection === CoreCollectionNames.RELATED && (
-					<RelatedByControl { ...queryControlProps } />
-				)
-			}
+			{ renderCollectionSpecificControl() }
 
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
