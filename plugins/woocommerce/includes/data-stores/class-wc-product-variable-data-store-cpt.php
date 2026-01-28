@@ -316,7 +316,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				/** @var int[] $variation_ids */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$variation_ids = $product->get_visible_children();
 
-				if ( array() !== $variation_ids ) {
+				if ( ! empty( $variation_ids ) ) {
 					_prime_post_caches( $variation_ids );
 				}
 
