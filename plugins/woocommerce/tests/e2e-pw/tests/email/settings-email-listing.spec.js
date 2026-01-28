@@ -67,7 +67,7 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		// Check that first row shows Active status
 		const firstRow = listViewLocator.locator( 'tr' ).nth( 1 ); // nth(1) because nth(0) is header row
 		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
-			'Enabled'
+			'Active'
 		);
 
 		// Open the first row more actions menu
@@ -97,7 +97,7 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 
 		// Check that the email status is now Active again
 		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
-			'Enabled'
+			'Active'
 		);
 
 		// I want to check that search works

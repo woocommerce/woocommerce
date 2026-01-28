@@ -110,17 +110,6 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	const actions = useMemo(
 		() => [
 			{
-				id: 'preview',
-				label: __( 'Preview', 'woocommerce' ),
-				icon: <Icon icon={ external } />,
-				supportsBulk: false,
-				callback: ( items: EmailType[] ) => {
-					window.open( items[ 0 ].link );
-				},
-				isEligible: ( item: EmailType ) => !! item.post_id,
-				isPrimary: true,
-			},
-			{
 				id: 'edit',
 				label: __( 'Edit', 'woocommerce' ),
 				icon: <Icon icon={ edit } />,
@@ -141,6 +130,17 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 						);
 					}
 				},
+			},
+			{
+				id: 'preview',
+				label: __( 'Preview', 'woocommerce' ),
+				icon: <Icon icon={ external } />,
+				supportsBulk: false,
+				callback: ( items: EmailType[] ) => {
+					window.open( items[ 0 ].link );
+				},
+				isEligible: ( item: EmailType ) => !! item.post_id,
+				isPrimary: true,
 			},
 			{
 				id: 'test',

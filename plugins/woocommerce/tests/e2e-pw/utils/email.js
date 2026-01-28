@@ -96,10 +96,13 @@ export async function getWooEmails( params ) {
  */
 export async function accessTheEmailEditor( page, emailTitle = 'New order' ) {
 	await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
-	await page
-		.getByRole( 'row', { name: new RegExp( emailTitle ) } )
-		.getByLabel( 'Edit' )
+	const theRow = page.getByRole( 'row', {
+		name: new RegExp( emailTitle ),
+	} );
+	await theRow
+		.getByRole( 'button', { name: 'Actions', exact: true } )
 		.click();
+	await page.getByRole( 'menuitem', { name: 'Edit', exact: true } ).click();
 	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible();
 }
 
