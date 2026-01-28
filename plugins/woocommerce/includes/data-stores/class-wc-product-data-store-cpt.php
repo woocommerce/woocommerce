@@ -1510,7 +1510,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$child_ids           = $product->get_children();
 		$existing_attributes = array();
 
-		if ( ! empty ( $child_ids ) ) {
+		if ( ! empty( $child_ids ) ) {
 			_prime_post_caches( $child_ids );
 
 			// Get existing variations so we don't create duplicates.
