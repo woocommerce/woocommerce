@@ -159,6 +159,21 @@ const ProductCollectionInspectorControls = (
 				location={ props.location }
 			/>
 
+			{
+				/**
+				 * "Hand-Picked" collection-specific control.
+				 * Placed at the top for easy access when editing product selection.
+				 * Only rendered when ProductCollectionContent is shown (not during picker).
+				 */
+				collection === CoreCollectionNames.HAND_PICKED && (
+					<PanelBody>
+						<HandPickedProductsControlField
+							{ ...queryControlProps }
+						/>
+					</PanelBody>
+				)
+			}
+
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
@@ -265,12 +280,14 @@ const isProductCollection = ( blockName: string ) =>
 const CollectionSpecificControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
-	const { collection } = props.attributes;
+	const { attributes, context } = props;
+	const { collection } = attributes;
+
 	const setQueryAttributeBind = useMemo(
 		() => setQueryAttribute.bind( null, props ),
 		[ props ]
 	);
-	const tracksLocation = useTracksLocation( props.context.templateSlug );
+	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) => {
 		return recordEvent(
 			'blocks_product_collection_inspector_control_clicked',
@@ -284,27 +301,16 @@ const CollectionSpecificControls = (
 	const queryControlProps = {
 		setQueryAttribute: setQueryAttributeBind,
 		trackInteraction,
-		query: props.attributes.query,
+		query: attributes.query,
 	};
 
-	const isByCategoryOrTag =
+	const isByTaxonomy =
 		collection === CoreCollectionNames.BY_CATEGORY ||
-		collection === CoreCollectionNames.BY_TAG;
+		collection === CoreCollectionNames.BY_TAG ||
+		collection === CoreCollectionNames.BY_BRAND;
 
 	return (
 		<InspectorControls>
-			{
-				/**
-				 * "Hand-Picked" collection-specific controls.
-				 */
-				collection === CoreCollectionNames.HAND_PICKED && (
-					<PanelBody>
-						<HandPickedProductsControlField
-							{ ...queryControlProps }
-						/>
-					</PanelBody>
-				)
-			}
 			{
 				/**
 				 * "Related Products" collection-specific controls.
@@ -315,9 +321,9 @@ const CollectionSpecificControls = (
 			}
 			{
 				/**
-				 * "Category and Tag" collection-specific controls.
+				 * "By Taxonomy" collection-specific controls.
 				 */
-				isByCategoryOrTag && (
+				isByTaxonomy && (
 					<PanelBody>
 						<TaxonomyControls
 							{ ...queryControlProps }

@@ -33,6 +33,9 @@ declare global {
 	interface Window {
 		wcSettings: {
 			timeZone?: string;
+			admin?: {
+				timeZone?: string;
+			};
 		};
 	}
 }
@@ -1073,6 +1076,55 @@ describe( 'getStoreTimeZoneMoment', () => {
 
 		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '-04:00' );
+	} );
+
+	it( 'should fall back to wcSettings.admin.timeZone when wcSettings.timeZone is not set', () => {
+		global.window.wcSettings = {
+			admin: {
+				timeZone: 'America/New_York',
+			},
+		};
+
+		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+
+		getStoreTimeZoneMoment();
+
+		expect( mockTz ).toHaveBeenCalledWith( 'America/New_York' );
+		expect( utcOffset ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should use wcSettings.admin.timeZone utc offset when wcSettings.timeZone is not set', () => {
+		global.window.wcSettings = {
+			admin: {
+				timeZone: '+05:00',
+			},
+		};
+
+		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+
+		getStoreTimeZoneMoment();
+
+		expect( mockTz ).not.toHaveBeenCalled();
+		expect( utcOffset ).toHaveBeenCalledWith( '+05:00' );
+	} );
+
+	it( 'should prefer wcSettings.timeZone over wcSettings.admin.timeZone', () => {
+		global.window.wcSettings = {
+			timeZone: 'Europe/London',
+			admin: {
+				timeZone: 'America/New_York',
+			},
+		};
+
+		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+
+		getStoreTimeZoneMoment();
+
+		expect( mockTz ).toHaveBeenCalledWith( 'Europe/London' );
+		expect( utcOffset ).not.toHaveBeenCalled();
 	} );
 } );
 

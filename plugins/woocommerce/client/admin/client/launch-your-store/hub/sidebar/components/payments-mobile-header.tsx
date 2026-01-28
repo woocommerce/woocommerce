@@ -64,7 +64,10 @@ export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
 				aria-label={ __( 'Go back', 'woocommerce' ) }
 			/>
 			<h1 className="mobile-header__title">
-				{ __( 'Set up WooPayments', 'woocommerce' ) }
+				{
+					/* translators: %s: Payment provider name (e.g., WooPayments) */
+					sprintf( __( 'Set up %s', 'woocommerce' ), 'WooPayments' )
+				}
 			</h1>
 			<div className="mobile-header__steps">
 				{ /* translators: %1$s: current step number, %2$s: total number of steps */ }
