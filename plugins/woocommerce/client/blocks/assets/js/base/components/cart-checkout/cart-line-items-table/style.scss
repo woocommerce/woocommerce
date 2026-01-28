@@ -45,6 +45,19 @@ table.wc-block-cart-items {
 		}
 		.wc-block-cart-item__prices {
 			@include font-small-locked;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			gap: $gap-smaller;
+
+			.price {
+				display: flex;
+				align-items: center;
+
+				&[hidden] {
+					display: none;
+				}
+			}
 		}
 
 		.wc-block-cart-item__quantity {
