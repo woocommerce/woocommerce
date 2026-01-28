@@ -115,6 +115,7 @@ class Renderer {
 		}
 
 		wp_enqueue_script_module( 'woocommerce/product-collection' );
+		wp_enqueue_script_module( 'woocommerce/product-collection-cross-sells' );
 
 		ob_start();
 		?>
@@ -198,6 +199,7 @@ class Renderer {
 				$query                  = $block['attrs']['query'] ?? array();
 				$product_reference_type = $query['productReferenceType'] ?? null;
 				if ( 'cart' === $product_reference_type ) {
+					wp_enqueue_script_module( 'woocommerce/product-collection-cross-sells' );
 					$p->set_attribute( 'data-product-reference-type', 'cart' );
 					$p->set_attribute( 'data-wp-watch--mini-cart', 'callbacks.onMiniCartOpen' );
 				}

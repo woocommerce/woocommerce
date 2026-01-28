@@ -38,6 +38,10 @@ const entries = {
 	'woocommerce/add-to-cart-with-options-quantity-selector':
 		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
 
+	// Product Collection cross-sells store part. Conditionally enqueued for cart-referencing collections.
+	'woocommerce/product-collection-cross-sells':
+		'./assets/js/blocks/product-collection/cross-sells-frontend.ts',
+
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',

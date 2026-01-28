@@ -11,7 +11,6 @@ import {
 	triggerViewedProductEvent,
 } from './legacy-events';
 import { CoreCollectionNames } from './types';
-import type { MiniCart } from '../mini-cart/iapi-frontend';
 import './style.scss';
 
 export type ProductCollectionStoreContext = {
@@ -150,8 +149,6 @@ function isValidEvent( event: MouseEvent ): boolean {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-let wasMiniCartOpen = false;
-
 const productCollectionStore = {
 	actions: {
 		*navigate( event: MouseEvent ) {
@@ -273,36 +270,9 @@ const productCollectionStore = {
 
 			observer.observe( scrollableElement );
 		},
-		/**
-		 * Watches Mini Cart's drawer state and refreshes cart-referencing
-		 * Product Collections (e.g., cross-sells) when the drawer opens.
-		 * This is needed because Product Collections are SSR'd at page load,
-		 * so they don't automatically update when cart items change.
-		 */
-		*onMiniCartOpen() {
-			const { state: miniCartState } = store< MiniCart >(
-				'woocommerce/mini-cart',
-				{},
-				{ lock: universalLock }
-			);
-
-			const isOpen = miniCartState.isOpen;
-			const wasOpen = wasMiniCartOpen;
-			wasMiniCartOpen = isOpen;
-
-			// Only refresh on transition from closed to open.
-			if ( ! isOpen || isOpen === wasOpen ) {
-				return;
-			}
-
-			const { actions: routerActions } = yield import(
-				'@wordpress/interactivity-router'
-			);
-			yield routerActions.navigate( window.location.href );
-		},
 	},
 };
 
 store( 'woocommerce/product-collection', productCollectionStore, {
-	lock: true,
+	lock: universalLock,
 } );
