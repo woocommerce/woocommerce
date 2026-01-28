@@ -536,7 +536,7 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 					function ( $event_data ) use ( $order ) {
 						return isset( $event_data['order_id'] )
 							&& $order->get_id() === $event_data['order_id']
-							&& isset( $event_data['status'] )
+							&& isset( $event_data['order_status'] )
 							&& isset( $event_data['payment_method'] )
 							&& isset( $event_data['total'] );
 					}
