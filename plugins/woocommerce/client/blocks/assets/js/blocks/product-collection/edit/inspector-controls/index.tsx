@@ -193,6 +193,16 @@ const ProductCollectionInspectorControls = (
 				)
 			}
 
+			{
+				/**
+				 * "Related Products" collection-specific control.
+				 * Placed at the top for easy access when editing related products criteria.
+				 */
+				collection === CoreCollectionNames.RELATED && (
+					<RelatedByControl { ...queryControlProps } />
+				)
+			}
+
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
 				resetAll={ () => {
@@ -295,61 +305,3 @@ export default ProductCollectionInspectorControls;
 
 const isProductCollection = ( blockName: string ) =>
 	blockName === metadata.name;
-
-const CollectionSpecificControls = (
-	props: ProductCollectionEditComponentProps
-) => {
-	const { attributes, context } = props;
-	const { collection } = attributes;
-
-	const setQueryAttributeBind = useMemo(
-		() => setQueryAttribute.bind( null, props ),
-		[ props ]
-	);
-	const tracksLocation = useTracksLocation( context.templateSlug );
-	const trackInteraction = ( filter: FilterName ) => {
-		return recordEvent(
-			'blocks_product_collection_inspector_control_clicked',
-			{
-				collection,
-				location: tracksLocation,
-				filter,
-			}
-		);
-	};
-	const queryControlProps = {
-		setQueryAttribute: setQueryAttributeBind,
-		trackInteraction,
-		query: attributes.query,
-	};
-
-	return (
-		<InspectorControls>
-			{
-				/**
-				 * "Related Products" collection-specific controls.
-				 */
-				collection === CoreCollectionNames.RELATED && (
-					<RelatedByControl { ...queryControlProps } />
-				)
-			}
-		</InspectorControls>
-	);
-};
-
-const withCollectionSpecificControls =
-	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
-	( props: ProductCollectionEditComponentProps ) => {
-		if ( ! isProductCollection( props.name ) ) {
-			return <BlockEdit { ...props } />;
-		}
-
-		return (
-			<>
-				<CollectionSpecificControls { ...props } />
-				<BlockEdit { ...props } />
-			</>
-		);
-	};
-
-addFilter( 'editor.BlockEdit', metadata.name, withCollectionSpecificControls );
