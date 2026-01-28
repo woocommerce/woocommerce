@@ -1514,9 +1514,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			_prime_post_caches( $child_ids );
 
 			// Get existing variations so we don't create duplicates.
-			$existing_variations = array_map( 'wc_get_product', $child_ids );
-			foreach ( $existing_variations as $existing_variation ) {
-				$existing_attributes[] = $existing_variation->get_attributes();
+			foreach ( $child_ids as $child_id ) {
+				$child = wc_get_product( $child_id );
+				if ( $child ) {
+					$existing_attributes[] = $child->get_attributes();
+				}
 			}
 		}
 
