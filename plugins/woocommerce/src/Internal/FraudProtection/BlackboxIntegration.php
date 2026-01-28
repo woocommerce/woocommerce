@@ -227,20 +227,21 @@ class BlackboxIntegration {
 			array( 'in_footer' => true )
 		);
 
-		// Check if session is already verified (to prevent infinite reload on add-payment-method).
-		// Use !is_session_pending() since both ALLOWED and BLOCKED are "verified" states.
-		$session_verified = ! $this->session_manager->is_session_pending();
+		// Check if session was verified recently (to prevent infinite reload on add-payment-method).
+		// This uses a timestamp-based check: if verification happened within 10 seconds,
+		// we know this is a post-reload page load and should skip re-verification.
+		$recently_verified = $this->session_manager->was_verified_recently( 10 );
 
 		wp_localize_script(
 			'wc-fraud-protection-checkout',
 			'wcFraudProtection',
 			array(
-				'checkoutType'    => $checkout_type,
-				'namespace'       => 'woocommerce/fraud-protection',
-				'timeoutMs'       => 5000,
-				'ajaxUrl'         => \WC_AJAX::get_endpoint( 'fraud_protection_verify' ),
-				'nonce'           => wp_create_nonce( 'fraud-protection-verify' ),
-				'sessionVerified' => $session_verified,
+				'checkoutType'      => $checkout_type,
+				'namespace'         => 'woocommerce/fraud-protection',
+				'timeoutMs'         => 5000,
+				'ajaxUrl'           => \WC_AJAX::get_endpoint( 'fraud_protection_verify' ),
+				'nonce'             => wp_create_nonce( 'fraud-protection-verify' ),
+				'recentlyVerified'  => $recently_verified,
 			)
 		);
 	}

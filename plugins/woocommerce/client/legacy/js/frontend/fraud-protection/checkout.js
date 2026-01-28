@@ -170,14 +170,15 @@
 				triggerShortcodeUpdate( sessionId );
 				break;
 			case 'add-payment-method':
-				// Skip if already verified (prevents infinite reload loop).
-				if ( ! config.sessionVerified ) {
-					await verifyAndReload( sessionId );
-				} else {
+				// Skip if verified recently (prevents infinite reload loop after verification).
+				// Uses timestamp-based check: if verification happened within 10 seconds, skip.
+				if ( config.recentlyVerified ) {
 					// eslint-disable-next-line no-console
 					console.log(
-						'[FraudProtection] Session already verified, skipping verification'
+						'[FraudProtection] Recently verified, skipping verification'
 					);
+				} else {
+					await verifyAndReload( sessionId );
 				}
 				break;
 		}

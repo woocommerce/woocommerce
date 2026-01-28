@@ -54,6 +54,11 @@ class SessionClearanceManager {
 	private const BLACKBOX_SESSION_KEY = '_fraud_protection_blackbox_session_id';
 
 	/**
+	 * Session key for storing verification timestamp.
+	 */
+	private const VERIFICATION_TIMESTAMP_KEY = '_fraud_protection_verification_timestamp';
+
+	/**
 	 * Session key for storing the event queue.
 	 */
 	private const EVENT_QUEUE_KEY = '_fraud_protection_event_queue';
@@ -203,6 +208,27 @@ class SessionClearanceManager {
 			return;
 		}
 		WC()->session->set( self::BLACKBOX_SESSION_KEY, $session_id );
+		WC()->session->set( self::VERIFICATION_TIMESTAMP_KEY, time() );
+	}
+
+	/**
+	 * Check if session was verified recently.
+	 *
+	 * Used to prevent infinite reload loops on add-payment-method page.
+	 * If verification happened within the given threshold, we skip re-verification.
+	 *
+	 * @param int $seconds The time threshold in seconds.
+	 * @return bool True if verified within the threshold, false otherwise.
+	 */
+	public function was_verified_recently( int $seconds = 10 ): bool {
+		if ( ! $this->is_session_available() ) {
+			return false;
+		}
+		$timestamp = WC()->session->get( self::VERIFICATION_TIMESTAMP_KEY );
+		if ( ! $timestamp ) {
+			return false;
+		}
+		return ( time() - (int) $timestamp ) < $seconds;
 	}
 
 	/**
