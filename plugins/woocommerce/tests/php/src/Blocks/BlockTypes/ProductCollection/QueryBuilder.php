@@ -1059,4 +1059,22 @@ class QueryBuilder extends \WP_UnitTestCase {
 		wp_delete_term( $nike_brand_id, 'product_brand' );
 		wp_delete_term( $adidas_brand_id, 'product_brand' );
 	}
+
+	/**
+	 * Tests that empty string values for perPage and offset are handled correctly.
+	 * This ensures the null coalescing and integer casting work as expected 
+	 * when a key exists but contains an empty value.
+	 */
+	public function test_per_page_and_offset_empty_string_handling() {
+		$parsed_block = Utils::get_base_parsed_block();
+		
+		// Set values as empty strings.
+		$parsed_block['attrs']['query']['perPage'] = '';
+		$parsed_block['attrs']['query']['offset']  = '';
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+		$this->assertEquals( 0, $merged_query['offset'] );
+		$this->assertEquals( 9, $merged_query['posts_per_page'] );
+	}
 }

@@ -141,8 +141,8 @@ class QueryBuilder {
 	 */
 	public function get_final_frontend_query( $collection_args, $query, $page = 1, $is_exclude_applied_filters = false ) {
 		$product_ids = $query['post__in'] ?? array();
-		$offset      = $query['offset'] ?? 0;
-		$per_page    = $query['perPage'] ?? 9;
+		$offset      = isset( $query['offset'] ) ? (int) $query['offset'] : 0;
+		$per_page    = ! empty( $query['perPage'] ) ? (int) $query['perPage'] : 9;
 		$order       = $query['order'] ?? 'asc';
 		$search      = $query['search'] ?? '';
 
