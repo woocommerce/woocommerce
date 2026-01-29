@@ -421,9 +421,14 @@ const { state, actions } = store< Store >(
 					itemToSend = { ...existingItem, quantity };
 				} else {
 					// New item or optimistic item: build fresh for add-item endpoint.
+					// For optimistic items (existingItem without key), calculate delta
+					// since add-item adds to existing quantity, not sets it.
+					const quantityToSend = existingItem
+						? quantity - existingItem.quantity
+						: quantity;
 					itemToSend = {
 						id,
-						quantity,
+						quantity: quantityToSend,
 						type: variation ? 'variation' : 'simple',
 						...( variation && { variation } ),
 					} as OptimisticCartItem;

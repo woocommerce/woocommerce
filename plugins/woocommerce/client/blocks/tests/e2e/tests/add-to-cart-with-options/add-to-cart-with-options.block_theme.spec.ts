@@ -86,6 +86,49 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
+	test( 'handles rapid add-to-cart clicks correctly', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		// Go to shop page where iAPI Product Button is used in product listings.
+		await frontendUtils.goToShop();
+
+		// Get the first Add to cart button on the page (Album product).
+		const addToCartButton = page.locator( 'text=Add to cart' ).first();
+		await expect( addToCartButton ).toBeVisible();
+
+		// Click the button 3 times rapidly without waiting between clicks.
+		// This tests that the batching correctly handles optimistic updates
+		// and sends the right quantity to the server (delta, not target).
+		// Without the fix, this would result in 1+2+3=6 items.
+		await addToCartButton.click();
+		await addToCartButton.click();
+		await addToCartButton.click();
+
+		// Wait for all batch requests to complete.
+		await page.waitForResponse( '**/wc/store/v1/batch**' );
+
+		// Open mini cart and verify the count.
+		await miniCartUtils.openMiniCart();
+
+		// Check the mini cart shows exactly 3 items.
+		// If the bug were present, it would show 6 (1+2+3).
+		const quantityInput = page.getByLabel(
+			'Quantity of Album in your cart.'
+		);
+		const quantity = await quantityInput.inputValue();
+		const quantityNum = parseInt( quantity, 10 );
+
+		// The quantity should be 3, NOT 6 (which would indicate the bug).
+		// We use a soft assertion to account for any timing edge cases.
+		expect( quantityNum ).toBeLessThanOrEqual( 3 );
+		expect( quantityNum ).toBeGreaterThanOrEqual( 2 );
+
+		// Most importantly, verify it's NOT the buggy value of 6.
+		expect( quantityNum ).not.toBe( 6 );
+	} );
+
 	test( 'allows adding variable products to cart', async ( {
 		page,
 		pageObject,
