@@ -7,12 +7,12 @@ export const productPriceValidation = ( value: string ) =>
 	mustContain( value, '<price/>' );
 
 /**
- * Ensure that the screen reader price text contains a string.
+ * Ensure that the screen reader price text contains required placeholders.
  *
- * Extensions such as WooCommerce Deposits manipulate the `<price/>` element
- * to contain additional text (e.g, $x.xx due today) so the text here needs
- * to be open so the extensions can replace the text with their own in its
- * entirety.
+ * Ensure the filter value contains the three required placeholders:
+ * - <quantity/>
+ * - <productName/>
+ * - <price/>
  */
 export const productPriceScreenReaderValidation = (
 	value: string
