@@ -20,6 +20,7 @@ class WC_Checkout_Hook {
      */
     public static function init() {
         // Hook after each individual cart item meta (as requested in GitHub issue #36379)
+        // Users will implement their own functionality using this hook
         add_action( 'woocommerce_review_order_after_cart_item_meta', array( __CLASS__, 'add_custom_content_after_cart_item_meta' ), 10, 3 );
         
         // Block checkout JavaScript support
@@ -27,12 +28,14 @@ class WC_Checkout_Hook {
     }
 
     /**
-     * Add custom content after each individual cart item meta in classic checkout
+     * Hook implementation - users will add their own functionality
+     * This is just a placeholder to demonstrate the hook works
      */
     public static function add_custom_content_after_cart_item_meta( $_product, $cart_item, $cart_item_key ) {
-        echo '<div style="background: #f0f8ff; padding: 10px; margin: 10px 0; border-left: 3px solid #0073aa; font-size: 14px; font-weight: bold;">';
-        echo 'This is custom block';
-        echo '</div>';
+        // This hook is now available for users to implement their own functionality
+        // Example: do_action( 'woocommerce_review_order_after_cart_item_meta', $_product, $cart_item, $cart_item_key );
+        // Users can add their own functions like:
+        // add_action( 'woocommerce_review_order_after_cart_item_meta', 'my_custom_function', 10, 3 );
     }
 
     /**
@@ -47,28 +50,35 @@ class WC_Checkout_Hook {
                 const cartItems = document.querySelectorAll('.wc-block-components-order-summary-item');
                 
                 cartItems.forEach(function(cartItem) {
-                    // Check if custom block already exists for this item
-                    const existingBlock = cartItem.querySelector('.custom-cart-item-meta-block');
-                    if (existingBlock) {
+                    // Check if custom content already exists for this item
+                    const existingContent = cartItem.querySelector('.wc-block-cart-item-meta-hook');
+                    if (existingContent) {
                         return; // Skip if already added
                     }
                     
-                    // Find the description element to add content after it
+                    // Find the description element to add hook container after it
                     const description = cartItem.querySelector('.wc-block-components-order-summary-item__description');
                     if (description) {
-                        // Create custom content div
-                        const customContent = document.createElement('div');
-                        customContent.className = 'custom-cart-item-meta-block';
-                        customContent.style.cssText = 'background: #f0f8ff; padding: 10px; margin: 10px 0; border-left: 3px solid #0073aa; font-size: 14px; font-weight: bold;';
-                        
-                        customContent.innerHTML = 'This is custom block';
+                        // Create hook container div for users to target
+                        const hookContainer = document.createElement('div');
+                        hookContainer.className = 'wc-block-cart-item-meta-hook';
+                        hookContainer.setAttribute('data-hook', 'woocommerce_review_order_after_cart_item_meta');
                         
                         // Insert after the description (which contains the item meta)
-                        description.appendChild(customContent);
+                        description.appendChild(hookContainer);
+                        
+                        // Dispatch custom event for users to listen to
+                        const event = new CustomEvent('woocommerce_review_order_after_cart_item_meta', {
+                            detail: {
+                                container: hookContainer,
+                                cartItem: cartItem
+                            }
+                        });
+                        document.dispatchEvent(event);
                     }
                 });
                 
-                console.log('✅ Custom blocks added after each cart item meta');
+                console.log('✅ Hook containers added after each cart item meta for block checkout');
             }
             
             // Try immediately
