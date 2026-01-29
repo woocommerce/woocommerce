@@ -1506,13 +1506,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $count;
 		}
 
-		/** @var int[] $child_ids */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
-		$child_ids           = $product->get_children();
 		$existing_attributes = array();
 
+		$child_ids = $product->get_children();
 		if ( ! empty( $child_ids ) ) {
 			_prime_post_caches( $child_ids );
-
 			// Get existing variations so we don't create duplicates.
 			foreach ( $child_ids as $child_id ) {
 				$child = wc_get_product( $child_id );
