@@ -89,6 +89,7 @@ type MiniCart = {
 		miniCartButtonRef: HTMLElement | null;
 	};
 	actions: {
+		addedToCart: () => void;
 		openDrawer: () => void;
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
@@ -249,11 +250,26 @@ store< MiniCart >(
 		},
 
 		actions: {
+			*addedToCart() {
+				if ( onCartClickBehaviour !== 'navigate_to_checkout' ) {
+					const a11yModulePromise = import( '@wordpress/a11y' );
+
+					const { messages } = getConfig(
+						'woocommerce'
+					) as WooCommerceConfig;
+					if ( messages?.addedToCartText ) {
+						const { speak } = yield a11yModulePromise;
+						speak( messages.addedToCartText, 'assertive' );
+					}
+				}
+				miniCartActions.openDrawer();
+			},
 			openDrawer() {
 				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
 					window.location.href = checkoutUrl;
 					return;
 				}
+
 				const { ref } = getElement();
 				state.miniCartButtonRef = ref;
 				state.isOpen = true;
