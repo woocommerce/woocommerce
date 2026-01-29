@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix an a11y issue when only one country is available, ensure the country is still rendered as an input field, but retain existing styling.

@@ -2,7 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
  * Cart class.
@@ -164,6 +165,12 @@ class Cart extends AbstractBlock {
 	protected function render( $attributes, $content, $block ) {
 		// Dequeue the core scripts when rendering this block.
 		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_woocommerce_core_scripts' ), 20 );
+
+		// Track cart page loaded for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CartEventTracker::class )
+				->track_cart_page_loaded();
+		}
 
 		/**
 		 * We need to check if $content has any templates from prior iterations of the block, in order to update to the latest iteration.

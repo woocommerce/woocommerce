@@ -10,7 +10,7 @@
 	}
 
 	.wc-block-components-shipping-rates-control__no-shipping-address-message {
-		@include font-regular-locked;
+		@include font-small-locked;
 		padding: $gap-large;
 		background-color: color-mix(in srgb, currentColor 6%, transparent);
 		color: color-mix(in srgb, currentColor 66%, transparent);

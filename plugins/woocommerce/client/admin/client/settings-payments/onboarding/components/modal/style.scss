@@ -154,6 +154,13 @@
 			flex: 1;
 			height: 100%;
 		}
+
+		.components-notice {
+			margin: $gap-small auto;
+			padding: 0 $gap-small;
+			width: 95%;
+			max-width: 620px;
+		}
 	}
 
 	&__loading {

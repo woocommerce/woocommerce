@@ -182,6 +182,22 @@
 			}
 		}
 
+		.woocommerce-recommended-payment-methods__error.components-notice {
+			margin: $gap-small $gap-larger;
+
+			@media screen and (max-width: 1024px) {
+				width: auto;
+				max-width: 100%;
+				margin: $gap-small $gap-large;
+			}
+
+			@media screen and (max-width: $break-medium) {
+				width: auto;
+				max-width: 100%;
+				margin: $gap-small $gap;
+			}
+		}
+
 		.woocommerce-recommended-payment-methods__list {
 			flex: 1;
 			min-height: 0;

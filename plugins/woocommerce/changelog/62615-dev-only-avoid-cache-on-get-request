@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Only apply no-store header to GET request of Mini Cart store.
