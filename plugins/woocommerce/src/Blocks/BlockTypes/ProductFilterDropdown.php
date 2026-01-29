@@ -43,26 +43,16 @@ final class ProductFilterDropdown extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
-		$selected_items = array_filter(
-			$items,
-			function ( $item ) {
-				return $item['selected'];
+		$selected_items = [];
+		foreach ( $items as $item ) {
+			if ( ! empty( $item['selected'] ) ) {
+				$selected_items[] = [
+					'label' => $item['label'],
+					'value' => $item['value'],
+					'type'  => $item['type'],
+				];
 			}
-		);
-
-		// Map selected items to only include label and value properties expected by frontend.
-		$selected_items_for_context = array_values(
-			array_map(
-				function ( $item ) {
-					return [
-						'label' => $item['label'],
-						'value' => $item['value'],
-						'type'  => $item['type'],
-					];
-				},
-				$selected_items
-			)
-		);
+		}
 
 		/* translators: %s: filter group label. */
 		$placeholder = sprintf( __( 'Select %s', 'woocommerce' ), $block->context['filterData']['groupLabel'] ?? '' );
@@ -72,7 +62,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
 				[
-					'selectedItems'      => $selected_items_for_context,
+					'selectedItems'      => $selected_items,
 					'isOpen'             => false,
 					'defaultPlaceholder' => $placeholder,
 				],
