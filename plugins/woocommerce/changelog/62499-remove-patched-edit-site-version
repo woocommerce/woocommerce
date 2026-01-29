@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Deps: Remove patched and pinned @wordpress/edit-site@5.15.0
+
