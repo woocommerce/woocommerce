@@ -110,21 +110,14 @@ export const getProductData = (
 		}
 	}
 
-	const {
-		id: productId,
-		type,
-		is_purchasable: isPurchasable,
-		is_in_stock: isInStock,
-		sold_individually: soldIndividually,
-		add_to_cart: addToCart,
-	} = product;
+	const { add_to_cart: addToCart } = product;
 	const maximum = addToCart?.maximum ?? 0;
 
 	return {
-		id: productId,
-		type,
-		is_in_stock: isPurchasable && isInStock,
-		sold_individually: soldIndividually,
+		id: product.id,
+		type: product.type,
+		is_in_stock: product.is_purchasable && product.is_in_stock,
+		sold_individually: product.sold_individually,
 		min: addToCart?.minimum ?? 1,
 		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
 		step: addToCart?.multiple_of ?? 1,
