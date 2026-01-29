@@ -38,38 +38,6 @@ export type AddToCartError = {
 };
 
 /**
- * Quantity constraints normalized from the Store API format.
- */
-type QuantityConstraints = {
-	min: number;
-	max: number;
-	step: number;
-};
-
-/**
- * Extract quantity constraints from a product in Store API format.
- *
- * @param product The product in Store API format.
- * @return Normalized quantity constraints.
- */
-const getQuantityConstraints = (
-	product: ProductResponseItem | null
-): QuantityConstraints => {
-	if ( ! product ) {
-		return { min: 1, max: Number.MAX_SAFE_INTEGER, step: 1 };
-	}
-
-	const addToCart = product.add_to_cart;
-	const maximum = addToCart?.maximum ?? 0;
-
-	return {
-		min: addToCart?.minimum ?? 1,
-		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
-		step: addToCart?.multiple_of ?? 1,
-	};
-};
-
-/**
  * Manually dispatches a 'change' event on the quantity input element.
  *
  * When users click the plus/minus stepper buttons, no 'change' event is fired
@@ -117,14 +85,17 @@ const { state: productsState } = store< ProductsStore >(
 const normalizeProductFromStore = (
 	product: ProductResponseItem
 ): NormalizedProductData | NormalizedVariationData => {
-	const constraints = getQuantityConstraints( product );
+	const addToCart = product.add_to_cart;
+	const maximum = addToCart?.maximum ?? 0;
 
 	return {
 		id: product.id,
 		type: product.type,
 		is_in_stock: product.is_purchasable && product.is_in_stock,
 		sold_individually: product.sold_individually,
-		...constraints,
+		min: addToCart?.minimum ?? 1,
+		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
+		step: addToCart?.multiple_of ?? 1,
 	};
 };
 
