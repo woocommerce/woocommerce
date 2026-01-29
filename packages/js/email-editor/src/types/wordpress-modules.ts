@@ -3,37 +3,51 @@
 /* eslint-disable @typescript-eslint/no-duplicate-imports -- importing within multiple "declare module" blocks is OK  */
 
 declare module '@wordpress/block-editor' {
-	import * as blockEditorActions from '@wordpress/block-editor/store/actions';
-	import * as blockEditorSelectors from '@wordpress/block-editor/store/selectors';
-	import { StoreDescriptor as GenericStoreDescriptor } from '@wordpress/data/build-types/types';
+	import { FontSize } from '@wordpress/components/build-types/font-size-picker/types';
+	import {
+		Color,
+		Gradient,
+	} from '@wordpress/components/build-types/palette-edit/types';
+
+	// FontFamily defined inline (can't use relative imports in ambient modules)
+	type FontFamily = {
+		name: string;
+		slug: string;
+		fontFamily: string;
+	};
 
 	export * from '@wordpress/block-editor/index';
 
-	export const store: {
-		name: 'core/block-editor';
-	} & GenericStoreDescriptor< {
-		reducer: () => unknown;
-		actions: typeof blockEditorActions;
-		selectors: typeof blockEditorSelectors;
-	} >;
+	export const __experimentalLibrary: any;
+	export const __experimentalListView: any;
+
+	// types for 'useSettings' are missing in @types/wordpress__block-editor
+	export function useSettings( path: string ): unknown;
+	export function useSettings(
+		path1: 'typography.fontSizes',
+		path2: 'typography.fontFamilies'
+	): [ FontSize[], { default: FontFamily[] } ];
+	export function useSettings(
+		path1: 'color.palette',
+		path2: 'color.gradients'
+	): [ Color[], Gradient[] ];
+	export function useSettings( path: 'typography.fontSizes' ): [ FontSize[] ];
+
+	// types for 'gradients' are missing in @types/wordpress__block-editor
+	export interface EditorSettings {
+		gradients: {
+			name: string;
+			slug: string;
+			gradient: string;
+		}[];
+	}
 }
 
 declare module '@wordpress/editor' {
 	import { ComponentType } from 'react';
-	import * as editorActions from '@wordpress/editor/store/actions';
-	import * as editorSelectors from '@wordpress/editor/store/selectors';
-	import { StoreDescriptor as GenericStoreDescriptor } from '@wordpress/data/build-types/types';
 	import { PostPreviewButton as WPPostPreviewButton } from '@wordpress/editor/components';
 
 	export * from '@wordpress/editor/index';
-
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - disable redeclaration error because it's a module declaration
-	export const store: { name: 'core/editor' } & GenericStoreDescriptor< {
-		reducer: () => unknown;
-		actions: typeof editorActions;
-		selectors: typeof editorSelectors;
-	} >;
 
 	export const PostPreviewButton: ComponentType<
 		WPPostPreviewButton.Props & {
@@ -45,74 +59,10 @@ declare module '@wordpress/editor' {
 	>;
 }
 
-// there are no @types/wordpress__keyboard-shortcuts yet
-declare module '@wordpress/keyboard-shortcuts' {
-	import { StoreDescriptor } from '@wordpress/data/build-types/types';
-
-	export const store: { name: 'core/keyboard-shortcuts' } & StoreDescriptor< {
-		reducer: () => unknown;
-		selectors: {
-			getShortcutRepresentation: (
-				state: unknown,
-				scope: string
-			) => unknown;
-		};
-		actions: {
-			registerShortcut: ( options: any ) => object;
-		};
-	} >;
-	export const ShortcutProvider: any;
-	export const useShortcut: any;
-}
-
-// there are no @types/wordpress__preferences yet
-declare module '@wordpress/preferences' {
-	import { StoreDescriptor } from '@wordpress/data/build-types/types';
-
-	export const store: { name: 'core/preferences' } & StoreDescriptor< {
-		reducer: () => unknown;
-		selectors: {
-			get: < T >( state: unknown, scope: string, name: string ) => T;
-		};
-	} >;
-	export const PreferenceToggleMenuItem: any;
-}
-
-// Types in @types/wordpress__notices are outdated and build on top of @types/wordpress__data
-declare module '@wordpress/notices' {
-	import { StoreDescriptor } from '@wordpress/data/build-types/types';
-	import { NoticeProps } from '@wordpress/components/build-types/notice/types';
-	import { WPNotice } from '@wordpress/notices/build-types/store/selectors';
-
-	export * from '@wordpress/notices';
-
-	type Notice = Omit< NoticeProps, 'children' > & {
-		id: string;
-		content: WPNotice[ 'content' ];
-		type: WPNotice[ 'type' ];
-	};
-
-	export const store: { name: 'core/notices' } & StoreDescriptor< {
-		reducer: () => unknown;
-		actions: {
-			createSuccessNotice: ( content: string, options?: unknown ) => void;
-			createErrorNotice: ( content: string, options?: unknown ) => void;
-			removeNotice: ( id: string, context?: string ) => void;
-			createNotice: (
-				status: 'error' | 'info' | 'success' | 'warning' | undefined,
-				content: string,
-				options?: unknown
-			) => void;
-		};
-		selectors: {
-			getNotices: ( state?: unknown, context?: string ) => Notice[];
-			removeNotice: ( id: string, context?: string ) => void;
-		};
-	} >;
-}
-
 declare module '@wordpress/core-data' {
 	import { BlockInstance } from '@wordpress/blocks/index';
+
+	export * from '@wordpress/core-data/build-types';
 
 	export function useEntityBlockEditor(
 		kind: string,
@@ -130,6 +80,38 @@ declare module '@wordpress/core-data' {
 		( blocks: BlockInstance[] ) => void
 	];
 	export type WPBlock = any;
+}
 
-	export * from '@wordpress/core-data/build-types';
+// Re-declare NoticeList and SnackbarList with looser types.
+// The @wordpress/notices WPNotice type has `status: string` but
+// @wordpress/components expects `status: 'info' | 'warning' | 'success' | 'error'`.
+// This is a type incompatibility in WordPress packages that we work around here.
+declare module '@wordpress/components' {
+	import type { ReactNode } from 'react';
+
+	export * from '@wordpress/components/build-types';
+
+	// Looser notice type that accepts WPNotice from @wordpress/notices
+	type LooseNotice = {
+		id: string;
+		content: string;
+		status?: string;
+		isDismissible?: boolean;
+		actions?: any[];
+		[ key: string ]: any;
+	};
+
+	export function NoticeList( props: {
+		notices: LooseNotice[];
+		onRemove?: ( id: string ) => void;
+		className?: string;
+		children?: ReactNode;
+	} ): JSX.Element;
+
+	export function SnackbarList( props: {
+		notices: LooseNotice[];
+		onRemove?: ( id: string ) => void;
+		className?: string;
+		children?: ReactNode;
+	} ): JSX.Element;
 }
