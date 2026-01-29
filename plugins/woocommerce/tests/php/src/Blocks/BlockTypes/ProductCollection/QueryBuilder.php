@@ -1062,12 +1062,12 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 	/**
 	 * Tests that empty string values for perPage and offset are handled correctly.
-	 * This ensures the null coalescing and integer casting work as expected 
+	 * This ensures the null coalescing and integer casting work as expected
 	 * when a key exists but contains an empty value.
 	 */
 	public function test_per_page_and_offset_empty_string_handling() {
 		$parsed_block = Utils::get_base_parsed_block();
-		
+
 		// Set values as empty strings.
 		$parsed_block['attrs']['query']['perPage'] = '';
 		$parsed_block['attrs']['query']['offset']  = '';
