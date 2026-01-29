@@ -23,6 +23,10 @@ import getResetEmailTemplateAction from '../components/sidebar/reset-email-templ
  * @param postType - The post type to modify actions for.
  */
 const modifyActionsForPostType = ( postType: string ) => {
+	// Only modify actions for wp_template post type.
+	if ( postType !== 'wp_template' ) {
+		return;
+	}
 	// Remove the default duplicate action.
 	unregisterEntityAction( 'postType', postType, 'duplicate-post' );
 
