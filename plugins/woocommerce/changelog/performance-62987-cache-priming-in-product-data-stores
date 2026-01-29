@@ -1,4 +1,4 @@
 Significance: patch
-Type: performance
+Type: minor
 
 Products: consolidate cache priming calls within product data stores.
