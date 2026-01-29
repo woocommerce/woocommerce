@@ -100,7 +100,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 			thumbnailFileName: string;
 		}
 	) => {
-		await page.getByLabel( `"${ currentName }" (Edit)` ).click();
+		await page.getByLabel( `“${ currentName }” (Edit)` ).click();
 		await page.getByLabel( 'Name' ).fill( name );
 		await page.getByLabel( 'Slug' ).fill( slug );
 		await page
@@ -140,7 +140,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 * After a brand is deleted, you will be redirected to the Brands page.
 	 */
 	const deleteBrand = async ( name: string ) => {
-		await page.getByLabel( `"${ name }" (Edit)` ).click();
+		await page.getByLabel( `“${ name }” (Edit)` ).click();
 
 		// After clicking the "Delete" button, there will be a confirmation dialog.
 		page.once( 'dialog', ( dialog ) => {

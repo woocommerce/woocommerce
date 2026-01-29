@@ -26,10 +26,6 @@ interface WooEmail {
 	id: number;
 }
 
-interface WooEmailsResponse {
-	data: WooEmail[];
-}
-
 /**
  * The purpose of this test is to alert us if the selectors that are used to track telemetry events in the email editor are changed.
  *
@@ -50,10 +46,10 @@ test.describe( 'WooCommerce Email Editor Tracking Selectors', () => {
 
 		// Navigate to WooCommerce Email Settings page to generate email posts
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
-		const emails: WooEmailsResponse = await getWooEmails();
+		const emails: WooEmail[] = await getWooEmails();
 
 		await page.goto(
-			`wp-admin/post.php?post=${ emails.data[ 0 ].id }&action=edit`
+			`wp-admin/post.php?post=${ emails[ 0 ].id }&action=edit`
 		);
 
 		// Check that the Editor is present

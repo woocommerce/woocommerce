@@ -272,7 +272,7 @@ for ( const productType of Object.keys( productData ) ) {
 					).toBeChecked();
 
 					// Add a download link
-					await page.getByRole( 'link', { name: 'General' } ).click();
+					await page.locator( '#woocommerce-product-data' ).getByRole( 'link', { name: 'General' } ).click();
 					await page
 						.getByRole( 'link', { name: 'Add File' } )
 						.click();
