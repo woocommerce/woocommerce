@@ -637,10 +637,15 @@ class Request {
 			true
 		) ) {
 			$shipping_callback_token = $this->generate_shipping_callback_token( $order );
+			$callback_url            = add_query_arg(
+				'token',
+				$shipping_callback_token,
+				rest_url( 'wc/v3/paypal-standard/update-shipping' )
+			);
 
 			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
-				'callback_url'    => $this->normalize_url_for_paypal( rest_url( 'wc/v3/paypal-standard/update-shipping?token=' . $shipping_callback_token ) ),
+				'callback_url'    => $this->normalize_url_for_paypal( $callback_url ),
 			);
 		}
 
