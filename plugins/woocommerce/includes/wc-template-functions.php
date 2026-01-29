@@ -2277,7 +2277,7 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 			/** @var WC_Product[] $related_products */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 
 			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
-			_prime_post_caches( array_filter( array_map( fn( $product ) => $product->get_image_id(), $related_products ) ) );
+			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $related_products ) ) );
 		}
 		$args['related_products'] = $related_products;
 
@@ -2341,7 +2341,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 			/** @var WC_Product[] $upsells */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 
 			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
-			_prime_post_caches( array_filter( array_map( fn( $product ) => $product->get_image_id(), $upsells ) ) );
+			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $upsells ) ) );
 		}
 
 		wc_get_template(
