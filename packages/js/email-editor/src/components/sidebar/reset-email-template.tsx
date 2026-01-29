@@ -6,7 +6,7 @@ import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore, type WpTemplate } from '@wordpress/core-data';
 import { backup } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch } from '@wordpress/data';
 import {
 	Button,
 	__experimentalText as Text,
@@ -22,13 +22,6 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { PostWithPermissions } from '../../store';
 import { recordEvent } from '../../events';
-
-/**
- * Types
- */
-type WpTemplateWithBlocks = WpTemplate & {
-	blocks?: ReturnType< typeof parse >;
-};
 
 function getItemTitle( item: {
 	title: string | { rendered: string } | { raw: string };
@@ -86,17 +79,6 @@ const getResetEmailTemplateAction = () => {
 			} = useDispatch( coreStore );
 
 			const item = items[ 0 ];
-			const editedEntity = useSelect(
-				( select ) => {
-					const entity = select( coreStore ).getEditedEntityRecord(
-						'postType',
-						item.type,
-						item.id
-					);
-					return entity as unknown as WpTemplateWithBlocks;
-				},
-				[ item.type, item.id ]
-			);
 			const modalTitle = sprintf(
 				// translators: %s: The template's title
 				__(
@@ -143,25 +125,7 @@ const getResetEmailTemplateAction = () => {
 										fileTemplate.content?.raw || ''
 									);
 
-									// Follow Gutenberg's two-call pattern to properly handle undo state
-									// First call: Preserve the current undo level with existing blocks
-									const currentBlocks =
-										editedEntity?.blocks || [];
-									editEntityRecord(
-										'postType',
-										item.type,
-										item.id,
-										{
-											content: serialize( currentBlocks ),
-											blocks: currentBlocks,
-											source: 'custom',
-										},
-										{
-											undoIgnore: true,
-										}
-									);
-
-									// Second call: Apply the reset with original blocks
+									// Apply the reset with original blocks
 									editEntityRecord(
 										'postType',
 										item.type,
