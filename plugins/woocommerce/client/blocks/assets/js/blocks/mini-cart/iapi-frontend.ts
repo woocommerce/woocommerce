@@ -717,6 +717,13 @@ const { state: cartItemState } = store(
 				return price;
 			},
 
+			get isLineItemSingleDiscountVisible(): boolean {
+				return (
+					cartItemState.cartItemHasDiscount &&
+					cartItemState.cartItem.quantity === 1
+				);
+			},
+
 			get isLineItemTotalDiscountVisible(): boolean {
 				return (
 					cartItemState.cartItemHasDiscount &&
