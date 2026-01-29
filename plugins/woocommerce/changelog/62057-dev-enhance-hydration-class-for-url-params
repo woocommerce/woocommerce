@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add support to Hydration class to get store API responses with url and query params.

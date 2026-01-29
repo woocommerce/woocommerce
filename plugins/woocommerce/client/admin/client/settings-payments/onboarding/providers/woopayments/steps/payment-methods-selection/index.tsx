@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Button, Icon } from '@wordpress/components';
+import { Button, Icon, Notice } from '@wordpress/components';
 import { RecommendedPaymentMethod } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useState, useEffect, useMemo, useRef } from '@wordpress/element';
@@ -232,6 +232,15 @@ export default function PaymentMethodsSelection() {
 						) }
 					</div>
 				</div>
+				{ currentStep?.errors && currentStep.errors.length > 0 && (
+					<Notice
+						status="error"
+						isDismissible={ false }
+						className="woocommerce-recommended-payment-methods__error"
+					>
+						<p>{ currentStep.errors[ 0 ].message }</p>
+					</Notice>
+				) }
 				<div className="woocommerce-recommended-payment-methods__list">
 					<div
 						className="settings-payments-methods__container"

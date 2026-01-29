@@ -12,6 +12,9 @@
 declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Gateways\PayPal\WebhookHandler as PayPalWebhookHandler;
+
 /**
  * REST API PayPal webhook handler controller class.
  *
@@ -80,8 +83,7 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	 * @return WP_REST_Response The response object.
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
-		include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php';
-		$webhook_handler = new WC_Gateway_Paypal_Webhook_Handler();
+		$webhook_handler = new PayPalWebhookHandler();
 
 		try {
 			$webhook_handler->process_webhook( $request );

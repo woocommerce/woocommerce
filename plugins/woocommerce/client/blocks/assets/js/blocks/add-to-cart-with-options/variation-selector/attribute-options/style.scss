@@ -41,6 +41,11 @@
 		);
 	}
 
+	/* When the pill button is hidden, we also need to hide the label (&) */
+	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input[hidden]) {
+		display: none;
+	}
+
 	&:where(:focus-within) {
 		outline: 1px solid var(--pill-color);
 		outline-offset: 1px;

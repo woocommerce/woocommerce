@@ -47,6 +47,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public function add_paypal_notices() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_notices()' );
 		$this->notices->add_paypal_notices();
 	}
 
@@ -58,6 +59,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public function add_paypal_notices_on_payments_settings_page() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_notices_on_payments_settings_page()' );
 		$this->notices->add_paypal_notices_on_payments_settings_page();
 	}
 
@@ -80,6 +82,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public function add_paypal_migration_notice() {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::add_paypal_migration_notice()' );
 		$this->notices->add_paypal_migration_notice();
 	}
 
@@ -102,6 +105,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public static function set_account_restriction_flag(): void {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::set_account_restriction_flag()' );
 		PayPalNotices::set_account_restriction_flag();
 	}
 
@@ -113,6 +117,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public static function clear_account_restriction_flag(): void {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::clear_account_restriction_flag()' );
 		PayPalNotices::clear_account_restriction_flag();
 	}
 
@@ -127,6 +132,7 @@ class WC_Gateway_Paypal_Notices {
 	 * @return void
 	 */
 	public static function manage_account_restriction_flag_for_notice( $http_code, array $response_data, WC_Order $order ): void {
+		wc_deprecated_function( __METHOD__, '10.5.0', 'Automattic\WooCommerce\Gateways\PayPal\Notices::manage_account_restriction_flag_for_notice()' );
 		PayPalNotices::manage_account_restriction_flag_for_notice( $http_code, $response_data, $order );
 	}
 }

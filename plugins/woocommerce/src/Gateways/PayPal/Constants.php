@@ -143,4 +143,67 @@ class Constants {
 	 * @var string
 	 */
 	const PAYPAL_ISSUE_PAYEE_ACCOUNT_RESTRICTED = 'PAYEE_ACCOUNT_RESTRICTED';
+
+	/**
+	 * Meta key for storing PayPal payment status in order meta.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
+	public const PAYPAL_ORDER_META_STATUS = '_paypal_status';
+
+	/**
+	 * Meta key for storing PayPal capture ID in order meta.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
+	public const PAYPAL_ORDER_META_CAPTURE_ID = '_paypal_capture_id';
+
+	/**
+	 * Meta key for storing PayPal authorization ID in order meta.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
+	public const PAYPAL_ORDER_META_AUTHORIZATION_ID = '_paypal_authorization_id';
+
+	/**
+	 * Meta key for storing PayPal authorization checked flag in order meta.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
+	public const PAYPAL_ORDER_META_AUTHORIZATION_CHECKED = '_paypal_authorization_checked';
+
+	/**
+	 * Meta key for storing PayPal order ID in order meta.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
+	public const PAYPAL_ORDER_META_ORDER_ID = '_paypal_order_id';
+
+	/**
+	 * Meta key for storing PayPal addresses updated flag in order meta.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
+	public const PAYPAL_ORDER_META_ADDRESSES_UPDATED = '_paypal_addresses_updated';
+
+	/**
+	 * Meta key for storing PayPal payment source in order meta.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
+	public const PAYPAL_ORDER_META_PAYMENT_SOURCE = '_paypal_payment_source';
 }

@@ -1,10 +1,6 @@
 .wc-block-components-address-card {
 	@include card-styles();
 
-	.has-dark-controls & {
-		border-color: $input-border-dark;
-	}
-
 	address {
 		display: flex;
 		flex-direction: column;
@@ -28,7 +24,7 @@
 	}
 }
 .wc-block-components-address-card__edit {
-	@include font-regular-locked;
+	@include font-small-locked;
 	background-color: transparent;
 	border: 0;
 	color: inherit;
