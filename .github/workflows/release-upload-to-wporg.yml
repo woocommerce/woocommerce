@@ -30,6 +30,12 @@ jobs:
     steps:
       - name: Check confirmation
         run: |
+          # Log inputs to console.
+          echo "Uploading to WordPress.org: release=${{ inputs.release }}, confirm-update=${{ github.event.inputs.confirm-update }}"
+
+          # Write summary header.
+          echo "📤 Uploading release \`${{ inputs.release }}\` to WordPress.org." >> $GITHUB_STEP_SUMMARY
+
           if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
             echo "::error::You must check the confirmation checkbox to proceed."
             exit 1
@@ -227,6 +233,14 @@ jobs:
             --non-interactive \
             --config-option=servers:global:http-timeout=1800
 
+          # Write success to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Release committed to WordPress.org (trunk + tag):" >> $GITHUB_STEP_SUMMARY
+          echo "- [view trunk](https://plugins.trac.wordpress.org/browser/woocommerce/trunk)" >> $GITHUB_STEP_SUMMARY
+          echo "- [view tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags/$RELEASE_TAG)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Validate the release as described in the [release docs](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/)." >> $GITHUB_STEP_SUMMARY
+
       - name: Commit to tag only
         if: ${{ needs.get-and-validate-release-asset.outputs.overwrite_trunk != 1 }}
         working-directory: ./svn
@@ -253,3 +267,9 @@ jobs:
             --no-auth-cache \
             --non-interactive \
             --config-option=servers:global:http-timeout=1800
+
+          # Write success to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Release committed to WordPress.org (tag only): [view tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags/$RELEASE_TAG)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Validate the release as described in the [release docs](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/)." >> $GITHUB_STEP_SUMMARY
