@@ -74,7 +74,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request<array<string, mixed>> $request The request object.
 	 * @return bool True if the request is valid, false otherwise.
 	 */
-	public function validate_shipping_callback_request( WP_REST_Request $request ) {
+	public function validate_shipping_callback_request( WP_REST_Request $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		$token = $request->get_param( 'token' );
 		if ( empty( $token ) ) {
 			return false;
