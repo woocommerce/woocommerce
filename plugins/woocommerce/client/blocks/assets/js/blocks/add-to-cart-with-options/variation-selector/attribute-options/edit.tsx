@@ -142,7 +142,7 @@ export default function AttributeOptionsEdit(
 				>
 					<ToolsPanelItem
 						label={ __(
-							'Auto-select when only one attribute is compatible',
+							'Auto-select when only one option is available',
 							'woocommerce'
 						) }
 						hasValue={ () => autoselect }
@@ -150,11 +150,11 @@ export default function AttributeOptionsEdit(
 					>
 						<ToggleControl
 							label={ __(
-								'Auto-select when only one attribute is compatible',
+								'Auto-select when only one option is available',
 								'woocommerce'
 							) }
 							help={ __(
-								'This controls whether attributes will be auto-selected once upon loading the page and when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.',
+								'Automatically select options on page load or after the shopper changes attributes, when only one valid choice is available.',
 								'woocommerce'
 							) }
 							checked={ autoselect }
