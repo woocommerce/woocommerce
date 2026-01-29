@@ -19,3 +19,25 @@ export interface ProductCategoryResponseItem {
 	review_count: number;
 	permalink: string;
 }
+
+export interface ProductBrandResponseImageItem {
+	id: number;
+	src: string;
+	thumbnail: string;
+	srcset: string;
+	sizes: string;
+	name: string;
+	alt: string;
+}
+
+export interface ProductBrandResponseItem {
+	id: number;
+	name: string;
+	slug: string;
+	description: string;
+	parent: number;
+	count: number;
+	image: ProductBrandResponseImageItem | null;
+	review_count: number;
+	permalink: string;
+}
