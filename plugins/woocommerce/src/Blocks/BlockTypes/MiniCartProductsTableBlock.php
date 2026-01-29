@@ -170,22 +170,22 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 											</span>
 											<span data-wp-text="state.afterItemPrice"></span>
 										</span>
-									</div>
-									<div 
-										data-wp-bind--hidden="!state.isLineItemSingleDiscountVisible"
-										class="wc-block-components-product-badge wc-block-components-sale-badge"
-									>
-									<?php
-										echo wp_kses(
-											$cart_item_save_badge,
-											array(
-												'span' => array(
-													'data-wp-text' => true,
-													'class'        => true,
-												),
-											)
-										);
-									?>
+										<div
+											data-wp-bind--hidden="!state.isLineItemSingleDiscountVisible"
+											class="wc-block-components-product-badge wc-block-components-sale-badge"
+										>
+										<?php
+											echo wp_kses(
+												$cart_item_save_badge,
+												array(
+													'span' => array(
+														'data-wp-text' => true,
+														'class'        => true,
+													),
+												)
+											);
+										?>
+										</div>
 									</div>
 									<div class="wc-block-components-product-metadata">
 										<div data-wp-watch="callbacks.itemShortDescription" >
