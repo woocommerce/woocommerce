@@ -85,6 +85,9 @@ export const getProductData = (
 		return null;
 	}
 
+	// Determine which product to use for the response.
+	let product = productFromStore;
+
 	// For variable products with selected attributes, find the matching variation.
 	if (
 		productFromStore.type === 'variable' &&
@@ -98,39 +101,30 @@ export const getProductData = (
 		if ( matchedVariation ) {
 			const variation =
 				productsState.productVariations[ matchedVariation.id ];
-			if ( variation ) {
-				const variationAddToCart = variation.add_to_cart;
-				const variationMaximum = variationAddToCart?.maximum ?? 0;
-
-				return {
-					id: variation.id,
-					type: variation.type,
-					is_in_stock:
-						variation.is_purchasable && variation.is_in_stock,
-					sold_individually: variation.sold_individually,
-					min: variationAddToCart?.minimum ?? 1,
-					max:
-						variationMaximum > 0
-							? variationMaximum
-							: Number.MAX_SAFE_INTEGER,
-					step: variationAddToCart?.multiple_of ?? 1,
-				};
+			if ( ! variation ) {
+				// Variation was matched but its data isn't in the store.
+				// Return null to prevent using stale parent product data.
+				return null;
 			}
-			// Variation was matched but its data isn't in the store.
-			// Return null to prevent using stale parent product data.
-			return null;
+			product = variation;
 		}
 	}
 
-	const addToCart = productFromStore.add_to_cart;
+	const {
+		id: productId,
+		type,
+		is_purchasable: isPurchasable,
+		is_in_stock: isInStock,
+		sold_individually: soldIndividually,
+		add_to_cart: addToCart,
+	} = product;
 	const maximum = addToCart?.maximum ?? 0;
 
 	return {
-		id: productFromStore.id,
-		type: productFromStore.type,
-		is_in_stock:
-			productFromStore.is_purchasable && productFromStore.is_in_stock,
-		sold_individually: productFromStore.sold_individually,
+		id: productId,
+		type,
+		is_in_stock: isPurchasable && isInStock,
+		sold_individually: soldIndividually,
 		min: addToCart?.minimum ?? 1,
 		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
 		step: addToCart?.multiple_of ?? 1,
