@@ -11,14 +11,14 @@ declare module '@wordpress/data' {
 	export { default as withDispatch } from '@wordpress/data/build-types/components/with-dispatch';
 	export { default as withRegistry } from '@wordpress/data/build-types/components/with-registry';
 
-	export { RegistryProvider, RegistryConsumer, useRegistry } from '@wordpress/data/build-types/components/registry-provider';
+	export { RegistryProvider, RegistryConsumer } from '@wordpress/data/build-types/components/registry-provider';
 	export { AsyncModeProvider } from '@wordpress/data/build-types/components/async-mode-provider';
 
 	export { createRegistry } from '@wordpress/data/build-types/registry';
 	export { createSelector } from '@wordpress/data/build-types/create-selector';
 	export { controls } from '@wordpress/data/build-types/controls';
 	export { default as createReduxStore } from '@wordpress/data/build-types/redux-store';
-	export { createRegistrySelector, createRegistryControl } from '@wordpress/data/build-types/factory';
+	export { createRegistryControl } from '@wordpress/data/build-types/factory';
 
 	export const combineReducers: import('@wordpress/data/build-types/types').combineReducers;
 	export const subscribe: Function;
@@ -324,11 +324,14 @@ declare module '@wordpress/data' {
 	export const suspendSelect: typeof resolveSelect;
 
 	/**
-	 * Helper types for React hooks.
+	 * Type for the dispatch function returned by useDispatch() with no arguments.
+	 * Supports StoreDescriptor, registered strings, and unknown strings.
 	 */
-	type DispatchFunction = <T extends StoreDescriptor<AnyConfig>>(
-		storeDescriptor: string | T
-	) => T extends StoreDescriptor<infer Config extends AnyConfig> ? ActionCreatorsOf<Config> : any;
+	interface DispatchFunction {
+		<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): ActionCreatorsOf<ConfigOf<T>>;
+		<K extends keyof StoreRegistry>(storeDescriptor: K): ActionCreatorsOf<ConfigOf<StoreRegistry[K]>>;
+		(storeDescriptor: string): any;
+	}
 
 	/**
 	 * Type for the select function parameter in useSelect callbacks.
@@ -345,6 +348,8 @@ declare module '@wordpress/data' {
 	export type UseDispatchReturn<StoreNameOrDescriptor> =
 		StoreNameOrDescriptor extends StoreDescriptor<any>
 			? ActionCreatorsOf<ConfigOf<StoreNameOrDescriptor>>
+			: StoreNameOrDescriptor extends keyof StoreRegistry
+			? ActionCreatorsOf<ConfigOf<StoreRegistry[StoreNameOrDescriptor]>>
 			: StoreNameOrDescriptor extends undefined
 			? DispatchFunction
 			: any;
@@ -379,4 +384,23 @@ declare module '@wordpress/data' {
 		CurriedSignature: Function;
 		PromiseCurriedSignature?: Function;
 	}
+
+	/**
+	 * Registry object returned by useRegistry().
+	 * Provides access to store operations and batching.
+	 */
+	export interface DataRegistry {
+		select: typeof select;
+		dispatch: typeof dispatch;
+		resolveSelect: typeof resolveSelect;
+		subscribe: (listener: () => void) => () => void;
+		batch: (callback: () => void) => void;
+	}
+
+	export function useRegistry(): DataRegistry;
+	export function createRegistrySelector<
+		T extends (state: any, ...args: any[]) => any
+	>(
+		registrySelector: (select: SelectFunction) => T
+	): T;
 }

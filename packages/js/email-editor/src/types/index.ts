@@ -10,7 +10,6 @@ import {
 	ActionCreatorsOf,
 	ConfigOf,
 	CurriedSelectorsOf,
-	DataRegistry,
 	StoreDescriptor as GenericStoreDescriptor,
 	UseSelectReturn,
 } from '@wordpress/data/build-types/types';
