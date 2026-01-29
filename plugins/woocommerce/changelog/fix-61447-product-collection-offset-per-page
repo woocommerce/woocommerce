@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Collection block: empty offset ("") triggers fatal 500 (TypeError: int + string) — frontend and editor become inaccessible The same happens when per_page is empty.
