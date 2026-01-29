@@ -153,7 +153,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 
 		// Validate that the order does not have a transaction ID.
 		$transaction_id = $order->get_transaction_id();
-		if ( ! empty ( $transaction_id ) ) {
+		if ( ! empty( $transaction_id ) ) {
 			WC_Gateway_Paypal::log(
 				'Order already has a transaction ID, cannot update shipping. Order ID: ' . $order->get_id() .
 				'. Transaction ID: ' . $transaction_id
