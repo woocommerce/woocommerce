@@ -313,7 +313,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					'sale_price'    => array(),
 				);
 
-				/** @var int[] $variation_ids */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$variation_ids = $product->get_visible_children();
 
 				if ( ! empty( $variation_ids ) ) {
