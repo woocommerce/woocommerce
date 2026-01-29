@@ -34,6 +34,7 @@ import {
 	PreviewState,
 	SetPreviewState,
 	ProductCollectionUIStatesInEditor,
+	CoreCollectionNames,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -265,7 +266,26 @@ export const useProductCollectionUIState = ( {
 		}
 
 		/**
-		 * Case 3: Preview mode - based on `usesReference` value
+		 * Case 3: Hand-picked products picker
+		 * Show the product picker when the Hand-Picked collection is selected
+		 * but no products have been chosen yet.
+		 */
+		const isHandPickedCollection =
+			attributes.collection === CoreCollectionNames.HAND_PICKED;
+		const hasHandPickedProducts =
+			( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) >
+			0;
+
+		if (
+			isCollectionSelected &&
+			isHandPickedCollection &&
+			! hasHandPickedProducts
+		) {
+			return ProductCollectionUIStatesInEditor.HAND_PICKED_PRODUCTS_PICKER;
+		}
+
+		/**
+		 * Case 4: Preview mode - based on `usesReference` value
 		 */
 		if ( isInRequiredLocation ) {
 			/**
@@ -310,6 +330,7 @@ export const useProductCollectionUIState = ( {
 		product,
 		hasInnerBlocks,
 		attributes.query?.productReference,
+		attributes.query?.woocommerceHandPickedProducts,
 	] );
 
 	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };

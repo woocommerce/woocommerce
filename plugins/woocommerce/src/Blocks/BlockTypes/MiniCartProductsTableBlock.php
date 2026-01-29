@@ -59,8 +59,12 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		// translators: %s is the name of the product in cart.
 		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
 
-		// translators: Save as in "Save $x".
-		$save_label = __( 'Save', 'woocommerce' );
+		/* translators: %s is the discount amount. */
+		$save_format             = __( 'Save %s', 'woocommerce' );
+		$cart_item_discount_span = '<span data-wp-text="state.cartItemDiscount" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"></span>';
+		$cart_item_save_badge    = sprintf( $save_format, $cart_item_discount_span );
+		$line_item_discount_span = '<span data-wp-text="state.lineItemDiscount" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"></span>';
+		$line_item_save_badge    = sprintf( $save_format, $line_item_discount_span );
 
 		$available_on_backorder_label = __( 'Available on backorder', 'woocommerce' );
 
@@ -171,12 +175,17 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										data-wp-bind--hidden="!state.cartItemHasDiscount" 
 										class="wc-block-components-product-badge wc-block-components-sale-badge"
 									>
-										<?php echo $save_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										<span
-											data-wp-text="state.cartItemDiscount" 
-											class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
-										>
-										</span>
+									<?php
+										echo wp_kses(
+											$cart_item_save_badge,
+											array(
+												'span' => array(
+													'data-wp-text' => true,
+													'class'        => true,
+												),
+											)
+										);
+									?>
 									</div>
 									<div class="wc-block-components-product-metadata">
 										<div data-wp-watch="callbacks.itemShortDescription" >
@@ -239,13 +248,17 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										data-wp-bind--hidden="!state.isLineItemTotalDiscountVisible" 
 										class="wc-block-components-product-badge wc-block-components-sale-badge"
 									>
-										<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										<?php echo $save_label; ?>
-										<span
-											data-wp-text="state.lineItemDiscount" 
-											class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
-										>
-										</span>
+									<?php
+										echo wp_kses(
+											$line_item_save_badge,
+											array(
+												'span' => array(
+													'data-wp-text' => true,
+													'class'        => true,
+												),
+											)
+										);
+									?>
 									</div>
 								</div>
 							</td>

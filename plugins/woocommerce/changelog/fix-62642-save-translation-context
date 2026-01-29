@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use existing "Save %s" translation for mini cart discount badge to ensure correct translation for discount savings.

@@ -7,12 +7,12 @@ import {
 	getConfig,
 	getElement,
 } from '@wordpress/interactivity';
-import {
-	SelectedAttributes,
-	VariationData,
-} from '@woocommerce/stores/woocommerce/cart';
+import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -22,8 +22,12 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import type { NormalizedProductData } from '../types';
-import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
+import {
+	normalizeAttributeName,
+	attributeNamesMatch,
+	getVariationAttributeValue,
+	findMatchingVariation,
+} from '../../../base/utils/variations/attribute-matching';
 import setStyles from './set-styles';
 
 type Option = {
@@ -46,6 +50,18 @@ setStyles();
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
 
 /**
  * Check if the attribute value is valid given the other selected attributes and
@@ -78,29 +94,31 @@ const isAttributeValueValid = ( {
 	// valid, that's why we subtract one from the total number of attributes to
 	// match.
 	const isCurrentAttributeSelected = selectedAttributes.some(
-		( selectedAttribute ) => selectedAttribute.attribute === attributeName
+		( selectedAttribute ) =>
+			attributeNamesMatch( selectedAttribute.attribute, attributeName )
 	);
 	const attributesToMatch = isCurrentAttributeSelected
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const { products } = getConfig( 'woocommerce' );
+	const product = productsState.products[ productDataState.productId ];
 
-	if ( ! products || ! products[ productDataState.productId ] ) {
+	if ( ! product?.variations?.length ) {
 		return false;
 	}
 
-	const availableVariations = Object.values(
-		products[ productDataState.productId ].variations || {}
-	);
-
 	// Check if there is at least one available variation matching the current
 	// selected attributes and the attribute value being checked.
-	return availableVariations.some( ( availableVariation ) => {
+	return product.variations.some( ( variation ) => {
+		const variationAttrValue = getVariationAttributeValue(
+			variation,
+			attributeName
+		);
+
 		// Skip variations that don't match the current attribute value.
 		if (
-			availableVariation.attributes[ attributeName ] !== attributeValue &&
-			availableVariation.attributes[ attributeName ] !== '' // "" is used for "any".
+			variationAttrValue !== attributeValue &&
+			variationAttrValue !== '' // "" is used for "any".
 		) {
 			return false;
 		}
@@ -109,9 +127,10 @@ const isAttributeValueValid = ( {
 		const matchingAttributes = selectedAttributes.filter(
 			( selectedAttribute ) => {
 				const availableVariationAttributeValue =
-					availableVariation.attributes[
+					getVariationAttributeValue(
+						variation,
 						selectedAttribute.attribute
-					];
+					);
 				// If the current available variation matches the selected
 				// value, count it.
 				if (
@@ -125,7 +144,10 @@ const isAttributeValueValid = ( {
 				// selection.
 				if ( availableVariationAttributeValue === '' ) {
 					if (
-						selectedAttribute.attribute !== attributeName ||
+						! attributeNamesMatch(
+							selectedAttribute.attribute,
+							attributeName
+						) ||
 						attributeValue === selectedAttribute.value
 					) {
 						return true;
@@ -140,32 +162,31 @@ const isAttributeValueValid = ( {
 };
 
 /**
- * Return the product attributes and options.
+ * Return the product attributes and options from Store API format.
+ *
+ * @param product The product in Store API format.
+ * @return Record of attribute names to their available option values.
  */
 const getProductAttributesAndOptions = (
-	productObject: NormalizedProductData | null
+	product: ProductResponseItem | null
 ): Record< string, string[] > => {
-	if ( ! productObject?.variations ) {
+	if ( ! product?.variations?.length ) {
 		return {};
 	}
 
-	const variations: VariationData[] = Object.values(
-		productObject.variations
-	);
 	const productAttributesAndOptions = {} as Record< string, string[] >;
-	variations.forEach( ( variation: VariationData ) => {
-		if ( ! variation?.attributes ) {
-			return;
-		}
-		Object.entries( variation.attributes ).forEach( ( [ key, value ] ) => {
-			if ( typeof key !== 'string' || typeof value !== 'string' ) {
-				return;
+	product.variations.forEach( ( variation ) => {
+		variation.attributes.forEach( ( attr ) => {
+			if ( ! Array.isArray( productAttributesAndOptions[ attr.name ] ) ) {
+				productAttributesAndOptions[ attr.name ] = [];
 			}
-			if ( ! Array.isArray( productAttributesAndOptions[ key ] ) ) {
-				productAttributesAndOptions[ key ] = [];
-			}
-			if ( ! productAttributesAndOptions[ key ].includes( value ) ) {
-				productAttributesAndOptions[ key ].push( value );
+			if (
+				attr.value &&
+				! productAttributesAndOptions[ attr.name ].includes(
+					attr.value
+				)
+			) {
+				productAttributesAndOptions[ attr.name ].push( attr.value );
 			}
 		} );
 	} );
@@ -200,12 +221,6 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 	};
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
-
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
@@ -223,7 +238,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				return selectedAttributes.some( ( attrObject ) => {
 					return (
-						attrObject.attribute === name &&
+						attributeNamesMatch( attrObject.attribute, name ) &&
 						attrObject.value === option.value
 					);
 				} );
@@ -248,7 +263,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
-						selectedAttribute.attribute === attribute
+						attributeNamesMatch(
+							selectedAttribute.attribute,
+							attribute
+						)
 				);
 
 				if ( value === '' ) {
@@ -274,7 +292,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
-						selectedAttribute.attribute === attribute
+						attributeNamesMatch(
+							selectedAttribute.attribute,
+							attribute
+						)
 				);
 				if ( index >= 0 ) {
 					selectedAttributes.splice( index, 1 );
@@ -319,24 +340,35 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const productObject: NormalizedProductData | null =
-					getProductData( productDataState.productId, [] );
-				if ( ! productObject ) {
+				const product =
+					productsState.products[ productDataState.productId ];
+				if ( ! product ) {
 					return;
 				}
+
+				// Normalize included/excluded attributes to lowercase for comparison
+				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
+				const normalizedIncluded = includedAttributes.map( ( attr ) =>
+					normalizeAttributeName( attr ).toLowerCase()
+				);
+				const normalizedExcluded = excludedAttributes.map( ( attr ) =>
+					normalizeAttributeName( attr ).toLowerCase()
+				);
+
 				const productAttributesAndOptions: Record< string, string[] > =
-					getProductAttributesAndOptions( productObject );
+					getProductAttributesAndOptions( product );
 				Object.entries( productAttributesAndOptions ).forEach(
 					( [ attribute, options ] ) => {
+						const attributeLower = attribute.toLowerCase();
 						if (
-							includedAttributes.length !== 0 &&
-							! includedAttributes.includes( attribute )
+							normalizedIncluded.length !== 0 &&
+							! normalizedIncluded.includes( attributeLower )
 						) {
 							return;
 						}
 						if (
-							excludedAttributes.length !== 0 &&
-							excludedAttributes.includes( attribute )
+							normalizedExcluded.length !== 0 &&
+							normalizedExcluded.includes( attributeLower )
 						) {
 							return;
 						}
@@ -349,7 +381,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						);
 						if ( validOptions.length === 1 ) {
 							const validOption = validOptions[ 0 ];
-							actions.setAttribute( attribute, validOption );
+							// Use the context's attribute name format for consistency.
+							// Find the matching context name by comparing normalized versions.
+							const contextName =
+								includedAttributes.find(
+									( attr ) =>
+										normalizeAttributeName(
+											attr
+										).toLowerCase() === attributeLower
+								) || attribute;
+							actions.setAttribute( contextName, validOption );
 						}
 					}
 				);
@@ -367,15 +408,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 			setSelectedVariationId: () => {
-				const { products } = getConfig( 'woocommerce' );
+				const product =
+					productsState.products[ productDataState.productId ];
 
-				const variations =
-					products?.[ productDataState.productId ].variations;
+				if ( ! product?.variations?.length ) {
+					return;
+				}
 
 				const { selectedAttributes } = getContext< Context >();
-
-				const matchedVariation = getMatchedVariation(
-					variations,
+				const matchedVariation = findMatchingVariation(
+					product,
 					selectedAttributes
 				);
 
@@ -385,32 +427,29 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						{},
 						{ lock: universalLock }
 					);
-				const matchedVariationId =
-					matchedVariation?.variation_id || null;
-				productDataActions.setVariationId( matchedVariationId );
+				productDataActions.setVariationId(
+					matchedVariation?.id ?? null
+				);
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { products } = getConfig( 'woocommerce' );
+				const product =
+					productsState.products[ productDataState.productId ];
 
-				if ( ! products || ! products[ productDataState.productId ] ) {
+				if ( ! product?.variations?.length ) {
 					return;
 				}
 
-				const variations =
-					products[ productDataState.productId ].variations;
-
 				const { selectedAttributes } = getContext< Context >();
-
-				const matchedVariation = getMatchedVariation(
-					variations,
+				const matchedVariation = findMatchingVariation(
+					product,
 					selectedAttributes
 				);
 
 				const { errorMessages } = getConfig();
 
-				if ( ! matchedVariation?.variation_id ) {
+				if ( ! matchedVariation?.id ) {
 					actions.addError( {
 						code: 'variableProductMissingAttributes',
 						message:
@@ -421,7 +460,18 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				if ( ! matchedVariation?.is_in_stock ) {
+				// Check stock status from productVariations store.
+				const variationData =
+					productsState.productVariations[ matchedVariation.id ];
+
+				if ( ! variationData ) {
+					// Variation data not loaded - this is a data consistency issue.
+					// Return early; getProductData already returns null for this case,
+					// which prevents add-to-cart from proceeding.
+					return;
+				}
+
+				if ( ! variationData.is_in_stock ) {
 					actions.addError( {
 						code: 'variableProductOutOfStock',
 						message: errorMessages?.variableProductOutOfStock || '',
