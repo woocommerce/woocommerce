@@ -20,7 +20,7 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * Internal dependencies
  */
-import { PostWithPermissions } from '../../store';
+import { type PostWithPermissions } from '../../store';
 import { recordEvent } from '../../events';
 
 function getItemTitle( item: {
