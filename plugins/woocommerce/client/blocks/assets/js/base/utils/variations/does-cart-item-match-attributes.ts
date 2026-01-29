@@ -6,6 +6,11 @@ import type {
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
 
+/**
+ * Internal dependencies
+ */
+import { attributeNamesMatch } from './attribute-matching';
+
 export const doesCartItemMatchAttributes = (
 	cartItem: OptimisticCartItem,
 	selectedAttributes: SelectedAttributes[]
@@ -32,7 +37,7 @@ export const doesCartItemMatchAttributes = (
 		} ) =>
 			selectedAttributes.some( ( item: SelectedAttributes ) => {
 				return (
-					item.attribute === raw_attribute &&
+					attributeNamesMatch( item.attribute, raw_attribute ) &&
 					( item.value.toLowerCase() === value.toLowerCase() ||
 						( item.value && value === '' ) ) // Handle "any" attribute type
 				);

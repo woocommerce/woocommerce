@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0](https://github.com/woocommerce/email-editor/releases/tag/2.5.0) - 2026-01-29 
+
+-   Minor - Fix image alignment by adding alignment to the inner cell when rendered.  Fix image border alignment by adding a border wrapper. [#62899]
+-   Minor - Add action hooks for customizing preview email sending: woocommerce_email_editor_send_preview_email_before_wp_mail and woocommerce_email_editor_send_preview_email_after_wp_mail. [#62936]
+-   Minor - Add support for VideoPress embeds in the Email Editor package. [#62870]
+-   Patch - Improved extraction of style values from site theme [#62911]
+
 ## [2.4.0](https://github.com/woocommerce/email-editor/releases/tag/2.4.0) - 2026-01-21 
 
 -   Minor - Add woocommerce_email_editor_site_theme filter to allow overriding the site theme used when syncing global styles for the email editor. [#62889]
@@ -40,7 +47,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 -   Patch - Fix core/post-content block rendering empty on second email in batch processing by overriding WordPress render callback with stateless version [#61546]
 -   Minor - Extend Rendering_Context with email-specific context support (user_id, order_id, recipient_email), add woocommerce_email_editor_rendering_email_context filter [#61546]
--   ** BREAKING CHANGE ** Updated all PHP dependencies. [#61753]
 
 ## [1.9.0](https://github.com/woocommerce/email-editor/releases/tag/1.9.0) - 2025-10-31 
 

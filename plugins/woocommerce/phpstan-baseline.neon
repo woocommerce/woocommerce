@@ -57088,20 +57088,8 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartForm.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_variation_attributes\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\AddToCartWithOptions\:\:enqueue_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
 
