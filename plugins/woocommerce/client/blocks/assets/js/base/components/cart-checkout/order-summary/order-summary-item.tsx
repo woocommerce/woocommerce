@@ -134,15 +134,12 @@ const OrderSummaryItem = ( {
 		validation: productPriceValidation,
 	} );
 
-	const productPriceScreenReaderDefault = sprintf(
-		/* translators: %1$d is the total price including the currency symbol. <quantity/> and <productName/> are placeholders and should not be translated. */
-		_n(
-			'Total price for <quantity/> <productName/> item: %1$s',
-			'Total price for <quantity/> <productName/> items: %1$s',
-			quantity,
-			'woocommerce'
-		),
-		formatPrice( subtotalPrice, totalsCurrency )
+	/* translators: <quantity/>, <productName/> and <price/> are placeholders and should not be translated. */
+	const productPriceScreenReaderDefault = _n(
+		'Total price for <quantity/> <productName/> item: <price/>',
+		'Total price for <quantity/> <productName/> items: <price/>',
+		quantity,
+		'woocommerce'
 	);
 
 	const productPriceScreenReaderFormat = applyCheckoutFilter( {
@@ -157,6 +154,7 @@ const OrderSummaryItem = ( {
 		return createInterpolateElement( productPriceScreenReaderFormat, {
 			quantity: <>{ quantity }</>,
 			productName: <>{ name }</>,
+			price: <>{ formatPrice( subtotalPrice, totalsCurrency ) }</>,
 		} );
 	};
 
