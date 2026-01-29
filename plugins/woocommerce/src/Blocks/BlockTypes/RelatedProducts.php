@@ -168,21 +168,21 @@ class RelatedProducts extends AbstractBlock {
 			return array();
 		}
 
-		$related_products     = array();
 		$related_products_ids = wc_get_related_products( $product->get_id(), $product_per_page, $product->get_upsell_ids() );
 		if ( ! empty( $related_products_ids ) ) {
+			// Optimization: reduce the number of SQLs needed to populate product objects.
 			_prime_post_caches( $related_products_ids );
+
 			$related_products = array_filter( array_map( 'wc_get_product', $related_products_ids ), 'wc_products_array_filter_visible' );
 			$related_products = wc_products_array_orderby( $related_products, 'rand', 'desc' );
+			/** @var \WC_Product[] $related_products */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+
+			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
+			_prime_post_caches( array_filter( array_map( fn( $product ) => $product->get_image_id(), $related_products ) ) );
+
+			$related_products_ids = array_map( fn( $product ) => $product->get_id(), $related_products );
 		}
 
-		$related_product_ids = array_map(
-			function ( $product ) {
-				return $product->get_id();
-			},
-			$related_products
-		);
-
-		return $related_product_ids;
+		return $related_products_ids;
 	}
 }
