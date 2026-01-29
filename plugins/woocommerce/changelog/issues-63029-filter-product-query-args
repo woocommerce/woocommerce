@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add woocommerce_store_api_product_query_args filter

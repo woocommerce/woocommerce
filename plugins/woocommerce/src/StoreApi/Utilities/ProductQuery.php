@@ -251,7 +251,13 @@ class ProductQuery implements QueryClausesGenerator {
 			$args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore
 		}
 
-		return $args;
+		/**
+		 * Filters query args from Store API before passing to WP_Query.
+		 *
+		 * @param \WP_REST_Request $request Request data.
+		 * @return array
+		 */
+		return (array) apply_filters( 'woocommerce_store_api_product_query_args', $args, $request );
 	}
 
 	/**
