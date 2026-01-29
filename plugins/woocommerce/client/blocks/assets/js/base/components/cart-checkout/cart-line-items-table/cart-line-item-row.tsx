@@ -268,6 +268,16 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								) }
 								format={ subtotalPriceFormat }
 							/>
+							{ quantity === 1 && (
+								<ProductSaleBadge
+									currency={ priceCurrency }
+									saleAmount={ getAmountFromRawPrice(
+										saleAmountSingle,
+										priceCurrency
+									) }
+									format={ saleBadgePriceFormat }
+								/>
+							) }
 						</div>
 
 						<ProductSaleBadge
