@@ -11,7 +11,6 @@ import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -76,29 +75,6 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
-/**
- * Normalize a Store API product into the format expected by consumers.
- *
- * @param product The product in Store API format.
- * @return Normalized product data.
- */
-const normalizeProductFromStore = (
-	product: ProductResponseItem
-): NormalizedProductData | NormalizedVariationData => {
-	const addToCart = product.add_to_cart;
-	const maximum = addToCart?.maximum ?? 0;
-
-	return {
-		id: product.id,
-		type: product.type,
-		is_in_stock: product.is_purchasable && product.is_in_stock,
-		sold_individually: product.sold_individually,
-		min: addToCart?.minimum ?? 1,
-		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
-		step: addToCart?.multiple_of ?? 1,
-	};
-};
-
 export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
@@ -123,7 +99,22 @@ export const getProductData = (
 			const variation =
 				productsState.productVariations[ matchedVariation.id ];
 			if ( variation ) {
-				return normalizeProductFromStore( variation );
+				const variationAddToCart = variation.add_to_cart;
+				const variationMaximum = variationAddToCart?.maximum ?? 0;
+
+				return {
+					id: variation.id,
+					type: variation.type,
+					is_in_stock:
+						variation.is_purchasable && variation.is_in_stock,
+					sold_individually: variation.sold_individually,
+					min: variationAddToCart?.minimum ?? 1,
+					max:
+						variationMaximum > 0
+							? variationMaximum
+							: Number.MAX_SAFE_INTEGER,
+					step: variationAddToCart?.multiple_of ?? 1,
+				};
 			}
 			// Variation was matched but its data isn't in the store.
 			// Return null to prevent using stale parent product data.
@@ -131,7 +122,19 @@ export const getProductData = (
 		}
 	}
 
-	return normalizeProductFromStore( productFromStore );
+	const addToCart = productFromStore.add_to_cart;
+	const maximum = addToCart?.maximum ?? 0;
+
+	return {
+		id: productFromStore.id,
+		type: productFromStore.type,
+		is_in_stock:
+			productFromStore.is_purchasable && productFromStore.is_in_stock,
+		sold_individually: productFromStore.sold_individually,
+		min: addToCart?.minimum ?? 1,
+		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
+		step: addToCart?.multiple_of ?? 1,
+	};
 };
 
 export const getNewQuantity = (
