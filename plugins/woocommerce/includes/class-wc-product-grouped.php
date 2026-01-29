@@ -142,7 +142,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * Return the children of this product.
 	 *
 	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return array
+	 * @return int[]
 	 */
 	public function get_children( $context = 'view' ) {
 		return $this->get_prop( 'children', $context );
