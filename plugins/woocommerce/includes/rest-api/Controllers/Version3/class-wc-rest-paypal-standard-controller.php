@@ -93,7 +93,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		$order_id        = $order->get_id();
 		$transient_key   = PayPalConstants::SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX . $order_id;
 		$transient_value = get_transient( $transient_key );
-		if ( empty( $transient_value ) || $token !== $transient_value ) {
+		if ( empty( $transient_value ) || hash_equals( $token, $transient_value ) ) {
 			return false;
 		}
 
