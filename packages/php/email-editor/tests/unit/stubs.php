@@ -40,9 +40,17 @@ if ( ! function_exists( 'wp_style_engine_get_styles' ) ) {
 	 * Mock wp_style_engine_get_styles function.
 	 *
 	 * @param array $block_styles Array of block styles.
+	 * @param array $options Optional. Style engine options.
 	 * @return array
 	 */
-	function wp_style_engine_get_styles( $block_styles ) {
+	function wp_style_engine_get_styles( $block_styles, $options = array() ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		// Capture last call for assertions in unit tests.
+		global $__email_editor_last_wp_style_engine_get_styles_call;
+		$__email_editor_last_wp_style_engine_get_styles_call = array(
+			'block_styles' => $block_styles,
+			'options'      => $options,
+		);
+
 		// Return empty structure for empty input.
 		if ( empty( $block_styles ) ) {
 			return array(

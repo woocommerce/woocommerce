@@ -133,6 +133,31 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it removes inline margin styles (not supported in email renderer).
+	 */
+	public function testItRemovesInlineMarginStyles(): void {
+		$content                          = '<p style="margin-top:10px;margin-bottom:12px;">Lorem Ipsum</p>';
+		$parsed_paragraph                 = $this->parsed_paragraph;
+		$parsed_paragraph['innerHTML']    = $content;
+		$parsed_paragraph['innerContent'] = array( $content );
+
+		$rendered = $this->paragraph_renderer->render( $content, $parsed_paragraph, $this->rendering_context );
+		$html     = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag( array( 'tag_name' => 'p' ) );
+
+		$paragraph_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $paragraph_style );
+		$this->assertStringNotContainsString( 'margin', $paragraph_style );
+
+		// Margin styles should also not leak to the wrapper table cell.
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag( array( 'tag_name' => 'td' ) );
+		$table_cell_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $table_cell_style );
+		$this->assertStringNotContainsString( 'margin', $table_cell_style );
+	}
+
+	/**
 	 * Test it converts block typography
 	 */
 	public function testItConvertsBlockTypography(): void {

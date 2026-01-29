@@ -485,4 +485,35 @@ class CheckoutEventTrackerTest extends \WC_Unit_Test_Case {
 		$posted_data = 'billing_country=US&billing_email=test@example.com';
 		$this->sut->track_shortcode_checkout_field_update( $posted_data );
 	}
+
+	/**
+	 * Test track_order_placed dispatches event with correct data structure.
+	 */
+	public function test_track_order_placed_dispatches_event(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->mock_dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch_event' )
+			->with(
+				$this->equalTo( 'order_placed' ),
+				$this->callback(
+					function ( $event_data ) use ( $order ) {
+						$this->assertArrayHasKey( 'order_id', $event_data );
+						$this->assertEquals( $order->get_id(), $event_data['order_id'] );
+						$this->assertArrayHasKey( 'payment_method', $event_data );
+						$this->assertArrayHasKey( 'total', $event_data );
+						$this->assertArrayHasKey( 'currency', $event_data );
+						$this->assertArrayHasKey( 'customer_id', $event_data );
+						$this->assertArrayHasKey( 'status', $event_data );
+						return true;
+					}
+				)
+			);
+
+		$this->sut->track_order_placed( $order->get_id(), $order );
+
+		// Clean up.
+		$order->delete( true );
+	}
 }

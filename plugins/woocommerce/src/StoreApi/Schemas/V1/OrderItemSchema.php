@@ -17,6 +17,13 @@ class OrderItemSchema extends ItemSchema {
 	protected $title = 'order_item';
 
 	/**
+	 * Cache for parent product attributes.
+	 *
+	 * @var array|null
+	 */
+	private $cached_parent_attributes = null;
+
+	/**
 	 * The schema item identifier.
 	 *
 	 * @var string
@@ -30,6 +37,8 @@ class OrderItemSchema extends ItemSchema {
 	 * @return array
 	 */
 	public function get_item_response( $order_item ) {
+		$this->cached_parent_attributes = null;
+
 		$order   = $order_item->get_order();
 		$product = $order_item->get_product();
 
@@ -72,10 +81,11 @@ class OrderItemSchema extends ItemSchema {
 			$product_properties['prices']             = $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) );
 			$product_properties['sold_individually']  = $product->is_sold_individually();
 			$product_properties['images']             = $this->get_images( $product );
+
 			// Only include variation data for product variations, not simple products.
 			// This is consistent with the cart endpoint behavior.
 			if ( $product instanceof \WC_Product_Variation ) {
-				$product_properties['variation'] = $this->format_variation_data( $product->get_attributes(), $product );
+				$product_properties['variation'] = $this->get_variation_data_from_order_item( $order_item, $product );
 			}
 		}
 
@@ -120,5 +130,86 @@ class OrderItemSchema extends ItemSchema {
 			'line_total'        => $this->prepare_money_response( $order_item->get_total(), wc_get_price_decimals() ),
 			'line_total_tax'    => $this->prepare_money_response( $order_item->get_total_tax(), wc_get_price_decimals() ),
 		];
+	}
+
+	/**
+	 * Get variation data from order item metadata.
+	 *
+	 * Gets the customer's actual attribute choices from the order metadata.
+	 * This fixes variations set to "Any" returning empty values.
+	 *
+	 * @param \WC_Order_Item_Product $order_item Order item instance.
+	 * @param \WC_Product            $product Product instance.
+	 * @return array Formatted variation data.
+	 */
+	protected function get_variation_data_from_order_item( $order_item, $product ) {
+		$variation_data = array();
+		$meta_data      = $order_item->get_meta_data();
+
+		$parent_attributes = $this->get_parent_product_attributes( $product );
+
+		foreach ( $meta_data as $meta ) {
+			$meta_key   = $meta->key;
+			$meta_value = $meta->value;
+
+			if ( empty( $meta_key ) || ! is_scalar( $meta_value ) || '' === $meta_value || strpos( $meta_key, '_' ) === 0 ) {
+				continue;
+			}
+
+			$is_variation_attribute = false;
+			$normalized_key         = $meta_key;
+
+			if ( strpos( $meta_key, 'attribute_' ) === 0 ) {
+				$normalized_key = substr( $meta_key, strlen( 'attribute_' ) );
+			}
+
+			if ( strpos( $normalized_key, 'pa_' ) === 0 ) {
+				$is_variation_attribute = true;
+			} else {
+				foreach ( $parent_attributes as $attribute ) {
+					if ( strtolower( $attribute->get_name() ) === strtolower( $normalized_key ) ) {
+						$is_variation_attribute = true;
+						break;
+					}
+				}
+			}
+
+			if ( $is_variation_attribute ) {
+				$variation_data[ wc_variation_attribute_name( $normalized_key ) ] = $meta_value;
+			}
+		}
+
+		return $this->format_variation_data( $variation_data, $product );
+	}
+
+	/**
+	 * Get parent product attributes.
+	 *
+	 * Cached to avoid multiple DB lookups when processing multiple meta items.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return array Array of WC_Product_Attribute objects.
+	 *
+	 * @since 10.5.0
+	 */
+	protected function get_parent_product_attributes( $product ) {
+		if ( null !== $this->cached_parent_attributes ) {
+			return $this->cached_parent_attributes;
+		}
+
+		$this->cached_parent_attributes = array();
+
+		if ( ! $product->get_parent_id() ) {
+			return $this->cached_parent_attributes;
+		}
+
+		$parent_product = wc_get_product( $product->get_parent_id() );
+		if ( ! $parent_product instanceof \WC_Product ) {
+			return $this->cached_parent_attributes;
+		}
+
+		$this->cached_parent_attributes = $parent_product->get_attributes();
+
+		return $this->cached_parent_attributes;
 	}
 }

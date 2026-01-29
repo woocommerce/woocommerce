@@ -57,14 +57,14 @@
 	}
 
 	.wc-block-components-checkout-step__description-payments-aligned {
-		@include font-regular-locked;
+		@include font-small-locked;
 		margin: 0;
 		padding-top: $gap-small;
 		padding-bottom: $gap-smaller;
 	}
 }
 .wc-block-components-radio-control-accordion-content {
-	@include font-regular-locked;
+	@include font-small-locked;
 	padding: 0 $gap $gap;
 
 	&:empty,
