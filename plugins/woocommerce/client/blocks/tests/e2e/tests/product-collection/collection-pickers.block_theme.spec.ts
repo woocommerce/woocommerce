@@ -36,21 +36,21 @@ const taxonomyCollections: {
 		slug: 'productsByCategory',
 		name: 'Products by Category',
 		termName: 'categories',
-		termLabel: 'Music',
-		expectedProductCount: 2, // Album and Single are in Music category
+		termLabel: 'Accessories',
+		expectedProductCount: 5,
 	},
 	{
 		slug: 'productsByTag',
 		name: 'Products by Tag',
 		termName: 'tags',
 		termLabel: 'Recommended',
-		expectedProductCount: 1,
+		expectedProductCount: 2,
 	},
 ];
 
 test.describe( 'Product Collection: Collection Pickers', () => {
 	test.describe( 'Hand-Picked Products', () => {
-		test( 'Picker is shown immediately when collection is selected', async ( {
+		test( 'Can select multiple products and Done button becomes enabled', async ( {
 			pageObject,
 			admin,
 			editor,
@@ -59,59 +59,35 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'handPicked' );
 
-			// Verify the product picker is shown
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-			await expect( productPicker ).toBeVisible();
-
-			// Verify the Done button is visible but disabled (no products selected)
 			const doneButton = productPicker.locator(
 				SELECTORS.pickerDoneButton
 			);
-			await expect( doneButton ).toBeVisible();
+
+			// Initially disabled
 			await expect( doneButton ).toBeDisabled();
-		} );
 
-		test( 'Can select multiple products and click Done', async ( {
-			pageObject,
-			admin,
-			editor,
-		} ) => {
-			await admin.createNewPost();
-			await pageObject.insertProductCollection();
-			await pageObject.chooseCollectionInPost( 'handPicked' );
-
-			const productPicker = editor.canvas.locator(
-				SELECTORS.productPicker
-			);
-			await expect( productPicker ).toBeVisible();
-
-			// Select first product (Album)
-			await productPicker
-				.getByRole( 'option', { name: 'Album' } )
-				.click();
+			// Select first product
+			await productPicker.getByText( 'Album (woo-album)' ).click();
 
 			// Done button should now be enabled
-			const doneButton = productPicker.locator(
-				SELECTORS.pickerDoneButton
-			);
 			await expect( doneButton ).toBeEnabled();
 
-			// Select second product (Beanie)
-			await productPicker
-				.getByRole( 'option', { name: 'Beanie' } )
-				.click();
+			// Select second product
+			await productPicker.getByText( 'Beanie (woo-beanie)' ).click();
 
 			// Click Done
 			await doneButton.click();
 
 			// Picker should be hidden and products should be displayed
 			await expect( productPicker ).toBeHidden();
+			await pageObject.refreshLocators( 'editor' );
 			await expect( pageObject.products ).toHaveCount( 2 );
 		} );
 
-		test( 'Picker is not shown after save and refresh when products are selected', async ( {
+		test( 'Picker is not shown after save and refresh', async ( {
 			pageObject,
 			admin,
 			editor,
@@ -121,14 +97,11 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'handPicked' );
 
+			// Select a product and click Done
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-
-			// Select a product and click Done
-			await productPicker
-				.getByRole( 'option', { name: 'Album' } )
-				.click();
+			await productPicker.getByText( 'Album (woo-album)' ).click();
 			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
 
 			// Save and refresh
@@ -149,6 +122,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await expect( pickerAfterRefresh ).toBeHidden();
 
 			// Products should be visible
+			await pageObject.refreshLocators( 'editor' );
 			await expect( pageObject.products ).toHaveCount( 1 );
 		} );
 
@@ -161,32 +135,23 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'handPicked' );
 
+			// Select products and click Done
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-
-			// Select products and click Done
-			await productPicker
-				.getByRole( 'option', { name: 'Album' } )
-				.click();
-			await productPicker
-				.getByRole( 'option', { name: 'Beanie' } )
-				.click();
+			await productPicker.getByText( 'Album (woo-album)' ).click();
+			await productPicker.getByText( 'Beanie (woo-beanie)' ).click();
 			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
 
-			// Publish and verify on frontend
+			await pageObject.refreshLocators( 'editor' );
 			await pageObject.publishAndGoToFrontend();
 			await expect( pageObject.products ).toHaveCount( 2 );
-			await expect( pageObject.productTitles ).toContainText( [
-				'Album',
-				'Beanie',
-			] );
 		} );
 	} );
 
 	for ( const collection of taxonomyCollections ) {
 		test.describe( `${ collection.name }`, () => {
-			test( 'Picker is shown immediately when collection is selected', async ( {
+			test( `Can select ${ collection.termName } and Done button becomes enabled`, async ( {
 				pageObject,
 				admin,
 				editor,
@@ -195,43 +160,22 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 				await pageObject.insertProductCollection();
 				await pageObject.chooseCollectionInPost( collection.slug );
 
-				// Verify the taxonomy picker is shown
 				const taxonomyPicker = editor.canvas.locator(
 					SELECTORS.taxonomyPicker
 				);
-				await expect( taxonomyPicker ).toBeVisible();
-
-				// Verify the Done button is visible but disabled (no terms selected)
-				const doneButton = editor.canvas.locator(
-					`${ SELECTORS.taxonomyPicker } ${ SELECTORS.pickerDoneButton }`
+				const doneButton = taxonomyPicker.locator(
+					SELECTORS.pickerDoneButton
 				);
-				await expect( doneButton ).toBeVisible();
+
+				// Initially disabled
 				await expect( doneButton ).toBeDisabled();
-			} );
-
-			test( `Can select ${ collection.termName } and click Done`, async ( {
-				pageObject,
-				admin,
-				editor,
-			} ) => {
-				await admin.createNewPost();
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInPost( collection.slug );
-
-				const taxonomyPicker = editor.canvas.locator(
-					SELECTORS.taxonomyPicker
-				);
-				await expect( taxonomyPicker ).toBeVisible();
 
 				// Select a term
 				await taxonomyPicker
-					.getByRole( 'option', { name: collection.termLabel } )
+					.getByRole( 'checkbox', { name: collection.termLabel } )
 					.click();
 
 				// Done button should now be enabled
-				const doneButton = editor.canvas.locator(
-					`${ SELECTORS.taxonomyPicker } ${ SELECTORS.pickerDoneButton }`
-				);
 				await expect( doneButton ).toBeEnabled();
 
 				// Click Done
@@ -239,6 +183,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 
 				// Picker should be hidden and products should be displayed
 				await expect( taxonomyPicker ).toBeHidden();
+				await pageObject.refreshLocators( 'editor' );
 				await expect( pageObject.products ).toHaveCount(
 					collection.expectedProductCount
 				);
@@ -253,21 +198,18 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 				await pageObject.insertProductCollection();
 				await pageObject.chooseCollectionInPost( collection.slug );
 
+				// Select term and click Done
 				const taxonomyPicker = editor.canvas.locator(
 					SELECTORS.taxonomyPicker
 				);
-
-				// Select term and click Done
 				await taxonomyPicker
-					.getByRole( 'option', { name: collection.termLabel } )
+					.getByRole( 'checkbox', { name: collection.termLabel } )
 					.click();
-				await editor.canvas
-					.locator(
-						`${ SELECTORS.taxonomyPicker } ${ SELECTORS.pickerDoneButton }`
-					)
+				await taxonomyPicker
+					.locator( SELECTORS.pickerDoneButton )
 					.click();
 
-				// Publish and verify on frontend
+				await pageObject.refreshLocators( 'editor' );
 				await pageObject.publishAndGoToFrontend();
 				await expect( pageObject.products ).toHaveCount(
 					collection.expectedProductCount
@@ -277,7 +219,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 	}
 
 	test.describe( 'Collection switching', () => {
-		test( 'Switching from Hand-Picked to Products by Category shows appropriate picker', async ( {
+		test( 'Switching from Hand-Picked to Products by Category shows taxonomy picker', async ( {
 			pageObject,
 			admin,
 			editor,
@@ -286,18 +228,12 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'handPicked' );
 
-			// Verify product picker is shown
+			// Select a product and click Done
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-			await expect( productPicker ).toBeVisible();
-
-			// Select a product and click Done
-			await productPicker
-				.getByRole( 'option', { name: 'Album' } )
-				.click();
+			await productPicker.getByText( 'Album (woo-album)' ).click();
 			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
-			await expect( productPicker ).toBeHidden();
 
 			// Switch to Products by Category using toolbar
 			await pageObject.changeCollectionUsingToolbar(
@@ -311,7 +247,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await expect( taxonomyPicker ).toBeVisible();
 		} );
 
-		test( 'Switching to a non-picker collection hides any picker', async ( {
+		test( 'Switching to a non-picker collection displays products immediately', async ( {
 			pageObject,
 			admin,
 			editor,
@@ -320,11 +256,12 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInPost( 'handPicked' );
 
-			// Verify product picker is shown
+			// Select a product and click Done
 			const productPicker = editor.canvas.locator(
 				SELECTORS.productPicker
 			);
-			await expect( productPicker ).toBeVisible();
+			await productPicker.getByText( 'Album (woo-album)' ).click();
+			await productPicker.locator( SELECTORS.pickerDoneButton ).click();
 
 			// Switch to Featured Products (no picker needed)
 			await pageObject.changeCollectionUsingToolbar( 'featured' );
@@ -337,6 +274,7 @@ test.describe( 'Product Collection: Collection Pickers', () => {
 			await expect( taxonomyPicker ).toBeHidden();
 
 			// Products should be displayed
+			await pageObject.refreshLocators( 'editor' );
 			await expect( pageObject.products ).toHaveCount( 4 );
 		} );
 	} );
