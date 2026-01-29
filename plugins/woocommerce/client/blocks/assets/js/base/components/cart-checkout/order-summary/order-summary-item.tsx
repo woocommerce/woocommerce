@@ -27,6 +27,7 @@ import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
 import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
+import ProductSaleBadge from '../product-sale-badge';
 
 interface OrderSummaryProps {
 	cartItem: CartItem;
@@ -102,8 +103,47 @@ const OrderSummaryItem = ( {
 		amount: lineSubtotal,
 		precision: totalsCurrency.minorUnit,
 	} ).getAmount();
+
+	// Sale badge discount calculation — duplicated from cart-line-item-row.tsx.
+	// Both components already depend on Dinero for other price math, and the
+	// logic is small enough that a shared hook would add indirection without
+	// meaningful deduplication.
+
+	const regularAmountSingle = Dinero( {
+		amount: parseInt( prices.raw_prices.regular_price, 10 ),
+		precision: isString( prices.raw_prices.precision )
+			? parseInt( prices.raw_prices.precision, 10 )
+			: prices.raw_prices.precision,
+	} );
+
+	const purchaseAmountSingle = Dinero( {
+		amount: parseInt( prices.raw_prices.price, 10 ),
+		precision: isString( prices.raw_prices.precision )
+			? parseInt( prices.raw_prices.precision, 10 )
+			: prices.raw_prices.precision,
+	} );
+
+	const saleAmountSingle = regularAmountSingle
+		.subtract( purchaseAmountSingle )
+		.convertPrecision( priceCurrency.minorUnit )
+		.getAmount();
+
+	const saleAmount = regularAmountSingle
+		.subtract( purchaseAmountSingle )
+		.multiply( quantity )
+		.convertPrecision( priceCurrency.minorUnit )
+		.getAmount();
+
 	const subtotalPriceFormat = applyCheckoutFilter( {
 		filterName: 'subtotalPriceFormat',
+		defaultValue: '<price/>',
+		extensions,
+		arg,
+		validation: productPriceValidation,
+	} );
+
+	const saleBadgePriceFormat = applyCheckoutFilter( {
+		filterName: 'saleBadgePriceFormat',
 		defaultValue: '<price/>',
 		extensions,
 		arg,
@@ -175,15 +215,24 @@ const OrderSummaryItem = ( {
 					permalink={ permalink }
 					disabledTagName="h3"
 				/>
-				<ProductPrice
-					currency={ priceCurrency }
-					price={ priceSingle }
-					regularPrice={ regularPriceSingle }
-					className="wc-block-components-order-summary-item__individual-prices"
-					priceClassName="wc-block-components-order-summary-item__individual-price"
-					regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
-					format={ subtotalPriceFormat }
-				/>
+				<div className="wc-block-cart-item__prices">
+					<ProductPrice
+						currency={ priceCurrency }
+						price={ priceSingle }
+						regularPrice={ regularPriceSingle }
+						className="wc-block-components-order-summary-item__individual-prices"
+						priceClassName="wc-block-components-order-summary-item__individual-price"
+						regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
+						format={ subtotalPriceFormat }
+					/>
+					{ quantity === 1 && (
+						<ProductSaleBadge
+							currency={ priceCurrency }
+							saleAmount={ saleAmountSingle }
+							format={ saleBadgePriceFormat }
+						/>
+					) }
+				</div>
 				{ showBackorderBadge ? (
 					<ProductBackorderBadge />
 				) : (
@@ -213,11 +262,20 @@ const OrderSummaryItem = ( {
 				className="wc-block-components-order-summary-item__total-price"
 				aria-hidden="true"
 			>
-				<ProductPrice
-					currency={ totalsCurrency }
-					format={ productPriceFormat }
-					price={ subtotalPrice }
-				/>
+				<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
+					<ProductPrice
+						currency={ totalsCurrency }
+						format={ productPriceFormat }
+						price={ subtotalPrice }
+					/>
+					{ quantity > 1 && (
+						<ProductSaleBadge
+							currency={ priceCurrency }
+							saleAmount={ saleAmount }
+							format={ saleBadgePriceFormat }
+						/>
+					) }
+				</div>
 			</div>
 		</div>
 	);
