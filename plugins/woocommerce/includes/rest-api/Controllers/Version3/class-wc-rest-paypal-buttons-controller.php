@@ -15,6 +15,15 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
+// Require the deprecated classes for backward compatibility.
+// This will be removed in 11.0.0.
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-constants.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+}
 
 /**
  * REST API PayPal buttons controller class.

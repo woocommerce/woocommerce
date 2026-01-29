@@ -20,6 +20,12 @@ if ( ! class_exists( 'WC_Gateway_Paypal' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/class-wc-gateway-paypal.php';
 }
 
+// Require the deprecated classes for backward compatibility.
+// This will be removed in 11.0.0.
+if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+}
+
 /**
  * REST API PayPal Standard controller class.
  *
