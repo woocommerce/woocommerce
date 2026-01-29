@@ -160,9 +160,8 @@ final class ProductFilterDropdown extends AbstractBlock {
 						data-wp-bind--hidden="!context.isOpen"
 						hidden
 					>
-						<?php
-						foreach ( $items as $item ) :
-							?>
+						<?php foreach ( $items as $item ) { ?>
+							<?php $item_id = $item['type'] . '-' . $item['value']; ?>
 							<div
 								class="wc-block-product-filter-dropdown__dropdown-option"
 								role="option"
@@ -172,6 +171,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 								data-wp-on--click---parent-action="actions.toggleFilter"
 								data-wp-class--is-selected="state.isFilterSelected"
 								data-wp-bind--aria-selected="state.isFilterSelected"
+								data-wp-key="<?php echo esc_attr( $item_id ); ?>"
 								<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							>
 								<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -182,7 +182,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 									</span>
 								<?php endif; ?>
 							</div>
-						<?php endforeach; ?>
+						<?php } ?>
 					</div>
 				</div>
 			</div>
