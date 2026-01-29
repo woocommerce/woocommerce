@@ -19,22 +19,20 @@ class WC_Checkout_Hook {
      * Initialize the hooks
      */
     public static function init() {
-        // Classic checkout hook
-        add_action( 'woocommerce_review_order_after_cart_contents', array( __CLASS__, 'add_custom_content_after_cart_contents' ) );
+        // Hook after each individual cart item meta (as requested in GitHub issue #36379)
+        add_action( 'woocommerce_review_order_after_cart_item_meta', array( __CLASS__, 'add_custom_content_after_cart_item_meta' ), 10, 3 );
         
         // Block checkout JavaScript support
         add_action( 'wp_footer', array( __CLASS__, 'add_block_checkout_support' ) );
     }
 
     /**
-     * Add custom content after cart contents in classic checkout
+     * Add custom content after each individual cart item meta in classic checkout
      */
-    public static function add_custom_content_after_cart_contents() {
-        echo '<tr><td colspan="2">';
-        echo '<div style="background: #f0f8ff; padding: 15px; margin: 15px 0; border-left: 3px solid #0073aa; font-size: 14px; font-weight: bold; text-align: center;">';
+    public static function add_custom_content_after_cart_item_meta( $_product, $cart_item, $cart_item_key ) {
+        echo '<div style="background: #f0f8ff; padding: 10px; margin: 10px 0; border-left: 3px solid #0073aa; font-size: 14px; font-weight: bold;">';
         echo 'This is custom block';
         echo '</div>';
-        echo '</td></tr>';
     }
 
     /**
@@ -45,42 +43,44 @@ class WC_Checkout_Hook {
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             function addBlockCheckoutContent() {
-                const cartItemsContainer = document.querySelector('.wc-block-components-order-summary__content');
+                // Find all cart items in block checkout
+                const cartItems = document.querySelectorAll('.wc-block-components-order-summary-item');
                 
-                if (!cartItemsContainer) {
-                    return;
-                }
-                
-                const existingBlock = cartItemsContainer.querySelector('.custom-cart-item-meta-block');
-                if (existingBlock) {
-                    return;
-                }
-                
-                const customContent = document.createElement('div');
-                customContent.className = 'custom-cart-item-meta-block';
-                customContent.style.cssText = 'background: #f0f8ff; padding: 15px; margin: 15px 0; border-left: 3px solid #0073aa; font-size: 14px; font-weight: bold; text-align: center;';
-                
-                customContent.innerHTML = 'This is custom block';
-                
-                const couponForm = cartItemsContainer.querySelector('.wp-block-woocommerce-checkout-order-summary-coupon-form-block');
-                if (couponForm) {
-                    cartItemsContainer.insertBefore(customContent, couponForm);
-                } else {
-                    const totalsBlock = cartItemsContainer.querySelector('.wp-block-woocommerce-checkout-order-summary-totals-block');
-                    if (totalsBlock) {
-                        cartItemsContainer.insertBefore(customContent, totalsBlock);
-                    } else {
-                        cartItemsContainer.appendChild(customContent);
+                cartItems.forEach(function(cartItem) {
+                    // Check if custom block already exists for this item
+                    const existingBlock = cartItem.querySelector('.custom-cart-item-meta-block');
+                    if (existingBlock) {
+                        return; // Skip if already added
                     }
-                }
+                    
+                    // Find the description element to add content after it
+                    const description = cartItem.querySelector('.wc-block-components-order-summary-item__description');
+                    if (description) {
+                        // Create custom content div
+                        const customContent = document.createElement('div');
+                        customContent.className = 'custom-cart-item-meta-block';
+                        customContent.style.cssText = 'background: #f0f8ff; padding: 10px; margin: 10px 0; border-left: 3px solid #0073aa; font-size: 14px; font-weight: bold;';
+                        
+                        customContent.innerHTML = 'This is custom block';
+                        
+                        // Insert after the description (which contains the item meta)
+                        description.appendChild(customContent);
+                    }
+                });
                 
-                console.log('✅ Custom block added after all cart items');
+                console.log('✅ Custom blocks added after each cart item meta');
             }
             
+            // Try immediately
             addBlockCheckoutContent();
+            
+            // Also try after a short delay (for dynamic loading)
             setTimeout(addBlockCheckoutContent, 1000);
+            
+            // Also try after 2 seconds (for slower loading)
             setTimeout(addBlockCheckoutContent, 2000);
             
+            // Also try when DOM changes (for AJAX updates)
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     if (mutation.addedNodes.length) {
