@@ -280,15 +280,6 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							) }
 						</div>
 
-						<ProductSaleBadge
-							currency={ priceCurrency }
-							saleAmount={ getAmountFromRawPrice(
-								saleAmountSingle,
-								priceCurrency
-							) }
-							format={ saleBadgePriceFormat }
-						/>
-
 						<ProductMetadata
 							shortDescription={ shortDescription }
 							fullDescription={ fullDescription }
