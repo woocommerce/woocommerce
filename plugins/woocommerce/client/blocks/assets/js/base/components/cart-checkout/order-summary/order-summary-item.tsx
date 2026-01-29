@@ -2,7 +2,6 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { createInterpolateElement } from '@wordpress/element';
 import { sprintf, _n } from '@wordpress/i18n';
 import { Label } from '@woocommerce/blocks-components';
 import ProductPrice from '@woocommerce/base-components/product-price';
@@ -18,7 +17,7 @@ import {
 } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
-import { useMemo } from '@wordpress/element';
+import { createInterpolateElement, useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartItem, isString } from '@woocommerce/types';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
