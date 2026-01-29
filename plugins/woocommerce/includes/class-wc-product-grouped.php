@@ -152,7 +152,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * Return the product's children - visible only.
 	 *
 	 * @since 9.8.0
-	 * @return int[] Child products
+	 * @return WC_Product[] Child products
 	 */
 	public function get_visible_children() {
 		$grouped_products = array_map( 'wc_get_product', $this->get_children() );
