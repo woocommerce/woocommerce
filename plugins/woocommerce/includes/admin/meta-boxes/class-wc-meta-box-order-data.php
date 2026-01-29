@@ -647,14 +647,24 @@ class WC_Meta_Box_Order_Data {
 						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
 					<div class="order_data_column order_data_column_shipping">
-						<h3>
-							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
-							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
-							<span>
-								<a href="#" class="load_customer_shipping" style="display:none;"><?php esc_html_e( 'Load shipping address', 'woocommerce' ); ?></a>
-								<a href="#" class="billing-same-as-shipping" style="display:none;"><?php esc_html_e( 'Copy billing address', 'woocommerce' ); ?></a>
-							</span>
-						</h3>
+					<?php
+					$shipping_address_plain = $order->get_formatted_shipping_address();
+					$shipping_address_plain = $shipping_address_plain
+						? wp_strip_all_tags( preg_replace( '/<br\s*\/\?\s*>/i', "\n", $shipping_address_plain ) )
+						: '';
+					?>
+					<h3>
+						<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
+						<a href="#" class="wc-copy-shipping-address" data-shipping-address="<?php echo esc_attr( $shipping_address_plain ); ?>">
+							<span class="dashicons dashicons-admin-page" aria-hidden="true"></span>
+							<span class="screen-reader-text"><?php esc_html_e( 'Copy', 'woocommerce' ); ?></span>
+						</a>
+						<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+						<span>
+							<a href="#" class="load_customer_shipping" style="display:none;"><?php esc_html_e( 'Load shipping address', 'woocommerce' ); ?></a>
+							<a href="#" class="billing-same-as-shipping" style="display:none;"><?php esc_html_e( 'Copy billing address', 'woocommerce' ); ?></a>
+						</span>
+					</h3>
 						<div class="address">
 							<?php
 							// Display values.

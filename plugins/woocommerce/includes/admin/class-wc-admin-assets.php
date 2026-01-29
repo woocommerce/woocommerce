@@ -447,7 +447,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			$suffix       = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 			$version      = Constants::get_constant( 'WC_VERSION' );
 
-			wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-jquery-blockui' ), $version, array( 'in_footer' => false ) );
+			wp_register_script( 'wc-orders', WC()->plugin_url() . '/assets/js/admin/wc-orders' . $suffix . '.js', array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-jquery-blockui', 'wc-clipboard' ), $version, array( 'in_footer' => false ) );
 			wp_localize_script(
 				'wc-orders',
 				'wc_orders_params',

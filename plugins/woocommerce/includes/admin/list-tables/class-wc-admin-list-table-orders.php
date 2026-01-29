@@ -430,8 +430,16 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 			}
 		}
 
-		$billing_address  = $order->get_formatted_billing_address();
-		$shipping_address = $order->get_formatted_shipping_address();
+		$billing_address         = $order->get_formatted_billing_address();
+		$shipping_address        = $order->get_formatted_shipping_address();
+		$shipping_address_plain  = $shipping_address
+			? wc_clean( wp_strip_all_tags( preg_replace( '/<br\s*\/?\s*>/i', "\n", $shipping_address ) ) )
+			: '';
+		$shipping_address_plain  = $shipping_address_plain && $shipping_address_plain !== 'N/A'
+			? $shipping_address_plain
+			: ( $billing_address
+				? wc_clean( wp_strip_all_tags( preg_replace( '/<br\s*\/?\s*>/i', "\n", $billing_address ) ) )
+				: '' );
 
 		$wp_post_type = get_post_type_object( $order->get_type() ) ?? get_post_type_object( 'shop_order' );
 		$is_editable  = current_user_can( $wp_post_type->cap->edit_post, $order->get_id() );
@@ -454,6 +462,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 				'needs_shipping'             => $order->needs_shipping_address(),
 				'formatted_billing_address'  => $billing_address ? $billing_address : __( 'N/A', 'woocommerce' ),
 				'formatted_shipping_address' => $shipping_address ? $shipping_address : __( 'N/A', 'woocommerce' ),
+				'shipping_address_plain'     => $shipping_address_plain,
 				'shipping_address_map_url'   => $order->get_shipping_address_map_url(),
 				'payment_via'                => $payment_via,
 				'shipping_via'               => $order->get_shipping_method(),

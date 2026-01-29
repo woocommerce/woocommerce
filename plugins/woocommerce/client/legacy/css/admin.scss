@@ -1959,6 +1959,37 @@ ul.wc_coupon_list_block {
 			display: block;
 		}
 
+		> h3 a.wc-copy-shipping-address {
+			width: 14px;
+			height: 0;
+			padding: 14px 0 0;
+			margin: 0 0 0 6px;
+			overflow: hidden;
+			position: relative;
+			color: #999;
+			border: 0;
+			float: right;
+
+			&:hover,
+			&:focus {
+				color: #000;
+			}
+
+			&::after {
+				font-family: "Dashicons";
+				content: "\f105";
+				position: absolute;
+				top: 0;
+				left: 0;
+				text-align: center;
+				vertical-align: top;
+				line-height: 14px;
+				font-size: 14px;
+				font-weight: 400;
+			}
+		}
+
+
 		&:last-child {
 			padding-right: 0;
 		}
@@ -3489,6 +3520,7 @@ body.woocommerce_page_wc-orders {
 				margin-top: 0;
 			}
 		}
+
 	}
 
 	footer {

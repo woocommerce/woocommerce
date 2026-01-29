@@ -33,6 +33,10 @@ jQuery( function ( $ ) {
 			$( 'a.billing-same-as-shipping' ).on( 'click', this.copy_billing_to_shipping );
 			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
 			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );
+			$( document.body )
+				.on( 'click', '.wc-copy-shipping-address', this.copy_shipping_address )
+				.on( 'aftercopy', '.wc-copy-shipping-address', this.copy_shipping_success )
+				.on( 'aftercopyfailure', '.wc-copy-shipping-address', this.copy_shipping_failure );
 			$( '#customer_user' ).on( 'change', this.change_customer_user );
 		},
 
@@ -258,6 +262,56 @@ jQuery( function ( $ ) {
 				});
 			}
 			return false;
+		},
+
+		/**
+		 * Copy shipping address from order edit screen.
+		 *
+		 * @param {Object} event Copy event.
+		 */
+		copy_shipping_address: function( event ) {
+			event.preventDefault();
+
+			var $button = $( this ),
+				shippingAddress = $button.data( 'shipping-address' ) || '';
+
+			if ( ! shippingAddress ) {
+				return;
+			}
+
+			$button.addClass( 'is-copying' );
+			wcClearClipboard();
+			wcSetClipboard( shippingAddress, $button );
+		},
+
+		/**
+		 * Display copied feedback.
+		 */
+		copy_shipping_success: function() {
+			var $button = $( this ),
+				originalText = $button.data( 'copy-text' ) || '',
+				copiedText = $button.data( 'copied-text' ) || originalText;
+
+			$button.addClass( 'is-copied' );
+			if ( copiedText ) {
+				$button.attr( 'title', copiedText );
+			}
+
+			window.setTimeout( function() {
+				$button.removeClass( 'is-copied is-copying' );
+				if ( originalText ) {
+					$button.attr( 'title', originalText );
+				} else {
+					$button.removeAttr( 'title' );
+				}
+			}, 2000 );
+		},
+
+		/**
+		 * Reset UI on copy failure.
+		 */
+		copy_shipping_failure: function() {
+			$( this ).removeClass( 'is-copying' );
 		}
 	};
 

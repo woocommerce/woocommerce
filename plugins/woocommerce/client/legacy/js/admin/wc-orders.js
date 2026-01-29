@@ -24,7 +24,8 @@ jQuery( function( $ ) {
 				SELECTORS.join( ', ' ),
 				this.onRowClick
 			)
-			.on( 'click', '.order-preview:not(.disabled)', this.onPreview );
+			.on( 'click', '.order-preview:not(.disabled)', this.onPreview )
+			.on( 'click', '.wc-copy-shipping-address', this.copyShippingAddress );
 	};
 
 	/**
@@ -93,6 +94,50 @@ jQuery( function( $ ) {
 		return false;
 
 	};
+
+	/**
+	 * Copy shipping address from order preview modal.
+	 *
+	 * @param {Object} event Copy event.
+	 */
+	WCOrdersTable.prototype.copyShippingAddress = function( event ) {
+		event.preventDefault();
+
+		var $button = $( this ),
+			shippingAddress = $button.data( 'shipping-address' ) || '';
+
+		if ( ! shippingAddress ) {
+			return;
+		}
+
+		$button.addClass( 'is-copying' );
+		wcClearClipboard();
+		wcSetClipboard( shippingAddress, $button );
+	};
+
+	$( document.body )
+		.on( 'aftercopy', '.wc-copy-shipping-address', function() {
+			var $button = $( this ),
+				originalText = $button.data( 'copy-text' ) || '',
+				copiedText = $button.data( 'copied-text' ) || originalText;
+
+			$button.addClass( 'is-copied' );
+			if ( copiedText ) {
+				$button.attr( 'title', copiedText );
+			}
+
+			window.setTimeout( function() {
+				$button.removeClass( 'is-copied is-copying' );
+				if ( originalText ) {
+					$button.attr( 'title', originalText );
+				} else {
+					$button.removeAttr( 'title' );
+				}
+			}, 2000 );
+		} )
+		.on( 'aftercopyfailure', '.wc-copy-shipping-address', function() {
+			$( this ).removeClass( 'is-copying' );
+		} );
 
 	/**
 	 * Init WCOrdersTable.
