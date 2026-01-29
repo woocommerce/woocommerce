@@ -19,6 +19,7 @@ export const productPriceScreenReaderValidation = (
 ): true | never => {
 	return (
 		mustContain( value, '<quantity/>' ) &&
-		mustContain( value, '<productName/>' )
+		mustContain( value, '<productName/>' ) &&
+		mustContain( value, '<price/>' )
 	);
 };
