@@ -26,7 +26,7 @@ class RestApiUtil {
 	 */
 	public static function get_coupon_data_for_response( WC_Order_Item_Coupon $order_item ): array {
 		$coupon_info = $order_item->get_meta( 'coupon_info', true );
-		if ( $coupon_info ) {
+		if ( is_string( $coupon_info ) && '' !== $coupon_info ) {
 			$parsed = WC_Coupon::parse_short_info( $coupon_info );
 
 			return array(
@@ -37,13 +37,13 @@ class RestApiUtil {
 		}
 
 		$coupon_meta = $order_item->get_meta( 'coupon_data', true );
-		if ( $coupon_meta ) {
+		if ( is_object( $coupon_meta ) || is_array( $coupon_meta ) ) {
 			$coupon_meta = (array) $coupon_meta;
 
 			return array(
 				'discount_type'  => $coupon_meta['discount_type'] ?? 'fixed_cart',
 				'nominal_amount' => (float) ( $coupon_meta['amount'] ?? 0 ),
-				'free_shipping'  => $coupon_meta['free_shipping'] ?? false,
+				'free_shipping'  => (bool) ( $coupon_meta['free_shipping'] ?? false ),
 			);
 		}
 

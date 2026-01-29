@@ -183,7 +183,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$order_item = $this->createMock( WC_Order_Item_Coupon::class );
 		$order_item->method( 'get_meta' )
 			->willReturnCallback(
-				function ( $key ) {
+				function ( $key, $single = true, $context = 'view' ) { //phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 					if ( 'coupon_info' === $key ) {
 						return wp_json_encode( array( 123, 'TESTCODE', 'percent', 25.5, true ) );
 					}
@@ -205,7 +205,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$order_item = $this->createMock( WC_Order_Item_Coupon::class );
 		$order_item->method( 'get_meta' )
 			->willReturnCallback(
-				function ( $key ) {
+				function ( $key, $single = true, $context = 'view' ) { //phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
 					if ( 'coupon_info' === $key ) {
 						return '';
 					}
@@ -248,7 +248,8 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		$order_item = $this->createMock( WC_Order_Item_Coupon::class );
 		$order_item->method( 'get_meta' )
 			->willReturnCallback(
-				function ( $key ) {
+				function ( $key, $single = true, $context = 'view' ) {
+					unset( $single, $context ); // Avoid parameter not used PHPCS errors.
 					if ( 'coupon_info' === $key ) {
 						return wp_json_encode( array( 1, 'CODE', 'percent', 150.0 ) );
 					}

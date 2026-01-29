@@ -95,7 +95,7 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		$coupon = new WC_Coupon();
 		$info   = wp_json_encode( array( 1, 'CODE', 'percent', 150.0 ) );
 
-		$this->expectException( \Exception::class );
+		$this->expectException( \WC_Data_Exception::class );
 
 		$coupon->set_short_info( $info );
 	}

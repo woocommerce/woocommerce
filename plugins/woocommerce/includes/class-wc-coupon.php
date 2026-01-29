@@ -1327,7 +1327,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			'code'          => $data[1] ?? '',
 			'discount_type' => $data[2] ?? 'fixed_cart',
 			'amount'        => (float) ( $data[3] ?? 0 ),
-			'free_shipping' => $data[4] ?? false,
+			'free_shipping' => (bool) ( $data[4] ?? false ),
 		);
 	}
 
