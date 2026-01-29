@@ -50,6 +50,10 @@ table.wc-block-cart-items {
 			flex-wrap: nowrap;
 			gap: $gap-smaller;
 
+			@include cart-checkout-mobile-container {
+				flex-wrap: wrap;
+			}
+
 			.price {
 				display: flex;
 				align-items: center;
