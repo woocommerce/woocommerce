@@ -214,7 +214,7 @@
 				"node_modules/@woocommerce/internal-style-build/abstracts",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
-				"node_modules/@woocommerce/internal-ts-config/typings",
+				"node_modules/@woocommerce/internal-ts-config/types",
 				"node_modules/@woocommerce/navigation/build",
 				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",

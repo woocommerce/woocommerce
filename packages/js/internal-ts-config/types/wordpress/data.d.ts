@@ -1,11 +1,3 @@
-/**
- * Complete type replacement for @wordpress/data to support Generator functions.
- *
- * This file completely replaces @wordpress/data's type definitions while
- * re-exporting its runtime values. This allows us to define Generator-aware
- * types without the limitations of module augmentation.
- */
-
 declare module '@wordpress/data' {
 	export { default as withSelect } from '@wordpress/data/build-types/components/with-select';
 	export { default as withDispatch } from '@wordpress/data/build-types/components/with-dispatch';

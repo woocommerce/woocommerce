@@ -166,7 +166,7 @@
 				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
 				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
-				"node_modules/@woocommerce/internal-ts-config/typings"
+				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
 	}

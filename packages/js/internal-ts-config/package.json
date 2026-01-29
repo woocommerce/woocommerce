@@ -11,13 +11,35 @@
 	"files": [
 		"tsconfig.json",
 		"tsconfig-cjs.json",
-		"typings"
+		"types"
 	],
 	"devDependencies": {
 		"typescript": "5.7.x"
 	},
 	"peerDependencies": {
+		"@types/wordpress__block-editor": ">=11.5.0",
+		"@types/wordpress__editor": ">=13.6.0",
+		"@types/wordpress__notices": ">=3.5.0",
+		"@wordpress/block-editor": "wp-6.6",
+		"@wordpress/components": "wp-6.6",
 		"@wordpress/core-data": "wp-6.6",
-		"@wordpress/data": "wp-6.6"
+		"@wordpress/data": "wp-6.6",
+		"@wordpress/editor": "wp-6.6",
+		"@wordpress/keyboard-shortcuts": "wp-6.6",
+		"@wordpress/notices": "wp-6.6",
+		"@wordpress/preferences": "wp-6.6"
+	},
+	"peerDependenciesMeta": {
+		"@types/wordpress__block-editor": { "optional": true },
+		"@types/wordpress__editor": { "optional": true },
+		"@types/wordpress__notices": { "optional": true },
+		"@wordpress/block-editor": { "optional": true },
+		"@wordpress/components": { "optional": true },
+		"@wordpress/core-data": { "optional": true },
+		"@wordpress/data": { "optional": true },
+		"@wordpress/editor": { "optional": true },
+		"@wordpress/keyboard-shortcuts": { "optional": true },
+		"@wordpress/notices": { "optional": true },
+		"@wordpress/preferences": { "optional": true }
 	}
 }

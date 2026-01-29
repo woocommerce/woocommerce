@@ -6,7 +6,6 @@
 		"outDir": "build",
 		"typeRoots": [
 			"./typings",
-			"./node_modules/@woocommerce/internal-ts-config/typings",
 			"./node_modules/@types"
 		]
 	},
