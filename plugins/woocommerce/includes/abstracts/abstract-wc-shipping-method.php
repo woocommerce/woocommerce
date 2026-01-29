@@ -319,8 +319,10 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable. This saves shipping methods having to do complex tax calculations.
 		if ( ! is_array( $taxes ) && false !== $taxes && $total_cost > 0 && $this->is_taxable() ) {
 			$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
-			$shipping_prices_include_tax = apply_filters( 'woocommerce_shipping_prices_include_tax', false, $total_cost, $shipping_tax_rates );
-			
+			$shipping_prices_include_tax = wc_string_to_bool(
+				apply_filters( 'woocommerce_shipping_prices_include_tax', false, $total_cost, $shipping_tax_rates )
+			);
+
 			if ( 'per_item' === $args['calc_tax'] ) {
 				$taxes = $this->get_taxes_per_item( $args['cost'], $shipping_prices_include_tax );
 			} else {
@@ -391,7 +393,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 					continue;
 				}
 
-				$item_tax_rates = WC_Tax::get_shipping_tax_rates( $cart[ $cost_key ]['data']->get_tax_class() );
+				$cart_item_data = $cart[ $cost_key ]['data'];
+				$tax_class      = ( $cart_item_data && is_callable( array( $cart_item_data, 'get_tax_class' ) ) )
+					? $cart_item_data->get_tax_class()
+					: '';
+				$item_tax_rates = WC_Tax::get_shipping_tax_rates( $tax_class );
 				$item_taxes     = WC_Tax::calc_shipping_tax( $amount, $item_tax_rates, $shipping_prices_include_tax );
 
 				// Sum the item taxes.

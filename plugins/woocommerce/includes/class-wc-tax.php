@@ -91,7 +91,9 @@ class WC_Tax {
 		 * @param array $rates Tax rates.
 		 */
 		if ( null === $shipping_prices_include_tax ) {
-			$shipping_prices_include_tax = apply_filters( 'woocommerce_shipping_prices_include_tax', false, $price, $rates );
+			$shipping_prices_include_tax = wc_string_to_bool(
+				apply_filters( 'woocommerce_shipping_prices_include_tax', false, $price, $rates )
+			);
 		}
 
 		if ( $shipping_prices_include_tax ) {
