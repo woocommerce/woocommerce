@@ -17,10 +17,6 @@
 	},
 	"usesContext": [ "filterData" ],
 	"attributes": {
-		"className": {
-			"type": "string",
-			"default": ""
-		},
 		"containerBackground": {
 			"type": "string",
 			"default": ""

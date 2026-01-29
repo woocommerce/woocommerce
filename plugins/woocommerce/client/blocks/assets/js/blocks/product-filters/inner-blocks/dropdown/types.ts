@@ -9,7 +9,6 @@ import { BlockEditProps } from '@wordpress/blocks';
 import type { Color, FilterBlockContext } from '../../types';
 
 export type BlockAttributes = {
-	className: string;
 	containerBackground: string;
 	customContainerBackground: string;
 	containerBorder: string;

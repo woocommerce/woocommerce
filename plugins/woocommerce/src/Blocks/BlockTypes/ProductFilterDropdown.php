@@ -164,7 +164,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 								data-wp-key="<?php echo esc_attr( $item_id ); ?>"
 								<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							>
-								<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								<?php echo esc_html( $item['label'] ); ?>
 
 								<?php if ( $show_counts ) : ?>
 									<span class="wc-block-product-filter-dropdown__count">

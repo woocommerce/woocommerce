@@ -106,9 +106,11 @@ store< DropdownStore >( 'woocommerce/product-filters', {
 			const element = getElement();
 			const dropdownElement = element?.ref;
 
+			const target = event.target;
 			if (
 				dropdownElement &&
-				! dropdownElement.contains( event.target as Node )
+				target instanceof Node &&
+				! dropdownElement.contains( target )
 			) {
 				context.isOpen = false;
 			}
