@@ -1,0 +1,111 @@
+.wc-block-product-filter-dropdown {
+	position: relative;
+	width: 100%;
+	gap: 16px;
+
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+	font-style: inherit;
+	font-weight: inherit;
+	letter-spacing: inherit;
+	line-height: inherit;
+	text-decoration: inherit;
+	text-transform: inherit;
+}
+
+.wc-block-product-filter-dropdown__selected-badge {
+	@include font-size(smaller);
+	padding: 0.25em 0.25em 0.25em 0.75em;
+	margin: 2px 0;
+	border-radius: em(20px);
+	border: 1px solid $black;
+	display: inline-flex;
+	align-items: center;
+	gap: em(4px);
+
+	.has-badge-background-color & {
+		background: var(--wc-product-filter-dropdown-badge-background);
+	}
+
+}
+
+.wc-block-product-filter-dropdown__badge-text {
+	margin-right: 0.25em;
+
+	.has-badge-text-color & {
+		color: var(--wc-product-filter-dropdown-badge-text);
+	}
+}
+
+.wc-block-product-filter-dropdown__badge-remove {
+	background-color: $gray-200;
+	cursor: pointer;
+	border-radius: em(20px);
+}
+
+.wc-block-product-filter-dropdown__dropdown-selection {
+	display: flex;
+	padding: 4px 30px 4px 8px;
+	border: 1px solid $gray-700;
+	border-radius: em(4px);
+	cursor: pointer;
+	align-items: center;
+
+	.has-container-background-color & {
+		background: var(--wc-product-filter-dropdown-container-background);
+	}
+
+	.has-container-border-color & {
+		border-color: var(--wc-product-filter-dropdown-container-border);
+	}
+
+}
+
+.wc-block-product-filter-dropdown__placeholder {
+	@include font-size(smaller);
+	margin: 0.25em 0;
+	display: flex;
+	justify-content: center;
+	flex-direction: column;
+	height: 30px;
+
+	.has-placeholder-text-color & {
+		color: var(--wc-product-filter-dropdown-placeholder-text);
+	}
+}
+
+.wc-block-product-filter-dropdown__svg-container {
+	> svg {
+		position: absolute;
+		right: 8px;
+		top: 50%;
+		transform: translateY(-50%);
+		pointer-events: none;
+	}
+}
+
+.wc-block-product-filter-dropdown__dropdown-list {
+	position: absolute;
+	width: 100%;
+	background: $white;
+	border: 1px solid $gray-700;
+	border-radius: em(4px);
+	z-index: 1000;
+	margin-top: $gap-smaller;
+	box-sizing: border-box;
+}
+
+.wc-block-product-filter-dropdown__dropdown-option {
+	margin: $gap-small;
+	padding: $gap-small;
+	border-radius: em(4px);
+	border: 1px solid $gray-400;
+	@include font-size(small);
+	cursor: pointer;
+	&:hover,
+	&:focus,
+	&.is-selected {
+		background-color: $gray-100;
+	}
+}

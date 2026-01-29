@@ -151,6 +151,9 @@ const blocks = {
 	'product-filter-chips': {
 		customDir: 'product-filters/inner-blocks/chips',
 	},
+	'product-filter-dropdown': {
+		customDir: 'product-filters/inner-blocks/dropdown',
+	},
 	'product-filter-price-slider': {
 		customDir: 'product-filters/inner-blocks/price-slider',
 	},

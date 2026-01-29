@@ -473,6 +473,7 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+			'ProductFilterDropdown',
 			'ProductFilterTaxonomy',
 			'ProductGallery',
 			'ProductGalleryLargeImage',

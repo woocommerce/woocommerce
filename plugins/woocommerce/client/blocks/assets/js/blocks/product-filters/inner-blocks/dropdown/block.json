@@ -1,0 +1,68 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-dropdown",
+	"title": "Dropdown",
+	"description": "Display filter options in a dropdown.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filter-attribute",
+		"woocommerce/product-filter-status",
+		"woocommerce/product-filter-taxonomy"
+	],
+	"supports": {
+		"interactivity": true
+	},
+	"usesContext": [ "filterData" ],
+	"attributes": {
+		"className": {
+			"type": "string",
+			"default": ""
+		},
+		"containerBackground": {
+			"type": "string",
+			"default": ""
+		},
+		"customContainerBackground": {
+			"type": "string",
+			"default": ""
+		},
+		"containerBorder": {
+			"type": "string",
+			"default": ""
+		},
+		"customContainerBorder": {
+			"type": "string",
+			"default": ""
+		},
+		"badgeBackground": {
+			"type": "string",
+			"default": ""
+		},
+		"customBadgeBackground": {
+			"type": "string",
+			"default": ""
+		},
+		"badgeText": {
+			"type": "string",
+			"default": ""
+		},
+		"customBadgeText": {
+			"type": "string",
+			"default": ""
+		},
+		"placeholderText": {
+			"type": "string",
+			"default": ""
+		},
+		"customPlaceholderText": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"viewScriptModule": "woocommerce/product-filter-dropdown",
+	"style": "file:../woocommerce/product-filter-dropdown-style.css",
+	"editorStyle": "file:../woocommerce/product-filter-dropdown-editor.css"
+}

@@ -1,0 +1,7 @@
+.wc-block-product-filter-dropdown.is-loading {
+	.wc-block-product-filter-dropdown__dropdown {
+		@include placeholder();
+		margin: 5px 0;
+		min-width: 25%;
+	}
+}
