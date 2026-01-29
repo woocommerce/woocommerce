@@ -240,7 +240,7 @@ class WC_Product_Variable extends WC_Product {
 	 * This is lazy loaded as it's not used often and does require several queries.
 	 *
 	 * @since 3.0.0
-	 * @return WC_Product[] Children ids
+	 * @return int[] Children ids
 	 */
 	public function get_visible_children() {
 		if ( null === $this->visible_children ) {

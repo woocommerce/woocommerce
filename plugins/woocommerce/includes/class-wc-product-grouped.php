@@ -156,7 +156,10 @@ class WC_Product_Grouped extends WC_Product {
 	 */
 	public function get_visible_children() {
 		$grouped_products = array_map( 'wc_get_product', $this->get_children() );
-		return array_filter( $grouped_products, 'wc_products_array_filter_visible_grouped' );
+		$grouped_products = array_filter( $grouped_products, 'wc_products_array_filter_visible_grouped' );
+		/** @var WC_Product[] $grouped_products */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+
+		return $grouped_products;
 	}
 
 	/**
