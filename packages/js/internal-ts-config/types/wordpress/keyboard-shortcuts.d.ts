@@ -1,5 +1,8 @@
 declare module '@wordpress/keyboard-shortcuts' {
-	import type { StoreDescriptor, ReduxStoreConfig } from '@wordpress/data/build-types/types';
+	import type {
+		StoreDescriptor,
+		ReduxStoreConfig,
+	} from '@wordpress/data/build-types/types';
 
 	type KeyboardShortcutsConfig = ReduxStoreConfig<
 		unknown,
@@ -29,7 +32,10 @@ declare module '@wordpress/keyboard-shortcuts' {
 				name: string,
 				representation?: 'display' | 'raw' | 'ariaLabel'
 			) => string | null;
-			getShortcutDescription: ( state: unknown, name: string ) => string | null;
+			getShortcutDescription: (
+				state: unknown,
+				name: string
+			) => string | null;
 			getShortcutAliases: (
 				state: unknown,
 				name: string
@@ -37,9 +43,10 @@ declare module '@wordpress/keyboard-shortcuts' {
 		}
 	>;
 
-	type KeyboardShortcutsStoreDescriptor = StoreDescriptor< KeyboardShortcutsConfig > & {
-		name: 'core/keyboard-shortcuts';
-	};
+	type KeyboardShortcutsStoreDescriptor =
+		StoreDescriptor< KeyboardShortcutsConfig > & {
+			name: 'core/keyboard-shortcuts';
+		};
 
 	export const store: KeyboardShortcutsStoreDescriptor;
 	export const ShortcutProvider: any;
@@ -51,7 +58,10 @@ declare module '@wordpress/keyboard-shortcuts' {
 }
 
 declare module '@wordpress/data' {
-	import type { StoreDescriptor, ReduxStoreConfig } from '@wordpress/data/build-types/types';
+	import type {
+		StoreDescriptor,
+		ReduxStoreConfig,
+	} from '@wordpress/data/build-types/types';
 
 	type KeyboardShortcutsConfig = ReduxStoreConfig<
 		unknown,
@@ -81,7 +91,10 @@ declare module '@wordpress/data' {
 				name: string,
 				representation?: 'display' | 'raw' | 'ariaLabel'
 			) => string | null;
-			getShortcutDescription: ( state: unknown, name: string ) => string | null;
+			getShortcutDescription: (
+				state: unknown,
+				name: string
+			) => string | null;
 			getShortcutAliases: (
 				state: unknown,
 				name: string
@@ -89,9 +102,10 @@ declare module '@wordpress/data' {
 		}
 	>;
 
-	type KeyboardShortcutsStoreDescriptor = StoreDescriptor< KeyboardShortcutsConfig > & {
-		name: 'core/keyboard-shortcuts';
-	};
+	type KeyboardShortcutsStoreDescriptor =
+		StoreDescriptor< KeyboardShortcutsConfig > & {
+			name: 'core/keyboard-shortcuts';
+		};
 
 	interface StoreRegistry {
 		'core/keyboard-shortcuts': KeyboardShortcutsStoreDescriptor;

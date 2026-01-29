@@ -13,7 +13,15 @@
 		"tsconfig-cjs.json",
 		"types"
 	],
+	"scripts": {
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint 'types/**/*.d.ts' --fix",
+		"lint:lang:js": "eslint 'types/**/*.d.ts'"
+	},
 	"devDependencies": {
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.55.0",
 		"typescript": "5.7.x"
 	},
 	"peerDependencies": {

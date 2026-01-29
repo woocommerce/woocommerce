@@ -13,19 +13,27 @@ declare module '@wordpress/core-data/build-types/selectors' {
 	type EntityRecordKey = string | number;
 
 	export interface GetEntityRecord {
-		PromiseCurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(
+		PromiseCurriedSignature: <
+			EntityRecord extends
+				| ET.EntityRecord< any >
+				| Partial< ET.EntityRecord< any > >
+		>(
 			kind: string,
 			name: string,
 			key?: EntityRecordKey,
 			query?: GetRecordsHttpQuery
-		) => Promise<EntityRecord | undefined>;
+		) => Promise< EntityRecord | undefined >;
 	}
 
 	export interface GetEntityRecords {
-		PromiseCurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(
+		PromiseCurriedSignature: <
+			EntityRecord extends
+				| ET.EntityRecord< any >
+				| Partial< ET.EntityRecord< any > >
+		>(
 			kind: string,
 			name: string,
 			query?: GetRecordsHttpQuery
-		) => Promise<EntityRecord[] | null>;
+		) => Promise< EntityRecord[] | null >;
 	}
 }

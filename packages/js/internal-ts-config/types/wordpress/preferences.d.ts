@@ -1,17 +1,26 @@
 declare module '@wordpress/preferences' {
-	import type { StoreDescriptor, ReduxStoreConfig } from '@wordpress/data/build-types/types';
+	import type {
+		StoreDescriptor,
+		ReduxStoreConfig,
+	} from '@wordpress/data/build-types/types';
 
 	type PreferencesConfig = ReduxStoreConfig<
 		unknown,
 		{
 			set: ( scope: string, name: string, value: unknown ) => object;
-			setDefaults: ( scope: string, defaults: Record< string, unknown > ) => object;
+			setDefaults: (
+				scope: string,
+				defaults: Record< string, unknown >
+			) => object;
 			toggle: ( scope: string, name: string ) => object;
 		},
 		{
 			get: {
 				( state: unknown, scope: string, name: string ): unknown;
-				CurriedSignature: < T = unknown >( scope: string, name: string ) => T;
+				CurriedSignature: < T = unknown >(
+					scope: string,
+					name: string
+				) => T;
 			};
 		}
 	>;
@@ -25,19 +34,28 @@ declare module '@wordpress/preferences' {
 }
 
 declare module '@wordpress/data' {
-	import type { StoreDescriptor, ReduxStoreConfig } from '@wordpress/data/build-types/types';
+	import type {
+		StoreDescriptor,
+		ReduxStoreConfig,
+	} from '@wordpress/data/build-types/types';
 
 	type PreferencesConfig = ReduxStoreConfig<
 		unknown,
 		{
 			set: ( scope: string, name: string, value: unknown ) => object;
-			setDefaults: ( scope: string, defaults: Record< string, unknown > ) => object;
+			setDefaults: (
+				scope: string,
+				defaults: Record< string, unknown >
+			) => object;
 			toggle: ( scope: string, name: string ) => object;
 		},
 		{
 			get: {
 				( state: unknown, scope: string, name: string ): unknown;
-				CurriedSignature: < T = unknown >( scope: string, name: string ) => T;
+				CurriedSignature: < T = unknown >(
+					scope: string,
+					name: string
+				) => T;
 			};
 		}
 	>;
