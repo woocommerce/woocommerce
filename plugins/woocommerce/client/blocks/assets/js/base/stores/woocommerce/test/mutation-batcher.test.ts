@@ -382,10 +382,10 @@ describe( 'createMutationQueue', () => {
 		} );
 	} );
 
-	describe( 'out-of-order response handling', () => {
-		it( 'uses newest server state when responses arrive out of order', async () => {
-			// This test simulates two batch groups where responses arrive out of order
-			// We need to manually control fetch timing
+	describe( 'single batch in-flight', () => {
+		it( 'only allows one batch in-flight at a time to prevent server race conditions', async () => {
+			// This test verifies that we don't send multiple batches concurrently,
+			// which would cause race conditions on the server (lost cart updates).
 
 			let fetchCallCount = 0;
 			const fetchPromises: Array< {
@@ -410,21 +410,14 @@ describe( 'createMutationQueue', () => {
 			await flushMicrotasks();
 			expect( fetchCallCount ).toBe( 1 );
 
-			// Second batch - submit after first is in-flight
+			// Second request - submit while first is in-flight
 			const p2 = queue.submit( { id: '2', path: '/b', method: 'POST' } );
 			await flushMicrotasks();
-			expect( fetchCallCount ).toBe( 2 );
 
-			// Resolve second batch FIRST (out of order) with value 200
-			fetchPromises[ 1 ].resolve( {
-				ok: true,
-				json: () =>
-					Promise.resolve( {
-						responses: [ { status: 200, body: { value: 200 } } ],
-					} ),
-			} as Response );
+			// Should NOT have sent a second batch yet - only one in-flight allowed
+			expect( fetchCallCount ).toBe( 1 );
 
-			// Resolve first batch SECOND with value 100
+			// Resolve first batch
 			fetchPromises[ 0 ].resolve( {
 				ok: true,
 				json: () =>
@@ -433,10 +426,22 @@ describe( 'createMutationQueue', () => {
 					} ),
 			} as Response );
 
+			// Wait for first batch to complete and second to be sent
+			await flushMicrotasks();
+			expect( fetchCallCount ).toBe( 2 );
+
+			// Resolve second batch
+			fetchPromises[ 1 ].resolve( {
+				ok: true,
+				json: () =>
+					Promise.resolve( {
+						responses: [ { status: 200, body: { value: 200 } } ],
+					} ),
+			} as Response );
+
 			await Promise.all( [ p1, p2 ] );
 
-			// Should use value from batch 2 (group index 1) not batch 1 (group index 0)
-			// because batch 2 has higher group index even though it resolved first
+			// Should use value from the second (and last) batch
 			expect( mockState.value ).toBe( 200 );
 		} );
 	} );

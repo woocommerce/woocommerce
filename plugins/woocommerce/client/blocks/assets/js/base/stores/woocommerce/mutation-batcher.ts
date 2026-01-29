@@ -329,6 +329,12 @@ export function createMutationQueue< TState >(
 			return;
 		}
 
+		// Only allow one batch in-flight at a time to prevent server-side race conditions.
+		// Pending requests will be sent when checkAndReconcile runs after in-flight completes.
+		if ( inFlightGroups.size > 0 ) {
+			return;
+		}
+
 		// Assign group index.
 		const groupIndex = nextGroupIndex++;
 		const requestIdsToSend = [ ...pendingRequestIds ];
