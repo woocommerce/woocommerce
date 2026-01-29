@@ -196,7 +196,10 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 				$class_cost_string   = $shipping_class_term && $shipping_class_term->term_id ? $this->get_option( 'class_cost_' . $shipping_class_term->term_id, $this->get_option( 'class_cost_' . $shipping_class, '' ) ) : $this->get_option( 'no_class_cost', '' );
 
 				if ( '' === $class_cost_string ) {
-					continue;
+					// A shipping class in the cart has no cost defined for this method.
+					// Do not offer this rate since this method cannot ship all items.
+					$has_costs = false;
+					break;
 				}
 
 				$has_costs  = true;
