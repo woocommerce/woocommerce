@@ -285,7 +285,30 @@ export const useProductCollectionUIState = ( {
 		}
 
 		/**
-		 * Case 4: Preview mode - based on `usesReference` value
+		 * Case 4: Taxonomy picker for BY_CATEGORY, BY_TAG collections
+		 * Show the picker when no taxonomy terms are selected.
+		 */
+		const isTaxonomyCollection =
+			attributes.collection === CoreCollectionNames.BY_CATEGORY ||
+			attributes.collection === CoreCollectionNames.BY_TAG;
+
+		if ( isCollectionSelected && isTaxonomyCollection ) {
+			const taxonomySlug =
+				attributes.collection === CoreCollectionNames.BY_CATEGORY
+					? 'product_cat'
+					: 'product_tag';
+
+			const selectedTermIds =
+				attributes.query?.taxQuery?.[ taxonomySlug ] || [];
+			const hasSelectedTerms = selectedTermIds.length > 0;
+
+			if ( ! hasSelectedTerms ) {
+				return ProductCollectionUIStatesInEditor.TAXONOMY_PICKER;
+			}
+		}
+
+		/**
+		 * Case 5: Preview mode - based on `usesReference` value
 		 */
 		if ( isInRequiredLocation ) {
 			/**
@@ -331,6 +354,7 @@ export const useProductCollectionUIState = ( {
 		hasInnerBlocks,
 		attributes.query?.productReference,
 		attributes.query?.woocommerceHandPickedProducts,
+		attributes.query?.taxQuery,
 	] );
 
 	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };
