@@ -511,6 +511,9 @@ class Products extends ControllerTestCase {
 
 		// Main product should not be in its own related products.
 		$this->assertNotContains( $main_product->get_id(), $product_ids );
+
+		// Related product should be returned.
+		$this->assertContains( $related_product->get_id(), $product_ids );
 	}
 
 	/**
