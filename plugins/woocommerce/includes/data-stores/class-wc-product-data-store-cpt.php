@@ -622,7 +622,17 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$attribute->set_position( $meta_value['position'] );
 				$attribute->set_visible( $meta_value['is_visible'] );
 				$attribute->set_variation( $meta_value['is_variation'] );
-				$attributes[] = $attribute;
+
+				/**
+				 * Filter product attribute after initialization.
+				 *
+				 * @since 10.6.0
+				 *
+				 * @param WC_Product_Attribute $attribute  The attribute object.
+				 * @param array                $meta_value The meta value.
+				 * @param WC_Product           $product    The product object.
+				 */
+				$attributes[] = apply_filters( 'woocommerce_product_read_attribute', $attribute, $meta_value, $product );
 			}
 			$product->set_attributes( $attributes );
 		}
@@ -639,15 +649,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( $meta_values ) {
 			$downloads = array();
-			foreach ( $meta_values as $key => $value ) {
-				if ( ! isset( $value['name'], $value['file'] ) ) {
+			foreach ( $meta_values as $key => $meta_value ) {
+				if ( ! isset( $meta_value['name'], $meta_value['file'] ) ) {
 					continue;
 				}
 				$download = new WC_Product_Download();
 				$download->set_id( $key );
-				$download->set_name( $value['name'] ? $value['name'] : wc_get_filename_from_url( $value['file'] ) );
-				$download->set_file( apply_filters( 'woocommerce_file_download_path', $value['file'], $product, $key ) );
-				$downloads[] = $download;
+				$download->set_name( $meta_value['name'] ? $meta_value['name'] : wc_get_filename_from_url( $meta_value['file'] ) );
+
+				/**
+				 * Filter for the path of the downloadable file.
+				 *
+				 * @since 2.1.0
+				 *
+				 * @param string     $file    The file path.
+				 * @param WC_Product $product The product object.
+				 * @param string     $key     The download key.
+				 */
+				$download->set_file( apply_filters( 'woocommerce_file_download_path', $meta_value['file'], $product, $key ) );
+
+				/**
+				 * Filter product download after initialization.
+				 *
+				 * @since 10.6.0
+				 *
+				 * @param WC_Product_Download $download   The attribute object.
+				 * @param array               $meta_value The meta value.
+				 * @param WC_Product          $product    The product object.
+				 */
+				$downloads[] = apply_filters( 'woocommerce_product_read_download', $download, $meta_value, $product );
 			}
 			$product->set_downloads( $downloads );
 		}
@@ -1011,13 +1041,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					}
 
 					// Store in format WC uses in meta.
-					$meta_values[ $attribute_key ] = array(
-						'name'         => $attribute->get_name(),
-						'value'        => $value,
-						'position'     => $attribute->get_position(),
-						'is_visible'   => $attribute->get_visible() ? 1 : 0,
-						'is_variation' => $attribute->get_variation() ? 1 : 0,
-						'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+					$meta_values[ $attribute_key ] = array_merge(
+						$attribute->get_all_extra_data(),
+						array(
+							'name'         => $attribute->get_name(),
+							'value'        => $value,
+							'position'     => $attribute->get_position(),
+							'is_visible'   => $attribute->get_visible() ? 1 : 0,
+							'is_variation' => $attribute->get_variation() ? 1 : 0,
+							'is_taxonomy'  => $attribute->is_taxonomy() ? 1 : 0,
+						),
 					);
 				}
 			}
