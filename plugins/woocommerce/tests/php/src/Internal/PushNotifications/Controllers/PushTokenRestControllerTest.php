@@ -77,10 +77,10 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		( new PushTokenRestController() )->register_routes();
 
-		$this->user_id              = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->customer_id          = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$this->user_id               = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		$this->customer_id           = $this->factory->user->create( array( 'role' => 'customer' ) );
 		$this->other_shop_manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->subscriber_id        = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$this->subscriber_id         = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 	}
 
 	/**
