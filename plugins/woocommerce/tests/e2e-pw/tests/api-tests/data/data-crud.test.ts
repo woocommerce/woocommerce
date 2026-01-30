@@ -3995,14 +3995,14 @@ test.describe( 'Data API tests', () => {
 
 		// loop through all the countries and validate against the expected data
 		for ( const country of countryCodes ) {
-			/* eslint-disable @typescript-eslint/no-var-requires */
-			const countryData =
-				require( `../../../data/countries/${ country }.json` ) as {
-					code: string;
-					name: string;
-					states: unknown[];
-				};
-			/* eslint-enable @typescript-eslint/no-var-requires */
+			const countryData = ( await import(
+				`../../../data/countries/${ country }.json`,
+				{ with: { type: 'json' } }
+			) ).default as {
+				code: string;
+				name: string;
+				states: unknown[];
+			};
 			expect( responseJSON, `Checking country ${ country }` ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
