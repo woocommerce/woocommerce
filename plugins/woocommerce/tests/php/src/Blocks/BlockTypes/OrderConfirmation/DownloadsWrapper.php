@@ -14,6 +14,9 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	public function test_store_has_downloadable_products_via_product_meta_lookup_table(): void {
 		$proxy = new class() extends DownloadsWrapperClass {
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function __construct() {
+			}
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function store_has_downloadable_products_proxy(): bool {
 				return $this->store_has_downloadable_products();
 			}
@@ -31,6 +34,9 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 */
 	public function test_store_has_downloadable_products_via_posts_meta_table(): void {
 		$proxy = new class() extends DownloadsWrapperClass {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function __construct() {
+			}
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function store_has_downloadable_products_proxy(): bool {
 				return $this->store_has_downloadable_products();
@@ -52,6 +58,9 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 */
 	public function test_store_has_downloadable_products_via_cache(): void {
 		$proxy = new class() extends DownloadsWrapperClass {
+			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+			public function __construct() {
+			}
 			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 			public function store_has_downloadable_products_proxy(): bool {
 				return $this->store_has_downloadable_products();
