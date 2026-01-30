@@ -48,7 +48,10 @@ export type OptimisticCartItem = {
 	type: string;
 };
 
-export type ClientCartItem = Omit< OptimisticCartItem, 'variation' | 'quantity' > & {
+export type ClientCartItem = Omit<
+	OptimisticCartItem,
+	'variation' | 'quantity'
+> & {
 	variation?: SelectedAttributes[];
 	/** The target quantity (absolute). Either this or quantityToAdd must be provided. */
 	quantity?: number;
