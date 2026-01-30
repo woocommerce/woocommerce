@@ -301,12 +301,12 @@ wc_admin_connect_page(
 
 // WooCommerce > Products > Reviews.
 wc_admin_connect_page(
-	[
+	array(
 		'id'        => 'woocommerce-product-reviews',
 		'parent'    => 'woocommerce-products',
 		'screen_id' => 'product_page_product-reviews',
 		'title'     => __( 'Product Reviews', 'woocommerce' ),
-	]
+	)
 );
 
 // WooCommerce > Products > Edit attribute.
