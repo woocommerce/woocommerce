@@ -255,7 +255,7 @@ class ProductQuery implements QueryClausesGenerator {
 		if ( ! empty( $request['related'] ) ) {
 			$product_id = absint( $request['related'] );
 			$limit      = ! empty( $request['per_page'] ) ? (int) $request['per_page'] : 100;
-			$related    = wc_get_related_products( $product_id, $limit, array( $product_id ) );
+			$related    = wc_get_related_products( $product_id, $limit );
 
 			if ( ! empty( $related ) ) {
 				$args['post__in'] = ! empty( $args['post__in'] )
