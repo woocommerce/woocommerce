@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal errors when WooCommerce.com Helper API transients contain corrupted data.

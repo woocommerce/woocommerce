@@ -116,15 +116,18 @@ class Text extends Abstract_Block_Renderer {
 			$element_style_value = $html->get_attribute( 'style' );
 			$element_style       = isset( $element_style_value ) ? strval( $element_style_value ) : '';
 			// Padding may contain value like 10px or variable like var(--spacing-10).
-			$element_style = preg_replace( '/padding[^:]*:.?[0-9a-z-()]+;?/', '', $element_style );
+			$element_style = (string) preg_replace( '/padding[^:]*:.?[0-9a-z-()]+;?/', '', $element_style );
+
+			// Margin is not supported in email renderer, so we need to remove it.
+			$element_style = (string) preg_replace( '/margin[^:]*:.?[0-9a-z-()]+;?/', '', $element_style );
 
 			// Remove border styles. We apply border styles on the wrapping table cell.
-			$element_style = preg_replace( '/border[^:]*:.?[0-9a-z-()#]+;?/', '', strval( $element_style ) );
+			$element_style = (string) preg_replace( '/border[^:]*:.?[0-9a-z-()#]+;?/', '', $element_style );
 
 			// We define the font-size on the wrapper element, but we need to keep font-size definition here
 			// to prevent CSS Inliner from adding a default value and overriding the value set by user, which is on the wrapper element.
 			// The value provided by WP uses clamp() function which is not supported in many email clients.
-			$element_style = preg_replace( '/font-size:[^;]+;?/', 'font-size: inherit;', strval( $element_style ) );
+			$element_style = (string) preg_replace( '/font-size:[^;]+;?/', 'font-size: inherit;', $element_style );
 			/** @var string $element_style */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$html->set_attribute( 'style', esc_attr( $element_style ) );
 			$block_content = $html->get_updated_html();
