@@ -17,6 +17,8 @@ trait ProductLinksTrait {
 	 * @param \WC_Product      $item Product object.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return array
+	 *
+	 * @since 10.6.0
 	 */
 	protected function prepare_links( $item, $request ): array {
 		$links = array(
@@ -60,7 +62,7 @@ trait ProductLinksTrait {
 			'href'       => add_query_arg(
 				array(
 					'related'  => $item->get_id(),
-					'per_page' => 5,
+					'per_page' => 10,
 				),
 				rest_url( $this->get_namespace() . '/products' )
 			),
