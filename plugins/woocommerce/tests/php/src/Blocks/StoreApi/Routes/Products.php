@@ -460,7 +460,7 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'related', $links );
 		$this->assertStringContainsString( 'related=' . $this->products[0]->get_id(), $links['related'][0]['href'] );
-		$this->assertStringContainsString( 'per_page=5', $links['related'][0]['href'] );
+		$this->assertStringContainsString( 'per_page=10', $links['related'][0]['href'] );
 		$this->assertStringNotContainsString( 'include=', $links['related'][0]['href'] );
 		$this->assertArrayHasKey( 'embeddable', $links['related'][0]['attributes'] );
 		$this->assertTrue( $links['related'][0]['attributes']['embeddable'] );
