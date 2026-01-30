@@ -31,8 +31,7 @@ table.wc-block-cart-items {
 		}
 	}
 	.wc-block-cart-items__row {
-		.wc-block-cart-item__wrap > *,
-		.wc-block-components-quantity-selector {
+		.wc-block-cart-item__wrap > * {
 			margin-bottom: $gap-smaller * 1.25;
 		}
 
@@ -50,14 +49,16 @@ table.wc-block-cart-items {
 
 		.wc-block-cart-item__quantity {
 			display: flex;
-			flex-direction: column;
-			align-items: start;
+			flex-direction: row;
+			gap: $gap-small;
+			align-items: center;
 
 			.wc-block-cart-item__remove-link {
 				@include link-button();
 				@include hover-effect();
-				@include font-x-small-locked;
 
+				height: 24px;
+				width: 24px;
 				text-transform: none;
 				white-space: nowrap;
 				&[hidden] {

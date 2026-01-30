@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update email settings actions menu: remove divider between Edit and Send test email, change terminology from Enable/Disable to Activate/Deactivate email.

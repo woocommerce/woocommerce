@@ -1939,7 +1939,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Returns the children IDs if applicable. Overridden by child classes.
 	 *
-	 * @return array of IDs
+	 * @return int[] of IDs
 	 */
 	public function get_children() {
 		return array();

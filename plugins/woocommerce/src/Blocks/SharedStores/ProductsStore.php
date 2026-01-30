@@ -115,7 +115,28 @@ class ProductsStore {
 	public static function load_purchasable_child_products( string $consent_statement, int $parent_id ): array {
 		self::check_consent( $consent_statement );
 
-		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id );
+		// Get the parent product to retrieve child IDs.
+		$parent_product = wc_get_product( $parent_id );
+		if ( ! $parent_product ) {
+			return array();
+		}
+
+		// Get child product IDs (for grouped products, these are linked products).
+		$child_ids = $parent_product->get_children();
+		if ( empty( $child_ids ) ) {
+			return array();
+		}
+
+		// Query child products using include[] filter.
+		// The parent[] filter doesn't work for grouped products because
+		// their children are standalone products, not variations.
+		$include_params = array_map(
+			fn( $id ) => 'include[]=' . $id,
+			$child_ids
+		);
+		$query_string   = implode( '&', $include_params );
+
+		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?' . $query_string );
 
 		if ( empty( $response['body'] ) ) {
 			return array();
@@ -128,8 +149,9 @@ class ProductsStore {
 		);
 
 		// Re-key array by product ID and merge into state.
+		// Use array_replace instead of array_merge to preserve numeric keys.
 		$keyed_products = array_column( $purchasable_products, null, 'id' );
-		self::$products = array_merge( self::$products, $keyed_products );
+		self::$products = array_replace( self::$products, $keyed_products );
 		self::register_state();
 
 		return $keyed_products;
@@ -153,8 +175,9 @@ class ProductsStore {
 		}
 
 		// Re-key array by variation ID and merge into state.
+		// Use array_replace instead of array_merge to preserve numeric keys.
 		$keyed_variations         = array_column( $response['body'], null, 'id' );
-		self::$product_variations = array_merge( self::$product_variations, $keyed_variations );
+		self::$product_variations = array_replace( self::$product_variations, $keyed_variations );
 		self::register_state();
 
 		return $keyed_variations;
