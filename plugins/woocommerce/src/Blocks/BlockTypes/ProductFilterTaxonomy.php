@@ -98,7 +98,17 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * This allows the editor to display terms in menu order.
 	 */
 	private function register_taxonomy_menu_order_rest_field(): void {
-		/** This filter is documented in includes/admin/class-wc-admin-assets.php */
+		/**
+		 * Filters the list of taxonomies that support custom ordering. Filter was introduced long
+		 * ago is only documented in 10.6.0.
+		 *
+		 * First instance in plugins/woocommerce/includes/admin/class-wc-admin-assets.php.
+		 *
+		 * @since 1.0
+		 *
+		 * @param array $sortable_taxonomies List of taxonomy slugs that support custom ordering.
+		 * @return array List of taxonomy slugs that support custom ordering.
+		 */
 		$sortable_taxonomies = apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) );
 
 		foreach ( $sortable_taxonomies as $taxonomy ) {
