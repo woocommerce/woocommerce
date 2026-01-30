@@ -162,6 +162,13 @@ const productButtonStore = {
 		*addCartItem(): Generator< unknown, void > {
 			const context = getContext< Context >();
 
+			// Capture productId BEFORE any yields or async operations.
+			// The state.productId getter calls getContext() dynamically, which
+			// can return stale context when multiple generators from different
+			// product buttons run concurrently.
+			const productIdToAdd = state.productId;
+			const quantityToAdd = context.quantityToAdd;
+
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
 			yield import( '@woocommerce/stores/woocommerce/cart' );
@@ -172,10 +179,15 @@ const productButtonStore = {
 				{ lock: universalLock }
 			);
 
+			// Pass quantityToAdd as a delta. The cart store will add this to
+			// the current quantity. We can't calculate the total here because
+			// rapid clicks cause stale reads - by the time our calculated total
+			// reaches cart.ts, previous clicks may have already updated the
+			// optimistic quantity, making our total outdated.
 			yield actions.addCartItem(
 				{
-					id: state.productId,
-					quantity: state.quantity + context.quantityToAdd,
+					id: productIdToAdd,
+					quantityToAdd,
 					type: context.productType,
 				},
 				{

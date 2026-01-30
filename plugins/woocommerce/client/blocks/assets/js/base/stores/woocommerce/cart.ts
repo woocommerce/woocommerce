@@ -48,8 +48,12 @@ export type OptimisticCartItem = {
 	type: string;
 };
 
-export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
+export type ClientCartItem = Omit< OptimisticCartItem, 'variation' | 'quantity' > & {
 	variation?: SelectedAttributes[];
+	/** The target quantity (absolute). Either this or quantityToAdd must be provided. */
+	quantity?: number;
+	/** Optional: add this delta to current quantity instead of setting absolute quantity */
+	quantityToAdd?: number;
 };
 
 export type VariationData = {
@@ -376,7 +380,13 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				{ id, key, quantity, variation }: ClientCartItem,
+				{
+					id,
+					key,
+					quantity: initialQuantity,
+					quantityToAdd,
+					variation,
+				}: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				const a11yModulePromise = import( '@wordpress/a11y' );
@@ -399,6 +409,21 @@ const { state, actions } = store< Store >(
 					}
 					return key ? key === cartItem.key : id === cartItem.id;
 				} );
+
+				// Determine the target quantity.
+				// If quantityToAdd is provided, calculate target based on current
+				// cart state (which includes optimistic updates from previous clicks).
+				// This ensures rapid clicks compound correctly.
+				let quantity: number;
+				if ( typeof quantityToAdd === 'number' ) {
+					const currentQuantity = existingItem?.quantity ?? 0;
+					quantity = currentQuantity + quantityToAdd;
+				} else if ( typeof initialQuantity === 'number' ) {
+					quantity = initialQuantity;
+				} else {
+					// Neither provided - default to 1
+					quantity = 1;
+				}
 
 				// Only treat as update if the item has a key (server-confirmed item).
 				// Optimistic items don't have keys, so we should add them instead.

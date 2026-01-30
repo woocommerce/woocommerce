@@ -428,15 +428,23 @@ export function createMutationQueue< TState >(
 				transitionTo( 'collecting' );
 			}
 
+			// Clone the request body to isolate it from future mutations.
+			// Batched requests wait in a queue before sending. During that
+			// time, optimistic updates may mutate shared objects. Without
+			// cloning, those mutations would corrupt the queued request body.
+			const clonedBody = request.body
+				? JSON.parse( JSON.stringify( request.body ) )
+				: undefined;
+
 			// Apply optimistic update immediately.
 			if ( request.applyOptimistic ) {
 				request.applyOptimistic();
 			}
 
-			// Track this request.
+			// Track this request with the cloned body.
 			const tracked: TrackedRequest< TState > = {
 				id: request.id,
-				request,
+				request: { ...request, body: clonedBody },
 				resolve: resolve as ( result: MutationResult ) => void,
 				reject,
 				requestIndex: -1,

@@ -564,4 +564,56 @@ describe( 'createMutationQueue', () => {
 			} );
 		} );
 	} );
+
+	describe( 'body cloning', () => {
+		it( 'clones request body to prevent mutation corruption', async () => {
+			// This test verifies that mutating an object after submission
+			// does not affect the queued request body.
+			let capturedBody: unknown;
+
+			global.fetch = jest.fn( ( _url, options ) => {
+				// Capture what was actually sent
+				const parsed = JSON.parse( options.body as string );
+				capturedBody = parsed.requests[ 0 ].body;
+				return Promise.resolve( {
+					ok: true,
+					json: () =>
+						Promise.resolve( {
+							responses: [ { status: 200, body: { value: 1 } } ],
+						} ),
+				} );
+			} ) as jest.Mock;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				stateHandler,
+			} );
+
+			// Create a mutable body object
+			const body = { id: 1, quantity: 1 };
+
+			// Submit the request
+			const promise = queue.submit( {
+				id: '1',
+				path: '/a',
+				method: 'POST',
+				body,
+				applyOptimistic: () => {
+					// Simulate what happens in cart.ts: push to state, then
+					// a subsequent operation mutates it
+					mockState.value = 100;
+				},
+			} );
+
+			// Mutate the body AFTER submission (simulating another click's
+			// optimistic update finding and mutating the same object)
+			body.quantity = 999;
+
+			await promise;
+
+			// The sent body should have the ORIGINAL value, not the mutated one
+			expect( capturedBody ).toEqual( { id: 1, quantity: 1 } );
+		} );
+	} );
 } );
