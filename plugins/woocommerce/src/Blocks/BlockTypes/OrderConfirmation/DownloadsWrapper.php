@@ -27,17 +27,15 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 			$has_downloadable_products = wp_cache_get( 'woocommerce_has_downloadable_products', 'woocommerce' );
 			if ( false === $has_downloadable_products ) {
 				$has_downloadable_products = (bool) $wpdb->get_var(
-					$wpdb->prepare(
-						"SELECT posts.ID
-							FROM {$wpdb->posts} as posts
-							INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
-						 WHERE
-							AND postmeta.meta_key   = '_downloadable'
-							AND postmeta.meta_value = 'yes'
-							AND posts.post_type     = 'product'
-							AND posts.post_status   = 'publish'
-							LIMIT 1"
-					)
+					"SELECT posts.ID
+						FROM {$wpdb->posts} as posts
+						INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
+					 WHERE
+						AND postmeta.meta_key   = '_downloadable'
+						AND postmeta.meta_value = 'yes'
+						AND posts.post_type     = 'product'
+						AND posts.post_status   = 'publish'
+						LIMIT 1"
 				);
 				$has_downloadable_products = $has_downloadable_products ? 'yes' : 'no';
 				wp_cache_set( 'woocommerce_has_downloadable_products', $has_downloadable_products, 'woocommerce', HOUR_IN_SECONDS );
