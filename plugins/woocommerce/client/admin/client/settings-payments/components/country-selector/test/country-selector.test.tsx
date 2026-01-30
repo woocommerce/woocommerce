@@ -128,7 +128,9 @@ describe( 'CountrySelector', () => {
 		await new Promise( ( resolve ) => setTimeout( resolve, 10 ) );
 
 		// The checkmark should be on Canada, not United States.
-		const newCanadaOption = screen.getByRole( 'option', { name: 'Canada' } );
+		const newCanadaOption = screen.getByRole( 'option', {
+			name: 'Canada',
+		} );
 		const usOption = screen.getByRole( 'option', {
 			name: 'United States',
 		} );
@@ -252,7 +254,9 @@ describe( 'CountrySelector', () => {
 			expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
 
 			// Focus should have moved to the Apply button.
-			const applyButton = screen.getByRole( 'button', { name: /apply/i } );
+			const applyButton = screen.getByRole( 'button', {
+				name: /apply/i,
+			} );
 			expect( applyButton ).toHaveFocus();
 		} );
 	} );
