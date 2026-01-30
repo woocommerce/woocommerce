@@ -91,6 +91,8 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		}
 
 		// If shipping callback token is not stored in order meta, return true for this order as the token is not generated for the original order.
+		// We will not validate the token if the order did not generate a token in the create order request.
+		// This is done to prevent orders created before the shipping callback token feature was introduced from being blocked from updating their shipping details.
 		if ( ! $order->meta_exists( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN ) ) {
 			return true;
 		}
