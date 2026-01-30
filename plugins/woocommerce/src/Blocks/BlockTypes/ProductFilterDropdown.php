@@ -57,6 +57,9 @@ final class ProductFilterDropdown extends AbstractBlock {
 		/* translators: %s: filter group label. */
 		$placeholder = sprintf( __( 'Select %s', 'woocommerce' ), $block->context['filterData']['groupLabel'] ?? '' );
 
+		// Generate a unique ID for this dropdown instance to avoid duplicate IDs.
+		$dropdown_id = wp_unique_prefixed_id( 'options-dropdown-' );
+
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
@@ -83,7 +86,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 				<div class="wc-block-product-filter-dropdown__dropdown" tabindex="-1" >
 					<div
 						class="wc-block-product-filter-dropdown__dropdown-selection"
-						id="options-dropdown"
+						id="<?php echo esc_attr( $dropdown_id ); ?>"
 						tabindex="0"
 						role="button"
 						aria-haspopup="listbox"
@@ -145,7 +148,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 					</div>
 					<div
 						class="wc-block-product-filter-dropdown__dropdown-list"
-						aria-labelledby="options-dropdown"
+						aria-labelledby="<?php echo esc_attr( $dropdown_id ); ?>"
 						role="listbox"
 						data-wp-bind--hidden="!context.isOpen"
 						hidden
