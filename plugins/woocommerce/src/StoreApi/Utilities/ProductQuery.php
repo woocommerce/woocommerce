@@ -254,7 +254,7 @@ class ProductQuery implements QueryClausesGenerator {
 		// Filter by related products.
 		if ( ! empty( $request['related'] ) ) {
 			$related_to  = array_map( 'absint', $request['related'] );
-			$limit       = ! empty( $request['per_page'] ) ? (int) $request['per_page'] : -1;
+			$limit       = ! empty( $request['per_page'] ) ? (int) $request['per_page'] : 100;
 			$all_related = array();
 
 			foreach ( $related_to as $product_id ) {
