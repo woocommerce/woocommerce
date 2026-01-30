@@ -78,12 +78,12 @@ test.describe( 'WooCommerce Email Editor Reset Template', () => {
 			.frameLocator( 'iframe[name="editor-canvas"]' )
 			.first();
 
-		// Click on the last paragraph to select it (the footer paragraph is editable)
-		await editorFrame.locator( 'p' ).last().click();
-
-		// Clear existing text and type new text
-		await page.keyboard.press( 'ControlOrMeta+A' ); // Select all
-		await page.keyboard.type( uniqueText );
+		// Update the footer text and add a custom text
+		await page
+			.locator( 'iframe[name="editor-canvas"]' )
+			.contentFrame()
+			.getByText( 'All Rights Reserved' )
+			.fill( `All Rights Reserved. Custom text: ${ uniqueText }` );
 
 		// Save the customization
 		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
