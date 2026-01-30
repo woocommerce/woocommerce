@@ -49,6 +49,7 @@ table.wc-block-cart-items {
 			flex-direction: row;
 			flex-wrap: nowrap;
 			gap: $gap-smaller;
+			align-items: center;
 
 			@include cart-checkout-mobile-container {
 				flex-wrap: wrap;
