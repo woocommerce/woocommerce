@@ -23,9 +23,10 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 		global $wpdb;
 
 		if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
-			$has_downloadable_product = wp_cache_get( 'woocommerce_has_downloadable_products', 'woocommerce' );
-			if ( false === $has_downloadable_product ) {
-				$has_downloadable_product = (bool) $wpdb->get_var(
+			// The underlying SQL is slower than querying `wc_product_meta_lookup`, so caching is used for performance.
+			$has_downloadable_products = wp_cache_get( 'woocommerce_has_downloadable_products', 'woocommerce' );
+			if ( false === $has_downloadable_products ) {
+				$has_downloadable_products = (bool) $wpdb->get_var(
 					$wpdb->prepare(
 						"SELECT posts.ID
 							FROM {$wpdb->posts} as posts
@@ -39,11 +40,12 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 						$wpdb->wc_product_meta_lookup,
 					)
 				);
-				wp_cache_set( 'woocommerce_has_downloadable_products', $has_downloadable_product ? 'yes' : 'no', 'woocommerce', HOUR_IN_SECONDS );
+				$has_downloadable_products = $has_downloadable_products ? 'yes' : 'no';
+				wp_cache_set( 'woocommerce_has_downloadable_products', $has_downloadable_products, 'woocommerce', HOUR_IN_SECONDS );
 			}
-			$has_downloadable_product = 'yes' === $has_downloadable_product;
+			$has_downloadable_products = 'yes' === $has_downloadable_products;
 		} else {
-			$has_downloadable_product = (bool) $wpdb->get_var(
+			$has_downloadable_products = (bool) $wpdb->get_var(
 				$wpdb->prepare(
 					'SELECT product_id FROM %i WHERE downloadable = 1 LIMIT 1',
 					$wpdb->wc_product_meta_lookup,
@@ -51,7 +53,7 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 			);
 		}
 
-		return $has_downloadable_product;
+		return $has_downloadable_products;
 	}
 
 	/**
