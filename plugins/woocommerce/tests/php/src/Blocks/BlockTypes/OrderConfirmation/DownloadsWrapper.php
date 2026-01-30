@@ -1,0 +1,59 @@
+<?php declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\OrderConfirmation;
+
+use \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper as DownloadsWrapperClass;
+
+/**
+ * Test DownloadsWrapper class.
+ */
+final class DownloadsWrapper extends \WP_UnitTestCase {
+	/**
+	 * Test `store_has_downloadable_products`: query product meta lookup table.
+	 */
+	public function test_store_has_downloadable_products_via_product_meta_lookup_table(): void {
+		$proxy = new class() extends DownloadsWrapperClass {
+			public function store_has_downloadable_products_proxy(): bool {
+				return $this->store_has_downloadable_products();
+			}
+		};
+
+		$this->assertFalse( $proxy->store_has_downloadable_products_proxy() );
+		// TODO: create downloadable product
+		$this->assertTrue( $proxy->store_has_downloadable_products_proxy() );
+	}
+
+	/**
+	 * Test `store_has_downloadable_products`: query post meta table.
+	 */
+	public function test_store_has_downloadable_products_via_posts_meta_table(): void {
+		$proxy = new class() extends DownloadsWrapperClass {
+			public function store_has_downloadable_products_proxy(): bool {
+				return $this->store_has_downloadable_products();
+			}
+		};
+		add_option( 'woocommerce_product_lookup_table_is_generating', 'yes' );
+
+		// TODO: create downloadable product
+		$this->assertTrue( $proxy->store_has_downloadable_products_proxy() );
+		// TODO: test cache value
+		// TODO: clean cache/option values
+	}
+
+	/**
+	 * Test `store_has_downloadable_products`: picking up the cached value.
+	 */
+	public function test_store_has_downloadable_products_via_cache(): void {
+		$proxy = new class() extends DownloadsWrapperClass {
+			public function store_has_downloadable_products_proxy(): bool {
+				return $this->store_has_downloadable_products();
+			}
+		};
+		add_option( 'woocommerce_product_lookup_table_is_generating', 'yes' );
+		wp_cache_set( 'woocommerce_has_downloadable_products', 'no', 'woocommerce' );
+
+		// TODO: create downloadable product
+		$this->assertFalse( $proxy->store_has_downloadable_products_proxy() );
+		// TODO: clean cache/option values
+	}
+}
