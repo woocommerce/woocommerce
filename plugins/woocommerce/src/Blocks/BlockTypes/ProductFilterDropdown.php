@@ -199,11 +199,11 @@ final class ProductFilterDropdown extends AbstractBlock {
 				_n(
 					'%1$s (%2$d product)',
 					'%1$s (%2$d products)',
-					$item['count'],
+					(int) $item['count'],
 					'woocommerce'
 				),
 				$item['ariaLabel'] ?? $item['label'],
-				$item['count']
+				(int) $item['count']
 			);
 		}
 
