@@ -165,7 +165,7 @@ class PayPalCache {
 	/**
 	 * Checks if the cache value is expired.
 	 *
-	 * @param array  $cache_contents The cache contents.
+	 * @param array $cache_contents The cache contents.
 	 *
 	 * @return bool True if the contents are expired. False otherwise.
 	 */

@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
-use Automattic\WooCommerce\Gateways\PayPal\PayPalCache as PayPalCache;
+use Automattic\WooCommerce\Gateways\PayPal\PayPalCache;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 
