@@ -95,6 +95,55 @@ describe( 'CountrySelector', () => {
 		expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
 	} );
 
+	it( 'shows checkmark on newly selected item when reopening dropdown after Apply', async () => {
+		// This test reproduces a bug where the checkmark would show on the
+		// initial item instead of the newly selected item after reopening.
+		const { rerender } = render( <CountrySelector { ...defaultProps } /> );
+		const toggleButton = screen.getByRole( 'combobox' );
+
+		// Open dropdown and wait for focus to move to search input.
+		fireEvent.click( toggleButton );
+		await new Promise( ( resolve ) => setTimeout( resolve, 10 ) );
+
+		// Select Canada.
+		const canadaItem = screen.getByRole( 'option', { name: 'Canada' } );
+		fireEvent.click( canadaItem );
+
+		// Click Apply.
+		const applyButton = screen.getByText( 'Apply' );
+		fireEvent.click( applyButton );
+
+		// Simulate parent updating the value prop after onChange.
+		rerender(
+			<CountrySelector { ...defaultProps } value={ mockItems[ 1 ] } />
+		);
+
+		// Reopen dropdown and wait for focus to move to search input.
+		fireEvent.click( toggleButton );
+		await new Promise( ( resolve ) => setTimeout( resolve, 10 ) );
+
+		// Simulate blur event on toggle button (happens when focus moves to search input).
+		fireEvent.blur( toggleButton );
+		await new Promise( ( resolve ) => setTimeout( resolve, 10 ) );
+
+		// The checkmark should be on Canada, not United States.
+		const newCanadaOption = screen.getByRole( 'option', { name: 'Canada' } );
+		const usOption = screen.getByRole( 'option', {
+			name: 'United States',
+		} );
+
+		expect(
+			newCanadaOption.querySelector(
+				'.components-country-select-control__item-icon'
+			)
+		).toBeInTheDocument();
+		expect(
+			usOption.querySelector(
+				'.components-country-select-control__item-icon'
+			)
+		).not.toBeInTheDocument();
+	} );
+
 	describe( 'Keyboard Navigation', () => {
 		it( 'focuses search input when dropdown opens', async () => {
 			render( <CountrySelector { ...defaultProps } /> );

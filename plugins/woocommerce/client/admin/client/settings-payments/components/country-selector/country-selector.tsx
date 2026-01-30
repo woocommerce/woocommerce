@@ -42,9 +42,11 @@ const stateReducer = < ItemType extends Item >(
 	switch ( type ) {
 		case useSelect.stateChangeTypes.ToggleButtonBlur:
 			// Prevent menu from closing when focus moves to search input.
+			// Also preserve the current selection to avoid resetting it.
 			return {
 				...changes,
 				isOpen: state.isOpen,
+				selectedItem: state.selectedItem,
 			};
 		case useSelect.stateChangeTypes.ItemClick:
 			return {
