@@ -58648,12 +58648,6 @@ parameters:
 			path: src/Blocks/BlockTypes/OrderConfirmation/Downloads.php
 
 		-
-			message: '#^Function get_transient invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/DownloadsWrapper.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\DownloadsWrapper\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -61020,12 +61014,6 @@ parameters:
 		-
 			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
 			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTypesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:delete_product_transients\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypesController.php
 
