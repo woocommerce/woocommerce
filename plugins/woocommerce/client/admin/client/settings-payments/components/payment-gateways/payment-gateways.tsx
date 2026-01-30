@@ -137,6 +137,11 @@ export const PaymentGateways = ( {
 			setIsPopoverVisible( false );
 			buttonRef.current?.focus();
 		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			// Only handle Enter/Space when the indicator button itself is focused,
+			// allowing links inside the popover to work normally.
+			if ( event.target !== buttonRef.current ) {
+				return;
+			}
 			event.preventDefault();
 			handleBusinessLocationIndicatorClick( event );
 		}
@@ -234,13 +239,8 @@ export const PaymentGateways = ( {
 									noArrow={ true }
 									shift={ true }
 									onFocusOutside={ handleFocusOutside }
-									onKeyDown={ handleIndicatorKeyDown }
 								>
-									{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
-									<div
-										className="components-popover__content-container"
-										onKeyDown={ handleIndicatorKeyDown }
-									>
+									<div className="components-popover__content-container">
 										<p>
 											{ interpolateComponents( {
 												mixedString: __(
