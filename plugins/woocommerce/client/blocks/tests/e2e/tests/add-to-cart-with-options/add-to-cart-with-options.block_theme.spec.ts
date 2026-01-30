@@ -1166,21 +1166,32 @@ test.describe( 'Add to Cart + Options Block', () => {
 			}
 
 			const autoselectInput = page.getByRole( 'checkbox', {
-				name: 'Auto-select when only one attribute is compatible',
+				name: 'Auto-select when only one option is available',
 			} );
-			const disabledAttributesActionInput =
-				page.getByLabel( 'Values in conflict' );
+			const invalidOptionsLabel =
+				disabledAttributesAction === 'disable'
+					? 'Grayed-out'
+					: 'Hidden';
+			const invalidOptionsRadio = page
+				.getByLabel( 'Invalid options' )
+				.getByRole( 'radio', { name: invalidOptionsLabel } );
+
+			const isAutoselectChecked = await autoselectInput.isChecked();
+			const isInvalidOptionSelected =
+				( await invalidOptionsRadio.getAttribute( 'aria-checked' ) ) ===
+				'true';
+
 			if (
-				( await autoselectInput.isChecked() ) !== autoselect ||
-				( await disabledAttributesActionInput.inputValue() ) !==
-					disabledAttributesAction
+				isAutoselectChecked !== autoselect ||
+				! isInvalidOptionSelected
 			) {
 				isOnlyCurrentEntityDirty = false;
 			}
+
 			await autoselectInput.setChecked( autoselect );
-			await disabledAttributesActionInput.selectOption( {
-				value: disabledAttributesAction,
-			} );
+			if ( ! isInvalidOptionSelected ) {
+				await invalidOptionsRadio.click();
+			}
 			if (
 				await page
 					.getByRole( 'region', {

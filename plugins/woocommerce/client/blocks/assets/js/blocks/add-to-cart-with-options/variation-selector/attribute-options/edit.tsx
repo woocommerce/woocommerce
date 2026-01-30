@@ -163,38 +163,32 @@ export default function AttributeOptionsEdit(
 							}
 							__nextHasNoMarginBottom
 						/>
-						<SelectControl
-							label={ __(
-								'Values in conflict with current selection',
-								'woocommerce'
-							) }
+						<ToggleGroupControl
+							label={ __( 'Invalid options', 'woocommerce' ) }
 							help={ __(
-								'This controls what to do with attribute values that conflict with the current selection.',
+								'Control the display of invalid options.',
 								'woocommerce'
 							) }
 							value={ disabledAttributesAction }
-							options={ [
-								{
-									label: __( 'Hidden', 'woocommerce' ),
-									value: 'hide',
-								},
-								{
-									label: __(
-										'Grayed-out/crossed-out and disabled',
-										'woocommerce'
-									),
-									value: 'disable',
-								},
-							] }
-							onChange={ ( value ) =>
-								setAttributes( {
-									disabledAttributesAction: value as
-										| 'disable'
-										| 'hide',
-								} )
-							}
-							__nextHasNoMarginBottom
-						/>
+							onChange={ ( value ) => {
+								if ( value === 'hide' || value === 'disable' ) {
+									setAttributes( {
+										disabledAttributesAction: value,
+									} );
+								}
+							} }
+							isBlock
+							size="__unstable-large"
+						>
+							<ToggleGroupControlOption
+								value="disable"
+								label={ __( 'Grayed-out', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="hide"
+								label={ __( 'Hidden', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
 					</ToolsPanelItem>
 				</ToolsPanel>
 			</InspectorControls>
