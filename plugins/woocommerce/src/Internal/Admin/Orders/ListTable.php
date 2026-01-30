@@ -880,7 +880,7 @@ class ListTable extends WP_List_Table {
 					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY id DESC LIMIT 1 )
 					UNION ALL
 					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY id ASC LIMIT 1 )
-				 ) d;",
+				 ) d",
 				$table_name,
 				$this->order_type,
 				$table_name,
