@@ -545,7 +545,7 @@ jobs:
           list-files: shell
           filters: |
             needs-markdown-linting:
-              - added|modified: '!(.github/**)/**/*.md'
+              - added|modified: '!(.github/**|.linear/**)/**/*.md'
               - added|modified: '*.md'
             needs-docs-build-validation:
               - 'docs/**/*.md'
