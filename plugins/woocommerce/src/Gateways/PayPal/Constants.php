@@ -135,7 +135,7 @@ class Constants {
 	 *
 	 * @var int
 	 */
-	const SHIPPING_CALLBACK_TOKEN_EXPIRATION = 600;
+	const SHIPPING_CALLBACK_TOKEN_EXPIRATION = 3600;
 
 	/**
 	 * PayPal authorization already captured issue code.
