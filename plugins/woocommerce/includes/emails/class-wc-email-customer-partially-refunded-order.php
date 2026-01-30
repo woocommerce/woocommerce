@@ -80,7 +80,7 @@ if ( ! class_exists( 'WC_Email_Customer_Partially_Refunded_Order', false ) ) :
 			 * Filter the email subject for customer refunded order.
 			 *
 			 * @param string $subject The email subject.
-			 * @param WC_Order $order Order object.
+			 * @param object|bool $order Order object.
 			 * @param WC_Email_Customer_Refunded_Order $email Email object.
 			 * @since 3.7.0
 			 */

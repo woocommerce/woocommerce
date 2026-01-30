@@ -294,14 +294,14 @@ class EmailsSettingsSchema extends AbstractSchema {
 
 			// Handle customer_refunded_order email type because it has two different subjects.
 			if ( 'customer_refunded_order' === $email->id && 'subject_full' === $id ) {
-				if ( ! isset( $values[ 'subject' ] ) ) {
-					$values[ 'subject' ] = $value;
+				if ( ! isset( $values['subject'] ) ) {
+					$values['subject'] = $value;
 				}
 			}
 
 			if ( 'customer_partially_refunded_order' === $email->id && 'subject_partial' === $id ) {
-				if ( ! isset( $values[ 'subject' ] ) ) {
-					$values[ 'subject' ] = $value;
+				if ( ! isset( $values['subject'] ) ) {
+					$values['subject'] = $value;
 				}
 			}
 		}
