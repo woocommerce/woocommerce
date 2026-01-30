@@ -170,11 +170,6 @@ class PayPalCache {
 	 * @return bool True if the contents are expired. False otherwise.
 	 */
 	private static function is_expired( array $cache_contents ): bool {
-		if ( ! is_array( $cache_contents ) ) {
-			// Treat bad/invalid cache contents as expired.
-			return true;
-		}
-
 		$expires = self::get_expiry_time( $cache_contents );
 		if ( null === $expires ) {
 			return true;
