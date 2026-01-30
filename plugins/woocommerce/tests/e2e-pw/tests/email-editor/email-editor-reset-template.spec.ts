@@ -1,18 +1,26 @@
-const { test, expect } = require( '@playwright/test' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const {
+/**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { expect, test } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import {
 	enableEmailEditor,
 	disableEmailEditor,
 	resetWCTransactionalEmail,
-} = require( './helpers/enable-email-editor-feature' );
-const { accessTheEmailEditor } = require( '../../utils/email' );
+} from './helpers/enable-email-editor-feature';
+import { accessTheEmailEditor } from '../../utils/email';
 
 /**
  * Helper function to switch from email editor to template editing mode.
  *
- * @param {import('@playwright/test').Page} page The Playwright page.
+ * @param page - The Playwright page.
  */
-async function switchToTemplateEditingMode( page ) {
+async function switchToTemplateEditingMode( page: Page ): Promise< void > {
 	// Open the Settings panel if not already open
 	const settingsPanel = page.locator(
 		'.woocommerce-email-editor__settings-panel'
@@ -50,12 +58,12 @@ test.describe( 'WooCommerce Email Editor Reset Template', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
 	test.beforeAll( async ( { baseURL } ) => {
-		await enableEmailEditor( baseURL );
+		await enableEmailEditor( baseURL as string );
 	} );
 
 	test.afterAll( async ( { baseURL } ) => {
-		await resetWCTransactionalEmail( baseURL, 'customer_note' );
-		await disableEmailEditor( baseURL );
+		await resetWCTransactionalEmail( baseURL as string, 'customer_note' );
+		await disableEmailEditor( baseURL as string );
 	} );
 
 	test( 'Can reset a customized email template to default', async ( {
