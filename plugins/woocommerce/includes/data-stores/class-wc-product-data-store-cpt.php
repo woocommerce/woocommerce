@@ -1506,15 +1506,22 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $count;
 		}
 
-		// Get existing variations so we don't create duplicates.
-		$existing_variations = array_map( 'wc_get_product', $product->get_children() );
 		$existing_attributes = array();
 
-		foreach ( $existing_variations as $existing_variation ) {
-			$existing_attributes[] = $existing_variation->get_attributes();
+		$child_ids = $product->get_children();
+		if ( ! empty( $child_ids ) ) {
+			_prime_post_caches( $child_ids );
+			// Get existing variations so we don't create duplicates.
+			foreach ( $child_ids as $child_id ) {
+				$child = wc_get_product( $child_id );
+				if ( $child ) {
+					$existing_attributes[] = $child->get_attributes();
+				}
+			}
 		}
 
 		$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
+		$product_id          = $product->get_id();
 
 		foreach ( $possible_attributes as $possible_attribute ) {
 			// Allow any order if key/values -- do not use strict mode.
@@ -1526,7 +1533,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			foreach ( $metadata as $meta ) {
 				$variation->add_meta_data( $meta['key'], $meta['value'] );
 			}
-			$variation->set_parent_id( $product->get_id() );
+			$variation->set_parent_id( $product_id );
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
 

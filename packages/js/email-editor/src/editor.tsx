@@ -28,6 +28,7 @@ import {
 	initDomTracking,
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
+import { initHacks } from './hacks';
 import {
 	useContentValidation,
 	useRemoveSavingFailedNotices,
@@ -101,6 +102,7 @@ function onInit() {
 	createStore();
 	initContentValidationMiddleware();
 	initBlocks();
+	initHacks();
 	initTextHooks();
 	initializeLayout();
 }

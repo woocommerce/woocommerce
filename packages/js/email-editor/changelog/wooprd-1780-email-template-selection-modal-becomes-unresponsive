@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix infinite loop when selecting a template in the email design selector modal
