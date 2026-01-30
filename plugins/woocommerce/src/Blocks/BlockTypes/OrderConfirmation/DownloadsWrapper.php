@@ -36,8 +36,7 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 							AND postmeta.meta_value = 'yes'
 							AND posts.post_type     = 'product'
 							AND posts.post_status   = 'publish'
-							LIMIT 1",
-						$wpdb->wc_product_meta_lookup,
+							LIMIT 1"
 					)
 				);
 				$has_downloadable_products = $has_downloadable_products ? 'yes' : 'no';
@@ -48,7 +47,7 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 			$has_downloadable_products = (bool) $wpdb->get_var(
 				$wpdb->prepare(
 					'SELECT product_id FROM %i WHERE downloadable = 1 LIMIT 1',
-					$wpdb->wc_product_meta_lookup,
+					$wpdb->wc_product_meta_lookup
 				)
 			);
 		}
