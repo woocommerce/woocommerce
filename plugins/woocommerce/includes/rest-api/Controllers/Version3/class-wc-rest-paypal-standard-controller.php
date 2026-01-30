@@ -151,7 +151,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( $response, 422 );
 		}
 
-		// Validate that the order does not have a transaction ID.
+		// If the order has a PayPal transaction ID, a charge has already occurred, so we shouldn't change the shipping address.
 		$transaction_id = $order->get_transaction_id();
 		if ( ! empty( $transaction_id ) ) {
 			WC_Gateway_Paypal::log(
