@@ -3,6 +3,7 @@
  */
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -235,19 +236,24 @@ describe( 'CountrySelector', () => {
 			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
 		} );
 
-		it( 'allows Tab to move focus to Apply button', () => {
+		it( 'allows Tab to move focus to Apply button', async () => {
 			render( <CountrySelector { ...defaultProps } /> );
 			const toggleButton = screen.getByRole( 'combobox' );
 
 			fireEvent.click( toggleButton );
 
-			const searchInput = screen.getByPlaceholderText( 'Search' );
+			// Wait for focus to be set on search input.
+			await new Promise( ( resolve ) => setTimeout( resolve, 10 ) );
 
-			// Tab should not be prevented, allowing focus to move.
-			fireEvent.keyDown( searchInput, { key: 'Tab' } );
+			// Tab should not be prevented by onSearchKeyDown, allowing focus to move to Apply button.
+			userEvent.tab();
 
 			// Dropdown should still be open.
 			expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();
+
+			// Focus should have moved to the Apply button.
+			const applyButton = screen.getByRole( 'button', { name: /apply/i } );
+			expect( applyButton ).toHaveFocus();
 		} );
 	} );
 } );
