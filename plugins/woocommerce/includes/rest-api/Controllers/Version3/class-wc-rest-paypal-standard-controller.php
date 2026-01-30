@@ -70,6 +70,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	/**
 	 * Validate the shipping callback request.
 	 *
+	 * @since 10.5.0
 	 * @param WP_REST_Request<array<string, mixed>> $request The request object.
 	 * @return bool True if the request is valid, false otherwise.
 	 */
