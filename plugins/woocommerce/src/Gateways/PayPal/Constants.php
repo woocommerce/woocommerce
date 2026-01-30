@@ -128,7 +128,7 @@ class Constants {
 	 *
 	 * @var string
 	 */
-	const SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX = 'wc_paypal_shipping_callback_token_';
+	const SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX = 'shipping_callback_token_';
 
 	/**
 	 * The expiration time for the shipping callback token.
