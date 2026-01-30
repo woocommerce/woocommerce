@@ -88,6 +88,37 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		parent::initialize();
 
 		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
+
+		// Register REST field for menu_order on sortable taxonomies.
+		$this->register_taxonomy_menu_order_rest_field();
+	}
+
+	/**
+	 * Register a REST field to expose the menu_order meta for sortable taxonomies.
+	 * This allows the editor to display terms in menu order.
+	 */
+	private function register_taxonomy_menu_order_rest_field(): void {
+		/** This filter is documented in includes/admin/class-wc-admin-assets.php */
+		$sortable_taxonomies = apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) );
+
+		foreach ( $sortable_taxonomies as $taxonomy ) {
+			register_rest_field(
+				$taxonomy,
+				'menu_order',
+				array(
+					'get_callback' => function ( $term ) {
+						$menu_order = get_term_meta( $term['id'], 'order', true );
+						return is_numeric( $menu_order ) ? (int) $menu_order : 0;
+					},
+					'schema'       => array(
+						'description' => __( 'Menu order, used to custom sort the term.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+				)
+			);
+		}
 	}
 
 	/**

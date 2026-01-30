@@ -86,7 +86,7 @@ class CacheController implements RegisterHooksInterface {
 	 * @param string $meta_key   Meta key.
 	 * @param mixed  $meta_value Meta value.
 	 */
-	public function clear_taxonomy_hierarchy_cache_on_meta_update( $meta_id, $term_id, $meta_key, $meta_value ) {
+	public function clear_taxonomy_hierarchy_cache_on_meta_update( $meta_id, $term_id, $meta_key, $meta_value ): void {
 		// Only clear cache when the 'order' meta key is updated (used for menu ordering).
 		if ( 'order' !== $meta_key ) {
 			return;
