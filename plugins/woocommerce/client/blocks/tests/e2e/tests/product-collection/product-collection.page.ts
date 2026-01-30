@@ -56,7 +56,10 @@ export const SELECTORS = {
 	previewButtonTestID: 'product-collection-preview-button',
 	collectionPlaceholder:
 		'[data-type="woocommerce/product-collection"] .components-placeholder',
-	productPicker: '.wc-blocks-product-collection__editor-product-picker',
+	productPicker: '.wc-block-editor-product-collection__product-picker',
+	taxonomyPicker:
+		'.wc-block-editor-product-collection__taxonomy-picker-selection',
+	pickerDoneButton: '.components-button.is-primary',
 	linkedProductControl: {
 		button: '.wc-block-product-collection-linked-product-control__button',
 		popoverContent:
@@ -71,6 +74,9 @@ export type Collections =
 	| 'onSale'
 	| 'featured'
 	| 'relatedProducts'
+	| 'handPicked'
+	| 'productsByCategory'
+	| 'productsByTag'
 	| 'productCatalog'
 	| 'myCustomCollection'
 	| 'myCustomCollectionWithPreview'
@@ -90,6 +96,9 @@ const collectionToButtonNameMap = {
 	onSale: 'On Sale Products',
 	featured: 'Featured Products',
 	relatedProducts: 'Related Products',
+	handPicked: 'Hand-Picked Products',
+	productsByCategory: 'Products by Category',
+	productsByTag: 'Products by Tag',
 	productCatalog: 'create your own',
 	myCustomCollection: 'My Custom Collection',
 	myCustomCollectionWithPreview: 'My Custom Collection with Preview',

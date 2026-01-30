@@ -45,22 +45,34 @@ jobs:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     steps:
       - name: Workflow checks
+        env:
+          BRANCH: ${{ inputs.branch || github.ref }}
         run: |
           # No special checks when running as a reusable workflow.
           if [ "${{ ! contains( github.workflow_ref, 'release-build-zip-file.yml' ) }}" = "true" ]; then
             exit 0
           fi
 
+          # Log inputs to console.
+          echo "Building WooCommerce ZIP: branch=${BRANCH}, skip_verify=${{ inputs.skip_verify }}, create_github_release=${{ inputs.create_github_release }}"
+
+          # Write summary header.
+          options=""
+          [ "${{ inputs.skip_verify }}" = "true" ] && options="skipping verification"
+          [ "${{ inputs.create_github_release }}" = "true" ] && options="${options:+$options, }creating release"
+          [ -n "$options" ] && options=" ($options)"
+          echo "🔨 Building WooCommerce ZIP from \`${BRANCH}\`${options}." >> $GITHUB_STEP_SUMMARY
+
           # Must run from trunk.
           if [ "${{ github.ref }}" != "refs/heads/trunk" ]; then
-              echo "::error::This workflow must be run from the 'trunk' branch. Enter the release branch as input."
-              exit 1
+            echo "::error::This workflow must be run from the 'trunk' branch. Enter the release branch as input."
+            exit 1
           fi
 
           # Can not skip verification for actual releases.
           if [ "${{ inputs.create_github_release }}" = "true" ] && [ "${{ inputs.skip_verify }}" = "true" ]; then
-              echo "::error::Verification can not be skipped when building for a release."
-              exit 1
+            echo "::error::Verification cannot be skipped when building for a release."
+            exit 1
           fi
 
         # Checkout trunk.
@@ -92,32 +104,36 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
+            # Helper to fail with console error and summary message.
+            fail() {
+              echo "::error::$1"
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "❌ Build failed. See annotations or workflow logs for details." >> $GITHUB_STEP_SUMMARY
+              exit 1
+            }
+
             # Branch name must be 'release/*'.
             branch_name="${BRANCH#refs/heads/}"
-            if  [[ $branch_name != release/* ]] ; then
-                echo "::error::Pre-build verification: branch name '$branch_name' is not matching 'release/*' pattern."
-                exit 1
+            if [[ $branch_name != release/* ]]; then
+              fail "Branch name '$branch_name' does not match 'release/*' pattern."
             fi
 
             # Version number in branch name and plugin main version must match.
             branch_plugin_version=$( cat checkout-branch/plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
             version_prefix=${branch_name/"release/"/""}
-            if [[ $branch_plugin_version != "$version_prefix."* ]] ; then
-                echo "::error::Pre-build verification: release version in branch ($branch_plugin_version) is not matching '$version_prefix.*' pattern."
-                exit 1
+            if [[ $branch_plugin_version != "$version_prefix."* ]]; then
+              fail "Release version in branch ($branch_plugin_version) does not match '$version_prefix.*' pattern."
             fi
 
             # GH release should not already exist.
             if gh release view "$branch_plugin_version" &>/dev/null; then
-              echo "::error::Pre-build verification: GitHub release '$branch_plugin_version' already exists."
-              exit 1
+              fail "GitHub release '$branch_plugin_version' already exists."
             fi
 
             # Release should not already exist on wporg.
             tag_exists=$(curl -s 'https://api.wordpress.org/plugins/info/1.2/?action=plugin_information&request\[slug\]=woocommerce' | jq "(.versions | has(\"$branch_plugin_version\"))")
             if [ "$tag_exists" == "true" ]; then
-              echo "::error::Tag '$branch_plugin_version' already exists on WordPress.org."
-              exit 1
+              fail "Version '$branch_plugin_version' already exists on WordPress.org."
             fi
 
             # Stable version in release branch should match wporg.
@@ -133,24 +149,21 @@ jobs:
               branch_stable_version=$( cat checkout-branch/plugins/woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1 )            
 
               if [[ $branch_stable_version != $svn_stable_version ]] ; then
-                echo "::error::Pre-build verification: stable version in release branch ($branch_stable_version) is not matching the one in SVN trunk ($svn_stable_version)."
-                exit 1
+                fail "Stable version in release branch ($branch_stable_version) does not match SVN trunk ($svn_stable_version)."
               fi
             fi
 
             # No PRs against release branch should remain open.
             count=$( gh pr list --search "is:open base:$BRANCH" --limit 1 --json number | jq length )
             if (( count > 0 )); then
-                echo "::error::Pre-build verification: there are PRs against the release branch ($BRANCH) still open."
-                exit 1
+              fail "There are open PRs against the release branch ($BRANCH)."
             fi
 
             # No PRs with same milestone as main version should remain open.
             milestone="$version_prefix.0"
             count=$( gh pr list --search "is:open milestone:$milestone" --limit 1 --json number | jq length )
             if (( count > 0 )); then
-                echo "::error::Pre-build verification: there are PRs with milestone '$milestone' still open."
-                exit 1
+              fail "There are open PRs with milestone '$milestone'."
             fi
 
             # Changelog section must have at least one entry.
@@ -184,7 +197,7 @@ jobs:
         env:
           BRANCH: ${{ inputs.branch || github.ref }}
         run: |
-          if ! git ls-remote --exit-code --heads  https://github.com/${GITHUB_REPOSITORY} ${BRANCH} > /dev/null; then
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${BRANCH} > /dev/null; then
             echo "::error::Source branch '$BRANCH' does not exist."
             exit 1
           fi
@@ -224,6 +237,10 @@ jobs:
           # Fetch commit hash for this build.
           commit_hash=$(git rev-parse "${{ inputs.branch || github.ref }}")
           echo "commit-hash=$commit_hash" >> $GITHUB_OUTPUT
+
+          # Write artifact to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📎 Build artifact: ${ARTIFACT_URL}" >> $GITHUB_STEP_SUMMARY
 
   create-release:
     name: Create GitHub release
@@ -268,3 +285,11 @@ jobs:
             --latest=false \
             --draft \
             $FLAGS
+
+          # Get the release URL directly using gh CLI, since drafts use a different URL.
+          release_url=$(gh release view "${{ steps.get_version.outputs.version }}" --json url --jq ".url")
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Draft release created: ${release_url}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ For next steps, see the [release docs](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/)." >> $GITHUB_STEP_SUMMARY

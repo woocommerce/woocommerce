@@ -5,23 +5,23 @@ import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
-	ProductData,
-	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import { getMatchedVariation } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
+import { findMatchingVariation } from '../../base/utils/variations/attribute-matching';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 import type { NormalizedProductData, NormalizedVariationData } from './types';
-import type { ProductResponseItem } from '../../types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -35,6 +35,38 @@ export type AddToCartError = {
 	code: string;
 	group: string;
 	message: string;
+};
+
+/**
+ * Quantity constraints normalized from the Store API format.
+ */
+type QuantityConstraints = {
+	min: number;
+	max: number;
+	step: number;
+};
+
+/**
+ * Extract quantity constraints from a product in Store API format.
+ *
+ * @param product The product in Store API format.
+ * @return Normalized quantity constraints.
+ */
+const getQuantityConstraints = (
+	product: ProductResponseItem | null
+): QuantityConstraints => {
+	if ( ! product ) {
+		return { min: 1, max: Number.MAX_SAFE_INTEGER, step: 1 };
+	}
+
+	const addToCart = product.add_to_cart;
+	const maximum = addToCart?.maximum ?? 0;
+
+	return {
+		min: addToCart?.minimum ?? 1,
+		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
+		step: addToCart?.multiple_of ?? 1,
+	};
 };
 
 /**
@@ -70,37 +102,29 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
-const { state: productsStoreState } = store( 'woocommerce/products' );
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
 
 /**
- * Helper to extract quantity constraints from product data.
- * Supports both REST API format (new shared store) and config format (legacy).
+ * Normalize a Store API product into the format expected by consumers.
  *
- * @param product Product data in either format
- * @return Quantity constraints
+ * @param product The product in Store API format.
+ * @return Normalized product data.
  */
-const getQuantityConstraints = ( product: ProductResponseItem ) => {
-	// New format (REST API from shared store)
-	if ( product.add_to_cart ) {
-		const maximum = product.add_to_cart.maximum ?? Number.MAX_SAFE_INTEGER;
-		return {
-			min: product.add_to_cart.minimum ?? 1,
-			max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
-			step: product.add_to_cart.multiple_of ?? 1,
-		};
-	}
+const normalizeProductFromStore = (
+	product: ProductResponseItem
+): NormalizedProductData | NormalizedVariationData => {
+	const constraints = getQuantityConstraints( product );
 
-	// Old format (config)
 	return {
-		min: typeof product.min === 'number' ? product.min : 1,
-		max:
-			typeof product.max === 'number'
-				? Math.max( product.max, 0 )
-				: Number.MAX_SAFE_INTEGER,
-		step:
-			typeof product.step === 'number' && product.step > 0
-				? product.step
-				: 1,
+		id: product.id,
+		type: product.type,
+		is_in_stock: product.is_purchasable && product.is_in_stock,
+		sold_individually: product.sold_individually,
+		...constraints,
 	};
 };
 
@@ -108,64 +132,35 @@ export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
 ): NormalizedProductData | NormalizedVariationData | null => {
-	// Try to get product from the new shared store first (for simple products)
-	try {
-		if ( productsStoreState?.products?.[ id ] ) {
-			const productFromStore = productsStoreState.products[ id ];
+	const productFromStore = productsState.products[ id ];
 
-			// Return REST API format directly with normalized constraints
-			const constraints = getQuantityConstraints( productFromStore );
-
-			return {
-				id,
-				type: productFromStore.type,
-				is_in_stock:
-					productFromStore.is_purchasable &&
-					productFromStore.is_in_stock,
-				sold_individually: productFromStore.sold_individually,
-				...constraints,
-			};
-		}
-	} catch ( error ) {
-		// If the store doesn't exist or there's an error, fall through to config
-	}
-
-	// Fall back to existing config approach for variable/grouped products
-	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
-
-	if ( ! products || ! products[ id ] ) {
+	if ( ! productFromStore ) {
 		return null;
 	}
 
-	let product = {
-		id,
-		...products[ id ],
-	} as ProductData & { id: number };
-
+	// For variable products with selected attributes, find the matching variation.
 	if (
-		product.type === 'variable' &&
-		selectedAttributes &&
-		selectedAttributes.length > 0
+		productFromStore.type === 'variable' &&
+		selectedAttributes?.length > 0
 	) {
-		const matchedVariation = getMatchedVariation(
-			product.variations,
+		const matchedVariation = findMatchingVariation(
+			productFromStore,
 			selectedAttributes
 		);
+
 		if ( matchedVariation ) {
-			product = {
-				...matchedVariation,
-				id: matchedVariation.variation_id,
-				type: 'variation',
-			};
+			const variation =
+				productsState.productVariations[ matchedVariation.id ];
+			if ( variation ) {
+				return normalizeProductFromStore( variation );
+			}
+			// Variation was matched but its data isn't in the store.
+			// Return null to prevent using stale parent product data.
+			return null;
 		}
 	}
 
-	const constraints = getQuantityConstraints( product );
-
-	return {
-		...product,
-		...constraints,
-	};
+	return normalizeProductFromStore( productFromStore );
 };
 
 export const getNewQuantity = (
@@ -240,6 +235,13 @@ const { actions, state } = store<
 			get allowsAddingToCart(): boolean {
 				const { productData } = state;
 
+				// For grouped products, the button should always be visible.
+				// Its enabled/disabled state is controlled by isFormValid which
+				// checks whether any child products are selected.
+				if ( productData?.type === 'grouped' ) {
+					return true;
+				}
+
 				return productData?.is_in_stock ?? true;
 			},
 			get quantity(): Record< number, number > {
@@ -297,14 +299,14 @@ const { actions, state } = store<
 						'woocommerce/add-to-cart-with-options-quantity-selector'
 					);
 				const inputElement = quantitySelectorContext?.inputElement;
-				const { products } = getConfig(
-					'woocommerce'
-				) as WooCommerceConfig;
-				const variations = products?.[ productId ].variations;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				if ( variations ) {
-					const variationIds = Object.keys( variations );
+				// Get variations from the products store.
+				const productFromStore = productsState.products[ productId ];
+				const variationIds =
+					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
+
+				if ( variationIds.length > 0 ) {
 					// Set the quantity for all variations, so when switching
 					// variations the quantity persists.
 					const idsToUpdate = [ productId, ...variationIds ];

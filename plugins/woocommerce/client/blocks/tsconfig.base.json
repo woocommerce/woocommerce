@@ -124,6 +124,9 @@
 			"@woocommerce/stores/woocommerce/product-data": [
 				"assets/js/base/stores/woocommerce/product-data"
 			],
+			"@woocommerce/stores/woocommerce/products": [
+				"assets/js/base/stores/woocommerce/products"
+			],
 			"@woocommerce/type-defs/*": [
 				"assets/js/types/type-defs/*"
 			],
