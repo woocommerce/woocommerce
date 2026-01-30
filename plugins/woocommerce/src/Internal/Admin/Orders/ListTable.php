@@ -870,12 +870,12 @@ class ListTable extends WP_List_Table {
 
 		$min_max_months = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
+				'SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
 				 FROM (
 					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != %s ORDER BY id DESC LIMIT 1 )
 					UNION ALL
 					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != %s ORDER BY id ASC LIMIT 1 )
-				 ) d;",
+				 ) d;',
 				OrdersTableDataStore::get_orders_table_name(),
 				$this->order_type,
 				OrderStatus::TRASH,
