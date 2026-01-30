@@ -31,7 +31,7 @@ class DownloadsWrapper extends AbstractOrderConfirmationBlock {
 						FROM {$wpdb->posts} as posts
 						INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
 					 WHERE
-						postmeta.meta_key   = '_downloadable'
+						    postmeta.meta_key   = '_downloadable'
 						AND postmeta.meta_value = 'yes'
 						AND posts.post_type     = 'product'
 						AND posts.post_status   = 'publish'
