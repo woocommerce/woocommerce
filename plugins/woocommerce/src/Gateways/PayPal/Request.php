@@ -925,15 +925,9 @@ class Request {
 	private function generate_shipping_callback_token( WC_Order $order ): string {
 		$token = bin2hex( random_bytes( 32 ) );
 
-		$cache_key   = PayPalConstants::SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX . $order->get_id();
-		$cache_value = array(
-			'token' => $token,
-			'order_id' => $order->get_id()
-		);
-
-		// Store the token in database cache for validation.
-		// This provides reliable storage across all hosting setups, including those with object caching.
-		PayPalCache::set( $cache_key, $cache_value, PayPalConstants::SHIPPING_CALLBACK_TOKEN_EXPIRATION );
+		// Store the token in order meta for validation.
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, $token );
+		$order->save();
 
 		return $token;
 	}
