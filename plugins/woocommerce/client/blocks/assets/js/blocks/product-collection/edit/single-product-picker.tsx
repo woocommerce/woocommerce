@@ -19,7 +19,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 import type { ProductCollectionEditComponentProps } from '../types';
 import { getCollectionByName } from '../collections';
 
-const ProductPicker = (
+const SingleProductPicker = (
 	props: ProductCollectionEditComponentProps & {
 		isDeletedProductReference: boolean;
 	}
@@ -52,11 +52,11 @@ const ProductPicker = (
 
 	return (
 		<div { ...blockProps }>
-			<Placeholder className="wc-blocks-product-collection__editor-product-picker">
+			<Placeholder className="wc-block-editor-product-collection__product-picker">
 				<HStack alignment="center">
 					<Icon
 						icon={ info }
-						className="wc-blocks-product-collection__info-icon"
+						className="wc-block-editor-product-collection__info-icon"
 					/>
 					<Text>{ infoText }</Text>
 				</HStack>
@@ -84,4 +84,4 @@ const ProductPicker = (
 	);
 };
 
-export default ProductPicker;
+export default SingleProductPicker;

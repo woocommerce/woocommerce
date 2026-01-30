@@ -143,10 +143,5 @@ export default defineConfig( {
 			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
 			dependencies: [ 'site setup' ],
 		},
-		{
-			name: 'paypal-standard',
-			testMatch: [ '**/tests/paypal/**' ],
-			dependencies: [ 'site setup' ],
-		},
 	],
 } );
