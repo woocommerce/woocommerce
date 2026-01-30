@@ -34,11 +34,15 @@ jobs:
     steps:
       - name: Check confirmation
         run: |
+          # Log inputs to console.
+          echo "Updating stable tag: version=${{ github.event.inputs.version }}, confirm-update=${{ github.event.inputs.confirm-update }}, allow-revert=${{ github.event.inputs.allow-revert }}"
+
+          # Write summary header.
+          echo "🏷️ Updating stable tag to \`${{ github.event.inputs.version }}\`." >> $GITHUB_STEP_SUMMARY
+
           if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
-            echo "::error::You must check the confirmation checkbox to proceed with the stable tag update"
+            echo "::error::You must check the confirmation checkbox to proceed with the stable tag update."
             exit 1
-          else
-            echo "✅ Confirmation received - proceeding with stable tag update"
           fi
 
       - name: Validate release version
@@ -138,7 +142,7 @@ jobs:
           if svn list "${{ secrets.WPORG_SVN_URL }}/tags/$TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive > /dev/null 2>&1; then
             echo "✅ SVN tag '$TARGET_VERSION' exists"
           else
-            echo "::error::SVN tag '$TARGET_VERSION' does not exist in the repository"
+            echo "::error::SVN tag '$TARGET_VERSION' does not exist in the SVN repository"
             exit 1
           fi
 
@@ -218,6 +222,10 @@ jobs:
             echo "📤 Changes detected. Committing changes to SVN..."
             svn commit -m "Setting stable tag to $TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
             echo "✅ Successfully committed stable tag update to $TARGET_VERSION"
+
+            # Write success to summary.
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ WordPress.org SVN updated: [view readme.txt on WordPress.org](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7)" >> $GITHUB_STEP_SUMMARY
           fi
 
   update-gh-stable-tag:
@@ -276,19 +284,22 @@ jobs:
             git push origin "$UPDATE_BRANCH"
 
             # Determine milestone from woocommerce.php version.
-            milestone=$( cat ./plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed 's/\.[0-9]\+\(-dev\)\?$/.0/' )
+            milestone=$( cat ./plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 | sed -E 's/^([0-9]+\.[0-9]+)\.[0-9]+.*$/\1.0/' )
             echo "Using milestone: '$milestone'."
 
-            gh pr create \
+            pr_url=$(gh pr create \
               --title "Update stable tag to $TARGET_VERSION ($BRANCH_NAME)" \
               --body "This PR updates the stable tag to $TARGET_VERSION." \
               --base "$BRANCH_NAME" \
               --head "$UPDATE_BRANCH" \
               --reviewer ${{ github.actor }} \
               --label Release \
-              --milestone "$milestone"
+              --milestone "$milestone")
 
             echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME with milestone $milestone"
+
+            # Write PR to summary.
+            echo "✅ PR targeting \`$BRANCH_NAME\` [created](${pr_url})." >> $GITHUB_STEP_SUMMARY
           fi
 
   notify-release:
@@ -304,3 +315,10 @@ jobs:
           slack-optional-unfurl_links: false
           slack-text: |
             :woo-bounce: *<https://github.com/woocommerce/woocommerce/releases/tag/${{ github.event.inputs.version }}|WooCommerce ${{ github.event.inputs.version }}>* has been released! :rocket:
+
+      - name: Write next steps to summary
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📢 Release announcement sent." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Review and merge the PRs listed above." >> $GITHUB_STEP_SUMMARY

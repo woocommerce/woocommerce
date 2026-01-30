@@ -22,6 +22,7 @@ import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
 import { objectHasProp, Currency } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
+import { Icon, trash } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -341,7 +342,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 									} }
 									disabled={ isPendingDelete }
 								>
-									{ __( 'Remove item', 'woocommerce' ) }
+									<Icon icon={ trash } size={ 24 } />
 								</button>
 							) }
 						</div>

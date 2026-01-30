@@ -1,88 +1,58 @@
-# WooCommerce {RELEASE_VERSION}.{PATCH_VERSION}
+# [{release_main_version}] Release `{release_version}`
 
-This issue tracks the progress of a single WooCommerce core plugin release iteration that covers the publishing of a single patch version. "Patch version" in this context refers to `z` in a version following `x.y.z` where `z` can be any of `0-99`, `0-rc.[0-99]`, or `0-beta.[0-99]`.
+These are the instructions for releasing `{release_version}`, scheduled for `{release_date}`.
 
-## Version being released {RELEASE_VERSION}.{PATCH_VERSION}
+----
 
-The following details are copied from the official [Building and Publishing guide](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/). Please check it to make sure these instructions haven't become out of date.
-Check the [Release Troubleshooting & Recovery](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/) page for any issues you may encounter.
+Perform all the steps below in order. When running _any_ GitHub workflow, ensure you do it from the `trunk` branch (the default) and input the release version or branch as indicated.
 
-## Pre-Checks
+Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/)_ guide handy, in case you encounter any issues.
 
-- [ ] **Verify no open [Pull Requests](https://github.com/woocommerce/woocommerce/pulls?q=is%3Aopen+is%3Apr) or [Issues](https://github.com/woocommerce/woocommerce/issues)** for the milestone matching the release being published.
-    - All pull requests tied to the release milestone must be closed, including [backported pull requests](https://github.com/woocommerce/woocommerce/pulls?q=is%3Apr+label%3A%22type%3A+cherry-pick%22) that may need to be merged into other release branches or trunk.
-- [ ] **Check for unresolved ["cherry pick failed" Pull Requests](https://github.com/woocommerce/woocommerce/pulls?q=is:pr+label:%22cherry+pick+failed%22).**
-    - Ensure any such PRs are either expected or manually resolved via another PR.
-- [ ] **Confirm the Stable tag in** `readme.txt` **matches [trunk on WordPress.org](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).**
-    - The value should match the current stable version, not the version being built.
-- [ ] **Ensure [GitHub services](https://www.githubstatus.com/) are fully operational**
+----
 
-## Build WooCommerce
+### 1. Pre-build checks
 
-1. **Run the ["Release: Bump version number" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-bump-version.yml).**
-   - Run from `trunk`.
-   - Choose the type of version you're releasing (`beta`, `rc`, or `stable`).
-   - Enter as *Release branch* the branch you are about to release from (e.g. `release/10.0`).
-   - Review and merge the PR created.
+- [ ] Confirm [GitHub services](https://www.githubstatus.com/) are operational.
+- [ ] Verify no open issues or pull requests exist against the [{release_milestone} milestone]({repository_url}/issues?q=is:open+milestone:{release_milestone}). Ping authors as needed to merge or close.
+- [ ] Ensure that there aren't any pull requests [with label "cherry pick failed"]({repository_url}/pulls?q=is:pr+label:%22cherry+pick+failed%22) that apply to this release that haven't been actioned.
+- [ ] Confirm the `Stable tag` value [in the readme.txt on the release branch]({repository_url}/blob/{release_branch}/plugins/woocommerce/readme.txt#L7) matches the one [on WordPress.org's `trunk`](https://plugins.trac.wordpress.org/browser/woocommerce/trunk/readme.txt#L7).
 
-2. **Run the ["Release: Compile changelog" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-compile-changelog.yml).**
-   - Run from `trunk` and enter the major version number and the intended release date.
-   - **Review and merge the two PRs created** (one for trunk, one for the release branch).
-   - **Ensure the changelog date is correct.**
 
-3. **Build the release ZIP file.**
-   - Build the release ZIP file using the ["Release: Build ZIP file" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml).
-   - Run from `trunk` and enter the release branch as argument.
-   - The workflow will create a [draft release tag](https://github.com/woocommerce/woocommerce/releases) with an attached `woocommerce.zip` file.
+### 2. Build the release package
 
-## Publish the Release
+- [ ] Run workflow **[Release: Bump version number]({repository_url}/actions/workflows/release-bump-version.yml)**: enter `{release_branch}` as _Release branch_ and `{release_type}` as _Type of version bump to perform_.
+- [ ] Review and merge the PR that was generated against the release branch. Check the [{release_milestone} milestone]({repository_url}/issues?q=is:open+milestone:{release_milestone}).
+- [ ] Run workflow **[Release: Compile changelog]({repository_url}/actions/workflows/release-compile-changelog.yml)**: enter `{release_main_version}` as _Version_ and leave _Release date_ empty, except when building the package ahead of schedule.
+- [ ] Review and merge the PRs that were generated: one against `trunk` and another one against the release branch. Both should be under the [{release_milestone} milestone]({repository_url}/issues?q=is:open+milestone:{release_milestone}).
+- [ ] Run workflow **[Release: Build ZIP file]({repository_url}/actions/workflows/release-build-zip-file.yml)** to build the asset and create the GitHub release: enter `{release_branch}` as _Release branch_ and check _Create GitHub release_.
+- [ ] Confirm that a draft `{release_version}` release [was created in the repository]({repository_url}/releases) with an attached `woocommerce.zip` asset.
 
-### Step 1: Upload Release to WordPress.org
 
-- [ ] **Run the ["Release: Upload release to WordPress.org" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-upload-to-wporg.yml)** from `trunk` using the release tag.
-- [ ] **This creates a new [SVN tag](https://plugins.svn.wordpress.org/woocommerce/tags/) and, if the release is newer than trunk, overwrites trunk.**
+### 3. Upload the release to WordPress.org
 
-### Step 2: Approve the Release
+- [ ] Run workflow **[Release: Upload release to WordPress.org]({repository_url}/actions/workflows/release-upload-to-wporg.yml)**: enter `{release_version}` as _Release tag to upload_ and make sure to check off the confirmation box.
+- [ ] Confirm that SVN tag `{release_version}` [exists on WordPress.org SVN](https://plugins.svn.wordpress.org/woocommerce/tags/{release_version}).
+- [ ] [Log into WordPress.org](https://wordpress.org/plugins/developers/releases/) using the credentials from the `WordPress.org "WooCommerce" user account` secret in the secret store and approve the release.
+- [ ] After a few minutes, confirm that [`{release_version}` is available for download](https://downloads.wordpress.org/plugin/woocommerce.{release_version}.zip).
 
-- [ ] **Visit [WordPress.org plugin releases](https://wordpress.org/plugins/developers/releases/) and approve the release.**
-- [ ] **Wait a few minutes for WordPress.org to build the new version.**
 
-### Step 3: Verify Release Availability
+### 4. Deploy to the staging environment
 
-- [ ] **Confirm the new release appears at:**
-    - <https://plugins.svn.wordpress.org/woocommerce/tags/>
-    - The "Previous versions" dropdown on the [Advanced Options screen](https://wordpress.org/plugins/woocommerce/advanced/).
+- [ ] Follow the [guide to deploy to the staging environment](https://wp.me/PCYsg-18BQ) and monitor for at least {release_monitoring_time} hours after deploy.
 
-## Release to the Staging Environment (Stable and RC releases)
+**If a critical issue was detected while monitoring...**
 
-- [ ] **Condition:** Only perform this step for stable and RC releases (`-rc.x` or `.x`).
-- [ ] **Action:** Follow the [guide to deploy to the staging environment](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/).
+- [ ] Request a revert in the staging environment.
+- [ ] Pause the release process and **do not continue with any steps on this issue**. Follow the procedure in the [troubleshooting guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/#deploy-serious-bug) instead.
 
-## Update the Release Tags
 
-### Step 1: Update Stable Tag
+### 5. Publish the release
 
-- [ ] **Condition:** Only perform this step if:
-    - The release is a stable release, and
-    - No major issues were found during the release to staging.
-    - You have monitored the release following the ["Monitoring Deploys to WPCOM Atomic"](https://fieldguide.automattic.com/woocommerce-core-releases/woocommerce-core-releases-deploying-to-atomic-staging/#monitoring-deploys-atomic) guide for at least 4 hours for `.0` releases and at least 2 hours for other patch releases.
-- [ ] **Action:** Run the ["Release: Update stable tag" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) from `trunk`, set the version, and select the option to update the stable tag as part of the workflow input.
-    - Review and merge the pull requests created (one for the release branch and trunk).
+- [ ] Run workflow **[Release: Update stable tag]({repository_url}/actions/workflows/release-update-stable-tag.yml)**: enter `{release_version}` as _Version_ and make sure to check off the confirmation box.
+- [ ] Publish the `{release_version}` [release draft]({repository_url}/releases) that was previously created, as well as any other `{release_main_version}` drafts that might exist from previous attempts. **Ensure** that "Set as the latest release" is checked for `{release_version}`.
 
-### Step 2: Publish GitHub Release Tag
 
-- [ ] **Action:** Publish the [previously created GitHub draft release tag](https://github.com/woocommerce/woocommerce/releases).
-- [ ] **When setting release status:**
-    - If releasing a dev, beta, or RC, check "Set as a pre-release."
-    - If the version was marked as stable in Step 1 above, check "Set as the latest release."
-    - If the version was not marked as stable in Step 1 above, do not set as the latest release.
+### 6. Post-release tasks
 
-### Step 3: Merge follow-up PRs
-
-- [ ] **Action:** Merge the "Update changelog.txt after {RELEASE_VERSION}.{PATCH_VERSION}" PR that is automatically created once the release tag is published on GitHub.
-
-## Post Release Monitoring
-
-For all RC and stable releases, the release lead should continue to monitor for any bugs directly related to the latest version. Monitoring should continue for 3 days after a major release and 1 day for a point release.
-
-See the [WooCommerce Release Monitoring Guide](https://developer.woocommerce.com/docs/contribution/releases/monitoring/) for more details.
+- [ ] Wait at least 1 hour for all automations to complete and make sure to merge any follow-up PRs under the [{release_milestone} milestone]({repository_url}/issues?q=is:open+milestone:{release_milestone}).
+- [ ] Continue monitoring for bugs related to the release for at least 3 days. See the [release monitoring guide](https://developer.woocommerce.com/docs/contribution/releases/monitoring/) for more details.

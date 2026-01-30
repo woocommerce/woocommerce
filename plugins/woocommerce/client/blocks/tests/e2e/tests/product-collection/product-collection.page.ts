@@ -56,7 +56,7 @@ export const SELECTORS = {
 	previewButtonTestID: 'product-collection-preview-button',
 	collectionPlaceholder:
 		'[data-type="woocommerce/product-collection"] .components-placeholder',
-	productPicker: '.wc-blocks-product-collection__editor-product-picker',
+	productPicker: '.wc-block-editor-product-collection__product-picker',
 	linkedProductControl: {
 		button: '.wc-block-product-collection-linked-product-control__button',
 		popoverContent:
