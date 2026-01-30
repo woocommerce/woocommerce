@@ -81,6 +81,10 @@ table.wc-block-cart-items {
 				&[hidden] {
 					display: none;
 				}
+
+				svg {
+					fill: currentColor;
+				}
 			}
 		}
 		.wc-block-components-product-name {
