@@ -301,10 +301,19 @@ const ValidatedTextInput = forwardRef<
 					}
 				} }
 				onBlur={ () => {
-					// Don't show validation error on blur for empty fields.
-					// Empty field errors should only appear on form submission.
 					const isEmpty = ! inputRef.current?.value.trim();
-					validateInput( isEmpty );
+
+					if ( isEmpty ) {
+						// If the error was already shown (e.g. after form
+						// submission), keep it visible. Otherwise, keep it
+						// hidden until the next form submission.
+						validateInput(
+							! validationError?.message ||
+								validationError?.hidden
+						);
+					} else {
+						validateInput( false );
+					}
 				} }
 				aria-describedby={ ariaDescribedBy }
 				value={ value }

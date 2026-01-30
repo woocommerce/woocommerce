@@ -324,6 +324,16 @@ describe( 'ValidatedTextInput', () => {
 		expect(
 			screen.queryByText( 'Please enter a valid test input' )
 		).toBeInTheDocument();
+
+		// After submission, blurring the empty field should NOT hide the error
+		await act( async () => {
+			await user.click( textInputElement );
+			textInputElement.blur();
+		} );
+
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeInTheDocument();
 	} );
 
 	describe( 'correctly validates on mount', () => {
