@@ -19,6 +19,7 @@ import { getSetting } from '@woocommerce/settings';
 import { useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartItem, isString } from '@woocommerce/types';
+import { calculateSaleAmount } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -104,35 +105,10 @@ const OrderSummaryItem = ( {
 		precision: totalsCurrency.minorUnit,
 	} ).getAmount();
 
-	// Sale badge discount calculation — duplicated from cart-line-item-row.tsx.
-	// Both components already depend on Dinero for other price math, and the
-	// logic is small enough that a shared hook would add indirection without
-	// meaningful deduplication.
-
-	const regularAmountSingle = Dinero( {
-		amount: parseInt( prices.raw_prices.regular_price, 10 ),
-		precision: isString( prices.raw_prices.precision )
-			? parseInt( prices.raw_prices.precision, 10 )
-			: prices.raw_prices.precision,
-	} );
-
-	const purchaseAmountSingle = Dinero( {
-		amount: parseInt( prices.raw_prices.price, 10 ),
-		precision: isString( prices.raw_prices.precision )
-			? parseInt( prices.raw_prices.precision, 10 )
-			: prices.raw_prices.precision,
-	} );
-
-	const saleAmountSingle = regularAmountSingle
-		.subtract( purchaseAmountSingle )
-		.convertPrecision( priceCurrency.minorUnit )
-		.getAmount();
-
-	const saleAmount = regularAmountSingle
-		.subtract( purchaseAmountSingle )
-		.multiply( quantity )
-		.convertPrecision( priceCurrency.minorUnit )
-		.getAmount();
+	const saleAmountSingle = calculateSaleAmount(
+		prices,
+		priceCurrency.minorUnit
+	);
 
 	const subtotalPriceFormat = applyCheckoutFilter( {
 		filterName: 'subtotalPriceFormat',
@@ -271,7 +247,7 @@ const OrderSummaryItem = ( {
 					{ quantity > 1 && (
 						<ProductSaleBadge
 							currency={ priceCurrency }
-							saleAmount={ saleAmount }
+							saleAmount={ saleAmountSingle * quantity }
 							format={ saleBadgePriceFormat }
 						/>
 					) }

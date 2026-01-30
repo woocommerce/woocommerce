@@ -23,6 +23,7 @@ import type { CartItem } from '@woocommerce/types';
 import { objectHasProp, Currency } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
+import { calculateSaleAmount } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
@@ -146,9 +147,10 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			amount: parseInt( prices.raw_prices.price, 10 ),
 			precision: prices.raw_prices.precision,
 		} );
-		const saleAmountSingle =
-			regularAmountSingle.subtract( purchaseAmountSingle );
-		const saleAmount = saleAmountSingle.multiply( quantity );
+		const saleAmountSingle = calculateSaleAmount(
+			prices,
+			priceCurrency.minorUnit
+		);
 		const totalsCurrency = getCurrencyFromPriceResponse( totals );
 		let lineSubtotal = parseInt( totals.line_subtotal, 10 );
 		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
@@ -271,10 +273,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							{ quantity === 1 && (
 								<ProductSaleBadge
 									currency={ priceCurrency }
-									saleAmount={ getAmountFromRawPrice(
-										saleAmountSingle,
-										priceCurrency
-									) }
+									saleAmount={ saleAmountSingle }
 									format={ saleBadgePriceFormat }
 								/>
 							) }
@@ -360,10 +359,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						{ quantity > 1 && (
 							<ProductSaleBadge
 								currency={ priceCurrency }
-								saleAmount={ getAmountFromRawPrice(
-									saleAmount,
-									priceCurrency
-								) }
+								saleAmount={ saleAmountSingle * quantity }
 								format={ saleBadgePriceFormat }
 							/>
 						) }
