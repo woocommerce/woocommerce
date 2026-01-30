@@ -288,7 +288,7 @@ Product responses include `_links` that provide URLs to related resources. When 
 		"collection": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products"}],
 		"upsells": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products?include=10,20", "embeddable": true}],
 		"cross_sells": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products?include=30", "embeddable": true}],
-		"related": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products?related=34&per_page=5", "embeddable": true}]
+		"related": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products?related=34&per_page=10", "embeddable": true}]
 	}
 }
 ```
