@@ -85,6 +85,7 @@ class WebhookHandler {
 		if ( PayPalConstants::STATUS_APPROVED === $status ) {
 			\WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
 			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, '' );
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: PayPal order ID */
