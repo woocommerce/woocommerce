@@ -444,6 +444,7 @@ class Products extends AbstractRoute {
 			'description'       => __( 'Limit result set to products related to a specific product ID.', 'woocommerce' ),
 			'type'              => 'integer',
 			'sanitize_callback' => 'absint',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;
