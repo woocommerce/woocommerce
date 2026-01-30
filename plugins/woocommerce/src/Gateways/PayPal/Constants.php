@@ -124,20 +124,6 @@ class Constants {
 	);
 
 	/**
-	 * The prefix for the shipping callback token transient.
-	 *
-	 * @var string
-	 */
-	const SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX = 'shipping_callback_token_';
-
-	/**
-	 * The expiration time for the shipping callback token.
-	 *
-	 * @var int
-	 */
-	const SHIPPING_CALLBACK_TOKEN_EXPIRATION = 3600;
-
-	/**
 	 * PayPal authorization already captured issue code.
 	 *
 	 * @var string
