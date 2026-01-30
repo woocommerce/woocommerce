@@ -21997,12 +21997,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
-			message: '#^Cannot call method get_attributes\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Product_Data_Store_CPT\:\:clear_caches\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -22183,12 +22177,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/data-stores/class-wc-product-grouped-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Product\:\:get_children\(\) invoked with 1 parameter, 0 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -22251,12 +22239,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Product\:\:set_visible_children\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
-
-		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
 
@@ -25563,12 +25545,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property WC_Abstract_Legacy_Product\:\:\$post_type\.$#'
 			identifier: property.notFound
-			count: 1
-			path: includes/legacy/abstract-wc-legacy-product.php
-
-		-
-			message: '#^Argument of an invalid type array\|true supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
 			count: 1
 			path: includes/legacy/abstract-wc-legacy-product.php
 
