@@ -495,7 +495,7 @@ class Products extends ControllerTestCase {
 		wp_set_object_terms( $related_product->get_id(), $term['term_id'], 'product_cat' );
 
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-		$request->set_param( 'related', array( $main_product->get_id() ) );
+		$request->set_param( 'related', $main_product->get_id() );
 
 		$response = rest_get_server()->dispatch( $request );
 
@@ -532,7 +532,7 @@ class Products extends ControllerTestCase {
 		wp_set_object_terms( $lonely_product->get_id(), $term['term_id'], 'product_cat' );
 
 		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
-		$request->set_param( 'related', array( $lonely_product->get_id() ) );
+		$request->set_param( 'related', $lonely_product->get_id() );
 
 		$response = rest_get_server()->dispatch( $request );
 
