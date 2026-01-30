@@ -102,12 +102,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 		// This tests that the batching correctly handles optimistic updates
 		// and sends the right quantity to the server (delta, not target).
 		// Without the fix, this would result in 1+2+3=6 items.
+		//
+		// Set up waitForResponse BEFORE the clicks to avoid a race condition.
+		// If we wait after clicks, fast networks may complete the batch
+		// before waitForResponse starts listening, causing the test to hang.
+		const batchPromise = page.waitForResponse( '**/wc/store/v1/batch**' );
 		await addToCartButton.click();
 		await addToCartButton.click();
 		await addToCartButton.click();
 
 		// Wait for all batch requests to complete.
-		await page.waitForResponse( '**/wc/store/v1/batch**' );
+		await batchPromise;
 
 		// Open mini cart and verify the count.
 		await miniCartUtils.openMiniCart();
@@ -425,6 +430,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
+			// Set up waitForResponse BEFORE the click to avoid race condition.
+			// Fast networks may complete the batch before waitForResponse
+			// starts listening if we set it up after the click.
+			const batchPromise = page.waitForResponse( '**/wc/store/v1/batch**' );
 			await addToCartButton.click();
 
 			await expect(
@@ -437,7 +446,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			// Wait for the batch API response to ensure the DB has been updated.
 			// This prevents a race condition where the subsequent page.reload()
 			// could execute before the product is fully added to the cart.
-			await page.waitForResponse( '**/wc/store/v1/batch**' );
+			await batchPromise;
 
 			await expect(
 				page.getByLabel(

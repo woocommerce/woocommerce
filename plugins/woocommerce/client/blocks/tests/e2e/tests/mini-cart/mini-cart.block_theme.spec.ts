@@ -218,21 +218,28 @@ test.describe( `${ blockData.name } Block`, () => {
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '1' );
 
+		// Set up waitForResponse BEFORE the click to avoid race condition.
+		// Fast networks may complete the batch before waitForResponse
+		// starts listening if we set it up after the click.
+		let batchPromise = page.waitForResponse(
+			'**/wp-json/wc/store/v1/batch**'
+		);
 		await page
 			.getByRole( 'button', { name: 'Increase quantity of Polo' } )
 			.click();
 
-		await page.waitForResponse( '**/wp-json/wc/store/v1/batch**' );
+		await batchPromise;
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '2' );
 
+		batchPromise = page.waitForResponse( '**/wp-json/wc/store/v1/batch**' );
 		await page
 			.getByRole( 'button', { name: 'Reduce quantity of Polo' } )
 			.click();
 
-		await page.waitForResponse( '**/wp-json/wc/store/v1/batch**' );
+		await batchPromise;
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
