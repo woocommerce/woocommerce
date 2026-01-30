@@ -19,8 +19,10 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 		};
 
 		$this->assertFalse( $proxy->store_has_downloadable_products_proxy() );
-		// TODO: create downloadable product
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => true ) );
 		$this->assertTrue( $proxy->store_has_downloadable_products_proxy() );
+
+		$product->delete();
 	}
 
 	/**
@@ -34,12 +36,13 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 		};
 		add_option( 'woocommerce_product_lookup_table_is_generating', 'yes' );
 
-		// TODO: create downloadable product
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => true ) );
 		$this->assertTrue( $proxy->store_has_downloadable_products_proxy() );
 		$this->assertSame( 'yes', wp_cache_get( 'woocommerce_has_downloadable_products', 'woocommerce' ) );
 
 		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 		wp_cache_delete( 'woocommerce_has_downloadable_products', 'woocommerce' );
+		$product->delete();
 	}
 
 	/**
@@ -54,10 +57,11 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 		add_option( 'woocommerce_product_lookup_table_is_generating', 'yes' );
 		wp_cache_set( 'woocommerce_has_downloadable_products', 'no', 'woocommerce' );
 
-		// TODO: create downloadable product
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'downloadable' => true ) );
 		$this->assertFalse( $proxy->store_has_downloadable_products_proxy() );
 
 		delete_option( 'woocommerce_product_lookup_table_is_generating' );
 		wp_cache_delete( 'woocommerce_has_downloadable_products', 'woocommerce' );
+		$product->delete();
 	}
 }
