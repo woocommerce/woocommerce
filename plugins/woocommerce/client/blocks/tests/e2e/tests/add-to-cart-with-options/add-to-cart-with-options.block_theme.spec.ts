@@ -86,53 +86,59 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
-	test( 'handles rapid add-to-cart clicks correctly', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		// Go to shop page where iAPI Product Button is used in product listings.
-		await frontendUtils.goToShop();
+	// This test only applies to the iAPI cart which uses batch requests.
+	// The legacy cart sends individual requests, not batched ones.
+	if ( config.features[ 'experimental-iapi-mini-cart' ] ) {
+		test( 'handles rapid add-to-cart clicks correctly', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+		} ) => {
+			// Go to shop page where iAPI Product Button is used in product listings.
+			await frontendUtils.goToShop();
 
-		// Get the first Add to cart button on the page (Album product).
-		const addToCartButton = page.locator( 'text=Add to cart' ).first();
-		await expect( addToCartButton ).toBeVisible();
+			// Get the first Add to cart button on the page (Album product).
+			const addToCartButton = page.locator( 'text=Add to cart' ).first();
+			await expect( addToCartButton ).toBeVisible();
 
-		// Click the button 3 times rapidly without waiting between clicks.
-		// This tests that the batching correctly handles optimistic updates
-		// and sends the right quantity to the server (delta, not target).
-		// Without the fix, this would result in 1+2+3=6 items.
-		//
-		// Set up waitForResponse BEFORE the clicks to avoid a race condition.
-		// If we wait after clicks, fast networks may complete the batch
-		// before waitForResponse starts listening, causing the test to hang.
-		const batchPromise = page.waitForResponse( '**/wc/store/v1/batch**' );
-		await addToCartButton.click();
-		await addToCartButton.click();
-		await addToCartButton.click();
+			// Click the button 3 times rapidly without waiting between clicks.
+			// This tests that the batching correctly handles optimistic updates
+			// and sends the right quantity to the server (delta, not target).
+			// Without the fix, this would result in 1+2+3=6 items.
+			//
+			// Set up waitForResponse BEFORE the clicks to avoid a race condition.
+			// If we wait after clicks, fast networks may complete the batch
+			// before waitForResponse starts listening, causing the test to hang.
+			const batchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+			await addToCartButton.click();
+			await addToCartButton.click();
+			await addToCartButton.click();
 
-		// Wait for all batch requests to complete.
-		await batchPromise;
+			// Wait for all batch requests to complete.
+			await batchPromise;
 
-		// Open mini cart and verify the count.
-		await miniCartUtils.openMiniCart();
+			// Open mini cart and verify the count.
+			await miniCartUtils.openMiniCart();
 
-		// Check the mini cart shows exactly 3 items.
-		// If the bug were present, it would show 6 (1+2+3).
-		const quantityInput = page.getByLabel(
-			'Quantity of Album in your cart.'
-		);
-		const quantity = await quantityInput.inputValue();
-		const quantityNum = parseInt( quantity, 10 );
+			// Check the mini cart shows exactly 3 items.
+			// If the bug were present, it would show 6 (1+2+3).
+			const quantityInput = page.getByLabel(
+				'Quantity of Album in your cart.'
+			);
+			const quantity = await quantityInput.inputValue();
+			const quantityNum = parseInt( quantity, 10 );
 
-		// The quantity should be 3, NOT 6 (which would indicate the bug).
-		// We use a soft assertion to account for any timing edge cases.
-		expect( quantityNum ).toBeLessThanOrEqual( 3 );
-		expect( quantityNum ).toBeGreaterThanOrEqual( 2 );
+			// The quantity should be 3, NOT 6 (which would indicate the bug).
+			// We use a soft assertion to account for any timing edge cases.
+			expect( quantityNum ).toBeLessThanOrEqual( 3 );
+			expect( quantityNum ).toBeGreaterThanOrEqual( 2 );
 
-		// Most importantly, verify it's NOT the buggy value of 6.
-		expect( quantityNum ).not.toBe( 6 );
-	} );
+			// Most importantly, verify it's NOT the buggy value of 6.
+			expect( quantityNum ).not.toBe( 6 );
+		} );
+	}
 
 	test( 'allows adding variable products to cart', async ( {
 		page,
@@ -430,10 +436,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
+			// iAPI cart uses batch requests, legacy cart uses individual endpoints.
 			// Set up waitForResponse BEFORE the click to avoid race condition.
-			// Fast networks may complete the batch before waitForResponse
-			// starts listening if we set it up after the click.
-			const batchPromise = page.waitForResponse( '**/wc/store/v1/batch**' );
+			const useBatch =
+				config.features[ 'experimental-iapi-mini-cart' ];
+			const batchPromise = useBatch
+				? page.waitForResponse( '**/wc/store/v1/batch**' )
+				: null;
 			await addToCartButton.click();
 
 			await expect(
@@ -446,7 +455,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			// Wait for the batch API response to ensure the DB has been updated.
 			// This prevents a race condition where the subsequent page.reload()
 			// could execute before the product is fully added to the cart.
-			await batchPromise;
+			if ( batchPromise ) {
+				await batchPromise;
+			}
 
 			await expect(
 				page.getByLabel(
