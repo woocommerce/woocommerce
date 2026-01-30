@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
+use WC_Tracks_Client;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -134,14 +136,6 @@ class SessionClearanceManager {
 		}
 
 		WC()->session->set( self::SESSION_KEY, $status );
-
-		// Ensure session cookie is set so the session persists across page loads.
-		// This is important because fraud protection may set session status before
-		// any cart action triggers the cookie to be set.
-		// Skip cookie setting if headers have already been sent (e.g., in test environment).
-		if ( WC()->session instanceof \WC_Session_Handler ) {
-			WC()->session->set_customer_session_cookie( true );
-		}
 	}
 
 	/**
@@ -183,17 +177,8 @@ class SessionClearanceManager {
 	 * @return string Session identifier.
 	 */
 	public function get_session_id(): string {
-		if ( ! $this->is_session_available() ) {
-			return 'no-session';
-		}
-
-		// Use or generate a stable session ID for tracking consistency.
-		$fraud_customer_session_id = WC()->session->get( '_fraud_protection_customer_session_id' );
-		if ( ! $fraud_customer_session_id ) {
-			$fraud_customer_session_id = WC()->call_function( 'wc_rand_hash', 'customer_', 30 );
-			WC()->session->set( '_fraud_protection_customer_session_id', $fraud_customer_session_id );
-		}
-		return $fraud_customer_session_id;
+		$identity = WC_Tracks_Client::get_identity( get_current_user_id() );
+		return $identity['_ui'] ?? 'no-session';
 	}
 
 	/**
