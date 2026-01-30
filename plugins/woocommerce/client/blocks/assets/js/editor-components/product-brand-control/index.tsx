@@ -21,12 +21,13 @@ import { convertProductBrandResponseItemToSearchItem } from '@woocommerce/utils'
  * Internal dependencies
  */
 import './style.scss';
+import type { SearchListItem as SearchListItemProps } from '../search-list-control/types';
 
 interface ProductBrandControlProps {
 	/**
 	 * Callback to update the selected product brands.
 	 */
-	onChange: () => void;
+	onChange: ( selected: SearchListItemProps[] ) => void;
 	/**
 	 * Whether or not the search control should be displayed in a compact way, so it occupies less space.
 	 */
@@ -38,7 +39,7 @@ interface ProductBrandControlProps {
 	/**
 	 * Callback to update the brand operator. If not passed in, setting is not used.
 	 */
-	onOperatorChange?: () => void;
+	onOperatorChange?: ( operator: string ) => void;
 	/**
 	 * Setting for whether products should match all or any selected brands.
 	 */
@@ -56,7 +57,7 @@ const ProductBrandControl = ( {
 	onChange,
 	onOperatorChange,
 	operator = 'any',
-	selected,
+	selected = [],
 	isCompact = false,
 	isSingle = false,
 	showReviewCount,
