@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes\OrderConfirmation;
 
-use \Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper as DownloadsWrapperClass;
+use Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation\DownloadsWrapper as DownloadsWrapperClass;
 
 /**
  * Test DownloadsWrapper class.
