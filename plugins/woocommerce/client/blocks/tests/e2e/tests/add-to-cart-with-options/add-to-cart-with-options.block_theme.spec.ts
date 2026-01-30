@@ -267,8 +267,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( productPrice ).toHaveText( '$45.00' );
 			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
-			await expect( addToCartButton ).not.toBeVisible();
-			await expect( quantitySelector ).not.toBeVisible();
+			await expect( addToCartButton ).toBeHidden();
+			await expect( quantitySelector ).toBeHidden();
 			await expect(
 				page.getByText( 'SKU: woo-hoodie-blue' )
 			).toBeVisible();
@@ -438,8 +438,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			// iAPI cart uses batch requests, legacy cart uses individual endpoints.
 			// Set up waitForResponse BEFORE the click to avoid race condition.
-			const useBatch =
-				config.features[ 'experimental-iapi-mini-cart' ];
+			const useBatch = config.features[ 'experimental-iapi-mini-cart' ];
 			const batchPromise = useBatch
 				? page.waitForResponse( '**/wc/store/v1/batch**' )
 				: null;
