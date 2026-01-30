@@ -88,7 +88,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$attribute->set_position( $meta_value['position'] );
 				$attribute->set_visible( $meta_value['is_visible'] );
 				$attribute->set_variation( $meta_value['is_variation'] );
-				$attributes[] = $attribute;
+
+				/**
+				 * Filter product attribute after initialization.
+				 *
+				 * @since 10.6.0
+				 *
+				 * @param WC_Product_Attribute $attribute  The attribute object.
+				 * @param array                $meta_value The meta value.
+				 * @param WC_Product           $product    The product object.
+				 */
+				$attributes[] = apply_filters( 'woocommerce_product_read_attribute', $attribute, $meta_value, $product );
 			}
 			$product->set_attributes( $attributes );
 
@@ -315,12 +325,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				$variation_ids = $product->get_visible_children();
 
-				if ( is_callable( '_prime_post_caches' ) ) {
+				if ( ! empty( $variation_ids ) ) {
 					_prime_post_caches( $variation_ids );
 				}
 
 				$tax_display_mode = $for_display ? get_option( 'woocommerce_tax_display_shop' ) : null;
-
+				$price_decimals   = wc_get_price_decimals();
 				foreach ( $variation_ids as $variation_id ) {
 					$variation = wc_get_product( $variation_id );
 
@@ -359,6 +369,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 */
 						$price = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price( 'edit' ), $variation, $product );
 
+						// Skip empty prices.
+						if ( '' === $price ) {
+							continue;
+						}
+
 						/**
 						 * Filters the regular price for a product variation before it is used in price calculations and caching.
 						 *
@@ -384,11 +399,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 * @param WC_Product    $product    The parent variable product object.
 						 */
 						$sale_price = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price( 'edit' ), $variation, $product );
-
-						// Skip empty prices.
-						if ( '' === $price ) {
-							continue;
-						}
 
 						// If sale price does not equal price, the product is not yet on sale.
 						if ( $sale_price === $regular_price || $sale_price !== $price ) {
@@ -444,9 +454,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 							}
 						}
 
-						$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
-						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
-						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, wc_get_price_decimals() );
+						$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, $price_decimals );
+						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, $price_decimals );
+						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, $price_decimals );
 
 						if ( has_filter( 'woocommerce_variation_prices_array' ) ) {
 							$original_prices_array = $prices_array;

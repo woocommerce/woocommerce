@@ -1,12 +1,9 @@
 /**
  * Internal dependencies
  */
-import {
-	registerEntityAction,
-	unregisterEntityAction,
-} from '../../private-apis';
-import { addActionForEmail } from '../../config-tools/filters';
-import getTrashEmailPostAction from '../../components/header/trash-email-post';
+import { registerEntityAction, unregisterEntityAction } from '../private-apis';
+import { addActionForEmail } from '../config-tools/filters';
+import getTrashEmailPostAction from '../components/header/trash-email-post';
 
 const removeDefaultMoveToTrashActionAddCustom = ( postType: string ) => {
 	// Remove the default move to trash action.
