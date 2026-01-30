@@ -454,10 +454,10 @@ const { state, actions } = store< Store >(
 					const quantityToSend = existingItem
 						? quantity - existingItem.quantity
 						: quantity;
+
 					itemToSend = {
 						id,
 						quantity: quantityToSend,
-						type: variation ? 'variation' : 'simple',
 						...( variation && { variation } ),
 					} as OptimisticCartItem;
 				}
