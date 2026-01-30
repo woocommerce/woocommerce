@@ -8,6 +8,7 @@ use Exception;
 use WC_Order;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
+use Automattic\WooCommerce\Gateways\PayPal\PayPalCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
@@ -916,7 +917,7 @@ class Request {
 
 	/**
 	 * Generate and store a shipping callback token for the order.
-	 * The token is stored in a transient and can be validated later.
+	 * The token is stored in the database cache and can be validated later.
 	 *
 	 * @param WC_Order $order The order object.
 	 * @return string The generated token.
@@ -924,11 +925,12 @@ class Request {
 	private function generate_shipping_callback_token( WC_Order $order ): string {
 		$token = bin2hex( random_bytes( 32 ) );
 
-		$transient_key = PayPalConstants::SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX . $order->get_id();
+		$cache_key   = PayPalConstants::SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX . $order->get_id();
+		$cache_value = array( 'token' => $token, 'order_id' => $order->get_id() );
 
-		// Store the token with order ID for validation.
-		// This allows us to verify the token belongs to the correct order.
-		set_transient( $transient_key, $token, PayPalConstants::SHIPPING_CALLBACK_TOKEN_EXPIRATION );
+		// Store the token in database cache for validation.
+		// This provides reliable storage across all hosting setups, including those with object caching.
+		PayPalCache::set( $cache_key, $cache_value, PayPalConstants::SHIPPING_CALLBACK_TOKEN_EXPIRATION );
 
 		return $token;
 	}

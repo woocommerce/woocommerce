@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Gateways\PayPal\PayPalCache as PayPalCache;
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-helper.php';
@@ -90,10 +91,25 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			return false;
 		}
 
-		$order_id        = $order->get_id();
-		$transient_key   = PayPalConstants::SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX . $order_id;
-		$transient_value = get_transient( $transient_key );
-		if ( empty( $transient_value ) || ! hash_equals( $token, $transient_value ) ) {
+		$order_id     = $order->get_id();
+		$cache_key    = PayPalConstants::SHIPPING_CALLBACK_TOKEN_TRANSIENT_PREFIX . $order_id;
+		$cached_value = PayPalCache::get( $cache_key );
+
+		if ( empty( $cached_value ) ) {
+			// Check if the cache is empty or 'PayPalCache::get' returned empty because it is expired.
+			// If it is actually empty, this means the token has not been stored for this order.
+			// Return true to indicate that the request is valid as the token is not generated for the original order.
+			$cached_expired_value = PayPalCache::get_from_cache( $cache_key );
+			if ( empty( $cached_expired_value ) ) {
+				return true;
+			}
+		}
+
+		if ( empty( $cached_value['order_id'] ) || $cached_value['order_id'] !== $order_id ) {
+			return false;
+		}
+
+		if ( empty( $cached_value['token'] ) || ! hash_equals( $token, $cached_value['token'] ) ) {
 			return false;
 		}
 
