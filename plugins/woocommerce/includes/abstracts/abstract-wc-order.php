@@ -1636,9 +1636,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Order_Item_Product::class );
 		$item->set_props( $args );
 		$item->set_backorder_meta();
+
+		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
+			$item->calculate_cogs_value();
+		}
+
 		$item->set_order_id( $this->get_id() );
 		$item->save();
 		$this->add_item( $item );
+
+		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
+			$this->calculate_cogs_total_value();
+			$this->save();
+		}
+
 		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
 		delete_transient( 'wc_order_' . $this->get_id() . '_needs_processing' );
 		return $item->get_id();

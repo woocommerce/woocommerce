@@ -474,6 +474,25 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'add_product' sets the line item cost from the product when cost of goods is enabled.
+	 */
+	public function test_add_product_sets_line_item_cogs_from_product() {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( 0.25 );
+		$product->save();
+
+		$order = new WC_Order();
+		$item_id = $order->add_product( $product, 1 );
+
+		$item = $order->get_item( $item_id );
+		$this->assertInstanceOf( WC_Order_Item_Product::class, $item );
+		$this->assertEquals( 0.25, $item->get_cogs_value(), 'Line item cost should be set from the product when adding via add_product.' );
+		$this->assertEquals( 0.25, $order->get_cogs_total_value(), 'Order cost total should be updated when adding a product with a cost.' );
+	}
+
+	/**
 	 * @testdox 'calculate_cogs_total_value' calculates the value from the prices and the quantities of all the items with a Cost of Goods Sold value.
 	 */
 	public function test_calculate_cogs_uses_product_info_and_sets_the_value() {
