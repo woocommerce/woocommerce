@@ -12,4 +12,20 @@ module.exports = {
 		'jest/valid-title': 'off',
 		'testing-library/await-async-utils': 'off',
 	},
+	/**
+	 * TypeScript files require @typescript-eslint/parser. Without this override,
+	 * the parent config's @babel/eslint-parser is used, which produces an AST
+	 * incompatible with @typescript-eslint rules (e.g., "node.params is not iterable").
+	 * See: https://github.com/typescript-eslint/typescript-eslint/issues/3517
+	 */
+	overrides: [
+		{
+			files: [ '**/*.ts', '**/*.tsx' ],
+			parser: '@typescript-eslint/parser',
+			parserOptions: {
+				ecmaVersion: 'latest',
+				sourceType: 'module',
+			},
+		},
+	],
 };
