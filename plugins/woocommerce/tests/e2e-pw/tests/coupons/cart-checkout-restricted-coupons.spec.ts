@@ -2,7 +2,6 @@
  * External dependencies
  */
 import type { Page } from '@playwright/test';
-// @ts-expect-error -- No types available for this package yet
 import {
 	addAProductToCart,
 	getOrderIdFromUrl,

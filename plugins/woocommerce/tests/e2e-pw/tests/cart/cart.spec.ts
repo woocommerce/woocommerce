@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-// @ts-expect-error -- @woocommerce/e2e-utils-playwright is not typed
+import type { Page } from '@playwright/test';
 import {
 	addAProductToCart,
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
-import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -210,7 +209,7 @@ test(
 			// Verify undo link is no longer visible (cleanup occurred)
 			await expect(
 				page.getByRole( 'link', { name: 'Undo?' } )
-			).not.toBeVisible();
+			).toBeHidden();
 		} );
 	}
 );

@@ -1,5 +1,12 @@
+/**
+ * External dependencies
+ */
 import { test, expect, request } from '@playwright/test';
 import type { Page, Browser } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import { tags } from '../../fixtures/fixtures';
 import { setOption, deleteOption } from '../../utils/options';
 import { ADMIN_STATE_PATH } from '../../playwright.config';

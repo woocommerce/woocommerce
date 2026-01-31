@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import {
 	WC_API_PATH,
 	WC_ADMIN_API_PATH,

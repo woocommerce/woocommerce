@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -36,11 +35,11 @@ interface Customer extends CustomerData {
 	id: number;
 }
 
-const test = baseTest.extend<{ customers: Customer[] }>( {
+const test = baseTest.extend< { customers: Customer[] } >( {
 	storageState: ADMIN_STATE_PATH,
 	customers: async ( { restApi }, use ) => {
 		const now = Date.now();
-		const customerData: Record<string, CustomerData> = {
+		const customerData: Record< string, CustomerData > = {
 			walterWhite: {
 				first_name: 'Walter',
 				last_name: 'White',

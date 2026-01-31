@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -16,7 +15,9 @@ const productPrice = '9.99';
 const productName = 'Apply Coupon Product';
 const couponCode = '5off';
 const couponAmount = '5';
-const discountedPrice = ( Number( productPrice ) - Number( couponAmount ) ).toString();
+const discountedPrice = (
+	Number( productPrice ) - Number( couponAmount )
+).toString();
 
 test.describe(
 	'WooCommerce Orders > Apply Coupon',

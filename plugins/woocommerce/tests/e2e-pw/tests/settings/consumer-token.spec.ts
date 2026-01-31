@@ -1,8 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
-// eslint-disable-next-line @woocommerce/dependency-group -- @ts-expect-error comment above breaks expected format
 import { createClient } from '@woocommerce/e2e-utils-playwright';
 
 /**

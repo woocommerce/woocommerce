@@ -2,17 +2,13 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { test as baseTest, expect } from '../../fixtures/fixtures';
-import {
-	ADMIN_STATE_PATH,
-	CUSTOMER_STATE_PATH,
-} from '../../playwright.config';
+import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
 import { getFakeProduct } from '../../utils/data';
 
 interface Product {

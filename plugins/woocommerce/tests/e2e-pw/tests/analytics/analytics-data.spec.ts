@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-// @ts-expect-error -- No types available for this package yet
+import type { Page, Browser } from '@playwright/test';
 import {
 	WC_ADMIN_API_PATH,
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
-import type { Page, Browser } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -59,7 +58,7 @@ test.beforeAll(
 			.then( ( response ) => {
 				categoryIds = (
 					response.data as { create: Array< { id: number } > }
-				).create.map( ( category ) => category.id );
+				 ).create.map( ( category ) => category.id );
 			} );
 
 		// create a number of products to be used in orders
@@ -135,7 +134,7 @@ test.beforeAll(
 			.then( ( response ) => {
 				productIds = (
 					response.data as { create: Array< { id: number } > }
-				).create.map( ( item ) => item.id );
+				 ).create.map( ( item ) => item.id );
 			} );
 		// set up the variations on the variable product
 		for ( const key in variations ) {
@@ -147,9 +146,7 @@ test.beforeAll(
 					variations[ key ] as Record< string, unknown >
 				)
 				.then( ( response ) => {
-					variationIds.push(
-						( response.data as { id: number } ).id
-					);
+					variationIds.push( ( response.data as { id: number } ).id );
 				} );
 		}
 
@@ -187,7 +184,7 @@ test.beforeAll(
 			.then( ( response ) => {
 				orderIds = (
 					response.data as { create: Array< { id: number } > }
-				).create.map( ( order ) => order.id );
+				 ).create.map( ( order ) => order.id );
 			} );
 
 		// Reset Analytics Settings to their default values.
@@ -247,9 +244,9 @@ test.beforeAll(
 			)
 			.then( ( response ) => {
 				// '&' is encoded as '&amp;' in the response.
-				expect(
-					( response.data as { value: string } ).value
-				).toEqual( 'period=month&amp;compare=previous_year' );
+				expect( ( response.data as { value: string } ).value ).toEqual(
+					'period=month&amp;compare=previous_year'
+				);
 			} )
 			.catch( ( error: Error ) => {
 				throw new Error(

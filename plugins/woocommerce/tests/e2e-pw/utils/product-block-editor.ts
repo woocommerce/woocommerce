@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { expect } from '@playwright/test';
 import type { Page, Expect } from '@playwright/test';
 
 /**
@@ -46,7 +45,9 @@ interface DisableVariableProductBlockTourParams {
 /**
  * Update a product in the block editor and verify the update.
  *
- * @param params - Object containing page and expect.
+ * @param params        - Object containing page and expect.
+ * @param params.page   - Playwright page object.
+ * @param params.expect - Playwright expect function.
  */
 export const updateProduct = async ( {
 	page,
@@ -62,7 +63,8 @@ export const updateProduct = async ( {
 /**
  * Disable the variable product block tour.
  *
- * @param params - Object containing page.
+ * @param params      - Object containing page.
+ * @param params.page - Playwright page object.
  */
 export const disableVariableProductBlockTour = async ( {
 	page,

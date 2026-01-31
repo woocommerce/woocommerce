@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error -- No types available for this package yet
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**

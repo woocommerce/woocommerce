@@ -3995,10 +3995,11 @@ test.describe( 'Data API tests', () => {
 
 		// loop through all the countries and validate against the expected data
 		for ( const country of countryCodes ) {
-			const countryData = ( await import(
-				`../../../data/countries/${ country }.json`,
-				{ with: { type: 'json' } }
-			) ).default as {
+			const countryData = (
+				await import( `../../../data/countries/${ country }.json`, {
+					with: { type: 'json' },
+				} )
+			 ).default as {
 				code: string;
 				name: string;
 				states: unknown[];

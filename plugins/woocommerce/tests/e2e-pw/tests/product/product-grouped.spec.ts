@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -20,9 +19,7 @@ const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
 const groupedProductName = 'Grouped single product';
 
-let simpleProductId: number,
-	simpleProduct2Id: number,
-	groupedProductId: number;
+let simpleProductId: number, simpleProduct2Id: number, groupedProductId: number;
 
 test.describe(
 	'Grouped Product Page',

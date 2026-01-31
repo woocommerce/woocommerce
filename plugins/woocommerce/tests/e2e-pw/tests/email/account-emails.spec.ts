@@ -3,9 +3,8 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
-import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { Locator } from '@playwright/test';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies

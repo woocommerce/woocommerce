@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error -- No types available for this package yet
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -95,7 +94,7 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 								couponData[
 									couponType as keyof typeof couponData
 								] as { expiryDate: string }
-							).expiryDate
+							 ).expiryDate
 						);
 				}
 
@@ -103,9 +102,11 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				if (
 					'freeShipping' in
 						couponData[ couponType as keyof typeof couponData ] &&
-					( couponData[ couponType as keyof typeof couponData ] as {
-						freeShipping: boolean;
-					} ).freeShipping
+					(
+						couponData[ couponType as keyof typeof couponData ] as {
+							freeShipping: boolean;
+						}
+					 ).freeShipping
 				) {
 					await page.getByLabel( 'Allow free shipping' ).check();
 				} else {
@@ -134,20 +135,23 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 				await page.goto( 'wp-admin/edit.php?post_type=shop_coupon' );
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType as keyof typeof couponData ]
-							.code,
+						name: couponData[
+							couponType as keyof typeof couponData
+						].code,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType as keyof typeof couponData ]
-							.description,
+						name: couponData[
+							couponType as keyof typeof couponData
+						].description,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType as keyof typeof couponData ]
-							.amount,
+						name: couponData[
+							couponType as keyof typeof couponData
+						].amount,
 						exact: true,
 					} )
 				).toBeVisible();
@@ -173,7 +177,7 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 							couponData[
 								couponType as keyof typeof couponData
 							] as { expiryDate: string }
-						).expiryDate
+						 ).expiryDate
 					);
 				} );
 			}
@@ -182,9 +186,11 @@ test.describe( 'Coupon management', { tag: tags.SERVICES }, () => {
 			if (
 				'freeShipping' in
 					couponData[ couponType as keyof typeof couponData ] &&
-				( couponData[ couponType as keyof typeof couponData ] as {
-					freeShipping: boolean;
-				} ).freeShipping
+				(
+					couponData[ couponType as keyof typeof couponData ] as {
+						freeShipping: boolean;
+					}
+				 ).freeShipping
 			) {
 				await test.step( 'verify free shipping', async () => {
 					await page

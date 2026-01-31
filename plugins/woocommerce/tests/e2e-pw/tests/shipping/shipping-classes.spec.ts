@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**

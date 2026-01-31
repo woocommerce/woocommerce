@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error -- No types available for this package yet
 import {
 	addAProductToCart,
 	WC_API_PATH,

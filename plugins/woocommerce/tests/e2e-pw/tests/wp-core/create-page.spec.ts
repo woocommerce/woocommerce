@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import {
 	closeChoosePatternModal,
 	getCanvas,

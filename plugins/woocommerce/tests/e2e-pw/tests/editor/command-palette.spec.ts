@@ -1,12 +1,11 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
+import { Page } from '@playwright/test';
 import {
 	disableWelcomeModal,
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
-import { Page } from '@playwright/test';
 
 /**
  * Internal dependencies

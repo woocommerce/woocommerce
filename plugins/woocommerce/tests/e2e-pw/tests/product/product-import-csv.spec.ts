@@ -2,7 +2,6 @@
  * External dependencies
  */
 import path from 'path';
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -126,8 +125,7 @@ const productCategories = [
 ];
 const productAttributes = [ 'Color', 'Size' ];
 
-const errorMessage =
-	'File is empty. Please upload something more substantial.';
+const errorMessage = 'File is empty. Please upload something more substantial.';
 
 test.describe( 'Import Products from a CSV file', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );

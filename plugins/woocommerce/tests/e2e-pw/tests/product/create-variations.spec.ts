@@ -106,16 +106,39 @@ test.describe( 'Add variations', { tag: tags.GUTENBERG }, () => {
 		// hook up the woocommerce_variations_added jQuery trigger so we can check if it's fired
 		await test.step( 'Hook up the woocommerce_variations_added jQuery trigger', async () => {
 			await page.evaluate( () => {
-				( window as Window & { woocommerceVariationsAddedFunctionCalls?: unknown[][] } ).woocommerceVariationsAddedFunctionCalls = [];
+				(
+					window as Window & {
+						woocommerceVariationsAddedFunctionCalls?: unknown[][];
+					}
+				 ).woocommerceVariationsAddedFunctionCalls = [];
 
-				( window as Window & { jQuery: ( selector: string ) => { on: ( event: string, callback: ( event: unknown, data: unknown ) => void ) => void } } )
+				(
+					window as Window & {
+						jQuery: ( selector: string ) => {
+							on: (
+								event: string,
+								callback: (
+									event: unknown,
+									data: unknown
+								) => void
+							) => void;
+						};
+					}
+				 )
 					.jQuery( '#variable_product_options' )
-					.on( 'woocommerce_variations_added', ( event: unknown, data: unknown ) => {
-						( window as Window & { woocommerceVariationsAddedFunctionCalls?: unknown[][] } ).woocommerceVariationsAddedFunctionCalls!.push( [
-							event,
-							data,
-						] );
-					} );
+					.on(
+						'woocommerce_variations_added',
+						( event: unknown, data: unknown ) => {
+							(
+								window as Window & {
+									woocommerceVariationsAddedFunctionCalls?: unknown[][];
+								}
+							 ).woocommerceVariationsAddedFunctionCalls!.push( [
+								event,
+								data,
+							] );
+						}
+					);
 			} );
 		} );
 
@@ -143,7 +166,12 @@ test.describe( 'Add variations', { tag: tags.GUTENBERG }, () => {
 					// verify that the woocommerce_variations_added jQuery trigger was fired
 					const woocommerceVariationsAddedFunctionCalls =
 						await page.evaluate(
-							() => ( window as Window & { woocommerceVariationsAddedFunctionCalls?: unknown[][] } ).woocommerceVariationsAddedFunctionCalls
+							() =>
+								(
+									window as Window & {
+										woocommerceVariationsAddedFunctionCalls?: unknown[][];
+									}
+								 ).woocommerceVariationsAddedFunctionCalls
 						);
 					expect(
 						woocommerceVariationsAddedFunctionCalls!.length
@@ -154,7 +182,8 @@ test.describe( 'Add variations', { tag: tags.GUTENBERG }, () => {
 
 				for ( const attributeValue of variationToCreate ) {
 					const attributeName = productAttributes.find(
-						( { options }: { options: string[] } ) => options.includes( attributeValue )
+						( { options }: { options: string[] } ) =>
+							options.includes( attributeValue )
 					)!.name;
 					const addAttributeMenu = variationRows
 						.nth( 0 )

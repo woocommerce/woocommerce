@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import type {
 	Reporter,
 	TestCase,
@@ -19,6 +22,7 @@ class SkippedReporter implements Reporter {
 		}
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	onEnd( _result: FullResult ): void {
 		if ( this.skippedTests.length > 0 ) {
 			const skippedTestsMessage = this.skippedTests.join( '%0A' );

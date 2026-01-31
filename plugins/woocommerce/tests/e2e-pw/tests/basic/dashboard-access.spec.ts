@@ -1,7 +1,11 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
 import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 
 test.describe( 'Customer-role users are blocked from accessing the WP Dashboard.', () => {

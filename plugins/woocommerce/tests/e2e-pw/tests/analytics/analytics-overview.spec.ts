@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { test, expect, request } from '@playwright/test';
 import type {
 	Page,
@@ -6,6 +9,10 @@ import type {
 	Response,
 	APIResponse,
 } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import { admin } from '../../test-data/data';
 import { tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';

@@ -119,11 +119,11 @@ const test = baseTest.extend< {
 		await use( simpleTestProduct );
 
 		// Cleanup
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		await request.delete(
 			`wp-json/wc/v3/products/${ simpleTestProduct.id }`,
 			{
 				force: true,
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			} as any
 		);
 	},

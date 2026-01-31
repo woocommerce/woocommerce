@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
-import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { Page } from '@playwright/test';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -179,9 +178,7 @@ async function selectVariation(
 		await page.locator( `#${ v.locatorId }` ).selectOption( v.value );
 		const selectedValue = await page
 			.locator( `#${ v.locatorId }` )
-			.evaluate(
-				( select: HTMLSelectElement ) => select.value
-			);
+			.evaluate( ( select: HTMLSelectElement ) => select.value );
 		await expect( selectedValue ).toBe( v.value ); // Use lowercase if the value attribute is lowercase
 	}
 

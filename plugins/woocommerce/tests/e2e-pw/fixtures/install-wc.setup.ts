@@ -2,7 +2,7 @@
  * Internal dependencies
  */
 import { test as setup } from './fixtures';
-import type { RestApiClient, RestApiResponse } from './fixtures';
+import type { RestApiClient } from './fixtures';
 
 /**
  * Plugin information from WordPress REST API.

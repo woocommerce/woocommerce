@@ -1,15 +1,14 @@
 /**
  * External dependencies
  */
-// @ts-expect-error -- @woocommerce/e2e-utils-playwright is not typed
+import { faker } from '@faker-js/faker';
+import type { Page } from '@playwright/test';
 import {
 	addAProductToCart,
 	fillBillingCheckoutBlocks,
 	fillShippingCheckoutBlocks,
 	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
-import { faker } from '@faker-js/faker';
-import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies

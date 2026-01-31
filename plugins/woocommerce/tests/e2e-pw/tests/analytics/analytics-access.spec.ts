@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import { tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 

@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-// @ts-expect-error -- @woocommerce/e2e-utils-playwright is not typed
-import { WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import type { Page } from '@playwright/test';
+import { WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies

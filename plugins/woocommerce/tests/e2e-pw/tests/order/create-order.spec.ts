@@ -1,9 +1,8 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
-import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { Page } from '@playwright/test';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -358,9 +357,7 @@ test.describe(
 						force: true,
 					} )
 					.catch(
-						( error: {
-							response: { data: { code: string } };
-						} ) => {
+						( error: { response: { data: { code: string } } } ) => {
 							if (
 								error.response.data.code ===
 								'woocommerce_rest_invalid_tax_class'

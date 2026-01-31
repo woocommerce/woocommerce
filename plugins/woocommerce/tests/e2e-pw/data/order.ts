@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { customerBilling, customerShipping } from './shared';
 import type { CustomerBilling, CustomerShipping } from './shared';
 import {

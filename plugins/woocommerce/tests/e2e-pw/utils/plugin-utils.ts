@@ -83,7 +83,11 @@ export const encodeCredentials = (
 /**
  * Get the download URL of the latest release zip for a plugin using GitHub API.
  *
- * @param params - Parameters for the request.
+ * @param params                    - Parameters for the request.
+ * @param params.repository         - GitHub repository in format 'owner/repo'.
+ * @param params.authorizationToken - Optional GitHub authorization token.
+ * @param params.prerelease         - Whether to get prerelease version.
+ * @param params.perPage            - Number of releases per page.
  * @return Download URL for the release zip file.
  */
 export const getLatestReleaseZipUrl = async ( {
@@ -165,7 +169,12 @@ export const getLatestReleaseZipUrl = async ( {
 /**
  * Deactivate and delete a plugin specified by the given `slug` using the WordPress API.
  *
- * @param params - Parameters for the delete operation.
+ * @param params          - Parameters for the delete operation.
+ * @param params.request  - Playwright API request context.
+ * @param params.baseURL  - Base URL of the WordPress site.
+ * @param params.slug     - Plugin slug (textdomain) to delete.
+ * @param params.username - WordPress admin username.
+ * @param params.password - WordPress admin password.
  */
 export const deletePlugin = async ( {
 	request,
@@ -210,7 +219,12 @@ export const deletePlugin = async ( {
 /**
  * Download the zip file from a remote location.
  *
- * @param params - Parameters for the download operation.
+ * @param params                    - Parameters for the download operation.
+ * @param params.url                - Direct URL to the zip file.
+ * @param params.repository         - GitHub repository in format 'owner/repo'.
+ * @param params.authorizationToken - Optional GitHub authorization token.
+ * @param params.prerelease         - Whether to get prerelease version.
+ * @param params.downloadDir        - Directory to download the zip to.
  * @return Absolute path to the downloaded zip.
  */
 export const downloadZip = async ( {

@@ -1,10 +1,14 @@
 /**
+ * External dependencies
+ */
+import { Page } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { variableProducts as utils } from '../../utils';
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { Page } from '@playwright/test';
 
 interface VariationAttribute {
 	name: string;

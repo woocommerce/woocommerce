@@ -1,7 +1,14 @@
+/**
+ * External dependencies
+ */
 import type { Reporter, FullResult } from '@playwright/test/reporter';
 import { request } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+
+/**
+ * Internal dependencies
+ */
 import { admin } from '../test-data/data';
 
 interface ReporterOptions {
@@ -19,6 +26,7 @@ class EnvironmentReporter implements Reporter {
 		this.reportOptions = options;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	async onEnd( _result: FullResult ): Promise< void > {
 		console.log( '::debug::Getting environment details' );
 		const { outputFolder } = this.reportOptions;

@@ -6,7 +6,6 @@ import {
 	expect as baseExpect,
 	request as baseRequest,
 } from '@playwright/test';
-// @ts-expect-error -- No types available for this package yet
 import { createClient, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**

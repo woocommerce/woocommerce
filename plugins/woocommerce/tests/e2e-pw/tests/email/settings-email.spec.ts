@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@playwright/test';
-import { Page } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -37,7 +36,15 @@ test.describe( 'WooCommerce Email Settings', () => {
 		const hasIframe = async (): Promise< boolean > => {
 			return ( await page.locator( emailPreviewElement ).count() ) > 0;
 		};
-		const iframeContains = async ( text: string ): Promise< ReturnType< typeof page.frameLocator >[ 'getByText' ] extends ( ...args: infer A ) => infer R ? R : never > => {
+		const iframeContains = async (
+			text: string
+		): Promise<
+			ReturnType< typeof page.frameLocator >[ 'getByText' ] extends (
+				...args: infer A
+			) => infer R
+				? R
+				: never
+		> => {
 			const iframe = page.frameLocator( emailPreviewElement );
 			return iframe.getByText( text );
 		};
@@ -140,8 +147,13 @@ test.describe( 'WooCommerce Email Settings', () => {
 			await page.fill( `#${ baseColorId }`, baseColorValue );
 
 			await page.evaluate(
-				async ( args: { baseColorId: string; iframeSelector: string } ) => {
-					const input = document.getElementById( args.baseColorId ) as HTMLInputElement;
+				async ( args: {
+					baseColorId: string;
+					iframeSelector: string;
+				} ) => {
+					const input = document.getElementById(
+						args.baseColorId
+					) as HTMLInputElement;
 					// Blur the input to trigger value change event
 					input.blur();
 
@@ -227,7 +239,15 @@ test.describe( 'WooCommerce Email Settings', () => {
 					( await page.locator( emailPreviewElement ).count() ) > 0
 				);
 			};
-			const iframeContains = async ( text: string ): Promise< ReturnType< typeof page.frameLocator >[ 'getByText' ] extends ( ...args: infer A ) => infer R ? R : never > => {
+			const iframeContains = async (
+				text: string
+			): Promise<
+				ReturnType< typeof page.frameLocator >[ 'getByText' ] extends (
+					...args: infer A
+				) => infer R
+					? R
+					: never
+			> => {
 				const iframe = page.frameLocator( emailPreviewElement );
 				return iframe.getByText( text );
 			};
@@ -260,7 +280,9 @@ test.describe( 'WooCommerce Email Settings', () => {
 
 			await page.fill( `#${ subjectId }`, newSubject );
 			await page.evaluate( async ( inputId: string ) => {
-				const input = document.getElementById( inputId ) as HTMLInputElement;
+				const input = document.getElementById(
+					inputId
+				) as HTMLInputElement;
 				input.blur();
 
 				await new Promise< void >( ( resolve ) => {
@@ -284,7 +306,9 @@ test.describe( 'WooCommerce Email Settings', () => {
 			// Reset the subject to default value
 			await page.fill( `#${ subjectId }`, '' );
 			await page.evaluate( async ( inputId: string ) => {
-				const input = document.getElementById( inputId ) as HTMLInputElement;
+				const input = document.getElementById(
+					inputId
+				) as HTMLInputElement;
 				input.blur();
 
 				return await new Promise< void >( ( resolve ) => {

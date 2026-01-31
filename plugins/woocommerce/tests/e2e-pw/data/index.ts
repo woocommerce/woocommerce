@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { order, getOrderExample, getOrderExampleSearchTest } from './order';
 import type {
 	Order,

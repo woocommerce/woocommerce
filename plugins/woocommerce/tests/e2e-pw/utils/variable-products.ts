@@ -210,6 +210,7 @@ export async function showVariableProductTour(
 
 	// Save the updated user preferences
 	await addProductPage.evaluate(
+		// eslint-disable-next-line @typescript-eslint/no-shadow
 		async ( { userId, updatedWooCommerceMeta } ) => {
 			await window.wp.data.dispatch( 'core' ).saveUser( {
 				id: userId,

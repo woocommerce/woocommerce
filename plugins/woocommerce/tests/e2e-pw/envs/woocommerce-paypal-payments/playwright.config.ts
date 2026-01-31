@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import type { PlaywrightTestConfig } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import baseConfig, { setupProjects } from '../../playwright.config';
 import { tags } from '../../fixtures/fixtures';
 

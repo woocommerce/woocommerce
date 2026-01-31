@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error -- No types available for this package yet
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -101,7 +100,11 @@ interface Brand {
 	name?: string;
 }
 
-const test = baseTest.extend< { coupon: Coupon; product: Product; brand: Brand } >( {
+const test = baseTest.extend< {
+	coupon: Coupon;
+	product: Product;
+	brand: Brand;
+} >( {
 	storageState: ADMIN_STATE_PATH,
 	coupon: async ( { restApi }, use ) => {
 		const coupon: Coupon = {};
@@ -202,7 +205,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 								couponData[
 									couponType as keyof typeof couponData
 								] as { minSpend: string }
-							).minSpend
+							 ).minSpend
 						);
 				} );
 			}
@@ -221,7 +224,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 								couponData[
 									couponType as keyof typeof couponData
 								] as { maxSpend: string }
-							).maxSpend
+							 ).maxSpend
 						);
 				} );
 			}
@@ -347,7 +350,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 								couponData[
 									couponType as keyof typeof couponData
 								] as { allowedEmails: string[] }
-							).allowedEmails[ 0 ]
+							 ).allowedEmails[ 0 ]
 						);
 				} );
 			}
@@ -364,7 +367,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 								couponData[
 									couponType as keyof typeof couponData
 								] as { usageLimit: string }
-							).usageLimit
+							 ).usageLimit
 						);
 				} );
 			}
@@ -381,7 +384,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 								couponData[
 									couponType as keyof typeof couponData
 								] as { usageLimitPerUser: string }
-							).usageLimitPerUser
+							 ).usageLimitPerUser
 						);
 				} );
 			}
@@ -404,28 +407,32 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 				await page.goto( 'wp-admin/edit.php?post_type=shop_coupon' );
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType as keyof typeof couponData ]
-							.code,
+						name: couponData[
+							couponType as keyof typeof couponData
+						].code,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType as keyof typeof couponData ]
-							.description,
+						name: couponData[
+							couponType as keyof typeof couponData
+						].description,
 					} )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'cell', {
-						name: couponData[ couponType as keyof typeof couponData ]
-							.amount,
+						name: couponData[
+							couponType as keyof typeof couponData
+						].amount,
 						exact: true,
 					} )
 				).toBeVisible();
 
 				await page
 					.getByRole( 'link', {
-						name: couponData[ couponType as keyof typeof couponData ]
-							.code,
+						name: couponData[
+							couponType as keyof typeof couponData
+						].code,
 					} )
 					.first()
 					.click();
@@ -447,7 +454,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 							couponData[
 								couponType as keyof typeof couponData
 							] as { minSpend: string }
-						).minSpend
+						 ).minSpend
 					);
 				} );
 			}
@@ -467,7 +474,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 							couponData[
 								couponType as keyof typeof couponData
 							] as { maxSpend: string }
-						).maxSpend
+						 ).maxSpend
 					);
 				} );
 			}
@@ -575,7 +582,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 							couponData[
 								couponType as keyof typeof couponData
 							] as { allowedEmails: string[] }
-						).allowedEmails[ 0 ]
+						 ).allowedEmails[ 0 ]
 					);
 				} );
 			}
@@ -593,7 +600,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 							couponData[
 								couponType as keyof typeof couponData
 							] as { usageLimit: string }
-						).usageLimit
+						 ).usageLimit
 					);
 				} );
 			}
@@ -611,7 +618,7 @@ test.describe( 'Restricted coupon management', { tag: tags.SERVICES }, () => {
 							couponData[
 								couponType as keyof typeof couponData
 							] as { usageLimitPerUser: string }
-						).usageLimitPerUser
+						 ).usageLimitPerUser
 					);
 				} );
 			}

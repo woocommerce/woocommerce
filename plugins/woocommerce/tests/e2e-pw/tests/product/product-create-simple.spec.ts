@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-// @ts-expect-error - @woocommerce/e2e-utils-playwright is not typed
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -272,7 +271,10 @@ for ( const productType of Object.keys( productData ) ) {
 					).toBeChecked();
 
 					// Add a download link
-					await page.locator( '#woocommerce-product-data' ).getByRole( 'link', { name: 'General' } ).click();
+					await page
+						.locator( '#woocommerce-product-data' )
+						.getByRole( 'link', { name: 'General' } )
+						.click();
 					await page
 						.getByRole( 'link', { name: 'Add File' } )
 						.click();
