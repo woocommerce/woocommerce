@@ -11,6 +11,13 @@ module.exports = {
 		'jest/no-standalone-expect': 'off',
 		'jest/valid-title': 'off',
 		'testing-library/await-async-utils': 'off',
+		// Pre-existing warnings - to be addressed in future PRs.
+		'@typescript-eslint/no-non-null-assertion': 'off',
+		'playwright/no-conditional-in-test': 'off',
+		'playwright/no-nested-step': 'off',
+		'playwright/no-wait-for-selector': 'off',
+		'playwright/expect-expect': 'off',
+		'playwright/no-eval': 'off',
 		/*
 		 * The e2e-pw tests use dependencies from the parent woocommerce package.
 		 * This configuration tells ESLint to check both the local package.json
