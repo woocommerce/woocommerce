@@ -11,6 +11,17 @@ module.exports = {
 		'jest/no-standalone-expect': 'off',
 		'jest/valid-title': 'off',
 		'testing-library/await-async-utils': 'off',
+		/*
+		 * The e2e-pw tests use dependencies from the parent woocommerce package.
+		 * This configuration tells ESLint to check both the local package.json
+		 * and the parent package.json when validating imports.
+		 */
+		'import/no-extraneous-dependencies': [
+			'warn',
+			{
+				packageDir: [ '.', '../..' ],
+			},
+		],
 	},
 	/**
 	 * TypeScript files require @typescript-eslint/parser. Without this override,
