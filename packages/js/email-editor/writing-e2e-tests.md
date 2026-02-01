@@ -39,17 +39,17 @@
 
 ### 1. Basic Test File Structure
 
-```javascript
-const { test, expect } = require('@playwright/test');
-const { ADMIN_STATE_PATH } = require('../../playwright.config');
-const { 
+```typescript
+import { test, expect } from '@playwright/test';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import {
     enableEmailEditor,
-    disableEmailEditor 
-} = require('./helpers/enable-email-editor-feature');
-const { 
+    disableEmailEditor
+} from './helpers/enable-email-editor-feature';
+import {
     accessTheEmailEditor,
-    ensureEmailEditorSettingsPanelIsOpened 
-} = require('../../utils/email');
+    ensureEmailEditorSettingsPanelIsOpened
+} from '../../utils/email';
 
 test.describe('WooCommerce Email Editor', () => {
     test.use({ storageState: ADMIN_STATE_PATH });
@@ -71,7 +71,7 @@ test.describe('WooCommerce Email Editor', () => {
 ### 2. Test Organization
 
 - Place tests in `tests/e2e-pw/tests/email-editor/`
-- Use descriptive file names with `.spec.js` extension
+- Use descriptive file names with `.spec.ts` extension
 - Group related tests using `test.describe()`
 - Use helper functions for common operations
 
@@ -79,7 +79,7 @@ test.describe('WooCommerce Email Editor', () => {
 
 ### 1. Basic Test Structure
 
-```javascript
+```typescript
 test('Can perform specific action', async ({ page }) => {
     // Setup
     await accessTheEmailEditor(page, 'New order');
@@ -97,7 +97,7 @@ test('Can perform specific action', async ({ page }) => {
 
 #### Testing Email Editor Access
 
-```javascript
+```typescript
 test('Can access the email editor', async ({ page }) => {
     await accessTheEmailEditor(page, 'New order');
     await page.getByRole('tab', { name: 'Email' }).click();
@@ -108,7 +108,7 @@ test('Can access the email editor', async ({ page }) => {
 
 #### Testing Email Settings
 
-```javascript
+```typescript
 test('Can update email settings', async ({ page }) => {
     await accessTheEmailEditor(page, 'Customer note');
     await page.getByLabel('Email')
@@ -131,10 +131,10 @@ test('Can update email settings', async ({ page }) => {
 
 Note: If updating the WC_Email options, remember to reset to default. This can be done with
 
-```bash
+```typescript
 test.afterAll( async ( { baseURL } ) => {
-		await resetWCTransactionalEmail( baseURL, EMAIL_ID );
-	} );
+    await resetWCTransactionalEmail( baseURL, EMAIL_ID );
+} );
 ```
 
 ## Best Practices
@@ -176,7 +176,7 @@ test.afterAll( async ( { baseURL } ) => {
 
 3. **Taking Screenshots**:
 
-   ```javascript
+   ```typescript
    await page.screenshot({ path: 'debug-screenshot.png' });
    ```
 

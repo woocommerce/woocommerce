@@ -59,7 +59,7 @@ Other ways of running tests (make sure you are in the `plugins/woocommerce` fold
 - `pnpm test:e2e` (usual, headless run)
 - `pnpm test:e2e --headed` (headed -- displaying browser window and test interactions)
 - `pnpm test:e2e --debug` (runs tests in debug mode)
-- `pnpm test:e2e basic.spec.js` (runs a single test file - `basic.spec.js` in this case)
+- `pnpm test:e2e basic.spec.ts` (runs a single test file - `basic.spec.ts` in this case)
 - `pnpm test:e2e ./tests/e2e-pw/tests/merchant` (runs all tests that are found in the `merchant` folder)
 - `pnpm test:e2e --ui` (open tests in [Playwright UI mode](https://playwright.dev/docs/test-ui-mode)).
 
@@ -72,8 +72,8 @@ run `pnpm playwright test --help`
 > they can be run as you would run any other tests folder in the suite. 
 > Keep in mind that from a tool point of view they are only a folder in the main e2e tests project as any other folder.
 > 
-> For convenience, a `test:api` command is offered that will run all the tests in the `api-tests` folder against the 
-> default environment, but this may change. You can always find the setup by checking the `package.json` scripts section and the `playwright.config.js`.
+> For convenience, a `test:api` command is offered that will run all the tests in the `api-tests` folder against the
+> default environment, but this may change. You can always find the setup by checking the `package.json` scripts section and the `playwright.config.ts`.
 >
 
 ## Test environment
@@ -87,7 +87,7 @@ the official [documentation](https://github.com/WordPress/gutenberg/tree/trunk/p
 ### Alternate environments
 
 The test site URL and the credentials can be set via environment variables. If no variables are set, the defaults will be used,
-as configured in the `test-data/data.js` file.
+as configured in the `test-data/data.ts` file.
 
 If you'd like to overwrite the default values to run against a different environment (external host for
 example), you can create a `.env` file in `tests/e2e-pw/`:
@@ -106,10 +106,10 @@ CUSTOMER_PASSWORD='customer.password'
 > command: `pnpm playwright ...`
 
 There are some pre-defined environments set in the `tests/e2e-pw/envs` path.
-Each folder represents an environment, and contains a setup script, a `playwright.config.js` file and optionally an
+Each folder represents an environment, and contains a setup script, a `playwright.config.ts` file and optionally an
 encrypted `.env` file.
 Running the tests with one of these environments will first decrypt the `.env.enc` file if it exists, execute the setup 
-script and then run the tests using the configuration in the `playwright.config.js` file.
+script and then run the tests using the configuration in the `playwright.config.ts` file.
 
 To run the tests using one of these environment, you can use the `test:e2e:with-env` script. Some examples:
 
@@ -143,7 +143,7 @@ If you need to create a new pre-defined environment, you can follow these steps:
   Example: `tests/e2e-pw/envs/my-new-env`
 - create an `env-setup.sh` file in the new folder. This file should contain any setup steps for the environment. This
   will run before any test execution.
-- create a `playwright.config.js` file in the new folder. This file should contain the configuration for the
+- create a `playwright.config.ts` file in the new folder. This file should contain the configuration for the
   environment.
   It's recommended that the config extends the default configuration and only updates the necessary values.
 - if you need to store an encrypted `.env` file, first create the `.env` file in the `tests/e2e-pw` folder, then

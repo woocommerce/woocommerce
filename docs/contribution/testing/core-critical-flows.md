@@ -40,96 +40,96 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 | User Type | Flow Area | Flow Name                                   | Test File                                    |
 | --------- | --------- | ------------------------------------------- | -------------------------------------------- |
-| Shopper   | Shop      | Search Store                                | shopper/shop-search-browse-sort.spec.js      |
-| Shopper   | Shop      | Browse by categories                        | shopper/shop-search-browse-sort.spec.js      |
-| Shopper   | Shop      | Can sort items                              | shopper/shop-search-browse-sort.spec.js      |
-| Shopper   | Shop      | Add Simple Product to Cart (from shop page) | shopper/cart.spec.js                         |
-| Shopper   | Shop      | Display shop catalog                        | shopper/shop-search-browse-sort.spec.js      |
-| Shopper   | Shop      | Products by tag                             | shopper/product-tags-attributes.spec.js      |
-| Shopper   | Shop      | Products by attribute                       | shopper/product-tags-attributes.spec.js      |
-| Shopper   | Shop      | Use product filters                         | shopper/shop-products-filer-by-price.spec.js |
+| Shopper   | Shop      | Search Store                                | shopper/shop-search-browse-sort.spec.ts      |
+| Shopper   | Shop      | Browse by categories                        | shopper/shop-search-browse-sort.spec.ts      |
+| Shopper   | Shop      | Can sort items                              | shopper/shop-search-browse-sort.spec.ts      |
+| Shopper   | Shop      | Add Simple Product to Cart (from shop page) | shopper/cart.spec.ts                         |
+| Shopper   | Shop      | Display shop catalog                        | shopper/shop-search-browse-sort.spec.ts      |
+| Shopper   | Shop      | Products by tag                             | shopper/product-tags-attributes.spec.ts      |
+| Shopper   | Shop      | Products by attribute                       | shopper/product-tags-attributes.spec.ts      |
+| Shopper   | Shop      | Use product filters                         | shopper/shop-products-filer-by-price.spec.ts |
 
 ### Shopper - Product
 
 | User Type | Flow Area | Flow Name                                            | Test File                                |
 | --------- | --------- | ---------------------------------------------------- | ---------------------------------------- |
-| Shopper   | Product   | Add Simple Product to Cart                           | shopper/product-simple.spec.js           |
-| Shopper   | Product   | Add Grouped Product to Cart                          | shopper/product-grouped.spec.js          |
-| Shopper   | Product   | Variable Product info updates depending on variation | shopper/product-variable.spec.js         |
-| Shopper   | Product   | Add Variable Product to Cart                         | shopper/product-variable.spec.js         |
-| Shopper   | Product   | Display up-sell product                              | products/product-linked-products.spec.js |
-| Shopper   | Product   | Display related products                             | products/product-linked-products.spec.js |
-| Shopper   | Product   | Display reviews                                      | merchant/product-reviews.spec.js         |
-| Shopper   | Product   | Add review                                           | merchant/product-reviews.spec.js         |
-| Shopper   | Product   | View product images                                  | shopper/product-simple.spec.js           |
-| Shopper   | Product   | View product descriptions                            | shopper/product-simple.spec.js           |
+| Shopper   | Product   | Add Simple Product to Cart                           | shopper/product-simple.spec.ts           |
+| Shopper   | Product   | Add Grouped Product to Cart                          | shopper/product-grouped.spec.ts          |
+| Shopper   | Product   | Variable Product info updates depending on variation | shopper/product-variable.spec.ts         |
+| Shopper   | Product   | Add Variable Product to Cart                         | shopper/product-variable.spec.ts         |
+| Shopper   | Product   | Display up-sell product                              | products/product-linked-products.spec.ts |
+| Shopper   | Product   | Display related products                             | products/product-linked-products.spec.ts |
+| Shopper   | Product   | Display reviews                                      | merchant/product-reviews.spec.ts         |
+| Shopper   | Product   | Add review                                           | merchant/product-reviews.spec.ts         |
+| Shopper   | Product   | View product images                                  | shopper/product-simple.spec.ts           |
+| Shopper   | Product   | View product descriptions                            | shopper/product-simple.spec.ts           |
 
 ### Shopper - Cart
 
 | User Type | Flow Area | Flow Name                                  | Test File                                   |
 | --------- | --------- | ------------------------------------------ | ------------------------------------------- |
-| Shopper   | Cart      | Add to cart redirects to cart when enabled | shopper/cart-redirection.spec.js            |
-| Shopper   | Cart      | View cart                                  | shopper/cart.spec.js                        |
-| Shopper   | Cart      | Update product quantity within limits      | shopper/cart.spec.js                        |
-| Shopper   | Cart      | Remove products from cart                  | shopper/cart.spec.js                        |
-| Shopper   | Cart      | Apply all coupon types                     | shopper/cart-coupons.spec.js                |
-| Shopper   | Cart      | Display shipping options by address        | shopper/calculate-shipping.spec.js          |
-| Shopper   | Cart      | View empty cart                            | shopper/cart.spec.js                        |
-| Shopper   | Cart      | Display correct tax                        | shopper/cart-checkout-calculate-tax.spec.js |
-| Shopper   | Cart      | Respect coupon usage constraints           | shopper/cart-checkout-coupons.spec.js       |
-| Shopper   | Cart      | Display cross-sell products                | products/product-linked-products.spec.js    |
-| Shopper   | Cart      | Proceed to checkout                        | shopper/checkout.spec.js                    |
+| Shopper   | Cart      | Add to cart redirects to cart when enabled | shopper/cart-redirection.spec.ts            |
+| Shopper   | Cart      | View cart                                  | shopper/cart.spec.ts                        |
+| Shopper   | Cart      | Update product quantity within limits      | shopper/cart.spec.ts                        |
+| Shopper   | Cart      | Remove products from cart                  | shopper/cart.spec.ts                        |
+| Shopper   | Cart      | Apply all coupon types                     | shopper/cart-coupons.spec.ts                |
+| Shopper   | Cart      | Display shipping options by address        | shopper/calculate-shipping.spec.ts          |
+| Shopper   | Cart      | View empty cart                            | shopper/cart.spec.ts                        |
+| Shopper   | Cart      | Display correct tax                        | shopper/cart-checkout-calculate-tax.spec.ts |
+| Shopper   | Cart      | Respect coupon usage constraints           | shopper/cart-checkout-coupons.spec.ts       |
+| Shopper   | Cart      | Display cross-sell products                | products/product-linked-products.spec.ts    |
+| Shopper   | Cart      | Proceed to checkout                        | shopper/checkout.spec.ts                    |
 
 ### Shopper - Checkout
 
 | User Type | Flow Area | Flow Name                                | Test File                                   |
 | --------- | --------- | ---------------------------------------- | ------------------------------------------- |
-| Shopper   | Checkout  | Correct item in Order Review             | shopper/checkout.spec.js                    |
-| Shopper   | Checkout  | Can add shipping address                 | shopper/checkout.spec.js                    |
-| Shopper   | Checkout  | Guest can place order                    | shopper/checkout.spec.js                    |
-| Shopper   | Checkout  | Create an account                        | shopper/checkout-create-account.spec.js     |
-| Shopper   | Checkout  | Login to existing account                | shopper/checkout-login.spec.js              |
-| Shopper   | Checkout  | Existing customer can place order        | shopper/checkout.spec.js                    |
-| Shopper   | Checkout  | Use all coupon types                     | shopper/checkout-coupons.spec.js            |
-| Shopper   | Checkout  | View checkout                            | shopper/checkout.spec.js                    |
-| Shopper   | Checkout  | Receive warnings when form is incomplete | shopper/checkout.spec.js                    |
-| Shopper   | Checkout  | Add billing address                      | shopper/checkout.spec.js                    |
-| Shopper   | Checkout  | Respect coupon usage constraints         | shopper/cart-checkout-coupons.spec.js       |
-| Shopper   | Checkout  | Display correct tax in checkout          | shopper/cart-checkout-calculate-tax.spec.js |
-| Shopper   | Checkout  | View order confirmation page             | shopper/checkout.spec.js                    |
+| Shopper   | Checkout  | Correct item in Order Review             | shopper/checkout.spec.ts                    |
+| Shopper   | Checkout  | Can add shipping address                 | shopper/checkout.spec.ts                    |
+| Shopper   | Checkout  | Guest can place order                    | shopper/checkout.spec.ts                    |
+| Shopper   | Checkout  | Create an account                        | shopper/checkout-create-account.spec.ts     |
+| Shopper   | Checkout  | Login to existing account                | shopper/checkout-login.spec.ts              |
+| Shopper   | Checkout  | Existing customer can place order        | shopper/checkout.spec.ts                    |
+| Shopper   | Checkout  | Use all coupon types                     | shopper/checkout-coupons.spec.ts            |
+| Shopper   | Checkout  | View checkout                            | shopper/checkout.spec.ts                    |
+| Shopper   | Checkout  | Receive warnings when form is incomplete | shopper/checkout.spec.ts                    |
+| Shopper   | Checkout  | Add billing address                      | shopper/checkout.spec.ts                    |
+| Shopper   | Checkout  | Respect coupon usage constraints         | shopper/cart-checkout-coupons.spec.ts       |
+| Shopper   | Checkout  | Display correct tax in checkout          | shopper/cart-checkout-calculate-tax.spec.ts |
+| Shopper   | Checkout  | View order confirmation page             | shopper/checkout.spec.ts                    |
 
 ### Shopper - Email
 
 | User Type | Flow Area | Flow Name                             | Test File                               |
 | --------- | --------- | ------------------------------------- | --------------------------------------- |
-| Shopper   | Email     | Customer Account Emails Received      | shopper/account-email-receiving.spec.js |
-| Shopper   | Email     | Customer Order Detail Emails Received | shopper/order-email-receiving.spec.js   |
+| Shopper   | Email     | Customer Account Emails Received      | shopper/account-email-receiving.spec.ts |
+| Shopper   | Email     | Customer Order Detail Emails Received | shopper/order-email-receiving.spec.ts   |
 
 ### Shopper - My Account
 
 | User Type | Flow Area  | Flow Name                 | Test File                                 |
 | --------- | ---------- | ------------------------- | ----------------------------------------- |
-| Shopper   | My Account | Create an account         | shopper/my-account-create-account.spec.js |
-| Shopper   | My Account | Login to existing account | shopper/my-account.spec.js                |
-| Shopper   | My Account | View Account Details      | shopper/my-account.spec.js                |
-| Shopper   | My Account | Update Addresses          | shopper/my-account-addresses.spec.js      |
-| Shopper   | My Account | View Orders               | shopper/my-account-pay-order.spec.js      |
-| Shopper   | My Account | Pay for Order             | shopper/my-account-pay-order.spec.js      |
-| Shopper   | My Account | View Downloads            | shopper/my-account-downloads.spec.js      |
+| Shopper   | My Account | Create an account         | shopper/my-account-create-account.spec.ts |
+| Shopper   | My Account | Login to existing account | shopper/my-account.spec.ts                |
+| Shopper   | My Account | View Account Details      | shopper/my-account.spec.ts                |
+| Shopper   | My Account | Update Addresses          | shopper/my-account-addresses.spec.ts      |
+| Shopper   | My Account | View Orders               | shopper/my-account-pay-order.spec.ts      |
+| Shopper   | My Account | Pay for Order             | shopper/my-account-pay-order.spec.ts      |
+| Shopper   | My Account | View Downloads            | shopper/my-account-downloads.spec.ts      |
 
 ### Merchant - Onboarding
 
 | User Type | Flow Area     | Flow Name                                                      | Test File                                |
 | --------- | ------------- | -------------------------------------------------------------- | ---------------------------------------- |
-| Merchant  | Core Profiler | Introduction & opt-in                                          | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | User profile information                                       | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Business information                                           | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Extensions page                                                | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | WooPayments included in extensions for eligible criteria       | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | WooPayments not included in extensions for ineligible criteria | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Install all default extensions                                 | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Complete site setup                                            | activate-and-setup/core-profiler.spec.js |
-| Merchant  | Core Profiler | Skip introduction and confirm business location                | activate-and-setup/core-profiler.spec.js |
+| Merchant  | Core Profiler | Introduction & opt-in                                          | activate-and-setup/core-profiler.spec.ts |
+| Merchant  | Core Profiler | User profile information                                       | activate-and-setup/core-profiler.spec.ts |
+| Merchant  | Core Profiler | Business information                                           | activate-and-setup/core-profiler.spec.ts |
+| Merchant  | Core Profiler | Extensions page                                                | activate-and-setup/core-profiler.spec.ts |
+| Merchant  | Core Profiler | WooPayments included in extensions for eligible criteria       | activate-and-setup/core-profiler.spec.ts |
+| Merchant  | Core Profiler | WooPayments not included in extensions for ineligible criteria | activate-and-setup/core-profiler.spec.ts |
+| Merchant  | Core Profiler | Install all default extensions                                 | activate-and-setup/core-profiler.spec.ts |
+| Merchant  | Core Profiler | Complete site setup                                            | activate-and-setup/core-profiler.spec.ts |
+| Merchant  | Core Profiler | Skip introduction and confirm business location                | activate-and-setup/core-profiler.spec.ts |
 
 ### Merchant - Dashboard
 
@@ -150,128 +150,128 @@ These flows will continually evolve as the platform evolves with flows updated, 
 
 | User Type | Flow Area | Flow Name                              | Test File                                |
 | --------- | --------- |----------------------------------------|------------------------------------------|
-| Merchant  | Settings  | Update General Settings                | merchant/settings-general.spec.js        |
-| Merchant  | Settings  | Add Tax Rates                          | merchant/settings-tax.spec.js            |
-| Merchant  | Settings  | Add Shipping Zones                     | merchant/create-shipping-zones.spec.js   |
-| Merchant  | Settings  | Add Shipping Classes                   | merchant/create-shipping-classes.spec.js |
-| Merchant  | Settings  | Enable local pickup for checkout block | merchant/settings-shipping.spec.js       |
-| Merchant  | Settings  | Update payment settings                | admin-tasks/payment.spec.js              |
-| Merchant  | Settings  | Handle Product Brands                  | merchant/create-product-brand.spec.js    |
+| Merchant  | Settings  | Update General Settings                | merchant/settings-general.spec.ts        |
+| Merchant  | Settings  | Add Tax Rates                          | merchant/settings-tax.spec.ts            |
+| Merchant  | Settings  | Add Shipping Zones                     | merchant/create-shipping-zones.spec.ts   |
+| Merchant  | Settings  | Add Shipping Classes                   | merchant/create-shipping-classes.spec.ts |
+| Merchant  | Settings  | Enable local pickup for checkout block | merchant/settings-shipping.spec.ts       |
+| Merchant  | Settings  | Update payment settings                | admin-tasks/payment.spec.ts              |
+| Merchant  | Settings  | Handle Product Brands                  | merchant/create-product-brand.spec.ts    |
 
 ### Merchant - Coupons
 
 | User Type | Flow Area | Flow Name             | Test File                                  |
 | --------- | --------- | --------------------- | ------------------------------------------ |
-| Merchant  | Coupons   | Add all coupon types  | merchant/create-coupon.spec.js             |
-| Merchant  | Coupons   | Add restricted coupon | merchant/create-restricted-coupons.spec.js |
+| Merchant  | Coupons   | Add all coupon types  | merchant/create-coupon.spec.ts             |
+| Merchant  | Coupons   | Add restricted coupon | merchant/create-restricted-coupons.spec.ts |
 
 ### Merchant - Marketing
 
 | User Type | Flow Area | Flow Name                  | Test File                        |
 | --------- | --------- | -------------------------- | -------------------------------- |
-| Merchant  | Marketing | Display marketing overview | admin-marketing/overview.spec.js |
+| Merchant  | Marketing | Display marketing overview | admin-marketing/overview.spec.ts |
 
 ### Merchant - Analytics
 
 | User Type | Flow Area | Flow Name                                          | Test File                                  |
 | --------- | --------- | -------------------------------------------------- | ------------------------------------------ |
-| Merchant  | Analytics | View revenue report                                | admin-analytics/analytics.spec.js          |
-| Merchant  | Analytics | View overview report                               | admin-analytics/analytics-overview.spec.js |
-| Merchant  | Analytics | Confirm correct summary numbers on overview report | admin-analytics/analytics-data.spec.js     |
-| Merchant  | Analytics | Use date filter on overview page                   | admin-analytics/analytics-data.spec.js     |
-| Merchant  | Analytics | Customize performance indicators on overview page  | admin-analytics/analytics-overview.spec.js |
-| Merchant  | Analytics | Use date filter on revenue report                  | admin-analytics/analytics-data.spec.js     |
-| Merchant  | Analytics | Download revenue report as CSV                     | admin-analytics/analytics-data.spec.js     |
-| Merchant  | Analytics | Use advanced filters on orders report              | admin-analytics/analytics-data.spec.js     |
-| Merchant  | Analytics | Analytics settings                                 | admin-analytics/analytics-data.spec.js     |
-| Merchant  | Analytics | Set custom date range on revenue report            | admin-analytics/analytics-data.spec.js     |
+| Merchant  | Analytics | View revenue report                                | admin-analytics/analytics.spec.ts          |
+| Merchant  | Analytics | View overview report                               | admin-analytics/analytics-overview.spec.ts |
+| Merchant  | Analytics | Confirm correct summary numbers on overview report | admin-analytics/analytics-data.spec.ts     |
+| Merchant  | Analytics | Use date filter on overview page                   | admin-analytics/analytics-data.spec.ts     |
+| Merchant  | Analytics | Customize performance indicators on overview page  | admin-analytics/analytics-overview.spec.ts |
+| Merchant  | Analytics | Use date filter on revenue report                  | admin-analytics/analytics-data.spec.ts     |
+| Merchant  | Analytics | Download revenue report as CSV                     | admin-analytics/analytics-data.spec.ts     |
+| Merchant  | Analytics | Use advanced filters on orders report              | admin-analytics/analytics-data.spec.ts     |
+| Merchant  | Analytics | Analytics settings                                 | admin-analytics/analytics-data.spec.ts     |
+| Merchant  | Analytics | Set custom date range on revenue report            | admin-analytics/analytics-data.spec.ts     |
 
 ### Merchant - Products
 
 | User Type | Flow Area      | Flow Name                      | Test File                                                                 |
 | --------- | -------------- | ------------------------------ | ------------------------------------------------------------------------- |
-| Merchant  | Products       | View all products              | merchant/product-search.spec.js                                           |
-| Merchant  | Products       | Search products                | merchant/product-search.spec.js                                           |
-| Merchant  | Products       | Add simple product             | merchant/product-create-simple.spec.js                                    |
-| Merchant  | Products       | Add variable product           | merchant/products/add-variable-product/create-variable-product.spec.js    |
-| Merchant  | Products       | Edit product details           | merchant/product-edit.spec.js                                             |
-| Merchant  | Products       | Add virtual product            | merchant/product-create-simple.spec.js                                    |
-| Merchant  | Products       | Import products CSV            | merchant/product-import-csv.spec.js                                       |
-| Merchant  | Products       | Add downloadable product       | merchant/product-create-simple.spec.js                                    |
-| Merchant  | Products       | View product reviews list      | merchant/product-reviews.spec.js                                          |
-| Merchant  | Products       | View all products reviews list | merchant/product-reviews.spec.js                                          |
-| Merchant  | Products       | Edit product review            | merchant/product-reviews.spec.js                                          |
-| Merchant  | Products       | Trash product review           | merchant/product-reviews.spec.js                                          |
-| Merchant  | Products       | Bulk edit products             | merchant/product-edit.spec.js                                             |
-| Merchant  | Products       | Remove products                | merchant/product-delete.spec.js                                           |
-| Merchant  | Products       | Manage product images          | merchant/product-images.spec.js                                           |
-| Merchant  | Products       | Manage product inventory       | merchant/product-create-simple.spec.js                                    |
-| Merchant  | Products       | Manage product attributes      | merchant/product-create-simple.spec.js                                    |
+| Merchant  | Products       | View all products              | merchant/product-search.spec.ts                                           |
+| Merchant  | Products       | Search products                | merchant/product-search.spec.ts                                           |
+| Merchant  | Products       | Add simple product             | merchant/product-create-simple.spec.ts                                    |
+| Merchant  | Products       | Add variable product           | merchant/products/add-variable-product/create-variable-product.spec.ts    |
+| Merchant  | Products       | Edit product details           | merchant/product-edit.spec.ts                                             |
+| Merchant  | Products       | Add virtual product            | merchant/product-create-simple.spec.ts                                    |
+| Merchant  | Products       | Import products CSV            | merchant/product-import-csv.spec.ts                                       |
+| Merchant  | Products       | Add downloadable product       | merchant/product-create-simple.spec.ts                                    |
+| Merchant  | Products       | View product reviews list      | merchant/product-reviews.spec.ts                                          |
+| Merchant  | Products       | View all products reviews list | merchant/product-reviews.spec.ts                                          |
+| Merchant  | Products       | Edit product review            | merchant/product-reviews.spec.ts                                          |
+| Merchant  | Products       | Trash product review           | merchant/product-reviews.spec.ts                                          |
+| Merchant  | Products       | Bulk edit products             | merchant/product-edit.spec.ts                                             |
+| Merchant  | Products       | Remove products                | merchant/product-delete.spec.ts                                           |
+| Merchant  | Products       | Manage product images          | merchant/product-images.spec.ts                                           |
+| Merchant  | Products       | Manage product inventory       | merchant/product-create-simple.spec.ts                                    |
+| Merchant  | Products       | Manage product attributes      | merchant/product-create-simple.spec.ts                                    |
 | Merchant  | Products       | Manage global attributes       |                                                                           |
-| Merchant  | Products       | Add up-sell                    | products/product-linked-products.spec.js                                  |
-| Merchant  | Products       | Add cross-sell                 | products/product-linked-products.spec.js                                  |
-| Merchant  | Products (New) | Disable new product experience | merchant/products/block-editor/disable-block-product-editor.spec.js       |
-| Merchant  | Products (New) | Add simple product             | merchant/products/block-editor/create-simple-product-block-editor.spec.js |
-| Merchant  | Products (New) | Edit simple product            | merchant/products/block-editor/product-edit-block-editor.spec.js          |
-| Merchant  | Products (New) | Manage product images          | merchant/products/block-editor/product-images-block-editor.spec.js        |
-| Merchant  | Products (New) | Manage product inventory       | merchant/products/block-editor/product-inventory-block-editor.spec.js     |
-| Merchant  | Products (New) | Manage product attributes      | merchant/products/block-editor/product-attributes-block-editor.spec.js    |
+| Merchant  | Products       | Add up-sell                    | products/product-linked-products.spec.ts                                  |
+| Merchant  | Products       | Add cross-sell                 | products/product-linked-products.spec.ts                                  |
+| Merchant  | Products (New) | Disable new product experience | merchant/products/block-editor/disable-block-product-editor.spec.ts       |
+| Merchant  | Products (New) | Add simple product             | merchant/products/block-editor/create-simple-product-block-editor.spec.ts |
+| Merchant  | Products (New) | Edit simple product            | merchant/products/block-editor/product-edit-block-editor.spec.ts          |
+| Merchant  | Products (New) | Manage product images          | merchant/products/block-editor/product-images-block-editor.spec.ts        |
+| Merchant  | Products (New) | Manage product inventory       | merchant/products/block-editor/product-inventory-block-editor.spec.ts     |
+| Merchant  | Products (New) | Manage product attributes      | merchant/products/block-editor/product-attributes-block-editor.spec.ts    |
 
 ### Merchant - Orders
 
 | User Type | Flow Area | Flow Name                                                        | Test File                              |
 | --------- | --------- | ---------------------------------------------------------------- | -------------------------------------- |
-| Merchant  | Orders    | View all orders                                                  | merchant/order-status-filter.spec.js   |
-| Merchant  | Orders    | Can add new order basic                                          | merchant/order-edit.spec.js            |
-| Merchant  | Orders    | View single order                                                | merchant/order-edit.spec.js            |
-| Merchant  | Orders    | Update order status to completed                                 | merchant/order-edit.spec.js            |
-| Merchant  | Orders    | Update order status to cancelled                                 | merchant/order-edit.spec.js            |
-| Merchant  | Orders    | Update order details                                             | merchant/order-edit.spec.js            |
-| Merchant  | Orders    | Customer payment page                                            | merchant/customer-payment-page.spec.js |
-| Merchant  | Orders    | Refund order                                                     | merchant/order-refund.spec.js          |
-| Merchant  | Orders    | Apply coupon                                                     | merchant/order-coupon.spec.js          |
-| Merchant  | Orders    | Can add new order complex - multiple product types & tax classes | merchant/create-order.spec.js          |
-| Merchant  | Orders    | Search orders                                                    | merchant/order-search.spec.js          |
-| Merchant  | Orders    | Filter orders by order status                                    | merchant/order-status-filter.spec.js   |
-| Merchant  | Orders    | Bulk change order status                                         | merchant/order-bulk-edit.spec.js       |
-| Merchant  | Orders    | Add order notes                                                  | merchant/order-edit.spec.js            |
+| Merchant  | Orders    | View all orders                                                  | merchant/order-status-filter.spec.ts   |
+| Merchant  | Orders    | Can add new order basic                                          | merchant/order-edit.spec.ts            |
+| Merchant  | Orders    | View single order                                                | merchant/order-edit.spec.ts            |
+| Merchant  | Orders    | Update order status to completed                                 | merchant/order-edit.spec.ts            |
+| Merchant  | Orders    | Update order status to cancelled                                 | merchant/order-edit.spec.ts            |
+| Merchant  | Orders    | Update order details                                             | merchant/order-edit.spec.ts            |
+| Merchant  | Orders    | Customer payment page                                            | merchant/customer-payment-page.spec.ts |
+| Merchant  | Orders    | Refund order                                                     | merchant/order-refund.spec.ts          |
+| Merchant  | Orders    | Apply coupon                                                     | merchant/order-coupon.spec.ts          |
+| Merchant  | Orders    | Can add new order complex - multiple product types & tax classes | merchant/create-order.spec.ts          |
+| Merchant  | Orders    | Search orders                                                    | merchant/order-search.spec.ts          |
+| Merchant  | Orders    | Filter orders by order status                                    | merchant/order-status-filter.spec.ts   |
+| Merchant  | Orders    | Bulk change order status                                         | merchant/order-bulk-edit.spec.ts       |
+| Merchant  | Orders    | Add order notes                                                  | merchant/order-edit.spec.ts            |
 
 ### Merchant - Customers
 
 | User Type | Flow Area | Flow Name             | Test File                      |
 | --------- | --------- | --------------------- | ------------------------------ |
-| Merchant  | Customers | Display customer list | merchant/customer-list.spec.js |
+| Merchant  | Customers | Display customer list | merchant/customer-list.spec.ts |
 
 ### Merchant - Email
 
 | User Type | Flow Area | Flow Name                                          | Test File                     |
 | --------- | --------- | -------------------------------------------------- | ----------------------------- |
-| Merchant  | Email     | Receive and check content of new order email       | merchant/order-emails.spec.js |
-| Merchant  | Email     | Receive and check content of cancelled order email | merchant/order-emails.spec.js |
-| Merchant  | Email     | Receive and check content of failed order email    | merchant/order-emails.spec.js |
-| Merchant  | Email     | Resent new order email                             | merchant/order-emails.spec.js |
-| Merchant  | Email     | Send invoice/order details to customer via Email   | merchant/order-emails.spec.js |
+| Merchant  | Email     | Receive and check content of new order email       | merchant/order-emails.spec.ts |
+| Merchant  | Email     | Receive and check content of cancelled order email | merchant/order-emails.spec.ts |
+| Merchant  | Email     | Receive and check content of failed order email    | merchant/order-emails.spec.ts |
+| Merchant  | Email     | Resent new order email                             | merchant/order-emails.spec.ts |
+| Merchant  | Email     | Send invoice/order details to customer via Email   | merchant/order-emails.spec.ts |
 
 ### Merchant - Plugins
 
 | User Type | Flow Area | Flow Name              | Test File                              |
 | --------- | --------- | ---------------------- | -------------------------------------- |
-| Merchant  | Plugins   | Can update WooCommerce | smoke-tests/update-woocommerce.spec.js |
+| Merchant  | Plugins   | Can update WooCommerce | smoke-tests/update-woocommerce.spec.ts |
 
 ### Merchant - My Subscriptions
 
 | User Type | Flow Area        | Flow Name                               | Test File                         |
 | --------- | ---------------- | --------------------------------------- | --------------------------------- |
-| Merchant  | My Subscriptions | Can initiate WooCommerce.com Connection | merchant/settings-woo-com.spec.js |
+| Merchant  | My Subscriptions | Can initiate WooCommerce.com Connection | merchant/settings-woo-com.spec.ts |
 
 ### Merchant - Pages
 
 | User Type | Flow Area | Flow Name             | Test File                    |
 | --------- | --------- | --------------------- | ---------------------------- |
-| Merchant  | Pages     | Can create a new page | merchant/create-page.spec.js |
+| Merchant  | Pages     | Can create a new page | merchant/create-page.spec.ts |
 
 ### Merchant - Posts
 
 | User Type | Flow Area | Flow Name             | Test File                    |
 | --------- | --------- | --------------------- | ---------------------------- |
-| Merchant  | Posts     | Can create a new post | merchant/create-post.spec.js |
+| Merchant  | Posts     | Can create a new post | merchant/create-post.spec.ts |
