@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix cost of goods showing 0 when adding a product to an order in admin until Recalculate was clicked.
