@@ -9,14 +9,15 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
-use InvalidArgumentException;
 use RuntimeException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
+use WC_Data_Exception;
 use WC_REST_Unit_Test_Case;
 use WP_Error;
 use WP_Http;
@@ -984,11 +985,11 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * @testdox Test convert_exception_to_wp_error exposes message for
-	 * InvalidArgumentException.
+	 * PushTokenInvalidDataException.
 	 */
-	public function test_it_exposes_message_for_invalid_argument_exception() {
+	public function test_it_exposes_message_for_push_token_invalid_data_exception() {
 		$controller = new PushTokenRestController();
-		$exception  = new InvalidArgumentException( 'Invalid argument provided.' );
+		$exception  = new PushTokenInvalidDataException( 'Invalid argument provided.' );
 
 		$reflection = new ReflectionClass( $controller );
 		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
@@ -1003,13 +1004,16 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test convert_exception_to_wp_error hides message for unknown
-	 * exception subclasses.
+	 * @testdox Test convert_exception_to_wp_error correctly handles any
+	 * WC_Data_Exception.
 	 */
-	public function test_it_hides_internal_error_message_for_unknown_exception_subclass() {
+	public function test_it_handles_any_wc_data_exception() {
 		$controller = new PushTokenRestController();
-		// RuntimeException is a subclass of Exception but not in our mapping.
-		$exception = new RuntimeException( 'Sensitive runtime error details' );
+		$exception  = new WC_Data_Exception(
+			'custom_error_code',
+			'Custom error message.',
+			WP_Http::FORBIDDEN
+		);
 
 		$reflection = new ReflectionClass( $controller );
 		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
@@ -1018,9 +1022,9 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$result = $method->invoke( $controller, $exception );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'woocommerce_rest_internal_error', $result->get_error_code() );
-		$this->assertEquals( 'Internal server error', $result->get_error_message() );
-		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $result->get_error_data()['status'] );
+		$this->assertEquals( 'custom_error_code', $result->get_error_code() );
+		$this->assertEquals( 'Custom error message.', $result->get_error_message() );
+		$this->assertEquals( WP_Http::FORBIDDEN, $result->get_error_data()['status'] );
 	}
 
 	/**

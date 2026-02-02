@@ -11,8 +11,8 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use InvalidArgumentException;
 use Exception;
+use WC_Data_Exception;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -348,23 +348,19 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return WP_Error
 	 */
 	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
-		$exception_class = get_class( $e );
+		if ( $e instanceof WC_Data_Exception ) {
+			return new WP_Error(
+				$e->getErrorCode(),
+				$e->getMessage(),
+				array( 'status' => $e->getCode() )
+			);
+		}
 
-		$slugs = array(
-			PushTokenNotFoundException::class => 'woocommerce_rest_invalid_push_token',
-			InvalidArgumentException::class   => 'woocommerce_rest_invalid_argument',
+		return new WP_Error(
+			'woocommerce_rest_internal_error',
+			'Internal server error',
+			array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
 		);
-
-		$statuses = array(
-			PushTokenNotFoundException::class => WP_Http::NOT_FOUND,
-			InvalidArgumentException::class   => WP_Http::BAD_REQUEST,
-		);
-
-		$slug    = $slugs[ $exception_class ] ?? 'woocommerce_rest_internal_error';
-		$status  = $statuses[ $exception_class ] ?? WP_Http::INTERNAL_SERVER_ERROR;
-		$message = ! isset( $slugs[ $exception_class ] ) ? 'Internal server error' : $e->getMessage();
-
-		return new WP_Error( $slug, $message, array( 'status' => $status ) );
 	}
 
 	/**
