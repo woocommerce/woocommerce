@@ -716,12 +716,12 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$child_ids  = array_values( $product->get_children() );
 
 		// Patch up the metas to match pre-BC state.
-		$attributes                      = get_post_meta( $product_id, '_product_attributes' )[0];
+		$attributes                      = get_post_meta( $product_id, '_product_attributes', true )[0];
 		$attributes['Size/Size']         = $attributes['pa_size'];
 		$attributes['Size/Size']['name'] = 'Size/Size';
 		unset( $attributes['pa_size'] );
 		update_post_meta( $product_id, '_product_attributes', $attributes );
-		foreach( $child_ids as $child_id ) {
+		foreach ( $child_ids as $child_id ) {
 			update_post_meta( $child_id, 'attribute_Size/Size', get_post_meta( $child_id, 'attribute_pa_size', true ) );
 			delete_post_meta( $child_id, 'attribute_pa_size' );
 		}
@@ -731,9 +731,9 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Verify the migrated entries and cleanup.
 		$sizes = array( 'small', 'large', 'huge', 'huge', 'huge', 'huge' );
-		foreach( $child_ids as $index => $child_id ) {
-			$this->assertSame( $sizes[$index], get_post_meta( $child_id, 'attribute_size-size', true ) );
-			$this->assertSame( $sizes[$index], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
+		foreach ( $child_ids as $index => $child_id ) {
+			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_size-size', true ) );
+			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
 		}
 		$product->delete();
 	}
