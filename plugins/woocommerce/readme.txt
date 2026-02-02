@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.5.0-rc.1 2026-XX-XX =
+= 10.5.0-rc.1 2026-02-02 =
 
 **WooCommerce**
 
@@ -319,6 +319,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Remove the AccessiblePrivateMethods trait [#62200](https://github.com/woocommerce/woocommerce/pull/62200)
 * Dev - Update AI backend skill to always be invoked before writing tests [#62531](https://github.com/woocommerce/woocommerce/pull/62531)
 * Dev - [Experimental] Add to Cart + Options: improve quantity selection by removing imperative DOM manipulation. [#61821](https://github.com/woocommerce/woocommerce/pull/61821)
+* Dev - Update PayPal REST API controllers to use new namespaced classes instead of deprecated WC_Gateway_Paypal_* classes. [#63040](https://github.com/woocommerce/woocommerce/pull/63040)
 * Tweak - - Includes a source parameter for requests to the `/update-check` and `/subscriptions` endpoints on WooCommerce.com if the request originates from the Refresh button on My Subscriptions - Fix source parameter for other requests to the `/subscriptions` endpoint originating from the My Subscriptions page [#62674](https://github.com/woocommerce/woocommerce/pull/62674)
 * Tweak - Add a hook enabling Woo extensions to set the Personalizer context for their personalization tags. [#62337](https://github.com/woocommerce/woocommerce/pull/62337)
 * Tweak - Add deprecated tag to wc_enqueue_js(). [#62219](https://github.com/woocommerce/woocommerce/pull/62219)
