@@ -201,22 +201,9 @@ const OrderSummaryItem = ( {
 						regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
 						format={ subtotalPriceFormat }
 					/>
-					{ quantity === 1 && (
-						<ProductSaleBadge
-							currency={ priceCurrency }
-							saleAmount={ saleAmountSingle }
-							format={ saleBadgePriceFormat }
-						/>
-					) }
-				</div>
-				{ showBackorderBadge ? (
+					</div>
+				{ showBackorderBadge && (
 					<ProductBackorderBadge />
-				) : (
-					!! lowStockRemaining && (
-						<ProductLowStockBadge
-							lowStockRemaining={ lowStockRemaining }
-						/>
-					)
 				) }
 				<ProductMetadata { ...productMetaProps } />
 			</div>
