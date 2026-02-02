@@ -250,7 +250,7 @@ jobs:
           if git cherry-pick -m1 "$MERGE_COMMIT_SHA"; then
             # Check if only changelog files were changed (code already exists in target branch)
             CHANGED_FILES=$(git diff --name-only HEAD~1)
-            NON_CHANGELOG_FILES=$(echo "$CHANGED_FILES" | grep -v "^plugins/woocommerce/changelog/" || true)
+            NON_CHANGELOG_FILES=$(echo "$CHANGED_FILES" | grep -vE "^(plugins|packages)/.*/changelog/" || true)
 
             if [[ -z "$NON_CHANGELOG_FILES" ]]; then
               echo "status=skipped" >> $GITHUB_OUTPUT
