@@ -31,6 +31,7 @@ final class DownloadsWrapper extends \WP_UnitTestCase {
 	 * Test `store_has_downloadable_products`: query product meta lookup table.
 	 *
 	 * @dataProvider provider_downloadable_products
+	 * @param \WC_Product $product The product instance.
 	 */
 	public function test_store_has_downloadable_products_via_product_meta_lookup_table_with_downloadable( \WC_Product $product ): void {
 		$proxy = new class() extends DownloadsWrapperClass {
