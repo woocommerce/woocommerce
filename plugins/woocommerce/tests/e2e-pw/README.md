@@ -43,6 +43,7 @@ Start in the repository root folder:
 > [!NOTE]
 > The test support files depend on the built version of the `@woocommerce/e2e-utils-playwright` package.
 > If you make changes to this package, you must rebuild it for the changes to take effect:
+> 
 > ```bash
 > pnpm --filter='@woocommerce/e2e-utils-playwright' build
 > ```
