@@ -26,7 +26,6 @@ import { calculateSaleAmount } from '@woocommerce/base-utils';
  */
 import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
-import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
 import ProductSaleBadge from '../product-sale-badge';
 
@@ -41,7 +40,6 @@ const OrderSummaryItem = ( {
 }: OrderSummaryProps ): JSX.Element => {
 	const {
 		images,
-		low_stock_remaining: lowStockRemaining,
 		show_backorder_badge: showBackorderBadge,
 		name: initialName,
 		permalink,
@@ -231,13 +229,11 @@ const OrderSummaryItem = ( {
 						format={ productPriceFormat }
 						price={ subtotalPrice }
 					/>
-					{ quantity > 1 && (
-						<ProductSaleBadge
-							currency={ priceCurrency }
-							saleAmount={ saleAmountSingle * quantity }
-							format={ saleBadgePriceFormat }
-						/>
-					) }
+					<ProductSaleBadge
+						currency={ priceCurrency }
+						saleAmount={ saleAmountSingle * quantity }
+						format={ saleBadgePriceFormat }
+					/>
 				</div>
 			</div>
 		</div>
