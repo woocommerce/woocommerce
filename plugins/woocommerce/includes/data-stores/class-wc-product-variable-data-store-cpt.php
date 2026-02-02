@@ -63,6 +63,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$old_slug            = 'attribute_' . $meta_attribute_key;
 					$old_meta_rows       = $wpdb->get_results(
 						$wpdb->prepare(
+							// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 							"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ( $products_to_migrate )",
 							$old_slug
 						)
