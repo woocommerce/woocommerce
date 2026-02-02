@@ -848,4 +848,58 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'order_placed', $stored_data[2]['event_type'] );
 		$this->assertEquals( 123, $stored_data[2]['event_data']['order_id'] );
 	}
+
+	/**
+	 * Test get_collected_data returns empty array when no data collected.
+	 *
+	 * @testdox get_collected_data() returns empty array when no data has been collected.
+	 */
+	public function test_get_collected_data_returns_empty_array_when_no_data_collected(): void {
+		$result = $this->sut->get_collected_data();
+
+		$this->assertIsArray( $result );
+		$this->assertEmpty( $result );
+	}
+
+	/**
+	 * Test get_collected_data returns empty array when session unavailable.
+	 *
+	 * @testdox get_collected_data() returns empty array when session is unavailable.
+	 */
+	public function test_get_collected_data_returns_empty_array_when_session_unavailable(): void {
+		// Store original session.
+		$original_session = WC()->session;
+
+		// Set session to null to simulate unavailability.
+		WC()->session = null;
+
+		$result = $this->sut->get_collected_data();
+
+		// Restore original session.
+		WC()->session = $original_session;
+
+		$this->assertIsArray( $result );
+		$this->assertEmpty( $result );
+	}
+
+	/**
+	 * Test get_collected_data returns collected data after collect is called.
+	 *
+	 * @testdox get_collected_data() returns collected data array after collect() is called.
+	 */
+	public function test_get_collected_data_returns_data_after_collect(): void {
+		// Collect some data.
+		$this->sut->collect( 'cart_page_loaded', array( 'source' => 'test' ) );
+		$this->sut->collect( 'checkout_started', array( 'gateway' => 'stripe' ) );
+
+		// Get collected data using the new method.
+		$result = $this->sut->get_collected_data();
+
+		$this->assertIsArray( $result );
+		$this->assertCount( 2, $result );
+		$this->assertEquals( 'cart_page_loaded', $result[0]['event_type'] );
+		$this->assertEquals( array( 'source' => 'test' ), $result[0]['event_data'] );
+		$this->assertEquals( 'checkout_started', $result[1]['event_type'] );
+		$this->assertEquals( array( 'gateway' => 'stripe' ), $result[1]['event_data'] );
+	}
 }

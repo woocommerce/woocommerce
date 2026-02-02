@@ -96,6 +96,26 @@ class SessionDataCollector {
 	}
 
 	/**
+	 * Get all collected fraud protection data from the session.
+	 *
+	 * Retrieves the array of collected event data stored during this session.
+	 * Returns an empty array if no data has been collected or session is unavailable.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @return array Array of collected fraud protection event data.
+	 */
+	public function get_collected_data(): array {
+		if ( WC()->session instanceof \WC_Session ) {
+			$collected_data = WC()->session->get( 'fraud_protection_collected_data' );
+			if ( is_array( $collected_data ) ) {
+				return $collected_data;
+			}
+		}
+		return array();
+	}
+
+	/**
 	 * Get current billing country from customer data.
 	 *
 	 * Reuses the same logic as get_billing_address() but returns only the country.
