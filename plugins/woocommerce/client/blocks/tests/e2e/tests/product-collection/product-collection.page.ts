@@ -77,6 +77,7 @@ export type Collections =
 	| 'handPicked'
 	| 'productsByCategory'
 	| 'productsByTag'
+	| 'productsByBrand'
 	| 'productCatalog'
 	| 'myCustomCollection'
 	| 'myCustomCollectionWithPreview'
@@ -99,6 +100,7 @@ const collectionToButtonNameMap = {
 	handPicked: 'Hand-Picked Products',
 	productsByCategory: 'Products by Category',
 	productsByTag: 'Products by Tag',
+	productsByBrand: 'Products by Brand',
 	productCatalog: 'create your own',
 	myCustomCollection: 'My Custom Collection',
 	myCustomCollectionWithPreview: 'My Custom Collection with Preview',

@@ -27,6 +27,13 @@ tag_id=$(wp wc product_tag create --name="Recommended" --slug="recommended" --de
 wp wc product update $hoodie_product_id --tags="[ { \"id\": $tag_id } ]" --user=1
 wp wc product update $beanie_product_id --tags="[ { \"id\": $tag_id } ]" --user=1
 
+# Create a brand, so we can add tests for brand-related blocks and templates.
+album_product_id=$(wp post list --post_type=product --field=ID --name="Album" --format=ids)
+brand_id=$(wp term create product_brand "WooCommerce" --slug="woocommerce" --description="Official WooCommerce products" --porcelain)
+wp post term set $hoodie_product_id product_brand $brand_id --by=id
+wp post term set $beanie_product_id product_brand $brand_id --by=id
+wp post term set $album_product_id product_brand $brand_id --by=id
+
 # This is a non-hacky work around to set up the cross sells product.
 cap_product_id=$(wp post list --post_type=product --field=ID --name="Cap" --format=ids)
 wp post meta update $beanie_product_id _crosssell_ids "$cap_product_id"
