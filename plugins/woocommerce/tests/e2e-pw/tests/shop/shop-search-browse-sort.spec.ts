@@ -147,7 +147,7 @@ test.describe(
 				await expect(
 					page.getByLabel(
 						new RegExp(
-							`Add to cart: ["|"]${ products[ 0 ].name }["|"]`
+							`Add to cart: ["|“]${ products[ 0 ].name }["|”]`
 						)
 					)
 				).toBeVisible();
@@ -183,7 +183,7 @@ test.describe(
 				await expect(
 					page.getByLabel(
 						new RegExp(
-							`Add to cart: ["|"]${ products[ 0 ].name }["|"]`
+							`Add to cart: ["|“]${ products[ 0 ].name }["|”]`
 						)
 					)
 				).toBeVisible();
