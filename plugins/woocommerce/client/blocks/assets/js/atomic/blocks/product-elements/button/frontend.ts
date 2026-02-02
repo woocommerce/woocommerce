@@ -3,7 +3,8 @@
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import '@woocommerce/stores/woocommerce/product-context';
 
 /**
  * Internal dependencies
@@ -54,8 +55,8 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -151,10 +152,10 @@ const productButtonStore = {
 			const { productId } = getContext< Context >();
 
 			const isDescendantOfAddToCartWithOptions =
-				productId === productDataState?.productId;
+				productId === productContextState?.productId;
 
 			return isDescendantOfAddToCartWithOptions
-				? productDataState?.variationId || productId
+				? productContextState?.variationId || productId
 				: productId;
 		},
 	},

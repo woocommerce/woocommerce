@@ -6,10 +6,10 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/product-context';
 import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
 
@@ -96,8 +96,8 @@ const { state: wooState } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -256,7 +256,7 @@ const { actions, state } = store<
 				const { selectedAttributes } = getContext< Context >();
 
 				return getProductData(
-					productDataState.productId,
+					productContextState.productId,
 					selectedAttributes
 				);
 			},
@@ -378,9 +378,10 @@ const { actions, state } = store<
 				const { selectedAttributes } = getContext< Context >();
 
 				const id =
-					productDataState.variationId || productDataState.productId;
+					productContextState.variationId ||
+					productContextState.productId;
 
-				const productType = productDataState.variationId
+				const productType = productContextState.variationId
 					? 'variation'
 					: getProductData( id, selectedAttributes )?.type;
 

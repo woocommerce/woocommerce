@@ -7,8 +7,8 @@ import {
 	getContext,
 	getConfig,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/product-data';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/product-context';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
 import type {
 	ProductData,
 	WooCommerceConfig,
@@ -19,8 +19,8 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -62,7 +62,7 @@ const productElementStore = store(
 	{
 		state: {
 			get productData(): ProductData | undefined {
-				if ( ! productDataState?.productId ) {
+				if ( ! productContextState?.productId ) {
 					return undefined;
 				}
 
@@ -75,9 +75,9 @@ const productElementStore = store(
 				}
 
 				return (
-					products?.[ productDataState.productId ]?.variations?.[
-						productDataState?.variationId || 0
-					] || products?.[ productDataState.productId ]
+					products?.[ productContextState.productId ]?.variations?.[
+						productContextState?.variationId || 0
+					] || products?.[ productContextState.productId ]
 				);
 			},
 		},
@@ -85,7 +85,7 @@ const productElementStore = store(
 			updateValue: () => {
 				const element = getElement();
 
-				if ( ! element.ref || ! productDataState?.productId ) {
+				if ( ! element.ref || ! productContextState?.productId ) {
 					return;
 				}
 

@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductContextStore;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -84,14 +85,9 @@ class SingleProductTemplate extends AbstractTemplate {
 
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
-				wp_interactivity_state(
-					'woocommerce/product-data',
-					array(
-						'templateState' => array(
-							'productId'   => $product->get_id(),
-							'variationId' => null,
-						),
-					)
+				ProductContextStore::load_context(
+					'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+					$product->get_id()
 				);
 			}
 		}

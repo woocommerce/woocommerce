@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductContextStore;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -267,6 +268,12 @@ class AddToCartWithOptions extends AbstractBlock {
 				$product->get_id()
 			);
 
+			// Load product context into the new ProductContextStore.
+			ProductContextStore::load_context(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+				$product->get_id()
+			);
+
 			$context = array(
 				'quantity'         => array( $product->get_id() => $default_quantity ),
 				'validationErrors' => array(),
@@ -513,6 +520,13 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 			$context_directive  = wp_interactivity_data_wp_context( $context );
 
+			// Add per-block product context for isolation when multiple Add to Cart blocks are on the same page.
+			$product_context_data      = ProductContextStore::get_context_data(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+				$product->get_id()
+			);
+			$product_context_directive = wp_interactivity_data_wp_context( $product_context_data, 'woocommerce/product-context' );
+
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
 			$legacy_mode             = 'yes' === $cart_redirect_after_add || $this->has_form_elements( $hooks_before ) || $this->has_form_elements( $hooks_after );
@@ -555,13 +569,13 @@ class AddToCartWithOptions extends AbstractBlock {
 					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
 					<input type="hidden"
 						name="variation_id"
-						data-wp-bind--value="woocommerce/product-data::state.variationId"
+						data-wp-bind--value="woocommerce/product-context::state.variationId"
 					/>
 				</div>';
 			}
 
 			$form_html = sprintf(
-				'<form %1$s %2$s>%3$s%4$s%5$s%6$s</form>',
+				'<form %1$s %2$s %3$s>%4$s%5$s%6$s%7$s</form>',
 				get_block_wrapper_attributes(
 					array_merge(
 						$wrapper_attributes,
@@ -580,6 +594,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					)
 				),
 				$context_directive,
+				$product_context_directive,
 				$hooks_before,
 				$template_part_blocks,
 				$hooks_after,

@@ -8,7 +8,8 @@ import {
 	withScope,
 	getConfig,
 } from '@wordpress/interactivity';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import '@woocommerce/stores/woocommerce/product-context';
 import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 /**
@@ -164,8 +165,8 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -426,7 +427,7 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			const productId = productDataState?.productId;
+			const productId = productContextState?.productId;
 			if ( ! productId ) {
 				return;
 			}
@@ -437,7 +438,7 @@ const productGallery = {
 
 			const productData =
 				products?.[ productId ]?.variations?.[
-					productDataState?.variationId || 0
+					productContextState?.variationId || 0
 				] || products?.[ productId ];
 
 			const imageId = productData?.image_id;
