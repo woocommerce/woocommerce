@@ -270,14 +270,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								) }
 								format={ subtotalPriceFormat }
 							/>
-							{ quantity === 1 && (
-								<ProductSaleBadge
-									currency={ priceCurrency }
-									saleAmount={ saleAmountSingle }
-									format={ saleBadgePriceFormat }
-								/>
-							) }
-						</div>
+							</div>
 
 						<ProductMetadata
 							shortDescription={ shortDescription }
@@ -356,13 +349,11 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							price={ subtotalPrice.getAmount() }
 						/>
 
-						{ quantity > 1 && (
-							<ProductSaleBadge
-								currency={ priceCurrency }
-								saleAmount={ saleAmountSingle * quantity }
-								format={ saleBadgePriceFormat }
-							/>
-						) }
+						<ProductSaleBadge
+							currency={ priceCurrency }
+							saleAmount={ saleAmountSingle * quantity }
+							format={ saleBadgePriceFormat }
+						/>
 					</div>
 				</td>
 			</tr>
