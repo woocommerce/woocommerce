@@ -711,55 +711,30 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * Tests `read_attributes` for handling metas migration due to sanitize_title BC breaks.
 	 */
 	public function test_read_attributes_addresses_bc_break_in_sanitize(): void {
-		$store = new class() extends WC_Product_Variable_Data_Store_CPT {
-			/**
-			 * Makes read_attributes available for direct calls.
-			 *
-			 * @param WC_Product $product Product object.
-			 * @return void
-			 */
-			public function proxy_read_attributes( WC_Product $product ): void {
-				$this->read_attributes( $product );
-			}
-		};
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+		$child_ids  = array_values( $product->get_children() );
 
-		$product = new WC_Product();
-		$product->save();
+		// Patch up the metas to match pre-BC state.
+		$attributes                      = get_post_meta( $product_id, '_product_attributes' )[0];
+		$attributes['Size/Size']         = $attributes['pa_size'];
+		$attributes['Size/Size']['name'] = 'Size/Size';
+		unset( $attributes['pa_size'] );
+		update_post_meta( $product_id, '_product_attributes', $attributes );
+		foreach( $child_ids as $child_id ) {
+			update_post_meta( $child_id, 'attribute_Size/Size', get_post_meta( $child_id, 'attribute_pa_size', true ) );
+			delete_post_meta( $child_id, 'attribute_pa_size' );
+		}
 
-		$product_id     = $product->get_id();
-		$attribute_name = 'Size/Style';
+		// Reload the product object, so the migration is executed.
+		$product = wc_get_product( $product_id );
 
-		update_post_meta( $product_id, 'attribute_' . $attribute_name, '...' );
-		update_post_meta(
-			$product_id,
-			'_product_attributes',
-			array(
-				'Size/Style' => array(
-					'name'         => $attribute_name,
-					'value'        => '...',
-					'is_variation' => 1,
-				),
-			)
-		);
-
-		$attribute_meta_update_counter = 0;
-		$root_cause_update_counter     = 0;
-		$callback                      = function ( ?bool $check, int $object_id, string $meta_key, $meta_value ) use ( &$attribute_meta_update_counter, &$root_cause_update_counter ) {
-			$root_cause_update_counter     += (int) ( '_product_attributes' === $meta_key && isset( $meta_value['size-style'] ) && ! isset( $meta_value['Size/Style'] ) );
-			$attribute_meta_update_counter += (int) ( 'attribute_size-style' === $meta_key && '...' === $meta_value );
-			return $check;
-		};
-		add_action( 'update_post_metadata', $callback, 10, 4 );
-
-		// Initial attribute meta migration.
-		$store->proxy_read_attributes( $product );
-		$this->assertSame( 1, $attribute_meta_update_counter );
-		$this->assertSame( 1, $root_cause_update_counter );
-		// Once the migration complete, no consequent updates attempted.
-		$store->proxy_read_attributes( $product );
-		$this->assertSame( 1, $attribute_meta_update_counter );
-		$this->assertSame( 1, $root_cause_update_counter );
-
-		remove_action( 'update_post_metadata', $callback );
+		// Verify the migrated entries and cleanup.
+		$sizes = array( 'small', 'large', 'huge', 'huge', 'huge', 'huge' );
+		foreach( $child_ids as $index => $child_id ) {
+			$this->assertSame( $sizes[$index], get_post_meta( $child_id, 'attribute_size-size', true ) );
+			$this->assertSame( $sizes[$index], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
+		}
+		$product->delete();
 	}
 }
