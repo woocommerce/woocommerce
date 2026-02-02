@@ -92,7 +92,7 @@ const SidebarSettings = ( {
 				<br />
 				<Text>
 					{ __(
-						'Update this email configuration in the "Refunded order" email.',
+						'Update this email configuration in the "Order refunded" email.',
 						'woocommerce'
 					) }
 				</Text>
