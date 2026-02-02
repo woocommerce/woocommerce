@@ -51,7 +51,8 @@ class CacheController implements RegisterHooksInterface {
 		add_action( 'edited_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
 		add_action( 'delete_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
 
-		// Clear taxonomy hierarchy cache when term meta (like 'order') is updated.
+		// Clear taxonomy hierarchy cache when term meta (like 'order') is added or updated.
+		add_action( 'added_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
 		add_action( 'updated_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
 	}
 

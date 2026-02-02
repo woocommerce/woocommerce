@@ -153,6 +153,9 @@ class TaxonomyHierarchyData {
 		$temp_parents  = array();
 		$temp_terms    = array();
 
+		// Prime term meta cache in single query to avoid N+1.
+		update_termmeta_cache( wp_list_pluck( $terms, 'term_id' ) );
+
 		foreach ( $terms as $term ) {
 			$term_id   = $term->term_id;
 			$parent_id = $term->parent;

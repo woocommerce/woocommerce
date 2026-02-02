@@ -328,6 +328,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 			// Add menu_order to flat terms for sorting.
 			if ( 'menu_order' === $orderby ) {
+				// Prime term meta cache in single query to avoid N+1.
+				update_termmeta_cache( wp_list_pluck( $terms, 'term_id' ) );
 				$terms = array_map(
 					function ( $term ) {
 						$term               = (array) $term;
