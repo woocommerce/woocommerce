@@ -89,6 +89,7 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'woocommerce-services:tax' ),
 						self::get_plugin( 'tiktok-for-business' ),
 						self::get_plugin( 'snapchat-for-woocommerce' ),
+						self::get_plugin( 'facebook-for-woocommerce' ),
 					)
 				),
 			),
@@ -557,6 +558,13 @@ class DefaultFreeExtensions {
 				'learn_more_link'  => 'https://woocommerce.com/products/snapchat/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 1,
 			),
+			'facebook-for-woocommerce'  => array(
+				'label'            => __( 'Grow your business with Facebook and Instagram', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-facebook.svg', WC_PLUGIN_FILE ),
+				'description'      => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
+				'learn_more_link'  => 'https://woocommerce.com/products/facebook/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
+				'install_priority' => 2,
+			),
 			'woocommerce-services:tax'  => array(
 				'label'            => __( 'Get automated tax rates with WooCommerce Tax', 'woocommerce' ),
 				'image_url'        => self::get_woo_logo(),
@@ -576,6 +584,37 @@ class DefaultFreeExtensions {
 
 		$_plugins['woocommerce-services:tax']['is_visible'] = array(
 			self::get_rules_for_wcservices_tax_countries(),
+		);
+
+		// TikTok, Pinterest, and Facebook share a single spot with 1/3 rotation each.
+		$_plugins['tiktok-for-business']['is_visible'] = array(
+			array(
+				'type'        => 'option',
+				'option_name' => 'woocommerce_remote_variant_assignment',
+				'value'       => array( 1, 40 ),
+				'default'     => false,
+				'operation'   => 'range',
+			),
+		);
+
+		$_plugins['pinterest-for-woocommerce']['is_visible'] = array(
+			array(
+				'type'        => 'option',
+				'option_name' => 'woocommerce_remote_variant_assignment',
+				'value'       => array( 41, 80 ),
+				'default'     => false,
+				'operation'   => 'range',
+			),
+		);
+
+		$_plugins['facebook-for-woocommerce']['is_visible'] = array(
+			array(
+				'type'        => 'option',
+				'option_name' => 'woocommerce_remote_variant_assignment',
+				'value'       => array( 81, 120 ),
+				'default'     => false,
+				'operation'   => 'range',
+			),
 		);
 
 		$remove_plugins_activated_rule = function ( $is_visible ) {
