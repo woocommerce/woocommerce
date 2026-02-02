@@ -30,7 +30,6 @@ import { calculateSaleAmount } from '@woocommerce/base-utils';
  */
 import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
-import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
 import ProductSaleBadge from '../product-sale-badge';
 
@@ -69,7 +68,6 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			catalog_visibility: catalogVisibility = 'visible',
 			short_description: shortDescription = '',
 			description: fullDescription = '',
-			low_stock_remaining: lowStockRemaining = null,
 			show_backorder_badge: showBackorderBadge = false,
 			quantity_limits: quantityLimits = {
 				minimum: 1,
@@ -247,15 +245,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							name={ name }
 							permalink={ permalink }
 						/>
-						{ showBackorderBadge ? (
-							<ProductBackorderBadge />
-						) : (
-							!! lowStockRemaining && (
-								<ProductLowStockBadge
-									lowStockRemaining={ lowStockRemaining }
-								/>
-							)
-						) }
+						{ showBackorderBadge && <ProductBackorderBadge /> }
 
 						<div className="wc-block-cart-item__prices">
 							<ProductPrice
@@ -270,7 +260,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								) }
 								format={ subtotalPriceFormat }
 							/>
-							</div>
+						</div>
 
 						<ProductMetadata
 							shortDescription={ shortDescription }
