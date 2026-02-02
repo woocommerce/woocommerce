@@ -52,9 +52,8 @@ class SessionDataCollector {
 	 *
 	 * @param string|null $event_type Optional event type identifier (e.g., 'checkout_started', 'payment_attempt').
 	 * @param array       $event_data Optional event-specific additional context data (may include 'order_id').
-	 * @return array Nested array containing all collected fraud protection data.
 	 */
-	public function collect( ?string $event_type = null, array $event_data = array() ): array {
+	public function collect( ?string $event_type = null, array $event_data = array() ): void {
 		// Ensure cart and session are loaded.
 		$this->session_clearance_manager->ensure_cart_loaded();
 
@@ -62,7 +61,7 @@ class SessionDataCollector {
 		// There seem to be no universal way to get order id from session data, so we may start with passing it as a parameter when calling this method.
 		$order_id_from_event = $event_data['order_id'] ?? null;
 
-		return array(
+		$data = array(
 			'event_type'       => $event_type,
 			'timestamp'        => gmdate( 'Y-m-d H:i:s' ),
 			'wc_version'       => WC()->version,
@@ -73,6 +72,27 @@ class SessionDataCollector {
 			'billing_address'  => $this->get_billing_address(),
 			'event_data'       => $event_data,
 		);
+
+		// Save the collected data in the session for fraud analysis tracking, preserving multiple calls.
+		if ( WC()->session instanceof \WC_Session ) {
+			// Retrieve existing data array or initialize if not present.
+			$collected_data = WC()->session->get( 'fraud_protection_collected_data' );
+			if ( ! is_array( $collected_data ) ) {
+				$collected_data = array();
+			}
+			$collected_data[] = $data;
+			WC()->session->set( 'fraud_protection_collected_data', $collected_data );
+		} else {
+			FraudProtectionController::log(
+				'error',
+				'Attempted to save fraud protection data, but no valid WooCommerce session exists.',
+				array(
+					'context'    => 'SessionDataCollector::collect',
+					'event_type' => $event_type,
+					'event_data' => $event_data,
+				)
+			);
+		}
 	}
 
 	/**

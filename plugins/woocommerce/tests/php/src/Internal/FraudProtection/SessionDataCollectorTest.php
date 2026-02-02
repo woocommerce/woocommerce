@@ -48,13 +48,29 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 
 		// Disable taxes before adding products to cart.
 		update_option( 'woocommerce_calc_taxes', 'no' );
+
+		// Clear any existing session data before each test.
+		WC()->session->set( 'fraud_protection_collected_data', null );
 	}
 
 	/**
-	 * Test that collect() method returns properly structured nested array with 9 top-level keys.
+	 * Helper method to collect data and retrieve it from session.
+	 *
+	 * @param string|null $event_type Optional event type.
+	 * @param array       $event_data Optional event data.
+	 * @return array The collected data from session.
 	 */
-	public function test_collect_returns_properly_structured_nested_array() {
-		$result = $this->sut->collect();
+	private function collect_and_get_data( ?string $event_type = null, array $event_data = array() ): array {
+		$this->sut->collect( $event_type, $event_data );
+		$stored_data = WC()->session->get( 'fraud_protection_collected_data' );
+		return $stored_data[0] ?? array();
+	}
+
+	/**
+	 * Test that collect() stores properly structured nested array with 9 top-level keys.
+	 */
+	public function test_collect_stores_properly_structured_nested_array(): void {
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'event_type', $result );
@@ -72,14 +88,14 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test that collect() accepts event_type and event_data parameters.
 	 */
-	public function test_collect_accepts_event_type_and_event_data_parameters() {
+	public function test_collect_accepts_event_type_and_event_data_parameters(): void {
 		$event_type = 'checkout_started';
 		$event_data = array(
 			'page'   => 'checkout',
 			'source' => 'test',
 		);
 
-		$result = $this->sut->collect( $event_type, $event_data );
+		$result = $this->collect_and_get_data( $event_type, $event_data );
 
 		$this->assertEquals( $event_type, $result['event_type'] );
 		$this->assertEquals( $event_data, $result['event_data'] );
@@ -88,11 +104,11 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test graceful degradation when session is unavailable.
 	 */
-	public function test_graceful_degradation_when_session_unavailable() {
+	public function test_graceful_degradation_when_session_unavailable(): void {
 		// This test verifies that collect() doesn't throw exceptions even if session is unavailable.
 		// We can't easily simulate session being unavailable in unit tests without mocking,
-		// but we can verify that calling collect() returns a valid structure.
-		$result = $this->sut->collect();
+		// but we can verify that calling collect() stores valid structure.
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result );
 		$this->assertCount( 9, $result );
@@ -105,8 +121,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test wc_version field is included in collected data.
 	 */
-	public function test_wc_version_is_included() {
-		$result = $this->sut->collect();
+	public function test_wc_version_is_included(): void {
+		$result = $this->collect_and_get_data();
 
 		$this->assertEquals( WC()->version, $result['wc_version'] );
 	}
@@ -114,8 +130,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test timestamp format is UTC (gmdate format).
 	 */
-	public function test_timestamp_format_is_utc() {
-		$result = $this->sut->collect();
+	public function test_timestamp_format_is_utc(): void {
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'timestamp', $result );
 		$this->assertNotEmpty( $result['timestamp'] );
@@ -133,8 +149,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test that collect() uses default values when parameters not provided.
 	 */
-	public function test_collect_uses_default_values_when_parameters_not_provided() {
-		$result = $this->sut->collect();
+	public function test_collect_uses_default_values_when_parameters_not_provided(): void {
+		$result = $this->collect_and_get_data();
 
 		$this->assertNull( $result['event_type'] );
 		$this->assertEquals( array(), $result['event_data'] );
@@ -143,8 +159,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test that nested sections are initialized as arrays.
 	 */
-	public function test_nested_sections_initialized_as_arrays() {
-		$result = $this->sut->collect();
+	public function test_nested_sections_initialized_as_arrays(): void {
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result['session'] );
 		$this->assertIsArray( $result['customer'] );
@@ -156,8 +172,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test session data includes all 6 required fields.
 	 */
-	public function test_session_data_includes_all_required_fields() {
-		$result = $this->sut->collect();
+	public function test_session_data_includes_all_required_fields(): void {
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result['session'] );
 		$this->assertArrayHasKey( 'session_id', $result['session'] );
@@ -171,8 +187,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test session_id is retrieved from SessionClearanceManager.
 	 */
-	public function test_session_id_retrieved_from_session_clearance_manager() {
-		$result = $this->sut->collect();
+	public function test_session_id_retrieved_from_session_clearance_manager(): void {
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'session_id', $result['session'] );
 		// Session ID should be a string when session is available.
@@ -185,7 +201,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test email collection fallback chain for logged-in user.
 	 */
-	public function test_email_collection_for_logged_in_user() {
+	public function test_email_collection_for_logged_in_user(): void {
 		// Create a test user and log them in.
 		$user_id = $this->factory->user->create(
 			array(
@@ -194,7 +210,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		);
 		wp_set_current_user( $user_id );
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'email', $result['session'] );
 		$this->assertEquals( 'testuser@example.com', $result['session']['email'] );
@@ -203,7 +219,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test email collection from WC_Customer when user not logged in.
 	 */
-	public function test_email_collection_from_wc_customer() {
+	public function test_email_collection_from_wc_customer(): void {
 		// Ensure no user is logged in.
 		wp_set_current_user( 0 );
 
@@ -212,7 +228,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 			WC()->customer->set_billing_email( 'customer@example.com' );
 		}
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'email', $result['session'] );
 		// Email should be from customer object if available.
@@ -224,8 +240,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test customer data includes all 4 required fields.
 	 */
-	public function test_customer_data_includes_all_required_fields() {
-		$result = $this->sut->collect();
+	public function test_customer_data_includes_all_required_fields(): void {
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result['customer'] );
 		$this->assertArrayHasKey( 'first_name', $result['customer'] );
@@ -237,13 +253,13 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test customer name collection from WC_Customer.
 	 */
-	public function test_customer_name_collection_from_wc_customer() {
+	public function test_customer_name_collection_from_wc_customer(): void {
 		if ( isset( WC()->customer ) ) {
 			WC()->customer->set_billing_first_name( 'John' );
 			WC()->customer->set_billing_last_name( 'Doe' );
 		}
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'first_name', $result['customer'] );
 		$this->assertArrayHasKey( 'last_name', $result['customer'] );
@@ -257,7 +273,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test customer data fallback to session when WC_Customer not available.
 	 */
-	public function test_customer_data_fallback_to_session() {
+	public function test_customer_data_fallback_to_session(): void {
 		// Ensure no user is logged in.
 		wp_set_current_user( 0 );
 
@@ -277,7 +293,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$original_customer = WC()->customer;
 		WC()->customer     = null;
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		// Restore original customer.
 		WC()->customer = $original_customer;
@@ -293,7 +309,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test lifetime_order_count field exists and uses WC_Customer::get_order_count().
 	 */
-	public function test_lifetime_order_count_for_registered_customer() {
+	public function test_lifetime_order_count_for_registered_customer(): void {
 		// Create a test user.
 		$user_id = $this->factory->user->create(
 			array(
@@ -310,7 +326,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		WC()->customer->set_billing_last_name( 'Doe' );
 		WC()->customer->set_billing_email( 'customer@example.com' );
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		// Verify lifetime_order_count field exists and returns a valid integer.
 		// In test environment, the method returns 0 because the cache is not automatically
@@ -323,7 +339,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test graceful degradation when customer data unavailable.
 	 */
-	public function test_graceful_degradation_when_customer_data_unavailable() {
+	public function test_graceful_degradation_when_customer_data_unavailable(): void {
 		// Ensure no user is logged in.
 		wp_set_current_user( 0 );
 
@@ -334,7 +350,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 			WC()->customer->set_billing_email( '' );
 		}
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		// Should return customer section with fields, even if empty/null.
 		$this->assertIsArray( $result['customer'] );
@@ -347,12 +363,12 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test order data includes all required fields with proper structure.
 	 */
-	public function test_order_data_includes_all_required_fields() {
+	public function test_order_data_includes_all_required_fields(): void {
 		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result['order'] );
 		$this->assertArrayHasKey( 'order_id', $result['order'] );
@@ -372,7 +388,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test order totals are collected from cart.
 	 */
-	public function test_order_totals_collected_from_cart() {
+	public function test_order_totals_collected_from_cart(): void {
 		// Empty cart first to ensure clean state.
 		WC()->cart->empty_cart();
 
@@ -384,7 +400,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 2 );
 		WC()->cart->calculate_totals();
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'items_total', $result['order'] );
 		$this->assertArrayHasKey( 'total', $result['order'] );
@@ -395,12 +411,12 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test shipping_tax_rate calculation.
 	 */
-	public function test_shipping_tax_rate_calculation() {
+	public function test_shipping_tax_rate_calculation(): void {
 		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'shipping_tax_rate', $result['order'] );
 		// When shipping total is zero, shipping_tax_rate should be null.
@@ -412,7 +428,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test cart item data includes all 12 required fields.
 	 */
-	public function test_cart_item_includes_all_required_fields() {
+	public function test_cart_item_includes_all_required_fields(): void {
 		// Empty cart first to ensure clean state.
 		WC()->cart->empty_cart();
 
@@ -426,7 +442,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 2 );
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'items', $result['order'] );
 		$this->assertIsArray( $result['order']['items'] );
@@ -457,7 +473,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test billing address includes all required fields.
 	 */
-	public function test_billing_address_includes_all_required_fields() {
+	public function test_billing_address_includes_all_required_fields(): void {
 		// Set billing address data.
 		if ( isset( WC()->customer ) ) {
 			WC()->customer->set_billing_address_1( '123 Main St' );
@@ -468,7 +484,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 			WC()->customer->set_billing_postcode( '10001' );
 		}
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result['billing_address'] );
 		$this->assertArrayHasKey( 'address_1', $result['billing_address'] );
@@ -492,7 +508,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test shipping address includes all required fields.
 	 */
-	public function test_shipping_address_includes_all_required_fields() {
+	public function test_shipping_address_includes_all_required_fields(): void {
 		// Set shipping address data.
 		if ( isset( WC()->customer ) ) {
 			WC()->customer->set_shipping_address_1( '456 Oak Ave' );
@@ -503,7 +519,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 			WC()->customer->set_shipping_postcode( '90001' );
 		}
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result['shipping_address'] );
 		$this->assertArrayHasKey( 'address_1', $result['shipping_address'] );
@@ -527,11 +543,11 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test graceful degradation when cart is empty.
 	 */
-	public function test_graceful_degradation_when_cart_is_empty() {
+	public function test_graceful_degradation_when_cart_is_empty(): void {
 		// Ensure cart is empty.
 		WC()->cart->empty_cart();
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		// Order section should still exist even with empty cart.
 		$this->assertIsArray( $result['order'] );
@@ -547,7 +563,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test customer_id for guest users.
 	 */
-	public function test_customer_id_for_guest_users() {
+	public function test_customer_id_for_guest_users(): void {
 		// Ensure no user is logged in.
 		wp_set_current_user( 0 );
 
@@ -558,7 +574,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'customer_id', $result['order'] );
 		$this->assertEquals( 'guest', $result['order']['customer_id'] );
@@ -567,7 +583,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test customer_id for logged-in users.
 	 */
-	public function test_customer_id_for_logged_in_users() {
+	public function test_customer_id_for_logged_in_users(): void {
 		// Create a test user and log them in.
 		$user_id = $this->factory->user->create(
 			array(
@@ -583,7 +599,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertArrayHasKey( 'customer_id', $result['order'] );
 		$this->assertEquals( $user_id, $result['order']['customer_id'] );
@@ -592,7 +608,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test complete collect() output includes all 8 top-level sections with data.
 	 */
-	public function test_complete_collect_output_includes_all_sections() {
+	public function test_complete_collect_output_includes_all_sections(): void {
 		// Create a logged-in user.
 		$user_id = $this->factory->user->create(
 			array(
@@ -615,7 +631,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$result = $this->sut->collect( 'checkout_started', array( 'test' => 'data' ) );
+		$result = $this->collect_and_get_data( 'checkout_started', array( 'test' => 'data' ) );
 
 		// Verify all 8 sections exist.
 		$this->assertArrayHasKey( 'event_type', $result );
@@ -641,7 +657,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test end-to-end data collection with full cart scenario.
 	 */
-	public function test_end_to_end_data_collection_with_full_cart() {
+	public function test_end_to_end_data_collection_with_full_cart(): void {
 		// Empty cart first.
 		WC()->cart->empty_cart();
 
@@ -694,7 +710,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		// Collect data.
-		$result = $this->sut->collect( 'payment_attempt', array( 'gateway' => 'stripe' ) );
+		$result = $this->collect_and_get_data( 'payment_attempt', array( 'gateway' => 'stripe' ) );
 
 		// Verify comprehensive data collection.
 		$this->assertEquals( 'payment_attempt', $result['event_type'] );
@@ -730,7 +746,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test graceful degradation across all sections.
 	 */
-	public function test_graceful_degradation_across_all_sections() {
+	public function test_graceful_degradation_across_all_sections(): void {
 		// Ensure no user logged in.
 		wp_set_current_user( 0 );
 
@@ -747,8 +763,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 			WC()->customer->set_billing_email( '' );
 		}
 
-		// Collect should still succeed and return valid structure.
-		$result = $this->sut->collect();
+		// Collect should still succeed and store valid structure.
+		$result = $this->collect_and_get_data();
 
 		// Verify structure is intact even with minimal data.
 		$this->assertIsArray( $result );
@@ -770,7 +786,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Test manual triggering only (no automatic hooks).
 	 */
-	public function test_manual_triggering_only() {
+	public function test_manual_triggering_only(): void {
 		// This test verifies that SessionDataCollector doesn't automatically
 		// hook into WooCommerce events. It should only collect data when
 		// collect() is explicitly called.
@@ -780,12 +796,56 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
 		// Verify collect() must be called manually.
-		$result = $this->sut->collect();
+		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result );
 		$this->assertCount( 1, $result['order']['items'] );
 
 		// No automatic data collection should have occurred.
 		// This is a design verification test - the class should not register hooks.
+	}
+
+	/**
+	 * Test collect stores event data in session.
+	 *
+	 * @testdox collect() stores event data in WooCommerce session under 'fraud_protection_collected_data' key.
+	 */
+	public function test_collect_stores_event_data_in_session(): void {
+		// Collect data with a specific event type.
+		$this->sut->collect( 'cart_page_loaded', array( 'source' => 'test' ) );
+
+		// Verify data was stored in session.
+		$stored_data = WC()->session->get( 'fraud_protection_collected_data' );
+
+		$this->assertIsArray( $stored_data );
+		$this->assertCount( 1, $stored_data );
+		$this->assertEquals( 'cart_page_loaded', $stored_data[0]['event_type'] );
+		$this->assertEquals( array( 'source' => 'test' ), $stored_data[0]['event_data'] );
+	}
+
+	/**
+	 * Test multiple collect calls append data to session.
+	 *
+	 * @testdox Multiple collect() calls append data to session array, preserving event history.
+	 */
+	public function test_multiple_collect_calls_append_data_to_session(): void {
+		// First collect call.
+		$this->sut->collect( 'cart_page_loaded', array() );
+
+		// Second collect call.
+		$this->sut->collect( 'checkout_page_loaded', array() );
+
+		// Third collect call.
+		$this->sut->collect( 'order_placed', array( 'order_id' => 123 ) );
+
+		// Verify all three events are stored.
+		$stored_data = WC()->session->get( 'fraud_protection_collected_data' );
+
+		$this->assertIsArray( $stored_data );
+		$this->assertCount( 3, $stored_data );
+		$this->assertEquals( 'cart_page_loaded', $stored_data[0]['event_type'] );
+		$this->assertEquals( 'checkout_page_loaded', $stored_data[1]['event_type'] );
+		$this->assertEquals( 'order_placed', $stored_data[2]['event_type'] );
+		$this->assertEquals( 123, $stored_data[2]['event_data']['order_id'] );
 	}
 }
