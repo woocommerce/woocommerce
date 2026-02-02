@@ -21,7 +21,7 @@ class PushTokenNotFoundException extends WC_Data_Exception {
 	/**
 	 * Constructor.
 	 *
-	 * @since 10.5.0
+	 * @since 10.6.0
 	 */
 	public function __construct() {
 		parent::__construct(
