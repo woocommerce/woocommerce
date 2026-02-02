@@ -716,7 +716,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$child_ids  = array_values( $product->get_children() );
 
 		// Patch up the metas to match pre-BC state.
-		$attributes                      = get_post_meta( $product_id, '_product_attributes', true )[0];
+		$attributes                      = get_post_meta( $product_id, '_product_attributes', true );
 		$attributes['Size/Size']         = $attributes['pa_size'];
 		$attributes['Size/Size']['name'] = 'Size/Size';
 		unset( $attributes['pa_size'] );
