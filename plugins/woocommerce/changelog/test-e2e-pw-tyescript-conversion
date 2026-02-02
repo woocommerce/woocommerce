@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Convert WooCommeerce e2e-pw tests to TypeScript.
