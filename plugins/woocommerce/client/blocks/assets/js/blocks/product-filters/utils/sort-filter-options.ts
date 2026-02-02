@@ -23,7 +23,7 @@ function getSortableText( item: FilterOptionItem ): string {
  * Sorts filter options based on the specified sort order
  *
  * @param options   - Array of filter option items to sort
- * @param sortOrder - Sort order (name-asc, name-desc, count-asc, count-desc)
+ * @param sortOrder - Sort order (name-asc, name-desc, count-asc, count-desc, menu_order-asc)
  * @return Sorted array of filter option items
  */
 export function sortFilterOptions(
@@ -32,6 +32,17 @@ export function sortFilterOptions(
 ): FilterOptionItem[] {
 	return options.sort( ( a, b ) => {
 		switch ( sortOrder ) {
+			case 'menu_order-asc': {
+				// Sort by menu order, with secondary sort by name when equal.
+				const orderA = a.menuOrder ?? 0;
+				const orderB = b.menuOrder ?? 0;
+				if ( orderA !== orderB ) {
+					return orderA - orderB;
+				}
+				return getSortableText( a ).localeCompare(
+					getSortableText( b )
+				);
+			}
 			case 'name-asc':
 				return getSortableText( a ).localeCompare(
 					getSortableText( b )

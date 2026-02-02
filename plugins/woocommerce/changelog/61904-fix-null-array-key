@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent undefined index notices when connecting admin pages without an `id`.
