@@ -11,8 +11,10 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Data_Exception;
+use WC_Logger;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -348,6 +350,12 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return WP_Error
 	 */
 	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
+		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+
+		if ( $logger instanceof WC_Logger ) {
+			$logger->error( (string) $e->getMessage() );
+		}
+
 		if ( $e instanceof WC_Data_Exception ) {
 			return new WP_Error(
 				$e->getErrorCode(),
