@@ -252,6 +252,18 @@ jobs:
             echo "has_conflicts=false" >> $GITHUB_OUTPUT
             echo "Cherry-pick completed successfully"
           else
+            # Cherry-pick failed - determine the reason
+
+            # Case 1: Empty cherry-pick - changes already exist in target branch.
+            # Git leaves the repo mid cherry-pick (CHERRY_PICK_HEAD exists) with nothing staged.
+            if [[ -f .git/CHERRY_PICK_HEAD ]] && [[ -z "$(git diff --cached --name-only)" ]]; then
+              echo "status=skipped" >> $GITHUB_OUTPUT
+              echo "error_message=Cherry-pick skipped: changes from PR #$PR_NUMBER already exist in '$TARGET_BRANCH'." >> $GITHUB_OUTPUT
+              git cherry-pick --abort 2>/dev/null || true
+              exit 0
+            fi
+
+            # Case 2: Real conflicts
             # Capture conflicted files with their status codes and build JSON array using jq
             CONFLICT_JSON=$(git status --porcelain | grep -E "^(DD|AU|UD|UA|DU|AA|UU)" | jq -R -n -c '
               [inputs | {status: .[0:2], file: .[3:]}]
@@ -299,6 +311,7 @@ jobs:
 
       - name: Create cherry-pick pull request
         id: create-pr
+        if: steps.cherry-pick.outputs.status != 'skipped'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           CONFLICT_STATUS: ${{ steps.cherry-pick.outputs.conflict_status }}
@@ -432,7 +445,11 @@ jobs:
         id: aggregate-status
         if: always()
         run: |
-          if [[ "${{ steps.cherry-pick.outcome }}" == "failure" ]]; then
+          if [[ "${{ steps.cherry-pick.outputs.status }}" == "skipped" ]]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "error_message=${{ steps.cherry-pick.outputs.error_message }}" >> $GITHUB_OUTPUT
+            echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
+          elif [[ "${{ steps.cherry-pick.outcome }}" == "failure" ]]; then
             # Use the detailed error message from cherry-pick step
             error_msg="${{ steps.cherry-pick.outputs.error_message }}"
             if [[ -z "$error_msg" ]]; then
@@ -474,6 +491,10 @@ jobs:
           elif [[ "$verify_status" != "success" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
             echo "error_message=${{ needs.verify.outputs.error_message }}" >> $GITHUB_OUTPUT
+            echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
+          elif [[ "$cherry_status" == "skipped" ]]; then
+            echo "status=skipped" >> $GITHUB_OUTPUT
+            echo "error_message=${{ needs.cherry-pick.outputs.error_message }}" >> $GITHUB_OUTPUT
             echo "cherry_pick_pr_number=" >> $GITHUB_OUTPUT
           elif [[ "$cherry_status" != "success" ]]; then
             echo "status=failed" >> $GITHUB_OUTPUT
