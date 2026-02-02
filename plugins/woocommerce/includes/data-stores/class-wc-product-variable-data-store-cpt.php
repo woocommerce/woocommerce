@@ -57,13 +57,25 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				// As per 2026, we are refactoring the updates into product-level: BC-focused (not all-in on-spot migration), optimized for performance.
 				// Use-case: `_product_attributes` has data populated on WordPress pre-4.8 and containing symbols affected by the breaking changes.
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
-					$old_slug  = 'attribute_' . $meta_attribute_key;
-					$old_value = get_post_meta( $product_id, $old_slug, true );
-					if ( '' !== $old_value ) {
+					global $wpdb;
+
+					$products_to_migrate = implode( ', ', array( $product_id, ...$product->get_children() ) );
+					$old_slug            = 'attribute_' . $meta_attribute_key;
+					$old_meta_rows       = $wpdb->get_results(
+						$wpdb->prepare(
+							"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ( $products_to_migrate )",
+							$old_slug
+						)
+					);
+
+					if ( $old_meta_rows ) {
 						$new_slug = 'attribute_' . sanitize_title( $meta_value['name'] );
-						update_post_meta( $product_id, $new_slug, $old_value );
-						$force_update = true;
+						foreach ( $old_meta_rows as $old_meta_row ) {
+							update_post_meta( $old_meta_row->post_id, $new_slug, $old_meta_row->meta_value );
+						}
 					}
+
+					$force_update = true;
 				}
 
 				// Check if is a taxonomy attribute.
