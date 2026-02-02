@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useEffect, useState, useRef } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { getBrands } from '@woocommerce/editor-components/utils';
 import type {
 	ProductBrandResponseItem,
@@ -47,16 +47,14 @@ const withSearchedBrands = <
 			setIsLoading( false );
 		};
 
-		const selectedRef = useRef( selected );
-
 		useEffect( () => {
-			getBrands( { selected: selectedRef.current } )
+			getBrands( {} )
 				.then( ( results ) => {
 					setBrandsList( results as ProductBrandResponseItem[] );
 					setIsLoading( false );
 				} )
 				.catch( setErrorState );
-		}, [ selectedRef ] );
+		}, [] );
 
 		return (
 			<OriginalComponent
