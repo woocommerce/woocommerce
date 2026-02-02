@@ -321,7 +321,6 @@ class PushTokensDataStore {
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return array
-	 * @throws PushTokenInvalidDataException If the token can't be read.
 	 */
 	private function build_meta_array_from_token( PushToken &$push_token ) {
 		return array_filter(
