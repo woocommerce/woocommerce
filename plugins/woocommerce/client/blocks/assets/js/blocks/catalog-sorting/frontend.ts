@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getConfig } from '@wordpress/interactivity';
+import { store, getConfig, withSyncEvent } from '@wordpress/interactivity';
 
 const BLOCK_NAME = 'woocommerce/catalog-sorting';
 
@@ -23,16 +23,16 @@ const catalogSortingStore = {
 		/**
 		 * Prevent default form submission only when using client-side navigation.
 		 */
-		preventSubmit: ( event: Event ) => {
+		preventSubmit: withSyncEvent( ( event: Event ) => {
 			if ( shouldUseClientNavigation() ) {
 				event.preventDefault();
 			}
-		},
+		} ),
 
 		/**
 		 * Handle sort order change.
 		 */
-		*handleSortChange( event: Event ): Generator {
+		handleSortChange: withSyncEvent( function* ( event: Event ): Generator {
 			// Only intercept when using client-side navigation.
 			if ( ! shouldUseClientNavigation() ) {
 				// Let legacy handler and form submission do their job.
@@ -56,7 +56,7 @@ const catalogSortingStore = {
 				yield import( '@wordpress/interactivity-router' );
 
 			yield routerModule.actions.navigate( url.href );
-		},
+		} ),
 	},
 };
 
