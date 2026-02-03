@@ -45,3 +45,22 @@ export { generateCommandId } from './types';
 
 // Implementation
 export { createCommandQueue } from './create-command-queue';
+
+// Cart Commands
+export {
+	createAddItemCommand,
+	createRemoveItemCommand,
+	createUpdateQuantityCommand,
+	createBatchAddItemCommands,
+	isCartItem,
+} from './cart-commands';
+
+export type {
+	CartState,
+	OptimisticCartItem,
+	SelectedAttributes,
+	ClientCartItem,
+	AddItemPayload,
+	RemoveItemPayload,
+	UpdateQuantityPayload,
+} from './cart-commands';
