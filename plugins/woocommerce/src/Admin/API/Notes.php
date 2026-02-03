@@ -597,6 +597,17 @@ class Notes extends \WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Track opened emails.
+	 *
+	 * @deprecated 10.6.0 This method is no longer functional as the email tracking feature was removed in WooCommerce 9.9.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 */
+	public function track_opened_email( $request ) {
+		wc_deprecated_function( __METHOD__, '10.6.0' );
+	}
+
+	/**
 	 * Get the query params for collections.
 	 *
 	 * @return array
