@@ -14,7 +14,9 @@ test.describe(
 
 		async function openWCSettings( page ) {
 			await page.goto( '/wp-admin/index.php', {
-				waitUntil: 'networkidle0',
+				// networkidle is needed to ensure all JS files are loaded and avoid race conditions
+				// eslint-disable-next-line playwright/no-networkidle
+				waitUntil: 'networkidle',
 			} );
 
 			await page
