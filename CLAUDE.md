@@ -33,6 +33,7 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
 - **`woocommerce-git`** - Guidelines for git and GitHub operations
+- **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 
 **CRITICAL:** After reading a skill, check if a personal skill override file exists at
 `~/.ai/skills/{skill-name}-personal/SKILL.md` and apply it too. For example, for the
