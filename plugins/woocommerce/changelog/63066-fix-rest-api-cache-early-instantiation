@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fatal error when third-party plugins instantiate REST controllers before WooCommerce is fully initialized.
