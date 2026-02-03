@@ -130,6 +130,30 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests the update method preserves device_uuid when not provided
+	 * in the data array.
+	 */
+	public function test_it_preserves_device_uuid_when_not_provided_in_update() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		$original_device_uuid = $push_token->get_device_uuid();
+		$this->assertNotNull( $original_device_uuid );
+
+		$data_store->update(
+			$push_token->get_id(),
+			array(
+				'token' => 'updated_token_only',
+			)
+		);
+
+		$updated_token = $data_store->read( $push_token->get_id() );
+
+		$this->assertEquals( 'updated_token_only', $updated_token->get_token() );
+		$this->assertEquals( $original_device_uuid, $updated_token->get_device_uuid() );
+	}
+
+	/**
 	 * @testdox Tests the delete method of the push tokens data store.
 	 */
 	public function test_it_can_delete_push_token() {

@@ -147,7 +147,14 @@ class PushTokensDataStore {
 		$push_token->set_token( $data['token'] ?? $push_token->get_token() );
 		$push_token->set_platform( $data['platform'] ?? $push_token->get_platform() );
 		$push_token->set_origin( $data['origin'] ?? $push_token->get_origin() );
-		$push_token->set_device_uuid( array_key_exists( 'device_uuid', $data ) ? $data['device_uuid'] : null );
+
+		/**
+		 * Allow null as a value for `device_uuid` as browser tokens don't have
+		 * device UUIDs.
+		 */
+		$push_token->set_device_uuid(
+			array_key_exists( 'device_uuid', $data ) ? $data['device_uuid'] : $push_token->get_device_uuid()
+		);
 
 		if ( ! $push_token->can_be_updated() ) {
 			throw new PushTokenInvalidDataException(
