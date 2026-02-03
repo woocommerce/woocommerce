@@ -10,6 +10,8 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
+		const visibilityOptions = { timeout: 30000 };
+
 		async function openWCSettings( page ) {
 			await page.goto( '/wp-admin/index.php', {
 				waitUntil: 'networkidle0',
@@ -43,12 +45,12 @@ test.describe(
 
 			await expect(
 				page.locator( '.settings-payment-gateways__header-title' )
-			).toBeVisible( { timeout: 30000 } );
+			).toBeVisible( visibilityOptions );
 		}
 
 		async function waitForPayPalToLoad( page ) {
 			const paypalDiv = page.locator( '#paypal' );
-			await expect( paypalDiv ).toBeVisible( { timeout: 30000 } );
+			await expect( paypalDiv ).toBeVisible( visibilityOptions );
 
 			return paypalDiv;
 		}
@@ -70,7 +72,9 @@ test.describe(
 			const labelTestAccount = paypalDiv.getByText( 'Test account' );
 
 			// Confirm the status label is present with any of the expected texts.
-			await expect( labelActive.or( labelTestAccount ) ).toBeVisible();
+			await expect( labelActive.or( labelTestAccount ) ).toBeVisible(
+				visibilityOptions
+			);
 
 			// Clean up by disabling PayPal again.
 			await test.step( 'Disable PayPal Standard', async () => {
@@ -89,7 +93,7 @@ test.describe(
 				// Confirm the Enable button is present again.
 				await expect(
 					paypalDiv.getByRole( 'link', { name: 'Enable' } )
-				).toBeVisible();
+				).toBeVisible( visibilityOptions );
 			} );
 		} );
 	}
