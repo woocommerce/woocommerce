@@ -170,7 +170,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		//phpcs:disable Squiz.Commenting
+		// phpcs:disable Squiz.Commenting
 		$order_item = new class() extends WC_Order_Item_Product {
 			public $passed_props;
 
@@ -178,7 +178,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 				$this->passed_props = $args;
 			}
 		};
-		//phpcs:enable Squiz.Commenting
+		// phpcs:enable Squiz.Commenting
 
 		$this->register_legacy_proxy_class_mocks(
 			array( 'WC_Order_Item_Product' => $order_item )

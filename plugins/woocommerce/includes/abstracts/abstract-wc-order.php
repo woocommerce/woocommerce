@@ -1637,7 +1637,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_props( $args );
 		$item->set_backorder_meta();
 
-		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
+		$cogs_enabled = $this->cogs_is_enabled();
+		if ( $item->has_cogs() && $cogs_enabled ) {
 			$item->calculate_cogs_value();
 		}
 
@@ -1645,7 +1646,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->save();
 		$this->add_item( $item );
 
-		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
+		if ( $item->has_cogs() && $cogs_enabled ) {
 			$this->calculate_cogs_total_value();
 			$this->save();
 		}
