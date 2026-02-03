@@ -328,6 +328,21 @@ declare module '@wordpress/data' {
 			: never;
 
 	/**
+	 * StoreRegistry - base interface for string-based store lookups.
+	 * Consumers should augment this interface to add their stores:
+	 *
+	 * declare module '@wordpress/data' {
+	 *     interface StoreRegistry {
+	 *         'core': typeof import('@wordpress/core-data').store;
+	 *         'my-store': typeof import('./my-store').store;
+	 *     }
+	 * }
+	 */
+	export interface StoreRegistry {
+		// Empty by default - consumers augment this interface
+	}
+
+	/**
 	 * Override dispatch() to use our custom ActionCreatorsOf type.
 	 * Supports three modes:
 	 * 1. StoreDescriptor → full typing
