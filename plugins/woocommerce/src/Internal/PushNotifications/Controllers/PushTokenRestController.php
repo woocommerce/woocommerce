@@ -408,11 +408,10 @@ class PushTokenRestController extends RestApiControllerBase {
 			);
 		}
 
-		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
-
-		if ( $logger instanceof WC_Logger ) {
-			$logger->error( (string) $e->getMessage(), array( 'source' => PushNotifications::FEATURE_NAME ) );
-		}
+		wc_get_container()
+			->get( LegacyProxy::class )
+			->call_function( 'wc_get_logger' )
+			->error( (string) $e->getMessage(), array( 'source' => PushNotifications::FEATURE_NAME ) );
 
 		return new WP_Error(
 			'woocommerce_internal_error',
