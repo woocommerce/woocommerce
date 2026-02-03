@@ -199,10 +199,8 @@ const OrderSummaryItem = ( {
 						regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
 						format={ subtotalPriceFormat }
 					/>
-					</div>
-				{ showBackorderBadge && (
-					<ProductBackorderBadge />
-				) }
+				</div>
+				{ showBackorderBadge && <ProductBackorderBadge /> }
 				<ProductMetadata { ...productMetaProps } />
 			</div>
 			<span className="screen-reader-text">
